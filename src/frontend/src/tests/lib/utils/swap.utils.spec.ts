@@ -1,7 +1,7 @@
 import type {
 	SwapAmountsReply,
 	SwapAmountsTxReply
-} from '$declarations/kong_backend/declarations/kong_backend.did';
+} from '$declarations/kong_backend/kong_backend.did';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';

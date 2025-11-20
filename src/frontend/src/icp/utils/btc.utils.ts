@@ -1,6 +1,6 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
-import type { PendingTransaction } from '$declarations/backend/declarations/backend.did';
+import type { PendingTransaction } from '$declarations/backend/backend.did';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -41,10 +41,10 @@ export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined =
 /**
  * Bitcoin txid to text representation requires inverting the array.
  *
- * @param txid Uint8Array | number[]
+ * @param txid Uint8Array
  * @returns string A human-readable transaction id.
  */
-export const utxoTxIdToString = (txid: Uint8Array | number[]): string =>
+export const utxoTxIdToString = (txid: Uint8Array): string =>
 	uint8ArrayToHexString(Uint8Array.from(txid).toReversed());
 
 /**

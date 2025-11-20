@@ -68,7 +68,9 @@ export interface Modal<T> {
 		| 'nft-fullscreen-display'
 		| 'gldt-stake'
 		| 'gldt-unstake'
-		| 'gldt-claim-staking-reward';
+		| 'gldt-claim-staking-reward'
+		| 'get-token'
+		| 'universal-scanner';
 	data?: T;
 	id?: symbol;
 }
@@ -138,6 +140,8 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openGldtStake: (id: symbol) => void;
 	openGldtUnstake: (id: symbol) => void;
 	openGldtClaimStakingReward: (params: SetWithDataParams<ClaimStakingRewardParams>) => void;
+	openUniversalScanner: (id: symbol) => void;
+	openGetToken: (id: symbol) => void;
 	close: () => void;
 }
 
@@ -246,6 +250,8 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openGldtClaimStakingReward: <(params: SetWithDataParams<ClaimStakingRewardParams>) => void>(
 			setTypeWithData('gldt-claim-staking-reward')
 		),
+		openUniversalScanner: setType('universal-scanner'),
+		openGetToken: setType('get-token'),
 		close: () => set(null),
 		subscribe
 	};

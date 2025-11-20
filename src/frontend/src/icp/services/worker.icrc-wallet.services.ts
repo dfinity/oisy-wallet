@@ -15,6 +15,7 @@ import type {
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
+import { isIOS } from '@dfinity/gix-components';
 import { nonNullish } from '@dfinity/utils';
 
 export class IcrcWalletWorker extends AppWorker implements WalletWorker {
@@ -37,7 +38,13 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 					| PostMessageDataResponseWalletCleanUp
 				>
 			>) => {
-				const { msg, data } = dataMsg;
+				const { ref, msg, data } = dataMsg;
+
+				// This is an additional guard because it may happen that the worker is initialised as a singleton.
+				// In this case, we need to check if we should treat the message or if the message was intended for another worker.
+				if (ref !== this.ledgerCanisterId) {
+					return;
+				}
 
 				switch (msg) {
 					case 'syncIcrcWallet':
@@ -64,7 +71,6 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 							tokenId,
 							transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 						});
-						return;
 				}
 			}
 		);
@@ -78,7 +84,7 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	}: IcToken): Promise<IcrcWalletWorker> {
 		await syncWalletFromCache({ tokenId, networkId });
 
-		const worker = await AppWorker.getInstance();
+		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
 		return new IcrcWalletWorker(worker, tokenId, ledgerCanisterId, indexCanisterId, env);
 	}
 

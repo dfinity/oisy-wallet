@@ -3,16 +3,12 @@ import type { DeltaAuctionOrder, SignableDeltaOrderData } from '@velora-dex/sdk'
 import { Signature } from 'ethers/crypto';
 import { TypedDataEncoder } from 'ethers/hash';
 
-vi.mock('ethers/hash', () => ({
-	TypedDataEncoder: {
-		hash: vi.fn()
-	}
+vi.mock('ethers/hash', async (importActual) => ({
+	...(await importActual())
 }));
 
-vi.mock('ethers/crypto', () => ({
-	Signature: {
-		from: vi.fn()
-	}
+vi.mock('ethers/crypto', async (importActual) => ({
+	...(await importActual())
 }));
 
 const orderTypes = [
@@ -79,12 +75,11 @@ describe('EIP - 712 utils methods', () => {
 				}
 			};
 
-			mockTypedDataEncoder.hash.mockReturnValue(expectedHash);
+			vi.spyOn(TypedDataEncoder, 'hash').mockReturnValue(expectedHash);
 
 			const result = getSignParamsEIP712(inputParams);
 
-			expect(mockTypedDataEncoder.hash).toHaveBeenNthCalledWith(
-				1,
+			expect(mockTypedDataEncoder.hash).toHaveBeenCalledExactlyOnceWith(
 				inputParams.domain,
 				inputParams.types,
 				inputParams.data
@@ -132,12 +127,11 @@ describe('EIP - 712 utils methods', () => {
 				}
 			};
 
-			mockTypedDataEncoder.hash.mockReturnValue(expectedHash);
+			vi.spyOn(TypedDataEncoder, 'hash').mockReturnValue(expectedHash);
 
 			const result = getSignParamsEIP712(inputParams);
 
-			expect(mockTypedDataEncoder.hash).toHaveBeenNthCalledWith(
-				1,
+			expect(mockTypedDataEncoder.hash).toHaveBeenCalledExactlyOnceWith(
 				inputParams.domain,
 				inputParams.types,
 				inputParams.data
@@ -161,12 +155,11 @@ describe('EIP - 712 utils methods', () => {
 				data: {} as DeltaAuctionOrder
 			};
 
-			mockTypedDataEncoder.hash.mockReturnValue(expectedHash);
+			vi.spyOn(TypedDataEncoder, 'hash').mockReturnValue(expectedHash);
 
 			const result = getSignParamsEIP712(inputParams);
 
-			expect(mockTypedDataEncoder.hash).toHaveBeenNthCalledWith(
-				1,
+			expect(mockTypedDataEncoder.hash).toHaveBeenCalledExactlyOnceWith(
 				inputParams.domain,
 				inputParams.types,
 				inputParams.data
@@ -185,11 +178,11 @@ describe('EIP - 712 utils methods', () => {
 				compactSerialized: expectedCompactSerialized
 			} as Signature;
 
-			mockSignature.from.mockReturnValue(mockSignatureObject);
+			vi.spyOn(Signature, 'from').mockReturnValue(mockSignatureObject);
 
 			const result = getCompactSignature(inputSignature);
 
-			expect(mockSignature.from).toHaveBeenNthCalledWith(1, inputSignature);
+			expect(mockSignature.from).toHaveBeenCalledExactlyOnceWith(inputSignature);
 			expect(result).toBe(expectedCompactSerialized);
 		});
 
@@ -200,11 +193,11 @@ describe('EIP - 712 utils methods', () => {
 				compactSerialized: expectedCompactSerialized
 			} as Signature;
 
-			mockSignature.from.mockReturnValue(mockSignatureObject);
+			vi.spyOn(Signature, 'from').mockReturnValue(mockSignatureObject);
 
 			const result = getCompactSignature(inputSignature);
 
-			expect(mockSignature.from).toHaveBeenNthCalledWith(1, inputSignature);
+			expect(mockSignature.from).toHaveBeenCalledExactlyOnceWith(inputSignature);
 			expect(result).toBe(expectedCompactSerialized);
 		});
 
@@ -215,11 +208,11 @@ describe('EIP - 712 utils methods', () => {
 				compactSerialized: expectedCompactSerialized
 			} as Signature;
 
-			mockSignature.from.mockReturnValue(mockSignatureObject);
+			vi.spyOn(Signature, 'from').mockReturnValue(mockSignatureObject);
 
 			const result = getCompactSignature(inputSignature);
 
-			expect(mockSignature.from).toHaveBeenNthCalledWith(1, inputSignature);
+			expect(mockSignature.from).toHaveBeenCalledExactlyOnceWith(inputSignature);
 			expect(result).toBe(expectedCompactSerialized);
 		});
 
@@ -240,7 +233,7 @@ describe('EIP - 712 utils methods', () => {
 					compactSerialized: expectedOutput
 				} as Signature;
 
-				mockSignature.from.mockReturnValue(mockSignatureObject);
+				vi.spyOn(Signature, 'from').mockReturnValue(mockSignatureObject);
 
 				const result = getCompactSignature(input);
 
@@ -295,23 +288,22 @@ describe('EIP - 712 utils methods', () => {
 			const expectedHash = '0xhash-result';
 			const expectedCompactSignature = '0xcompact-result';
 
-			mockTypedDataEncoder.hash.mockReturnValue(expectedHash);
-			mockSignature.from.mockReturnValue({
+			vi.spyOn(TypedDataEncoder, 'hash').mockReturnValue(expectedHash);
+			vi.spyOn(Signature, 'from').mockReturnValue({
 				compactSerialized: expectedCompactSignature
 			} as Signature);
 
 			const hash = getSignParamsEIP712(orderData);
 			const compactSig = getCompactSignature(signatureString);
 
-			expect(mockTypedDataEncoder.hash).toHaveBeenNthCalledWith(
-				1,
+			expect(mockTypedDataEncoder.hash).toHaveBeenCalledExactlyOnceWith(
 				orderData.domain,
 				orderData.types,
 				orderData.data
 			);
 			expect(hash).toBe(expectedHash);
 
-			expect(mockSignature.from).toHaveBeenNthCalledWith(1, signatureString);
+			expect(mockSignature.from).toHaveBeenCalledExactlyOnceWith(signatureString);
 			expect(compactSig).toBe(expectedCompactSignature);
 		});
 	});

@@ -3,7 +3,7 @@ import type {
 	BitcoinNetwork,
 	EthSignTransactionRequest,
 	SendBtcResponse
-} from '$declarations/signer/declarations/signer.did';
+} from '$declarations/signer/signer.did';
 import type { EthAddress } from '$eth/types/address';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';

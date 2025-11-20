@@ -1,4 +1,4 @@
-import type { PoolMetadata } from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
+import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import { ICPSwapPoolCanister } from '$lib/canisters/icp-swap-pool.canister';
 import type {
 	ICPSwapDepositWithdrawParams,
