@@ -102,3 +102,12 @@ export const allEarningPositionsUsd: Readable<number> = derived([earningData], (
 		0
 	)
 );
+
+export const allEarningYearlyAmountUsd = derived([earningData], ([$earningData]) =>
+	Object.values($earningData).reduce((acc, record) => {
+		const earning = Number(record[EarningCardFields.CURRENT_EARNING] ?? 0);
+		const apy = Number(record[EarningCardFields.APY] ?? 0);
+
+		return isNaN(earning) || isNaN(apy) ? acc : acc + earning * (apy / 100);
+	}, 0)
+);
