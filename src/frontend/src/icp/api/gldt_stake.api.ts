@@ -3,7 +3,7 @@ import type {
 	DailyAnalytics,
 	ManageStakePositionArgs,
 	StakePositionResponse
-} from '$declarations/gldt_stake/declarations/gldt_stake.did';
+} from '$declarations/gldt_stake/gldt_stake.did';
 import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
 import { GLDT_STAKE_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
