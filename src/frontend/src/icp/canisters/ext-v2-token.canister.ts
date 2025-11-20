@@ -2,8 +2,8 @@ import type {
 	_SERVICE as ExtV2TokenService,
 	Transaction
 } from '$declarations/ext_v2_token/declarations/ext_v2_token.did';
-import { idlFactory as idlCertifiedFactoryXtcLedger } from '$declarations/xtc_ledger/xtc_ledger.factory.certified.did';
-import { idlFactory as idlFactoryXtcLedger } from '$declarations/xtc_ledger/xtc_ledger.factory.did';
+import { idlFactory as idlCertifiedFactoryExtV2Token } from '$declarations/ext_v2_token/ext_v2_token.factory.certified.did';
+import { idlFactory as idlFactoryExtV2Token } from '$declarations/ext_v2_token/ext_v2_token.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, type QueryParams } from '@dfinity/utils';
@@ -20,8 +20,8 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 				...options,
 				agent
 			},
-			idlFactory: idlFactoryXtcLedger,
-			certifiedIdlFactory: idlCertifiedFactoryXtcLedger
+			idlFactory: idlFactoryExtV2Token,
+			certifiedIdlFactory: idlCertifiedFactoryExtV2Token
 		});
 
 		return new ExtV2TokenCanister(canisterId, service, certifiedService);
