@@ -41,7 +41,6 @@ export class BtcStatusesWorker extends AppWorker {
 							tokenId,
 							error: data.error
 						});
-						return;
 				}
 			}
 		);

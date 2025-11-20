@@ -11,6 +11,7 @@ interface I18nCore {
 		done: string;
 		close: string;
 		change: string;
+		continue: string;
 		apply: string;
 		retry: string;
 		refresh: string;
@@ -272,8 +273,11 @@ interface I18nDapps {
 		mobox: { name: string; one_liner: string; description: string };
 		cyql: { name: string; one_liner: string; description: string };
 		icpanda_message: { name: string; one_liner: string; description: string };
+		opensea: { name: string; one_liner: string; description: string };
 		pacifica: { name: string; one_liner: string; description: string };
 		magic_eden: { name: string; one_liner: string; description: string };
+		solayer: { name: string; one_liner: string; description: string };
+		kamino: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -681,7 +685,24 @@ interface I18nSend {
 }
 
 interface I18nScanner {
-	text: { scan_qr_code: string };
+	text: {
+		scan_qr_code: string;
+		pay_to: string;
+		powered_by: string;
+		receipt: string;
+		name: string;
+		address: string;
+		country: string;
+		phone_number: string;
+		email_address: string;
+		website: string;
+		enter_manually: string;
+		url_or_code: string;
+		enter_or_paste_code: string;
+		scan: string;
+		pay: string;
+	};
+	error: { code_link_is_not_valid: string };
 }
 
 interface I18nConvert {

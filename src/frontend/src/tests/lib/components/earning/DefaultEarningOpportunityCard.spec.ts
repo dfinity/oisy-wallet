@@ -29,7 +29,7 @@ describe('DefaultEarningOpportunityCard', () => {
 	const mockAction = vi.fn().mockResolvedValue(undefined);
 
 	const mockCardFields = {
-		[EarningCardFields.APY]: '5%',
+		[EarningCardFields.APY]: '5.00',
 		[EarningCardFields.CURRENT_STAKED]: '100 GLDT',
 		[EarningCardFields.CURRENT_EARNING]: 50,
 		[EarningCardFields.EARNING_POTENTIAL]: 200,
@@ -54,7 +54,7 @@ describe('DefaultEarningOpportunityCard', () => {
 		});
 
 		expect(screen.getByText(get(i18n).stake.text.current_apy_label)).toBeInTheDocument();
-		expect(screen.getAllByText('5%').length).toBeGreaterThanOrEqual(1);
+		expect(screen.getAllByText('5.00%').length).toBeGreaterThanOrEqual(1);
 	});
 
 	it('renders normal list fields correctly', () => {
@@ -73,7 +73,7 @@ describe('DefaultEarningOpportunityCard', () => {
 			cardFields: mockCardFields
 		});
 
-		expect(screen.getByText('+$50/year')).toBeInTheDocument();
+		expect(screen.getByText('+$2.5/year')).toBeInTheDocument();
 		expect(screen.getByText('+$200/year')).toBeInTheDocument();
 	});
 

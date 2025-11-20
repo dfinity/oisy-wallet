@@ -14,13 +14,13 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
+import { assertNonNullish, isNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 import {
 	MinterNoNewUtxosError,
 	type BitcoinNetwork,
 	type PendingUtxo,
 	type UtxoStatus
-} from '@dfinity/ckbtc';
-import { assertNonNullish, isNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ckbtc';
 
 export class CkBTCUpdateBalanceScheduler
 	implements Scheduler<PostMessageDataRequestIcCkBTCUpdateBalance>

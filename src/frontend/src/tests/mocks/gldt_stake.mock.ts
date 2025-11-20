@@ -1,8 +1,8 @@
 import type {
 	DailyAnalytics,
+	Duration,
 	StakePositionResponse
-} from '$declarations/gldt_stake/declarations/gldt_stake.did';
-import type { Duration } from '$declarations/gldt_stake/gldt_stake.did';
+} from '$declarations/gldt_stake/gldt_stake.did';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 

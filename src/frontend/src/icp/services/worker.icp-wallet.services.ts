@@ -16,6 +16,7 @@ import type {
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
+import { isIOS } from '@dfinity/gix-components';
 import { assertNonNullish } from '@dfinity/utils';
 
 export class IcpWalletWorker extends AppWorker implements WalletWorker {
@@ -62,7 +63,6 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 							tokenId,
 							transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 						});
-						return;
 				}
 			}
 		);
@@ -79,7 +79,7 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 
 		await syncWalletFromCache({ tokenId, networkId });
 
-		const worker = await AppWorker.getInstance();
+		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
 		return new IcpWalletWorker(worker, tokenId, indexCanisterId);
 	}
 

@@ -1,6 +1,6 @@
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
-import type { PendingTransaction } from '$declarations/backend/declarations/backend.did';
+import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import * as backendAPI from '$lib/api/backend.api';

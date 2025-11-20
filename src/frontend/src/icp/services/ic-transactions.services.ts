@@ -113,8 +113,6 @@ export const onLoadTransactionsError = ({
 			...(mapIcErrorMetadata(err) ?? {})
 		}
 	});
-
-	return;
 };
 
 export const onTransactionsCleanUp = (data: { tokenId: TokenId; transactionIds: string[] }) => {

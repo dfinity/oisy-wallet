@@ -8,6 +8,7 @@
 			"done": "Hecho",
 			"close": "Cerrar",
 			"change": "Cambiar",
+			"continue": "",
 			"apply": "Aplicar",
 			"retry": "Reintentar",
 			"refresh": "Actualizar",
@@ -68,7 +69,7 @@
 			"dapp_explorer": "Explorar",
 			"activity": "Actividad",
 			"airdrops": "Recompensas",
-			"earning": "Ganar y Recompensas",
+			"earning": "Ganar",
 			"source_code_on_github": "Código fuente en GitHub",
 			"view_on_explorer": "Ver en el explorador",
 			"source_code": "Código fuente",
@@ -383,12 +384,27 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"pacifica": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -876,7 +892,24 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": ""
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {

@@ -1,4 +1,4 @@
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 

@@ -1,4 +1,4 @@
-import type { CustomToken, UserToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken, UserToken } from '$declarations/backend/backend.did';
 import {
 	SUPPORTED_EVM_NETWORKS,
 	SUPPORTED_EVM_NETWORKS_CHAIN_IDS
@@ -268,7 +268,6 @@ const loadCustomTokensWithMetadata = async (
 					`Error loading metadata for custom ERC20 token ${address} on network ${networkId.description}`,
 					err
 				);
-				return;
 			}
 		};
 

@@ -6,7 +6,6 @@ vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
 		if (lnurl === 'VALID_LNURL') {
 			return 'https://api.dfx.swiss/v1/lnurlp/pl_test123';
 		}
-		return;
 	})
 }));
 
