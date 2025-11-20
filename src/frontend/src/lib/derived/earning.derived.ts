@@ -92,3 +92,13 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 		}, undefined);
 	}
 );
+
+export const allEarningPositionsUsd: Readable<number> = derived([earningData], ([$earningData]) =>
+	Object.values($earningData).reduce<number>(
+		(acc, record) =>
+			isNaN(Number(record[EarningCardFields.CURRENT_EARNING]))
+				? acc
+				: acc + Number(record[EarningCardFields.CURRENT_EARNING]),
+		0
+	)
+);
