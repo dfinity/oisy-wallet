@@ -92,3 +92,8 @@ export enum WizardStepsClaimStakingReward {
 	REVIEW = 'Review',
 	CLAIMING = 'Claiming'
 }
+
+export enum WizardStepsScanner {
+	SCAN = 'Scan',
+	PAY = 'Pay'
+}

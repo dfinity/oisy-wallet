@@ -4,7 +4,7 @@ import type {
 	SwapArgs,
 	_SERVICE as SwapPoolService,
 	WithdrawArgs
-} from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
+} from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ICPSwapPoolCanister } from '$lib/canisters/icp-swap-pool.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';

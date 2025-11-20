@@ -5,6 +5,7 @@ import type {
 	WizardStepsConvert,
 	WizardStepsHowToConvert,
 	WizardStepsReceive,
+	WizardStepsScanner,
 	WizardStepsSend,
 	WizardStepsSwap
 } from '$lib/enums/wizard-steps';
@@ -18,7 +19,8 @@ type StepName =
 	| WizardStepsHowToConvert
 	| WizardStepsReceive
 	| AddressBookSteps
-	| TokenModalSteps;
+	| TokenModalSteps
+	| WizardStepsScanner;
 
 export const goToWizardStep = ({
 	modal,
