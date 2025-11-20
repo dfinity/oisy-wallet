@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -12,30 +13,40 @@
 		value?: number;
 		showPlusSign?: boolean;
 		formatPositiveAmount?: boolean;
+		fallback?: Snippet;
 	}
 
-	const { value, showPlusSign = false, formatPositiveAmount = false }: Props = $props();
+	const { value, showPlusSign = false, formatPositiveAmount = false, fallback }: Props = $props();
+
+	const formattedCurrency = $derived(
+		nonNullish(value)
+			? formatCurrency({
+					value,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})
+			: undefined
+	);
 
 	const yearlyAmount = $derived(
-		nonNullish(value)
+		nonNullish(formattedCurrency)
 			? replacePlaceholders($i18n.stake.text.active_earning_per_year, {
-					$amount: `${formatCurrency({
-						value,
-						currency: $currentCurrency,
-						exchangeRate: $currencyExchangeStore,
-						language: $currentLanguage
-					})}`
+					$amount: `${formattedCurrency}`
 				})
 			: undefined
 	);
 </script>
 
-{#if nonNullish(yearlyAmount) && nonNullish(value)}
+{#if nonNullish(yearlyAmount)}
 	<span
 		class:text-brand-primary={!formatPositiveAmount}
-		class:text-success-primary={formatPositiveAmount && value > 0}
+		class:text-success-primary={formatPositiveAmount && nonNullish(value) && value > 0}
+		class:text-tertiary={value === 0}
 		in:fade
 	>
 		{`${showPlusSign ? '+' : ''}${yearlyAmount}`}
 	</span>
+{:else if nonNullish(fallback)}
+	{@render fallback()}
 {/if}
