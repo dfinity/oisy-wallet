@@ -11,6 +11,18 @@ vi.mock('$lib/services/open-crypto-pay.services', () => ({
 	processOpenCryptoPayCode: vi.fn()
 }));
 
+vi.mock('@dfinity/gix-components', async () => {
+	const actual = await vi.importActual('@dfinity/gix-components');
+	return {
+		...actual,
+		QRCodeReader: vi.fn().mockImplementation(() => ({
+			$$render: () => '<div data-tid="mock-qr-reader">Mocked QR Reader</div>',
+			$$slots: {},
+			$$scope: {}
+		}))
+	};
+});
+
 describe('ScannerCode.svelte', () => {
 	const mockOnNext = vi.fn();
 	const mockSetData = vi.fn();
@@ -86,6 +98,16 @@ describe('ScannerCode.svelte', () => {
 		renderWithContext();
 
 		expect(screen.getByTestId(OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON)).toBeInTheDocument();
+	});
+
+	it('should show input after clicking enter manually', async () => {
+		renderWithContext();
+
+		await openManualEntry();
+
+		await waitFor(() => {
+			expect(screen.getByPlaceholderText(en.scanner.text.enter_or_paste_code)).toBeInTheDocument();
+		});
 	});
 
 	it('should disable continue button when empty', async () => {
