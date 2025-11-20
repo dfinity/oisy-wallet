@@ -4,7 +4,7 @@ import type {
 } from '$declarations/ext_v2_token/declarations/ext_v2_token.did';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { mockExtV2Transactions } from '$tests/mocks/ext-v2-token.mock';
+import { mockExtV2TokenCanisterId, mockExtV2Transactions } from '$tests/mocks/ext-v2-token.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -20,7 +20,7 @@ describe('ext-v2-token.canister', () => {
 		'serviceOverride'
 	>): Promise<ExtV2TokenCanister> =>
 		ExtV2TokenCanister.create({
-			canisterId: Principal.fromText('oeee4-qaaaa-aaaak-qaaeq-cai'),
+			canisterId: Principal.fromText(mockExtV2TokenCanisterId),
 			identity: mockIdentity,
 			certifiedServiceOverride: serviceOverride,
 			serviceOverride
