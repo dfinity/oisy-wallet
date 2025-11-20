@@ -72,6 +72,14 @@ describe('EarningYearlyAmount', () => {
 		expect(span).toHaveClass('text-brand-primary');
 	});
 
+	it('applies text-tertiary when formatPositiveAmount is true but amount is 0', () => {
+		const { container } = render(EarningYearlyAmount, { value: 0, formatPositiveAmount: true });
+
+		const span = container.querySelector('span');
+
+		expect(span).toHaveClass('text-tertiary');
+	});
+
 	it('renders nothing if value is null or undefined and no fallback is provided', () => {
 		const { container, rerender } = render(EarningYearlyAmount, {
 			value: undefined
