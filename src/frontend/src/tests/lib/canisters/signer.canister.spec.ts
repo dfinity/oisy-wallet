@@ -3,7 +3,7 @@ import type {
 	EthSignTransactionRequest,
 	RejectionCode_1,
 	_SERVICE as SignerService
-} from '$declarations/signer/declarations/signer.did';
+} from '$declarations/signer/signer.did';
 import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';

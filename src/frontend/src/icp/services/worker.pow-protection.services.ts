@@ -41,7 +41,6 @@ export class PowProtectorWorker extends AppWorker {
 						syncPowNextAllowance({
 							data: data as PostMessageDataResponsePowProtectorNextAllowance
 						});
-						return;
 					}
 				}
 			}
