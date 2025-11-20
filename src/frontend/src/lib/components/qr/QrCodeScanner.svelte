@@ -29,7 +29,7 @@
 			onScan(result);
 		}
 
-			onBack?.();
+		onBack?.();
 	};
 
 	const onQRCode = ({ detail: code }: CustomEvent<string>) => {
