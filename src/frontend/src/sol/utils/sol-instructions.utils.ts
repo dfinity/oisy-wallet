@@ -263,7 +263,7 @@ const mapToken2022ParsedInstruction = async ({
 };
 
 // This is just a placeholder to "treat" ATA instructions in SOL.
-// For now, we don't map any of them because we don't need it.
+// For now, we don't map any of them because we don't need to.
 // It is just for completeness in util `mapSolParsedInstruction` to be aware of this kind of instruction.
 const mapAssociatedTokenAccountInstruction = ({
 	type
