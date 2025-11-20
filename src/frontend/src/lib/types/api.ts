@@ -66,7 +66,7 @@ export interface GetSchnorrPublicKeyParams {
 }
 
 export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
-	message: number[];
+	message: Uint8Array;
 }
 
 export interface AddUserHiddenDappIdParams {
