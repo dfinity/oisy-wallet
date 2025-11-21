@@ -9,6 +9,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { OISY_HOW_TO_CONVERT_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { GET_TOKEN_MODAL_OPEN_SWAP_BUTTON } from '$lib/constants/test-ids.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		enabledMainnetFungibleTokensUsdBalance,
@@ -85,7 +86,10 @@
 			{#snippet buttons()}
 				<SwapLoader>
 					{#snippet button(onSwapLoad)}
-						<Button onclick={() => onSwapOpen(onSwapLoad)}>
+						<Button
+							onclick={() => onSwapOpen(onSwapLoad)}
+							testId={GET_TOKEN_MODAL_OPEN_SWAP_BUTTON}
+						>
 							{replacePlaceholders($i18n.get_token.text.swap_to_token, { $token: tokenSymbol })}
 						</Button>
 					{/snippet}

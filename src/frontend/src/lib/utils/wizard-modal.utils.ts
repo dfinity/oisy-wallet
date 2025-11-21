@@ -9,6 +9,7 @@ import type {
 	WizardStepsSend,
 	WizardStepsSwap
 } from '$lib/enums/wizard-steps';
+import type { WizardStepsGetTokenType } from '$lib/types/get-token';
 import type { WizardModal, WizardSteps } from '@dfinity/gix-components';
 
 type StepName =
@@ -20,6 +21,7 @@ type StepName =
 	| WizardStepsReceive
 	| AddressBookSteps
 	| TokenModalSteps
+	| WizardStepsGetTokenType
 	| WizardStepsScanner;
 
 export const goToWizardStep = ({
