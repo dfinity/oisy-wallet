@@ -23,16 +23,17 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+	import type { WizardStepsGetTokenType } from '$lib/types/get-token';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
-		steps: WizardSteps<WizardStepsSwap>;
-		currentStep?: WizardStep<WizardStepsSwap>;
+		steps: WizardSteps<WizardStepsSwap | WizardStepsGetTokenType>;
+		currentStep?: WizardStep<WizardStepsSwap | WizardStepsGetTokenType>;
 		selectTokenType?: SwapSelectTokenType;
-		modal: WizardModal<WizardStepsSwap>;
+		modal: WizardModal<WizardStepsSwap | WizardStepsGetTokenType>;
 		showSelectProviderModal: boolean;
 		onClose: () => void;
 		swapAmount: OptionAmount;
@@ -151,7 +152,7 @@
 		goToStep(WizardStepsSwap.SWAP);
 	};
 
-	const goToStep = (stepName: WizardStepsSwap) => {
+	const goToStep = (stepName: WizardStepsSwap | WizardStepsGetTokenType) => {
 		if (isNullish(modal)) {
 			return;
 		}
