@@ -45,7 +45,7 @@ export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined =
  * @returns string A human-readable transaction id.
  */
 export const utxoTxIdToString = (txid: Uint8Array): string =>
-	uint8ArrayToHexString(Uint8Array.from(txid).toReversed());
+	uint8ArrayToHexString(txid.toReversed());
 
 /**
  * Convert a Bitcoin transaction ID hex string to Uint8Array with proper byte reversal.
