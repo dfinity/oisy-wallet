@@ -39,11 +39,6 @@ import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('all-network-tokens.derived', () => {
-	const toggleProps = {
-		version: undefined,
-		enabled: true
-	};
-
 	const mockIcrcToken: IcrcCustomToken = {
 		...mockValidIcToken,
 		enabled: true
