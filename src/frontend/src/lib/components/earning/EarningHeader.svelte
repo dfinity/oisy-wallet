@@ -16,7 +16,7 @@
 	{#snippet content()}
 		<p class="w-full text-center">
 			{$i18n.earning.text.header_description}
-			<ExternalLink href={OISY_DOCS_URL} ariaLabel={$i18n.core.alt.learn_more} iconAsLast>
+			<ExternalLink ariaLabel={$i18n.core.alt.learn_more} href={OISY_DOCS_URL} iconAsLast>
 				{$i18n.core.text.learn_more}
 			</ExternalLink>
 		</p>
