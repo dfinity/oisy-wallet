@@ -50,13 +50,13 @@ describe('btc.utils', () => {
 	});
 
 	describe('pendingTransactionTxidToString', () => {
-		it('converts Uint8Array transaction ID to hex with byte reversal', () => {
+		it('converts Uint8Array with hex transaction ID to hex with byte reversal', () => {
 			const tx = { txid: new Uint8Array([0x00, 0x01, 0xff]), utxos: [] };
 
 			expect(pendingTransactionTxidToString(tx)).toBe('ff0100');
 		});
 
-		it('converts number[] transaction ID to hex with byte reversal', () => {
+		it('converts Uint8Array with number transaction ID to hex with byte reversal', () => {
 			const tx = { txid: Uint8Array.from([15, 255, 1]), utxos: [] };
 
 			expect(pendingTransactionTxidToString(tx)).toBe('01ff0f');
