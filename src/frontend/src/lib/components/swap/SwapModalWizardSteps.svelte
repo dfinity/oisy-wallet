@@ -80,6 +80,7 @@
 			setFilterNetwork($sourceToken.network);
 
 			setAllowedNetworkIds(SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id]);
+			return;
 		}
 
 		if (nonNullish($destinationToken) && nonNullish($sourceToken)) {
@@ -95,6 +96,7 @@
 
 		if (nonNullish($sourceToken)) {
 			setFilterNetwork($sourceToken.network);
+			return;
 		}
 
 		if (nonNullish($destinationToken) && isNullish($sourceToken)) {
@@ -162,35 +164,37 @@
 	};
 </script>
 
-{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
-	<SwapTokensList
-		onCloseTokensList={closeTokenList}
-		onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
-		onSelectToken={selectToken}
-	/>
-{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
-	<ModalNetworksFilter
-		{allNetworksEnabled}
-		filteredNetworks={$filteredNetworks}
-		onNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
-	/>
-{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
-	<SwapProviderListModal
-		onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
-		onSelectProvider={selectProvider}
-	/>
-{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
-	<SwapTokenWizard
-		{currentStep}
-		onBack={() => modal?.back()}
-		{onClose}
-		onNext={() => modal?.next()}
-		onShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
-		onShowTokensList={showTokensList}
-		bind:swapAmount
-		bind:receiveAmount
-		bind:slippageValue
-		bind:swapProgressStep
-		bind:swapFailedProgressSteps
-	/>
-{/if}
+{#key currentStep?.name}
+	{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
+		<SwapTokensList
+			onCloseTokensList={closeTokenList}
+			onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
+			onSelectToken={selectToken}
+		/>
+	{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
+		<ModalNetworksFilter
+			{allNetworksEnabled}
+			filteredNetworks={$filteredNetworks}
+			onNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
+		/>
+	{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
+		<SwapProviderListModal
+			onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
+			onSelectProvider={selectProvider}
+		/>
+	{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
+		<SwapTokenWizard
+			{currentStep}
+			onBack={() => modal?.back()}
+			{onClose}
+			onNext={() => modal?.next()}
+			onShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
+			onShowTokensList={showTokensList}
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+			bind:swapProgressStep
+			bind:swapFailedProgressSteps
+		/>
+	{/if}
+{/key}
