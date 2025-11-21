@@ -9,39 +9,62 @@
 	import { formatStakeApyNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { readable } from 'svelte/store';
+	import StakeProviderItem from '$lib/components/stake/StakeProviderItem.svelte';
 
 	//const { sendTokenSymbol } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const sendTokenSymbol = readable('gldt');
 
 	const { store: gldtStakeApyStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
-
-	const data: { icon: Component; title: string; description?: string }[] = [
-		{
-			icon: IconLineChart,
-			title: replacePlaceholders($i18n.stake.text.current_apy, {
-				$apy: formatStakeApyNumber($gldtStakeApyStore?.apy ?? 0)
-			}),
-			description: replacePlaceholders($i18n.stake.text.current_apy_info, {
-				$token: $sendTokenSymbol
-			})
-		},
-		{
-			icon: IconLineChart,
-			title: replacePlaceholders($i18n.stake.text.current_apy, {
-				$apy: formatStakeApyNumber($gldtStakeApyStore?.apy ?? 0)
-			}),
-			description: replacePlaceholders($i18n.stake.text.current_apy_info, {
-				$token: $sendTokenSymbol
-			})
-		},
-		{
-			icon: IconLineChart,
-			title: replacePlaceholders($i18n.stake.text.current_apy, {
-				$apy: formatStakeApyNumber($gldtStakeApyStore?.apy ?? 0)
-			})
-		}
-	];
 </script>
 
-<StakeProvider provider={StakeProviderType.GLDT} {data} />
+{#snippet item1()}
+	<StakeProviderItem>
+		{#snippet icon()}
+			<IconLineChart />
+		{/snippet}
+		{#snippet title()}
+			{replacePlaceholders($i18n.stake.text.current_apy, {
+				$apy: formatStakeApyNumber($gldtStakeApyStore?.apy ?? 0)
+			})}
+		{/snippet}
+		{#snippet description()}
+			{replacePlaceholders($i18n.stake.text.current_apy_info, {
+				$token: $sendTokenSymbol
+			})}
+		{/snippet}
+	</StakeProviderItem>
+{/snippet}
+
+{#snippet item2()}
+	<StakeProviderItem>
+		{#snippet icon()}
+			<IconLineChart />
+		{/snippet}
+		{#snippet title()}
+			{replacePlaceholders($i18n.stake.text.current_apy, {
+				$apy: formatStakeApyNumber($gldtStakeApyStore?.apy ?? 0)
+			})}
+		{/snippet}
+		{#snippet description()}
+			{replacePlaceholders($i18n.stake.text.current_apy_info, {
+				$token: $sendTokenSymbol
+			})}
+		{/snippet}
+	</StakeProviderItem>
+{/snippet}
+
+{#snippet item3()}
+	<StakeProviderItem>
+		{#snippet icon()}
+			<IconLineChart />
+		{/snippet}
+		{#snippet title()}
+			{replacePlaceholders($i18n.stake.text.current_apy, {
+				$apy: formatStakeApyNumber($gldtStakeApyStore?.apy ?? 0)
+			})}
+		{/snippet}
+	</StakeProviderItem>
+{/snippet}
+
+<StakeProvider provider={StakeProviderType.GLDT} data={[item1, item2, item3]} />

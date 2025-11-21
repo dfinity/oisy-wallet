@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import type { Snippet } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		icon: Snippet;
 		title: Snippet;
-		description: Snippet;
+		description?: Snippet;
 	}
 
 	const { icon, title, description }: Props = $props();
@@ -19,8 +20,10 @@
 			{@render title()}
 		</div>
 
-		<div class="mt-1 text-tertiary">
-			{@render description()}
-		</div>
+		{#if nonNullish(description)}
+			<div class="mt-1 text-tertiary">
+				{@render description()}
+			</div>
+		{/if}
 	</div>
 </div>

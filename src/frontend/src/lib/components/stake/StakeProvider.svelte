@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Component, Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { stakeProvidersConfig } from '$lib/config/stake.config';
@@ -10,13 +10,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { StakeProvider } from '$lib/types/stake';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import StakeProviderItem from '$lib/components/stake/StakeProviderItem.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 
 	interface Props {
 		provider: StakeProvider;
-		data: { icon: Component; title: string; description?: string }[];
+		data: Snippet[];
 	}
 
 	let { provider, data }: Props = $props();
@@ -55,18 +54,8 @@
 	</div>
 
 	<div class="mt-4 flex flex-col px-4">
-		{#each items as { icon: Icon, title: titleStr, description: descriptionStr }}
-			<StakeProviderItem>
-				{#snippet icon()}
-					<Icon />
-				{/snippet}
-				{#snippet title()}
-					{titleStr}
-				{/snippet}
-				{#snippet description()}
-					{descriptionStr}
-				{/snippet}
-			</StakeProviderItem>
+		{#each items as item}
+			{@render item()}
 		{/each}
 	</div>
 
