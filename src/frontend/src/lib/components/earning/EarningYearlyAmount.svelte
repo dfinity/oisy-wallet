@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
