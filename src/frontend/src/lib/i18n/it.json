@@ -40,7 +40,8 @@
 			"confirm": "",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "Solo a scopo di test!",
@@ -55,7 +56,8 @@
 			"switch_language": "Cambia lingua",
 			"switch_currency": "Cambia valuta",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",
@@ -1766,7 +1768,9 @@
 	"earning": {
 		"text": {
 			"title": "Guadagna",
-			"earning_opportunities": ""
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
 			"gldt": {

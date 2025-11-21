@@ -40,7 +40,8 @@
 			"confirm": "Confirm",
 			"more": "More",
 			"less": "Less",
-			"ellipsis": "…"
+			"ellipsis": "…",
+			"learn_more": "Learn more"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -55,7 +56,8 @@
 			"switch_language": "Switch language",
 			"switch_currency": "Switch currency",
 			"more": "Show full text",
-			"less": "Show less text"
+			"less": "Show less text",
+			"learn_more": "Follow the link to learn more"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
@@ -1766,7 +1768,9 @@
 	"earning": {
 		"text": {
 			"title": "Earn",
-			"earning_opportunities": "Earning opportunities"
+			"earning_opportunities": "Earning opportunities",
+			"header_title": "Welcome to Earn!",
+			"header_description": "Grow your crypto portfolio by staking your tokens and earning rewards. Choose from various earning strategies based on your risk tolerance."
 		},
 		"cards": {
 			"gldt": {
