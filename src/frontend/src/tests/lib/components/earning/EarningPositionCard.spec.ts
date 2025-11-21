@@ -33,9 +33,7 @@ describe('EarningPositionCard', () => {
 		});
 
 		// formatCurrency mock
-		vi.spyOn(formatUtils, 'formatCurrency').mockImplementation(({ value }) => {
-			return `$${value}.00`;
-		});
+		vi.spyOn(formatUtils, 'formatCurrency').mockImplementation(({ value }) => `$${value}.00`);
 	});
 
 	it('renders yearly earning amount correctly', () => {
