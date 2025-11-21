@@ -22,15 +22,13 @@
 			</EarningYearlyAmount>
 		</div>
 
-		<div class="flex justify-center gap-2 text-sm sm:text-base">
-			<span class="font-bold">
-				{formatCurrency({
-					value: $allEarningPositionsUsd,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
-				})}
-			</span>
+		<div class="flex justify-center gap-2 text-sm font-bold sm:text-base">
+			{formatCurrency({
+				value: $allEarningPositionsUsd,
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage
+			})}
 		</div>
 	{/snippet}
 </StakeContentCard>
