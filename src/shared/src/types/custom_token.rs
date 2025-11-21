@@ -14,6 +14,13 @@ pub struct IcrcToken {
     pub index_id: Option<IndexId>,
 }
 
+/// An EXT v2 compliant token on the Internet Computer.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct ExtV2Token {
+    pub ledger_id: LedgerId,
+}
+
 /// A network-specific unique Solana token identifier.
 #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
 #[serde(remote = "Self")]
@@ -57,6 +64,7 @@ pub enum Token {
     Erc20(ErcToken) = 3,
     Erc721(ErcToken) = 4,
     Erc1155(ErcToken) = 5,
+    ExtV2(ExtV2Token) = 6,
 }
 
 /// User preferences for any token
@@ -89,4 +97,6 @@ pub enum CustomTokenId {
     SolDevnet(SplTokenId) = 2,
     /// An Ethereum/EVM token on an EVM-compatible network.
     Ethereum(ErcTokenId, ChainId) = 3,
+    /// An EXT v2 Token on the Internet Computer mainnet.
+    ExtV2(LedgerId) = 4,
 }

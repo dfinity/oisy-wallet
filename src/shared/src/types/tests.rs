@@ -463,6 +463,59 @@ mod contact_image {
             ]
         );
     }
+
+    mod ext_v2 {
+        //! Tests for the ext_v2 module.
+        use candid::Principal;
+
+        use super::*;
+        use crate::{
+            types::custom_token::ExtV2Token,
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
+
+        fn canister_id1() -> Principal {
+            Principal::from_text("ckbgq-4yaaa-aaaak-qi2xq-cai").unwrap()
+        }
+        fn user_id() -> Principal {
+            Principal::from_text("tdb26-jop6k-aogll-7ltgs-eruif-6kk7m-qpktf-gdiqx-mxtrf-vb5e6-eqe")
+                .unwrap()
+        }
+
+        test_validate_on_deserialize!(
+            ExtV2Token,
+            vec![
+                TestVector {
+                    input: ExtV2Token {
+                        ledger_id: canister_id1(),
+                    },
+                    valid: true,
+                    description: "ExtV2Token with valid ledger_id",
+                },
+                TestVector {
+                    input: ExtV2Token {
+                        ledger_id: Principal::anonymous(),
+                    },
+                    valid: false,
+                    description: "ExtV2Token with anonymous ledger_id",
+                },
+                TestVector {
+                    input: ExtV2Token {
+                        ledger_id: Principal::management_canister(),
+                    },
+                    valid: false,
+                    description: "ExtV2Token with the management canister as ledger_id",
+                },
+                TestVector {
+                    input: ExtV2Token {
+                        ledger_id: user_id(),
+                    },
+                    valid: false,
+                    description: "ExtV2Token with user or network principal as ledger_id",
+                },
+            ]
+        );
+    }
 }
 
 mod token {
