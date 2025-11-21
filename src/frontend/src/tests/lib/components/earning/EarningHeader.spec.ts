@@ -6,11 +6,13 @@ import { get } from 'svelte/store';
 describe('EarningHeader', () => {
 	it('renders header title', () => {
 		render(EarningHeader);
+
 		expect(screen.getByText(get(i18n).earning.text.header_title)).toBeInTheDocument();
 	});
 
 	it('renders header description', () => {
 		render(EarningHeader);
+
 		expect(screen.getByText(get(i18n).earning.text.header_description)).toBeInTheDocument();
 	});
 
