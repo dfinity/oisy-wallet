@@ -106,7 +106,7 @@ impl From<&Token> for CustomTokenId {
                 chain_id,
                 ..
             }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
-            Token::ExtV2(token) => CustomTokenId::ExtV2(token.ledger_id),
+            Token::ExtV2(token) => CustomTokenId::ExtV2(token.canister_id),
         }
     }
 }
@@ -632,13 +632,13 @@ impl Validate for IcrcToken {
 impl Validate for ExtV2Token {
     /// Verifies that an EXT v2 token is valid.
     ///
-    /// - Checks that the ledger principal is the type of principal used for a canister.
+    /// - Checks that the canister principal is the type of principal used for a canister.
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
     fn validate(&self) -> Result<(), candid::Error> {
-        let ExtV2Token { ledger_id } = self;
-        // The ledger_id should be appropriate for a canister.
-        if ledger_id.as_slice().last() != Some(&1) {
-            return Err(candid::Error::msg("Ledger ID is not a canister"));
+        let ExtV2Token { canister_id } = self;
+        // The canister_id should be appropriate for a canister.
+        if canister_id.as_slice().last() != Some(&1) {
+            return Err(candid::Error::msg("Canister ID is not a canister"));
         }
         Ok(())
     }
