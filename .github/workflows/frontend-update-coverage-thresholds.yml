@@ -49,6 +49,9 @@ jobs:
           path: coverage/
           retention-days: 3
 
+      - name: Adapt the thresholds with margins and checks
+        run: npm run build:vitest-thresholds
+
       # The coverage calculation is a bit flaky, so to avoid being stuck, we reduce it to have an acceptable margin
       - name: Give a margin to coverage thresholds
         run: |
