@@ -74,7 +74,7 @@
 				>
 					{#snippet title()}
 						{replacePlaceholders($i18n.get_token.text.swap_to_token, { $token: tokenSymbol })}
-					{/snippet}}
+					{/snippet}
 
 					{#snippet label()}
 						{$i18n.get_token.text.convert_assets}:
@@ -107,7 +107,7 @@
 
 					{#snippet label()}
 						{$i18n.get_token.text.convertible_assets}:
-					{/snippet}}
+					{/snippet}
 				</GetTokenCardContent>
 			{/snippet}
 
