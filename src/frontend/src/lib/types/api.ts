@@ -49,7 +49,7 @@ export interface BtcGetPendingTransactionParams {
 }
 
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
-	txId: Uint8Array | number[];
+	txId: Uint8Array;
 	utxos: Utxo[];
 }
 
@@ -66,7 +66,7 @@ export interface GetSchnorrPublicKeyParams {
 }
 
 export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
-	message: number[];
+	message: Uint8Array;
 }
 
 export interface AddUserHiddenDappIdParams {
