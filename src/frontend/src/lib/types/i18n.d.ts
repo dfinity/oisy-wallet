@@ -1459,6 +1459,19 @@ interface I18nStake {
 		claim_rewards: string;
 		claim_now: string;
 		claiming: string;
+		get_tokens_with_amount: string;
+		get_tokens: string;
+	};
+}
+
+interface I18nGet_token {
+	text: {
+		title: string;
+		swap_to_token: string;
+		ready_to_swap: string;
+		convert_assets: string;
+		convertible_assets: string;
+		how_to_convert: string;
 	};
 }
 
@@ -1553,6 +1566,7 @@ interface I18n {
 	activity: I18nActivity;
 	earning: I18nEarning;
 	stake: I18nStake;
+	get_token: I18nGet_token;
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
 }

@@ -1832,7 +1832,19 @@
 			"claim_reward": "Claim reward",
 			"claim_rewards": "Claim rewards",
 			"claim_now": "Claim now",
-			"claiming": "Claiming..."
+			"claiming": "Claiming...",
+			"get_tokens_with_amount": "Get up to $amount $token_symbol",
+			"get_tokens": "Get more $token_symbol"
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "Get $token",
+			"swap_to_token": "Swap to $token",
+			"ready_to_swap": "Ready to swap",
+			"convert_assets": "Convert Assets",
+			"convertible_assets": "Convertible assets",
+			"how_to_convert": "How to convert"
 		}
 	},
 	"temporal": {
