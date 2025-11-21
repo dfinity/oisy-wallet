@@ -36,7 +36,7 @@ describe('ext-v2-token.api', () => {
 			expect(tokenCanisterMock.transactions).toHaveBeenCalledExactlyOnceWith({});
 		});
 
-		it('should throw an error if identity is undefined', async () => {
+		it('should throw an error if identity is nullish', async () => {
 			await expect(transactions({ ...params, identity: undefined })).rejects.toThrow();
 
 			await expect(transactions({ ...params, identity: null })).rejects.toThrow();
