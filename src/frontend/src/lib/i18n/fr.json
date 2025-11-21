@@ -40,7 +40,8 @@
 			"confirm": "",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "À des fins de test uniquement !",
@@ -55,7 +56,8 @@
 			"switch_language": "Changer de langue",
 			"switch_currency": "Changer de devise",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
@@ -1766,7 +1768,9 @@
 	"earning": {
 		"text": {
 			"title": "Gagner",
-			"earning_opportunities": ""
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
 			"gldt": {

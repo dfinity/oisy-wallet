@@ -40,7 +40,8 @@
 			"confirm": "Подтвердить",
 			"more": "Больше",
 			"less": "Меньше",
-			"ellipsis": "…"
+			"ellipsis": "…",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
@@ -55,7 +56,8 @@
 			"switch_language": "Сменить язык",
 			"switch_currency": "Сменить валюту",
 			"more": "Показать больше",
-			"less": "Показать меньше"
+			"less": "Показать меньше",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
@@ -1766,7 +1768,9 @@
 	"earning": {
 		"text": {
 			"title": "Заработать",
-			"earning_opportunities": ""
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
 			"gldt": {

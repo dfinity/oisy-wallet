@@ -40,7 +40,8 @@
 			"confirm": "",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -55,7 +56,8 @@
 			"switch_language": "言語を切り替え",
 			"switch_currency": "通貨を切り替え",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "取引完了までタブを閉じないでください",
@@ -1766,7 +1768,9 @@
 	"earning": {
 		"text": {
 			"title": "獲得",
-			"earning_opportunities": ""
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
 			"gldt": {
