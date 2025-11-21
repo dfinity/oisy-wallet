@@ -21,7 +21,7 @@
 			</ExternalLink>
 		</p>
 
-		<div class="flex w-full grid-cols-2 gap-3">
+		<div class="flex w-full flex-col gap-3 sm:flex-row">
 			<EarningPotentialCard />
 			<EarningPositionCard />
 		</div>
