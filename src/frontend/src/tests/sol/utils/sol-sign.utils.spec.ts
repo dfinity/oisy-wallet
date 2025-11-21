@@ -12,7 +12,7 @@ describe('sol-sign.utils', () => {
 	describe('createSigner', () => {
 		let spySignWithSchnorr: MockInstance;
 
-		const mockSignedBytes = [4, 5, 6];
+		const mockSignedBytes = Uint8Array.from([4, 5, 6]);
 		const mockNetwork: SolanaNetworkType = 'mainnet';
 		const mockTransaction: Transaction & TransactionWithinSizeLimit & TransactionWithLifetime = {
 			messageBytes: new Uint8Array([1, 2, 3])
@@ -49,7 +49,7 @@ describe('sol-sign.utils', () => {
 				identity: mockIdentity,
 				derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, mockNetwork],
 				keyId: SOLANA_KEY_ID,
-				message: Array.from(mockTransaction.messageBytes)
+				message: Uint8Array.from(mockTransaction.messageBytes)
 			});
 			expect(signature).toEqual([{ [mockSolAddress]: Uint8Array.from(mockSignedBytes) }]);
 		});
@@ -72,7 +72,7 @@ describe('sol-sign.utils', () => {
 					identity: mockIdentity,
 					derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, mockNetwork],
 					keyId: SOLANA_KEY_ID,
-					message: Array.from(mockTransaction.messageBytes)
+					message: Uint8Array.from(mockTransaction.messageBytes)
 				});
 			});
 

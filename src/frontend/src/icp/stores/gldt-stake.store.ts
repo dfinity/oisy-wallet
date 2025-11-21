@@ -1,4 +1,4 @@
-import type { StakePositionResponse } from '$declarations/gldt_stake/declarations/gldt_stake.did';
+import type { StakePositionResponse } from '$declarations/gldt_stake/gldt_stake.did';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
