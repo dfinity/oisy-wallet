@@ -9,7 +9,7 @@
 	import { formatStakeApyNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { readable } from 'svelte/store';
-	import StakeProviderItem from '$lib/components/stake/StakeProviderItem.svelte';
+	import CollapsibleListItem from '$lib/components/ui/CollapsibleListItem.svelte';
 
 	//const { sendTokenSymbol } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -19,7 +19,7 @@
 </script>
 
 {#snippet item1()}
-	<StakeProviderItem>
+	<CollapsibleListItem>
 		{#snippet icon()}
 			<IconLineChart />
 		{/snippet}
@@ -33,11 +33,11 @@
 				$token: $sendTokenSymbol
 			})}
 		{/snippet}
-	</StakeProviderItem>
+	</CollapsibleListItem>
 {/snippet}
 
 {#snippet item2()}
-	<StakeProviderItem>
+	<CollapsibleListItem>
 		{#snippet icon()}
 			<IconLineChart />
 		{/snippet}
@@ -51,11 +51,11 @@
 				$token: $sendTokenSymbol
 			})}
 		{/snippet}
-	</StakeProviderItem>
+	</CollapsibleListItem>
 {/snippet}
 
 {#snippet item3()}
-	<StakeProviderItem>
+	<CollapsibleListItem>
 		{#snippet icon()}
 			<IconLineChart />
 		{/snippet}
@@ -64,7 +64,7 @@
 				$apy: formatStakeApyNumber($gldtStakeApyStore?.apy ?? 0)
 			})}
 		{/snippet}
-	</StakeProviderItem>
+	</CollapsibleListItem>
 {/snippet}
 
 <StakeProvider provider={StakeProviderType.GLDT} data={[item1, item2, item3]} />

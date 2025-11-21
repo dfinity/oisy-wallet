@@ -4,7 +4,7 @@
 	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
-		icon: Snippet;
+		icon?: Snippet;
 		title: Snippet;
 		description?: Snippet;
 	}
@@ -13,7 +13,7 @@
 </script>
 
 <div class="flex border-b-1 border-secondary py-3" transition:slide>
-	{@render icon()}
+	{@render icon?.()}
 
 	<div class="ml-3 w-full text-sm">
 		<div class="font-bold">

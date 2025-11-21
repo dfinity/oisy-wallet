@@ -10,8 +10,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { StakeProvider } from '$lib/types/stake';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import Button from '$lib/components/ui/Button.svelte';
-	import IconExpand from '$lib/components/icons/IconExpand.svelte';
+	import CollapsibleList from '$lib/components/ui/CollapsibleList.svelte';
 
 	interface Props {
 		provider: StakeProvider;
@@ -19,10 +18,6 @@
 	}
 
 	let { provider, data }: Props = $props();
-
-	let expanded = $state(false);
-
-	let items = $derived(expanded && data.length > 0 ? data : [data[0]]);
 </script>
 
 <div class="my-4 rounded-lg border border-disabled bg-secondary px-2 py-3">
@@ -53,24 +48,5 @@
 		</ExternalLink>
 	</div>
 
-	<div class="mt-4 flex flex-col px-4">
-		{#each items as item}
-			{@render item()}
-		{/each}
-	</div>
-
-	{#if data.length > 1}
-		<Button
-			fullWidth
-			transparent
-			colorStyle="muted"
-			onclick={() => (expanded = !expanded)}
-			paddingSmall
-			styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
-			innerStyleClass="items-center"
-		>
-			{expanded ? $i18n.core.text.less : $i18n.core.text.more}
-			<IconExpand {expanded} />
-		</Button>
-	{/if}
+	<CollapsibleList items={data} />
 </div>
