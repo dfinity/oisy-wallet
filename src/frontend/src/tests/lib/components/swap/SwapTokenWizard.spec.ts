@@ -46,7 +46,8 @@ describe('SwapTokenWizard', () => {
 		onShowTokensList: vi.fn(),
 		onClose: vi.fn(),
 		onNext: vi.fn(),
-		onBack: vi.fn()
+		onBack: vi.fn(),
+		onShowProviderList: vi.fn()
 	};
 
 	beforeEach(() => {
