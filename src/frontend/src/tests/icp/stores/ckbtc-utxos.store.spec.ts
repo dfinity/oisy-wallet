@@ -9,7 +9,7 @@ vi.mock('@dfinity/utils', async () => {
 	const mod = await vi.importActual<object>('@dfinity/utils');
 	return {
 		...mod,
-		uint8ArrayToHexString: (v: Uint8Array | number[]) => v
+		uint8ArrayToHexString: (v: Uint8Array) => v
 	};
 });
 
