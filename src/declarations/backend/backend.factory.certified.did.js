@@ -396,7 +396,7 @@ export const idlFactory = ({ IDL }) => {
 		token_address: IDL.Text,
 		chain_id: IDL.Nat64
 	});
-	const ExtV2Token = IDL.Record({ ledger_id: IDL.Principal });
+	const ExtV2Token = IDL.Record({ canister_id: IDL.Principal });
 	const IcrcToken = IDL.Record({
 		ledger_id: IDL.Principal,
 		index_id: IDL.Opt(IDL.Principal)

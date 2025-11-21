@@ -200,7 +200,7 @@ type ExperimentalFeaturesSettings = record {
 		ExperimentalFeatureSettings
 	}
 };
-type ExtV2Token = record { ledger_id : principal };
+type ExtV2Token = record { canister_id : principal };
 type GetAllowedCyclesError = variant {
 	Other : text;
 	FailedToContactCyclesLedger
