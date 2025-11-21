@@ -21,7 +21,7 @@
 <RewardsEligibilityContext>
 	<GldtStakeContext>
 		<div class="flex flex-col gap-5">
-			<GldtStakeProvider />
+			<!--<GldtStakeProvider />-->
 			<EarningHeader />
 			<StakeContentSection>
 				{#snippet title()}
