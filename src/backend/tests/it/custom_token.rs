@@ -3,7 +3,8 @@ use std::sync::LazyLock;
 use candid::Principal;
 use shared::types::{
     custom_token::{
-        ChainId, CustomToken, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId, Token,
+        ChainId, CustomToken, ErcToken, ErcTokenId, ExtV2Token, IcrcToken, SplToken, SplTokenId,
+        Token,
     },
     TokenVersion,
 };
@@ -97,6 +98,15 @@ static ERC1155_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     section: None,
     allow_external_content_source: Some(false),
 });
+static EXT_V2_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::ExtV2(ExtV2Token {
+        ledger_id: Principal::from_text("ckbgq-4yaaa-aaaak-qi2xq-cai").unwrap(),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
 static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
     vec![
         USER_TOKEN.clone(),
@@ -105,6 +115,7 @@ static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
         ERC20_TOKEN.clone(),
         ERC721_TOKEN.clone(),
         ERC1155_TOKEN.clone(),
+        EXT_V2_TOKEN.clone(),
     ]
 });
 
@@ -157,6 +168,11 @@ fn test_remove_custom_erc1155_token() {
 #[test]
 fn test_remove_custom_icrc_token() {
     test_remove_custom_token(&USER_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_ext_v2_token() {
+    test_remove_custom_token(&EXT_V2_TOKEN)
 }
 
 #[test]
