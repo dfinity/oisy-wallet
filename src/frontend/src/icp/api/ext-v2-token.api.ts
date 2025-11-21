@@ -5,14 +5,16 @@ import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 /**
- * TBD (we need to find out if the transactions returned are only for the caller or for the entire token)
+ * Returns all collection transactions, not filtered by the caller.
  *
- * @param {Object} params - The parameters for fetching metadata.
+ * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/LEGACY-SUPPORT.md#transactions-api
+ *
+ * @param {Object} params - The parameters for fetching transactions.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
  * @param {OptionIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.canisterId - The canister ID of the EXT v2 token.
  * @param {QueryParams} params.rest - Additional query parameters.
- * @returns {Promise<Transaction[]>} The array of transactions of ????????????????????????????????????
+ * @returns {Promise<Transaction[]>} The array of all collection transactions, not filtered by caller.
  */
 export const transactions = async ({
 	identity,

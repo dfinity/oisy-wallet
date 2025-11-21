@@ -27,6 +27,11 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 		return new ExtV2TokenCanister(canisterId, service, certifiedService);
 	}
 
+	/**
+	 * Fetches all collection transactions, not filtered by caller.
+	 *
+	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/LEGACY-SUPPORT.md#transactions-api
+	 */
 	transactions = async ({ certified }: QueryParams): Promise<Transaction[]> => {
 		const { transactions } = this.caller({ certified });
 
