@@ -100,6 +100,8 @@ describe('all-tokens.derived', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 
+		setupTestnetsStore('disabled');
+
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
