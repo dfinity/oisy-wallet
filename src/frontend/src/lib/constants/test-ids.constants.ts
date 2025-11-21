@@ -151,6 +151,9 @@ export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-una
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
 export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
 export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
+export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step';
+
+export const MODAL_FILTER_NETWORKS = 'MODAL_FILTER_NETWORKS';
 
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
@@ -218,6 +221,7 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+export const MODAL_TOKENS_LIST = 'modal-tokens-list';
 
 export const ADDRESS_BOOK_MODAL = 'address-book-modal';
 export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
@@ -316,3 +320,6 @@ export const PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-info-banner-close-butto
 
 // OpenCryptoPay
 export const OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON = 'open-crypto-pay-enter-manually-button';
+
+// Get Token Modal
+export const GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE = 'get-token-modal-potential-usd-balance';
