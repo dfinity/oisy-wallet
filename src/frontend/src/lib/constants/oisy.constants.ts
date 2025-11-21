@@ -19,7 +19,8 @@ export const {
 	OISY_FIND_INTERNET_IDENTITY_URL,
 	OISY_FAQ_URL,
 	OISY_ACCESS_CONTROL_URL,
-	OISY_NFT_DOCS_URL
+	OISY_NFT_DOCS_URL,
+	OISY_HOW_TO_CONVERT_DOCS_URL
 } = safeParse({
 	schema: OisyMetadataSchema,
 	value: metadata,
@@ -40,7 +41,8 @@ export const {
 		OISY_FIND_INTERNET_IDENTITY_URL: '',
 		OISY_FAQ_URL: '',
 		OISY_ACCESS_CONTROL_URL: '',
-		OISY_NFT_DOCS_URL: ''
+		OISY_NFT_DOCS_URL: '',
+		OISY_HOW_TO_CONVERT_DOCS_URL: ''
 	}
 });
 
