@@ -67,6 +67,10 @@ jobs:
               - '**/*rust*'
               - # Scripts that download external Candid files, with false positives.
                 'scripts/build.*.sh'
+              - # Scripts that generate the declarations.
+                'scripts/generate.sh'
+              - # Scripts that download the candid files.
+                'scripts/did.sh'
               - # This workflow
                 '.github/workflows/binding-checks.yml'
 
