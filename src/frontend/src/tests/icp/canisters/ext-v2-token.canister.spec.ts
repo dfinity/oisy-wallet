@@ -164,15 +164,15 @@ describe('ext-v2-token.canister', () => {
 			expect(service.balance).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
-		it('should throw an error if transactions throws', async () => {
+		it('should throw an error if balance throws', async () => {
 			const mockError = new Error('Test response error');
-			service.transactions.mockRejectedValue(mockError);
+			service.balance.mockRejectedValue(mockError);
 
-			const { transactions } = await createExtV2TokenCanister({
+			const { balance } = await createExtV2TokenCanister({
 				serviceOverride: service
 			});
 
-			const res = transactions(mockParams);
+			const res = balance(mockParams);
 
 			await expect(res).rejects.toThrow(mockError);
 		});
