@@ -6,13 +6,16 @@
 
 	interface Props {
 		items: Snippet[];
+		hideExpandButton?: boolean;
 	}
 
-	let { items }: Props = $props();
+	let { items, hideExpandButton = false }: Props = $props();
 
 	let expanded = $state(false);
 
-	let displayItems = $derived(expanded && items.length > 0 ? items : [items[0]]);
+	let displayItems = $derived(
+		(expanded && items.length > 0) || hideExpandButton ? items : [items[0]]
+	);
 </script>
 
 {#if items.length > 0}
@@ -23,7 +26,7 @@
 			{/each}
 		</div>
 
-		{#if items.length > 1}
+		{#if items.length > 1 && !hideExpandButton}
 			<Button
 				fullWidth
 				transparent

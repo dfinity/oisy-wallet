@@ -56,4 +56,19 @@ describe('CollapsibleList', () => {
 		expect(queryByTestId('item2')).not.toBeInTheDocument();
 		expect(queryByTestId('item3')).not.toBeInTheDocument();
 	});
+
+	it('should render all items by default and not render the expand button if hideExpandButton is passed', async () => {
+		const { queryByTestId, queryByRole } = render(CollapsibleList, {
+			props: {
+				items: [createMockSnippet('item1'), createMockSnippet('item2'), createMockSnippet('item3')],
+				hideExpandButton: true
+			}
+		});
+
+		expect(queryByRole('button')).not.toBeInTheDocument();
+
+		expect(queryByTestId('item1')).toBeInTheDocument();
+		expect(queryByTestId('item2')).toBeInTheDocument();
+		expect(queryByTestId('item3')).toBeInTheDocument();
+	});
 });
