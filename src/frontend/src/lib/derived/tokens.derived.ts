@@ -229,3 +229,13 @@ export const enabledMainnetFungibleTokensUsdBalance: Readable<number> = derived(
 			$enabledFungibleTokensUi.filter(({ network: { env } }) => env !== 'testnet')
 		)
 );
+
+export const enabledMainnetFungibleIcTokensUsdBalance: Readable<number> = derived(
+	[enabledFungibleTokensUi],
+	([$enabledFungibleTokensUi]) =>
+		sumTokensUiUsdBalance(
+			$enabledFungibleTokensUi.filter(
+				(token) => isTokenIc(token) && token.network.env !== 'testnet'
+			)
+		)
+);
