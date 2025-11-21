@@ -40,7 +40,8 @@
 			"confirm": "Confirmar",
 			"more": "Más",
 			"less": "Menos",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
@@ -55,7 +56,8 @@
 			"switch_language": "Cambiar idioma",
 			"switch_currency": "Cambiar moneda",
 			"more": "Mas",
-			"less": "Menos"
+			"less": "Menos",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
@@ -1766,7 +1768,9 @@
 	"earning": {
 		"text": {
 			"title": "",
-			"earning_opportunities": ""
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
 			"gldt": {

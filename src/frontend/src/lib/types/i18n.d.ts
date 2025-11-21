@@ -44,6 +44,7 @@ interface I18nCore {
 		more: string;
 		less: string;
 		ellipsis: string;
+		learn_more: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -56,6 +57,7 @@ interface I18nCore {
 		switch_currency: string;
 		more: string;
 		less: string;
+		learn_more: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string };
 }
@@ -1399,7 +1401,12 @@ interface I18nActivity {
 }
 
 interface I18nEarning {
-	text: { title: string; earning_opportunities: string };
+	text: {
+		title: string;
+		earning_opportunities: string;
+		header_title: string;
+		header_description: string;
+	};
 	cards: {
 		gldt: { title: string; description: string; action: string };
 		sprinkles: { title: string; description: string; action: string };
