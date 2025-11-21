@@ -150,7 +150,7 @@ describe('ext-v2-token.canister', () => {
 		});
 
 		it('should handle a generic canister error', async () => {
-			// @ts-expect-error we test this in purposes
+			// @ts-expect-error we test this on purpose
 			service.balance.mockResolvedValue({ err: { CanisterError: null } });
 
 			const { balance } = await createExtV2TokenCanister({
