@@ -68,7 +68,7 @@ describe('signer.canister', () => {
 				height: 1000,
 				value: 1n,
 				outpoint: {
-					txid: [1, 2, 3],
+					txid: Uint8Array.from([1, 2, 3]),
 					vout: 1
 				}
 			}
@@ -648,8 +648,8 @@ describe('signer.canister', () => {
 
 	describe('getSchnorrPublicKey', () => {
 		it('returns correct Schnorr public key', async () => {
-			const publicKey = [1, 2, 3];
-			const response = { public_key: publicKey, chain_code: [4, 5, 6] };
+			const publicKey = Uint8Array.from([1, 2, 3]);
+			const response = { public_key: publicKey, chain_code: Uint8Array.from([4, 5, 6]) };
 			service.schnorr_public_key.mockResolvedValue({ Ok: [response] });
 
 			const { getSchnorrPublicKey } = await createSignerCanister({
@@ -685,8 +685,8 @@ describe('signer.canister', () => {
 	});
 
 	describe('signWithSchnorr', () => {
-		const message = [1, 2, 3];
-		const signature = [4, 5, 6];
+		const message = Uint8Array.from([1, 2, 3]);
+		const signature = Uint8Array.from([4, 5, 6]);
 
 		it('signs with Schnorr', async () => {
 			service.schnorr_sign.mockResolvedValue({ Ok: [{ signature }] });
