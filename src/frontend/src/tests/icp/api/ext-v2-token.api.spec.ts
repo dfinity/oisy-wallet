@@ -38,6 +38,8 @@ describe('ext-v2-token.api', () => {
 
 		it('should throw an error if identity is undefined', async () => {
 			await expect(transactions({ ...params, identity: undefined })).rejects.toThrow();
+
+			await expect(transactions({ ...params, identity: null })).rejects.toThrow();
 		});
 	});
 
@@ -68,9 +70,9 @@ describe('ext-v2-token.api', () => {
 		});
 
 		it('should return zero balance if identity is nullish', async () => {
-			const result = await balance({ ...params, identity: undefined });
+			await expect(balance({ ...params, identity: undefined })).resolves.toEqual(ZERO);
 
-			expect(result).toEqual(ZERO);
+			await expect(balance({ ...params, identity: null })).resolves.toEqual(ZERO);
 
 			expect(tokenCanisterMock.balance).not.toHaveBeenCalled();
 		});
