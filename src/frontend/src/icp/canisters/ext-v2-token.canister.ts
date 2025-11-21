@@ -28,7 +28,7 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	}
 
 	/**
-	 * Fetches all collection transactions, not filtered by caller.
+	 * Fetches all collection transactions, not filtered by the caller.
 	 *
 	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/LEGACY-SUPPORT.md#transactions-api
 	 */
