@@ -50,7 +50,11 @@
 								value={nonNullish(cardFields[cardField])
 									? Number(cardFields[cardField])
 									: undefined}
-							/>
+							>
+								{#snippet fallback()}
+									-
+								{/snippet}
+							</EarningYearlyAmount>
 						{:else if cardField === EarningCardFields.CURRENT_EARNING}
 							<EarningYearlyAmount
 								formatPositiveAmount
@@ -60,7 +64,11 @@
 									? (Number(cardFields[cardField]) * Number(cardFields[EarningCardFields.APY])) /
 										100
 									: undefined}
-							/>
+							>
+								{#snippet fallback()}
+									-
+								{/snippet}
+							</EarningYearlyAmount>
 						{:else if cardField === EarningCardFields.APY}
 							{formattedApy}
 						{:else}
