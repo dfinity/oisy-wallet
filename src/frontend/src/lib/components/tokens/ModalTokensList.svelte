@@ -6,7 +6,10 @@
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import { MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS } from '$lib/constants/test-ids.constants';
+	import {
+		MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS,
+		MODAL_TOKENS_LIST
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -46,7 +49,7 @@
 	let noTokensMatch = $derived($filteredTokens.length === 0);
 </script>
 
-<div>
+<div data-tid={MODAL_TOKENS_LIST}>
 	<div class="input-field condensed mb-4 flex-1">
 		<InputSearch
 			autofocus={isDesktop()}
