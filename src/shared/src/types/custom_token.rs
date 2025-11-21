@@ -3,8 +3,9 @@ use candid::{CandidType, Deserialize, Principal};
 
 use crate::types::Version;
 
-pub type LedgerId = Principal;
-pub type IndexId = Principal;
+pub type CanisterId = Principal;
+pub type LedgerId = CanisterId;
+pub type IndexId = CanisterId;
 
 /// An ICRC-1 compliant token on the Internet Computer.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -18,7 +19,7 @@ pub struct IcrcToken {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[serde(remote = "Self")]
 pub struct ExtV2Token {
-    pub ledger_id: LedgerId,
+    pub canister_id: CanisterId,
 }
 
 /// A network-specific unique Solana token identifier.
