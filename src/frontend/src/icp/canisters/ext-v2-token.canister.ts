@@ -44,7 +44,7 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	};
 
 	/**
-	 * Get the balance of a user for a specific token.
+	 * Get the balance of a user for a specific token of the collection.
 	 *
 	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#balance-1
 	 *
