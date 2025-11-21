@@ -100,7 +100,7 @@ static ERC1155_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
 });
 static EXT_V2_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::ExtV2(ExtV2Token {
-        ledger_id: Principal::from_text("ckbgq-4yaaa-aaaak-qi2xq-cai").unwrap(),
+        canister_id: Principal::from_text("ckbgq-4yaaa-aaaak-qi2xq-cai").unwrap(),
     }),
     enabled: true,
     version: None,
