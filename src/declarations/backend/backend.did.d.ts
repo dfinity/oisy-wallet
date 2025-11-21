@@ -220,6 +220,9 @@ export type ExperimentalFeatureSettingsFor = { AiAssistantBeta: null };
 export interface ExperimentalFeaturesSettings {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
 }
+export interface ExtV2Token {
+	ledger_id: Principal;
+}
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
 	allowed_cycles: bigint;
@@ -351,6 +354,7 @@ export interface TestnetsSettings {
 }
 export type Token =
 	| { Erc20: ErcToken }
+	| { ExtV2: ExtV2Token }
 	| { Icrc: IcrcToken }
 	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }

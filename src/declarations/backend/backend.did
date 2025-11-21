@@ -200,6 +200,7 @@ type ExperimentalFeaturesSettings = record {
 		ExperimentalFeatureSettings
 	}
 };
+type ExtV2Token = record { ledger_id : principal };
 type GetAllowedCyclesError = variant {
 	Other : text;
 	FailedToContactCyclesLedger
@@ -322,6 +323,7 @@ type SupportedCredential = record {
 type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
 	Erc20 : ErcToken;
+	ExtV2 : ExtV2Token;
 	Icrc : IcrcToken;
 	Erc721 : ErcToken;
 	SplDevnet : SplToken;
