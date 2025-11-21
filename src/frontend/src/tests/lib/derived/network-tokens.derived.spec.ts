@@ -54,8 +54,7 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import {
 	enabledFungibleNetworkTokens,
-	enabledNonFungibleNetworkTokens,
-	fungibleNetworkTokens
+	enabledNonFungibleNetworkTokens
 } from '$lib/derived/network-tokens.derived';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
@@ -99,139 +98,6 @@ describe('network-tokens.derived', () => {
 		icrcCustomTokensStore.resetAll();
 		splDefaultTokensStore.reset();
 		splCustomTokensStore.resetAll();
-	});
-
-	describe('fungibleNetworkTokens', () => {
-		it('should return all non-testnet tokens when no network is selected and testnets are disabled', () => {
-			expect(get(fungibleNetworkTokens)).toEqual([
-				ICP_TOKEN,
-				BTC_MAINNET_TOKEN,
-				ETHEREUM_TOKEN,
-				SOLANA_TOKEN,
-				BASE_ETH_TOKEN,
-				BNB_MAINNET_TOKEN,
-				POL_MAINNET_TOKEN,
-				ARBITRUM_ETH_TOKEN
-			]);
-		});
-
-		describe('when testnets are enabled', () => {
-			const mockErc20UserToken: Erc20UserToken = {
-				...PEPE_TOKEN,
-				...toggleProps
-			};
-
-			const mockErc20SepoliaUserToken: Erc20UserToken = {
-				...SEPOLIA_LINK_TOKEN,
-				...toggleProps
-			};
-
-			const mockSplCustomToken: SplCustomToken = {
-				...BONK_TOKEN,
-				...toggleProps
-			};
-
-			const mockSplDevnetCustomToken: SplCustomToken = {
-				...DEVNET_EURC_TOKEN,
-				...toggleProps
-			};
-
-			const networkMap: { network: Network; tokens: Token[] }[] = [
-				{
-					network: ICP_NETWORK,
-					tokens: [ICP_TOKEN]
-				},
-				{
-					network: BTC_MAINNET_NETWORK,
-					tokens: [BTC_MAINNET_TOKEN]
-				},
-				{
-					network: ETHEREUM_NETWORK,
-					tokens: [ETHEREUM_TOKEN, mockErc20UserToken]
-				},
-				{
-					network: SEPOLIA_NETWORK,
-					tokens: [SEPOLIA_TOKEN, mockErc20SepoliaUserToken]
-				},
-				{
-					network: SOLANA_MAINNET_NETWORK,
-					tokens: [SOLANA_TOKEN, mockSplCustomToken]
-				},
-				{
-					network: SOLANA_DEVNET_NETWORK,
-					tokens: [SOLANA_DEVNET_TOKEN, mockSplDevnetCustomToken]
-				},
-				{
-					network: BASE_NETWORK,
-					tokens: [BASE_ETH_TOKEN]
-				},
-				{
-					network: BASE_SEPOLIA_NETWORK,
-					tokens: [BASE_SEPOLIA_ETH_TOKEN]
-				},
-				{
-					network: BSC_MAINNET_NETWORK,
-					tokens: [BNB_MAINNET_TOKEN]
-				},
-				{
-					network: BSC_TESTNET_NETWORK,
-					tokens: [BNB_TESTNET_TOKEN]
-				},
-				{
-					network: POLYGON_MAINNET_NETWORK,
-					tokens: [POL_MAINNET_TOKEN]
-				},
-				{
-					network: POLYGON_AMOY_NETWORK,
-					tokens: [POL_AMOY_TOKEN]
-				},
-				{
-					network: ARBITRUM_MAINNET_NETWORK,
-					tokens: [ARBITRUM_ETH_TOKEN]
-				},
-				{
-					network: ARBITRUM_SEPOLIA_NETWORK,
-					tokens: [ARBITRUM_SEPOLIA_ETH_TOKEN]
-				}
-			];
-
-			beforeEach(() => {
-				setupTestnetsStore('enabled');
-
-				erc20UserTokensStore.setAll([
-					{ data: mockErc20UserToken, certified: false },
-					{ data: mockErc20SepoliaUserToken, certified: false }
-				]);
-				splCustomTokensStore.setAll([
-					{ data: mockSplCustomToken, certified: false },
-					{ data: mockSplDevnetCustomToken, certified: false }
-				]);
-			});
-
-			it('should not return testnet tokens when no network is selected', () => {
-				expect(get(fungibleNetworkTokens)).toEqual([
-					ICP_TOKEN,
-					BTC_MAINNET_TOKEN,
-					ETHEREUM_TOKEN,
-					SOLANA_TOKEN,
-					BASE_ETH_TOKEN,
-					BNB_MAINNET_TOKEN,
-					POL_MAINNET_TOKEN,
-					ARBITRUM_ETH_TOKEN,
-					mockErc20UserToken,
-					mockSplCustomToken
-				]);
-			});
-
-			it.each(networkMap)(
-				'should return all tokens for network $network.name',
-				({ network, tokens }) => {
-					mockPage.mock({ network: network.id.description });
-
-					expect(get(fungibleNetworkTokens)).toEqual(tokens);
-				}
-			);
-		});
 	});
 
 	describe('enabledFungibleNetworkTokens', () => {
