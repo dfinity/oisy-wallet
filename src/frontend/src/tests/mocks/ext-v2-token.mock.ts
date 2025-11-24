@@ -14,6 +14,8 @@ import {
 } from '$tests/mocks/identity.mock';
 
 export const mockExtV2TokenCanisterId: CanisterIdText = 'oeee4-qaaaa-aaaak-qaaeq-cai';
+export const mockExtV2TokenCanisterId2: CanisterIdText = 'rhg63-2aaaa-aaaag-qcwhq-cai';
+export const mockExtV2TokenCanisterId3: CanisterIdText = 'ckbgq-4yaaa-aaaak-qi2xq-cai';
 
 export const mockExtV2TokenIdentifier: TokenIdentifier =
 	'7lok3-dakor-uwiaa-aaaaa-cuaab-eaqca-aacwh-q';
