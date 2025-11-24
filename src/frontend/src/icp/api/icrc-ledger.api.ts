@@ -246,6 +246,30 @@ export const icrc1SupportedStandards = async ({
 	return icrc1SupportedStandards({ certified });
 };
 
+/**
+ * Retrieves the ledger ICRC10 supported standards.
+ *
+ * @param {Object} params - The parameters for fetching supported standards.
+ * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
+ * @returns {Promise<IcrcStandardRecord[]>} The array of all supported standards.
+ */
+export const icrc10SupportedStandards = async ({
+	certified = true,
+	identity,
+	ledgerCanisterId
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & QueryParams): Promise<IcrcStandardRecord[]> => {
+	assertNonNullish(identity);
+
+	const { icrc10SupportedStandards } = await ledgerCanister({ identity, ledgerCanisterId });
+
+	return icrc10SupportedStandards({ certified });
+};
+
 export const getMintingAccount = async ({
 	certified = true,
 	identity,
