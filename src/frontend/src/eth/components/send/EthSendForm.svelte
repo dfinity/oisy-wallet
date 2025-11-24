@@ -50,10 +50,8 @@
 		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	let highestNonce = $state<number | undefined>();
-	let onChainNonce = $state<number | undefined>();
 
-	let highestNonceDestination = $state<number | undefined>();
-	let onChainNonceDestination = $state<number | undefined>();
+	let onChainNonce = $state<number | undefined>();
 
 	const updateHighestNonce = async () => {
 		const {
@@ -67,10 +65,9 @@
 		}
 
 		highestNonce = (await getTransactionCountPending($ethAddress)) - 1;
+
 		onChainNonce = (await getTransactionCountLatest($ethAddress)) - 1;
 
-		highestNonceDestination = (await getTransactionCountPending($destination)) - 1;
-		onChainNonceDestination = (await getTransactionCountLatest($destination)) - 1;
 	};
 
 	$effect(() => {
@@ -113,21 +110,6 @@
 		<div>
 			<span>On-chain nonce</span>
 			<span>{onChainNonce}</span>
-		</div>
-
-		<div>
-			<span>---------------------</span>
-			<span></span>
-		</div>
-
-		<div>
-			<span>Destination Highest nonce</span>
-			<span>{highestNonceDestination}</span>
-		</div>
-
-		<div>
-			<span>Destination On-chain nonce</span>
-			<span>{onChainNonceDestination}</span>
 		</div>
 	{/snippet}
 
