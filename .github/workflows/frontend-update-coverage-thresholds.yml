@@ -49,53 +49,8 @@ jobs:
           path: coverage/
           retention-days: 3
 
-      # The coverage calculation is a bit flaky, so to avoid being stuck, we reduce it to have an acceptable margin
-      - name: Give a margin to coverage thresholds
-        run: |
-          node -e "
-          const fs = require('fs');
-          const file = 'vitest.config.ts';
-          const text = fs.readFileSync(file, 'utf8');
-          const updated = text.replace(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g, (_, key, value) => {
-            const reduced = (parseFloat(value) - 0.2).toFixed(2);
-            return \`\${key}: \${reduced}\`;
-          });
-          fs.writeFileSync(file, updated);
-          "
-
-      # The coverage thresholds should never decrease
-      - name: Update thresholds only if increased
-        run: |
-          node -e "
-          const fs = require('fs');
-
-          const file = 'vitest.config.ts';
-          const current = fs.readFileSync(file, 'utf8');
-          const original = fs.readFileSync('vitest.config.before.ts', 'utf8');
-
-          const extractThresholds = (text) => {
-            const map = {};
-            for (const match of text.matchAll(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g)) {
-             map[match[1]] = parseFloat(match[2]);
-            }
-            return map;
-          };
-
-          const originalThresholds = extractThresholds(original);
-          const updatedThresholds = extractThresholds(current);
-
-          const updated = current.replace(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g, (_, key, value) => {
-            const oldValue = originalThresholds[key];
-            const newValue = updatedThresholds[key];
-            if (newValue > oldValue) {
-             return \`\${key}: \${newValue}\`;
-            } else {
-             return \`\${key}: \${oldValue}\`;
-            }
-          });
-
-          fs.writeFileSync(file, updated);
-          "
+      - name: Adapt the thresholds with margins and checks
+        run: npm run build:vitest-thresholds
 
       - name: Remove old thresholds file
         run: rm vitest.config.before.ts
