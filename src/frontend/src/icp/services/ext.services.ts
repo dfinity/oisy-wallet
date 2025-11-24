@@ -98,7 +98,7 @@ const loadCustomTokensWithMetadata = async (
 			acc.push(result.value);
 		}
 
-		if (result.status === 'rejected') {
+		if (result.status === 'rejected' && params.certified) {
 			toastsError({
 				msg: { text: get(i18n).init.error.ext_custom_tokens },
 				err: result.reason

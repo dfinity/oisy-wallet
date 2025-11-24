@@ -16,10 +16,6 @@ vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
 }));
 
-vi.mock('$lib/services/analytics.services', () => ({
-	trackEvent: vi.fn()
-}));
-
 describe('ext.services', () => {
 	const expectedCustomTokens = [
 		{
