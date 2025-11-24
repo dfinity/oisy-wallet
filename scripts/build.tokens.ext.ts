@@ -163,7 +163,9 @@ const getCollections = async (): Promise<EnvExtToken[]> => {
 
 
 try {
-	await main();
+const tokens = await getCollections();
+
+	writeFileSync(EXT_COLLECTIONS_JSON_FILE, JSON.stringify(tokens, jsonReplacer, 8));
 } catch (err) {
 	console.error(err);
 	process.exit(1);
