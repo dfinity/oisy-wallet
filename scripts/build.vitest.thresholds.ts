@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { isNullish } from '@dfinity/utils';
 import { readFileSync, writeFileSync } from 'node:fs';
 
@@ -60,10 +62,10 @@ const enforceNonDecreasingThresholds = ({
 		}
 
 		if (newValue > oldValue) {
-			return `${key}: ${newValue}`;
+			return `${key}: ${newValue.toFixed(2)}`;
 		}
 
-		return `${key}: ${oldValue}`;
+		return `${key}: ${oldValue.toFixed(2)}`;
 	});
 };
 
