@@ -50,8 +50,10 @@
 		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	let highestNonce = $state<number | undefined>();
-
 	let onChainNonce = $state<number | undefined>();
+
+	let highestNonceDestination = $state<number | undefined>();
+	let onChainNonceDestination = $state<number | undefined>();
 
 	const updateHighestNonce = async () => {
 		const {
