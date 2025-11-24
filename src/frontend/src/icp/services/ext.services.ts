@@ -52,7 +52,6 @@ const loadCustomTokensWithMetadata = async (
 				version: versionNullable,
 				section: sectionNullable,
 				allow_external_content_source: allowExternalContentSourceNullable
-				// eslint-disable-next-line require-await -- We are going to add an async function to fetch the metadata
 			}) => {
 				const version = fromNullable(versionNullable);
 				const section = fromNullable(sectionNullable);

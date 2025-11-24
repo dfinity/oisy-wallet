@@ -19,7 +19,7 @@ vi.mock('$lib/api/backend.api', () => ({
 describe('ext.services', () => {
 	const expectedCustomTokens = [
 		{
-			certified: true,
+			certified: false,
 			data: {
 				version: 1n,
 				enabled: true,
@@ -27,7 +27,7 @@ describe('ext.services', () => {
 			}
 		},
 		{
-			certified: true,
+			certified: false,
 			data: {
 				version: 2n,
 				enabled: true,
@@ -35,9 +35,8 @@ describe('ext.services', () => {
 			}
 		},
 		{
-			certified: true,
+			certified: false,
 			data: {
-				version: undefined,
 				enabled: false,
 				...EXT_BUILTIN_TOKENS[2]
 			}
@@ -50,7 +49,7 @@ describe('ext.services', () => {
 
 			mockAuthStore();
 
-			vi.spyOn(toastsStore, 'toastsErrorNoTrace');
+			vi.spyOn(toastsStore, 'toastsError');
 
 			extCustomTokensStore.resetAll();
 
@@ -116,8 +115,7 @@ describe('ext.services', () => {
 
 			await loadCustomTokens({ identity: mockIdentity });
 
-			expect(toastsError).toHaveBeenCalledOnce();
-			expect(toastsError).toHaveBeenNthCalledWith(1, {
+			expect(toastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.init.error.ext_custom_tokens },
 				err: mockError
 			});
@@ -126,9 +124,7 @@ describe('ext.services', () => {
 		it('should cache the custom tokens in IDB on update call', async () => {
 			await loadCustomTokens({ identity: mockIdentity });
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
-			expect(idbKeyval.set).toHaveBeenNthCalledWith(
-				1,
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
 				mockIdentity.getPrincipal().toText(),
 				mockCustomTokensExt,
 				expect.any(Object)
@@ -138,9 +134,7 @@ describe('ext.services', () => {
 		it('should fetch the cached custom tokens in IDB on query call', async () => {
 			await loadCustomTokens({ identity: mockIdentity, useCache: true });
 
-			expect(idbKeyval.get).toHaveBeenCalledOnce();
-			expect(idbKeyval.get).toHaveBeenNthCalledWith(
-				1,
+			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(
 				mockIdentity.getPrincipal().toText(),
 				expect.any(Object)
 			);
