@@ -160,10 +160,8 @@ const getCollections = async (): Promise<EnvExtToken[]> => {
 	return Object.values(collectionsMap).sort((a, b) => a.canisterId.localeCompare(b.canisterId));
 };
 
-
-
 try {
-const tokens = await getCollections();
+	const tokens = await getCollections();
 
 	writeFileSync(EXT_COLLECTIONS_JSON_FILE, JSON.stringify(tokens, jsonReplacer, 8));
 } catch (err) {
