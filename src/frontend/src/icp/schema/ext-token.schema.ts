@@ -14,3 +14,5 @@ export const ExtTokenSchema = z.object({
 	...TokenSchema.shape,
 	...ExtInterfaceSchema.shape
 });
+
+export const ExtTokenWithoutIdSchema = ExtTokenSchema.omit({ id: true }).strict();
