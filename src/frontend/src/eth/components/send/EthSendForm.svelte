@@ -67,7 +67,6 @@
 		highestNonce = (await getTransactionCountPending($ethAddress)) - 1;
 
 		onChainNonce = (await getTransactionCountLatest($ethAddress)) - 1;
-
 	};
 
 	$effect(() => {
