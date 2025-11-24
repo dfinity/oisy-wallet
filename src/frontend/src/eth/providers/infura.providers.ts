@@ -62,7 +62,7 @@ export class InfuraProvider {
 		this.provider.getTransactionCount({address, tag:'latest'});
 
 	getTransactionCountPending = (address: EthAddress): Promise<number> =>
-		this.provider.getTransactionCount({address, tag:'pending'});
+		this.getTransactionCount({address, tag:'pending'});
 
 	getBlockNumber = (): Promise<number> => this.provider.getBlockNumber();
 }
