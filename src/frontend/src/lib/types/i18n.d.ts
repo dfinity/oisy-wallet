@@ -11,6 +11,7 @@ interface I18nCore {
 		done: string;
 		close: string;
 		change: string;
+		continue: string;
 		apply: string;
 		retry: string;
 		refresh: string;
@@ -43,6 +44,7 @@ interface I18nCore {
 		more: string;
 		less: string;
 		ellipsis: string;
+		learn_more: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -55,6 +57,7 @@ interface I18nCore {
 		switch_currency: string;
 		more: string;
 		less: string;
+		learn_more: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string };
 }
@@ -208,6 +211,7 @@ interface I18nDapps {
 		game: string;
 		tools: string;
 		ai: string;
+		nft: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -271,6 +275,11 @@ interface I18nDapps {
 		mobox: { name: string; one_liner: string; description: string };
 		cyql: { name: string; one_liner: string; description: string };
 		icpanda_message: { name: string; one_liner: string; description: string };
+		opensea: { name: string; one_liner: string; description: string };
+		pacifica: { name: string; one_liner: string; description: string };
+		magic_eden: { name: string; one_liner: string; description: string };
+		solayer: { name: string; one_liner: string; description: string };
+		kamino: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -675,6 +684,27 @@ interface I18nSend {
 		solana_confirmation_failed: string;
 		fee_calc_unsupported_standard: string;
 	};
+}
+
+interface I18nScanner {
+	text: {
+		scan_qr_code: string;
+		pay_to: string;
+		powered_by: string;
+		receipt: string;
+		name: string;
+		address: string;
+		country: string;
+		phone_number: string;
+		email_address: string;
+		website: string;
+		enter_manually: string;
+		url_or_code: string;
+		enter_or_paste_code: string;
+		scan: string;
+		pay: string;
+	};
+	error: { code_link_is_not_valid: string };
 }
 
 interface I18nConvert {
@@ -1371,15 +1401,24 @@ interface I18nActivity {
 }
 
 interface I18nEarning {
-	text: { title: string };
-	cards: {
-		gold_title: string;
-		gold_description: string;
-		stablecoins_title: string;
-		stablecoins_description: string;
-		sprinkles_title: string;
-		sprinkles_description: string;
+	text: {
+		title: string;
+		earning_opportunities: string;
+		header_title: string;
+		header_description: string;
 	};
+	cards: {
+		gldt: { title: string; description: string; action: string };
+		sprinkles: { title: string; description: string; action: string };
+	};
+	card_fields: {
+		apy: string;
+		currentStaked: string;
+		currentEarning: string;
+		earningPotential: string;
+		terms: string;
+	};
+	terms: { flexible: string };
 }
 
 interface I18nStake {
@@ -1420,6 +1459,19 @@ interface I18nStake {
 		claim_rewards: string;
 		claim_now: string;
 		claiming: string;
+		get_tokens_with_amount: string;
+		get_tokens: string;
+	};
+}
+
+interface I18nGet_token {
+	text: {
+		title: string;
+		swap_to_token: string;
+		ready_to_swap: string;
+		convert_assets: string;
+		convertible_assets: string;
+		how_to_convert: string;
 	};
 }
 
@@ -1487,6 +1539,7 @@ interface I18n {
 	networks: I18nNetworks;
 	receive: I18nReceive;
 	send: I18nSend;
+	scanner: I18nScanner;
 	convert: I18nConvert;
 	swap: I18nSwap;
 	buy: I18nBuy;
@@ -1513,6 +1566,7 @@ interface I18n {
 	activity: I18nActivity;
 	earning: I18nEarning;
 	stake: I18nStake;
+	get_token: I18nGet_token;
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
 }

@@ -50,8 +50,13 @@ export class InfuraProvider {
 	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
 		this.provider.broadcastTransaction(signedTransaction);
 
-	getTransactionCount = (address: EthAddress): Promise<number> =>
-		this.provider.getTransactionCount(address, 'pending');
+	getTransactionCount = ({
+		address,
+		tag
+	}: {
+		address: EthAddress;
+		tag: 'pending' | 'latest';
+	}): Promise<number> => this.provider.getTransactionCount(address, tag);
 
 	getTransactionCount2 = (address: EthAddress): Promise<number> =>
 		this.provider.getTransactionCount(address, 'latest');

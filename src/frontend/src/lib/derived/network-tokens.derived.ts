@@ -3,7 +3,6 @@ import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.
 import {
 	enabledFungibleTokens,
 	enabledNonFungibleTokens,
-	fungibleTokens,
 	tokensToPin
 } from '$lib/derived/tokens.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
@@ -14,14 +13,6 @@ import type { TokenUi } from '$lib/types/token-ui';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
-
-/**
- * All fungible tokens matching the selected network or chain fusion.
- */
-export const fungibleNetworkTokens: Readable<Token[]> = derived(
-	[fungibleTokens, selectedNetwork, pseudoNetworkChainFusion],
-	filterTokensForSelectedNetwork
-);
 
 /**
  * All user-enabled fungible tokens matching the selected network or chain fusion.

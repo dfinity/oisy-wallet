@@ -8,6 +8,7 @@
 			"done": "Hoàn thành",
 			"close": "Đóng",
 			"change": "Thay đổi",
+			"continue": "",
 			"apply": "Áp dụng",
 			"retry": "Thử lại",
 			"refresh": "Làm mới",
@@ -39,7 +40,8 @@
 			"confirm": "",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -54,7 +56,8 @@
 			"switch_language": "Chuyển đổi ngôn ngữ",
 			"switch_currency": "Chuyển đổi tiền tệ",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
@@ -68,7 +71,7 @@
 			"dapp_explorer": "Khám phá",
 			"activity": "Hoạt động",
 			"airdrops": "Phần thưởng",
-			"earning": "Kiếm tiền & Phần thưởng",
+			"earning": "Kiếm tiền",
 			"source_code_on_github": "Mã nguồn trên GitHub",
 			"view_on_explorer": "Xem trên trình khám phá",
 			"source_code": "Mã nguồn",
@@ -216,7 +219,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Trò chơi",
 			"tools": "Công cụ",
-			"ai": "AI"
+			"ai": "AI",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +382,31 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -861,6 +890,28 @@
 			"solana_transaction_expired": "Giao dịch gửi của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể do phí ưu tiên không được cung cấp đủ. Chúng tôi đã cập nhật nó lên số tiền khuyến nghị mới nhất, vì vậy vui lòng thử gửi lại.",
 			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa.",
 			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -1716,15 +1767,32 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Kiếm tiền"
+			"title": "Kiếm tiền",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
-			"gold_title": "Vàng",
-			"gold_description": "GLDT Staking",
-			"stablecoins_title": "Stablecoins",
-			"stablecoins_description": "Sắp ra mắt",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Phần thưởng OISY"
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {
@@ -1764,7 +1832,19 @@
 			"claim_reward": "",
 			"claim_rewards": "",
 			"claim_now": "",
-			"claiming": ""
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": ""
 		}
 	},
 	"temporal": {

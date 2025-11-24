@@ -132,7 +132,7 @@ describe('transferErc721', () => {
 		});
 
 		expect(providersMod.infuraProviders).toHaveBeenCalledWith(BASE_NETWORK.id);
-		expect(getTransactionCount).toHaveBeenCalledWith(FROM);
+		expect(getTransactionCount).toHaveBeenCalledWith({ address: FROM, tag: 'pending' });
 		expect(signTransactionSpy).toHaveBeenCalledOnce();
 
 		const signedReq = signTransactionSpy.mock.calls[0][0].transaction;
@@ -193,7 +193,7 @@ describe('transferErc1155', () => {
 		});
 
 		expect(providersMod.infuraProviders).toHaveBeenCalledWith(BASE_NETWORK.id);
-		expect(getTransactionCount).toHaveBeenCalledWith(FROM);
+		expect(getTransactionCount).toHaveBeenCalledWith({ address: FROM, tag: 'pending' });
 		expect(signTransactionSpy).toHaveBeenCalledOnce();
 
 		const signedReq = signTransactionSpy.mock.calls[0][0].transaction;

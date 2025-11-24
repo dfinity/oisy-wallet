@@ -12,6 +12,8 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
+import type { Token } from '$lib/types/token';
+import { isTokenFungible } from '$lib/utils/nft.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { nonNullish } from '@dfinity/utils';
@@ -99,6 +101,10 @@ export const allTokens = derived(
 		...$allIcrcTokens,
 		...$splTokens
 	]
+);
+
+export const allFungibleTokens: Readable<Token[]> = derived([allTokens], ([$tokens]) =>
+	$tokens.filter(isTokenFungible)
 );
 
 export const allCrossChainSwapTokens = derived(

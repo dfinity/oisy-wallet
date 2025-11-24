@@ -20,7 +20,7 @@ import {
 	IcrcMetadataResponseEntries,
 	type IcrcStandardRecord,
 	type IcrcTokenMetadataResponse
-} from '@dfinity/ledger-icrc';
+} from '@icp-sdk/canisters/ledger/icrc';
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({
 	icrc1SupportedStandards: vi.fn()
@@ -398,7 +398,7 @@ describe('icrc.utils', () => {
 		});
 	});
 
-	describe('isTokenSupportIcrc2', () => {
+	describe('isIcrcTokenSupportIcrc2', () => {
 		const params = {
 			identity: mockIdentity,
 			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID

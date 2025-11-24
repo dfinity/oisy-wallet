@@ -41,6 +41,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appConstants from '$lib/constants/app.constants';
 import {
 	enabledFungibleTokensUi,
+	enabledMainnetFungibleIcTokensUsdBalance,
 	enabledMainnetFungibleTokensUsdBalance,
 	enabledNonFungibleTokensBySectionHidden,
 	enabledNonFungibleTokensBySectionSpam,
@@ -471,6 +472,31 @@ describe('tokens.derived', () => {
 			]);
 
 			expect(get(enabledMainnetFungibleTokensUsdBalance)).toEqual(110000.0005);
+		});
+	});
+
+	describe('enabledMainnetFungibleIcTokensUsdBalance', () => {
+		it('returns correct data', () => {
+			balancesStore.set({
+				id: ICP_TOKEN.id,
+				data: { data: 500000000000n, certified: true }
+			});
+			balancesStore.set({
+				id: BTC_MAINNET_TOKEN.id,
+				data: { data: 200000000000n, certified: true }
+			});
+			balancesStore.set({
+				id: ETHEREUM_TOKEN.id,
+				data: { data: 500000000000000n, certified: true }
+			});
+
+			exchangeStore.set([
+				{ ethereum: { usd: 1 } },
+				{ 'internet-computer': { usd: 20 } },
+				{ bitcoin: { usd: 5 } }
+			]);
+
+			expect(get(enabledMainnetFungibleIcTokensUsdBalance)).toEqual(100000);
 		});
 	});
 });

@@ -8,6 +8,7 @@
 			"done": "完了",
 			"close": "閉じる",
 			"change": "変更",
+			"continue": "",
 			"apply": "適用",
 			"retry": "",
 			"refresh": "再度読み込み",
@@ -39,7 +40,8 @@
 			"confirm": "",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -54,7 +56,8 @@
 			"switch_language": "言語を切り替え",
 			"switch_currency": "通貨を切り替え",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "取引完了までタブを閉じないでください",
@@ -68,7 +71,7 @@
 			"dapp_explorer": "DApp一覧",
 			"activity": "履歴",
 			"airdrops": "エアドロップ",
-			"earning": "獲得と報酬",
+			"earning": "収益",
 			"source_code_on_github": "GitHub上のソースコード",
 			"view_on_explorer": "エクスプローラーで確認",
 			"source_code": "ソースコード",
@@ -216,7 +219,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "ゲーム",
 			"tools": "ツール",
-			"ai": ""
+			"ai": "",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +382,31 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -861,6 +890,28 @@
 			"solana_transaction_expired": "あなたの送信トランザクションはSolanaネットワークによって処理されず、期限切れになりました。これはおそらく提供された優先手数料が不足していたためです。最新の推奨金額に更新しましたので、もう一度送信を試みてください。",
 			"solana_confirmation_failed": "作成したトランザクションの確認を受信できませんでした。数秒待ってから、トークンのトランザクションリストでトランザクションが正しく作成されたかどうかを確認してください。",
 			"fee_calc_unsupported_standard": ""
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -1716,15 +1767,32 @@
 	},
 	"earning": {
 		"text": {
-			"title": "獲得"
+			"title": "獲得",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
-			"gold_title": "ゴールド",
-			"gold_description": "GLDT ステーキング",
-			"stablecoins_title": "ステーブルコイン",
-			"stablecoins_description": "近日公開",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "OISY 報酬"
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {
@@ -1764,7 +1832,19 @@
 			"claim_reward": "",
 			"claim_rewards": "",
 			"claim_now": "",
-			"claiming": ""
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": ""
 		}
 	},
 	"temporal": {

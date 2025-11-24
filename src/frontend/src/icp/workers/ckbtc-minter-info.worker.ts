@@ -19,6 +19,5 @@ export const onCkBtcMinterInfoMessage = async ({
 			return;
 		case 'triggerCkBtcMinterInfoTimer':
 			await scheduler.trigger(data);
-			return;
 	}
 };

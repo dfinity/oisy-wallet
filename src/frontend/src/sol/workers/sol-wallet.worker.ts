@@ -17,6 +17,5 @@ export const onSolWalletMessage = async ({
 			return;
 		case 'triggerSolWalletTimer':
 			await scheduler.trigger(data);
-			return;
 	}
 };

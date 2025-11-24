@@ -19,7 +19,7 @@ import type { CertifiedData } from '$lib/types/store';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import * as z from 'zod';
 
 export const POST_MESSAGE_REQUESTS = [
@@ -232,15 +232,21 @@ export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
 		nextAllowanceMs: z.custom<bigint>().optional()
 	});
 
-const PostMessageCommonSchema = z.object({
+export const PostMessageCommonSchema = z.object({
 	ref: z.string().optional()
 });
 
-export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+const buildPostMessageSchema = <T extends z.ZodTypeAny, MsgSchema extends z.ZodTypeAny>({
+	dataSchema,
+	msgSchema
+}: {
+	dataSchema: T;
+	msgSchema: MsgSchema;
+}) =>
 	z.union([
 		z.object({
 			...PostMessageCommonSchema.shape,
-			msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
+			msg: msgSchema,
 			data: z.strictObject(dataSchema).shape.optional()
 		}),
 		z.object({
@@ -248,3 +254,12 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 			...PostMessageDataErrorSchema.shape
 		})
 	]);
+
+export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+	buildPostMessageSchema({
+		dataSchema,
+		msgSchema: z.union([PostMessageRequestSchema, PostMessageResponseSchema])
+	});
+
+export const inferPostMessageSchedulerSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+	buildPostMessageSchema({ dataSchema, msgSchema: PostMessageResponseSchema });

@@ -8,6 +8,7 @@
 			"done": "Готово",
 			"close": "Закрыть",
 			"change": "Изменить",
+			"continue": "",
 			"apply": "Применить",
 			"retry": "Повторить попытку",
 			"refresh": "Обновить",
@@ -39,7 +40,8 @@
 			"confirm": "Подтвердить",
 			"more": "Больше",
 			"less": "Меньше",
-			"ellipsis": "…"
+			"ellipsis": "…",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
@@ -54,7 +56,8 @@
 			"switch_language": "Сменить язык",
 			"switch_currency": "Сменить валюту",
 			"more": "Показать больше",
-			"less": "Показать меньше"
+			"less": "Показать меньше",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
@@ -68,7 +71,7 @@
 			"dapp_explorer": "Приложения",
 			"activity": "Активность",
 			"airdrops": "Награды",
-			"earning": "Награды и заработок",
+			"earning": "Зарабатывать",
 			"source_code_on_github": "Исходный код на GitHub",
 			"view_on_explorer": "Посмотреть в проводнике",
 			"source_code": "Исходный код",
@@ -216,7 +219,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Игра",
 			"tools": "Инструменты",
-			"ai": "ИИ"
+			"ai": "ИИ",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +382,31 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -861,6 +890,28 @@
 			"solana_transaction_expired": "Ваша транзакция отправки не была обработана сетью Solana и истекла, скорее всего, потому что предоставленная приоритетная комиссия была недостаточной. Мы обновили ее до последней рекомендованной суммы, поэтому, пожалуйста, попробуйте отправить ее снова.",
 			"solana_confirmation_failed": "Мы не получили подтверждения для только что созданной вами транзакции. Пожалуйста, подождите несколько секунд, а затем проверьте список транзакций вашего токена, чтобы убедиться, что транзакция была создана правильно.",
 			"fee_calc_unsupported_standard": "Не удалось рассчитать комиссию, так как предоставленный стандарт токена не поддерживается."
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -1716,15 +1767,32 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Заработать"
+			"title": "Заработать",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
-			"gold_title": "GLDT",
-			"gold_description": "Стейкинг GLDT",
-			"stablecoins_title": "Стейблкоины",
-			"stablecoins_description": "Скоро",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Награды OISY"
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {
@@ -1764,7 +1832,19 @@
 			"claim_reward": "",
 			"claim_rewards": "",
 			"claim_now": "",
-			"claiming": ""
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": ""
 		}
 	},
 	"temporal": {
