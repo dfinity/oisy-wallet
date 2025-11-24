@@ -150,7 +150,7 @@ const getCollections = async (): Promise<EnvExtToken[]> => {
 	const collectionsMap = [
 		...existingCollections,
 		...nftGeekCollections,
-				...toniqCollections,
+		...toniqCollections
 	].reduce<Record<string, EnvExtToken>>((acc, collection) => {
 		acc[collection.canisterId] = collection;
 
