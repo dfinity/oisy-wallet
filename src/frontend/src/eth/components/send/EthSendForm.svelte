@@ -71,7 +71,6 @@
 
 		highestNonceDestination = (await getTransactionCountPending($destination)) - 1;
 		onChainNonceDestination = (await getTransactionCountLatest($destination)) - 1;
-
 	};
 
 	$effect(() => {
@@ -130,7 +129,6 @@
 			<span>Destination On-chain nonce</span>
 			<span>{onChainNonceDestination}</span>
 		</div>
-
 	{/snippet}
 
 	{#snippet info()}
