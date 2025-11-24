@@ -58,15 +58,15 @@
 			network: { id: networkId }
 		} = nativeEthereumToken;
 
-		const { getTransactionCount, getTransactionCount2 } = infuraProviders(networkId);
+		const { getTransactionCount } = infuraProviders(networkId);
 
 		if (isNullish($ethAddress)) {
 			return;
 		}
 
-		highestNonce = (await getTransactionCount($ethAddress)) - 1;
+		highestNonce = (await getTransactionCount($ethAddress, "pending")) - 1;
 
-		onChainNonce = (await getTransactionCount2($ethAddress)) - 1;
+		onChainNonce = (await getTransactionCount($ethAddress, "latest")) - 1;
 	};
 
 	$effect(() => {
