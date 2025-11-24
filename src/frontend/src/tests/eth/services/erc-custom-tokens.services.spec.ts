@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { saveErcCustomTokens } from '$eth/services/erc-custom-tokens.services';
 import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
 import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
+import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { OwnedContract } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
@@ -48,7 +49,7 @@ describe('erc-custom-tokens.services', () => {
 			({ address }) => ({ address, network: mockNetwork, enabled: true })
 		);
 
-		const expectedErc1155Tokens: SaveErc721CustomToken[] = mockOwnedContractsErc1155.map(
+		const expectedErc1155Tokens: SaveErc1155CustomToken[] = mockOwnedContractsErc1155.map(
 			({ address }) => ({ address, network: mockNetwork, enabled: true })
 		);
 
