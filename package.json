@@ -22,6 +22,7 @@
 		"build:tokens-sns": "vite-node scripts/build.tokens.sns.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.sns.json",
 		"build:tokens-ckerc20": "vite-node scripts/build.tokens.ckerc20.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.ckerc20.json",
 		"build:tokens-icrc": "vite-node scripts/build.tokens.icrc.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.icrc.json",
+		"build:vitest-thresholds": "vite-node scripts/build.vitest.thresholds.ts",
 		"dev": "vite dev",
 		"build": "tsc --noEmit && vite build && npm run build:post-process",
 		"prepare": "svelte-kit sync",
