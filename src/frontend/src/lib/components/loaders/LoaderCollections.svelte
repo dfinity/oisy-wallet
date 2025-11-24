@@ -29,8 +29,8 @@
 		}
 	};
 
-	const onLoad = async () => {
-		if (!NFTS_ENABLED || isNullish($authIdentity)) {
+	const loadErcTokens = async () => {
+		if (isNullish($authIdentity)) {
 			return;
 		}
 
@@ -51,6 +51,14 @@
 				identity: $authIdentity
 			});
 		}
+	};
+
+	const onLoad = async () => {
+		if (!NFTS_ENABLED) {
+			return;
+		}
+
+		await Promise.all([loadErcTokens()]);
 	};
 </script>
 
