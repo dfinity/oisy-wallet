@@ -8,3 +8,5 @@ export const EnvExtTokenSchema = z.object({
 	canisterId: z.string(),
 	metadata: EnvExtTokenMetadataSchema
 });
+
+export const EnvExtTokensSchema = z.array(EnvExtTokenSchema);
