@@ -149,8 +149,8 @@ const getCollections = async (): Promise<EnvExtToken[]> => {
 	// We want to keep the existing collections in the file that are not in the fetched lists anymore.
 	const collectionsMap = [
 		...existingCollections,
-		...toniqCollections,
-		...nftGeekCollections
+		...nftGeekCollections,
+				...toniqCollections,
 	].reduce<Record<string, EnvExtToken>>((acc, collection) => {
 		acc[collection.canisterId] = collection;
 
