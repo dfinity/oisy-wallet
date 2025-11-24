@@ -487,31 +487,31 @@ mod contact_image {
             vec![
                 TestVector {
                     input: ExtV2Token {
-                        ledger_id: canister_id1(),
+                        canister_id: canister_id1(),
                     },
                     valid: true,
-                    description: "ExtV2Token with valid ledger_id",
+                    description: "ExtV2Token with valid canister_id",
                 },
                 TestVector {
                     input: ExtV2Token {
-                        ledger_id: Principal::anonymous(),
+                        canister_id: Principal::anonymous(),
                     },
                     valid: false,
-                    description: "ExtV2Token with anonymous ledger_id",
+                    description: "ExtV2Token with anonymous canister_id",
                 },
                 TestVector {
                     input: ExtV2Token {
-                        ledger_id: Principal::management_canister(),
+                        canister_id: Principal::management_canister(),
                     },
                     valid: false,
-                    description: "ExtV2Token with the management canister as ledger_id",
+                    description: "ExtV2Token with the management canister as canister_id",
                 },
                 TestVector {
                     input: ExtV2Token {
-                        ledger_id: user_id(),
+                        canister_id: user_id(),
                     },
                     valid: false,
-                    description: "ExtV2Token with user or network principal as ledger_id",
+                    description: "ExtV2Token with user or network principal as canister_id",
                 },
             ]
         );
