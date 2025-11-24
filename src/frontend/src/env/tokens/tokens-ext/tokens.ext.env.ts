@@ -16,7 +16,7 @@ const mapExtToken = ({ canisterId, metadata: { name } }: EnvExtToken): ExtTokenW
 	category: 'custom'
 });
 
-// Just to be safe, we want to raise an error on build time if the tokens.ext.json file is not valid.
+// Just to be safe, we want to raise an error at build time if the tokens.ext.json file is not valid.
 export const EXT_BUILTIN_TOKENS = EnvExtTokensSchema.parse(extTokens).map(mapExtToken);
 
 export const EXT_BUILTIN_TOKENS_INDEXED = new Map(
