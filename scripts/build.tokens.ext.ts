@@ -2,7 +2,7 @@
 
 import type { EnvExtToken } from '$env/types/env-ext-token';
 import { jsonReplacer } from '@dfinity/utils';
-import { writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { EXT_COLLECTIONS_JSON_FILE } from './constants.mjs';
 
 const ACCEPTED_STANDARDS = ['ext'];
@@ -130,13 +130,28 @@ const getNftGeekCollections = async (): Promise<EnvExtToken[]> => {
 	return parseNftGeekData(data);
 };
 
+const readExistingCollections = (): EnvExtToken[] => {
+	if (!existsSync(EXT_COLLECTIONS_JSON_FILE)) {
+		return [];
+	}
+
+	const content = readFileSync(EXT_COLLECTIONS_JSON_FILE, 'utf8');
+
+	return JSON.parse(content) as EnvExtToken[];
+};
+
 const getCollections = async (): Promise<EnvExtToken[]> => {
+	const existingCollections = readExistingCollections();
+
 	const toniqCollections = await getToniqCollections();
 	const nftGeekCollections = await getNftGeekCollections();
 
-	const collectionsMap = [...toniqCollections, ...nftGeekCollections].reduce<
-		Record<string, EnvExtToken>
-	>((acc, collection) => {
+	// We want to keep the existing collections in the file that are not in the fetched lists anymore.
+	const collectionsMap = [
+		...existingCollections,
+		...toniqCollections,
+		...nftGeekCollections
+	].reduce<Record<string, EnvExtToken>>((acc, collection) => {
 		acc[collection.canisterId] = collection;
 
 		return acc;
