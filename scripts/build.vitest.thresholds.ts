@@ -1,3 +1,4 @@
+import { isNullish } from '@dfinity/utils';
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const CONFIG_FILE = 'vitest.config.ts';
@@ -6,12 +7,6 @@ const COVERAGE_REGEX = /(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-
 
 type ThresholdKey = 'lines' | 'functions' | 'branches' | 'statements';
 type ThresholdMap = Partial<Record<ThresholdKey, number>>;
-
-const applyMargin = ({ text, margin }: { text: string; margin: number }): string =>
-	text.replace(COVERAGE_REGEX, (_: string, key: string, value: string) => {
-		const reduced = (parseFloat(value) - margin).toFixed(2);
-		return `${key}: ${reduced}`;
-	});
 
 const extractThresholds = (text: string): ThresholdMap => {
 	const map: ThresholdMap = {};
@@ -24,6 +19,24 @@ const extractThresholds = (text: string): ThresholdMap => {
 	}
 
 	return map;
+};
+
+const applyMargin = ({ text, margin }: { text: string; margin: number }): string => {
+	const currentThresholds = extractThresholds(text);
+
+	return text.replace(COVERAGE_REGEX, (_: string, key: string, value: string) => {
+		const typedKey = key as ThresholdKey;
+		const oldValue = currentThresholds[typedKey];
+
+		if (isNullish(oldValue)) {
+			// If something is missing, do not change this occurrence
+			return `${key}: ${value}`;
+		}
+
+		const newValue = (oldValue - margin).toFixed(2);
+
+		return `${key}: ${newValue}`;
+	});
 };
 
 const enforceNonDecreasingThresholds = ({
@@ -41,7 +54,7 @@ const enforceNonDecreasingThresholds = ({
 		const oldValue = originalThresholds[typedKey];
 		const newValue = currentThresholds[typedKey];
 
-		if (oldValue === undefined || newValue === undefined) {
+		if (isNullish(oldValue) || isNullish(newValue)) {
 			// If something is missing, do not change this occurrence
 			return `${key}: ${value}`;
 		}
