@@ -1,18 +1,18 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { isTokenErc } from '$eth/utils/erc.utils';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { CertifiedData } from '$lib/types/store';
 import type { Token, TokenId } from '$lib/types/token';
-import type { UserToken } from '$lib/types/user-token';
 import type { Option } from '$lib/types/utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { writable, type Readable } from 'svelte/store';
 
-type CertifiedCustomTokensData<T extends Token> = Option<CertifiedData<UserToken<T>>[]>;
+type CertifiedCustomTokensData<T extends Token> = Option<CertifiedData<CustomToken<T>>[]>;
 
 export interface CertifiedCustomTokensStore<T extends Token>
 	extends Readable<CertifiedCustomTokensData<T>> {
-	setAll: (tokens: CertifiedData<UserToken<T>>[]) => void;
+	setAll: (tokens: CertifiedData<CustomToken<T>>[]) => void;
 	reset: (tokenId: TokenId) => void;
 	resetAll: () => void;
 }
@@ -32,7 +32,7 @@ export const initCertifiedCustomTokensStore = <
 				: token.id;
 
 	return {
-		setAll: (tokens: CertifiedData<UserToken<T>>[]) =>
+		setAll: (tokens: CertifiedData<CustomToken<T>>[]) =>
 			update((state) => [
 				...(state ?? []).filter(
 					({ data }) => !tokens.map(({ data }) => getIdentifier(data)).includes(getIdentifier(data))

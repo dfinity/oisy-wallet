@@ -12,9 +12,9 @@ import {
 	initCertifiedCustomTokensStore,
 	type CertifiedCustomTokensStore
 } from '$lib/stores/custom-tokens.store';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { CertifiedData } from '$lib/types/store';
 import type { Token } from '$lib/types/token';
-import type { UserToken } from '$lib/types/user-token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import {
@@ -231,7 +231,7 @@ describe('custom-token.store', () => {
 		});
 
 		describe('reset', () => {
-			let mockTokens: CertifiedData<UserToken<Token>>[];
+			let mockTokens: CertifiedData<CustomToken<Token>>[];
 
 			beforeEach(() => {
 				const tokens = [BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN, SOLANA_TOKEN];
