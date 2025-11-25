@@ -19,7 +19,7 @@ vi.mock('$lib/api/backend.api', () => ({
 describe('ext.services', () => {
 	const expectedCustomTokens = [
 		{
-			certified: false,
+			certified: true,
 			data: {
 				version: 1n,
 				enabled: true,
@@ -27,7 +27,7 @@ describe('ext.services', () => {
 			}
 		},
 		{
-			certified: false,
+			certified: true,
 			data: {
 				version: 2n,
 				enabled: true,
@@ -35,7 +35,7 @@ describe('ext.services', () => {
 			}
 		},
 		{
-			certified: false,
+			certified: true,
 			data: {
 				enabled: false,
 				...EXT_BUILTIN_TOKENS[2]
