@@ -9,13 +9,6 @@ export const isTokenExtV2 = (token: Partial<IcToken>): token is ExtToken =>
 // The minting number (that wallets, frontends, etc. usually show) is 1-based indexed, it's simply (TokenIndex + 1).
 export const parseTokenIndex = (index: TokenIndex): TokenIndex => index + 1;
 
-const to32bits = (num: number): number[] => [
-	(num >>> 24) & 0xff,
-	(num >>> 16) & 0xff,
-	(num >>> 8) & 0xff,
-	num & 0xff
-];
-
 /**
  * Converts a token index to a token identifier.
  *
@@ -40,6 +33,13 @@ export const extIndexToIdentifier = ({
 	if (index < 0) {
 		throw new Error(`EXT token index ${index} is out of bounds`);
 	}
+
+	const to32bits = (num: number): number[] => [
+		(num >>> 24) & 0xff,
+		(num >>> 16) & 0xff,
+		(num >>> 8) & 0xff,
+		num & 0xff
+	];
 
 	const padding = new Uint8Array([0x0a, ...'tid'.split('').map((c) => c.charCodeAt(0))]);
 
