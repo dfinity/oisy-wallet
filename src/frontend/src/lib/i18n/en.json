@@ -722,11 +722,11 @@
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard.",
 				"principal": "ICP Principal",
-				"principal_title": "ICP wallet address - ICP only",
+				"principal_title": "ICP wallet address - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard.",
 				"display_internet_computer_principal_qr": "Display Internet Computer Principal as a QR code",
 				"icp_account": "ICP Account (for exchanges)",
-				"icp_account_title": "ICP wallet address - ckBTC, CHAT, ...",
+				"icp_account_title": "ICP wallet address - ICP only",
 				"icp_account_copied": "ICP Account copied to clipboard.",
 				"display_icp_account_qr": "Display ICP Account as a QR code"
 			}
