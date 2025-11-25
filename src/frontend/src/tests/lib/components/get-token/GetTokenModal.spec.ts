@@ -21,14 +21,14 @@ describe('GetTokenModal', () => {
 		});
 
 	it('should display GET_TOKEN step', () => {
-		const { getByText } = renderGetTokenModal();
+		const { getAllByText } = renderGetTokenModal();
 
 		expect(
-			getByText(
+			getAllByText(
 				replacePlaceholders(en.stake.text.get_tokens, {
 					$token_symbol: ICP_TOKEN.symbol
 				})
-			)
+			)[0]
 		).toBeInTheDocument();
 	});
 

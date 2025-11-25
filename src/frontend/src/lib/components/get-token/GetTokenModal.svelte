@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import BuyModalContent from '$lib/components/buy/BuyModalContent.svelte';
 	import GetTokenWizardStep from '$lib/components/get-token/GetTokenWizardStep.svelte';
+	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
 	import { getTokenWizardSteps } from '$lib/config/get-token.config';
@@ -9,20 +11,23 @@
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsGetToken } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Address } from '$lib/types/address';
 	import type { WizardStepsGetTokenType } from '$lib/types/get-token';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
 		token: Token;
+		receiveAddress?: Address;
 		currentApy: number;
 	}
 
-	let { token, currentApy }: Props = $props();
+	let { token, currentApy, receiveAddress }: Props = $props();
 
 	let steps = $derived(
 		getTokenWizardSteps({ i18n: $i18n, tokenSymbol: getTokenDisplaySymbol(token) })
@@ -98,6 +103,23 @@
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsGetToken.GET_TOKEN}
 				<GetTokenWizardStep {currentApy} onClose={close} onGoToStep={goToStep} {token} />
+			{:else if currentStep?.name === WizardStepsGetToken.RECEIVE}
+				<ReceiveAddressQrCode
+					address={receiveAddress}
+					addressLabel={$i18n.wallet.text.wallet_address}
+					addressToken={token}
+					copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
+					network={token.network}
+					onBack={() => goToStep(WizardStepsGetToken.GET_TOKEN)}
+				>
+					{#snippet text()}
+						{replacePlaceholders($i18n.wallet.text.use_address_from_to, {
+							$token: getTokenDisplaySymbol(token)
+						})}
+					{/snippet}
+				</ReceiveAddressQrCode>
+			{:else if currentStep?.name === WizardStepsGetToken.BUY_TOKEN}
+				<BuyModalContent />
 			{:else if showSwapWizard}
 				<SwapModalWizardSteps
 					{currentStep}

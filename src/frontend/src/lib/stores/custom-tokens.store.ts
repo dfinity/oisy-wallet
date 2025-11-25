@@ -1,36 +1,46 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { isTokenErc } from '$eth/utils/erc.utils';
+import type { ExtToken } from '$icp/types/ext-token';
+import { isTokenExtV2 } from '$icp/utils/ext.utils';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { CertifiedData } from '$lib/types/store';
 import type { Token, TokenId } from '$lib/types/token';
-import type { UserToken } from '$lib/types/user-token';
 import type { Option } from '$lib/types/utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { writable, type Readable } from 'svelte/store';
 
-type CertifiedUserTokensData<T extends Token> = Option<CertifiedData<UserToken<T>>[]>;
+type CertifiedCustomTokensData<T extends Token> = Option<CertifiedData<CustomToken<T>>[]>;
 
-export interface CertifiedUserTokensStore<T extends Token>
-	extends Readable<CertifiedUserTokensData<T>> {
-	setAll: (tokens: CertifiedData<UserToken<T>>[]) => void;
+export interface CertifiedCustomTokensStore<T extends Token>
+	extends Readable<CertifiedCustomTokensData<T>> {
+	setAll: (tokens: CertifiedData<CustomToken<T>>[]) => void;
 	reset: (tokenId: TokenId) => void;
 	resetAll: () => void;
 }
 
-export const initCertifiedUserTokensStore = <T extends Token>(): CertifiedUserTokensStore<T> => {
-	const { subscribe, update, set } = writable<CertifiedUserTokensData<T>>(undefined);
+type Identifier =
+	| TokenId
+	| Erc20ContractAddress['address']
+	| SplTokenAddress
+	| ExtToken['canisterId'];
 
-	const getIdentifier = <T extends Token>(
-		token: T
-	): TokenId | Erc20ContractAddress['address'] | SplTokenAddress =>
+export const initCertifiedCustomTokensStore = <
+	T extends Token
+>(): CertifiedCustomTokensStore<T> => {
+	const { subscribe, update, set } = writable<CertifiedCustomTokensData<T>>(undefined);
+
+	const getIdentifier = <T extends Token>(token: T): Identifier =>
 		isTokenSpl(token)
 			? token.address
 			: isTokenErc(token)
 				? `${token.address}#${token.network.chainId}`
-				: token.id;
+				: isTokenExtV2(token)
+					? token.canisterId
+					: token.id;
 
 	return {
-		setAll: (tokens: CertifiedData<UserToken<T>>[]) =>
+		setAll: (tokens: CertifiedData<CustomToken<T>>[]) =>
 			update((state) => [
 				...(state ?? []).filter(
 					({ data }) => !tokens.map(({ data }) => getIdentifier(data)).includes(getIdentifier(data))
