@@ -1464,7 +1464,8 @@ interface I18nStake {
 		gldt: {
 			item1_title: string;
 			item1_description: string;
-			item2_title: string;
+			item2_title_1: string;
+			item2_title_2: string;
 			item3_title: string;
 			item3_description: string;
 			item4_title: string;
