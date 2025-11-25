@@ -722,11 +722,11 @@
 				"display_account_id_qr": "ICP-Konto-ID als QR-Code anzeigen",
 				"account_id_copied": "ICP-Konto-ID in Zwischenablage kopiert.",
 				"principal": "ICP-Principal",
-				"principal_title": "ICP Wallet Adresse - Nur ICP Token",
+				"principal_title": "ICP Wallet Adresse - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Internet Computer Principal in Zwischenablage kopiert.",
 				"display_internet_computer_principal_qr": "Internet Computer Principal als QR-Code anzeigen",
 				"icp_account": "ICP-Konto (für Börsen)",
-				"icp_account_title": "ICP Wallet Adresse - ckBTC, CHAT, ...",
+				"icp_account_title": "ICP Wallet Adresse - Nur ICP Token",
 				"icp_account_copied": "ICP-Konto in Zwischenablage kopiert.",
 				"display_icp_account_qr": "ICP-Konto als QR-Code anzeigen"
 			}
