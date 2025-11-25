@@ -56,9 +56,7 @@
 				class:mt-1.5={isNullish(text)}
 				data-tid={testId}
 			>
-				<div>
-					<NetworkLogo color="white" {network} size="sm" />
-				</div>
+				<NetworkLogo color="white" {network} size="sm" />
 
 				{#if nonNullish(address)}
 					<output
