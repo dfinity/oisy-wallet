@@ -8,17 +8,19 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { writable, type Readable } from 'svelte/store';
 
-type CertifiedUserTokensData<T extends Token> = Option<CertifiedData<UserToken<T>>[]>;
+type CertifiedCustomTokensData<T extends Token> = Option<CertifiedData<UserToken<T>>[]>;
 
-export interface CertifiedUserTokensStore<T extends Token>
-	extends Readable<CertifiedUserTokensData<T>> {
+export interface CertifiedCustomTokensStore<T extends Token>
+	extends Readable<CertifiedCustomTokensData<T>> {
 	setAll: (tokens: CertifiedData<UserToken<T>>[]) => void;
 	reset: (tokenId: TokenId) => void;
 	resetAll: () => void;
 }
 
-export const initCertifiedUserTokensStore = <T extends Token>(): CertifiedUserTokensStore<T> => {
-	const { subscribe, update, set } = writable<CertifiedUserTokensData<T>>(undefined);
+export const initCertifiedCustomTokensStore = <
+	T extends Token
+>(): CertifiedCustomTokensStore<T> => {
+	const { subscribe, update, set } = writable<CertifiedCustomTokensData<T>>(undefined);
 
 	const getIdentifier = <T extends Token>(
 		token: T

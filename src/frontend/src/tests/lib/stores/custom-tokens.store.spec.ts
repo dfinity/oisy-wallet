@@ -9,9 +9,9 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import {
-	initCertifiedUserTokensStore,
-	type CertifiedUserTokensStore
-} from '$lib/stores/user-tokens.store';
+	initCertifiedCustomTokensStore,
+	type CertifiedCustomTokensStore
+} from '$lib/stores/custom-tokens.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { Token } from '$lib/types/token';
 import type { UserToken } from '$lib/types/user-token';
@@ -24,15 +24,15 @@ import {
 } from '$tests/mocks/erc721-tokens.mock';
 import { get } from 'svelte/store';
 
-describe('user-token.store', () => {
+describe('custom-token.store', () => {
 	const certified = false;
 	const enabled = true;
 
-	describe('initCertifiedUserTokensStore', () => {
-		let mockStore: CertifiedUserTokensStore<Token>;
+	describe('initCertifiedCustomTokensStore', () => {
+		let mockStore: CertifiedCustomTokensStore<Token>;
 
 		beforeEach(() => {
-			mockStore = initCertifiedUserTokensStore<Token>();
+			mockStore = initCertifiedCustomTokensStore<Token>();
 		});
 
 		describe('setAll', () => {
