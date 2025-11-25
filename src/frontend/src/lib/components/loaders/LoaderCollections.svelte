@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { get } from 'svelte/store';
-	import type { TokenIndex } from '$declarations/ext_v2_token/ext_v2_token.did';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
@@ -10,6 +9,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
+	import { saveExtCustomTokens } from '$icp/services/ext-custom-tokens.services';
 	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { COLLECTION_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
@@ -62,7 +62,13 @@
 			return;
 		}
 
-		const tokens = await EXT_BUILTIN_TOKENS.reduce<Promise<Record<CanisterIdText, TokenIndex[]>>>(
+		const customTokens = await listCustomTokens({
+			identity: $authIdentity,
+			certified: true,
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		});
+
+		const canisterIds = await EXT_BUILTIN_TOKENS.reduce<Promise<CanisterIdText[]>>(
 			async (acc, { canisterId }) => {
 				if (isNullish($authIdentity)) {
 					return await acc;
@@ -75,22 +81,21 @@
 						canisterId
 					});
 
-					return tokens.length > 0 ? {...(await acc), [canisterId]: tokens} : await acc;
+					return tokens.length > 0 ? [...(await acc), canisterId] : await acc;
 				} catch (error: unknown) {
 					console.warn(`Error fetching tokens from canister ${canisterId}:`, error);
 
 					return await acc;
 				}
 			},
-			Promise.resolve({})
+			Promise.resolve([])
 		);
 
-		console.log('Loaded tokens from external canisters:', tokens);
-
-		// await saveExtCustomTokens({
-		// 	identity: $authIdentity,
-		// 	tokens: tokens as NonEmptyArray<SaveExtCustomToken>
-		// });
+		await saveExtCustomTokens({
+			canisterIds,
+			customTokens,
+			identity: $authIdentity
+		});
 	};
 
 	const onLoad = async () => {
