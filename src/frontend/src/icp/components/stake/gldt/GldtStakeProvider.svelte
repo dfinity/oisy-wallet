@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { type Component, getContext } from 'svelte';
-	import { readable } from 'svelte/store';
+	import { getContext } from 'svelte';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import IconForbidden from '$lib/components/icons/IconForbidden.svelte';
 	import IconTrophy from '$lib/components/icons/IconTrophy.svelte';
@@ -19,9 +18,7 @@
 	import { formatStakeApyNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	//const { sendTokenSymbol } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	const sendTokenSymbol = readable('gldt');
+	const { sendTokenSymbol } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { store: gldtStakeApyStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 </script>
