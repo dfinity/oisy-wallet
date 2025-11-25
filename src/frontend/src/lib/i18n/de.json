@@ -782,7 +782,7 @@
 				"solana_devnet_address": "Solana-Devnet-Adresse",
 				"solana_devnet_address_title": "Solana Devnet Wallet Adresse",
 				"solana_local_address": "Solana-Lokaladresse",
-				"solana_local_address_title": "Solana Local Wallet Adresse"",
+				"solana_local_address_title": "Solana Local Wallet Adresse",
 				"solana_address_copied": "Solana-Adresse in Zwischenablage kopiert",
 				"display_solana_address_qr": "Solana-Adresse als QR-Code anzeigen"
 			}
