@@ -10,7 +10,6 @@
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import {
 		RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON,
 		RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON,
