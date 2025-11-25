@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import CollapsibleList from '$lib/components/ui/CollapsibleList.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { stakeProvidersConfig } from '$lib/config/stake.config';
@@ -10,7 +11,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { StakeProvider } from '$lib/types/stake';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import CollapsibleList from '$lib/components/ui/CollapsibleList.svelte';
 
 	interface Props {
 		provider: StakeProvider;
