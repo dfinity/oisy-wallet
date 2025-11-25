@@ -58,8 +58,6 @@
 		{/snippet}
 	</ReceiveAddress>
 
-	<Hr spacing="lg" />
-
 	<ReceiveAddress
 		address={$icpAccountIdentifierText ?? ''}
 		copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
