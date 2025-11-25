@@ -1,4 +1,4 @@
 import type { ExtToken } from '$icp/types/ext-token';
-import { initCertifiedUserTokensStore } from '$lib/stores/user-tokens.store';
+import { initCertifiedCustomTokensStore } from '$lib/stores/custom-tokens.store';
 
-export const extCustomTokensStore = initCertifiedUserTokensStore<ExtToken>();
+export const extCustomTokensStore = initCertifiedCustomTokensStore<ExtToken>();
