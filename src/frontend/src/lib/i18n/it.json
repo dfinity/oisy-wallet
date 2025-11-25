@@ -726,7 +726,7 @@
 				"internet_computer_principal_copied": "Principal Internet Computer copiato negli appunti.",
 				"display_internet_computer_principal_qr": "Visualizza Principal Internet Computer come codice QR",
 				"icp_account": "Account ICP (per gli exchange)",
-				"icp_account_title": "Indirizzo del wallet ICP - Solo per ICP",
+				"icp_account_title": "Indirizzo del wallet ICP - Solo per token ICP",
 				"icp_account_copied": "Account ICP copiato negli appunti.",
 				"display_icp_account_qr": "Visualizza Account ICP come codice QR"
 			}

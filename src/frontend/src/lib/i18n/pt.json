@@ -726,7 +726,7 @@
 				"internet_computer_principal_copied": "Principal Internet Computer copiado para a área de transferência.",
 				"display_internet_computer_principal_qr": "Exibir Principal Internet Computer como um código QR",
 				"icp_account": "Conta ICP (para exchanges)",
-				"icp_account_title": "Endereço da carteira ICP - Apenas por ICP",
+				"icp_account_title": "Endereço da carteira ICP - Apenas por token ICP",
 				"icp_account_copied": "Conta ICP copiada para a área de transferência.",
 				"display_icp_account_qr": "Exibir Conta ICP como um código QR"
 			}
