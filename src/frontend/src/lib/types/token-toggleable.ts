@@ -6,10 +6,9 @@ import type { Token } from '$lib/types/token';
 export type UserTokenState = Omit<
 	Pick<UserToken | CustomToken, 'version' | 'enabled'>,
 	'version' | 'enabled' | 'section' | 'allowExternalContentSource'
-> &
-	NonFungibleTokenAppearance & {
-		version?: bigint;
-		enabled: boolean;
-	};
+> & {
+	version?: bigint;
+	enabled: boolean;
+} & NonFungibleTokenAppearance;
 
 export type TokenToggleable<T extends Token> = T & UserTokenState;
