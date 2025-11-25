@@ -13,7 +13,7 @@ import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, type QueryParams } from '@dfinity/utils';
-import { type IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { Principal } from '@icp-sdk/core/principal';
 
 export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
