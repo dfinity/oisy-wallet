@@ -1,4 +1,4 @@
-import { balance, transactions } from '$icp/api/ext-v2-token.api';
+import { balance, getTokensByOwner, transactions } from '$icp/api/ext-v2-token.api';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -75,6 +75,40 @@ describe('ext-v2-token.api', () => {
 			await expect(balance({ ...params, identity: null })).resolves.toEqual(ZERO);
 
 			expect(tokenCanisterMock.balance).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('getTokensByOwner', () => {
+		const mockTokens = [123, 456, 789];
+
+		const params = {
+			identity: mockIdentity,
+			owner: mockPrincipal,
+			canisterId: mockExtV2TokenCanisterId
+		};
+
+		const expectedParams = {
+			owner: mockPrincipal
+		};
+
+		beforeEach(() => {
+			tokenCanisterMock.getTokensByOwner.mockResolvedValue(mockTokens);
+		});
+
+		it('should call successfully getTokensByOwner endpoint', async () => {
+			const result = await getTokensByOwner(params);
+
+			expect(result).toEqual(mockTokens);
+
+			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should return an empty array if identity is nullish', async () => {
+			await expect(getTokensByOwner({ ...params, identity: undefined })).resolves.toEqual([]);
+
+			await expect(getTokensByOwner({ ...params, identity: null })).resolves.toEqual([]);
+
+			expect(tokenCanisterMock.getTokensByOwner).not.toHaveBeenCalled();
 		});
 	});
 });

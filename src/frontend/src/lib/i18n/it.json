@@ -1815,9 +1815,7 @@
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"visit_provider": "",
-			"current_apy": "",
 			"current_apy_label": "",
-			"current_apy_info": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1835,6 +1833,19 @@
 			"claiming": "",
 			"get_tokens_with_amount": "",
 			"get_tokens": ""
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "",
+				"item1_description": "",
+				"item2_title_1": "",
+				"item2_title_2": "",
+				"item3_title": "",
+				"item3_description": "",
+				"item4_title": "",
+				"item4_description": "",
+				"item5_title": ""
+			}
 		}
 	},
 	"get_token": {
@@ -1844,7 +1855,14 @@
 			"ready_to_swap": "",
 			"convert_assets": "",
 			"convertible_assets": "",
-			"how_to_convert": ""
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
 		}
 	},
 	"temporal": {
