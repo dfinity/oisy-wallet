@@ -18,6 +18,12 @@
 	import { formatStakeApyNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
+	interface Props {
+		showAllTerms?: boolean;
+	}
+
+	const { showAllTerms }: Props = $props();
+
 	const { sendTokenSymbol } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { store: gldtStakeApyStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
@@ -113,4 +119,8 @@
 	</CollapsibleListItem>
 {/snippet}
 
-<StakeProvider data={[item1, item2, item3, item4, item5]} provider={StakeProviderType.GLDT} />
+<StakeProvider
+	data={[item1, item2, item3, item4, item5]}
+	provider={StakeProviderType.GLDT}
+	{showAllTerms}
+/>

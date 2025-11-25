@@ -15,9 +15,10 @@
 	interface Props {
 		provider: StakeProvider;
 		data: Snippet[];
+		showAllTerms?: boolean;
 	}
 
-	let { provider, data }: Props = $props();
+	let { provider, data, showAllTerms = false }: Props = $props();
 </script>
 
 <div class="my-4 rounded-lg border border-disabled bg-secondary px-2 py-3">
@@ -48,5 +49,5 @@
 		</ExternalLink>
 	</div>
 
-	<CollapsibleList items={data} />
+	<CollapsibleList items={data} hideExpandButton={showAllTerms} />
 </div>

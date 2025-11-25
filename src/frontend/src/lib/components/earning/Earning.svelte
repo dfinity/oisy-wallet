@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { setContext } from 'svelte';
 	import GldtStakeContext from '$icp/components/stake/gldt/GldtStakeContext.svelte';
-	import GldtStakeProvider from '$icp/components/stake/gldt/GldtStakeProvider.svelte';
 	import {
 		GLDT_STAKE_CONTEXT_KEY,
 		type GldtStakeContext as GldtStakeContextType,
@@ -21,7 +20,6 @@
 <RewardsEligibilityContext>
 	<GldtStakeContext>
 		<div class="flex flex-col gap-5">
-			<!-- <GldtStakeProvider /> -->
 			<EarningHeader />
 			<StakeContentSection>
 				{#snippet title()}

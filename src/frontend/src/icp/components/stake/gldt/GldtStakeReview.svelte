@@ -44,7 +44,7 @@
 	{/snippet}
 
 	{#snippet provider()}
-		<GldtStakeProvider />
+		<GldtStakeProvider showAllTerms />
 	{/snippet}
 
 	{#snippet network()}
