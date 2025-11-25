@@ -14,9 +14,15 @@ import {
 } from '$tests/mocks/identity.mock';
 
 export const mockExtV2TokenCanisterId: CanisterIdText = 'oeee4-qaaaa-aaaak-qaaeq-cai';
+export const mockExtV2TokenCanisterId2: CanisterIdText = 'rhg63-2aaaa-aaaag-qcwhq-cai';
+export const mockExtV2TokenCanisterId3: CanisterIdText = 'ckbgq-4yaaa-aaaak-qi2xq-cai';
 
 export const mockExtV2TokenIdentifier: TokenIdentifier =
 	'7lok3-dakor-uwiaa-aaaaa-cuaab-eaqca-aacwh-q';
+export const mockExtV2TokenIdentifier2: TokenIdentifier =
+	'kz6x4-7akor-uwiaa-aaaaa-cue46-4aqca-aaah4-a';
+export const mockExtV2TokenIdentifier3: TokenIdentifier =
+	'tdxsh-eqkor-uwiaa-aaaaa-cue46-4aqca-aacpd-q';
 
 export const mockExtV2Transactions: Transaction[] = [
 	{

@@ -632,6 +632,7 @@
 			"spl_custom_tokens": "Errore durante il caricamento del token personalizzato SPL.",
 			"erc20_user_token": "Errore durante l'abilitazione del token gemello ERC20.",
 			"icrc_custom_token": "Errore durante il caricamento del token personalizzato ICRC.",
+			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "Il tuo wallet richiede alcuni dati iniziali che non sono ancora stati caricati. Riprova.",
 			"allow_signing": "Si è verificato un problema durante la configurazione del tuo wallet per la firma. Sei stato disconnesso. Se il problema persiste, contatta il supporto.",
 			"waiting_for_allowed_cycles_aborted": "",
