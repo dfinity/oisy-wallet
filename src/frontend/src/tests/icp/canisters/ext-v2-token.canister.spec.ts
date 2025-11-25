@@ -251,6 +251,21 @@ describe('ext-v2-token.canister', () => {
 			expect(service.tokens_ext).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
 		});
 
+		it('should return an empty list if it is a no-tokens Other error', async () => {
+			service.tokens_ext.mockResolvedValue({
+				err: { Other: 'No tokens' }
+			});
+
+			const { getTokensByOwner } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			const res = await getTokensByOwner(mockParams);
+
+			expect(res).toEqual([]);
+			expect(service.tokens_ext).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
+		});
+
 		it('should handle a generic canister error', async () => {
 			// @ts-expect-error we test this on purpose
 			service.tokens_ext.mockResolvedValue({ err: { CanisterError: null } });
