@@ -36,52 +36,52 @@
 </script>
 
 <ContentWithToolbar>
-	<ReceiveAddress
-		address={$icrcAccountIdentifierText ?? ''}
-		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
-		copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON}
-		labelRef="wallet-address"
-		network={ICP_NETWORK}
-		qrCodeAction={{
-			enabled: true,
-			ariaLabel: $i18n.wallet.text.display_wallet_address_qr,
-			onClick: () =>
-				displayQRCode({
-					address: $icrcAccountIdentifierText ?? '',
-					addressLabel: $i18n.wallet.text.wallet_address,
-					copyAriaLabel: $i18n.wallet.text.wallet_address_copied
-				})
-		}}
-	>
-		{#snippet title()}
-			{$i18n.receive.icp.text.principal_title}
-		{/snippet}
-	</ReceiveAddress>
+	<div class="flex flex-col gap-3">
+		<ReceiveAddress
+			address={$icpAccountIdentifierText ?? ''}
+			copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
+			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON}
+			labelRef="icp-account-id"
+			network={ICP_NETWORK}
+			qrCodeAction={{
+				enabled: true,
+				ariaLabel: $i18n.receive.icp.text.display_account_id_qr,
+				onClick: () =>
+					displayQRCode({
+						address: $icpAccountIdentifierText ?? '',
+						addressLabel: $i18n.receive.icp.text.account_id,
+						copyAriaLabel: $i18n.receive.icp.text.account_id_copied
+					})
+			}}
+			testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
+		>
+			{#snippet title()}
+				{$i18n.receive.icp.text.icp_account_title}
+			{/snippet}
+		</ReceiveAddress>
 
-	<Hr spacing="lg" />
-
-	<ReceiveAddress
-		address={$icpAccountIdentifierText ?? ''}
-		copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
-		copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON}
-		labelRef="icp-account-id"
-		network={ICP_NETWORK}
-		qrCodeAction={{
-			enabled: true,
-			ariaLabel: $i18n.receive.icp.text.display_account_id_qr,
-			onClick: () =>
-				displayQRCode({
-					address: $icpAccountIdentifierText ?? '',
-					addressLabel: $i18n.receive.icp.text.account_id,
-					copyAriaLabel: $i18n.receive.icp.text.account_id_copied
-				})
-		}}
-		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
-	>
-		{#snippet title()}
-			{$i18n.receive.icp.text.icp_account_title}
-		{/snippet}
-	</ReceiveAddress>
+		<ReceiveAddress
+			address={$icrcAccountIdentifierText ?? ''}
+			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
+			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON}
+			labelRef="wallet-address"
+			network={ICP_NETWORK}
+			qrCodeAction={{
+				enabled: true,
+				ariaLabel: $i18n.wallet.text.display_wallet_address_qr,
+				onClick: () =>
+					displayQRCode({
+						address: $icrcAccountIdentifierText ?? '',
+						addressLabel: $i18n.wallet.text.wallet_address,
+						copyAriaLabel: $i18n.wallet.text.wallet_address_copied
+					})
+			}}
+		>
+			{#snippet title()}
+				{$i18n.receive.icp.text.principal_title}
+			{/snippet}
+		</ReceiveAddress>
+	</div>
 
 	{#snippet toolbar()}
 		<ButtonDone onclick={close} testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} />
