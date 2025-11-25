@@ -54,10 +54,7 @@
 		}}
 	>
 		{#snippet title()}
-			{$i18n.wallet.text.wallet_address}
-		{/snippet}
-		{#snippet text()}
-			{$i18n.receive.icp.text.use_for_all_tokens}
+			{$i18n.receive.icp.text.principal_title}
 		{/snippet}
 	</ReceiveAddress>
 
@@ -82,10 +79,7 @@
 		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
 	>
 		{#snippet title()}
-			{$i18n.receive.icp.text.account_id}
-		{/snippet}
-		{#snippet text()}
-			{$i18n.receive.icp.text.use_for_icp_deposit}
+			{$i18n.receive.icp.text.icp_account_title}
 		{/snippet}
 	</ReceiveAddress>
 

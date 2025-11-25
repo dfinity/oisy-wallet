@@ -106,65 +106,12 @@
 
 	let receiveAddressCoreList = $derived<Omit<ReceiveAddressProps, 'qrCodeAction' | 'on'>[]>([
 		{
-			labelRef: 'btcAddressMainnet',
-			address: $btcAddressMainnet,
-			network: BTC_MAINNET_NETWORK,
-			token: BTC_MAINNET_TOKEN,
-			testId: RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
-			title: $i18n.receive.bitcoin.text.bitcoin_address,
-			label: $i18n.receive.bitcoin.text.bitcoin_address,
-			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
-			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
-			condition: $networkBitcoinMainnetEnabled
-		},
-		{
-			labelRef: 'btcAddressTestnet',
-			address: $btcAddressTestnet,
-			network: BTC_TESTNET_NETWORK,
-			token: BTC_TESTNET_TOKEN,
-			testId: RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
-			title: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
-			label: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
-			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
-			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
-			condition: $networkBitcoinTestnetEnabled && $testnetsEnabled
-		},
-		{
-			labelRef: 'btcAddressRegtest',
-			address: $btcAddressRegtest,
-			network: BTC_REGTEST_NETWORK,
-			token: BTC_REGTEST_TOKEN,
-			testId: RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION,
-			title: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
-			label: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
-			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
-			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
-			condition: $networkBitcoinRegtestEnabled && $testnetsEnabled && LOCAL
-		},
-		{
-			labelRef: 'ethAddress',
-			address: $ethAddress,
-			network: ETHEREUM_NETWORK,
-			token: ETHEREUM_TOKEN,
-			testId: RECEIVE_TOKENS_MODAL_ETH_SECTION,
-			title: $i18n.receive.ethereum.text.ethereum,
-			label: $i18n.receive.ethereum.text.ethereum_address,
-			copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied,
-			qrCodeAriaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr,
-			text: $i18n.receive.icp.text.your_private_eth_address,
-			condition:
-				$networkEthereumEnabled ||
-				$networkSepoliaEnabled ||
-				$networkEvmMainnetEnabled ||
-				$networkEvmTestnetEnabled
-		},
-		{
 			labelRef: 'icrcTokenAddress',
 			address: $icrcAccountIdentifierText,
 			network: ICP_NETWORK,
 			token: ICP_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_ICRC_SECTION,
-			title: $i18n.receive.icp.text.principal,
+			title: $i18n.receive.icp.text.principal_title,
 			label: $i18n.receive.icp.text.principal,
 			copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied,
 			qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr,
@@ -176,10 +123,63 @@
 			network: ICP_NETWORK,
 			token: ICP_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_ICP_SECTION,
-			title: $i18n.receive.icp.text.icp_account,
+			title: $i18n.receive.icp.text.icp_account_title,
 			label: $i18n.receive.icp.text.icp_account,
 			copyAriaLabel: $i18n.receive.icp.text.icp_account_copied,
 			qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr
+		},
+		{
+			labelRef: 'btcAddressMainnet',
+			address: $btcAddressMainnet,
+			network: BTC_MAINNET_NETWORK,
+			token: BTC_MAINNET_TOKEN,
+			testId: RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
+			title: $i18n.receive.bitcoin.text.bitcoin_address_title,
+			label: $i18n.receive.bitcoin.text.bitcoin_address,
+			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
+			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
+			condition: $networkBitcoinMainnetEnabled
+		},
+		{
+			labelRef: 'btcAddressTestnet',
+			address: $btcAddressTestnet,
+			network: BTC_TESTNET_NETWORK,
+			token: BTC_TESTNET_TOKEN,
+			testId: RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
+			title: $i18n.receive.bitcoin.text.bitcoin_testnet_address_title,
+			label: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
+			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
+			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
+			condition: $networkBitcoinTestnetEnabled && $testnetsEnabled
+		},
+		{
+			labelRef: 'btcAddressRegtest',
+			address: $btcAddressRegtest,
+			network: BTC_REGTEST_NETWORK,
+			token: BTC_REGTEST_TOKEN,
+			testId: RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION,
+			title: $i18n.receive.bitcoin.text.bitcoin_regtest_address_title,
+			label: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
+			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
+			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
+			condition: $networkBitcoinRegtestEnabled && $testnetsEnabled && LOCAL
+		},
+		{
+			labelRef: 'ethAddress',
+			address: $ethAddress,
+			network: ETHEREUM_NETWORK,
+			token: ETHEREUM_TOKEN,
+			testId: RECEIVE_TOKENS_MODAL_ETH_SECTION,
+			title: $i18n.receive.ethereum.text.ethereum_title,
+			label: $i18n.receive.ethereum.text.ethereum_address,
+			copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied,
+			qrCodeAriaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr,
+			text: $i18n.receive.icp.text.your_private_eth_address,
+			condition:
+				$networkEthereumEnabled ||
+				$networkSepoliaEnabled ||
+				$networkEvmMainnetEnabled ||
+				$networkEvmTestnetEnabled
 		},
 		{
 			labelRef: 'solAddressMainnet',
@@ -187,7 +187,7 @@
 			network: SOLANA_MAINNET_NETWORK,
 			token: SOLANA_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION,
-			title: $i18n.receive.solana.text.solana_address,
+			title: $i18n.receive.solana.text.solana_address_title,
 			label: $i18n.receive.solana.text.solana_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
@@ -199,7 +199,7 @@
 			network: SOLANA_DEVNET_NETWORK,
 			token: SOLANA_DEVNET_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION,
-			title: $i18n.receive.solana.text.solana_devnet_address,
+			title: $i18n.receive.solana.text.solana_devnet_title,
 			label: $i18n.receive.solana.text.solana_devnet_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
@@ -211,7 +211,7 @@
 			network: SOLANA_LOCAL_NETWORK,
 			token: SOLANA_LOCAL_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION,
-			title: $i18n.receive.solana.text.solana_local_address,
+			title: $i18n.receive.solana.text.solana_local_title,
 			label: $i18n.receive.solana.text.solana_local_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
@@ -272,9 +272,6 @@
 					<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
 						{#snippet title()}
 							{_title}
-						{/snippet}
-						{#snippet text()}
-							<span class="text-sm">{_text}</span>
 						{/snippet}
 					</ReceiveAddress>
 				{:else}
