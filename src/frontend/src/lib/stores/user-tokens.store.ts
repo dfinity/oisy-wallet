@@ -1,5 +1,7 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { isTokenErc } from '$eth/utils/erc.utils';
+import type { ExtToken } from '$icp/types/ext-token';
+import { isTokenExtV2 } from '$icp/utils/ext.utils';
 import type { CertifiedData } from '$lib/types/store';
 import type { Token, TokenId } from '$lib/types/token';
 import type { UserToken } from '$lib/types/user-token';
@@ -17,17 +19,23 @@ export interface CertifiedUserTokensStore<T extends Token>
 	resetAll: () => void;
 }
 
+type Identifier =
+	| TokenId
+	| Erc20ContractAddress['address']
+	| SplTokenAddress
+	| ExtToken['canisterId'];
+
 export const initCertifiedUserTokensStore = <T extends Token>(): CertifiedUserTokensStore<T> => {
 	const { subscribe, update, set } = writable<CertifiedUserTokensData<T>>(undefined);
 
-	const getIdentifier = <T extends Token>(
-		token: T
-	): TokenId | Erc20ContractAddress['address'] | SplTokenAddress =>
+	const getIdentifier = <T extends Token>(token: T): Identifier =>
 		isTokenSpl(token)
 			? token.address
 			: isTokenErc(token)
 				? `${token.address}#${token.network.chainId}`
-				: token.id;
+				: isTokenExtV2(token)
+					? token.canisterId
+					: token.id;
 
 	return {
 		setAll: (tokens: CertifiedData<UserToken<T>>[]) =>

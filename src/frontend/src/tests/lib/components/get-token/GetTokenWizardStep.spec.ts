@@ -43,34 +43,34 @@ describe('GetTokenWizardStep', () => {
 			readable(balance)
 		);
 
-		const { getByText } = render(GetTokenWizardStep, {
+		const { getAllByText } = render(GetTokenWizardStep, {
 			props,
 			context: mockContext()
 		});
 
 		expect(
-			getByText(
+			getAllByText(
 				replacePlaceholders(en.stake.text.get_tokens, {
 					$token_symbol: ETHEREUM_TOKEN.symbol
 				})
-			)
+			)[0]
 		).toBeInTheDocument();
 	});
 
 	it('renders correct title if balance is not available', () => {
 		exchangeStore.set([{ ethereum: { usd: exchangeRate } }]);
 
-		const { getByText } = render(GetTokenWizardStep, {
+		const { getAllByText } = render(GetTokenWizardStep, {
 			props,
 			context: mockContext()
 		});
 
 		expect(
-			getByText(
+			getAllByText(
 				replacePlaceholders(en.stake.text.get_tokens, {
 					$token_symbol: ETHEREUM_TOKEN.symbol
 				})
-			)
+			)[0]
 		).toBeInTheDocument();
 	});
 

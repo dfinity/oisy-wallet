@@ -1854,7 +1854,14 @@
 			"ready_to_swap": "",
 			"convert_assets": "",
 			"convertible_assets": "",
-			"how_to_convert": ""
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
 		}
 	},
 	"temporal": {

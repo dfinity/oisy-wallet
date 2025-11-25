@@ -22,6 +22,7 @@ import {
 	DE_GODS_TOKEN,
 	mockValidErc721Token
 } from '$tests/mocks/erc721-tokens.mock';
+import { mockValidErcExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { get } from 'svelte/store';
 
 describe('user-token.store', () => {
@@ -138,6 +139,22 @@ describe('user-token.store', () => {
 
 				const expectedResults = [
 					{ data: { ...erc20Token2, enabled, id: BONK_TOKEN.id }, certified }
+				];
+
+				expect(get(mockStore)).toEqual(expectedResults);
+			});
+
+			it('should use the canister ID as identifier for EXT tokens', () => {
+				mockStore.setAll([{ data: { ...mockValidErcExtV2Token, enabled }, certified }]);
+				const extToken2 = {
+					...TRUMP_TOKEN,
+					standard: 'extV2' as const,
+					canisterId: mockValidErcExtV2Token.canisterId
+				};
+				mockStore.setAll([{ data: { ...extToken2, enabled }, certified }]);
+
+				const expectedResults = [
+					{ data: { ...extToken2, enabled, id: mockValidErcExtV2Token.id }, certified }
 				];
 
 				expect(get(mockStore)).toEqual(expectedResults);

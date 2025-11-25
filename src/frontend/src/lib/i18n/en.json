@@ -1854,7 +1854,14 @@
 			"ready_to_swap": "Ready to swap",
 			"convert_assets": "Convert Assets",
 			"convertible_assets": "Convertible assets",
-			"how_to_convert": "How to convert"
+			"how_to_convert": "How to convert",
+			"get_more_token": "Get more $token",
+			"receive_token": "Receive $token",
+			"receive_token_title": "Receive $token directly",
+			"receive_token_text": "Receive $token directly to your account",
+			"buy_assets": "Buy assets",
+			"buy_assets_title": "Buy convertible assets",
+			"buy_assets_text": "Buy more assets and convert to $token"
 		}
 	},
 	"temporal": {
