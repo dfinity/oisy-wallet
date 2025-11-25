@@ -28,13 +28,13 @@
 
 		{#if items.length > 1 && !hideExpandButton}
 			<Button
-				fullWidth
-				transparent
 				colorStyle="muted"
+				fullWidth
+				innerStyleClass="items-center"
 				onclick={() => (expanded = !expanded)}
 				paddingSmall
 				styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
-				innerStyleClass="items-center"
+				transparent
 			>
 				{expanded ? $i18n.core.text.less : $i18n.core.text.more}
 				<IconExpand {expanded} />
