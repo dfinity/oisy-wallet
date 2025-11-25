@@ -778,9 +778,9 @@
 		"solana": {
 			"text": {
 				"solana_address": "Indirizzo Solana",
-				"solana_address_title": "",
+				"solana_address_title": "Indirizzo del wallet Solana",
 				"solana_devnet_address": "Indirizzo Solana Devnet",
-				"solana_devnet_address_title": "Indirizzo del wallet Solana",
+				"solana_devnet_address_title": "Indirizzo del wallet Solana Devnet",
 				"solana_local_address": "Indirizzo Solana Locale",
 				"solana_local_address_title": "Indirizzo del wallet Solana Locale",
 				"solana_address_copied": "Indirizzo Solana copiato negli appunti",
