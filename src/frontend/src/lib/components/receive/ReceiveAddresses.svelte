@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
 	import type { OptionBtcAddress } from '$btc/types/address';
 	import {
