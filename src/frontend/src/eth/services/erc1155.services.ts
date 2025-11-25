@@ -1,4 +1,4 @@
-import type { CustomToken, ErcToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken, ErcToken } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
@@ -6,7 +6,6 @@ import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers'
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import type { Erc721ContractAddress } from '$eth/types/erc721';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -79,7 +78,7 @@ const safeLoadMetadata = async ({
 	address
 }: {
 	networkId: NetworkId;
-	address: Erc721ContractAddress['address'];
+	address: Erc1155ContractAddress['address'];
 }) => {
 	try {
 		const { getContractMetadata } = alchemyProviders(networkId);

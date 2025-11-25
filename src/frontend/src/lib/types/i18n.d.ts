@@ -11,6 +11,7 @@ interface I18nCore {
 		done: string;
 		close: string;
 		change: string;
+		continue: string;
 		apply: string;
 		retry: string;
 		refresh: string;
@@ -43,6 +44,7 @@ interface I18nCore {
 		more: string;
 		less: string;
 		ellipsis: string;
+		learn_more: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -55,6 +57,7 @@ interface I18nCore {
 		switch_currency: string;
 		more: string;
 		less: string;
+		learn_more: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string };
 }
@@ -431,6 +434,7 @@ interface I18nInit {
 		spl_custom_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
+		ext_custom_tokens: string;
 		loading_wallet_timeout: string;
 		allow_signing: string;
 		waiting_for_allowed_cycles_aborted: string;
@@ -704,7 +708,13 @@ interface I18nScanner {
 		phone_number: string;
 		email_address: string;
 		website: string;
+		enter_manually: string;
+		url_or_code: string;
+		enter_or_paste_code: string;
+		scan: string;
+		pay: string;
 	};
+	error: { code_link_is_not_valid: string };
 }
 
 interface I18nConvert {
@@ -1401,7 +1411,12 @@ interface I18nActivity {
 }
 
 interface I18nEarning {
-	text: { title: string; earning_opportunities: string };
+	text: {
+		title: string;
+		earning_opportunities: string;
+		header_title: string;
+		header_description: string;
+	};
 	cards: {
 		gldt: { title: string; description: string; action: string };
 		sprinkles: { title: string; description: string; action: string };
@@ -1436,9 +1451,7 @@ interface I18nStake {
 		active_earning: string;
 		active_earning_per_year: string;
 		visit_provider: string;
-		current_apy: string;
 		current_apy_label: string;
-		current_apy_info: string;
 		stake_review_subtitle: string;
 		unstake_review_subtitle: string;
 		delayed_dissolve: string;
@@ -1454,6 +1467,39 @@ interface I18nStake {
 		claim_rewards: string;
 		claim_now: string;
 		claiming: string;
+		get_tokens_with_amount: string;
+		get_tokens: string;
+	};
+	terms: {
+		gldt: {
+			item1_title: string;
+			item1_description: string;
+			item2_title_1: string;
+			item2_title_2: string;
+			item3_title: string;
+			item3_description: string;
+			item4_title: string;
+			item4_description: string;
+			item5_title: string;
+		};
+	};
+}
+
+interface I18nGet_token {
+	text: {
+		title: string;
+		swap_to_token: string;
+		ready_to_swap: string;
+		convert_assets: string;
+		convertible_assets: string;
+		how_to_convert: string;
+		get_more_token: string;
+		receive_token: string;
+		receive_token_title: string;
+		receive_token_text: string;
+		buy_assets: string;
+		buy_assets_title: string;
+		buy_assets_text: string;
 	};
 }
 
@@ -1548,6 +1594,7 @@ interface I18n {
 	activity: I18nActivity;
 	earning: I18nEarning;
 	stake: I18nStake;
+	get_token: I18nGet_token;
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
 }

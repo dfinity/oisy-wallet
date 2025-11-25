@@ -14,8 +14,8 @@
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { fungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -64,7 +64,7 @@
 			filter,
 			list: sortTokenOrGroupUi(
 				getDisabledOrModifiedTokens({
-					tokens: $fungibleNetworkTokens,
+					tokens: $allFungibleNetworkTokens,
 					modifiedTokens
 				})
 			)

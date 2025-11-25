@@ -8,6 +8,7 @@
 			"done": "Fertig",
 			"close": "Schließen",
 			"change": "Ändern",
+			"continue": "",
 			"apply": "Anwenden",
 			"retry": "Erneut versuchen",
 			"refresh": "Aktualisieren",
@@ -39,7 +40,8 @@
 			"confirm": "Bestätigen",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
@@ -54,7 +56,8 @@
 			"switch_language": "Sprache wechseln",
 			"switch_currency": "Währung wechseln",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
@@ -629,6 +632,7 @@
 			"spl_custom_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
 			"erc20_user_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
+			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
 			"allow_signing": "Ein Problem trat auf beim Einrichten deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -909,7 +913,15 @@
 			"country": "",
 			"phone_number": "",
 			"email_address": "",
-			"website": ""
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -1766,7 +1778,9 @@
 	"earning": {
 		"text": {
 			"title": "Verdienen",
-			"earning_opportunities": ""
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
 			"gldt": {
@@ -1811,9 +1825,7 @@
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"visit_provider": "",
-			"current_apy": "",
 			"current_apy_label": "",
-			"current_apy_info": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1828,7 +1840,39 @@
 			"claim_reward": "",
 			"claim_rewards": "",
 			"claim_now": "",
-			"claiming": ""
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": ""
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "",
+				"item1_description": "",
+				"item2_title_1": "",
+				"item2_title_2": "",
+				"item3_title": "",
+				"item3_description": "",
+				"item4_title": "",
+				"item4_description": "",
+				"item5_title": ""
+			}
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
 		}
 	},
 	"temporal": {

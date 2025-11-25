@@ -15,5 +15,6 @@
 	"OISY_FIND_INTERNET_IDENTITY_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/find-your-internet-identity",
 	"OISY_FAQ_URL": "https://docs.oisy.com/using-oisy-wallet/faq",
 	"OISY_ACCESS_CONTROL_URL": "https://docs.oisy.com/security/asset-control-recovery-and-governance-in-oisy-wallet",
-	"OISY_NFT_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/nfts"
+	"OISY_NFT_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/nfts",
+	"OISY_HOW_TO_CONVERT_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/"
 }

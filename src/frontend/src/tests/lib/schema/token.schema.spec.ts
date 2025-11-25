@@ -50,6 +50,18 @@ describe('token.schema', () => {
 			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
+		it('should validate "dip20" as a supported token standard', () => {
+			const validStandard = 'dip20';
+
+			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "extV2" as a supported token standard', () => {
+			const validStandard = 'extV2';
+
+			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
 		it('should validate "bitcoin" as a supported token standard', () => {
 			const validStandard = 'bitcoin';
 

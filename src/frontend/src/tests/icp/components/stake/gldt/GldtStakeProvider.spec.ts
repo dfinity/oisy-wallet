@@ -28,23 +28,38 @@ describe('GldtStakeProvider', () => {
 		]);
 	};
 
-	it('renders provided provider data correctly', () => {
-		const { container, getByTestId } = render(GldtStakeProvider, {
+	it('renders provided provider data correctly', async () => {
+		const { container, getByTestId, rerender } = render(GldtStakeProvider, {
+			props: { showAllTerms: false },
 			context: mockContext()
 		});
 
 		expect(container).toHaveTextContent(stakeProvidersConfig[StakeProviderType.GLDT].name);
 		expect(container).toHaveTextContent(
-			replacePlaceholders(en.stake.text.current_apy, {
+			replacePlaceholders(en.stake.terms.gldt.item1_title, {
 				$apy: '10.0'
 			})
 		);
 		expect(container).toHaveTextContent(
-			replacePlaceholders(en.stake.text.current_apy_info, {
+			replacePlaceholders(en.stake.terms.gldt.item1_description, {
 				$token: `${ICP_TOKEN.symbol}`
 			})
 		);
 		expect(getByTestId(STAKE_PROVIDER_LOGO)).toBeInTheDocument();
 		expect(getByTestId(STAKE_PROVIDER_EXTERNAL_URL)).toBeInTheDocument();
+
+		expect(container).not.toHaveTextContent(en.stake.terms.gldt.item3_title);
+		expect(container).not.toHaveTextContent(en.stake.terms.gldt.item3_description);
+		expect(container).not.toHaveTextContent(en.stake.terms.gldt.item4_title);
+		expect(container).not.toHaveTextContent(en.stake.terms.gldt.item4_description);
+		expect(container).not.toHaveTextContent(en.stake.terms.gldt.item5_title);
+
+		await rerender({ showAllTerms: true });
+
+		expect(container).toHaveTextContent(en.stake.terms.gldt.item3_title);
+		expect(container).toHaveTextContent(en.stake.terms.gldt.item3_description);
+		expect(container).toHaveTextContent(en.stake.terms.gldt.item4_title);
+		expect(container).toHaveTextContent(en.stake.terms.gldt.item4_description);
+		expect(container).toHaveTextContent(en.stake.terms.gldt.item5_title);
 	});
 });

@@ -39,7 +39,7 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should convert number array to hex string with byte reversal', () => {
-			const txid = [1, 2, 3, 4];
+			const txid = Uint8Array.from([1, 2, 3, 4]);
 			const result = utxoTxIdToString(txid);
 
 			expect(result).toBe('04030201');

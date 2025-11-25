@@ -2,12 +2,14 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { icrcTokens, icrcCustomTokensNotInitialized } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { setCustomToken } from '$icp-eth/services/custom-token.services';
 	import { isGLDTToken } from '$icp-eth/utils/token.utils';
+	import GetTokenModal from '$lib/components/get-token/GetTokenModal.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import StakeModal from '$lib/components/stake/StakeModal.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -18,7 +20,7 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { modalGldtStake } from '$lib/derived/modal.derived';
+	import { modalGetToken, modalGldtStake } from '$lib/derived/modal.derived';
 	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
@@ -59,6 +61,8 @@
 			? Math.round($enabledMainnetFungibleTokensUsdBalance / gldtTokenExchangeRate)
 			: 0
 	);
+
+	let getMoreTokensButtonDisabled = $derived(potentialGldtTokenBalance <= 0);
 
 	const enableStakingToken = async () => {
 		if (isNullish($authIdentity)) {
@@ -101,7 +105,7 @@
 		</div>
 
 		{#if $icrcCustomTokensNotInitialized || nonNullish(gldtToken)}
-			<div class="flex justify-center gap-2 text-sm sm:text-base">
+			<div class="flex items-center justify-center gap-2 text-sm sm:text-base">
 				{#if $enabledMainnetFungibleTokensUsdBalance > 0}
 					<span class="font-bold">
 						{formatCurrency({
@@ -135,9 +139,33 @@
 
 	{#snippet buttons()}
 		{#if nonNullish(gldtToken)}
-			<ButtonWithModal isOpen={$modalGldtStake} onOpen={modalStore.openGldtStake}>
+			<ButtonWithModal isOpen={$modalGetToken} onOpen={modalStore.openGetToken}>
 				{#snippet button(onclick)}
 					<Button disabled={gldtStakeButtonDisabled} fullWidth {onclick}>
+						{replacePlaceholders(
+							getMoreTokensButtonDisabled
+								? $i18n.stake.text.get_tokens
+								: $i18n.stake.text.get_tokens_with_amount,
+							{
+								$token_symbol: gldtTokenSymbol,
+								$amount: `${potentialGldtTokenBalance}`
+							}
+						)}
+					</Button>
+				{/snippet}
+
+				{#snippet modal()}
+					<GetTokenModal
+						{currentApy}
+						receiveAddress={$icrcAccountIdentifierText}
+						token={gldtToken}
+					/>
+				{/snippet}
+			</ButtonWithModal>
+
+			<ButtonWithModal isOpen={$modalGldtStake} onOpen={modalStore.openGldtStake}>
+				{#snippet button(onclick)}
+					<Button colorStyle="success" disabled={gldtStakeButtonDisabled} fullWidth {onclick}>
 						{replacePlaceholders(
 							gldtStakeButtonDisabled
 								? $i18n.stake.text.not_enough_to_stake

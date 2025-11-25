@@ -1,7 +1,7 @@
 import type {
 	ExperimentalFeatureSettings,
 	ExperimentalFeatureSettingsFor
-} from '$declarations/backend/declarations/backend.did';
+} from '$declarations/backend/backend.did';
 import type {
 	ExperimentalFeatureId,
 	UserExperimentalFeatures

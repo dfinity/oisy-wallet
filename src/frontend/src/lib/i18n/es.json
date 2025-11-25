@@ -8,6 +8,7 @@
 			"done": "Hecho",
 			"close": "Cerrar",
 			"change": "Cambiar",
+			"continue": "",
 			"apply": "Aplicar",
 			"retry": "Reintentar",
 			"refresh": "Actualizar",
@@ -39,7 +40,8 @@
 			"confirm": "Confirmar",
 			"more": "Más",
 			"less": "Menos",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
@@ -54,7 +56,8 @@
 			"switch_language": "Cambiar idioma",
 			"switch_currency": "Cambiar moneda",
 			"more": "Mas",
-			"less": "Menos"
+			"less": "Menos",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
@@ -629,6 +632,7 @@
 			"spl_custom_tokens": "Error al cargar los tokens SPL personalizados.",
 			"erc20_user_token": "Error al habilitar el token gemelo ERC20.",
 			"icrc_custom_token": "Error al cargar el token ICRC personalizado.",
+			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "Tu billetera requiere algunos datos iniciales que aún no se han cargado. Por favor, inténtalo de nuevo.",
 			"allow_signing": "Ocurrió un problema al configurar tu billetera para firmar. Has sido desconectado. Si el problema persiste, contacta con el soporte.",
 			"waiting_for_allowed_cycles_aborted": "Preparación del ledger de ciclos abortada. Por favor, intenta iniciar sesión más tarde",
@@ -909,7 +913,15 @@
 			"country": "",
 			"phone_number": "",
 			"email_address": "",
-			"website": ""
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -1766,7 +1778,9 @@
 	"earning": {
 		"text": {
 			"title": "",
-			"earning_opportunities": ""
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
 			"gldt": {
@@ -1811,9 +1825,7 @@
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"visit_provider": "",
-			"current_apy": "",
 			"current_apy_label": "",
-			"current_apy_info": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1828,7 +1840,39 @@
 			"claim_reward": "",
 			"claim_rewards": "",
 			"claim_now": "",
-			"claiming": ""
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": ""
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "",
+				"item1_description": "",
+				"item2_title_1": "",
+				"item2_title_2": "",
+				"item3_title": "",
+				"item3_description": "",
+				"item4_title": "",
+				"item4_description": "",
+				"item5_title": ""
+			}
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
 		}
 	},
 	"temporal": {
