@@ -21,7 +21,7 @@
 {#if items.length > 0}
 	<div class="flex flex-col">
 		<div class="mt-4 flex flex-col px-4">
-			{#each displayItems as item}
+			{#each displayItems as item, index (`list-item-${index}`)}
 				{@render item()}
 			{/each}
 		</div>

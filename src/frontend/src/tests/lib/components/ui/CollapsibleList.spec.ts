@@ -57,7 +57,7 @@ describe('CollapsibleList', () => {
 		expect(queryByTestId('item3')).not.toBeInTheDocument();
 	});
 
-	it('should render all items by default and not render the expand button if hideExpandButton is passed', async () => {
+	it('should render all items by default and not render the expand button if hideExpandButton is passed', () => {
 		const { queryByTestId, queryByRole } = render(CollapsibleList, {
 			props: {
 				items: [createMockSnippet('item1'), createMockSnippet('item2'), createMockSnippet('item3')],
