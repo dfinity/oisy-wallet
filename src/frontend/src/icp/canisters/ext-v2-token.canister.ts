@@ -99,6 +99,12 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 			return mapExtTokensListing(response.ok);
 		}
 
+		// If the owner has no tokens in the collection, apparently it is returned as a generic `Other` error.
+		// Since we don't have a resilient way of distinguishing this from other errors, we manually compare the error message.
+		if ('Other' in response.err && response.err.Other === 'No tokens') {
+			return [];
+		}
+
 		throw mapExtV2TokenCommonError(response.err);
 	};
 }
