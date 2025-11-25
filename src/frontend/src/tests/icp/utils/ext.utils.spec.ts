@@ -1,8 +1,8 @@
-import { isTokenExtV2 } from '$icp/utils/ext-v2.utils';
+import { isTokenExtV2 } from '$icp/utils/ext.utils';
 import type { TokenStandard } from '$lib/types/token';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 
-describe('ext-v2.utils', () => {
+describe('ext.utils', () => {
 	describe('isTokenExtV2', () => {
 		it.each(['extV2'])('should return true for valid token standards: %s', (standard) => {
 			expect(
