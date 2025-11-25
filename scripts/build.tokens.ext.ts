@@ -50,17 +50,6 @@ interface ToniqResponseData {
 	royalty: string;
 }
 
-interface NftGeekResponseData {
-	canisterId: string;
-	name: string;
-	alias: string;
-	interface: string;
-}
-
-interface NftGeekCollectionsResponseData {
-	collections: NftGeekResponseData[];
-}
-
 const queryToniqData = async (): Promise<ToniqResponseData[]> => {
 	const response = await fetch(TONIQ_COLLECTION_LIST_URL);
 
