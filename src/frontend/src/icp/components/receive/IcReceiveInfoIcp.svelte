@@ -54,7 +54,7 @@
 		}}
 	>
 		{#snippet title()}
-			{$i18n.wallet.text.wallet_address}
+			{$i18n.receive.icp.text.principal_title}
 		{/snippet}
 	</ReceiveAddress>
 
@@ -79,7 +79,7 @@
 		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
 	>
 		{#snippet title()}
-			{$i18n.receive.icp.text.account_id}
+			{$i18n.receive.icp.text.icp_account_title}
 		{/snippet}
 	</ReceiveAddress>
 

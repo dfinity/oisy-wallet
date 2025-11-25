@@ -722,9 +722,11 @@
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard.",
 				"principal": "ICP Principal",
+				"principal_title": "ICP wallet address - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard.",
 				"display_internet_computer_principal_qr": "Display Internet Computer Principal as a QR code",
 				"icp_account": "ICP Account (for exchanges)",
+				"icp_account_title": "ICP wallet address - ICP only",
 				"icp_account_copied": "ICP Account copied to clipboard.",
 				"display_icp_account_qr": "Display ICP Account as a QR code"
 			}
@@ -737,6 +739,7 @@
 				"learn_how_to_convert": "Learn how to convert $token to $ckToken",
 				"metamask": "Receive from Metamask",
 				"ethereum": "Ethereum",
+				"ethereum_title": "Ethereum wallet address",
 				"ethereum_address": "Address",
 				"ethereum_address_copied": "Ethereum address copied to clipboard.",
 				"display_ethereum_address_qr": "Display Ethereum address as a QR code"
@@ -754,8 +757,11 @@
 				"checking_incoming": "Checking for incoming BTC...",
 				"refreshing_wallet": "Refreshing wallet...",
 				"bitcoin_address": "Bitcoin",
+				"bitcoin_address_title": "Bitcoin wallet address",
 				"bitcoin_testnet_address": "Bitcoin (Testnet)",
+				"bitcoin_testnet_address_title": "Bitcoin (Testnet) wallet address",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
+				"bitcoin_regtest_address_title": "Bitcoin (Regtest) wallet address",
 				"display_bitcoin_address_qr": "Display Bitcoin Address as a QR code",
 				"bitcoin_address_copied": "Bitcoin Address copied to clipboard.",
 				"from_network": "Transfer Bitcoin on the BTC network to this address to receive ckBTC.",
@@ -772,8 +778,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Solana Address",
+				"solana_address_title": "Solana wallet address",
 				"solana_devnet_address": "Solana Devnet Address",
+				"solana_devnet_address_title": "Solana Devnet wallet address",
 				"solana_local_address": "Solana Local Address",
+				"solana_local_address_title": "Solana Local wallet address",
 				"solana_address_copied": "Solana address copied to clipboard",
 				"display_solana_address_qr": "Display Solana address as QR code"
 			}

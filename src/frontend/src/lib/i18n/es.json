@@ -722,9 +722,11 @@
 				"display_account_id_qr": "Mostrar ID de cuenta de ICP como un código QR",
 				"account_id_copied": "ID de cuenta de ICP copiada al portapapeles.",
 				"principal": "Principal de ICP",
+				"principal_title": "Dirección de la billetera ICP - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Principal de Internet Computer copiado al portapapeles.",
 				"display_internet_computer_principal_qr": "Mostrar Principal de Internet Computer como un código QR",
 				"icp_account": "Cuenta de ICP (para exchanges)",
+				"icp_account_title": "Dirección de la billetera ICP - Solo por ICP",
 				"icp_account_copied": "Cuenta de ICP copiada al portapapeles.",
 				"display_icp_account_qr": "Mostrar cuenta de ICP como un código QR"
 			}
@@ -737,6 +739,7 @@
 				"learn_how_to_convert": "Aprende cómo convertir $token a $ckToken",
 				"metamask": "Recibir desde Metamask",
 				"ethereum": "Ethereum",
+				"ethereum_title": "Dirección de la billetera Ethereum",
 				"ethereum_address": "Dirección de Ethereum ",
 				"ethereum_address_copied": "Dirección de Ethereum copiada al portapapeles.",
 				"display_ethereum_address_qr": "Mostrar dirección de Ethereum como un código QR"
@@ -754,8 +757,11 @@
 				"checking_incoming": "Verificando BTC entrante...",
 				"refreshing_wallet": "Actualizando billetera...",
 				"bitcoin_address": "Bitcoin",
+				"bitcoin_address_title": "Dirección de la billetera Bitcoin",
 				"bitcoin_testnet_address": "Bitcoin (Testnet)",
+				"bitcoin_testnet_address_title": "Dirección de la billetera Bitcoin (Testnet)",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
+				"bitcoin_regtest_address_title": "Dirección de la billetera Bitcoin (Regtest)",
 				"display_bitcoin_address_qr": "Mostrar Dirección de Bitcoin como un código QR",
 				"bitcoin_address_copied": "Dirección de Bitcoin copiada al portapapeles.",
 				"from_network": "Transfiere Bitcoin en la red BTC a esta dirección para recibir ckBTC.",
@@ -772,8 +778,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Dirección de Solana",
+				"solana_address_title": "Dirección de la billetera Solana",
 				"solana_devnet_address": "Dirección Devnet de Solana",
+				"solana_devnet_address_title": "Dirección de la billetera Solana Devnet",
 				"solana_local_address": "Dirección Local de Solana",
+				"solana_local_address_title": "Dirección de la billetera Solana Local",
 				"solana_address_copied": "Dirección de Solana copiada al portapapeles",
 				"display_solana_address_qr": "Mostrar dirección de Solana como código QR"
 			}
