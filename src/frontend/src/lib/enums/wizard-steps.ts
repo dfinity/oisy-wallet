@@ -95,10 +95,10 @@ export enum WizardStepsClaimStakingReward {
 
 export const WizardStepsGetToken = {
 	GET_TOKEN: 'Get Token',
+	RECEIVE: 'Receive',
+	BUY_TOKEN: 'Buy Token',
 	...WizardStepsSwap,
-	...WizardStepsHowToConvert,
-	...WizardStepsReceive,
-	BUY_TOKEN: 'Buy Token'
+	...WizardStepsHowToConvert
 } as const;
 
 export enum WizardStepsScanner {
