@@ -726,7 +726,7 @@
 				"internet_computer_principal_copied": "Principal de Internet Computer copiado al portapapeles.",
 				"display_internet_computer_principal_qr": "Mostrar Principal de Internet Computer como un código QR",
 				"icp_account": "Cuenta de ICP (para exchanges)",
-				"icp_account_title": "Dirección de la billetera ICP - Solo por ICP",
+				"icp_account_title": "Dirección de la billetera ICP - Solo por token ICP",
 				"icp_account_copied": "Cuenta de ICP copiada al portapapeles.",
 				"display_icp_account_qr": "Mostrar cuenta de ICP como un código QR"
 			}
