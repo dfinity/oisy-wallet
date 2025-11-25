@@ -778,9 +778,9 @@
 		"solana": {
 			"text": {
 				"solana_address": "Dirección de Solana",
-				"solana_address_title": "",
+				"solana_address_title": "Dirección de la billetera Solana",
 				"solana_devnet_address": "Dirección Devnet de Solana",
-				"solana_devnet_address_title": "Dirección de la billetera Solana",
+				"solana_devnet_address_title": "Dirección de la billetera Solana Devnet",
 				"solana_local_address": "Dirección Local de Solana",
 				"solana_local_address_title": "Dirección de la billetera Solana Local",
 				"solana_address_copied": "Dirección de Solana copiada al portapapeles",
