@@ -82,7 +82,7 @@ export const balance = async ({
  * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#tokens_ext
  *
  * @param {Object} params - The parameters for fetching the tokens.
- * @param {Principal} params.owner - The principal to use for the request.
+ * @param {Principal} params.owner - The principal of the owner whose tokens should be fetched.
  * @param {OptionIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.canisterId - The canister ID of the EXT v2 token.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
