@@ -56,9 +56,6 @@
 		{#snippet title()}
 			{$i18n.wallet.text.wallet_address}
 		{/snippet}
-		{#snippet text()}
-			{$i18n.receive.icp.text.use_for_all_tokens}
-		{/snippet}
 	</ReceiveAddress>
 
 	<Hr spacing="lg" />
@@ -83,9 +80,6 @@
 	>
 		{#snippet title()}
 			{$i18n.receive.icp.text.account_id}
-		{/snippet}
-		{#snippet text()}
-			{$i18n.receive.icp.text.use_for_icp_deposit}
 		{/snippet}
 	</ReceiveAddress>
 

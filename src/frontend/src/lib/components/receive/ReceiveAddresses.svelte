@@ -268,22 +268,11 @@
 				condition !== false && (!isNftsPage || (isNftsPage && network.supportsNft))}
 
 			{#if showAddress}
-				{#if nonNullish(_text)}
-					<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
-						{#snippet title()}
-							{_title}
-						{/snippet}
-						{#snippet text()}
-							<span class="text-sm">{_text}</span>
-						{/snippet}
-					</ReceiveAddress>
-				{:else}
-					<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
-						{#snippet title()}
-							{_title}
-						{/snippet}
-					</ReceiveAddress>
-				{/if}
+				<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
+					{#snippet title()}
+						{_title}
+					{/snippet}
+				</ReceiveAddress>
 			{/if}
 		{/each}
 	</div>
