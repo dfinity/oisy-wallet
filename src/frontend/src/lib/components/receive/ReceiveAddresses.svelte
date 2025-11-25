@@ -106,27 +106,27 @@
 
 	let receiveAddressCoreList = $derived<Omit<ReceiveAddressProps, 'qrCodeAction' | 'on'>[]>([
 		{
-			labelRef: 'icrcTokenAddress',
-			address: $icrcAccountIdentifierText,
-			network: ICP_NETWORK,
-			token: ICP_TOKEN,
-			testId: RECEIVE_TOKENS_MODAL_ICRC_SECTION,
-			title: $i18n.receive.icp.text.principal_title,
-			label: $i18n.receive.icp.text.principal,
-			copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied,
-			qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr,
-			text: $i18n.receive.icp.text.use_for_icrc_deposit
-		},
-		{
 			labelRef: 'icpTokenAddress',
 			address: $icpAccountIdentifierText,
 			network: ICP_NETWORK,
 			token: ICP_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_ICP_SECTION,
-			title: $i18n.receive.icp.text.icp_account_title,
+			title: $i18n.receive.icp.text.principal_title,
 			label: $i18n.receive.icp.text.icp_account,
 			copyAriaLabel: $i18n.receive.icp.text.icp_account_copied,
 			qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr
+		},
+		{
+			labelRef: 'icrcTokenAddress',
+			address: $icrcAccountIdentifierText,
+			network: ICP_NETWORK,
+			token: ICP_TOKEN,
+			testId: RECEIVE_TOKENS_MODAL_ICRC_SECTION,
+			title: $i18n.receive.icp.text.icp_account_title,
+			label: $i18n.receive.icp.text.principal,
+			copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied,
+			qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr,
+			text: $i18n.receive.icp.text.use_for_icrc_deposit
 		},
 		{
 			labelRef: 'btcAddressMainnet',
@@ -199,7 +199,7 @@
 			network: SOLANA_DEVNET_NETWORK,
 			token: SOLANA_DEVNET_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION,
-			title: $i18n.receive.solana.text.solana_devnet_title,
+			title: $i18n.receive.solana.text.solana_devnet_address_title,
 			label: $i18n.receive.solana.text.solana_devnet_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
@@ -211,7 +211,7 @@
 			network: SOLANA_LOCAL_NETWORK,
 			token: SOLANA_LOCAL_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION,
-			title: $i18n.receive.solana.text.solana_local_title,
+			title: $i18n.receive.solana.text.solana_local_address_title,
 			label: $i18n.receive.solana.text.solana_local_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
