@@ -14,10 +14,14 @@
 	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
 	import IconForbidden from '$lib/components/icons/IconForbidden.svelte';
 	import IconTrophy from '$lib/components/icons/IconTrophy.svelte';
+	import { componentToHtml } from '$lib/utils/component.utils';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import { stakeProvidersConfig } from '$lib/config/stake.config';
+	import { Html } from '@dfinity/gix-components';
 
-	const { sendTokenSymbol } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	//const { sendTokenSymbol } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	//const sendTokenSymbol = readable('gldt');
+	const sendTokenSymbol = readable('gldt');
 
 	const { store: gldtStakeApyStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 </script>
@@ -25,15 +29,17 @@
 {#snippet item1()}
 	<CollapsibleListItem>
 		{#snippet icon()}
-			<IconLineChart />
+			<span class="text-warning-primary">
+				<IconLineChart />
+			</span>
 		{/snippet}
 		{#snippet title()}
-			{replacePlaceholders($i18n.stake.text.current_apy, {
+			{replacePlaceholders($i18n.stake.terms.gldt.item1_title, {
 				$apy: formatStakeApyNumber($gldtStakeApyStore?.apy ?? 0)
 			})}
 		{/snippet}
 		{#snippet description()}
-			{replacePlaceholders($i18n.stake.text.current_apy_info, {
+			{replacePlaceholders($i18n.stake.terms.gldt.item1_description, {
 				$token: $sendTokenSymbol
 			})}
 		{/snippet}
@@ -43,10 +49,24 @@
 {#snippet item2()}
 	<CollapsibleListItem>
 		{#snippet icon()}
-			<IconTrophy />
+			<span class="text-warning-primary">
+				<IconTrophy />
+			</span>
 		{/snippet}
 		{#snippet title()}
-			Staking rewards are being paid in GOLDAO tokens
+			<span class="flex gap-1">
+				<Html
+					text={replacePlaceholders($i18n.stake.terms.gldt.item2_title, {
+						$icon: componentToHtml({
+							Component: Logo,
+							props: {
+								alt: stakeProvidersConfig[StakeProviderType.GLDT].name,
+								src: stakeProvidersConfig[StakeProviderType.GLDT].logo
+							}
+						}).replace('opacity-10', '')
+					})}
+				/>
+			</span>
 		{/snippet}
 	</CollapsibleListItem>
 {/snippet}
@@ -54,15 +74,15 @@
 {#snippet item3()}
 	<CollapsibleListItem>
 		{#snippet icon()}
-			<IconClock />
+			<span class="text-warning-primary">
+				<IconClock />
+			</span>
 		{/snippet}
 		{#snippet title()}
-			Unlock delay of 1 week
+			{$i18n.stake.terms.gldt.item3_title}
 		{/snippet}
 		{#snippet description()}
-			When unlocking GLDT from staking, the tokens are locked for 1 week without receiving any
-			further rewards, before they can be withdrawn. You can pay a 5% fee on your stake to unloc
-			immediately.
+			{$i18n.stake.terms.gldt.item3_description}
 		{/snippet}
 	</CollapsibleListItem>
 {/snippet}
@@ -75,11 +95,10 @@
 			</span>
 		{/snippet}
 		{#snippet title()}
-			Age bonus
+			{$i18n.stake.terms.gldt.item4_title}
 		{/snippet}
 		{#snippet description()}
-			GLDT stakes start obtaining an age bonus from day 1. The older the stakes, the bigger the age
-			bonus, growing linearly at 100% per year.
+			{$i18n.stake.terms.gldt.item4_description}
 		{/snippet}
 	</CollapsibleListItem>
 {/snippet}
@@ -87,10 +106,12 @@
 {#snippet item5()}
 	<CollapsibleListItem>
 		{#snippet icon()}
-			<IconForbidden />
+			<span class="text-warning-primary">
+				<IconForbidden />
+			</span>
 		{/snippet}
 		{#snippet title()}
-			When you start unlocking your GLDT stake, you will no longer receive new rewards
+			{$i18n.stake.terms.gldt.item5_title}
 		{/snippet}
 	</CollapsibleListItem>
 {/snippet}
