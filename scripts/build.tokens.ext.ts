@@ -11,9 +11,6 @@ const ACCEPTED_STANDARDS = ['ext'];
 const TONIQ_COLLECTION_LIST_URL =
 	'https://us-central1-entrepot-api.cloudfunctions.net/api/collections';
 
-// This URL was extracted analysing the network request of nftGeek (https://t5t44-naaaa-aaaah-qcutq-cai.raw.icp0.io/)
-const NFT_GEEK_COLLECTION_LIST_URL = 'https://api.nftgeek.app/api/1/collections';
-
 interface ToniqResponseData {
 	id: string;
 	priority: number;
@@ -97,39 +94,6 @@ const getToniqCollections = async (): Promise<EnvExtToken[]> => {
 	return parseToniqData(data);
 };
 
-const queryNftGeekData = async (): Promise<NftGeekCollectionsResponseData> => {
-	const response = await fetch(NFT_GEEK_COLLECTION_LIST_URL);
-
-	if (!response.ok) {
-		throw new Error(`Error loading nftGeek collection list: ${response.statusText}`);
-	}
-
-	return await response.json();
-};
-
-const parseNftGeekData = (data: NftGeekCollectionsResponseData): EnvExtToken[] =>
-	data.collections.reduce<EnvExtToken[]>((acc, { canisterId, name, interface: standard }) => {
-		if (!ACCEPTED_STANDARDS.includes(standard.toLowerCase())) {
-			return acc;
-		}
-
-		return [
-			...acc,
-			{
-				canisterId,
-				metadata: {
-					name
-				}
-			}
-		];
-	}, []);
-
-const getNftGeekCollections = async (): Promise<EnvExtToken[]> => {
-	const data = await queryNftGeekData();
-
-	return parseNftGeekData(data);
-};
-
 const readExistingCollections = (): EnvExtToken[] => {
 	if (!existsSync(EXT_COLLECTIONS_JSON_FILE)) {
 		return [];
@@ -144,14 +108,11 @@ const getCollections = async (): Promise<EnvExtToken[]> => {
 	const existingCollections = readExistingCollections();
 
 	const toniqCollections = await getToniqCollections();
-	const nftGeekCollections = await getNftGeekCollections();
 
 	// We want to keep the existing collections in the file that are not in the fetched lists anymore.
-	const collectionsMap = [
-		...existingCollections,
-		...nftGeekCollections,
-		...toniqCollections
-	].reduce<Record<string, EnvExtToken>>((acc, collection) => {
+	const collectionsMap = [...existingCollections, ...toniqCollections].reduce<
+		Record<string, EnvExtToken>
+	>((acc, collection) => {
 		acc[collection.canisterId] = collection;
 
 		return acc;
