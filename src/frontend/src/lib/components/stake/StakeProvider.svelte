@@ -49,5 +49,5 @@
 		</ExternalLink>
 	</div>
 
-	<CollapsibleList items={data} hideExpandButton={showAllTerms} />
+	<CollapsibleList hideExpandButton={showAllTerms} items={data} />
 </div>
