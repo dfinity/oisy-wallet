@@ -10,6 +10,22 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
+	const loadEthNfts = async () => {
+		if (isNullish($ethAddress)) {
+			return;
+		}
+
+		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
+
+		const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
+			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
+
+			nftStore.setAllByNetwork({ networkId, nfts });
+		});
+
+		await Promise.allSettled(promises);
+	};
+
 	const onLoad = async () => {
 		if (!NFTS_ENABLED || isNullish($ethAddress)) {
 			return;
