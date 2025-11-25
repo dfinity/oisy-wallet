@@ -60,7 +60,7 @@
 	{/snippet}
 
 	{#snippet provider()}
-		<StakeProvider terms={[stakeTermItems]} provider={StakeProviderType.GLDT} showAllTerms />
+		<StakeProvider provider={StakeProviderType.GLDT} showAllTerms terms={[stakeTermItems]} />
 	{/snippet}
 
 	{#snippet network()}
