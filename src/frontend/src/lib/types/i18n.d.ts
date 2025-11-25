@@ -1472,6 +1472,13 @@ interface I18nGet_token {
 		convert_assets: string;
 		convertible_assets: string;
 		how_to_convert: string;
+		get_more_token: string;
+		receive_token: string;
+		receive_token_title: string;
+		receive_token_text: string;
+		buy_assets: string;
+		buy_assets_title: string;
+		buy_assets_text: string;
 	};
 }
 
