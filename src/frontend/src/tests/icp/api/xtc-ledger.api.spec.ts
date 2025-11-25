@@ -33,7 +33,7 @@ describe('xtc-ledger.api', () => {
 			ledgerCanisterMock.transfer.mockResolvedValue(transactionId);
 		});
 
-		it('successfully calls balance endpoint', async () => {
+		it('successfully calls transfer endpoint', async () => {
 			const result = await transfer(params);
 
 			expect(result).toEqual(transactionId);
