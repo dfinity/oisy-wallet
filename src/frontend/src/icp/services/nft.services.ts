@@ -35,9 +35,7 @@ export const loadNfts = async ({
 				canisterId
 			});
 
-			const nfts = tokenIndices.map((index) => {
-				return mapExtNft({ index, collection: token });
-			});
+			const nfts = tokenIndices.map((index) => mapExtNft({ index, collection: token }));
 
 			return nfts.length > 0 ? [...(await acc), ...nfts] : await acc;
 		} catch (error: unknown) {
