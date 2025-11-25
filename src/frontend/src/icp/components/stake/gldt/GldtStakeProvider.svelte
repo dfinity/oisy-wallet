@@ -62,7 +62,6 @@
 					src={stakeProvidersConfig[StakeProviderType.GLDT].logo}
 				/>
 				{$i18n.stake.terms.gldt.item2_title_2}
-				/>
 			</span>
 		{/snippet}
 	</CollapsibleListItem>
