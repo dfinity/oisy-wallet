@@ -521,9 +521,11 @@ interface I18nReceive {
 			display_account_id_qr: string;
 			account_id_copied: string;
 			principal: string;
+			principal_title: string;
 			internet_computer_principal_copied: string;
 			display_internet_computer_principal_qr: string;
 			icp_account: string;
+			icp_account_title: string;
 			icp_account_copied: string;
 			display_icp_account_qr: string;
 		};
@@ -536,6 +538,7 @@ interface I18nReceive {
 			learn_how_to_convert: string;
 			metamask: string;
 			ethereum: string;
+			ethereum_title: string;
 			ethereum_address: string;
 			ethereum_address_copied: string;
 			display_ethereum_address_qr: string;
@@ -551,8 +554,11 @@ interface I18nReceive {
 			checking_incoming: string;
 			refreshing_wallet: string;
 			bitcoin_address: string;
+			bitcoin_address_title: string;
 			bitcoin_testnet_address: string;
+			bitcoin_testnet_address_title: string;
 			bitcoin_regtest_address: string;
+			bitcoin_regtest_address_title: string;
 			display_bitcoin_address_qr: string;
 			bitcoin_address_copied: string;
 			from_network: string;
@@ -564,8 +570,11 @@ interface I18nReceive {
 	solana: {
 		text: {
 			solana_address: string;
+			solana_address_title: string;
 			solana_devnet_address: string;
+			solana_devnet_address_title: string;
 			solana_local_address: string;
+			solana_local_address_title: string;
 			solana_address_copied: string;
 			display_solana_address_qr: string;
 		};
