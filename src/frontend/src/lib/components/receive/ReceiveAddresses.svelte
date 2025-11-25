@@ -112,9 +112,9 @@
 			token: ICP_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_ICP_SECTION,
 			title: $i18n.receive.icp.text.principal_title,
-			label: $i18n.receive.icp.text.icp_account,
-			copyAriaLabel: $i18n.receive.icp.text.icp_account_copied,
-			qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr
+			label: $i18n.receive.icp.text.principal,
+			copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied,
+			qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr
 		},
 		{
 			labelRef: 'icrcTokenAddress',
@@ -123,9 +123,9 @@
 			token: ICP_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 			title: $i18n.receive.icp.text.icp_account_title,
-			label: $i18n.receive.icp.text.principal,
-			copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied,
-			qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr,
+			label: $i18n.receive.icp.text.icp_account,
+			copyAriaLabel: $i18n.receive.icp.text.icp_account_copied,
+			qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr,
 			text: $i18n.receive.icp.text.use_for_icrc_deposit
 		},
 		{
