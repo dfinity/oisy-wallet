@@ -46,21 +46,21 @@
 	);
 </script>
 
+{#snippet stakeTermItems()}
+	{#if dissolveInstantly}
+		<GldtUnstakeImmediateDissolveTerms isReview />
+	{:else}
+		<GldtUnstakeDelayedDissolveTerms isReview />
+	{/if}
+{/snippet}
+
 <StakeReview {amount} disabled={invalid} {onBack} onConfirm={onUnstake}>
 	{#snippet subtitle()}
 		{$i18n.stake.text.unstake_review_subtitle}
 	{/snippet}
 
 	{#snippet provider()}
-		<StakeProvider provider={StakeProviderType.GLDT}>
-			{#snippet content()}
-				{#if dissolveInstantly}
-					<GldtUnstakeImmediateDissolveTerms isReview />
-				{:else}
-					<GldtUnstakeDelayedDissolveTerms isReview />
-				{/if}
-			{/snippet}
-		</StakeProvider>
+		<StakeProvider provider={StakeProviderType.GLDT} showAllTerms terms={[stakeTermItems]} />
 	{/snippet}
 
 	{#snippet network()}

@@ -1441,9 +1441,7 @@ interface I18nStake {
 		active_earning: string;
 		active_earning_per_year: string;
 		visit_provider: string;
-		current_apy: string;
 		current_apy_label: string;
-		current_apy_info: string;
 		stake_review_subtitle: string;
 		unstake_review_subtitle: string;
 		delayed_dissolve: string;
@@ -1461,6 +1459,19 @@ interface I18nStake {
 		claiming: string;
 		get_tokens_with_amount: string;
 		get_tokens: string;
+	};
+	terms: {
+		gldt: {
+			item1_title: string;
+			item1_description: string;
+			item2_title_1: string;
+			item2_title_2: string;
+			item3_title: string;
+			item3_description: string;
+			item4_title: string;
+			item4_description: string;
+			item5_title: string;
+		};
 	};
 }
 
