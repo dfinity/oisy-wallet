@@ -9,10 +9,11 @@ import { idlFactory as idlCertifiedFactoryExtV2Token } from '$declarations/ext_v
 import { idlFactory as idlFactoryExtV2Token } from '$declarations/ext_v2_token/ext_v2_token.factory.did';
 import { mapExtV2TokenCommonError } from '$icp/canisters/ext-v2-token.errors';
 import { mapExtTokensListing, toUser } from '$icp/utils/ext-v2-token.utils';
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, type QueryParams } from '@dfinity/utils';
-import { encodeIcrcAccount, type IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+import { type IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { Principal } from '@icp-sdk/core/principal';
 
 export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
@@ -82,18 +83,18 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#tokens_ext
 	 *
 	 * @param {Object} params - The parameters for fetching the tokens.
-	 * @param {IcrcAccount} params.account - The ICRC account of the user (principal and subaccount).
+	 * @param {Principal} params.owner - The ICRC principal of the user.
 	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
 	 * @returns {Promise<TokenIndex[]>} The list of token indices owned by the user.
 	 * @throws CanisterInternalError if the token identifier is invalid.
 	 */
 	getTokensByOwner = async ({
 		certified,
-		...account
+		owner
 	}: IcrcAccount & QueryParams): Promise<TokenIndex[]> => {
 		const { tokens_ext } = this.caller({ certified });
 
-		const response = await tokens_ext(encodeIcrcAccount(account));
+		const response = await tokens_ext(getAccountIdentifier(owner).toHex());
 
 		if ('ok' in response) {
 			return mapExtTokensListing(response.ok);
