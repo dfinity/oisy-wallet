@@ -221,7 +221,7 @@ export interface ExperimentalFeaturesSettings {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
 }
 export interface ExtV2Token {
-	ledger_id: Principal;
+	canister_id: Principal;
 }
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
