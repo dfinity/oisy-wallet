@@ -58,16 +58,12 @@
 		{/snippet}
 		{#snippet title()}
 			<span class="flex gap-1">
-				<Html
-					text={replacePlaceholders($i18n.stake.terms.gldt.item2_title, {
-						$icon: componentToHtml({
-							Component: Logo,
-							props: {
-								alt: stakeProvidersConfig[StakeProviderType.GLDT].name,
-								src: stakeProvidersConfig[StakeProviderType.GLDT].logo
-							}
-						}).replace('opacity-10', '')
-					})}
+				{$i18n.stake.terms.gldt.item2_title_1}
+				<Logo
+					alt={stakeProvidersConfig[StakeProviderType.GLDT].name}
+					src={stakeProvidersConfig[StakeProviderType.GLDT].logo}
+				/>
+				{$i18n.stake.terms.gldt.item2_title_2}
 				/>
 			</span>
 		{/snippet}
