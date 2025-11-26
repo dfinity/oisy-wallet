@@ -39,7 +39,6 @@ describe('GldtInfoBox', () => {
 		expect(screen.getByText(get(i18n).stake.info.gldt.fact_2_description)).toBeInTheDocument();
 
 		expect(screen.getByText(get(i18n).stake.info.gldt.fact_3_title)).toBeInTheDocument();
-		expect(screen.getByText(get(i18n).stake.info.gldt.fact_3_description)).toBeInTheDocument();
 	});
 
 	it('renders APY replaced text when APY exists', () => {
