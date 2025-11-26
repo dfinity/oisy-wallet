@@ -26,39 +26,39 @@
 	let gldtToken = $derived($enabledIcrcTokens.find(isGLDTToken));
 </script>
 
-<StakeProviderContainer currentApy={$gldtStakeStore?.apy} provider={StakeProvider.GLDT}>
-	{#snippet backButton()}
-		{#if EARNING_ENABLED}
-			<ButtonIcon
-				ariaLabel="icon"
-				colorStyle="tertiary"
-				link={false}
-				onclick={() =>
-					goto(
-						networkUrl({
-							path: AppPath.Earning,
-							networkId: $networkId,
-							usePreviousRoute: true,
-							fromRoute
-						})
-					)}
-			>
-				{#snippet icon()}
-					<IconBackArrow />
-				{/snippet}
-			</ButtonIcon>
-		{/if}
-	{/snippet}
+<div class="flex flex-col gap-6 pb-6">
+	<StakeProviderContainer currentApy={$gldtStakeStore?.apy} provider={StakeProvider.GLDT}>
+		{#snippet backButton()}
+			{#if EARNING_ENABLED}
+				<ButtonIcon
+					ariaLabel="icon"
+					colorStyle="tertiary"
+					link={false}
+					onclick={() =>
+						goto(
+							networkUrl({
+								path: AppPath.Earning,
+								networkId: $networkId,
+								usePreviousRoute: true,
+								fromRoute
+							})
+						)}
+				>
+					{#snippet icon()}
+						<IconBackArrow />
+					{/snippet}
+				</ButtonIcon>
+			{/if}
+		{/snippet}
 
-	{#snippet content()}
-		<div class="mt-6 flex flex-col justify-between gap-4 sm:flex-row">
-			<GldtStakeEarnCard {gldtToken} />
-			<GldtStakePositionCard {gldtToken} />
-		</div>
-	{/snippet}
-</StakeProviderContainer>
+		{#snippet content()}
+			<div class="mt-6 flex flex-col justify-between gap-4 sm:flex-row">
+				<GldtStakeEarnCard {gldtToken} />
+				<GldtStakePositionCard {gldtToken} />
+			</div>
+		{/snippet}
+	</StakeProviderContainer>
 
-<div class="my-8 gap-4">
 	<GldtStakeRewards />
 	<GldtInfoBox />
 </div>
