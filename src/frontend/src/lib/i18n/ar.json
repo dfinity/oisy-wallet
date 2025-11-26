@@ -726,9 +726,11 @@
 				"display_account_id_qr": "عرض معرف حساب ICP كرمز QR",
 				"account_id_copied": "تم نسخ معرف حساب ICP إلى الحافظة.",
 				"principal": "الرئيسي لـ ICP",
+				"principal_title": "",
 				"internet_computer_principal_copied": "تم نسخ الرئيسي لـ Internet Computer إلى الحافظة.",
 				"display_internet_computer_principal_qr": "عرض الرئيسي لـ Internet Computer كرمز QR",
 				"icp_account": "حساب ICP (للبورصات)",
+				"icp_account_title": "",
 				"icp_account_copied": "تم نسخ حساب ICP إلى الحافظة.",
 				"display_icp_account_qr": "عرض حساب ICP كرمز QR"
 			}
@@ -741,6 +743,7 @@
 				"learn_how_to_convert": "تعرف على كيفية تحويل $token إلى $ckToken",
 				"metamask": "استلام من Metamask",
 				"ethereum": "إيثريوم",
+				"ethereum_title": "",
 				"ethereum_address": "العنوان",
 				"ethereum_address_copied": "تم نسخ عنوان إيثريوم إلى الحافظة.",
 				"display_ethereum_address_qr": "عرض عنوان إيثريوم كرمز QR"
@@ -758,8 +761,11 @@
 				"checking_incoming": "جاري التحقق من وجود BTC واردة...",
 				"refreshing_wallet": "جاري تحديث المحفظة...",
 				"bitcoin_address": "بيتكوين",
+				"bitcoin_address_title": "",
 				"bitcoin_testnet_address": "بيتكوين (شبكة اختبار)",
+				"bitcoin_testnet_address_title": "",
 				"bitcoin_regtest_address": "بيتكوين (Regtest)",
+				"bitcoin_regtest_address_title": "",
 				"display_bitcoin_address_qr": "عرض عنوان بيتكوين كرمز QR",
 				"bitcoin_address_copied": "تم نسخ عنوان بيتكوين إلى الحافظة.",
 				"from_network": "قم بتحويل البيتكوين على شبكة BTC إلى هذا العنوان لاستلام ckBTC.",
@@ -776,8 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "عنوان سولانا",
+				"solana_address_title": "",
 				"solana_devnet_address": "عنوان شبكة سولانا للمطورين",
+				"solana_devnet_address_title": "",
 				"solana_local_address": "عنوان سولانا المحلي",
+				"solana_local_address_title": "",
 				"solana_address_copied": "تم نسخ عنوان سولانا إلى الحافظة",
 				"display_solana_address_qr": "عرض عنوان سولانا كرمز QR"
 			}
