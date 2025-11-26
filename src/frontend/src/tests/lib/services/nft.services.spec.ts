@@ -181,7 +181,7 @@ describe('nft.services', () => {
 			expect(erc1155Spy).toHaveBeenCalledExactlyOnceWith();
 		});
 
-		it('should load NFT', () => {});
+		it.todo('should load NFT');
 	});
 
 	describe('sendNft', () => {
