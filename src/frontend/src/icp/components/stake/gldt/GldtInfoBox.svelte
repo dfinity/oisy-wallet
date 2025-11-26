@@ -7,6 +7,7 @@
 	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import FactBox from '$lib/components/ui/FactBox.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { stakeProvidersConfig } from '$lib/config/stake.config';
 	import { STAKE_PROVIDER_EXTERNAL_URL } from '$lib/constants/test-ids.constants';
@@ -14,7 +15,6 @@
 	import { StakeProvider } from '$lib/types/stake';
 	import { formatStakeApyNumber } from '$lib/utils/format.utils.js';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import FactBox from '$lib/components/ui/FactBox.svelte';
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 </script>
