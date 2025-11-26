@@ -9,7 +9,7 @@
 	import GldtStakeRewards from '$icp/components/stake/gldt/GldtStakeRewards.svelte';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
-	import { isGLDTToken } from '$icp-eth/utils/token.utils';
+	import { isGLDTToken, isGoldaoToken } from '$icp-eth/utils/token.utils';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import StakeProviderContainer from '$lib/components/stake/StakeProviderContainer.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
@@ -38,7 +38,7 @@
 	});
 
 	let gldtToken = $derived($enabledIcrcTokens.find(isGLDTToken));
-	let goldaoToken = $derived($enabledIcrcTokens.find((t) => t.id.description === 'GOLDAO'));
+	let goldaoToken = $derived($enabledIcrcTokens.find(isGoldaoToken));
 
 	let transactions: IcTransactionUi[] = $derived(
 		nonNullish(gldtToken) && nonNullish(goldaoToken)
