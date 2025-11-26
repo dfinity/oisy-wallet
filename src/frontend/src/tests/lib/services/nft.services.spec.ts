@@ -4,15 +4,20 @@ import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.servic
 import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { loadNfts, sendNft, updateNftSection } from '$lib/services/nft.services';
+import {
+	loadNfts,
+	saveNftCustomToken,
+	sendNft,
+	updateNftSection
+} from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
-import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { NYAN_CAT_TOKEN, mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN, mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
@@ -122,6 +127,61 @@ describe('nft.services', () => {
 
 			expect(get(nftStore)).toEqual([mockNft3]);
 		});
+	});
+
+	describe('saveNftCustomToken', () => {
+		let erc721Spy: MockInstance;
+		let erc1155Spy: MockInstance;
+
+		const mockParams = {
+			identity: mockIdentity,
+			token: mockValidErc721Token,
+			$ethAddress: mockEthAddress
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			erc721Spy = vi.spyOn(erc721CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
+			erc1155Spy = vi.spyOn(erc1155CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
+		});
+
+		it('should return early if identity is nullish', async () => {
+			await saveNftCustomToken({
+				...mockParams,
+				identity: undefined
+			});
+
+			await saveNftCustomToken({
+				...mockParams,
+				identity: null
+			});
+
+			expect(erc721Spy).not.toHaveBeenCalled();
+			expect(erc1155Spy).not.toHaveBeenCalled();
+		});
+
+		it('should save an ERC721 custom token', async () => {
+			await saveNftCustomToken({
+				...mockParams,
+				token: mockValidErc721Token
+			});
+
+			expect(erc721Spy).toHaveBeenCalledExactlyOnceWith();
+			expect(erc1155Spy).not.toHaveBeenCalled();
+		});
+
+		it('should save an ERC1155 custom token', async () => {
+			await saveNftCustomToken({
+				...mockParams,
+				token: mockValidErc1155Token
+			});
+
+			expect(erc721Spy).not.toHaveBeenCalled();
+			expect(erc1155Spy).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it('should load NFT', () => {});
 	});
 
 	describe('sendNft', () => {

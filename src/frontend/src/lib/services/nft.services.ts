@@ -3,8 +3,8 @@ import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-
 import { transferErc1155, transferErc721 } from '$eth/services/nft-send.services';
 import { loadNftsByNetwork } from '$eth/services/nft.services';
 import type { OptionEthAddress } from '$eth/types/address';
-import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
-import { isTokenErc721 } from '$eth/utils/erc721.utils';
+import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
+import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { nftStore } from '$lib/stores/nft.store';
@@ -39,6 +39,37 @@ export const loadNfts = async ({
 	});
 
 	await Promise.allSettled(promises);
+};
+
+export const saveNftCustomToken = async ({
+	identity,
+	token,
+	$ethAddress
+}: {
+	identity: OptionIdentity;
+	token: NonFungibleToken;
+	$ethAddress: OptionEthAddress;
+}) => {
+	if (isNullish(identity)) {
+		return;
+	}
+
+	if (isTokenErc721CustomToken(token)) {
+		await saveCustomErc721Token({
+			identity,
+			tokens: [token]
+		});
+	} else if (isTokenErc1155CustomToken(token)) {
+		await saveCustomErc1155Token({
+			identity,
+			tokens: [token]
+		});
+	}
+
+	await loadNfts({
+		tokens: [token],
+		walletAddress: $ethAddress
+	});
 };
 
 export const sendNft = async ({
@@ -109,10 +140,6 @@ export const updateNftSection = async ({
 	token: NonFungibleToken;
 	$ethAddress: OptionEthAddress;
 }): Promise<NonFungibleToken | undefined> => {
-	if (isNullish($authIdentity)) {
-		return;
-	}
-
 	const currentAllowMedia = token.allowExternalContentSource;
 
 	const saveToken = {
@@ -125,22 +152,7 @@ export const updateNftSection = async ({
 		})
 	};
 
-	if (isTokenErc721(token)) {
-		await saveCustomErc721Token({
-			identity: $authIdentity,
-			tokens: [saveToken]
-		});
-	} else if (isTokenErc1155(token)) {
-		await saveCustomErc1155Token({
-			identity: $authIdentity,
-			tokens: [saveToken]
-		});
-	}
-
-	await loadNfts({
-		tokens: [saveToken],
-		walletAddress: $ethAddress
-	});
+	await saveNftCustomToken({ identity: $authIdentity, token: saveToken, $ethAddress });
 
 	return saveToken;
 };
