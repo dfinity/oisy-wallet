@@ -7,6 +7,10 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import IconClock from '$lib/components/icons/lucide/IconClock.svelte';
+	import IconGift from '$lib/components/icons/IconGift.svelte';
+	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
+	import IconBook from '$lib/components/icons/IconBook.svelte';
+	import IconContainer from '$lib/components/icons/IconContainer.svelte';
 </script>
 
 <StakeContentSection>
@@ -33,22 +37,34 @@
 			gold, and GLD NFTs can be swapped at a ratio of 1g for 100 GLDTs.</p
 		>
 
-		<div class="mt-4 flex w-full grid-cols-1 text-center text-sm sm:grid-cols-3">
+		<div class="mt-6 flex grid w-full grid-cols-1 gap-3 text-center text-sm md:grid-cols-3">
 			<div class="flex w-full flex-col items-center">
-				<IconClock size="40" />
-				<span class="my-2 text-lg font-bold">Backend by real gold</span>
+				<span
+					class="rounded-full bg-gradient-to-r from-gold-0 to-gold-100 p-4 text-primary-inverted"
+				>
+					<IconContainer size="24" />
+				</span>
+				<span class="my-3 text-lg font-bold">Backed by real gold</span>
 				<p class="text-tertiary"
 					>Every GLDT token is backed by actual gold stored in secure vaults</p
 				>
 			</div>
 			<div class="flex w-full flex-col items-center">
-				<IconClock size="40" />
-				<span class="my-2 text-lg font-bold">Flexible terms</span>
+				<span
+					class="rounded-full bg-gradient-to-r from-gold-0 to-gold-100 p-4 text-primary-inverted"
+				>
+					<IconClock size="24" />
+				</span>
+				<span class="my-3 text-lg font-bold">Flexible terms</span>
 				<p class="text-tertiary">No lock-up periods, stake and unstake anytime you want</p>
 			</div>
 			<div class="flex w-full flex-col items-center">
-				<IconClock size="40" />
-				<span class="my-2 text-lg font-bold">Stable returns</span>
+				<span
+					class="rounded-full bg-gradient-to-r from-gold-0 to-gold-100 p-4 text-primary-inverted"
+				>
+					<IconLineChart size="24" />
+				</span>
+				<span class="my-3 text-lg font-bold">Stable returns</span>
 				<p class="text-tertiary">Earn consistent 8.5% APY with minimal volatility risk</p>
 			</div>
 		</div>
