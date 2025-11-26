@@ -14,6 +14,10 @@
 	import { OISY_HOW_TO_CONVERT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { GET_TOKEN_MODAL_OPEN_SWAP_BUTTON } from '$lib/constants/test-ids.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import {
+		enabledMainnetFungibleIcTokensUsdBalance,
+		enabledMainnetFungibleTokensUsdBalance
+	} from '$lib/derived/tokens-ui.derived';
 	import { WizardStepsGetToken } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
@@ -21,10 +25,6 @@
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import {
-		enabledMainnetFungibleIcTokensUsdBalance,
-		enabledMainnetFungibleTokensUsdBalance
-	} from "$lib/derived/tokens-ui.derived";
 
 	interface Props {
 		token: Token;

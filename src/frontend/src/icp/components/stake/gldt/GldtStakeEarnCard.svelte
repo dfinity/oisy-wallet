@@ -21,6 +21,7 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { modalGetToken, modalGldtStake } from '$lib/derived/modal.derived';
+	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -30,7 +31,6 @@
 	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import {enabledMainnetFungibleTokensUsdBalance} from "$lib/derived/tokens-ui.derived";
 
 	interface Props {
 		gldtToken?: IcToken;
