@@ -15,9 +15,9 @@
 	import { GET_TOKEN_MODAL_OPEN_SWAP_BUTTON } from '$lib/constants/test-ids.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
-		enabledMainnetFungibleTokensUsdBalance,
-		enabledMainnetFungibleIcTokensUsdBalance
-	} from '$lib/derived/tokens.derived';
+		enabledMainnetFungibleIcTokensUsdBalance,
+		enabledMainnetFungibleTokensUsdBalance
+	} from '$lib/derived/tokens-ui.derived';
 	import { WizardStepsGetToken } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
