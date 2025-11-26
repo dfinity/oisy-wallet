@@ -12,6 +12,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { StakeBalances } from '$lib/types/stake-balance';
 import type { RequiredTokenWithLinkedData, Token, TokenStandard } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -140,33 +141,63 @@ export const calculateTokenUsdAmount = ({
 		: undefined;
 };
 
-/** Maps a Token object to a TokenUi object, meaning it adds the balance and the USD balance to the token.
+/**
+ * Maps a Token object to a TokenUi object.
+ *
+ * It adds the balance and the USD balance to the token, including the staking and claimable rewards.
  *
  * @param token - The given token.
- * @param $balancesStore - The balances data for the tokens.
+ * @param $balancesStore - The balance data for the tokens.
+ * @param $stakeBalances - The stake balances data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns The token UI.
  */
 export const mapTokenUi = <T extends Token>({
 	token,
 	$balances,
+	$stakeBalances,
 	$exchanges
 }: {
 	token: T;
 	$balances: CertifiedStoreData<BalancesData>;
+	$stakeBalances: StakeBalances;
 	$exchanges: ExchangesData;
-}): TokenUi<T> => ({
-	...token,
-	// There is a difference between undefined and null for the balance.
-	// The balance is undefined if the balance store is not initiated or the specific balance loader for the token is not initiated.
-	// If the balance loader was initiated at some point, it will either contain data or be null, but not undefined.
-	balance: mapCertifiedData($balances?.[token.id]),
-	usdBalance: calculateTokenUsdBalance({
-		token,
-		$balances,
-		$exchanges
-	})
-});
+}): TokenUi<T> => {
+	const { staked, claimable } = $stakeBalances[token.id] ?? {};
+
+	return {
+		...token,
+		// There is a difference between undefined and null for the balance.
+		// The balance is undefined if the balance store is not initiated or the specific balance loader for the token is not initiated.
+		// If the balance loader was initiated at some point, it will either contain data or be null, but not undefined.
+		balance: mapCertifiedData($balances?.[token.id]),
+		usdBalance: calculateTokenUsdBalance({
+			token,
+			$balances,
+			$exchanges
+		}),
+		...(nonNullish(staked)
+			? {
+					stakeBalance: staked,
+					stakeUsdBalance: calculateTokenUsdAmount({
+						amount: staked,
+						token,
+						$exchanges
+					})
+				}
+			: {}),
+		...(nonNullish(claimable)
+			? {
+					claimableStakeBalance: claimable,
+					claimableStakeBalanceUsd: calculateTokenUsdAmount({
+						amount: claimable,
+						token,
+						$exchanges
+					})
+				}
+			: {})
+	};
+};
 
 export const sumBalances = ([balance1, balance2]: TokenUi['balance'][]): TokenUi['balance'] =>
 	nonNullish(balance1) && nonNullish(balance2)
