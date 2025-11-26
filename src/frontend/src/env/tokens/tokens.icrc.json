@@ -157,5 +157,15 @@
 		"fee": {
 			"__bigint__": "1000000"
 		}
+	},
+	"EXE": {
+		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai",
+		"indexCanisterId": "us3ng-pyaaa-aaaan-q2cva-cai",
+		"decimals": 8,
+		"name": "Windoge98",
+		"symbol": "EXE",
+		"fee": {
+			"__bigint__": "100000"
+		}
 	}
 }
