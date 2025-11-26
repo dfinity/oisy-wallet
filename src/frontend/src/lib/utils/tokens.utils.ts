@@ -169,6 +169,18 @@ export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
 	tokens.reduce((acc, token) => acc + (token.usdBalance ?? 0), 0);
 
 /**
+ * Calculates total USD stake balance of the provided UI tokens list, including claimable rewards.
+ *
+ * @param tokens - The list of UI tokens for total USD stake balance calculation.
+ * @returns The sum of UI tokens USD stake balance.
+ */
+export const sumTokensUiUsdStakeBalance = (tokens: TokenUi[]): number =>
+	tokens.reduce(
+		(acc, token) => acc + ((token.stakeUsdBalance ?? 0) + (token.claimableStakeBalanceUsd ?? 0)),
+		0
+	);
+
+/**
  * Calculates total USD balance of mainnet tokens per network from the provided tokens list.
  *
  * @param $tokens - The list of tokens for filtering by network env and total USD balance calculation.
