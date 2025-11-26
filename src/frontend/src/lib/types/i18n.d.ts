@@ -1483,6 +1483,19 @@ interface I18nStake {
 			item5_title: string;
 		};
 	};
+	info: {
+		gldt: {
+			title: string;
+			description: string;
+			fact_1_title: string;
+			fact_1_description: string;
+			fact_2_title: string;
+			fact_2_description: string;
+			fact_3_title: string;
+			fact_3_description: string;
+			fact_3_description_fallback: string;
+		};
+	};
 }
 
 interface I18nGet_token {

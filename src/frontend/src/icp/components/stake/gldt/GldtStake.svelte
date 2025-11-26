@@ -2,6 +2,7 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
+	import GldtInfoBox from '$icp/components/stake/gldt/GldtInfoBox.svelte';
 	import GldtStakeEarnCard from '$icp/components/stake/gldt/GldtStakeEarnCard.svelte';
 	import GldtStakePositionCard from '$icp/components/stake/gldt/GldtStakePositionCard.svelte';
 	import GldtStakeRewards from '$icp/components/stake/gldt/GldtStakeRewards.svelte';
@@ -57,6 +58,7 @@
 	{/snippet}
 </StakeProviderContainer>
 
-<div class="my-8">
+<div class="my-8 gap-4">
 	<GldtStakeRewards />
+	<GldtInfoBox />
 </div>
