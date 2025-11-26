@@ -2,9 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
-	import IconBook from '$lib/components/icons/IconBook.svelte';
 	import IconContainer from '$lib/components/icons/IconContainer.svelte';
-	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconClock from '$lib/components/icons/lucide/IconClock.svelte';
 	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
