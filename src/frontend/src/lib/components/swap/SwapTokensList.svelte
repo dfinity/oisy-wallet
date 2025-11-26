@@ -7,6 +7,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import { allCrossChainSwapTokens, allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -17,7 +18,6 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
-	import {stakeBalances} from "$lib/derived/stake.derived";
 
 	interface Props {
 		onSelectToken: (token: Token) => void;
