@@ -9,6 +9,7 @@ import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
+import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId } from '$lib/types/nft';
 import {
@@ -337,7 +338,7 @@ describe('nfts.utils', () => {
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
 				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description
 			});
@@ -368,7 +369,7 @@ describe('nfts.utils', () => {
 			expect(result).toEqual({
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
 			});
 		});
@@ -384,7 +385,7 @@ describe('nfts.utils', () => {
 				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
 				section: CustomTokenSection.HIDDEN,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol
@@ -401,7 +402,7 @@ describe('nfts.utils', () => {
 				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
 				section: undefined,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol
