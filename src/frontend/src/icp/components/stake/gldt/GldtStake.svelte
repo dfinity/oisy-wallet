@@ -16,6 +16,19 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { StakeProvider } from '$lib/types/stake';
 	import { networkUrl } from '$lib/utils/nav.utils';
+	import { icTransactions } from '$icp/derived/ic-transactions.derived';
+	import { getAllIcTransactions } from '$icp/utils/ic-transactions.utils';
+	import { nonNullish } from '@dfinity/utils';
+	import { ckBtcPendingUtxoTransactions } from '$icp/derived/ckbtc-transactions.derived';
+	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
+	import { ckEthPendingTransactions } from '$icp/derived/cketh-transactions.derived';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import { btcStatusesStore } from '$icp/stores/btc.store';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
+	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -24,6 +37,40 @@
 	});
 
 	let gldtToken = $derived($enabledIcrcTokens.find(isGLDTToken));
+	let goldaoToken = $derived($enabledIcrcTokens.find((t) => t.id.description === 'GOLDAO'));
+
+	let transactions: IcTransactionUi[] = $derived(
+		nonNullish(gldtToken) && nonNullish(goldaoToken)
+			? [
+					...getAllIcTransactions({
+						token: gldtToken,
+						ckBtcPendingUtxoTransactions: $ckBtcPendingUtxoTransactions,
+						ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore,
+						ckEthPendingTransactions: $ckEthPendingTransactions,
+						ckBtcMinterInfoStore: $ckBtcMinterInfoStore,
+						btcStatusesStore: $btcStatusesStore,
+						icPendingTransactionsStore: $icPendingTransactionsStore,
+						icExtendedTransactions: [],
+						icTransactionsStore: $icTransactionsStore
+					}),
+					...getAllIcTransactions({
+						token: goldaoToken,
+						ckBtcPendingUtxoTransactions: $ckBtcPendingUtxoTransactions,
+						ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore,
+						ckEthPendingTransactions: $ckEthPendingTransactions,
+						ckBtcMinterInfoStore: $ckBtcMinterInfoStore,
+						btcStatusesStore: $btcStatusesStore,
+						icPendingTransactionsStore: $icPendingTransactionsStore,
+						icExtendedTransactions: [],
+						icTransactionsStore: $icTransactionsStore
+					})
+				].map((t) => t.data)
+			: []
+	);
+
+	$effect(() => {
+		console.log('filtered transactions', transactions);
+	});
 </script>
 
 <div class="flex flex-col gap-6 pb-6">
