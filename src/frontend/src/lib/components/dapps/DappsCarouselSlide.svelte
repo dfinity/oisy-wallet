@@ -59,8 +59,8 @@
 	};
 </script>
 
-<div class="flex h-full w-full items-center justify-between gap-2">
-	<div class="mr-2 flex">
+<div class="flex h-full w-full items-center justify-between">
+	<div class="mr-4 flex">
 		<Img
 			alt={replacePlaceholders($i18n.dapps.alt.logo, {
 				$dAppName: resolveText({ i18n: $i18n, path: dAppName })
