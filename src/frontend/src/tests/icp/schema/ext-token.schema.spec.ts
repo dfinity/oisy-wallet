@@ -1,4 +1,4 @@
-import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	ExtCanistersSchema,
 	ExtInterfaceSchema,
@@ -8,11 +8,9 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 
 describe('ext-token.schema', () => {
-	const { chainId: _, explorerUrl: __, providers: ___, ...mockNetwork } = SEPOLIA_NETWORK;
-
 	const mockToken = {
 		id: parseTokenId('Test'),
-		network: mockNetwork,
+		network: ICP_NETWORK,
 		standard: 'extV2',
 		category: 'default',
 		name: 'SampleToken',
