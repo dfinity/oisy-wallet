@@ -20,6 +20,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
+import type { StakeBalances } from '$lib/types/stake-balance';
 import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -178,6 +179,8 @@ describe('tokens.utils', () => {
 	describe('pinTokensWithBalanceAtTop', () => {
 		const mockUsdValue = vi.mocked(usdValue);
 
+		const mockStakeBalances: StakeBalances = {};
+
 		beforeEach(() => {
 			vi.resetAllMocks();
 
@@ -196,6 +199,7 @@ describe('tokens.utils', () => {
 			const result = pinTokensWithBalanceAtTop({
 				$tokens: mockTokens,
 				$balances: newBalances,
+				$stakeBalances: mockStakeBalances,
 				$exchanges: mockExchanges
 			});
 
@@ -214,6 +218,7 @@ describe('tokens.utils', () => {
 			const result = pinTokensWithBalanceAtTop({
 				$tokens: mockTokens,
 				$balances: mockBalances,
+				$stakeBalances: mockStakeBalances,
 				$exchanges: newExchanges
 			});
 
@@ -234,6 +239,7 @@ describe('tokens.utils', () => {
 			const result = pinTokensWithBalanceAtTop({
 				$tokens: mockTokens,
 				$balances: newBalances,
+				$stakeBalances: mockStakeBalances,
 				$exchanges: mockExchanges
 			});
 
@@ -254,6 +260,7 @@ describe('tokens.utils', () => {
 			const result = pinTokensWithBalanceAtTop({
 				$tokens: mockTokens,
 				$balances: newBalances,
+				$stakeBalances: mockStakeBalances,
 				$exchanges: mockExchanges
 			});
 
@@ -273,6 +280,7 @@ describe('tokens.utils', () => {
 			const result = pinTokensWithBalanceAtTop({
 				$tokens: mockTokens,
 				$balances: newBalances,
+				$stakeBalances: mockStakeBalances,
 				$exchanges: mockExchanges
 			});
 
