@@ -58,6 +58,15 @@ export const earningData: Readable<EarningData> = derived(
 							$exchanges
 						})
 					: undefined,
+				[EarningCardFields.CLAIMABLE_REWARDS]: nonNullish(gldtToken)
+					? calculateTokenUsdAmount({
+							amount: $gldtStakeStore?.position?.claimable_rewards.find(([tokenSymbol]) =>
+								Object.keys(tokenSymbol).includes(gldtToken.symbol)
+							)?.[1],
+							token: gldtToken,
+							$exchanges
+						})
+					: undefined,
 				[EarningCardFields.TERMS]: $i18n.earning.terms.flexible,
 				action: () => goto(AppPath.EarningGold)
 			}
@@ -110,4 +119,14 @@ export const allEarningYearlyAmountUsd = derived([earningData], ([$earningData])
 
 		return isNaN(earning) || isNaN(apy) ? acc : acc + earning * (apy / 100);
 	}, 0)
+);
+
+export const allClaimableRewardsUsd: Readable<number> = derived([earningData], ([$earningData]) =>
+	Object.values($earningData).reduce<number>(
+		(acc, record) =>
+			isNaN(Number(record[EarningCardFields.CLAIMABLE_REWARDS]))
+				? acc
+				: acc + Number(record[EarningCardFields.CLAIMABLE_REWARDS]),
+		0
+	)
 );
