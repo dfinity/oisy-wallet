@@ -22,8 +22,8 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getNftIdentifier } from '$lib/utils/nft.utils';
 	import { findNftsByToken, mapTokenToCollection } from '$lib/utils/nfts.utils';
-	import {getNftIdentifier} from "$lib/utils/nft.utils";
 
 	interface Props {
 		token: NonFungibleToken;
