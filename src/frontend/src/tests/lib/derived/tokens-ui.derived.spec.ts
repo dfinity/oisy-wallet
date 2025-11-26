@@ -46,7 +46,9 @@ describe('tokens-ui.derived', () => {
 	describe('enabledFungibleTokensUi', () => {
 		it('returns correct data', () => {
 			expect(get(enabledFungibleTokensUi)).toStrictEqual(
-				get(tokens).map((token) => mapTokenUi({ token, $balances: {}, $exchanges: {} }))
+				get(tokens).map((token) =>
+					mapTokenUi({ token, $balances: {}, $stakeBalances: {}, $exchanges: {} })
+				)
 			);
 		});
 

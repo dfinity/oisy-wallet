@@ -31,6 +31,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { StakeBalances } from '$lib/types/stake-balance';
 import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -116,15 +117,17 @@ export const sortTokens = <T extends Token>({
 export const pinTokensWithBalanceAtTop = <T extends Token>({
 	$tokens,
 	$balances,
+	$stakeBalances,
 	$exchanges
 }: {
 	$tokens: T[];
 	$balances: CertifiedStoreData<BalancesData>;
+	$stakeBalances: StakeBalances;
 	$exchanges: ExchangesData;
 }): TokenUi<T>[] => {
 	// If balances data are nullish, there is no need to sort.
 	if (isNullish($balances)) {
-		return $tokens.map((token) => mapTokenUi({ token, $balances, $exchanges }));
+		return $tokens.map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges }));
 	}
 
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi<T>[], TokenUi<T>[]]>(
@@ -132,6 +135,7 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 			const tokenUI: TokenUi<T> = mapTokenUi<T>({
 				token,
 				$balances,
+				$stakeBalances,
 				$exchanges
 			});
 
