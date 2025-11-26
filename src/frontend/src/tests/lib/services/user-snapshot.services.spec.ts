@@ -24,7 +24,7 @@ import {
 import * as addressStore from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
-import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
+import * as tokensDerived from '$lib/derived/tokens.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
 import * as balancesStores from '$lib/stores/balances.store';
@@ -281,7 +281,7 @@ describe('user-snapshot.services', () => {
 
 			mockAuthStore();
 
-			vi.spyOn(tokensUiDerived, 'tokens', 'get').mockImplementation(() => readable(tokens));
+			vi.spyOn(tokensDerived, 'tokens', 'get').mockImplementation(() => readable(tokens));
 
 			vi.spyOn(addressStore, 'solAddressMainnet', 'get').mockImplementation(() =>
 				readable(mockSolAddress)
@@ -356,7 +356,7 @@ describe('user-snapshot.services', () => {
 		});
 
 		it('should do nothing if no tokens are present', async () => {
-			vi.spyOn(tokensUiDerived, 'tokens', 'get').mockImplementationOnce(() => readable([]));
+			vi.spyOn(tokensDerived, 'tokens', 'get').mockImplementationOnce(() => readable([]));
 
 			await registerUserSnapshot();
 
@@ -513,7 +513,7 @@ describe('user-snapshot.services', () => {
 				timestamp: toNullable(nowNanoseconds)
 			};
 
-			vi.spyOn(tokensUiDerived, 'tokens', 'get').mockImplementation(() => readable(mockTokens));
+			vi.spyOn(tokensDerived, 'tokens', 'get').mockImplementation(() => readable(mockTokens));
 
 			await registerUserSnapshot();
 
