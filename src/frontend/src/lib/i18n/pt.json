@@ -782,11 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Endereço Solana",
-				"solana_address_title": "",
+				"solana_address_title": "Endereço da carteira Solana",
 				"solana_devnet_address": "Endereço Solana da Devnet",
-				"solana_devnet_address_title": "",
+				"solana_devnet_address_title": "Endereço da carteira Solana Devnet",
 				"solana_local_address": "Endereço Solana Local",
-				"solana_local_address_title": "",
+				"solana_local_address_title": "Endereço da carteira Solana Local",
 				"solana_address_copied": "Endereço Solana copiado para a área de transferência",
 				"display_solana_address_qr": "Exibir endereço Solana como QR code"
 			}
