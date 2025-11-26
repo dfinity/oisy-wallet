@@ -27,6 +27,8 @@
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
+	import type {EthNonFungibleToken} from "$eth/types/nft";
+	import {isNetworkIdEthereum, isNetworkIdEvm} from "$lib/utils/network.utils";
 
 	interface Props {
 		displayAmount?: bigint;
@@ -105,10 +107,17 @@
 			return;
 		}
 
+		if (!isNetworkIdEthereum(network.id) && !isNetworkIdEvm(network.id)) {
+			return;
+		}
+
 		try {
 			const { getNftMetadata } = alchemyProviders(network.id);
 
-			fetchedNft = await getNftMetadata({ token, tokenId: parseNftId(String(tokenId)) });
+			fetchedNft = await getNftMetadata({
+				// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
+				token: token as EthNonFungibleToken,
+				tokenId: parseNftId(String(tokenId)) });
 		} catch (_: unknown) {
 			fetchedNft = undefined;
 		}
