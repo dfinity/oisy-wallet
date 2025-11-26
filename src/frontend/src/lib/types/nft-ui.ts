@@ -1,6 +1,4 @@
-import type { CustomTokenSection } from '$lib/enums/custom-token-section';
+import type { NonFungibleTokenAppearanceSchema } from '$lib/schema/nft-ui.schema';
+import type * as z from 'zod';
 
-export interface NonFungibleTokenAppearance {
-	section?: CustomTokenSection;
-	allowExternalContentSource?: boolean;
-}
+export type NonFungibleTokenAppearance = z.infer<typeof NonFungibleTokenAppearanceSchema>;

@@ -1,3 +1,4 @@
+import { NonFungibleTokenAppearanceSchema } from '$lib/schema/nft-ui.schema';
 import { TokenSchema } from '$lib/schema/token.schema';
 import { CanisterIdTextSchema } from '$lib/types/canister';
 import * as z from 'zod';
@@ -12,6 +13,7 @@ export const ExtInterfaceSchema = z.object({
 
 export const ExtTokenSchema = z.object({
 	...TokenSchema.shape,
+	...NonFungibleTokenAppearanceSchema.shape,
 	...ExtInterfaceSchema.shape
 });
 
