@@ -726,11 +726,11 @@
 				"display_account_id_qr": "Visualizza Account ID ICP come codice QR",
 				"account_id_copied": "Account ID ICP copiato negli appunti.",
 				"principal": "Principal ICP",
-				"principal_title": "Indirizzo del wallet ICP - ckBTC, CHAT, ...",
+				"principal_title": "",
 				"internet_computer_principal_copied": "Principal Internet Computer copiato negli appunti.",
 				"display_internet_computer_principal_qr": "Visualizza Principal Internet Computer come codice QR",
 				"icp_account": "Account ICP (per gli exchange)",
-				"icp_account_title": "Indirizzo del wallet ICP - Solo per token ICP",
+				"icp_account_title": "",
 				"icp_account_copied": "Account ICP copiato negli appunti.",
 				"display_icp_account_qr": "Visualizza Account ICP come codice QR"
 			}
@@ -743,7 +743,7 @@
 				"learn_how_to_convert": "Scopri come convertire $token in $ckToken",
 				"metamask": "Ricevi da Metamask",
 				"ethereum": "Ethereum",
-				"ethereum_title": "Indirizzo del wallet Ethereum",
+				"ethereum_title": "",
 				"ethereum_address": "Indirizzo",
 				"ethereum_address_copied": "Indirizzo Ethereum copiato negli appunti.",
 				"display_ethereum_address_qr": "Visualizza indirizzo Ethereum come codice QR"
@@ -761,11 +761,11 @@
 				"checking_incoming": "Controllo BTC in arrivo...",
 				"refreshing_wallet": "Aggiornamento wallet...",
 				"bitcoin_address": "Bitcoin",
-				"bitcoin_address_title": "Indirizzo del wallet Bitcoin",
+				"bitcoin_address_title": "",
 				"bitcoin_testnet_address": "Bitcoin (Testnet)",
-				"bitcoin_testnet_address_title": "Indirizzo del wallet Bitcoin (Testnet)",
+				"bitcoin_testnet_address_title": "",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
-				"bitcoin_regtest_address_title": "Indirizzo del wallet Bitcoin (Regtest)",
+				"bitcoin_regtest_address_title": "",
 				"display_bitcoin_address_qr": "Visualizza indirizzo Bitcoin come codice QR",
 				"bitcoin_address_copied": "Indirizzo Bitcoin copiato negli appunti.",
 				"from_network": "Trasferisci Bitcoin sulla rete BTC a questo indirizzo per ricevere ckBTC.",
@@ -782,11 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Indirizzo Solana",
-				"solana_address_title": "Indirizzo del wallet Solana",
+				"solana_address_title": "",
 				"solana_devnet_address": "Indirizzo Solana Devnet",
-				"solana_devnet_address_title": "Indirizzo del wallet Solana Devnet",
+				"solana_devnet_address_title": "",
 				"solana_local_address": "Indirizzo Solana Locale",
-				"solana_local_address_title": "Indirizzo del wallet Solana Locale",
+				"solana_local_address_title": "",
 				"solana_address_copied": "Indirizzo Solana copiato negli appunti",
 				"display_solana_address_qr": "Visualizza indirizzo Solana come codice QR"
 			}
@@ -1855,6 +1855,19 @@
 				"item4_title": "",
 				"item4_description": "",
 				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
 			}
 		}
 	},
