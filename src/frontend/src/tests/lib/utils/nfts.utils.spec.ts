@@ -344,7 +344,6 @@ describe('nfts.utils', () => {
 		});
 
 		it('should map EXT token correctly', () => {
-			// @ts-expect-error Testing invalid input types
 			const result = mapTokenToCollection(mockValidExtV2Token);
 
 			expect(result).toEqual({

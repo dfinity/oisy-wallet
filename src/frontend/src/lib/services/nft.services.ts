@@ -3,6 +3,7 @@ import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-
 import { transferErc1155, transferErc721 } from '$eth/services/nft-send.services';
 import { loadNftsByNetwork } from '$eth/services/nft.services';
 import type { OptionEthAddress } from '$eth/types/address';
+import type { EthNonFungibleToken } from '$eth/types/nft';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
@@ -26,13 +27,18 @@ export const loadNfts = async ({
 	const tokensByNetwork = getTokensByNetwork(tokens);
 
 	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
+		if (!isNetworkIdEthereum(networkId) && !isNetworkIdEvm(networkId)) {
+			return;
+		}
+
 		if (tokens.length === 0) {
 			return;
 		}
 
 		const nfts: Nft[] = await loadNftsByNetwork({
 			networkId,
-			tokens,
+			// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
+			tokens: tokens as EthNonFungibleToken[],
 			walletAddress
 		});
 
