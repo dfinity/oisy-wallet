@@ -171,7 +171,7 @@ export const updateNftMediaConsent = async ({
 }): Promise<NonFungibleToken | undefined> => {
 	const saveToken = {
 		...token,
-		enabled: true,
+		enabled: true, // must be true otherwise we couldn't see it at this point
 		allowExternalContentSource: allowMedia
 	};
 
