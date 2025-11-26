@@ -38,7 +38,8 @@ import {
 	saveAllCustomTokens,
 	sortTokens,
 	sumMainnetTokensUsdBalancesPerNetwork,
-	sumTokensUiUsdBalance
+	sumTokensUiUsdBalance,
+	sumTokensUiUsdStakeBalance
 } from '$lib/utils/tokens.utils';
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
@@ -319,6 +320,50 @@ describe('tokens.utils', () => {
 
 		it('should correctly calculate USD total balance when tokens list is empty', () => {
 			const result = sumTokensUiUsdBalance([]);
+
+			expect(result).toEqual(0);
+		});
+	});
+
+	describe('sumTokensUiUsdStakeBalance', () => {
+		it('should correctly calculate USD total staking balance', () => {
+			const tokens: TokenUi[] = [
+				{ ...ICP_TOKEN, stakeUsdBalance: 50 },
+				{ ...BTC_MAINNET_TOKEN, stakeUsdBalance: 50 },
+				{ ...ETHEREUM_TOKEN, stakeUsdBalance: 100 }
+			];
+
+			const result = sumTokensUiUsdStakeBalance(tokens);
+
+			expect(result).toEqual(200);
+		});
+
+		it('should correctly calculate USD total staking balance when some tokens do not have it', () => {
+			const tokens: TokenUi[] = [
+				{ ...ICP_TOKEN, stakeUsdBalance: 50 },
+				{ ...BTC_MAINNET_TOKEN, stakeUsdBalance: 0 },
+				{ ...ETHEREUM_TOKEN }
+			];
+
+			const result = sumTokensUiUsdStakeBalance(tokens);
+
+			expect(result).toEqual(50);
+		});
+
+		it('should include claimable stake balance in the total', () => {
+			const tokens: TokenUi[] = [
+				{ ...ICP_TOKEN, stakeUsdBalance: 50, claimableStakeBalanceUsd: 10 },
+				{ ...BTC_MAINNET_TOKEN, stakeUsdBalance: 50 },
+				{ ...ETHEREUM_TOKEN, stakeUsdBalance: 100, claimableStakeBalanceUsd: 20 }
+			];
+
+			const result = sumTokensUiUsdStakeBalance(tokens);
+
+			expect(result).toEqual(230);
+		});
+
+		it('should correctly calculate USD total staking balance when tokens list is empty', () => {
+			const result = sumTokensUiUsdStakeBalance([]);
 
 			expect(result).toEqual(0);
 		});
