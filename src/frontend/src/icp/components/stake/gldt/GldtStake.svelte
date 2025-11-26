@@ -3,7 +3,7 @@
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
 	import GldtInfoBox from '$icp/components/stake/gldt/GldtInfoBox.svelte';
-	import GldtStakeEarnCard from '$icp/components/stake/gldt/GldtStakeEarnCard.svelte';
+		import GldtStakeEarnCard from '$icp/components/stake/gldt/GldtStakeEarnCard.svelte';
 	import GldtStakePositionCard from '$icp/components/stake/gldt/GldtStakePositionCard.svelte';
 	import GldtStakeRewards from '$icp/components/stake/gldt/GldtStakeRewards.svelte';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
@@ -16,7 +16,6 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { StakeProvider } from '$lib/types/stake';
 	import { networkUrl } from '$lib/utils/nav.utils';
-	import GldtInfoBox from '$icp/components/stake/gldt/GldtInfoBox.svelte';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
