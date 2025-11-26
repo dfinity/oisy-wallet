@@ -33,10 +33,13 @@ describe('GldtInfoBox', () => {
 		renderWithStakeContext(5);
 
 		expect(screen.getByText(get(i18n).stake.info.gldt.fact_1_title)).toBeInTheDocument();
+		expect(screen.getByText(get(i18n).stake.info.gldt.fact_1_description)).toBeInTheDocument();
 
 		expect(screen.getByText(get(i18n).stake.info.gldt.fact_2_title)).toBeInTheDocument();
+		expect(screen.getByText(get(i18n).stake.info.gldt.fact_2_description)).toBeInTheDocument();
 
 		expect(screen.getByText(get(i18n).stake.info.gldt.fact_3_title)).toBeInTheDocument();
+		expect(screen.getByText(get(i18n).stake.info.gldt.fact_3_description)).toBeInTheDocument();
 	});
 
 	it('renders APY replaced text when APY exists', () => {
