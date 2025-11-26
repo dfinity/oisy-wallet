@@ -632,6 +632,7 @@
 			"spl_custom_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
 			"erc20_user_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
+			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
 			"allow_signing": "Ein Problem trat auf beim Einrichten deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -725,9 +726,11 @@
 				"display_account_id_qr": "ICP-Konto-ID als QR-Code anzeigen",
 				"account_id_copied": "ICP-Konto-ID in Zwischenablage kopiert.",
 				"principal": "ICP-Principal",
+				"principal_title": "ICP Wallet Adresse - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Internet Computer Principal in Zwischenablage kopiert.",
 				"display_internet_computer_principal_qr": "Internet Computer Principal als QR-Code anzeigen",
 				"icp_account": "ICP-Konto (für Börsen)",
+				"icp_account_title": "ICP Wallet Adresse - Nur ICP Token",
 				"icp_account_copied": "ICP-Konto in Zwischenablage kopiert.",
 				"display_icp_account_qr": "ICP-Konto als QR-Code anzeigen"
 			}
@@ -740,6 +743,7 @@
 				"learn_how_to_convert": "Erfahre, wie du $token in $ckToken umwandelst",
 				"metamask": "Empfangen über Metamask",
 				"ethereum": "Ethereum",
+				"ethereum_title": "Ethereum Wallet Addresse",
 				"ethereum_address": "Adresse",
 				"ethereum_address_copied": "Ethereum-Adresse in Zwischenablage kopiert.",
 				"display_ethereum_address_qr": "Ethereum-Adresse als QR-Code anzeigen"
@@ -757,8 +761,11 @@
 				"checking_incoming": "Prüfe eingehende BTC...",
 				"refreshing_wallet": "Aktualisiere Wallet...",
 				"bitcoin_address": "Bitcoin-Adresse",
+				"bitcoin_address_title": "Bitcoin Wallet Adresse",
 				"bitcoin_testnet_address": "Bitcoin-Adresse (Testnet)",
+				"bitcoin_testnet_address_title": "Bitcoin (Testnet) Wallet Adresse",
 				"bitcoin_regtest_address": "Bitcoin-Adresse (Regtest)",
+				"bitcoin_regtest_address_title": "Bitcoin (Regtest) Wallet Adresse",
 				"display_bitcoin_address_qr": "Bitcoin-Adresse als QR-Code anzeigen",
 				"bitcoin_address_copied": "Bitcoin-Adresse in Zwischenablage kopiert.",
 				"from_network": "Sende Bitcoin im BTC-Netzwerk an diese Adresse, um ckBTC zu erhalten.",
@@ -775,8 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Solana-Adresse",
+				"solana_address_title": "Solana Wallet Adresse",
 				"solana_devnet_address": "Solana-Devnet-Adresse",
+				"solana_devnet_address_title": "Solana Devnet Wallet Adresse",
 				"solana_local_address": "Solana-Lokaladresse",
+				"solana_local_address_title": "Solana Local Wallet Adresse",
 				"solana_address_copied": "Solana-Adresse in Zwischenablage kopiert",
 				"display_solana_address_qr": "Solana-Adresse als QR-Code anzeigen"
 			}
