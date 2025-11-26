@@ -8,7 +8,6 @@ import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { NetworkSchema } from '$lib/schema/network.schema';
-import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId } from '$lib/types/nft';
