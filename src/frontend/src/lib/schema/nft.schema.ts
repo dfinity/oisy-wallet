@@ -1,5 +1,4 @@
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { NetworkAppMetadataSchema, NetworkSchema } from '$lib/schema/network.schema';
 import { TokenSchema } from '$lib/schema/token.schema';
 import * as z from 'zod';
 
@@ -18,11 +17,6 @@ export const NftMetadataSchema = z.object({
 	attributes: z.array(NftAttributeSchema).optional()
 });
 
-export const NftNetworkSchema = z.object({
-	...NetworkSchema.shape,
-	...NetworkAppMetadataSchema.shape
-});
-
 export enum NftMediaStatusEnum {
 	OK = 'ok',
 	FILESIZE_LIMIT_EXCEEDED = 'filesize_limit_exceeded',
@@ -31,14 +25,13 @@ export enum NftMediaStatusEnum {
 }
 
 export const NftCollectionSchema = z.object({
-	...TokenSchema.pick({ id: true, standard: true }).shape,
+	...TokenSchema.pick({ id: true, standard: true, network: true }).shape,
 	address: z.string(),
 	name: z.string().optional(),
 	symbol: z.string().optional(),
 	bannerImageUrl: z.url().optional(),
 	bannerMediaStatus: z.enum(NftMediaStatusEnum).optional(),
 	description: z.string().optional(),
-	network: NftNetworkSchema,
 	newestAcquiredAt: z.date().optional(),
 	allowExternalContentSource: z.boolean().optional(),
 	section: z.enum(CustomTokenSection).optional()
