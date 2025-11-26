@@ -14,6 +14,8 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { getContext } from 'svelte';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
+	import { formatStakeApyNumber } from '$lib/utils/format.utils.js';
+	import { nonNullish } from '@dfinity/utils';
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 </script>
@@ -65,9 +67,11 @@
 				</span>
 				<span class="my-3 text-lg font-bold">{$i18n.stake.info.gldt.fact_3_title}</span>
 				<p class="text-tertiary"
-					>{replacePlaceholders($i18n.stake.info.gldt.fact_3_description, {
-						$apy: `${$gldtStakeStore?.apy ?? '0'}`
-					})}</p
+					>{nonNullish($gldtStakeStore?.apy)
+						? replacePlaceholders($i18n.stake.info.gldt.fact_3_description, {
+								$apy: `${formatStakeApyNumber($gldtStakeStore.apy)}`
+							})
+						: $i18n.stake.info.gldt.fact_3_description_fallback}</p
 				>
 			</div>
 		</div>

@@ -1856,7 +1856,8 @@
             "fact_2_title": "Flexible terms",
             "fact_2_description": "No lock-up periods, stake and unstake anytime you want",
             "fact_3_title": "Stable returns",
-            "fact_3_description": "Earn $apy% APY with minimal volatility risk"
+            "fact_3_description": "Earn $apy% APY with minimal volatility risk",
+            "fact_3_description_fallback": "Earn consistent rewards with minimal volatility risk"
           }
         }
 	},
