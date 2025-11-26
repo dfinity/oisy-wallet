@@ -23,6 +23,7 @@
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken, mapTokenToCollection } from '$lib/utils/nfts.utils';
+	import {getNftIdentifier} from "$lib/utils/nft.utils";
 
 	interface Props {
 		token: NonFungibleToken;
@@ -52,7 +53,7 @@
 				event_value: nonNullish(value) ? 'spam' : 'unspam',
 				location_source: source,
 				token_name: token.name,
-				token_address: token.address,
+				token_address: getNftIdentifier(token),
 				token_network: token.network.name,
 				token_standard: token.standard,
 				result_status: status

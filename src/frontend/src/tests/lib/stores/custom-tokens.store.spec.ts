@@ -22,7 +22,7 @@ import {
 	DE_GODS_TOKEN,
 	mockValidErc721Token
 } from '$tests/mocks/erc721-tokens.mock';
-import { mockValidErcExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { get } from 'svelte/store';
 
 describe('custom-token.store', () => {
@@ -145,16 +145,16 @@ describe('custom-token.store', () => {
 			});
 
 			it('should use the canister ID as identifier for EXT tokens', () => {
-				mockStore.setAll([{ data: { ...mockValidErcExtV2Token, enabled }, certified }]);
+				mockStore.setAll([{ data: { ...mockValidExtV2Token, enabled }, certified }]);
 				const extToken2 = {
 					...TRUMP_TOKEN,
 					standard: 'extV2' as const,
-					canisterId: mockValidErcExtV2Token.canisterId
+					canisterId: mockValidExtV2Token.canisterId
 				};
 				mockStore.setAll([{ data: { ...extToken2, enabled }, certified }]);
 
 				const expectedResults = [
-					{ data: { ...extToken2, enabled, id: mockValidErcExtV2Token.id }, certified }
+					{ data: { ...extToken2, enabled, id: mockValidExtV2Token.id }, certified }
 				];
 
 				expect(get(mockStore)).toEqual(expectedResults);

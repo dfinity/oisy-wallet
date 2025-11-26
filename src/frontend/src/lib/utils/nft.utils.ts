@@ -2,6 +2,8 @@ import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc721Token } from '$eth/types/erc721';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
+import type { ExtToken } from '$icp/types/ext-token';
+import { isTokenExtV2 } from '$icp/utils/ext.utils';
 import type { NonFungibleToken, NonFungibleTokensByNetwork } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 
@@ -15,3 +17,8 @@ export const getTokensByNetwork = (tokens: NonFungibleToken[]): NonFungibleToken
 		const networkId = token.network.id;
 		return acc.set(networkId, [...(acc.get(networkId) ?? []), token]);
 	}, new Map());
+
+export const getNftIdentifier = (
+	token: NonFungibleToken
+): Erc721Token['address'] | Erc1155Token['address'] | ExtToken['canisterId'] =>
+	isTokenExtV2(token) ? token.canisterId : token.address;
