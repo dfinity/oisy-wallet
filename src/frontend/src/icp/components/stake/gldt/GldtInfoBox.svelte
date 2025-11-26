@@ -1,19 +1,19 @@
 <script lang="ts">
-	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
-	import { stakeProvidersConfig } from '$lib/config/stake.config';
-	import { StakeProvider } from '$lib/types/stake';
-	import { STAKE_PROVIDER_EXTERNAL_URL } from '$lib/constants/test-ids.constants';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import IconClock from '$lib/components/icons/lucide/IconClock.svelte';
-	import IconGift from '$lib/components/icons/IconGift.svelte';
-	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
-	import IconBook from '$lib/components/icons/IconBook.svelte';
-	import IconContainer from '$lib/components/icons/IconContainer.svelte';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { getContext } from 'svelte';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
+	import IconBook from '$lib/components/icons/IconBook.svelte';
+	import IconContainer from '$lib/components/icons/IconContainer.svelte';
+	import IconGift from '$lib/components/icons/IconGift.svelte';
+	import IconClock from '$lib/components/icons/lucide/IconClock.svelte';
+	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
+	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import { stakeProvidersConfig } from '$lib/config/stake.config';
+	import { STAKE_PROVIDER_EXTERNAL_URL } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { StakeProvider } from '$lib/types/stake';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 </script>
@@ -21,7 +21,7 @@
 <StakeContentSection>
 	{#snippet title()}
 		<div class="flex w-full items-center gap-3 border-b border-secondary pb-4">
-			<Logo src={stakeProvidersConfig[StakeProvider.GLDT].logo} size="md" />
+			<Logo size="md" src={stakeProvidersConfig[StakeProvider.GLDT].logo} />
 			<h3 class="flex flex-1">{$i18n.stake.info.gldt.title}</h3>
 			<ExternalLink
 				ariaLabel={stakeProvidersConfig[StakeProvider.GLDT].name}
