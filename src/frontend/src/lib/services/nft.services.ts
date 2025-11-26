@@ -157,3 +157,25 @@ export const updateNftSection = async ({
 
 	return saveToken;
 };
+
+export const updateNftMediaConsent = async ({
+	allowMedia,
+	$authIdentity,
+	token,
+	$ethAddress
+}: {
+	allowMedia: boolean;
+	$authIdentity: OptionIdentity;
+	token: NonFungibleToken;
+	$ethAddress: OptionEthAddress;
+}): Promise<NonFungibleToken | undefined> => {
+	const saveToken = {
+		...token,
+		enabled: true, // must be true otherwise we couldn't see it at this point
+		allowExternalContentSource: allowMedia
+	};
+
+	await saveNftCustomToken({ identity: $authIdentity, token: saveToken, $ethAddress });
+
+	return saveToken;
+};
