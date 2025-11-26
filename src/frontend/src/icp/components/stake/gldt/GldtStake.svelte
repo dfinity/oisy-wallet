@@ -15,6 +15,7 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { StakeProvider } from '$lib/types/stake';
 	import { networkUrl } from '$lib/utils/nav.utils';
+	import GldtInfoBox from '$icp/components/stake/gldt/GldtInfoBox.svelte';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -57,6 +58,7 @@
 	{/snippet}
 </StakeProviderContainer>
 
-<div class="my-8">
+<div class="my-8 gap-4">
 	<GldtStakeRewards />
+	<GldtInfoBox />
 </div>

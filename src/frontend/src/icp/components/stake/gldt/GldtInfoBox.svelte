@@ -14,6 +14,7 @@
 	import { StakeProvider } from '$lib/types/stake';
 	import { formatStakeApyNumber } from '$lib/utils/format.utils.js';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import FactBox from '$lib/components/ui/FactBox.svelte';
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 </script>
@@ -39,39 +40,54 @@
 		<p class="mt-4 text-sm text-secondary">{$i18n.stake.info.gldt.description}</p>
 
 		<div class="mt-6 grid w-full grid-cols-1 gap-3 text-center text-sm md:grid-cols-3">
-			<div class="flex w-full flex-col items-center">
-				<span
-					class="rounded-full bg-gradient-to-r from-gold-0 to-gold-100 p-4 text-primary-inverted"
-				>
-					<IconContainer size="24" />
-				</span>
-				<span class="my-3 text-lg font-bold">{$i18n.stake.info.gldt.fact_1_title}</span>
-				<p class="text-tertiary">{$i18n.stake.info.gldt.fact_1_description}</p>
-			</div>
-			<div class="flex w-full flex-col items-center">
-				<span
-					class="rounded-full bg-gradient-to-r from-gold-0 to-gold-100 p-4 text-primary-inverted"
-				>
-					<IconClock size="24" />
-				</span>
-				<span class="my-3 text-lg font-bold">{$i18n.stake.info.gldt.fact_2_title}</span>
-				<p class="text-tertiary">{$i18n.stake.info.gldt.fact_2_description}</p>
-			</div>
-			<div class="flex w-full flex-col items-center">
-				<span
-					class="rounded-full bg-gradient-to-r from-gold-0 to-gold-100 p-4 text-primary-inverted"
-				>
-					<IconLineChart size="24" />
-				</span>
-				<span class="my-3 text-lg font-bold">{$i18n.stake.info.gldt.fact_3_title}</span>
-				<p class="text-tertiary"
-					>{nonNullish($gldtStakeStore?.apy)
+			<FactBox>
+				{#snippet icon()}
+					<span
+						class="rounded-full bg-gradient-to-r from-gold-0 to-gold-100 p-4 text-primary-inverted"
+					>
+						<IconContainer size="24" />
+					</span>
+				{/snippet}
+				{#snippet title()}
+					{$i18n.stake.info.gldt.fact_1_title}
+				{/snippet}
+				{#snippet description()}
+					{$i18n.stake.info.gldt.fact_1_description}
+				{/snippet}
+			</FactBox>
+			<FactBox>
+				{#snippet icon()}
+					<span
+						class="rounded-full bg-gradient-to-r from-gold-0 to-gold-100 p-4 text-primary-inverted"
+					>
+						<IconClock size="24" />
+					</span>
+				{/snippet}
+				{#snippet title()}
+					{$i18n.stake.info.gldt.fact_2_title}
+				{/snippet}
+				{#snippet description()}{$i18n.stake.info.gldt.fact_2_description}
+				{/snippet}
+			</FactBox>
+			<FactBox>
+				{#snippet icon()}
+					<span
+						class="rounded-full bg-gradient-to-r from-gold-0 to-gold-100 p-4 text-primary-inverted"
+					>
+						<IconLineChart size="24" />
+					</span>
+				{/snippet}
+				{#snippet title()}
+					{$i18n.stake.info.gldt.fact_3_title}
+				{/snippet}
+				{#snippet description()}
+					{nonNullish($gldtStakeStore?.apy)
 						? replacePlaceholders($i18n.stake.info.gldt.fact_3_description, {
 								$apy: `${formatStakeApyNumber($gldtStakeStore.apy)}`
 							})
-						: $i18n.stake.info.gldt.fact_3_description_fallback}</p
-				>
-			</div>
+						: $i18n.stake.info.gldt.fact_3_description_fallback}
+				{/snippet}
+			</FactBox>
 		</div>
 	{/snippet}
 </StakeContentSection>
