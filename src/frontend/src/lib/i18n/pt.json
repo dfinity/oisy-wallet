@@ -726,11 +726,11 @@
 				"display_account_id_qr": "Exibir ID da Conta ICP como um código QR",
 				"account_id_copied": "ID da Conta ICP copiado para a área de transferência.",
 				"principal": "Principal ICP",
-				"principal_title": "",
+				"principal_title": "Endereço da carteira ICP - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Principal Internet Computer copiado para a área de transferência.",
 				"display_internet_computer_principal_qr": "Exibir Principal Internet Computer como um código QR",
 				"icp_account": "Conta ICP (para exchanges)",
-				"icp_account_title": "",
+				"icp_account_title": "Endereço da carteira ICP - Apenas por token ICP",
 				"icp_account_copied": "Conta ICP copiada para a área de transferência.",
 				"display_icp_account_qr": "Exibir Conta ICP como um código QR"
 			}
@@ -743,7 +743,7 @@
 				"learn_how_to_convert": "Saiba como converter $token para $ckToken",
 				"metamask": "Receber do Metamask",
 				"ethereum": "Ethereum",
-				"ethereum_title": "",
+				"ethereum_title": "Endereço da carteira Ethereum",
 				"ethereum_address": "Endereço",
 				"ethereum_address_copied": "Endereço Ethereum copiado para a área de transferência.",
 				"display_ethereum_address_qr": "Exibir endereço Ethereum como um código QR"
@@ -761,11 +761,11 @@
 				"checking_incoming": "Verificando BTCs recebidos...",
 				"refreshing_wallet": "Atualizando carteira...",
 				"bitcoin_address": "Bitcoin",
-				"bitcoin_address_title": "",
+				"bitcoin_address_title": "Endereço da carteira Bitcoin",
 				"bitcoin_testnet_address": "Bitcoin (Testnet)",
-				"bitcoin_testnet_address_title": "",
+				"bitcoin_testnet_address_title": "Endereço da carteira Bitcoin (Testnet)",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
-				"bitcoin_regtest_address_title": "",
+				"bitcoin_regtest_address_title": "Endereço da carteira Bitcoin (Regtest)",
 				"display_bitcoin_address_qr": "Exibir Endereço Bitcoin como um código QR",
 				"bitcoin_address_copied": "Endereço Bitcoin copiado para a área de transferência.",
 				"from_network": "Transfira Bitcoin na rede BTC para este endereço para receber ckBTC.",
@@ -782,11 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Endereço Solana",
-				"solana_address_title": "",
+				"solana_address_title": "Endereço da carteira Solana",
 				"solana_devnet_address": "Endereço Solana da Devnet",
-				"solana_devnet_address_title": "",
+				"solana_devnet_address_title": "Endereço da carteira Solana Devnet",
 				"solana_local_address": "Endereço Solana Local",
-				"solana_local_address_title": "",
+				"solana_local_address_title": "Endereço da carteira Solana Local",
 				"solana_address_copied": "Endereço Solana copiado para a área de transferência",
 				"display_solana_address_qr": "Exibir endereço Solana como QR code"
 			}

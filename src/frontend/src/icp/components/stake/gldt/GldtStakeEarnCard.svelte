@@ -21,7 +21,7 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { modalGetToken, modalGldtStake } from '$lib/derived/modal.derived';
-	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens.derived';
+	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { balancesStore } from '$lib/stores/balances.store';

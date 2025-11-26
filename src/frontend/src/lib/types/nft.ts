@@ -32,3 +32,8 @@ export type OwnedContract = z.infer<typeof OwnedContractSchema>;
 export type NonFungibleTokensByNetwork = Map<NetworkId, NonFungibleToken[]>;
 
 export type NonFungibleToken = Erc721Token | Erc1155Token | ExtToken;
+
+export type NonFungibleTokenIdentifier =
+	| Erc721Token['address']
+	| Erc1155Token['address']
+	| ExtToken['canisterId'];
