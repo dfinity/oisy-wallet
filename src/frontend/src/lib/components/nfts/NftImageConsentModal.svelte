@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
 	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
@@ -30,7 +31,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft, NftCollection } from '$lib/types/nft';
+	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
@@ -64,33 +65,65 @@
 
 	let saveLoading = $state(false);
 
+	const createSaveToken = ({
+		token,
+		allowMedia
+	}: {
+		token: NonFungibleToken;
+		allowMedia: boolean;
+	}) => ({
+		...token,
+		allowExternalContentSource: allowMedia,
+		enabled: true // must be true otherwise we couldn't see it at this point
+	});
+
+	const saveByStandard = async ({
+		token,
+		identity,
+		allowMedia
+	}: {
+		token: NonFungibleToken;
+		identity: Identity;
+		allowMedia: boolean;
+	}): Promise<NonFungibleToken | undefined> => {
+		if (isTokenErc721(token)) {
+			const saveToken = createSaveToken({ token, allowMedia });
+
+			await saveErc721CustomTokens({
+				tokens: [saveToken],
+				identity
+			});
+
+			return saveToken;
+		}
+
+		if (isTokenErc1155(token)) {
+			const saveToken = createSaveToken({ token, allowMedia });
+
+			await saveErc1155CustomTokens({
+				tokens: [saveToken],
+				identity
+			});
+
+			return saveToken;
+		}
+	};
+
 	const save = async (allowMedia: boolean) => {
 		saveLoading = true;
 		if (nonNullish(token) && nonNullish($authIdentity)) {
-			const saveToken = {
-				...token,
-				allowExternalContentSource: allowMedia,
-				enabled: true // must be true otherwise we couldnt see it at this point
-			};
+			const saveToken = await saveByStandard({ token, identity: $authIdentity, allowMedia });
 
-			if (isTokenErc721(token)) {
-				await saveErc721CustomTokens({
+			if (nonNullish(saveToken)) {
+				await loadNfts({
 					tokens: [saveToken],
-					identity: $authIdentity
-				});
-			} else if (isTokenErc1155(token)) {
-				await saveErc1155CustomTokens({
-					tokens: [saveToken],
-					identity: $authIdentity
+					walletAddress: $ethAddress
 				});
 			}
-
-			await loadNfts({
-				tokens: [saveToken],
-				walletAddress: $ethAddress
-			});
 		}
+
 		saveLoading = false;
+
 		modalStore.close();
 	};
 
