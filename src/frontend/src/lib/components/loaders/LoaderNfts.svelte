@@ -2,11 +2,11 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { NFTS_ENABLED } from '$env/nft.env';
+	import { loadNftsByNetwork } from '$eth/services/nft.services';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
-	import { loadNftsByNetwork } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
