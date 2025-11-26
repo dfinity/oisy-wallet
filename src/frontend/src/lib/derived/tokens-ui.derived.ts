@@ -12,13 +12,12 @@ import { derived, type Readable } from 'svelte/store';
  * All user-enabled fungible tokens with financial data.
  */
 export const enabledFungibleTokensUi: Readable<TokenUi[]> = derived(
-	[enabledFungibleTokens, balancesStore, stakeBalances, exchanges],
-	([$enabledFungibleTokens, $balances, $stakeBalances, $exchanges]) =>
+	[enabledFungibleTokens, balancesStore, exchanges],
+	([$enabledFungibleTokens, $balances, $exchanges]) =>
 		$enabledFungibleTokens.map((token) =>
 			mapTokenUi({
 				token,
 				$balances,
-				$stakeBalances,
 				$exchanges
 			})
 		)
