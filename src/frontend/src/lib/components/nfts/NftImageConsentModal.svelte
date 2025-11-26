@@ -65,7 +65,13 @@
 
 	let saveLoading = $state(false);
 
-	const createSaveToken = ({token,allowMedia}:{token: NonFungibleToken, allowMedia: boolean}) => ({
+	const createSaveToken = ({
+		token,
+		allowMedia
+	}: {
+		token: NonFungibleToken;
+		allowMedia: boolean;
+	}) => ({
 		...token,
 		allowExternalContentSource: allowMedia,
 		enabled: true // must be true otherwise we couldn't see it at this point
@@ -81,7 +87,7 @@
 		allowMedia: boolean;
 	}): Promise<NonFungibleToken | undefined> => {
 		if (isTokenErc721(token)) {
-			const saveToken =createSaveToken({token, allowMedia});
+			const saveToken = createSaveToken({ token, allowMedia });
 
 			await saveErc721CustomTokens({
 				tokens: [saveToken],
@@ -92,8 +98,7 @@
 		}
 
 		if (isTokenErc1155(token)) {
-			const saveToken =createSaveToken({token, allowMedia});
-
+			const saveToken = createSaveToken({ token, allowMedia });
 
 			await saveErc1155CustomTokens({
 				tokens: [saveToken],
