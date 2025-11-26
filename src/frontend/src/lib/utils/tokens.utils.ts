@@ -171,7 +171,7 @@ export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
 /**
  * Calculates total USD stake balance of the provided UI tokens list, including claimable rewards.
  *
- * @param tokens - The list of UI tokens for total USD balance calculation.
+ * @param tokens - The list of UI tokens for total USD stake balance calculation.
  * @returns The sum of UI tokens USD stake balance.
  */
 export const sumTokensUiUsdStakeBalance = (tokens: TokenUi[]): number =>
