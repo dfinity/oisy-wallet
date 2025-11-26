@@ -1846,7 +1846,19 @@
 				"item4_description": "GLDT stakes start obtaining an age bonus from day 1. The older the stakes, the bigger the age bonus, growing linearly at 100% per year.",
 				"item5_title": "When you start unlocking your GLDT stake, you will no longer receive new rewards"
 			}
-		}
+		},
+        "info": {
+          "gldt": {
+            "title": "What is GLDT",
+            "description": "GLDT stands for “Gold Token”, being a fungible token backed by GLD NFTs. GLD NFTs are NFTs that represent irrefutable ownership of physical gold bars. 1 GLDT represents exactly 0.01g of gold, and GLD NFTs can be swapped at a ratio of 1g for 100 GLDTs.",
+            "fact_1_title": "Backed by real gold",
+            "fact_1_description": "Every GLDT token is backed by actual gold stored in secure vaults",
+            "fact_2_title": "Flexible terms",
+            "fact_2_description": "No lock-up periods, stake and unstake anytime you want",
+            "fact_3_title": "Stable returns",
+            "fact_3_description": "Earn $apy% APY with minimal volatility risk"
+          }
+        }
 	},
 	"get_token": {
 		"text": {

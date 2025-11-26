@@ -11,13 +11,18 @@
 	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
 	import IconBook from '$lib/components/icons/IconBook.svelte';
 	import IconContainer from '$lib/components/icons/IconContainer.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { getContext } from 'svelte';
+	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
+
+	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 </script>
 
 <StakeContentSection>
 	{#snippet title()}
 		<div class="flex w-full items-center gap-3 border-b border-secondary pb-4">
 			<Logo src={stakeProvidersConfig[StakeProvider.GLDT].logo} size="md" />
-			<h3 class="flex flex-1">What is GLDT</h3>
+			<h3 class="flex flex-1">{$i18n.stake.info.gldt.title}</h3>
 			<ExternalLink
 				ariaLabel={stakeProvidersConfig[StakeProvider.GLDT].name}
 				href={stakeProvidersConfig[StakeProvider.GLDT].url}
@@ -31,11 +36,7 @@
 		</div>
 	{/snippet}
 	{#snippet content()}
-		<p class="mt-4 text-sm text-secondary"
-			>GLDT stands for “Gold Token”, being a fungible token backed by GLD NFTs. GLD NFTs are NFTs
-			that represent irrefutable ownership of physical gold bars. 1 GLDT represents exactly 0.01g of
-			gold, and GLD NFTs can be swapped at a ratio of 1g for 100 GLDTs.</p
-		>
+		<p class="mt-4 text-sm text-secondary">{$i18n.stake.info.gldt.description}</p>
 
 		<div class="mt-6 flex grid w-full grid-cols-1 gap-3 text-center text-sm md:grid-cols-3">
 			<div class="flex w-full flex-col items-center">
@@ -44,10 +45,8 @@
 				>
 					<IconContainer size="24" />
 				</span>
-				<span class="my-3 text-lg font-bold">Backed by real gold</span>
-				<p class="text-tertiary"
-					>Every GLDT token is backed by actual gold stored in secure vaults</p
-				>
+				<span class="my-3 text-lg font-bold">{$i18n.stake.info.gldt.fact_1_title}</span>
+				<p class="text-tertiary">{$i18n.stake.info.gldt.fact_1_description}</p>
 			</div>
 			<div class="flex w-full flex-col items-center">
 				<span
@@ -55,8 +54,8 @@
 				>
 					<IconClock size="24" />
 				</span>
-				<span class="my-3 text-lg font-bold">Flexible terms</span>
-				<p class="text-tertiary">No lock-up periods, stake and unstake anytime you want</p>
+				<span class="my-3 text-lg font-bold">{$i18n.stake.info.gldt.fact_2_title}</span>
+				<p class="text-tertiary">{$i18n.stake.info.gldt.fact_2_description}</p>
 			</div>
 			<div class="flex w-full flex-col items-center">
 				<span
@@ -64,8 +63,12 @@
 				>
 					<IconLineChart size="24" />
 				</span>
-				<span class="my-3 text-lg font-bold">Stable returns</span>
-				<p class="text-tertiary">Earn consistent 8.5% APY with minimal volatility risk</p>
+				<span class="my-3 text-lg font-bold">{$i18n.stake.info.gldt.fact_3_title}</span>
+				<p class="text-tertiary"
+					>{replacePlaceholders($i18n.stake.info.gldt.fact_3_description, {
+						$apy: `${$gldtStakeStore?.apy ?? '0'}`
+					})}</p
+				>
 			</div>
 		</div>
 	{/snippet}
