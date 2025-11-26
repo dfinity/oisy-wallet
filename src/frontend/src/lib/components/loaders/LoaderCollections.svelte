@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import { get } from 'svelte/store';
+	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
@@ -29,8 +31,28 @@
 		}
 	};
 
-	const loadErcTokens = async () => {
-		if (isNullish($authIdentity)) {
+	interface LoadTokensParams {
+		identity: Identity;
+		customTokens: CustomToken[];
+	}
+
+	const loadErcTokens = async ({ identity, customTokens }: LoadTokensParams) => {
+		const networks = [...$enabledEthereumNetworks, ...$enabledEvmNetworks];
+
+		for (const network of networks) {
+			const contracts: OwnedContract[] = await loadContracts(network);
+
+			await saveErcCustomTokens({
+				contracts,
+				customTokens,
+				network,
+				identity
+			});
+		}
+	};
+
+	const onLoad = async () => {
+		if (!NFTS_ENABLED || isNullish($authIdentity)) {
 			return;
 		}
 
@@ -40,25 +62,12 @@
 			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 		});
 
-		const networks = [...$enabledEthereumNetworks, ...$enabledEvmNetworks];
-		for (const network of networks) {
-			const contracts: OwnedContract[] = await loadContracts(network);
+		const params: LoadTokensParams = {
+			identity: $authIdentity,
+			customTokens
+		};
 
-			await saveErcCustomTokens({
-				contracts,
-				customTokens,
-				network,
-				identity: $authIdentity
-			});
-		}
-	};
-
-	const onLoad = async () => {
-		if (!NFTS_ENABLED) {
-			return;
-		}
-
-		await Promise.all([loadErcTokens()]);
+		await Promise.all([loadErcTokens(params)]);
 	};
 </script>
 
