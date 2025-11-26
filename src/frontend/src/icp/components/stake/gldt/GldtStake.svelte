@@ -69,9 +69,8 @@
 		{/snippet}
 	</StakeProviderContainer>
 
-	<div class="my-8">
+	<div class="my-8 flex flex-col gap-8">
 		<GldtStakeRewards />
+		<GldtInfoBox />
 	</div>
-
-	<GldtInfoBox />
 </GldtStakeContext>
