@@ -1,7 +1,7 @@
 import { isGLDTToken } from '$icp-eth/utils/token.utils';
 import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
 import { ZERO } from '$lib/constants/app.constants';
-import { enabledTokens } from '$lib/derived/tokens-ui.derived';
+import { enabledTokens } from '$lib/derived/tokens.derived';
 import type { StakeBalances } from '$lib/types/stake-balance';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
