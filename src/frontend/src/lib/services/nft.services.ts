@@ -9,6 +9,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Address } from '$lib/types/address';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
@@ -47,7 +48,7 @@ export const saveNftCustomToken = async ({
 	$ethAddress
 }: {
 	identity: OptionIdentity;
-	token: NonFungibleToken;
+	token: CustomToken<NonFungibleToken>;
 	$ethAddress: OptionEthAddress;
 }) => {
 	if (isNullish(identity)) {
