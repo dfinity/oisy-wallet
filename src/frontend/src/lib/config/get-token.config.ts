@@ -19,5 +19,15 @@ export const getTokenWizardSteps = ({
 			$token: tokenSymbol
 		})
 	},
+	{
+		name: WizardStepsGetToken.RECEIVE,
+		title: replacePlaceholders(i18n.get_token.text.receive_token, {
+			$token: tokenSymbol
+		})
+	},
+	{
+		name: WizardStepsGetToken.BUY_TOKEN,
+		title: i18n.get_token.text.buy_assets
+	},
 	...swapWizardSteps({ i18n })
 ];
