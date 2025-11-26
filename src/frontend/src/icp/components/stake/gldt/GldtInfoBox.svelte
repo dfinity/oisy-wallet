@@ -38,7 +38,7 @@
 	{#snippet content()}
 		<p class="mt-4 text-sm text-secondary">{$i18n.stake.info.gldt.description}</p>
 
-		<div class="mt-6 flex grid w-full grid-cols-1 gap-3 text-center text-sm md:grid-cols-3">
+		<div class="mt-6 grid w-full grid-cols-1 gap-3 text-center text-sm md:grid-cols-3">
 			<div class="flex w-full flex-col items-center">
 				<span
 					class="rounded-full bg-gradient-to-r from-gold-0 to-gold-100 p-4 text-primary-inverted"
