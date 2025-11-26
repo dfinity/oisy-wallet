@@ -9,6 +9,7 @@ import { derived, type Readable } from 'svelte/store';
 export const stakeBalances: Readable<StakeBalances> = derived(
 	[enabledTokens, gldtStakeStore],
 	([$enabledTokens, $gldtStakeStore]) => {
+		// TODO: As per Roman's suggestion, check if this can be transformed into a Map to avoid the casting.
 		const balances = {} as StakeBalances;
 
 		const gldtToken = $enabledTokens.find(isGLDTToken);
