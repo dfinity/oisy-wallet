@@ -6,6 +6,7 @@ import type { NftError } from '$lib/types/errors';
 import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
+import { getNftIdentifier } from '$lib/utils/nft.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { SvelteMap } from 'svelte/reactivity';
@@ -97,7 +98,7 @@ export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: N
 
 export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 	NftCollectionSchema.parse({
-		address: token.address,
+		address: getNftIdentifier(token),
 		id: token.id,
 		network: token.network,
 		standard: token.standard,

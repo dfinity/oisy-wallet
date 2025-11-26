@@ -136,7 +136,7 @@ describe('nft.services', () => {
 
 		const mockParams = {
 			identity: mockIdentity,
-			token: mockValidErc721Token,
+			token: { ...mockValidErc721Token, enabled: true },
 			$ethAddress: mockEthAddress
 		};
 
@@ -165,21 +165,27 @@ describe('nft.services', () => {
 		it('should save an ERC721 custom token', async () => {
 			await saveNftCustomToken({
 				...mockParams,
-				token: mockValidErc721Token
+				token: { ...mockValidErc721Token, enabled: true }
 			});
 
-			expect(erc721Spy).toHaveBeenCalledExactlyOnceWith();
+			expect(erc721Spy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				tokens: [{ ...mockValidErc721Token, enabled: true }]
+			});
 			expect(erc1155Spy).not.toHaveBeenCalled();
 		});
 
 		it('should save an ERC1155 custom token', async () => {
 			await saveNftCustomToken({
 				...mockParams,
-				token: mockValidErc1155Token
+				token: { ...mockValidErc1155Token, enabled: true }
 			});
 
 			expect(erc721Spy).not.toHaveBeenCalled();
-			expect(erc1155Spy).toHaveBeenCalledExactlyOnceWith();
+			expect(erc1155Spy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				tokens: [{ ...mockValidErc1155Token, enabled: true }]
+			});
 		});
 
 		it.todo('should load NFT');
