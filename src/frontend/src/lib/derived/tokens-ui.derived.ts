@@ -1,6 +1,5 @@
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
-import { stakeBalances } from '$lib/derived/stake.derived';
 import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenUi } from '$lib/types/token-ui';
