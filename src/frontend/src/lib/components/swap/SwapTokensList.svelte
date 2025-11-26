@@ -17,6 +17,7 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
+	import {stakeBalances} from "$lib/derived/stake.derived";
 
 	interface Props {
 		onSelectToken: (token: Token) => void;
@@ -40,7 +41,8 @@
 				(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
 			),
 			$exchanges,
-			$balances: $balancesStore
+			$balances: $balancesStore,
+			$stakeBalances
 		})
 	);
 
