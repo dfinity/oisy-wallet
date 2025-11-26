@@ -4,7 +4,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
-export const mockValidErcExtV2Token: ExtToken = {
+export const mockValidExtV2Token: ExtToken = {
 	...mockValidToken,
 	id: parseTokenId('ExtV2TokenId'),
 	network: ICP_NETWORK,
