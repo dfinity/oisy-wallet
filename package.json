@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.8.5",
+	"version": "1.8.6",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -22,6 +22,8 @@
 		"build:tokens-sns": "vite-node scripts/build.tokens.sns.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.sns.json",
 		"build:tokens-ckerc20": "vite-node scripts/build.tokens.ckerc20.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.ckerc20.json",
 		"build:tokens-icrc": "vite-node scripts/build.tokens.icrc.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.icrc.json",
+		"build:tokens-ext": "vite-node scripts/build.tokens.ext.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens-ext/tokens.ext.json",
+		"build:vitest-thresholds": "vite-node scripts/build.vitest.thresholds.ts",
 		"dev": "vite dev",
 		"build": "tsc --noEmit && vite build && npm run build:post-process",
 		"prepare": "svelte-kit sync",

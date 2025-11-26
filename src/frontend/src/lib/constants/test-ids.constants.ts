@@ -324,3 +324,6 @@ export const OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON = 'open-crypto-pay-enter-manu
 // Get Token Modal
 export const GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE = 'get-token-modal-potential-usd-balance';
 export const GET_TOKEN_MODAL_OPEN_SWAP_BUTTON = 'get-token-modal-open-swap-button';
+
+// BUY MODAL
+export const BUY_MODAL_ONRAMPER_IFRAME = 'buy-modal-onramper-iframe';

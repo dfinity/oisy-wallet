@@ -434,6 +434,7 @@ interface I18nInit {
 		spl_custom_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
+		ext_custom_tokens: string;
 		loading_wallet_timeout: string;
 		allow_signing: string;
 		waiting_for_allowed_cycles_aborted: string;
@@ -524,9 +525,11 @@ interface I18nReceive {
 			display_account_id_qr: string;
 			account_id_copied: string;
 			principal: string;
+			principal_title: string;
 			internet_computer_principal_copied: string;
 			display_internet_computer_principal_qr: string;
 			icp_account: string;
+			icp_account_title: string;
 			icp_account_copied: string;
 			display_icp_account_qr: string;
 		};
@@ -539,6 +542,7 @@ interface I18nReceive {
 			learn_how_to_convert: string;
 			metamask: string;
 			ethereum: string;
+			ethereum_title: string;
 			ethereum_address: string;
 			ethereum_address_copied: string;
 			display_ethereum_address_qr: string;
@@ -554,8 +558,11 @@ interface I18nReceive {
 			checking_incoming: string;
 			refreshing_wallet: string;
 			bitcoin_address: string;
+			bitcoin_address_title: string;
 			bitcoin_testnet_address: string;
+			bitcoin_testnet_address_title: string;
 			bitcoin_regtest_address: string;
+			bitcoin_regtest_address_title: string;
 			display_bitcoin_address_qr: string;
 			bitcoin_address_copied: string;
 			from_network: string;
@@ -567,8 +574,11 @@ interface I18nReceive {
 	solana: {
 		text: {
 			solana_address: string;
+			solana_address_title: string;
 			solana_devnet_address: string;
+			solana_devnet_address_title: string;
 			solana_local_address: string;
+			solana_local_address_title: string;
 			solana_address_copied: string;
 			display_solana_address_qr: string;
 		};
@@ -1441,9 +1451,7 @@ interface I18nStake {
 		active_earning: string;
 		active_earning_per_year: string;
 		visit_provider: string;
-		current_apy: string;
 		current_apy_label: string;
-		current_apy_info: string;
 		stake_review_subtitle: string;
 		unstake_review_subtitle: string;
 		delayed_dissolve: string;
@@ -1462,6 +1470,19 @@ interface I18nStake {
 		get_tokens_with_amount: string;
 		get_tokens: string;
 	};
+	terms: {
+		gldt: {
+			item1_title: string;
+			item1_description: string;
+			item2_title_1: string;
+			item2_title_2: string;
+			item3_title: string;
+			item3_description: string;
+			item4_title: string;
+			item4_description: string;
+			item5_title: string;
+		};
+	};
 }
 
 interface I18nGet_token {
@@ -1472,6 +1493,13 @@ interface I18nGet_token {
 		convert_assets: string;
 		convertible_assets: string;
 		how_to_convert: string;
+		get_more_token: string;
+		receive_token: string;
+		receive_token_title: string;
+		receive_token_text: string;
+		buy_assets: string;
+		buy_assets_title: string;
+		buy_assets_text: string;
 	};
 }
 

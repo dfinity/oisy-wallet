@@ -4,6 +4,7 @@ import type {
 	Transaction
 } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import {
@@ -14,7 +15,6 @@ import {
 	mockExtV2Transactions
 } from '$tests/mocks/ext-v2-token.mock';
 import { mockIcrcAccount, mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
@@ -187,7 +187,7 @@ describe('ext-v2-token.canister', () => {
 			...mockIcrcAccount
 		};
 
-		const expectedIcrcAddress = encodeIcrcAccount(mockIcrcAccount);
+		const expectedIcrcAddress = getAccountIdentifier(mockPrincipal).toHex();
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -248,6 +248,21 @@ describe('ext-v2-token.canister', () => {
 				new CanisterInternalError('other error')
 			);
 
+			expect(service.tokens_ext).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
+		});
+
+		it('should return an empty list if it is a no-tokens Other error', async () => {
+			service.tokens_ext.mockResolvedValue({
+				err: { Other: 'No tokens' }
+			});
+
+			const { getTokensByOwner } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			const res = await getTokensByOwner(mockParams);
+
+			expect(res).toEqual([]);
 			expect(service.tokens_ext).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
 		});
 
