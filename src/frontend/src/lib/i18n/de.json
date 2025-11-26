@@ -743,7 +743,7 @@
 				"learn_how_to_convert": "Erfahre, wie du $token in $ckToken umwandelst",
 				"metamask": "Empfangen über Metamask",
 				"ethereum": "Ethereum",
-				"ethereum_title": "Ethereum Wallet Addresse",
+				"ethereum_title": "Ethereum Wallet Adresse",
 				"ethereum_address": "Adresse",
 				"ethereum_address_copied": "Ethereum-Adresse in Zwischenablage kopiert.",
 				"display_ethereum_address_qr": "Ethereum-Adresse als QR-Code anzeigen"
@@ -1855,6 +1855,19 @@
 				"item4_title": "",
 				"item4_description": "",
 				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
 			}
 		}
 	},

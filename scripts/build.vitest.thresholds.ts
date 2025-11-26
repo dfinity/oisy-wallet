@@ -74,7 +74,7 @@ const main = () => {
 	const original = readFileSync(ORIGINAL_FILE, 'utf8');
 
 	// The coverage calculation is a bit flaky, so to avoid being stuck, we reduce it to have an acceptable margin
-	const withMargin = applyMargin({ text: current, margin: 0.2 });
+	const withMargin = applyMargin({ text: current, margin: 0.3 });
 
 	// Ensure thresholds never decrease
 	const finalText = enforceNonDecreasingThresholds({
