@@ -8,6 +8,9 @@
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
+	import IconExpand from '$lib/components/icons/IconExpand.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		transactions: StakingTransactionsUiWithToken[];
@@ -41,6 +44,8 @@
 		}
 		return 'unconfirmed';
 	};
+
+	let expanded = $state(false);
 </script>
 
 <StakeContentSection>
@@ -48,7 +53,7 @@
 		<h4>Activity</h4>
 	{/snippet}
 	{#snippet content()}
-		{#each transactions as transaction}
+		{#each expanded ? transactions : transactions.slice(0, 5) as transaction}
 			<Transaction
 				type={transaction.type}
 				token={transaction.token}
@@ -70,5 +75,18 @@
 				{/if}
 			</Transaction>
 		{/each}
+
+		<Button
+			colorStyle="muted"
+			fullWidth
+			innerStyleClass="items-center"
+			onclick={() => (expanded = !expanded)}
+			paddingSmall
+			styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
+			transparent
+		>
+			{expanded ? $i18n.core.text.less : $i18n.core.text.more}
+			<IconExpand {expanded} />
+		</Button>
 	{/snippet}
 </StakeContentSection>
