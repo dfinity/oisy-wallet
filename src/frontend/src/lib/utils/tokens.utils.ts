@@ -216,7 +216,7 @@ export const sumMainnetTokensUsdBalancesPerNetwork = ({
 /**
  * Calculates total USD stake balance (including claimable rewards) of mainnet tokens per network from the provided tokens list.
  *
- * @param $tokens - The list of UI tokens for filtering by network env and total USD stake balance calculation.
+ * @param tokens - The list of UI tokens for filtering by network env and total USD stake balance calculation.
  * @returns A NetworkId-number dictionary with total USD stake balance of mainnet tokens per network.
  *
  */

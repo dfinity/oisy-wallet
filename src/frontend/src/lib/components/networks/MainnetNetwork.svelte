@@ -25,6 +25,8 @@
 
 	let usdStakeBalance = $derived($enabledMainnetTokensUsdStakeBalancesPerNetwork[network.id] ?? 0);
 
+	let usdStakeBalance = $derived($enabledMainnetTokensUsdStakeBalancesPerNetwork[network.id] ?? 0);
+
 	let usdBalance = $derived($enabledMainnetTokensUsdBalancesPerNetwork[network.id] ?? 0);
 </script>
 

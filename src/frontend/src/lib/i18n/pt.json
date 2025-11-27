@@ -1837,12 +1837,21 @@
 			"immediate_dissolve_terms": "",
 			"amount_to_receive": "",
 			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
 			"claim_reward": "",
 			"claim_rewards": "",
+			"claim_reward_short": "",
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
 			"get_tokens": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": ""
 		},
 		"terms": {
 			"gldt": {
