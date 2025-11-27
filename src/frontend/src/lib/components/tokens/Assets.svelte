@@ -95,7 +95,7 @@
 						<div class="flex">
 							<TokensMenu />
 						</div>
-					{:else}
+					{:else if tab === TokenTypes.NFTS}
 						<div class="flex">
 							<NftSortMenu />
 						</div>
