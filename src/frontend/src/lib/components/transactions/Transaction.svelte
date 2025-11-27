@@ -42,6 +42,7 @@
 		children: Snippet;
 		onClick?: () => void;
 		approveSpender?: string;
+		fullDate?: boolean;
 	}
 
 	const {
@@ -57,7 +58,8 @@
 		tokenId,
 		children,
 		onClick,
-		approveSpender
+		approveSpender,
+		fullDate = false
 	}: Props = $props();
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
@@ -185,7 +187,7 @@
 								minute: '2-digit',
 								hour12: false
 							},
-							timeOnly: true
+							timeOnly: !fullDate
 						})}
 					</span>
 				{/if}
