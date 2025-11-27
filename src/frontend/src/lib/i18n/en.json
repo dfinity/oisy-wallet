@@ -1843,8 +1843,8 @@
 			"claiming": "Claiming...",
 			"get_tokens_with_amount": "Get up to $amount $token_symbol",
 			"get_tokens": "Get more $token_symbol",
-            "full_history": "Show full history",
-            "recent_history": "Close full history"
+			"full_history": "Show full history",
+			"recent_history": "Close full history"
 		},
 		"terms": {
 			"gldt": {
