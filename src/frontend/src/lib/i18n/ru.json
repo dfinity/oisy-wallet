@@ -1778,6 +1778,7 @@
 	"earning": {
 		"text": {
 			"title": "Заработать",
+			"tab_title": "",
 			"earning_opportunities": "",
 			"header_title": "",
 			"header_description": ""

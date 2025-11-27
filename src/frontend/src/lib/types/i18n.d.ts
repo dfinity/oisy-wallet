@@ -1413,6 +1413,7 @@ interface I18nActivity {
 interface I18nEarning {
 	text: {
 		title: string;
+		tab_title: string;
 		earning_opportunities: string;
 		header_title: string;
 		header_description: string;
