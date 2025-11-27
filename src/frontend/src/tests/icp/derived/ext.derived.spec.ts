@@ -1,4 +1,4 @@
-import { extCustomTokens } from '$icp/derived/ext.derived';
+import { enabledExtTokens, extCustomTokens } from '$icp/derived/ext.derived';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
@@ -33,6 +33,25 @@ describe('ext.derived', () => {
 			const result = get(extCustomTokens);
 
 			expect(result).toEqual([mockExtCustomToken1, mockExtCustomToken2]);
+		});
+	});
+
+	describe('enabledExtTokens', () => {
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			extCustomTokensStore.resetAll();
+
+			extCustomTokensStore.setAll([
+				{ data: mockExtCustomToken1, certified: false },
+				{ data: { ...mockExtCustomToken2, enabled: false }, certified: false }
+			]);
+		});
+
+		it('should return only enabled tokens', () => {
+			const result = get(enabledExtTokens);
+
+			expect(result).toEqual([mockExtCustomToken1]);
 		});
 	});
 });
