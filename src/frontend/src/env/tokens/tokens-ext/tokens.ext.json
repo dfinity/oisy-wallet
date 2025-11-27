@@ -1158,12 +1158,6 @@
 		}
 	},
 	{
-		"canisterId": "efbpx-hqaaa-aaaam-ab7ja-cai",
-		"metadata": {
-			"name": "Rune Specific Internet Canisters (RSIC)"
-		}
-	},
-	{
 		"canisterId": "ems7u-lyaaa-aaaal-qnbma-cai",
 		"metadata": {
 			"name": "Motoko Monsters Gen 2"
@@ -1533,12 +1527,6 @@
 		"canisterId": "hqvrp-baaaa-aaaag-qbfva-cai",
 		"metadata": {
 			"name": "Keys"
-		}
-	},
-	{
-		"canisterId": "hvgd6-taaaa-aaaap-ahgsa-cai",
-		"metadata": {
-			"name": "Pixel Girls"
 		}
 	},
 	{
@@ -1935,12 +1923,6 @@
 		"canisterId": "lvbdd-pyaaa-aaaag-qbqmq-cai",
 		"metadata": {
 			"name": "Dark of the Night"
-		}
-	},
-	{
-		"canisterId": "lzhom-nqaaa-aaaap-ahmpq-cai",
-		"metadata": {
-			"name": "B.A.D 3D Avatars"
 		}
 	},
 	{
@@ -2892,12 +2874,6 @@
 		}
 	},
 	{
-		"canisterId": "ufmrp-niaaa-aaaal-ab3eq-cai",
-		"metadata": {
-			"name": "Motoko Batteries"
-		}
-	},
-	{
 		"canisterId": "ufn3y-oyaaa-aaaag-qdawq-cai",
 		"metadata": {
 			"name": "Land in Netherworld"
@@ -3267,12 +3243,6 @@
 		"canisterId": "xe4dz-oqaaa-aaaag-qbspa-cai",
 		"metadata": {
 			"name": "EMOTE Badge"
-		}
-	},
-	{
-		"canisterId": "xeyge-6yaaa-aaaap-ahcba-cai",
-		"metadata": {
-			"name": "Jester Medallions"
 		}
 	},
 	{
