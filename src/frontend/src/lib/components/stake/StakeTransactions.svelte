@@ -120,10 +120,15 @@
 	};
 
 	const getDisplayAmount = (transaction: StakingTransactionsUiWithToken) =>
-		'incoming' in transaction && transaction.incoming && !transaction.isReward
-			? transaction.value
+		'incoming' in transaction &&
+		transaction.incoming &&
+		!transaction.isReward &&
+		nonNullish(transaction.value) &&
+		'fee' in transaction &&
+		nonNullish(transaction.fee)
+			? transaction.value + transaction.fee * -1n
 			: nonNullish(transaction.value)
-				? transaction.value * -1n
+				? transaction.value
 				: undefined;
 </script>
 
