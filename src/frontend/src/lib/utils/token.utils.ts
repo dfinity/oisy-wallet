@@ -65,7 +65,7 @@ export const getMaxTransactionAmount = ({
  * In addition to those, we display also:
  * - The tokens that have been enabled by the user
  *
- * That is why the `enabled` flag is either enabled for a subset of ledgerCanisterIds or if user has set an enabled custom token in the backend.
+ * That is why the `enabled` flag is either enabled for a subset of ledgerCanisterIds or if the user has set an enabled custom token in the backend.
  */
 export const mapDefaultTokenToToggleable = <T extends Token>({
 	defaultToken,
@@ -101,7 +101,7 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
  * Calculates USD balance for the provided token.
  *
  * @param token - Token for which USD balance will be calculated.
- * @param $balancesStore - The balances data for the tokens.
+ * @param $balancesStore - The balances' data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns The USD balance or undefined in case the number cannot be calculated.
  *
