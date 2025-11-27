@@ -16,6 +16,7 @@ import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { NonFungibleToken } from '$lib/types/nft';
@@ -24,7 +25,8 @@ import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import { isTokenFungible } from '$lib/utils/nft.utils';
 import {
 	filterEnabledTokens,
-	sumMainnetTokensUsdBalancesPerNetwork
+	sumMainnetTokensUsdBalancesPerNetwork,
+	sumMainnetTokensUsdStakeBalancesPerNetwork
 } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
@@ -169,7 +171,7 @@ export const enabledNonFungibleTokensWithoutSpam: Readable<NonFungibleToken[]> =
 );
 
 /**
- * It isn't performant to post filter again the Erc20 tokens that are enabled, but it's code wise convenient to avoid duplication of logic.
+ * It isn't performant to post filter again the Erc20 tokens that are enabled, but it's codewise convenient to avoid duplication of logic.
  */
 export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 	[enabledTokens],
@@ -193,7 +195,7 @@ export const enabledSplTokens: Readable<SplToken[]> = derived([enabledTokens], (
 );
 
 /**
- * A store with NetworkId-number dictionary with total USD balance of mainnet tokens per network.
+ * A store with a NetworkId-number dictionary with a total USD balance of mainnet tokens per network.
  */
 export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdBalancePerNetwork> =
 	derived([enabledTokens, balancesStore, exchanges], ([$enabledTokens, $balances, $exchanges]) =>
@@ -201,5 +203,15 @@ export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdB
 			$tokens: $enabledTokens,
 			$balances,
 			$exchanges
+		})
+	);
+
+/**
+ * A store with a NetworkId-number dictionary with total USD stake balance (including claimable rewards) of mainnet tokens per network.
+ */
+export const enabledMainnetTokensUsdStakeBalancesPerNetwork: Readable<TokensTotalUsdBalancePerNetwork> =
+	derived([enabledFungibleTokensUi], ([$enabledTokens]) =>
+		sumMainnetTokensUsdStakeBalancesPerNetwork({
+			tokens: $enabledTokens
 		})
 	);
