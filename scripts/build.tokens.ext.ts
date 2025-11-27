@@ -161,6 +161,7 @@ const getCollections = async (): Promise<EnvExtToken[]> => {
 		await Promise.all(
 			Object.entries(collectionsMap).map(async ([, collection]) => {
 				const isActive = await checkActive(collection);
+
 				return isActive ? collection : undefined;
 			})
 		)
