@@ -11,10 +11,17 @@
 		network: Network;
 		selectedNetworkId?: NetworkId;
 		labelsSize?: LabelSize;
+		showStakeBalance?: boolean;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
 
-	let { network, selectedNetworkId, labelsSize = 'md', onSelected }: Props = $props();
+	let {
+		network,
+		selectedNetworkId,
+		labelsSize = 'md',
+		showStakeBalance = true,
+		onSelected
+	}: Props = $props();
 
 	let usdStakeBalance = $derived($enabledMainnetTokensUsdStakeBalancesPerNetwork[network.id] ?? 0);
 
@@ -26,5 +33,5 @@
 	{network}
 	{onSelected}
 	{selectedNetworkId}
-	usdBalance={usdBalance + usdStakeBalance}
+	usdBalance={usdBalance + (showStakeBalance ? usdStakeBalance : 0)}
 />

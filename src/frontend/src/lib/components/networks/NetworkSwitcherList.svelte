@@ -21,6 +21,7 @@
 		supportedNetworks?: NetworkType[];
 		allNetworksEnabled?: boolean;
 		showTestnets?: boolean;
+		showStakeBalance?: boolean;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
 
@@ -30,6 +31,7 @@
 		supportedNetworks,
 		allNetworksEnabled = true,
 		showTestnets = true,
+		showStakeBalance = true,
 		onSelected
 	}: Props = $props();
 
@@ -57,9 +59,9 @@
 
 <ul class="flex list-none flex-col">
 	{#each enabledNetworks as network (network.id)}
-		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
-			><MainnetNetwork {labelsSize} {network} {onSelected} {selectedNetworkId} /></li
-		>
+		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}>
+			<MainnetNetwork {labelsSize} {network} {onSelected} {selectedNetworkId} {showStakeBalance} />
+		</li>
 	{/each}
 </ul>
 

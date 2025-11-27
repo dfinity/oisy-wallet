@@ -15,10 +15,16 @@
 	interface Props {
 		allNetworksEnabled?: boolean;
 		filteredNetworks?: Network[];
+		showStakeBalance?: boolean;
 		onNetworkFilter: () => void;
 	}
 
-	let { allNetworksEnabled, filteredNetworks, onNetworkFilter }: Props = $props();
+	let {
+		allNetworksEnabled,
+		filteredNetworks,
+		showStakeBalance = true,
+		onNetworkFilter
+	}: Props = $props();
 
 	const { setFilterNetwork, filterNetwork } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
@@ -41,6 +47,7 @@
 		labelsSize="lg"
 		onSelected={onNetworkSelect}
 		selectedNetworkId={$filterNetwork?.id}
+		{showStakeBalance}
 		showTestnets={false}
 		supportedNetworks={filteredNetworks}
 	/>
