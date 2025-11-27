@@ -18,3 +18,21 @@ export const extTokens: Readable<ExtTokenToggleable[]> = derived(
 	[extCustomTokens],
 	([$extCustomTokens]) => [...$extCustomTokens]
 );
+
+/**
+ * The list of all enabled EXT tokens.
+ */
+export const enabledExtTokens: Readable<ExtTokenToggleable[]> = derived(
+	[extTokens],
+	([$extTokens]) => $extTokens.filter(({ enabled }) => enabled)
+);
+
+export const extCustomTokensInitialized: Readable<boolean> = derived(
+	[extCustomTokensStore],
+	([$extCustomTokensStore]) => $extCustomTokensStore !== undefined
+);
+
+export const extCustomTokensNotInitialized: Readable<boolean> = derived(
+	[extCustomTokensInitialized],
+	([$extCustomTokensInitialized]) => !$extCustomTokensInitialized
+);
