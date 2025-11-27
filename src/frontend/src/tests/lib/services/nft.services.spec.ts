@@ -8,6 +8,7 @@ import {
 	loadNfts,
 	saveNftCustomToken,
 	sendNft,
+	updateNftMediaConsent,
 	updateNftSection
 } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
@@ -19,6 +20,7 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { NYAN_CAT_TOKEN, mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { Network, type TransactionResponse } from 'ethers/providers';
@@ -104,6 +106,16 @@ describe('nft.services', () => {
 			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(get(nftStore)).toEqual([mockNft3]);
+		});
+
+		it('should not load EXT NFTs', async () => {
+			const tokens: NonFungibleToken[] = [mockValidExtV2Token];
+
+			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+
+			expect(get(nftStore)).toBeUndefined();
+
+			expect(mockAlchemyProvider.getNftsByOwner).not.toHaveBeenCalled();
 		});
 
 		it('should handle nfts loading error gracefully', async () => {
@@ -486,6 +498,136 @@ describe('nft.services', () => {
 						...base1155,
 						enabled: true,
 						section: CustomTokenSection.SPAM,
+						allowExternalContentSource: false
+					}
+				]
+			});
+		});
+	});
+
+	describe('updateNftMediaConsent', () => {
+		let erc721Spy: MockInstance;
+		let erc1155Spy: MockInstance;
+
+		beforeEach(() => {
+			erc721Spy = vi.spyOn(erc721CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
+			erc1155Spy = vi.spyOn(erc1155CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		const base721: NonFungibleToken = {
+			address: '0x111',
+			category: 'custom',
+			decimals: 0,
+			id: parseTokenId('721'),
+			name: 'My721',
+			network: ETHEREUM_NETWORK,
+			standard: 'erc721',
+			symbol: 'MY721',
+			section: undefined
+		};
+
+		const base1155: NonFungibleToken = {
+			address: '0x222',
+			category: 'custom',
+			decimals: 0,
+			id: parseTokenId('1155'),
+			name: 'My1155',
+			network: ETHEREUM_NETWORK,
+			standard: 'erc1155',
+			symbol: 'MY1155',
+			section: undefined
+		};
+
+		it('does nothing if auth identity is nullish', async () => {
+			await updateNftMediaConsent({
+				allowMedia: true,
+				token: base721,
+				$authIdentity: null,
+				$ethAddress: mockEthAddress
+			});
+
+			expect(erc721Spy).not.toHaveBeenCalled();
+			expect(erc1155Spy).not.toHaveBeenCalled();
+		});
+
+		it('updates ERC721 token with allowExternalContentSource=true', async () => {
+			await updateNftMediaConsent({
+				allowMedia: true,
+				token: base721,
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
+			});
+
+			expect(erc721Spy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...base721,
+						enabled: true,
+						allowExternalContentSource: true
+					}
+				]
+			});
+		});
+
+		it('updates ERC721 token with allowExternalContentSource=false', async () => {
+			await updateNftMediaConsent({
+				allowMedia: false,
+				token: { ...base721, allowExternalContentSource: true },
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
+			});
+
+			expect(erc721Spy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...base721,
+						enabled: true,
+						allowExternalContentSource: false
+					}
+				]
+			});
+		});
+
+		it('updates ERC1155 token with allowExternalContentSource=true', async () => {
+			await updateNftMediaConsent({
+				allowMedia: true,
+				token: base1155,
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
+			});
+
+			expect(erc1155Spy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...base1155,
+						enabled: true,
+						allowExternalContentSource: true
+					}
+				]
+			});
+		});
+
+		it('updates ERC1155 token with allowExternalContentSource=false', async () => {
+			await updateNftMediaConsent({
+				allowMedia: false,
+				token: { ...base1155, allowExternalContentSource: true },
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
+			});
+
+			expect(erc1155Spy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...base1155,
+						enabled: true,
 						allowExternalContentSource: false
 					}
 				]

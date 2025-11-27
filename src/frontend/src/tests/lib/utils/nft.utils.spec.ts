@@ -111,7 +111,6 @@ describe('nft.utils', () => {
 		});
 
 		it('should return the canisterId for EXT tokens', () => {
-			// @ts-expect-error Testing invalid input types
 			expect(getNftIdentifier(mockValidExtV2Token)).toBe(mockValidExtV2Token.canisterId);
 		});
 	});

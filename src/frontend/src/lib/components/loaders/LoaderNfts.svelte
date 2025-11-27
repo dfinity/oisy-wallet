@@ -3,11 +3,13 @@
 	import { untrack } from 'svelte';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import { loadNftsByNetwork } from '$eth/services/nft.services';
+	import type { EthNonFungibleToken } from '$eth/types/nft';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { nftStore } from '$lib/stores/nft.store';
+	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
 	const loadEthNfts = async () => {
@@ -34,7 +36,16 @@
 		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
 
 		const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
-			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
+			if (!isNetworkIdEthereum(networkId) && !isNetworkIdEvm(networkId)) {
+				return;
+			}
+
+			const nfts = await loadNftsByNetwork({
+				networkId,
+				// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
+				tokens: tokens as EthNonFungibleToken[],
+				walletAddress: $ethAddress
+			});
 
 			nftStore.setAllByNetwork({ networkId, nfts });
 		});
