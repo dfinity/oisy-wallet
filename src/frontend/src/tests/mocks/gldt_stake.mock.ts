@@ -18,10 +18,10 @@ export const stakePositionMockResponse = {
 	owned_by: mockPrincipal,
 	dissolve_events: [
 		{
-			dissolved_date: 1000n,
+			dissolved_date: 1764237501193n,
 			completed: true,
 			amount: 1000n,
-			percentage: 1000
+			percentage: 1
 		}
 	],
 	weighted_stake: 1000n,
