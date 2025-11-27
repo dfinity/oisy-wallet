@@ -8,11 +8,6 @@ import {
 	sumMainnetTokensUsdStakeBalancesPerNetwork
 } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
-import { enabledTokens } from '$lib/derived/tokens.derived';
-import { balancesStore } from '$lib/stores/balances.store';
-import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
-import { sumMainnetTokensUsdBalancesPerNetwork } from '$lib/utils/tokens.utils';
-import { derived, type Readable } from 'svelte/store';
 
 /**
  * A store with a NetworkId-number dictionary with a total USD balance of mainnet tokens per network.
