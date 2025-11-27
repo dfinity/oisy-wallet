@@ -1463,6 +1463,11 @@ interface I18nStake {
 		immediate_dissolve_terms: string;
 		amount_to_receive: string;
 		unclaimed_rewards: string;
+		unlock_requests: string;
+		unlocking_in: string;
+		unlocked: string;
+		withdraw: string;
+		withdraw_successful: string;
 		claim_reward: string;
 		claim_rewards: string;
 		claim_now: string;
@@ -1470,6 +1475,7 @@ interface I18nStake {
 		get_tokens_with_amount: string;
 		get_tokens: string;
 	};
+	error: { unexpected_error_on_withdraw: string };
 	terms: {
 		gldt: {
 			item1_title: string;
