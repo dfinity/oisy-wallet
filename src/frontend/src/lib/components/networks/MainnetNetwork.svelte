@@ -1,6 +1,6 @@
 <script lang="ts">
 	import NetworkComponent from '$lib/components/networks/Network.svelte';
-	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
+	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/network-balances.derived';
 	import type { LabelSize } from '$lib/types/components';
 	import type { Network, NetworkId, OptionNetworkId } from '$lib/types/network';
 
