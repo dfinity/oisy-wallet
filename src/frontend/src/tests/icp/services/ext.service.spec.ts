@@ -1,5 +1,5 @@
 import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
-import { loadCustomTokens } from '$icp/services/ext.services';
+import { loadCustomTokens, loadExtTokens } from '$icp/services/ext.services';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { listCustomTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -42,6 +42,43 @@ describe('ext.services', () => {
 			}
 		}
 	];
+
+	describe('loadErc1155Tokens', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			mockAuthStore();
+
+			vi.spyOn(toastsStore, 'toastsError');
+
+			extCustomTokensStore.resetAll();
+
+			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensExt);
+		});
+
+		it('should save the custom tokens in the store', async () => {
+			await loadExtTokens({ identity: mockIdentity });
+
+			const tokens = get(extCustomTokensStore);
+
+			const expected = expectedCustomTokens.map((token, index) => ({
+				...token,
+				data: {
+					...token.data,
+					id: (tokens ?? [])[index].data.id
+				}
+			}));
+
+			expect(tokens).toEqual(expected);
+		});
+
+		it('should not throw error if list custom tokens throws', async () => {
+			const mockError = new Error('Error loading custom tokens');
+			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
+
+			await expect(loadExtTokens({ identity: mockIdentity })).resolves.not.toThrow();
+		});
+	});
 
 	describe('loadCustomTokens', () => {
 		beforeEach(() => {
