@@ -33,12 +33,17 @@
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
 	import IconList from '$lib/components/icons/IconList.svelte';
+	import { sortTransactions } from '$lib/utils/transactions.utils';
 
 	interface Props {
 		transactions: StakingTransactionsUiWithToken[];
 	}
 
 	const { transactions }: Props = $props();
+
+	const sortedTransactions = $derived(
+		transactions.sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }))
+	);
 
 	const getTimestamp = (timestampNanoseconds?: bigint | number) =>
 		nonNullish(timestampNanoseconds)
@@ -135,13 +140,13 @@
 				: undefined;
 </script>
 
-{#if transactions.length > 0}
+{#if sortedTransactions.length > 0}
 	<StakeContentSection>
 		{#snippet title()}
 			<h4>Activity</h4>
 		{/snippet}
 		{#snippet content()}
-			{#each expanded ? transactions : transactions.slice(0, 5) as transaction}
+			{#each expanded ? sortedTransactions : sortedTransactions.slice(0, 5) as transaction, index (`${index}-${transaction.timestamp}`)}
 				<Transaction
 					type={transaction.type}
 					token={transaction.token}
@@ -166,7 +171,7 @@
 				</Transaction>
 			{/each}
 
-			{#if transactions.length > 5}
+			{#if sortedTransactions.length > 5}
 				<Button
 					colorStyle="muted"
 					fullWidth
@@ -182,14 +187,14 @@
 			{/if}
 		{/snippet}
 	</StakeContentSection>
-{/if}
 
-{#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
-	<BtcTransactionModal token={selectedBtcToken} transaction={selectedBtcTransaction} />
-{:else if $modalEthTransaction && nonNullish(selectedEthTransaction)}
-	<EthTransactionModal token={selectedEthToken} transaction={selectedEthTransaction} />
-{:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
-	<IcTransactionModal token={selectedIcToken} transaction={selectedIcTransaction} />
-{:else if $modalSolTransaction && nonNullish(selectedSolTransaction)}
-	<SolTransactionModal token={selectedSolToken} transaction={selectedSolTransaction} />
+	{#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
+		<BtcTransactionModal token={selectedBtcToken} transaction={selectedBtcTransaction} />
+	{:else if $modalEthTransaction && nonNullish(selectedEthTransaction)}
+		<EthTransactionModal token={selectedEthToken} transaction={selectedEthTransaction} />
+	{:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
+		<IcTransactionModal token={selectedIcToken} transaction={selectedIcTransaction} />
+	{:else if $modalSolTransaction && nonNullish(selectedSolTransaction)}
+		<SolTransactionModal token={selectedSolToken} transaction={selectedSolTransaction} />
+	{/if}
 {/if}
