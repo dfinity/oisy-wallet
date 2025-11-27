@@ -118,10 +118,8 @@ class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 }
 
 const extensions = async (canisterId: CanisterIdText) => {
-	const identity = new AnonymousIdentity();
-
 	const { extensions } = ExtV2TokenCanister.create({
-		identity,
+		identity: new AnonymousIdentity(),
 		canisterId: Principal.fromText(canisterId)
 	});
 
