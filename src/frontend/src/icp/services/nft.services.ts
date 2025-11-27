@@ -1,18 +1,15 @@
 import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
-import { isTokenExtV2 } from '$icp/utils/ext.utils';
+import type { IcNonFungibleToken } from '$icp/types/nft';
 import { mapExtNft } from '$icp/utils/nft.utils';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { NetworkId } from '$lib/types/network';
-import type { Nft, NonFungibleToken } from '$lib/types/nft';
+import type { Nft } from '$lib/types/nft';
 import { isNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
-	networkId,
 	tokens,
 	identity
 }: {
-	networkId: NetworkId;
-	tokens: NonFungibleToken[];
+	tokens: IcNonFungibleToken[];
 	identity: OptionIdentity;
 }): Promise<Nft[]> => {
 	if (isNullish(identity)) {
@@ -21,11 +18,7 @@ export const loadNfts = async ({
 
 	const owner = identity.getPrincipal();
 
-	const nfts = await tokens.reduce<Promise<Nft[]>>(async (acc, token) => {
-		if (!isTokenExtV2(token)) {
-			return await acc;
-		}
-
+	const nftPromises = tokens.map(async (token) => {
 		const { canisterId } = token;
 
 		try {
@@ -35,15 +28,13 @@ export const loadNfts = async ({
 				canisterId
 			});
 
-			const nfts = tokenIndices.map((index) => mapExtNft({ index, collection: token }));
-
-			return nfts.length > 0 ? [...(await acc), ...nfts] : await acc;
+			return tokenIndices.map((index) => mapExtNft({ index, token }));
 		} catch (error: unknown) {
 			console.warn(`Error loading EXT tokens from collection ${canisterId}:`, error);
 
-			return await acc;
+			return [];
 		}
-	}, Promise.resolve([]));
+	});
 
-	return nfts;
+	return (await Promise.all(nftPromises)).flat();
 };
