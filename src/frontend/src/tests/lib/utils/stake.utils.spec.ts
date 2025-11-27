@@ -21,8 +21,6 @@ const mockGoldaoToken: IcToken = {
 	symbol: 'GOLDAO'
 };
 
-// For simplicity we just pass icExtendedTransactions.
-
 const BASE_INPUT = {
 	ckBtcPendingUtxoTransactions: [],
 	ckEthPendingTransactions: [],
