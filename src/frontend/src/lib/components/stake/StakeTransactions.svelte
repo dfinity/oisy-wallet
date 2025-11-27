@@ -25,11 +25,13 @@
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { isIcToken } from '$icp/validation/ic-token.validation.js';
-	import { isTokenIcrc } from '$icp/utils/icrc.utils';
-	import { isSolanaToken } from '$sol/utils/token.utils';
-	import { isNetworkIdEvm } from '$lib/utils/network.utils';
-	import { isBitcoinToken } from '$btc/utils/token.utils';
+	import {
+		isNetworkIdBitcoin,
+		isNetworkIdEthereum,
+		isNetworkIdEvm,
+		isNetworkIdICP,
+		isNetworkIdSolana
+	} from '$lib/utils/network.utils';
 	import IconList from '$lib/components/icons/IconList.svelte';
 
 	interface Props {
@@ -96,22 +98,23 @@
 	);
 
 	const openModal = (transaction: AnyTransactionUiWithToken) => {
-		if (isIcToken(transaction.token) || isTokenIcrc(transaction.token)) {
+		const { id: networkId } = transaction.token.network;
+		if (isNetworkIdICP(networkId)) {
 			modalStore.openIcTransaction({
 				id: Symbol(),
 				data: { transaction: transaction as IcTransactionUi, token: transaction.token }
 			});
-		} else if (isSolanaToken(transaction.token)) {
+		} else if (isNetworkIdSolana(networkId)) {
 			modalStore.openSolTransaction({
 				id: Symbol(),
 				data: { transaction: transaction as SolTransactionUi, token: transaction.token }
 			});
-		} else if (isNetworkIdEvm(transaction.token.network.id)) {
+		} else if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
 			modalStore.openEthTransaction({
 				id: Symbol(),
 				data: { transaction: transaction as EthTransactionUi, token: transaction.token }
 			});
-		} else if (isBitcoinToken(transaction.token)) {
+		} else if (isNetworkIdBitcoin(networkId)) {
 			modalStore.openBtcTransaction({
 				id: Symbol(),
 				data: { transaction: transaction as BtcTransactionUi, token: transaction.token }
