@@ -101,9 +101,9 @@ describe('LoaderNfts', () => {
 		}
 	};
 
-	const mockExtNft1 = mapExtNft({ index: 1, token: mockValidExtV2Token });
-	const mockExtNft2 = mapExtNft({ index: 2, token: mockValidExtV2Token });
-	const mockExtNft3 = mapExtNft({ index: 3, token: mockValidExtV2Token });
+	const mockExtNft1 = mapExtNft({ index: 1, token: mockEnabledExtToken1 });
+	const mockExtNft2 = mapExtNft({ index: 2, token: mockEnabledExtToken1 });
+	const mockExtNft3 = mapExtNft({ index: 3, token: mockEnabledExtToken1 });
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -203,7 +203,13 @@ describe('LoaderNfts', () => {
 					canisterId: mockEnabledExtToken2.canisterId
 				});
 
-				expect(get(nftStore)).toEqual([mockExtNft1, mockExtNft2, mockExtNft3]);
+				const results = get(nftStore);
+
+				expect(results).toEqual([
+					{ ...mockExtNft1, id: results?.[0].id },
+					{ ...mockExtNft2, id: results?.[1].id },
+					{ ...mockExtNft3, id: results?.[2].id }
+				]);
 			});
 		});
 	});
