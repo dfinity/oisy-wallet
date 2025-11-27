@@ -3,7 +3,7 @@
 	import {
 		enabledMainnetTokensUsdBalancesPerNetwork,
 		enabledMainnetTokensUsdStakeBalancesPerNetwork
-	} from '$lib/derived/tokens.derived';
+	} from '$lib/derived/network-balances.derived';
 	import type { LabelSize } from '$lib/types/components';
 	import type { Network, NetworkId, OptionNetworkId } from '$lib/types/network';
 
