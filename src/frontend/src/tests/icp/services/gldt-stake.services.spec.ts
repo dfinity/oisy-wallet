@@ -177,5 +177,13 @@ describe('gldt-stake.services', () => {
 			expect(response).toBe(stakePositionMockResponse);
 			expect(mockStakeCompleted).toHaveBeenCalledOnce();
 		});
+
+		it('throws an error if the API call fails', async () => {
+			vi.spyOn(gldtStakeApi, 'manageStakePosition').mockRejectedValue(new Error('Error'));
+
+			await expect(
+				withdrawGldtStakingDissolvedTokens(withdrawGldtStakingDissolvedTokensParams)
+			).rejects.toThrow('Error');
+		});
 	});
 });
