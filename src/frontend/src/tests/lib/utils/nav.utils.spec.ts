@@ -538,7 +538,7 @@ describe('nav.utils', () => {
 			});
 		});
 
-		describe('isRouteEarning', () => {
+		describe('isRouteEarn', () => {
 			it('should return true when route id matches Earning path', () => {
 				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Earn}`;
 
