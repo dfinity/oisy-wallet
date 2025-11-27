@@ -65,28 +65,30 @@
 			[]
 		);
 
-		const canisterIds = await EXT_BUILTIN_TOKENS.reduce<Promise<CanisterIdText[]>>(
-			async (acc, { canisterId }) => {
-				if (extEnabledCustomToken.includes(canisterId)) {
-					return await acc;
-				}
+		// For now, we have no other way of knowing what EXT tokens/collections the user has NFT with.
+		// So, we loop through a curated list, and we use the method `getTokensByOwner` to check if the user has any NFTs from that collection.
+		// TODO: Find a better method of `getTokensByOwner` to know if the user has NFTs from a specific collection.
+		const canisterIdPromises = EXT_BUILTIN_TOKENS.map(async ({ canisterId }) => {
+			if (extEnabledCustomToken.includes(canisterId)) {
+				return [];
+			}
 
-				try {
-					const tokens = await getTokensByOwner({
-						identity,
-						owner: identity.getPrincipal(),
-						canisterId
-					});
+			try {
+				const tokens = await getTokensByOwner({
+					identity,
+					owner: identity.getPrincipal(),
+					canisterId
+				});
 
-					return tokens.length > 0 ? [...(await acc), canisterId] : await acc;
-				} catch (error: unknown) {
-					console.warn(`Error fetching EXT tokens from canister ${canisterId}:`, error);
+				return tokens.length > 0 ? [canisterId] : [];
+			} catch (error: unknown) {
+				console.warn(`Error fetching EXT tokens from canister ${canisterId}:`, error);
 
-					return await acc;
-				}
-			},
-			Promise.resolve([])
-		);
+				return [];
+			}
+		});
+
+		const canisterIds = (await Promise.all(canisterIdPromises)).flat();
 
 		if (canisterIds.length === 0) {
 			return;
