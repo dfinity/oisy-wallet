@@ -63,9 +63,9 @@
 						icExtendedTransactions: [],
 						icTransactionsStore: $icTransactionsStore
 					}).map(({ data: t }) => ({ ...t, isReward: true, token: goldaoToken }))
-				].filter(
+				] /*.filter(
 					({ from, to }) => from === GLDT_LEDGER_CANISTER_ID || to === GLDT_LEDGER_CANISTER_ID
-				)
+				)*/
 			: []
 	);
 
