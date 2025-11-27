@@ -17,7 +17,6 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { StakeProvider } from '$lib/types/stake';
 	import { networkUrl } from '$lib/utils/nav.utils';
-	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { getAllIcTransactions } from '$icp/utils/ic-transactions.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import { ckBtcPendingUtxoTransactions } from '$icp/derived/ckbtc-transactions.derived';
@@ -27,9 +26,8 @@
 	import { btcStatusesStore } from '$icp/stores/btc.store';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import StakeTransactions from '$lib/components/stake/StakeTransactions.svelte';
+	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -40,7 +38,7 @@
 	let gldtToken = $derived($enabledIcrcTokens.find(isGLDTToken));
 	let goldaoToken = $derived($enabledIcrcTokens.find(isGoldaoToken));
 
-	let transactions: IcTransactionUi[] = $derived(
+	let transactions: StakingTransactionsUiWithToken[] = $derived(
 		nonNullish(gldtToken) && nonNullish(goldaoToken)
 			? [
 					...getAllIcTransactions({
@@ -53,7 +51,7 @@
 						icPendingTransactionsStore: $icPendingTransactionsStore,
 						icExtendedTransactions: [],
 						icTransactionsStore: $icTransactionsStore
-					}),
+					}).map(({ data: t }) => ({ ...t, isReward: false, token: gldtToken })),
 					...getAllIcTransactions({
 						token: goldaoToken,
 						ckBtcPendingUtxoTransactions: $ckBtcPendingUtxoTransactions,
@@ -64,8 +62,8 @@
 						icPendingTransactionsStore: $icPendingTransactionsStore,
 						icExtendedTransactions: [],
 						icTransactionsStore: $icTransactionsStore
-					})
-				].map((t) => t.data)
+					}).map(({ data: t }) => ({ ...t, isReward: true, token: goldaoToken }))
+				]
 			: []
 	);
 
@@ -109,5 +107,6 @@
 
 	<GldtStakeDissolveEvents {gldtToken} />
 	<GldtStakeRewards />
+	<StakeTransactions {transactions} />
 	<GldtInfoBox />
 </div>
