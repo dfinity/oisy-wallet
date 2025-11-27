@@ -54,16 +54,22 @@
 			return;
 		}
 
-		if (nonNullish(nft.name)) {
+		const {
+			id,
+			name,
+			collection: { name: collectionName }
+		} = nft;
+
+		if (nonNullish(name)) {
 			// sometimes NFT names include the number itself, in that case we do not display the number
-			return nft.name.includes(`#${nft.id}`) ? nft.name : `${nft.name} #${nft.id}`;
+			return name.includes(`#${id}`) ? name : `${name} #${id}`;
 		}
 
-		if (nonNullish(nft.collection.name)) {
-			return `${nft.collection.name} #${nft.id}`
+		if (nonNullish(collectionName)) {
+			return `${collectionName} #${id}`;
 		}
 
-		return `#${nft.id}`
+		return `#${id}`;
 	});
 </script>
 
