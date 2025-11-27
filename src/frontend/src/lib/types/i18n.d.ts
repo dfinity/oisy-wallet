@@ -1469,6 +1469,8 @@ interface I18nStake {
 		claiming: string;
 		get_tokens_with_amount: string;
 		get_tokens: string;
+		full_history: string;
+		recent_history: string;
 	};
 	terms: {
 		gldt: {
