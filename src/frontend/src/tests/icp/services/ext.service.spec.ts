@@ -43,7 +43,7 @@ describe('ext.services', () => {
 		}
 	];
 
-	describe('loadErc1155Tokens', () => {
+	describe('loadExtTokens', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
