@@ -58,6 +58,7 @@
 		}
 	};
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we will re-enable in the next release
 	const loadExtTokens = async ({ identity, customTokens }: LoadTokensParams) => {
 		const extEnabledCustomToken = customTokens.reduce<CanisterIdText[]>(
 			(acc, { token, enabled }) =>
@@ -123,7 +124,7 @@
 			customTokens
 		};
 
-		await Promise.all([loadErcTokens(params), loadExtTokens(params)]);
+		await Promise.all([loadErcTokens(params)]);
 	};
 </script>
 

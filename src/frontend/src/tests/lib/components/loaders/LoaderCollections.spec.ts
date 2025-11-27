@@ -104,7 +104,7 @@ describe('LoaderCollections', () => {
 		});
 	});
 
-	it('should add new EXT collections', async () => {
+	it.skip('should add new EXT collections', async () => {
 		extGetTokensByOwnerSpy.mockResolvedValueOnce([1, 2, 3]);
 
 		render(LoaderCollections);
@@ -149,7 +149,7 @@ describe('LoaderCollections', () => {
 		});
 	});
 
-	it('should not add EXT collections if there are no new collections', async () => {
+	it.skip('should not add EXT collections if there are no new collections', async () => {
 		extGetTokensByOwnerSpy.mockResolvedValueOnce([]);
 
 		render(LoaderCollections);
@@ -218,7 +218,7 @@ describe('LoaderCollections', () => {
 		});
 	});
 
-	it('should not add existing EXT collections', async () => {
+	it.skip('should not add existing EXT collections', async () => {
 		const existingExtCustomToken: CustomToken = {
 			token: {
 				ExtV2: {
@@ -251,7 +251,7 @@ describe('LoaderCollections', () => {
 		});
 	});
 
-	it('should handle EXT error gracefully', async () => {
+	it.skip('should handle EXT error gracefully', async () => {
 		const mockError = new Error('EXT error');
 		extGetTokensByOwnerSpy.mockRejectedValueOnce(mockError);
 
