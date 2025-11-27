@@ -5,9 +5,9 @@
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
+	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/network-balances.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
-	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/network-balances.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
 	import type { NetworkId, Network as NetworkType, OptionNetworkId } from '$lib/types/network';
