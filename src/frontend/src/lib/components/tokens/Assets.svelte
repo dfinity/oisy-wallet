@@ -24,6 +24,7 @@
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
+	import {EARNING_ENABLED} from "$env/earning";
 
 	interface Props {
 		tab: TokenTypes;
