@@ -5,6 +5,7 @@ import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+import { extTokens } from '$icp/derived/ext.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
@@ -74,6 +75,7 @@ export const allTokens = derived(
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		allIcrcTokens,
+		extTokens,
 		enabledSolanaTokens,
 		splTokens,
 		enabledEvmTokens
@@ -86,6 +88,7 @@ export const allTokens = derived(
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$allIcrcTokens,
+		$extTokens,
 		$enabledSolanaTokens,
 		$splTokens,
 		$enabledEvmTokens
@@ -99,6 +102,7 @@ export const allTokens = derived(
 		...$erc721Tokens,
 		...$erc1155Tokens,
 		...$allIcrcTokens,
+		...$extTokens,
 		...$splTokens
 	]
 );
