@@ -67,14 +67,6 @@ describe('exchange.services', () => {
 			expect(rate).toBe(2); // 10000 / 5000
 		});
 
-		it('should return undefined for a nullish response', async () => {
-			vi.mocked(simplePrice).mockResolvedValue(null);
-
-			const rate = await exchangeRateUsdToCurrency(Currency.EUR);
-
-			expect(rate).toBeUndefined();
-		});
-
 		it('should return undefined for a nullish price for BTC', async () => {
 			vi.mocked(simplePrice).mockResolvedValue({});
 
