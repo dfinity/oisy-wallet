@@ -12,7 +12,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
-	import { saveCustomTokens } from '$icp/services/ext-custom-tokens.services';
+	import { saveCustomTokens as saveExtCustomTokens } from '$icp/services/ext-custom-tokens.services';
 	import type { SaveExtCustomToken } from '$icp/types/ext-custom-token';
 	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
@@ -100,7 +100,7 @@
 			enabled: true
 		}));
 
-		await saveCustomTokens({
+		await saveExtCustomTokens({
 			tokens: extTokens as NonEmptyArray<SaveExtCustomToken>,
 			identity
 		});
