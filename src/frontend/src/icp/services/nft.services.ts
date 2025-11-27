@@ -18,7 +18,7 @@ export const loadNfts = async ({
 
 	const owner = identity.getPrincipal();
 
-	return await tokens.reduce<Promise<Nft[]>>(async (acc, token) => {
+	const nftPromises = tokens.map(async (token) => {
 		const { canisterId } = token;
 
 		try {
@@ -28,13 +28,13 @@ export const loadNfts = async ({
 				canisterId
 			});
 
-			const nfts = tokenIndices.map((index) => mapExtNft({ index, token }));
-
-			return nfts.length > 0 ? [...(await acc), ...nfts] : await acc;
+			return tokenIndices.map((index) => mapExtNft({ index, token }));
 		} catch (error: unknown) {
 			console.warn(`Error loading EXT tokens from collection ${canisterId}:`, error);
 
-			return await acc;
+			return [];
 		}
-	}, Promise.resolve([]));
+	});
+
+	return (await Promise.all(nftPromises)).flat();
 };
