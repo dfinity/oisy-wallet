@@ -29,6 +29,7 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('nfts.utils', () => {
@@ -339,6 +340,20 @@ describe('nfts.utils', () => {
 				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
 				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description
+			});
+		});
+
+		it('should map EXT token correctly', () => {
+			const result = mapTokenToCollection(mockValidExtV2Token);
+
+			expect(result).toEqual({
+				address: mockValidExtV2Token.canisterId,
+				name: mockValidExtV2Token.name,
+				symbol: mockValidExtV2Token.symbol,
+				id: mockValidExtV2Token.id,
+				network: NetworkSchema.parse(mockValidExtV2Token.network),
+				standard: mockValidExtV2Token.standard,
+				description: mockValidExtV2Token.description
 			});
 		});
 

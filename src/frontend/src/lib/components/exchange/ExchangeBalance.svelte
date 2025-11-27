@@ -7,7 +7,6 @@
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
-	import { allEarningPositionsUsd } from '$lib/derived/earning.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
@@ -16,7 +15,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
-	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
+	import { sumTokensUiUsdBalance, sumTokensUiUsdStakeBalance } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		hideBalance?: boolean;
@@ -28,13 +27,13 @@
 
 	const totalUsd = $derived(sumTokensUiUsdBalance($combinedDerivedSortedFungibleNetworkTokensUi));
 
-	// All stake positions plus the unclaimed rewards
-	// TODO: Add the unclaimed rewards to the stake positions
-	const stakedUsd = $derived($allEarningPositionsUsd);
+	const totalStakeUsd = $derived(
+		sumTokensUiUsdStakeBalance($combinedDerivedSortedFungibleNetworkTokensUi)
+	);
 
 	let balance = $derived(
 		formatCurrency({
-			value: $loaded ? totalUsd + stakedUsd : 0,
+			value: $loaded ? totalUsd + totalStakeUsd : 0,
 			currency: $currentCurrency,
 			exchangeRate: $currencyExchangeStore,
 			language: $currentLanguage

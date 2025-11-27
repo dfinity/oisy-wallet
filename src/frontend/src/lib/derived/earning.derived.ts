@@ -8,7 +8,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import {
 	enabledFungibleTokensUi,
 	enabledMainnetFungibleTokensUsdBalance
-} from '$lib/derived/tokens.derived';
+} from '$lib/derived/tokens-ui.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';

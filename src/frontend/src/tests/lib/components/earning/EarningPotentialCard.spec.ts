@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/svelte';
 import * as currencyDerived from '$lib/derived/currency.derived';
 import * as earningDerived from '$lib/derived/earning.derived';
 import * as i18nDerived from '$lib/derived/i18n.derived';
-import * as tokensDerived from '$lib/derived/tokens.derived';
+import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
 import * as currencyStore from '$lib/stores/currency-exchange.store';
 import * as formatUtils from '$lib/utils/format.utils';
 
@@ -43,7 +43,7 @@ describe('EarningPotentialCard', () => {
 		);
 
 		// Mock fungible USD balance
-		vi.spyOn(tokensDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
+		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
 			staticStore(1000)
 		);
 
@@ -60,7 +60,7 @@ describe('EarningPotentialCard', () => {
 		vi.spyOn(earningDerived, 'highestApyEarningData', 'get').mockReturnValue(
 			staticStore({ apy: '15', action: vi.fn() })
 		);
-		vi.spyOn(tokensDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
+		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
 			staticStore(200)
 		);
 
@@ -74,7 +74,7 @@ describe('EarningPotentialCard', () => {
 		vi.spyOn(earningDerived, 'highestApyEarningData', 'get').mockReturnValue(
 			staticStore({ apy: 'abc', action: vi.fn() })
 		);
-		vi.spyOn(tokensDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
+		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
 			staticStore(1000)
 		);
 
@@ -87,7 +87,7 @@ describe('EarningPotentialCard', () => {
 		vi.spyOn(earningDerived, 'highestApyEarningData', 'get').mockReturnValue(
 			staticStore(undefined)
 		);
-		vi.spyOn(tokensDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
+		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
 			staticStore(1000)
 		);
 
