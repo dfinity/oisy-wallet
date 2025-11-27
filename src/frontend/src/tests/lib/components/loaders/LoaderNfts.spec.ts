@@ -10,11 +10,12 @@ import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { BUILD_AN_APE_TOKEN, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -127,6 +128,8 @@ describe('LoaderNfts', () => {
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
 
+		mockAuthStore();
+
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 	});
 
@@ -188,9 +191,16 @@ describe('LoaderNfts', () => {
 			render(LoaderNfts);
 
 			await waitFor(() => {
-				expect(extGetTokensByOwnerSpy).toHaveBeenCalledExactlyOnceWith({
+				expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(2);
+				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(1, {
 					identity: mockIdentity,
-					tokens: [mockEnabledExtToken1, mockEnabledExtToken2]
+					owner: mockPrincipal,
+					canisterId: mockEnabledExtToken1.canisterId
+				});
+				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(2, {
+					identity: mockIdentity,
+					owner: mockPrincipal,
+					canisterId: mockEnabledExtToken2.canisterId
 				});
 
 				expect(get(nftStore)).toEqual([mockExtNft1, mockExtNft2, mockExtNft3]);
