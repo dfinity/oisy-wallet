@@ -39,7 +39,7 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { calculateTokenUsdBalance, filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
+import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
@@ -183,35 +183,25 @@ export const sumTokensUiUsdStakeBalance = (tokens: TokenUi[]): number =>
 /**
  * Calculates total USD balance of mainnet tokens per network from the provided tokens list.
  *
- * @param $tokens - The list of tokens for filtering by network env and total USD balance calculation.
- * @param $balancesStore - The balances' data for the tokens.
- * @param $exchanges - The exchange rates data for the tokens.
+ * @param tokens - The list of UI tokens for filtering by network env and total USD balance calculation.
  * @returns A NetworkId-number dictionary with total USD balance of mainnet tokens per network.
  *
  */
 export const sumMainnetTokensUsdBalancesPerNetwork = ({
-	$tokens,
-	$balances,
-	$exchanges
+	tokens
 }: {
-	$tokens: Token[];
-	$balances: CertifiedStoreData<BalancesData>;
-	$exchanges: ExchangesData;
+	tokens: TokenUi[];
 }): TokensTotalUsdBalancePerNetwork =>
-	nonNullish($exchanges) && nonNullish($balances)
-		? $tokens.reduce<TokensTotalUsdBalancePerNetwork>(
-				(acc, token) =>
-					token.network.env === 'mainnet'
-						? {
-								...acc,
-								[token.network.id]:
-									(acc[token.network.id] ?? 0) +
-									(calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0)
-							}
-						: acc,
-				{}
-			)
-		: {};
+	tokens.reduce<TokensTotalUsdBalancePerNetwork>(
+		(acc, { network: { id, env }, usdBalance }) =>
+			env === 'mainnet'
+				? {
+						...acc,
+						[id]: (acc[id] ?? 0) + (usdBalance ?? 0)
+					}
+				: acc,
+		{}
+	);
 
 /**
  * Calculates total USD stake balance (including claimable rewards) of mainnet tokens per network from the provided tokens list.
