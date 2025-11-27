@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
-	import { EARNING_ENABLED } from '$env/earning';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
@@ -108,7 +107,7 @@
 
 			{#if activeTab === TokenTypes.TOKENS}
 				<TokensList />
-			{:else}
+			{:else if activeTab === TokenTypes.NFTS}
 				<NftsList />
 			{/if}
 		</StickyHeader>
@@ -118,7 +117,7 @@
 				{#snippet label()}
 					{#if activeTab === TokenTypes.TOKENS}
 						{$i18n.tokens.manage.text.manage_list}
-					{:else}
+					{:else if activeTab === TokenTypes.NFTS}
 						{$i18n.tokens.manage.text.manage_list_nft}
 					{/if}
 				{/snippet}
