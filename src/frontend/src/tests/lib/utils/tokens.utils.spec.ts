@@ -1,6 +1,7 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import {
@@ -38,6 +39,7 @@ import {
 	saveAllCustomTokens,
 	sortTokens,
 	sumMainnetTokensUsdBalancesPerNetwork,
+	sumMainnetTokensUsdStakeBalancesPerNetwork,
 	sumTokensUiUsdBalance,
 	sumTokensUiUsdStakeBalance
 } from '$lib/utils/tokens.utils';
@@ -475,6 +477,98 @@ describe('tokens.utils', () => {
 				$tokens: [],
 				$balances: mockBalances,
 				$exchanges: mockExchanges
+			});
+
+			expect(result).toEqual({});
+		});
+	});
+
+	describe('sumMainnetTokensUsdStakeBalancesPerNetwork', () => {
+		const mockTokens = [
+			{ ...ICP_TOKEN, stakeUsdBalance: Number(bn2Bi), claimableStakeBalanceUsd: Number(bn1Bi) },
+			{
+				...BTC_MAINNET_TOKEN,
+				stakeUsdBalance: Number(bn1Bi),
+				claimableStakeBalanceUsd: Number(bn3Bi)
+			},
+			{ ...ETHEREUM_TOKEN, stakeUsdBalance: Number(bn3Bi), claimableStakeBalanceUsd: Number(bn2Bi) }
+		];
+
+		const mockTestnetToken = {
+			...BTC_TESTNET_TOKEN,
+			stakeUsdBalance: Number(bn3Bi),
+			claimableStakeBalanceUsd: Number(bn2Bi)
+		};
+
+		const mockAllTokens = [...mockTokens, mockTestnetToken];
+
+		it('should return a dictionary with correct balances for the list of mainnet and testnet tokens', () => {
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
+				tokens: mockAllTokens
+			});
+
+			expect(result).toEqual({
+				[BTC_MAINNET_NETWORK_ID]: Number(bn1Bi + bn3Bi),
+				[ETHEREUM_NETWORK_ID]: Number(bn3Bi + bn2Bi),
+				[ICP_NETWORK_ID]: Number(bn2Bi + bn1Bi)
+			});
+		});
+
+		it('should handle missing stake balances', () => {
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
+				tokens: [...mockAllTokens, { ...BONK_TOKEN, claimableStakeBalanceUsd: 123 }]
+			});
+
+			expect(result).toEqual({
+				[BTC_MAINNET_NETWORK_ID]: Number(bn1Bi + bn3Bi),
+				[ETHEREUM_NETWORK_ID]: Number(bn3Bi + bn2Bi),
+				[ICP_NETWORK_ID]: Number(bn2Bi + bn1Bi),
+				[SOLANA_MAINNET_NETWORK_ID]: 123
+			});
+		});
+
+		it('should handle missing claimable balances', () => {
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
+				tokens: [...mockAllTokens, { ...BONK_TOKEN, stakeUsdBalance: 456 }]
+			});
+
+			expect(result).toEqual({
+				[BTC_MAINNET_NETWORK_ID]: Number(bn1Bi + bn3Bi),
+				[ETHEREUM_NETWORK_ID]: Number(bn3Bi + bn2Bi),
+				[ICP_NETWORK_ID]: Number(bn2Bi + bn1Bi),
+				[SOLANA_MAINNET_NETWORK_ID]: 456
+			});
+		});
+
+		it('should return a dictionary with correct balances if all token balances are 0', () => {
+			const tokens = mockAllTokens.map((t) => ({
+				...t,
+				stakeUsdBalance: Number(ZERO),
+				claimableStakeBalanceUsd: Number(ZERO)
+			}));
+
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
+				tokens
+			});
+
+			expect(result).toEqual({
+				[BTC_MAINNET_NETWORK_ID]: Number(ZERO),
+				[ETHEREUM_NETWORK_ID]: Number(ZERO),
+				[ICP_NETWORK_ID]: Number(ZERO)
+			});
+		});
+
+		it('should return an empty dictionary if no mainnet tokens are in the list', () => {
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
+				tokens: [mockTestnetToken]
+			});
+
+			expect(result).toEqual({});
+		});
+
+		it('should return an empty dictionary if no tokens are provided', () => {
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
+				tokens: []
 			});
 
 			expect(result).toEqual({});
