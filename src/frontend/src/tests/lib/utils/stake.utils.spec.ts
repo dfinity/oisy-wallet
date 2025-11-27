@@ -7,7 +7,6 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 
-
 const mockGldtToken: IcToken = {
 	...mockValidIcrcToken,
 	id: parseTokenId('GLDT'),
