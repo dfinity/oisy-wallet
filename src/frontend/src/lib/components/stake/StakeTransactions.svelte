@@ -45,7 +45,7 @@
 
 <StakeContentSection>
 	{#snippet title()}
-		Activity
+		<h4>Activity</h4>
 	{/snippet}
 	{#snippet content()}
 		{#each transactions as transaction}
