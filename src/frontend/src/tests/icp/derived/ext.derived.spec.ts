@@ -1,5 +1,4 @@
 import { enabledExtTokens, extCustomTokens } from '$icp/derived/ext.derived';
-import { extCustomTokens } from '$icp/derived/ext.derived';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
