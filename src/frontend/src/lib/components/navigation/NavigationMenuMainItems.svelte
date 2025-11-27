@@ -119,7 +119,7 @@
 	<NavigationItem
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
-			path: AppPath.Earning,
+			path: AppPath.Earn,
 			networkId,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute

@@ -540,7 +540,7 @@ describe('nav.utils', () => {
 
 		describe('isRouteEarning', () => {
 			it('should return true when route id matches Earning path', () => {
-				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Earning}`;
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Earn}`;
 
 				expect(isRouteEarning(mockPage(mockPath))).toBeTruthy();
 				expect(isRouteEarning(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
@@ -548,10 +548,10 @@ describe('nav.utils', () => {
 
 			it('should return true when route id is any subroute of the Earning path', () => {
 				expect(
-					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarningRewards}`))
+					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnRewards}`))
 				).toBeTruthy();
 				expect(
-					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}/subroute`))
+					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}/subroute`))
 				).toBeTruthy();
 			});
 
@@ -568,18 +568,16 @@ describe('nav.utils', () => {
 
 		describe('isRouteEarningGold', () => {
 			it('should return true when route id matches EarningGold path', () => {
-				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.EarningGold}`;
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}`;
 
 				expect(isRouteEarningGold(mockPage(mockPath))).toBeTruthy();
 				expect(isRouteEarningGold(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
 			});
 
 			it('should return true when route id is any subroute of the EarningGold path', () => {
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}`))).toBeTruthy();
 				expect(
-					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarningGold}`))
-				).toBeTruthy();
-				expect(
-					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarningGold}/subroute`))
+					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}/subroute`))
 				).toBeTruthy();
 			});
 
@@ -669,16 +667,16 @@ describe('nav.utils', () => {
 		});
 
 		it('isEarningPath', () => {
-			expect(isEarningPath(withAppPrefix(AppPath.Earning))).toBeTruthy();
-			expect(isEarningPath(withAppPrefix(AppPath.EarningRewards))).toBeTruthy();
-			expect(isEarningPath('/(app)/earning/whatever')).toBeTruthy();
+			expect(isEarningPath(withAppPrefix(AppPath.Earn))).toBeTruthy();
+			expect(isEarningPath(withAppPrefix(AppPath.EarnRewards))).toBeTruthy();
+			expect(isEarningPath('/(app)/earn/whatever')).toBeTruthy();
 			expect(isEarningPath(null)).toBeFalsy();
 		});
 
 		it('isEarningGoldPath', () => {
-			expect(isEarningGoldPath(withAppPrefix(AppPath.EarningGold))).toBeTruthy();
-			expect(isEarningGoldPath('/(app)/earning/gold')).toBeTruthy();
-			expect(isEarningGoldPath('/(app)/earning/ICP')).toBeFalsy();
+			expect(isEarningGoldPath(withAppPrefix(AppPath.EarnGold))).toBeTruthy();
+			expect(isEarningGoldPath('/(app)/earn/gold')).toBeTruthy();
+			expect(isEarningGoldPath('/(app)/earn/ICP')).toBeFalsy();
 			expect(isEarningGoldPath(null)).toBeFalsy();
 		});
 	});

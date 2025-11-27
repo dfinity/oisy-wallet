@@ -7,9 +7,9 @@ export enum AppPath {
 	Activity = '/activity/',
 	WalletConnect = '/wc/',
 	Rewards = '/rewards/', // Todo: remove when feature is completed
-	Earning = '/earning/',
-	EarningGold = '/earning/gold/',
-	EarningRewards = '/earning/rewards/'
+	Earn = '/earn/',
+	EarnGold = '/earn/gold/',
+	EarnRewards = '/earn/rewards/'
 }
 
 // SvelteKit uses the group defined in src/routes/(app)/ as part of the routeId. It also prefixes it with /.

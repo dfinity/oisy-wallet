@@ -68,7 +68,7 @@
 			<Button
 				colorStyle="primary"
 				fullWidth
-				onclick={() => goto(AppPath.EarningRewards)}
+				onclick={() => goto(AppPath.EarnRewards)}
 				paddingSmall>{resolveText({ i18n: $i18n, path: cardData.actionText })}</Button
 			>
 		{/snippet}
