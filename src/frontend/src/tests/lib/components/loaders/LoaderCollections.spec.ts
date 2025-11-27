@@ -116,7 +116,8 @@ describe('LoaderCollections', () => {
 				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
 					identity: mockIdentity,
 					owner: mockPrincipal,
-					canisterId
+					canisterId,
+					certified: false
 				});
 			});
 
@@ -160,7 +161,8 @@ describe('LoaderCollections', () => {
 				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
 					identity: mockIdentity,
 					owner: mockPrincipal,
-					canisterId
+					canisterId,
+					certified: false
 				});
 			});
 
@@ -240,7 +242,8 @@ describe('LoaderCollections', () => {
 				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
 					identity: mockIdentity,
 					owner: mockPrincipal,
-					canisterId
+					canisterId,
+					certified: false
 				});
 			});
 
@@ -261,7 +264,8 @@ describe('LoaderCollections', () => {
 				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
 					identity: mockIdentity,
 					owner: mockPrincipal,
-					canisterId
+					canisterId,
+					certified: false
 				});
 			});
 

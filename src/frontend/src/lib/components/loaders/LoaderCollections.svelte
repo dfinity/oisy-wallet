@@ -77,7 +77,8 @@
 				const tokens = await getTokensByOwner({
 					identity,
 					owner: identity.getPrincipal(),
-					canisterId
+					canisterId,
+					certified: false
 				});
 
 				return tokens.length > 0 ? [canisterId] : [];
