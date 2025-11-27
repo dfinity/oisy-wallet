@@ -8,7 +8,6 @@
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
-	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -128,51 +127,53 @@
 				: undefined;
 </script>
 
-<StakeContentSection>
-	{#snippet title()}
-		<h4>Activity</h4>
-	{/snippet}
-	{#snippet content()}
-		{#each expanded ? transactions : transactions.slice(0, 5) as transaction}
-			<Transaction
-				type={transaction.type}
-				token={transaction.token}
-				status={getStatus(transaction)}
-				iconType="token"
-				timestamp={getTimestamp(transaction.timestamp)}
-				from={transaction.from}
-				to={getTo(transaction)}
-				displayAmount={getDisplayAmount(transaction)}
-				onClick={() => openModal(transaction)}
-			>
-				{#if 'incoming' in transaction && transaction.incoming}
-					{#if transaction.isReward}
-						Reward claimed
+{#if transactions.length > 0}
+	<StakeContentSection>
+		{#snippet title()}
+			<h4>Activity</h4>
+		{/snippet}
+		{#snippet content()}
+			{#each expanded ? transactions : transactions.slice(0, 5) as transaction}
+				<Transaction
+					type={transaction.type}
+					token={transaction.token}
+					status={getStatus(transaction)}
+					iconType="token"
+					timestamp={getTimestamp(transaction.timestamp)}
+					from={transaction.from}
+					to={getTo(transaction)}
+					displayAmount={getDisplayAmount(transaction)}
+					onClick={() => openModal(transaction)}
+				>
+					{#if 'incoming' in transaction && transaction.incoming}
+						{#if transaction.isReward}
+							Reward claimed
+						{:else}
+							Unstaked
+						{/if}
 					{:else}
-						Unstaked
+						Staked
 					{/if}
-				{:else}
-					Staked
-				{/if}
-			</Transaction>
-		{/each}
+				</Transaction>
+			{/each}
 
-		{#if transactions.length > 5}
-			<Button
-				colorStyle="muted"
-				fullWidth
-				innerStyleClass="items-center"
-				onclick={() => (expanded = !expanded)}
-				paddingSmall
-				styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
-				transparent
-			>
-				<IconList />
-				{expanded ? $i18n.stake.text.full_history : $i18n.stake.text.recent_history}
-			</Button>
-		{/if}
-	{/snippet}
-</StakeContentSection>
+			{#if transactions.length > 5}
+				<Button
+					colorStyle="muted"
+					fullWidth
+					innerStyleClass="items-center"
+					onclick={() => (expanded = !expanded)}
+					paddingSmall
+					styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
+					transparent
+				>
+					<IconList />
+					{expanded ? $i18n.stake.text.full_history : $i18n.stake.text.recent_history}
+				</Button>
+			{/if}
+		{/snippet}
+	</StakeContentSection>
+{/if}
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
 	<BtcTransactionModal token={selectedBtcToken} transaction={selectedBtcTransaction} />
