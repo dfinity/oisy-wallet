@@ -171,7 +171,7 @@ export const enabledNonFungibleTokensWithoutSpam: Readable<NonFungibleToken[]> =
 );
 
 /**
- * It isn't performant to post filter again the Erc20 tokens that are enabled, but it's code wise convenient to avoid duplication of logic.
+ * It isn't performant to post filter again the Erc20 tokens that are enabled, but it's codewise convenient to avoid duplication of logic.
  */
 export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 	[enabledTokens],
