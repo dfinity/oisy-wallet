@@ -176,7 +176,7 @@
 					transparent
 				>
 					<IconList />
-					{expanded ? $i18n.stake.text.full_history : $i18n.stake.text.recent_history}
+					{expanded ? $i18n.stake.text.recent_history : $i18n.stake.text.full_history}
 				</Button>
 			{/if}
 		{/snippet}
