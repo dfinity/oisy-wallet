@@ -56,27 +56,28 @@
 		fromRoute = from;
 	});
 
-	let navigationPath = $derived(
+	let assetsPath = $derived(
 		$activeAssetsTabStore === TokenTypes.NFTS
 			? AppPath.Nfts
 			: $activeAssetsTabStore === TokenTypes.EARNING
 				? AppPath.Earning
 				: AppPath.Tokens
 	);
+
+	let assetsSelected = $derived(
+		isRouteTokens(page) || isRouteNfts(page) || isRouteEarning(page) || isRouteTransactions(page)
+	);
 </script>
 
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
-		path: navigationPath,
+		path: assetsPath,
 		networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
-	selected={isRouteTokens(page) ||
-		isRouteNfts(page) ||
-		isRouteEarning(page) ||
-		isRouteTransactions(page)}
+	selected={assetsSelected}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
 	{#snippet icon()}
