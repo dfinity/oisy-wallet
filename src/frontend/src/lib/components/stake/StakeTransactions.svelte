@@ -29,7 +29,7 @@
 	import { isIcToken } from '$icp/validation/ic-token.validation.js';
 	import { isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
-	import { isNetworkIdBTCMainnet, isNetworkIdEvm } from '$lib/utils/network.utils';
+	import { isNetworkIdEvm } from '$lib/utils/network.utils';
 	import { isBitcoinToken } from '$btc/utils/token.utils';
 
 	interface Props {
@@ -118,6 +118,13 @@
 			});
 		}
 	};
+
+	const getDisplayAmount = (transaction: StakingTransactionsUiWithToken) =>
+		'incoming' in transaction && transaction.incoming && !transaction.isReward
+			? transaction.value
+			: nonNullish(transaction.value)
+				? transaction.value * -1n
+				: undefined;
 </script>
 
 <StakeContentSection>
@@ -134,10 +141,10 @@
 				timestamp={getTimestamp(transaction.timestamp)}
 				from={transaction.from}
 				to={getTo(transaction)}
-				displayAmount={transaction.value}
+				displayAmount={getDisplayAmount(transaction)}
 				onClick={() => openModal(transaction)}
 			>
-				{#if 'incoming' in transaction && transaction?.incoming}
+				{#if 'incoming' in transaction && transaction.incoming}
 					{#if transaction.isReward}
 						Reward claimed
 					{:else}
@@ -149,18 +156,20 @@
 			</Transaction>
 		{/each}
 
-		<Button
-			colorStyle="muted"
-			fullWidth
-			innerStyleClass="items-center"
-			onclick={() => (expanded = !expanded)}
-			paddingSmall
-			styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
-			transparent
-		>
-			{expanded ? $i18n.core.text.less : $i18n.core.text.more}
-			<IconExpand {expanded} />
-		</Button>
+		{#if transactions.length > 5}
+			<Button
+				colorStyle="muted"
+				fullWidth
+				innerStyleClass="items-center"
+				onclick={() => (expanded = !expanded)}
+				paddingSmall
+				styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
+				transparent
+			>
+				{expanded ? $i18n.core.text.less : $i18n.core.text.more}
+				<IconExpand {expanded} />
+			</Button>
+		{/if}
 	{/snippet}
 </StakeContentSection>
 
