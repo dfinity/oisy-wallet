@@ -59,7 +59,7 @@
 		<span class="text-sm">
 			{getTokenDisplaySymbol(token)}
 
-			<span class="hidden font-normal text-tertiary sm:block">
+			<span class="hidden font-normal text-tertiary sm:inline-block">
 				<Divider />{token.name}
 			</span>
 		</span>
