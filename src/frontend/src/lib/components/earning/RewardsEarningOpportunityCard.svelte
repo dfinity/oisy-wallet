@@ -65,12 +65,9 @@
 			/>
 		{/snippet}
 		{#snippet button()}
-			<Button
-				colorStyle="primary"
-				fullWidth
-				onclick={() => goto(AppPath.EarningRewards)}
-				paddingSmall>{resolveText({ i18n: $i18n, path: cardData.actionText })}</Button
-			>
+			<Button colorStyle="primary" fullWidth onclick={() => goto(AppPath.EarnRewards)} paddingSmall>
+				{resolveText({ i18n: $i18n, path: cardData.actionText })}
+			</Button>
 		{/snippet}
 	</EarningOpportunityCard>
 {/if}
