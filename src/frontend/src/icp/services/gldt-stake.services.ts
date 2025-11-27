@@ -132,3 +132,22 @@ export const claimGldtStakingReward = async ({
 
 	return response;
 };
+
+export const withdrawGldtStakingDissolvedTokens = async ({
+	identity,
+	withdrawCompleted
+}: {
+	identity: Identity;
+	withdrawCompleted: () => void;
+}): Promise<StakePositionResponse | undefined> => {
+	const response = await manageStakePosition({
+		identity,
+		positionParams: { Withdraw: {} }
+	});
+
+	withdrawCompleted();
+
+	await waitAndTriggerWallet();
+
+	return response;
+};
