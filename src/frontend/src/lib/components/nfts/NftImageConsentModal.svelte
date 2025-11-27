@@ -22,7 +22,7 @@
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import {  updateNftMediaConsent } from '$lib/services/nft.services';
+	import { updateNftMediaConsent } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
