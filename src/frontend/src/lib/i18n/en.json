@@ -1851,7 +1851,9 @@
 			"claim_now": "Claim now",
 			"claiming": "Claiming...",
 			"get_tokens_with_amount": "Get up to $amount $token_symbol",
-			"get_tokens": "Get more $token_symbol"
+			"get_tokens": "Get more $token_symbol",
+            "full_history": "Show full history",
+            "recent_history": "Close full history"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens."
