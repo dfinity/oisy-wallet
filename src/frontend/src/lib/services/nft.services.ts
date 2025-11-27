@@ -1,21 +1,59 @@
 import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
 import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
 import { transferErc1155, transferErc721 } from '$eth/services/nft-send.services';
-import { loadNftsByNetwork } from '$eth/services/nft.services';
+import { loadNftsByNetwork as loadErcNftsByNetwork } from '$eth/services/nft.services';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
+import { loadNfts as loadExtNfts } from '$icp/services/nft.services';
+import type { IcNonFungibleToken } from '$icp/types/nft';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Address } from '$lib/types/address';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
-import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
+import { isNetworkIdEthereum, isNetworkIdEvm, isNetworkIdICP } from '$lib/utils/network.utils';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
 import { isNullish } from '@dfinity/utils';
+
+export const loadNftsByNetwork = async ({
+	networkId,
+	tokens,
+	identity,
+	ethAddress
+}: {
+	networkId: NetworkId;
+	tokens: NonFungibleToken[];
+	identity: OptionIdentity;
+	ethAddress: OptionEthAddress;
+}): Promise<Nft[]> => {
+	if (tokens.length === 0) {
+		return [];
+	}
+
+	if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
+		return await loadErcNftsByNetwork({
+			networkId,
+			// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
+			tokens: tokens as EthNonFungibleToken[],
+			walletAddress: ethAddress
+		});
+	}
+
+	if (isNetworkIdICP(networkId)) {
+		return await loadExtNfts({
+			// For now, it is acceptable to cast it since we checked before if the network is ICP.
+			tokens: tokens as IcNonFungibleToken[],
+			identity
+		});
+	}
+
+	return [];
+};
 
 export const loadNfts = async ({
 	tokens,
@@ -35,7 +73,7 @@ export const loadNfts = async ({
 			return;
 		}
 
-		const nfts: Nft[] = await loadNftsByNetwork({
+		const nfts: Nft[] = await loadErcNftsByNetwork({
 			networkId,
 			// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
 			tokens: tokens as EthNonFungibleToken[],
