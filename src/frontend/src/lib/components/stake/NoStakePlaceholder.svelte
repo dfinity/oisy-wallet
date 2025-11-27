@@ -11,6 +11,7 @@
 </script>
 
 <div class="flex flex-col items-center gap-5 px-6 py-10">
+	<!-- TODO: use the placeholder image for the staking or rename the current one to be more generic -->
 	<Img alt={$i18n.stake.alt.placeholder_image} src={noNftsBanner} />
 
 	<div class="flex flex-col items-center gap-2">
