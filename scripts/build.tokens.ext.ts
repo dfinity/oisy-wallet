@@ -114,11 +114,7 @@ class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 		return new ExtV2TokenCanister(canisterId, service, certifiedService);
 	}
 
-	extensions = async ({ certified }: QueryParams) => {
-		const { ext_extensions } = this.caller({ certified });
-
-		return await ext_extensions();
-	};
+	extensions = ({ certified }: QueryParams) => this.caller({ certified }).ext_extensions();
 }
 
 const extensions = async (canisterId: CanisterIdText) => {
