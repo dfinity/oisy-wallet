@@ -23,7 +23,12 @@
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import { isRouteNfts, isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
+	import {
+		isRouteEarning,
+		isRouteNfts,
+		isRouteTokens,
+		isRouteTransactions
+	} from '$lib/utils/nav.utils';
 
 	interface Props {
 		children: Snippet;
@@ -36,9 +41,13 @@
 	let nftsRoute = $derived(isRouteNfts(page));
 	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
 
+	let earningRoute = $derived(isRouteEarning(page));
+
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
-	let showHero = $derived((tokensRoute || nftsRoute || transactionsRoute) && !nftsCollectionRoute);
+	let showHero = $derived(
+		(tokensRoute || nftsRoute || earningRoute || transactionsRoute) && !nftsCollectionRoute
+	);
 
 	$effect(() => {
 		token.set(nftsCollectionRoute ? ($pageNonFungibleToken ?? $pageToken) : $pageToken); // we could be on the nfts page without a pageNonFungibleToken set
