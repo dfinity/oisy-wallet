@@ -152,6 +152,7 @@
 					to={getTo(transaction)}
 					displayAmount={getDisplayAmount(transaction)}
 					onClick={() => openModal(transaction)}
+					fullDate
 				>
 					{#if 'incoming' in transaction && transaction.incoming}
 						{#if transaction.isReward}
