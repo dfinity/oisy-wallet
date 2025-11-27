@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
+	import { EARNING_ENABLED } from '$env/earning';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
@@ -24,7 +25,6 @@
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
-	import {EARNING_ENABLED} from "$env/earning";
 
 	interface Props {
 		tab: TokenTypes;
@@ -72,11 +72,15 @@
 												id: TokenTypes.NFTS,
 												path: `${AppPath.Nfts}${page.url.search}`
 											},
-											...(EARNING_ENABLED ? [{
-												label: $i18n.earning.text.tab_title,
-												id: TokenTypes.EARNING,
-												path: `${AppPath.Earning}${page.url.search}`
-											}] :[]),
+											...(EARNING_ENABLED
+												? [
+														{
+															label: $i18n.earning.text.tab_title,
+															id: TokenTypes.EARNING,
+															path: `${AppPath.Earning}${page.url.search}`
+														}
+													]
+												: [])
 										]}
 										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
 										bind:activeTab
