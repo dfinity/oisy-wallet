@@ -14,8 +14,8 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import { isNetworkIdEthereum, isNetworkIdEvm , isNetworkIdICP } from '$lib/utils/network.utils';
-		import { getTokensByNetwork } from '$lib/utils/nft.utils';
+	import { isNetworkIdEthereum, isNetworkIdEvm, isNetworkIdICP } from '$lib/utils/network.utils';
+	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
 	const loadNfts = async ({
 		networkId,
