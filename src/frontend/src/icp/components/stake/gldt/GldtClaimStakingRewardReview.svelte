@@ -19,7 +19,12 @@
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<StakeReview amount={rewardAmount} {onClose} onConfirm={onClaimReward}>
+<StakeReview
+	actionButtonLabel={$i18n.stake.text.claim_now}
+	amount={rewardAmount}
+	{onClose}
+	onConfirm={onClaimReward}
+>
 	{#snippet subtitle()}
 		{$i18n.stake.text.claim_reward}
 	{/snippet}
