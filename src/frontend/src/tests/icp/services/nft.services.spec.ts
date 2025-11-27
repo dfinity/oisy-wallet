@@ -6,7 +6,7 @@ import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-toke
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 
 describe('nft.services', () => {
-	describe('loadNfts', () => {
+	describe('loadNfts', async () => {
 		const mockParams = {
 			tokens: [mockValidExtV2Token, mockValidExtV2Token2],
 			identity: mockIdentity
@@ -15,11 +15,11 @@ describe('nft.services', () => {
 		const mockTokenIndices1 = [1, 2, 3];
 		const mockTokenIndices2 = [4, 5];
 
-		const expected1 = mockTokenIndices1.map((index) =>
-			mapExtNft({ index, token: mockValidExtV2Token })
+		const expected1 = await Promise.all(
+			mockTokenIndices1.map((index) => mapExtNft({ index, token: mockValidExtV2Token }))
 		);
-		const expected2 = mockTokenIndices2.map((index) =>
-			mapExtNft({ index, token: mockValidExtV2Token2 })
+		const expected2 = await Promise.all(
+			mockTokenIndices2.map((index) => mapExtNft({ index, token: mockValidExtV2Token2 }))
 		);
 		const expected = [...expected1, ...expected2];
 
