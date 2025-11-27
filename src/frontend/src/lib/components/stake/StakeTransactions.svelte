@@ -11,6 +11,26 @@
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		modalBtcTransaction,
+		modalEthTransaction,
+		modalIcTransaction,
+		modalSolTransaction
+	} from '$lib/derived/modal.derived';
+	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
+	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
+	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
+	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
+	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import type { BtcTransactionUi } from '$btc/types/btc';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { isIcToken } from '$icp/validation/ic-token.validation.js';
+	import { isTokenIcrc } from '$icp/utils/icrc.utils';
+	import { isSolanaToken } from '$sol/utils/token.utils';
+	import { isNetworkIdBTCMainnet, isNetworkIdEvm } from '$lib/utils/network.utils';
+	import { isBitcoinToken } from '$btc/utils/token.utils';
 
 	interface Props {
 		transactions: StakingTransactionsUiWithToken[];
@@ -46,6 +66,58 @@
 	};
 
 	let expanded = $state(false);
+
+	let { transaction: selectedBtcTransaction, token: selectedBtcToken } = $derived(
+		mapTransactionModalData<BtcTransactionUi>({
+			$modalOpen: $modalBtcTransaction,
+			$modalStore
+		})
+	);
+
+	let { transaction: selectedEthTransaction, token: selectedEthToken } = $derived(
+		mapTransactionModalData<EthTransactionUi>({
+			$modalOpen: $modalEthTransaction,
+			$modalStore
+		})
+	);
+
+	let { transaction: selectedIcTransaction, token: selectedIcToken } = $derived(
+		mapTransactionModalData<IcTransactionUi>({
+			$modalOpen: $modalIcTransaction,
+			$modalStore
+		})
+	);
+
+	let { transaction: selectedSolTransaction, token: selectedSolToken } = $derived(
+		mapTransactionModalData<SolTransactionUi>({
+			$modalOpen: $modalSolTransaction,
+			$modalStore
+		})
+	);
+
+	const openModal = (transaction: AnyTransactionUiWithToken) => {
+		if (isIcToken(transaction.token) || isTokenIcrc(transaction.token)) {
+			modalStore.openIcTransaction({
+				id: Symbol(),
+				data: { transaction: transaction as IcTransactionUi, token: transaction.token }
+			});
+		} else if (isSolanaToken(transaction.token)) {
+			modalStore.openSolTransaction({
+				id: Symbol(),
+				data: { transaction: transaction as SolTransactionUi, token: transaction.token }
+			});
+		} else if (isNetworkIdEvm(transaction.token.network.id)) {
+			modalStore.openEthTransaction({
+				id: Symbol(),
+				data: { transaction: transaction as EthTransactionUi, token: transaction.token }
+			});
+		} else if (isBitcoinToken(transaction.token)) {
+			modalStore.openBtcTransaction({
+				id: Symbol(),
+				data: { transaction: transaction as BtcTransactionUi, token: transaction.token }
+			});
+		}
+	};
 </script>
 
 <StakeContentSection>
@@ -63,6 +135,7 @@
 				from={transaction.from}
 				to={getTo(transaction)}
 				displayAmount={transaction.value}
+				onClick={() => openModal(transaction)}
 			>
 				{#if 'incoming' in transaction && transaction?.incoming}
 					{#if transaction.isReward}
@@ -90,3 +163,13 @@
 		</Button>
 	{/snippet}
 </StakeContentSection>
+
+{#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
+	<BtcTransactionModal token={selectedBtcToken} transaction={selectedBtcTransaction} />
+{:else if $modalEthTransaction && nonNullish(selectedEthTransaction)}
+	<EthTransactionModal token={selectedEthToken} transaction={selectedEthTransaction} />
+{:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
+	<IcTransactionModal token={selectedIcToken} transaction={selectedIcTransaction} />
+{:else if $modalSolTransaction && nonNullish(selectedSolTransaction)}
+	<SolTransactionModal token={selectedSolToken} transaction={selectedSolTransaction} />
+{/if}
