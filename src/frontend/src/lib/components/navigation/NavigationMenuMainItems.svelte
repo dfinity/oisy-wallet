@@ -13,24 +13,25 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_ITEM_ACTIVITY,
-		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_EXPLORER,
+		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
 	} from '$lib/constants/test-ids.constants';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { userSelectedNetworkStore, activeAssetsTabStore } from '$lib/stores/settings.store';
+	import { activeAssetsTabStore, userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import {
 		isRouteActivity,
-		isRouteRewards,
 		isRouteDappExplorer,
-		isRouteSettings,
-		isRouteTransactions,
-		networkUrl,
 		isRouteEarn,
+		isRouteEarning,
+		isRouteNfts,
+		isRouteRewards,
+		isRouteSettings,
 		isRouteTokens,
-		isRouteNfts
+		isRouteTransactions,
+		networkUrl
 	} from '$lib/utils/nav.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
@@ -54,17 +55,28 @@
 	afterNavigate(({ from }) => {
 		fromRoute = from;
 	});
+
+	let navigationPath = $derived(
+		$activeAssetsTabStore === TokenTypes.NFTS
+			? AppPath.Nfts
+			: $activeAssetsTabStore === TokenTypes.EARNING
+				? AppPath.Earning
+				: AppPath.Tokens
+	);
 </script>
 
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
-		path: $activeAssetsTabStore === TokenTypes.NFTS ? AppPath.Nfts : AppPath.Tokens,
+		path: navigationPath,
 		networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
-	selected={isRouteTokens(page) || isRouteNfts(page) || isRouteTransactions(page)}
+	selected={isRouteTokens(page) ||
+		isRouteNfts(page) ||
+		isRouteEarning(page) ||
+		isRouteTransactions(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
 	{#snippet icon()}
