@@ -1,7 +1,4 @@
-import { exchanges } from '$lib/derived/exchange.derived';
 import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
-import { enabledTokens } from '$lib/derived/tokens.derived';
-import { balancesStore } from '$lib/stores/balances.store';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import {
 	sumMainnetTokensUsdBalancesPerNetwork,
@@ -10,14 +7,12 @@ import {
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * A store with a NetworkId-number dictionary with a total USD balance of mainnet tokens per network.
+ * A store with a NetworkId-number dictionary with total USD balance of mainnet tokens per network.
  */
 export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdBalancePerNetwork> =
-	derived([enabledTokens, balancesStore, exchanges], ([$enabledTokens, $balances, $exchanges]) =>
+	derived([enabledFungibleTokensUi], ([$enabledTokens]) =>
 		sumMainnetTokensUsdBalancesPerNetwork({
-			$tokens: $enabledTokens,
-			$balances,
-			$exchanges
+			tokens: $enabledTokens
 		})
 	);
 
