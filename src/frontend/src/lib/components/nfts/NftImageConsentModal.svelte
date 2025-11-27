@@ -22,7 +22,7 @@
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { loadNfts, updateNftMediaConsent } from '$lib/services/nft.services';
+	import {  updateNftMediaConsent } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -62,20 +62,14 @@
 
 	const save = async (allowMedia: boolean) => {
 		saveLoading = true;
+
 		if (nonNullish(token)) {
-			const saveToken = await updateNftMediaConsent({
+			await updateNftMediaConsent({
 				token,
 				$authIdentity,
 				allowMedia,
 				$ethAddress
 			});
-
-			if (nonNullish(saveToken)) {
-				await loadNfts({
-					tokens: [saveToken],
-					walletAddress: $ethAddress
-				});
-			}
 		}
 
 		saveLoading = false;
