@@ -15,17 +15,10 @@ import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icr
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
-import { exchanges } from '$lib/derived/exchange.derived';
-import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
 import { isTokenFungible } from '$lib/utils/nft.utils';
-import {
-	filterEnabledTokens,
-	sumMainnetTokensUsdBalancesPerNetwork,
-	sumMainnetTokensUsdStakeBalancesPerNetwork
-} from '$lib/utils/tokens.utils';
 import { filterEnabledTokens } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
