@@ -3,7 +3,12 @@ import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as gldtStakeApi from '$icp/api/gldt_stake.api';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
-import { claimGldtStakingReward, stakeGldt, unstakeGldt } from '$icp/services/gldt-stake.services';
+import {
+	claimGldtStakingReward,
+	stakeGldt,
+	unstakeGldt,
+	withdrawGldtStakingDissolvedTokens
+} from '$icp/services/gldt-stake.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import * as dateUtils from '$icp/utils/date.utils';
 import * as backendApi from '$lib/api/backend.api';
@@ -151,6 +156,34 @@ describe('gldt-stake.services', () => {
 			expect(setCustomTokenMock).toHaveBeenCalledOnce();
 			expect(loadCustomTokens).toHaveBeenCalledOnce();
 			expect(mockStakeCompleted).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('withdrawGldtStakingDissolvedTokens', () => {
+		const withdrawGldtStakingDissolvedTokensParams = {
+			identity: baseParams.identity,
+			withdrawCompleted: mockStakeCompleted
+		};
+
+		it('calls all required functions and returns response correctly', async () => {
+			const response = await withdrawGldtStakingDissolvedTokens(
+				withdrawGldtStakingDissolvedTokensParams
+			);
+
+			expect(gldtStakeApi.manageStakePosition).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				positionParams: { Withdraw: {} }
+			});
+			expect(response).toBe(stakePositionMockResponse);
+			expect(mockStakeCompleted).toHaveBeenCalledOnce();
+		});
+
+		it('throws an error if the API call fails', async () => {
+			vi.spyOn(gldtStakeApi, 'manageStakePosition').mockRejectedValue(new Error('Error'));
+
+			await expect(
+				withdrawGldtStakingDissolvedTokens(withdrawGldtStakingDissolvedTokensParams)
+			).rejects.toThrow('Error');
 		});
 	});
 });

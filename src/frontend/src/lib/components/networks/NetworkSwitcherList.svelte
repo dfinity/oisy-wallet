@@ -10,7 +10,7 @@
 	import {
 		enabledMainnetTokensUsdBalancesPerNetwork,
 		enabledMainnetTokensUsdStakeBalancesPerNetwork
-	} from '$lib/derived/tokens.derived';
+	} from '$lib/derived/network-balances.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
 	import type { NetworkId, Network as NetworkType, OptionNetworkId } from '$lib/types/network';

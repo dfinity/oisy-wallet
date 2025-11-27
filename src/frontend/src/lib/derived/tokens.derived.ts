@@ -18,16 +18,15 @@ import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { balancesStore } from '$lib/stores/balances.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
-import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import { isTokenFungible } from '$lib/utils/nft.utils';
 import {
 	filterEnabledTokens,
 	sumMainnetTokensUsdBalancesPerNetwork,
 	sumMainnetTokensUsdStakeBalancesPerNetwork
 } from '$lib/utils/tokens.utils';
+import { filterEnabledTokens } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
@@ -193,25 +192,3 @@ export const enabledIcTokens: Readable<IcToken[]> = derived([enabledTokens], ([$
 export const enabledSplTokens: Readable<SplToken[]> = derived([enabledTokens], ([$enabledTokens]) =>
 	$enabledTokens.filter(isTokenSpl)
 );
-
-/**
- * A store with a NetworkId-number dictionary with a total USD balance of mainnet tokens per network.
- */
-export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdBalancePerNetwork> =
-	derived([enabledTokens, balancesStore, exchanges], ([$enabledTokens, $balances, $exchanges]) =>
-		sumMainnetTokensUsdBalancesPerNetwork({
-			$tokens: $enabledTokens,
-			$balances,
-			$exchanges
-		})
-	);
-
-/**
- * A store with a NetworkId-number dictionary with total USD stake balance (including claimable rewards) of mainnet tokens per network.
- */
-export const enabledMainnetTokensUsdStakeBalancesPerNetwork: Readable<TokensTotalUsdBalancePerNetwork> =
-	derived([enabledFungibleTokensUi], ([$enabledTokens]) =>
-		sumMainnetTokensUsdStakeBalancesPerNetwork({
-			tokens: $enabledTokens
-		})
-	);

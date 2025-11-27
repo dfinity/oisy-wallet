@@ -2,6 +2,7 @@ import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc721Token } from '$eth/types/erc721';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import type { ExtToken } from '$icp/types/ext-token';
+import type { IcNonFungibleToken } from '$icp/types/nft';
 import type {
 	NftAttributeSchema,
 	NftCollectionSchema,
@@ -32,7 +33,7 @@ export type OwnedContract = z.infer<typeof OwnedContractSchema>;
 
 export type NonFungibleTokensByNetwork = Map<NetworkId, NonFungibleToken[]>;
 
-export type NonFungibleToken = EthNonFungibleToken | ExtToken;
+export type NonFungibleToken = EthNonFungibleToken | IcNonFungibleToken;
 
 export type NonFungibleTokenIdentifier =
 	| Erc721Token['address']
