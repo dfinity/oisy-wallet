@@ -1839,6 +1839,7 @@
 			"unclaimed_rewards": "",
 			"claim_reward": "",
 			"claim_rewards": "",
+			"claim_reward_short": "",
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",

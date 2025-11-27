@@ -1839,6 +1839,7 @@
 			"unclaimed_rewards": "Unclaimed rewards",
 			"claim_reward": "Claim reward",
 			"claim_rewards": "Claim rewards",
+			"claim_reward_short": "Claim",
 			"claim_now": "Claim now",
 			"claiming": "Claiming...",
 			"get_tokens_with_amount": "Get up to $amount $token_symbol",

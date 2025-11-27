@@ -1465,6 +1465,7 @@ interface I18nStake {
 		unclaimed_rewards: string;
 		claim_reward: string;
 		claim_rewards: string;
+		claim_reward_short: string;
 		claim_now: string;
 		claiming: string;
 		get_tokens_with_amount: string;
