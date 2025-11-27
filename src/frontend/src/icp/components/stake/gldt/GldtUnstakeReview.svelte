@@ -54,7 +54,13 @@
 	{/if}
 {/snippet}
 
-<StakeReview {amount} disabled={invalid} {onBack} onConfirm={onUnstake}>
+<StakeReview
+	actionButtonLabel={$i18n.stake.text.unstake_now}
+	{amount}
+	disabled={invalid}
+	{onBack}
+	onConfirm={onUnstake}
+>
 	{#snippet subtitle()}
 		{$i18n.stake.text.unstake_review_subtitle}
 	{/snippet}
