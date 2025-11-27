@@ -1851,7 +1851,9 @@
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": ""
+			"get_tokens": "",
+			"full_history": "",
+			"recent_history": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": ""
