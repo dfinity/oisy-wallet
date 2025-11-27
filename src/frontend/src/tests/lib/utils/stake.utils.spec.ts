@@ -6,7 +6,7 @@ import { getGldtStakingTransactions } from '$lib/utils/stake.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
-import { describe, expect, it } from 'vitest';
+
 
 const mockGldtToken: IcToken = {
 	...mockValidIcrcToken,
@@ -64,7 +64,7 @@ describe('getStakingTransactions', () => {
 			...BASE_INPUT
 		});
 
-		expect(result[0].isReward).toBe(false);
+		expect(result[0].isReward).toBeFalsy();
 		expect(result[0].token).toBe(mockGldtToken);
 	});
 
@@ -80,7 +80,7 @@ describe('getStakingTransactions', () => {
 			...BASE_INPUT
 		});
 
-		expect(result[0].isReward).toBe(true);
+		expect(result[0].isReward).toBeTruthy();
 		expect(result[0].token).toBe(mockGoldaoToken);
 	});
 
@@ -141,7 +141,7 @@ describe('getStakingTransactions', () => {
 			...BASE_INPUT
 		});
 
-		expect(result.every((tx) => tx.isReward)).toBe(true);
-		expect(result.every((tx) => tx.token === mockGoldaoToken)).toBe(true);
+		expect(result.every((tx) => tx.isReward)).toBeTruthy();
+		expect(result.every((tx) => tx.token === mockGoldaoToken)).toBeTruthy();
 	});
 });
