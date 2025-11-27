@@ -41,6 +41,8 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 }));
 
 describe('nft.services', () => {
+	const originalLoadErcNftsByNetwork = ethNftServices.loadNftsByNetwork;
+
 	const mockAlchemyProvider = {
 		network: new Network('ethereum', 1),
 		provider: {},
@@ -162,6 +164,10 @@ describe('nft.services', () => {
 			nftStore.resetAll();
 
 			vi.mocked(alchemyProviders).mockReturnValue(mockAlchemyProvider);
+
+			vi.spyOn(ethNftServices, 'loadNftsByNetwork').mockImplementation(
+				originalLoadErcNftsByNetwork
+			);
 		});
 
 		it('should not load NFTs if no tokens were provided', async () => {
