@@ -8,6 +8,7 @@ import {
 	formatSecondsToDate,
 	formatSecondsToNormalizedDate,
 	formatStakeApyNumber,
+	formatTimestampToDaysDifference,
 	formatToShortDateString,
 	formatToken,
 	formatTokenBigintToNumber
@@ -449,6 +450,40 @@ describe('format.utils', () => {
 
 				expect(result).toMatch('December 25, 2022');
 			});
+		});
+	});
+
+	describe('formatTimestampToDaysDifference', () => {
+		const currentDate = new Date();
+
+		it('should return "today" for the current date', () => {
+			const currentDateTimestamp = currentDate.getTime();
+
+			expect(formatTimestampToDaysDifference({ timestamp: currentDateTimestamp })).toBe('today');
+		});
+
+		it('should return "yesterday" for the previous date', () => {
+			const yesterday = new Date(currentDate);
+			yesterday.setDate(currentDate.getDate() - 1);
+			const yesterdayTimestamp = yesterday.getTime();
+
+			expect(formatTimestampToDaysDifference({ timestamp: yesterdayTimestamp })).toBe('yesterday');
+		});
+
+		it('should return 7 days for the future date', () => {
+			const yesterday = new Date(currentDate);
+			yesterday.setDate(currentDate.getDate() + 7);
+			const yesterdayTimestamp = yesterday.getTime();
+
+			expect(formatTimestampToDaysDifference({ timestamp: yesterdayTimestamp })).toBe('in 7 days');
+		});
+
+		it('should return "tomorrow" for the next date', () => {
+			const yesterday = new Date(currentDate);
+			yesterday.setDate(currentDate.getDate() + 1);
+			const yesterdayTimestamp = yesterday.getTime();
+
+			expect(formatTimestampToDaysDifference({ timestamp: yesterdayTimestamp })).toBe('tomorrow');
 		});
 	});
 

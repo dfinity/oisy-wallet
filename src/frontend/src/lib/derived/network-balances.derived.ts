@@ -7,7 +7,7 @@ import {
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * A store with a NetworkId-number dictionary with a total USD balance of mainnet tokens per network.
+ * A store with a NetworkId-number dictionary with total USD balance of mainnet tokens per network.
  */
 export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdBalancePerNetwork> =
 	derived([enabledFungibleTokensUi], ([$enabledTokens]) =>
