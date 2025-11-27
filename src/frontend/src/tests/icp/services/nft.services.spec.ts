@@ -26,7 +26,8 @@ describe('nft.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(extTokenApi, 'getTokensByOwner').mockImplementation(async ({ canisterId }) => {
+			// @ts-expect-error This is a mocked implementation that is not asynchronous as the original method is.
+			vi.spyOn(extTokenApi, 'getTokensByOwner').mockImplementation(({ canisterId }) => {
 				if (canisterId === mockValidExtV2Token.canisterId) {
 					return mockTokenIndices1;
 				}
