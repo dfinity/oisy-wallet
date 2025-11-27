@@ -5,7 +5,7 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { highestApyEarningData } from '$lib/derived/earning.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens.derived';
+	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';

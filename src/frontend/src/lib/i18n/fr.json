@@ -730,7 +730,7 @@
 				"internet_computer_principal_copied": "Principal Internet Computer copié dans le presse-papiers.",
 				"display_internet_computer_principal_qr": "Afficher le Principal Internet Computer sous forme de code QR",
 				"icp_account": "Compte ICP (pour les échanges)",
-				"icp_account_title": "Adresse du portefeuille ICP - Seulement ICP",
+				"icp_account_title": "Adresse du portefeuille ICP - Seulement token ICP",
 				"icp_account_copied": "Compte ICP copié dans le presse-papiers.",
 				"display_icp_account_qr": "Afficher le compte ICP sous forme de code QR"
 			}
@@ -1855,6 +1855,19 @@
 				"item4_title": "",
 				"item4_description": "",
 				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
 			}
 		}
 	},

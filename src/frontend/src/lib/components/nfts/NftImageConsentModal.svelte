@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
-	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
-	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
-	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
@@ -26,7 +22,7 @@
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { loadNfts } from '$lib/services/nft.services';
+	import { loadNfts, updateNftMediaConsent } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -66,31 +62,24 @@
 
 	const save = async (allowMedia: boolean) => {
 		saveLoading = true;
-		if (nonNullish(token) && nonNullish($authIdentity)) {
-			const saveToken = {
-				...token,
-				allowExternalContentSource: allowMedia,
-				enabled: true // must be true otherwise we couldnt see it at this point
-			};
+		if (nonNullish(token)) {
+			const saveToken = await updateNftMediaConsent({
+				token,
+				$authIdentity,
+				allowMedia,
+				$ethAddress
+			});
 
-			if (isTokenErc721(token)) {
-				await saveErc721CustomTokens({
+			if (nonNullish(saveToken)) {
+				await loadNfts({
 					tokens: [saveToken],
-					identity: $authIdentity
-				});
-			} else if (isTokenErc1155(token)) {
-				await saveErc1155CustomTokens({
-					tokens: [saveToken],
-					identity: $authIdentity
+					walletAddress: $ethAddress
 				});
 			}
-
-			await loadNfts({
-				tokens: [saveToken],
-				walletAddress: $ethAddress
-			});
 		}
+
 		saveLoading = false;
+
 		modalStore.close();
 	};
 

@@ -7,6 +7,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import { allCrossChainSwapTokens, allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -40,7 +41,8 @@
 				(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
 			),
 			$exchanges,
-			$balances: $balancesStore
+			$balances: $balancesStore,
+			$stakeBalances
 		})
 	);
 

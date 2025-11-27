@@ -784,7 +784,7 @@
 				"solana_address": "Endereço Solana",
 				"solana_address_title": "Endereço da carteira Solana",
 				"solana_devnet_address": "Endereço Solana da Devnet",
-				"solana_devnet_address_title": "Endereço da carteira Solana da Devnet",
+				"solana_devnet_address_title": "Endereço da carteira Solana Devnet",
 				"solana_local_address": "Endereço Solana Local",
 				"solana_local_address_title": "Endereço da carteira Solana Local",
 				"solana_address_copied": "Endereço Solana copiado para a área de transferência",
@@ -1855,6 +1855,19 @@
 				"item4_title": "",
 				"item4_description": "",
 				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
 			}
 		}
 	},

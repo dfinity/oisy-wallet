@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { type Component, type Snippet, untrack } from 'svelte';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
+	import type { EthNonFungibleToken } from '$eth/types/nft';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -22,6 +23,7 @@
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
+	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -105,10 +107,18 @@
 			return;
 		}
 
+		if (!isNetworkIdEthereum(network.id) && !isNetworkIdEvm(network.id)) {
+			return;
+		}
+
 		try {
 			const { getNftMetadata } = alchemyProviders(network.id);
 
-			fetchedNft = await getNftMetadata({ token, tokenId: parseNftId(String(tokenId)) });
+			fetchedNft = await getNftMetadata({
+				// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
+				token: token as EthNonFungibleToken,
+				tokenId: parseNftId(String(tokenId))
+			});
 		} catch (_: unknown) {
 			fetchedNft = undefined;
 		}
