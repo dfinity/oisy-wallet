@@ -70,6 +70,11 @@
 												label: $i18n.nfts.text.title,
 												id: TokenTypes.NFTS,
 												path: `${AppPath.Nfts}${page.url.search}`
+											},
+											{
+												label: $i18n.earning.text.tab_title,
+												id:TokenTypes.EARNING,
+												path: `${AppPath.Earning}${page.url.search}`
 											}
 										]}
 										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
