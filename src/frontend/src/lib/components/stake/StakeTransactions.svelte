@@ -31,6 +31,7 @@
 	import { isSolanaToken } from '$sol/utils/token.utils';
 	import { isNetworkIdEvm } from '$lib/utils/network.utils';
 	import { isBitcoinToken } from '$btc/utils/token.utils';
+	import IconList from '$lib/components/icons/IconList.svelte';
 
 	interface Props {
 		transactions: StakingTransactionsUiWithToken[];
@@ -166,8 +167,8 @@
 				styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
 				transparent
 			>
-				{expanded ? $i18n.core.text.less : $i18n.core.text.more}
-				<IconExpand {expanded} />
+				<IconList />
+				{expanded ? $i18n.stake.text.full_history : $i18n.stake.text.recent_history}
 			</Button>
 		{/if}
 	{/snippet}
