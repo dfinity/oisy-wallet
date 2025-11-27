@@ -54,10 +54,6 @@
 		const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
 			const nfts = await loadNfts({ networkId, tokens });
 
-			if (nfts.length === 0) {
-				return;
-			}
-
 			nftStore.setAllByNetwork({ networkId, nfts });
 		});
 
