@@ -4,6 +4,7 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -44,8 +45,13 @@
 
 <LogoButton hover={false}>
 	{#snippet logo()}
-		<span class="mr-2 flex">
-			<TokenLogo badge={{ type: 'network' }} color="white" data={token} />
+		<span class="flex sm:mr-2">
+			<Responsive up="md">
+				<TokenLogo badge={{ type: 'network' }} color="white" data={token} />
+			</Responsive>
+			<Responsive down="sm">
+				<TokenLogo badge={{ type: 'network' }} color="white" data={token} logoSize="xs" />
+			</Responsive>
 		</span>
 	{/snippet}
 
@@ -53,7 +59,7 @@
 		<span class="text-sm">
 			{getTokenDisplaySymbol(token)}
 
-			<span class="font-normal text-tertiary">
+			<span class="hidden font-normal text-tertiary sm:block">
 				<Divider />{token.name}
 			</span>
 		</span>
@@ -88,9 +94,14 @@
 			{disabled}
 			onclick={stopPropagation(onClick)}
 			paddingSmall
-			styleClass="ml-8"
+			styleClass="sm:ml-8 ml-2 sm:text-base text-sm"
 		>
-			{$i18n.stake.text.claim_reward}
+			<Responsive up="md">
+				{$i18n.stake.text.claim_reward}
+			</Responsive>
+			<Responsive down="sm">
+				{$i18n.stake.text.claim_reward_short}
+			</Responsive>
 		</Button>
 	{/snippet}
 </LogoButton>
