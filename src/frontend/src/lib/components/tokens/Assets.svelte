@@ -73,7 +73,7 @@
 											},
 											{
 												label: $i18n.earning.text.tab_title,
-												id:TokenTypes.EARNING,
+												id: TokenTypes.EARNING,
 												path: `${AppPath.Earning}${page.url.search}`
 											}
 										]}
