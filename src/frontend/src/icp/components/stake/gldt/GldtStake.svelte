@@ -27,6 +27,7 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import StakeTransactions from '$lib/components/stake/StakeTransactions.svelte';
 	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
+	import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -62,7 +63,9 @@
 						icExtendedTransactions: [],
 						icTransactionsStore: $icTransactionsStore
 					}).map(({ data: t }) => ({ ...t, isReward: true, token: goldaoToken }))
-				]
+				].filter(
+					({ from, to }) => from === GLDT_LEDGER_CANISTER_ID || to === GLDT_LEDGER_CANISTER_ID
+				)
 			: []
 	);
 
