@@ -9,8 +9,29 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { nftStore } from '$lib/stores/nft.store';
+	import type { NetworkId } from '$lib/types/network';
+	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
+
+	const loadNfts = async ({
+		networkId,
+		tokens
+	}: {
+		networkId: NetworkId;
+		tokens: NonFungibleToken[];
+	}): Promise<Nft[]> => {
+		if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
+			return await loadNftsByNetwork({
+				networkId,
+				// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
+				tokens: tokens as EthNonFungibleToken[],
+				walletAddress: $ethAddress
+			});
+		}
+
+		return [];
+	};
 
 	const onLoad = async () => {
 		if (!NFTS_ENABLED || isNullish($ethAddress)) {
@@ -20,16 +41,11 @@
 		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
 
 		const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
-			if (!isNetworkIdEthereum(networkId) && !isNetworkIdEvm(networkId)) {
+			const nfts = await loadNfts({ networkId, tokens });
+
+			if (nfts.length === 0) {
 				return;
 			}
-
-			const nfts = await loadNftsByNetwork({
-				networkId,
-				// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
-				tokens: tokens as EthNonFungibleToken[],
-				walletAddress: $ethAddress
-			});
 
 			nftStore.setAllByNetwork({ networkId, nfts });
 		});
