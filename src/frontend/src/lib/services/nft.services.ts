@@ -6,6 +6,8 @@ import type { OptionEthAddress } from '$eth/types/address';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
+import { saveCustomTokens as saveCustomExtToken } from '$icp/services/ext-custom-tokens.services';
+import { isTokenExtV2CustomToken } from '$icp/utils/ext.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { nftStore } from '$lib/stores/nft.store';
@@ -68,6 +70,11 @@ export const saveNftCustomToken = async ({
 		});
 	} else if (isTokenErc1155CustomToken(token)) {
 		await saveCustomErc1155Token({
+			identity,
+			tokens: [token]
+		});
+	} else if (isTokenExtV2CustomToken(token)) {
+		await saveCustomExtToken({
 			identity,
 			tokens: [token]
 		});
