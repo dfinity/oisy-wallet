@@ -404,50 +404,33 @@ describe('tokens.utils', () => {
 	});
 
 	describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
-		const mockUsdValue = vi.mocked(usdValue);
+		const mockTokens = [
+			{ ...ICP_TOKEN, usdBalance: Number(bn2Bi) },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: Number(bn1Bi) },
+			{ ...ETHEREUM_TOKEN, usdBalance: Number(bn3Bi) }
+		];
 
-		beforeEach(() => {
-			vi.resetAllMocks();
+		const mockTestnetToken = { ...BTC_TESTNET_TOKEN, usdBalance: Number(bn3Bi) };
 
-			mockUsdValue.mockImplementation(
-				({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
-			);
-		});
+		const mockAllTokens = [...mockTokens, mockTestnetToken];
 
 		it('should return a dictionary with correct balances for the list of mainnet and testnet tokens', () => {
-			const balances = {
-				...mockBalances,
-				[BTC_TESTNET_TOKEN.id]: { data: bn3Bi, certified }
-			};
-			const tokens = [...mockTokens, BTC_TESTNET_TOKEN];
-
-			const result = sumMainnetTokensUsdBalancesPerNetwork({
-				$tokens: tokens,
-				$balances: balances,
-				$exchanges: mockExchanges
-			});
+			const result = sumMainnetTokensUsdBalancesPerNetwork({ tokens: mockAllTokens });
 
 			expect(result).toEqual({
-				[BTC_MAINNET_NETWORK_ID]: Number(bn2Bi),
+				[BTC_MAINNET_NETWORK_ID]: Number(bn1Bi),
 				[ETHEREUM_NETWORK_ID]: Number(bn3Bi),
-				[ICP_NETWORK_ID]: Number(bn1Bi)
+				[ICP_NETWORK_ID]: Number(bn2Bi)
 			});
 		});
 
 		it('should return a dictionary with correct balances if all token balances are 0', () => {
-			const balances = {
-				[ICP_TOKEN.id]: { data: ZERO, certified },
-				[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
-				[ETHEREUM_TOKEN.id]: { data: ZERO, certified },
-				[BTC_TESTNET_TOKEN.id]: { data: ZERO, certified }
-			};
-			const tokens = [...mockTokens, BTC_TESTNET_TOKEN];
+			const tokens = mockAllTokens.map((t) => ({
+				...t,
+				usdBalance: Number(ZERO)
+			}));
 
-			const result = sumMainnetTokensUsdBalancesPerNetwork({
-				$tokens: tokens,
-				$balances: balances,
-				$exchanges: mockExchanges
-			});
+			const result = sumMainnetTokensUsdBalancesPerNetwork({ tokens });
 
 			expect(result).toEqual({
 				[BTC_MAINNET_NETWORK_ID]: Number(ZERO),
@@ -457,27 +440,13 @@ describe('tokens.utils', () => {
 		});
 
 		it('should return an empty dictionary if no mainnet tokens are in the list', () => {
-			const balances = {
-				...mockBalances,
-				[BTC_TESTNET_TOKEN.id]: { data: bn2Bi, certified }
-			};
-			const tokens = [BTC_TESTNET_TOKEN];
-
-			const result = sumMainnetTokensUsdBalancesPerNetwork({
-				$tokens: tokens,
-				$balances: balances,
-				$exchanges: mockExchanges
-			});
+			const result = sumMainnetTokensUsdBalancesPerNetwork({ tokens: [mockTestnetToken] });
 
 			expect(result).toEqual({});
 		});
 
 		it('should return an empty dictionary if no tokens are provided', () => {
-			const result = sumMainnetTokensUsdBalancesPerNetwork({
-				$tokens: [],
-				$balances: mockBalances,
-				$exchanges: mockExchanges
-			});
+			const result = sumMainnetTokensUsdBalancesPerNetwork({ tokens: [] });
 
 			expect(result).toEqual({});
 		});
@@ -503,9 +472,7 @@ describe('tokens.utils', () => {
 		const mockAllTokens = [...mockTokens, mockTestnetToken];
 
 		it('should return a dictionary with correct balances for the list of mainnet and testnet tokens', () => {
-			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
-				tokens: mockAllTokens
-			});
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({ tokens: mockAllTokens });
 
 			expect(result).toEqual({
 				[BTC_MAINNET_NETWORK_ID]: Number(bn1Bi + bn3Bi),
@@ -559,17 +526,13 @@ describe('tokens.utils', () => {
 		});
 
 		it('should return an empty dictionary if no mainnet tokens are in the list', () => {
-			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
-				tokens: [mockTestnetToken]
-			});
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({ tokens: [mockTestnetToken] });
 
 			expect(result).toEqual({});
 		});
 
 		it('should return an empty dictionary if no tokens are provided', () => {
-			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
-				tokens: []
-			});
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({ tokens: [] });
 
 			expect(result).toEqual({});
 		});
