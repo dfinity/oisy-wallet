@@ -5,7 +5,13 @@ import { idlFactory as idlCertifiedFactoryExtV2Token } from '$declarations/ext_v
 import { idlFactory as idlFactoryExtV2Token } from '$declarations/ext_v2_token/ext_v2_token.factory.did';
 import type { EnvExtToken } from '$env/types/env-ext-token';
 import type { CanisterIdText, CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices, jsonReplacer, type QueryParams } from '@dfinity/utils';
+import {
+	Canister,
+	createServices,
+	jsonReplacer,
+	nonNullish,
+	type QueryParams
+} from '@dfinity/utils';
 import { AnonymousIdentity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -126,13 +132,13 @@ const extensions = async (canisterId: CanisterIdText) => {
 	return await extensions({ certified: false });
 };
 
-const checkInactive = async ({ canisterId }: EnvExtToken): Promise<boolean> => {
+const checkActive = async ({ canisterId }: EnvExtToken): Promise<boolean> => {
 	try {
 		await extensions(canisterId);
 
-		return false;
-	} catch (_: unknown) {
 		return true;
+	} catch (_: unknown) {
+		return false;
 	}
 };
 
@@ -150,13 +156,15 @@ const getCollections = async (): Promise<EnvExtToken[]> => {
 		return acc;
 	}, {});
 
-	// We filter out the inactive collections in a functional way.
-	const activeCollections = (await Promise.all(
-		Object.entries(collectionsMap).map(async ([canisterId, value]) => {
-			const isInactive = await checkInactive(value);
-			return isInactive ? null : value;
-		})
-	)).filter(Boolean);
+	// We filter out the inactive collections.
+	const activeCollections = (
+		await Promise.all(
+			Object.entries(collectionsMap).map(async ([, collection]) => {
+				const isActive = await checkActive(collection);
+				return isActive ? collection : undefined;
+			})
+		)
+	).filter(nonNullish);
 
 	return activeCollections.sort((a, b) => a.canisterId.localeCompare(b.canisterId));
 };
