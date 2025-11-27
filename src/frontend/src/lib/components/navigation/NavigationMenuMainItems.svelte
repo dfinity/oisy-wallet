@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { assertNever, nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
@@ -56,13 +56,21 @@
 		fromRoute = from;
 	});
 
-	let assetsPath = $derived(
-		$activeAssetsTabStore === TokenTypes.NFTS
-			? AppPath.Nfts
-			: $activeAssetsTabStore === TokenTypes.EARNING
-				? AppPath.Earning
-				: AppPath.Tokens
-	);
+	let assetsPath = $derived.by(() => {
+		if ($activeAssetsTabStore === TokenTypes.NFTS) {
+			return AppPath.Nfts;
+		}
+
+		if ($activeAssetsTabStore === TokenTypes.EARNING) {
+			return AppPath.Earning;
+		}
+
+		if ($activeAssetsTabStore === TokenTypes.TOKENS) {
+			return AppPath.Tokens;
+		}
+
+		assertNever($activeAssetsTabStore);
+	});
 
 	let assetsSelected = $derived(
 		isRouteTokens(page) || isRouteNfts(page) || isRouteEarning(page) || isRouteTransactions(page)
