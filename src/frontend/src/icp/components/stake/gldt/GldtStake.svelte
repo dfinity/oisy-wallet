@@ -16,7 +16,6 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { StakeProvider } from '$lib/types/stake';
 	import { networkUrl } from '$lib/utils/nav.utils';
-	import { getAllIcTransactions } from '$icp/utils/ic-transactions.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import { ckBtcPendingUtxoTransactions } from '$icp/derived/ckbtc-transactions.derived';
 	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
@@ -27,8 +26,7 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import StakeTransactions from '$lib/components/stake/StakeTransactions.svelte';
 	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
-	import { GLDT_STAKE_CANISTER_ID } from '$lib/constants/app.constants';
-	import { sortTransactions } from '$lib/utils/transactions.utils';
+	import { getGldtStakingTransactions } from '$lib/utils/stake.utils';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -41,35 +39,18 @@
 
 	let transactions: StakingTransactionsUiWithToken[] = $derived(
 		nonNullish(gldtToken) && nonNullish(goldaoToken)
-			? [
-					...getAllIcTransactions({
-						token: gldtToken,
-						ckBtcPendingUtxoTransactions: $ckBtcPendingUtxoTransactions,
-						ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore,
-						ckEthPendingTransactions: $ckEthPendingTransactions,
-						ckBtcMinterInfoStore: $ckBtcMinterInfoStore,
-						btcStatusesStore: $btcStatusesStore,
-						icPendingTransactionsStore: $icPendingTransactionsStore,
-						icExtendedTransactions: [],
-						icTransactionsStore: $icTransactionsStore
-					}).map(({ data: t }) => ({ ...t, isReward: false, token: gldtToken })),
-					...getAllIcTransactions({
-						token: goldaoToken,
-						ckBtcPendingUtxoTransactions: $ckBtcPendingUtxoTransactions,
-						ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore,
-						ckEthPendingTransactions: $ckEthPendingTransactions,
-						ckBtcMinterInfoStore: $ckBtcMinterInfoStore,
-						btcStatusesStore: $btcStatusesStore,
-						icPendingTransactionsStore: $icPendingTransactionsStore,
-						icExtendedTransactions: [],
-						icTransactionsStore: $icTransactionsStore
-					}).map(({ data: t }) => ({ ...t, isReward: true, token: goldaoToken }))
-				]
-					.filter(
-						({ from, to }) =>
-							from?.includes(GLDT_STAKE_CANISTER_ID) || to?.includes(GLDT_STAKE_CANISTER_ID)
-					)
-					.sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }))
+			? getGldtStakingTransactions({
+					gldtToken: gldtToken,
+					goldaoToken: goldaoToken,
+					ckBtcPendingUtxoTransactions: $ckBtcPendingUtxoTransactions,
+					ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore,
+					ckEthPendingTransactions: $ckEthPendingTransactions,
+					ckBtcMinterInfoStore: $ckBtcMinterInfoStore,
+					btcStatusesStore: $btcStatusesStore,
+					icPendingTransactionsStore: $icPendingTransactionsStore,
+					icExtendedTransactions: [],
+					icTransactionsStore: $icTransactionsStore
+				})
 			: []
 	);
 
