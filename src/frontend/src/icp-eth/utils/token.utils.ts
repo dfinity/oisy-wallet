@@ -7,6 +7,9 @@ export const isGLDTToken = (token: Token): boolean =>
 	token.symbol === 'GLDT' &&
 	token.ledgerCanisterId === GLDT_LEDGER_CANISTER_ID;
 
+export const isGoldaoToken = (token: Token): boolean =>
+	isTokenIcrc(token) && token.symbol === 'GOLDAO';
+
 export const isVCHFToken = (token: Token): boolean => isTokenIcrc(token) && token.symbol === 'VCHF';
 
 export const isVEURToken = (token: Token): boolean => isTokenIcrc(token) && token.symbol === 'VEUR';

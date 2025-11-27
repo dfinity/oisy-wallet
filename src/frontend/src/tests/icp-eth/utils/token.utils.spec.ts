@@ -7,7 +7,7 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { isGLDTToken, isVCHFToken, isVEURToken } from '$icp-eth/utils/token.utils';
+import { isGLDTToken, isGoldaoToken, isVCHFToken, isVEURToken } from '$icp-eth/utils/token.utils';
 import type { Token } from '$lib/types/token';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 
@@ -47,6 +47,45 @@ describe('token.utils', () => {
 			...SPL_TOKENS
 		])('should return false for token $name', (token) => {
 			expect(isGLDTToken(token)).toBeFalsy();
+		});
+	});
+
+	describe('isGoldaoToken', () => {
+		it('should return true for ICRC token with symbol GOLDAO on ICP network', () => {
+			expect(
+				isGoldaoToken({
+					...mockValidIcToken,
+					standard: 'icrc',
+					symbol: 'GOLDAO',
+					network: ICP_TOKEN.network
+				} as Token)
+			).toBeTruthy();
+		});
+
+		it('should return false for GOLDAO symbol that is not an ICRC token', () => {
+			expect(isGoldaoToken({ ...mockValidIcToken, symbol: 'GOLDAO' })).toBeFalsy();
+			expect(
+				isGoldaoToken({ ...mockValidIcToken, standard: 'erc20', symbol: 'GOLDAO' })
+			).toBeFalsy();
+		});
+
+		it('should return false for ICRC tokens that are not GOLDAO', () => {
+			expect(
+				isGoldaoToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'not-GOLDAO' })
+			).toBeFalsy();
+		});
+
+		it.each([
+			ICP_TOKEN,
+			...SUPPORTED_BITCOIN_TOKENS,
+			...SUPPORTED_ETHEREUM_TOKENS,
+			...SUPPORTED_EVM_TOKENS,
+			...SUPPORTED_SOLANA_TOKENS,
+			...ERC20_TWIN_TOKENS,
+			...EVM_ERC20_TOKENS,
+			...SPL_TOKENS
+		])('should return false for token $name', (token) => {
+			expect(isGoldaoToken(token)).toBeFalsy();
 		});
 	});
 
