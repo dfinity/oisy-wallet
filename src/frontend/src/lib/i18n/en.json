@@ -1837,12 +1837,20 @@
 			"immediate_dissolve_terms": "You will receive your $token immediately but are charged a fee on the $token tokens you are unlocking.",
 			"amount_to_receive": "Amount to receive",
 			"unclaimed_rewards": "Unclaimed rewards",
+			"unlock_requests": "Unlock requests",
+			"unlocking_in": "Unlocking $time",
+			"unlocked": "Unlocked",
+			"withdraw": "Withdraw",
+			"withdraw_successful": "Tokens have been successfully withdrawn.",
 			"claim_reward": "Claim reward",
 			"claim_rewards": "Claim rewards",
 			"claim_now": "Claim now",
 			"claiming": "Claiming...",
 			"get_tokens_with_amount": "Get up to $amount $token_symbol",
 			"get_tokens": "Get more $token_symbol"
+		},
+		"error": {
+			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens."
 		},
 		"terms": {
 			"gldt": {
