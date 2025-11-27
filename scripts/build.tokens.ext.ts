@@ -150,18 +150,15 @@ const getCollections = async (): Promise<EnvExtToken[]> => {
 		return acc;
 	}, {});
 
-	// We remove the inactive collections from the map.
-	await Promise.all(
+	// We filter out the inactive collections in a functional way.
+	const activeCollections = (await Promise.all(
 		Object.entries(collectionsMap).map(async ([canisterId, value]) => {
 			const isInactive = await checkInactive(value);
-
-			if (isInactive) {
-				delete collectionsMap[canisterId];
-			}
+			return isInactive ? null : value;
 		})
-	);
+	)).filter(Boolean);
 
-	return Object.values(collectionsMap).sort((a, b) => a.canisterId.localeCompare(b.canisterId));
+	return activeCollections.sort((a, b) => a.canisterId.localeCompare(b.canisterId));
 };
 
 try {
