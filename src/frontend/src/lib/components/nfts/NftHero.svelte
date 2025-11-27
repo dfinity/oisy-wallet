@@ -59,7 +59,11 @@
 			return nft.name.includes(`#${nft.id}`) ? nft.name : `${nft.name} #${nft.id}`;
 		}
 
-		return `#${nft.id}`;
+		if (nonNullish(nft.collection.name)) {
+			return `${nft.collection.name} #${nft.id}`
+		}
+
+		return `#${nft.id}`
 	});
 </script>
 
