@@ -189,6 +189,31 @@ export const formatSecondsToNormalizedDate = ({
 	});
 };
 
+/** Formats a timestamp to a day difference.
+ *
+ * It uses the current date to compare the date with.
+ *
+ * @param {Object} params - The option object.
+ * @param {number} params.timestamp - The timestamp to format.
+ * @param {number} params.language - Current language.
+ */
+export const formatTimestampToDaysDifference = ({
+	timestamp,
+	language
+}: {
+	timestamp: number;
+	language?: Languages;
+}): string => {
+	const date = new Date(timestamp);
+	const today = new Date();
+
+	const dateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+	const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+	const daysDifference = Math.ceil((dateUTC - todayUTC) / MILLISECONDS_IN_DAY);
+
+	return getRelativeTimeFormatter(language).format(daysDifference, 'day');
+};
+
 export const formatCurrency = ({
 	value,
 	currency,

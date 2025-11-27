@@ -8,7 +8,7 @@ describe('nft.utils', () => {
 
 			const { canisterId: _, ...rest } = mockValidExtV2Token;
 
-			expect(mapExtNft({ index: 123, token: mockValidExtV2Token })).toStrictEqual({
+			expect(result).toStrictEqual({
 				id: result.id,
 				imageUrl: `https://${mockValidExtV2Token.canisterId}.raw.icp0.io/?index=123`,
 				collection: {
