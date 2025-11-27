@@ -57,27 +57,25 @@ export const loadNftsByNetwork = async ({
 
 export const loadNfts = async ({
 	tokens,
-	walletAddress
+	identity,
+	ethAddress
 }: {
 	tokens: NonFungibleToken[];
-	walletAddress: OptionEthAddress;
+	identity: OptionIdentity;
+	ethAddress: OptionEthAddress;
 }) => {
 	const tokensByNetwork = getTokensByNetwork(tokens);
 
 	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
-		if (!isNetworkIdEthereum(networkId) && !isNetworkIdEvm(networkId)) {
-			return;
-		}
-
 		if (tokens.length === 0) {
 			return;
 		}
 
-		const nfts: Nft[] = await loadErcNftsByNetwork({
+		const nfts: Nft[] = await loadNftsByNetwork({
 			networkId,
-			// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
-			tokens: tokens as EthNonFungibleToken[],
-			walletAddress
+			tokens,
+			identity,
+			ethAddress
 		});
 
 		nftStore.addAll(nfts);
@@ -113,7 +111,8 @@ export const saveNftCustomToken = async ({
 
 	await loadNfts({
 		tokens: [token],
-		walletAddress: $ethAddress
+		identity,
+		ethAddress: $ethAddress
 	});
 };
 
