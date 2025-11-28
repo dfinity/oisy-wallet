@@ -13,6 +13,7 @@ import * as extCustomTokens from '$icp/services/ext-custom-tokens.services';
 import { listCustomTokens } from '$lib/api/backend.api';
 import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 import { ethAddressStore } from '$lib/stores/address.store';
+import { emit } from '$lib/utils/events.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
@@ -104,10 +105,23 @@ describe('LoaderCollections', () => {
 		});
 	});
 
-	it.skip('should add new EXT collections', async () => {
+	it('should not add new EXT collections by default', async () => {
 		extGetTokensByOwnerSpy.mockResolvedValueOnce([1, 2, 3]);
 
 		render(LoaderCollections);
+
+		await waitFor(() => {
+			expect(extGetTokensByOwnerSpy).not.toHaveBeenCalled();
+			expect(extCustomTokensSpy).not.toHaveBeenCalled();
+		});
+	});
+
+	it('should add new EXT collections if the event is triggered', async () => {
+		extGetTokensByOwnerSpy.mockResolvedValueOnce([1, 2, 3]);
+
+		render(LoaderCollections);
+
+		emit({ message: 'oisyReloadCollections' });
 
 		await waitFor(() => {
 			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length);
@@ -149,10 +163,12 @@ describe('LoaderCollections', () => {
 		});
 	});
 
-	it.skip('should not add EXT collections if there are no new collections', async () => {
+	it('should not add EXT collections if there are no new collections', async () => {
 		extGetTokensByOwnerSpy.mockResolvedValueOnce([]);
 
 		render(LoaderCollections);
+
+		emit({ message: 'oisyReloadCollections' });
 
 		await waitFor(() => {
 			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length);
@@ -218,7 +234,7 @@ describe('LoaderCollections', () => {
 		});
 	});
 
-	it.skip('should not add existing EXT collections', async () => {
+	it('should not add existing EXT collections', async () => {
 		const existingExtCustomToken: CustomToken = {
 			token: {
 				ExtV2: {
@@ -234,6 +250,8 @@ describe('LoaderCollections', () => {
 		vi.mocked(listCustomTokens).mockResolvedValue([existingExtCustomToken]);
 
 		render(LoaderCollections);
+
+		emit({ message: 'oisyReloadCollections' });
 
 		await waitFor(() => {
 			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length - 1);
@@ -251,11 +269,13 @@ describe('LoaderCollections', () => {
 		});
 	});
 
-	it.skip('should handle EXT error gracefully', async () => {
+	it('should handle EXT error gracefully', async () => {
 		const mockError = new Error('EXT error');
 		extGetTokensByOwnerSpy.mockRejectedValueOnce(mockError);
 
 		render(LoaderCollections);
+
+		emit({ message: 'oisyReloadCollections' });
 
 		await waitFor(() => {
 			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length);
