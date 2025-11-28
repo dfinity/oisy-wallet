@@ -74,7 +74,6 @@
 
 	const nftSend = async () => {
 		if (isNullish($authIdentity)) {
-
 			return;
 		}
 
@@ -84,11 +83,6 @@
 			});
 			return;
 		}
-
-
-
-
-
 
 		if (isNullish(nft)) {
 			toastsError({
