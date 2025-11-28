@@ -1,9 +1,9 @@
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { ZCHF_TOKEN_GROUP } from '$env/tokens/groups/groups.zchf.env';
+import zchf from '$eth/assets/zchf.webp';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import zchf from '$eth/assets/zchf.webp';
 
 export const ZCHF_DECIMALS = 18;
 
