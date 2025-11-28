@@ -18,12 +18,15 @@ describe('nft.utils', () => {
 		});
 
 		it('should map correctly an EXT NFT', async () => {
-			const result = await mapExtNft({ index: 123, token: mockValidExtV2Token });
+			const mockIndex = 123;
+
+			const result = await mapExtNft({ index: mockIndex, token: mockValidExtV2Token });
 
 			const { canisterId: _, ...rest } = mockValidExtV2Token;
 
 			expect(result).toStrictEqual({
 				id: result.id,
+				name: `${mockValidExtV2Token.name} #${mockIndex + 1}`,
 				imageUrl: `https://${mockValidExtV2Token.canisterId}.raw.icp0.io/?index=123`,
 				mediaStatus: NftMediaStatusEnum.OK,
 				collection: {
