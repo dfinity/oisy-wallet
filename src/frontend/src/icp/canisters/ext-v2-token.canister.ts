@@ -3,16 +3,20 @@ import type {
 	_SERVICE as ExtV2TokenService,
 	TokenIdentifier,
 	TokenIndex,
-	Transaction
+	Transaction,
+	TransferRequest
 } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { idlFactory as idlCertifiedFactoryExtV2Token } from '$declarations/ext_v2_token/ext_v2_token.factory.certified.did';
 import { idlFactory as idlFactoryExtV2Token } from '$declarations/ext_v2_token/ext_v2_token.factory.did';
-import { mapExtV2TokenCommonError } from '$icp/canisters/ext-v2-token.errors';
+import {
+	mapExtV2TokenCommonError,
+	mapExtV2TokenTransferError
+} from '$icp/canisters/ext-v2-token.errors';
 import { mapExtTokensListing, toUser } from '$icp/utils/ext-v2-token.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices, type QueryParams } from '@dfinity/utils';
+import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { Principal } from '@icp-sdk/core/principal';
 
@@ -107,5 +111,52 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 		}
 
 		throw mapExtV2TokenCommonError(response.err);
+	};
+
+	/**
+	 * Transfer tokens from one user to another.
+	 *
+	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
+	 *
+	 * @param {Object} params - The parameters for fetching the tokens.
+	 * @param {Principal} params.from - The ICRC principal of the sender.
+	 * @param {Principal} params.to - The ICRC principal of the receiver.
+	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier as string.
+	 * @param {bigint} params.amount - The amount to transfer.
+	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
+	 * @returns {Promise<TokenIndex[]>} The list of token indices owned by the user.
+	 * @throws CanisterInternalError if the token identifier is invalid.
+	 */
+	transfer = async ({
+		certified,
+		from,
+		to,
+		tokenIdentifier: token,
+		amount
+	}: {
+		from: Principal;
+		to: Principal;
+		tokenIdentifier: TokenIdentifier;
+		amount: bigint;
+	} & QueryParams): Promise<Balance> => {
+		const { ext_transfer } = this.caller({ certified });
+
+		const args: TransferRequest = {
+			from: { principal: from },
+			to: { principal: to },
+			token,
+			amount,
+			notify: false,
+			memo: new Uint8Array(),
+			subaccount: toNullable()
+		};
+
+		const response = await ext_transfer(args);
+
+		if ('ok' in response) {
+			return response.ok;
+		}
+
+		throw mapExtV2TokenTransferError(response);
 	};
 }
