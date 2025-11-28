@@ -118,7 +118,7 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	 *
 	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
 	 *
-	 * @param {Object} params - The parameters for fetching the tokens.
+	 * @param {Object} params - The parameters for the transfer.
 	 * @param {Principal} params.from - The ICRC principal of the sender.
 	 * @param {Principal} params.to - The ICRC principal of the receiver.
 	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier as string.
