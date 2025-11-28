@@ -3,7 +3,6 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
 import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
@@ -33,7 +32,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft, mockValidExtNft } from '$tests/mocks/nfts.mock';
-import { Network, type TransactionResponse } from 'ethers/providers';
+import { type TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -43,12 +42,6 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 }));
 
 describe('nft.services', () => {
-	const mockAlchemyProvider = {
-		network: new Network('ethereum', 1),
-		provider: {},
-		getNftsByOwner: vi.fn()
-	} as unknown as AlchemyProvider;
-
 	describe('loadNftsByNetwork', () => {
 		const mockEthNfts = [mockValidErc721Nft, mockValidErc1155Nft];
 		const mockIcNfts = [mockValidExtNft];
