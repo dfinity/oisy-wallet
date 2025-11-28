@@ -6,8 +6,6 @@ import type { OptionEthAddress } from '$eth/types/address';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
-import { loadNfts as loadExtNfts } from '$icp/services/nft.services';
-import type { IcNonFungibleToken } from '$icp/types/nft';
 import { saveCustomTokens as saveCustomExtToken } from '$icp/services/ext-custom-tokens.services';
 import { loadNfts as loadExtNfts } from '$icp/services/nft.services';
 import type { IcNonFungibleToken } from '$icp/types/nft';

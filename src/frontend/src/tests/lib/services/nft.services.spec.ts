@@ -2,9 +2,8 @@ import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.en
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
+import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
 import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
@@ -44,7 +43,6 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 }));
 
 describe('nft.services', () => {
-
 	const mockAlchemyProvider = {
 		network: new Network('ethereum', 1),
 		provider: {},
