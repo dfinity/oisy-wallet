@@ -3,7 +3,7 @@ import { ZCHF_TOKEN_GROUP } from '$env/tokens/groups/groups.zchf.env';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import zchf from '$sol/assets/zchf.webp';
+import zchf from '$eth/assets/zchf.webp';
 
 export const ZCHF_DECIMALS = 18;
 
