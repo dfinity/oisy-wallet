@@ -1,5 +1,3 @@
-import type { Mock } from 'vitest';
-
 vi.mock('$icp/utils/ic-transactions.utils', () => ({
 	getAllIcTransactions: vi.fn()
 }));
@@ -45,7 +43,7 @@ describe('getStakingTransactions', () => {
 	});
 
 	it('returns empty array when no stake transactions exist', () => {
-		(vi.mocked(icTxUtils.getAllIcTransactions))
+		vi.mocked(icTxUtils.getAllIcTransactions)
 			.mockReturnValueOnce([]) // GLDT call
 			.mockReturnValueOnce([]); // GOLDAO call
 
@@ -62,7 +60,7 @@ describe('getStakingTransactions', () => {
 		const tx = createCertifiedIcTransactionUiMock('stake');
 		tx.data.to = GLDT_STAKE_CANISTER_ID;
 
-		(vi.mocked(icTxUtils.getAllIcTransactions)).mockReturnValueOnce([tx]).mockReturnValueOnce([]);
+		vi.mocked(icTxUtils.getAllIcTransactions).mockReturnValueOnce([tx]).mockReturnValueOnce([]);
 
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
@@ -78,7 +76,7 @@ describe('getStakingTransactions', () => {
 		const tx = createCertifiedIcTransactionUiMock('reward');
 		tx.data.from = GLDT_STAKE_CANISTER_ID;
 
-		(vi.mocked(icTxUtils.getAllIcTransactions)).mockReturnValueOnce([]).mockReturnValueOnce([tx]);
+		vi.mocked(icTxUtils.getAllIcTransactions).mockReturnValueOnce([]).mockReturnValueOnce([tx]);
 
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
@@ -95,7 +93,7 @@ describe('getStakingTransactions', () => {
 		const related = createCertifiedIcTransactionUiMock('yes');
 		related.data.to = GLDT_STAKE_CANISTER_ID;
 
-		(vi.mocked(icTxUtils.getAllIcTransactions))
+		vi.mocked(icTxUtils.getAllIcTransactions)
 			.mockReturnValueOnce([irrelevant])
 			.mockReturnValueOnce([related]);
 
@@ -118,7 +116,7 @@ describe('getStakingTransactions', () => {
 		const gold1 = createCertifiedIcTransactionUiMock('o1');
 		gold1.data.from = GLDT_STAKE_CANISTER_ID;
 
-		(vi.mocked(icTxUtils.getAllIcTransactions))
+		vi.mocked(icTxUtils.getAllIcTransactions)
 			.mockReturnValueOnce([gldt1, gldt2]) // GLDT call
 			.mockReturnValueOnce([gold1]); // GOLDAO call
 
@@ -137,7 +135,7 @@ describe('getStakingTransactions', () => {
 		rewardA.data.from = GLDT_STAKE_CANISTER_ID;
 		rewardB.data.from = GLDT_STAKE_CANISTER_ID;
 
-		(vi.mocked(icTxUtils.getAllIcTransactions))
+		vi.mocked(icTxUtils.getAllIcTransactions)
 			.mockReturnValueOnce([])
 			.mockReturnValueOnce([rewardA, rewardB]);
 
