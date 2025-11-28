@@ -1,9 +1,10 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import Transaction from '$lib/components/transactions/Transaction.svelte';
+import { currentLanguage } from '$lib/derived/i18n.derived';
 import { contactsStore } from '$lib/stores/contacts.store';
 import { nftStore } from '$lib/stores/nft.store';
-import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { getMockContactsUi } from '$tests/mocks/contacts.mock';
@@ -11,6 +12,7 @@ import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('Transaction', () => {
 	const NFT_TEST_TOKEN = AZUKI_ELEMENTAL_BEANS_TOKEN;
@@ -213,5 +215,32 @@ describe('Transaction', () => {
 		expect(getByText(/^to$/i)).toBeInTheDocument();
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: '0xaddr' }));
 		expect(getByText(/Pending\.\.\./i)).toBeInTheDocument();
+	});
+
+	it('should render full date when fullDate is passed', () => {
+		const { container, getByText } = render(Transaction, {
+			displayAmount: 42n,
+			type: 'receive',
+			status: 'confirmed',
+			timestamp: 1_690_000_000,
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			children: mockSnippet,
+			fullDate: true
+		});
+
+		expect(getByText(/From/i)).toBeInTheDocument();
+		expect(container).toHaveTextContent(
+			formatSecondsToDate({
+				seconds: Number(1_690_000_000),
+				language: get(currentLanguage),
+				formatOptions: {
+					hour: '2-digit',
+					minute: '2-digit',
+					hour12: false
+				},
+				timeOnly: false
+			})
+		);
 	});
 });
