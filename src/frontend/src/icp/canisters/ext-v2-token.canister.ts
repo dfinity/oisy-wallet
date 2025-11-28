@@ -142,8 +142,8 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 		const { ext_transfer } = this.caller({ certified });
 
 		const args: TransferRequest = {
-			from: { principal: from },
-			to: { principal: to },
+			from: toUser(from),
+			to: toUser(to),
 			token,
 			amount,
 			notify: false,
