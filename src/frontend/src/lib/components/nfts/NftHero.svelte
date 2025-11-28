@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
@@ -50,10 +50,26 @@
 	});
 
 	const normalizedNftName = $derived.by(() => {
-		if (nonNullish(nft?.name)) {
-			// sometimes NFT names include the number itself, in that case we do not display the number
-			return nft.name.includes(`#${nft.id}`) ? nft.name : `${nft.name} #${nft.id}`;
+		if (isNullish(nft)) {
+			return;
 		}
+
+		const {
+			id,
+			name,
+			collection: { name: collectionName }
+		} = nft;
+
+		if (nonNullish(name)) {
+			// sometimes NFT names include the number itself, in that case we do not display the number
+			return name.includes(`#${id}`) ? name : `${name} #${id}`;
+		}
+
+		if (nonNullish(collectionName)) {
+			return `${collectionName} #${id}`;
+		}
+
+		return `#${id}`;
 	});
 </script>
 
