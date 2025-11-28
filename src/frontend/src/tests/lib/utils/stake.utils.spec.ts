@@ -1,6 +1,4 @@
 import { GOLDAO_LEDGER_CANISTER_ID } from '$env/tokens/tokens.sns.env';
-import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
 import { GLDT_STAKE_CANISTER_ID } from '$lib/constants/app.constants';
 import { getGldtStakingTransactions } from '$lib/utils/stake.utils';
@@ -30,11 +28,6 @@ const mockGoldaoToken: IcToken = {
 describe('getStakingTransactions', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
-
-		icTransactionsStore.reset(mockGldtToken.id);
-		icTransactionsStore.reset(mockGoldaoToken.id);
-		icPendingTransactionsStore.reset(mockGldtToken.id);
-		icPendingTransactionsStore.reset(mockGoldaoToken.id);
 	});
 
 	it('returns empty array when no stake transactions exist', () => {

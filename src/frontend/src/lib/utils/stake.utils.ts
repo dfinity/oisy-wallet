@@ -20,23 +20,19 @@ export const getGldtStakingTransactions = ({
 	icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
 }): StakingTransactionsUiWithToken[] => {
 	const gldtTxs = [
-		...(nonNullish(icTransactionsStore?.[gldtToken.id]) &&
-		Array.isArray(icTransactionsStore[gldtToken.id])
+		...(nonNullish(icTransactionsStore?.[gldtToken.id])
 			? (icTransactionsStore[gldtToken.id] as CertifiedTransaction<IcTransactionUi>[])
 			: []),
-		...(nonNullish(icPendingTransactionsStore?.[gldtToken.id]) &&
-		Array.isArray(icPendingTransactionsStore[gldtToken.id])
+		...(nonNullish(icPendingTransactionsStore?.[gldtToken.id])
 			? (icPendingTransactionsStore[gldtToken.id] as IcPendingTransactionsData)
 			: [])
 	];
 
 	const goldaoTxs = [
-		...(nonNullish(icTransactionsStore?.[goldaoToken.id]) &&
-		Array.isArray(icTransactionsStore[goldaoToken.id])
+		...(nonNullish(icTransactionsStore?.[goldaoToken.id])
 			? (icTransactionsStore[goldaoToken.id] as CertifiedTransaction<IcTransactionUi>[])
 			: []),
-		...(nonNullish(icPendingTransactionsStore?.[goldaoToken.id]) &&
-		Array.isArray(icPendingTransactionsStore[goldaoToken.id])
+		...(nonNullish(icPendingTransactionsStore?.[goldaoToken.id])
 			? (icPendingTransactionsStore[goldaoToken.id] as IcPendingTransactionsData)
 			: [])
 	];
