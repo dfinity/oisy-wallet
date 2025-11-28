@@ -24,8 +24,8 @@ export const getGldtStakingTransactions = ({
 	];
 
 	const goldaoTxs = [
-		...(icTransactionsStore?.[goldaoToken.id] as CertifiedTransaction<IcTransactionUi>[]),
-		...(icPendingTransactionsStore?.[goldaoToken.id] as IcPendingTransactionsData)
+		...((icTransactionsStore?.[goldaoToken.id] as CertifiedTransaction<IcTransactionUi>[]) ?? []),
+		...((icPendingTransactionsStore?.[goldaoToken.id] as IcPendingTransactionsData) ?? [])
 	];
 
 	return [...gldtTxs, ...goldaoTxs].reduce<StakingTransactionsUiWithToken[]>((acc, tx) => {
