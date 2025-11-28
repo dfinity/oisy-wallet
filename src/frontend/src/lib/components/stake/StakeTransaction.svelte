@@ -58,16 +58,15 @@
 </script>
 
 <Transaction
-	type={transaction.type}
-	token={transaction.token}
-	status={getStatus(transaction)}
-	iconType="token"
-	timestamp={getTimestamp(transaction.timestamp)}
-	from={transaction.from}
-	to={getToAddress(transaction)}
 	displayAmount={getDisplayAmount(transaction)}
-	{onClick}
+	from={transaction.from}
+	iconType="token"
+	status={getStatus(transaction)}
 	timeOnly={false}
+	timestamp={getTimestamp(transaction.timestamp)}
+	to={getToAddress(transaction)}
+	token={transaction.token}
+	type={transaction.type}
 >
 	{getLabel(transaction)}
 </Transaction>
