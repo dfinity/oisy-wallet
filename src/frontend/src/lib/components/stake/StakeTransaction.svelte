@@ -17,11 +17,11 @@
 			: undefined;
 
 	const getToAddress = (transaction: StakingTransactionsUiWithToken): string | undefined =>
-		nonNullish(transaction.to) && transaction.to.length > 0
-			? transaction.to[0]
-			: nonNullish(transaction.to) && transaction.to.length === 0
-				? (transaction.to as string)
-				: undefined;
+		nonNullish(transaction.to)
+			? transaction.to.length > 0
+				? transaction.to[0]
+				: (transaction.to as string)
+			: undefined;
 
 	const getStatus = (transaction: StakingTransactionsUiWithToken) => {
 		if ('status' in transaction && nonNullish(transaction.status)) {
