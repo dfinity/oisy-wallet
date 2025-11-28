@@ -6,7 +6,7 @@
 	const { size = '20' }: Props = $props();
 </script>
 
-<svg fill="none" width={size} height={size} viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<svg fill="none" height={size} viewBox="0 0 20 20" width={size} xmlns="http://www.w3.org/2000/svg">
 	<path
 		clip-rule="evenodd"
 		d="M5.83334 5.00033C5.83334 4.54009 6.20644 4.16699 6.66668 4.16699H17.5C17.9602 4.16699 18.3333 4.54009 18.3333 5.00033C18.3333 5.46056 17.9602 5.83366 17.5 5.83366H6.66668C6.20644 5.83366 5.83334 5.46056 5.83334 5.00033Z"
