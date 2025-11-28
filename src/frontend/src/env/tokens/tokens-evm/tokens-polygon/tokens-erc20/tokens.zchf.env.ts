@@ -16,7 +16,7 @@ export const ZCHF_TOKEN: RequiredEvmBep20Token = {
 	network: POLYGON_MAINNET_NETWORK,
 	standard: 'erc20',
 	category: 'default',
-	name: 'Frankencoin (PoS)',
+	name: 'Frankencoin',
 	symbol: ZCHF_SYMBOL,
 	decimals: ZCHF_DECIMALS,
 	icon: zchf,
