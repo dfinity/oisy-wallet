@@ -1478,6 +1478,8 @@ interface I18nStake {
 		claiming: string;
 		get_tokens_with_amount: string;
 		get_tokens: string;
+		title_empty: string;
+		description_empty: string;
 	};
 	error: { unexpected_error_on_withdraw: string };
 	terms: {
@@ -1506,6 +1508,7 @@ interface I18nStake {
 			fact_3_description_fallback: string;
 		};
 	};
+	alt: { placeholder_image: string };
 }
 
 interface I18nGet_token {
