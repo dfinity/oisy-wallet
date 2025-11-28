@@ -52,6 +52,8 @@ describe('EIP2612 Permit Services', () => {
 
 	const mockIdentity = {} as Identity;
 
+	const mockContract = vi.mocked(Contract);
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
@@ -84,8 +86,9 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			vi.spyOn(Contract.prototype, 'nonces').mockImplementation(mockNonces);
-			vi.spyOn(Contract.prototype, 'version').mockImplementation(mockVersionFn);
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
 
 			vi.mocked(Signature.from).mockReturnValue({
 				v: 27,
@@ -109,13 +112,10 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			vi.mocked(Contract).mockImplementation(
-				() =>
-					({
-						nonces: mockNonces,
-						version: mockVersionFn
-					}) as unknown as Contract
-			);
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
+
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
 			vi.mocked(Signature.from).mockReturnValue({
@@ -141,13 +141,10 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			vi.mocked(Contract).mockImplementation(
-				() =>
-					({
-						nonces: mockNonces,
-						version: mockVersionFn
-					}) as unknown as Contract
-			);
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
+
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
 			vi.mocked(Signature.from).mockReturnValue({
@@ -175,13 +172,10 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			vi.mocked(Contract).mockImplementation(
-				() =>
-					({
-						nonces: mockNonces,
-						version: mockVersionFn
-					}) as unknown as Contract
-			);
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
+
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
 			vi.mocked(Signature.from).mockReturnValue({
@@ -215,13 +209,10 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			vi.mocked(Contract).mockImplementation(
-				() =>
-					({
-						nonces: mockNonces,
-						version: mockVersionFn
-					}) as unknown as Contract
-			);
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
+
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
 			vi.mocked(Signature.from).mockReturnValue({
@@ -258,13 +249,10 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			vi.mocked(Contract).mockImplementation(
-				() =>
-					({
-						nonces: mockNonces,
-						version: mockVersionFn
-					}) as unknown as Contract
-			);
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
+
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
 			vi.mocked(Signature.from).mockReturnValue({
@@ -292,8 +280,9 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			vi.spyOn(Contract.prototype, 'nonces').mockImplementation(mockNonces);
-			vi.spyOn(Contract.prototype, 'version').mockImplementation(mockVersionFn);
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
 
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
@@ -319,13 +308,10 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			vi.mocked(Contract).mockImplementation(
-				() =>
-					({
-						nonces: mockNonces,
-						version: mockVersionFn
-					}) as unknown as Contract
-			);
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
+
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
 			vi.mocked(Signature.from).mockReturnValue({
@@ -352,13 +338,10 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
-			vi.mocked(Contract).mockImplementation(
-				() =>
-					({
-						nonces: mockNonces,
-						version: mockVersionFn
-					}) as unknown as Contract
-			);
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
+
 			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
 			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
 			vi.mocked(Signature.from).mockReturnValue({
