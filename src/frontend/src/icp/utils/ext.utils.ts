@@ -15,7 +15,7 @@ export const isTokenExtV2CustomToken = (token: Token): token is ExtCustomToken =
 // The minting number (that wallets, frontends, etc. usually show) is 1-based indexed, it's simply (TokenIndex + 1).
 const parseExtTokenIndex = (index: TokenIndex): TokenIndex => index + 1;
 
-export const parseExtTokenNome = ({
+export const parseExtTokenName = ({
 	index,
 	token
 }: {
