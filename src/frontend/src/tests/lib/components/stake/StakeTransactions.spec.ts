@@ -2,6 +2,7 @@ import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import StakeTransactions from '$lib/components/stake/StakeTransactions.svelte';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
@@ -9,16 +10,18 @@ import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-const makeTx = (id: string, network = ICP_NETWORK): any => ({
-	id,
-	token: { symbol: 'X', network, decimals: 8 },
-	timestamp: BigInt(Date.now()) * 1_000_000n,
-	from: '0xabc',
-	to: '0xdef',
-	incoming: false,
-	isReward: false,
-	type: 'send'
-});
+const makeTx = (id: string, network = ICP_NETWORK): StakingTransactionsUiWithToken =>
+	({
+		id,
+		token: ICP_TOKEN,
+		timestamp: BigInt(Date.now()) * 1_000_000n,
+		from: '0xabc',
+		to: '0xdef',
+		incoming: false,
+		isReward: false,
+		type: 'send',
+		status: 'confirmed'
+	}) as unknown as StakingTransactionsUiWithToken;
 
 const renderTxs = (txs: StakingTransactionsUiWithToken[]) =>
 	render(StakeTransactions, {
@@ -67,11 +70,11 @@ describe('StakeTransactions', () => {
 	});
 
 	it('sorts by timestamp newest first', () => {
-		const older = makeTx('old');
-		older.timestamp -= 5000n;
-
-		const newer = makeTx('new');
-		newer.timestamp += 5000n;
+		const older = { ...makeTx('old'), timestamp: 0n } as unknown as StakingTransactionsUiWithToken;
+		const newer = {
+			...makeTx('old'),
+			timestamp: 5_000_000n
+		} as unknown as StakingTransactionsUiWithToken;
 
 		renderTxs([older, newer]);
 
