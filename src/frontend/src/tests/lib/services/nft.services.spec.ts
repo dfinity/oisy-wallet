@@ -1,12 +1,21 @@
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
 import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
 import * as extCustomTokens from '$icp/services/ext-custom-tokens.services';
+import * as ethNftServices from '$eth/services/nft.services';
+import { loadNftsByNetwork as loadErcNftsByNetwork } from '$eth/services/nft.services';
+import * as icNftServices from '$icp/services/nft.services';
+import { loadNfts as loadExtNfts } from '$icp/services/nft.services';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import {
 	loadNfts,
+	loadNftsByNetwork,
 	saveNftCustomToken,
 	sendNft,
 	updateNftMediaConsent,
@@ -23,7 +32,7 @@ import { AZUKI_ELEMENTAL_BEANS_TOKEN, mockValidErc721Token } from '$tests/mocks/
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft, mockValidExtNft } from '$tests/mocks/nfts.mock';
 import { Network, type TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -34,11 +43,94 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 }));
 
 describe('nft.services', () => {
+	const originalLoadErcNftsByNetwork = ethNftServices.loadNftsByNetwork;
+
 	const mockAlchemyProvider = {
 		network: new Network('ethereum', 1),
 		provider: {},
 		getNftsByOwner: vi.fn()
 	} as unknown as AlchemyProvider;
+
+	describe('loadNftsByNetwork', () => {
+		const mockEthNfts = [mockValidErc721Nft, mockValidErc1155Nft];
+		const mockIcNfts = [mockValidExtNft];
+
+		const mockTokens = [mockValidExtV2Token, mockValidErc721Token, mockValidErc1155Token];
+
+		const mockParams = {
+			networkId: BTC_MAINNET_NETWORK_ID,
+			tokens: mockTokens,
+			identity: mockIdentity,
+			ethAddress: mockEthAddress
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(ethNftServices, 'loadNftsByNetwork').mockResolvedValue(mockEthNfts);
+			vi.spyOn(icNftServices, 'loadNfts').mockResolvedValue(mockIcNfts);
+		});
+
+		it('should return an empty array if no tokens were provided', async () => {
+			await expect(loadNftsByNetwork({ ...mockParams, tokens: [] })).resolves.toEqual([]);
+
+			expect(loadErcNftsByNetwork).not.toHaveBeenCalled();
+			expect(loadExtNfts).not.toHaveBeenCalled();
+		});
+
+		it('should call the ETH NFT loader if the network is Ethereum', async () => {
+			await expect(
+				loadNftsByNetwork({ ...mockParams, networkId: ETHEREUM_NETWORK_ID })
+			).resolves.toEqual(mockEthNfts);
+
+			expect(loadErcNftsByNetwork).toHaveBeenCalledExactlyOnceWith({
+				networkId: ETHEREUM_NETWORK_ID,
+				tokens: mockTokens,
+				walletAddress: mockEthAddress
+			});
+
+			expect(loadExtNfts).not.toHaveBeenCalled();
+		});
+
+		it('should call the ETH NFT loader if the network is EVM', async () => {
+			await expect(
+				loadNftsByNetwork({ ...mockParams, networkId: BASE_NETWORK_ID })
+			).resolves.toEqual(mockEthNfts);
+
+			expect(loadErcNftsByNetwork).toHaveBeenCalledExactlyOnceWith({
+				networkId: BASE_NETWORK_ID,
+				tokens: mockTokens,
+				walletAddress: mockEthAddress
+			});
+
+			expect(loadExtNfts).not.toHaveBeenCalled();
+		});
+
+		it('should call the IC NFT loader if the network is ICP', async () => {
+			await expect(
+				loadNftsByNetwork({ ...mockParams, networkId: ICP_NETWORK_ID })
+			).resolves.toEqual(mockIcNfts);
+
+			expect(loadExtNfts).toHaveBeenCalledExactlyOnceWith({
+				tokens: mockTokens,
+				identity: mockIdentity
+			});
+
+			expect(loadErcNftsByNetwork).not.toHaveBeenCalled();
+		});
+
+		it('should return an empty array for an unmapped network', async () => {
+			await expect(
+				loadNftsByNetwork({ ...mockParams, networkId: SOLANA_MAINNET_NETWORK_ID })
+			).resolves.toEqual([]);
+			await expect(
+				loadNftsByNetwork({ ...mockParams, networkId: BTC_MAINNET_NETWORK_ID })
+			).resolves.toEqual([]);
+
+			expect(loadErcNftsByNetwork).not.toHaveBeenCalled();
+			expect(loadExtNfts).not.toHaveBeenCalled();
+		});
+	});
 
 	describe('loadNfts', () => {
 		const mockNft1 = {
@@ -79,6 +171,10 @@ describe('nft.services', () => {
 			nftStore.resetAll();
 
 			vi.mocked(alchemyProviders).mockReturnValue(mockAlchemyProvider);
+
+			vi.spyOn(ethNftServices, 'loadNftsByNetwork').mockImplementation(
+				originalLoadErcNftsByNetwork
+			);
 		});
 
 		it('should not load NFTs if no tokens were provided', async () => {
