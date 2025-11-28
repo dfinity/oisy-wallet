@@ -29,7 +29,7 @@
 		colorStyle = 'tertiary',
 		testId,
 		ariaLabel,
-		disabled = false,
+		disabled,
 		loading = false, // renders with spinner
 		link = true,
 		styleClass = '',
@@ -52,7 +52,7 @@
 	class:transparent
 	aria-label={ariaLabel}
 	data-tid={testId}
-	disabled={disabled || loading}
+	disabled={disabled ?? loading}
 	{onclick}
 	type="button"
 >
