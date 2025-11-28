@@ -61,6 +61,7 @@
 	displayAmount={getDisplayAmount(transaction)}
 	from={transaction.from}
 	iconType="token"
+	{onClick}
 	status={getStatus(transaction)}
 	timeOnly={false}
 	timestamp={getTimestamp(transaction.timestamp)}
