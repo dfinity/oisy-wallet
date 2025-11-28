@@ -1,6 +1,7 @@
 import type {
 	DailyAnalytics,
 	Duration,
+	Response,
 	StakePositionResponse
 } from '$declarations/gldt_stake/gldt_stake.did';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
@@ -34,3 +35,12 @@ export const dailyAnalyticsMockResponse = {
 	rewards: toNullable([{ ICP: null }, 100n]),
 	weighted_stake: 1000n
 } as DailyAnalytics;
+
+export const configMockResponse = {
+	reward_tokens: ['ICP'],
+	max_dissolve_events: 5n,
+	early_unlock_fee: 0.05,
+	unlock_delay: 50000n,
+	stake_limit_max: 100000000n,
+	stake_limit_min: 10000n
+} as Response;
