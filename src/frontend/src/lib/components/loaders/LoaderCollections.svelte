@@ -108,7 +108,7 @@
 		});
 	};
 
-	const onLoad = async () => {
+	const load = async ({extTokens=false}:{extTokens?:boolean}) => {
 		if (!NFTS_ENABLED || isNullish($authIdentity)) {
 			return;
 		}
@@ -124,8 +124,21 @@
 			customTokens
 		};
 
-		await Promise.all([loadErcTokens(params)]);
+		await Promise.all([
+			loadErcTokens(params),
+			...(extTokens ? [loadExtTokens(params)] : [])
+		]);
+	};
+
+	const onLoad = async () => {
+		await load({});
+	};
+
+	const reload = async () => {
+		await load({extTokens:true});
 	};
 </script>
+
+<svelte:window onoisyReloadCollections={reload} />
 
 <IntervalLoader interval={COLLECTION_TIMER_INTERVAL_MILLIS} {onLoad} />
