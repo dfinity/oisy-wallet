@@ -6,16 +6,11 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 
-vi.mock('$env/networks/networks.icrc.env', async (importActual) => ({
-	...(await importActual()),
-	GLDT_LEDGER_CANISTER_ID: 'qoc74-tyaaa-aaaaa-aaaca-cai'
-}));
-
 const mockGldtToken: IcToken = {
 	...mockValidIcrcToken,
 	id: parseTokenId('GLDT'),
 	symbol: 'GLDT',
-	ledgerCanisterId: 'qoc74-tyaaa-aaaaa-aaaca-cai'
+	ledgerCanisterId: GLDT_STAKE_CANISTER_ID
 };
 
 const mockGoldaoToken: IcToken = {
@@ -43,7 +38,7 @@ describe('getStakingTransactions', () => {
 
 	it('classifies direction: GLDT stake execution', () => {
 		const tx = createCertifiedIcTransactionUiMock('stake');
-		tx.data.to = GLDT_STAKE_CANISTER_ID;
+		tx.data.to = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
 
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
@@ -74,7 +69,7 @@ describe('getStakingTransactions', () => {
 	it('filters out transactions not involving the stake canister', () => {
 		const irrelevant = createCertifiedIcTransactionUiMock('x-nope');
 		const related = createCertifiedIcTransactionUiMock('yes');
-		related.data.to = GLDT_STAKE_CANISTER_ID;
+		related.data.to = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
 
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
@@ -88,13 +83,13 @@ describe('getStakingTransactions', () => {
 
 	it('preserves order: GLDT first then GOLDAO', () => {
 		const gldt1 = createCertifiedIcTransactionUiMock('g1');
-		gldt1.data.to = GLDT_STAKE_CANISTER_ID;
+		gldt1.data.to = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
 
 		const gldt2 = createCertifiedIcTransactionUiMock('g2');
-		gldt2.data.to = GLDT_STAKE_CANISTER_ID;
+		gldt2.data.to = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
 
 		const gold1 = createCertifiedIcTransactionUiMock('o1');
-		gold1.data.from = GLDT_STAKE_CANISTER_ID;
+		gold1.data.from = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
 
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
@@ -109,8 +104,8 @@ describe('getStakingTransactions', () => {
 	it('supports multiple GOLDAO reward records', () => {
 		const rewardA = createCertifiedIcTransactionUiMock('rA');
 		const rewardB = createCertifiedIcTransactionUiMock('rB');
-		rewardA.data.from = GLDT_STAKE_CANISTER_ID;
-		rewardB.data.from = GLDT_STAKE_CANISTER_ID;
+		rewardA.data.from = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
+		rewardB.data.from = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
 
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
