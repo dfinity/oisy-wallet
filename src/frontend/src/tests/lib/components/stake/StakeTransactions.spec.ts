@@ -6,11 +6,18 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import StakeTransactions from '$lib/components/stake/StakeTransactions.svelte';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
+import type { Network } from '$lib/types/network';
 import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-const makeTx = (id: string, network = ICP_NETWORK): StakingTransactionsUiWithToken =>
+const makeTx = ({
+	id,
+	network = ICP_NETWORK
+}: {
+	id: string;
+	network?: Network;
+}): StakingTransactionsUiWithToken =>
 	({
 		id,
 		token: { ...ICP_TOKEN, network },
@@ -20,7 +27,8 @@ const makeTx = (id: string, network = ICP_NETWORK): StakingTransactionsUiWithTok
 		incoming: false,
 		isReward: false,
 		type: 'send',
-		status: 'confirmed'
+		status: 'confirmed',
+		value: 10000000000n
 	}) as unknown as StakingTransactionsUiWithToken;
 
 const renderTxs = (txs: StakingTransactionsUiWithToken[]) =>
@@ -38,16 +46,18 @@ describe('StakeTransactions', () => {
 
 	it('renders nothing when list empty', () => {
 		renderTxs([]);
+
 		expect(screen.queryByText(get(i18n).navigation.text.activity)).not.toBeInTheDocument();
 	});
 
 	it('renders title when transactions exist', () => {
-		renderTxs([makeTx('t1')]);
+		renderTxs([makeTx({ id: 't1' })]);
+
 		expect(screen.getByText(get(i18n).navigation.text.activity)).toBeInTheDocument();
 	});
 
 	it('shows max 5 until expanded', () => {
-		const txs = Array.from({ length: 8 }, (_, i) => makeTx(`tx${i}`));
+		const txs = Array.from({ length: 8 }, (_, i) => makeTx({ id: `tx${i}` }));
 		renderTxs(txs);
 
 		expect(screen.getAllByTestId(/stake-tx-transaction/)).toHaveLength(5);
@@ -55,7 +65,7 @@ describe('StakeTransactions', () => {
 	});
 
 	it('expands to full history when button clicked', async () => {
-		const txs = Array.from({ length: 7 }, (_, i) => makeTx(`t${i}`));
+		const txs = Array.from({ length: 7 }, (_, i) => makeTx({ id: `t${i}` }));
 		renderTxs(txs);
 
 		await fireEvent.click(screen.getByTestId('stake-tx-expand-transactions-button'));
@@ -65,28 +75,32 @@ describe('StakeTransactions', () => {
 	});
 
 	it('no expand button for ≤ 5 items', () => {
-		renderTxs(Array.from({ length: 3 }, (_, i) => makeTx(`x${i}`)));
+		renderTxs(Array.from({ length: 3 }, (_, i) => makeTx({ id: `x${i}` })));
+
 		expect(screen.queryByTestId('stake-tx-expand-transactions-button')).not.toBeInTheDocument();
 	});
 
 	it('sorts by timestamp newest first', () => {
-		const older = { ...makeTx('old'), timestamp: 0n } as unknown as StakingTransactionsUiWithToken;
+		const older = {
+			...makeTx({ id: 'old' }),
+			timestamp: 0n,
+			value: 10000000000n
+		} as unknown as StakingTransactionsUiWithToken;
 		const newer = {
-			...makeTx('old'),
-			timestamp: 5_000_000n
+			...makeTx({ id: 'new' }),
+			timestamp: 5_000_000n,
+			value: 50000000000n
 		} as unknown as StakingTransactionsUiWithToken;
 
 		renderTxs([older, newer]);
 
-		const ids = screen
-			.getAllByTestId(/stake-tx-transaction/)
-			.map((el) => el.getAttribute('data-id'));
+		const elms = screen.getAllByTestId(/stake-tx-transaction/);
 
-		expect(ids[0]).toBe('new');
+		expect(elms[0]).toBe('new');
 	});
 
 	it('opens ICP modal', async () => {
-		const tx = makeTx('icpTx', ICP_NETWORK);
+		const tx = makeTx({ id: 'icpTx', network: ICP_NETWORK });
 		renderTxs([tx]);
 
 		await fireEvent.click(screen.getByTestId('stake-tx-transaction-0'));
@@ -95,7 +109,7 @@ describe('StakeTransactions', () => {
 	});
 
 	it('opens ETH modal', async () => {
-		const tx = makeTx('ethTx', ETHEREUM_NETWORK);
+		const tx = makeTx({ id: 'ethTx', network: ETHEREUM_NETWORK });
 		renderTxs([tx]);
 
 		await fireEvent.click(screen.getByTestId('stake-tx-transaction-0'));
@@ -104,7 +118,7 @@ describe('StakeTransactions', () => {
 	});
 
 	it('opens BTC modal', async () => {
-		const tx = makeTx('btcTx', BTC_MAINNET_NETWORK);
+		const tx = makeTx({ id: 'btcTx', network: BTC_MAINNET_NETWORK });
 		renderTxs([tx]);
 
 		await fireEvent.click(screen.getByTestId('stake-tx-transaction-0'));
@@ -113,7 +127,7 @@ describe('StakeTransactions', () => {
 	});
 
 	it('opens SOL modal', async () => {
-		const tx = makeTx('solTx', SOLANA_MAINNET_NETWORK);
+		const tx = makeTx({ id: 'solTx', network: SOLANA_MAINNET_NETWORK });
 		renderTxs([tx]);
 
 		await fireEvent.click(screen.getByTestId('stake-tx-transaction-0'));

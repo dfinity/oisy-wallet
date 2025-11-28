@@ -4,10 +4,8 @@
 		AnyTransactionUiWithToken,
 		StakingTransactionsUiWithToken
 	} from '$lib/types/transaction-ui';
-	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import { nonNullish } from '@dfinity/utils';
-	import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
