@@ -1,4 +1,3 @@
-import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { GOLDAO_LEDGER_CANISTER_ID } from '$env/tokens/tokens.sns.env';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
@@ -9,11 +8,16 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 
+vi.mock('$env/networks/networks.icrc.env', async (importActual) => ({
+	...(await importActual()),
+	GLDT_LEDGER_CANISTER_ID: 'qoc74-tyaaa-aaaaa-aaaca-cai'
+}));
+
 const mockGldtToken: IcToken = {
 	...mockValidIcrcToken,
 	id: parseTokenId('GLDT'),
 	symbol: 'GLDT',
-	ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
+	ledgerCanisterId: 'qoc74-tyaaa-aaaaa-aaaca-cai'
 };
 
 const mockGoldaoToken: IcToken = {
