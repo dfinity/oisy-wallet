@@ -7,9 +7,9 @@ import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.p
 import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
 import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
-import * as extCustomTokens from '$icp/services/ext-custom-tokens.services';
 import * as ethNftServices from '$eth/services/nft.services';
 import { loadNftsByNetwork as loadErcNftsByNetwork } from '$eth/services/nft.services';
+import * as extCustomTokens from '$icp/services/ext-custom-tokens.services';
 import * as icNftServices from '$icp/services/nft.services';
 import { loadNfts as loadExtNfts } from '$icp/services/nft.services';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
