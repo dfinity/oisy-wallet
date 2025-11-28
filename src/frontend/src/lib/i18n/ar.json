@@ -1856,9 +1856,7 @@
 			"staked": "",
 			"unstaked": "",
 			"title_empty": "",
-			"description_empty": "",
-          "full_history": "",
-          "recent_history": ""
+			"description_empty": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": ""

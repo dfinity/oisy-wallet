@@ -34,6 +34,7 @@
 	} from '$lib/utils/network.utils';
 	import IconList from '$lib/components/icons/IconList.svelte';
 	import { sortTransactions } from '$lib/utils/transactions.utils';
+	import StakeTransaction from '$lib/components/stake/StakeTransaction.svelte';
 
 	interface Props {
 		transactions: StakingTransactionsUiWithToken[];
@@ -44,33 +45,6 @@
 	const sortedTransactions = $derived(
 		transactions.sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }))
 	);
-
-	const getTimestamp = (timestampNanoseconds?: bigint | number) =>
-		nonNullish(timestampNanoseconds)
-			? Number(BigInt(timestampNanoseconds) / NANO_SECONDS_IN_SECOND)
-			: undefined;
-
-	const getTo = (transaction: StakingTransactionsUiWithToken): string | undefined => {
-		return nonNullish(transaction.to) && transaction.to.length > 0
-			? (transaction.to[0] as string)
-			: nonNullish(transaction.to) && transaction.to.length === 0
-				? (transaction.to as string)
-				: undefined;
-	};
-
-	const getStatus = (transaction: StakingTransactionsUiWithToken) => {
-		if ('status' in transaction && nonNullish(transaction.status)) {
-			return transaction.status === 'confirmed' ||
-				transaction.status === 'executed' ||
-				transaction.status === 'finalized' ||
-				transaction.status === 'processed'
-				? 'confirmed'
-				: transaction.status === 'pending'
-					? 'pending'
-					: 'unconfirmed';
-		}
-		return 'unconfirmed';
-	};
 
 	let expanded = $state(false);
 
@@ -126,18 +100,6 @@
 			});
 		}
 	};
-
-	const getDisplayAmount = (transaction: StakingTransactionsUiWithToken) =>
-		'incoming' in transaction &&
-		transaction.incoming &&
-		!transaction.isReward &&
-		nonNullish(transaction.value)
-			? (transaction.value +
-					('fee' in transaction && nonNullish(transaction.fee) ? transaction.fee : 0n)) *
-				-1n
-			: nonNullish(transaction.value)
-				? transaction.value
-				: undefined;
 </script>
 
 {#if sortedTransactions.length > 0}
@@ -147,28 +109,7 @@
 		{/snippet}
 		{#snippet content()}
 			{#each expanded ? sortedTransactions : sortedTransactions.slice(0, 5) as transaction, index (`${index}-${transaction.timestamp}`)}
-				<Transaction
-					type={transaction.type}
-					token={transaction.token}
-					status={getStatus(transaction)}
-					iconType="token"
-					timestamp={getTimestamp(transaction.timestamp)}
-					from={transaction.from}
-					to={getTo(transaction)}
-					displayAmount={getDisplayAmount(transaction)}
-					onClick={() => openModal(transaction)}
-					fullDate
-				>
-					{#if 'incoming' in transaction && transaction.incoming}
-						{#if transaction.isReward}
-							Reward claimed
-						{:else}
-							Unstaked
-						{/if}
-					{:else}
-						Staked
-					{/if}
-				</Transaction>
+				<StakeTransaction {transaction} onClick={() => openModal(transaction)} />
 			{/each}
 
 			{#if sortedTransactions.length > 5}

@@ -48,10 +48,6 @@
 				})
 			: []
 	);
-
-	$effect(() => {
-		console.log('filtered transactions', transactions);
-	});
 </script>
 
 <div class="flex flex-col gap-6 pb-6">
