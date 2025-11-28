@@ -1852,6 +1852,9 @@
 			"claiming": "Claiming...",
 			"get_tokens_with_amount": "Get up to $amount $token_symbol",
 			"get_tokens": "Get more $token_symbol",
+			"reward_claimed": "Reward claimed",
+			"staked": "Staked",
+			"unstaked": "Unstaked",
 			"title_empty": "Your staking positions will appear here",
 			"description_empty": "It looks like you haven't staked any tokens yet"
 		},

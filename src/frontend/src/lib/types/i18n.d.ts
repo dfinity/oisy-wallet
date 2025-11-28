@@ -1478,6 +1478,9 @@ interface I18nStake {
 		claiming: string;
 		get_tokens_with_amount: string;
 		get_tokens: string;
+		reward_claimed: string;
+		staked: string;
+		unstaked: string;
 		title_empty: string;
 		description_empty: string;
 	};

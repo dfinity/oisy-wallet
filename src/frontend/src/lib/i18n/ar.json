@@ -1852,6 +1852,9 @@
 			"claiming": "",
 			"get_tokens_with_amount": "",
 			"get_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
 			"title_empty": "",
 			"description_empty": ""
 		},
