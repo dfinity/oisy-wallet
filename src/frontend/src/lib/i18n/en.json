@@ -1778,7 +1778,6 @@
 	"earning": {
 		"text": {
 			"title": "Earn",
-			"tab_title": "Earning",
 			"earning_opportunities": "Earning opportunities",
 			"header_title": "Welcome to Earn!",
 			"header_description": "Grow your crypto portfolio by staking your tokens and earning rewards. Choose from various earning strategies based on your risk tolerance."
@@ -1811,11 +1810,9 @@
 			"stake_page_title": "$provider Staking",
 			"gldt_stake_page_description": "Stake GLDT tokens to earn rewards backed by physical gold",
 			"stake": "Stake $token_symbol",
-			"stake_now": "Stake now",
 			"stake_amount": "Stake $amount $token_symbol",
 			"not_enough_to_stake": "No $token_symbol to stake",
 			"unstake": "Unstake",
-			"unstake_now": "Unstake now",
 			"unstaking": "Unstaking...",
 			"unstake_token": "Unstake $token_symbol",
 			"enable_token_text": "You need to enable $token_symbol",
@@ -1840,23 +1837,14 @@
 			"immediate_dissolve_terms": "You will receive your $token immediately but are charged a fee on the $token tokens you are unlocking.",
 			"amount_to_receive": "Amount to receive",
 			"unclaimed_rewards": "Unclaimed rewards",
-			"unlock_requests": "Unlock requests",
-			"unlocking_in": "Unlocking $time",
-			"unlocked": "Unlocked",
-			"withdraw": "Withdraw",
-			"withdraw_successful": "Tokens have been successfully withdrawn.",
 			"claim_reward": "Claim reward",
 			"claim_rewards": "Claim rewards",
-			"claim_reward_short": "Claim",
 			"claim_now": "Claim now",
 			"claiming": "Claiming...",
 			"get_tokens_with_amount": "Get up to $amount $token_symbol",
 			"get_tokens": "Get more $token_symbol",
 			"full_history": "Show full history",
 			"recent_history": "Close full history"
-		},
-		"error": {
-			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens."
 		},
 		"terms": {
 			"gldt": {
