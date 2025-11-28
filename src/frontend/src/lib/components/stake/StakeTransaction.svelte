@@ -47,11 +47,9 @@
 						('fee' in transaction && nonNullish(transaction.fee) ? transaction.fee : ZERO)) *
 					-1n
 				);
-			} 
-				return transaction.value;
-			
+			}
+			return transaction.value;
 		}
-		
 	};
 
 	const getLabel = (transaction: StakingTransactionsUiWithToken) =>
