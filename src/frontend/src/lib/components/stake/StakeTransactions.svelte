@@ -1,5 +1,4 @@
 <script lang="ts">
-	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import type { BtcTransactionUi } from '$btc/types/btc';
@@ -7,17 +6,22 @@
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
-	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
-	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import IconList from '$lib/components/icons/IconList.svelte';
-	import { sortTransactions } from '$lib/utils/transactions.utils';
+	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import StakeTransaction from '$lib/components/stake/StakeTransaction.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import {
+		modalBtcTransaction,
+		modalEthTransaction,
+		modalIcTransaction,
+		modalSolTransaction
+	} from '$lib/derived/modal.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type {
 		AnyTransactionUiWithToken,
 		StakingTransactionsUiWithToken
 	} from '$lib/types/transaction-ui';
-	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
@@ -25,14 +29,10 @@
 		isNetworkIdICP,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import {
-		modalBtcTransaction,
-		modalEthTransaction,
-		modalIcTransaction,
-		modalSolTransaction
-	} from '$lib/derived/modal.derived';
+	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { sortTransactions } from '$lib/utils/transactions.utils';
+	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
+	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 	interface Props {
 		transactions: StakingTransactionsUiWithToken[];
