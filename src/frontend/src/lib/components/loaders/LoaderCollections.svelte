@@ -58,7 +58,7 @@
 		}
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we will re-enable in the next release
+	 
 	const loadExtTokens = async ({ identity, customTokens }: LoadTokensParams) => {
 		const extEnabledCustomToken = customTokens.reduce<CanisterIdText[]>(
 			(acc, { token, enabled }) =>
@@ -108,7 +108,7 @@
 		});
 	};
 
-	const load = async ({extTokens=false}:{extTokens?:boolean}) => {
+	const load = async ({ extTokens = false }: { extTokens?: boolean }) => {
 		if (!NFTS_ENABLED || isNullish($authIdentity)) {
 			return;
 		}
@@ -135,7 +135,7 @@
 	};
 
 	const reload = async () => {
-		await load({extTokens:true});
+		await load({ extTokens: true });
 	};
 </script>
 
