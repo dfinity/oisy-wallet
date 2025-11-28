@@ -36,6 +36,10 @@ describe('App Layout', () => {
 		});
 	});
 
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	it('should render the app layout', () => {
 		const { container } = render(App);
 
