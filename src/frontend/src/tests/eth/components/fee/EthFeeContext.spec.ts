@@ -2,7 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 import * as infuraMod from '$eth/providers/infura.providers';
-import * as infuraGasRestMod from '$eth/rest/infura.rest';
+import { InfuraGasRest } from '$eth/rest/infura.rest';
 import * as listenerServices from '$eth/services/eth-listener.services';
 import * as feeServices from '$eth/services/fee.services';
 import * as nftSend from '$eth/services/nft-send.services';
@@ -80,6 +80,11 @@ describe('EthFeeContext', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
+		InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
+			maxFeePerGas: 12n,
+			maxPriorityFeePerGas: 7n
+		});
+
 		vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(fromAddr));
 		vi.spyOn(networkUtils, 'isNetworkICP').mockReturnValue(false);
 		vi.spyOn(listenerServices, 'initMinedTransactionsListener').mockReturnValue({
@@ -108,19 +113,6 @@ describe('EthFeeContext', () => {
 			safeEstimateGas: async () => await new Promise((resolve) => resolve(ZERO)),
 			estimateGas: async () => await new Promise((resolve) => resolve(ZERO))
 		} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
-
-		vi.spyOn(infuraGasRestMod, 'InfuraGasRest').mockImplementation(
-			() =>
-				({
-					getSuggestedFeeData: async () =>
-						await new Promise((resolve) =>
-							resolve({
-								maxFeePerGas: 12n,
-								maxPriorityFeePerGas: 7n
-							})
-						)
-				}) as unknown as infuraGasRestMod.InfuraGasRest
-		);
 
 		vi.spyOn(feeServices, 'getEthFeeData').mockReturnValue(21n);
 		vi.spyOn(feeServices, 'getCkErc20FeeData').mockResolvedValue(ZERO);
