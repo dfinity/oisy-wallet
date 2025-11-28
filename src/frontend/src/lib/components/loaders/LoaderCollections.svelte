@@ -126,7 +126,7 @@
 
 		await Promise.all([
 			loadErcTokens(params),
-			...(extTokens ? [loadExtTokens(params)] : [])
+			extTokens ? loadExtTokens(params) : Promise.resolve()
 		]);
 	};
 
