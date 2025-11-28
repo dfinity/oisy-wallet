@@ -231,7 +231,7 @@ describe('nft.services', () => {
 			expect(get(nftStore)).toBeUndefined();
 		});
 
-		it('should handle EXT NFTs loading error gracefully 2', async () => {
+		it('should handle EXT NFTs loading error gracefully', async () => {
 			const tokens: NonFungibleToken[] = [mockValidExtV2Token];
 
 			vi.spyOn(icNftServices, 'loadNfts').mockRejectedValueOnce(new Error('NFTs Error'));
