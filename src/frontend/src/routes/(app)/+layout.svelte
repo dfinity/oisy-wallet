@@ -84,7 +84,7 @@
 				<SplitPane>
 					{#snippet menu()}
 						<NavigationMenu>
-							{#if tokensRoute || nftsRoute}
+							{#if tokensRoute || nftsRoute || earningRoute}
 								<Responsive up="1.5xl">
 									<DappsCarousel />
 								</Responsive>
