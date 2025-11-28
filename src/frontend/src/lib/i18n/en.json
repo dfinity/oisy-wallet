@@ -1857,9 +1857,9 @@
 			"unstaked": "Unstaked",
 			"title_empty": "Your staking positions will appear here",
 			"description_empty": "It looks like you haven't staked any tokens yet",
-          "full_history": "Show full history",
-          "recent_history": "Close full history"
-        },
+			"full_history": "Show full history",
+			"recent_history": "Close full history"
+		},
 		"error": {
 			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens."
 		},
