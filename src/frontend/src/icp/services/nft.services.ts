@@ -28,7 +28,9 @@ export const loadNfts = async ({
 				canisterId
 			});
 
-			return tokenIndices.map((index) => mapExtNft({ index, token }));
+			const promises = tokenIndices.map(async (index) => await mapExtNft({ index, token }));
+
+			return await Promise.all(promises);
 		} catch (error: unknown) {
 			console.warn(`Error loading EXT tokens from collection ${canisterId}:`, error);
 

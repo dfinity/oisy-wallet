@@ -1778,6 +1778,7 @@
 	"earning": {
 		"text": {
 			"title": "Earn",
+			"tab_title": "Earning",
 			"earning_opportunities": "Earning opportunities",
 			"header_title": "Welcome to Earn!",
 			"header_description": "Grow your crypto portfolio by staking your tokens and earning rewards. Choose from various earning strategies based on your risk tolerance."
@@ -1850,7 +1851,9 @@
 			"claim_now": "Claim now",
 			"claiming": "Claiming...",
 			"get_tokens_with_amount": "Get up to $amount $token_symbol",
-			"get_tokens": "Get more $token_symbol"
+			"get_tokens": "Get more $token_symbol",
+			"title_empty": "Your staking positions will appear here",
+			"description_empty": "It looks like you haven't staked any tokens yet"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens."
@@ -1880,6 +1883,9 @@
 				"fact_3_description": "Earn $apy% APY with minimal volatility risk",
 				"fact_3_description_fallback": "Earn consistent rewards with minimal volatility risk"
 			}
+		},
+		"alt": {
+			"placeholder_image": "No staked tokens yet"
 		}
 	},
 	"get_token": {

@@ -2,7 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 import * as infuraMod from '$eth/providers/infura.providers';
-import * as infuraGasRestMod from '$eth/rest/infura.rest';
+import { InfuraGasRest } from '$eth/rest/infura.rest';
 import * as listenerServices from '$eth/services/eth-listener.services';
 import * as feeServices from '$eth/services/fee.services';
 import * as nftSend from '$eth/services/nft-send.services';
@@ -29,6 +29,10 @@ import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 import type { Snippet } from 'svelte';
 import { readable, writable, type Writable } from 'svelte/store';
+
+vi.mock('$eth/rest/infura.rest', () => ({
+	InfuraGasRest: vi.fn()
+}));
 
 describe('EthFeeContext', () => {
 	const feeState: Writable<FeeStoreData | undefined> = writable(undefined);
@@ -73,9 +77,17 @@ describe('EthFeeContext', () => {
 		children: mockSnippet
 	};
 
+	const renderWith = (props: Partial<typeof baseProps> = {}) =>
+		render(EthFeeContext, { props: { ...baseProps, ...props }, context: mockContext(feeStore) });
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
+
+		InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
+			maxFeePerGas: 12n,
+			maxPriorityFeePerGas: 7n
+		});
 
 		vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(fromAddr));
 		vi.spyOn(networkUtils, 'isNetworkICP').mockReturnValue(false);
@@ -106,19 +118,6 @@ describe('EthFeeContext', () => {
 			estimateGas: async () => await new Promise((resolve) => resolve(ZERO))
 		} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
 
-		vi.spyOn(infuraGasRestMod, 'InfuraGasRest').mockImplementation(
-			() =>
-				({
-					getSuggestedFeeData: async () =>
-						await new Promise((resolve) =>
-							resolve({
-								maxFeePerGas: 12n,
-								maxPriorityFeePerGas: 7n
-							})
-						)
-				}) as unknown as infuraGasRestMod.InfuraGasRest
-		);
-
 		vi.spyOn(feeServices, 'getEthFeeData').mockReturnValue(21n);
 		vi.spyOn(feeServices, 'getCkErc20FeeData').mockResolvedValue(ZERO);
 		vi.spyOn(feeServices, 'getErc20FeeData').mockResolvedValue(ZERO);
@@ -133,8 +132,9 @@ describe('EthFeeContext', () => {
 		});
 	});
 
-	const renderWith = (props: Partial<typeof baseProps> = {}) =>
-		render(EthFeeContext, { props: { ...baseProps, ...props }, context: mockContext(feeStore) });
+	afterEach(() => {
+		vi.useRealTimers();
+	});
 
 	it('sets fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
 		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);

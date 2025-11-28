@@ -43,6 +43,10 @@ describe('ConvertToCkBtc', () => {
 	const mockIsBusyStore = (isBusy = false) =>
 		vi.spyOn(isBusyStore, 'isBusy', 'get').mockImplementation(() => readable(isBusy));
 
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	it('should keep the button disabled and not call the service if ckBtcToken is not available', () => {
 		const spy = mockCkMinterInfoWorkerServices();
 		mockIsBusyStore();

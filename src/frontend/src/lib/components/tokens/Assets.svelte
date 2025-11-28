@@ -2,7 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
+	import { EARNING_ENABLED } from '$env/earning';
 	import { NFTS_ENABLED } from '$env/nft.env';
+	import EarningsList from '$lib/components/earning/EarningsList.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
 	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
@@ -70,7 +72,16 @@
 												label: $i18n.nfts.text.title,
 												id: TokenTypes.NFTS,
 												path: `${AppPath.Nfts}${page.url.search}`
-											}
+											},
+											...(EARNING_ENABLED
+												? [
+														{
+															label: $i18n.earning.text.tab_title,
+															id: TokenTypes.EARNING,
+															path: `${AppPath.Earning}${page.url.search}`
+														}
+													]
+												: [])
 										]}
 										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
 										bind:activeTab
@@ -85,7 +96,7 @@
 						<div class="flex">
 							<TokensMenu />
 						</div>
-					{:else}
+					{:else if tab === TokenTypes.NFTS}
 						<div class="flex">
 							<NftSortMenu />
 						</div>
@@ -98,8 +109,10 @@
 
 			{#if activeTab === TokenTypes.TOKENS}
 				<TokensList />
-			{:else}
+			{:else if activeTab === TokenTypes.NFTS}
 				<NftsList />
+			{:else if activeTab === TokenTypes.EARNING}
+				<EarningsList />
 			{/if}
 		</StickyHeader>
 
@@ -108,7 +121,7 @@
 				{#snippet label()}
 					{#if activeTab === TokenTypes.TOKENS}
 						{$i18n.tokens.manage.text.manage_list}
-					{:else}
+					{:else if activeTab === TokenTypes.NFTS}
 						{$i18n.tokens.manage.text.manage_list_nft}
 					{/if}
 				{/snippet}

@@ -1778,6 +1778,7 @@
 	"earning": {
 		"text": {
 			"title": "Gagner",
+			"tab_title": "",
 			"earning_opportunities": "",
 			"header_title": "",
 			"header_description": ""
@@ -1850,7 +1851,9 @@
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": ""
+			"get_tokens": "",
+			"title_empty": "",
+			"description_empty": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": ""
@@ -1880,6 +1883,9 @@
 				"fact_3_description": "",
 				"fact_3_description_fallback": ""
 			}
+		},
+		"alt": {
+			"placeholder_image": ""
 		}
 	},
 	"get_token": {
