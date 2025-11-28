@@ -1,3 +1,9 @@
+import type { Mock } from 'vitest';
+
+vi.mock('$icp/utils/ic-transactions.utils', () => ({
+	getAllIcTransactions: vi.fn()
+}));
+
 import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { GOLDAO_LEDGER_CANISTER_ID } from '$env/tokens/tokens.sns.env';
 import type { IcToken } from '$icp/types/ic-token';
@@ -39,7 +45,7 @@ describe('getStakingTransactions', () => {
 	});
 
 	it('returns empty array when no stake transactions exist', () => {
-		vi.spyOn(icTxUtils, 'getAllIcTransactions')
+		(icTxUtils.getAllIcTransactions as Mock)
 			.mockReturnValueOnce([]) // GLDT call
 			.mockReturnValueOnce([]); // GOLDAO call
 
@@ -56,7 +62,7 @@ describe('getStakingTransactions', () => {
 		const tx = createCertifiedIcTransactionUiMock('stake');
 		tx.data.to = GLDT_STAKE_CANISTER_ID;
 
-		vi.spyOn(icTxUtils, 'getAllIcTransactions').mockReturnValueOnce([tx]).mockReturnValueOnce([]);
+		(icTxUtils.getAllIcTransactions as Mock).mockReturnValueOnce([tx]).mockReturnValueOnce([]);
 
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
@@ -72,7 +78,7 @@ describe('getStakingTransactions', () => {
 		const tx = createCertifiedIcTransactionUiMock('reward');
 		tx.data.from = GLDT_STAKE_CANISTER_ID;
 
-		vi.spyOn(icTxUtils, 'getAllIcTransactions').mockReturnValueOnce([]).mockReturnValueOnce([tx]);
+		(icTxUtils.getAllIcTransactions as Mock).mockReturnValueOnce([]).mockReturnValueOnce([tx]);
 
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
@@ -89,7 +95,7 @@ describe('getStakingTransactions', () => {
 		const related = createCertifiedIcTransactionUiMock('yes');
 		related.data.to = GLDT_STAKE_CANISTER_ID;
 
-		vi.spyOn(icTxUtils, 'getAllIcTransactions')
+		(icTxUtils.getAllIcTransactions as Mock)
 			.mockReturnValueOnce([irrelevant])
 			.mockReturnValueOnce([related]);
 
@@ -112,7 +118,7 @@ describe('getStakingTransactions', () => {
 		const gold1 = createCertifiedIcTransactionUiMock('o1');
 		gold1.data.from = GLDT_STAKE_CANISTER_ID;
 
-		vi.spyOn(icTxUtils, 'getAllIcTransactions')
+		(icTxUtils.getAllIcTransactions as Mock)
 			.mockReturnValueOnce([gldt1, gldt2]) // GLDT call
 			.mockReturnValueOnce([gold1]); // GOLDAO call
 
@@ -131,7 +137,7 @@ describe('getStakingTransactions', () => {
 		rewardA.data.from = GLDT_STAKE_CANISTER_ID;
 		rewardB.data.from = GLDT_STAKE_CANISTER_ID;
 
-		vi.spyOn(icTxUtils, 'getAllIcTransactions')
+		(icTxUtils.getAllIcTransactions as Mock)
 			.mockReturnValueOnce([])
 			.mockReturnValueOnce([rewardA, rewardB]);
 
