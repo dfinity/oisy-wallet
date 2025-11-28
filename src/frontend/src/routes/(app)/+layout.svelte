@@ -43,11 +43,11 @@
 
 	let earningRoute = $derived(isRouteEarning(page));
 
+	let assetsRoute = $derived(tokensRoute || nftsRoute || earningRoute);
+
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
-	let showHero = $derived(
-		(tokensRoute || nftsRoute || earningRoute || transactionsRoute) && !nftsCollectionRoute
-	);
+	let showHero = $derived((assetsRoute || transactionsRoute) && !nftsCollectionRoute);
 
 	$effect(() => {
 		token.set(nftsCollectionRoute ? ($pageNonFungibleToken ?? $pageToken) : $pageToken); // we could be on the nfts page without a pageNonFungibleToken set
@@ -84,7 +84,7 @@
 				<SplitPane>
 					{#snippet menu()}
 						<NavigationMenu>
-							{#if tokensRoute || nftsRoute || earningRoute}
+							{#if assetsRoute}
 								<Responsive up="1.5xl">
 									<DappsCarousel />
 								</Responsive>
@@ -97,6 +97,12 @@
 					{/if}
 
 					<Loaders>
+						{#if assetsRoute}
+							<Responsive down="xl">
+								<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
+							</Responsive>
+						{/if}
+
 						{@render children()}
 					</Loaders>
 				</SplitPane>
