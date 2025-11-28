@@ -3,4 +3,4 @@
 	import { TokenTypes } from '$lib/enums/token-types';
 </script>
 
-<Assets tab={TokenTypes.NFTS} />
+<Assets tab={TokenTypes.EARNING} />

@@ -2,6 +2,12 @@ import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
 import { buildIndexedIcTokens } from '$icp/utils/ic-tokens.utils';
+import {
+	buildIcrcCustomTokens,
+	buildIndexedIcrcCustomTokens
+} from '$icp/services/icrc-custom-tokens.services';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
 
 export const SNS_BUILTIN_TOKENS: IcTokenWithoutIdExtended[] = buildIcrcCustomTokens();
 
