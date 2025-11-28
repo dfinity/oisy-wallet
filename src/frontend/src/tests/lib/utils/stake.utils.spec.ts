@@ -1,13 +1,8 @@
-import type { Mock } from 'vitest';
-
-vi.mock('$icp/utils/ic-transactions.utils', () => ({
-	getAllIcTransactions: vi.fn()
-}));
-
 import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { GOLDAO_LEDGER_CANISTER_ID } from '$env/tokens/tokens.sns.env';
+import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
+import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
-import * as icTxUtils from '$icp/utils/ic-transactions.utils';
 import { GLDT_STAKE_CANISTER_ID } from '$lib/constants/app.constants';
 import { getGldtStakingTransactions } from '$lib/utils/stake.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -28,31 +23,22 @@ const mockGoldaoToken: IcToken = {
 	ledgerCanisterId: GOLDAO_LEDGER_CANISTER_ID
 };
 
-const BASE_INPUT = {
-	ckBtcPendingUtxoTransactions: [],
-	ckEthPendingTransactions: [],
-	icTransactionsStore: { data: [], certified: true },
-	btcStatusesStore: { data: undefined, certified: true },
-	ckBtcMinterInfoStore: { data: undefined, certified: true },
-	ckBtcPendingUtxosStore: { data: undefined, certified: true },
-	icExtendedTransactions: [],
-	icPendingTransactionsStore: { data: [], certified: true }
-};
-
 describe('getStakingTransactions', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+
+		icTransactionsStore.reset(mockGldtToken.id);
+		icTransactionsStore.reset(mockGoldaoToken.id);
+		icPendingTransactionsStore.reset(mockGldtToken.id);
+		icPendingTransactionsStore.reset(mockGoldaoToken.id);
 	});
 
 	it('returns empty array when no stake transactions exist', () => {
-		(icTxUtils.getAllIcTransactions as Mock)
-			.mockReturnValueOnce([]) // GLDT call
-			.mockReturnValueOnce([]); // GOLDAO call
-
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
 			goldaoToken: mockGoldaoToken,
-			...BASE_INPUT
+			icTransactionsStore: {},
+			icPendingTransactionsStore: {}
 		});
 
 		expect(result).toEqual([]);
@@ -62,12 +48,11 @@ describe('getStakingTransactions', () => {
 		const tx = createCertifiedIcTransactionUiMock('stake');
 		tx.data.to = GLDT_STAKE_CANISTER_ID;
 
-		(icTxUtils.getAllIcTransactions as Mock).mockReturnValueOnce([tx]).mockReturnValueOnce([]);
-
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
 			goldaoToken: mockGoldaoToken,
-			...BASE_INPUT
+			icTransactionsStore: { [mockGldtToken.id]: [tx] },
+			icPendingTransactionsStore: {}
 		});
 
 		expect(result[0].isReward).toBeFalsy();
@@ -78,12 +63,11 @@ describe('getStakingTransactions', () => {
 		const tx = createCertifiedIcTransactionUiMock('reward');
 		tx.data.from = GLDT_STAKE_CANISTER_ID;
 
-		(icTxUtils.getAllIcTransactions as Mock).mockReturnValueOnce([]).mockReturnValueOnce([tx]);
-
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
 			goldaoToken: mockGoldaoToken,
-			...BASE_INPUT
+			icTransactionsStore: { [mockGoldaoToken.id]: [tx] },
+			icPendingTransactionsStore: {}
 		});
 
 		expect(result[0].isReward).toBeTruthy();
@@ -95,14 +79,11 @@ describe('getStakingTransactions', () => {
 		const related = createCertifiedIcTransactionUiMock('yes');
 		related.data.to = GLDT_STAKE_CANISTER_ID;
 
-		(icTxUtils.getAllIcTransactions as Mock)
-			.mockReturnValueOnce([irrelevant])
-			.mockReturnValueOnce([related]);
-
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
 			goldaoToken: mockGoldaoToken,
-			...BASE_INPUT
+			icTransactionsStore: { [mockGldtToken.id]: [irrelevant], [mockGoldaoToken.id]: [related] },
+			icPendingTransactionsStore: {}
 		});
 
 		expect(result.map((t) => t.id)).toEqual(['yes']);
@@ -118,14 +99,11 @@ describe('getStakingTransactions', () => {
 		const gold1 = createCertifiedIcTransactionUiMock('o1');
 		gold1.data.from = GLDT_STAKE_CANISTER_ID;
 
-		(icTxUtils.getAllIcTransactions as Mock)
-			.mockReturnValueOnce([gldt1, gldt2]) // GLDT call
-			.mockReturnValueOnce([gold1]); // GOLDAO call
-
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
 			goldaoToken: mockGoldaoToken,
-			...BASE_INPUT
+			icTransactionsStore: { [mockGldtToken.id]: [gldt1, gldt2], [mockGoldaoToken.id]: [gold1] },
+			icPendingTransactionsStore: {}
 		});
 
 		expect(result.map((o) => o.id)).toEqual(['g1', 'g2', 'o1']);
@@ -137,14 +115,11 @@ describe('getStakingTransactions', () => {
 		rewardA.data.from = GLDT_STAKE_CANISTER_ID;
 		rewardB.data.from = GLDT_STAKE_CANISTER_ID;
 
-		(icTxUtils.getAllIcTransactions as Mock)
-			.mockReturnValueOnce([])
-			.mockReturnValueOnce([rewardA, rewardB]);
-
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
 			goldaoToken: mockGoldaoToken,
-			...BASE_INPUT
+			icTransactionsStore: { [mockGldtToken.id]: [], [mockGoldaoToken.id]: [rewardA, rewardB] },
+			icPendingTransactionsStore: {}
 		});
 
 		expect(result.every((tx) => tx.isReward)).toBeTruthy();
