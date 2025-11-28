@@ -124,8 +124,8 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier as string.
 	 * @param {bigint} params.amount - The amount to transfer.
 	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
-	 * @returns {Promise<TokenIndex[]>} The list of token indices owned by the user.
-	 * @throws CanisterInternalError if the token identifier is invalid.
+	 * @returns {Promise<Balance>} The new balance of the sender after the transfer.
+	 * @throws CanisterInternalError if the token identifier is invalid or if the transfer fails.
 	 */
 	transfer = async ({
 		certified,
