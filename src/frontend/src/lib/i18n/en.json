@@ -1778,6 +1778,7 @@
 	"earning": {
 		"text": {
 			"title": "Earn",
+			"tab_title": "Earning",
 			"earning_opportunities": "Earning opportunities",
 			"header_title": "Welcome to Earn!",
 			"header_description": "Grow your crypto portfolio by staking your tokens and earning rewards. Choose from various earning strategies based on your risk tolerance."

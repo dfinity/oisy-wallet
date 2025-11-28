@@ -5,6 +5,7 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 
 export const getMockNonFungibleToken = (params: {
 	addresses: string[];
@@ -57,6 +58,17 @@ export const mockValidErc1155Nft: Nft = {
 	},
 	mediaStatus: NftMediaStatusEnum.OK,
 	acquiredAt: new Date('2023-01-01T00:00:00.000Z')
+};
+
+export const mockValidExtNft: Nft = {
+	name: 'Mock EXT NFT',
+	id: parseNftId('123456'),
+	imageUrl: 'https://example.com/mock-ext-nft.png',
+	collection: {
+		...mockValidExtV2Token,
+		address: mockValidExtV2Token.canisterId
+	},
+	mediaStatus: NftMediaStatusEnum.OK
 };
 
 export const mockNftCollectionUi: NftCollectionUi = {
