@@ -1,4 +1,8 @@
-import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import {
+	GLDT_LEDGER_CANISTER_ID,
+	VCHF_LEDGER_CANISTER_ID,
+	VEUR_LEDGER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
 import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
 import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
@@ -52,7 +56,14 @@ describe('token.utils', () => {
 
 	describe('isVCHFToken', () => {
 		it('should return true for token VCHF', () => {
-			expect(isVCHFToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'VCHF' })).toBeTruthy();
+			expect(
+				isVCHFToken({
+					...mockValidIcToken,
+					standard: 'icrc',
+					symbol: 'VCHF',
+					ledgerCanisterId: VCHF_LEDGER_CANISTER_ID
+				} as Token)
+			).toBeTruthy();
 		});
 
 		it('should return false for token VCHF that is not ICRC token', () => {
@@ -83,7 +94,14 @@ describe('token.utils', () => {
 
 	describe('isVEURToken', () => {
 		it('should return true for token VEUR', () => {
-			expect(isVEURToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'VEUR' })).toBeTruthy();
+			expect(
+				isVEURToken({
+					...mockValidIcToken,
+					standard: 'icrc',
+					symbol: 'VEUR',
+					ledgerCanisterId: VEUR_LEDGER_CANISTER_ID
+				} as Token)
+			).toBeTruthy();
 		});
 
 		it('should return false for token VEUR that is not ICRC token', () => {
