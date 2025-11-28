@@ -25,6 +25,7 @@ import { WEETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.weeth.env';
 import { WETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.weth.env';
 import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
 import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
+import { ZCHF_TOKEN } from '$env/tokens/tokens-erc20/tokens.zchf.env';
 import type {
 	Erc20Contract,
 	RequiredAdditionalErc20Token,
@@ -68,7 +69,8 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	RNDR_TOKEN,
 	SPX_TOKEN,
 	WEETH_TOKEN,
-	WETH_TOKEN
+	WETH_TOKEN,
+	ZCHF_TOKEN
 ];
 
 /**

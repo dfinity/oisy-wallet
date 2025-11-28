@@ -8,8 +8,10 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { get } from 'svelte/store';
 
-export const buildIndexedDip20Tokens = (): Record<LedgerCanisterIdText, IcTokenWithoutIdExtended> =>
-	buildDip20Tokens().reduce(
+export const buildIndexedDip20Tokens = (
+	tokens: IcTokenWithoutIdExtended[]
+): Record<LedgerCanisterIdText, IcTokenWithoutIdExtended> =>
+	tokens.reduce(
 		(acc, { ledgerCanisterId, ...rest }) => ({
 			...acc,
 			[`${ledgerCanisterId}`]: {
