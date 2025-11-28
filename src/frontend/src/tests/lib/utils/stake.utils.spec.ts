@@ -1,7 +1,5 @@
-import {
-	GLDT_LEDGER_CANISTER_ID,
-	GOLDAO_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { GOLDAO_LEDGER_CANISTER_ID } from '$env/tokens/tokens.sns.env';
 import type { IcToken } from '$icp/types/ic-token';
 import * as icTxUtils from '$icp/utils/ic-transactions.utils';
 import { GLDT_STAKE_CANISTER_ID } from '$lib/constants/app.constants';
