@@ -7,13 +7,11 @@ type IcTokenInput = Omit<Partial<IcToken>, 'ledgerCanisterId'> &
 export const buildIndexedIcTokens = <T extends IcTokenInput>(
 	tokens: T[]
 ): Record<LedgerCanisterIdText, T> =>
-	tokens.reduce(
-		(acc, { ledgerCanisterId, ...rest }) => ({
-			...acc,
-			[`${ledgerCanisterId}`]: {
-				ledgerCanisterId,
-				...rest
-			}
-		}),
-		{}
-	);
+	tokens.reduce<Record<LedgerCanisterIdText, T>>((acc, { ledgerCanisterId, ...rest }) => {
+		acc[`${ledgerCanisterId}`] = {
+			ledgerCanisterId,
+			...rest
+		} as T;
+
+		return acc;
+	}, {});
