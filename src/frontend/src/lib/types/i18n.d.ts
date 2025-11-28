@@ -1413,7 +1413,6 @@ interface I18nActivity {
 interface I18nEarning {
 	text: {
 		title: string;
-		tab_title: string;
 		earning_opportunities: string;
 		header_title: string;
 		header_description: string;
@@ -1437,11 +1436,9 @@ interface I18nStake {
 		stake_page_title: string;
 		gldt_stake_page_description: string;
 		stake: string;
-		stake_now: string;
 		stake_amount: string;
 		not_enough_to_stake: string;
 		unstake: string;
-		unstake_now: string;
 		unstaking: string;
 		unstake_token: string;
 		enable_token_text: string;
@@ -1466,14 +1463,8 @@ interface I18nStake {
 		immediate_dissolve_terms: string;
 		amount_to_receive: string;
 		unclaimed_rewards: string;
-		unlock_requests: string;
-		unlocking_in: string;
-		unlocked: string;
-		withdraw: string;
-		withdraw_successful: string;
 		claim_reward: string;
 		claim_rewards: string;
-		claim_reward_short: string;
 		claim_now: string;
 		claiming: string;
 		get_tokens_with_amount: string;
@@ -1481,7 +1472,6 @@ interface I18nStake {
 		full_history: string;
 		recent_history: string;
 	};
-	error: { unexpected_error_on_withdraw: string };
 	terms: {
 		gldt: {
 			item1_title: string;
