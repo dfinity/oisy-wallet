@@ -34,6 +34,10 @@ describe('BtcUtxosFee', () => {
 		source: mockBtcAddress
 	};
 
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	it('renders utxos fee if provided', () => {
 		const { container } = render(BtcUtxosFee, {
 			props,
