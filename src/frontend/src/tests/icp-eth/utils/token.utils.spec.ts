@@ -1,6 +1,5 @@
 import {
 	GLDT_LEDGER_CANISTER_ID,
-	GOLDAO_LEDGER_CANISTER_ID,
 	VCHF_LEDGER_CANISTER_ID,
 	VEUR_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
@@ -10,6 +9,7 @@ import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { GOLDAO_LEDGER_CANISTER_ID } from '$env/tokens/tokens.sns.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { isGLDTToken, isGoldaoToken, isVCHFToken, isVEURToken } from '$icp-eth/utils/token.utils';
