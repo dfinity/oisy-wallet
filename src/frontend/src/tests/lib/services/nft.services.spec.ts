@@ -32,7 +32,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft, mockValidExtNft } from '$tests/mocks/nfts.mock';
-import { type TransactionResponse } from 'ethers/providers';
+import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
