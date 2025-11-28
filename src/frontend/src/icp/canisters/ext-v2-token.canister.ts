@@ -56,7 +56,7 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#balance-1
 	 *
 	 * @param {Object} params - The parameters for fetching the balance.
-	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier as string.
+	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
 	 * @param {Principal} params.account - The principal of the user.
 	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
 	 * @returns {Promise<Balance>} The balance of the user for the specified token.
@@ -114,14 +114,14 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	};
 
 	/**
-	 * Transfer tokens from one user to another.
+	 * Transfer NFT of a collection from one user to another.
 	 *
 	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
 	 *
 	 * @param {Object} params - The parameters for the transfer.
 	 * @param {Principal} params.from - The ICRC principal of the sender.
 	 * @param {Principal} params.to - The ICRC principal of the receiver.
-	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier as string.
+	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
 	 * @param {bigint} params.amount - The amount to transfer.
 	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
 	 * @returns {Promise<Balance>} The new balance of the sender after the transfer.
