@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
-	import { NANO_SECONDS_IN_SECOND, ZERO } from '$lib/constants/app.constants';
 	import { nonNullish } from '@dfinity/utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
+	import { NANO_SECONDS_IN_SECOND, ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
 
 	interface Props {
 		transaction: StakingTransactionsUiWithToken;
@@ -18,7 +18,7 @@
 
 	const getToAddress = (transaction: StakingTransactionsUiWithToken): string | undefined =>
 		nonNullish(transaction.to) && transaction.to.length > 0
-			? (transaction.to[0] as string)
+			? transaction.to[0]
 			: nonNullish(transaction.to) && transaction.to.length === 0
 				? (transaction.to as string)
 				: undefined;
