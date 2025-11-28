@@ -36,8 +36,8 @@
 	let transactions: StakingTransactionsUiWithToken[] = $derived(
 		nonNullish(gldtToken) && nonNullish(goldaoToken)
 			? getGldtStakingTransactions({
-					gldtToken: gldtToken,
-					goldaoToken: goldaoToken,
+					gldtToken,
+					goldaoToken,
 					icPendingTransactionsStore: $icPendingTransactionsStore,
 					icTransactionsStore: $icTransactionsStore
 				})

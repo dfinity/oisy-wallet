@@ -4,6 +4,7 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import StakeTransactions from '$lib/components/stake/StakeTransactions.svelte';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import type { Network } from '$lib/types/network';
@@ -83,7 +84,7 @@ describe('StakeTransactions', () => {
 	it('sorts by timestamp newest first', () => {
 		const older = {
 			...makeTx({ id: 'old' }),
-			timestamp: 0n,
+			timestamp: ZERO,
 			value: 10000000000n
 		} as unknown as StakingTransactionsUiWithToken;
 		const newer = {
@@ -95,12 +96,13 @@ describe('StakeTransactions', () => {
 		renderTxs([older, newer]);
 
 		const cards = screen.getAllByTestId(/stake-tx-transaction/);
+
 		expect(cards).toHaveLength(2);
 
 		const [first, second] = cards;
 
-		expect(first.textContent || '').toContain('500');
-		expect(second.textContent || '').toContain('100');
+		expect(first.textContent ?? '').toContain('500');
+		expect(second.textContent ?? '').toContain('100');
 	});
 
 	it('opens ICP modal', async () => {
