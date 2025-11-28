@@ -58,7 +58,6 @@
 		}
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we will re-enable in the next release
 	const loadExtTokens = async ({ identity, customTokens }: LoadTokensParams) => {
 		const extEnabledCustomToken = customTokens.reduce<CanisterIdText[]>(
 			(acc, { token, enabled }) =>
@@ -108,7 +107,7 @@
 		});
 	};
 
-	const onLoad = async () => {
+	const load = async ({ extTokens = false }: { extTokens?: boolean }) => {
 		if (!NFTS_ENABLED || isNullish($authIdentity)) {
 			return;
 		}
@@ -124,8 +123,21 @@
 			customTokens
 		};
 
-		await Promise.all([loadErcTokens(params)]);
+		await Promise.all([
+			loadErcTokens(params),
+			extTokens ? loadExtTokens(params) : Promise.resolve()
+		]);
+	};
+
+	const onLoad = async () => {
+		await load({});
+	};
+
+	const reload = async () => {
+		await load({ extTokens: true });
 	};
 </script>
+
+<svelte:window onoisyReloadCollections={reload} />
 
 <IntervalLoader interval={COLLECTION_TIMER_INTERVAL_MILLIS} {onLoad} />

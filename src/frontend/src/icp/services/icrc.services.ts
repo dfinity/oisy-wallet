@@ -1,9 +1,9 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
+import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
 import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { balance, allowance as icrcAllowance, metadata } from '$icp/api/icrc-ledger.api';
-import { buildIndexedDip20Tokens } from '$icp/services/dip20-tokens.services';
 import { buildIndexedIcpTokens } from '$icp/services/icp-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
@@ -165,7 +165,7 @@ const loadCustomIcrcTokensData = async ({
 	const indexedIcrcCustomTokens = {
 		...buildIndexedIcpTokens(),
 		...SNS_BUILTIN_TOKENS_INDEXED,
-		...buildIndexedDip20Tokens()
+		...DIP20_BUILTIN_TOKENS_INDEXED
 	};
 
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.

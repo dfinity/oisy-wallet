@@ -1778,6 +1778,7 @@
 	"earning": {
 		"text": {
 			"title": "Guadagna",
+			"tab_title": "",
 			"earning_opportunities": "",
 			"header_title": "",
 			"header_description": ""
@@ -1851,8 +1852,11 @@
 			"claiming": "",
 			"get_tokens_with_amount": "",
 			"get_tokens": "",
-			"full_history": "",
-			"recent_history": ""
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty": "",
+			"description_empty": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": ""
@@ -1882,6 +1886,9 @@
 				"fact_3_description": "",
 				"fact_3_description_fallback": ""
 			}
+		},
+		"alt": {
+			"placeholder_image": ""
 		}
 	},
 	"get_token": {
