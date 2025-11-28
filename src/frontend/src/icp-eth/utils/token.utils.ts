@@ -1,6 +1,5 @@
 import {
 	GLDT_LEDGER_CANISTER_ID,
-	GOLDAO_LEDGER_CANISTER_ID,
 	VCHF_LEDGER_CANISTER_ID,
 	VEUR_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
