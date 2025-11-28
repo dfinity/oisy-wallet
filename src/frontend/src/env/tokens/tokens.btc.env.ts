@@ -28,7 +28,7 @@ export const BTC_MAINNET_TOKEN: RequiredTokenWithLinkedData = {
 	icon: bitcoin,
 	twinTokenSymbol: 'ckBTC',
 	groupData: BTC_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true,
+	neverCollapseInTokenGroup: true,
 	buy: { onramperId: 'btc' }
 };
 
