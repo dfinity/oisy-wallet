@@ -1,5 +1,6 @@
 import {
 	GLDT_LEDGER_CANISTER_ID,
+	GOLDAO_LEDGER_CANISTER_ID,
 	VCHF_LEDGER_CANISTER_ID,
 	VEUR_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
@@ -61,7 +62,8 @@ describe('token.utils', () => {
 					...mockValidIcToken,
 					standard: 'icrc',
 					symbol: 'GOLDAO',
-					network: ICP_TOKEN.network
+					network: ICP_TOKEN.network,
+					ledgerCanisterId: GOLDAO_LEDGER_CANISTER_ID
 				} as Token)
 			).toBeTruthy();
 		});
