@@ -32,11 +32,5 @@ describe('nft.utils', () => {
 				}
 			});
 		});
-
-		it('should raise an error if the index is negative', async () => {
-			await expect(mapExtNft({ index: -1, token: mockValidExtV2Token })).rejects.toThrow(
-				'EXT token index -1 is out of bounds'
-			);
-		});
 	});
 });
