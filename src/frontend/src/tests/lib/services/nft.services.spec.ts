@@ -187,7 +187,8 @@ describe('nft.services', () => {
 
 			await loadNfts({ tokens, identity: mockIdentity, ethAddress: mockWalletAddress });
 
-			expect(mockAlchemyProvider.getNftsByOwner).not.toHaveBeenCalled();
+			expect(ethNftServices.loadNftsByNetwork).not.toHaveBeenCalled();
+			expect(icNftServices.loadNfts).not.toHaveBeenCalled();
 		});
 
 		it('should load ERC721 NFTs', async () => {
