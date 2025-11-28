@@ -58,7 +58,6 @@
 		}
 	};
 
-	 
 	const loadExtTokens = async ({ identity, customTokens }: LoadTokensParams) => {
 		const extEnabledCustomToken = customTokens.reduce<CanisterIdText[]>(
 			(acc, { token, enabled }) =>
