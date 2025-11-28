@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
@@ -9,6 +10,8 @@
 	import GldtStakeRewards from '$icp/components/stake/gldt/GldtStakeRewards.svelte';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
+	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { isGLDTToken, isGoldaoToken } from '$icp-eth/utils/token.utils';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import StakeProviderContainer from '$lib/components/stake/StakeProviderContainer.svelte';
@@ -16,12 +19,9 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { StakeProvider } from '$lib/types/stake';
-	import { networkUrl } from '$lib/utils/nav.utils';
-	import { nonNullish } from '@dfinity/utils';
-	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import StakeTransactions from '$lib/components/stake/StakeTransactions.svelte';
 	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
+	import { networkUrl } from '$lib/utils/nav.utils';
+	import StakeTransactions from '$lib/components/stake/StakeTransactions.svelte';
 	import { getGldtStakingTransactions } from '$lib/utils/stake.utils';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
