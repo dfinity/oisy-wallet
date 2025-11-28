@@ -42,7 +42,7 @@ export const NftSchema = z.object({
 	...NftMetadataSchema.shape,
 	collection: NftCollectionSchema,
 	acquiredAt: z.date().optional(),
-	mediaStatus: z.enum(NftMediaStatusEnum).optional()
+	mediaStatus: z.enum(NftMediaStatusEnum)
 });
 
 export const OwnedContractSchema = z.object({
