@@ -24,7 +24,7 @@ export const EURC_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckEURC',
 	groupData: EURC_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true
+	neverCollapseInTokenGroup: true
 };
 
 export const SEPOLIA_EURC_SYMBOL = 'SepoliaEURC';
