@@ -73,7 +73,11 @@ export default defineConfig(
 			include: ['src/frontend/src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
 				include: ['src/frontend/src/**/*.{ts,svelte}'],
-				exclude: ['src/frontend/src/**/*.d.ts'],
+				exclude: [
+					'src/frontend/src/routes/**/+page.ts',
+					'src/frontend/src/tests/**/*',
+					'src/frontend/src/**/*.d.ts'
+				],
 				// TODO: increase the thresholds slowly up to an acceptable 90% at least
 				thresholds: {
 					autoUpdate: true,
