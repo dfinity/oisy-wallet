@@ -13,7 +13,7 @@ import { get } from 'svelte/store';
 const makeTx = (id: string, network = ICP_NETWORK): StakingTransactionsUiWithToken =>
 	({
 		id,
-		token: ICP_TOKEN,
+		token: { ...ICP_TOKEN, network },
 		timestamp: BigInt(Date.now()) * 1_000_000n,
 		from: '0xabc',
 		to: '0xdef',
