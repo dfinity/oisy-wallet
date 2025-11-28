@@ -10,8 +10,6 @@
 
 	let loading = $state(false);
 
-
-
 	const onClick = () => {
 		loading = true;
 

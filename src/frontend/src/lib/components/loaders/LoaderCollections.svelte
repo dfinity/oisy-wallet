@@ -135,7 +135,7 @@
 
 	const reload = async (event?: CustomEvent<{ callback?: () => void }>) => {
 		try {
-			await load({extTokens: true});
+			await load({ extTokens: true });
 		} finally {
 			event?.detail.callback?.();
 		}
