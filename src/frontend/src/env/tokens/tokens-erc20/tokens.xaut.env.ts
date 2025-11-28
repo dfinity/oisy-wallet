@@ -24,5 +24,5 @@ export const XAUT_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckXAUT',
 	groupData: XAUT_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true
+	neverCollapseInTokenGroup: true
 };
