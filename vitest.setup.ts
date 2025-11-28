@@ -75,7 +75,7 @@ vi.mock('$lib/services/analytics-wrapper', () => ({
 }));
 
 vi.mock('ethers/providers', () => {
-	class MockProvider {}
+	const MockProvider = vi.fn(class {});
 
 	const plugin = vi.fn();
 
