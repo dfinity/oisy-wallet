@@ -37,20 +37,25 @@
 		return 'unconfirmed';
 	};
 
-	const getDisplayAmount = (transaction: StakingTransactionsUiWithToken) =>
-		'incoming' in transaction &&
-		transaction.incoming &&
-		!transaction.isReward &&
-		nonNullish(transaction.value)
-			? (transaction.value +
-					('fee' in transaction && nonNullish(transaction.fee) ? transaction.fee : ZERO)) *
-				-1n
-			: nonNullish(transaction.value)
-				? transaction.value
-				: undefined;
+	const incoming = $derived('incoming' in transaction && transaction.incoming);
+
+	const getDisplayAmount = (transaction: StakingTransactionsUiWithToken) => {
+		if (nonNullish(transaction.value)) {
+			if (incoming && !transaction.isReward) {
+				return (
+					(transaction.value +
+						('fee' in transaction && nonNullish(transaction.fee) ? transaction.fee : ZERO)) *
+					-1n
+				);
+			} else {
+				return transaction.value;
+			}
+		}
+		return;
+	};
 
 	const getLabel = (transaction: StakingTransactionsUiWithToken) =>
-		'incoming' in transaction && transaction.incoming
+		incoming
 			? transaction.isReward
 				? $i18n.stake.text.reward_claimed
 				: $i18n.stake.text.unstaked
