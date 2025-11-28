@@ -73,6 +73,9 @@ describe('EthFeeContext', () => {
 		children: mockSnippet
 	};
 
+	const renderWith = (props: Partial<typeof baseProps> = {}) =>
+		render(EthFeeContext, { props: { ...baseProps, ...props }, context: mockContext(feeStore) });
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
@@ -133,8 +136,9 @@ describe('EthFeeContext', () => {
 		});
 	});
 
-	const renderWith = (props: Partial<typeof baseProps> = {}) =>
-		render(EthFeeContext, { props: { ...baseProps, ...props }, context: mockContext(feeStore) });
+	afterEach(() => {
+		vi.useRealTimers();
+	});
 
 	it('sets fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
 		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
