@@ -44,7 +44,7 @@
 		children: Snippet;
 		onClick?: () => void;
 		approveSpender?: string;
-		fullDate?: boolean;
+		timeOnly?: boolean;
 	}
 
 	const {
@@ -61,7 +61,7 @@
 		children,
 		onClick,
 		approveSpender,
-		fullDate = false
+		timeOnly = true
 	}: Props = $props();
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
@@ -197,7 +197,7 @@
 								minute: '2-digit',
 								hour12: false
 							},
-							timeOnly: !fullDate
+							timeOnly
 						})}
 					</span>
 				{/if}
