@@ -8,6 +8,10 @@ import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.ut
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { loadNfts as loadExtNfts } from '$icp/services/nft.services';
 import type { IcNonFungibleToken } from '$icp/types/nft';
+import { saveCustomTokens as saveCustomExtToken } from '$icp/services/ext-custom-tokens.services';
+import { loadNfts as loadExtNfts } from '$icp/services/nft.services';
+import type { IcNonFungibleToken } from '$icp/types/nft';
+import { isTokenExtV2CustomToken } from '$icp/utils/ext.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { nftStore } from '$lib/stores/nft.store';
@@ -71,7 +75,7 @@ export const loadNfts = async ({
 			return;
 		}
 
-		const nfts: Nft[] = await loadNftsByNetwork({
+		const nfts: Nft[] = await loadErcNftsByNetwork({
 			networkId,
 			tokens,
 			identity,
@@ -104,6 +108,11 @@ export const saveNftCustomToken = async ({
 		});
 	} else if (isTokenErc1155CustomToken(token)) {
 		await saveCustomErc1155Token({
+			identity,
+			tokens: [token]
+		});
+	} else if (isTokenExtV2CustomToken(token)) {
+		await saveCustomExtToken({
 			identity,
 			tokens: [token]
 		});
