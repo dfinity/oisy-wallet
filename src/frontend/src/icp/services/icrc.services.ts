@@ -1,10 +1,10 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
+import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { balance, allowance as icrcAllowance, metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedDip20Tokens } from '$icp/services/dip20-tokens.services';
 import { buildIndexedIcpTokens } from '$icp/services/icp-tokens.services';
-import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -164,7 +164,7 @@ const loadCustomIcrcTokensData = async ({
 }): Promise<IcrcCustomToken[]> => {
 	const indexedIcrcCustomTokens = {
 		...buildIndexedIcpTokens(),
-		...buildIndexedIcrcCustomTokens(),
+		...SNS_BUILTIN_TOKENS_INDEXED,
 		...buildIndexedDip20Tokens()
 	};
 
