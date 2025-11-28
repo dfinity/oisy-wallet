@@ -43,13 +43,7 @@
 			? getGldtStakingTransactions({
 					gldtToken: gldtToken,
 					goldaoToken: goldaoToken,
-					ckBtcPendingUtxoTransactions: $ckBtcPendingUtxoTransactions,
-					ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore,
-					ckEthPendingTransactions: $ckEthPendingTransactions,
-					ckBtcMinterInfoStore: $ckBtcMinterInfoStore,
-					btcStatusesStore: $btcStatusesStore,
 					icPendingTransactionsStore: $icPendingTransactionsStore,
-					icExtendedTransactions: [],
 					icTransactionsStore: $icTransactionsStore
 				})
 			: []
