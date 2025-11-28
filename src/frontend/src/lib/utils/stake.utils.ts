@@ -6,6 +6,7 @@ import { GLDT_STAKE_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { CertifiedTransaction } from '$lib/stores/transactions.store';
 import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
+import { nonNullish } from '@dfinity/utils';
 
 export const getGldtStakingTransactions = ({
 	gldtToken,
@@ -19,13 +20,25 @@ export const getGldtStakingTransactions = ({
 	icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
 }): StakingTransactionsUiWithToken[] => {
 	const gldtTxs = [
-		...((icTransactionsStore?.[gldtToken.id] as CertifiedTransaction<IcTransactionUi>[]) ?? []),
-		...((icPendingTransactionsStore?.[gldtToken.id] as IcPendingTransactionsData) ?? [])
+		...(nonNullish(icTransactionsStore?.[gldtToken.id]) &&
+		Array.isArray(icTransactionsStore[gldtToken.id])
+			? (icTransactionsStore[gldtToken.id] as CertifiedTransaction<IcTransactionUi>[])
+			: []),
+		...(nonNullish(icPendingTransactionsStore?.[gldtToken.id]) &&
+		Array.isArray(icPendingTransactionsStore[gldtToken.id])
+			? (icPendingTransactionsStore[gldtToken.id] as IcPendingTransactionsData)
+			: [])
 	];
 
 	const goldaoTxs = [
-		...((icTransactionsStore?.[goldaoToken.id] as CertifiedTransaction<IcTransactionUi>[]) ?? []),
-		...((icPendingTransactionsStore?.[goldaoToken.id] as IcPendingTransactionsData) ?? [])
+		...(nonNullish(icTransactionsStore?.[goldaoToken.id]) &&
+		Array.isArray(icTransactionsStore[goldaoToken.id])
+			? (icTransactionsStore[goldaoToken.id] as CertifiedTransaction<IcTransactionUi>[])
+			: []),
+		...(nonNullish(icPendingTransactionsStore?.[goldaoToken.id]) &&
+		Array.isArray(icPendingTransactionsStore[goldaoToken.id])
+			? (icPendingTransactionsStore[goldaoToken.id] as IcPendingTransactionsData)
+			: [])
 	];
 
 	return [...gldtTxs, ...goldaoTxs].reduce<StakingTransactionsUiWithToken[]>((acc, tx) => {
