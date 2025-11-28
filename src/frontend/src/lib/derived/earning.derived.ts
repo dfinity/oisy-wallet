@@ -59,7 +59,7 @@ export const earningData: Readable<EarningData> = derived(
 						})
 					: undefined,
 				[EarningCardFields.TERMS]: $i18n.earning.terms.flexible,
-				action: () => goto(AppPath.EarningGold)
+				action: () => goto(AppPath.EarnGold)
 			}
 		};
 	}

@@ -28,7 +28,7 @@
 		isRouteSettings,
 		isRouteTransactions,
 		networkUrl,
-		isRouteEarning,
+		isRouteEarn,
 		isRouteTokens,
 		isRouteNfts
 	} from '$lib/utils/nav.utils';
@@ -119,12 +119,12 @@
 	<NavigationItem
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
-			path: AppPath.Earning,
+			path: AppPath.Earn,
 			networkId,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
-		selected={isRouteEarning(page)}
+		selected={isRouteEarn(page)}
 		tag={$i18n.core.text.new}
 		tagVariant="emphasis"
 		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
