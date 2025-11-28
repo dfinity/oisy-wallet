@@ -31,7 +31,7 @@ vi.mock('@dfinity/utils', async () => {
 	};
 });
 
-describe('LoaderNfts', () => {
+describe('LoaderNfts', async () => {
 	let alchemyProvidersSpy: MockInstance;
 	let extGetTokensByOwnerSpy: MockInstance;
 
@@ -101,9 +101,9 @@ describe('LoaderNfts', () => {
 		}
 	};
 
-	const mockExtNft1 = mapExtNft({ index: 1, token: mockEnabledExtToken1 });
-	const mockExtNft2 = mapExtNft({ index: 2, token: mockEnabledExtToken1 });
-	const mockExtNft3 = mapExtNft({ index: 3, token: mockEnabledExtToken1 });
+	const mockExtNft1 = await mapExtNft({ index: 1, token: mockEnabledExtToken1 });
+	const mockExtNft2 = await mapExtNft({ index: 2, token: mockEnabledExtToken1 });
+	const mockExtNft3 = await mapExtNft({ index: 3, token: mockEnabledExtToken1 });
 
 	beforeEach(() => {
 		vi.clearAllMocks();
