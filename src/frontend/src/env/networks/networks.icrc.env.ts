@@ -32,6 +32,7 @@ import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env
 import { ckErc20Production, ckErc20Staging } from '$env/tokens/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
+import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText, MinterCanisterIdText } from '$icp/types/canister';
@@ -444,7 +445,8 @@ export const VEUR_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA.VEUR?.ledgerCanisterId ?? 'wu6g4-6qaaa-aaaan-qmrza-cai';
 
 export const GOLDAO_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA.GOLDAO?.ledgerCanisterId ?? 'tyyy3-4aaaa-aaaaq-aab7a-cai';
+	SNS_BUILTIN_TOKENS.find((t) => t.symbol === 'GOLDAO')?.ledgerCanisterId ??
+	'tyyy3-4aaaa-aaaaq-aab7a-cai';
 
 export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA.GHOSTNODE?.ledgerCanisterId ?? 'sx3gz-hqaaa-aaaar-qaoca-cai';
