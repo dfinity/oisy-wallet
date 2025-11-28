@@ -6,10 +6,15 @@ import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
+import type { OptionIdentity } from '$lib/types/identity';
 import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { fromNullable, isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+export const loadExtTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
+	await Promise.all([loadCustomTokens({ identity, useCache: true })]);
+};
 
 export const loadCustomTokens = ({
 	identity,

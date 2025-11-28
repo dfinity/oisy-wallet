@@ -1778,6 +1778,7 @@
 	"earning": {
 		"text": {
 			"title": "कमाएँ",
+			"tab_title": "",
 			"earning_opportunities": "",
 			"header_title": "",
 			"header_description": ""
@@ -1810,9 +1811,11 @@
 			"stake_page_title": "",
 			"gldt_stake_page_description": "",
 			"stake": "",
+			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
 			"unstake": "",
+			"unstake_now": "",
 			"unstaking": "",
 			"unstake_token": "",
 			"enable_token_text": "",
@@ -1837,12 +1840,21 @@
 			"immediate_dissolve_terms": "",
 			"amount_to_receive": "",
 			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
 			"claim_reward": "",
 			"claim_rewards": "",
+			"claim_reward_short": "",
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
 			"get_tokens": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": ""
 		},
 		"terms": {
 			"gldt": {

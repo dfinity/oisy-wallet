@@ -1,6 +1,6 @@
 import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
 import { loadNftsByNetwork } from '$eth/services/nft.services';
-import type { NonFungibleToken } from '$lib/types/nft';
+import type { EthNonFungibleToken } from '$eth/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
@@ -84,7 +84,7 @@ describe('nft.services', () => {
 		});
 
 		it('should load ERC721 NFTs', async () => {
-			const tokens: NonFungibleToken[] = [erc721AzukiToken];
+			const tokens: EthNonFungibleToken[] = [erc721AzukiToken];
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft1, mockNft2]);
 
@@ -94,7 +94,7 @@ describe('nft.services', () => {
 		});
 
 		it('should load ERC1155 NFTs', async () => {
-			const tokens: NonFungibleToken[] = [erc1155NyanCatToken];
+			const tokens: EthNonFungibleToken[] = [erc1155NyanCatToken];
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft3]);
 
@@ -108,7 +108,10 @@ describe('nft.services', () => {
 			const size = 40;
 			const n = 3;
 
-			const tokens: NonFungibleToken[] = Array.from({ length: size * n }, () => erc721AzukiToken);
+			const tokens: EthNonFungibleToken[] = Array.from(
+				{ length: size * n },
+				() => erc721AzukiToken
+			);
 
 			await loadNftsByNetwork({ ...mockParams, tokens });
 
@@ -127,7 +130,7 @@ describe('nft.services', () => {
 		});
 
 		it('should handle loading error gracefully', async () => {
-			const tokens: NonFungibleToken[] = [erc1155NyanCatToken];
+			const tokens: EthNonFungibleToken[] = [erc1155NyanCatToken];
 
 			const mockError = new Error('Nfts Error');
 

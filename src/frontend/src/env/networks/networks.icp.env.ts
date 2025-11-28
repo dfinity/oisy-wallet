@@ -30,6 +30,7 @@ export const ICP_NETWORK: Network = {
 	name: 'Internet Computer',
 	icon: icpIcon,
 	explorerUrl: ICP_EXPLORER_URL,
+	supportsNft: true,
 	buy: { onramperId: 'icp' }
 };
 
@@ -51,5 +52,6 @@ export const ICP_PSEUDO_TESTNET_NETWORK: Network = {
 	env: 'testnet',
 	name: 'IC (testnet tokens)',
 	icon: icpIcon,
-	explorerUrl: ICP_EXPLORER_URL
+	explorerUrl: ICP_EXPLORER_URL,
+	supportsNft: true
 };

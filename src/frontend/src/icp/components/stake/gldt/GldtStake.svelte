@@ -3,6 +3,7 @@
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
 	import GldtInfoBox from '$icp/components/stake/gldt/GldtInfoBox.svelte';
+	import GldtStakeDissolveEvents from '$icp/components/stake/gldt/GldtStakeDissolveEvents.svelte';
 	import GldtStakeEarnCard from '$icp/components/stake/gldt/GldtStakeEarnCard.svelte';
 	import GldtStakePositionCard from '$icp/components/stake/gldt/GldtStakePositionCard.svelte';
 	import GldtStakeRewards from '$icp/components/stake/gldt/GldtStakeRewards.svelte';
@@ -37,7 +38,7 @@
 					onclick={() =>
 						goto(
 							networkUrl({
-								path: AppPath.Earning,
+								path: AppPath.Earn,
 								networkId: $networkId,
 								usePreviousRoute: true,
 								fromRoute
@@ -59,6 +60,7 @@
 		{/snippet}
 	</StakeProviderContainer>
 
+	<GldtStakeDissolveEvents {gldtToken} />
 	<GldtStakeRewards />
 	<GldtInfoBox />
 </div>

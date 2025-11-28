@@ -8,6 +8,7 @@ import type {
 } from '$eth/types/alchemy-contract';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { Erc721Metadata } from '$eth/types/erc721';
+import type { EthNonFungibleToken } from '$eth/types/nft';
 import { i18n } from '$lib/stores/i18n.store';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
@@ -242,7 +243,7 @@ export class AlchemyProvider {
 		tokens
 	}: {
 		address: EthAddress;
-		tokens: NonFungibleToken[];
+		tokens: EthNonFungibleToken[];
 	}): Promise<Nft[]> => {
 		const result: OwnedNftsResponse = await this.deprecatedProvider.nft.getNftsForOwner(address, {
 			contractAddresses: tokens.map((token) => token.address),
@@ -277,7 +278,7 @@ export class AlchemyProvider {
 		token,
 		tokenId
 	}: {
-		token: NonFungibleToken;
+		token: EthNonFungibleToken;
 		tokenId: NftId;
 	}): Promise<Nft> => {
 		const { address: contractAddress } = token;
