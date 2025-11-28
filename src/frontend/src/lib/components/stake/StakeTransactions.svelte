@@ -44,7 +44,7 @@
 	const { transactions, testId }: Props = $props();
 
 	const sortedTransactions = $derived(
-		transactions.sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }))
+		[...transactions].sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }))
 	);
 
 	let expanded = $state(false);
