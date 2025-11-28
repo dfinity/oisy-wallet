@@ -18,12 +18,15 @@ describe('nft.utils', () => {
 		});
 
 		it('should map correctly an EXT NFT', async () => {
-			const result = await mapExtNft({ index: 123, token: mockValidExtV2Token });
+			const mockIndex = 123;
+
+			const result = await mapExtNft({ index: mockIndex, token: mockValidExtV2Token });
 
 			const { canisterId: _, ...rest } = mockValidExtV2Token;
 
 			expect(result).toStrictEqual({
 				id: result.id,
+				name: `${mockValidExtV2Token.name} #${mockIndex + 1}`,
 				imageUrl: `https://${mockValidExtV2Token.canisterId}.raw.icp0.io/?index=123`,
 				mediaStatus: NftMediaStatusEnum.OK,
 				collection: {
@@ -31,6 +34,12 @@ describe('nft.utils', () => {
 					address: mockValidExtV2Token.canisterId
 				}
 			});
+		});
+
+		it('should raise an error if the index is negative', async () => {
+			await expect(mapExtNft({ index: -1, token: mockValidExtV2Token })).rejects.toThrow(
+				'EXT token index -1 is out of bounds'
+			);
 		});
 	});
 });
