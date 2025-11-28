@@ -1,6 +1,6 @@
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ZCHF_TOKEN_GROUP } from '$env/tokens/groups/groups.zchf.env';
-import zchf from '$eth/assets/zchf.svg';
+import zchf from '$eth/assets/zchf.webp';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
