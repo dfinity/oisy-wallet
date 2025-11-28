@@ -13,7 +13,8 @@ const makeTx = (id: string, network = ICP_NETWORK): any => ({
 	id,
 	token: { symbol: 'X', network, decimals: 8 },
 	timestamp: BigInt(Date.now()) * 1_000_000n,
-	from: [],
+	from: '0xabc',
+	to: '0xdef',
 	incoming: false,
 	isReward: false,
 	type: 'send'
