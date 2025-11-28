@@ -3,6 +3,7 @@ import type {
 	DailyAnalytics,
 	_SERVICE as GldtStakeService,
 	ManageStakePositionArgs,
+	Response,
 	StakePositionResponse
 } from '$declarations/gldt_stake/gldt_stake.did';
 import { idlFactory as idlCertifiedFactoryGldtStake } from '$declarations/gldt_stake/gldt_stake.factory.certified.did';
@@ -37,6 +38,12 @@ export class GldtStakeCanister extends Canister<GldtStakeService> {
 		const { get_apy_overall } = this.caller({ certified: true });
 
 		return get_apy_overall(null);
+	};
+
+	getConfig = (): Promise<Response> => {
+		const { get_config } = this.caller({ certified: true });
+
+		return get_config(null);
 	};
 
 	getDailyAnalytics = async (params?: Args_2): Promise<DailyAnalytics> => {
