@@ -34,6 +34,8 @@ export const isTokensPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`;
 export const isNftsPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`) ?? false;
+export const isEarningPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}`) ?? false;
 export const isRewardsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 export const isEarnPath = (path: string | null) =>
@@ -56,6 +58,8 @@ export const isRouteActivity = ({ route: { id } }: Page): boolean => isActivityP
 export const isRouteTokens = ({ route: { id } }: Page): boolean => isTokensPath(id);
 
 export const isRouteNfts = ({ route: { id } }: Page): boolean => isNftsPath(id);
+
+export const isRouteEarning = ({ route: { id } }: Page): boolean => isEarningPath(id);
 
 export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
 
