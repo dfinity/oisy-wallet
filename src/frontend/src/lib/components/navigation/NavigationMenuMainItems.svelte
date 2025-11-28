@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { assertNever, nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
@@ -25,6 +25,7 @@
 		isRouteActivity,
 		isRouteDappExplorer,
 		isRouteEarn,
+		isRouteEarning,
 		isRouteNfts,
 		isRouteRewards,
 		isRouteSettings,
@@ -60,15 +61,19 @@
 			return AppPath.Nfts;
 		}
 
+		if ($activeAssetsTabStore === TokenTypes.EARNING) {
+			return AppPath.Earning;
+		}
+
 		if ($activeAssetsTabStore === TokenTypes.TOKENS) {
 			return AppPath.Tokens;
 		}
 
-		return AppPath.Tokens;
+		assertNever($activeAssetsTabStore, `Unexpected TokenTypes value: ${$activeAssetsTabStore}`);
 	});
 
 	let assetsSelected = $derived(
-		isRouteTokens(page) || isRouteNfts(page) || isRouteTransactions(page)
+		isRouteTokens(page) || isRouteNfts(page) || isRouteEarning(page) || isRouteTransactions(page)
 	);
 </script>
 
