@@ -1,5 +1,6 @@
 import {
 	getApyOverall,
+	getConfig,
 	getDailyAnalytics,
 	getPosition,
 	manageStakePosition
@@ -8,6 +9,7 @@ import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
 import * as appConstants from '$lib/constants/app.constants';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import {
+	configMockResponse,
 	dailyAnalyticsMockResponse,
 	stakePositionMockResponse
 } from '$tests/mocks/gldt_stake.mock';
@@ -112,6 +114,28 @@ describe('gldt_stake.api', () => {
 
 		it('throws an error if the gldt_stake canister getPosition method called without identity', async () => {
 			const res = getPosition({
+				identity: null
+			});
+
+			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('getConfig', () => {
+		it('correctly calls the gldt_stake canister getConfig method', async () => {
+			mockAuthStore();
+			gldtStakeCanisterMock.getConfig.mockResolvedValue(configMockResponse);
+
+			const result = await getConfig({
+				identity: mockIdentity
+			});
+
+			expect(gldtStakeCanisterMock.getConfig).toHaveBeenCalledOnce();
+			expect(result).toBe(configMockResponse);
+		});
+
+		it('throws an error if the gldt_stake canister getConfig method called without identity', async () => {
+			const res = getConfig({
 				identity: null
 			});
 
