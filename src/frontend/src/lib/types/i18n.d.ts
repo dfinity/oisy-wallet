@@ -1483,6 +1483,8 @@ interface I18nStake {
 		unstaked: string;
 		title_empty: string;
 		description_empty: string;
+		full_history: string;
+		recent_history: string;
 	};
 	error: { unexpected_error_on_withdraw: string };
 	terms: {
