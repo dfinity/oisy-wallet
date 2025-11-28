@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
-	import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
+	import { NANO_SECONDS_IN_SECOND, ZERO } from '$lib/constants/app.constants';
 	import { nonNullish } from '@dfinity/utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -16,13 +16,12 @@
 			? Number(BigInt(timestampNanoseconds) / NANO_SECONDS_IN_SECOND)
 			: undefined;
 
-	const getToAddress = (transaction: StakingTransactionsUiWithToken): string | undefined => {
-		return nonNullish(transaction.to) && transaction.to.length > 0
+	const getToAddress = (transaction: StakingTransactionsUiWithToken): string | undefined =>
+		nonNullish(transaction.to) && transaction.to.length > 0
 			? (transaction.to[0] as string)
 			: nonNullish(transaction.to) && transaction.to.length === 0
 				? (transaction.to as string)
 				: undefined;
-	};
 
 	const getStatus = (transaction: StakingTransactionsUiWithToken) => {
 		if ('status' in transaction && nonNullish(transaction.status)) {
@@ -44,7 +43,7 @@
 		!transaction.isReward &&
 		nonNullish(transaction.value)
 			? (transaction.value +
-					('fee' in transaction && nonNullish(transaction.fee) ? transaction.fee : 0n)) *
+					('fee' in transaction && nonNullish(transaction.fee) ? transaction.fee : ZERO)) *
 				-1n
 			: nonNullish(transaction.value)
 				? transaction.value
