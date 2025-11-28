@@ -12,7 +12,7 @@ import { get } from 'svelte/store';
 const makeTx = (id: string, network = ICP_NETWORK): any => ({
 	id,
 	token: { symbol: 'X', network, decimals: 8 },
-	timestamp: BigInt(Date.now()) * 1_000_000n, // ensure valid sort order
+	timestamp: BigInt(Date.now()) * 1_000_000n,
 	from: [],
 	incoming: false,
 	isReward: false,
@@ -21,7 +21,10 @@ const makeTx = (id: string, network = ICP_NETWORK): any => ({
 
 const renderTxs = (txs: StakingTransactionsUiWithToken[]) =>
 	render(StakeTransactions, {
-		props: { transactions: txs }
+		props: {
+			transactions: txs,
+			testId: 'stake-tx'
+		}
 	});
 
 describe('StakeTransactions', () => {
@@ -31,38 +34,38 @@ describe('StakeTransactions', () => {
 
 	it('renders nothing when list empty', () => {
 		renderTxs([]);
-		expect(screen.queryByText(/Activity/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(get(i18n).navigation.text.activity)).not.toBeInTheDocument();
 	});
 
 	it('renders title when transactions exist', () => {
 		renderTxs([makeTx('t1')]);
-		expect(screen.getByText(/Activity/i)).toBeInTheDocument();
+		expect(screen.getByText(get(i18n).navigation.text.activity)).toBeInTheDocument();
 	});
 
 	it('shows max 5 until expanded', () => {
 		const txs = Array.from({ length: 8 }, (_, i) => makeTx(`tx${i}`));
 		renderTxs(txs);
 
-		expect(screen.getAllByTestId('stake-tx')).toHaveLength(5);
-		expect(screen.getByRole('button')).toBeInTheDocument();
+		expect(screen.getAllByTestId(/stake-tx-transaction/)).toHaveLength(5);
+		expect(screen.getByTestId('stake-tx-expand-transactions-button')).toBeInTheDocument();
 	});
 
 	it('expands to full history when button clicked', async () => {
 		const txs = Array.from({ length: 7 }, (_, i) => makeTx(`t${i}`));
 		renderTxs(txs);
 
-		await fireEvent.click(screen.getByRole('button'));
+		await fireEvent.click(screen.getByTestId('stake-tx-expand-transactions-button'));
 
-		expect(screen.getAllByTestId('stake-tx')).toHaveLength(7);
+		expect(screen.getAllByTestId(/stake-tx-transaction/)).toHaveLength(7);
 		expect(screen.getByText(get(i18n).stake.text.recent_history)).toBeInTheDocument();
 	});
 
-	it('short list does not show expand button', () => {
+	it('no expand button for ≤ 5 items', () => {
 		renderTxs(Array.from({ length: 3 }, (_, i) => makeTx(`x${i}`)));
-		expect(screen.queryByRole('button')).not.toBeInTheDocument();
+		expect(screen.queryByTestId('stake-tx-expand-transactions-button')).not.toBeInTheDocument();
 	});
 
-	it('sorts newest first by timestamp', () => {
+	it('sorts by timestamp newest first', () => {
 		const older = makeTx('old');
 		older.timestamp -= 5000n;
 
@@ -71,45 +74,45 @@ describe('StakeTransactions', () => {
 
 		renderTxs([older, newer]);
 
-		const orderedIds = screen.getAllByTestId('stake-tx').map((el) => el.getAttribute('data-id'));
-		expect(orderedIds[0]).toBe('new');
+		const ids = screen
+			.getAllByTestId(/stake-tx-transaction/)
+			.map((el) => el.getAttribute('data-id'));
+
+		expect(ids[0]).toBe('new');
 	});
 
-	it('opens ICP modal when clicking ICP transaction', async () => {
+	it('opens ICP modal', async () => {
 		const tx = makeTx('icpTx', ICP_NETWORK);
 		renderTxs([tx]);
 
-		await fireEvent.click(screen.getByTestId('stake-tx'));
+		await fireEvent.click(screen.getByTestId('stake-tx-transaction-0'));
 
-		expect(get(modalStore)).toMatchObject({
-			kind: 'ic-transaction'
-		});
+		expect(get(modalStore)?.type).toBe('ic-transaction');
 	});
 
-	it('opens Ethereum modal when clicking ETH transaction', async () => {
+	it('opens ETH modal', async () => {
 		const tx = makeTx('ethTx', ETHEREUM_NETWORK);
 		renderTxs([tx]);
 
-		await fireEvent.click(screen.getByTestId('stake-tx'));
+		await fireEvent.click(screen.getByTestId('stake-tx-transaction-0'));
 
-		const modal = get(modalStore);
-		expect(modal?.type === 'eth-transaction').toBeTruthy();
+		expect(get(modalStore)?.type).toBe('eth-transaction');
 	});
 
-	it('opens Bitcoin modal when clicking BTC transaction', async () => {
+	it('opens BTC modal', async () => {
 		const tx = makeTx('btcTx', BTC_MAINNET_NETWORK);
 		renderTxs([tx]);
 
-		await fireEvent.click(screen.getByTestId('stake-tx'));
+		await fireEvent.click(screen.getByTestId('stake-tx-transaction-0'));
 
 		expect(get(modalStore)?.type).toBe('btc-transaction');
 	});
 
-	it('opens Solana modal when clicking SOL transaction', async () => {
+	it('opens SOL modal', async () => {
 		const tx = makeTx('solTx', SOLANA_MAINNET_NETWORK);
 		renderTxs([tx]);
 
-		await fireEvent.click(screen.getByTestId('stake-tx'));
+		await fireEvent.click(screen.getByTestId('stake-tx-transaction-0'));
 
 		expect(get(modalStore)?.type).toBe('sol-transaction');
 	});

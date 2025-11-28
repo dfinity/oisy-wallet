@@ -38,9 +38,10 @@
 
 	interface Props {
 		transactions: StakingTransactionsUiWithToken[];
+		testId?: string;
 	}
 
-	const { transactions }: Props = $props();
+	const { transactions, testId }: Props = $props();
 
 	const sortedTransactions = $derived(
 		transactions.sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }))
@@ -105,11 +106,15 @@
 {#if sortedTransactions.length > 0}
 	<StakeContentSection>
 		{#snippet title()}
-			<h4>Activity</h4>
+			<h4>{$i18n.navigation.text.activity}</h4>
 		{/snippet}
 		{#snippet content()}
 			{#each expanded ? sortedTransactions : sortedTransactions.slice(0, 5) as transaction, index (`${index}-${transaction.timestamp}`)}
-				<StakeTransaction {transaction} onClick={() => openModal(transaction)} />
+				<StakeTransaction
+					{transaction}
+					onClick={() => openModal(transaction)}
+					testId={`${testId}-transaction-${index}`}
+				/>
 			{/each}
 
 			{#if sortedTransactions.length > 5}
@@ -121,6 +126,7 @@
 					paddingSmall
 					styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
 					transparent
+					testId={`${testId}-expand-transactions-button`}
 				>
 					<IconList />
 					{expanded ? $i18n.stake.text.recent_history : $i18n.stake.text.full_history}
