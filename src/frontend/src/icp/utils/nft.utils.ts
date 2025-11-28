@@ -1,6 +1,6 @@
 import type { TokenIndex } from '$declarations/ext_v2_token/ext_v2_token.did';
 import type { ExtToken } from '$icp/types/ext-token';
-import { extIndexToIdentifier, parseExtTokenNome } from '$icp/utils/ext.utils';
+import { extIndexToIdentifier, parseExtTokenName } from '$icp/utils/ext.utils';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import { getMediaStatusOrCache } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -28,7 +28,7 @@ export const mapExtNft = async ({
 
 	return {
 		id: parseNftId(identifier),
-		name: parseExtTokenNome({ index, token }),
+		name: parseExtTokenName({ index, token }),
 		imageUrl,
 		mediaStatus,
 		collection: mapExtCollection(token)
