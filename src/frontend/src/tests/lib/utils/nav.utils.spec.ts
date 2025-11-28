@@ -20,12 +20,14 @@ import {
 	isDappExplorerPath,
 	isEarnGoldPath,
 	isEarnPath,
+	isEarningPath,
 	isNftsPath,
 	isRewardsPath,
 	isRouteActivity,
 	isRouteDappExplorer,
 	isRouteEarn,
 	isRouteEarnGold,
+	isRouteEarning,
 	isRouteNfts,
 	isRouteRewards,
 	isRouteSettings,
@@ -607,6 +609,28 @@ describe('nav.utils', () => {
 				expect(isRouteNfts(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
 			});
 		});
+
+		describe('isRouteEarning', () => {
+			it('should return true when route id matches Earning path', () => {
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}`))).toBeTruthy();
+			});
+
+			it('should return true when route id is any subroute of the Earning path', () => {
+				expect(
+					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}/subroute`))
+				).toBeTruthy();
+			});
+
+			it('should return false when route id does not match Earning path', () => {
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
+			});
+		});
 	});
 
 	describe('Path Matching Functions', () => {
@@ -653,6 +677,13 @@ describe('nav.utils', () => {
 			expect(isNftsPath('/(app)/assets/nfts/subpath')).toBeFalsy();
 			expect(isNftsPath('/(app)/wrong')).toBeFalsy();
 			expect(isNftsPath(null)).toBeFalsy();
+		});
+
+		it('isEarningPath', () => {
+			expect(isEarningPath(withAppPrefix(AppPath.Earning))).toBeTruthy();
+			expect(isEarningPath('/(app)/assets/earning/subpath')).toBeFalsy();
+			expect(isEarningPath('/(app)/wrong')).toBeFalsy();
+			expect(isEarningPath(null)).toBeFalsy();
 		});
 
 		it('isRewardsPath', () => {
