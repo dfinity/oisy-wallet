@@ -64,7 +64,7 @@
 			return AppPath.Tokens;
 		}
 
-		assertNever($activeAssetsTabStore, `Unexpected TokenTypes value: ${$activeAssetsTabStore}`);
+		return AppPath.Tokens;
 	});
 
 	let assetsSelected = $derived(
