@@ -14,7 +14,7 @@
 	import {
 		encodeErc1155SafeTransfer,
 		encodeErc721SafeTransfer
-	} from '$eth/services/nft-send.services';
+	} from '$eth/services/nft-transfer.services';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
