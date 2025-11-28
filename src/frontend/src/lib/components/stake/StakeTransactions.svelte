@@ -109,9 +109,9 @@
 		{#snippet content()}
 			{#each expanded ? sortedTransactions : sortedTransactions.slice(0, 5) as transaction, index (`${index}-${transaction.timestamp}`)}
 				<StakeTransaction
-					{transaction}
 					onClick={() => openModal(transaction)}
 					testId={`${testId}-transaction-${index}`}
+					{transaction}
 				/>
 			{/each}
 
@@ -123,8 +123,8 @@
 					onclick={() => (expanded = !expanded)}
 					paddingSmall
 					styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
-					transparent
 					testId={`${testId}-expand-transactions-button`}
+					transparent
 				>
 					<IconList />
 					{expanded ? $i18n.stake.text.recent_history : $i18n.stake.text.full_history}

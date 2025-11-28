@@ -137,7 +137,7 @@
 	const nft = $derived(existingNft ?? fetchedNft);
 </script>
 
-<button class={`contents ${styleClass ?? ''}`} onclick={onClick} data-tid={testId}>
+<button class={`contents ${styleClass ?? ''}`} data-tid={testId} onclick={onClick}>
 	<span class="block w-full rounded-xl px-2 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin withGap>
 			<span class="flex min-w-0 flex-1 basis-0 items-center gap-1">

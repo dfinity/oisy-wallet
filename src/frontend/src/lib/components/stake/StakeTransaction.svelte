@@ -67,12 +67,12 @@
 	iconType="token"
 	{onClick}
 	status={getStatus(transaction)}
+	{testId}
 	timeOnly={false}
 	timestamp={getTimestamp(transaction.timestamp)}
 	to={getToAddress(transaction)}
 	token={transaction.token}
 	type={transaction.type}
-	{testId}
 >
 	{getLabel(transaction)}
 </Transaction>
