@@ -18,11 +18,6 @@
 	import { StakeProvider } from '$lib/types/stake';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { nonNullish } from '@dfinity/utils';
-	import { ckBtcPendingUtxoTransactions } from '$icp/derived/ckbtc-transactions.derived';
-	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
-	import { ckEthPendingTransactions } from '$icp/derived/cketh-transactions.derived';
-	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { btcStatusesStore } from '$icp/stores/btc.store';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import StakeTransactions from '$lib/components/stake/StakeTransactions.svelte';
