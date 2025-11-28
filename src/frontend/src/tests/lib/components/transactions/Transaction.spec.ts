@@ -217,7 +217,7 @@ describe('Transaction', () => {
 		expect(getByText(/Pending\.\.\./i)).toBeInTheDocument();
 	});
 
-	it('should render full date when fullDate is passed', () => {
+	it('should render full date when timeOnly is false', () => {
 		const { container, getByText } = render(Transaction, {
 			displayAmount: 42n,
 			type: 'receive',
@@ -226,7 +226,7 @@ describe('Transaction', () => {
 			token: ICP_TOKEN,
 			iconType: 'transaction',
 			children: mockSnippet,
-			fullDate: true
+			timeOnly: false
 		});
 
 		expect(getByText(/From/i)).toBeInTheDocument();
