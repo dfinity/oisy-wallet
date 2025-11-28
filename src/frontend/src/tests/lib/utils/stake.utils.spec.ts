@@ -53,7 +53,7 @@ describe('getStakingTransactions', () => {
 
 	it('classifies direction: GOLDAO reward distribution', () => {
 		const tx = createCertifiedIcTransactionUiMock('reward');
-		tx.data.from = GLDT_STAKE_CANISTER_ID;
+		tx.data.from = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
 
 		const result = getGldtStakingTransactions({
 			gldtToken: mockGldtToken,
