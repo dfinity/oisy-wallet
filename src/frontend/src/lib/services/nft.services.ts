@@ -73,7 +73,7 @@ export const loadNfts = async ({
 			return;
 		}
 
-		const nfts: Nft[] = await loadErcNftsByNetwork({
+		const nfts: Nft[] = await loadNftsByNetwork({
 			networkId,
 			tokens,
 			identity,
