@@ -15,7 +15,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
-	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
+	import { sumTokensUiUsdBalance, sumTokensUiUsdStakeBalance } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		hideBalance?: boolean;
@@ -27,9 +27,13 @@
 
 	const totalUsd = $derived(sumTokensUiUsdBalance($combinedDerivedSortedFungibleNetworkTokensUi));
 
+	const totalStakeUsd = $derived(
+		sumTokensUiUsdStakeBalance($combinedDerivedSortedFungibleNetworkTokensUi)
+	);
+
 	let balance = $derived(
 		formatCurrency({
-			value: $loaded ? totalUsd : 0,
+			value: $loaded ? totalUsd + totalStakeUsd : 0,
 			currency: $currentCurrency,
 			exchangeRate: $currencyExchangeStore,
 			language: $currentLanguage

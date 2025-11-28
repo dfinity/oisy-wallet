@@ -8,7 +8,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import {
 	enabledFungibleTokensUi,
 	enabledMainnetFungibleTokensUsdBalance
-} from '$lib/derived/tokens.derived';
+} from '$lib/derived/tokens-ui.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
@@ -59,7 +59,7 @@ export const earningData: Readable<EarningData> = derived(
 						})
 					: undefined,
 				[EarningCardFields.TERMS]: $i18n.earning.terms.flexible,
-				action: () => goto(AppPath.EarningGold)
+				action: () => goto(AppPath.EarnGold)
 			}
 		};
 	}
@@ -91,4 +91,23 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 			return currentApy > highestApy ? record : highest;
 		}, undefined);
 	}
+);
+
+export const allEarningPositionsUsd: Readable<number> = derived([earningData], ([$earningData]) =>
+	Object.values($earningData).reduce<number>(
+		(acc, record) =>
+			isNaN(Number(record[EarningCardFields.CURRENT_EARNING]))
+				? acc
+				: acc + Number(record[EarningCardFields.CURRENT_EARNING]),
+		0
+	)
+);
+
+export const allEarningYearlyAmountUsd = derived([earningData], ([$earningData]) =>
+	Object.values($earningData).reduce((acc, record) => {
+		const earning = Number(record[EarningCardFields.CURRENT_EARNING] ?? 0);
+		const apy = Number(record[EarningCardFields.APY] ?? 0);
+
+		return isNaN(earning) || isNaN(apy) ? acc : acc + earning * (apy / 100);
+	}, 0)
 );

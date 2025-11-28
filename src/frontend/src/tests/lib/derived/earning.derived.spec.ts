@@ -5,7 +5,12 @@ import { EarningCardFields } from '$env/types/env.earning-cards';
 import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { earningData, highestApyEarningData } from '$lib/derived/earning.derived';
+import {
+	allEarningPositionsUsd,
+	allEarningYearlyAmountUsd,
+	earningData,
+	highestApyEarningData
+} from '$lib/derived/earning.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { usdValue } from '$lib/utils/exchange.utils';
 import * as tokenUtils from '$lib/utils/token.utils';
@@ -36,7 +41,7 @@ describe('earning.derived', () => {
 			usdValue({ decimals: mockGldtToken.decimals, balance: amount, exchangeRate: 1 })
 		);
 
-		vi.mock(import('$lib/derived/tokens.derived'), async (importOriginal) => {
+		vi.mock(import('$lib/derived/tokens-ui.derived'), async (importOriginal) => {
 			const actual = await importOriginal();
 			const staticStore = <T>(value: T) => ({
 				subscribe: (fn: (v: T) => void): (() => void) => {
@@ -142,6 +147,163 @@ describe('earning.derived', () => {
 			const highest = get(highestApyEarningData);
 
 			expect(highest).toEqual(mockSecondRecord);
+		});
+	});
+
+	describe('allEarningPositionsUsd', () => {
+		it('sums all valid CURRENT_EARNING values', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					a: { [EarningCardFields.CURRENT_EARNING]: 10, action: async () => {} },
+					b: { [EarningCardFields.CURRENT_EARNING]: 20, action: async () => {} }
+				});
+				return () => {};
+			});
+
+			expect(get(allEarningPositionsUsd)).toBe(30);
+		});
+
+		it('ignores undefined CURRENT_EARNING', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					a: { action: async () => {} },
+					b: { [EarningCardFields.CURRENT_EARNING]: 20, action: async () => {} }
+				});
+				return () => {};
+			});
+
+			expect(get(allEarningPositionsUsd)).toBe(20);
+		});
+
+		it('ignores invalid numeric values', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					a: { [EarningCardFields.CURRENT_EARNING]: 'abc', action: async () => {} },
+					b: { [EarningCardFields.CURRENT_EARNING]: 10, action: async () => {} }
+				});
+				return () => {};
+			});
+
+			expect(get(allEarningPositionsUsd)).toBe(10);
+		});
+
+		it('returns 0 for empty earning data', () => {
+			expect(get(allEarningPositionsUsd)).toBe(0);
+		});
+	});
+
+	describe('allEarningYearlyAmountUsd (mocked subscribe)', () => {
+		beforeEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('computes yearly earning correctly from valid entries', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					a: {
+						[EarningCardFields.CURRENT_EARNING]: 100,
+						[EarningCardFields.APY]: 10,
+						action: async () => {}
+					},
+					b: {
+						[EarningCardFields.CURRENT_EARNING]: 200,
+						[EarningCardFields.APY]: 5,
+						action: async () => {}
+					}
+				});
+				return () => {};
+			});
+
+			expect(get(allEarningYearlyAmountUsd)).toBe(20);
+		});
+
+		it('ignores invalid CURRENT_EARNING values', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					a: {
+						[EarningCardFields.CURRENT_EARNING]: 'abc', // invalid
+						[EarningCardFields.APY]: 10,
+						action: async () => {}
+					},
+					b: {
+						[EarningCardFields.CURRENT_EARNING]: 50,
+						[EarningCardFields.APY]: 20,
+						action: async () => {}
+					}
+				});
+				return () => {};
+			});
+
+			expect(get(allEarningYearlyAmountUsd)).toBe(10);
+		});
+
+		it('ignores entries with missing APY', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					a: {
+						[EarningCardFields.CURRENT_EARNING]: 100,
+						action: async () => {}
+					},
+					b: {
+						[EarningCardFields.CURRENT_EARNING]: 20,
+						[EarningCardFields.APY]: 10,
+						action: async () => {}
+					}
+				});
+				return () => {};
+			});
+
+			expect(get(allEarningYearlyAmountUsd)).toBe(2);
+		});
+
+		it('returns 0 when all records are invalid', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					a: {
+						[EarningCardFields.CURRENT_EARNING]: 'nope',
+						[EarningCardFields.APY]: 'bad',
+						action: async () => {}
+					},
+					b: {
+						[EarningCardFields.CURRENT_EARNING]: undefined,
+						[EarningCardFields.APY]: undefined,
+						action: async () => {}
+					}
+				});
+				return () => {};
+			});
+
+			expect(get(allEarningYearlyAmountUsd)).toBe(0);
+		});
+
+		it('handles mixed valid + invalid entries', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					a: {
+						[EarningCardFields.CURRENT_EARNING]: 100,
+						[EarningCardFields.APY]: 10,
+						action: async () => {}
+					},
+					b: {
+						[EarningCardFields.CURRENT_EARNING]: NaN,
+						[EarningCardFields.APY]: 20,
+						action: async () => {}
+					},
+					c: {
+						[EarningCardFields.CURRENT_EARNING]: 50,
+						[EarningCardFields.APY]: undefined,
+						action: async () => {}
+					},
+					d: {
+						[EarningCardFields.CURRENT_EARNING]: 20,
+						[EarningCardFields.APY]: 20,
+						action: async () => {}
+					}
+				});
+				return () => {};
+			});
+
+			expect(get(allEarningYearlyAmountUsd)).toBe(14);
 		});
 	});
 });

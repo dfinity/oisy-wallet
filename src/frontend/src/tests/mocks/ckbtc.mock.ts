@@ -6,7 +6,7 @@ import type { MinterInfo, PendingUtxo } from '@icp-sdk/canisters/ckbtc';
 export const mockPendingUtxo: PendingUtxo = {
 	value: 1000n,
 	confirmations: 1,
-	outpoint: { txid: [1, 2, 3], vout: 666 }
+	outpoint: { txid: Uint8Array.from([1, 2, 3]), vout: 666 }
 };
 
 export const mockCkBtcMinterInfo = { kyt_fee: 100n } as MinterInfo;

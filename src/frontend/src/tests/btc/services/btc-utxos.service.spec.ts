@@ -99,7 +99,7 @@ describe('btc-utxos.service', () => {
 	};
 
 	const mockFeePercentiles = {
-		fee_percentiles: [1000n, 2000n, 5000n, 10000n, 20000n]
+		fee_percentiles: BigUint64Array.from([1000n, 2000n, 5000n, 10000n, 20000n])
 	};
 
 	const defaultParams = {
@@ -367,7 +367,7 @@ describe('btc-utxos.service', () => {
 	describe('getFeeRateFromPercentiles', () => {
 		it('should throw error when no fee percentiles are available', async () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue({
-				fee_percentiles: []
+				fee_percentiles: BigUint64Array.from([])
 			});
 
 			await expect(
@@ -380,7 +380,7 @@ describe('btc-utxos.service', () => {
 
 		it('should throw error when fee percentiles is null', async () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue({
-				fee_percentiles: null as unknown as bigint[]
+				fee_percentiles: null as unknown as BigUint64Array
 			});
 
 			await expect(
@@ -394,7 +394,7 @@ describe('btc-utxos.service', () => {
 		it('should return minimum fee rate when calculated fee is too low', async () => {
 			// Very low fees in millisats that should trigger minimum fee rate
 			const lowFeePercentiles = {
-				fee_percentiles: [100n, 200n, 500n]
+				fee_percentiles: BigUint64Array.from([100n, 200n, 500n])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(lowFeePercentiles);
@@ -411,7 +411,7 @@ describe('btc-utxos.service', () => {
 		it('should return capped fee rate when calculated fee is too high', async () => {
 			// Very high fees in millisats that should trigger maximum fee rate cap
 			const highFeePercentiles = {
-				fee_percentiles: [200_000n, 300_000n, 500_000n]
+				fee_percentiles: BigUint64Array.from([200_000n, 300_000n, 500_000n])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(highFeePercentiles);
@@ -428,7 +428,7 @@ describe('btc-utxos.service', () => {
 		it('should correctly convert from millisats to sats using median', async () => {
 			// Fee percentiles in millisats per vbyte - median should be 6000n millisats
 			const feePercentiles = {
-				fee_percentiles: [2_000n, 4_000n, 6_000n, 8_000n, 10_000n]
+				fee_percentiles: BigUint64Array.from([2_000n, 4_000n, 6_000n, 8_000n, 10_000n])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(feePercentiles);
@@ -445,7 +445,7 @@ describe('btc-utxos.service', () => {
 		it('should handle odd number of fee percentiles correctly', async () => {
 			// Odd number of percentiles - median should be middle element
 			const oddFeePercentiles = {
-				fee_percentiles: [3_000n, 5_000n, 7_000n]
+				fee_percentiles: BigUint64Array.from([3_000n, 5_000n, 7_000n])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(oddFeePercentiles);
@@ -462,7 +462,7 @@ describe('btc-utxos.service', () => {
 		it('should handle even number of fee percentiles correctly', async () => {
 			// Even number of percentiles - should take middle element (index 1 for length 4)
 			const evenFeePercentiles = {
-				fee_percentiles: [2_000n, 4_000n, 6_000n, 8_000n]
+				fee_percentiles: BigUint64Array.from([2_000n, 4_000n, 6_000n, 8_000n])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(evenFeePercentiles);
@@ -479,7 +479,7 @@ describe('btc-utxos.service', () => {
 		it('should handle single fee percentile correctly', async () => {
 			// Single percentile - should use that value as median
 			const singleFeePercentile = {
-				fee_percentiles: [5_000n]
+				fee_percentiles: BigUint64Array.from([5_000n])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(singleFeePercentile);
@@ -496,7 +496,7 @@ describe('btc-utxos.service', () => {
 		it('should handle zero fee percentile with minimum fallback', async () => {
 			// Zero fee that should trigger minimum fee rate
 			const zeroFeePercentiles = {
-				fee_percentiles: [ZERO]
+				fee_percentiles: BigUint64Array.from([ZERO])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(zeroFeePercentiles);
@@ -513,7 +513,7 @@ describe('btc-utxos.service', () => {
 		it('should handle boundary case at minimum fee rate threshold', async () => {
 			// Exactly 1_000n millisats/vbyte (should not trigger minimum)
 			const boundaryFeePercentiles = {
-				fee_percentiles: [1_000n]
+				fee_percentiles: BigUint64Array.from([1_000n])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(boundaryFeePercentiles);
@@ -530,7 +530,7 @@ describe('btc-utxos.service', () => {
 		it('should handle boundary case at maximum fee rate threshold', async () => {
 			// Exactly 100_000n millisats/vbyte (should not trigger cap)
 			const boundaryFeePercentiles = {
-				fee_percentiles: [100_000n]
+				fee_percentiles: BigUint64Array.from([100_000n])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(boundaryFeePercentiles);
@@ -588,7 +588,7 @@ describe('btc-utxos.service', () => {
 		it('should handle very small non-zero fee that rounds to zero', async () => {
 			// Fee smaller than 1_000n millisats will trigger minimum
 			const smallFeePercentiles = {
-				fee_percentiles: [999n]
+				fee_percentiles: BigUint64Array.from([999n])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(smallFeePercentiles);
@@ -605,7 +605,7 @@ describe('btc-utxos.service', () => {
 		it('should handle fee rate just above maximum threshold', async () => {
 			// Fee just above 100_000n millisats should be capped
 			const aboveMaxFeePercentiles = {
-				fee_percentiles: [100_001n]
+				fee_percentiles: BigUint64Array.from([100_001n])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(aboveMaxFeePercentiles);
@@ -622,7 +622,7 @@ describe('btc-utxos.service', () => {
 		it('should handle fee rate significantly above maximum threshold', async () => {
 			// Fee significantly above maximum should be capped
 			const wayAboveMaxFeePercentiles = {
-				fee_percentiles: [500_000n]
+				fee_percentiles: BigUint64Array.from([500_000n])
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(

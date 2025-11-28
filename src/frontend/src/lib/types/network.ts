@@ -1,5 +1,4 @@
 import type {
-	NetworkAppMetadataSchema,
 	NetworkEnvironmentSchema,
 	NetworkExchangeSchema,
 	NetworkIdSchema,
@@ -15,7 +14,5 @@ export type NetworkEnvironment = z.infer<typeof NetworkEnvironmentSchema>;
 export type Network = z.infer<typeof NetworkSchema>;
 
 export type NetworkExchange = z.infer<typeof NetworkExchangeSchema>;
-
-export type NetworkAppMetadata = z.infer<typeof NetworkAppMetadataSchema>;
 
 export type OptionNetworkId = Option<NetworkId>;

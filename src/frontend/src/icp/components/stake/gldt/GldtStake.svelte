@@ -1,18 +1,14 @@
 <script lang="ts">
 	import type { NavigationTarget } from '@sveltejs/kit';
-	import { setContext } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
-	import GldtStakeContext from '$icp/components/stake/gldt/GldtStakeContext.svelte';
+	import GldtInfoBox from '$icp/components/stake/gldt/GldtInfoBox.svelte';
+	import GldtStakeDissolveEvents from '$icp/components/stake/gldt/GldtStakeDissolveEvents.svelte';
 	import GldtStakeEarnCard from '$icp/components/stake/gldt/GldtStakeEarnCard.svelte';
 	import GldtStakePositionCard from '$icp/components/stake/gldt/GldtStakePositionCard.svelte';
 	import GldtStakeRewards from '$icp/components/stake/gldt/GldtStakeRewards.svelte';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
-	import {
-		GLDT_STAKE_CONTEXT_KEY,
-		type GldtStakeContext as GldtStakeContextType,
-		gldtStakeStore
-	} from '$icp/stores/gldt-stake.store';
+	import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
 	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import StakeProviderContainer from '$lib/components/stake/StakeProviderContainer.svelte';
@@ -28,14 +24,10 @@
 		fromRoute = from;
 	});
 
-	setContext<GldtStakeContextType>(GLDT_STAKE_CONTEXT_KEY, {
-		store: gldtStakeStore
-	});
-
 	let gldtToken = $derived($enabledIcrcTokens.find(isGLDTToken));
 </script>
 
-<GldtStakeContext>
+<div class="flex flex-col gap-6 pb-6">
 	<StakeProviderContainer currentApy={$gldtStakeStore?.apy} provider={StakeProvider.GLDT}>
 		{#snippet backButton()}
 			{#if EARNING_ENABLED}
@@ -46,7 +38,7 @@
 					onclick={() =>
 						goto(
 							networkUrl({
-								path: AppPath.Earning,
+								path: AppPath.Earn,
 								networkId: $networkId,
 								usePreviousRoute: true,
 								fromRoute
@@ -68,7 +60,7 @@
 		{/snippet}
 	</StakeProviderContainer>
 
-	<div class="my-8">
-		<GldtStakeRewards />
-	</div>
-</GldtStakeContext>
+	<GldtStakeDissolveEvents {gldtToken} />
+	<GldtStakeRewards />
+	<GldtInfoBox />
+</div>
