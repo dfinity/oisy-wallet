@@ -94,9 +94,13 @@ describe('StakeTransactions', () => {
 
 		renderTxs([older, newer]);
 
-		const elms = screen.getAllByTestId(/stake-tx-transaction/);
+		const cards = screen.getAllByTestId(/stake-tx-transaction/);
+		expect(cards).toHaveLength(2);
 
-		expect(elms[0]).toBe('new');
+		const [first, second] = cards;
+
+		expect(first.textContent || '').toContain('500');
+		expect(second.textContent || '').toContain('100');
 	});
 
 	it('opens ICP modal', async () => {
