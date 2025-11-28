@@ -1,5 +1,6 @@
 import {
 	GLDT_LEDGER_CANISTER_ID,
+	GOLDAO_LEDGER_CANISTER_ID,
 	VCHF_LEDGER_CANISTER_ID,
 	VEUR_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
@@ -12,7 +13,9 @@ export const isGLDTToken = (token: Token): boolean =>
 	token.ledgerCanisterId === GLDT_LEDGER_CANISTER_ID;
 
 export const isGoldaoToken = (token: Token): boolean =>
-	isTokenIcrc(token) && token.symbol === 'GOLDAO';
+	isTokenIcrc(token) &&
+	token.symbol === 'GOLDAO' &&
+	token.ledgerCanisterId === GOLDAO_LEDGER_CANISTER_ID;
 
 export const isVCHFToken = (token: Token): boolean =>
 	isTokenIcrc(token) &&

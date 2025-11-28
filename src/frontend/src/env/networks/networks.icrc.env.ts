@@ -443,6 +443,9 @@ export const VCHF_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 export const VEUR_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA.VEUR?.ledgerCanisterId ?? 'wu6g4-6qaaa-aaaan-qmrza-cai';
 
+export const GOLDAO_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA.GOLDAO?.ledgerCanisterId ?? 'tyyy3-4aaaa-aaaaq-aab7a-cai';
+
 export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA.GHOSTNODE?.ledgerCanisterId ?? 'sx3gz-hqaaa-aaaar-qaoca-cai';
 
