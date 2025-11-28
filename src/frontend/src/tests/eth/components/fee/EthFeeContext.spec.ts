@@ -30,6 +30,10 @@ import { render } from '@testing-library/svelte';
 import type { Snippet } from 'svelte';
 import { readable, writable, type Writable } from 'svelte/store';
 
+vi.mock('$eth/rest/infura.rest', () => ({
+	InfuraGasRest: vi.fn()
+}));
+
 describe('EthFeeContext', () => {
 	const feeState: Writable<FeeStoreData | undefined> = writable(undefined);
 	const setFeeMock = vi.fn((v: FeeStoreData) => feeState.set(v));
