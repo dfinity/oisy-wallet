@@ -133,8 +133,12 @@
 		await load({});
 	};
 
-	const reload = async () => {
-		await load({ extTokens: true });
+	const reload = async (event?: CustomEvent<{ callback?: () => void }>) => {
+		try {
+			await load({extTokens: true});
+		} finally {
+			event?.detail.callback?.();
+		}
 	};
 </script>
 
