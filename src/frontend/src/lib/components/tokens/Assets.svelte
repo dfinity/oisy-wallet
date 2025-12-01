@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { NFTS_ENABLED } from '$env/nft.env';
+	import EarningsList from '$lib/components/earning/EarningsList.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
 	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
@@ -110,6 +111,8 @@
 				<TokensList />
 			{:else if activeTab === TokenTypes.NFTS}
 				<NftsList />
+			{:else if activeTab === TokenTypes.EARNING}
+				<EarningsList />
 			{/if}
 		</StickyHeader>
 

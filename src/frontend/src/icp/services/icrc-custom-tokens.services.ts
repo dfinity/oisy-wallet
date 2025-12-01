@@ -3,25 +3,10 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { EnvSnsTokenSchema, EnvSnsTokensSchema } from '$env/schema/env-sns-token.schema';
 import snsTokens from '$env/tokens/tokens.sns.json';
 import type { EnvSnsToken } from '$env/types/env-sns-token';
-import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { get } from 'svelte/store';
-
-export const buildIndexedIcrcCustomTokens = (
-	tokens: IcTokenWithoutIdExtended[]
-): Record<LedgerCanisterIdText, IcTokenWithoutIdExtended> =>
-	tokens.reduce(
-		(acc, { ledgerCanisterId, ...rest }) => ({
-			...acc,
-			[`${ledgerCanisterId}`]: {
-				ledgerCanisterId,
-				...rest
-			}
-		}),
-		{}
-	);
 
 /**
  * @todo Add missing document and test for this function.
