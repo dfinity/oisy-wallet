@@ -32,7 +32,7 @@ export const ICP_NETWORK: Network = {
 	explorerUrl: ICP_EXPLORER_URL,
 	supportsNft: true,
 	buy: { onramperId: 'icp' },
-  pay: { openCryptoPay: 'Internet Computer' }
+	pay: { openCryptoPay: 'Internet Computer' }
 };
 
 /**
