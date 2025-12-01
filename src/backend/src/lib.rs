@@ -77,6 +77,7 @@ use crate::{
         update_experimental_feature_settings, update_network_settings,
     },
 };
+use crate::types::AgreementsHistoryMap;
 
 mod assertions;
 mod bitcoin_api;
@@ -105,6 +106,7 @@ const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
+const USER_AGREEMENTS_HISTORY_MEMORY_ID: MemoryId = MemoryId::new(7);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -121,6 +123,7 @@ thread_local! {
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
+            agreements_history: AgreementsHistoryMap::init(mm.borrow().get(USER_AGREEMENTS_HISTORY_MEMORY_ID)),
         })
     );
 }
@@ -159,6 +162,7 @@ pub struct State {
     user_profile_updated: UserProfileUpdatedMap,
     pow_challenge: PowChallengeMap,
     contact: ContactMap,
+    agreements_history: AgreementsHistoryMap,
 }
 
 fn set_config(arg: InitArg) {

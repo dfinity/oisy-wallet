@@ -6,6 +6,7 @@ use shared::types::{
     backend_config::Config, contact::StoredContacts, custom_token::CustomToken,
     pow::StoredChallenge, token::UserToken, user_profile::StoredUserProfile, Timestamp,
 };
+use shared::types::agreement::UserAgreements;
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 pub type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
@@ -26,3 +27,4 @@ where
 pub struct StoredPrincipal(pub Principal);
 // Define a new type for the contact storage
 pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VMem>;
+pub type AgreementsHistoryMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserAgreements>>, VMem>;
