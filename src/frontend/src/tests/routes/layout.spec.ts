@@ -17,6 +17,10 @@ vi.mock('$lib/services/worker.auth.services', () => ({
 	}
 }));
 
+vi.mock('$lib/providers/auth-broadcast.providers', async (importActual) => ({
+	...(await importActual())
+}));
+
 describe('App Layout', () => {
 	beforeAll(() => {
 		Object.defineProperty(window, 'matchMedia', {
@@ -30,6 +34,10 @@ describe('App Layout', () => {
 				dispatchEvent: vi.fn()
 			}))
 		});
+	});
+
+	beforeEach(() => {
+		vi.clearAllMocks();
 	});
 
 	it('should render the app layout', () => {
@@ -78,7 +86,8 @@ describe('App Layout', () => {
 
 			vi.stubGlobal(
 				'BroadcastChannel',
-				vi.fn((name: string) => {
+				// eslint-disable-next-line prefer-arrow/prefer-arrow-functions,prefer-arrow-callback,local-rules/prefer-object-params
+				vi.fn(function (this: BroadcastChannel, name: string) {
 					const postMessage = vi.fn();
 
 					const channel =
@@ -142,17 +151,21 @@ describe('App Layout', () => {
 		});
 
 		it('should initialize a channel for auth synchronization', () => {
-			const spy = vi.fn();
+			AuthBroadcastChannel.prototype.onLoginSuccess = vi.fn();
 
 			const service = AuthBroadcastChannel.getInstance();
-			vi.spyOn(service, 'onLoginSuccess').mockImplementation(spy);
+			vi.spyOn(service, 'onLoginSuccess').mockImplementation(
+				AuthBroadcastChannel.prototype.onLoginSuccess
+			);
 			vi.spyOn(service, 'destroy').mockImplementation(vi.fn());
 
-			expect(spy).not.toHaveBeenCalled();
+			expect(AuthBroadcastChannel.prototype.onLoginSuccess).not.toHaveBeenCalled();
 
 			render(App, { children: mockSnippet });
 
-			expect(spy).toHaveBeenCalledExactlyOnceWith(expect.any(Function));
+			expect(AuthBroadcastChannel.prototype.onLoginSuccess).toHaveBeenCalledExactlyOnceWith(
+				expect.any(Function)
+			);
 		});
 
 		describe('on login success message', () => {

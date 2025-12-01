@@ -106,7 +106,7 @@ describe('LoaderCollections', () => {
 	});
 
 	it('should not add new EXT collections by default', async () => {
-		extGetTokensByOwnerSpy.mockResolvedValueOnce([1, 2, 3]);
+		extGetTokensByOwnerSpy.mockReset().mockResolvedValueOnce([1, 2, 3]);
 
 		render(LoaderCollections);
 
@@ -117,7 +117,7 @@ describe('LoaderCollections', () => {
 	});
 
 	it('should add new EXT collections if the event is triggered', async () => {
-		extGetTokensByOwnerSpy.mockResolvedValueOnce([1, 2, 3]);
+		extGetTokensByOwnerSpy.mockReset().mockResolvedValueOnce([1, 2, 3]);
 
 		render(LoaderCollections);
 
@@ -164,7 +164,7 @@ describe('LoaderCollections', () => {
 	});
 
 	it('should not add EXT collections if there are no new collections', async () => {
-		extGetTokensByOwnerSpy.mockResolvedValueOnce([]);
+		extGetTokensByOwnerSpy.mockReset().mockResolvedValueOnce([]);
 
 		render(LoaderCollections);
 
