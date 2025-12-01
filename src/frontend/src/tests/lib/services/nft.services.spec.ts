@@ -3,7 +3,6 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
 import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
@@ -33,7 +32,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft, mockValidExtNft } from '$tests/mocks/nfts.mock';
-import { Network, type TransactionResponse } from 'ethers/providers';
+import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -43,14 +42,6 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 }));
 
 describe('nft.services', () => {
-	const originalLoadErcNftsByNetwork = ethNftServices.loadNftsByNetwork;
-
-	const mockAlchemyProvider = {
-		network: new Network('ethereum', 1),
-		provider: {},
-		getNftsByOwner: vi.fn()
-	} as unknown as AlchemyProvider;
-
 	describe('loadNftsByNetwork', () => {
 		const mockEthNfts = [mockValidErc721Nft, mockValidErc1155Nft];
 		const mockIcNfts = [mockValidExtNft];
@@ -160,6 +151,16 @@ describe('nft.services', () => {
 				network: NYAN_CAT_TOKEN.network
 			}
 		};
+		const mockNft4 = {
+			...mockValidExtNft,
+			id: parseNftId('1111'),
+			collection: mockValidExtNft.collection
+		};
+		const mockNft5 = {
+			...mockValidExtNft,
+			id: parseNftId('2222'),
+			collection: mockValidExtNft.collection
+		};
 
 		const erc721AzukiToken = { ...AZUKI_ELEMENTAL_BEANS_TOKEN, version: BigInt(1), enabled: true };
 		const erc1155NyanCatToken = { ...NYAN_CAT_TOKEN, version: BigInt(1), enabled: true };
@@ -170,27 +171,25 @@ describe('nft.services', () => {
 
 			nftStore.resetAll();
 
-			vi.mocked(alchemyProviders).mockReturnValue(mockAlchemyProvider);
-
-			vi.spyOn(ethNftServices, 'loadNftsByNetwork').mockImplementation(
-				originalLoadErcNftsByNetwork
-			);
+			vi.spyOn(ethNftServices, 'loadNftsByNetwork').mockResolvedValue([]);
+			vi.spyOn(icNftServices, 'loadNfts').mockResolvedValue([]);
 		});
 
 		it('should not load NFTs if no tokens were provided', async () => {
 			const tokens: NonFungibleToken[] = [];
 
-			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, identity: mockIdentity, ethAddress: mockWalletAddress });
 
-			expect(mockAlchemyProvider.getNftsByOwner).not.toHaveBeenCalled();
+			expect(ethNftServices.loadNftsByNetwork).not.toHaveBeenCalled();
+			expect(icNftServices.loadNfts).not.toHaveBeenCalled();
 		});
 
 		it('should load ERC721 NFTs', async () => {
 			const tokens: NonFungibleToken[] = [erc721AzukiToken];
 
-			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft1, mockNft2]);
+			vi.spyOn(ethNftServices, 'loadNftsByNetwork').mockResolvedValue([mockNft1, mockNft2]);
 
-			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, identity: mockIdentity, ethAddress: mockWalletAddress });
 
 			expect(get(nftStore)).toEqual([mockNft1, mockNft2]);
 		});
@@ -198,41 +197,52 @@ describe('nft.services', () => {
 		it('should load ERC1155 NFTs', async () => {
 			const tokens: NonFungibleToken[] = [erc1155NyanCatToken];
 
-			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft3]);
+			vi.spyOn(ethNftServices, 'loadNftsByNetwork').mockResolvedValue([mockNft3]);
 
-			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, identity: mockIdentity, ethAddress: mockWalletAddress });
 
 			expect(get(nftStore)).toEqual([mockNft3]);
 		});
 
-		it('should not load EXT NFTs', async () => {
+		it('should load EXT NFTs', async () => {
 			const tokens: NonFungibleToken[] = [mockValidExtV2Token];
 
-			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+			vi.spyOn(icNftServices, 'loadNfts').mockResolvedValue([mockNft4, mockNft5]);
 
-			expect(get(nftStore)).toBeUndefined();
+			await loadNfts({ tokens, identity: mockIdentity, ethAddress: mockWalletAddress });
 
-			expect(mockAlchemyProvider.getNftsByOwner).not.toHaveBeenCalled();
+			expect(get(nftStore)).toEqual([mockNft4, mockNft5]);
 		});
 
-		it('should handle nfts loading error gracefully', async () => {
+		it('should handle ERC NFTs loading error gracefully', async () => {
 			const tokens: NonFungibleToken[] = [erc1155NyanCatToken];
 
-			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockRejectedValueOnce(new Error('Nfts Error'));
+			vi.spyOn(ethNftServices, 'loadNftsByNetwork').mockRejectedValueOnce(new Error('NFTs Error'));
 
-			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, identity: mockIdentity, ethAddress: mockWalletAddress });
 
-			expect(mockAlchemyProvider.getNftsByOwner).toHaveBeenCalled();
-			expect(get(nftStore)).toEqual([]);
+			expect(loadErcNftsByNetwork).toHaveBeenCalled();
+			expect(get(nftStore)).toBeUndefined();
+		});
+
+		it('should handle EXT NFTs loading error gracefully', async () => {
+			const tokens: NonFungibleToken[] = [mockValidExtV2Token];
+
+			vi.spyOn(icNftServices, 'loadNfts').mockRejectedValueOnce(new Error('NFTs Error'));
+
+			await loadNfts({ tokens, identity: mockIdentity, ethAddress: mockWalletAddress });
+
+			expect(loadExtNfts).toHaveBeenCalled();
+			expect(get(nftStore)).toBeUndefined();
 		});
 
 		it('should re-load NFTs', async () => {
 			const tokens: NonFungibleToken[] = [erc1155NyanCatToken];
 
-			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft3]);
+			vi.spyOn(ethNftServices, 'loadNftsByNetwork').mockResolvedValueOnce([mockNft3]);
 			vi.spyOn(nftsUtils, 'findNftsByToken').mockReturnValueOnce([]);
 
-			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, identity: mockIdentity, ethAddress: mockWalletAddress });
 
 			expect(get(nftStore)).toEqual([mockNft3]);
 		});

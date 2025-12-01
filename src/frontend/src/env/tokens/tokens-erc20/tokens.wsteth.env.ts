@@ -24,5 +24,5 @@ export const WSTETH_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckWSTETH',
 	groupData: WSTETH_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true
+	neverCollapseInTokenGroup: true
 };

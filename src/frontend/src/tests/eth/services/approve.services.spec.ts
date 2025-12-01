@@ -119,6 +119,7 @@ describe('approve.services', () => {
 			populateApproveSpy.mockResolvedValue({ data: 'mock-approve-data' });
 
 			vi.spyOn(signerApiLib, 'signTransaction')
+				.mockReset()
 				.mockResolvedValueOnce(mockRawTransaction1)
 				.mockResolvedValueOnce(mockRawTransaction2);
 		});
