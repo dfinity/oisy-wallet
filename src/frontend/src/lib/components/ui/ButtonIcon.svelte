@@ -29,7 +29,7 @@
 		colorStyle = 'tertiary',
 		testId,
 		ariaLabel,
-		disabled = false,
+		disabled,
 		loading = false, // renders with spinner
 		link = true,
 		styleClass = '',
