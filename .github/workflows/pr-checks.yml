@@ -74,7 +74,9 @@ jobs:
 
       - name: Fetch base branch
         run: |
-          git fetch origin "$BASE_REF:$BASE_REF"
+          if [ -n "$BASE_REF" ]; then
+            git fetch origin "$BASE_REF:$BASE_REF"
+          fi
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
 
@@ -82,6 +84,11 @@ jobs:
         id: file_check
         run: |
           if [[ "$BASE_REV" =~ ^[0-9a-f]{40}$ ]]; then
+            # In merge groups, we need to fetch the specific commit as it might not be in the shallow clone.
+            # We check if BASE_REF is empty to avoid fetching from origin (which might be a fork) in PRs.
+            if [ -z "$BASE_REF" ]; then
+              git fetch --no-tags --depth=1 origin "$BASE_REV"
+            fi
             BASE_SPEC="$BASE_REV"
           else
             git fetch --no-tags --depth=1 origin "$BASE_REV"
@@ -95,6 +102,7 @@ jobs:
             exit 1
           fi
         env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
           BASE_REV: ${{ github.event.merge_group.base_sha || github.event.merge_group.base_ref || github.event.pull_request.base.sha || github.event.pull_request.base.ref || 'main' }}
 
   pr-checks-pass:
