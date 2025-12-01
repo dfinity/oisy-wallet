@@ -9,14 +9,19 @@
 	import GldtStakeRewards from '$icp/components/stake/gldt/GldtStakeRewards.svelte';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
-	import { isGLDTToken } from '$icp-eth/utils/token.utils';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
+	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import { isGLDTToken, isGoldaoToken } from '$icp-eth/utils/token.utils';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import StakeProviderContainer from '$lib/components/stake/StakeProviderContainer.svelte';
+	import StakeTransactions from '$lib/components/stake/StakeTransactions.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { StakeProvider } from '$lib/types/stake';
+	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
 	import { networkUrl } from '$lib/utils/nav.utils';
+	import { getGldtStakingTransactions } from '$lib/utils/stake.utils';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -25,6 +30,16 @@
 	});
 
 	let gldtToken = $derived($enabledIcrcTokens.find(isGLDTToken));
+	let goldaoToken = $derived($enabledIcrcTokens.find(isGoldaoToken));
+
+	let transactions: StakingTransactionsUiWithToken[] = $derived(
+		getGldtStakingTransactions({
+			gldtToken,
+			goldaoToken,
+			icPendingTransactionsStore: $icPendingTransactionsStore,
+			icTransactionsStore: $icTransactionsStore
+		})
+	);
 </script>
 
 <div class="flex flex-col gap-6 pb-6">
@@ -62,5 +77,6 @@
 
 	<GldtStakeDissolveEvents {gldtToken} />
 	<GldtStakeRewards />
+	<StakeTransactions {transactions} />
 	<GldtInfoBox />
 </div>
