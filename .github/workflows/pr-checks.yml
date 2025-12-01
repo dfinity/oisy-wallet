@@ -74,15 +74,28 @@ jobs:
 
       - name: Fetch base branch
         run: |
-          git fetch origin "$BASE_REF:$BASE_REF"
+          if [ -n "$BASE_REF" ]; then
+            git fetch origin "$BASE_REF:$BASE_REF"
+          fi
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
 
       - name: 'Check for changed files'
-        if: ${{ github.event_name != 'merge_group' }}
         id: file_check
         run: |
-          CHANGED_FILES=$(git diff "origin/$BASE_REF" HEAD --name-only | wc -l)
+          if [[ "$BASE_REV" =~ ^[0-9a-f]{40}$ ]]; then
+            # In merge groups, we need to fetch the specific commit as it might not be in the shallow clone.
+            # We check if BASE_REF is empty to avoid fetching from origin (which might be a fork) in PRs.
+            if [ -z "$BASE_REF" ]; then
+              git fetch --no-tags --depth=1 origin "$BASE_REV"
+            fi
+            BASE_SPEC="$BASE_REV"
+          else
+            git fetch --no-tags --depth=1 origin "$BASE_REV"
+            BASE_SPEC="origin/$BASE_REV"
+          fi
+
+          CHANGED_FILES=$(git diff "$BASE_SPEC" HEAD --name-only | wc -l)
           echo "Changed files: $CHANGED_FILES"
           if [ "$CHANGED_FILES" -eq "0" ]; then
             echo "No changes detected in PR!"
@@ -90,6 +103,7 @@ jobs:
           fi
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_REV: ${{ github.event.merge_group.base_sha || github.event.merge_group.base_ref || github.event.pull_request.base.sha || github.event.pull_request.base.ref || 'main' }}
 
   pr-checks-pass:
     if: always()
