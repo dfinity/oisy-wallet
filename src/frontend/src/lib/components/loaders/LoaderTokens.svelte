@@ -8,6 +8,8 @@
 	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
+	import { extCustomTokensNotInitialized } from '$icp/derived/ext.derived';
+	import { loadExtTokens } from '$icp/services/ext.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
@@ -63,6 +65,8 @@
 		(loadSplMainnet || loadSplDevnet || loadSplLocal) && $splCustomTokensNotInitialized
 	);
 
+	let loadExt = $derived($extCustomTokensNotInitialized);
+
 	$effect(() => {
 		if (loadErc20) {
 			loadErc20Tokens({ identity: $authIdentity });
@@ -84,6 +88,12 @@
 	$effect(() => {
 		if (loadSpl) {
 			loadSplTokens({ identity: $authIdentity });
+		}
+	});
+
+	$effect(() => {
+		if (loadExt) {
+			loadExtTokens({ identity: $authIdentity });
 		}
 	});
 </script>

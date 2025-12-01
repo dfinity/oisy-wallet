@@ -11,9 +11,10 @@
 		visible: boolean;
 		content: Snippet;
 		footer?: Snippet;
+		contentClass?: string;
 	}
 
-	let { visible = $bindable(), content, footer }: Props = $props();
+	let { visible = $bindable(), content, footer, contentClass = 'min-h-[30vh]' }: Props = $props();
 
 	$effect(() => {
 		bottomSheetOpenStore.set(visible);
@@ -37,7 +38,7 @@
 				</div>
 			{/snippet}
 
-			<div class="min-h-[30vh] w-full p-4">
+			<div class="w-full p-4 {contentClass}">
 				{@render content()}
 			</div>
 			{#if nonNullish(footer)}

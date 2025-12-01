@@ -7,7 +7,8 @@ import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.et
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
+import { NetworkSchema } from '$lib/schema/network.schema';
+import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId } from '$lib/types/nft';
 import {
@@ -19,6 +20,7 @@ import {
 	findNonFungibleToken,
 	getEnabledNfts,
 	getMediaStatus,
+	getMediaStatusOrCache,
 	getNftCollectionUi,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
@@ -27,6 +29,7 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('nfts.utils', () => {
@@ -326,7 +329,7 @@ describe('nfts.utils', () => {
 	});
 
 	describe('mapTokenToCollection', () => {
-		it('should map token correctly', () => {
+		it('should map ERC721 token correctly', () => {
 			const result = mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN);
 
 			expect(result).toEqual({
@@ -334,9 +337,23 @@ describe('nfts.utils', () => {
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
 				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description
+			});
+		});
+
+		it('should map EXT token correctly', () => {
+			const result = mapTokenToCollection(mockValidExtV2Token);
+
+			expect(result).toEqual({
+				address: mockValidExtV2Token.canisterId,
+				name: mockValidExtV2Token.name,
+				symbol: mockValidExtV2Token.symbol,
+				id: mockValidExtV2Token.id,
+				network: NetworkSchema.parse(mockValidExtV2Token.network),
+				standard: mockValidExtV2Token.standard,
+				description: mockValidExtV2Token.description
 			});
 		});
 
@@ -351,7 +368,7 @@ describe('nfts.utils', () => {
 			expect(result).toEqual({
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
 			});
 		});
@@ -367,7 +384,7 @@ describe('nfts.utils', () => {
 				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
 				section: CustomTokenSection.HIDDEN,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol
@@ -384,7 +401,7 @@ describe('nfts.utils', () => {
 				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
 				section: undefined,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol
@@ -867,6 +884,52 @@ describe('nfts.utils', () => {
 			expect(global.fetch).toHaveBeenCalledExactlyOnceWith('https://ipfs.io/ipfs/ipfs-image-url', {
 				method: 'HEAD'
 			});
+		});
+	});
+
+	describe('getMediaStatusOrCache', () => {
+		const mockUrl = 'https://example.com/image.png';
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'image/png'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+		});
+
+		it('should fetch and cache value if not available', async () => {
+			const result = await getMediaStatusOrCache(mockUrl);
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+
+			expect(global.fetch).toHaveBeenCalledExactlyOnceWith(mockUrl, { method: 'HEAD' });
+		});
+
+		it('should return cached value if available', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'image/png'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT + 100).toString() // Should have returned FILESIZE_LIMIT_EXCEEDED
+								: null
+				}
+			});
+
+			const result = await getMediaStatusOrCache(mockUrl);
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+
+			expect(global.fetch).not.toHaveBeenCalled();
 		});
 	});
 });

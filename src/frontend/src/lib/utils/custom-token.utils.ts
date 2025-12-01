@@ -1,14 +1,16 @@
 import type {
 	CustomToken,
 	ErcToken,
+	ExtV2Token,
 	IcrcToken,
 	SplToken,
 	Token
-} from '$declarations/backend/declarations/backend.did';
+} from '$declarations/backend/backend.did';
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumChainId } from '$eth/types/network';
 import type {
 	ErcSaveCustomToken,
+	ExtSaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
@@ -29,6 +31,10 @@ const toIcrcCustomToken = ({
 	index_id: toNullable(
 		nonNullish(indexCanisterId) ? Principal.fromText(indexCanisterId) : undefined
 	)
+});
+
+const toExtV2CustomToken = ({ canisterId }: ExtSaveCustomToken): ExtV2Token => ({
+	canister_id: Principal.fromText(canisterId)
 });
 
 const toErcCustomToken = ({
@@ -61,6 +67,10 @@ export const toCustomToken = ({
 
 		if (networkKey === 'Icrc') {
 			return { Icrc: toIcrcCustomToken(rest) };
+		}
+
+		if (networkKey === 'ExtV2') {
+			return { ExtV2: toExtV2CustomToken(rest) };
 		}
 
 		if (networkKey === 'Erc20') {

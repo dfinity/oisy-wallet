@@ -8,18 +8,19 @@
 		action?: Snippet;
 	}
 
-	let { content, action, title }: Props = $props();
+	let { content, title, action }: Props = $props();
 </script>
 
-<!-- TODO: add styling according to the designs -->
-<div class="rounded-xl bg-secondary p-4" in:fade>
-	<div class="flex w-full justify-between">
-		<h4>{@render title()}</h4>
+<div class="flex flex-col rounded-xl bg-surface p-4" in:fade>
+	<div class="relative flex w-full items-center justify-between">
+		{@render title()}
 
-		{@render action?.()}
+		<div>
+			{@render action?.()}
+		</div>
 	</div>
 
-	<div class="mt-2">
+	<div class="mt-2 flex w-full flex-col">
 		{@render content()}
 	</div>
 </div>

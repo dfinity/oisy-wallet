@@ -12,8 +12,8 @@ use crate::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{
-            CustomToken, CustomTokenId, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId,
-            Token,
+            CustomToken, CustomTokenId, ErcToken, ErcTokenId, ExtV2Token, IcrcToken, SplToken,
+            SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         experimental_feature::{
@@ -106,6 +106,7 @@ impl From<&Token> for CustomTokenId {
                 chain_id,
                 ..
             }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
+            Token::ExtV2(token) => CustomTokenId::ExtV2(token.canister_id),
         }
     }
 }
@@ -551,8 +552,10 @@ impl Validate for ErcTokenId {
 impl Validate for CustomTokenId {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
-            CustomTokenId::Icrc(_) => Ok(()), /* This is a principal.  In principle, we could */
-            // check the exact type of principal.
+            CustomTokenId::Icrc(_) | CustomTokenId::ExtV2(_) => Ok(()), /* This is a principal. */
+            // In principle, we
+            // could check the exact
+            // type of principal.
             CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
                 token_address.validate()
             }
@@ -573,6 +576,7 @@ impl Validate for Token {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
             Token::Erc20(token) | Token::Erc721(token) | Token::Erc1155(token) => token.validate(),
+            Token::ExtV2(token) => token.validate(),
         }
     }
 }
@@ -620,6 +624,21 @@ impl Validate for IcrcToken {
             if index_id.as_slice().last() != Some(&1) {
                 return Err(candid::Error::msg("Index ID is not a canister"));
             }
+        }
+        Ok(())
+    }
+}
+
+impl Validate for ExtV2Token {
+    /// Verifies that an EXT v2 token is valid.
+    ///
+    /// - Checks that the canister principal is the type of principal used for a canister.
+    ///   - <https://wiki.internetcomputer.org/wiki/Principal>
+    fn validate(&self) -> Result<(), candid::Error> {
+        let ExtV2Token { canister_id } = self;
+        // The canister_id should be appropriate for a canister.
+        if canister_id.as_slice().last() != Some(&1) {
+            return Err(candid::Error::msg("Canister ID is not a canister"));
         }
         Ok(())
     }
@@ -732,6 +751,7 @@ validate_on_deserialize!(ContactImage);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
+validate_on_deserialize!(ExtV2Token);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(ErcToken);

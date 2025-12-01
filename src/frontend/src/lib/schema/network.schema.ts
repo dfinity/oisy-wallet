@@ -15,10 +15,6 @@ const NetworkBuySchema = z.object({
 	onramperId: OnramperNetworkIdSchema
 });
 
-export const NetworkAppMetadataSchema = z.object({
-	explorerUrl: UrlSchema
-});
-
 const IconSchema = z
 	.string()
 	.refine((value) => value.endsWith('.svg') || value.startsWith('data:image/svg+xml'), {
@@ -41,6 +37,7 @@ export const NetworkSchema = z.object({
 	env: NetworkEnvironmentSchema,
 	name: z.string(),
 	icon: IconSchema.optional(),
+	explorerUrl: UrlSchema,
 	exchange: NetworkExchangeSchema.optional(),
 	buy: NetworkBuySchema.optional(),
 	supportsNft: z.boolean().optional()

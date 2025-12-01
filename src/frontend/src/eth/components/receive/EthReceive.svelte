@@ -4,7 +4,8 @@
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { modalEthReceive } from '$lib/derived/modal.derived';
-	import { networkAddress, networkEthereum } from '$lib/derived/network.derived';
+	import { networkAddress } from '$lib/derived/network-address.derived';
+	import { networkEthereum } from '$lib/derived/network.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';

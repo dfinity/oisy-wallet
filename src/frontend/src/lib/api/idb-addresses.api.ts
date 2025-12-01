@@ -111,14 +111,29 @@ export const getIdbSolAddressMainnet = (principal: Principal): Promise<IdbSolAdd
 export const deleteIdbBtcAddressMainnet = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbBtcAddressesStoreMainnet);
 
+export const deleteIdbBtcAddressTestnet = (principal: Principal): Promise<void> =>
+	del(principal.toText(), idbBtcAddressesStoreTestnet);
+
 export const deleteIdbEthAddress = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbEthAddressesStore);
 
 export const deleteIdbSolAddressMainnet = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbSolAddressesStoreMainnet);
 
+export const deleteIdbSolAddressDevnet = (principal: Principal): Promise<void> =>
+	del(principal.toText(), idbSolAddressesStoreDevnet);
+
+export const deleteIdbSolAddressLocal = (principal: Principal): Promise<void> =>
+	del(principal.toText(), idbSolAddressesStoreLocal);
+
 export const clearIdbBtcAddressMainnet = (): Promise<void> => clear(idbBtcAddressesStoreMainnet);
+
+export const clearIdbBtcAddressTestnet = (): Promise<void> => clear(idbBtcAddressesStoreTestnet);
 
 export const clearIdbEthAddress = (): Promise<void> => clear(idbEthAddressesStore);
 
 export const clearIdbSolAddressMainnet = (): Promise<void> => clear(idbSolAddressesStoreMainnet);
+
+export const clearIdbSolAddressDevnet = (): Promise<void> => clear(idbSolAddressesStoreDevnet);
+
+export const clearIdbSolAddressLocal = (): Promise<void> => clear(idbSolAddressesStoreLocal);

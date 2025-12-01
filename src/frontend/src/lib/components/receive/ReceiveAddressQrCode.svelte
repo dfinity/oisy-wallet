@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import ReceiveAddressQrCodeContent from '$lib/components/receive/ReceiveAddressQrCodeContent.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -15,9 +16,10 @@
 		copyAriaLabel: string;
 		testId?: string;
 		onBack: () => void;
+		text?: Snippet;
 	}
 
-	let { address, addressLabel, addressToken, network, copyAriaLabel, testId, onBack }: Props =
+	let { address, addressLabel, addressToken, network, copyAriaLabel, testId, onBack, text }: Props =
 		$props();
 </script>
 
@@ -29,6 +31,7 @@
 		{copyAriaLabel}
 		{network}
 		testId={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}
+		{text}
 	/>
 
 	{#snippet toolbar()}

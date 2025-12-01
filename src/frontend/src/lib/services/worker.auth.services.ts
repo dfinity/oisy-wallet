@@ -1,7 +1,8 @@
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import { idleSignOut } from '$lib/services/auth.services';
 import { authRemainingTimeStore, type AuthStoreData } from '$lib/stores/auth.store';
 import type { PostMessage, PostMessageDataResponseAuth } from '$lib/types/post-message';
+import type { WorkerData } from '$lib/types/worker';
 import { isNullish } from '@dfinity/utils';
 
 export class AuthWorker extends AppWorker {
@@ -20,7 +21,6 @@ export class AuthWorker extends AppWorker {
 						return;
 					case 'delegationRemainingTime':
 						authRemainingTimeStore.set(data?.authRemainingTime);
-						return;
 				}
 			}
 		);

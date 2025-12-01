@@ -119,8 +119,8 @@ describe('auth.services', () => {
 
 			await signOut({});
 
-			// 3 addresses + 1(+1) tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(5);
+			// 6 addresses (mainnet and testnet) + 1(+1) tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(8);
 
 			// 4 transactions + 1 balances
 			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
@@ -129,8 +129,8 @@ describe('auth.services', () => {
 		it('should clean the IDB storage for all principals', async () => {
 			await signOut({ clearAllPrincipalsStorages: true });
 
-			// 3 addresses + 1(+1) tokens + 4 txs + 1 balance
-			expect(idbKeyval.clear).toHaveBeenCalledTimes(10);
+			// 6 addresses (mainnet and testnet) + 1(+1) tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(13);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
@@ -242,8 +242,8 @@ describe('auth.services', () => {
 
 			await errorSignOut(mockText);
 
-			// 3 addresses + 1(+1) tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(5);
+			// 6 addresses (mainnet and testnet) + 1(+1) tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(8);
 
 			// 4 transactions + 1 balances
 			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
@@ -368,8 +368,8 @@ describe('auth.services', () => {
 
 			await warnSignOut(mockText);
 
-			// 3 addresses + 1(+1) tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(5);
+			// 6 addresses (mainnet and testnet) + 1(+1) tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(8);
 
 			// 4 transactions + 1 balances
 			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
@@ -494,8 +494,8 @@ describe('auth.services', () => {
 
 			await nullishSignOut();
 
-			// 3 addresses + 1(+1) tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(5);
+			// 6 addresses (mainnet and testnet) + 1(+1) tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(8);
 
 			// 4 transactions + 1 balances
 			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);

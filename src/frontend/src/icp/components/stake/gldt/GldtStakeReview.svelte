@@ -4,6 +4,7 @@
 	import GldtStakeFees from '$icp/components/stake/gldt/GldtStakeFees.svelte';
 	import GldtStakeProvider from '$icp/components/stake/gldt/GldtStakeProvider.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
+	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import StakeReview from '$lib/components/stake/StakeReview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -18,26 +19,38 @@
 		onStake: () => void;
 	}
 
-	let { destination = '', amount, onBack, onStake }: Props = $props();
+	let { destination: address = '', amount, onBack, onStake }: Props = $props();
 
 	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = $derived(
 		isInvalidDestinationIc({
-			destination,
+			destination: address,
 			tokenStandard: $sendTokenStandard
 		}) || invalidAmount(amount)
 	);
 </script>
 
-<StakeReview {amount} {destination} disabled={invalid} {onBack} {onStake}>
+<StakeReview
+	actionButtonLabel={$i18n.stake.text.stake_now}
+	{amount}
+	disabled={invalid}
+	{onBack}
+	onConfirm={onStake}
+>
 	{#snippet subtitle()}
 		{$i18n.stake.text.stake_review_subtitle}
 	{/snippet}
 
+	{#snippet destination()}
+		<div class="mb-4">
+			<SendReviewDestination destination={address} />
+		</div>
+	{/snippet}
+
 	{#snippet provider()}
-		<GldtStakeProvider />
+		<GldtStakeProvider showAllTerms />
 	{/snippet}
 
 	{#snippet network()}

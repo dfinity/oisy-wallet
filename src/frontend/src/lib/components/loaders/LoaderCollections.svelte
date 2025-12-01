@@ -1,132 +1,28 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
 	import { get } from 'svelte/store';
-	import type { CustomToken } from '$declarations/backend/declarations/backend.did';
+	import type { CustomToken } from '$declarations/backend/backend.did';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { NFTS_ENABLED } from '$env/nft.env';
+	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
-	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
-	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
-	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
-	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
+	import { saveErcCustomTokens } from '$eth/services/erc-custom-tokens.services';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
+	import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
+	import { saveCustomTokens as saveExtCustomTokens } from '$icp/services/ext-custom-tokens.services';
+	import type { SaveExtCustomToken } from '$icp/types/ext-custom-token';
 	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { COLLECTION_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { CanisterIdText } from '$lib/types/canister';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
-	import { areAddressesEqual } from '$lib/utils/address.utils';
-
-	const handleErcTokens = async ({
-		contracts,
-		customTokens,
-		network,
-		identity
-	}: {
-		contracts: OwnedContract[];
-		customTokens: CustomToken[];
-		network: EthereumNetwork;
-		identity: Identity;
-	}) => {
-		const [erc721Tokens, erc1155Tokens] = contracts.reduce<
-			[SaveErc721CustomToken[], SaveErc1155CustomToken[]]
-		>(
-			(acc, { standard: rawStandard, address }) => {
-				const [erc721TokensAcc, erc1155TokensAcc] = acc;
-
-				const standard = rawStandard.toLowerCase();
-
-				if (standard === 'erc721') {
-					const existingToken = customTokens.find(({ token }) => {
-						if (!('Erc721' in token)) {
-							return false;
-						}
-
-						const {
-							Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
-						} = token;
-
-						return (
-							areAddressesEqual({
-								address1: tokenAddress,
-								address2: address,
-								networkId: network.id
-							}) && tokenChainId === network.chainId
-						);
-					});
-
-					if (nonNullish(existingToken)) {
-						return acc;
-					}
-
-					const newToken: SaveErc721CustomToken = {
-						address,
-						network,
-						enabled: true
-					};
-
-					erc721TokensAcc.push(newToken);
-
-					return [erc721TokensAcc, erc1155TokensAcc];
-				}
-
-				if (standard === 'erc1155') {
-					const existingToken = customTokens.find(({ token }) => {
-						if (!('Erc1155' in token)) {
-							return false;
-						}
-
-						const {
-							Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
-						} = token;
-
-						return (
-							areAddressesEqual({
-								address1: tokenAddress,
-								address2: address,
-								networkId: network.id
-							}) && tokenChainId === network.chainId
-						);
-					});
-
-					if (nonNullish(existingToken)) {
-						return acc;
-					}
-
-					const newToken: SaveErc1155CustomToken = {
-						address,
-						network,
-						enabled: true
-					};
-
-					erc1155TokensAcc.push(newToken);
-
-					return [erc721TokensAcc, erc1155TokensAcc];
-				}
-
-				return acc;
-			},
-			[[], []]
-		);
-
-		await Promise.all([
-			erc721Tokens.length > 0 &&
-				saveErc721CustomTokens({
-					tokens: erc721Tokens as NonEmptyArray<SaveErc721CustomToken>,
-					identity
-				}),
-			erc1155Tokens.length > 0 &&
-				saveErc1155CustomTokens({
-					tokens: erc1155Tokens as NonEmptyArray<SaveErc1155CustomToken>,
-					identity
-				})
-		]);
-	};
 
 	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
 		if (isNullish($ethAddress)) {
@@ -142,7 +38,76 @@
 		}
 	};
 
-	const onLoad = async () => {
+	interface LoadTokensParams {
+		identity: Identity;
+		customTokens: CustomToken[];
+	}
+
+	const loadErcTokens = async ({ identity, customTokens }: LoadTokensParams) => {
+		const networks = [...$enabledEthereumNetworks, ...$enabledEvmNetworks];
+
+		for (const network of networks) {
+			const contracts: OwnedContract[] = await loadContracts(network);
+
+			await saveErcCustomTokens({
+				contracts,
+				customTokens,
+				network,
+				identity
+			});
+		}
+	};
+
+	const loadExtTokens = async ({ identity, customTokens }: LoadTokensParams) => {
+		const extEnabledCustomToken = customTokens.reduce<CanisterIdText[]>(
+			(acc, { token, enabled }) =>
+				'ExtV2' in token && enabled ? [...acc, token.ExtV2.canister_id.toText()] : acc,
+			[]
+		);
+
+		// For now, we have no other way of knowing what EXT tokens/collections the user has NFT with.
+		// So, we loop through a curated list, and we use the method `getTokensByOwner` to check if the user has any NFTs from that collection.
+		// TODO: Find a better method of `getTokensByOwner` to know if the user has NFTs from a specific collection.
+		const canisterIdPromises = EXT_BUILTIN_TOKENS.map(async ({ canisterId }) => {
+			if (extEnabledCustomToken.includes(canisterId)) {
+				return [];
+			}
+
+			try {
+				const tokens = await getTokensByOwner({
+					identity,
+					owner: identity.getPrincipal(),
+					canisterId,
+					certified: false
+				});
+
+				return tokens.length > 0 ? [canisterId] : [];
+			} catch (error: unknown) {
+				console.warn(`Error fetching EXT tokens from canister ${canisterId}:`, error);
+
+				return [];
+			}
+		});
+
+		const canisterIds = (await Promise.all(canisterIdPromises)).flat();
+
+		if (canisterIds.length === 0) {
+			return;
+		}
+
+		const extTokens: SaveExtCustomToken[] = canisterIds.map((canisterId) => ({
+			canisterId,
+			network: ICP_NETWORK,
+			enabled: true
+		}));
+
+		await saveExtCustomTokens({
+			tokens: extTokens as NonEmptyArray<SaveExtCustomToken>,
+			identity
+		});
+	};
+
+	const load = async ({ extTokens = false }: { extTokens?: boolean }) => {
 		if (!NFTS_ENABLED || isNullish($authIdentity)) {
 			return;
 		}
@@ -153,18 +118,26 @@
 			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 		});
 
-		const networks = [...$enabledEthereumNetworks, ...$enabledEvmNetworks];
-		for (const network of networks) {
-			const contracts: OwnedContract[] = await loadContracts(network);
+		const params: LoadTokensParams = {
+			identity: $authIdentity,
+			customTokens
+		};
 
-			await handleErcTokens({
-				contracts,
-				customTokens,
-				network,
-				identity: $authIdentity
-			});
-		}
+		await Promise.all([
+			loadErcTokens(params),
+			extTokens ? loadExtTokens(params) : Promise.resolve()
+		]);
+	};
+
+	const onLoad = async () => {
+		await load({});
+	};
+
+	const reload = async () => {
+		await load({ extTokens: true });
 	};
 </script>
+
+<svelte:window onoisyReloadCollections={reload} />
 
 <IntervalLoader interval={COLLECTION_TIMER_INTERVAL_MILLIS} {onLoad} />

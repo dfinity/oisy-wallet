@@ -13,6 +13,7 @@ export const TokenStandardSchema = z.enum([
 	'icp',
 	'icrc',
 	'dip20',
+	'extV2',
 	'bitcoin',
 	'solana',
 	'spl'
@@ -40,7 +41,7 @@ const TokenOisyNameSchema = z.object({
 export const TokenAppearanceSchema = z.object({
 	oisySymbol: TokenOisySymbolSchema.optional(),
 	oisyName: TokenOisyNameSchema.optional(),
-	alwaysShowInTokenGroup: z.boolean().optional()
+	neverCollapseInTokenGroup: z.boolean().optional()
 });
 
 const TokenBuySchema = z.object({

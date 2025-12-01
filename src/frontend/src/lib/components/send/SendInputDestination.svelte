@@ -118,12 +118,11 @@
 		<InputTextWithAction
 			name="destination"
 			autofocus={isDesktop()}
+			{onBlur}
+			{onFocus}
 			placeholder={inputPlaceholder}
 			testId={DESTINATION_INPUT}
 			bind:value={destination}
-			on:focus={onFocus}
-			on:blur={onBlur}
-			on:nnsInput
 			bind:inputElement
 		>
 			{#snippet innerEnd()}

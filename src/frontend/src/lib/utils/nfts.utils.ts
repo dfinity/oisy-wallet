@@ -6,12 +6,14 @@ import type { NftError } from '$lib/types/errors';
 import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
+import { getNftIdentifier } from '$lib/utils/nft.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import { SvelteMap } from 'svelte/reactivity';
 
 export const findNft = ({
 	nfts,
-	token: { address: tokenAddress, network: tokenNetwork },
+	token,
 	tokenId
 }: {
 	nfts: Nft[];
@@ -20,21 +22,15 @@ export const findNft = ({
 }): Nft | undefined =>
 	nfts.find(
 		({ id, collection: { address, network } }) =>
-			address === tokenAddress && network.id === tokenNetwork.id && id === tokenId
+			address === getNftIdentifier(token) && network.id === token.network.id && id === tokenId
 	);
 
-export const findNftsByToken = ({
-	nfts,
-	token: { address: tokenAddress, network: tokenNetwork }
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-}): Nft[] =>
+export const findNftsByToken = ({ nfts, token }: { nfts: Nft[]; token: NonFungibleToken }): Nft[] =>
 	nfts.filter((nft) =>
 		areAddressesEqual({
 			address1: nft.collection.address,
-			address2: tokenAddress,
-			networkId: tokenNetwork.id
+			address2: getNftIdentifier(token),
+			networkId: token.network.id
 		})
 	);
 
@@ -96,7 +92,7 @@ export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: N
 
 export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 	NftCollectionSchema.parse({
-		address: token.address,
+		address: getNftIdentifier(token),
 		id: token.id,
 		network: token.network,
 		standard: token.standard,
@@ -124,8 +120,9 @@ export const getEnabledNfts = ({
 			}
 		}) =>
 			$enabledNonFungibleNetworkTokens.some(
-				({ address: contractAddress, network: { id: contractNetworkId } }) =>
-					contractAddress === nftContractAddress && contractNetworkId === nftContractNetworkId
+				(token) =>
+					getNftIdentifier(token) === nftContractAddress &&
+					token.network.id === nftContractNetworkId
 			)
 	);
 
@@ -296,7 +293,7 @@ export const findNonFungibleToken = ({
 	address: EthAddress;
 	networkId: NetworkId;
 }): NonFungibleToken | undefined =>
-	tokens.find((token) => token.address === address && token.network.id === networkId);
+	tokens.find((token) => getNftIdentifier(token) === address && token.network.id === networkId);
 
 export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
 	if (isNullish(mediaUrl)) {
@@ -340,4 +337,26 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 	}
 
 	return NftMediaStatusEnum.OK;
+};
+
+// The CORS policy raises an error everytime we try to access the media URL, so we cache the result to avoid making the same request multiple times.
+// Unfortunately, the CORS errors cannot be removed from the browser: https://stackoverflow.com/questions/52807184/how-to-hide-console-status-error-message-while-fetching-in-react-js
+const mediaStatusCache = new SvelteMap<string, NftMediaStatusEnum>();
+
+export const getMediaStatusOrCache = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+	if (isNullish(mediaUrl)) {
+		return NftMediaStatusEnum.INVALID_DATA;
+	}
+
+	const cachedStatus = mediaStatusCache.get(mediaUrl);
+
+	if (nonNullish(cachedStatus)) {
+		return cachedStatus;
+	}
+
+	const status = await getMediaStatus(mediaUrl);
+
+	mediaStatusCache.set(mediaUrl, status);
+
+	return status;
 };

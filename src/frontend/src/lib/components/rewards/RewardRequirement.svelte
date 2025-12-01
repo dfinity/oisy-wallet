@@ -15,9 +15,10 @@
 	interface Props {
 		criterion: CampaignCriterion;
 		testId?: string;
+		truncate?: boolean;
 	}
 
-	let { criterion, testId }: Props = $props();
+	let { criterion, testId, truncate = false }: Props = $props();
 
 	const getCriterionText = (criterion: CampaignCriterion): string | undefined => {
 		if (RewardCriterionType.MIN_LOGINS === criterion.type) {
@@ -70,7 +71,7 @@
 		>
 			<IconCheckCircleFill size={24} />
 		</span>
-		<span>
+		<span class:truncate>
 			{criterionText}
 		</span>
 	</span>
