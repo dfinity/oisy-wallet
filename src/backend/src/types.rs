@@ -3,10 +3,10 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    backend_config::Config, contact::StoredContacts, custom_token::CustomToken,
-    pow::StoredChallenge, token::UserToken, user_profile::StoredUserProfile, Timestamp,
+    agreement::UserAgreements, backend_config::Config, contact::StoredContacts,
+    custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
+    user_profile::StoredUserProfile, Timestamp,
 };
-use shared::types::agreement::UserAgreements;
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 pub type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;

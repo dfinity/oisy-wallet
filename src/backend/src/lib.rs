@@ -71,13 +71,12 @@ use crate::{
     bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
-    types::{ContactMap, PowChallengeMap},
+    types::{AgreementsHistoryMap, ContactMap, PowChallengeMap},
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
         update_experimental_feature_settings, update_network_settings,
     },
 };
-use crate::types::AgreementsHistoryMap;
 
 mod assertions;
 mod bitcoin_api;
