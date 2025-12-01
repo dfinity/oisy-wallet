@@ -28,7 +28,8 @@ export const ICP_NETWORK: Network = {
 	env: 'mainnet',
 	name: 'Internet Computer',
 	icon: icpIcon,
-	buy: { onramperId: 'icp' }
+	buy: { onramperId: 'icp' },
+	pay: { openCryptoPay: 'Internet Computer' }
 };
 
 /**
