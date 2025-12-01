@@ -10,8 +10,6 @@
 
 	const { testId }: Props = $props();
 
-	let visible = $state(false);
-
 	let loading = $state(false);
 
 	const onClick = () => {
@@ -32,7 +30,6 @@
 	link={false}
 	{loading}
 	onclick={onClick}
-	styleClass={visible ? 'active' : ''}
 	{testId}
 >
 	{#snippet icon()}
