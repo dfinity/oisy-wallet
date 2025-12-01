@@ -10,8 +10,6 @@
 
 	const { testId }: Props = $props();
 
-	let visible = $state(false);
-
 	let loading = $state(false);
 
 	const onClick = () => {
@@ -27,12 +25,11 @@
 </script>
 
 <ButtonIcon
-	ariaLabel={$i18n.navigation.alt.menu}
+	ariaLabel={$i18n.core.text.refresh}
 	colorStyle="muted"
 	link={false}
 	{loading}
 	onclick={onClick}
-	styleClass={visible ? 'active' : ''}
 	{testId}
 >
 	{#snippet icon()}
