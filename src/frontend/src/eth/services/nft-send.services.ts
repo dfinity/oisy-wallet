@@ -5,6 +5,7 @@ import { infuraProviders } from '$eth/providers/infura.providers';
 import { getNonce } from '$eth/services/nonce.services';
 import type { EthAddress } from '$eth/types/address';
 import type {
+	CommonNftTransferParams,
 	PreparedContractCall,
 	TransferErc1155Params,
 	TransferErc721Params
@@ -106,19 +107,18 @@ const sendRaw = ({
 	raw: string;
 }): Promise<TransactionResponse> => infuraProviders(networkId).sendTransaction(raw);
 
-export const transferErc721 = async ({
+const transferErc = async ({
 	identity,
 	sourceNetwork,
-	to,
 	from,
-	tokenId,
-	contractAddress,
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
+	call,
 	progress
-}: TransferErc721Params): Promise<TransactionResponse> => {
-	const call = encodeErc721SafeTransfer({ contractAddress, from, to, tokenId });
+}: CommonNftTransferParams & {
+	call: PreparedContractCall;
+}): Promise<TransactionResponse> => {
 	const { id: networkId, chainId } = sourceNetwork;
 	const nonce = await getNonce({ from, networkId });
 
@@ -141,19 +141,26 @@ export const transferErc721 = async ({
 	return result;
 };
 
+export const transferErc721 = async ({
+	to,
+	from,
+	tokenId,
+	contractAddress,
+	...rest
+}: TransferErc721Params): Promise<TransactionResponse> => {
+	const call = encodeErc721SafeTransfer({ contractAddress, from, to, tokenId });
+
+	return await transferErc({ from, call, ...rest });
+};
+
 export const transferErc1155 = async ({
-	identity,
-	sourceNetwork,
 	to,
 	from,
 	id,
 	amount,
 	contractAddress,
-	gas,
-	maxFeePerGas,
-	maxPriorityFeePerGas,
 	data,
-	progress
+	...rest
 }: TransferErc1155Params): Promise<TransactionResponse> => {
 	const call = encodeErc1155SafeTransfer({
 		contractAddress,
@@ -163,23 +170,6 @@ export const transferErc1155 = async ({
 		amount,
 		data
 	});
-	const { id: networkId, chainId } = sourceNetwork;
-	const nonce = await getNonce({ from, networkId });
 
-	const tx = buildSignRequest({
-		call,
-		nonce,
-		chainId,
-		gas,
-		maxFeePerGas,
-		maxPriorityFeePerGas
-	});
-	progress?.(ProgressStepsSendEnum.SIGN_TRANSFER);
-
-	const raw = await signWithIdentity({ identity, transaction: tx });
-	const result = await sendRaw({ networkId, raw });
-
-	progress?.(ProgressStepsSendEnum.TRANSFER);
-
-	return result;
+	return await transferErc({ from, call, ...rest });
 };
