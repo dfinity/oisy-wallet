@@ -3,8 +3,9 @@ use candid::{CandidType, Deserialize, Principal};
 
 use crate::types::Version;
 
-pub type LedgerId = Principal;
-pub type IndexId = Principal;
+pub type CanisterId = Principal;
+pub type LedgerId = CanisterId;
+pub type IndexId = CanisterId;
 
 /// An ICRC-1 compliant token on the Internet Computer.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -12,6 +13,13 @@ pub type IndexId = Principal;
 pub struct IcrcToken {
     pub ledger_id: LedgerId,
     pub index_id: Option<IndexId>,
+}
+
+/// An EXT v2 compliant token on the Internet Computer.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct ExtV2Token {
+    pub canister_id: CanisterId,
 }
 
 /// A network-specific unique Solana token identifier.
@@ -57,6 +65,7 @@ pub enum Token {
     Erc20(ErcToken) = 3,
     Erc721(ErcToken) = 4,
     Erc1155(ErcToken) = 5,
+    ExtV2(ExtV2Token) = 6,
 }
 
 /// User preferences for any token
@@ -89,4 +98,6 @@ pub enum CustomTokenId {
     SolDevnet(SplTokenId) = 2,
     /// An Ethereum/EVM token on an EVM-compatible network.
     Ethereum(ErcTokenId, ChainId) = 3,
+    /// An EXT v2 Token on the Internet Computer mainnet.
+    ExtV2(LedgerId) = 4,
 }

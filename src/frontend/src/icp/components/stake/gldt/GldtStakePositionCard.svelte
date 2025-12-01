@@ -68,7 +68,7 @@
 			})}
 		</div>
 
-		<div class="flex justify-center gap-2 text-sm sm:text-base">
+		<div class="flex items-center justify-center gap-2 text-sm sm:text-base">
 			{#if stakedAmountUsd > 0}
 				<span class="font-bold">
 					{formatCurrency({

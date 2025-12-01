@@ -7,7 +7,7 @@ import type {
 	_SERVICE as RewardService,
 	UserData,
 	UserSnapshot
-} from '$declarations/rewards/declarations/rewards.did';
+} from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';

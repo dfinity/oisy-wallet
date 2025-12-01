@@ -4,7 +4,7 @@ import type {
 	NetworksSettings,
 	Settings,
 	UserProfile
-} from '$declarations/backend/declarations/backend.did';
+} from '$declarations/backend/backend.did';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { fromNullishNullable, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';

@@ -3,6 +3,7 @@ import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterApiFunctionParams, CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
+import { assertNonNullish, fromDefinedNullable, type QueryParams } from '@dfinity/utils';
 import {
 	IcrcLedgerCanister,
 	fromCandidAccount,
@@ -15,8 +16,7 @@ import {
 	type IcrcStandardRecord,
 	type IcrcTokenMetadataResponse,
 	type IcrcTokens
-} from '@dfinity/ledger-icrc';
-import { assertNonNullish, fromDefinedNullable, type QueryParams } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ledger/icrc';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -244,6 +244,30 @@ export const icrc1SupportedStandards = async ({
 	const { icrc1SupportedStandards } = await ledgerCanister({ identity, ledgerCanisterId });
 
 	return icrc1SupportedStandards({ certified });
+};
+
+/**
+ * Retrieves the ledger ICRC10 supported standards.
+ *
+ * @param {Object} params - The parameters for fetching supported standards.
+ * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
+ * @returns {Promise<IcrcStandardRecord[]>} The array of all supported standards.
+ */
+export const icrc10SupportedStandards = async ({
+	certified = true,
+	identity,
+	ledgerCanisterId
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & QueryParams): Promise<IcrcStandardRecord[]> => {
+	assertNonNullish(identity);
+
+	const { icrc10SupportedStandards } = await ledgerCanister({ identity, ledgerCanisterId });
+
+	return icrc10SupportedStandards({ certified });
 };
 
 export const getMintingAccount = async ({

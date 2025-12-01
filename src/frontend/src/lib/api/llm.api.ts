@@ -1,4 +1,4 @@
-import type { chat_request_v1, chat_response_v1 } from '$declarations/llm/declarations/llm.did';
+import type { chat_request_v1, chat_response_v1 } from '$declarations/llm/llm.did';
 import { LlmCanister } from '$lib/canisters/llm.canister';
 import { LLM_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';

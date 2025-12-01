@@ -11,8 +11,8 @@ import { ZERO } from '$lib/constants/app.constants';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { Utxo } from '@dfinity/ckbtc';
 import { toNullable } from '@dfinity/utils';
+import type { Utxo } from '@icp-sdk/canisters/ckbtc';
 
 // Mock environment variables (same as btc-utxos.service.spec.ts)
 vi.mock('$env/networks/networks.icrc.env', () => ({
@@ -106,7 +106,7 @@ describe('btc-send.services', () => {
 			height: 100,
 			value: 100000n,
 			outpoint: {
-				txid: [1, 2, 3, 4, 5],
+				txid: Uint8Array.from([1, 2, 3, 4, 5]),
 				vout: 0
 			}
 		};
@@ -179,7 +179,7 @@ describe('btc-send.services', () => {
 			it('should throw InvalidUtxoData error when UTXO has no txid', async () => {
 				const invalidUtxo = {
 					...validUtxo,
-					outpoint: { ...validUtxo.outpoint, txid: [] as number[] }
+					outpoint: { ...validUtxo.outpoint, txid: Uint8Array.from([]) }
 				};
 				const params = {
 					...defaultValidateParams,
@@ -379,7 +379,7 @@ describe('btc-send.services', () => {
 				height: 200,
 				value: 50000n,
 				outpoint: {
-					txid: [6, 7, 8, 9, 10],
+					txid: Uint8Array.from([6, 7, 8, 9, 10]),
 					vout: 1
 				}
 			};

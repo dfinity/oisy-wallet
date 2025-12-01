@@ -119,6 +119,7 @@ describe('approve.services', () => {
 			populateApproveSpy.mockResolvedValue({ data: 'mock-approve-data' });
 
 			vi.spyOn(signerApiLib, 'signTransaction')
+				.mockReset()
 				.mockResolvedValueOnce(mockRawTransaction1)
 				.mockResolvedValueOnce(mockRawTransaction2);
 		});
@@ -129,7 +130,10 @@ describe('approve.services', () => {
 
 			await expect(approve(mockParams)).rejects.toThrow(mockError);
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 		});
 
 		it('should return early if it should not swap with approval', async () => {
@@ -137,7 +141,10 @@ describe('approve.services', () => {
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).not.toHaveBeenCalled();
 		});
@@ -147,7 +154,10 @@ describe('approve.services', () => {
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).not.toHaveBeenCalled();
 		});
@@ -166,7 +176,10 @@ describe('approve.services', () => {
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).not.toHaveBeenCalled();
 		});
@@ -187,7 +200,10 @@ describe('approve.services', () => {
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).not.toHaveBeenCalled();
 		});
@@ -199,7 +215,10 @@ describe('approve.services', () => {
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).toHaveBeenCalledExactlyOnceWith({
 				contract: mockParams.token,
@@ -227,7 +246,10 @@ describe('approve.services', () => {
 				nonce: initialNonce
 			});
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).toHaveBeenCalledExactlyOnceWith({
 				contract: mockParams.token,
@@ -273,7 +295,10 @@ describe('approve.services', () => {
 				nonce: initialNonce + 1
 			});
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).toHaveBeenCalledExactlyOnceWith({
 				contract: mockParams.token,
@@ -347,7 +372,10 @@ describe('approve.services', () => {
 				nonce: initialNonce
 			});
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).toHaveBeenCalledExactlyOnceWith({
 				contract: mockParams.token,
@@ -372,6 +400,54 @@ describe('approve.services', () => {
 					max_fee_per_gas: mockParams.maxFeePerGas,
 					max_priority_fee_per_gas: mockParams.maxPriorityFeePerGas,
 					nonce: BigInt(initialNonce),
+					to: USDC_TOKEN.address,
+					value: ZERO
+				}
+			});
+
+			expect(mockProgress).toHaveBeenCalledTimes(2);
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSend.SIGN_APPROVE);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSend.APPROVE);
+		});
+
+		it('should accept a custom nonce', async () => {
+			const mockNonce = initialNonce - 2;
+
+			allowanceSpy.mockResolvedValueOnce(ZERO);
+
+			const result = await approve({ ...mockParams, customNonce: mockNonce });
+
+			expect(result).toStrictEqual({
+				transactionNeededApproval: true,
+				hash: mockHash,
+				nonce: mockNonce
+			});
+
+			expect(getTransactionCountSpy).not.toHaveBeenCalled();
+
+			expect(allowanceSpy).toHaveBeenCalledExactlyOnceWith({
+				contract: mockParams.token,
+				owner: mockParams.from,
+				spender: mockParams.to
+			});
+
+			expect(populateApproveSpy).toHaveBeenCalledExactlyOnceWith({
+				contract: mockParams.token,
+				spender: mockParams.to,
+				amount: mockParams.amount
+			});
+
+			expect(sendTransactionSpy).toHaveBeenCalledExactlyOnceWith(mockRawTransaction1);
+
+			expect(signTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transaction: {
+					chain_id: mockParams.sourceNetwork.chainId,
+					data: toNullable(mockParams.data),
+					gas: mockParams.gas,
+					max_fee_per_gas: mockParams.maxFeePerGas,
+					max_priority_fee_per_gas: mockParams.maxPriorityFeePerGas,
+					nonce: BigInt(mockNonce),
 					to: USDC_TOKEN.address,
 					value: ZERO
 				}

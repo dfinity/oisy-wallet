@@ -1,6 +1,6 @@
 import { onLoadBtcStatusesError, syncBtcStatuses } from '$icp/services/ckbtc-listener.services';
 import type { IcCkWorkerParams } from '$icp/types/ck-listener';
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequestIcCk,
@@ -9,6 +9,7 @@ import type {
 	PostMessageSyncState
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
 
 export class BtcStatusesWorker extends AppWorker {
 	private constructor(
@@ -40,7 +41,6 @@ export class BtcStatusesWorker extends AppWorker {
 							tokenId,
 							error: data.error
 						});
-						return;
 				}
 			}
 		);
@@ -61,12 +61,12 @@ export class BtcStatusesWorker extends AppWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcCk>>({
 			msg: 'startBtcStatusesTimer',
 			data: {
 				minterCanisterId: this.minterCanisterId
 			}
-		} as PostMessage<PostMessageDataRequestIcCk>);
+		});
 	};
 
 	stop = () => {
@@ -74,11 +74,11 @@ export class BtcStatusesWorker extends AppWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcCk>>({
 			msg: 'triggerBtcStatusesTimer',
 			data: {
 				minterCanisterId: this.minterCanisterId
 			}
-		} as PostMessage<PostMessageDataRequestIcCk>);
+		});
 	};
 }

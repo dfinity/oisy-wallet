@@ -20,7 +20,7 @@ import {
 import { parseTokenId } from '$lib/validation/token.validation';
 
 describe('ic-token.schema', () => {
-	const { chainId: _, explorerUrl: __, providers: ___, ...mockNetwork } = SEPOLIA_NETWORK;
+	const { chainId: _, providers: __, ...mockNetwork } = SEPOLIA_NETWORK;
 
 	const mockToken = {
 		id: parseTokenId('Test'),

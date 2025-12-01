@@ -1,10 +1,10 @@
-import type { BtcAddress } from '$declarations/backend/declarations/backend.did';
+import type { BtcAddress } from '$declarations/backend/backend.did';
+import { assertNever } from '@dfinity/utils';
 import {
 	BtcAddressType,
 	parseBtcAddress as parseBtcAddressCkbtc,
 	type BtcAddressInfo
-} from '@dfinity/ckbtc';
-import { assertNever } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ckbtc';
 
 const createBtcAddressFromAddressInfo = ({ info }: { info: BtcAddressInfo }): BtcAddress => {
 	switch (info.type) {
@@ -29,7 +29,7 @@ export const parseBtcAddress = (address: string): BtcAddress | undefined => {
 		const info = parseBtcAddressCkbtc({ address });
 		return createBtcAddressFromAddressInfo({ info });
 	} catch (_: unknown) {
-		return;
+		return undefined;
 	}
 };
 

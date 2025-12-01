@@ -99,6 +99,8 @@
 		})
 	);
 
+	let customNonce = $state<number | undefined>();
+
 	/**
 	 * Fee context store
 	 */
@@ -306,6 +308,7 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
+				customNonce,
 				sourceNetwork,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
@@ -370,6 +373,7 @@
 				{onTokensList}
 				{selectedContact}
 				bind:destination
+				bind:customNonce
 				bind:amount
 			>
 				{#snippet cancel()}

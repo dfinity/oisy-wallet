@@ -1,7 +1,7 @@
 import type {
 	AllowSigningResponse,
 	CreateChallengeResponse
-} from '$declarations/backend/declarations/backend.did';
+} from '$declarations/backend/backend.did';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import { PowProtectionScheduler } from '$icp/schedulers/pow-protection.scheduler';
 import * as powProtectorServices from '$icp/services/pow-protector.services';

@@ -59,8 +59,8 @@
 	};
 </script>
 
-<div class="flex h-full items-center justify-between">
-	<div class="mr-4 shrink-0">
+<div class="flex h-full w-full items-center justify-between">
+	<div class="mr-4 flex">
 		<Img
 			alt={replacePlaceholders($i18n.dapps.alt.logo, {
 				$dAppName: resolveText({ i18n: $i18n, path: dAppName })
@@ -71,7 +71,7 @@
 			width="64"
 		/>
 	</div>
-	<div class="w-full justify-start">
+	<div class="flex flex-1 flex-col justify-start">
 		<div class="mb-1">{resolveText({ i18n: $i18n, path: text })}</div>
 		<button
 			class="text-sm font-semibold text-brand-primary-alt"
@@ -83,7 +83,7 @@
 			{resolveText({ i18n: $i18n, path: callToAction })} →
 		</button>
 	</div>
-	<div class="h-full items-start">
+	<div class="flex h-full items-start">
 		<button class="p-1 text-tertiary" aria-label={$i18n.core.text.close} onclick={close}>
 			<IconClose size="20" />
 		</button>

@@ -1,5 +1,5 @@
 import type { UtxosFee } from '$btc/types/btc-send';
-import type { Utxo } from '@dfinity/ckbtc';
+import type { Utxo } from '@icp-sdk/canisters/ckbtc';
 
 export const mockBtcAddress = 'bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7';
 
@@ -9,7 +9,7 @@ export const mockUtxo: Utxo = {
 	height: 1000,
 	value: 1n,
 	outpoint: {
-		txid: [1, 2, 3],
+		txid: Uint8Array.from([1, 2, 3]),
 		vout: 1
 	}
 };
