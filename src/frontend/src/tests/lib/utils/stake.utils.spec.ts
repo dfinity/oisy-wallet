@@ -20,9 +20,9 @@ const mockGoldaoToken: IcToken = {
 	ledgerCanisterId: GOLDAO_LEDGER_CANISTER_ID
 };
 
-describe('getStakingTransactions', () => {
+describe('getGldtStakingTransactions', () => {
 	beforeEach(() => {
-		vi.restoreAllMocks();
+		vi.resetAllMocks();
 	});
 
 	it('returns empty array when no stake transactions exist', () => {
@@ -34,6 +34,38 @@ describe('getStakingTransactions', () => {
 		});
 
 		expect(result).toEqual([]);
+	});
+
+	it('returns empty array when both tokens are not available', () => {
+		const rewardA = createCertifiedIcTransactionUiMock('rA');
+		const rewardB = createCertifiedIcTransactionUiMock('rB');
+		rewardA.data.from = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
+		rewardB.data.from = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
+
+		const result = getGldtStakingTransactions({
+			icTransactionsStore: { [mockGldtToken.id]: [], [mockGoldaoToken.id]: [rewardA, rewardB] },
+			icPendingTransactionsStore: {}
+		});
+
+		expect(result).toHaveLength(0);
+		expect(result).toEqual([]);
+	});
+
+	it('returns corrext txs if both store and token are available', () => {
+		const rewardA = createCertifiedIcTransactionUiMock('rA');
+		const rewardB = createCertifiedIcTransactionUiMock('rB');
+		rewardA.data.from = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
+		rewardB.data.from = `${GLDT_STAKE_CANISTER_ID}.300000000000000000000000`;
+
+		const result = getGldtStakingTransactions({
+			icTransactionsStore: { [mockGldtToken.id]: [], [mockGoldaoToken.id]: [rewardA, rewardB] },
+			icPendingTransactionsStore: {},
+			goldaoToken: mockGoldaoToken
+		});
+
+		expect(result).toHaveLength(2);
+		expect(result.every((tx) => tx.isReward)).toBeTruthy();
+		expect(result.every((tx) => tx.token === mockGoldaoToken)).toBeTruthy();
 	});
 
 	it('classifies direction: GLDT stake execution', () => {
