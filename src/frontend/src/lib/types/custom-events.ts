@@ -1,1 +1,3 @@
-export interface OisyReloadCollectionsEvent { callback?: () => void }
+export interface OisyReloadCollectionsEvent {
+	callback?: () => void;
+}
