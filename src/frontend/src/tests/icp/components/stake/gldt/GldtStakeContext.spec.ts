@@ -8,23 +8,24 @@ import {
 import { icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import * as authStore from '$lib/derived/auth.derived';
 import {
+	configMockResponse,
 	dailyAnalyticsMockResponse,
 	stakePositionMockResponse
 } from '$tests/mocks/gldt_stake.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('GldtStakeContext', () => {
-	const parsedMockApy = Math.round(dailyAnalyticsMockResponse.apy * 100) / 100;
-
 	const mockContext = (store: GldtStakeStore) => new Map([[GLDT_STAKE_CONTEXT_KEY, { store }]]);
 	const mockGetDailyAnalytics = () =>
 		vi.spyOn(gldtStakeApi, 'getDailyAnalytics').mockResolvedValue(dailyAnalyticsMockResponse);
 	const mockGetPosition = () =>
 		vi.spyOn(gldtStakeApi, 'getPosition').mockResolvedValue(stakePositionMockResponse);
+	const mockGetConfig = () =>
+		vi.spyOn(gldtStakeApi, 'getConfig').mockResolvedValue(configMockResponse);
 	const mockAuthStore = (value: Identity | null = mockIdentity) =>
 		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 
@@ -33,6 +34,8 @@ describe('GldtStakeContext', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		icTokenFeeStore.reset();
 	});
 
@@ -40,8 +43,10 @@ describe('GldtStakeContext', () => {
 		const store = initGldtStakeStore();
 		const setApySpy = vi.spyOn(store, 'setApy');
 		const setPositionSpy = vi.spyOn(store, 'setPosition');
+		const setConfigSpy = vi.spyOn(store, 'setConfig');
 		const getDailyAnalyticsSpy = mockGetDailyAnalytics();
 		const getPositionSpy = mockGetPosition();
+		const getConfigSpy = mockGetConfig();
 
 		mockAuthStore();
 
@@ -57,8 +62,12 @@ describe('GldtStakeContext', () => {
 			expect(getPositionSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity
 			});
-			expect(setApySpy).toHaveBeenCalledExactlyOnceWith(parsedMockApy);
+			expect(getConfigSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity
+			});
+			expect(setApySpy).toHaveBeenCalledExactlyOnceWith(dailyAnalyticsMockResponse.apy);
 			expect(setPositionSpy).toHaveBeenCalledExactlyOnceWith(stakePositionMockResponse);
+			expect(setConfigSpy).toHaveBeenCalledExactlyOnceWith(configMockResponse);
 		});
 	});
 
@@ -66,6 +75,7 @@ describe('GldtStakeContext', () => {
 		const store = initGldtStakeStore();
 		const getDailyAnalyticsSpy = mockGetDailyAnalytics();
 		const getPositionSpy = mockGetPosition();
+		const getConfigSpy = mockGetConfig();
 
 		mockAuthStore(null);
 
@@ -77,6 +87,7 @@ describe('GldtStakeContext', () => {
 		await waitFor(() => {
 			expect(getDailyAnalyticsSpy).not.toHaveBeenCalled();
 			expect(getPositionSpy).not.toHaveBeenCalled();
+			expect(getConfigSpy).not.toHaveBeenCalled();
 		});
 	});
 });

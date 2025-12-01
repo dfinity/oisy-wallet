@@ -2,8 +2,8 @@ import { balance, transactions, transfer } from '$icp/api/xtc-ledger.api';
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
-import type { IcrcAccount } from '@dfinity/ledger-icrc';
 import { toNullable } from '@dfinity/utils';
+import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
 
 describe('xtc-ledger.api', () => {
@@ -33,7 +33,7 @@ describe('xtc-ledger.api', () => {
 			ledgerCanisterMock.transfer.mockResolvedValue(transactionId);
 		});
 
-		it('successfully calls balance endpoint', async () => {
+		it('successfully calls transfer endpoint', async () => {
 			const result = await transfer(params);
 
 			expect(result).toEqual(transactionId);

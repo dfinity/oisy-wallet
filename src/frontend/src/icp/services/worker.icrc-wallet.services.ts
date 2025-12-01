@@ -4,7 +4,7 @@ import {
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
 import type { IcToken } from '$icp/types/ic-token';
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
@@ -14,6 +14,8 @@ import type {
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
+import { isIOS } from '@dfinity/gix-components';
 import { nonNullish } from '@dfinity/utils';
 
 export class IcrcWalletWorker extends AppWorker implements WalletWorker {
@@ -36,7 +38,13 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 					| PostMessageDataResponseWalletCleanUp
 				>
 			>) => {
-				const { msg, data } = dataMsg;
+				const { ref, msg, data } = dataMsg;
+
+				// This is an additional guard because it may happen that the worker is initialised as a singleton.
+				// In this case, we need to check if we should treat the message or if the message was intended for another worker.
+				if (ref !== this.ledgerCanisterId) {
+					return;
+				}
 
 				switch (msg) {
 					case 'syncIcrcWallet':
@@ -63,7 +71,6 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 							tokenId,
 							transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 						});
-						return;
 				}
 			}
 		);
@@ -77,7 +84,7 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	}: IcToken): Promise<IcrcWalletWorker> {
 		await syncWalletFromCache({ tokenId, networkId });
 
-		const worker = await AppWorker.getInstance();
+		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
 		return new IcrcWalletWorker(worker, tokenId, ledgerCanisterId, indexCanisterId, env);
 	}
 
@@ -106,14 +113,14 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcrc>>({
 			msg: 'startIcrcWalletTimer',
 			data: {
 				indexCanisterId: this.indexCanisterId,
 				ledgerCanisterId: this.ledgerCanisterId,
 				env: this.env
 			}
-		} as PostMessage<PostMessageDataRequestIcrc>);
+		});
 	};
 
 	stop = () => {
@@ -121,13 +128,13 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcrc>>({
 			msg: 'triggerIcrcWalletTimer',
 			data: {
 				indexCanisterId: this.indexCanisterId,
 				ledgerCanisterId: this.ledgerCanisterId,
 				env: this.env
 			}
-		} as PostMessage<PostMessageDataRequestIcrc>);
+		});
 	};
 }

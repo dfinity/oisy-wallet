@@ -135,14 +135,14 @@ export class InfuraErc20Provider implements Erc20Provider {
 		contractAddress: string;
 		userAddress: EthAddress;
 	}): Promise<boolean> => {
-		const { nonces, DOMAIN_SEPARATOR } = new Contract(
+		const { nonces, DOMAIN_SEPARATOR, version } = new Contract(
 			contractAddress,
 			ERC20_PERMIT_ABI,
 			this.provider
 		);
 
 		try {
-			await Promise.all([nonces(userAddress), DOMAIN_SEPARATOR()]);
+			await Promise.all([nonces(userAddress), DOMAIN_SEPARATOR(), version()]);
 
 			return true;
 		} catch (_: unknown) {

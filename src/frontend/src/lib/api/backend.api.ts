@@ -11,7 +11,7 @@ import type {
 	UserProfile,
 	UserToken,
 	UserTokenId
-} from '$declarations/backend/declarations/backend.did';
+} from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
@@ -33,8 +33,8 @@ import type {
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 let canister: BackendCanister | undefined = undefined;
 

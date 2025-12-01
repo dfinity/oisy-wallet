@@ -57,7 +57,6 @@
 			});
 
 			onBack();
-			return;
 		}
 	};
 

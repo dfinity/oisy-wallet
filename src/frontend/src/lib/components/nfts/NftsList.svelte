@@ -7,6 +7,7 @@
 	import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
+	import NftsNetworkUnsupported from '$lib/components/nfts/NftsNetworkUnsupported.svelte';
 	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants';
 	import {
 		NFT_COLLECTION_LIST_COMMON,
@@ -16,6 +17,7 @@
 		NFT_LIST_HIDDEN,
 		NFT_LIST_SPAM
 	} from '$lib/constants/test-ids.constants';
+	import { selectedNetworkNftUnsupported } from '$lib/derived/network.derived';
 	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
@@ -110,8 +112,12 @@
 </script>
 
 <NftsDisplayHandler bind:nfts bind:nftCollections>
-	{#if $nftGroupByCollection}
-		{#if isEmptyList}
+	{#if $selectedNetworkNftUnsupported}
+		<NftsNetworkUnsupported />
+	{:else if $nftGroupByCollection}
+		{#if $selectedNetworkNftUnsupported}
+			<NftsNetworkUnsupported />
+		{:else if isEmptyList}
 			<EmptyNftsList />
 		{:else}
 			<NftCollectionList

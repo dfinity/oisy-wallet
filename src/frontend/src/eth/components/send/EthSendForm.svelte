@@ -17,6 +17,7 @@
 	interface Props {
 		amount: OptionAmount;
 		destination?: string;
+		customNonce?: number;
 		nativeEthereumToken: Token;
 		selectedContact?: ContactUi;
 		onBack: () => void;
@@ -28,6 +29,7 @@
 	let {
 		amount = $bindable(),
 		destination = $bindable(''),
+		customNonce = $bindable(),
 		nativeEthereumToken,
 		selectedContact,
 		onBack,

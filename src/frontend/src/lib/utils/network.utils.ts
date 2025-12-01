@@ -1,5 +1,5 @@
-import type { BitcoinNetwork as BackendBitcoinNetwork } from '$declarations/backend/declarations/backend.did';
-import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/declarations/signer.did';
+import type { BitcoinNetwork as BackendBitcoinNetwork } from '$declarations/backend/backend.did';
+import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
@@ -23,8 +23,8 @@ import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { SolanaNetwork } from '$sol/types/network';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { nonNullish } from '@dfinity/utils';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 
 export type IsNetworkIdUtil = (networkId: NetworkId | undefined) => boolean;
 

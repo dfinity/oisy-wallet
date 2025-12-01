@@ -1,26 +1,29 @@
 import { WorkerQueue } from '$lib/services/worker-queue.services';
 import type {
-	PostMessage,
-	PostMessageDataRequest,
-	PostMessageDataResponseLoose
-} from '$lib/types/post-message';
+	WithoutWorkerId,
+	WorkerData,
+	WorkerId,
+	WorkerListener,
+	WorkerPostMessageData
+} from '$lib/types/worker';
 import { isNullish } from '@dfinity/utils';
-
-export interface WorkerData {
-	worker: Worker;
-	isSingleton: boolean;
-}
 
 export abstract class AppWorker {
 	readonly #worker: Worker;
+	readonly #workerId: WorkerId;
+	readonly #isSingleton: boolean;
 	readonly #queue: WorkerQueue;
+	// TODO: use generics directly in the class so that we can use type WorkerListener
+	#listener: ((ev: MessageEvent) => void) | undefined;
 
 	static #singletonWorker?: Worker;
 
 	protected constructor(workerData: WorkerData) {
-		const { worker } = workerData;
+		const { worker, isSingleton } = workerData;
 
 		this.#worker = worker;
+		this.#workerId = crypto.randomUUID();
+		this.#isSingleton = isSingleton;
 		this.#queue = new WorkerQueue(worker);
 	}
 
@@ -45,26 +48,54 @@ export abstract class AppWorker {
 		return { worker, isSingleton: asSingleton };
 	};
 
-	protected setOnMessage = <T extends PostMessageDataRequest | PostMessageDataResponseLoose>(
-		fn: (ev: MessageEvent<PostMessage<T>>) => void
-	) => {
-		this.#worker.onmessage = fn;
+	#addMessageListener = <T extends WorkerPostMessageData>(listener: WorkerListener<T>) => {
+		this.#worker.addEventListener('message', listener);
+		this.#listener = listener;
 	};
 
-	protected postMessage = <T>(data: T) => {
+	#removeListener = () => {
+		if (isNullish(this.#listener)) {
+			return;
+		}
+
+		this.#worker.removeEventListener('message', this.#listener);
+
+		this.#listener = undefined;
+	};
+
+	#setOnMessageAsSingleton = <T extends WorkerPostMessageData>(listener: WorkerListener<T>) => {
+		this.#addMessageListener(listener);
+	};
+
+	protected setOnMessage = <T extends WorkerPostMessageData>(listener: WorkerListener<T>) => {
+		if (this.#isSingleton) {
+			this.#setOnMessageAsSingleton(listener);
+			return;
+		}
+
+		this.#worker.onmessage = listener;
+	};
+
+	protected postMessage = <T>(data: WithoutWorkerId<T>) => {
 		// Route via queue to enforce back-pressure
-		this.#queue.send(data);
+		this.#queue.send({ ...data, workerId: this.#workerId });
 	};
 
 	terminate = () => {
+		if (this.#isSingleton) {
+			// If it's a singleton, we could have several listeners on the same instance of the worker and we cannot terminate it.
+			// Ideally, we should have a way to terminate the worker if we find out that there are no more listeners on it.
+			// TODO: Terminate the worker when there are no more listeners even from other instances of `AppWorker`.
+			this.#removeListener();
+			return;
+		}
+
 		this.#worker.terminate();
+
+		this.#worker.onmessage = null;
 	};
 
 	protected abstract stopTimer(): void;
-
-	protected destroyCallback = (): void => {
-		// default: do nothing
-	};
 
 	// Used internally to control destruction state. Do not expose or override.
 	private isDestroying = false;
@@ -77,6 +108,5 @@ export abstract class AppWorker {
 		this.stopTimer();
 		this.terminate();
 		this.isDestroying = false;
-		this.destroyCallback();
 	};
 }

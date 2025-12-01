@@ -90,10 +90,10 @@
 						{name}
 						decimals={SWAP_SLIPPAGE_VALUE_DECIMALS}
 						error={slippageValueError}
+						{onBlur}
+						{onFocus}
 						onInput={() => {}}
 						bind:value={slippageValue}
-						on:focus={onFocus}
-						on:blur={onBlur}
 					>
 						{#snippet innerEnd()}
 							<span class="text-tertiary">%</span>

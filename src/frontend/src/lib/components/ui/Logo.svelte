@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isIOS } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import IconRandom from '$lib/components/icons/IconRandom.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -29,17 +30,21 @@
 
 	let loadingError: boolean | undefined = $state();
 	let isReady = $derived((nonNullish(src) && nonNullish(loadingError)) || isNullish(src));
+
+	let ios = $derived(isIOS());
 </script>
 
 <div
-	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
+	style={`width: ${sizePx}; height: ${sizePx};`}
 	class="flex items-center justify-center overflow-hidden ring-primary"
 	class:bg-off-white={color === 'off-white' && !isReady}
 	class:bg-white={color === 'white' && !isReady}
+	class:ease-in={!ios}
 	class:opacity-10={!isReady}
 	class:ring-2={ring}
 	class:rounded-full={circle}
 	class:rounded-lg={!circle}
+	class:transition-opacity={!ios}
 	data-tid={testId}
 >
 	{#if nonNullish(src) && !loadingError}

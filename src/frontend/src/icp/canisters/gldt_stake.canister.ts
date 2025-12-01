@@ -3,16 +3,17 @@ import type {
 	DailyAnalytics,
 	_SERVICE as GldtStakeService,
 	ManageStakePositionArgs,
+	Response,
 	StakePositionResponse
-} from '$declarations/gldt_stake/declarations/gldt_stake.did';
+} from '$declarations/gldt_stake/gldt_stake.did';
 import { idlFactory as idlCertifiedFactoryGldtStake } from '$declarations/gldt_stake/gldt_stake.factory.certified.did';
 import { idlFactory as idlFactoryGldtStake } from '$declarations/gldt_stake/gldt_stake.factory.did';
 import { mapGldtStakeCanisterError } from '$icp/canisters/gldt_stake.errors';
 import { getAgent } from '$lib/actors/agents.ic';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import type { Principal } from '@dfinity/principal';
 import { Canister, createServices, fromNullable, toNullable } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export class GldtStakeCanister extends Canister<GldtStakeService> {
 	static async create({
@@ -37,6 +38,12 @@ export class GldtStakeCanister extends Canister<GldtStakeService> {
 		const { get_apy_overall } = this.caller({ certified: true });
 
 		return get_apy_overall(null);
+	};
+
+	getConfig = (): Promise<Response> => {
+		const { get_config } = this.caller({ certified: true });
+
+		return get_config(null);
 	};
 
 	getDailyAnalytics = async (params?: Args_2): Promise<DailyAnalytics> => {

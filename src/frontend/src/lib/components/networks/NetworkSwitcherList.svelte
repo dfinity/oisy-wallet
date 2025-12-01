@@ -5,28 +5,33 @@
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
+	import {
+		enabledMainnetTokensUsdBalancesPerNetwork,
+		enabledMainnetTokensUsdStakeBalancesPerNetwork
+	} from '$lib/derived/network-balances.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
-	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
 	import type { NetworkId, Network as NetworkType, OptionNetworkId } from '$lib/types/network';
 
 	interface Props {
 		selectedNetworkId?: NetworkId;
-		delayOnNetworkSelect?: boolean;
 		labelsSize?: LabelSize;
 		supportedNetworks?: NetworkType[];
 		allNetworksEnabled?: boolean;
+		showTestnets?: boolean;
+		showStakeBalance?: boolean;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
 
 	let {
 		selectedNetworkId,
-		delayOnNetworkSelect = true,
 		labelsSize = 'md',
 		supportedNetworks,
 		allNetworksEnabled = true,
+		showTestnets = true,
+		showStakeBalance = true,
 		onSelected
 	}: Props = $props();
 
@@ -34,7 +39,10 @@
 
 	let mainnetTokensUsdBalance = $derived<number>(
 		enabledNetworks.reduce(
-			(acc, { id }) => acc + ($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0),
+			(acc, { id }) =>
+				acc +
+				($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0) +
+				($enabledMainnetTokensUsdStakeBalancesPerNetwork[id] ?? 0),
 			0
 		)
 	);
@@ -42,7 +50,6 @@
 
 {#if allNetworksEnabled}
 	<NetworkButton
-		{delayOnNetworkSelect}
 		{labelsSize}
 		{onSelected}
 		{selectedNetworkId}
@@ -52,19 +59,13 @@
 
 <ul class="flex list-none flex-col">
 	{#each enabledNetworks as network (network.id)}
-		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
-			><MainnetNetwork
-				{delayOnNetworkSelect}
-				{labelsSize}
-				{network}
-				{onSelected}
-				{selectedNetworkId}
-			/></li
-		>
+		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}>
+			<MainnetNetwork {labelsSize} {network} {onSelected} {selectedNetworkId} {showStakeBalance} />
+		</li>
 	{/each}
 </ul>
 
-{#if $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
+{#if showTestnets && $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
 	<span class="mt-6 mb-3 flex px-3 font-bold" transition:slide={SLIDE_EASING}
 		>{$i18n.networks.test_networks}</span
 	>
@@ -72,13 +73,7 @@
 	<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
 		{#each $networksTestnets as network (network.id)}
 			<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
-				><Network
-					{delayOnNetworkSelect}
-					{labelsSize}
-					{network}
-					{onSelected}
-					{selectedNetworkId}
-				/></li
+				><Network {labelsSize} {network} {onSelected} {selectedNetworkId} /></li
 			>
 		{/each}
 	</ul>

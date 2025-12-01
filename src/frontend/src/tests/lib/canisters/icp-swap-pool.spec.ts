@@ -4,13 +4,13 @@ import type {
 	SwapArgs,
 	_SERVICE as SwapPoolService,
 	WithdrawArgs
-} from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
+} from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ICPSwapPoolCanister } from '$lib/canisters/icp-swap-pool.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { ActorSubclass } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import type { ActorSubclass } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 const args: SwapArgs = {

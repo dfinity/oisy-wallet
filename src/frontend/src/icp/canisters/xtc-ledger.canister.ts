@@ -1,4 +1,4 @@
-import type { _SERVICE as XtcLedgerService } from '$declarations/xtc_ledger/declarations/xtc_ledger.did';
+import type { _SERVICE as XtcLedgerService } from '$declarations/xtc_ledger/xtc_ledger.did';
 import { idlFactory as idlCertifiedFactoryXtcLedger } from '$declarations/xtc_ledger/xtc_ledger.factory.certified.did';
 import { idlFactory as idlFactoryXtcLedger } from '$declarations/xtc_ledger/xtc_ledger.factory.did';
 import { mapXtcLedgerCanisterError } from '$icp/canisters/xtc-ledger.errors';
@@ -7,8 +7,8 @@ import type { XtcLedgerTransferParams } from '$icp/types/xtc-ledger';
 import { getAgent } from '$lib/actors/agents.ic';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import type { Principal } from '@dfinity/principal';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 	static async create({

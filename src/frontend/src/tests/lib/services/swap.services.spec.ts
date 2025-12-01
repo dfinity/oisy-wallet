@@ -1,7 +1,8 @@
-import type { PoolMetadata } from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
-import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
+import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
+import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { createPermit } from '$eth/services/eip2612-permit.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
@@ -76,7 +77,7 @@ vi.mock('@velora-dex/sdk', () => ({
 	constructSimpleSDK: vi.fn()
 }));
 
-vi.mock('$eth/services/send.services', () => ({
+vi.mock('$eth/services/approve.services', () => ({
 	approve: vi.fn(),
 	erc20ContractAllowance: vi.fn()
 }));
@@ -107,6 +108,10 @@ vi.mock('$lib/utils/swap.utils', async (importOriginal) => {
 	};
 });
 
+vi.mock('$eth/services/eip2612-permit.services', () => ({
+	createPermit: vi.fn()
+}));
+
 describe('swap.services', () => {
 	describe('fetchSwapAmounts', () => {
 		const mockTokens = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
@@ -126,7 +131,7 @@ describe('swap.services', () => {
 				slippage: 0.5
 			} as SwapAmountsReply;
 			const icpSwapResponse = {
-				receiveAmount: 975
+				receiveAmount: 975n
 			} as unknown as ICPSwapAmountReply;
 
 			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
@@ -152,7 +157,9 @@ describe('swap.services', () => {
 			expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
 
 			expect(icpSwapResult).toBeDefined();
-			expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
+			expect(icpSwapResult?.receiveAmount).toBe(
+				icpSwapResponse.receiveAmount - destinationToken.fee
+			);
 		});
 
 		it('should make a call oly to icpSwap if icrc2 is false', async () => {
@@ -191,7 +198,7 @@ describe('swap.services', () => {
 				slippage: 0.5
 			} as SwapAmountsReply;
 			const icpSwapResponse = {
-				receiveAmount: 975
+				receiveAmount: 975n
 			} as unknown as ICPSwapAmountReply;
 
 			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
@@ -219,7 +226,9 @@ describe('swap.services', () => {
 			expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
 
 			expect(icpSwapResult).toBeDefined();
-			expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
+			expect(icpSwapResult?.receiveAmount).toBe(
+				icpSwapResponse.receiveAmount - destinationToken.fee
+			);
 		});
 
 		it('should handle provider failures gracefully (e.g., rejected promises)', async () => {
@@ -624,9 +633,15 @@ describe('swap.services', () => {
 				status: 'EXECUTED',
 				order: { bridge: { destinationChainId: 0 } }
 			});
+
+			vi.mocked(createPermit).mockResolvedValue({
+				nonce: '0',
+				deadline: 1234567890,
+				encodedPermit: '0xpermitdata'
+			});
 		});
 
-		it('should execute delta swap successfully', async () => {
+		it('should execute delta swap successfully when isGasless is false', async () => {
 			await fetchVeloraDeltaSwap({
 				identity: mockIdentity,
 				progress: mockProgress,
@@ -639,17 +654,37 @@ describe('swap.services', () => {
 				destinationNetwork: mockDestinationNetwork,
 				userAddress: mockUserAddress,
 				gas: BigInt(mockGas),
+				isGasless: false,
 				maxFeePerGas: BigInt(mockMaxFeePerGas),
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
 				swapDetails: mockSwapDetails as VeloraSwapDetails
 			});
 
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
-			expect(mockDeltaContractGetDeltaContract).toHaveBeenCalled();
-			expect(mockDeltaContractPostDeltaOrder).toHaveBeenCalledWith({
-				order: { order: 'mock-order-data' },
-				signature: 'mock-signature'
+			expect(createPermit).not.toHaveBeenCalled();
+		});
+
+		it('should execute delta swap successfully when isGasless is true', async () => {
+			await fetchVeloraDeltaSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				receiveAmount: mockReceiveAmount,
+				slippageValue: mockSlippageValue,
+				destinationNetwork: mockDestinationNetwork,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				isGasless: true,
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails as VeloraSwapDetails
 			});
+
+			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+			expect(createPermit).toHaveBeenCalled();
 		});
 
 		it('should handle delta contract not found', async () => {
@@ -667,6 +702,7 @@ describe('swap.services', () => {
 				destinationNetwork: mockDestinationNetwork,
 				userAddress: mockUserAddress,
 				gas: BigInt(mockGas),
+				isGasless: false,
 				maxFeePerGas: BigInt(mockMaxFeePerGas),
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
 				swapDetails: mockSwapDetails as VeloraSwapDetails
@@ -695,6 +731,7 @@ describe('swap.services', () => {
 				destinationNetwork: mockDestinationNetwork,
 				userAddress: mockUserAddress,
 				gas: BigInt(mockGas),
+				isGasless: false,
 				maxFeePerGas: BigInt(mockMaxFeePerGas),
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
 				swapDetails: mockSwapDetails as VeloraSwapDetails
@@ -798,6 +835,7 @@ describe('swap.services', () => {
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
 				swapDetails: mockSwapDetails as VeloraSwapDetails,
 				receiveAmount: BigInt(1000),
+				isGasless: false,
 				destinationNetwork: SEPOLIA_NETWORK
 			});
 
@@ -825,6 +863,7 @@ describe('swap.services', () => {
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
 				swapDetails: mockSwapDetails as VeloraSwapDetails,
 				receiveAmount: BigInt(1000),
+				isGasless: false,
 				destinationNetwork: SEPOLIA_NETWORK
 			});
 

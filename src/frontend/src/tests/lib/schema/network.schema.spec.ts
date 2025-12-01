@@ -1,5 +1,4 @@
 import {
-	NetworkAppMetadataSchema,
 	NetworkEnvironmentSchema,
 	NetworkIdSchema,
 	NetworkSchema
@@ -41,35 +40,12 @@ describe('network.schema', () => {
 		});
 	});
 
-	describe('NetworkAppMetadataSchema', () => {
-		it('should validate complete metadata', () => {
-			const validMetadata = {
-				explorerUrl: 'https://example.com/explorer'
-			};
-
-			expect(NetworkAppMetadataSchema.parse(validMetadata)).toEqual(validMetadata);
-		});
-
-		it('should fail validation with an invalid explorer URL', () => {
-			const invalidMetadata = {
-				explorerUrl: 'invalid-url'
-			};
-
-			expect(() => NetworkAppMetadataSchema.parse(invalidMetadata)).toThrow();
-		});
-
-		it('should fail validation with missing explorer URL', () => {
-			const invalidMetadata = {};
-
-			expect(() => NetworkAppMetadataSchema.parse(invalidMetadata)).toThrow();
-		});
-	});
-
 	describe('NetworkSchema', () => {
 		const validNetworkWithRequiredFields = {
 			id: parseNetworkId('NetworkId'),
 			env: 'testnet',
-			name: 'Test Network'
+			name: 'Test Network',
+			explorerUrl: 'https://example.com/explorer'
 		};
 
 		const validNetwork = {

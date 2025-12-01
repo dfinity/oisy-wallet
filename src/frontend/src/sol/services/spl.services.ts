@@ -1,4 +1,4 @@
-import type { CustomToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken } from '$declarations/backend/backend.did';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
@@ -140,9 +140,14 @@ const loadCustomTokensWithMetadata = async (
 
 			const metadata = await getSplMetadata({ address, network: solNetwork });
 
-			return nonNullish(metadata)
-				? [...(await acc), { ...token, owner, ...rest, ...hardenMetadata(metadata) }]
-				: acc;
+			const newToken: SplCustomToken = {
+				...token,
+				owner,
+				...rest,
+				...(nonNullish(metadata) ? hardenMetadata(metadata) : {})
+			};
+
+			return [...(await acc), newToken];
 		}, Promise.resolve([]));
 
 		return [...existingTokens, ...customTokens];

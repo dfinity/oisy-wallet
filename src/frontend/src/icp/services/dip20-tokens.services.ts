@@ -2,23 +2,10 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { EnvDip20TokenSchema, EnvDip20TokensSchema } from '$env/schema/env-dip20-token.schema';
 import dip20Tokens from '$env/tokens/tokens.dip20.json';
 import type { EnvDip20Token } from '$env/types/env-dip20-token';
-import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { get } from 'svelte/store';
-
-export const buildIndexedDip20Tokens = (): Record<LedgerCanisterIdText, IcTokenWithoutIdExtended> =>
-	buildDip20Tokens().reduce(
-		(acc, { ledgerCanisterId, ...rest }) => ({
-			...acc,
-			[`${ledgerCanisterId}`]: {
-				ledgerCanisterId,
-				...rest
-			}
-		}),
-		{}
-	);
 
 export const buildDip20Tokens = (): IcTokenWithoutIdExtended[] => {
 	try {

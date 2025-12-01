@@ -51,6 +51,8 @@
 	};
 
 	const isLoading = $derived(isNullish(nft));
+
+	let hoveredReviewButton = $derived(type === 'card' && nonNullish(hasConsent));
 </script>
 
 {#if nonNullish(hasConsent) && hasConsent}
@@ -82,9 +84,16 @@
 			{/if}
 			{#if type !== 'card-selectable' && type !== 'nft-logo'}
 				<span
-					class="max-h-full overflow-hidden opacity-100 transition-all duration-300 ease-in-out group-hover:max-h-full group-hover:opacity-100"
-					class:lg:max-h-0={type === 'card' && nonNullish(hasConsent)}
-					class:lg:opacity-0={type === 'card' && nonNullish(hasConsent)}
+					class="overflow-hidden"
+					class:duration-300={hoveredReviewButton}
+					class:ease-in-out={hoveredReviewButton}
+					class:lg:group-hover:max-h-full={hoveredReviewButton}
+					class:lg:group-hover:opacity-100={hoveredReviewButton}
+					class:max-h-0={hoveredReviewButton}
+					class:max-h-full={!hoveredReviewButton}
+					class:opacity-0={hoveredReviewButton}
+					class:opacity-100={!hoveredReviewButton}
+					class:transition-all={hoveredReviewButton}
 				>
 					<Button
 						colorStyle="secondary-light"

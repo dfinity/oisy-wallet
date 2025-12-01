@@ -1,6 +1,6 @@
 import type { EthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import type { Contract } from 'ethers/contract';
 
 export interface PermitParams {

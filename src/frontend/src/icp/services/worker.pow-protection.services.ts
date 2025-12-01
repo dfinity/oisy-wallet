@@ -2,7 +2,7 @@ import {
 	syncPowNextAllowance,
 	syncPowProgress
 } from '$icp/services/pow-protector-listener.services';
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequest,
@@ -10,6 +10,7 @@ import type {
 	PostMessageDataResponsePowProtectorNextAllowance,
 	PostMessageDataResponsePowProtectorProgress
 } from '$lib/types/post-message';
+import type { WorkerData } from '$lib/types/worker';
 
 // TODO: add tests for POW worker/scheduler
 export class PowProtectorWorker extends AppWorker {
@@ -40,7 +41,6 @@ export class PowProtectorWorker extends AppWorker {
 						syncPowNextAllowance({
 							data: data as PostMessageDataResponsePowProtectorNextAllowance
 						});
-						return;
 					}
 				}
 			}
@@ -59,14 +59,14 @@ export class PowProtectorWorker extends AppWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequest>>({
 			msg: 'startPowProtectionTimer'
-		} as PostMessage<PostMessageDataRequest>);
+		});
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequest>>({
 			msg: 'triggerPowProtectionTimer'
-		} as PostMessage<PostMessageDataRequest>);
+		});
 	};
 }

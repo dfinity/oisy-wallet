@@ -1,13 +1,14 @@
-import type { CustomToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken } from '$declarations/backend/backend.did';
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const mockCustomTokens: CustomToken[] = [
 	{
@@ -159,6 +160,42 @@ export const mockCustomTokensErc1155: CustomToken[] = [
 			Erc1155: {
 				chain_id: POLYGON_AMOY_NETWORK.chainId,
 				token_address: mockEthAddress3
+			}
+		},
+		section: toNullable(),
+		allow_external_content_source: toNullable()
+	}
+];
+
+export const mockCustomTokensExt: CustomToken[] = [
+	{
+		version: toNullable(1n),
+		enabled: true,
+		token: {
+			ExtV2: {
+				canister_id: Principal.fromText(EXT_BUILTIN_TOKENS[0].canisterId)
+			}
+		},
+		section: toNullable(),
+		allow_external_content_source: toNullable()
+	},
+	{
+		version: toNullable(2n),
+		enabled: true,
+		token: {
+			ExtV2: {
+				canister_id: Principal.fromText(EXT_BUILTIN_TOKENS[1].canisterId)
+			}
+		},
+		section: toNullable(),
+		allow_external_content_source: toNullable()
+	},
+	{
+		version: toNullable(),
+		enabled: false,
+		token: {
+			ExtV2: {
+				canister_id: Principal.fromText(EXT_BUILTIN_TOKENS[2].canisterId)
 			}
 		},
 		section: toNullable(),

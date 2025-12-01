@@ -1,4 +1,4 @@
-import type { UserToken } from '$declarations/backend/declarations/backend.did';
+import type { UserToken } from '$declarations/backend/backend.did';
 import { loadErc20UserTokens } from '$eth/services/erc20.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken, SaveUserToken } from '$eth/types/erc20-user-token';
@@ -8,8 +8,8 @@ import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.ser
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
-import type { Identity } from '@dfinity/agent';
 import { toNullable } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 const assertIcrcSendTokenData = (sendToken: IcCkToken): AutoLoadTokenResult | undefined => {
