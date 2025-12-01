@@ -9,12 +9,12 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import {
-	initCertifiedUserTokensStore,
-	type CertifiedUserTokensStore
-} from '$lib/stores/user-tokens.store';
+	initCertifiedCustomTokensStore,
+	type CertifiedCustomTokensStore
+} from '$lib/stores/custom-tokens.store';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { CertifiedData } from '$lib/types/store';
 import type { Token } from '$lib/types/token';
-import type { UserToken } from '$lib/types/user-token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import {
@@ -22,17 +22,18 @@ import {
 	DE_GODS_TOKEN,
 	mockValidErc721Token
 } from '$tests/mocks/erc721-tokens.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { get } from 'svelte/store';
 
-describe('user-token.store', () => {
+describe('custom-token.store', () => {
 	const certified = false;
 	const enabled = true;
 
-	describe('initCertifiedUserTokensStore', () => {
-		let mockStore: CertifiedUserTokensStore<Token>;
+	describe('initCertifiedCustomTokensStore', () => {
+		let mockStore: CertifiedCustomTokensStore<Token>;
 
 		beforeEach(() => {
-			mockStore = initCertifiedUserTokensStore<Token>();
+			mockStore = initCertifiedCustomTokensStore<Token>();
 		});
 
 		describe('setAll', () => {
@@ -143,6 +144,22 @@ describe('user-token.store', () => {
 				expect(get(mockStore)).toEqual(expectedResults);
 			});
 
+			it('should use the canister ID as identifier for EXT tokens', () => {
+				mockStore.setAll([{ data: { ...mockValidExtV2Token, enabled }, certified }]);
+				const extToken2 = {
+					...TRUMP_TOKEN,
+					standard: 'extV2' as const,
+					canisterId: mockValidExtV2Token.canisterId
+				};
+				mockStore.setAll([{ data: { ...extToken2, enabled }, certified }]);
+
+				const expectedResults = [
+					{ data: { ...extToken2, enabled, id: mockValidExtV2Token.id }, certified }
+				];
+
+				expect(get(mockStore)).toEqual(expectedResults);
+			});
+
 			it('should not save ERC20 tokens with same address and same networks as different tokens', () => {
 				mockStore.setAll([
 					{ data: { ...mockValidErc20Token, network: BASE_NETWORK, enabled }, certified }
@@ -231,7 +248,7 @@ describe('user-token.store', () => {
 		});
 
 		describe('reset', () => {
-			let mockTokens: CertifiedData<UserToken<Token>>[];
+			let mockTokens: CertifiedData<CustomToken<Token>>[];
 
 			beforeEach(() => {
 				const tokens = [BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN, SOLANA_TOKEN];

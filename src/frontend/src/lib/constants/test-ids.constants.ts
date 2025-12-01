@@ -313,6 +313,7 @@ export const STAKE_REVIEW_FORM_BUTTON = 'stake-review-form-button';
 export const STAKE_FORM_REVIEW_BUTTON = 'stake-form-next-button';
 export const STAKE_PROVIDER_LOGO = 'stake-provider-logo';
 export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';
+export const STAKE_DISSOLVE_EVENTS_WITHDRAW_BUTTON = 'stake-dissolve-events-withdraw-button';
 
 // PWA
 export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';
@@ -324,3 +325,6 @@ export const OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON = 'open-crypto-pay-enter-manu
 // Get Token Modal
 export const GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE = 'get-token-modal-potential-usd-balance';
 export const GET_TOKEN_MODAL_OPEN_SWAP_BUTTON = 'get-token-modal-open-swap-button';
+
+// BUY MODAL
+export const BUY_MODAL_ONRAMPER_IFRAME = 'buy-modal-onramper-iframe';

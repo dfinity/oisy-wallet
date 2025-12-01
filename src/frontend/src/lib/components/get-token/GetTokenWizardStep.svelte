@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import GetTokenActionItem from '$lib/components/get-token/GetTokenActionItem.svelte';
 	import GetTokenCardContent from '$lib/components/get-token/GetTokenCardContent.svelte';
+	import IconQr from '$lib/components/icons/IconQr.svelte';
+	import IconlyBuy from '$lib/components/icons/iconly/IconlyBuy.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import SwapLoader from '$lib/components/swap/SwapLoader.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -12,9 +15,9 @@
 	import { GET_TOKEN_MODAL_OPEN_SWAP_BUTTON } from '$lib/constants/test-ids.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
-		enabledMainnetFungibleTokensUsdBalance,
-		enabledMainnetFungibleIcTokensUsdBalance
-	} from '$lib/derived/tokens.derived';
+		enabledMainnetFungibleIcTokensUsdBalance,
+		enabledMainnetFungibleTokensUsdBalance
+	} from '$lib/derived/tokens-ui.derived';
 	import { WizardStepsGetToken } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
@@ -128,6 +131,62 @@
 				</ExternalLink>
 			{/snippet}
 		</StakeContentCard>
+	</div>
+
+	<div class="mt-6 mb-2 text-base font-bold sm:text-lg">
+		{replacePlaceholders($i18n.get_token.text.get_more_token, {
+			$token: tokenSymbol
+		})}
+	</div>
+
+	<div class="flex w-full flex-col gap-2">
+		<GetTokenActionItem>
+			{#snippet icon()}
+				<IconQr />
+			{/snippet}
+
+			{#snippet title()}
+				{replacePlaceholders($i18n.get_token.text.receive_token_title, {
+					$token: tokenSymbol
+				})}
+			{/snippet}
+
+			{#snippet description()}
+				{replacePlaceholders($i18n.get_token.text.receive_token_text, {
+					$token: tokenSymbol
+				})}
+			{/snippet}
+
+			{#snippet button()}
+				<Button onclick={() => onGoToStep(WizardStepsGetToken.RECEIVE)} paddingSmall>
+					{replacePlaceholders($i18n.get_token.text.receive_token, {
+						$token: tokenSymbol
+					})}
+				</Button>
+			{/snippet}
+		</GetTokenActionItem>
+
+		<GetTokenActionItem>
+			{#snippet icon()}
+				<IconlyBuy />
+			{/snippet}
+
+			{#snippet title()}
+				{$i18n.get_token.text.buy_assets_title}
+			{/snippet}
+
+			{#snippet description()}
+				{replacePlaceholders($i18n.get_token.text.buy_assets_text, {
+					$token: tokenSymbol
+				})}
+			{/snippet}
+
+			{#snippet button()}
+				<Button onclick={() => onGoToStep(WizardStepsGetToken.BUY_TOKEN)} paddingSmall>
+					{$i18n.get_token.text.buy_assets}
+				</Button>
+			{/snippet}
+		</GetTokenActionItem>
 	</div>
 
 	{#snippet toolbar()}

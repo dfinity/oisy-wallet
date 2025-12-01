@@ -632,6 +632,7 @@
 			"spl_custom_tokens": "Ошибка при загрузке пользовательских токенов SPL.",
 			"erc20_user_token": "Ошибка при включении токена ERC-20.",
 			"icrc_custom_token": "Ошибка при загрузке пользовательского токена ICRC.",
+			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "Вашему кошельку требуются некоторые начальные данные, которые еще не загружены. Пожалуйста, попробуйте еще раз.",
 			"allow_signing": "Проблема с настройкой вашего кошелька для подписи. Вы были выведены из системы. Если проблема не исчезнет, обратитесь в службу поддержки.",
 			"waiting_for_allowed_cycles_aborted": "Пожалуйста, попробуйте войти позже",
@@ -725,9 +726,11 @@
 				"display_account_id_qr": "Показать ID аккаунта ICP в виде QR-кода",
 				"account_id_copied": "ID аккаунта ICP скопирован в буфер обмена.",
 				"principal": "Принципал ICP",
+				"principal_title": "",
 				"internet_computer_principal_copied": "Принципал Internet Computer скопирован в буфер обмена.",
 				"display_internet_computer_principal_qr": "Показать Принципал Internet Computer в виде QR-кода",
 				"icp_account": "Аккаунт ICP (для бирж)",
+				"icp_account_title": "",
 				"icp_account_copied": "Аккаунт ICP скопирован в буфер обмена.",
 				"display_icp_account_qr": "Показать аккаунт ICP в виде QR-кода"
 			}
@@ -740,6 +743,7 @@
 				"learn_how_to_convert": "Узнайте, как конвертировать $token в $ckToken",
 				"metamask": "Получить от Metamask",
 				"ethereum": "Эфириум",
+				"ethereum_title": "",
 				"ethereum_address": "Адрес",
 				"ethereum_address_copied": "Адрес Ethereum скопирован в буфер обмена.",
 				"display_ethereum_address_qr": "Показать адрес Ethereum в виде QR-кода"
@@ -757,8 +761,11 @@
 				"checking_incoming": "Проверка входящих BTC...",
 				"refreshing_wallet": "Обновление кошелька...",
 				"bitcoin_address": "Биткойн",
+				"bitcoin_address_title": "",
 				"bitcoin_testnet_address": "Биткойн (тестовая сеть)",
+				"bitcoin_testnet_address_title": "",
 				"bitcoin_regtest_address": "Биткойн (Regtest)",
+				"bitcoin_regtest_address_title": "",
 				"display_bitcoin_address_qr": "Показать адрес Биткойна в виде QR-кода",
 				"bitcoin_address_copied": "Адрес Биткойна скопирован в буфер обмена.",
 				"from_network": "Переведите биткойн по сети BTC на этот адрес, чтобы получить ckBTC.",
@@ -775,8 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Адрес Solana",
+				"solana_address_title": "",
 				"solana_devnet_address": "Адрес Solana Devnet",
+				"solana_devnet_address_title": "",
 				"solana_local_address": "Локальный адрес Solana",
+				"solana_local_address_title": "",
 				"solana_address_copied": "Адрес Solana скопирован в буфер обмена",
 				"display_solana_address_qr": "Показать адрес Solana в виде QR-кода"
 			}
@@ -1768,6 +1778,7 @@
 	"earning": {
 		"text": {
 			"title": "Заработать",
+			"tab_title": "",
 			"earning_opportunities": "",
 			"header_title": "",
 			"header_description": ""
@@ -1800,9 +1811,11 @@
 			"stake_page_title": "",
 			"gldt_stake_page_description": "",
 			"stake": "Стейкинг",
+			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
 			"unstake": "",
+			"unstake_now": "",
 			"unstaking": "",
 			"unstake_token": "",
 			"enable_token_text": "Включить токен",
@@ -1815,9 +1828,7 @@
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"visit_provider": "Посетить провайдера",
-			"current_apy": "Текущий APY",
 			"current_apy_label": "",
-			"current_apy_info": "Информация о текущем APY",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1829,12 +1840,57 @@
 			"immediate_dissolve_terms": "",
 			"amount_to_receive": "",
 			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
 			"claim_reward": "",
 			"claim_rewards": "",
+			"claim_reward_short": "",
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": ""
+			"get_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": ""
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "",
+				"item1_description": "",
+				"item2_title_1": "",
+				"item2_title_2": "",
+				"item3_title": "",
+				"item3_description": "",
+				"item4_title": "",
+				"item4_description": "",
+				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
+			}
+		},
+		"alt": {
+			"placeholder_image": ""
 		}
 	},
 	"get_token": {
@@ -1844,7 +1900,14 @@
 			"ready_to_swap": "",
 			"convert_assets": "",
 			"convertible_assets": "",
-			"how_to_convert": ""
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
 		}
 	},
 	"temporal": {

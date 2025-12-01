@@ -34,15 +34,14 @@ import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
+import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appConstants from '$lib/constants/app.constants';
 import {
-	enabledFungibleTokensUi,
-	enabledMainnetFungibleIcTokensUsdBalance,
-	enabledMainnetFungibleTokensUsdBalance,
 	enabledNonFungibleTokensBySectionHidden,
 	enabledNonFungibleTokensBySectionSpam,
 	enabledNonFungibleTokensWithoutSection,
@@ -52,10 +51,6 @@ import {
 	tokens
 } from '$lib/derived/tokens.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { balancesStore } from '$lib/stores/balances.store';
-import { exchangeStore } from '$lib/stores/exchange.store';
-import { isTokenNonFungible } from '$lib/utils/nft.utils';
-import { mapTokenUi } from '$lib/utils/token.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
@@ -63,6 +58,7 @@ import type { SplToken } from '$sol/types/spl';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
@@ -113,6 +109,12 @@ describe('tokens.derived', () => {
 		...mockValidIcToken,
 		ledgerCanisterId: `${mockValidIcToken.ledgerCanisterId}2`,
 		version: 1n,
+		enabled: true
+	};
+
+	const mockExtCustomToken: ExtCustomToken = {
+		...mockValidExtV2Token,
+		version: 7n,
 		enabled: true
 	};
 
@@ -193,6 +195,7 @@ describe('tokens.derived', () => {
 		erc1155CustomTokensStore.resetAll();
 		icrcDefaultTokensStore.resetAll();
 		icrcCustomTokensStore.resetAll();
+		extCustomTokensStore.resetAll();
 		splDefaultTokensStore.reset();
 		splCustomTokensStore.resetAll();
 
@@ -210,6 +213,7 @@ describe('tokens.derived', () => {
 			erc1155CustomTokensStore.setAll([{ data: mockErc1155CustomToken, certified: false }]);
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
 			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			extCustomTokensStore.setAll([{ data: mockExtCustomToken, certified: false }]);
 			splDefaultTokensStore.add(mockSplDefaultToken);
 			splCustomTokensStore.setAll([{ data: mockSplCustomToken, certified: false }]);
 
@@ -230,6 +234,7 @@ describe('tokens.derived', () => {
 				{ ...mockErc1155CustomToken, id: result[11].id },
 				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[12].id },
 				{ ...mockIcrcCustomToken, id: result[13].id },
+				{ ...mockExtCustomToken, id: result[14].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);
@@ -320,6 +325,7 @@ describe('tokens.derived', () => {
 			erc1155CustomTokensStore.setAll([{ data: mockErc1155CustomToken, certified: false }]);
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
 			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			extCustomTokensStore.setAll([{ data: mockExtCustomToken, certified: false }]);
 			splDefaultTokensStore.add(mockSplDefaultToken);
 			splCustomTokensStore.setAll([{ data: mockSplCustomToken, certified: false }]);
 
@@ -338,6 +344,7 @@ describe('tokens.derived', () => {
 				mockEr20UserToken,
 				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[10].id },
 				{ ...mockIcrcCustomToken, id: result[11].id },
+				{ ...mockExtCustomToken, id: result[12].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);
@@ -435,68 +442,6 @@ describe('tokens.derived', () => {
 			erc1155CustomTokensStore.resetAll();
 
 			expect(get(enabledNonFungibleTokensWithoutSpam)).toStrictEqual([]);
-		});
-	});
-
-	describe('enabledFungibleTokensUi', () => {
-		it('returns correct data', () => {
-			expect(get(enabledFungibleTokensUi)).toStrictEqual(
-				get(tokens).map((token) => mapTokenUi({ token, $balances: {}, $exchanges: {} }))
-			);
-		});
-
-		it('should not include NFTs', () => {
-			expect(get(enabledFungibleTokensUi).every(isTokenNonFungible)).toBeFalsy();
-		});
-	});
-
-	describe('enabledMainnetFungibleTokensUsdBalance', () => {
-		it('returns correct data', () => {
-			balancesStore.set({
-				id: ICP_TOKEN.id,
-				data: { data: 500000000000n, certified: true }
-			});
-			balancesStore.set({
-				id: BTC_MAINNET_TOKEN.id,
-				data: { data: 200000000000n, certified: true }
-			});
-			balancesStore.set({
-				id: ETHEREUM_TOKEN.id,
-				data: { data: 500000000000000n, certified: true }
-			});
-
-			exchangeStore.set([
-				{ ethereum: { usd: 1 } },
-				{ 'internet-computer': { usd: 20 } },
-				{ bitcoin: { usd: 5 } }
-			]);
-
-			expect(get(enabledMainnetFungibleTokensUsdBalance)).toEqual(110000.0005);
-		});
-	});
-
-	describe('enabledMainnetFungibleIcTokensUsdBalance', () => {
-		it('returns correct data', () => {
-			balancesStore.set({
-				id: ICP_TOKEN.id,
-				data: { data: 500000000000n, certified: true }
-			});
-			balancesStore.set({
-				id: BTC_MAINNET_TOKEN.id,
-				data: { data: 200000000000n, certified: true }
-			});
-			balancesStore.set({
-				id: ETHEREUM_TOKEN.id,
-				data: { data: 500000000000000n, certified: true }
-			});
-
-			exchangeStore.set([
-				{ ethereum: { usd: 1 } },
-				{ 'internet-computer': { usd: 20 } },
-				{ bitcoin: { usd: 5 } }
-			]);
-
-			expect(get(enabledMainnetFungibleIcTokensUsdBalance)).toEqual(100000);
 		});
 	});
 });

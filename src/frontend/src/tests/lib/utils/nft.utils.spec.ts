@@ -8,14 +8,20 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { getTokensByNetwork, isTokenFungible, isTokenNonFungible } from '$lib/utils/nft.utils';
-import { MOCK_ERC1155_TOKENS } from '$tests/mocks/erc1155-tokens.mock';
+import {
+	getNftIdentifier,
+	getTokensByNetwork,
+	isTokenFungible,
+	isTokenNonFungible
+} from '$lib/utils/nft.utils';
+import { MOCK_ERC1155_TOKENS, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import {
 	AZUKI_ELEMENTAL_BEANS_TOKEN,
 	DE_GODS_TOKEN,
 	MOCK_ERC721_TOKENS,
 	PUDGY_PENGUINS_TOKEN
 } from '$tests/mocks/erc721-tokens.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 
 describe('nft.utils', () => {
 	describe('isTokenNonFungible', () => {
@@ -90,6 +96,22 @@ describe('nft.utils', () => {
 			expect(ethereumTokens).toBeDefined();
 			expect(ethereumTokens).toHaveLength(1);
 			expect(ethereumTokens).toContain(PUDGY_PENGUINS_TOKEN);
+		});
+	});
+
+	describe('getNftIdentifier', () => {
+		it('should return the token identifier for ERC721 tokens', () => {
+			expect(getNftIdentifier(AZUKI_ELEMENTAL_BEANS_TOKEN)).toBe(
+				AZUKI_ELEMENTAL_BEANS_TOKEN.address
+			);
+		});
+
+		it('should return the token identifier for ERC1155 tokens', () => {
+			expect(getNftIdentifier(NYAN_CAT_TOKEN)).toBe(NYAN_CAT_TOKEN.address);
+		});
+
+		it('should return the canisterId for EXT tokens', () => {
+			expect(getNftIdentifier(mockValidExtV2Token)).toBe(mockValidExtV2Token.canisterId);
 		});
 	});
 });

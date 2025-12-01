@@ -30,7 +30,7 @@
 			onclick={() =>
 				goto(
 					networkUrl({
-						path: AppPath.Earning,
+						path: AppPath.Earn,
 						networkId: $networkId,
 						usePreviousRoute: true,
 						fromRoute

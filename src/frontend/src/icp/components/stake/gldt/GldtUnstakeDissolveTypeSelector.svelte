@@ -8,7 +8,6 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import RadioBox from '$lib/components/ui/RadioBox.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -35,11 +34,9 @@
 	);
 
 	let instantDissolveFee = $derived(
-		formatTokenBigintToNumber({
-			value: $gldtStakeStore?.position?.instant_dissolve_fee ?? ZERO,
-			displayDecimals: $sendTokenDecimals,
-			unitName: $sendTokenDecimals
-		})
+		nonNullish(amount) && nonNullish($gldtStakeStore?.config?.early_unlock_fee)
+			? Number(amount) * $gldtStakeStore.config.early_unlock_fee
+			: 0
 	);
 
 	let delayedDissolveAmount = $derived(

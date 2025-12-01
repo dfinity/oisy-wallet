@@ -70,7 +70,8 @@ export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 	id: SOLANA_LOCAL_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Local',
-	icon: solDevnetIcon
+	icon: solDevnetIcon,
+	explorerUrl: SOL_MAINNET_EXPLORER_URL
 };
 
 export const SUPPORTED_SOLANA_NETWORKS: Network[] = defineSupportedNetworks({
