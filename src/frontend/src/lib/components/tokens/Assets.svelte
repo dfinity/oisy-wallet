@@ -11,7 +11,7 @@
 	import NftSettingsMenu from '$lib/components/nfts/NftSettingsMenu.svelte';
 	import NftSortMenu from '$lib/components/nfts/NftSortMenu.svelte';
 	import NftsList from '$lib/components/nfts/NftsList.svelte';
-	import RefreshCollectionButton from '$lib/components/nfts/RefreshCollectionButton.svelte';
+	import RefreshCollectionsButton from '$lib/components/nfts/RefreshCollectionsButton.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
@@ -99,7 +99,7 @@
 						</div>
 					{:else if tab === TokenTypes.NFTS}
 						<div class="flex">
-							<RefreshCollectionButton />
+							<RefreshCollectionsButton />
 						</div>
 						<div class="ml-1 flex">
 							<NftSortMenu />

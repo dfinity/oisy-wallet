@@ -4,9 +4,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { emit } from '$lib/utils/events.utils';
 
-	let visible = $state(false);
+	interface Props {
+		testId?: string;
+	}
 
-	let button = $state<HTMLButtonElement | undefined>();
+	const { testId }: Props = $props();
+
+	let visible = $state(false);
 
 	let loading = $state(false);
 
@@ -29,7 +33,7 @@
 	{loading}
 	onclick={onClick}
 	styleClass={visible ? 'active' : ''}
-	bind:button
+	{testId}
 >
 	{#snippet icon()}
 		<IconRetry />
