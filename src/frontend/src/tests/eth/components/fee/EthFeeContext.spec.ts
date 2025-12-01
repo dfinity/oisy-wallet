@@ -5,7 +5,7 @@ import * as infuraMod from '$eth/providers/infura.providers';
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import * as listenerServices from '$eth/services/eth-listener.services';
 import * as feeServices from '$eth/services/fee.services';
-import * as nftSend from '$eth/services/nft-send.services';
+import * as nftTransfer from '$eth/services/nft-transfer.services';
 import {
 	ETH_FEE_CONTEXT_KEY,
 	type EthFeeStore,
@@ -122,11 +122,11 @@ describe('EthFeeContext', () => {
 		vi.spyOn(feeServices, 'getCkErc20FeeData').mockResolvedValue(ZERO);
 		vi.spyOn(feeServices, 'getErc20FeeData').mockResolvedValue(ZERO);
 
-		vi.spyOn(nftSend, 'encodeErc721SafeTransfer').mockReturnValue({
+		vi.spyOn(nftTransfer, 'encodeErc721SafeTransfer').mockReturnValue({
 			to: '0x2222222222222222222222222222222222222222',
 			data: '0xdeadbeef'
 		});
-		vi.spyOn(nftSend, 'encodeErc1155SafeTransfer').mockReturnValue({
+		vi.spyOn(nftTransfer, 'encodeErc1155SafeTransfer').mockReturnValue({
 			to: '0x3333333333333333333333333333333333333333',
 			data: '0xfeedbead'
 		});
@@ -193,7 +193,7 @@ describe('EthFeeContext', () => {
 
 		await vi.runAllTimersAsync();
 
-		expect(nftSend.encodeErc721SafeTransfer).toHaveBeenCalledExactlyOnceWith({
+		expect(nftTransfer.encodeErc721SafeTransfer).toHaveBeenCalledExactlyOnceWith({
 			contractAddress: nft.collection.address,
 			from: fromAddr,
 			to: destination,

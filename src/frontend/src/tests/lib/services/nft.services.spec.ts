@@ -5,7 +5,7 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
 import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
-import * as nftSendServices from '$eth/services/nft-send.services';
+import * as nftTransferServices from '$eth/services/nft-transfer.services';
 import * as ethNftServices from '$eth/services/nft.services';
 import { loadNftsByNetwork as loadErcNftsByNetwork } from '$eth/services/nft.services';
 import * as extCustomTokens from '$icp/services/ext-custom-tokens.services';
@@ -337,11 +337,11 @@ describe('nft.services', () => {
 		const maxPriorityFeePerGas = 2_000_000n;
 
 		const transfer721Spy = vi
-			.spyOn(nftSendServices, 'transferErc721')
+			.spyOn(nftTransferServices, 'transferErc721')
 			.mockResolvedValue({} as unknown as TransactionResponse);
 
 		const transfer1155Spy = vi
-			.spyOn(nftSendServices, 'transferErc1155')
+			.spyOn(nftTransferServices, 'transferErc1155')
 			.mockResolvedValue({} as unknown as TransactionResponse);
 
 		const token721: NonFungibleToken = {
