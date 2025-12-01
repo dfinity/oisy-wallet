@@ -17,6 +17,10 @@ export const NftMetadataSchema = z.object({
 	attributes: z.array(NftAttributeSchema).optional()
 });
 
+export const NftAppearanceSchema = z.object({
+	oisyId: NftIdSchema.optional()
+});
+
 export enum NftMediaStatusEnum {
 	OK = 'ok',
 	FILESIZE_LIMIT_EXCEEDED = 'filesize_limit_exceeded',
@@ -39,10 +43,11 @@ export const NftCollectionSchema = z.object({
 
 export const NftSchema = z.object({
 	balance: z.number().optional(),
-	...NftMetadataSchema.shape,
 	collection: NftCollectionSchema,
 	acquiredAt: z.date().optional(),
-	mediaStatus: z.enum(NftMediaStatusEnum)
+	mediaStatus: z.enum(NftMediaStatusEnum),
+	...NftMetadataSchema.shape,
+	...NftAppearanceSchema.shape
 });
 
 export const OwnedContractSchema = z.object({
