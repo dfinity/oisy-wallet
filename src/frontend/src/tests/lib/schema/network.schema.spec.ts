@@ -51,7 +51,8 @@ describe('network.schema', () => {
 		const validNetwork = {
 			...validNetworkWithRequiredFields,
 			icon: 'https://example.com/icon.svg',
-			buy: { onramperId: 'icp' }
+			buy: { onramperId: 'icp' },
+			pay: { openCryptoPay: 'Internet Computer' }
 		};
 
 		it('should validate a complete network', () => {

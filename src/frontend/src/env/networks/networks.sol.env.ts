@@ -45,7 +45,8 @@ export const SOLANA_MAINNET_NETWORK: SolanaNetwork = {
 	chainId: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
 	icon: solMainnetIcon,
 	explorerUrl: SOL_MAINNET_EXPLORER_URL,
-	buy: { onramperId: 'solana' }
+	buy: { onramperId: 'solana' },
+	pay: { openCryptoPay: 'Solana' }
 };
 
 export const SOLANA_DEVNET_NETWORK_SYMBOL = 'SOL (Devnet)';
