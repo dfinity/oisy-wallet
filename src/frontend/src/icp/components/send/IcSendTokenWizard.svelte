@@ -7,6 +7,7 @@
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
 	import { sendIc } from '$icp/services/ic-send.services';
+	import { sendNft } from '$icp/services/nft-send.services';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -19,7 +20,6 @@
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { sendNft } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
