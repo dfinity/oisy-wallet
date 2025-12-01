@@ -3,7 +3,7 @@ import {
 	encodeErc721SafeTransfer,
 	transferErc1155,
 	transferErc721
-} from '$eth/services/nft-send.services';
+} from '$eth/services/nft-transfer.services';
 
 import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
@@ -26,7 +26,7 @@ const TO = '0x3a1E2B9F5D7c8A4E6F2D9b1C0A7f8E4d6C5b9A2f';
 const CONTRACT_721 = '0xf60a44920D51F4264ba0a8EB164A4bC15dc34E92';
 const CONTRACT_1155 = '0xd11324e0fd7099499B4B0DC1Ad035F6Db00a3D62';
 
-describe('nft-send.services', () => {
+describe('nft-transfer.services', () => {
 	describe('encodeErc721SafeTransfer', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
