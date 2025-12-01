@@ -19,7 +19,10 @@ EOF
 DFX_NETWORK="${DFX_NETWORK:-local}"
 export GLDT_STAKE_BUILDENV="$DFX_NETWORK"
 
-GLDT_STAKE_REPO_DOWNLOADS_URL="https://github.com/GoldDAO/gold-dao/releases/latest/download"
+# Gold DAO repo contains different canisters, not only gldt_stake.
+# Therefore pointing to /releases/latest does not guarantee that the latest release is related to gldt_stake.
+# Instead, we will need to directly use a specific version of gldt_stake.
+GLDT_STAKE_REPO_DOWNLOADS_URL="https://github.com/GoldDAO/gold-dao/releases/download/gldt_stake-v1.0.15"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${GLDT_STAKE_REPO_DOWNLOADS_URL}/can.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.

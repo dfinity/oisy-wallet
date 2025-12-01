@@ -9,6 +9,7 @@ import icpLight from '$icp/assets/icp-light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
+import { buildIndexedIcTokens } from '$icp/utils/ic-tokens.utils';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -69,6 +70,8 @@ export const SUPPORTED_ICP_TOKENS: RequiredToken<Omit<IcToken, 'deprecated' | 'e
 		mainnetTokens: [ICP_TOKEN],
 		testnetTokens: [TESTICP_TOKEN]
 	});
+
+export const SUPPORTED_ICP_TOKENS_INDEXED = buildIndexedIcTokens(SUPPORTED_ICP_TOKENS);
 
 export const SUPPORTED_ICP_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = SUPPORTED_ICP_TOKENS.map(
 	({ ledgerCanisterId }) => ledgerCanisterId
