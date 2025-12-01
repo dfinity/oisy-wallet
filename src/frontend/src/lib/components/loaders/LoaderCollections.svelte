@@ -21,9 +21,9 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CanisterIdText } from '$lib/types/canister';
+	import type { OisyReloadCollectionsEvent } from '$lib/types/custom-events';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
-	import type {OisyReloadCollectionsEvent} from "$lib/types/custom-events";
 
 	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
 		if (isNullish($ethAddress)) {
