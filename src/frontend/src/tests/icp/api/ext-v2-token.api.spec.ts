@@ -117,7 +117,6 @@ describe('ext-v2-token.api', () => {
 
 		const params = {
 			identity: mockIdentity,
-			owner: mockPrincipal,
 			canisterId: mockExtV2TokenCanisterId,
 			from: mockPrincipal,
 			to: mockPrincipal2,
