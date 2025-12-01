@@ -72,7 +72,10 @@
 				<span class="truncate">
 					{nft?.oisyId ?? nft?.id}
 				</span>
-				<AddressActions copyAddress={nft?.oisyId ?? nft?.id} copyAddressText={$i18n.nfts.text.id_copied ?? ''} />
+				<AddressActions
+					copyAddress={nft?.oisyId ?? nft?.id}
+					copyAddressText={$i18n.nfts.text.id_copied ?? ''}
+				/>
 			</span>
 		</ListItem>
 	{/if}
