@@ -60,6 +60,10 @@ export const createPaymentMethodDataMap = ({
 		return acc;
 	}, new Set());
 
+	if (supportedMethods.size === 0) {
+		return new Map();
+	}
+
 	return transferAmounts.reduce<Map<string, PaymentMethodData>>(
 		(acc, { method, assets, minFee, available }) => {
 			if (available && assets.length > 0 && supportedMethods.has(method)) {
