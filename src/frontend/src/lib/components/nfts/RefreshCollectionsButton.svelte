@@ -27,7 +27,7 @@
 </script>
 
 <ButtonIcon
-	ariaLabel={$i18n.navigation.alt.menu}
+	ariaLabel={$i18n.core.text.refresh}
 	colorStyle="muted"
 	link={false}
 	{loading}
