@@ -607,6 +607,12 @@
 					"audit": "sqpxs-piaaa-aaaaj-qneva-cai"
 				}
 			}
+		},
+		"ext_v2_token": {
+			"type": "custom",
+			"build": "scripts/build.ext_v2_token.sh",
+			"candid": "target/ext_v2_token.did",
+			"wasm": "target/ext_v2_token.wasm.gz"
 		}
 	},
 	"defaults": {

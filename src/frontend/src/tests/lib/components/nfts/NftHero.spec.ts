@@ -9,7 +9,7 @@ import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 import type { OptionString } from '$lib/types/string';
 import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { mockNftollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { mockNftCollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -47,17 +47,17 @@ describe('NftHero', () => {
 
 		expect(description).toBeInTheDocument();
 
-		const standard: HTMLElement | null = getByText(mockNftollectionUi.collection.standard);
+		const standard: HTMLElement | null = getByText(mockNftCollectionUi.collection.standard);
 
 		expect(standard).toBeInTheDocument();
 
 		const address: HTMLElement | null = getByText(
-			shortenWithMiddleEllipsis({ text: mockNftollectionUi.collection.address })
+			shortenWithMiddleEllipsis({ text: mockNftCollectionUi.collection.address })
 		);
 
 		expect(address).toBeInTheDocument();
 
-		const network: HTMLElement | null = getByText(mockNftollectionUi.collection.network.name);
+		const network: HTMLElement | null = getByText(mockNftCollectionUi.collection.network.name);
 
 		expect(network).toBeInTheDocument();
 
@@ -84,6 +84,8 @@ describe('NftHero', () => {
 			const attrTypeEl: HTMLElement | null = getByText(attr.traitType);
 
 			expect(attrTypeEl).toBeInTheDocument();
+
+			assertNonNullish(attr.value);
 
 			const attrValEl: HTMLElement | null = getByText(attr.value);
 

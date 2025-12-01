@@ -9,6 +9,7 @@ import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
+import type { ClaimStakingRewardParams } from '$lib/types/stake';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 import type { Option } from '$lib/types/utils';
@@ -66,7 +67,10 @@ export interface Modal<T> {
 		| 'nft-image-consent'
 		| 'nft-fullscreen-display'
 		| 'gldt-stake'
-		| 'gldt-unstake';
+		| 'gldt-unstake'
+		| 'gldt-claim-staking-reward'
+		| 'get-token'
+		| 'universal-scanner';
 	data?: T;
 	id?: symbol;
 }
@@ -135,6 +139,9 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
 	openGldtStake: (id: symbol) => void;
 	openGldtUnstake: (id: symbol) => void;
+	openGldtClaimStakingReward: (params: SetWithDataParams<ClaimStakingRewardParams>) => void;
+	openUniversalScanner: (id: symbol) => void;
+	openGetToken: (id: symbol) => void;
 	close: () => void;
 }
 
@@ -240,6 +247,11 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openGldtStake: setType('gldt-stake'),
 		openGldtUnstake: setType('gldt-unstake'),
+		openGldtClaimStakingReward: <(params: SetWithDataParams<ClaimStakingRewardParams>) => void>(
+			setTypeWithData('gldt-claim-staking-reward')
+		),
+		openUniversalScanner: setType('universal-scanner'),
+		openGetToken: setType('get-token'),
 		close: () => set(null),
 		subscribe
 	};

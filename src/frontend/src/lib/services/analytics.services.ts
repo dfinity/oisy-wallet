@@ -1,27 +1,38 @@
+import { browser } from '$app/environment';
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
+import { loadPlausibleTracker } from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import Plausible from 'plausible-tracker';
+import type { init, track } from '@plausible-analytics/tracker';
 
-let plausibleTracker: ReturnType<typeof Plausible> | null = null;
+let plausibleTracker: { init: typeof init; track: typeof track } | undefined = undefined;
 
-// eslint-disable-next-line require-await -- We use this service during initialisation among other async functions, so for consistency we force the asynchronicity here.
 export const initPlausibleAnalytics = async () => {
-	if (!PLAUSIBLE_ENABLED || isNullish(PLAUSIBLE_DOMAIN)) {
+	if (
+		!PLAUSIBLE_ENABLED ||
+		isNullish(PLAUSIBLE_DOMAIN) ||
+		!browser ||
+		nonNullish(plausibleTracker)
+	) {
 		return;
 	}
 
+	// Note: This module must be imported in the browser only.
+	// The latest version of @plausible-analytics/tracker does not work in server (SSR) mode.
+	// Reference: https://www.npmjs.com/package/@plausible-analytics/tracker
+	// Important: This library only works in browser environments. The `init` and `track`
+	// functions rely on browser APIs, so they should only be initialized and called on the client side.
 	try {
-		if (isNullish(plausibleTracker)) {
-			plausibleTracker = Plausible({
-				domain: PLAUSIBLE_DOMAIN,
-				hashMode: false,
-				trackLocalhost: false
-			});
-			plausibleTracker.enableAutoPageviews();
-		}
-	} catch (_err: unknown) {
+		const tracker = await loadPlausibleTracker();
+
+		tracker.init({
+			domain: PLAUSIBLE_DOMAIN
+		});
+
+		plausibleTracker = tracker;
+	} catch (_: unknown) {
 		console.warn('An unexpected error occurred during initialization.');
+		plausibleTracker = undefined;
 	}
 };
 
@@ -35,7 +46,10 @@ export const trackEvent = ({ name, metadata, warning }: TrackEventParams) => {
 	 * replace the `PLAUSIBLE_ENABLED` check with a `PROD` check and remove the feature flag.
 	 */
 	if (PLAUSIBLE_ENABLED && nonNullish(plausibleTracker)) {
-		plausibleTracker.trackEvent(name, { props: metadata });
+		// Important: This library only works in browser environments. The `init` and `track`
+		// functions rely on browser APIs, so they should only be initialized and called on the client side.
+
+		plausibleTracker.track(name, { props: metadata });
 
 		if (nonNullish(warning)) {
 			// We print the error to console just for debugging purposes

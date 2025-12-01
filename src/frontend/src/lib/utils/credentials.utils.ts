@@ -1,4 +1,4 @@
-import type { UserCredential, UserProfile } from '$declarations/backend/declarations/backend.did';
+import type { UserCredential, UserProfile } from '$declarations/backend/backend.did';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import type { Option } from '$lib/types/utils';
 import { isNullish } from '@dfinity/utils';

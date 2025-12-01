@@ -1,5 +1,5 @@
-import type { PoolMetadata } from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
-import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
+import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
+import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { createPermit } from '$eth/services/eip2612-permit.services';
@@ -77,7 +77,7 @@ vi.mock('@velora-dex/sdk', () => ({
 	constructSimpleSDK: vi.fn()
 }));
 
-vi.mock('$eth/services/send.services', () => ({
+vi.mock('$eth/services/approve.services', () => ({
 	approve: vi.fn(),
 	erc20ContractAllowance: vi.fn()
 }));
@@ -131,7 +131,7 @@ describe('swap.services', () => {
 				slippage: 0.5
 			} as SwapAmountsReply;
 			const icpSwapResponse = {
-				receiveAmount: 975
+				receiveAmount: 975n
 			} as unknown as ICPSwapAmountReply;
 
 			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
@@ -157,7 +157,9 @@ describe('swap.services', () => {
 			expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
 
 			expect(icpSwapResult).toBeDefined();
-			expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
+			expect(icpSwapResult?.receiveAmount).toBe(
+				icpSwapResponse.receiveAmount - destinationToken.fee
+			);
 		});
 
 		it('should make a call oly to icpSwap if icrc2 is false', async () => {
@@ -196,7 +198,7 @@ describe('swap.services', () => {
 				slippage: 0.5
 			} as SwapAmountsReply;
 			const icpSwapResponse = {
-				receiveAmount: 975
+				receiveAmount: 975n
 			} as unknown as ICPSwapAmountReply;
 
 			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
@@ -224,7 +226,9 @@ describe('swap.services', () => {
 			expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
 
 			expect(icpSwapResult).toBeDefined();
-			expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
+			expect(icpSwapResult?.receiveAmount).toBe(
+				icpSwapResponse.receiveAmount - destinationToken.fee
+			);
 		});
 
 		it('should handle provider failures gracefully (e.g., rejected promises)', async () => {

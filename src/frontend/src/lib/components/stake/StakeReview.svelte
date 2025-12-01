@@ -1,28 +1,28 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
-	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { Address } from '$lib/types/address';
 	import type { OptionAmount } from '$lib/types/send';
 
 	interface Props {
 		amount?: OptionAmount;
-		destination?: Address;
+		destination?: Snippet;
 		disabled?: boolean;
 		network?: Snippet;
 		fee?: Snippet;
 		provider?: Snippet;
 		subtitle?: Snippet;
-		onBack: () => void;
-		onStake: () => void;
+		onBack?: () => void;
+		onClose?: () => void;
+		onConfirm: () => void;
+		actionButtonLabel: string;
 	}
 
 	let {
@@ -34,7 +34,9 @@
 		provider,
 		subtitle,
 		onBack,
-		onStake
+		onClose,
+		onConfirm,
+		actionButtonLabel
 	}: Props = $props();
 
 	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -48,11 +50,7 @@
 		token={$sendToken}
 	/>
 
-	{#if nonNullish(destination)}
-		<div class="mb-4">
-			<SendReviewDestination {destination} />
-		</div>
-	{/if}
+	{@render destination?.()}
 
 	{@render network?.()}
 
@@ -62,9 +60,14 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup testId="toolbar">
-			<ButtonBack onclick={onBack} />
-			<Button {disabled} onclick={onStake} testId={STAKE_REVIEW_FORM_BUTTON}>
-				{$i18n.send.text.send}
+			{#if nonNullish(onBack)}
+				<ButtonBack onclick={onBack} />
+			{:else if nonNullish(onClose)}
+				<ButtonCancel onclick={onClose} />
+			{/if}
+
+			<Button {disabled} onclick={onConfirm} testId={STAKE_REVIEW_FORM_BUTTON}>
+				{actionButtonLabel}
 			</Button>
 		</ButtonGroup>
 	{/snippet}

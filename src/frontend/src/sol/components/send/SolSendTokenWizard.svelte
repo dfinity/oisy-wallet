@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { assertNonNullish, isNullish } from '@dfinity/utils';
+	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import { isSolanaError, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED } from '@solana/kit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -173,6 +173,16 @@
 
 		onNext();
 
+		const sendTrackingEventMetadata = {
+			token: $sendToken.symbol,
+			network: `${$sendToken.network.id.description}`,
+			...(nonNullish($prioritizationFeeStore)
+				? { prioritizationFee: $prioritizationFeeStore.toString() }
+				: {}),
+			...(nonNullish($ataFeeStore) ? { ataFee: $ataFeeStore.toString() } : {}),
+			...(nonNullish($feeStore) ? { fee: $feeStore.toString() } : {})
+		};
+
 		try {
 			await sendSol({
 				identity: $authIdentity,
@@ -189,18 +199,14 @@
 
 			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_SUCCESS,
-				metadata: {
-					token: $sendToken.symbol
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_ERROR,
-				metadata: {
-					token: $sendToken.symbol
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			if (sendProgressStep === ProgressStepsSendSol.CONFIRM) {

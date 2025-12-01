@@ -16,9 +16,9 @@ import {
 	type MinterInfo,
 	type RetrieveBtcOk,
 	type RetrieveBtcStatusV2WithId,
+	type UpdateBalanceOk,
 	type Utxo
-} from '@dfinity/ckbtc';
-import type { UpdateBalanceOk } from '@dfinity/ckbtc/dist/types/types/minter.responses';
+} from '@icp-sdk/canisters/ckbtc';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('$icp/utils/date.utils', () => ({

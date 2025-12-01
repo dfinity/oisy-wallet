@@ -1,3 +1,4 @@
+import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import icpIcon from '$lib/assets/networks/icp.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { OptionCanisterIdText } from '$lib/types/canister';
@@ -28,6 +29,8 @@ export const ICP_NETWORK: Network = {
 	env: 'mainnet',
 	name: 'Internet Computer',
 	icon: icpIcon,
+	explorerUrl: ICP_EXPLORER_URL,
+	supportsNft: true,
 	buy: { onramperId: 'icp' }
 };
 
@@ -48,5 +51,7 @@ export const ICP_PSEUDO_TESTNET_NETWORK: Network = {
 	id: ICP_PSEUDO_TESTNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'IC (testnet tokens)',
-	icon: icpIcon
+	icon: icpIcon,
+	explorerUrl: ICP_EXPLORER_URL,
+	supportsNft: true
 };

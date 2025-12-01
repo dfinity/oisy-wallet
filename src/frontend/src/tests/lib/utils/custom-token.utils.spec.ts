@@ -1,7 +1,8 @@
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 
 describe('custom-token.utils', () => {
 	describe('toCustomToken', () => {
@@ -92,6 +93,25 @@ describe('custom-token.utils', () => {
 					Icrc: {
 						ledger_id: Principal.fromText(mockLedgerCanisterId),
 						index_id: []
+					}
+				}
+			});
+		});
+
+		it('should return correct type for ExtV2 network key', () => {
+			const networkKey = 'ExtV2';
+
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey,
+					canisterId: mockExtV2TokenCanisterId
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					ExtV2: {
+						canister_id: Principal.fromText(mockExtV2TokenCanisterId)
 					}
 				}
 			});

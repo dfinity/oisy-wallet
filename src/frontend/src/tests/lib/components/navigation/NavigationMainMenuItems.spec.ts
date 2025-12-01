@@ -46,6 +46,16 @@ describe('NavigationMainMenuItems', () => {
 		expect(tokenLink.getAttribute('href')).toContain(AppPath.Nfts);
 	});
 
+	it('builds assets link with Earning path when assetsTab = EARNING', () => {
+		activeAssetsTabStore.set({ key: 'active-assets-tab', value: TokenTypes.EARNING });
+
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
+
+		expect(tokenLink.getAttribute('href')).toContain(AppPath.Earning);
+	});
+
 	it('builds assets link with Tokens path when assetsTab = TOKENS', () => {
 		activeAssetsTabStore.set({ key: 'active-assets-tab', value: TokenTypes.TOKENS });
 

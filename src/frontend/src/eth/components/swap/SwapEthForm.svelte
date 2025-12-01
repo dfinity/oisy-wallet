@@ -8,12 +8,17 @@
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
+	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
@@ -50,6 +55,8 @@
 
 	const { sourceToken, destinationToken, sourceTokenBalance } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	let errorType = $state<TokenActionErrorType | undefined>();
 
@@ -160,17 +167,24 @@
 
 			<div class="flex flex-col gap-3">
 				<SwapProvider {slippageValue} />
-				<EthFeeDisplay {isApproveNeeded}>
-					{#snippet label()}
-						<Html text={$i18n.fee.text.total_fee} />
-					{/snippet}
-				</EthFeeDisplay>
 
-				<SwapEthFeeInfo
-					decimals={$feeDecimalsStore}
-					feeSymbol={$feeSymbolStore}
-					feeTokenId={$feeTokenIdStore}
-				/>
+				{#if nonNullish($swapAmountsStore?.selectedProvider)}
+					{#if isGasless}
+						<SwapGaslessFee />
+					{:else}
+						<EthFeeDisplay {isApproveNeeded}>
+							{#snippet label()}
+								<Html text={$i18n.fee.text.total_fee} />
+							{/snippet}
+						</EthFeeDisplay>
+
+						<SwapEthFeeInfo
+							decimals={$feeDecimalsStore}
+							feeSymbol={$feeSymbolStore}
+							feeTokenId={$feeTokenIdStore}
+						/>
+					{/if}
+				{/if}
 			</div>
 		{/if}
 	{/snippet}

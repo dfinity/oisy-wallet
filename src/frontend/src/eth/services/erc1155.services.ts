@@ -1,4 +1,4 @@
-import type { CustomToken, ErcToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken, ErcToken } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
@@ -6,7 +6,6 @@ import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers'
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import type { Erc721ContractAddress } from '$eth/types/erc721';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -79,7 +78,7 @@ const safeLoadMetadata = async ({
 	address
 }: {
 	networkId: NetworkId;
-	address: Erc721ContractAddress['address'];
+	address: Erc1155ContractAddress['address'];
 }) => {
 	try {
 		const { getContractMetadata } = alchemyProviders(networkId);
@@ -96,8 +95,6 @@ const safeLoadMetadata = async ({
 			},
 			warning: `Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}. ${err}`
 		});
-
-		return;
 	}
 };
 
@@ -150,7 +147,7 @@ const loadCustomTokensWithMetadata = async (
 						name: tokenAddress,
 						address: tokenAddress,
 						network,
-						symbol: tokenAddress,
+						symbol: metadata.symbol ?? '', // The symbol is used with the amount, no issue with having it empty for NFTs
 						decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 						standard: 'erc1155' as const,
 						category: 'custom' as const,
@@ -166,9 +163,22 @@ const loadCustomTokensWithMetadata = async (
 			}
 		);
 
-	const customTokens = await Promise.all(customTokenPromises);
+	const customTokens = await Promise.allSettled(customTokenPromises);
 
-	return customTokens.filter(nonNullish);
+	return customTokens.reduce<Erc1155CustomToken[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		if (result.status === 'rejected') {
+			toastsError({
+				msg: { text: get(i18n).init.error.erc1155_custom_tokens },
+				err: result.reason
+			});
+		}
+
+		return acc;
+	}, []);
 };
 
 const loadCustomTokenData = ({

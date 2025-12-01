@@ -1,4 +1,5 @@
 import type { Erc20Token } from '$eth/types/erc20';
-import { initCertifiedUserTokensStore } from '$lib/stores/user-tokens.store';
+import { initCertifiedCustomTokensStore } from '$lib/stores/custom-tokens.store';
 
-export const erc20UserTokensStore = initCertifiedUserTokensStore<Erc20Token>();
+// TODO: UserToken is deprecated - replace this store with erc20CustomTokensStore (already exists)
+export const erc20UserTokensStore = initCertifiedCustomTokensStore<Erc20Token>();

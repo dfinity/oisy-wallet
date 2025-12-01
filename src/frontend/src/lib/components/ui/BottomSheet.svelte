@@ -5,14 +5,20 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 
 	interface Props {
 		visible: boolean;
 		content: Snippet;
 		footer?: Snippet;
+		contentClass?: string;
 	}
 
-	let { visible = $bindable(), content, footer }: Props = $props();
+	let { visible = $bindable(), content, footer, contentClass = 'min-h-[30vh]' }: Props = $props();
+
+	$effect(() => {
+		bottomSheetOpenStore.set(visible);
+	});
 </script>
 
 {#if visible}
@@ -32,7 +38,7 @@
 				</div>
 			{/snippet}
 
-			<div class="min-h-[30vh] w-full p-4">
+			<div class="w-full p-4 {contentClass}">
 				{@render content()}
 			</div>
 			{#if nonNullish(footer)}

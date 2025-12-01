@@ -8,17 +8,21 @@ import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ckErc20Production } from '$env/tokens/tokens.ckerc20.env';
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcCkToken } from '$icp/types/ic-token';
+import type { StakeBalances } from '$lib/types/stake-balance';
 import type { TokenStandard } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	calculateTokenUsdAmount,
 	calculateTokenUsdBalance,
+	filterEnabledToken,
 	findTwinToken,
 	getMaxTransactionAmount,
 	getTokenDisplaySymbol,
+	isTokenToggleable,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
 	sumUsdBalances
@@ -222,6 +226,27 @@ describe('token.utils', () => {
 	describe('mapTokenUi', () => {
 		const mockUsdValue = vi.mocked(usdValue);
 
+		const mockStakeBalances: StakeBalances = {
+			[ETHEREUM_TOKEN_ID]: { staked: 123n, claimable: 456n }
+		};
+
+		const mockParams = {
+			token: ETHEREUM_TOKEN,
+			$balances: mockBalances,
+			$stakeBalances: mockStakeBalances,
+			$exchanges: mockExchanges
+		};
+
+		const expected: TokenUi = {
+			...ETHEREUM_TOKEN,
+			balance: bn3Bi,
+			usdBalance: Number(bn3Bi),
+			stakeBalance: 123n,
+			stakeUsdBalance: Number(123n),
+			claimableStakeBalance: 456n,
+			claimableStakeBalanceUsd: Number(456n)
+		};
+
 		beforeEach(() => {
 			vi.resetAllMocks();
 
@@ -231,38 +256,33 @@ describe('token.utils', () => {
 		});
 
 		it('should return an object TokenUi with the correct values', () => {
-			const result = mapTokenUi({
-				token: ETHEREUM_TOKEN,
-				$balances: mockBalances,
-				$exchanges: mockExchanges
-			});
+			const result = mapTokenUi(mockParams);
 
-			expect(result).toEqual({
-				...ETHEREUM_TOKEN,
-				balance: bn3Bi,
-				usdBalance: Number(bn3Bi)
-			});
+			expect(result).toEqual(expected);
 		});
 
 		it('should return an object TokenUi with undefined usdBalance if exchange rate is not available', () => {
-			const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: mockBalances, $exchanges: {} });
+			const result = mapTokenUi({
+				...mockParams,
+				$exchanges: {}
+			});
 
 			expect(result).toEqual({
-				...ETHEREUM_TOKEN,
-				balance: bn3Bi,
-				usdBalance: undefined
+				...expected,
+				usdBalance: undefined,
+				stakeUsdBalance: undefined,
+				claimableStakeBalanceUsd: undefined
 			});
 		});
 
 		it('should return an object TokenUi with undefined balance if balances store is not initiated', () => {
 			const result = mapTokenUi({
-				token: ETHEREUM_TOKEN,
-				$balances: undefined,
-				$exchanges: mockExchanges
+				...mockParams,
+				$balances: undefined
 			});
 
 			expect(result).toEqual({
-				...ETHEREUM_TOKEN,
+				...expected,
 				balance: undefined,
 				usdBalance: 0
 			});
@@ -270,13 +290,12 @@ describe('token.utils', () => {
 
 		it('should return an object TokenUi with undefined balance if balances store is not available', () => {
 			const result = mapTokenUi({
-				token: ETHEREUM_TOKEN,
-				$balances: {},
-				$exchanges: mockExchanges
+				...mockParams,
+				$balances: {}
 			});
 
 			expect(result).toEqual({
-				...ETHEREUM_TOKEN,
+				...expected,
 				balance: undefined,
 				usdBalance: 0
 			});
@@ -284,15 +303,61 @@ describe('token.utils', () => {
 
 		it('should return an object TokenUi with null balance if balances data is null', () => {
 			const result = mapTokenUi({
-				token: ETHEREUM_TOKEN,
-				$balances: { [ETHEREUM_TOKEN.id]: null },
-				$exchanges: mockExchanges
+				...mockParams,
+				$balances: { [ETHEREUM_TOKEN.id]: null }
 			});
 
 			expect(result).toEqual({
-				...ETHEREUM_TOKEN,
+				...expected,
 				balance: null,
 				usdBalance: 0
+			});
+		});
+
+		it('should return an object TokenUi with undefined stake balances if stake balances store is not available', () => {
+			const result = mapTokenUi({
+				...mockParams,
+				$stakeBalances: {}
+			});
+
+			expect(result).toEqual({
+				...expected,
+				stakeBalance: undefined,
+				stakeUsdBalance: undefined,
+				claimableStakeBalance: undefined,
+				claimableStakeBalanceUsd: undefined
+			});
+		});
+
+		it('should return an object TokenUi with undefined stake balance if stake balance is not available', () => {
+			const result = mapTokenUi({
+				...mockParams,
+				$stakeBalances: {
+					...mockStakeBalances,
+					[ETHEREUM_TOKEN_ID]: { ...mockStakeBalances[ETHEREUM_TOKEN_ID], staked: undefined }
+				}
+			});
+
+			expect(result).toEqual({
+				...expected,
+				stakeBalance: undefined,
+				stakeUsdBalance: undefined
+			});
+		});
+
+		it('should return an object TokenUi with undefined claimable balance if claimable balance is not available', () => {
+			const result = mapTokenUi({
+				...mockParams,
+				$stakeBalances: {
+					...mockStakeBalances,
+					[ETHEREUM_TOKEN_ID]: { ...mockStakeBalances[ETHEREUM_TOKEN_ID], claimable: undefined }
+				}
+			});
+
+			expect(result).toEqual({
+				...expected,
+				claimableStakeBalance: undefined,
+				claimableStakeBalanceUsd: undefined
 			});
 		});
 	});
@@ -516,6 +581,58 @@ describe('token.utils', () => {
 			const result = getTokenDisplaySymbol(mockIcrcCustomToken);
 
 			expect(result).toBe(mockIcrcCustomToken.symbol);
+		});
+	});
+
+	describe('isTokenToggleable', () => {
+		it('should return true if token has property `enabled`', () => {
+			expect(isTokenToggleable({ ...ICP_TOKEN, enabled: true })).toBeTruthy();
+
+			expect(isTokenToggleable({ ...ICP_TOKEN, enabled: false })).toBeTruthy();
+
+			expect(isTokenToggleable({ ...ICP_TOKEN, enabled: undefined })).toBeTruthy();
+
+			expect(isTokenToggleable({ ...ICP_TOKEN, enabled: null })).toBeTruthy();
+		});
+
+		it('should return false if token has no property `enabled`', () => {
+			expect(isTokenToggleable(ICP_TOKEN)).toBeFalsy();
+		});
+
+		it('should return true if token has property `enabled` even if not boolean', () => {
+			expect(isTokenToggleable({ ...ICP_TOKEN, enabled: 123 })).toBeTruthy();
+
+			expect(isTokenToggleable({ ...ICP_TOKEN, enabled: 'random-string' })).toBeTruthy();
+
+			expect(isTokenToggleable({ ...ICP_TOKEN, enabled: {} })).toBeTruthy();
+		});
+	});
+
+	describe('filterEnabledToken', () => {
+		it('should return true if token has property `enabled` as true', () => {
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: true })).toBeTruthy();
+		});
+
+		it('should return false if token has property `enabled` as false', () => {
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: false })).toBeFalsy();
+		});
+
+		it('should return true if token has no property `enabled`', () => {
+			expect(filterEnabledToken(ICP_TOKEN)).toBeTruthy();
+		});
+
+		it('should return false if token has nullish `enabled`', () => {
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: undefined })).toBeFalsy();
+
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: null })).toBeFalsy();
+		});
+
+		it('should return true if token has property `enabled` but not boolean', () => {
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: 123 })).toBeTruthy();
+
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: 'random-string' })).toBeTruthy();
+
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: {} })).toBeTruthy();
 		});
 	});
 });

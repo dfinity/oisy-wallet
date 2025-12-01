@@ -1,5 +1,6 @@
 import * as appEnvironment from '$app/environment';
 import * as appNavigation from '$app/navigation';
+import { goto } from '$app/navigation';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
@@ -11,16 +12,21 @@ import {
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
+import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 import {
 	back,
 	gotoReplaceRoot,
 	isActivityPath,
 	isDappExplorerPath,
+	isEarnGoldPath,
+	isEarnPath,
 	isEarningPath,
 	isNftsPath,
 	isRewardsPath,
 	isRouteActivity,
 	isRouteDappExplorer,
+	isRouteEarn,
+	isRouteEarnGold,
 	isRouteEarning,
 	isRouteNfts,
 	isRouteRewards,
@@ -36,6 +42,7 @@ import {
 	nftsUrl,
 	removeSearchParam,
 	resetRouteParams,
+	switchNetwork,
 	type RouteParams
 } from '$lib/utils/nav.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
@@ -43,6 +50,7 @@ import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
+import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 describe('nav.utils', () => {
@@ -532,31 +540,53 @@ describe('nav.utils', () => {
 			});
 		});
 
-		describe('isRouteEarning', () => {
-			it('should return true when route id matches Earning path', () => {
-				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Earning}`;
+		describe('isRouteEarn', () => {
+			it('should return true when route id matches Earn path', () => {
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Earn}`;
 
-				expect(isRouteEarning(mockPage(mockPath))).toBeTruthy();
-				expect(isRouteEarning(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
+				expect(isRouteEarn(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteEarn(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
 			});
 
-			it('should return true when route id is any subroute of the Earning path', () => {
+			it('should return true when route id is any subroute of the Earn path', () => {
+				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnRewards}`))).toBeTruthy();
+				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}/subroute`))).toBeTruthy();
+			});
+
+			it('should return false when route id does not match Earn path', () => {
+				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				expect(isRouteEarn(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
+			});
+		});
+
+		describe('isRouteEarnGold', () => {
+			it('should return true when route id matches EarnGold path', () => {
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}`;
+
+				expect(isRouteEarnGold(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteEarnGold(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
+			});
+
+			it('should return true when route id is any subroute of the EarnGold path', () => {
+				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}`))).toBeTruthy();
 				expect(
-					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarningRewards}`))
-				).toBeTruthy();
-				expect(
-					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}/subroute`))
+					isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}/subroute`))
 				).toBeTruthy();
 			});
 
-			it('should return false when route id does not match Earning path', () => {
-				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+			it('should return false when route id does not match EarnGold path', () => {
+				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
-				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
 
-				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
-				expect(isRouteEarning(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
+				expect(isRouteEarn(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
 			});
 		});
 
@@ -577,6 +607,28 @@ describe('nav.utils', () => {
 				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
 				expect(isRouteNfts(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
+			});
+		});
+
+		describe('isRouteEarning', () => {
+			it('should return true when route id matches Earning path', () => {
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}`))).toBeTruthy();
+			});
+
+			it('should return true when route id is any subroute of the Earning path', () => {
+				expect(
+					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}/subroute`))
+				).toBeTruthy();
+			});
+
+			it('should return false when route id does not match Earning path', () => {
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
 			});
 		});
 	});
@@ -627,6 +679,13 @@ describe('nav.utils', () => {
 			expect(isNftsPath(null)).toBeFalsy();
 		});
 
+		it('isEarningPath', () => {
+			expect(isEarningPath(withAppPrefix(AppPath.Earning))).toBeTruthy();
+			expect(isEarningPath('/(app)/assets/earning/subpath')).toBeFalsy();
+			expect(isEarningPath('/(app)/wrong')).toBeFalsy();
+			expect(isEarningPath(null)).toBeFalsy();
+		});
+
 		it('isRewardsPath', () => {
 			expect(isRewardsPath(withAppPrefix(AppPath.Rewards))).toBeTruthy();
 			expect(isRewardsPath('/(app)/rewards')).toBeTruthy();
@@ -634,11 +693,51 @@ describe('nav.utils', () => {
 			expect(isRewardsPath(null)).toBeFalsy();
 		});
 
-		it('isEarningPath', () => {
-			expect(isEarningPath(withAppPrefix(AppPath.Earning))).toBeTruthy();
-			expect(isEarningPath(withAppPrefix(AppPath.EarningRewards))).toBeTruthy();
-			expect(isEarningPath('/(app)/earning/whatever')).toBeTruthy();
-			expect(isEarningPath(null)).toBeFalsy();
+		it('isEarnPath', () => {
+			expect(isEarnPath(withAppPrefix(AppPath.Earn))).toBeTruthy();
+			expect(isEarnPath(withAppPrefix(AppPath.EarnRewards))).toBeTruthy();
+			expect(isEarnPath('/(app)/earn/whatever')).toBeTruthy();
+			expect(isEarnPath(null)).toBeFalsy();
+		});
+
+		it('isEarnGoldPath', () => {
+			expect(isEarnGoldPath(withAppPrefix(AppPath.EarnGold))).toBeTruthy();
+			expect(isEarnGoldPath('/(app)/earn/gold')).toBeTruthy();
+			expect(isEarnGoldPath('/(app)/earn/ICP')).toBeFalsy();
+			expect(isEarnGoldPath(null)).toBeFalsy();
+		});
+	});
+
+	describe('switchNetwork', () => {
+		const baseUrl = new URL(window.location.href);
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+		});
+
+		it('should handle a nullish network ID', async () => {
+			userSelectedNetworkStore.set({
+				key: 'user-selected-network',
+				value: ICP_NETWORK_ID.description
+			});
+
+			await switchNetwork({ networkId: undefined, userSelectedNetworkStore });
+
+			expect(get(userSelectedNetworkStore)).toBeUndefined();
+
+			expect(goto).toHaveBeenCalledExactlyOnceWith(baseUrl, { replaceState: true, noScroll: true });
+		});
+
+		it('should go to the URL with the set network ID', async () => {
+			await switchNetwork({ networkId: ICP_NETWORK_ID, userSelectedNetworkStore });
+
+			expect(get(userSelectedNetworkStore)).toBe(ICP_NETWORK_ID.description);
+
+			const newUrl = new URL(`${baseUrl}?${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`);
+
+			expect(goto).toHaveBeenCalledExactlyOnceWith(newUrl, { replaceState: true, noScroll: true });
 		});
 	});
 

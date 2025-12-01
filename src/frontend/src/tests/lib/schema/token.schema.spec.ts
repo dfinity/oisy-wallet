@@ -50,6 +50,18 @@ describe('token.schema', () => {
 			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
+		it('should validate "dip20" as a supported token standard', () => {
+			const validStandard = 'dip20';
+
+			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "extV2" as a supported token standard', () => {
+			const validStandard = 'extV2';
+
+			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
 		it('should validate "bitcoin" as a supported token standard', () => {
 			const validStandard = 'bitcoin';
 
@@ -198,7 +210,7 @@ describe('token.schema', () => {
 	});
 
 	describe('TokenSchema', () => {
-		const { chainId: _, explorerUrl: __, providers: ___, ...mockNetwork } = SEPOLIA_NETWORK;
+		const { chainId: _, providers: __, ...mockNetwork } = SEPOLIA_NETWORK;
 
 		const validTokenWithRequiredFields = {
 			id: parseTokenId('TokenId'),

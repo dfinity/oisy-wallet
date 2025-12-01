@@ -20,6 +20,7 @@
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
@@ -170,8 +171,7 @@
 
 	const isApproveNeeded = $derived<boolean>(
 		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.MARKET &&
-			isNotDefaultEthereumToken($sourceToken) &&
-			!$isSourceTokenPermitSupported
+			isNotDefaultEthereumToken($sourceToken)
 	);
 
 	const isGasless = $derived<boolean>(
@@ -240,7 +240,7 @@
 				gas,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
-				isGasless: false,
+				isGasless: $isSourceTokenPermitSupported ?? false,
 				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
 			};
 
@@ -328,11 +328,15 @@
 					{swapAmount}
 				>
 					{#snippet swapFees()}
-						<EthFeeDisplay>
-							{#snippet label()}
-								<Html text={$i18n.fee.text.total_fee} />
-							{/snippet}
-						</EthFeeDisplay>
+						{#if isGasless}
+							<SwapGaslessFee />
+						{:else}
+							<EthFeeDisplay>
+								{#snippet label()}
+									<Html text={$i18n.fee.text.total_fee} />
+								{/snippet}
+							</EthFeeDisplay>
+						{/if}
 					{/snippet}
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}

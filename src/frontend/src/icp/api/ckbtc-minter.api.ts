@@ -2,7 +2,7 @@ import type { MinterInfoParams } from '$icp/types/ck';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Identity } from '@dfinity/agent';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import {
 	CkBTCMinterCanister,
 	type EstimateWithdrawalFee,
@@ -12,9 +12,9 @@ import {
 	type RetrieveBtcStatusV2WithId,
 	type UpdateBalanceOk,
 	type Utxo
-} from '@dfinity/ckbtc';
-import { Principal } from '@dfinity/principal';
-import { assertNonNullish, type QueryParams } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ckbtc';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const retrieveBtc = async ({
 	identity,
