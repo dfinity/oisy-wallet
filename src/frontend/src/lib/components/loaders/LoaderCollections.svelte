@@ -23,6 +23,7 @@
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
+	import type {OisyReloadCollectionsEvent} from "$lib/types/custom-events";
 
 	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
 		if (isNullish($ethAddress)) {
@@ -133,7 +134,7 @@
 		await load({});
 	};
 
-	const reload = async (event?: CustomEvent<{ callback?: () => void }>) => {
+	const reload = async (event?: CustomEvent<OisyReloadCollectionsEvent>) => {
 		try {
 			await load({ extTokens: true });
 		} finally {
