@@ -1,4 +1,6 @@
 // TODO: try to provide the correct types to the events
+import type { OisyReloadCollectionsEvent } from '$lib/types/custom-events';
+
 declare module 'svelte/elements' {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	export interface HTMLAttributes<T> {
@@ -26,8 +28,7 @@ declare module 'svelte/elements' {
 		onoisyRefreshContacts?: (event: CustomEvent<any>) => void;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		onoisyDisconnectWalletConnect?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyReloadCollections?: (event: CustomEvent<any>) => void;
+		onoisyReloadCollections?: (event: CustomEvent<OisyReloadCollectionsEvent>) => void;
 	}
 }
 

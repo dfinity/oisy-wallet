@@ -8,40 +8,16 @@ import type { CertifiedTransaction } from '$lib/stores/transactions.store';
 import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
 import { nonNullish } from '@dfinity/utils';
 
-export const getGldtStakingTransactions = ({
-	gldtToken,
-	goldaoToken,
-	icTransactionsStore,
-	icPendingTransactionsStore
+const mapGldtStakingTransaction = ({
+	token,
+	isReward,
+	transactions
 }: {
-	gldtToken: IcToken;
-	goldaoToken: IcToken;
-	icTransactionsStore: IcCertifiedTransactionsData;
-	icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
-}): StakingTransactionsUiWithToken[] => {
-	const gldtTxs = [
-		...(nonNullish(icTransactionsStore?.[gldtToken.id])
-			? (icTransactionsStore[gldtToken.id] as CertifiedTransaction<IcTransactionUi>[])
-			: []),
-		...(nonNullish(icPendingTransactionsStore?.[gldtToken.id])
-			? (icPendingTransactionsStore[gldtToken.id] as IcPendingTransactionsData)
-			: [])
-	];
-
-	const goldaoTxs = [
-		...(nonNullish(icTransactionsStore?.[goldaoToken.id])
-			? (icTransactionsStore[goldaoToken.id] as CertifiedTransaction<IcTransactionUi>[])
-			: []),
-		...(nonNullish(icPendingTransactionsStore?.[goldaoToken.id])
-			? (icPendingTransactionsStore[goldaoToken.id] as IcPendingTransactionsData)
-			: [])
-	];
-
-	return [...gldtTxs, ...goldaoTxs].reduce<StakingTransactionsUiWithToken[]>((acc, tx) => {
-		const isGldtTx = gldtTxs.includes(tx);
-		const isReward = !isGldtTx;
-		const token = isGldtTx ? gldtToken : goldaoToken;
-
+	token: IcToken;
+	isReward: boolean;
+	transactions: CertifiedTransaction<IcTransactionUi>[];
+}): StakingTransactionsUiWithToken[] =>
+	transactions.reduce<StakingTransactionsUiWithToken[]>((acc, tx) => {
 		const { data } = tx;
 
 		if (data.from?.includes(GLDT_STAKE_CANISTER_ID) || data.to?.includes(GLDT_STAKE_CANISTER_ID)) {
@@ -54,4 +30,50 @@ export const getGldtStakingTransactions = ({
 
 		return acc;
 	}, []);
+
+export const getGldtStakingTransactions = ({
+	gldtToken,
+	goldaoToken,
+	icTransactionsStore,
+	icPendingTransactionsStore
+}: {
+	gldtToken?: IcToken;
+	goldaoToken?: IcToken;
+	icTransactionsStore: IcCertifiedTransactionsData;
+	icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
+}): StakingTransactionsUiWithToken[] => {
+	let result: StakingTransactionsUiWithToken[] = [];
+
+	if (nonNullish(gldtToken)) {
+		const gldtTxs = [
+			...(nonNullish(icTransactionsStore?.[gldtToken.id])
+				? (icTransactionsStore[gldtToken.id] as CertifiedTransaction<IcTransactionUi>[])
+				: []),
+			...(nonNullish(icPendingTransactionsStore?.[gldtToken.id])
+				? (icPendingTransactionsStore[gldtToken.id] as IcPendingTransactionsData)
+				: [])
+		];
+
+		result = [
+			...mapGldtStakingTransaction({ transactions: gldtTxs, token: gldtToken, isReward: false })
+		];
+	}
+
+	if (nonNullish(goldaoToken)) {
+		const goldaoTxs = [
+			...(nonNullish(icTransactionsStore?.[goldaoToken.id])
+				? (icTransactionsStore[goldaoToken.id] as CertifiedTransaction<IcTransactionUi>[])
+				: []),
+			...(nonNullish(icPendingTransactionsStore?.[goldaoToken.id])
+				? (icPendingTransactionsStore[goldaoToken.id] as IcPendingTransactionsData)
+				: [])
+		];
+
+		result = [
+			...result,
+			...mapGldtStakingTransaction({ transactions: goldaoTxs, token: goldaoToken, isReward: true })
+		];
+	}
+
+	return result;
 };
