@@ -7,6 +7,7 @@
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
+	import { sendNft } from '$eth/services/nft-send.services';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -34,7 +35,6 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { sendNft } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
