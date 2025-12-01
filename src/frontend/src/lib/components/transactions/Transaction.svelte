@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { type Component, type Snippet, untrack } from 'svelte';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
+	import type { EthNonFungibleToken } from '$eth/types/nft';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -22,6 +23,7 @@
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
+	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -42,6 +44,8 @@
 		children: Snippet;
 		onClick?: () => void;
 		approveSpender?: string;
+		timeOnly?: boolean;
+		testId?: string;
 	}
 
 	const {
@@ -57,7 +61,9 @@
 		tokenId,
 		children,
 		onClick,
-		approveSpender
+		approveSpender,
+		timeOnly = true,
+		testId
 	}: Props = $props();
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
@@ -105,10 +111,18 @@
 			return;
 		}
 
+		if (!isNetworkIdEthereum(network.id) && !isNetworkIdEvm(network.id)) {
+			return;
+		}
+
 		try {
 			const { getNftMetadata } = alchemyProviders(network.id);
 
-			fetchedNft = await getNftMetadata({ token, tokenId: parseNftId(String(tokenId)) });
+			fetchedNft = await getNftMetadata({
+				// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
+				token: token as EthNonFungibleToken,
+				tokenId: parseNftId(String(tokenId))
+			});
 		} catch (_: unknown) {
 			fetchedNft = undefined;
 		}
@@ -123,7 +137,7 @@
 	const nft = $derived(existingNft ?? fetchedNft);
 </script>
 
-<button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
+<button class={`contents ${styleClass ?? ''}`} data-tid={testId} onclick={onClick}>
 	<span class="block w-full rounded-xl px-2 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin withGap>
 			<span class="flex min-w-0 flex-1 basis-0 items-center gap-1">
@@ -185,7 +199,7 @@
 								minute: '2-digit',
 								hour12: false
 							},
-							timeOnly: true
+							timeOnly
 						})}
 					</span>
 				{/if}

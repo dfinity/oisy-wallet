@@ -1,5 +1,6 @@
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+import { stakeBalances } from '$lib/derived/stake.derived';
 import {
 	enabledFungibleTokens,
 	enabledNonFungibleTokens,
@@ -48,11 +49,12 @@ export const combinedDerivedSortedFungibleNetworkTokens: Readable<Token[]> = der
  * All fungible tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
  */
 export const combinedDerivedSortedFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[combinedDerivedSortedFungibleNetworkTokens, balancesStore, exchanges],
-	([$enabledNetworkTokens, $balances, $exchanges]) =>
+	[combinedDerivedSortedFungibleNetworkTokens, balancesStore, stakeBalances, exchanges],
+	([$enabledNetworkTokens, $balances, $stakeBalances, $exchanges]) =>
 		pinTokensWithBalanceAtTop({
 			$tokens: $enabledNetworkTokens,
 			$balances,
+			$stakeBalances,
 			$exchanges
 		})
 );

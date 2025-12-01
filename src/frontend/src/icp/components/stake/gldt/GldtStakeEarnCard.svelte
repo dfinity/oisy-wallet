@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { icrcTokens, icrcCustomTokensNotInitialized } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
@@ -20,7 +21,7 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { modalGetToken, modalGldtStake } from '$lib/derived/modal.derived';
-	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens.derived';
+	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -154,7 +155,11 @@
 				{/snippet}
 
 				{#snippet modal()}
-					<GetTokenModal {currentApy} token={gldtToken} />
+					<GetTokenModal
+						{currentApy}
+						receiveAddress={$icrcAccountIdentifierText}
+						token={gldtToken}
+					/>
 				{/snippet}
 			</ButtonWithModal>
 

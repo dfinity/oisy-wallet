@@ -1,16 +1,15 @@
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
-import type { CustomTokenSection } from '$lib/enums/custom-token-section';
+import type { NonFungibleTokenAppearance } from '$lib/types/nft-ui';
 import type { RequiredToken, Token, TokenMetadata, TokenStandard } from '$lib/types/token';
 
 type Erc1155Standard = Extract<TokenStandard, 'erc1155'>;
 
 export type Erc1155Token = Erc1155Contract &
+	NonFungibleTokenAppearance &
 	Omit<Token, 'network' | 'standard'> & {
 		network: EthereumNetwork;
 		standard: Erc1155Standard;
-		section?: CustomTokenSection;
-		allowExternalContentSource?: boolean;
 	};
 
 export type RequiredErc1155Token = RequiredToken<

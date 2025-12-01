@@ -28,6 +28,7 @@ import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { RequiredTokenWithLinkedData } from '$lib/types/token';
+import { getNftIdentifier } from '$lib/utils/nft.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
@@ -38,6 +39,7 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 describe('page-token.derived', () => {
@@ -426,7 +428,11 @@ describe('page-token.derived', () => {
 				collectionId: `${mockNft.collection.network.name}-${mockNft.collection.address}`
 			});
 
-			expect(get(pageNonFungibleToken)?.address).toBe(mockNft.collection.address);
+			const result = get(pageNonFungibleToken);
+
+			assertNonNullish(result);
+
+			expect(getNftIdentifier(result)).toBe(mockNft.collection.address);
 		});
 	});
 });

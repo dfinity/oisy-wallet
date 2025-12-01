@@ -149,6 +149,16 @@
 			"__bigint__": "10000"
 		}
 	},
+	"TCYCLES": {
+		"ledgerCanisterId": "um5iw-rqaaa-aaaaq-qaaba-cai",
+		"indexCanisterId": "ul4oc-4iaaa-aaaaq-qaabq-cai",
+		"decimals": 12,
+		"name": "Trillion Cycles",
+		"symbol": "TCYCLES",
+		"fee": {
+			"__bigint__": "100000000"
+		}
+	},
 	"BITTYICP": {
 		"ledgerCanisterId": "qroj6-lyaaa-aaaam-qeqta-cai",
 		"decimals": 8,
@@ -156,6 +166,26 @@
 		"symbol": "BITTYICP",
 		"fee": {
 			"__bigint__": "1000000"
+		}
+	},
+	"BOT": {
+		"ledgerCanisterId": "73f6j-5iaaa-aaaal-qsw4a-cai",
+		"indexCanisterId": "74ey5-qqaaa-aaaal-qsw4q-cai",
+		"decimals": 8,
+		"name": "BOTCOIN",
+		"symbol": "BOT",
+		"fee": {
+			"__bigint__": "1"
+		}
+	},
+	"EXE": {
+		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai",
+		"indexCanisterId": "us3ng-pyaaa-aaaan-q2cva-cai",
+		"decimals": 8,
+		"name": "Windoge98",
+		"symbol": "EXE",
+		"fee": {
+			"__bigint__": "100000"
 		}
 	}
 }

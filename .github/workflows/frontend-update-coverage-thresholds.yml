@@ -21,14 +21,14 @@ jobs:
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -49,53 +49,8 @@ jobs:
           path: coverage/
           retention-days: 3
 
-      # The coverage calculation is a bit flaky, so to avoid being stuck, we reduce it to have an acceptable margin
-      - name: Give a margin to coverage thresholds
-        run: |
-          node -e "
-          const fs = require('fs');
-          const file = 'vitest.config.ts';
-          const text = fs.readFileSync(file, 'utf8');
-          const updated = text.replace(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g, (_, key, value) => {
-            const reduced = (parseFloat(value) - 0.2).toFixed(2);
-            return \`\${key}: \${reduced}\`;
-          });
-          fs.writeFileSync(file, updated);
-          "
-
-      # The coverage thresholds should never decrease
-      - name: Update thresholds only if increased
-        run: |
-          node -e "
-          const fs = require('fs');
-
-          const file = 'vitest.config.ts';
-          const current = fs.readFileSync(file, 'utf8');
-          const original = fs.readFileSync('vitest.config.before.ts', 'utf8');
-
-          const extractThresholds = (text) => {
-            const map = {};
-            for (const match of text.matchAll(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g)) {
-             map[match[1]] = parseFloat(match[2]);
-            }
-            return map;
-          };
-
-          const originalThresholds = extractThresholds(original);
-          const updatedThresholds = extractThresholds(current);
-
-          const updated = current.replace(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g, (_, key, value) => {
-            const oldValue = originalThresholds[key];
-            const newValue = updatedThresholds[key];
-            if (newValue > oldValue) {
-             return \`\${key}: \${newValue}\`;
-            } else {
-             return \`\${key}: \${oldValue}\`;
-            }
-          });
-
-          fs.writeFileSync(file, updated);
-          "
+      - name: Adapt the thresholds with margins and checks
+        run: npm run build:vitest-thresholds
 
       - name: Remove old thresholds file
         run: rm vitest.config.before.ts

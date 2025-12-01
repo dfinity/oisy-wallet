@@ -26,7 +26,7 @@ export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 	icon: eth,
 	twinTokenSymbol: 'ckETH',
 	groupData: ETH_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true,
+	neverCollapseInTokenGroup: true,
 	buy: {
 		onramperId: 'eth'
 	}

@@ -5,6 +5,7 @@
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftsByNetwork } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -18,7 +19,12 @@
 		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
 
 		const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
-			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
+			const nfts = await loadNftsByNetwork({
+				networkId,
+				tokens,
+				identity: $authIdentity,
+				ethAddress: $ethAddress
+			});
 
 			nftStore.setAllByNetwork({ networkId, nfts });
 		});

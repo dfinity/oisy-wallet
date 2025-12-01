@@ -2,7 +2,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import GetTokenWizardStep from '$lib/components/get-token/GetTokenWizardStep.svelte';
-import * as tokensDerived from '$lib/derived/tokens.derived';
+import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { initSwapContext, SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -39,43 +39,43 @@ describe('GetTokenWizardStep', () => {
 	});
 
 	it('renders correct title if exchange is not available', () => {
-		vi.spyOn(tokensDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
+		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
 			readable(balance)
 		);
 
-		const { getByText } = render(GetTokenWizardStep, {
+		const { getAllByText } = render(GetTokenWizardStep, {
 			props,
 			context: mockContext()
 		});
 
 		expect(
-			getByText(
+			getAllByText(
 				replacePlaceholders(en.stake.text.get_tokens, {
 					$token_symbol: ETHEREUM_TOKEN.symbol
 				})
-			)
+			)[0]
 		).toBeInTheDocument();
 	});
 
 	it('renders correct title if balance is not available', () => {
 		exchangeStore.set([{ ethereum: { usd: exchangeRate } }]);
 
-		const { getByText } = render(GetTokenWizardStep, {
+		const { getAllByText } = render(GetTokenWizardStep, {
 			props,
 			context: mockContext()
 		});
 
 		expect(
-			getByText(
+			getAllByText(
 				replacePlaceholders(en.stake.text.get_tokens, {
 					$token_symbol: ETHEREUM_TOKEN.symbol
 				})
-			)
+			)[0]
 		).toBeInTheDocument();
 	});
 
 	it('renders correct title if exchange and balance are available', () => {
-		vi.spyOn(tokensDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
+		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
 			readable(balance)
 		);
 		exchangeStore.set([{ ethereum: { usd: exchangeRate } }]);

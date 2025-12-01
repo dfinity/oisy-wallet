@@ -31,6 +31,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { StakeBalances } from '$lib/types/stake-balance';
 import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -38,7 +39,7 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { calculateTokenUsdBalance, filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
+import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
@@ -116,15 +117,17 @@ export const sortTokens = <T extends Token>({
 export const pinTokensWithBalanceAtTop = <T extends Token>({
 	$tokens,
 	$balances,
+	$stakeBalances,
 	$exchanges
 }: {
 	$tokens: T[];
 	$balances: CertifiedStoreData<BalancesData>;
+	$stakeBalances: StakeBalances;
 	$exchanges: ExchangesData;
 }): TokenUi<T>[] => {
 	// If balances data are nullish, there is no need to sort.
 	if (isNullish($balances)) {
-		return $tokens.map((token) => mapTokenUi({ token, $balances, $exchanges }));
+		return $tokens.map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges }));
 	}
 
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi<T>[], TokenUi<T>[]]>(
@@ -132,6 +135,7 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 			const tokenUI: TokenUi<T> = mapTokenUi<T>({
 				token,
 				$balances,
+				$stakeBalances,
 				$exchanges
 			});
 
@@ -165,37 +169,62 @@ export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
 	tokens.reduce((acc, token) => acc + (token.usdBalance ?? 0), 0);
 
 /**
+ * Calculates total USD stake balance of the provided UI tokens list, including claimable rewards.
+ *
+ * @param tokens - The list of UI tokens for total USD stake balance calculation.
+ * @returns The sum of UI tokens USD stake balance.
+ */
+export const sumTokensUiUsdStakeBalance = (tokens: TokenUi[]): number =>
+	tokens.reduce(
+		(acc, token) => acc + ((token.stakeUsdBalance ?? 0) + (token.claimableStakeBalanceUsd ?? 0)),
+		0
+	);
+
+/**
  * Calculates total USD balance of mainnet tokens per network from the provided tokens list.
  *
- * @param $tokens - The list of tokens for filtering by network env and total USD balance calculation.
- * @param $balancesStore - The balances' data for the tokens.
- * @param $exchanges - The exchange rates data for the tokens.
+ * @param tokens - The list of UI tokens for filtering by network env and total USD balance calculation.
  * @returns A NetworkId-number dictionary with total USD balance of mainnet tokens per network.
  *
  */
 export const sumMainnetTokensUsdBalancesPerNetwork = ({
-	$tokens,
-	$balances,
-	$exchanges
+	tokens
 }: {
-	$tokens: Token[];
-	$balances: CertifiedStoreData<BalancesData>;
-	$exchanges: ExchangesData;
+	tokens: TokenUi[];
 }): TokensTotalUsdBalancePerNetwork =>
-	nonNullish($exchanges) && nonNullish($balances)
-		? $tokens.reduce<TokensTotalUsdBalancePerNetwork>(
-				(acc, token) =>
-					token.network.env === 'mainnet'
-						? {
-								...acc,
-								[token.network.id]:
-									(acc[token.network.id] ?? 0) +
-									(calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0)
-							}
-						: acc,
-				{}
-			)
-		: {};
+	tokens.reduce<TokensTotalUsdBalancePerNetwork>(
+		(acc, { network: { id, env }, usdBalance }) =>
+			env === 'mainnet'
+				? {
+						...acc,
+						[id]: (acc[id] ?? 0) + (usdBalance ?? 0)
+					}
+				: acc,
+		{}
+	);
+
+/**
+ * Calculates total USD stake balance (including claimable rewards) of mainnet tokens per network from the provided tokens list.
+ *
+ * @param tokens - The list of UI tokens for filtering by network env and total USD stake balance calculation.
+ * @returns A NetworkId-number dictionary with total USD stake balance of mainnet tokens per network.
+ *
+ */
+export const sumMainnetTokensUsdStakeBalancesPerNetwork = ({
+	tokens
+}: {
+	tokens: TokenUi[];
+}): TokensTotalUsdBalancePerNetwork =>
+	tokens.reduce<TokensTotalUsdBalancePerNetwork>(
+		(acc, { network: { id, env }, stakeUsdBalance, claimableStakeBalanceUsd }) =>
+			env === 'mainnet'
+				? {
+						...acc,
+						[id]: (acc[id] ?? 0) + (stakeUsdBalance ?? 0) + (claimableStakeBalanceUsd ?? 0)
+					}
+				: acc,
+		{}
+	);
 
 /**
  * Filters and returns a list of "enabled" by user tokens

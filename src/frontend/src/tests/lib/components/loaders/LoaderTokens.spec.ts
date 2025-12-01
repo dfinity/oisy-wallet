@@ -5,6 +5,8 @@ import * as erc721Derived from '$eth/derived/erc721.derived';
 import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 import { loadErc20Tokens } from '$eth/services/erc20.services';
 import { loadErc721Tokens } from '$eth/services/erc721.services';
+import * as extDerived from '$icp/derived/ext.derived';
+import { loadExtTokens } from '$icp/services/ext.services';
 import { loadIcrcTokens } from '$icp/services/icrc.services';
 import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 import * as appConstants from '$lib/constants/app.constants';
@@ -57,6 +59,10 @@ vi.mock('$icp/services/icrc.services', () => ({
 	loadIcrcTokens: vi.fn()
 }));
 
+vi.mock('$icp/services/ext.services', () => ({
+	loadExtTokens: vi.fn()
+}));
+
 vi.mock('$sol/services/spl.services', () => ({
 	loadSplTokens: vi.fn()
 }));
@@ -71,6 +77,7 @@ describe('LoaderTokens', () => {
 	const erc1155NotInitStore = writable(true);
 	const erc721InitStore = writable(false);
 	const erc1155InitStore = writable(false);
+	const extNotInitStore = writable(true);
 	const splNotInitStore = writable(true);
 
 	beforeEach(() => {
@@ -92,6 +99,7 @@ describe('LoaderTokens', () => {
 		erc1155NotInitStore.set(true);
 		erc721InitStore.set(false);
 		erc1155InitStore.set(false);
+		extNotInitStore.set(true);
 		splNotInitStore.set(true);
 
 		vi.spyOn(erc20Derived, 'erc20UserTokensNotInitialized', 'get').mockReturnValue(
@@ -114,6 +122,8 @@ describe('LoaderTokens', () => {
 			erc1155InitStore
 		);
 
+		vi.spyOn(extDerived, 'extCustomTokensNotInitialized', 'get').mockReturnValue(extNotInitStore);
+
 		vi.spyOn(splDerived, 'splCustomTokensNotInitialized', 'get').mockReturnValue(splNotInitStore);
 
 		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
@@ -124,6 +134,14 @@ describe('LoaderTokens', () => {
 
 		await waitFor(() => {
 			expect(loadIcrcTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+		});
+	});
+
+	it('should always load EXT tokens', async () => {
+		render(LoaderTokens, { children: mockSnippet });
+
+		await waitFor(() => {
+			expect(loadExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 		});
 	});
 
@@ -147,6 +165,7 @@ describe('LoaderTokens', () => {
 			expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 		});
 	});
@@ -262,6 +281,20 @@ describe('LoaderTokens', () => {
 				expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 				expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 				expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			});
+		});
+	});
+
+	describe('EXT tokens', () => {
+		it('should not load EXT tokens if the stores are already initialized', async () => {
+			setupUserNetworksStore('allEnabled');
+
+			extNotInitStore.set(false);
+
+			render(LoaderTokens, { children: mockSnippet });
+
+			await waitFor(() => {
+				expect(loadExtTokens).not.toHaveBeenCalled();
 			});
 		});
 	});

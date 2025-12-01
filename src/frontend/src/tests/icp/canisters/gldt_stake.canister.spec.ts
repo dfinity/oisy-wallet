@@ -4,6 +4,7 @@ import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import {
+	configMockResponse,
 	dailyAnalyticsMockResponse,
 	stakePositionMockResponse
 } from '$tests/mocks/gldt_stake.mock';
@@ -164,6 +165,34 @@ describe('gldt_stake.canister', () => {
 			});
 
 			const res = getPosition(params);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('getConfig', () => {
+		it('returns config successfully', async () => {
+			service.get_config.mockResolvedValue(configMockResponse);
+
+			const { getConfig } = await createGldtStakeCanister({ serviceOverride: service });
+
+			const result = await getConfig();
+
+			expect(result).toEqual(configMockResponse);
+			expect(service.get_config).toHaveBeenCalledOnce();
+		});
+
+		it('throws an error if get_config method fails', async () => {
+			service.get_config.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getConfig } = await createGldtStakeCanister({
+				serviceOverride: service
+			});
+
+			const res = getConfig();
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
