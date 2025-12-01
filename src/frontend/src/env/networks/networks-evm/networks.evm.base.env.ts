@@ -31,7 +31,8 @@ export const BASE_NETWORK: EthereumNetwork = {
 		alchemyJsonRpcUrl: 'https://base-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'base' },
-	buy: { onramperId: 'base' }
+	buy: { onramperId: 'base' },
+	pay: { openCryptoPay: 'Base' }
 };
 
 export const BASE_SEPOLIA_NETWORK_SYMBOL = 'SepoliaBASE';
