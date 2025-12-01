@@ -1,5 +1,10 @@
-import { decodeLNURL, formatAddress } from '$lib/utils/open-crypto-pay.utils';
+import {
+	createPaymentMethodDataMap,
+	decodeLNURL,
+	formatAddress
+} from '$lib/utils/open-crypto-pay.utils';
 
+import type { Network } from '$lib/types/network';
 import type { Address } from '$lib/types/open-crypto-pay';
 
 describe('open-crypto-pay.utils', () => {
@@ -253,6 +258,261 @@ describe('open-crypto-pay.utils', () => {
 			};
 
 			expect(formatAddress(address)).toBe('Street, 1234');
+		});
+	});
+
+	describe('createPaymentMethodDataMap', () => {
+		const mockNetworks: Network[] = [
+			{
+				name: 'Ethereum',
+				pay: { openCryptoPay: 'Ethereum' }
+			},
+			{
+				name: 'Polygon',
+				pay: { openCryptoPay: 'Polygon' }
+			},
+			{
+				name: 'BscMainnet',
+				pay: { openCryptoPay: 'BinanceSmartChain' }
+			},
+			{
+				name: 'Bitcoin'
+			},
+			{
+				name: 'Arbitrum',
+				pay: {}
+			}
+		] as Network[];
+
+		const mockTransferAmounts = [
+			{
+				method: 'Ethereum',
+				available: true,
+				minFee: 0.001,
+				assets: [
+					{ asset: 'ETH', amount: '100' },
+					{ asset: 'USDT', amount: '1000' }
+				]
+			},
+			{
+				method: 'Polygon',
+				available: true,
+				minFee: 0.001,
+				assets: [{ asset: 'MATIC', amount: '500' }]
+			},
+			{
+				method: 'BinanceSmartChain',
+				available: true,
+				minFee: 0.002,
+				assets: [{ asset: 'BNB', amount: '50' }]
+			},
+			{
+				method: 'Bitcoin',
+				available: false,
+				minFee: 0.0005,
+				assets: [{ asset: 'BTC', amount: '10' }]
+			},
+			{
+				method: 'Solana',
+				available: true,
+				minFee: 0.001,
+				assets: []
+			},
+			{
+				method: 'Avalanche',
+				available: true,
+				minFee: 0.001,
+				assets: [{ asset: 'AVAX', amount: '100' }]
+			}
+		];
+
+		it('should create empty map for empty transfer amounts', () => {
+			const result = createPaymentMethodDataMap({
+				transferAmounts: [],
+				networks: mockNetworks
+			});
+
+			expect(result).toBeInstanceOf(Map);
+			expect(result.size).toBe(0);
+		});
+
+		it('should create empty map for empty networks', () => {
+			const result = createPaymentMethodDataMap({
+				transferAmounts: mockTransferAmounts,
+				networks: []
+			});
+
+			expect(result.size).toBe(0);
+		});
+
+		it('should filter and create map for supported methods only', () => {
+			const result = createPaymentMethodDataMap({
+				transferAmounts: mockTransferAmounts,
+				networks: mockNetworks
+			});
+
+			expect(result.size).toBe(3);
+			expect(result.has('Ethereum')).toBeTruthy();
+			expect(result.has('Polygon')).toBeTruthy();
+			expect(result.has('BinanceSmartChain')).toBeTruthy();
+			expect(result.has('Bitcoin')).toBeFalsy();
+			expect(result.has('Solana')).toBeFalsy();
+			expect(result.has('Avalanche')).toBeFalsy();
+		});
+
+		it('should correctly map assets for each method', () => {
+			const result = createPaymentMethodDataMap({
+				transferAmounts: mockTransferAmounts,
+				networks: mockNetworks
+			});
+
+			const ethereumData = result.get('Ethereum');
+
+			expect(ethereumData?.assets.size).toBe(2);
+			expect(ethereumData?.assets.get('ETH')).toEqual({ amount: '100' });
+			expect(ethereumData?.assets.get('USDT')).toEqual({ amount: '1000' });
+
+			const polygonData = result.get('Polygon');
+
+			expect(polygonData?.assets.size).toBe(1);
+			expect(polygonData?.assets.get('MATIC')).toEqual({ amount: '500' });
+
+			const bscData = result.get('BinanceSmartChain');
+
+			expect(bscData?.assets.size).toBe(1);
+			expect(bscData?.assets.get('BNB')).toEqual({ amount: '50' });
+		});
+
+		it('should preserve minFee values', () => {
+			const result = createPaymentMethodDataMap({
+				transferAmounts: mockTransferAmounts,
+				networks: mockNetworks
+			});
+
+			expect(result.get('Ethereum')?.minFee).toBe(0.001);
+			expect(result.get('Polygon')?.minFee).toBe(0.001);
+			expect(result.get('BinanceSmartChain')?.minFee).toBe(0.002);
+		});
+
+		it('should filter out methods not available', () => {
+			const result = createPaymentMethodDataMap({
+				transferAmounts: mockTransferAmounts,
+				networks: [
+					...mockNetworks,
+					{ name: 'Bitcoin', pay: { openCryptoPay: 'Bitcoin' } }
+				] as Network[]
+			});
+
+			expect(result.has('Bitcoin')).toBeFalsy();
+		});
+
+		it('should filter out methods with empty assets', () => {
+			const result = createPaymentMethodDataMap({
+				transferAmounts: mockTransferAmounts,
+				networks: [
+					...mockNetworks,
+					{ name: 'Solana', pay: { openCryptoPay: 'Solana' } }
+				] as Network[]
+			});
+
+			expect(result.has('Solana')).toBeFalsy();
+		});
+
+		it('should filter out methods not supported by networks', () => {
+			const result = createPaymentMethodDataMap({
+				transferAmounts: mockTransferAmounts,
+				networks: [{ name: 'Ethereum', pay: { openCryptoPay: 'Ethereum' } }] as Network[]
+			});
+
+			expect(result.size).toBe(1);
+			expect(result.has('Ethereum')).toBeTruthy();
+			expect(result.has('Polygon')).toBeFalsy();
+			expect(result.has('BinanceSmartChain')).toBeFalsy();
+		});
+
+		it('should handle single asset per method', () => {
+			const singleAssetTransfer = [
+				{
+					method: 'Polygon',
+					available: true,
+					minFee: 0.0001,
+					assets: [{ asset: 'MATIC', amount: '500' }]
+				}
+			];
+
+			const result = createPaymentMethodDataMap({
+				transferAmounts: singleAssetTransfer,
+				networks: mockNetworks
+			});
+
+			expect(result.size).toBe(1);
+
+			const polygonData = result.get('Polygon');
+
+			expect(polygonData?.assets.size).toBe(1);
+			expect(polygonData?.assets.get('MATIC')).toEqual({ amount: '500' });
+		});
+
+		it('should return new Map instance each time', () => {
+			const result1 = createPaymentMethodDataMap({
+				transferAmounts: mockTransferAmounts,
+				networks: mockNetworks
+			});
+			const result2 = createPaymentMethodDataMap({
+				transferAmounts: mockTransferAmounts,
+				networks: mockNetworks
+			});
+
+			expect(result1).not.toBe(result2);
+		});
+
+		it('should handle method with zero minFee', () => {
+			const zeroFeeTransfer = [
+				{
+					method: 'Polygon',
+					available: true,
+					minFee: 0,
+					assets: [{ asset: 'MATIC', amount: '100' }]
+				}
+			];
+
+			const result = createPaymentMethodDataMap({
+				transferAmounts: zeroFeeTransfer,
+				networks: mockNetworks
+			});
+
+			const polygonData = result.get('Polygon');
+
+			expect(polygonData?.minFee).toBe(0);
+		});
+
+		it('should handle multiple assets for same method', () => {
+			const multiAssetTransfer = [
+				{
+					method: 'Ethereum',
+					available: true,
+					minFee: 0.001,
+					assets: [
+						{ asset: 'ETH', amount: '100' },
+						{ asset: 'USDT', amount: '1000' },
+						{ asset: 'USDC', amount: '2000' },
+						{ asset: 'DAI', amount: '1500' }
+					]
+				}
+			];
+
+			const result = createPaymentMethodDataMap({
+				transferAmounts: multiAssetTransfer,
+				networks: mockNetworks
+			});
+
+			const ethereumData = result.get('Ethereum');
+
+			expect(ethereumData?.assets.size).toBe(4);
+			expect(ethereumData?.assets.get('ETH')).toEqual({ amount: '100' });
+			expect(ethereumData?.assets.get('USDT')).toEqual({ amount: '1000' });
+			expect(ethereumData?.assets.get('USDC')).toEqual({ amount: '2000' });
+			expect(ethereumData?.assets.get('DAI')).toEqual({ amount: '1500' });
 		});
 	});
 });
