@@ -62,8 +62,6 @@ export interface OpenCryptoPayResponse {
 	quote: Quote;
 }
 
-export type PaymentAssetsData = Map<string, { amount: string }>;
-
 export interface PaymentMethodData {
 	assets: Map<string, { amount: string }>;
 	minFee?: number;
