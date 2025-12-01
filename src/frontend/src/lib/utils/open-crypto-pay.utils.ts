@@ -1,5 +1,12 @@
-import type { Address } from '$lib/types/open-crypto-pay';
-import { isNullish } from '@dfinity/utils';
+import type { Network } from '$lib/types/network';
+import type {
+	Address,
+	OpenCryptoPayResponse,
+	PaymentAssetsData,
+	PaymentMethodData,
+	RequestedAmount
+} from '$lib/types/open-crypto-pay';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
 
 /**
@@ -43,4 +50,60 @@ export const formatAddress = (address?: Address): string => {
 	}
 
 	return parts.length > 0 ? parts.join(', ') : '-';
+};
+
+const createAssetsMap = (assets: RequestedAmount[]): PaymentAssetsData => {
+	const assetsMap = new Map();
+
+	assets.forEach(({ asset, amount }) => {
+		assetsMap.set(asset, { amount });
+	});
+
+	return assetsMap;
+};
+
+const filterAvailableTransferMethods = ({
+	transferAmounts,
+	networks
+}: {
+	transferAmounts: OpenCryptoPayResponse['transferAmounts'];
+	networks: Network[];
+}) => {
+	const supportedMethods = networks.reduce<Set<string>>((acc, { pay }) => {
+		if (nonNullish(pay?.openCryptoPay)) {
+			acc.add(pay.openCryptoPay);
+		}
+		return acc;
+	}, new Set());
+
+	return transferAmounts.filter(
+		(transfer) =>
+			transfer.available && transfer.assets.length > 0 && supportedMethods.has(transfer.method)
+	);
+};
+
+export const createPaymentMethodDataMap = ({
+	transferAmounts,
+	networks
+}: {
+	transferAmounts: OpenCryptoPayResponse['transferAmounts'];
+	networks: Network[];
+}): Map<string, PaymentMethodData> => {
+	const methodDataMap = new Map<string, PaymentMethodData>();
+
+	const filteredMethods = filterAvailableTransferMethods({
+		transferAmounts,
+		networks
+	});
+
+	filteredMethods.forEach(({ method, assets, minFee }) => {
+		const assetsMap = createAssetsMap(assets);
+
+		methodDataMap.set(method, {
+			assets: assetsMap,
+			minFee
+		});
+	});
+
+	return methodDataMap;
 };
