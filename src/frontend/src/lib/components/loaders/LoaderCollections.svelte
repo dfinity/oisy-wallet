@@ -21,6 +21,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CanisterIdText } from '$lib/types/canister';
+	import type { OisyReloadCollectionsEvent } from '$lib/types/custom-events';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
@@ -133,8 +134,12 @@
 		await load({});
 	};
 
-	const reload = async () => {
-		await load({ extTokens: true });
+	const reload = async (event?: CustomEvent<OisyReloadCollectionsEvent>) => {
+		try {
+			await load({ extTokens: true });
+		} finally {
+			event?.detail.callback?.();
+		}
 	};
 </script>
 
