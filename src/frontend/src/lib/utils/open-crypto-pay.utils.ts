@@ -1,5 +1,7 @@
+import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import type { Network } from '$lib/types/network';
 import type { Address } from '$lib/types/open-crypto-pay';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
 
 /**
@@ -44,3 +46,21 @@ export const formatAddress = (address?: Address): string => {
 
 	return parts.length > 0 ? parts.join(', ') : '-';
 };
+
+const NETWORK_NAME_EXCEPTIONS: Readonly<Record<Network['name'], string>> = {
+	[BSC_MAINNET_NETWORK.name]: 'BinanceSmartChain'
+} as const;
+
+const getPaymentMethodFromNetwork = (networkName: Network['name']): string =>
+	NETWORK_NAME_EXCEPTIONS[networkName] ?? networkName;
+
+export const buildSupportedNetworks = (networks: Network[]): Set<string> =>
+	networks.reduce<Set<string>>((acc, { name }) => {
+		const method = getPaymentMethodFromNetwork(name);
+
+		if (nonNullish(method)) {
+			acc.add(method);
+		}
+
+		return acc;
+	}, new Set());

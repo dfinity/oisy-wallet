@@ -1,5 +1,10 @@
-import { decodeLNURL, formatAddress } from '$lib/utils/open-crypto-pay.utils';
+import {
+	buildSupportedNetworks,
+	decodeLNURL,
+	formatAddress
+} from '$lib/utils/open-crypto-pay.utils';
 
+import type { Network } from '$lib/types/network';
 import type { Address } from '$lib/types/open-crypto-pay';
 
 describe('open-crypto-pay.utils', () => {
@@ -253,6 +258,101 @@ describe('open-crypto-pay.utils', () => {
 			};
 
 			expect(formatAddress(address)).toBe('Street, 1234');
+		});
+	});
+
+	describe('buildSupportedNetworks', () => {
+		const mockBscNetwork = {
+			name: 'BNB Smart Chain'
+		} as const as Network;
+
+		const mockEthereumNetwork = {
+			name: 'Ethereum'
+		} as const as Network;
+
+		const mockPolygonNetwork = {
+			name: 'Polygon'
+		} as const as Network;
+
+		const mockBitcoinNetwork = {
+			name: 'Bitcoin'
+		} as const as Network;
+
+		it('should return empty Set for empty networks array', () => {
+			const result = buildSupportedNetworks([]);
+
+			expect(result).toBeInstanceOf(Set);
+			expect(result.size).toBe(0);
+		});
+
+		it('should build Set with single network', () => {
+			const result = buildSupportedNetworks([mockEthereumNetwork]);
+
+			expect(result).toBeInstanceOf(Set);
+			expect(result.size).toBe(1);
+			expect(result.has('Ethereum')).toBeTruthy();
+		});
+
+		it('should build Set with multiple networks', () => {
+			const networks = [mockEthereumNetwork, mockPolygonNetwork, mockBitcoinNetwork];
+			const result = buildSupportedNetworks(networks);
+
+			expect(result.size).toBe(3);
+			expect(result.has('Ethereum')).toBeTruthy();
+			expect(result.has('Polygon')).toBeTruthy();
+			expect(result.has('Bitcoin')).toBeTruthy();
+		});
+
+		it('should apply network name exception for BSC', () => {
+			const networks = [mockBscNetwork, mockEthereumNetwork];
+			const result = buildSupportedNetworks(networks);
+
+			expect(result.size).toBe(2);
+			expect(result.has('BinanceSmartChain')).toBeTruthy();
+			expect(result.has('Ethereum')).toBeTruthy();
+			expect(result.has('BscMainnet')).toBeFalsy();
+		});
+
+		it('should handle duplicate networks', () => {
+			const networks = [mockEthereumNetwork, mockEthereumNetwork, mockPolygonNetwork];
+			const result = buildSupportedNetworks(networks);
+
+			expect(result.size).toBe(2);
+			expect(result.has('Ethereum')).toBeTruthy();
+			expect(result.has('Polygon')).toBeTruthy();
+		});
+
+		it('should handle mix of regular and exception networks', () => {
+			const networks = [
+				mockBscNetwork,
+				mockEthereumNetwork,
+				mockPolygonNetwork,
+				mockBitcoinNetwork
+			];
+			const result = buildSupportedNetworks(networks);
+
+			expect(result.size).toBe(4);
+			expect(result.has('BinanceSmartChain')).toBeTruthy();
+			expect(result.has('Ethereum')).toBeTruthy();
+			expect(result.has('Polygon')).toBeTruthy();
+			expect(result.has('Bitcoin')).toBeTruthy();
+		});
+
+		it('should handle only BSC network', () => {
+			const result = buildSupportedNetworks([mockBscNetwork]);
+
+			expect(result.size).toBe(1);
+			expect(result.has('BinanceSmartChain')).toBeTruthy();
+			expect(result.has('BscMainnet')).toBeFalsy();
+		});
+
+		it('should return new Set instance each time', () => {
+			const networks = [mockEthereumNetwork];
+			const result1 = buildSupportedNetworks(networks);
+			const result2 = buildSupportedNetworks(networks);
+
+			expect(result1).not.toBe(result2);
+			expect(result1).toEqual(result2);
 		});
 	});
 });
