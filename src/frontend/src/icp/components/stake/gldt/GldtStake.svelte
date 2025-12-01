@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
@@ -34,14 +33,12 @@
 	let goldaoToken = $derived($enabledIcrcTokens.find(isGoldaoToken));
 
 	let transactions: StakingTransactionsUiWithToken[] = $derived(
-		nonNullish(gldtToken) && nonNullish(goldaoToken)
-			? getGldtStakingTransactions({
-					gldtToken,
-					goldaoToken,
-					icPendingTransactionsStore: $icPendingTransactionsStore,
-					icTransactionsStore: $icTransactionsStore
-				})
-			: []
+		getGldtStakingTransactions({
+			gldtToken,
+			goldaoToken,
+			icPendingTransactionsStore: $icPendingTransactionsStore,
+			icTransactionsStore: $icTransactionsStore
+		})
 	);
 </script>
 
