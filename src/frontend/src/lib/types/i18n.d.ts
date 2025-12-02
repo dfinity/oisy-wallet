@@ -1481,7 +1481,10 @@ interface I18nStake {
 		reward_claimed: string;
 		staked: string;
 		unstaked: string;
-		title_empty: string;
+		title_empty_1: string;
+		title_empty_2_usd: string;
+		title_empty_2_apy: string;
+		title_empty_3: string;
 		description_empty: string;
 		full_history: string;
 		recent_history: string;
