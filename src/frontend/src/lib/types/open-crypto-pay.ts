@@ -1,3 +1,4 @@
+import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 
 export interface Address {
@@ -73,4 +74,10 @@ export interface PayableToken extends Token {
 	amount: string;
 	tokenNetwork: string;
 	minFee?: number;
+}
+
+export interface PrepareTokensParams {
+	transferAmounts: TransferAmount[];
+	networks: Network[];
+	availableTokens: Token[];
 }
