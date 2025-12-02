@@ -1,11 +1,13 @@
 import {
 	createPaymentMethodDataMap,
 	decodeLNURL,
-	formatAddress
+	formatAddress,
+	mapTokenToPayableToken
 } from '$lib/utils/open-crypto-pay.utils';
 
 import type { Network } from '$lib/types/network';
-import type { Address } from '$lib/types/open-crypto-pay';
+import type { Address, PaymentMethodData } from '$lib/types/open-crypto-pay';
+import type { Token } from '$lib/types/token';
 
 describe('open-crypto-pay.utils', () => {
 	describe('decodeLNURL', () => {
@@ -513,6 +515,285 @@ describe('open-crypto-pay.utils', () => {
 			expect(ethereumData?.assets.get('USDT')).toEqual({ amount: '1000' });
 			expect(ethereumData?.assets.get('USDC')).toEqual({ amount: '2000' });
 			expect(ethereumData?.assets.get('DAI')).toEqual({ amount: '1500' });
+		});
+	});
+
+	describe('mapTokenToPayableToken', () => {
+		const mockMethodDataMap = new Map<string, PaymentMethodData>([
+			[
+				'Ethereum',
+				{
+					minFee: 0.001,
+					assets: new Map([
+						['ETH', { amount: '100' }],
+						['USDT', { amount: '1000' }],
+						['USDC', { amount: '2000' }]
+					])
+				}
+			],
+			[
+				'Polygon',
+				{
+					minFee: 0.0001,
+					assets: new Map([
+						['MATIC', { amount: '500' }],
+						['USDT', { amount: '800' }]
+					])
+				}
+			],
+			[
+				'BinanceSmartChain',
+				{
+					minFee: 0.0002,
+					assets: new Map([['BNB', { amount: '50' }]])
+				}
+			]
+		]);
+
+		const createMockToken = (overrides?: Partial<Token>): Token =>
+			({
+				id: 'token-1',
+				symbol: 'ETH',
+				name: 'Ethereum',
+				decimals: 18,
+				network: {
+					id: 'ethereum',
+					name: 'Ethereum',
+					pay: {
+						openCryptoPay: 'Ethereum'
+					}
+				},
+				...overrides
+			}) as Token;
+
+		it('should map token with all valid data', () => {
+			const token = createMockToken();
+
+			const result = mapTokenToPayableToken({
+				token,
+				methodDataMap: mockMethodDataMap
+			});
+
+			expect(result).toBeDefined();
+			expect(result?.symbol).toBe('ETH');
+			expect(result?.amount).toBe('100');
+			expect(result?.tokenNetwork).toBe('Ethereum');
+			expect(result?.minFee).toBe(0.001);
+			expect(result?.id).toBe('token-1');
+			expect(result?.name).toBe('Ethereum');
+		});
+
+		it('should map token with different symbol', () => {
+			const token = createMockToken({
+				symbol: 'USDT'
+			});
+
+			const result = mapTokenToPayableToken({
+				token,
+				methodDataMap: mockMethodDataMap
+			});
+
+			expect(result).toBeDefined();
+			expect(result?.symbol).toBe('USDT');
+			expect(result?.amount).toBe('1000');
+			expect(result?.tokenNetwork).toBe('Ethereum');
+			expect(result?.minFee).toBe(0.001);
+		});
+
+		it('should map token from different network', () => {
+			const token = createMockToken({
+				symbol: 'MATIC',
+				network: {
+					id: 'polygon',
+					name: 'Polygon',
+					pay: {
+						openCryptoPay: 'Polygon'
+					}
+				} as unknown as Network
+			});
+
+			const result = mapTokenToPayableToken({
+				token,
+				methodDataMap: mockMethodDataMap
+			});
+
+			expect(result).toBeDefined();
+			expect(result?.symbol).toBe('MATIC');
+			expect(result?.amount).toBe('500');
+			expect(result?.tokenNetwork).toBe('Polygon');
+			expect(result?.minFee).toBe(0.0001);
+		});
+
+		it('should return undefined when network has no pay property', () => {
+			const token = createMockToken({
+				network: {
+					id: 'bitcoin',
+					name: 'Bitcoin'
+				} as unknown as Network
+			});
+
+			const result = mapTokenToPayableToken({
+				token,
+				methodDataMap: mockMethodDataMap
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when network.pay has no openCryptoPay', () => {
+			const token = createMockToken({
+				network: {
+					id: 'arbitrum',
+					name: 'Arbitrum',
+					pay: {}
+				} as unknown as Network
+			});
+
+			const result = mapTokenToPayableToken({
+				token,
+				methodDataMap: mockMethodDataMap
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when network.pay.openCryptoPay is null', () => {
+			const token = createMockToken({
+				network: {
+					id: 'solana',
+					name: 'Solana',
+					pay: {
+						openCryptoPay: null
+					}
+				} as unknown as Network
+			});
+
+			const result = mapTokenToPayableToken({
+				token,
+				methodDataMap: mockMethodDataMap
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when network.pay.openCryptoPay is undefined', () => {
+			const token = createMockToken({
+				network: {
+					id: 'avalanche',
+					name: 'Avalanche',
+					pay: {
+						openCryptoPay: undefined
+					}
+				} as unknown as Network
+			});
+
+			const result = mapTokenToPayableToken({
+				token,
+				methodDataMap: mockMethodDataMap
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when methodDataMap does not have network', () => {
+			const token = createMockToken({
+				network: {
+					id: 'solana',
+					name: 'Solana',
+					pay: {
+						openCryptoPay: 'Solana'
+					}
+				} as unknown as Network
+			});
+
+			const result = mapTokenToPayableToken({
+				token,
+				methodDataMap: mockMethodDataMap
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when asset is not in methodData', () => {
+			const token = createMockToken({
+				symbol: 'DAI'
+			});
+
+			const result = mapTokenToPayableToken({
+				token,
+				methodDataMap: mockMethodDataMap
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when methodDataMap is empty', () => {
+			const token = createMockToken();
+
+			const result = mapTokenToPayableToken({
+				token,
+				methodDataMap: new Map()
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should handle token with zero amount', () => {
+			const customMethodDataMap = new Map<string, PaymentMethodData>([
+				[
+					'Ethereum',
+					{
+						minFee: 0.001,
+						assets: new Map([['ETH', { amount: '0' }]])
+					}
+				]
+			]);
+
+			const token = createMockToken();
+
+			const result = mapTokenToPayableToken({
+				token,
+				methodDataMap: customMethodDataMap
+			});
+
+			expect(result).toBeDefined();
+			expect(result?.amount).toBe('0');
+		});
+
+		it('should handle same symbol on different networks', () => {
+			const ethToken = createMockToken({
+				symbol: 'USDT',
+				network: {
+					id: 'ethereum',
+					name: 'Ethereum',
+					pay: { openCryptoPay: 'Ethereum' }
+				} as unknown as Network
+			});
+
+			const ethResult = mapTokenToPayableToken({
+				token: ethToken,
+				methodDataMap: mockMethodDataMap
+			});
+
+			expect(ethResult?.amount).toBe('1000');
+			expect(ethResult?.tokenNetwork).toBe('Ethereum');
+
+			const polyToken = createMockToken({
+				symbol: 'USDT',
+				network: {
+					id: 'polygon',
+					name: 'Polygon',
+					pay: { openCryptoPay: 'Polygon' }
+				} as unknown as Network
+			});
+
+			const polyResult = mapTokenToPayableToken({
+				token: polyToken,
+				methodDataMap: mockMethodDataMap
+			});
+
+			expect(polyResult?.amount).toBe('800');
+			expect(polyResult?.tokenNetwork).toBe('Polygon');
 		});
 	});
 });

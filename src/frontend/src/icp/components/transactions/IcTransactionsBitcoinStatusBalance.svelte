@@ -13,6 +13,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
+	import type { OisySyncStatusEvent } from '$lib/types/custom-events';
 	import type { SyncState } from '$lib/types/sync';
 
 	let receiveProgressStep = $state<string | undefined>();
@@ -77,7 +78,8 @@
 	const debounceUpdateSyncState = debounce(
 		(state: SyncState) => (ckBtcUpdateBalanceSyncState = state)
 	);
-	const onSyncState = ({ detail: state }: CustomEvent<SyncState>) => debounceUpdateSyncState(state);
+	const onSyncState = ({ detail: state }: CustomEvent<OisySyncStatusEvent>) =>
+		debounceUpdateSyncState(state);
 </script>
 
 <svelte:window onoisyCkBtcUpdateBalance={onSyncState} />

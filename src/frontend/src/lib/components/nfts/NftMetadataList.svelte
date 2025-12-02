@@ -70,9 +70,12 @@
 			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.token_id}</span>
 			<span class="inline-flex min-w-0 items-center">
 				<span class="truncate">
-					{nft?.id}
+					{nft?.oisyId ?? nft?.id}
 				</span>
-				<AddressActions copyAddress={nft?.id} copyAddressText={$i18n.nfts.text.id_copied ?? ''} />
+				<AddressActions
+					copyAddress={nft?.oisyId ?? nft?.id}
+					copyAddressText={$i18n.nfts.text.id_copied ?? ''}
+				/>
 			</span>
 		</ListItem>
 	{/if}
