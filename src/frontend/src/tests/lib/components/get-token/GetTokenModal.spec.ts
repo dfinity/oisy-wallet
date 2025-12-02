@@ -5,19 +5,75 @@ import {
 	GET_TOKEN_MODAL_OPEN_SWAP_BUTTON,
 	SWAP_SWITCH_TOKENS_BUTTON
 } from '$lib/constants/test-ids.constants';
+import {
+	MODAL_NETWORKS_LIST_CONTEXT_KEY,
+	initModalNetworksListContext
+} from '$lib/stores/modal-networks-list.store';
+import {
+	MODAL_TOKENS_LIST_CONTEXT_KEY,
+	initModalTokensListContext
+} from '$lib/stores/modal-tokens-list.store';
+import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
+import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { readable } from 'svelte/store';
 
 describe('GetTokenModal', () => {
+	const mockContext = new Map();
+
+	const mockSwapContext = () => {
+		const mockToken = { ...mockValidIcToken, enabled: true };
+
+		const originalContext = initSwapContext({
+			sourceToken: mockToken,
+			destinationToken: mockToken
+		});
+
+		const mockSwapContext = {
+			...originalContext,
+			sourceTokenExchangeRate: readable(10),
+			destinationTokenExchangeRate: readable(2)
+		};
+
+		mockContext.set(SWAP_CONTEXT_KEY, mockSwapContext);
+	};
+
+	const setupSwapAmountsStore = () => {
+		const swapAmountsStore = initSwapAmountsStore();
+		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+		return swapAmountsStore;
+	};
+
+	const setupModalTokensListContext = () => {
+		mockContext.set(MODAL_TOKENS_LIST_CONTEXT_KEY, initModalTokensListContext({ tokens: [] }));
+	};
+
+	const setupModalNetworksListContext = () => {
+		mockContext.set(
+			MODAL_NETWORKS_LIST_CONTEXT_KEY,
+			initModalNetworksListContext({ networks: [] })
+		);
+	};
+
+	beforeEach(() => {
+		mockSwapContext();
+		setupSwapAmountsStore();
+		setupModalTokensListContext();
+		setupModalNetworksListContext();
+	});
+
 	const renderGetTokenModal = () =>
 		render(GetTokenModal, {
 			props: {
 				token: ICP_TOKEN,
 				currentApy: 10
-			}
+			},
+			context: mockContext
 		});
 
 	it('should display GET_TOKEN step', () => {
