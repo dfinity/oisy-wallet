@@ -77,7 +77,7 @@ describe('eth-fee-data.services', () => {
 				networkId: network.id,
 				chainId: network.chainId,
 				from: fromAddr,
-				to: fromAddr,
+				to: fromAddr
 			});
 
 			expect(result.params).toEqual({
