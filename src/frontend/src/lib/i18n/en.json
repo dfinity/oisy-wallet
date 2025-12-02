@@ -1856,7 +1856,7 @@
 			"staked": "Staked",
 			"unstaked": "Unstaked",
 			"title_empty": "Your staking positions will appear here",
-			"description_empty": "It looks like you haven't staked any tokens yet",
+			"description_empty": "Your Earn portfolio is currently empty. Stake your tokens today to enjoy competitive APY rewards.",
 			"full_history": "Show full history",
 			"recent_history": "Close full history"
 		},
