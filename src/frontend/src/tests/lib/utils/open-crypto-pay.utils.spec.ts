@@ -2,7 +2,8 @@ import {
 	createPaymentMethodDataMap,
 	decodeLNURL,
 	formatAddress,
-	mapTokenToPayableToken
+	mapTokenToPayableToken,
+	prepareBasePayableTokens
 } from '$lib/utils/open-crypto-pay.utils';
 
 import type { Network } from '$lib/types/network';
@@ -794,6 +795,277 @@ describe('open-crypto-pay.utils', () => {
 
 			expect(polyResult?.amount).toBe('800');
 			expect(polyResult?.tokenNetwork).toBe('Polygon');
+		});
+	});
+
+	describe('prepareBasePayableTokens', () => {
+		const mockTransferAmounts = [
+			{
+				method: 'Ethereum',
+				available: true,
+				minFee: 0.001,
+				assets: [
+					{ asset: 'ETH', amount: '100' },
+					{ asset: 'USDT', amount: '1000' }
+				]
+			},
+			{
+				method: 'Polygon',
+				available: true,
+				minFee: 0.0001,
+				assets: [
+					{ asset: 'MATIC', amount: '500' },
+					{ asset: 'USDC', amount: '2000' }
+				]
+			},
+			{
+				method: 'BinanceSmartChain',
+				available: true,
+				minFee: 0.0002,
+				assets: [{ asset: 'BNB', amount: '50' }]
+			}
+		];
+
+		const mockNetworks: Network[] = [
+			{
+				id: 'ethereum',
+				name: 'Ethereum',
+				pay: { openCryptoPay: 'Ethereum' }
+			} as unknown as Network,
+			{
+				id: 'polygon',
+				name: 'Polygon',
+				pay: { openCryptoPay: 'Polygon' }
+			} as unknown as Network,
+			{
+				id: 'bsc',
+				name: 'BscMainnet',
+				pay: { openCryptoPay: 'BinanceSmartChain' }
+			} as unknown as Network
+		];
+
+		const mockAvailableTokens: Token[] = [
+			{
+				id: 'eth-token',
+				symbol: 'ETH',
+				name: 'Ethereum',
+				decimals: 18,
+				network: mockNetworks[0]
+			} as unknown as Token,
+			{
+				id: 'usdt-token',
+				symbol: 'USDT',
+				name: 'Tether',
+				decimals: 6,
+				network: mockNetworks[0]
+			} as unknown as Token,
+			{
+				id: 'matic-token',
+				symbol: 'MATIC',
+				name: 'Polygon',
+				decimals: 18,
+				network: mockNetworks[1]
+			} as unknown as Token,
+			{
+				id: 'bnb-token',
+				symbol: 'BNB',
+				name: 'BNB',
+				decimals: 18,
+				network: mockNetworks[2]
+			} as unknown as Token
+		];
+
+		it('should return empty array when transferAmounts is empty', () => {
+			const result = prepareBasePayableTokens({
+				transferAmounts: [],
+				networks: mockNetworks,
+				availableTokens: mockAvailableTokens
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should return empty array when networks is empty', () => {
+			const result = prepareBasePayableTokens({
+				transferAmounts: mockTransferAmounts,
+				networks: [],
+				availableTokens: mockAvailableTokens
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should return empty array when availableTokens is empty', () => {
+			const result = prepareBasePayableTokens({
+				transferAmounts: mockTransferAmounts,
+				networks: mockNetworks,
+				availableTokens: []
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should return empty array when all parameters are empty', () => {
+			const result = prepareBasePayableTokens({
+				transferAmounts: [],
+				networks: [],
+				availableTokens: []
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should prepare all valid payable tokens', () => {
+			const result = prepareBasePayableTokens({
+				transferAmounts: mockTransferAmounts,
+				networks: mockNetworks,
+				availableTokens: mockAvailableTokens
+			});
+
+			expect(result).toHaveLength(4);
+
+			// ETH token
+			expect(result[0].id).toBe('eth-token');
+			expect(result[0].symbol).toBe('ETH');
+			expect(result[0].amount).toBe('100');
+			expect(result[0].tokenNetwork).toBe('Ethereum');
+			expect(result[0].minFee).toBe(0.001);
+
+			// USDT token
+			expect(result[1].id).toBe('usdt-token');
+			expect(result[1].symbol).toBe('USDT');
+			expect(result[1].amount).toBe('1000');
+			expect(result[1].tokenNetwork).toBe('Ethereum');
+			expect(result[1].minFee).toBe(0.001);
+
+			// MATIC token
+			expect(result[2].id).toBe('matic-token');
+			expect(result[2].symbol).toBe('MATIC');
+			expect(result[2].amount).toBe('500');
+			expect(result[2].tokenNetwork).toBe('Polygon');
+			expect(result[2].minFee).toBe(0.0001);
+
+			// BNB token
+			expect(result[3].id).toBe('bnb-token');
+			expect(result[3].symbol).toBe('BNB');
+			expect(result[3].amount).toBe('50');
+			expect(result[3].tokenNetwork).toBe('BinanceSmartChain');
+			expect(result[3].minFee).toBe(0.0002);
+		});
+
+		it('should filter out tokens without matching transfer method', () => {
+			const tokensWithUnsupported: Token[] = [
+				...mockAvailableTokens,
+				{
+					id: 'sol-token',
+					symbol: 'SOL',
+					name: 'Solana',
+					decimals: 9,
+					network: {
+						id: 'solana',
+						name: 'Solana',
+						pay: { openCryptoPay: 'Solana' }
+					} as unknown as Network
+				} as unknown as Token
+			];
+
+			const result = prepareBasePayableTokens({
+				transferAmounts: mockTransferAmounts,
+				networks: [
+					...mockNetworks,
+					{
+						id: 'solana',
+						name: 'Solana',
+						pay: { openCryptoPay: 'Solana' }
+					} as unknown as Network
+				],
+				availableTokens: tokensWithUnsupported
+			});
+
+			expect(result).toHaveLength(4);
+			expect(result.find((t) => t.symbol === 'SOL')).toBeUndefined();
+		});
+
+		it('should filter out tokens without matching asset in transfer', () => {
+			const tokensWithMissingAsset: Token[] = [
+				...mockAvailableTokens,
+				{
+					id: 'dai-token',
+					symbol: 'DAI',
+					name: 'DAI',
+					decimals: 18,
+					network: mockNetworks[0]
+				} as unknown as Token
+			];
+
+			const result = prepareBasePayableTokens({
+				transferAmounts: mockTransferAmounts,
+				networks: mockNetworks,
+				availableTokens: tokensWithMissingAsset
+			});
+
+			expect(result).toHaveLength(4);
+			expect(result.find((t) => t.symbol === 'DAI')).toBeUndefined();
+		});
+
+		it('should handle single token', () => {
+			const result = prepareBasePayableTokens({
+				transferAmounts: mockTransferAmounts,
+				networks: mockNetworks,
+				availableTokens: [mockAvailableTokens[0]]
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].symbol).toBe('ETH');
+		});
+
+		it('should handle single transfer method', () => {
+			const result = prepareBasePayableTokens({
+				transferAmounts: [mockTransferAmounts[0]],
+				networks: mockNetworks,
+				availableTokens: mockAvailableTokens
+			});
+
+			expect(result).toHaveLength(2);
+			expect(result[0].symbol).toBe('ETH');
+			expect(result[1].symbol).toBe('USDT');
+		});
+
+		it('should filter unavailable transfer methods', () => {
+			const transferWithUnavailable = [
+				...mockTransferAmounts,
+				{
+					method: 'Avalanche',
+					available: false,
+					minFee: 0.0003,
+					assets: [{ asset: 'AVAX', amount: '100' }]
+				}
+			];
+
+			const result = prepareBasePayableTokens({
+				transferAmounts: transferWithUnavailable,
+				networks: mockNetworks,
+				availableTokens: mockAvailableTokens
+			});
+
+			expect(result).toHaveLength(4);
+		});
+
+		it('should return new array instance', () => {
+			const result1 = prepareBasePayableTokens({
+				transferAmounts: mockTransferAmounts,
+				networks: mockNetworks,
+				availableTokens: mockAvailableTokens
+			});
+
+			const result2 = prepareBasePayableTokens({
+				transferAmounts: mockTransferAmounts,
+				networks: mockNetworks,
+				availableTokens: mockAvailableTokens
+			});
+
+			expect(result1).not.toBe(result2);
+			expect(result1).toEqual(result2);
 		});
 	});
 });
