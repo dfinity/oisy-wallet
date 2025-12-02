@@ -144,7 +144,7 @@ const calculateTokenFee = async ({
 	}
 };
 
-export const calculateTokensFees = async ({
+export const calculateTokensWithFees = async ({
 	tokens,
 	userAddress
 }: {

@@ -6,7 +6,7 @@ import * as feeServices from '$eth/services/fee.services';
 import type { EthereumNetwork } from '$eth/types/network';
 import { ZERO } from '$lib/constants/app.constants';
 import {
-	calculateTokensFees,
+	calculateTokensWithFees,
 	processOpenCryptoPayCode
 } from '$lib/services/open-crypto-pay.services';
 import type { OpenCryptoPayResponse, PayableToken } from '$lib/types/open-crypto-pay';
@@ -170,7 +170,7 @@ describe('open-crypto-pay.service', () => {
 		});
 	});
 
-	describe('calculateTokensFees', () => {
+	describe('calculateTokensWithFees', () => {
 		const network = ETHEREUM_NETWORK;
 		const userAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
@@ -240,7 +240,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should return empty array for empty tokens array', async () => {
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [],
 				userAddress
 			});
@@ -249,7 +249,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should calculate fee for single native ETH token', async () => {
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [mockPayableToken],
 				userAddress
 			});
@@ -268,7 +268,7 @@ describe('open-crypto-pay.service', () => {
 		it('should calculate fee for native ETH using ETH_BASE_FEE when estimatedGas is lower', async () => {
 			vi.mocked(mockFeeDataResponse.provider.safeEstimateGas).mockResolvedValue(10n);
 
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [mockPayableToken],
 				userAddress
 			});
@@ -279,7 +279,7 @@ describe('open-crypto-pay.service', () => {
 		it('should calculate fee for ERC20 token', async () => {
 			vi.spyOn(feeServices, 'getErc20FeeData').mockResolvedValue(40n);
 
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [mockErc20Token],
 				userAddress
 			});
@@ -295,7 +295,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should skip non-Ethereum tokens', async () => {
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [mockBtcToken],
 				userAddress
 			});
@@ -307,7 +307,7 @@ describe('open-crypto-pay.service', () => {
 		it('should handle mixed tokens (ETH, ERC20, Bitcoin)', async () => {
 			const tokens = [mockPayableToken, mockErc20Token, mockBtcToken];
 
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens,
 				userAddress
 			});
@@ -319,7 +319,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should return token without fee when userAddress is null', async () => {
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [mockPayableToken],
 				userAddress: null as unknown as string
 			});
@@ -337,7 +337,7 @@ describe('open-crypto-pay.service', () => {
 				}
 			});
 
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [mockPayableToken],
 				userAddress
 			});
@@ -351,7 +351,7 @@ describe('open-crypto-pay.service', () => {
 				null as unknown as bigint
 			);
 
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [mockPayableToken],
 				userAddress
 			});
@@ -369,7 +369,7 @@ describe('open-crypto-pay.service', () => {
 				}
 			});
 
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [mockPayableToken],
 				userAddress
 			});
@@ -383,7 +383,7 @@ describe('open-crypto-pay.service', () => {
 			const estimatedGasLimit = 25n;
 			const expectedFeeInWei = maxFeePerGas * estimatedGasLimit;
 
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [mockPayableToken],
 				userAddress
 			});
@@ -405,7 +405,7 @@ describe('open-crypto-pay.service', () => {
 				}
 			});
 
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [tokenWithHighMinFee],
 				userAddress
 			});
@@ -423,7 +423,7 @@ describe('open-crypto-pay.service', () => {
 				new Error('Network error')
 			);
 
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens: [mockPayableToken],
 				userAddress
 			});
@@ -450,7 +450,7 @@ describe('open-crypto-pay.service', () => {
 				{ ...mockPayableToken, id: 'token-2', symbol: 'ETH2' }
 			] as unknown as PayableToken[];
 
-			const result = await calculateTokensFees({
+			const result = await calculateTokensWithFees({
 				tokens,
 				userAddress
 			});
