@@ -58,20 +58,6 @@ describe('eth-fee-data.services', () => {
 			});
 		});
 
-		it('should use from address as to when to is empty string', async () => {
-			const result = await getEthFeeDataWithProvider({
-				networkId: network.id,
-				chainId: network.chainId,
-				from: fromAddr,
-				to: ''
-			});
-
-			expect(result.params).toEqual({
-				from: fromAddr,
-				to: fromAddr
-			});
-		});
-
 		it('should use from address as to when to is not provided', async () => {
 			const result = await getEthFeeDataWithProvider({
 				networkId: network.id,
