@@ -3,16 +3,12 @@
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
-	import { highestApyEarningData } from '$lib/derived/earning.derived';
+	import { highestEarningPotentialUsd } from '$lib/derived/earning.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
-
-	const highestApy = $derived(
-		!isNaN(Number($highestApyEarningData?.apy)) ? Number($highestApyEarningData?.apy) : 0
-	);
 </script>
 
 <StakeContentCard>
@@ -21,8 +17,8 @@
 
 		<div class="my-1 text-lg font-bold sm:text-xl">
 			<EarningYearlyAmount
-				showPlusSign={$enabledMainnetFungibleTokensUsdBalance > 0 && highestApy > 0}
-				value={($enabledMainnetFungibleTokensUsdBalance * highestApy) / 100}
+				showPlusSign={$highestEarningPotentialUsd > 0}
+				value={$highestEarningPotentialUsd}
 			>
 				{#snippet fallback()}
 					<SkeletonText />

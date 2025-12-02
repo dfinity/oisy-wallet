@@ -1,6 +1,7 @@
 import type { StakePositionResponse } from '$declarations/gldt_stake/gldt_stake.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
@@ -9,12 +10,16 @@ import {
 	allEarningPositionsUsd,
 	allEarningYearlyAmountUsd,
 	earningData,
-	highestApyEarningData
+	highestApyEarning,
+	highestApyEarningData,
+	highestEarningPotentialUsd
 } from '$lib/derived/earning.derived';
+import { balancesStore } from '$lib/stores/balances.store';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { usdValue } from '$lib/utils/exchange.utils';
-import * as tokenUtils from '$lib/utils/token.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 const mockGldtToken = {
@@ -31,30 +36,27 @@ const mockGldtToken = {
 
 describe('earning.derived', () => {
 	beforeEach(() => {
-		vi.restoreAllMocks();
+		vi.clearAllMocks();
+
+		setupTestnetsStore('reset');
+		setupUserNetworksStore('allEnabled');
 
 		gldtStakeStore.reset();
 
+		icrcCustomTokensStore.resetAll();
 		icrcCustomTokensStore.set({ data: mockGldtToken, certified: true });
 
-		vi.spyOn(tokenUtils, 'calculateTokenUsdAmount').mockImplementation(({ amount }) =>
-			usdValue({ decimals: mockGldtToken.decimals, balance: amount, exchangeRate: 1 })
-		);
-
-		vi.mock(import('$lib/derived/tokens-ui.derived'), async (importOriginal) => {
-			const actual = await importOriginal();
-			const staticStore = <T>(value: T) => ({
-				subscribe: (fn: (v: T) => void): (() => void) => {
-					fn(value);
-					return () => {};
-				}
-			});
-
-			return {
-				...actual,
-				enabledMainnetFungibleTokensUsdBalance: staticStore(1000)
-			};
+		balancesStore.reset(ICP_TOKEN.id);
+		balancesStore.set({
+			id: ICP_TOKEN.id,
+			data: { data: 100_000_000_000n, certified: true }
 		});
+
+		exchangeStore.reset();
+		exchangeStore.set([
+			{ 'internet-computer': { usd: 1 } },
+			{ [mockGldtToken.ledgerCanisterId]: { usd: 1 } }
+		]);
 	});
 
 	describe('earningData', () => {
@@ -133,6 +135,8 @@ describe('earning.derived', () => {
 				action: vi.fn()
 			};
 
+			const originalEarningData = earningData.subscribe;
+
 			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
 				fn({
 					'gldt-staking': {
@@ -147,6 +151,79 @@ describe('earning.derived', () => {
 			const highest = get(highestApyEarningData);
 
 			expect(highest).toEqual(mockSecondRecord);
+
+			vi.spyOn(earningData, 'subscribe').mockImplementation(originalEarningData);
+		});
+	});
+
+	describe('highestApyEarning', () => {
+		const mockApy = 10;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			gldtStakeStore.reset();
+		});
+
+		it('returns the highest APY', () => {
+			gldtStakeStore.setApy(mockApy);
+			gldtStakeStore.setPosition({ staked: 1000000000n } as unknown as StakePositionResponse);
+
+			expect(get(highestApyEarning)).toBe(mockApy);
+		});
+
+		it('handles missing APY values gracefully', () => {
+			gldtStakeStore.setApy(undefined as unknown as number);
+			gldtStakeStore.setPosition({ staked: 1000000000n } as unknown as StakePositionResponse);
+
+			expect(get(highestApyEarning)).toBe(0);
+		});
+
+		it('handles missing earning records', () => {
+			gldtStakeStore.reset();
+
+			expect(get(highestApyEarning)).toBe(0);
+		});
+	});
+
+	describe('highestEarningPotentialUsd', () => {
+		const mockTotalBalance = 12_345_600_000_000n;
+		const mockApy = 10;
+		const expectedEarningPotential = (123_456 * mockApy) / 100;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			gldtStakeStore.reset();
+
+			gldtStakeStore.setApy(mockApy);
+			gldtStakeStore.setPosition({ staked: 123n } as unknown as StakePositionResponse);
+
+			balancesStore.set({
+				id: ICP_TOKEN.id,
+				data: { data: mockTotalBalance, certified: true }
+			});
+		});
+
+		it('returns the highest earning potential in USD', () => {
+			balancesStore.set({
+				id: ICP_TOKEN.id,
+				data: { data: mockTotalBalance, certified: true }
+			});
+
+			expect(get(highestEarningPotentialUsd)).toBe(expectedEarningPotential);
+		});
+
+		it('handles a null APY', () => {
+			gldtStakeStore.setApy(0);
+
+			expect(get(highestEarningPotentialUsd)).toBe(0);
+		});
+
+		it('handles a null balance', () => {
+			balancesStore.reset(ICP_TOKEN.id);
+
+			expect(get(highestEarningPotentialUsd)).toBe(0);
 		});
 	});
 
@@ -188,6 +265,11 @@ describe('earning.derived', () => {
 		});
 
 		it('returns 0 for empty earning data', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({});
+				return () => {};
+			});
+
 			expect(get(allEarningPositionsUsd)).toBe(0);
 		});
 	});
