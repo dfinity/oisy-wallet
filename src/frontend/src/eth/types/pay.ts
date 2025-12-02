@@ -1,7 +1,7 @@
-import type { TransactionFeeData } from "$lib/types/transaction";
+import type { TransactionFeeData } from '$lib/types/transaction';
 
 export interface EthFeeResult {
-    feeInWei: bigint;
-    feeData: Omit<TransactionFeeData, 'gas'>;
-    estimatedGasLimit: bigint;
+	feeInWei: bigint;
+	feeData: Omit<TransactionFeeData, 'gas'>;
+	estimatedGasLimit: bigint;
 }
