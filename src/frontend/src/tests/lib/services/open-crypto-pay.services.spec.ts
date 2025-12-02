@@ -57,7 +57,7 @@ describe('open-crypto-pay.service', () => {
 		},
 		requestedAmount: {
 			asset: 'CHF',
-			amount: 10
+			amount: '10'
 		},
 		transferAmounts: []
 	};

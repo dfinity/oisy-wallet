@@ -42,7 +42,7 @@ describe('OpenCryptoPayStore', () => {
 		},
 		requestedAmount: {
 			asset: 'CHF',
-			amount: 10
+			amount: '10'
 		},
 		transferAmounts: []
 	};
@@ -70,7 +70,7 @@ describe('OpenCryptoPayStore', () => {
 			displayName: 'New Shop',
 			requestedAmount: {
 				asset: 'EUR',
-				amount: 20
+				amount: '20'
 			}
 		};
 

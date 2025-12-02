@@ -66,7 +66,7 @@ describe('ScannerCode.svelte', () => {
 		},
 		requestedAmount: {
 			asset: 'CHF',
-			amount: 10
+			amount: '10'
 		},
 		transferAmounts: []
 	};

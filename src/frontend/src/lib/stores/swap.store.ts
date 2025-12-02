@@ -24,7 +24,7 @@ type IsTokensIcrc2Map = Record<string, boolean>;
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const data = writable<SwapData>(swapData);
-	const { update } = data;
+	const { update, set } = data;
 	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
 	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
 
@@ -121,7 +121,14 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			isErc20PermitSupported.update((state) => ({
 				...state,
 				[address]: isPermitSupported
-			}))
+			})),
+
+		reset: () => {
+			set({
+				sourceToken: undefined,
+				destinationToken: undefined
+			});
+		}
 	};
 };
 
@@ -146,6 +153,7 @@ export interface SwapContext {
 	setSourceToken: (token: Token) => void;
 	setDestinationToken: (token: Token | undefined) => void;
 	switchTokens: () => void;
+	reset: () => void;
 }
 
 export const SWAP_CONTEXT_KEY = Symbol('swap');
