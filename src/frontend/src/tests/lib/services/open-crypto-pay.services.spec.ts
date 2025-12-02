@@ -186,16 +186,15 @@ describe('open-crypto-pay.service', () => {
 			...USDC_TOKEN,
 			amount: '100',
 			minFee: 0.0001,
-			tokenNetwork: 'Ethereum',
-			standard: 'erc20'
-		} as unknown as PayableToken;
+			tokenNetwork: 'Ethereum'
+		};
 
 		const mockBtcToken: PayableToken = {
 			...BTC_MAINNET_TOKEN,
 			amount: '0.5',
 			minFee: 0.0001,
 			tokenNetwork: 'Bitcoin'
-		} as unknown as PayableToken;
+		};
 
 		const mockFeeResult: EthFeeResult = {
 			feeInWei: 300000n,
