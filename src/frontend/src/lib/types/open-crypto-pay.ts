@@ -1,3 +1,5 @@
+import type { Token } from '$lib/types/token';
+
 export interface Address {
 	street?: string;
 	houseNumber?: string;
@@ -64,5 +66,11 @@ export interface OpenCryptoPayResponse {
 
 export interface PaymentMethodData {
 	assets: Map<string, { amount: string }>;
+	minFee?: number;
+}
+
+export interface PayableToken extends Token {
+	amount: string;
+	tokenNetwork: string;
 	minFee?: number;
 }

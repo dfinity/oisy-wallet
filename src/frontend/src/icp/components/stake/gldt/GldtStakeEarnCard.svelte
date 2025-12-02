@@ -12,6 +12,7 @@
 	import GetTokenModal from '$lib/components/get-token/GetTokenModal.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import StakeModal from '$lib/components/stake/StakeModal.svelte';
+	import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
@@ -155,11 +156,13 @@
 				{/snippet}
 
 				{#snippet modal()}
-					<GetTokenModal
-						{currentApy}
-						receiveAddress={$icrcAccountIdentifierText}
-						token={gldtToken}
-					/>
+					<SwapContexts>
+						<GetTokenModal
+							{currentApy}
+							receiveAddress={$icrcAccountIdentifierText}
+							token={gldtToken}
+						/>
+					</SwapContexts>
 				{/snippet}
 			</ButtonWithModal>
 
