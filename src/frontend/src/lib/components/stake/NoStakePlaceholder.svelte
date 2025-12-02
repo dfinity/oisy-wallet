@@ -18,6 +18,6 @@
 		<h5>{$i18n.stake.text.title_empty}</h5>
 	</div>
 	{#if !hideDescription}
-		<span class="text-tertiary">{$i18n.stake.text.description_empty}</span>
+		<span class="text-tertiary text-center">{$i18n.stake.text.description_empty}</span>
 	{/if}
 </div>
