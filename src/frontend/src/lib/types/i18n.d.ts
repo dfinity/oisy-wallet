@@ -1485,6 +1485,8 @@ interface I18nStake {
 		description_empty: string;
 		full_history: string;
 		recent_history: string;
+		gldt_stake_carousel_slide_title: string;
+		gldt_stake_carousel_slide_cta: string;
 	};
 	error: { unexpected_error_on_withdraw: string };
 	terms: {
