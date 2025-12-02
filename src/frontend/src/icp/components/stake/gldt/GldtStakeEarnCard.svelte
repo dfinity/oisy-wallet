@@ -63,8 +63,6 @@
 			: 0
 	);
 
-	let getMoreTokensButtonDisabled = $derived(potentialGldtTokenBalance <= 0);
-
 	const enableStakingToken = async () => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
@@ -142,9 +140,9 @@
 		{#if nonNullish(gldtToken)}
 			<ButtonWithModal isOpen={$modalGetToken} onOpen={modalStore.openGetToken}>
 				{#snippet button(onclick)}
-					<Button disabled={gldtStakeButtonDisabled} fullWidth {onclick}>
+					<Button fullWidth {onclick}>
 						{replacePlaceholders(
-							getMoreTokensButtonDisabled
+							potentialGldtTokenBalance <= 0
 								? $i18n.stake.text.get_tokens
 								: $i18n.stake.text.get_tokens_with_amount,
 							{
