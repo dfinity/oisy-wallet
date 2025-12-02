@@ -197,18 +197,7 @@ describe('open-crypto-pay.service', () => {
 			tokenNetwork: 'Bitcoin'
 		} as unknown as PayableToken;
 
-		const mockFeeDataResponse: {
-			feeData: {
-				gasPrice: null;
-				maxFeePerGas: bigint;
-				maxPriorityFeePerGas: bigint;
-			};
-			provider: InfuraProvider;
-			params: {
-				from: string;
-				to: string;
-			};
-		} = {
+		const createMockFeeDataResponse = () => ({
 			feeData: {
 				gasPrice: null,
 				maxFeePerGas: 12n,
@@ -223,12 +212,14 @@ describe('open-crypto-pay.service', () => {
 				from: userAddress,
 				to: userAddress
 			}
-		};
+		});
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockResolvedValue(mockFeeDataResponse);
+			// Створюємо новий mock response для кожного тесту
+			const mockResponse = createMockFeeDataResponse();
+			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockResolvedValue(mockResponse);
 			vi.spyOn(feeServices, 'getErc20FeeData').mockResolvedValue(30n);
 		});
 
@@ -242,6 +233,8 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should calculate fee for single native ETH token', async () => {
+			const mockResponse = createMockFeeDataResponse();
+
 			const result = await calculateTokensWithFees({
 				tokens: [mockPayableToken],
 				userAddress
@@ -252,14 +245,16 @@ describe('open-crypto-pay.service', () => {
 				...mockPayableToken,
 				fee: {
 					feeInWei: expect.any(BigInt),
-					feeData: mockFeeDataResponse.feeData,
+					feeData: mockResponse.feeData,
 					estimatedGasLimit: expect.any(BigInt)
 				}
 			});
 		});
 
 		it('should calculate fee for native ETH using ETH_BASE_FEE when estimatedGas is lower', async () => {
-			vi.mocked(mockFeeDataResponse.provider.safeEstimateGas).mockResolvedValue(10n);
+			const mockResponse = createMockFeeDataResponse();
+
+			vi.mocked(mockResponse.provider.safeEstimateGas).mockResolvedValue(10n);
 
 			const result = await calculateTokensWithFees({
 				tokens: [mockPayableToken],
@@ -322,10 +317,12 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should return token without fee when maxFeePerGas is null', async () => {
+			const mockResponse = createMockFeeDataResponse();
+
 			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockResolvedValue({
-				...mockFeeDataResponse,
+				...mockResponse,
 				feeData: {
-					...mockFeeDataResponse.feeData,
+					...mockResponse.feeData,
 					maxFeePerGas: null as unknown as bigint
 				}
 			});
@@ -340,9 +337,9 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should return token without fee when estimatedGasLimit is null', async () => {
-			vi.mocked(mockFeeDataResponse.provider.safeEstimateGas).mockResolvedValue(
-				null as unknown as bigint
-			);
+			const mockResponse = createMockFeeDataResponse();
+
+			vi.mocked(mockResponse.provider.safeEstimateGas).mockResolvedValue(null as unknown as bigint);
 
 			const result = await calculateTokensWithFees({
 				tokens: [mockPayableToken],
@@ -354,10 +351,12 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should return token without fee when gasPrice is ZERO', async () => {
+			const mockResponse = createMockFeeDataResponse();
+
 			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockResolvedValue({
-				...mockFeeDataResponse,
+				...mockResponse,
 				feeData: {
-					...mockFeeDataResponse.feeData,
+					...mockResponse.feeData,
 					maxFeePerGas: ZERO
 				}
 			});
@@ -385,15 +384,17 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should use token.minFee if higher than maxFeePerGas', async () => {
+			const mockResponse = createMockFeeDataResponse();
+
 			const tokenWithHighMinFee = {
 				...mockPayableToken,
 				minFee: 1000
 			};
 
 			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockResolvedValue({
-				...mockFeeDataResponse,
+				...mockResponse,
 				feeData: {
-					...mockFeeDataResponse.feeData,
+					...mockResponse.feeData,
 					maxFeePerGas: 1n
 				}
 			});
@@ -432,11 +433,13 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should process all tokens even if some fail', async () => {
+			const mockResponse = createMockFeeDataResponse();
+
 			const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 			vi.spyOn(feeServices, 'getEthFeeDataWithProvider')
 				.mockRejectedValueOnce(new Error('Network error'))
-				.mockResolvedValueOnce(mockFeeDataResponse);
+				.mockResolvedValueOnce(mockResponse);
 
 			const tokens = [
 				mockPayableToken,
