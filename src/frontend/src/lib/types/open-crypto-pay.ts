@@ -1,6 +1,6 @@
+import type { EthFeeResult } from '$eth/types/pay';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
-import type { TransactionFeeData } from '$lib/types/transaction';
 
 export interface Address {
 	street?: string;
@@ -75,12 +75,6 @@ export interface PayableToken extends Token {
 	amount: string;
 	tokenNetwork: string;
 	minFee?: number;
-}
-
-export interface EthFeeResult {
-	feeInWei: bigint;
-	feeData: Omit<TransactionFeeData, 'gas'>;
-	estimatedGasLimit: bigint;
 }
 
 export interface PayableTokenWithFees extends PayableToken {
