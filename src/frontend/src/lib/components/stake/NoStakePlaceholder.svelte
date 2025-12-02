@@ -1,5 +1,5 @@
 <script lang="ts">
-  	import { notEmptyString } from '@dfinity/utils';
+	import { notEmptyString } from '@dfinity/utils';
 	import noEarningBanner from '$lib/assets/earning/no-earning-banner.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
