@@ -103,6 +103,8 @@ export const mapTokenToPayableToken = ({
 		return;
 	}
 
+	// We check token.symbol because OpenCryptoPay identifies assets by their symbol,
+	// not by token IDs or contract addresses.
 	const assetData = methodData.assets.get(token.symbol);
 
 	if (isNullish(assetData)) {
