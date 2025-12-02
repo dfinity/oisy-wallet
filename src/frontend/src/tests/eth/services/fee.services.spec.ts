@@ -50,7 +50,7 @@ describe('eth-fee-data.services', () => {
 					maxFeePerGas: 12n,
 					maxPriorityFeePerGas: 7n
 				},
-				providers: expect.any(Object),
+				provider: expect.any(Object),
 				params: {
 					from: fromAddr,
 					to: toAddr
@@ -259,10 +259,10 @@ describe('eth-fee-data.services', () => {
 				to: toAddr
 			});
 
-			expect(result.providers).toBeDefined();
-			expect(result.providers).toHaveProperty('getFeeData');
-			expect(result.providers).toHaveProperty('safeEstimateGas');
-			expect(result.providers).toHaveProperty('estimateGas');
+			expect(result.provider).toBeDefined();
+			expect(result.provider).toHaveProperty('getFeeData');
+			expect(result.provider).toHaveProperty('safeEstimateGas');
+			expect(result.provider).toHaveProperty('estimateGas');
 		});
 	});
 });
