@@ -15,7 +15,7 @@
 
 	let { hideDescription = false }: Props = $props();
 
-	const usdAmountThreshold = 20;
+	const USD_AMOUNT_THRESHOLD = 20;
 </script>
 
 <div class="flex flex-col items-center gap-5 px-6 py-10">
@@ -26,7 +26,7 @@
 			<h5>{$i18n.stake.text.title_empty_1}</h5>
 		{/if}
 		<h5 class="text-brand-primary">
-			{#if $highestEarningPotentialUsd >= usdAmountThreshold}
+			{#if $highestEarningPotentialUsd >= USD_AMOUNT_THRESHOLD}
 				<span class="text-4xl font-bold">
 					{formatCurrency({
 						value: $highestEarningPotentialUsd,
