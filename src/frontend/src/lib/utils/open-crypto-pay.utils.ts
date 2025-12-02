@@ -90,7 +90,7 @@ export const mapTokenToPayableToken = ({
 }: {
 	token: Token;
 	methodDataMap: Map<string, PaymentMethodData>;
-}): Partial<PayableToken> | undefined => {
+}): PayableToken | undefined => {
 	const tokenNetwork = token.network.pay?.openCryptoPay;
 
 	if (isNullish(tokenNetwork)) {
