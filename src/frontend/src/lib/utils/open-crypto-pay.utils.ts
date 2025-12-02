@@ -104,7 +104,7 @@ export const mapTokenToPayableToken = ({
 	}
 
 	// We check token.symbol because OpenCryptoPay identifies assets by their symbol,
-	// not by token IDs or contract addresses. This can lead to issues if multiple tokens share the same symbol. Careful mapping is required.
+	// not by token IDs or contract addresses. This can lead to issues if multiple tokens share the same symbol and the same network. Careful mapping is required.
 	const assetData = methodData.assets.get(token.symbol);
 
 	if (isNullish(assetData)) {
