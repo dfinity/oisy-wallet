@@ -8,12 +8,12 @@ import type {
 } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
+import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import {
 	CkETHOrchestratorCanister,
 	type ManagedCanisters,
 	type OrchestratorInfo
-} from '@dfinity/cketh';
-import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+} from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';

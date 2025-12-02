@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
-	import { getDailyAnalytics, getPosition } from '$icp/api/gldt_stake.api';
+	import { getConfig, getDailyAnalytics, getPosition } from '$icp/api/gldt_stake.api';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import { authIdentity } from '$lib/derived/auth.derived';
 
@@ -28,6 +28,21 @@
 		}
 	};
 
+	const loadConfig = async () => {
+		if (isNullish($authIdentity)) {
+			gldtStakeStore.reset();
+			return;
+		}
+
+		try {
+			const config = await getConfig({ identity: $authIdentity });
+
+			gldtStakeStore.setConfig(config);
+		} catch (_err: unknown) {
+			gldtStakeStore.resetConfig();
+		}
+	};
+
 	const loadGldStakePosition = async () => {
 		if (isNullish($authIdentity)) {
 			gldtStakeStore.reset();
@@ -46,6 +61,7 @@
 	$effect(() => {
 		loadGldStakeApy();
 		loadGldStakePosition();
+		loadConfig();
 	});
 </script>
 

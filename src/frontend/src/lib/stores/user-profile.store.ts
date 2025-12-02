@@ -1,4 +1,4 @@
-import type { UserProfile } from '$declarations/backend/declarations/backend.did';
+import type { UserProfile } from '$declarations/backend/backend.did';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 

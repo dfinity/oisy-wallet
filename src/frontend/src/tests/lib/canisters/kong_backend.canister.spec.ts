@@ -1,4 +1,4 @@
-import type { _SERVICE as KongBackendService } from '$declarations/kong_backend/declarations/kong_backend.did';
+import type { _SERVICE as KongBackendService } from '$declarations/kong_backend/kong_backend.did';
 import {
 	IC_CKETH_INDEX_CANISTER_ID,
 	IC_CKETH_LEDGER_CANISTER_ID,

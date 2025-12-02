@@ -8,6 +8,7 @@
 			"done": "Hotovo",
 			"close": "Zavřít",
 			"change": "Změnit",
+			"continue": "",
 			"apply": "Použít",
 			"retry": "Zkusit znovu",
 			"refresh": "Aktualizovat",
@@ -39,7 +40,8 @@
 			"confirm": "",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -54,7 +56,8 @@
 			"switch_language": "Přepnout jazyk",
 			"switch_currency": "Přepnout měnu",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
@@ -68,7 +71,7 @@
 			"dapp_explorer": "Prozkoumat",
 			"activity": "Aktivita",
 			"airdrops": "Odměny",
-			"earning": "Vydělávat a odměny",
+			"earning": "Vydělávat",
 			"source_code_on_github": "Zdrojový kód na GitHubu",
 			"view_on_explorer": "Zobrazit v průzkumníku",
 			"source_code": "Zdrojový kód",
@@ -383,12 +386,27 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"pacifica": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -614,6 +632,7 @@
 			"spl_custom_tokens": "Chyba při načítání vlastních tokenů SPL.",
 			"erc20_user_token": "Chyba při povolování dvojitého tokenu ERC20.",
 			"icrc_custom_token": "Chyba při načítání vlastního tokenu ICRC.",
+			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "Vaše peněženka vyžaduje některá počáteční data, která ještě nebyla načtena. Zkuste to prosím znovu.",
 			"allow_signing": "Při nastavování vaší peněženky pro podepisování došlo k problému. Byli jste odhlášeni. Pokud problém přetrvává, obraťte se na podporu.",
 			"waiting_for_allowed_cycles_aborted": "Příprava cyklů účetní knihy byla přerušena. Zkuste se prosím přihlásit později.",
@@ -707,9 +726,11 @@
 				"display_account_id_qr": "Zobrazit ID ICP Účtu jako QR kód",
 				"account_id_copied": "ID ICP Účtu zkopírováno do schránky.",
 				"principal": "Hlavní ICP ID",
+				"principal_title": "",
 				"internet_computer_principal_copied": "Hlavní ICP ID zkopírováno do schránky.",
 				"display_internet_computer_principal_qr": "Zobrazit Hlavní ICP ID jako QR kód",
 				"icp_account": "ID ICP Účtu (pro burzy)",
+				"icp_account_title": "",
 				"icp_account_copied": "ID ICP Účtu zkopírováno do schránky.",
 				"display_icp_account_qr": "Zobrazit ID ICP Účtu jako QR kód"
 			}
@@ -722,6 +743,7 @@
 				"learn_how_to_convert": "Zjistěte, jak převést $token na $ckToken",
 				"metamask": "Přijmout z Metamask",
 				"ethereum": "Ethereum",
+				"ethereum_title": "",
 				"ethereum_address": "Adresa",
 				"ethereum_address_copied": "Adresa Ethereum zkopírována do schránky.",
 				"display_ethereum_address_qr": "Zobrazit adresu Ethereum jako QR kód"
@@ -739,8 +761,11 @@
 				"checking_incoming": "Kontrola příchozích BTC...",
 				"refreshing_wallet": "Aktualizace peněženky...",
 				"bitcoin_address": "Bitcoin",
+				"bitcoin_address_title": "",
 				"bitcoin_testnet_address": "Bitcoin (Testnet)",
+				"bitcoin_testnet_address_title": "",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
+				"bitcoin_regtest_address_title": "",
 				"display_bitcoin_address_qr": "Zobrazit adresu Bitcoin jako QR kód",
 				"bitcoin_address_copied": "Adresa Bitcoin zkopírována do schránky.",
 				"from_network": "Převeďte Bitcoin na síti BTC na tuto adresu, abyste obdrželi ckBTC.",
@@ -757,8 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Adresa Solana",
+				"solana_address_title": "",
 				"solana_devnet_address": "Adresa Solana Devnet",
+				"solana_devnet_address_title": "",
 				"solana_local_address": "Místní adresa Solana",
+				"solana_local_address_title": "",
 				"solana_address_copied": "Adresa Solana zkopírována do schránky",
 				"display_solana_address_qr": "Zobrazit adresu Solana jako QR kód"
 			}
@@ -876,7 +904,24 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": ""
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -1733,7 +1778,10 @@
 	"earning": {
 		"text": {
 			"title": "Vydělat",
-			"earning_opportunities": ""
+			"tab_title": "",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
 			"gldt": {
@@ -1763,9 +1811,11 @@
 			"stake_page_title": "",
 			"gldt_stake_page_description": "",
 			"stake": "",
+			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
 			"unstake": "",
+			"unstake_now": "",
 			"unstaking": "",
 			"unstake_token": "",
 			"enable_token_text": "",
@@ -1778,9 +1828,7 @@
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"visit_provider": "",
-			"current_apy": "",
 			"current_apy_label": "",
-			"current_apy_info": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1792,10 +1840,76 @@
 			"immediate_dissolve_terms": "",
 			"amount_to_receive": "",
 			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
 			"claim_reward": "",
 			"claim_rewards": "",
+			"claim_reward_short": "",
 			"claim_now": "",
-			"claiming": ""
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": "",
+			"gldt_stake_carousel_slide_title": "",
+			"gldt_stake_carousel_slide_cta": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": ""
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "",
+				"item1_description": "",
+				"item2_title_1": "",
+				"item2_title_2": "",
+				"item3_title": "",
+				"item3_description": "",
+				"item4_title": "",
+				"item4_description": "",
+				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
+			}
+		},
+		"alt": {
+			"placeholder_image": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
 		}
 	},
 	"temporal": {

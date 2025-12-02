@@ -2,14 +2,14 @@ import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
 import { mockPendingUtxo } from '$tests/mocks/ckbtc.mock';
-import type { PendingUtxo } from '@dfinity/ckbtc';
+import type { PendingUtxo } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 vi.mock('@dfinity/utils', async () => {
 	const mod = await vi.importActual<object>('@dfinity/utils');
 	return {
 		...mod,
-		uint8ArrayToHexString: (v: Uint8Array | number[]) => v
+		uint8ArrayToHexString: (v: Uint8Array) => v
 	};
 });
 

@@ -1,9 +1,15 @@
 import {
 	clearIdbBtcAddressMainnet,
+	clearIdbBtcAddressTestnet,
 	clearIdbEthAddress,
+	clearIdbSolAddressDevnet,
+	clearIdbSolAddressLocal,
 	clearIdbSolAddressMainnet,
 	deleteIdbBtcAddressMainnet,
+	deleteIdbBtcAddressTestnet,
 	deleteIdbEthAddress,
+	deleteIdbSolAddressDevnet,
+	deleteIdbSolAddressLocal,
 	deleteIdbSolAddressMainnet,
 	getIdbBtcAddressMainnet,
 	getIdbEthAddress,
@@ -56,8 +62,14 @@ describe('idb-addresses.api', () => {
 			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
 		});
 
-		it('should delete BTC address', async () => {
+		it('should delete BTC mainnet address', async () => {
 			await deleteIdbBtcAddressMainnet(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+		});
+
+		it('should delete BTC Testnet address', async () => {
+			await deleteIdbBtcAddressTestnet(mockPrincipal);
 
 			expect(idbKeyval.del).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
 		});
@@ -146,8 +158,20 @@ describe('idb-addresses.api', () => {
 			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
 		});
 
-		it('should delete SOL address', async () => {
+		it('should delete SOL mainnet address', async () => {
 			await deleteIdbSolAddressMainnet(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+		});
+
+		it('should delete SOL devnet address', async () => {
+			await deleteIdbSolAddressDevnet(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+		});
+
+		it('should delete SOL local address', async () => {
+			await deleteIdbSolAddressLocal(mockPrincipal);
 
 			expect(idbKeyval.del).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
 		});
@@ -176,6 +200,14 @@ describe('idb-addresses.api', () => {
 		});
 	});
 
+	describe('clearIdbBtcAddressTestnet', () => {
+		it('should clear BTC addresses', async () => {
+			await clearIdbBtcAddressTestnet();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
 	describe('clearIdbEthAddress', () => {
 		it('should clear ETH addresses', async () => {
 			await clearIdbEthAddress();
@@ -187,6 +219,22 @@ describe('idb-addresses.api', () => {
 	describe('clearIdbSolAddressMainnet', () => {
 		it('should clear SOL addresses', async () => {
 			await clearIdbSolAddressMainnet();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbSolAddressDevnet', () => {
+		it('should clear SOL addresses', async () => {
+			await clearIdbSolAddressDevnet();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbSolAddressLocal', () => {
+		it('should clear SOL addresses', async () => {
+			await clearIdbSolAddressLocal();
 
 			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
 		});

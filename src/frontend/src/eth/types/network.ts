@@ -1,4 +1,4 @@
-import type { Network, NetworkAppMetadata } from '$lib/types/network';
+import type { Network } from '$lib/types/network';
 import type { Network as AlchemyNetwork } from 'alchemy-sdk';
 import type { Networkish } from 'ethers/providers';
 
@@ -17,4 +17,4 @@ interface NetworkProviders {
 	};
 }
 
-export type EthereumNetwork = Network & NetworkChainId & NetworkAppMetadata & NetworkProviders;
+export type EthereumNetwork = Network & NetworkChainId & NetworkProviders;

@@ -8,6 +8,7 @@
 			"done": "Done",
 			"close": "Close",
 			"change": "Change",
+			"continue": "Continue",
 			"apply": "Apply",
 			"retry": "Retry",
 			"refresh": "Refresh",
@@ -39,7 +40,8 @@
 			"confirm": "Confirm",
 			"more": "More",
 			"less": "Less",
-			"ellipsis": "…"
+			"ellipsis": "…",
+			"learn_more": "Learn more"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -54,7 +56,8 @@
 			"switch_language": "Switch language",
 			"switch_currency": "Switch currency",
 			"more": "Show full text",
-			"less": "Show less text"
+			"less": "Show less text",
+			"learn_more": "Follow the link to learn more"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
@@ -68,7 +71,7 @@
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
 			"airdrops": "Rewards",
-			"earning": "Earn & Rewards",
+			"earning": "Earn",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -383,6 +386,11 @@
 				"one_liner": "Decentralized alternative to Signal.",
 				"description": "ICPanda Message (dMsg.net) is a decentralized end-to-end encrypted messaging application fully running on the Internet Computer blockchain."
 			},
+			"opensea": {
+				"name": "OpenSea",
+				"one_liner": "OpenSea, exchange everything — token trading and NFT marketplace. Welcome to the best place to discover, trade, and create onchain.",
+				"description": "OpenSea is the world's largest decentralized marketplace for non-fungible tokens (NFTs), where users can create, buy, sell, and trade unique digital assets like art, collectibles, and virtual items. Founded in 2017, it operates on multiple blockchains and allows users to connect a cryptocurrency wallet to manage their digital assets."
+			},
 			"pacifica": {
 				"name": "Pacifica",
 				"one_liner": "Pacifica is a decentralized perpetual exchange (DEX) built on the Solana network that allows users to trade perpetual crypto futures with leverage.",
@@ -392,6 +400,16 @@
 				"name": "Magic Eden",
 				"one_liner": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains.",
 				"description": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains. It is known for its user-friendly interface, low transaction fees, and various tools for creators and collectors."
+			},
+			"solayer": {
+				"name": "Solayer",
+				"one_liner": "A high-speed DeFi platform on Solana offering native liquid staking (sSOL), a stablecoin (sUSD), and real-world spending with the Emerald Card.",
+				"description": "Solayer is a vertically integrated blockchain stack built on Solana, leveraging InfiniSVM for ultra-low latency and high throughput- scaling to over 1 million transactions per second. It integrates native staking (sSOL), a stablecoin (sUSD), and real-world payments via the Emerald Card. Solayer’s architecture combines DeFi, payments, and infrastructure under a single high-performance chain."
+			},
+			"kamino": {
+				"name": "Kamino",
+				"one_liner": "Kamino is the largest borrowing and lending protocol on Solana, powering a significant share of the network’s DeFi activity.",
+				"description": "Kamino is a decentralized finance (DeFi) platform on the Solana blockchain that integrates liquidity provision, lending, and leveraged trading into a single suite of products. It simplifies these DeFi strategies, especially through its automated liquidity vaults and Kamino Lend system, and uses concentrated liquidity management to increase capital efficiency for its users."
 			}
 		}
 	},
@@ -614,6 +632,7 @@
 			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
+			"ext_custom_tokens": "Error while loading the EXT custom tokens.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
 			"waiting_for_allowed_cycles_aborted": "Aborted cycles ledger preperation. Please try to login later",
@@ -707,9 +726,11 @@
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard.",
 				"principal": "ICP Principal",
+				"principal_title": "ICP wallet address - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard.",
 				"display_internet_computer_principal_qr": "Display Internet Computer Principal as a QR code",
 				"icp_account": "ICP Account (for exchanges)",
+				"icp_account_title": "ICP wallet address - ICP token only",
 				"icp_account_copied": "ICP Account copied to clipboard.",
 				"display_icp_account_qr": "Display ICP Account as a QR code"
 			}
@@ -722,6 +743,7 @@
 				"learn_how_to_convert": "Learn how to convert $token to $ckToken",
 				"metamask": "Receive from Metamask",
 				"ethereum": "Ethereum",
+				"ethereum_title": "Ethereum wallet address",
 				"ethereum_address": "Address",
 				"ethereum_address_copied": "Ethereum address copied to clipboard.",
 				"display_ethereum_address_qr": "Display Ethereum address as a QR code"
@@ -739,8 +761,11 @@
 				"checking_incoming": "Checking for incoming BTC...",
 				"refreshing_wallet": "Refreshing wallet...",
 				"bitcoin_address": "Bitcoin",
+				"bitcoin_address_title": "Bitcoin wallet address",
 				"bitcoin_testnet_address": "Bitcoin (Testnet)",
+				"bitcoin_testnet_address_title": "Bitcoin (Testnet) wallet address",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
+				"bitcoin_regtest_address_title": "Bitcoin (Regtest) wallet address",
 				"display_bitcoin_address_qr": "Display Bitcoin Address as a QR code",
 				"bitcoin_address_copied": "Bitcoin Address copied to clipboard.",
 				"from_network": "Transfer Bitcoin on the BTC network to this address to receive ckBTC.",
@@ -757,8 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Solana Address",
+				"solana_address_title": "Solana wallet address",
 				"solana_devnet_address": "Solana Devnet Address",
+				"solana_devnet_address_title": "Solana Devnet wallet address",
 				"solana_local_address": "Solana Local Address",
+				"solana_local_address_title": "Solana Local wallet address",
 				"solana_address_copied": "Solana address copied to clipboard",
 				"display_solana_address_qr": "Display Solana address as QR code"
 			}
@@ -876,7 +904,24 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "Scan QR Code"
+			"scan_qr_code": "Scan QR Code",
+			"pay_to": "Pay to $receipt",
+			"powered_by": "Powered by",
+			"receipt": "Receipt",
+			"name": "Name",
+			"address": "Address",
+			"country": "Country",
+			"phone_number": "Phone number",
+			"email_address": "Email address",
+			"website": "Website",
+			"enter_manually": "Enter manually",
+			"url_or_code": "URL or the code",
+			"enter_or_paste_code": "Enter or paste code",
+			"scan": "Scan",
+			"pay": "Pay"
+		},
+		"error": {
+			"code_link_is_not_valid": "Code/link is not valid"
 		}
 	},
 	"convert": {
@@ -1733,7 +1778,10 @@
 	"earning": {
 		"text": {
 			"title": "Earn",
-			"earning_opportunities": "Earning opportunities"
+			"tab_title": "Earning",
+			"earning_opportunities": "Earning opportunities",
+			"header_title": "Welcome to Earn!",
+			"header_description": "Grow your crypto portfolio by staking your tokens and earning rewards. Choose from various earning strategies based on your risk tolerance."
 		},
 		"cards": {
 			"gldt": {
@@ -1763,9 +1811,11 @@
 			"stake_page_title": "$provider Staking",
 			"gldt_stake_page_description": "Stake GLDT tokens to earn rewards backed by physical gold",
 			"stake": "Stake $token_symbol",
+			"stake_now": "Stake now",
 			"stake_amount": "Stake $amount $token_symbol",
 			"not_enough_to_stake": "No $token_symbol to stake",
 			"unstake": "Unstake",
+			"unstake_now": "Unstake now",
 			"unstaking": "Unstaking...",
 			"unstake_token": "Unstake $token_symbol",
 			"enable_token_text": "You need to enable $token_symbol",
@@ -1778,9 +1828,7 @@
 			"active_earning": "Active earning",
 			"active_earning_per_year": "$amount/year",
 			"visit_provider": "Visit website",
-			"current_apy": "Current APY $apy%",
 			"current_apy_label": "Current APY",
-			"current_apy_info": "Based on the latest rewards. The effective APY depends on the amount of $token staked in total each day.",
 			"stake_review_subtitle": "You stake",
 			"unstake_review_subtitle": "You unstake",
 			"delayed_dissolve": "Receive with a delay",
@@ -1792,10 +1840,76 @@
 			"immediate_dissolve_terms": "You will receive your $token immediately but are charged a fee on the $token tokens you are unlocking.",
 			"amount_to_receive": "Amount to receive",
 			"unclaimed_rewards": "Unclaimed rewards",
+			"unlock_requests": "Unlock requests",
+			"unlocking_in": "Unlocking $time",
+			"unlocked": "Unlocked",
+			"withdraw": "Withdraw",
+			"withdraw_successful": "Tokens have been successfully withdrawn.",
 			"claim_reward": "Claim reward",
 			"claim_rewards": "Claim rewards",
+			"claim_reward_short": "Claim",
 			"claim_now": "Claim now",
-			"claiming": "Claiming..."
+			"claiming": "Claiming...",
+			"get_tokens_with_amount": "Get up to $amount $token_symbol",
+			"get_tokens": "Get more $token_symbol",
+			"reward_claimed": "Reward claimed",
+			"staked": "Staked",
+			"unstaked": "Unstaked",
+			"title_empty": "Your staking positions will appear here",
+			"description_empty": "It looks like you haven't staked any tokens yet",
+			"full_history": "Show full history",
+			"recent_history": "Close full history",
+			"gldt_stake_carousel_slide_title": "Earn APY with Gold DAO Staking",
+			"gldt_stake_carousel_slide_cta": "Learn more"
+		},
+		"error": {
+			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens."
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "Current APY $apy%",
+				"item1_description": "Based on the latest rewards. The effective APY depends on the amount of $token staked in total each day.",
+				"item2_title_1": "Staking rewards are being paid in ",
+				"item2_title_2": " GOLDAO tokens",
+				"item3_title": "Unlock delay of 1 week",
+				"item3_description": "When unlocking GLDT from staking, the tokens are locked for 1 week without receiving any further rewards, before they can be withdrawn. You can pay a 5% fee on your stake to unlock immediately.",
+				"item4_title": "Age bonus",
+				"item4_description": "GLDT stakes start obtaining an age bonus from day 1. The older the stakes, the bigger the age bonus, growing linearly at 100% per year.",
+				"item5_title": "When you start unlocking your GLDT stake, you will no longer receive new rewards"
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "What is GLDT",
+				"description": "GLDT stands for “Gold Token”, being a fungible token backed by GLD NFTs. GLD NFTs are NFTs that represent irrefutable ownership of physical gold bars. 1 GLDT represents exactly 0.01g of gold, and GLD NFTs can be swapped at a ratio of 1g for 100 GLDTs.",
+				"fact_1_title": "Backed by real gold",
+				"fact_1_description": "Every GLDT token is backed by actual gold stored in secure vaults",
+				"fact_2_title": "Flexible terms",
+				"fact_2_description": "No lock-up periods, stake and unstake anytime you want",
+				"fact_3_title": "Stable returns",
+				"fact_3_description": "Earn $apy% APY with minimal volatility risk",
+				"fact_3_description_fallback": "Earn consistent rewards with minimal volatility risk"
+			}
+		},
+		"alt": {
+			"placeholder_image": "No staked tokens yet"
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "Get $token",
+			"swap_to_token": "Swap to $token",
+			"ready_to_swap": "Ready to swap",
+			"convert_assets": "Convert Assets",
+			"convertible_assets": "Convertible assets",
+			"how_to_convert": "How to convert",
+			"get_more_token": "Get more $token",
+			"receive_token": "Receive $token",
+			"receive_token_title": "Receive $token directly",
+			"receive_token_text": "Receive $token directly to your account",
+			"buy_assets": "Buy assets",
+			"buy_assets_title": "Buy convertible assets",
+			"buy_assets_text": "Buy more assets and convert to $token"
 		}
 	},
 	"temporal": {

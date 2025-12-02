@@ -5,7 +5,7 @@ import type {
 	ReferrerInfo,
 	RewardInfo,
 	UserData
-} from '$declarations/rewards/declarations/rewards.did';
+} from '$declarations/rewards/rewards.did';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as rewardApi from '$lib/api/reward.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -480,8 +480,8 @@ describe('reward.services', () => {
 			vi.clearAllMocks();
 		});
 
-		vi.spyOn(rewardApi, 'getUserInfo')
-			.mockResolvedValueOnce({
+		it('should calculate correct sums for all rewards', async () => {
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce({
 				...baseMockUserData,
 				usage_awards: [
 					[
@@ -493,8 +493,24 @@ describe('reward.services', () => {
 						getMockReward({ ledgerCanisterId: mockIcpToken.ledgerCanisterId, amount: 3000n })
 					]
 				]
-			})
-			.mockResolvedValueOnce({
+			});
+
+			const result = await getUserRewardsTokenAmounts({
+				ckBtcToken: mockCkBtcToken,
+				ckUsdcToken: mockCkUsdcToken,
+				icpToken: mockIcpToken,
+				identity: mockIdentity,
+				campaignId: defaultCampaignId
+			});
+
+			expect(result.ckBtcReward.toString()).toEqual('3000');
+			expect(result.ckUsdcReward.toString()).toEqual('4000');
+			expect(result.icpReward.toString()).toEqual('3000');
+			expect(result.amountOfRewards.toString()).toEqual('6');
+		});
+
+		it('should ignore invalid canister ids', async () => {
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce({
 				...baseMockUserData,
 				usage_awards: [
 					[
@@ -504,8 +520,24 @@ describe('reward.services', () => {
 						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 1000n })
 					]
 				]
-			})
-			.mockResolvedValueOnce({
+			});
+
+			const result = await getUserRewardsTokenAmounts({
+				ckBtcToken: mockCkBtcToken,
+				ckUsdcToken: mockCkUsdcToken,
+				icpToken: mockIcpToken,
+				identity: mockIdentity,
+				campaignId: defaultCampaignId
+			});
+
+			expect(result.ckBtcReward.toString()).toEqual('1000');
+			expect(result.ckUsdcReward.toString()).toEqual('0');
+			expect(result.icpReward.toString()).toEqual('0');
+			expect(result.amountOfRewards.toString()).toEqual('1');
+		});
+
+		it('should ignore invalid canister ids but still return values', async () => {
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce({
 				...baseMockUserData,
 				usage_awards: [
 					[
@@ -517,8 +549,24 @@ describe('reward.services', () => {
 						getMockReward({ ledgerCanisterId: mockIcpToken.ledgerCanisterId, amount: ZERO })
 					]
 				]
-			})
-			.mockResolvedValueOnce({
+			});
+
+			const result = await getUserRewardsTokenAmounts({
+				ckBtcToken: mockCkBtcToken,
+				ckUsdcToken: mockCkUsdcToken,
+				icpToken: mockIcpToken,
+				identity: mockIdentity,
+				campaignId: defaultCampaignId
+			});
+
+			expect(result.ckBtcReward.toString()).toEqual('0');
+			expect(result.ckUsdcReward.toString()).toEqual('0');
+			expect(result.icpReward.toString()).toEqual('0');
+			expect(result.amountOfRewards.toString()).toEqual('3');
+		});
+
+		it('should only load balances of a specific campaign', async () => {
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce({
 				...baseMockUserData,
 				usage_awards: [
 					[
@@ -544,52 +592,6 @@ describe('reward.services', () => {
 				]
 			});
 
-		it('should calculate correct sums for all rewards', async () => {
-			const result = await getUserRewardsTokenAmounts({
-				ckBtcToken: mockCkBtcToken,
-				ckUsdcToken: mockCkUsdcToken,
-				icpToken: mockIcpToken,
-				identity: mockIdentity,
-				campaignId: defaultCampaignId
-			});
-
-			expect(result.ckBtcReward.toString()).toEqual('3000');
-			expect(result.ckUsdcReward.toString()).toEqual('4000');
-			expect(result.icpReward.toString()).toEqual('3000');
-			expect(result.amountOfRewards.toString()).toEqual('6');
-		});
-
-		it('should ignore invalid canister ids', async () => {
-			const result = await getUserRewardsTokenAmounts({
-				ckBtcToken: mockCkBtcToken,
-				ckUsdcToken: mockCkUsdcToken,
-				icpToken: mockIcpToken,
-				identity: mockIdentity,
-				campaignId: defaultCampaignId
-			});
-
-			expect(result.ckBtcReward.toString()).toEqual('1000');
-			expect(result.ckUsdcReward.toString()).toEqual('0');
-			expect(result.icpReward.toString()).toEqual('0');
-			expect(result.amountOfRewards.toString()).toEqual('1');
-		});
-
-		it('should ignore invalid canister ids but still return values', async () => {
-			const result = await getUserRewardsTokenAmounts({
-				ckBtcToken: mockCkBtcToken,
-				ckUsdcToken: mockCkUsdcToken,
-				icpToken: mockIcpToken,
-				identity: mockIdentity,
-				campaignId: defaultCampaignId
-			});
-
-			expect(result.ckBtcReward.toString()).toEqual('0');
-			expect(result.ckUsdcReward.toString()).toEqual('0');
-			expect(result.icpReward.toString()).toEqual('0');
-			expect(result.amountOfRewards.toString()).toEqual('3');
-		});
-
-		it('should only load balances of a specific campaign', async () => {
 			const result = await getUserRewardsTokenAmounts({
 				ckBtcToken: mockCkBtcToken,
 				ckUsdcToken: mockCkUsdcToken,

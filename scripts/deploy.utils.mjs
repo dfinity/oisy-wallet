@@ -1,5 +1,5 @@
-import { ICManagementCanister, InstallMode } from '@dfinity/ic-management';
 import { nonNullish } from '@dfinity/utils';
+import { ICManagementCanister, InstallMode } from '@icp-sdk/canisters/ic-management';
 import { IDL } from '@icp-sdk/core/candid';
 import { Principal } from '@icp-sdk/core/principal';
 import { copyFile, readFile } from 'node:fs/promises';

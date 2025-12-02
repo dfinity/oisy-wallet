@@ -20,8 +20,8 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
-import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
 import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import type { PendingUtxo, RetrieveBtcStatusV2 } from '@icp-sdk/canisters/ckbtc';
 
 export const mapCkBTCTransaction = ({
 	transaction,
@@ -82,7 +82,7 @@ export const mapCkBTCTransaction = ({
 	}
 
 	if (nonNullish(burn)) {
-		const memo = fromNullable(burn.memo) ?? [];
+		const memo = fromNullable(burn.memo) ?? new Uint8Array();
 
 		const toAddress = burnMemoAddress(memo);
 
@@ -178,7 +178,7 @@ const burnStatus = (
 	}
 
 	// Force compiler error on unhandled cases based on leftover types
-	const _: { Confirmed: { txid: Uint8Array | number[] } } | { Unknown: null } | undefined | never =
+	const _: { Confirmed: { txid: Uint8Array } } | { Unknown: null } | undefined | never =
 		retrieveBtcStatus;
 
 	return {
@@ -187,7 +187,7 @@ const burnStatus = (
 	};
 };
 
-const isMemoReimbursement = (memo: Uint8Array | number[]) => {
+const isMemoReimbursement = (memo: Uint8Array) => {
 	try {
 		const [mintType, _] = decodeMintMemo(memo);
 		return mintType === MINT_MEMO_KYT_FAIL;
@@ -197,7 +197,7 @@ const isMemoReimbursement = (memo: Uint8Array | number[]) => {
 	}
 };
 
-const burnMemoAddress = (memo: Uint8Array | number[]): OptionString => {
+const burnMemoAddress = (memo: Uint8Array): OptionString => {
 	try {
 		const [_, [toAddress]] = decodeBurnMemo(memo);
 		return toAddress;

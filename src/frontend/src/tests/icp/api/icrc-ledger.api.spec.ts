@@ -5,6 +5,7 @@ import {
 	balance,
 	getBlocks,
 	getMintingAccount,
+	icrc10SupportedStandards,
 	icrc1SupportedStandards,
 	metadata,
 	transactionFee,
@@ -563,6 +564,47 @@ describe('icrc-ledger.api', () => {
 		});
 	});
 
+	describe('icrc10SupportedStandards', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
+
+		const supportedStandards = [
+			{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
+			{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }
+		];
+
+		beforeEach(() => {
+			ledgerCanisterMock.icrc10SupportedStandards.mockResolvedValue(supportedStandards);
+		});
+
+		it('successfully calls icrc10SupportedStandards endpoint', async () => {
+			const result = await icrc10SupportedStandards(params);
+
+			expect(result).toEqual(supportedStandards);
+
+			expect(ledgerCanisterMock.icrc10SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
+
+		it('successfully calls icrc10SupportedStandards endpoint as query', async () => {
+			const result = await icrc10SupportedStandards({ ...params, certified: false });
+
+			expect(result).toEqual(supportedStandards);
+
+			expect(ledgerCanisterMock.icrc10SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(icrc10SupportedStandards({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
 	describe('getMintingAccount', () => {
 		const params = {
 			certified: true,
@@ -570,8 +612,11 @@ describe('icrc-ledger.api', () => {
 			identity: mockIdentity
 		};
 
-		const candidAccount = { owner: mockPrincipal, subaccount: toNullable([1, 2, 3]) };
-		const expectedAccount = { owner: mockPrincipal, subaccount: [1, 2, 3] };
+		const candidAccount = {
+			owner: mockPrincipal,
+			subaccount: toNullable(Uint8Array.from([1, 2, 3]))
+		};
+		const expectedAccount = { owner: mockPrincipal, subaccount: Uint8Array.from([1, 2, 3]) };
 
 		beforeEach(() => {
 			ledgerCanisterMock.getMintingAccount.mockResolvedValue(toNullable(candidAccount));

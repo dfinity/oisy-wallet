@@ -62,7 +62,6 @@ export class CkBTCUpdateBalanceWorker extends AppWorker {
 							tokenId,
 							data: data as PostMessageJsonDataResponse
 						});
-						return;
 				}
 			}
 		);

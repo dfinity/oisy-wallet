@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/svelte';
-import { get, readable, writable } from 'svelte/store';
+import { readable, writable } from 'svelte/store';
 
 import AllEarningOpportunityCardList from '$lib/components/earning/AllEarningOpportunityCardList.svelte';
 
 import * as navModule from '$app/navigation';
 import * as tokenFilter from '$icp-eth/utils/token.utils';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
-import * as tokensDerived from '$lib/derived/tokens.derived';
+import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as tokenUtils from '$lib/utils/token.utils';
 
@@ -14,10 +14,8 @@ import * as earningCardsEnv from '$env/earning-cards.env';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import { GLDT_STAKE_CONTEXT_KEY } from '$icp/stores/gldt-stake.store';
-import { i18n } from '$lib/stores/i18n.store';
 import { REWARD_ELIGIBILITY_CONTEXT_KEY } from '$lib/stores/reward.store';
 import type { Token } from '$lib/types/token';
-import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 
 // mock contexts
@@ -112,10 +110,10 @@ describe('AllEarningOpportunityCardList', () => {
 		const enabledFungibleTokensUi = writable([mockGldtToken]);
 		const enabledMainnetFungibleTokensUsdBalance = readable(1000);
 
-		vi.spyOn(tokensDerived, 'enabledFungibleTokensUi', 'get').mockReturnValue(
+		vi.spyOn(tokensUiDerived, 'enabledFungibleTokensUi', 'get').mockReturnValue(
 			enabledFungibleTokensUi
 		);
-		vi.spyOn(tokensDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
+		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
 			enabledMainnetFungibleTokensUsdBalance
 		);
 
@@ -152,13 +150,6 @@ describe('AllEarningOpportunityCardList', () => {
 		expect(buttons[1]).toHaveTextContent('mock.gldt.action');
 	});
 
-	it('displays current APY correctly when GLDT staking data is available', () => {
-		render(AllEarningOpportunityCardList, { context: mockContexts });
-
-		expect(screen.getByText(get(i18n).stake.text.current_apy_label)).toBeInTheDocument();
-		expect(screen.getAllByText(`${formatStakeApyNumber(5)}%`)).toHaveLength(2);
-	});
-
 	it('calls goto when a card action button is clicked', async () => {
 		render(AllEarningOpportunityCardList, { context: mockContexts });
 
@@ -173,33 +164,5 @@ describe('AllEarningOpportunityCardList', () => {
 		}
 
 		expect(navModule.goto).toHaveBeenCalledTimes(2);
-	});
-
-	it('renders reward date text for the active reward card', () => {
-		render(AllEarningOpportunityCardList, { context: mockContexts });
-
-		expect(screen.getByText(/Dec 31, 2024/)).toBeInTheDocument();
-	});
-
-	it('renders the current staked amount correctly', () => {
-		render(AllEarningOpportunityCardList, { context: mockContexts });
-
-		// Should show the formatted staked token amount (mocked as "10.00")
-		expect(screen.getByText(/10\.00/)).toBeInTheDocument();
-	});
-
-	it('renders the current earning USD value correctly', () => {
-		render(AllEarningOpportunityCardList, { context: mockContexts });
-
-		// Our mock of calculateTokenUsdAmount returns 123.45, so formatted as $123.45
-		expect(screen.getByText(/\$123\.45/)).toBeInTheDocument();
-	});
-
-	it('renders earning potential field correctly', () => {
-		render(AllEarningOpportunityCardList, { context: mockContexts });
-
-		// Since APY = 5 and enabledMainnetFungibleTokensUsdBalance = 1000
-		// earningPotential = 1000 * 5 / 100 = 50 -> formatted by EarningYearlyAmount
-		expect(screen.getByText(/\$50\.00/)).toBeInTheDocument();
 	});
 });

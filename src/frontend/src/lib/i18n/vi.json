@@ -8,6 +8,7 @@
 			"done": "Hoàn thành",
 			"close": "Đóng",
 			"change": "Thay đổi",
+			"continue": "",
 			"apply": "Áp dụng",
 			"retry": "Thử lại",
 			"refresh": "Làm mới",
@@ -39,7 +40,8 @@
 			"confirm": "",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -54,7 +56,8 @@
 			"switch_language": "Chuyển đổi ngôn ngữ",
 			"switch_currency": "Chuyển đổi tiền tệ",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
@@ -68,7 +71,7 @@
 			"dapp_explorer": "Khám phá",
 			"activity": "Hoạt động",
 			"airdrops": "Phần thưởng",
-			"earning": "Kiếm tiền & Phần thưởng",
+			"earning": "Kiếm tiền",
 			"source_code_on_github": "Mã nguồn trên GitHub",
 			"view_on_explorer": "Xem trên trình khám phá",
 			"source_code": "Mã nguồn",
@@ -383,12 +386,27 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"pacifica": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -614,6 +632,7 @@
 			"spl_custom_tokens": "Lỗi khi tải các token tùy chỉnh SPL.",
 			"erc20_user_token": "Lỗi khi bật token đôi ERC20.",
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
+			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
 			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
 			"waiting_for_allowed_cycles_aborted": "Đã hủy bỏ quá trình chuẩn bị cycles ledger. Vui lòng thử đăng nhập lại sau.",
@@ -707,9 +726,11 @@
 				"display_account_id_qr": "Hiển thị địa chỉ ICP dưới dạng mã QR",
 				"account_id_copied": "Địa chỉ ICP đã được sao chép vào khay nhớ tạm.",
 				"principal": "Địa chỉ principal ICP",
+				"principal_title": "",
 				"internet_computer_principal_copied": "Địa chỉ principal Internet Computer đã được sao chép vào khay nhớ tạm.",
 				"display_internet_computer_principal_qr": "Hiển thị Địa chỉ principal Internet Computer dưới dạng mã QR",
 				"icp_account": "Địa chỉ ICP (dành cho sàn giao dịch)",
+				"icp_account_title": "",
 				"icp_account_copied": "Địa chỉ ICP đã được sao chép vào khay nhớ tạm.",
 				"display_icp_account_qr": "Hiển thị Tài khoản ICP dưới dạng mã QR"
 			}
@@ -722,6 +743,7 @@
 				"learn_how_to_convert": "Tìm hiểu cách chuyển đổi $token sang $ckToken",
 				"metamask": "Nhận từ Metamask",
 				"ethereum": "Ethereum",
+				"ethereum_title": "",
 				"ethereum_address": "Địa chỉ",
 				"ethereum_address_copied": "Địa chỉ Ethereum đã được sao chép vào khay nhớ tạm.",
 				"display_ethereum_address_qr": "Hiển thị địa chỉ Ethereum dưới dạng mã QR"
@@ -739,8 +761,11 @@
 				"checking_incoming": "Đang kiểm tra BTC đến...",
 				"refreshing_wallet": "Đang làm mới ví...",
 				"bitcoin_address": "Địa chỉ Bitcoin",
+				"bitcoin_address_title": "",
 				"bitcoin_testnet_address": "Địa chỉ Bitcoin (Testnet)",
+				"bitcoin_testnet_address_title": "",
 				"bitcoin_regtest_address": "Địa chỉ Bitcoin (Regtest)",
+				"bitcoin_regtest_address_title": "",
 				"display_bitcoin_address_qr": "Hiển thị Địa chỉ Bitcoin dưới dạng mã QR",
 				"bitcoin_address_copied": "Địa chỉ Bitcoin đã được sao chép vào khay nhớ tạm.",
 				"from_network": "Chuyển Bitcoin trên mạng BTC đến địa chỉ này để nhận ckBTC.",
@@ -757,8 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Địa chỉ Solana",
+				"solana_address_title": "",
 				"solana_devnet_address": "Địa chỉ Solana Devnet",
+				"solana_devnet_address_title": "",
 				"solana_local_address": "Địa chỉ Solana Local",
+				"solana_local_address_title": "",
 				"solana_address_copied": "Địa chỉ Solana đã được sao chép vào khay nhớ tạm",
 				"display_solana_address_qr": "Hiển thị địa chỉ Solana dưới dạng mã QR"
 			}
@@ -876,7 +904,24 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": ""
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -1733,7 +1778,10 @@
 	"earning": {
 		"text": {
 			"title": "Kiếm tiền",
-			"earning_opportunities": ""
+			"tab_title": "",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": ""
 		},
 		"cards": {
 			"gldt": {
@@ -1763,9 +1811,11 @@
 			"stake_page_title": "",
 			"gldt_stake_page_description": "",
 			"stake": "",
+			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
 			"unstake": "",
+			"unstake_now": "",
 			"unstaking": "",
 			"unstake_token": "",
 			"enable_token_text": "",
@@ -1778,9 +1828,7 @@
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"visit_provider": "",
-			"current_apy": "",
 			"current_apy_label": "",
-			"current_apy_info": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1792,10 +1840,76 @@
 			"immediate_dissolve_terms": "",
 			"amount_to_receive": "",
 			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
 			"claim_reward": "",
 			"claim_rewards": "",
+			"claim_reward_short": "",
 			"claim_now": "",
-			"claiming": ""
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": "",
+			"gldt_stake_carousel_slide_title": "",
+			"gldt_stake_carousel_slide_cta": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": ""
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "",
+				"item1_description": "",
+				"item2_title_1": "",
+				"item2_title_2": "",
+				"item3_title": "",
+				"item3_description": "",
+				"item4_title": "",
+				"item4_description": "",
+				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
+			}
+		},
+		"alt": {
+			"placeholder_image": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
 		}
 	},
 	"temporal": {
