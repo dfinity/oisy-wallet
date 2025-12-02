@@ -1417,6 +1417,7 @@ interface I18nEarning {
 		earning_opportunities: string;
 		header_title: string;
 		header_description: string;
+		go_to_earn: string;
 	};
 	cards: {
 		gldt: { title: string; description: string; action: string };
