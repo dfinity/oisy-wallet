@@ -47,7 +47,7 @@ const estimateGasLimit = async ({
 
 	// ERC20 token
 	if (!isTokenErc20(token)) {
-		return undefined;
+		return;
 	}
 
 	const erc20GasFeeParams = {
