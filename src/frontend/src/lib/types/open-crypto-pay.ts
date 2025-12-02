@@ -20,14 +20,14 @@ export interface Recipient {
 }
 
 export interface Quote {
-	id?: string;
+	id: string;
 	expiration?: string;
 	payment?: string;
 }
 
 export interface RequestedAmount {
 	asset: string;
-	amount: number;
+	amount: string;
 }
 
 export interface Asset {
@@ -60,4 +60,9 @@ export interface OpenCryptoPayResponse {
 	recipient?: Recipient;
 	route?: string;
 	quote?: Quote;
+}
+
+export interface PaymentMethodData {
+	assets: Map<string, { amount: string }>;
+	minFee?: number;
 }

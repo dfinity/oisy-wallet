@@ -128,7 +128,18 @@ export const initModalTokensListContext = (
 			update((state) => ({
 				...state,
 				filterNetworksIds: networksIds
-			}))
+			})),
+		resetFilters: () => {
+			update((state) => ({
+				...state,
+				filterQuery: undefined,
+				filterNetwork: undefined,
+				filterZeroBalance: undefined,
+				sortByBalance: undefined,
+				filterNetworksIds: undefined,
+				filterNfts: undefined
+			}));
+		}
 	};
 };
 
@@ -140,6 +151,7 @@ export interface ModalTokensListContext {
 	setFilterQuery: (query: string) => void;
 	setFilterNetwork: (network: Network | undefined) => void;
 	setFilterNetworksIds: (networksIds: NetworkId[] | undefined) => void;
+	resetFilters: () => void;
 }
 
 export const MODAL_TOKENS_LIST_CONTEXT_KEY = Symbol('modal-tokens-list');

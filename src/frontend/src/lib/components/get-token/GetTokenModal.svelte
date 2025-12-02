@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import BuyModalContent from '$lib/components/buy/BuyModalContent.svelte';
 	import GetTokenWizardStep from '$lib/components/get-token/GetTokenWizardStep.svelte';
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
@@ -11,6 +12,19 @@
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsGetToken } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		MODAL_NETWORKS_LIST_CONTEXT_KEY,
+		type ModalNetworksListContext
+	} from '$lib/stores/modal-networks-list.store';
+	import {
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
+	} from '$lib/stores/modal-tokens-list.store';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
+	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { Address } from '$lib/types/address';
 	import type { WizardStepsGetTokenType } from '$lib/types/get-token';
 	import type { OptionAmount } from '$lib/types/send';
@@ -28,6 +42,18 @@
 	}
 
 	let { token, currentApy, receiveAddress }: Props = $props();
+
+	const { reset: resetSwapStore } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	const { resetFilters: resetTokensListFilters } = getContext<ModalTokensListContext>(
+		MODAL_TOKENS_LIST_CONTEXT_KEY
+	);
+
+	const { resetAllowedNetworkIds } = getContext<ModalNetworksListContext>(
+		MODAL_NETWORKS_LIST_CONTEXT_KEY
+	);
+
+	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	let steps = $derived(
 		getTokenWizardSteps({ i18n: $i18n, tokenSymbol: getTokenDisplaySymbol(token) })
@@ -60,8 +86,17 @@
 		}
 
 		selectTokenType = undefined;
+		swapAmount = undefined;
+		receiveAmount = undefined;
+		slippageValue = SWAP_DEFAULT_SLIPPAGE_VALUE;
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION;
 		showSelectProviderModal = false;
+		allNetworksEnabled = true;
+
+		resetSwapStore();
+		resetTokensListFilters();
+		resetAllowedNetworkIds();
+		swapAmountsStore.reset();
 	};
 
 	const close = () =>
