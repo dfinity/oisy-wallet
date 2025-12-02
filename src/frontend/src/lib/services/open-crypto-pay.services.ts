@@ -119,7 +119,7 @@ const calculateEthFee = async ({
 		const feeInWei = gasPrice * estimatedGasLimit;
 
 		return { feeInWei, feeData, estimatedGasLimit };
-	} catch (error) {
+	} catch (error: unknown) {
 		console.warn(`Failed to calculate fee for ${token.symbol}:`, error);
 	}
 };
