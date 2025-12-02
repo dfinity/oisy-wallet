@@ -49,7 +49,7 @@ describe('PaymentDetails', () => {
 		},
 		requestedAmount: {
 			asset: 'CHF',
-			amount: 10
+			amount: '10'
 		},
 		transferAmounts: []
 	};
@@ -138,7 +138,7 @@ describe('PaymentDetails', () => {
 				metadata: '[]',
 				requestedAmount: {
 					asset: 'BTC',
-					amount: 0.001
+					amount: '0.001'
 				},
 				transferAmounts: []
 			};
@@ -154,7 +154,7 @@ describe('PaymentDetails', () => {
 		it('should render EUR currency', () => {
 			const data = {
 				...mockPaymentData,
-				requestedAmount: { asset: 'EUR', amount: 50 }
+				requestedAmount: { asset: 'EUR', amount: '50' }
 			};
 
 			const { container } = renderWithContext(data);
@@ -166,7 +166,7 @@ describe('PaymentDetails', () => {
 		it('should render BTC with decimals', () => {
 			const data = {
 				...mockPaymentData,
-				requestedAmount: { asset: 'BTC', amount: 0.00123456 }
+				requestedAmount: { asset: 'BTC', amount: '0.00123456' }
 			};
 
 			const { container } = renderWithContext(data);
@@ -178,7 +178,7 @@ describe('PaymentDetails', () => {
 		it('should render large amounts', () => {
 			const data = {
 				...mockPaymentData,
-				requestedAmount: { asset: 'CHF', amount: 1000000 }
+				requestedAmount: { asset: 'CHF', amount: '1000000' }
 			};
 
 			const { container } = renderWithContext(data);
