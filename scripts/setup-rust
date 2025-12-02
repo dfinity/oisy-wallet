@@ -22,7 +22,7 @@ echo "Using rust version '$RUST_VERSION' and nightly '$NIGHTLY_VERSION'"
 RUSTUP_VERSION="$(jq -re .rustup.version dev-tools.json)"
 
 # here we set the toolchain to 'none' and rustup will pick up on ./rust-toolchain.toml
-run curl --fail "https://raw.githubusercontent.com/rust-lang/rustup/refs/tags/${RUSTUP_VERSION}/rustup-init.sh" -sSf | run sh -s -- -y --no-modify-path --profile minimal
+run curl --fail "https://raw.githubusercontent.com/rust-lang/rustup/refs/tags/${RUSTUP_VERSION}/rustup-init.sh" -sSf | run sh -s -- -y --no-modify-path --default-toolchain none --profile minimal
 rustup toolchain install --profile minimal            # Version from rust-toolchain.toml
 rustup toolchain install "$version" --profile minimal # Version from dev-tools.json
 rustup component add clippy
