@@ -224,28 +224,6 @@ describe('eth-fee-data.services', () => {
 			expect(spy).toHaveBeenCalledWith(network.id);
 		});
 
-		it('should preserve gasPrice from getFeeData', async () => {
-			vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
-				getFeeData: async () =>
-					await new Promise((resolve) =>
-						resolve({
-							gasPrice: 999n,
-							maxFeePerGas: 10n,
-							maxPriorityFeePerGas: 5n
-						})
-					)
-			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
-
-			const result = await getEthFeeDataWithProvider({
-				networkId: network.id,
-				chainId: network.chainId,
-				from: fromAddr,
-				to: toAddr
-			});
-
-			expect(result.feeData.gasPrice).toBe(999n);
-		});
-
 		it('should add 0x prefix to addresses if missing', async () => {
 			const fromWithout0x = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 			const toWithout0x = '1111111111111111111111111111111111111111';

@@ -82,14 +82,14 @@
 				return;
 			}
 
-			const { feeData, providers, params } = await getEthFeeDataWithProvider({
+			const { feeData, provider, params } = await getEthFeeDataWithProvider({
 				networkId: sendToken.network.id,
 				chainId: (sendToken.network as EthereumNetwork).chainId,
 				from: $ethAddress,
 				to: destination !== '' ? destination : $ethAddress
 			});
 
-			const { safeEstimateGas, estimateGas } = providers;
+			const { safeEstimateGas, estimateGas } = provider;
 
 			const feeDataGas = getEthFeeData({
 				...params,

@@ -116,7 +116,7 @@ export const getEthFeeDataWithProvider = async ({
 	to: EthAddress;
 }): Promise<{
 	feeData: Omit<TransactionFeeData, 'gas'>;
-	providers: InfuraProvider;
+	provider: InfuraProvider;
 	params: GetFeeData;
 }> => {
 	const params: GetFeeData = {
@@ -124,8 +124,8 @@ export const getEthFeeDataWithProvider = async ({
 		from: mapAddressStartsWith0x(from)
 	};
 
-	const providers = infuraProviders(networkId);
-	const { getFeeData } = providers;
+	const provider = infuraProviders(networkId);
+	const { getFeeData } = provider;
 
 	const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
@@ -142,5 +142,5 @@ export const getEthFeeDataWithProvider = async ({
 		maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas) ?? null
 	};
 
-	return { feeData, providers, params };
+	return { feeData, provider, params };
 };
