@@ -1,5 +1,11 @@
 import type { Network } from '$lib/types/network';
-import type { Address, OpenCryptoPayResponse, PaymentMethodData } from '$lib/types/open-crypto-pay';
+import type {
+	Address,
+	OpenCryptoPayResponse,
+	PayableToken,
+	PaymentMethodData
+} from '$lib/types/open-crypto-pay';
+import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
 
@@ -76,4 +82,37 @@ export const createPaymentMethodDataMap = ({
 		},
 		new Map()
 	);
+};
+
+export const mapTokenToPayableToken = ({
+	token,
+	methodDataMap
+}: {
+	token: Token;
+	methodDataMap: Map<string, PaymentMethodData>;
+}): Partial<PayableToken> | undefined => {
+	const tokenNetwork = token.network.pay?.openCryptoPay;
+
+	if (isNullish(tokenNetwork)) {
+		return;
+	}
+
+	const methodData = methodDataMap.get(tokenNetwork);
+
+	if (isNullish(methodData)) {
+		return;
+	}
+
+	const assetData = methodData.assets.get(token.symbol);
+
+	if (isNullish(assetData)) {
+		return;
+	}
+
+	return {
+		...token,
+		amount: assetData.amount,
+		tokenNetwork,
+		minFee: methodData.minFee
+	};
 };
