@@ -1,9 +1,10 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as feeServices from '$eth/services/fee.services';
-import type { EthereumNetwork } from '$eth/types/network';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	calculateTokensWithFees,
@@ -182,11 +183,7 @@ describe('open-crypto-pay.service', () => {
 		};
 
 		const mockErc20Token: PayableToken = {
-			id: 'erc20-usdt',
-			symbol: 'USDT',
-			name: 'Tether',
-			decimals: 6,
-			network: network as unknown as EthereumNetwork,
+			...USDC_TOKEN,
 			amount: '100',
 			minFee: 0.0001,
 			tokenNetwork: 'Ethereum',
@@ -194,11 +191,7 @@ describe('open-crypto-pay.service', () => {
 		} as unknown as PayableToken;
 
 		const mockBtcToken: PayableToken = {
-			id: 'btc-token',
-			symbol: 'BTC',
-			name: 'Bitcoin',
-			decimals: 8,
-			network: { id: 'bitcoin', name: 'Bitcoin' },
+			...BTC_MAINNET_TOKEN,
 			amount: '0.5',
 			minFee: 0.0001,
 			tokenNetwork: 'Bitcoin'
