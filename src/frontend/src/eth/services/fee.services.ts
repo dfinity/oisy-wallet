@@ -12,6 +12,7 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { Network, NetworkId } from '$lib/types/network';
+import type { TransactionFeeData } from '$lib/types/transaction';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 
@@ -107,23 +108,19 @@ export const getEthFeeDataWithProvider = async ({
 	networkId,
 	chainId,
 	from,
-	to = ''
+	to
 }: {
 	networkId: NetworkId;
 	chainId: bigint;
 	from: EthAddress;
-	to?: EthAddress;
+	to: EthAddress;
 }): Promise<{
-	feeData: {
-		maxFeePerGas: bigint | null;
-		maxPriorityFeePerGas: bigint | null;
-		gasPrice: null | bigint;
-	};
+	feeData: Omit<TransactionFeeData, 'gas'>;
 	providers: InfuraProvider;
 	params: GetFeeData;
 }> => {
 	const params: GetFeeData = {
-		to: mapAddressStartsWith0x(to !== '' ? to : from),
+		to: mapAddressStartsWith0x(to),
 		from: mapAddressStartsWith0x(from)
 	};
 
