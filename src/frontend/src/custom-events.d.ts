@@ -1,33 +1,27 @@
-// TODO: try to provide the correct types to the events
-import type { OisyReloadCollectionsEvent } from '$lib/types/custom-events';
+import type {
+	NoParamEvent,
+	OisyIndexCanisterBalanceOutOfSyncEvent,
+	OisyReloadCollectionsEvent,
+	OisySyncStatusEvent
+} from '$lib/types/custom-events';
 
 declare module 'svelte/elements' {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	export interface HTMLAttributes<T> {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyTriggerWallet?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyReceiveCkBTC?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyCkBtcUpdateBalance?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyCkBtcMinterInfoStatus?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyCkEthMinterInfoStatus?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyCkEthereumPendingTransactions?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyIndexCanisterBalanceOutOfSync?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyValidateAddresses?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyRefreshUserProfile?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyToggleZeroBalances?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyRefreshContacts?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyDisconnectWalletConnect?: (event: CustomEvent<any>) => void;
+		onoisyTriggerWallet?: (event: CustomEvent<NoParamEvent>) => void;
+		onoisyReceiveCkBTC?: (event: CustomEvent<NoParamEvent>) => void;
+		onoisyCkBtcUpdateBalance?: (event: CustomEvent<OisySyncStatusEvent>) => void;
+		onoisyCkBtcMinterInfoStatus?: (event: CustomEvent<OisySyncStatusEvent>) => void;
+		onoisyCkEthMinterInfoStatus?: (event: CustomEvent<OisySyncStatusEvent>) => void;
+		onoisyCkEthereumPendingTransactions?: (event: CustomEvent<OisySyncStatusEvent>) => void;
+		onoisyIndexCanisterBalanceOutOfSync?: (
+			event: CustomEvent<OisyIndexCanisterBalanceOutOfSyncEvent>
+		) => void;
+		onoisyValidateAddresses?: (event: CustomEvent<NoParamEvent>) => void;
+		onoisyRefreshUserProfile?: (event: CustomEvent<NoParamEvent>) => void;
+		onoisyToggleZeroBalances?: (event: CustomEvent<NoParamEvent>) => void;
+		onoisyRefreshContacts?: (event: CustomEvent<NoParamEvent>) => void;
+		onoisyDisconnectWalletConnect?: (event: CustomEvent<NoParamEvent>) => void;
 		onoisyReloadCollections?: (event: CustomEvent<OisyReloadCollectionsEvent>) => void;
 	}
 }

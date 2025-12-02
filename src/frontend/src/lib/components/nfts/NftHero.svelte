@@ -56,20 +56,23 @@
 
 		const {
 			id,
+			oisyId,
 			name,
 			collection: { name: collectionName }
 		} = nft;
 
+		const idToUse = oisyId ?? id;
+
 		if (nonNullish(name)) {
 			// sometimes NFT names include the number itself, in that case we do not display the number
-			return name.includes(`#${id}`) ? name : `${name} #${id}`;
+			return name.includes(`#${idToUse}`) ? name : `${name} #${idToUse}`;
 		}
 
 		if (nonNullish(collectionName)) {
-			return `${collectionName} #${id}`;
+			return `${collectionName} #${idToUse}`;
 		}
 
-		return `#${id}`;
+		return `#${idToUse}`;
 	});
 </script>
 
