@@ -35,16 +35,24 @@
 
 	let instantDissolveFee = $derived(
 		nonNullish(amount) && nonNullish($gldtStakeStore?.config?.early_unlock_fee)
-			? Number(amount) * $gldtStakeStore.config.early_unlock_fee
+			? Number(
+					(Number(amount) * $gldtStakeStore.config.early_unlock_fee).toFixed($sendTokenDecimals)
+				)
 			: 0
 	);
 
 	let delayedDissolveAmount = $derived(
-		nonNullish(amount) ? Math.max(Number(amount) - tokenFee, 0) : 0
+		nonNullish(amount)
+			? Number(Math.max(Number(amount) - tokenFee, 0).toFixed($sendTokenDecimals))
+			: 0
 	);
 
 	let immediateDissolveAmount = $derived(
-		nonNullish(amount) ? Math.max(Number(amount) - instantDissolveFee - tokenFee, 0) : 0
+		nonNullish(amount)
+			? Number(
+					Math.max(Number(amount) - instantDissolveFee - tokenFee, 0).toFixed($sendTokenDecimals)
+				)
+			: 0
 	);
 
 	$effect(() => {
