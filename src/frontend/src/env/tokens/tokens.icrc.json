@@ -168,16 +168,6 @@
 			"__bigint__": "1000000"
 		}
 	},
-	"BOT": {
-		"ledgerCanisterId": "73f6j-5iaaa-aaaal-qsw4a-cai",
-		"indexCanisterId": "74ey5-qqaaa-aaaal-qsw4q-cai",
-		"decimals": 8,
-		"name": "BOTCOIN",
-		"symbol": "BOT",
-		"fee": {
-			"__bigint__": "1"
-		}
-	},
 	"EXE": {
 		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai",
 		"indexCanisterId": "us3ng-pyaaa-aaaan-q2cva-cai",
