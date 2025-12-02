@@ -76,7 +76,8 @@ describe('eth-fee-data.services', () => {
 			const result = await getEthFeeDataWithProvider({
 				networkId: network.id,
 				chainId: network.chainId,
-				from: fromAddr
+				from: fromAddr,
+				to: fromAddr,
 			});
 
 			expect(result.params).toEqual({
