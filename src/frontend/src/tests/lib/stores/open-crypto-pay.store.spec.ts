@@ -1,8 +1,52 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { initPayContext } from '$lib/stores/open-crypto-pay.store';
 import type { OpenCryptoPayResponse, PayableTokenWithFees } from '$lib/types/open-crypto-pay';
 import { get } from 'svelte/store';
+
+vi.mock('$eth/derived/tokens.derived', () => ({
+	enabledEthereumTokens: {
+		subscribe: vi.fn((callback) => {
+			callback([]);
+			return () => {};
+		})
+	}
+}));
+
+vi.mock('$evm/derived/tokens.derived', () => ({
+	enabledEvmTokens: {
+		subscribe: vi.fn((callback) => {
+			callback([]);
+			return () => {};
+		})
+	}
+}));
+
+vi.mock('$lib/derived/exchange.derived', () => ({
+	exchanges: {
+		subscribe: vi.fn((callback) => {
+			callback({});
+			return () => {};
+		})
+	}
+}));
+
+vi.mock('$lib/stores/balances.store', () => ({
+	balancesStore: {
+		subscribe: vi.fn((callback) => {
+			callback({});
+			return () => {};
+		})
+	}
+}));
+
+vi.mock('$eth/utils/token.utils', () => ({
+	enrichEthEvmToken: vi.fn(({ token }) => ({
+		...token
+	}))
+}));
 
 describe('OpenCryptoPayStore', () => {
 	const mockPaymentData: OpenCryptoPayResponse = {
@@ -170,7 +214,7 @@ describe('OpenCryptoPayStore', () => {
 
 			const tokens = [mockEthTokenWithFee];
 
-			context.setAvailableTokens(tokens);
+			context.setTokens(tokens);
 
 			expect(get(context.availableTokens)).toEqual(tokens);
 		});
@@ -180,7 +224,7 @@ describe('OpenCryptoPayStore', () => {
 
 			const tokens = [mockEthTokenWithFee, mockUsdcTokenWithFee];
 
-			context.setAvailableTokens(tokens);
+			context.setTokens(tokens);
 
 			expect(get(context.availableTokens)).toEqual(tokens);
 			expect(get(context.availableTokens)).toHaveLength(2);
@@ -192,8 +236,8 @@ describe('OpenCryptoPayStore', () => {
 			const firstTokens = [mockEthTokenWithFee];
 			const secondTokens = [mockUsdcTokenWithFee];
 
-			context.setAvailableTokens(firstTokens);
-			context.setAvailableTokens(secondTokens);
+			context.setTokens(firstTokens);
+			context.setTokens(secondTokens);
 
 			expect(get(context.availableTokens)).toEqual(secondTokens);
 			expect(get(context.availableTokens)).not.toEqual(firstTokens);
@@ -202,8 +246,8 @@ describe('OpenCryptoPayStore', () => {
 		it('should handle empty array of tokens', () => {
 			const context = initPayContext();
 
-			context.setAvailableTokens([mockEthTokenWithFee]);
-			context.setAvailableTokens([]);
+			context.setTokens([mockEthTokenWithFee]);
+			context.setTokens([]);
 
 			expect(get(context.availableTokens)).toEqual([]);
 		});
@@ -215,32 +259,12 @@ describe('OpenCryptoPayStore', () => {
 			const secondUpdate = [mockUsdcTokenWithFee];
 			const thirdUpdate = [mockEthTokenWithFee, mockUsdcTokenWithFee];
 
-			context.setAvailableTokens(firstUpdate);
-			context.setAvailableTokens(secondUpdate);
-			context.setAvailableTokens(thirdUpdate);
+			context.setTokens(firstUpdate);
+			context.setTokens(secondUpdate);
+			context.setTokens(thirdUpdate);
 
 			expect(get(context.availableTokens)).toEqual(thirdUpdate);
 			expect(get(context.availableTokens)).toHaveLength(2);
-		});
-
-		it('should preserve token data structure', () => {
-			const context = initPayContext();
-
-			context.setAvailableTokens([mockEthTokenWithFee]);
-
-			const [result] = get(context.availableTokens);
-
-			expect(result).toMatchObject({
-				...ETHEREUM_TOKEN,
-				amount: '1.5',
-				minFee: 0.001,
-				tokenNetwork: 'Ethereum',
-				fee: {
-					feeInWei: 300n,
-					feeData: expect.any(Object),
-					estimatedGasLimit: 25n
-				}
-			});
 		});
 
 		it('should handle tokens without fees', () => {
@@ -254,10 +278,9 @@ describe('OpenCryptoPayStore', () => {
 				fee: undefined
 			};
 
-			context.setAvailableTokens([tokenWithoutFee]);
+			context.setTokens([tokenWithoutFee]);
 
-			expect(get(context.availableTokens)).toEqual([tokenWithoutFee]);
-			expect(get(context.availableTokens)[0].fee).toBeUndefined();
+			expect(get(context.availableTokens)).toEqual([]);
 		});
 
 		it('should handle mixed tokens with and without fees', () => {
@@ -269,24 +292,37 @@ describe('OpenCryptoPayStore', () => {
 				minFee: 0.0001,
 				tokenNetwork: 'Ethereum',
 				fee: undefined
-			} as PayableTokenWithFees;
+			};
 
 			const tokens = [mockEthTokenWithFee, tokenWithoutFee];
 
-			context.setAvailableTokens(tokens);
+			context.setTokens(tokens);
 
-			expect(get(context.availableTokens)).toHaveLength(2);
+			expect(get(context.availableTokens)).toHaveLength(1);
 			expect(get(context.availableTokens)[0].fee).toBeDefined();
-			expect(get(context.availableTokens)[1].fee).toBeUndefined();
 		});
 	});
 
 	describe('combined operations', () => {
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+
+			vi.spyOn(enabledEvmTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+		});
+
 		it('should handle setting both data and tokens', () => {
 			const context = initPayContext();
 
 			context.setData(mockPaymentData);
-			context.setAvailableTokens([mockEthTokenWithFee]);
+			context.setTokens([mockEthTokenWithFee]);
 
 			expect(get(context.data)).toEqual(mockPaymentData);
 			expect(get(context.availableTokens)).toEqual([mockEthTokenWithFee]);
@@ -296,7 +332,7 @@ describe('OpenCryptoPayStore', () => {
 			const context = initPayContext();
 
 			context.setData(mockPaymentData);
-			context.setAvailableTokens([mockEthTokenWithFee]);
+			context.setTokens([mockEthTokenWithFee]);
 
 			context.setData({ ...mockPaymentData, displayName: 'Updated' });
 
@@ -308,9 +344,9 @@ describe('OpenCryptoPayStore', () => {
 			const context = initPayContext();
 
 			context.setData(mockPaymentData);
-			context.setAvailableTokens([mockEthTokenWithFee]);
+			context.setTokens([mockEthTokenWithFee]);
 
-			context.setAvailableTokens([mockUsdcTokenWithFee]);
+			context.setTokens([mockUsdcTokenWithFee]);
 
 			expect(get(context.data)).toEqual(mockPaymentData);
 			expect(get(context.availableTokens)).toEqual([mockUsdcTokenWithFee]);
