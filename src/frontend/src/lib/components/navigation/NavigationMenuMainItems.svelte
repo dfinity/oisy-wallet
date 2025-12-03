@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
+	import IconPlant from '$lib/components/icons/IconPlant.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -132,7 +133,7 @@
 		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
 	>
 		{#snippet icon()}
-			<IconGift />
+			<IconPlant />
 		{/snippet}
 		{#snippet label()}
 			{$i18n.navigation.text.earning}
