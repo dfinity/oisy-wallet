@@ -182,6 +182,7 @@ export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
 export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
 export const REWARDS_NETWORK_MULTIPLIER_IMAGE = 'reward-network-multiplier-image';
 
+export const EARNING_NO_POSITION_PLACEHOLDER = 'earning-no-position-placeholder';
 export const EARNING_GOTO_BUTTON = 'earning-goto-button';
 
 export const WELCOME_MODAL_IMAGE_BANNER = 'welcome-modal-image-banner';
