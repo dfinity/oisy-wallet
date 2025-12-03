@@ -1,15 +1,44 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
 import en from '$lib/i18n/en.json';
 import * as openCryptoPayServices from '$lib/services/open-crypto-pay.services';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
-import type { OpenCryptoPayResponse } from '$lib/types/open-crypto-pay';
+import type { OpenCryptoPayResponse, PayableTokenWithFees } from '$lib/types/open-crypto-pay';
+import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 vi.mock('$lib/services/open-crypto-pay.services', () => ({
-	processOpenCryptoPayCode: vi.fn()
+	processOpenCryptoPayCode: vi.fn(),
+	calculateTokensWithFees: vi.fn()
 }));
+
+vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
+	prepareBasePayableTokens: vi.fn()
+}));
+
+vi.mock('$lib/derived/address.derived', async () => {
+	const { writable } = await import('svelte/store');
+	return {
+		ethAddress: writable('0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+	};
+});
+
+vi.mock('$lib/derived/networks.derived', async () => {
+	const { readable } = await import('svelte/store');
+	return {
+		networksMainnets: readable([ETHEREUM_NETWORK])
+	};
+});
+
+vi.mock('$lib/derived/tokens.derived', async () => {
+	const { readable } = await import('svelte/store');
+	return {
+		enabledTokens: readable([ETHEREUM_TOKEN])
+	};
+});
 
 vi.mock('@dfinity/gix-components', async () => {
 	const actual = await vi.importActual('@dfinity/gix-components');
@@ -26,6 +55,7 @@ vi.mock('@dfinity/gix-components', async () => {
 describe('ScannerCode.svelte', () => {
 	const mockOnNext = vi.fn();
 	const mockSetData = vi.fn();
+	const mockSetTokensWithFees = vi.fn();
 
 	const mockApiResponse: OpenCryptoPayResponse = {
 		id: 'pl_test123',
@@ -68,15 +98,62 @@ describe('ScannerCode.svelte', () => {
 			asset: 'CHF',
 			amount: '10'
 		},
-		transferAmounts: []
+		transferAmounts: [
+			{
+				method: 'Ethereum',
+				available: true,
+				minFee: 0.001,
+				assets: [
+					{
+						asset: 'ETH',
+						amount: '0.01'
+					}
+				]
+			}
+		]
 	};
+
+	const mockBaseTokens = [
+		{
+			...ETHEREUM_TOKEN,
+			amount: '0.01',
+			minFee: 0.001,
+			tokenNetwork: 'Ethereum'
+		}
+	];
+
+	const mockTokensWithFees: PayableTokenWithFees[] = [
+		{
+			...ETHEREUM_TOKEN,
+			amount: '0.01',
+			minFee: 0.001,
+			tokenNetwork: 'Ethereum',
+			fee: {
+				feeInWei: 300n,
+				feeData: {
+					maxFeePerGas: 12n,
+					maxPriorityFeePerGas: 7n
+				},
+				estimatedGasLimit: 25n
+			}
+		}
+	];
 
 	const renderWithContext = () =>
 		render(ScannerCode, {
 			props: {
 				onNext: mockOnNext
 			},
-			context: new Map([[PAY_CONTEXT_KEY, { setData: mockSetData, data: writable(null) }]])
+			context: new Map([
+				[
+					PAY_CONTEXT_KEY,
+					{
+						setData: mockSetData,
+						setTokensWithFees: mockSetTokensWithFees,
+						data: writable(null)
+					}
+				]
+			])
 		});
 
 	const openManualEntry = async () => {
@@ -86,6 +163,9 @@ describe('ScannerCode.svelte', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		vi.mocked(openCryptoPayUtils.prepareBasePayableTokens).mockReturnValue(mockBaseTokens);
+		vi.mocked(openCryptoPayServices.calculateTokensWithFees).mockResolvedValue(mockTokensWithFees);
 	});
 
 	it('should render QR scanner', () => {
@@ -168,7 +248,7 @@ describe('ScannerCode.svelte', () => {
 
 		await waitFor(() => {
 			expect(mockOnNext).toHaveBeenCalled();
-			expect(mockSetData).toHaveBeenCalled();
+			expect(mockSetData).toHaveBeenCalledWith(mockApiResponse);
 		});
 	});
 
@@ -234,6 +314,93 @@ describe('ScannerCode.svelte', () => {
 
 		await waitFor(() => {
 			expect(screen.getByText(en.scanner.error.code_link_is_not_valid)).toBeInTheDocument();
+		});
+	});
+
+	describe('Token fee calculation flow', () => {
+		it('should prepare base tokens with correct parameters', async () => {
+			vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockResolvedValue(mockApiResponse);
+			renderWithContext();
+			await openManualEntry();
+			const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+			await fireEvent.input(input, { target: { value: 'valid-code' } });
+			const button = screen.getByRole('button', { name: en.core.text.continue });
+			await fireEvent.click(button);
+			await waitFor(() => {
+				expect(openCryptoPayUtils.prepareBasePayableTokens).toHaveBeenCalledWith({
+					transferAmounts: mockApiResponse.transferAmounts,
+					networks: [ETHEREUM_NETWORK],
+					availableTokens: [ETHEREUM_TOKEN]
+				});
+			});
+		});
+
+		it('should calculate fees for prepared tokens', async () => {
+			vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockResolvedValue(mockApiResponse);
+			renderWithContext();
+			await openManualEntry();
+			const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+			await fireEvent.input(input, { target: { value: 'valid-code' } });
+			const button = screen.getByRole('button', { name: en.core.text.continue });
+			await fireEvent.click(button);
+			await waitFor(() => {
+				expect(openCryptoPayServices.calculateTokensWithFees).toHaveBeenCalledWith({
+					tokens: mockBaseTokens,
+					userAddress: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+				});
+			});
+		});
+
+		it('should set tokens with fees in store', async () => {
+			vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockResolvedValue(mockApiResponse);
+			renderWithContext();
+			await openManualEntry();
+			const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+			await fireEvent.input(input, { target: { value: 'valid-code' } });
+			const button = screen.getByRole('button', { name: en.core.text.continue });
+			await fireEvent.click(button);
+			await waitFor(() => {
+				expect(mockSetTokensWithFees).toHaveBeenCalledWith(mockTokensWithFees);
+			});
+		});
+
+		it('should handle fee calculation errors', async () => {
+			vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockResolvedValue(mockApiResponse);
+			vi.mocked(openCryptoPayServices.calculateTokensWithFees).mockRejectedValue(
+				new Error('Fee calculation failed')
+			);
+			renderWithContext();
+			await openManualEntry();
+			const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+			await fireEvent.input(input, { target: { value: 'valid-code' } });
+			const button = screen.getByRole('button', { name: en.core.text.continue });
+			await fireEvent.click(button);
+			await waitFor(() => {
+				expect(screen.getByText(en.scanner.error.code_link_is_not_valid)).toBeInTheDocument();
+			});
+
+			expect(mockSetTokensWithFees).not.toHaveBeenCalled();
+			expect(mockOnNext).not.toHaveBeenCalled();
+		});
+
+		it('should handle empty transferAmounts', async () => {
+			const emptyResponse = {
+				...mockApiResponse,
+				transferAmounts: []
+			};
+			vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockResolvedValue(emptyResponse);
+			vi.mocked(openCryptoPayUtils.prepareBasePayableTokens).mockReturnValue([]);
+			vi.mocked(openCryptoPayServices.calculateTokensWithFees).mockResolvedValue([]);
+			renderWithContext();
+			await openManualEntry();
+			const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+			await fireEvent.input(input, { target: { value: 'valid-code' } });
+			const button = screen.getByRole('button', { name: en.core.text.continue });
+			await fireEvent.click(button);
+			await waitFor(() => {
+				expect(mockSetTokensWithFees).toHaveBeenCalledWith([]);
+				expect(mockOnNext).toHaveBeenCalled();
+			});
 		});
 	});
 });
