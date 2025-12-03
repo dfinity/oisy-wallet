@@ -1805,6 +1805,11 @@
 		},
 		"terms": {
 			"flexible": ""
+		},
+		"providers": {
+			"goldDaoStaking": {
+				"cardTitle": ""
+			}
 		}
 	},
 	"stake": {
