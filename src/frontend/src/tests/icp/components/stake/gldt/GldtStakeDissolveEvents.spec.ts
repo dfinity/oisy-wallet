@@ -71,7 +71,12 @@ describe('GldtStakeDissolveEvents', () => {
 		const { getByTestId } = render(GldtStakeDissolveEvents, {
 			props: { gldtToken },
 			context: mockContext(
-				getEvents([{ ...stakePositionMockResponse.dissolve_events[0], completed: false }])
+				getEvents([
+					{
+						...stakePositionMockResponse.dissolve_events[0],
+						dissolved_date: BigInt(Date.now() + 100000000)
+					}
+				])
 			)
 		});
 

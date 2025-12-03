@@ -58,7 +58,7 @@
 	</div>
 
 	<div class="flex flex-col items-center sm:w-1/3">
-		{#if event.completed}
+		{#if dissolvedDateTimestamp <= Date.now()}
 			<Tag variant="success">{$i18n.stake.text.unlocked}</Tag>
 		{:else}
 			<Tag variant="warning">
