@@ -217,6 +217,7 @@
 		<IcSendReview
 			{amount}
 			{destination}
+			{nft}
 			{onBack}
 			onSend={nonNullish(nft) ? nftSend : send}
 			{selectedContact}
