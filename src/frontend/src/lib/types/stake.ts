@@ -1,3 +1,4 @@
+import type { EarningCardData } from '$lib/types/earning';
 import type { Amount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 
@@ -15,5 +16,5 @@ export interface StakeProviderConfig {
 	logo: string;
 	url: string;
 	pageDescriptionKey: string;
-	cardTitle: string;
+	card: EarningCardData;
 }

@@ -1,4 +1,7 @@
+import { goto } from '$app/navigation';
 import EarningCard from '$lib/components/earning/EarningCard.svelte';
+import { AppPath } from '$lib/constants/routes.constants';
+import { EARNING_CARD } from '$lib/constants/test-ids.constants';
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import { formatCurrency, formatStakeApyNumber } from '$lib/utils/format.utils';
@@ -6,6 +9,14 @@ import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockProviderUi } from '$tests/mocks/providers-ui.mock';
 import { render } from '@testing-library/svelte';
+
+vi.mock(import('$app/navigation'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		goto: vi.fn()
+	};
+});
 
 describe('EarningCard', () => {
 	const props = {
@@ -24,7 +35,7 @@ describe('EarningCard', () => {
 		const { getByText } = render(EarningCard, { props });
 
 		expect(
-			getByText(resolveText({ i18n: en, path: mockProviderUi.cardTitle }))
+			getByText(resolveText({ i18n: en, path: mockProviderUi.card.title }))
 		).toBeInTheDocument();
 	});
 
@@ -69,5 +80,21 @@ describe('EarningCard', () => {
 		const { getByText } = render(EarningCard, { props });
 
 		expect(getByText(expected)).toBeInTheDocument();
+	});
+
+	it('should render the logo button', () => {
+		const { getByTestId } = render(EarningCard, { props });
+
+		expect(getByTestId(`${EARNING_CARD}-${mockProviderUi.name}`)).toBeInTheDocument();
+	});
+
+	it('should trigger the action when clicked', () => {
+		const { getByTestId } = render(EarningCard, { props });
+
+		const button = getByTestId(`${EARNING_CARD}-${mockProviderUi.name}`) as HTMLButtonElement;
+
+		button.click();
+
+		expect(goto).toHaveBeenCalledExactlyOnceWith(AppPath.EarnGold);
 	});
 });

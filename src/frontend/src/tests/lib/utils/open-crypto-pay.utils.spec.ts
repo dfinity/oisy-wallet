@@ -1,14 +1,19 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import type { BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import type { ExchangesData } from '$lib/types/exchange';
+import type { Network } from '$lib/types/network';
+import type { Address, PayableTokenWithFees, PaymentMethodData } from '$lib/types/open-crypto-pay';
+import type { Token } from '$lib/types/token';
 import {
 	createPaymentMethodDataMap,
 	decodeLNURL,
+	enrichTokensWithUsdAndBalance,
 	formatAddress,
 	mapTokenToPayableToken,
 	prepareBasePayableTokens
 } from '$lib/utils/open-crypto-pay.utils';
-
-import type { Network } from '$lib/types/network';
-import type { Address, PaymentMethodData } from '$lib/types/open-crypto-pay';
-import type { Token } from '$lib/types/token';
 
 describe('open-crypto-pay.utils', () => {
 	describe('decodeLNURL', () => {
@@ -1066,6 +1071,172 @@ describe('open-crypto-pay.utils', () => {
 
 			expect(result1).not.toBe(result2);
 			expect(result1).toEqual(result2);
+		});
+	});
+
+	describe('enrichTokensWithUsdAndBalance', () => {
+		const mockNativeToken: Token = ETHEREUM_TOKEN;
+
+		const mockToken1: PayableTokenWithFees = {
+			...ETHEREUM_TOKEN,
+			amount: '1.5',
+			minFee: 0.001,
+			tokenNetwork: 'Ethereum',
+			fee: {
+				feeInWei: 21000000000000000n,
+				feeData: {
+					maxFeePerGas: 12n,
+					maxPriorityFeePerGas: 7n
+				},
+				estimatedGasLimit: 21000n
+			}
+		};
+
+		const mockToken2: PayableTokenWithFees = {
+			...USDC_TOKEN,
+			amount: '100',
+			minFee: 0.0001,
+			tokenNetwork: 'Ethereum',
+			fee: {
+				feeInWei: 21000000000000000n,
+				feeData: {
+					gasPrice: null,
+					maxFeePerGas: 12n,
+					maxPriorityFeePerGas: 7n
+				},
+				estimatedGasLimit: 21000n
+			}
+		} as PayableTokenWithFees;
+
+		const nativeTokens: Token[] = [mockNativeToken];
+
+		const exchanges: ExchangesData = {
+			[ETHEREUM_TOKEN.id]: { usd: 2000, usd_market_cap: 1000000 },
+			[USDC_TOKEN.id]: { usd: 1, usd_market_cap: 50000 }
+		};
+
+		const balances: CertifiedStoreData<BalancesData> = {
+			[ETHEREUM_TOKEN.id]: {
+				data: 2000000000000000000n
+			},
+			[USDC_TOKEN.id]: {
+				data: 200000000n
+			}
+		} as unknown as CertifiedStoreData<BalancesData>;
+
+		it('should return empty array for empty tokens array', () => {
+			const result = enrichTokensWithUsdAndBalance({
+				tokens: [],
+				nativeTokens,
+				exchanges,
+				balances
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should enrich multiple tokens successfully', () => {
+			const result = enrichTokensWithUsdAndBalance({
+				tokens: [mockToken1, mockToken2],
+				nativeTokens,
+				exchanges,
+				balances
+			});
+
+			expect(result).toHaveLength(2);
+
+			expect(result[0].id).toBe(mockToken1.id);
+			expect(result[0].amountInUSD).toBeDefined();
+			expect(result[0].feeInUSD).toBeDefined();
+			expect(result[0].sumInUSD).toBeDefined();
+
+			expect(result[1].id).toBe(mockToken2.id);
+			expect(result[1].amountInUSD).toBeDefined();
+			expect(result[1].feeInUSD).toBeDefined();
+			expect(result[1].sumInUSD).toBeDefined();
+		});
+
+		it('should filter out tokens with insufficient balance', () => {
+			const insufficientBalances: CertifiedStoreData<BalancesData> = {
+				[ETHEREUM_TOKEN.id]: {
+					data: 1000000000000000n
+				},
+				[USDC_TOKEN.id]: {
+					data: 1000000n
+				}
+			} as unknown as CertifiedStoreData<BalancesData>;
+
+			const result = enrichTokensWithUsdAndBalance({
+				tokens: [mockToken1, mockToken2],
+				nativeTokens,
+				exchanges,
+				balances: insufficientBalances
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should filter out tokens without fee', () => {
+			const tokenWithoutFee = {
+				...mockToken1,
+				fee: undefined
+			};
+
+			const result = enrichTokensWithUsdAndBalance({
+				tokens: [tokenWithoutFee, mockToken2],
+				nativeTokens,
+				exchanges,
+				balances
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].id).toBe(mockToken2.id);
+		});
+
+		it('should filter out tokens with missing exchange rate', () => {
+			const limitedExchanges: ExchangesData = {
+				[ETHEREUM_TOKEN.id]: { usd: 2000, usd_market_cap: 1000000 }
+			};
+
+			const result = enrichTokensWithUsdAndBalance({
+				tokens: [mockToken1, mockToken2],
+				nativeTokens,
+				exchanges: limitedExchanges,
+				balances
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].id).toBe(mockToken1.id);
+		});
+
+		it('should preserve order of enriched tokens', () => {
+			const result = enrichTokensWithUsdAndBalance({
+				tokens: [mockToken2, mockToken1],
+				nativeTokens,
+				exchanges,
+				balances
+			});
+
+			expect(result[0].id).toBe(mockToken2.id);
+			expect(result[1].id).toBe(mockToken1.id);
+		});
+
+		it('should handle mix of valid and invalid tokens', () => {
+			const tokenWithoutFee = {
+				...mockToken1,
+				fee: undefined
+			};
+
+			const result = enrichTokensWithUsdAndBalance({
+				tokens: [mockToken1, tokenWithoutFee, mockToken2],
+				nativeTokens,
+				exchanges,
+				balances
+			});
+
+			expect(result).toHaveLength(2);
+			expect(result[0].id).toBe(mockToken1.id);
+			expect(result[1].id).toBe(mockToken2.id);
 		});
 	});
 });

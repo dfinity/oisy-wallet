@@ -17,6 +17,7 @@
 	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getNftDisplayId } from '$lib/utils/nft.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
@@ -55,13 +56,11 @@
 		}
 
 		const {
-			id,
-			oisyId,
 			name,
 			collection: { name: collectionName }
 		} = nft;
 
-		const idToUse = oisyId ?? id;
+		const idToUse = getNftDisplayId(nft);
 
 		if (nonNullish(name)) {
 			// sometimes NFT names include the number itself, in that case we do not display the number
@@ -111,7 +110,7 @@
 									data: nft
 								})}
 						>
-							<Img src={nft.imageUrl} styleClass="max-h-full max-w-full" />
+							<Img src={nft.imageUrl} styleClass="max-h-full max-w-full w-full" />
 						</button>
 					</NftDisplayGuard>
 					<span class="absolute right-0 bottom-0 m-2.5">

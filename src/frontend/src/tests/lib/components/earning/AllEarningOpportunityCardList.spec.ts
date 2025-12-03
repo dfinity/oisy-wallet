@@ -72,7 +72,7 @@ describe('AllEarningOpportunityCardList', () => {
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
 			{
 				id: mockRewardCampaigns[mockRewardCampaigns.length - 1].id,
-				title: 'mock.rewards.title',
+				titles: ['mock.rewards.title'],
 				description: 'mock.rewards.description',
 				logo: '/images/rewards/oisy-reward-logo.svg',
 				fields: [],
@@ -80,7 +80,7 @@ describe('AllEarningOpportunityCardList', () => {
 			},
 			{
 				id: 'gldt-staking',
-				title: 'mock.gldt.title',
+				titles: ['mock.gldt.title'],
 				description: 'mock.gldt.description',
 				logo: '/mock/logo.svg',
 				fields: [
