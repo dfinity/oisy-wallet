@@ -9,3 +9,10 @@ export interface ClaimStakingRewardParams {
 	token: Token;
 	rewardAmount: Amount;
 }
+
+export interface StakeProviderConfig {
+	name: string;
+	logo: string;
+	url: string;
+	pageDescriptionKey: string;
+}
