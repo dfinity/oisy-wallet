@@ -10,6 +10,9 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { networksMainnets } from '$lib/derived/networks.derived';
+	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import {
 		calculateTokensWithFees,
 		processOpenCryptoPayCode
@@ -19,9 +22,6 @@
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import type { QrStatus } from '$lib/types/qr-code';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
-	import { networksMainnets } from '$lib/derived/networks.derived';
-	import { enabledTokens } from '$lib/derived/tokens.derived';
-	import { ethAddress } from '$lib/derived/address.derived';
 
 	interface Props {
 		onNext: () => void;
@@ -60,7 +60,7 @@
 				tokens: baseTokens,
 				userAddress: $ethAddress
 			});
-			
+
 			setTokensWithFees(tokensWithFees);
 
 			onNext();
