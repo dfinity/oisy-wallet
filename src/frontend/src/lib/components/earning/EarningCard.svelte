@@ -15,7 +15,7 @@
 </script>
 
 <div class="flex w-full flex-col">
-	<LogoButton  rounded={false}>
+	<LogoButton rounded={false}>
 		{#snippet logo()}
 			<span class="mr-2 flex">
 				<Logo
