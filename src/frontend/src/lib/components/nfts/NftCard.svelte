@@ -136,7 +136,7 @@
 			{withCollectionLabel ? nft.collection.name : nft.name}
 		</span>
 		<span class="truncate text-xs" class:text-tertiary={!disabled}>
-			#{nft.id}
+			#{nft.oisyId ?? nft.id}
 			{#if withCollectionLabel}
 				&ndash; {nft.name}
 			{/if}
