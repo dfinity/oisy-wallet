@@ -1786,8 +1786,9 @@
 		},
 		"cards": {
 			"gldt": {
-				"title": "GLDT Staking",
-				"description": "Stake GLDT tokens to earn rewards backed by physical gold",
+				"title1": "Gold DAO",
+				"title2": "Earn with Gold",
+				"description": "Stake GLDT to earn daily rewards in governance tokens, unlocking passive income from gold holdings.",
 				"action": "Stake GLDT"
 			},
 			"sprinkles": {

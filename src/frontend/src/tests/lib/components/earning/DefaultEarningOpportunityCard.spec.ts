@@ -13,7 +13,7 @@ describe('DefaultEarningOpportunityCard', () => {
 
 	const mockCardData = {
 		id: 'gldt-staking',
-		title: 'mock.card.title',
+		titles: ['mock.card.title'],
 		description: 'mock.card.description',
 		logo: '/mock/logo.svg',
 		fields: [
