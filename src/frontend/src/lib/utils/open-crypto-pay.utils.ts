@@ -1,12 +1,19 @@
+import { enrichEthEvmToken } from '$eth/utils/token.utils';
+import type { BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
 import type {
 	Address,
 	OpenCryptoPayResponse,
 	PayableToken,
+	PayableTokenWithConvertedAmount,
+	PayableTokenWithFees,
 	PaymentMethodData,
 	PrepareTokensParams
 } from '$lib/types/open-crypto-pay';
 import type { Token } from '$lib/types/token';
+import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
 
@@ -142,3 +149,70 @@ export const prepareBasePayableTokens = ({
 		return acc;
 	}, []);
 };
+
+/**
+ * Routes token enrichment to appropriate network-specific handler.
+ * Currently supports:
+ * - Ethereum/EVM networks
+ *
+ * Future support:
+ * - Bitcoin
+ * - ICP
+ * - Solana
+ *
+ * @param token - Token with fee data to enrich
+ * @param nativeTokens - Available tokens for native token lookup
+ * @param exchanges - Exchange rates for price lookup
+ * @param balances - User token balances
+ */
+const enrichTokenWithUsdAndBalance = ({
+	token,
+	nativeTokens,
+	exchanges,
+	balances
+}: {
+	token: PayableTokenWithFees;
+	nativeTokens: Token[];
+	exchanges: ExchangesData;
+	balances: CertifiedStoreData<BalancesData>;
+}): PayableTokenWithConvertedAmount | undefined => {
+	if (isNullish(token.fee)) {
+		return;
+	}
+
+	// ETH/EVM networks
+	if (isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)) {
+		return enrichEthEvmToken({
+			token,
+			nativeTokens,
+			exchanges,
+			balances
+		});
+	}
+};
+
+export const enrichTokensWithUsdAndBalance = ({
+	tokens,
+	nativeTokens,
+	exchanges,
+	balances
+}: {
+	tokens: PayableTokenWithFees[];
+	nativeTokens: Token[];
+	exchanges: ExchangesData;
+	balances: CertifiedStoreData<BalancesData>;
+}): PayableTokenWithConvertedAmount[] =>
+	tokens.reduce<PayableTokenWithConvertedAmount[]>((acc, token) => {
+		const enrichedToken = enrichTokenWithUsdAndBalance({
+			token,
+			nativeTokens,
+			exchanges,
+			balances
+		});
+
+		if (nonNullish(enrichedToken)) {
+			acc.push(enrichedToken);
+		}
+
+		return acc;
+	}, []);
