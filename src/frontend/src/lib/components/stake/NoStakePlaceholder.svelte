@@ -2,6 +2,7 @@
 	import { notEmptyString } from '@dfinity/utils';
 	import noEarningBanner from '$lib/assets/earning/no-earning-banner.svg';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { EARNING_NO_POSITION_PLACEHOLDER } from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { highestApyEarning, highestEarningPotentialUsd } from '$lib/derived/earning.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -18,7 +19,7 @@
 	const USD_AMOUNT_THRESHOLD = 20;
 </script>
 
-<div class="flex flex-col items-center gap-5 px-6 py-10">
+<div class="flex flex-col items-center gap-5 px-6 py-10" data-tid={EARNING_NO_POSITION_PLACEHOLDER}>
 	<Img alt={$i18n.stake.alt.placeholder_image} src={noEarningBanner} />
 
 	<div class="flex flex-col items-center gap-2">
