@@ -1867,7 +1867,9 @@
 			"title_empty_3": "",
 			"description_empty": "It looks like you haven't staked any tokens yet",
 			"full_history": "Show full history",
-			"recent_history": "Close full history"
+			"recent_history": "Close full history",
+			"gldt_stake_carousel_slide_title": "Earn APY with Gold DAO Staking",
+			"gldt_stake_carousel_slide_cta": "Learn more"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens."
