@@ -21,8 +21,8 @@ const mockGldtToken: IcToken = {
 
 export const mockProviderUi: ProviderUi = {
 	...stakeProvidersConfig[StakeProvider.GLDT],
-	maxApy: 6,
-	totalEarningPerYear: 45,
-	totalPositionUsd: 123,
+	maxApy: 6.78,
+	totalEarningPerYear: 45.6,
+	totalPositionUsd: 123.45,
 	tokens: [mockGldtToken]
 };
