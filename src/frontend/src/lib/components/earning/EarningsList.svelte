@@ -19,7 +19,6 @@
 			if (providerName === StakeProvider.GLDT) {
 				const gldtToken = $enabledFungibleTokens.find(isGLDTToken);
 
-
 				const gldtStakePosition = $gldtStakeStore?.position?.staked ?? ZERO;
 
 				const gldtStakePositionUsd = nonNullish(gldtToken)
