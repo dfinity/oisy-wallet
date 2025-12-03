@@ -13,9 +13,7 @@
 	import Responsive from '../ui/Responsive.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import SwapBestRateBadge from '../swap/SwapBestRateBadge.svelte';
-
 	let { onSelectToken, isTokenSelecting = $bindable() }: any = $props();
-
 	let { selectedToken, availableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
 </script>
 

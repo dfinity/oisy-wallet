@@ -5,9 +5,8 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import type { PayableToken } from '$lib/stores/open-crypto-pay.store';
-
+    
 	let { token }: { token: PayableToken } = $props();
-
 	let exchangeBalance = $derived(
 		nonNullish(token.feeInUSD)
 			? formatCurrency({

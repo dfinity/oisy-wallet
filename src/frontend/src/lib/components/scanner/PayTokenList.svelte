@@ -13,10 +13,15 @@
 	import Responsive from '../ui/Responsive.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import SwapBestRateBadge from '../swap/SwapBestRateBadge.svelte';
-
-	let { onSelectToken, isTokenSelecting = $bindable() }: any = $props();
-
-	let { selectedToken, availableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
+	import { nonNullish } from '@dfinity/utils';
+	import IconOisyMate from '../icons/IconOisyMate.svelte';
+	import Button from '../ui/Button.svelte';
+	import { goto } from '$app/navigation';
+	interface Props {
+		onClose: void;
+	}
+	let { onClose } = $props();
+	const { availableTokens, setSelectedToken } = getContext<PayContext>(PAY_CONTEXT_KEY);
 </script>
 
 <div class="mt-8 mb-2 flex w-full items-end justify-between px-3">
@@ -56,31 +61,28 @@
 				<ExchangeTokenToPay token={$selectedToken} />
 			{/snippet}
 
-			{#snippet descriptionEnd()}
-				<div class="flex items-center justify-center gap-2">
-					{#if $selectedToken === $availableTokens[0]}
-						<SwapBestRateBadge />
-					{/if}
-					<ExchangeTokenFee token={$selectedToken} />
-				</div>
-			{/snippet}
-		</LogoButton>
-	{/if}
+						{#snippet descriptionEnd()}
+							<div class="flex items-center justify-center gap-2">
+								{#if token === $availableTokens[0]}
+									<SwapBestRateBadge />
+								{/if}
 
-	<Responsive down="sm">
-		<Button
-			fullWidth
-			colorStyle="secondary-light"
-			onclick={() => {
-				onSelectToken();
-				isTokenSelecting = true;
-			}}>{nonNullish($selectedToken) ? 'Select different Token' : 'Select the token'}</Button
-		>
-	</Responsive>
-
-	<Responsive up="md">
-		<Button colorStyle="secondary-light" fullWidth onclick={onSelectToken}
-			>Select different Token</Button
-		>
-	</Responsive>
-</div>
+								<ExchangeTokenFee {token} />
+							</div>
+						{/snippet}
+					</LogoButton>
+				</ListItem>
+			{/if}
+		{/each}
+	</List>
+{:else}
+	<div class="mb-12 flex flex-col items-center justify-center gap-4 text-center">
+		<IconOisyMate />
+		<h3>You have no supported tokens</h3>
+		<p
+			>OpenCrypto pay supports the following tokens: BTC, ETH, WBTC, XMR, dEURO, ZCHF, USDT, USDC,
+			DAI, etc...
+		</p>
+		<Button colorStyle="secondary-light" onclick={() => goto('/')}>Go to Assets</Button>
+	</div>
+{/if}
