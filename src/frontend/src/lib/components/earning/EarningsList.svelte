@@ -39,7 +39,6 @@
 					maxApy: gldtStakeApy,
 					totalEarningPerYear: gldtStakeEarningPerYear,
 					// TODO: improve this flow to calculate the sum of all positions among all possible earning features of the provider
-					totalPosition: gldtStakePosition,
 					totalPositionUsd: gldtStakePositionUsd,
 					tokens: [...(nonNullish(gldtToken) ? [gldtToken] : [])]
 				};
@@ -52,19 +51,19 @@
 	);
 
 	let filteredEarningProviders = $derived(
-		earningProvidersUi.filter(({ totalPosition }) => totalPosition !== ZERO)
+		earningProvidersUi.filter(({ totalPositionUsd }) => totalPositionUsd !== 0)
 	);
 </script>
 
 <!-- TODO: add a skeleton -->
-<div class="flex flex-col gap-3" transition:fade>
+<div class="flex flex-col gap-3">
 	{#each filteredEarningProviders as provider (provider.name)}
 		<div class="overflow-hidden rounded-xl" transition:fade>
 			<EarningCard {provider} />
 		</div>
 	{/each}
 
-	{#if filteredEarningProviders?.length === 0}
+	{#if filteredEarningProviders.length === 0}
 		<NoStakePlaceholder />
 	{/if}
 </div>

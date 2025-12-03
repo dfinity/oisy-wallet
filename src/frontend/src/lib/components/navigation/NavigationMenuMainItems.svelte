@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
+	import IconPlant from '$lib/components/icons/IconPlant.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -116,6 +117,30 @@
 	{/snippet}
 </NavigationItem>
 
+<!-- Todo: remove condition once the feature is completed -->
+{#if EARNING_ENABLED}
+	<NavigationItem
+		ariaLabel={$i18n.navigation.alt.airdrops}
+		href={networkUrl({
+			path: AppPath.Earn,
+			networkId,
+			usePreviousRoute: isTransactionsRoute,
+			fromRoute
+		})}
+		selected={isRouteEarn(page)}
+		tag={$i18n.core.text.new}
+		tagVariant="emphasis"
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+	>
+		{#snippet icon()}
+			<IconPlant />
+		{/snippet}
+		{#snippet label()}
+			{$i18n.navigation.text.earning}
+		{/snippet}
+	</NavigationItem>
+{/if}
+
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	href={networkUrl({
@@ -136,28 +161,7 @@
 </NavigationItem>
 
 <!-- Todo: remove condition once the feature is completed -->
-{#if EARNING_ENABLED}
-	<NavigationItem
-		ariaLabel={$i18n.navigation.alt.airdrops}
-		href={networkUrl({
-			path: AppPath.Earn,
-			networkId,
-			usePreviousRoute: isTransactionsRoute,
-			fromRoute
-		})}
-		selected={isRouteEarn(page)}
-		tag={$i18n.core.text.new}
-		tagVariant="emphasis"
-		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
-	>
-		{#snippet icon()}
-			<IconGift />
-		{/snippet}
-		{#snippet label()}
-			{$i18n.navigation.text.earning}
-		{/snippet}
-	</NavigationItem>
-{:else}
+{#if !EARNING_ENABLED}
 	<NavigationItem
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({

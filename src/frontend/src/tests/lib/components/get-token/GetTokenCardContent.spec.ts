@@ -26,7 +26,7 @@ describe('GetTokenCardContent', () => {
 		expect(getByTestId(GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE)).toBeInTheDocument();
 	});
 
-	it('should not display potential token USD balance if it is zero', () => {
+	it('should display potential token USD balance if it is zero', () => {
 		const { getByTestId } = render(GetTokenCardContent, {
 			props: {
 				...props,
@@ -34,15 +34,26 @@ describe('GetTokenCardContent', () => {
 			}
 		});
 
-		expect(() => getByTestId(GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE)).toThrow();
+		expect(getByTestId(GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE)).toBeInTheDocument();
 	});
 
-	it('displays balance value correctly if exchange is not available', () => {
+	it('should not display balance value if exchange is not available', () => {
 		const { getByText } = render(GetTokenCardContent, {
 			props
 		});
 
-		expect(getByText(`0 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();
+		expect(() => getByText(ETHEREUM_TOKEN.symbol)).toThrow();
+	});
+
+	it('should not display balance value if it is zero', () => {
+		const { getByText } = render(GetTokenCardContent, {
+			props: {
+				...props,
+				potentialTokensUsdBalance: 0
+			}
+		});
+
+		expect(() => getByText(ETHEREUM_TOKEN.symbol)).toThrow();
 	});
 
 	it('displays balance value correctly if exchange is available', () => {

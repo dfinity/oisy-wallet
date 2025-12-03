@@ -3,6 +3,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import Tag from '$lib/components/ui/Tag.svelte';
+	import { EARNING_CARD } from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -10,6 +11,7 @@
 	import type { ProviderUi } from '$lib/types/provider-ui';
 	import { formatCurrency, formatStakeApyNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		provider: ProviderUi;
@@ -26,8 +28,10 @@
 		totalPositionUsd
 	} = $derived(provider);
 
+	let testId = $derived(`${EARNING_CARD}-${name}`);
+
 	let tokenSymbols = $derived(
-		new Set(provider.tokens.map(({ oisySymbol, symbol }) => oisySymbol?.oisySymbol ?? symbol))
+		new Set(provider.tokens.map((token) => getTokenDisplaySymbol(token)))
 	);
 
 	let networkNames = $derived(new Set(provider.tokens.map(({ network: { name } }) => name)));
@@ -36,7 +40,7 @@
 </script>
 
 <div class="flex w-full flex-col">
-	<LogoButton condensed={false} dividers={false} hover={true} rounded={false}>
+	<LogoButton rounded={false} {testId}>
 		{#snippet logo()}
 			<span class="mr-2 flex">
 				<Logo
