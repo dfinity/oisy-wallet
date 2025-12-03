@@ -3,10 +3,10 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import Tag from '$lib/components/ui/Tag.svelte';
+	import { EARNING_CARD } from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
-	import { EARNING_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProviderUi } from '$lib/types/provider-ui';
 	import { formatCurrency, formatStakeApyNumber } from '$lib/utils/format.utils';
@@ -26,8 +26,7 @@
 		totalEarningPerYear,
 		totalPositionUsd
 	} = $derived(provider);
-  
-  
+
 	let testId = $derived(`${EARNING_CARD}-${name}`);
 
 	let tokenSymbols = $derived(
