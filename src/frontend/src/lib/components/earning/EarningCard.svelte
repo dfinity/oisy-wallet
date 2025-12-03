@@ -6,6 +6,7 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
+	import { EARNING_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProviderUi } from '$lib/types/provider-ui';
 	import { formatCurrency, formatStakeApyNumber } from '$lib/utils/format.utils';
@@ -25,6 +26,9 @@
 		totalEarningPerYear,
 		totalPositionUsd
 	} = $derived(provider);
+  
+  
+	let testId = $derived(`${EARNING_CARD}-${name}`);
 
 	let tokenSymbols = $derived(
 		new Set(provider.tokens.map(({ oisySymbol, symbol }) => oisySymbol?.oisySymbol ?? symbol))
@@ -36,7 +40,7 @@
 </script>
 
 <div class="flex w-full flex-col">
-	<LogoButton rounded={false}>
+	<LogoButton rounded={false} {testId}>
 		{#snippet logo()}
 			<span class="mr-2 flex">
 				<Logo
