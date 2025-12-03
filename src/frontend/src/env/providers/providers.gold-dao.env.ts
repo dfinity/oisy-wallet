@@ -8,6 +8,6 @@ export const GOLD_DAO_PROVIDER_ID: ProviderId = parseProviderId(GOLD_DAO_PROVIDE
 
 export const GOLD_DAO_PROVIDER: Provider = {
 	id: GOLD_DAO_PROVIDER_ID,
-	cardTitle: 'earning.providers.gold-dao-staking.cardTitle',
+	cardTitle: 'earning.providers.gold_dao_staking.cardTitle',
 	logo: goldDao
 };
