@@ -27,6 +27,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { usdValue } from '$lib/utils/exchange.utils';
+import { findNativeToken } from '$lib/utils/token.utils';
 import {
 	defineEnabledTokens,
 	filterEnabledTokens,
@@ -1081,6 +1082,73 @@ describe('tokens.utils', () => {
 			const result = filterTokensByNft({ tokens: [], filterNfts: false });
 
 			expect(result).toHaveLength(0);
+		});
+	});
+
+	describe('findNativeToken', () => {
+		it('should find token by network id', () => {
+			const enabledTokens = [ETHEREUM_TOKEN, ICP_TOKEN, BTC_MAINNET_TOKEN];
+
+			const result = findNativeToken({
+				networkId: ETHEREUM_NETWORK_ID,
+				enabledTokens
+			});
+
+			expect(result).toEqual(ETHEREUM_TOKEN);
+		});
+
+		it('should return undefined when token not found', () => {
+			const enabledTokens = [ETHEREUM_TOKEN];
+
+			const result = findNativeToken({
+				networkId: BTC_MAINNET_NETWORK_ID,
+				enabledTokens
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined for empty tokens array', () => {
+			const result = findNativeToken({
+				networkId: ETHEREUM_NETWORK_ID,
+				enabledTokens: []
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return first matching token when multiple tokens have same network', () => {
+			const mockUsdcToken = { ...USDC_TOKEN, network: ETHEREUM_TOKEN.network };
+			const enabledTokens = [ETHEREUM_TOKEN, mockUsdcToken];
+
+			const result = findNativeToken({
+				networkId: ETHEREUM_NETWORK_ID,
+				enabledTokens
+			});
+
+			expect(result).toEqual(ETHEREUM_TOKEN);
+		});
+
+		it('should find token from different network', () => {
+			const enabledTokens = [ETHEREUM_TOKEN, SOLANA_TOKEN, BTC_MAINNET_TOKEN];
+
+			const result = findNativeToken({
+				networkId: SOLANA_MAINNET_NETWORK_ID,
+				enabledTokens
+			});
+
+			expect(result).toEqual(SOLANA_TOKEN);
+		});
+
+		it('should handle single token in array', () => {
+			const enabledTokens = [ICP_TOKEN];
+
+			const result = findNativeToken({
+				networkId: ICP_NETWORK_ID,
+				enabledTokens
+			});
+
+			expect(result).toEqual(ICP_TOKEN);
 		});
 	});
 });

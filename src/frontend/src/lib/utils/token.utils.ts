@@ -12,6 +12,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { Network } from '$lib/types/network';
 import type { StakeBalances } from '$lib/types/stake-balance';
 import type { RequiredTokenWithLinkedData, Token, TokenStandard } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
@@ -269,3 +270,11 @@ export const isTokenToggleable = <T extends Token>(token: T): token is TokenTogg
  */
 export const filterEnabledToken = <T extends Token>(token: T): boolean =>
 	isTokenToggleable(token) ? token.enabled : true;
+
+export const findNativeToken = ({
+	networkId,
+	enabledTokens
+}: {
+	networkId: Network['id'];
+	enabledTokens: Token[];
+}): Token | undefined => enabledTokens.find(({ network: { id } }) => id === networkId);
