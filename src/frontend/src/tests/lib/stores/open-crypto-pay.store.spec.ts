@@ -214,7 +214,7 @@ describe('OpenCryptoPayStore', () => {
 
 			const tokens = [mockEthTokenWithFee];
 
-			context.setTokens(tokens);
+			context.setAvailableTokens(tokens);
 
 			expect(get(context.availableTokens)).toEqual(tokens);
 		});
@@ -224,7 +224,7 @@ describe('OpenCryptoPayStore', () => {
 
 			const tokens = [mockEthTokenWithFee, mockUsdcTokenWithFee];
 
-			context.setTokens(tokens);
+			context.setAvailableTokens(tokens);
 
 			expect(get(context.availableTokens)).toEqual(tokens);
 			expect(get(context.availableTokens)).toHaveLength(2);
@@ -236,8 +236,8 @@ describe('OpenCryptoPayStore', () => {
 			const firstTokens = [mockEthTokenWithFee];
 			const secondTokens = [mockUsdcTokenWithFee];
 
-			context.setTokens(firstTokens);
-			context.setTokens(secondTokens);
+			context.setAvailableTokens(firstTokens);
+			context.setAvailableTokens(secondTokens);
 
 			expect(get(context.availableTokens)).toEqual(secondTokens);
 			expect(get(context.availableTokens)).not.toEqual(firstTokens);
@@ -246,8 +246,8 @@ describe('OpenCryptoPayStore', () => {
 		it('should handle empty array of tokens', () => {
 			const context = initPayContext();
 
-			context.setTokens([mockEthTokenWithFee]);
-			context.setTokens([]);
+			context.setAvailableTokens([mockEthTokenWithFee]);
+			context.setAvailableTokens([]);
 
 			expect(get(context.availableTokens)).toEqual([]);
 		});
@@ -259,9 +259,9 @@ describe('OpenCryptoPayStore', () => {
 			const secondUpdate = [mockUsdcTokenWithFee];
 			const thirdUpdate = [mockEthTokenWithFee, mockUsdcTokenWithFee];
 
-			context.setTokens(firstUpdate);
-			context.setTokens(secondUpdate);
-			context.setTokens(thirdUpdate);
+			context.setAvailableTokens(firstUpdate);
+			context.setAvailableTokens(secondUpdate);
+			context.setAvailableTokens(thirdUpdate);
 
 			expect(get(context.availableTokens)).toEqual(thirdUpdate);
 			expect(get(context.availableTokens)).toHaveLength(2);
@@ -278,7 +278,7 @@ describe('OpenCryptoPayStore', () => {
 				fee: undefined
 			};
 
-			context.setTokens([tokenWithoutFee]);
+			context.setAvailableTokens([tokenWithoutFee]);
 
 			expect(get(context.availableTokens)).toEqual([]);
 		});
@@ -296,7 +296,7 @@ describe('OpenCryptoPayStore', () => {
 
 			const tokens = [mockEthTokenWithFee, tokenWithoutFee];
 
-			context.setTokens(tokens);
+			context.setAvailableTokens(tokens);
 
 			expect(get(context.availableTokens)).toHaveLength(1);
 			expect(get(context.availableTokens)[0].fee).toBeDefined();
@@ -322,7 +322,7 @@ describe('OpenCryptoPayStore', () => {
 			const context = initPayContext();
 
 			context.setData(mockPaymentData);
-			context.setTokens([mockEthTokenWithFee]);
+			context.setAvailableTokens([mockEthTokenWithFee]);
 
 			expect(get(context.data)).toEqual(mockPaymentData);
 			expect(get(context.availableTokens)).toEqual([mockEthTokenWithFee]);
@@ -332,7 +332,7 @@ describe('OpenCryptoPayStore', () => {
 			const context = initPayContext();
 
 			context.setData(mockPaymentData);
-			context.setTokens([mockEthTokenWithFee]);
+			context.setAvailableTokens([mockEthTokenWithFee]);
 
 			context.setData({ ...mockPaymentData, displayName: 'Updated' });
 
@@ -344,9 +344,9 @@ describe('OpenCryptoPayStore', () => {
 			const context = initPayContext();
 
 			context.setData(mockPaymentData);
-			context.setTokens([mockEthTokenWithFee]);
+			context.setAvailableTokens([mockEthTokenWithFee]);
 
-			context.setTokens([mockUsdcTokenWithFee]);
+			context.setAvailableTokens([mockUsdcTokenWithFee]);
 
 			expect(get(context.data)).toEqual(mockPaymentData);
 			expect(get(context.availableTokens)).toEqual([mockUsdcTokenWithFee]);

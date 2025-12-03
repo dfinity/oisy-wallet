@@ -16,7 +16,7 @@ export interface PayContext {
 	availableTokens: Readable<PayableTokenWithConvertedAmount[]>;
 	selectedToken: Readable<PayableTokenWithConvertedAmount | undefined>;
 	setData: (payData: OpenCryptoPayResponse) => void;
-	setTokens: (tokens: PayableTokenWithFees[]) => void;
+	setAvailableTokens: (tokens: PayableTokenWithFees[]) => void;
 	selectToken: (token: PayableTokenWithConvertedAmount) => void;
 }
 
@@ -48,14 +48,12 @@ export const initPayContext = (): PayContext => {
 			: []
 	);
 
-	const selectedToken = derived(
-		[tokensSorted, userSelection],
-		([$tokensSorted, $userSelection]) => {
-			if (nonNullish($userSelection) && $tokensSorted.find((t) => t.id === $userSelection.id)) {
-				return $userSelection;
-			}
-			return $tokensSorted.length > 0 ? $tokensSorted[0] : undefined;
-		}
+	const selectedToken = derived([tokensSorted, userSelection], ([$tokensSorted, $userSelection]) =>
+		nonNullish($userSelection)
+			? $tokensSorted.find((t) => t.id === $userSelection.id)
+			: $tokensSorted.length > 0
+				? $tokensSorted[0]
+				: undefined
 	);
 
 	return {
@@ -63,7 +61,7 @@ export const initPayContext = (): PayContext => {
 		availableTokens: tokensSorted,
 		selectedToken,
 		setData,
-		setTokens: (tokens: PayableTokenWithFees[]) => {
+		setAvailableTokens: (tokens: PayableTokenWithFees[]) => {
 			availableTokens.set(tokens);
 			userSelection.set(undefined);
 		},
