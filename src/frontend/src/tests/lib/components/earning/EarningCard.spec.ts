@@ -35,9 +35,9 @@ describe('EarningCard', () => {
 	});
 
 	it('should render the list of tokens and networks', () => {
-		const { queryByText, getByText } = render(EarningCard, { props });
+		const { getByText } = render(EarningCard, { props });
 
-		expect(queryByText(mockProviderUi.tokens[0].symbol, { exact: false })).toBeInTheDocument();
+		expect(getByText(mockProviderUi.tokens[0].symbol, { exact: false })).toBeInTheDocument();
 		expect(getByText('•')).toBeInTheDocument();
 		expect(getByText(mockProviderUi.tokens[0].network.name, { exact: false })).toBeInTheDocument();
 	});
