@@ -6,6 +6,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress3 } from '$tests/mocks/eth.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 
@@ -83,6 +84,13 @@ describe('ic-send.utils', () => {
 				params: {
 					destination: mockPrincipalText,
 					tokenStandard: mockValidIcrcToken.standard
+				},
+				result: false
+			},
+			{
+				params: {
+					destination: mockPrincipalText,
+					tokenStandard: mockValidExtV2Token.standard
 				},
 				result: false
 			},
