@@ -1,3 +1,5 @@
+import type { EthFeeResult } from '$eth/types/pay';
+import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 
 export interface Address {
@@ -73,4 +75,14 @@ export interface PayableToken extends Token {
 	amount: string;
 	tokenNetwork: string;
 	minFee?: number;
+}
+
+export interface PayableTokenWithFees extends PayableToken {
+	fee?: EthFeeResult;
+}
+
+export interface PrepareTokensParams {
+	transferAmounts: TransferAmount[];
+	networks: Network[];
+	availableTokens: Token[];
 }

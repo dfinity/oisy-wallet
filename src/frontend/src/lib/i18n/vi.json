@@ -1781,7 +1781,8 @@
 			"tab_title": "",
 			"earning_opportunities": "",
 			"header_title": "",
-			"header_description": ""
+			"header_description": "",
+			"go_to_earn": ""
 		},
 		"cards": {
 			"gldt": {
@@ -1855,10 +1856,15 @@
 			"reward_claimed": "",
 			"staked": "",
 			"unstaked": "",
-			"title_empty": "",
+			"title_empty_1": "",
+			"title_empty_2_usd": "",
+			"title_empty_2_apy": "",
+			"title_empty_3": "",
 			"description_empty": "",
 			"full_history": "",
-			"recent_history": ""
+			"recent_history": "",
+			"gldt_stake_carousel_slide_title": "",
+			"gldt_stake_carousel_slide_cta": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": ""

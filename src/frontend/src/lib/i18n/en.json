@@ -1781,7 +1781,8 @@
 			"tab_title": "Earning",
 			"earning_opportunities": "Earning opportunities",
 			"header_title": "Welcome to Earn!",
-			"header_description": "Grow your crypto portfolio by staking your tokens and earning rewards. Choose from various earning strategies based on your risk tolerance."
+			"header_description": "Grow your crypto portfolio by staking your tokens and earning rewards. Choose from various earning strategies based on your risk tolerance.",
+			"go_to_earn": "Go to Earn"
 		},
 		"cards": {
 			"gldt": {
@@ -1855,10 +1856,15 @@
 			"reward_claimed": "Reward claimed",
 			"staked": "Staked",
 			"unstaked": "Unstaked",
-			"title_empty": "Your staking positions will appear here",
+			"title_empty_1": "Earn up to",
+			"title_empty_2_usd": "/year",
+			"title_empty_2_apy": "yearly",
+			"title_empty_3": "",
 			"description_empty": "It looks like you haven't staked any tokens yet",
 			"full_history": "Show full history",
-			"recent_history": "Close full history"
+			"recent_history": "Close full history",
+			"gldt_stake_carousel_slide_title": "Earn APY with Gold DAO Staking",
+			"gldt_stake_carousel_slide_cta": "Learn more"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens."

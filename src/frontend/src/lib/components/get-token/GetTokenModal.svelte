@@ -5,7 +5,6 @@
 	import BuyModalContent from '$lib/components/buy/BuyModalContent.svelte';
 	import GetTokenWizardStep from '$lib/components/get-token/GetTokenWizardStep.svelte';
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
-	import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
 	import { getTokenWizardSteps } from '$lib/config/get-token.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
@@ -124,53 +123,51 @@
 	};
 </script>
 
-<SwapContexts>
-	<WizardModal
-		bind:this={modal}
-		disablePointerEvents={currentStep?.name === WizardStepsGetToken.SWAPPING ||
-			currentStep?.name === WizardStepsGetToken.FILTER_NETWORKS}
-		onClose={close}
-		{steps}
-		bind:currentStep
-	>
-		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
+<WizardModal
+	bind:this={modal}
+	disablePointerEvents={currentStep?.name === WizardStepsGetToken.SWAPPING ||
+		currentStep?.name === WizardStepsGetToken.FILTER_NETWORKS}
+	onClose={close}
+	{steps}
+	bind:currentStep
+>
+	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-		{#key currentStep?.name}
-			{#if currentStep?.name === WizardStepsGetToken.GET_TOKEN}
-				<GetTokenWizardStep {currentApy} onClose={close} onGoToStep={goToStep} {token} />
-			{:else if currentStep?.name === WizardStepsGetToken.RECEIVE}
-				<ReceiveAddressQrCode
-					address={receiveAddress}
-					addressLabel={$i18n.wallet.text.wallet_address}
-					addressToken={token}
-					copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
-					network={token.network}
-					onBack={() => goToStep(WizardStepsGetToken.GET_TOKEN)}
-				>
-					{#snippet text()}
-						{replacePlaceholders($i18n.wallet.text.use_address_from_to, {
-							$token: getTokenDisplaySymbol(token)
-						})}
-					{/snippet}
-				</ReceiveAddressQrCode>
-			{:else if currentStep?.name === WizardStepsGetToken.BUY_TOKEN}
-				<BuyModalContent />
-			{:else if showSwapWizard}
-				<SwapModalWizardSteps
-					{currentStep}
-					{modal}
-					onClose={closeSwapWizard}
-					{steps}
-					bind:swapAmount
-					bind:receiveAmount
-					bind:slippageValue
-					bind:swapProgressStep
-					bind:swapFailedProgressSteps
-					bind:allNetworksEnabled
-					bind:showSelectProviderModal
-					bind:selectTokenType
-				/>
-			{/if}
-		{/key}
-	</WizardModal>
-</SwapContexts>
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsGetToken.GET_TOKEN}
+			<GetTokenWizardStep {currentApy} onClose={close} onGoToStep={goToStep} {token} />
+		{:else if currentStep?.name === WizardStepsGetToken.RECEIVE}
+			<ReceiveAddressQrCode
+				address={receiveAddress}
+				addressLabel={$i18n.wallet.text.wallet_address}
+				addressToken={token}
+				copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
+				network={token.network}
+				onBack={() => goToStep(WizardStepsGetToken.GET_TOKEN)}
+			>
+				{#snippet text()}
+					{replacePlaceholders($i18n.wallet.text.use_address_from_to, {
+						$token: getTokenDisplaySymbol(token)
+					})}
+				{/snippet}
+			</ReceiveAddressQrCode>
+		{:else if currentStep?.name === WizardStepsGetToken.BUY_TOKEN}
+			<BuyModalContent />
+		{:else if showSwapWizard}
+			<SwapModalWizardSteps
+				{currentStep}
+				{modal}
+				onClose={closeSwapWizard}
+				{steps}
+				bind:swapAmount
+				bind:receiveAmount
+				bind:slippageValue
+				bind:swapProgressStep
+				bind:swapFailedProgressSteps
+				bind:allNetworksEnabled
+				bind:showSelectProviderModal
+				bind:selectTokenType
+			/>
+		{/if}
+	{/key}
+</WizardModal>

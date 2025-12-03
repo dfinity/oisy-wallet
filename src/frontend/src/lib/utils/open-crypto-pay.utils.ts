@@ -3,7 +3,8 @@ import type {
 	Address,
 	OpenCryptoPayResponse,
 	PayableToken,
-	PaymentMethodData
+	PaymentMethodData,
+	PrepareTokensParams
 } from '$lib/types/open-crypto-pay';
 import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -117,4 +118,27 @@ export const mapTokenToPayableToken = ({
 		tokenNetwork,
 		minFee: methodData.minFee
 	};
+};
+
+export const prepareBasePayableTokens = ({
+	transferAmounts,
+	networks,
+	availableTokens
+}: PrepareTokensParams): PayableToken[] => {
+	if (transferAmounts.length === 0 || networks.length === 0 || availableTokens.length === 0) {
+		return [];
+	}
+
+	const methodDataMap = createPaymentMethodDataMap({
+		transferAmounts,
+		networks
+	});
+
+	return availableTokens.reduce<PayableToken[]>((acc, token) => {
+		const payableToken = mapTokenToPayableToken({ token, methodDataMap });
+		if (nonNullish(payableToken)) {
+			acc.push(payableToken);
+		}
+		return acc;
+	}, []);
 };

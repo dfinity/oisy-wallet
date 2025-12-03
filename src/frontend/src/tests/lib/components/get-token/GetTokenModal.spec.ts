@@ -1,4 +1,5 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import GetTokenModal from '$lib/components/get-token/GetTokenModal.svelte';
 import {
@@ -22,6 +23,10 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
+
+vi.mock('$icp/api/icrc-ledger.api', () => ({
+	icrc1SupportedStandards: () => Promise.resolve([])
+}));
 
 describe('GetTokenModal', () => {
 	const mockContext = new Map();
@@ -53,6 +58,14 @@ describe('GetTokenModal', () => {
 		mockContext.set(MODAL_TOKENS_LIST_CONTEXT_KEY, initModalTokensListContext({ tokens: [] }));
 	};
 
+	const setupIcTokenFeeStore = () => {
+		icTokenFeeStore.setIcTokenFee({
+			tokenSymbol: mockValidIcToken.symbol,
+			fee: 1000n
+		});
+		mockContext.set(IC_TOKEN_FEE_CONTEXT_KEY, { store: icTokenFeeStore });
+	};
+
 	const setupModalNetworksListContext = () => {
 		mockContext.set(
 			MODAL_NETWORKS_LIST_CONTEXT_KEY,
@@ -63,6 +76,7 @@ describe('GetTokenModal', () => {
 	beforeEach(() => {
 		mockSwapContext();
 		setupSwapAmountsStore();
+		setupIcTokenFeeStore();
 		setupModalTokensListContext();
 		setupModalNetworksListContext();
 	});
