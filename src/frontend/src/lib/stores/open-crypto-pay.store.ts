@@ -51,7 +51,7 @@ export const initPayContext = (): PayContext => {
 	const selectedToken = derived(
 		[tokensSorted, userSelection],
 		([$tokensSorted, $userSelection]) => {
-			if (nonNullish($userSelection) && $tokensSorted.some((t) => t.id === $userSelection.id)) {
+			if (nonNullish($userSelection) && $tokensSorted.find((t) => t.id === $userSelection.id)) {
 				return $userSelection;
 			}
 			return $tokensSorted.length > 0 ? $tokensSorted[0] : undefined;
