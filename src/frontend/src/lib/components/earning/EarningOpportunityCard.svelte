@@ -1,15 +1,18 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { resolveText } from '$lib/utils/i18n.utils';
 
 	interface Props {
+		titles: string[];
 		logo: Snippet;
 		badge: Snippet;
-		title: Snippet;
 		description: Snippet;
 		button: Snippet;
 	}
 
-	const { logo, badge, title, description, button }: Props = $props();
+	const { titles, logo, badge, description, button }: Props = $props();
 </script>
 
 <div class="flex flex-col rounded-lg border-1 border-disabled bg-disabled p-4">
@@ -22,7 +25,20 @@
 			>
 		</span>
 
-		<h3>{@render title()}</h3>
+		<h3>
+			{#each titles as titlePath, i (`${titlePath}-${i}`)}
+				{#if i > 0}
+					<Responsive up="md">
+						<br />
+					</Responsive>
+					<Responsive down="sm">
+						<span> - </span>
+					</Responsive>
+				{/if}
+
+				<span>{resolveText({ i18n: $i18n, path: titlePath })}</span>
+			{/each}
+		</h3>
 
 		<span>{@render description()}</span>
 	</div>

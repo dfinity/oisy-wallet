@@ -1420,7 +1420,7 @@ interface I18nEarning {
 		go_to_earn: string;
 	};
 	cards: {
-		gldt: { title: string; description: string; action: string };
+		gldt: { title1: string; title2: string; description: string; action: string };
 		sprinkles: { title: string; description: string; action: string };
 	};
 	card_fields: {
