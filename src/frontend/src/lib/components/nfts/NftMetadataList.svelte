@@ -70,7 +70,7 @@
 			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.token_id}</span>
 			<span class="inline-flex min-w-0 items-center">
 				<span class="truncate">
-					{nft?.oisyId ?? nft?.id}
+					{nft?.id}
 				</span>
 				<AddressActions
 					copyAddress={nft?.oisyId ?? nft?.id}
