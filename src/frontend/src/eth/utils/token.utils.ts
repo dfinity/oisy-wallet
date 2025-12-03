@@ -31,6 +31,8 @@ export const isNotSupportedErc20TwinTokenId = (tokenId: TokenId): boolean =>
 export const tokenAddressToHex = (address: string): string =>
 	zeroPadValue(address.toLowerCase(), 32);
 
+// TODO: This function may duplicate balance-checking logic that exists elsewhere in the codebase.
+// Consolidate or refactor to avoid duplicated logic once there is time.
 export const hasSufficientBalance = ({
 	token,
 	tokenAmount,
@@ -63,6 +65,8 @@ export const hasSufficientBalance = ({
 	return false;
 };
 
+// TODO: This function may duplicate USD-value calculation logic used elsewhere.
+// Consolidate or refactor to avoid duplicated logic once there is time.
 export const calculateUsdValues = ({
 	token,
 	nativeToken,
