@@ -13,7 +13,7 @@
 				const providerUi = {
 					...config,
 					// TODO: add specific values to be shown, for example total position in USD, max APY
-					totalPositionUsd: 1
+					totalPositionUsd: 0
 				};
 
 				acc.push(providerUi);
@@ -36,7 +36,7 @@
 		</div>
 	{/each}
 
-	{#if filteredEarningProviders?.length === 0}
+	{#if filteredEarningProviders.length === 0}
 		<NoStakePlaceholder />
 	{/if}
 </div>

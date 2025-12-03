@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import GetTokenActionItem from '$lib/components/get-token/GetTokenActionItem.svelte';
 	import GetTokenCardContent from '$lib/components/get-token/GetTokenCardContent.svelte';
 	import IconQr from '$lib/components/icons/IconQr.svelte';
@@ -47,6 +48,14 @@
 			: 0
 	);
 
+	let convertibleAssetsUsdBalance = $derived(
+		$enabledMainnetFungibleTokensUsdBalance - $enabledMainnetFungibleIcTokensUsdBalance
+	);
+
+	let noSwappableAssets = $derived($enabledMainnetFungibleIcTokensUsdBalance <= 0);
+
+	let noConvertibleAssets = $derived(convertibleAssetsUsdBalance <= 0);
+
 	const onSwapOpen = (onSwapLoad: (callback: () => void) => void) => {
 		onSwapLoad(() => {
 			setDestinationToken(token);
@@ -56,20 +65,17 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="mb-2 text-base font-bold sm:text-lg">
-		{replacePlaceholders(
-			potentialTokenBalance <= 0
-				? $i18n.stake.text.get_tokens
-				: $i18n.stake.text.get_tokens_with_amount,
-			{
+	{#if potentialTokenBalance > 0}
+		<div class="mb-2 text-base font-bold sm:text-lg" in:fade>
+			{replacePlaceholders($i18n.stake.text.get_tokens_with_amount, {
 				$token_symbol: tokenSymbol,
 				$amount: `${potentialTokenBalance}`
-			}
-		)}
-	</div>
+			})}
+		</div>
+	{/if}
 
 	<div class="flex flex-col justify-between gap-4 sm:flex-row">
-		<StakeContentCard primaryStyle>
+		<StakeContentCard primaryStyle={!noSwappableAssets}>
 			{#snippet content()}
 				<GetTokenCardContent
 					{currentApy}
@@ -90,6 +96,7 @@
 				<SwapLoader>
 					{#snippet button(onSwapLoad)}
 						<Button
+							disabled={noSwappableAssets}
 							onclick={() => onSwapOpen(onSwapLoad)}
 							testId={GET_TOKEN_MODAL_OPEN_SWAP_BUTTON}
 						>
@@ -100,12 +107,11 @@
 			{/snippet}
 		</StakeContentCard>
 
-		<StakeContentCard primaryStyle>
+		<StakeContentCard primaryStyle={!noConvertibleAssets}>
 			{#snippet content()}
 				<GetTokenCardContent
 					{currentApy}
-					potentialTokensUsdBalance={$enabledMainnetFungibleTokensUsdBalance -
-						$enabledMainnetFungibleIcTokensUsdBalance}
+					potentialTokensUsdBalance={convertibleAssetsUsdBalance}
 					{token}
 				>
 					{#snippet title()}
