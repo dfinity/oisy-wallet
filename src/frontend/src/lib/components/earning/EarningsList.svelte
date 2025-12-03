@@ -40,7 +40,6 @@
 					maxApy: gldtStakeApy,
 					totalEarningPerYear: gldtStakeEarningPerYear,
 					// TODO: improve this flow to calculate the sum of all positions among all possible earning features of the provider
-					totalPosition: gldtStakePosition,
 					totalPositionUsd: gldtStakePositionUsd,
 					tokens: [...(nonNullish(gldtToken) ? [gldtToken] : [])]
 				};
