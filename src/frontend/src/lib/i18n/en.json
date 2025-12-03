@@ -1807,7 +1807,7 @@
 			"flexible": "Flexible"
 		},
 		"providers": {
-			"gold_dao_staking": {
+			"goldDaoStaking": {
 				"cardTitle": "Earn with Gold DAO"
 			}
 		}
