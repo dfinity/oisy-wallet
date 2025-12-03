@@ -55,7 +55,7 @@ vi.mock('@dfinity/gix-components', async () => {
 describe('ScannerCode.svelte', () => {
 	const mockOnNext = vi.fn();
 	const mockSetData = vi.fn();
-	const mockSetTokensWithFees = vi.fn();
+	const mockSetsetAvailableTokens = vi.fn();
 
 	const mockApiResponse: OpenCryptoPayResponse = {
 		id: 'pl_test123',
@@ -149,7 +149,7 @@ describe('ScannerCode.svelte', () => {
 					PAY_CONTEXT_KEY,
 					{
 						setData: mockSetData,
-						setTokensWithFees: mockSetTokensWithFees,
+						setAvailableTokens: mockSetsetAvailableTokens,
 						data: writable(null)
 					}
 				]
@@ -247,8 +247,8 @@ describe('ScannerCode.svelte', () => {
 		await fireEvent.click(button);
 
 		await waitFor(() => {
-			expect(mockOnNext).toHaveBeenCalled();
 			expect(mockSetData).toHaveBeenCalledWith(mockApiResponse);
+			expect(mockOnNext).toHaveBeenCalled();
 		});
 	});
 
@@ -360,7 +360,7 @@ describe('ScannerCode.svelte', () => {
 			const button = screen.getByRole('button', { name: en.core.text.continue });
 			await fireEvent.click(button);
 			await waitFor(() => {
-				expect(mockSetTokensWithFees).toHaveBeenCalledWith(mockTokensWithFees);
+				expect(mockSetsetAvailableTokens).toHaveBeenCalledWith(mockTokensWithFees);
 			});
 		});
 
@@ -379,7 +379,7 @@ describe('ScannerCode.svelte', () => {
 				expect(screen.getByText(en.scanner.error.code_link_is_not_valid)).toBeInTheDocument();
 			});
 
-			expect(mockSetTokensWithFees).not.toHaveBeenCalled();
+			expect(mockSetsetAvailableTokens).not.toHaveBeenCalled();
 			expect(mockOnNext).not.toHaveBeenCalled();
 		});
 
@@ -398,7 +398,7 @@ describe('ScannerCode.svelte', () => {
 			const button = screen.getByRole('button', { name: en.core.text.continue });
 			await fireEvent.click(button);
 			await waitFor(() => {
-				expect(mockSetTokensWithFees).toHaveBeenCalledWith([]);
+				expect(mockSetsetAvailableTokens).toHaveBeenCalledWith([]);
 				expect(mockOnNext).toHaveBeenCalled();
 			});
 		});

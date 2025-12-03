@@ -34,7 +34,7 @@
 	let error = $state('');
 	let isEmptyUri = $derived(isEmptyString(uri));
 
-	const { setData, setTokensWithFees } = getContext<PayContext>(PAY_CONTEXT_KEY);
+	const { setData, setAvailableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
 	const processCode = async (code: string) => {
 		busy.start();
@@ -61,7 +61,7 @@
 				userAddress: $ethAddress
 			});
 
-			setTokensWithFees(tokensWithFees);
+			setAvailableTokens(tokensWithFees);
 
 			onNext();
 		} catch (_: unknown) {

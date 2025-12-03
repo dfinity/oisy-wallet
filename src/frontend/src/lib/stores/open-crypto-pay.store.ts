@@ -5,7 +5,7 @@ export interface PayContext {
 	data: Readable<OpenCryptoPayResponse | undefined>;
 	availableTokens: Readable<PayableTokenWithFees[]>;
 	setData: (payData: OpenCryptoPayResponse) => void;
-	setTokensWithFees: (tokens: PayableTokenWithFees[]) => void;
+	setAvailableTokens: (tokens: PayableTokenWithFees[]) => void;
 }
 
 export const initPayContext = (): PayContext => {
@@ -17,7 +17,7 @@ export const initPayContext = (): PayContext => {
 		data,
 		setData,
 		availableTokens: tokensWithFees,
-		setTokensWithFees: (tokens: PayableTokenWithFees[]) => {
+		setAvailableTokens: (tokens: PayableTokenWithFees[]) => {
 			tokensWithFees.set(tokens);
 		}
 	};
