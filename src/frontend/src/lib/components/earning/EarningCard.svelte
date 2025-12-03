@@ -30,7 +30,9 @@
 
 	let testId = $derived(`${EARNING_CARD}-${name}`);
 
-	let tokenSymbols = $derived(new Set(provider.tokens.map((token) => getTokenDisplaySymbol(token))));
+	let tokenSymbols = $derived(
+		new Set(provider.tokens.map((token) => getTokenDisplaySymbol(token)))
+	);
 
 	let networkNames = $derived(new Set(provider.tokens.map(({ network: { name } }) => name)));
 
