@@ -35,7 +35,7 @@
 		</div>
 	{/each}
 
-	{#if filteredEarningProviders?.length === 0}
+	{#if filteredEarningProviders.length === 0}
 		<NoStakePlaceholder />
 	{/if}
 </div>
