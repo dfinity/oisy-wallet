@@ -116,25 +116,6 @@
 	{/snippet}
 </NavigationItem>
 
-<NavigationItem
-	ariaLabel={$i18n.navigation.alt.dapp_explorer}
-	href={networkUrl({
-		path: AppPath.Explore,
-		networkId,
-		usePreviousRoute: isTransactionsRoute,
-		fromRoute
-	})}
-	selected={isRouteDappExplorer(page)}
-	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
->
-	{#snippet icon()}
-		<AnimatedIconUfo />
-	{/snippet}
-	{#snippet label()}
-		{$i18n.navigation.text.dapp_explorer}
-	{/snippet}
-</NavigationItem>
-
 <!-- Todo: remove condition once the feature is completed -->
 {#if EARNING_ENABLED}
 	<NavigationItem
@@ -157,7 +138,29 @@
 			{$i18n.navigation.text.earning}
 		{/snippet}
 	</NavigationItem>
-{:else}
+{/if}
+
+<NavigationItem
+	ariaLabel={$i18n.navigation.alt.dapp_explorer}
+	href={networkUrl({
+		path: AppPath.Explore,
+		networkId,
+		usePreviousRoute: isTransactionsRoute,
+		fromRoute
+	})}
+	selected={isRouteDappExplorer(page)}
+	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
+>
+	{#snippet icon()}
+		<AnimatedIconUfo />
+	{/snippet}
+	{#snippet label()}
+		{$i18n.navigation.text.dapp_explorer}
+	{/snippet}
+</NavigationItem>
+
+<!-- Todo: remove condition once the feature is completed -->
+{#if !EARNING_ENABLED}
 	<NavigationItem
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
