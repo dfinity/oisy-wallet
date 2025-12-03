@@ -18,6 +18,7 @@
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation.js';
+	import {getNftDisplayId} from "$lib/utils/nft.utils";
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -54,14 +55,9 @@
 			return;
 		}
 
-		const {
-			id,
-			oisyId,
-			name,
-			collection: { name: collectionName }
-		} = nft;
+		const {name, collection: { name: collectionName }} = nft;
 
-		const idToUse = oisyId ?? id;
+		const idToUse = getNftDisplayId(nft);
 
 		if (nonNullish(name)) {
 			// sometimes NFT names include the number itself, in that case we do not display the number
