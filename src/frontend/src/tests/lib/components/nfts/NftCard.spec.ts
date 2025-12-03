@@ -253,7 +253,7 @@ describe('NftCard', () => {
 		expect(getByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
 	});
 
-	it('should render first hte OISY NFT ID', () => {
+	it('should render first the OISY NFT ID', () => {
 		const mockOisyId = parseNftId('mock-oisy-id');
 
 		const { getByText } = render(NftCard, {
