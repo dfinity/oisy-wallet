@@ -27,12 +27,14 @@ describe('GldtStakeDissolveEvent', () => {
 	});
 
 	it('should display correct tag if event is not unlocked', () => {
+		const timestamp = BigInt(Date.now() + 100000000);
+
 		const { getByText } = render(GldtStakeDissolveEvent, {
 			props: {
 				gldtToken,
 				event: {
 					...stakePositionMockResponse.dissolve_events[0],
-					completed: false
+					dissolved_date: timestamp
 				}
 			}
 		});
@@ -41,7 +43,7 @@ describe('GldtStakeDissolveEvent', () => {
 			getByText(
 				replacePlaceholders(en.stake.text.unlocking_in, {
 					$time: formatTimestampToDaysDifference({
-						timestamp: Number(stakePositionMockResponse.dissolve_events[0].dissolved_date)
+						timestamp: Number(timestamp)
 					})
 				})
 			)
