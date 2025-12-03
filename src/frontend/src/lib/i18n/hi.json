@@ -1786,7 +1786,8 @@
 		},
 		"cards": {
 			"gldt": {
-				"title": "",
+				"title1": "",
+				"title2": "",
 				"description": "",
 				"action": ""
 			},

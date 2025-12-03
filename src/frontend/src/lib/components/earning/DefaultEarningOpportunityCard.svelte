@@ -20,16 +20,13 @@
 	const formattedApy = $derived(cardFields.apy ? `${cardFields.apy}%` : '-');
 </script>
 
-<EarningOpportunityCard>
+<EarningOpportunityCard titles={cardData.titles}>
 	{#snippet logo()}
 		<Logo size="lg" src={cardData.logo} />
 	{/snippet}
 	{#snippet badge()}
 		{$i18n.stake.text.current_apy_label}
 		<span class="ml-1 font-bold text-success-primary">{formattedApy}</span>
-	{/snippet}
-	{#snippet title()}
-		{resolveText({ i18n: $i18n, path: cardData.title })}
 	{/snippet}
 	{#snippet description()}
 		<p>{resolveText({ i18n: $i18n, path: cardData.description })}</p>
