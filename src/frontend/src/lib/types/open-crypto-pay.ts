@@ -86,3 +86,9 @@ export interface PrepareTokensParams {
 	networks: Network[];
 	availableTokens: Token[];
 }
+
+export interface PayableTokenWithConvertedAmount extends PayableTokenWithFees {
+	amountInUSD: number;
+	feeInUSD: number;
+	sumInUSD: number;
+}
