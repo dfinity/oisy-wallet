@@ -11,6 +11,7 @@
 	import type { ProviderUi } from '$lib/types/provider-ui';
 	import { formatCurrency, formatStakeApyNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		provider: ProviderUi;
@@ -29,9 +30,7 @@
 
 	let testId = $derived(`${EARNING_CARD}-${name}`);
 
-	let tokenSymbols = $derived(
-		new Set(provider.tokens.map(({ oisySymbol, symbol }) => oisySymbol?.oisySymbol ?? symbol))
-	);
+	let tokenSymbols = $derived(new Set(provider.tokens.map((token) => getTokenDisplaySymbol(token))));
 
 	let networkNames = $derived(new Set(provider.tokens.map(({ network: { name } }) => name)));
 
