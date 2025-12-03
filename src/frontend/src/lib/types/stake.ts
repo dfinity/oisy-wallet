@@ -15,4 +15,5 @@ export interface StakeProviderConfig {
 	logo: string;
 	url: string;
 	pageDescriptionKey: string;
+	cardTitle: string;
 }
