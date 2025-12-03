@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
+	import EarningCard from '$lib/components/earning/EarningCard.svelte';
 	import NoStakePlaceholder from '$lib/components/stake/NoStakePlaceholder.svelte';
 	import { stakeProvidersConfig } from '$lib/config/stake.config';
 	import type { ProviderUi } from '$lib/types/provider-ui';
@@ -12,7 +13,7 @@
 				const providerUi = {
 					...config,
 					// TODO: add specific values to be shown, for example total position in USD, max APY
-					totalPositionUsd: 0
+					totalPositionUsd: 1
 				};
 
 				acc.push(providerUi);
@@ -31,7 +32,7 @@
 <div class="flex flex-col gap-3">
 	{#each filteredEarningProviders as provider (provider.name)}
 		<div class="overflow-hidden rounded-xl" transition:fade>
-			<!-- TODO: add the EarningCard per provider -->
+			<EarningCard {provider} />
 		</div>
 	{/each}
 
