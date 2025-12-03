@@ -34,6 +34,7 @@
 		networkUrl
 	} from '$lib/utils/nav.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation.js';
+	import IconPlant from "$lib/components/icons/IconPlant.svelte";
 
 	interface Props {
 		testIdPrefix?: string;
@@ -132,7 +133,7 @@
 		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
 	>
 		{#snippet icon()}
-			<IconGift />
+			<IconPlant />
 		{/snippet}
 		{#snippet label()}
 			{$i18n.navigation.text.earning}
