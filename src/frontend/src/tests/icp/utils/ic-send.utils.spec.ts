@@ -100,6 +100,13 @@ describe('ic-send.utils', () => {
 					tokenStandard: mockValidIcrcToken.standard
 				},
 				result: true
+			},
+			{
+				params: {
+					destination: mockBtcAddress,
+					tokenStandard: mockValidExtV2Token.standard
+				},
+				result: true
 			}
 		])('returns correct result', ({ params, result }) => {
 			expect(isInvalidDestinationIc(params)).toBe(result);
