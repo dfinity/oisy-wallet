@@ -22,7 +22,7 @@
 	let {
 		logo: logoSrc,
 		name,
-		cardTitle,
+		card: { title: cardTitle, action: cardAction },
 		maxApy,
 		totalEarningPerYear,
 		totalPositionUsd
@@ -40,7 +40,7 @@
 </script>
 
 <div class="flex w-full flex-col">
-	<LogoButton rounded={false} {testId}>
+	<LogoButton onClick={cardAction} rounded={false} {testId}>
 		{#snippet logo()}
 			<span class="mr-2 flex">
 				<Logo
