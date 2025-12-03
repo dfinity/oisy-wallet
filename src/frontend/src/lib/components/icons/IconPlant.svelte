@@ -7,8 +7,6 @@
 	let { size = '24' }: Props = $props();
 </script>
 
-
-
 <svg fill="none" height={size} viewBox="0 0 17 18" width={size} xmlns="http://www.w3.org/2000/svg">
 	<path
 		d="M15 18C15 16.3178 13.6363 14.9541 11.9541 14.9541H6.0459C4.36373 14.9541 3 16.3178 3 18H15Z"

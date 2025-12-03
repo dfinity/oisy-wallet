@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
+	import IconPlant from '$lib/components/icons/IconPlant.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -34,7 +35,6 @@
 		networkUrl
 	} from '$lib/utils/nav.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation.js';
-	import IconPlant from "$lib/components/icons/IconPlant.svelte";
 
 	interface Props {
 		testIdPrefix?: string;
