@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { EARNING_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProviderUi } from '$lib/types/provider-ui';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
@@ -12,10 +13,12 @@
 	let { provider }: Props = $props();
 
 	let { logo: logoSrc, name, cardTitle } = $derived(provider);
+
+	let testId = $derived(`${EARNING_CARD}-${name}`);
 </script>
 
 <div class="flex w-full flex-col">
-	<LogoButton rounded={false}>
+	<LogoButton rounded={false} {testId}>
 		{#snippet logo()}
 			<span class="mr-2 flex">
 				<Logo
