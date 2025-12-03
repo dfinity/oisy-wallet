@@ -323,6 +323,7 @@ export const PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-info-banner-close-butto
 
 // OpenCryptoPay
 export const OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON = 'open-crypto-pay-enter-manually-button';
+export const OPEN_CRYPTO_PAY_AMOUNT_DISPLAY_SKELETON = 'open-crypto-pay-amount-display-skeleton';
 
 // Get Token Modal
 export const GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE = 'get-token-modal-potential-usd-balance';
