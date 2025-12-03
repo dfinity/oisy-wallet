@@ -2,6 +2,7 @@ import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isTokenExtV2 } from '$icp/utils/ext.utils';
 import type {
+	Nft,
 	NonFungibleToken,
 	NonFungibleTokenIdentifier,
 	NonFungibleTokensByNetwork
@@ -21,3 +22,11 @@ export const getTokensByNetwork = (tokens: NonFungibleToken[]): NonFungibleToken
 
 export const getNftIdentifier = (token: NonFungibleToken): NonFungibleTokenIdentifier =>
 	isTokenExtV2(token) ? token.canisterId : token.address;
+
+/**
+ * Gets the ID to display for the given NFT.
+ *
+ * @param nft - for which the ID to display should be found
+ * @returns the ID to display for the NFT
+ */
+export const getNftDisplayId = (nft: Nft): string => nft.oisyId ?? nft.id;

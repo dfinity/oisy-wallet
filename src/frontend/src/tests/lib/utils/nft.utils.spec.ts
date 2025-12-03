@@ -9,11 +9,13 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import {
+	getNftDisplayId,
 	getNftIdentifier,
 	getTokensByNetwork,
 	isTokenFungible,
 	isTokenNonFungible
 } from '$lib/utils/nft.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { MOCK_ERC1155_TOKENS, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import {
 	AZUKI_ELEMENTAL_BEANS_TOKEN,
@@ -22,6 +24,7 @@ import {
 	PUDGY_PENGUINS_TOKEN
 } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('nft.utils', () => {
 	describe('isTokenNonFungible', () => {
@@ -112,6 +115,18 @@ describe('nft.utils', () => {
 
 		it('should return the canisterId for EXT tokens', () => {
 			expect(getNftIdentifier(mockValidExtV2Token)).toBe(mockValidExtV2Token.canisterId);
+		});
+	});
+
+	describe('getNftDisplayId', () => {
+		const mockOisyId = parseNftId('mock-oisy-id');
+
+		it('should use the OISY NFT ID if defined', () => {
+			expect(getNftDisplayId({ ...mockValidErc721Nft, oisyId: mockOisyId })).toBe(mockOisyId);
+		});
+
+		it('should fallback to the normal ID if OISY ID is not defined', () => {
+			expect(getNftDisplayId(mockValidErc721Nft)).toBe(mockValidErc721Nft.id);
 		});
 	});
 });
