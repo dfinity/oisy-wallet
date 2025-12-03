@@ -1431,6 +1431,7 @@ interface I18nEarning {
 		terms: string;
 	};
 	terms: { flexible: string };
+	providers: { goldDaoStaking: { cardTitle: string } };
 }
 
 interface I18nStake {
