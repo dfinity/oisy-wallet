@@ -17,8 +17,8 @@
 	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getNftDisplayId } from '$lib/utils/nft.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation.js';
-	import {getNftDisplayId} from "$lib/utils/nft.utils";
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -55,7 +55,10 @@
 			return;
 		}
 
-		const {name, collection: { name: collectionName }} = nft;
+		const {
+			name,
+			collection: { name: collectionName }
+		} = nft;
 
 		const idToUse = getNftDisplayId(nft);
 

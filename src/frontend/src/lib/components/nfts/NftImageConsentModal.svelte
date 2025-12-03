@@ -30,8 +30,8 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import { getNftDisplayId } from '$lib/utils/nft.utils';
 	import { findNonFungibleToken, getNftCollectionUi } from '$lib/utils/nfts.utils';
-	import {getNftDisplayId} from "$lib/utils/nft.utils";
 
 	interface Props {
 		collection: NftCollection;
