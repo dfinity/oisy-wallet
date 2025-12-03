@@ -16,8 +16,6 @@
 	// TODO: this logic is very custom-made for the current single provider. Improve it to be more generic: each provider has a feature (for example earning), and each feature a sub-group (for example staking), and each sub-group has a list of objects to which it applies (like tokens).
 	let earningProvidersUi = $derived(
 		Object.entries(stakeProvidersConfig).reduce<ProviderUi[]>((acc, [providerName, config]) => {
-			console.log(providerName);
-
 			if (providerName === StakeProvider.GLDT) {
 				const gldtToken = $enabledFungibleTokens.find(isGLDTToken);
 
@@ -58,6 +56,7 @@
 	);
 </script>
 
+<!-- TODO: add a skeleton -->
 <div class="flex flex-col gap-3" transition:fade>
 	{#each filteredEarningProviders as provider (provider.name)}
 		<div class="overflow-hidden rounded-xl" transition:fade>

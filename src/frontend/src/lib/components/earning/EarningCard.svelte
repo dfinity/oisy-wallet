@@ -8,7 +8,7 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProviderUi } from '$lib/types/provider-ui';
-	import { formatCurrency } from '$lib/utils/format.utils';
+	import { formatCurrency, formatStakeApyNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -51,12 +51,16 @@
 		{#snippet title()}
 			<span>
 				{resolveText({ i18n: $i18n, path: cardTitle })}
-				<Tag variant="info">{maxApy}%</Tag>
+				<Tag variant="info">{formatStakeApyNumber(maxApy)}%</Tag>
 			</span>
 		{/snippet}
 
 		{#snippet titleEnd()}
-			<span class="block min-w-12 text-nowrap">
+			<span
+				class="block min-w-12 text-nowrap"
+				class:text-success-primary={totalEarningPerYear > 0}
+				class:text-tertiary={totalEarningPerYear === 0}
+			>
 				{replacePlaceholders($i18n.stake.text.active_earning_per_year, {
 					$amount: `${formatCurrency({
 						value: totalEarningPerYear,
