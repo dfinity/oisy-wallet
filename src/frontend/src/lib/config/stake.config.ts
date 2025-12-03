@@ -71,6 +71,6 @@ export const stakeProvidersConfig: Record<StakeProvider, StakeProviderConfig> = 
 		logo: '/images/dapps/gold-dao-logo.svg',
 		url: 'https://app.gldt.org/earn/',
 		pageDescriptionKey: 'stake.text.gldt_stake_page_description',
-		cardTitle: 'earning.providers.gold-dao-staking.cardTitle'
+		cardTitle: 'earning.providers.goldDaoStaking.cardTitle'
 	}
 };

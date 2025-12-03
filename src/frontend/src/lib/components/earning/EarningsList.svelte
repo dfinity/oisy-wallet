@@ -8,7 +8,7 @@
 	import { stakeProvidersConfig } from '$lib/config/stake.config';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
+	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
 	import type { ProviderUi } from '$lib/types/provider-ui';
 	import { StakeProvider } from '$lib/types/stake';
 	import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
@@ -16,8 +16,10 @@
 	// TODO: this logic is very custom-made for the current single provider. Improve it to be more generic: each provider has a feature (for example earning), and each feature a sub-group (for example staking), and each sub-group has a list of objects to which it applies (like tokens).
 	let earningProvidersUi = $derived(
 		Object.entries(stakeProvidersConfig).reduce<ProviderUi[]>((acc, [providerName, config]) => {
+			console.log(providerName);
+
 			if (providerName === StakeProvider.GLDT) {
-				const gldtToken = $enabledFungibleTokensUi.find(isGLDTToken);
+				const gldtToken = $enabledFungibleTokens.find(isGLDTToken);
 
 				const gldtStakePosition = $gldtStakeStore?.position?.staked ?? ZERO;
 
@@ -57,7 +59,7 @@
 </script>
 
 <div class="flex flex-col gap-3" transition:fade>
-	{#each filteredEarningProviders as provider (provider)}
+	{#each filteredEarningProviders as provider (provider.name)}
 		<div class="overflow-hidden rounded-xl" transition:fade>
 			<EarningCard {provider} />
 		</div>
