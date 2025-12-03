@@ -36,7 +36,7 @@ import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
-const ethPrepareTransaction = ({
+export const ethPrepareTransaction = ({
 	to,
 	amount,
 	maxPriorityFeePerGas: max_priority_fee_per_gas,
@@ -57,7 +57,7 @@ const ethPrepareTransaction = ({
 	data: toNullable(data)
 });
 
-const erc20PrepareTransaction = async ({
+export const erc20PrepareTransaction = async ({
 	to,
 	amount,
 	token,
@@ -207,7 +207,7 @@ export const send = async ({
 	return { hash: transactionSent.hash };
 };
 
-const sendTransaction = async ({
+export const sendTransaction = async ({
 	progress,
 	token,
 	from,

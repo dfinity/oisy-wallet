@@ -12,5 +12,9 @@ export const scannerWizardSteps = ({
 	{
 		name: WizardStepsScanner.PAY,
 		title: i18n.scanner.text.pay
+	},
+	{
+		name: WizardStepsScanner.TOKENS_LIST,
+		title: 'Select Token'
 	}
 ];

@@ -10,11 +10,18 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
-	import { processOpenCryptoPayCode } from '$lib/services/open-crypto-pay.services';
+	import {
+		calculateTokensWithFees,
+		processOpenCryptoPayCode
+	} from '$lib/services/open-crypto-pay.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import type { QrStatus } from '$lib/types/qr-code';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { networksMainnets } from '$lib/derived/networks.derived';
+	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
 
 	interface Props {
 		onNext: () => void;
@@ -27,17 +34,34 @@
 	let error = $state('');
 	let isEmptyUri = $derived(isEmptyString(uri));
 
-	const { setData } = getContext<PayContext>(PAY_CONTEXT_KEY);
+	const { setData, setTokensWithFees } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
 	const processCode = async (code: string) => {
 		busy.start();
 
 		error = '';
 
+		if (isNullish($ethAddress)) {
+			return;
+		}
+
 		try {
 			const paymentData = await processOpenCryptoPayCode(code);
 
 			setData(paymentData);
+
+			const baseTokens = prepareBasePayableTokens({
+				transferAmounts: paymentData.transferAmounts,
+				networks: $networksMainnets,
+				availableTokens: $enabledTokens
+			});
+
+			const tokensWithFees = await calculateTokensWithFees({
+				tokens: baseTokens,
+				userAddress: $ethAddress
+			});
+
+			setTokensWithFees(tokensWithFees);
 
 			onNext();
 		} catch (_: unknown) {
