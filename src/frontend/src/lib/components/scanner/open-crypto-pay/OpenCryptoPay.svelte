@@ -16,7 +16,12 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let { onSelectToken, isTokenSelecting = $bindable() }: any = $props();
+	interface Props {
+		onSelectToken: () => void;
+		isTokenSelecting: boolean;
+	}
+
+	let { onSelectToken, isTokenSelecting = $bindable() }: Props = $props();
 
 	const { data, selectedToken } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
