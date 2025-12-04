@@ -66,7 +66,7 @@
 </Responsive>
 
 <Responsive down="sm">
-	<BottomSheet {footer} bind:visible={open}>
+	<BottomSheet {footer} onClose={close} bind:visible={open}>
 		{#snippet content()}
 			{@render banner()}
 
