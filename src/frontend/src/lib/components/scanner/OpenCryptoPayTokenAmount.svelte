@@ -11,7 +11,7 @@
 		isBestRate?: boolean;
 	}
 
-	let { amountInUSD, isBestRate=false }: Props = $props();
+	let { amountInUSD, isBestRate = false }: Props = $props();
 
 	let exchangeBalance = $derived(
 		formatCurrency({
