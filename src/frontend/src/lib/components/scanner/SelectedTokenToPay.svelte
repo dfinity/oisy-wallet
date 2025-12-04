@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
-	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import Divider from '$lib/components/common/Divider.svelte';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { nonNullish } from '@dfinity/utils';
-	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
+	import { getContext } from 'svelte';
+	import Divider from '$lib/components/common/Divider.svelte';
 	import OpenCryptoPayTokenAmount from '$lib/components/scanner/OpenCryptoPayTokenAmount.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 
 	interface Props {
 		onSelectToken: () => void;
@@ -17,7 +17,7 @@
 	}
 
 	let { onSelectToken, isTokenSelecting = $bindable() }: Props = $props();
-	let { selectedToken, availableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
+	const { selectedToken, availableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
 	let selectButtonText = $derived(
 		nonNullish($selectedToken)
@@ -34,7 +34,7 @@
 
 <div class="mb-4 rounded-[28px] border border-disabled bg-secondary p-3 text-center">
 	{#if nonNullish($selectedToken)}
-		<LogoButton hover={false} fullWidth styleClass="mb-2">
+		<LogoButton fullWidth hover={false} styleClass="mb-2">
 			{#snippet title()}
 				{$selectedToken.amount} {$selectedToken.symbol}
 			{/snippet}
@@ -74,8 +74,8 @@
 
 	<Responsive down="sm">
 		<Button
-			fullWidth
 			colorStyle="secondary-light"
+			fullWidth
 			onclick={() => {
 				onSelectToken();
 				isTokenSelecting = true;
