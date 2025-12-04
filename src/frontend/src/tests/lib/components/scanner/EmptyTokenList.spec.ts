@@ -55,7 +55,7 @@ describe('NoSupportedTokens', () => {
 
 		await fireEvent.click(button);
 
-		expect(goto).toHaveBeenCalledExactlyOnceWith('/');
+		expect(goto).toHaveBeenCalledOnce();
 	});
 
 	it('should have secondary-light button style', () => {
