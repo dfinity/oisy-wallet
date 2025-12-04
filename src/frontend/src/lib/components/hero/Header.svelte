@@ -53,7 +53,7 @@
 		<OisyWalletLogoLink />
 	</div>
 
-	<div class="pointer-events-auto flex justify-end gap-2 md:gap-5">
+	<div class="pointer-events-auto flex justify-end gap-2 md:gap-3">
 		{#if $authSignedIn && !isRouteTransactions(page) && !nftsCollectionRoute}
 			<NetworksSwitcher bind:visible={networkSwitcherOpen} />
 		{/if}
