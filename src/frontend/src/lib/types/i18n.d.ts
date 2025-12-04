@@ -1417,9 +1417,10 @@ interface I18nEarning {
 		earning_opportunities: string;
 		header_title: string;
 		header_description: string;
+		go_to_earn: string;
 	};
 	cards: {
-		gldt: { title: string; description: string; action: string };
+		gldt: { title1: string; title2: string; description: string; action: string };
 		sprinkles: { title: string; description: string; action: string };
 	};
 	card_fields: {
@@ -1430,6 +1431,7 @@ interface I18nEarning {
 		terms: string;
 	};
 	terms: { flexible: string };
+	providers: { goldDaoStaking: { cardTitle: string } };
 }
 
 interface I18nStake {
@@ -1481,8 +1483,15 @@ interface I18nStake {
 		reward_claimed: string;
 		staked: string;
 		unstaked: string;
-		title_empty: string;
+		title_empty_1: string;
+		title_empty_2_usd: string;
+		title_empty_2_apy: string;
+		title_empty_3: string;
 		description_empty: string;
+		full_history: string;
+		recent_history: string;
+		gldt_stake_carousel_slide_title: string;
+		gldt_stake_carousel_slide_cta: string;
 	};
 	error: { unexpected_error_on_withdraw: string };
 	terms: {

@@ -35,6 +35,8 @@ describe('LoaderCollections', () => {
 
 	const mockGetTokensForOwner = vi.fn();
 
+	const mockEventCallback = vi.fn();
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
@@ -121,7 +123,7 @@ describe('LoaderCollections', () => {
 
 		render(LoaderCollections);
 
-		emit({ message: 'oisyReloadCollections' });
+		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
 
 		await waitFor(() => {
 			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length);
@@ -145,6 +147,8 @@ describe('LoaderCollections', () => {
 					}
 				]
 			});
+
+			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 
@@ -168,7 +172,7 @@ describe('LoaderCollections', () => {
 
 		render(LoaderCollections);
 
-		emit({ message: 'oisyReloadCollections' });
+		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
 
 		await waitFor(() => {
 			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length);
@@ -183,6 +187,8 @@ describe('LoaderCollections', () => {
 			});
 
 			expect(extCustomTokensSpy).not.toHaveBeenCalled();
+
+			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 
@@ -251,7 +257,7 @@ describe('LoaderCollections', () => {
 
 		render(LoaderCollections);
 
-		emit({ message: 'oisyReloadCollections' });
+		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
 
 		await waitFor(() => {
 			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length - 1);
@@ -266,6 +272,8 @@ describe('LoaderCollections', () => {
 			});
 
 			expect(extCustomTokensSpy).not.toHaveBeenCalled();
+
+			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 
@@ -275,7 +283,7 @@ describe('LoaderCollections', () => {
 
 		render(LoaderCollections);
 
-		emit({ message: 'oisyReloadCollections' });
+		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
 
 		await waitFor(() => {
 			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length);
@@ -295,6 +303,8 @@ describe('LoaderCollections', () => {
 				`Error fetching EXT tokens from canister ${EXT_BUILTIN_TOKENS[0].canisterId}:`,
 				mockError
 			);
+
+			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 });

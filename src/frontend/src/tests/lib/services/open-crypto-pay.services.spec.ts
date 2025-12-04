@@ -1,5 +1,13 @@
-import { processOpenCryptoPayCode } from '$lib/services/open-crypto-pay.services';
-import type { OpenCryptoPayResponse } from '$lib/types/open-crypto-pay';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import * as payServices from '$eth/services/pay.services';
+import type { EthFeeResult } from '$eth/types/pay';
+import {
+	calculateTokensWithFees,
+	processOpenCryptoPayCode
+} from '$lib/services/open-crypto-pay.services';
+import type { OpenCryptoPayResponse, PayableToken } from '$lib/types/open-crypto-pay';
 
 vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
 	decodeLNURL: vi.fn((lnurl: string) => {
@@ -11,6 +19,10 @@ vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
 
 vi.mock('$lib/rest/open-crypto-pay.rest', () => ({
 	fetchOpenCryptoPay: vi.fn()
+}));
+
+vi.mock('$eth/services/pay.services', () => ({
+	calculateEthFee: vi.fn()
 }));
 
 describe('open-crypto-pay.service', () => {
@@ -57,7 +69,7 @@ describe('open-crypto-pay.service', () => {
 		},
 		requestedAmount: {
 			asset: 'CHF',
-			amount: 10
+			amount: '10'
 		},
 		transferAmounts: []
 	};
@@ -157,6 +169,154 @@ describe('open-crypto-pay.service', () => {
 				'https://api.dfx.swiss/v1/lnurlp/pl_test123'
 			);
 			expect(result).toEqual(mockApiResponse);
+		});
+	});
+
+	describe('calculateTokensWithFees', () => {
+		const userAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+
+		const mockPayableToken: PayableToken = {
+			...ETHEREUM_TOKEN,
+			amount: '1.5',
+			minFee: 0.001,
+			tokenNetwork: 'Ethereum'
+		};
+
+		const mockErc20Token: PayableToken = {
+			...USDC_TOKEN,
+			amount: '100',
+			minFee: 0.0001,
+			tokenNetwork: 'Ethereum'
+		};
+
+		const mockBtcToken: PayableToken = {
+			...BTC_MAINNET_TOKEN,
+			amount: '0.5',
+			minFee: 0.0001,
+			tokenNetwork: 'Bitcoin'
+		};
+
+		const mockFeeResult: EthFeeResult = {
+			feeInWei: 300000n,
+			feeData: {
+				maxFeePerGas: 12n,
+				maxPriorityFeePerGas: 7n
+			},
+			estimatedGasLimit: 25000n
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			vi.mocked(payServices.calculateEthFee).mockResolvedValue(mockFeeResult);
+		});
+
+		it('should return empty array for empty tokens array', async () => {
+			const result = await calculateTokensWithFees({
+				tokens: [],
+				userAddress
+			});
+
+			expect(result).toEqual([]);
+			expect(payServices.calculateEthFee).not.toHaveBeenCalled();
+		});
+
+		it('should calculate fee for single native ETH token', async () => {
+			const result = await calculateTokensWithFees({
+				tokens: [mockPayableToken],
+				userAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0]).toMatchObject({
+				...mockPayableToken,
+				fee: mockFeeResult
+			});
+			expect(payServices.calculateEthFee).toHaveBeenCalledWith({
+				userAddress,
+				token: mockPayableToken
+			});
+		});
+
+		it('should calculate fee for ERC20 token', async () => {
+			const result = await calculateTokensWithFees({
+				tokens: [mockErc20Token],
+				userAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].fee).toBeDefined();
+			expect(payServices.calculateEthFee).toHaveBeenCalledWith({
+				userAddress,
+				token: mockErc20Token
+			});
+		});
+
+		it('should skip non-Ethereum tokens', async () => {
+			const result = await calculateTokensWithFees({
+				tokens: [mockBtcToken],
+				userAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].fee).toBeUndefined();
+			expect(payServices.calculateEthFee).not.toHaveBeenCalled();
+		});
+
+		it('should handle mixed tokens (ETH, ERC20, Bitcoin)', async () => {
+			const tokens = [mockPayableToken, mockErc20Token, mockBtcToken];
+
+			const result = await calculateTokensWithFees({
+				tokens,
+				userAddress
+			});
+
+			expect(result).toHaveLength(3);
+			expect(result[0].fee).toBeDefined();
+			expect(result[1].fee).toBeDefined();
+			expect(result[2].fee).toBeUndefined();
+			expect(payServices.calculateEthFee).toHaveBeenCalledTimes(2);
+		});
+
+		it('should return token without fee when calculateEthFee returns undefined', async () => {
+			vi.mocked(payServices.calculateEthFee).mockResolvedValue(undefined);
+
+			const result = await calculateTokensWithFees({
+				tokens: [mockPayableToken],
+				userAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].fee).toBeUndefined();
+		});
+
+		it('should handle errors gracefully and exclude failed tokens', async () => {
+			vi.mocked(payServices.calculateEthFee).mockRejectedValue(new Error('Network error'));
+
+			const result = await calculateTokensWithFees({
+				tokens: [mockPayableToken],
+				userAddress
+			});
+
+			expect(result).toHaveLength(0);
+		});
+
+		it('should process all tokens even if some fail', async () => {
+			vi.mocked(payServices.calculateEthFee)
+				.mockRejectedValueOnce(new Error('Network error'))
+				.mockResolvedValueOnce(mockFeeResult);
+
+			const tokens = [
+				mockPayableToken,
+				{ ...mockPayableToken, id: 'token-2', symbol: 'ETH2' }
+			] as unknown as PayableToken[];
+
+			const result = await calculateTokensWithFees({
+				tokens,
+				userAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].fee).toBeDefined();
 		});
 	});
 });

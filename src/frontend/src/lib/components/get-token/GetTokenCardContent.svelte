@@ -31,6 +31,8 @@
 			? Math.round(potentialTokensUsdBalance / tokenExchangeRate)
 			: 0
 	);
+
+	let positivePotentialTokenBalance = $derived(potentialTokenBalance > 0);
 </script>
 
 <div class="mb-2 text-base font-bold">
@@ -43,21 +45,25 @@
 	</div>
 
 	<div class="flex items-center justify-center gap-2 text-sm sm:text-base">
-		{#if potentialTokensUsdBalance > 0}
-			<span class="font-bold" data-tid={GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE} in:fade>
-				{formatCurrency({
-					value: potentialTokensUsdBalance,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
-				})}
+		<span
+			class="font-bold"
+			class:text-disabled={!positivePotentialTokenBalance}
+			data-tid={GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE}
+		>
+			{formatCurrency({
+				value: potentialTokensUsdBalance,
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage
+			})}
+		</span>
+
+		{#if positivePotentialTokenBalance}
+			<span class="text-tertiary" in:fade>
+				{`${positivePotentialTokenBalance ? '~' : ''}${potentialTokenBalance}`}
+				{tokenSymbol}
 			</span>
 		{/if}
-
-		<span class="text-tertiary">
-			{`${potentialTokenBalance > 0 ? '~' : ''}${potentialTokenBalance}`}
-			{tokenSymbol}
-		</span>
 	</div>
 </div>
 
@@ -68,10 +74,10 @@
 
 	<div
 		class="text-lg font-bold sm:text-xl"
-		class:text-brand-primary-alt={potentialTokensUsdBalance > 0}
-		class:text-tertiary={potentialTokensUsdBalance === 0}
+		class:text-brand-primary-alt={positivePotentialTokenBalance}
+		class:text-disabled={!positivePotentialTokenBalance}
 	>
-		{`${potentialTokensUsdBalance > 0 && currentApy > 0 ? '+' : ''}`}{replacePlaceholders(
+		{`${positivePotentialTokenBalance && currentApy > 0 ? '+' : ''}`}{replacePlaceholders(
 			$i18n.stake.text.active_earning_per_year,
 			{
 				$amount: `${formatCurrency({

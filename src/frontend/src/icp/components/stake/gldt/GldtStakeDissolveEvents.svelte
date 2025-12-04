@@ -32,7 +32,9 @@
 	);
 
 	let withdrawButtonEnabled = $derived(
-		($gldtStakeStore?.position?.dissolve_events ?? []).some(({ completed }) => completed)
+		($gldtStakeStore?.position?.dissolve_events ?? []).some(
+			({ dissolved_date }) => Number(dissolved_date) <= Date.now()
+		)
 	);
 
 	let loading = $state(false);

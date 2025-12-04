@@ -1,4 +1,4 @@
-import { balance, getTokensByOwner, transactions } from '$icp/api/ext-v2-token.api';
+import { balance, getTokensByOwner, transactions, transfer } from '$icp/api/ext-v2-token.api';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -6,7 +6,7 @@ import {
 	mockExtV2TokenIdentifier,
 	mockExtV2Transactions
 } from '$tests/mocks/ext-v2-token.mock';
-import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { mock } from 'vitest-mock-extended';
 
 describe('ext-v2-token.api', () => {
@@ -109,6 +109,44 @@ describe('ext-v2-token.api', () => {
 			await expect(getTokensByOwner({ ...params, identity: null })).resolves.toEqual([]);
 
 			expect(tokenCanisterMock.getTokensByOwner).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('transfer', () => {
+		const mockBalance = 456n;
+
+		const params = {
+			identity: mockIdentity,
+			canisterId: mockExtV2TokenCanisterId,
+			from: mockPrincipal,
+			to: mockPrincipal2,
+			tokenIdentifier: mockExtV2TokenIdentifier,
+			amount: 123n
+		};
+
+		const expectedParams = {
+			from: mockPrincipal,
+			to: mockPrincipal2,
+			tokenIdentifier: mockExtV2TokenIdentifier,
+			amount: 123n
+		};
+
+		beforeEach(() => {
+			tokenCanisterMock.transfer.mockResolvedValue(mockBalance);
+		});
+
+		it('should call successfully transfer endpoint', async () => {
+			await transfer(params);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should raise an error if identity is nullish', async () => {
+			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
+
+			await expect(transfer({ ...params, identity: null })).rejects.toThrow();
+
+			expect(tokenCanisterMock.transfer).not.toHaveBeenCalled();
 		});
 	});
 });

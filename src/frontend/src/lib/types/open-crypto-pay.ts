@@ -1,3 +1,7 @@
+import type { EthFeeResult } from '$eth/types/pay';
+import type { Network } from '$lib/types/network';
+import type { Token } from '$lib/types/token';
+
 export interface Address {
 	street?: string;
 	houseNumber?: string;
@@ -20,14 +24,14 @@ export interface Recipient {
 }
 
 export interface Quote {
-	id?: string;
+	id: string;
 	expiration?: string;
 	payment?: string;
 }
 
 export interface RequestedAmount {
 	asset: string;
-	amount: number;
+	amount: string;
 }
 
 export interface Asset {
@@ -60,4 +64,31 @@ export interface OpenCryptoPayResponse {
 	recipient?: Recipient;
 	route?: string;
 	quote?: Quote;
+}
+
+export interface PaymentMethodData {
+	assets: Map<string, { amount: string }>;
+	minFee?: number;
+}
+
+export interface PayableToken extends Token {
+	amount: string;
+	tokenNetwork: string;
+	minFee?: number;
+}
+
+export interface PayableTokenWithFees extends PayableToken {
+	fee?: EthFeeResult;
+}
+
+export interface PrepareTokensParams {
+	transferAmounts: TransferAmount[];
+	networks: Network[];
+	availableTokens: Token[];
+}
+
+export interface PayableTokenWithConvertedAmount extends PayableTokenWithFees {
+	amountInUSD: number;
+	feeInUSD: number;
+	sumInUSD: number;
 }

@@ -1,9 +1,11 @@
+import { goto } from '$app/navigation';
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	WizardStepsClaimStakingReward,
 	WizardStepsStake,
 	WizardStepsUnstake
 } from '$lib/enums/wizard-steps';
-import { StakeProvider } from '$lib/types/stake';
+import { StakeProvider, type StakeProviderConfig } from '$lib/types/stake';
 import type { WizardStepsParams } from '$lib/types/steps';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { WizardSteps } from '@dfinity/gix-components';
@@ -65,19 +67,15 @@ export const claimStakingRewardWizardSteps = ({
 	}
 ];
 
-export const stakeProvidersConfig: Record<
-	StakeProvider,
-	{
-		name: string;
-		logo: string;
-		url: string;
-		pageDescriptionKey: string;
-	}
-> = {
+export const stakeProvidersConfig: Record<StakeProvider, StakeProviderConfig> = {
 	[StakeProvider.GLDT]: {
 		name: 'Gold DAO',
 		logo: '/images/dapps/gold-dao-logo.svg',
 		url: 'https://app.gldt.org/earn/',
-		pageDescriptionKey: 'stake.text.gldt_stake_page_description'
+		pageDescriptionKey: 'stake.text.gldt_stake_page_description',
+		card: {
+			title: 'earning.providers.goldDaoStaking.cardTitle',
+			action: () => goto(AppPath.EarnGold)
+		}
 	}
 };

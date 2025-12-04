@@ -19,6 +19,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getNftDisplayId } from '$lib/utils/nft.utils';
 
 	interface Props {
 		nft: Nft;
@@ -136,7 +137,7 @@
 			{withCollectionLabel ? nft.collection.name : nft.name}
 		</span>
 		<span class="truncate text-xs" class:text-tertiary={!disabled}>
-			#{nft.id}
+			#{getNftDisplayId(nft)}
 			{#if withCollectionLabel}
 				&ndash; {nft.name}
 			{/if}

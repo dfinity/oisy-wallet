@@ -8,8 +8,9 @@
 	interface Props {
 		transaction: StakingTransactionsUiWithToken;
 		onClick?: () => void;
+		testId?: string;
 	}
-	const { transaction, onClick }: Props = $props();
+	const { transaction, onClick, testId }: Props = $props();
 
 	const getTimestamp = (timestampNanoseconds?: bigint | number) =>
 		nonNullish(timestampNanoseconds)
@@ -18,9 +19,9 @@
 
 	const getToAddress = (transaction: StakingTransactionsUiWithToken): string | undefined =>
 		nonNullish(transaction.to)
-			? transaction.to.length > 0
+			? Array.isArray(transaction.to)
 				? transaction.to[0]
-				: (transaction.to as string)
+				: transaction.to
 			: undefined;
 
 	const getStatus = (transaction: StakingTransactionsUiWithToken) => {
@@ -66,6 +67,7 @@
 	iconType="token"
 	{onClick}
 	status={getStatus(transaction)}
+	{testId}
 	timeOnly={false}
 	timestamp={getTimestamp(transaction.timestamp)}
 	to={getToAddress(transaction)}
