@@ -6,6 +6,7 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 
 	let { feeInUSD }: { feeInUSD: number } = $props();
+	
 	let exchangeBalance = $derived(
 		formatCurrency({
 			value: feeInUSD,
@@ -18,5 +19,6 @@
 </script>
 
 <output class="text-xs break-all opacity-60">
-	{$i18n.fee.text.fee} {feeInUSD === 0 ? '' : exchangeBalance?.includes('<') ? '' : '~'}{exchangeBalance}
+	{$i18n.fee.text.fee}
+	{feeInUSD === 0 ? '' : exchangeBalance?.includes('<') ? '' : '~'}{exchangeBalance}
 </output>
