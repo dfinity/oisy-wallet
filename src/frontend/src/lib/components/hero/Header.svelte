@@ -9,6 +9,7 @@
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
+	import Pay from '$lib/components/pay/Pay.svelte';
 	import Scanner from '$lib/components/scanner/Scanner.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
@@ -21,7 +22,6 @@
 	} from '$lib/derived/modal.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
-	import Pay from "$lib/components/pay/Pay.svelte";
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
 	let networkSwitcherOpen = $state(false);

@@ -1,10 +1,10 @@
 <script lang="ts">
+	import IconPay from '$lib/components/icons/IconPay.svelte';
 	import ScannerWizard from '$lib/components/scanner/ScannerWizard.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import { modalUniversalScannerOpen } from '$lib/derived/modal.derived';
+	import { modalPayDialogOpen } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import IconPay from "$lib/components/icons/IconPay.svelte";
 
 	const modalId = Symbol();
 </script>
@@ -13,14 +13,15 @@
 	ariaLabel={$i18n.pay.alt.pay}
 	colorStyle="tertiary-alt"
 	link={false}
-	onclick={() => modalStore.openUniversalScanner(modalId)}
+	onclick={() => modalStore.openPayDialog(modalId)}
+	width="w-16"
 >
 	{#snippet icon()}
-		<IconPay height="24" />
+		<IconPay />
 	{/snippet}
 	{$i18n.pay.text.pay}
 </ButtonIcon>
 
-{#if $modalUniversalScannerOpen}
+{#if $modalPayDialogOpen}
 	<ScannerWizard />
 {/if}
