@@ -16,7 +16,7 @@
 		loading?: boolean;
 		link?: boolean;
 		styleClass?: string;
-		width?: 'w-6' | 'w-8' | 'w-10';
+		width?: 'w-6' | 'w-8' | 'w-10' | 'w-16';
 		height?: 'h-6' | 'h-8' | 'h-10';
 		transparent?: boolean;
 	}
