@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import PayHero from '$lib/components/scanner/PayHero.svelte';
 	import ReceiptData from '$lib/components/scanner/PayReceiptData.svelte';
