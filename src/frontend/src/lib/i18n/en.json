@@ -1815,7 +1815,6 @@
 	},
 	"stake": {
 		"text": {
-			"stake_page_title": "$provider Staking",
 			"gldt_stake_page_description": "Stake GLDT tokens to earn rewards backed by physical gold",
 			"stake": "Stake $token_symbol",
 			"stake_now": "Stake now",

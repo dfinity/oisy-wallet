@@ -1815,7 +1815,6 @@
 	},
 	"stake": {
 		"text": {
-			"stake_page_title": "",
 			"gldt_stake_page_description": "",
 			"stake": "Стейкинг",
 			"stake_now": "",
