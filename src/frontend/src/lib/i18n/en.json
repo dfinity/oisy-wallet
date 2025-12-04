@@ -1801,7 +1801,7 @@
 			"apy": "APY",
 			"currentStaked": "Staked",
 			"currentEarning": "Actively earning",
-			"earningPotential": "Max. earning potential",
+			"earningPotential": "Missing earning potential",
 			"terms": "Terms"
 		},
 		"terms": {

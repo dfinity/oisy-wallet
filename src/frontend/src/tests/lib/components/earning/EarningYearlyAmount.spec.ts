@@ -64,12 +64,12 @@ describe('EarningYearlyAmount', () => {
 		expect(span).toHaveClass('text-success-primary');
 	});
 
-	it('applies text-brand-primary when formatPositiveAmount is false', () => {
+	it('applies text-error-primary when formatPositiveAmount is false', () => {
 		const { container } = render(EarningYearlyAmount, { value: 5, formatPositiveAmount: false });
 
 		const span = container.querySelector('span');
 
-		expect(span).toHaveClass('text-brand-primary');
+		expect(span).toHaveClass('text-error-primary');
 	});
 
 	it('applies text-tertiary when formatPositiveAmount is true but amount is 0', () => {
