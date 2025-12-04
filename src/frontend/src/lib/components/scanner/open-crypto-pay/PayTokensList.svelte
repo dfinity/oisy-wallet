@@ -17,6 +17,7 @@
 	}
 
 	let { onClose }: Props = $props();
+
 	const { availableTokens, selectToken } = getContext<PayContext>(PAY_CONTEXT_KEY);
 </script>
 

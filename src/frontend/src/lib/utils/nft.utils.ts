@@ -26,7 +26,20 @@ export const getNftIdentifier = (token: NonFungibleToken): NonFungibleTokenIdent
 /**
  * Gets the ID to display for the given NFT.
  *
+ * Uses the OISY ID if available, otherwise falls back to the ID.
+ *
  * @param nft - for which the ID to display should be found
  * @returns the ID to display for the NFT
  */
 export const getNftDisplayId = (nft: Nft): string => nft.oisyId ?? nft.id;
+
+/**
+ * Gets the image URL to display for the given NFT.
+ *
+ * Uses the thumbnail URL if available, otherwise falls back to the image URL.
+ *
+ * @param nft - the NFT for which to get the display image URL
+ * @returns the thumbnail URL if defined, otherwise the image URL
+ */
+export const getNftDisplayImageUrl = (nft: Nft): string | undefined =>
+	nft.thumbnailUrl ?? nft.imageUrl;
