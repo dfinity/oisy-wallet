@@ -21,6 +21,7 @@
 	} from '$lib/derived/modal.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
+	import Pay from "$lib/components/pay/Pay.svelte";
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
 	let networkSwitcherOpen = $state(false);
@@ -63,6 +64,8 @@
 
 			{#if UNIVERSAL_SCANNER_ENABLED}
 				<Scanner />
+
+				<Pay />
 			{/if}
 		{/if}
 
