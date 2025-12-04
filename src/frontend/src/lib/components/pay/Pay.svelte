@@ -1,6 +1,6 @@
 <script lang="ts">
 	import IconPay from '$lib/components/icons/IconPay.svelte';
-	import ScannerWizard from '$lib/components/scanner/ScannerWizard.svelte';
+	import PayDialog from '$lib/components/pay/PayDialog.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { modalPayDialogOpen } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -23,5 +23,5 @@
 </ButtonIcon>
 
 {#if $modalPayDialogOpen}
-	<ScannerWizard />
+	<PayDialog />
 {/if}

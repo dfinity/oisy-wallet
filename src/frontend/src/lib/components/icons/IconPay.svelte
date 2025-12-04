@@ -1,13 +1,13 @@
 <script lang="ts">
 	interface Props {
-		height?: string;
+		width?: string;
 	}
 
-	let { height = '20' }: Props = $props();
+	let { width = '40' }: Props = $props();
 
-	const aspectRatio = 108 / 28;
+	const aspectRatio = 28 / 108;
 
-	let width = $derived((aspectRatio * parseFloat(height)).toString());
+	let height = $derived((aspectRatio * parseFloat(width)).toString());
 </script>
 
 <svg fill="none" {height} viewBox="0 0 108 28" {width} xmlns="http://www.w3.org/2000/svg">

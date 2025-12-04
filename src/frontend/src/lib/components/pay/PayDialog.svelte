@@ -1,26 +1,19 @@
 <script lang="ts">
-	import { Html, Modal } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { Modal } from '@dfinity/gix-components';
+	import CoverPayDialog from '$lib/assets/cover-pay-dialog.png';
+	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
+	import PayDialogContent from '$lib/components/pay/PayDialogContent.svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { modalPayDialogOpen } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	interface Props {
-		title: Snippet;
-		button: Snippet<[onclick: () => void]>;
-		onConfirm: () => void;
-		children: Snippet;
-		testId?: string;
-	}
-
-	const { title: innerTitle, button, onConfirm, children, testId }: Props = $props();
-
-	let open = $state(false);
+	let open = $state($modalPayDialogOpen);
 
 	const close = () => {
 		modalStore.close();
@@ -31,37 +24,51 @@
 	const modalId = Symbol();
 
 	const openScanner = () => {
-		() => modalStore.openUniversalScanner(modalId);
+		open = false;
 
-		close();
+		modalStore.openUniversalScanner(modalId);
 	};
 </script>
 
+{#snippet banner()}
+	<ImgBanner alt={$i18n.pay.text.dialog_title} src={CoverPayDialog} styleClass="max-h-56 rounded-full" />
+{/snippet}
+
 {#snippet footer()}
-	<Button onclick={openScanner}>
-		{$i18n.core.text.confirm}
+	<Button fullWidth onclick={openScanner}>
+		<div class="flex flex-row items-center gap-2">
+			<IconScanLine />
+			{replaceOisyPlaceholders($i18n.pay.text.dialog_button)}
+		</div>
 	</Button>
 {/snippet}
 
 <Responsive up="md">
-	<Modal {footer} onClose={close}>
+	<Modal onClose={close}>
 		{#snippet title()}
 			<div class="flex items-center gap-3 font-bold text-primary">
-				<Html text={replaceOisyPlaceholders(innerTitle)} />
+				{replaceOisyPlaceholders($i18n.pay.text.dialog_title)}
 			</div>
 		{/snippet}
 
-		{@render children()}
+		<ContentWithToolbar toolbar={footer}>
+			{@render banner()}
+
+			<div class="mt-5 flex flex-col gap-6">
+				<PayDialogContent />
+			</div>
+		</ContentWithToolbar>
 	</Modal>
 </Responsive>
 
 <Responsive down="sm">
 	<BottomSheet {footer} bind:visible={open}>
 		{#snippet content()}
-			{#if nonNullish(innerTitle)}
-				<h5 class="w-full py-3">{@render innerTitle()}</h5>
-			{/if}
-			{@render children()}
+			{@render banner()}
+
+			<h5 class="w-full py-3">{replaceOisyPlaceholders($i18n.pay.text.dialog_title)}</h5>
+
+			<PayDialogContent />
 		{/snippet}
 	</BottomSheet>
 </Responsive>

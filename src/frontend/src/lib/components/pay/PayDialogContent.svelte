@@ -1,22 +1,11 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import type { Snippet } from 'svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-
-	interface Props {
-		icon: Snippet;
-		title: string;
-		description: string;
-	}
-
-	let { icon, title, description }: Props = $props();
 </script>
 
 <div>
-	<div class="flex items-center gap-3 font-bold text-primary">
-		<Html text={replaceOisyPlaceholders(title)} />
-	</div>
 	<p class="mt-2 mb-0 text-sm sm:text-base">
-		<Html text={replaceOisyPlaceholders(description)} />
+		<Html text={replaceOisyPlaceholders($i18n.pay.text.dialog_description)} />
 	</p>
 </div>
