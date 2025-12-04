@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import SwapBestRateBadge from '$lib/components/swap/SwapBestRateBadge.svelte';
+	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
 	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
@@ -69,7 +69,7 @@
 				{#snippet mainValue()}
 					<div class="flex items-start gap-3">
 						{#if isBestRate && $swapAmountsStore.swaps.length > 1}
-							<SwapBestRateBadge />
+							<BestRateBadge />
 						{/if}
 						<div class="flex gap-2">
 							<div class="mt-1">
