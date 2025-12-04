@@ -4,6 +4,7 @@ import SelectedTokenToPay from '$lib/components/scanner/OpenCryptoPay/SelectedTo
 import en from '$lib/i18n/en.json';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import type { PayableTokenWithConvertedAmount } from '$lib/types/open-crypto-pay';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -134,7 +135,13 @@ describe('SelectedTokenToPay', () => {
 	it('should display available tokens count', () => {
 		renderWithContext({ availableTokens: [mockEthToken, mockUsdcToken] });
 
-		expect(screen.getByText(`2 ${en.scanner.text.tokens_available}`)).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				replacePlaceholders(en.scanner.text.tokens_available, {
+					$amount: '2'
+				})
+			)
+		).toBeInTheDocument();
 	});
 
 	describe('select button', () => {
@@ -215,19 +222,37 @@ describe('SelectedTokenToPay', () => {
 		it('should show 0 tokens available', () => {
 			renderWithContext({ availableTokens: [] });
 
-			expect(screen.getByText(`0 ${en.scanner.text.tokens_available}`)).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					replacePlaceholders(en.scanner.text.tokens_available, {
+						$amount: '0'
+					})
+				)
+			).toBeInTheDocument();
 		});
 
 		it('should show 1 token available', () => {
 			renderWithContext({ availableTokens: [mockEthToken] });
 
-			expect(screen.getByText(`1 ${en.scanner.text.tokens_available}`)).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					replacePlaceholders(en.scanner.text.tokens_available, {
+						$amount: '1'
+					})
+				)
+			).toBeInTheDocument();
 		});
 
 		it('should show multiple tokens available', () => {
 			renderWithContext({ availableTokens: [mockEthToken, mockUsdcToken] });
 
-			expect(screen.getByText(`2 ${en.scanner.text.tokens_available}`)).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					replacePlaceholders(en.scanner.text.tokens_available, {
+						$amount: '2'
+					})
+				)
+			).toBeInTheDocument();
 		});
 	});
 });
