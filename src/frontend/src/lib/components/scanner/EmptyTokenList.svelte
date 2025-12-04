@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { i18n } from '$lib/stores/i18n.store';
 	import IconOisyMate from '$lib/components/icons/IconOisyMate.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <div class="mb-12 flex flex-col items-center justify-center gap-4 text-center">
