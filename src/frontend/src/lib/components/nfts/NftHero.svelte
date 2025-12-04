@@ -110,7 +110,7 @@
 									data: nft
 								})}
 						>
-							<Img src={nft.imageUrl} styleClass="max-h-full max-w-full" />
+							<Img src={nft.imageUrl} styleClass="max-h-full max-w-full w-full" />
 						</button>
 					</NftDisplayGuard>
 					<span class="absolute right-0 bottom-0 m-2.5">
