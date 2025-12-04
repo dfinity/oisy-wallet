@@ -45,7 +45,7 @@
 		class:text-tertiary={value === 0}
 		in:fade
 	>
-		{`${showPlusSign ? '+' : ''}${yearlyAmount}`}
+		{`${showPlusSign ? '+ ' : ''}${yearlyAmount}`}
 	</span>
 {:else if nonNullish(fallback)}
 	{@render fallback()}

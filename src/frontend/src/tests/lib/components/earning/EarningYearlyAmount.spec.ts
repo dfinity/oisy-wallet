@@ -53,7 +53,7 @@ describe('EarningYearlyAmount', () => {
 	it('renders with plus sign when showPlusSign is true', () => {
 		render(EarningYearlyAmount, { value: 10, showPlusSign: true });
 
-		expect(screen.getByText(getFormattedText('+$10.00'))).toBeInTheDocument();
+		expect(screen.getByText(getFormattedText('+ $10.00'))).toBeInTheDocument();
 	});
 
 	it('applies text-success-primary class for positive amount when formatPositiveAmount is true', () => {
