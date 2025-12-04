@@ -7,7 +7,6 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import Divider from '$lib/components/common/Divider.svelte';
-	import { nonNullish } from '@dfinity/utils';
 	import OpenCryptoPayTokenAmount from '$lib/components/scanner/OpenCryptoPayTokenAmount.svelte';
 	import TokenFeeValue from '$lib/components/tokens/TokenFeeValue.svelte';
 	import EmptyTokenList from '$lib/components/tokens/EmptyTokenList.svelte';
@@ -21,7 +20,7 @@
 	const { availableTokens, selectToken } = getContext<PayContext>(PAY_CONTEXT_KEY);
 </script>
 
-{#if nonNullish($availableTokens) && $availableTokens.length > 0}
+{#if $availableTokens.length > 0}
 	<List noPadding>
 		{#each $availableTokens as token (token.id)}
 			{#if isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)}
