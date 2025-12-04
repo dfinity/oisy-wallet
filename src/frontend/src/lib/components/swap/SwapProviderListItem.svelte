@@ -2,8 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { UrlSchema } from '@dfinity/zod-schemas';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
-	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
+	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
