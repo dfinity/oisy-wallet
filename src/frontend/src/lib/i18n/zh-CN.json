@@ -1877,7 +1877,9 @@
 			"gldt_stake_carousel_slide_cta": ""
 		},
 		"error": {
-			"unexpected_error_on_withdraw": ""
+			"unexpected_error_on_withdraw": "",
+			"unexpected_error_on_unstake": "",
+			"dissolvement_limit_reached": ""
 		},
 		"terms": {
 			"gldt": {

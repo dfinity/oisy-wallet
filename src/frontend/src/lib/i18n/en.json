@@ -1877,7 +1877,9 @@
 			"gldt_stake_carousel_slide_cta": "Learn more"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens."
+			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens.",
+			"unexpected_error_on_unstake": "Something went wrong while unstaking tokens.",
+			"dissolvement_limit_reached": "You reached the maximum of $limit active unlock requests. Complete some before creating a new one.<br/>Note that you can always unstake using the ‘immediately’ option."
 		},
 		"terms": {
 			"gldt": {
