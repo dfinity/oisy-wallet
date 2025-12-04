@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {Html, Modal} from '@dfinity/gix-components';
+	import { Html, Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
@@ -8,7 +8,7 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils";
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		title: Snippet;
