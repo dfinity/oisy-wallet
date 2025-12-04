@@ -918,7 +918,10 @@
 			"url_or_code": "",
 			"enter_or_paste_code": "",
 			"scan": "",
-			"pay": ""
+			"pay": "",
+			"go_to_assets": "",
+			"supported_tokens": "",
+			"no_supported_tokens": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
