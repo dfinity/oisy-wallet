@@ -1041,6 +1041,13 @@
 			"title": "ऑनराम्पर के माध्यम से खरीदें"
 		}
 	},
+	"pay": {
+		"text": {
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": ""
+		}
+	},
 	"tokens": {
 		"text": {
 			"title": "टोकन",

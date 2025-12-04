@@ -1041,6 +1041,13 @@
 			"title": "通过 Onramper 购买"
 		}
 	},
+	"pay": {
+		"text": {
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": ""
+		}
+	},
 	"tokens": {
 		"text": {
 			"title": "代币",

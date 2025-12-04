@@ -1041,6 +1041,13 @@
 			"title": "Onramper経由で購入"
 		}
 	},
+	"pay": {
+		"text": {
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": ""
+		}
+	},
 	"tokens": {
 		"text": {
 			"title": "トークン",

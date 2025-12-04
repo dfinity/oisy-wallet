@@ -826,6 +826,10 @@ interface I18nBuy {
 	onramper: { title: string };
 }
 
+interface I18nPay {
+	text: { dialog_title: string; dialog_description: string; dialog_button: string };
+}
+
 interface I18nTokens {
 	text: {
 		title: string;
@@ -1609,6 +1613,7 @@ interface I18n {
 	convert: I18nConvert;
 	swap: I18nSwap;
 	buy: I18nBuy;
+	pay: I18nPay;
 	tokens: I18nTokens;
 	nfts: I18nNfts;
 	fee: I18nFee;

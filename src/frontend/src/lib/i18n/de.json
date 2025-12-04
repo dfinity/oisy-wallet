@@ -1041,6 +1041,13 @@
 			"title": "Kauf über Onramper"
 		}
 	},
+	"pay": {
+		"text": {
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": ""
+		}
+	},
 	"tokens": {
 		"text": {
 			"title": "Token",
