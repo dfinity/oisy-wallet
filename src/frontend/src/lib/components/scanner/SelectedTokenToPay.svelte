@@ -64,7 +64,7 @@
 
 			{#snippet descriptionEnd()}
 				<div class="flex items-center justify-center gap-2">
-					{#if $selectedToken === $availableTokens[0]}
+					{#if $selectedToken.id === $availableTokens[0].id}
 						<BestRateBadge />
 					{/if}
 				</div>
