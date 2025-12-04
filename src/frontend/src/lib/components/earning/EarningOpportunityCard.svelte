@@ -15,7 +15,7 @@
 	const { titles, logo, badge, description, button }: Props = $props();
 </script>
 
-<div class="flex flex-col rounded-lg border-1 border-disabled bg-disabled p-4">
+<div class="flex flex-col rounded-lg border-1 border-disabled bg-disabled px-3 py-4">
 	<div class="mb-3 flex flex-1 flex-col gap-3 text-sm">
 		<span class="flex items-start">
 			<span class="flex flex-1">{@render logo()}</span>
