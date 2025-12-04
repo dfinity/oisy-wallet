@@ -827,7 +827,8 @@ interface I18nBuy {
 }
 
 interface I18nPay {
-	text: { dialog_title: string; dialog_description: string; dialog_button: string };
+	text: { pay: string; dialog_title: string; dialog_description: string; dialog_button: string };
+	alt: { pay: string };
 }
 
 interface I18nTokens {
