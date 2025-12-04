@@ -23,6 +23,7 @@ export const mapExtNft = async ({
 	const identifier = extIndexToIdentifier({ collectionId: Principal.fromText(canisterId), index });
 
 	const imageUrl = `https://${canisterId}.raw.icp0.io/?index=${index}`;
+	const thumbnailUrl = `${imageUrl}&type=thumbnail`;
 
 	const mediaStatus = await getMediaStatusOrCache(imageUrl);
 
@@ -31,6 +32,7 @@ export const mapExtNft = async ({
 		oisyId: parseNftId(parseExtTokenIndex(index).toString()),
 		name: parseExtTokenName({ index, token }),
 		imageUrl,
+		thumbnailUrl,
 		mediaStatus,
 		collection: mapExtCollection(token)
 	};
