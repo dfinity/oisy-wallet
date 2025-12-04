@@ -1,15 +1,11 @@
 import ExchangeTokenToPay from '$lib/components/scanner/ExchangeTokenToPay.svelte';
-import { formatCurrency } from '$lib/utils/format.utils';
+import * as formatUtils from '$lib/utils/format.utils';
 import { render, screen } from '@testing-library/svelte';
-
-vi.mock('$lib/utils/format.utils', () => ({
-	formatCurrency: vi.fn()
-}));
 
 describe('ExchangeTokenToPay', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.mocked(formatCurrency).mockReturnValue('$15.50');
+		vi.spyOn(formatUtils, 'formatCurrency').mockImplementation(() => `$15.50`);
 	});
 
 	it('should render component', () => {
@@ -27,7 +23,7 @@ describe('ExchangeTokenToPay', () => {
 	it('should call formatCurrency with correct parameters', () => {
 		render(ExchangeTokenToPay, { props: { amountInUSD: 15.5 } });
 
-		expect(formatCurrency).toHaveBeenCalledWith({
+		expect(formatUtils.formatCurrency).toHaveBeenCalledWith({
 			value: 15.5,
 			currency: 'usd',
 			exchangeRate: {
@@ -39,7 +35,7 @@ describe('ExchangeTokenToPay', () => {
 	});
 
 	it('should display zero amount', () => {
-		vi.mocked(formatCurrency).mockReturnValue('$0.00');
+		vi.mocked(formatUtils.formatCurrency).mockReturnValue('$0.00');
 
 		render(ExchangeTokenToPay, { props: { amountInUSD: 0 } });
 
@@ -47,7 +43,7 @@ describe('ExchangeTokenToPay', () => {
 	});
 
 	it('should format different currencies', () => {
-		vi.mocked(formatCurrency).mockReturnValue('€15,50');
+		vi.mocked(formatUtils.formatCurrency).mockReturnValue('€15,50');
 
 		render(ExchangeTokenToPay, { props: { amountInUSD: 15.5 } });
 
@@ -55,7 +51,7 @@ describe('ExchangeTokenToPay', () => {
 	});
 
 	it('should handle very small amounts', () => {
-		vi.mocked(formatCurrency).mockReturnValue('$0.01');
+		vi.mocked(formatUtils.formatCurrency).mockReturnValue('$0.01');
 
 		render(ExchangeTokenToPay, { props: { amountInUSD: 0.01 } });
 
@@ -63,7 +59,7 @@ describe('ExchangeTokenToPay', () => {
 	});
 
 	it('should handle large amounts', () => {
-		vi.mocked(formatCurrency).mockReturnValue('$999,999.99');
+		vi.mocked(formatUtils.formatCurrency).mockReturnValue('$999,999.99');
 
 		render(ExchangeTokenToPay, { props: { amountInUSD: 999999.99 } });
 
