@@ -23,7 +23,7 @@
 		onClose
 	}: Props = $props();
 
-	const onBackDropClose = () => {
+	const onBackdropClose = () => {
 		visible = false;
 
 		onClose?.();
@@ -60,6 +60,6 @@
 				</div>
 			{/if}
 		</BottomSheet>
-		<Backdrop on:nnsClose={onBackDropClose} />
+		<Backdrop on:nnsClose={onBackdropClose} />
 	</div>
 {/if}
