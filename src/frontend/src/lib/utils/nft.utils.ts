@@ -30,3 +30,6 @@ export const getNftIdentifier = (token: NonFungibleToken): NonFungibleTokenIdent
  * @returns the ID to display for the NFT
  */
 export const getNftDisplayId = (nft: Nft): string => nft.oisyId ?? nft.id;
+
+export const getNftDisplayImageUrl = (nft: Nft): string | undefined =>
+	nft.thumbnailUrl ?? nft.imageUrl;

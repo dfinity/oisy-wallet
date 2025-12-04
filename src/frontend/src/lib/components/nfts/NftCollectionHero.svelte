@@ -14,6 +14,7 @@
 	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation';
 
 	interface Props {
@@ -35,7 +36,13 @@
 	]);
 
 	const firstNft = $derived(nfts?.[0]);
+	const firstNftDisplayImageUrl = $derived(
+		nonNullish(firstNft) ? getNftDisplayImageUrl(firstNft) : undefined
+	);
+
 	const bannerUrl = $derived(nonNullish(firstNft) ? firstNft.collection.bannerImageUrl : undefined);
+
+	let diplayImageUrl = $derived(bannerUrl ?? firstNftDisplayImageUrl);
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
@@ -45,10 +52,10 @@
 				source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION,
 				subSource: 'hero'
 			}}
-			nft={nfts?.[0]}
+			nft={firstNft}
 			type="hero-banner"
 		>
-			<BgImg imageUrl={bannerUrl ?? nfts?.[0]?.imageUrl} size="cover" />
+			<BgImg imageUrl={diplayImageUrl} size="cover" />
 		</NftDisplayGuard>
 	</div>
 
