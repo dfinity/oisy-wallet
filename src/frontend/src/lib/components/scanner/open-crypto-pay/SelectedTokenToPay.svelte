@@ -18,6 +18,7 @@
 	}
 
 	let { onSelectToken, isTokenSelecting = $bindable() }: Props = $props();
+
 	const { selectedToken, availableTokens } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
 	let selectButtonText = $derived(
