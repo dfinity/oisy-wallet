@@ -24,7 +24,7 @@
 </script>
 
 <output class="flex items-center justify-end gap-2 break-all">
-	{#if nonNullish(isBestRate) && isBestRate}
+	{#if isBestRate}
 		<BestRateBadge />
 	{/if}
 	{exchangeBalance}
