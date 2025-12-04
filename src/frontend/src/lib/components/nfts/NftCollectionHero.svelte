@@ -42,7 +42,7 @@
 
 	const bannerUrl = $derived(nonNullish(firstNft) ? firstNft.collection.bannerImageUrl : undefined);
 
-	let diplayImageUrl = $derived(bannerUrl ?? firstNftDisplayImageUrl);
+	let displayImageUrl = $derived(bannerUrl ?? firstNftDisplayImageUrl);
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
@@ -55,7 +55,7 @@
 			nft={firstNft}
 			type="hero-banner"
 		>
-			<BgImg imageUrl={diplayImageUrl} size="cover" />
+			<BgImg imageUrl={displayImageUrl} size="cover" />
 		</NftDisplayGuard>
 	</div>
 
