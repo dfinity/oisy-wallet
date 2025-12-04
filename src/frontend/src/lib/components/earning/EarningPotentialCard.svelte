@@ -13,7 +13,7 @@
 
 <StakeContentCard>
 	{#snippet content()}
-		<div class="text-sm">{$i18n.stake.text.earning_potential}</div>
+		<div class="text-sm font-bold">{$i18n.stake.text.earning_potential}</div>
 
 		<div class="my-1 text-lg font-bold sm:text-xl">
 			<EarningYearlyAmount
@@ -26,7 +26,8 @@
 			</EarningYearlyAmount>
 		</div>
 
-		<div class="flex justify-center gap-2 text-sm font-bold sm:text-base">
+		<div class="text-sm sm:text-base">
+			{$i18n.stake.text.unproductive_assets}:
 			{formatCurrency({
 				value: $enabledMainnetFungibleTokensUsdBalance,
 				currency: $currentCurrency,

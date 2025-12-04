@@ -90,7 +90,7 @@
 			class:text-brand-primary-alt={$enabledMainnetFungibleTokensUsdBalance > 0}
 			class:text-tertiary={$enabledMainnetFungibleTokensUsdBalance === 0}
 		>
-			{`${$enabledMainnetFungibleTokensUsdBalance > 0 && currentApy > 0 ? '+' : ''}`}{replacePlaceholders(
+			{`${$enabledMainnetFungibleTokensUsdBalance > 0 && currentApy > 0 ? '+ ' : ''}`}{replacePlaceholders(
 				$i18n.stake.text.active_earning_per_year,
 				{
 					$amount: `${formatCurrency({

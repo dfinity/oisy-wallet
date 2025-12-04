@@ -1457,6 +1457,8 @@ interface I18nStake {
 		earning_potential: string;
 		active_earning: string;
 		active_earning_per_year: string;
+		unproductive_assets: string;
+		invested_assets: string;
 		visit_provider: string;
 		current_apy_label: string;
 		stake_review_subtitle: string;
