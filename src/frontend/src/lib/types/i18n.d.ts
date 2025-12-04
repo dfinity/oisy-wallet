@@ -1436,7 +1436,6 @@ interface I18nEarning {
 
 interface I18nStake {
 	text: {
-		stake_page_title: string;
 		gldt_stake_page_description: string;
 		stake: string;
 		stake_now: string;
