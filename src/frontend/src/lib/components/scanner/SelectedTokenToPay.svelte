@@ -32,7 +32,7 @@
 	<p class="m-0">{$availableTokens.length} {$i18n.scanner.text.tokens_available}</p>
 </div>
 
-<div class="mb-4 rounded-[28px] border border-disabled bg-secondary p-3 text-center">
+<div class="mb-4 rounded-3xl border border-disabled bg-secondary p-3 text-center">
 	{#if nonNullish($selectedToken)}
 		<LogoButton hover={false} fullWidth styleClass="mb-2">
 			{#snippet title()}
