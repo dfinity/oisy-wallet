@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
