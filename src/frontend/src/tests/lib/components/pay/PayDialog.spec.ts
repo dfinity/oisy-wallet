@@ -22,17 +22,21 @@ describe('PayDialog', () => {
 	});
 
 	it('should render the dialog', async () => {
-		const { getByTestId } = render(PayDialog);
+		const { getByTestId, rerender } = render(PayDialog);
 
 		expect(getByTestId(PAY_DIALOG)).toBeInTheDocument();
 
 		screensStore.set('xl');
+
+		await rerender({});
 
 		await tick();
 
 		expect(getByTestId(PAY_DIALOG)).toBeInTheDocument();
 
 		screensStore.set('xs');
+
+		await rerender({});
 
 		await tick();
 
