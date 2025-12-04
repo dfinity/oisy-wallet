@@ -6,6 +6,7 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 
 	let { feeInUSD }: { feeInUSD: number } = $props();
+	
 	let exchangeBalance = $derived(
 		formatCurrency({
 			value: feeInUSD,
