@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import CoverPayDialog from '$lib/assets/cover-pay-dialog.png';
+	import CoverPayDialog from '$lib/assets/cover-pay-dialog.webp';
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
 	import PayDialogContent from '$lib/components/pay/PayDialogContent.svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
