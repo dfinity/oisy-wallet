@@ -31,7 +31,11 @@
 </script>
 
 {#snippet banner()}
-	<ImgBanner alt={$i18n.pay.text.dialog_title} src={CoverPayDialog} styleClass="max-h-56 rounded-full" />
+	<ImgBanner
+		alt={$i18n.pay.text.dialog_title}
+		src={CoverPayDialog}
+		styleClass="max-h-56 rounded-lg"
+	/>
 {/snippet}
 
 {#snippet footer()}

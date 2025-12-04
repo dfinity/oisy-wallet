@@ -17,6 +17,7 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalAboutWhyOisy,
+		modalPayDialogOpen,
 		modalUniversalScannerOpen,
 		modalWalletConnect
 	} from '$lib/derived/modal.derived';
@@ -29,6 +30,12 @@
 	let menuOpen = $state(false);
 
 	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
+
+	let modalsOpen = $derived(
+		$modalWalletConnect || $modalUniversalScannerOpen || $modalPayDialogOpen
+	);
+
+	let biggerOverlay = $derived(menuOpen || networkSwitcherOpen || helpMenuOpen || modalsOpen);
 </script>
 
 <header
@@ -39,16 +46,8 @@
 	class:1.5xl:z-10={$authSignedIn}
 	class:pb-10={$authNotSignedIn}
 	class:sm:pb-8={$authNotSignedIn}
-	class:z-3={!menuOpen &&
-		!networkSwitcherOpen &&
-		!helpMenuOpen &&
-		!$modalWalletConnect &&
-		!$modalUniversalScannerOpen}
-	class:z-4={menuOpen ||
-		networkSwitcherOpen ||
-		helpMenuOpen ||
-		$modalWalletConnect ||
-		$modalUniversalScannerOpen}
+	class:z-3={!biggerOverlay}
+	class:z-4={biggerOverlay}
 >
 	<div class="pointer-events-auto">
 		<OisyWalletLogoLink />

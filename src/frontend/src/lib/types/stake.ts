@@ -18,3 +18,11 @@ export interface StakeProviderConfig {
 	pageDescriptionKey: string;
 	card: EarningCardData;
 }
+
+export interface StakePosition {
+	apy: number;
+	staked: number;
+	earning: number;
+	earningPotential: number;
+	token: Token;
+}
