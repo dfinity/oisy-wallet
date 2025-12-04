@@ -925,7 +925,7 @@
 			"pay_with": "Pay with",
 			"select_token": "Select the token",
 			"select_different_token": "Select different token",
-			"tokens_available": "tokens available"
+			"tokens_available": "$amount tokens available"
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid"

@@ -10,6 +10,7 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		onSelectToken: () => void;
@@ -29,7 +30,11 @@
 <div class="mt-8 mb-2 flex w-full items-end justify-between px-3">
 	<h3>{$i18n.scanner.text.pay_with}</h3>
 
-	<p class="m-0">{$availableTokens.length} {$i18n.scanner.text.tokens_available}</p>
+	<p class="m-0">
+		{replacePlaceholders($i18n.scanner.text.tokens_available, {
+			$amount: `${$availableTokens.length}`
+		})}
+	</p>
 </div>
 
 <div class="mb-4 rounded-3xl border border-disabled bg-secondary p-3 text-center">
