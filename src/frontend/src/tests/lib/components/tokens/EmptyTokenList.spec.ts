@@ -1,5 +1,5 @@
 import { goto } from '$app/navigation';
-import EmptyTokenList from '$lib/components/scanner/EmptyTokenList.svelte';
+import EmptyTokenList from '$lib/components/tokens/EmptyTokenList.svelte';
 import en from '$lib/i18n/en.json';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 
@@ -13,7 +13,9 @@ describe('NoSupportedTokens', () => {
 	});
 
 	it('should render component', () => {
-		const { container } = render(EmptyTokenList);
+		const { container } = render(EmptyTokenList, {
+			props: { text: en.scanner.text.supported_tokens }
+		});
 
 		expect(container.firstChild).toBeInTheDocument();
 	});
@@ -27,7 +29,9 @@ describe('NoSupportedTokens', () => {
 	});
 
 	it('should display supported tokens description', () => {
-		render(EmptyTokenList);
+		render(EmptyTokenList, {
+			props: { text: en.scanner.text.supported_tokens }
+		});
 
 		expect(screen.getByText(en.scanner.text.supported_tokens)).toBeInTheDocument();
 	});
