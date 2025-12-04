@@ -713,6 +713,9 @@ interface I18nScanner {
 		enter_or_paste_code: string;
 		scan: string;
 		pay: string;
+		go_to_assets: string;
+		supported_tokens: string;
+		no_supported_tokens: string;
 	};
 	error: { code_link_is_not_valid: string };
 }
