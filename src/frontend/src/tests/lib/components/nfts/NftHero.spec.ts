@@ -107,6 +107,26 @@ describe('NftHero', () => {
 		expect(imageElement.getAttribute('src')).toContain(mockValidErc1155Nft.imageUrl);
 	});
 
+	it('should render the nft thumbnail in the banner if it exists', () => {
+		const thumbnailUrl =
+			'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/10.png';
+
+		// We need a different thumbnail url than the image url to test that the thumbnail is rendered instead of the image
+		expect(thumbnailUrl).not.toBe(mockValidErc1155Nft.imageUrl);
+
+		const { container } = render(NftHero, {
+			props: {
+				nft: { ...mockValidErc1155Nft, thumbnailUrl }
+			}
+		});
+
+		const imageElement: HTMLImageElement | null = container.querySelector('img');
+
+		assertNonNullish(imageElement);
+
+		expect(imageElement.getAttribute('src')).toContain(thumbnailUrl);
+	});
+
 	it('should render the hidden badge in the banner', () => {
 		const hiddenBadgeSelector = `span[data-tid="${NFT_HIDDEN_BADGE}"]`;
 
