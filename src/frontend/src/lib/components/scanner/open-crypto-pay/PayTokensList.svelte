@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import Divider from '$lib/components/common/Divider.svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -9,9 +9,13 @@
 	import Divider from '$lib/components/common/Divider.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import OpenCryptoPayTokenAmount from '$lib/components/scanner/OpenCryptoPayTokenAmount.svelte';
-	import TokenFeeValue from '$lib/components/tokens/TokenFeeValue.svelte';
 	import EmptyTokenList from '$lib/components/tokens/EmptyTokenList.svelte';
+	import TokenFeeValue from '$lib/components/tokens/TokenFeeValue.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 
 	interface Props {
 		onClose: () => void;
