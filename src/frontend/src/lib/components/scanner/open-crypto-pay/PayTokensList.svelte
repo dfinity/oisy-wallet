@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import List from '$lib/components/common/List.svelte';
@@ -6,7 +7,6 @@
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
-	import { nonNullish } from '@dfinity/utils';
 	import OpenCryptoPayTokenAmount from '$lib/components/scanner/OpenCryptoPayTokenAmount.svelte';
 	import EmptyTokenList from '$lib/components/tokens/EmptyTokenList.svelte';
 	import TokenFeeValue from '$lib/components/tokens/TokenFeeValue.svelte';
