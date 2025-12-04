@@ -10,6 +10,7 @@ import * as formatUtils from '$lib/utils/format.utils';
 
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
+import en from '$tests/mocks/i18n.mock';
 import { readable } from 'svelte/store';
 
 const staticStore = <T>(v: T) => readable<T>(v);
@@ -53,7 +54,7 @@ describe('EarningPotentialCard', () => {
 		expect(screen.getByText(/\$100\.00/)).toBeInTheDocument();
 
 		// Summary shows "$1000.00"
-		expect(screen.getByText('$1000.00')).toBeInTheDocument();
+		expect(screen.getByText(`${en.stake.text.unproductive_assets}: $1000.00`)).toBeInTheDocument();
 	});
 
 	it('shows a plus sign when balance > 0 and APY > 0', () => {

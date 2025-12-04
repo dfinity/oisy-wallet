@@ -1833,6 +1833,8 @@
 			"earning_potential": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"unproductive_assets": "",
+			"invested_assets": "",
 			"visit_provider": "",
 			"current_apy_label": "",
 			"stake_review_subtitle": "",
