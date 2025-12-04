@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
-	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 
 	interface Props {
 		amountInUSD: number;
