@@ -77,7 +77,7 @@
 		class:text-brand-primary-alt={positivePotentialTokenBalance}
 		class:text-disabled={!positivePotentialTokenBalance}
 	>
-		{`${positivePotentialTokenBalance && currentApy > 0 ? '+' : ''}`}{replacePlaceholders(
+		{`${positivePotentialTokenBalance && currentApy > 0 ? '+ ' : ''}`}{replacePlaceholders(
 			$i18n.stake.text.active_earning_per_year,
 			{
 				$amount: `${formatCurrency({

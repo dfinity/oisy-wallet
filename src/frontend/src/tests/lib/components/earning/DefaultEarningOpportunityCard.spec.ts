@@ -74,7 +74,7 @@ describe('DefaultEarningOpportunityCard', () => {
 		});
 
 		expect(screen.getByText('$2.5/year')).toBeInTheDocument();
-		expect(screen.getByText('+$200/year')).toBeInTheDocument();
+		expect(screen.getByText('+ $200/year')).toBeInTheDocument();
 	});
 
 	it('renders dash when a field is missing', () => {

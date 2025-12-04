@@ -69,8 +69,8 @@ describe('EarningPotentialCard', () => {
 
 		render(EarningPotentialCard);
 
-		// 200 * 15% = 30 -> "+$30.00"
-		expect(screen.getByText(/\+\$30\.00/)).toBeInTheDocument();
+		// 200 * 15% = 30 -> "+ $30.00"
+		expect(screen.getByText('+ $30.00/year')).toBeInTheDocument();
 	});
 
 	it('handles null earning potential gracefully', () => {
