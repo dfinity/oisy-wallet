@@ -85,6 +85,7 @@
 			fullWidth
 			onclick={() => {
 				onSelectToken();
+				// Set flag to open BottomSheet (mobile only)
 				isTokenSelecting = true;
 			}}>{selectButtonText}</Button
 		>
