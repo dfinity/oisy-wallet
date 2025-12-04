@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { setContext } from 'svelte';
-	import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
+	import OpenCryptoPay from '$lib/components/scanner/open-crypto-pay/OpenCryptoPay.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
