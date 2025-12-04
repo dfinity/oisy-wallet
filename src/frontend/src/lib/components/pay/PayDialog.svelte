@@ -8,7 +8,11 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import {PAY_DIALOG, PAY_DIALOG_BANNER, PAY_DIALOG_PAY_BUTTON} from '$lib/constants/test-ids.constants';
+	import {
+		PAY_DIALOG,
+		PAY_DIALOG_BANNER,
+		PAY_DIALOG_PAY_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { modalPayDialogOpen } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
