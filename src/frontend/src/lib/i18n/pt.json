@@ -921,7 +921,11 @@
 			"pay": "",
 			"go_to_assets": "",
 			"supported_tokens": "",
-			"no_supported_tokens": ""
+			"no_supported_tokens": "",
+			"pay_with": "",
+			"select_token": "",
+			"select_different_token": "",
+			"tokens_available": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
