@@ -3,18 +3,18 @@
 	import { getContext } from 'svelte';
 	import PayHero from '$lib/components/scanner/PayHero.svelte';
 	import ReceiptData from '$lib/components/scanner/PayReceiptData.svelte';
+	import SelectedTokenToPay from '$lib/components/scanner/open-crypto-pay/SelectedTokenToPay.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
-	import SelectedTokenToPay from '$lib/components/scanner/open-crypto-pay/SelectedTokenToPay.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
-	import { formatCurrency } from '$lib/utils/format.utils';
 	import { currentCurrency } from '$lib/derived/currency.derived';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import { formatCurrency } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		onSelectToken: () => void;
