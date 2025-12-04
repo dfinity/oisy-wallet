@@ -12,9 +12,22 @@
 		content: Snippet;
 		footer?: Snippet;
 		contentClass?: string;
+		onClose?: () => void;
 	}
 
-	let { visible = $bindable(), content, footer, contentClass = 'min-h-[30vh]' }: Props = $props();
+	let {
+		visible = $bindable(),
+		content,
+		footer,
+		contentClass = 'min-h-[30vh]',
+		onClose
+	}: Props = $props();
+
+	const onBackDropClose = () => {
+		visible = false;
+
+		onClose?.();
+	};
 
 	$effect(() => {
 		bottomSheetOpenStore.set(visible);
@@ -47,6 +60,6 @@
 				</div>
 			{/if}
 		</BottomSheet>
-		<Backdrop on:nnsClose={() => (visible = false)} />
+		<Backdrop on:nnsClose={onBackDropClose} />
 	</div>
 {/if}
