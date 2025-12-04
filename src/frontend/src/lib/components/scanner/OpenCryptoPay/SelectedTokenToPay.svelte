@@ -41,7 +41,9 @@
 	{#if nonNullish($selectedToken)}
 		<LogoButton fullWidth hover={false} styleClass="mb-2">
 			{#snippet title()}
-				{$selectedToken.amount} {$selectedToken.symbol}
+				<!-- Token amount is always formatted so we can use it without formatToken -->
+				{$selectedToken.amount}
+				{$selectedToken.symbol}
 			{/snippet}
 
 			{#snippet description()}
