@@ -3,11 +3,10 @@
 	import { onMount } from 'svelte';
 	import { blur, fade } from 'svelte/transition';
 	import { extTokens } from '$icp/derived/ext.derived';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import {
 		loadAndAssertAddCustomToken,
 		type ValidateTokenData
-	} from '$icp/services/ic-add-custom-tokens.service';
+	} from '$icp/services/ext-add-custom-tokens.service';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -37,9 +36,9 @@
 
 	onMount(async () => {
 		const { result, data } = await loadAndAssertAddCustomToken({
-			ledgerCanisterId: extCanisterId,
+			canisterId: extCanisterId,
 			identity: $authIdentity,
-			icrcTokens: $extTokens
+			extTokens: $extTokens
 		});
 
 		if (result === 'error' || isNullish(data)) {
