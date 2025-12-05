@@ -42,7 +42,7 @@
 	);
 
 	const previewNft = $derived(
-		collection.nfts.find((nft) => nft.mediaStatus !== NftMediaStatusEnum.OK) ?? collection.nfts[0]
+		collection.nfts.find((nft) => nft.mediaStatus.image !== NftMediaStatusEnum.OK) ?? collection.nfts[0]
 	);
 
 	const onClick = () => {
