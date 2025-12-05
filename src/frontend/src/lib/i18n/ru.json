@@ -1118,6 +1118,7 @@
 				"review": "Проверить",
 				"saving": "Сохранение...",
 				"updating": "Обновление списка токенов",
+				"canister_id": "",
 				"ledger_canister_id": "ID контейнера реестра",
 				"index_canister_id": "ID контейнера индекса",
 				"minter_canister_id": "ID контейнера минтера",

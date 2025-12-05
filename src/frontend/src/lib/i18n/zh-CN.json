@@ -1118,6 +1118,7 @@
 				"review": "审查",
 				"saving": "正在保存...",
 				"updating": "正在更新代币列表",
+				"canister_id": "",
 				"ledger_canister_id": "账本 Canister ID",
 				"index_canister_id": "索引 Canister ID",
 				"minter_canister_id": "铸币 Canister ID",

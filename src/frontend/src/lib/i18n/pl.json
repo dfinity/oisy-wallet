@@ -1118,6 +1118,7 @@
 				"review": "Przegląd",
 				"saving": "Zapisywanie...",
 				"updating": "Aktualizacja listy tokenów",
+				"canister_id": "",
 				"ledger_canister_id": "Identyfikator kanistra rejestru",
 				"index_canister_id": "Identyfikator kanistra indeksu",
 				"minter_canister_id": "Identyfikator kanistra mintera",

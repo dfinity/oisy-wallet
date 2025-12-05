@@ -1118,6 +1118,7 @@
 				"review": "Review",
 				"saving": "Saving...",
 				"updating": "Updating token list",
+				"canister_id": "Canister ID",
 				"ledger_canister_id": "Ledger Canister ID",
 				"index_canister_id": "Index Canister ID",
 				"minter_canister_id": "Minter Canister ID",

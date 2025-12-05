@@ -1118,6 +1118,7 @@
 				"review": "Xem lại",
 				"saving": "Đang lưu...",
 				"updating": "Đang cập nhật danh sách token",
+				"canister_id": "",
 				"ledger_canister_id": "ID Canister ledger",
 				"index_canister_id": "ID Canister index",
 				"minter_canister_id": "ID Canister minter",

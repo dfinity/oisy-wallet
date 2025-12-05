@@ -1118,6 +1118,7 @@
 				"review": "Überprüfen",
 				"saving": "Speichere...",
 				"updating": "Aktualisiere Token-Liste",
+				"canister_id": "",
 				"ledger_canister_id": "Ledger-Canister-ID",
 				"index_canister_id": "Index-Canister-ID",
 				"minter_canister_id": "Minter-Canister-ID",
