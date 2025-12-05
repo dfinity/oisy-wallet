@@ -1,4 +1,4 @@
 export interface EarningCardData {
-	title: string;
+	titles: string[];
 	action: () => void;
 }
