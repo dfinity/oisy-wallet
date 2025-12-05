@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { get } from 'svelte/store';
 	import GldtUnstakeForm from '$icp/components/stake/gldt/GldtUnstakeForm.svelte';
 	import GldtUnstakeReview from '$icp/components/stake/gldt/GldtUnstakeReview.svelte';
 	import { unstakeGldt } from '$icp/services/gldt-stake.services';
@@ -19,7 +20,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { GldtUnstakeDissolvementsLimitReached } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -98,10 +101,24 @@
 				}
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
+			if (
+				err instanceof GldtUnstakeDissolvementsLimitReached &&
+				nonNullish($gldtStakeStore?.config?.max_dissolve_events)
+			) {
+				toastsError({
+					msg: {
+						text: replacePlaceholders(get(i18n).stake.error.dissolvement_limit_reached, {
+							$limit: `${Number($gldtStakeStore.config.max_dissolve_events)}`
+						}),
+						renderAsHtml: true
+					}
+				});
+			} else {
+				toastsError({
+					msg: { text: $i18n.stake.error.unexpected_error_on_unstake },
+					err
+				});
+			}
 
 			onBack();
 		}
