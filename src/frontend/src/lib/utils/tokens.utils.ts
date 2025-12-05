@@ -15,7 +15,9 @@ import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.ut
 import { isTokenErc20, isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
+import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { isTokenExtV2 } from '$icp/utils/ext.utils';
 import {
 	icTokenIcrcCustomToken,
 	isTokenDip20,
@@ -344,6 +346,7 @@ export const groupTogglableTokens = (
 	tokens: Token[]
 ): {
 	icrc: IcrcCustomToken[];
+	ext: ExtCustomToken[];
 	erc20: (Erc20UserToken | Erc20CustomToken)[];
 	erc721: Erc721CustomToken[];
 	erc1155: Erc1155CustomToken[];
@@ -351,22 +354,24 @@ export const groupTogglableTokens = (
 } =>
 	tokens.reduce<{
 		icrc: IcrcCustomToken[];
+		ext: ExtCustomToken[];
 		erc20: Erc20UserToken[];
 		erc721: Erc721CustomToken[];
 		erc1155: Erc1155CustomToken[];
 		spl: SplTokenToggleable[];
 	}>(
-		({ icrc, erc20, erc721, erc1155, spl }, token) => ({
+		({ icrc, ext, erc20, erc721, erc1155, spl }, token) => ({
 			icrc: [
 				...icrc,
 				...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
 			],
+			ext: [...ext, ...(isTokenExtV2(token) ? [token as ExtCustomToken] : [])],
 			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
 			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
 			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
 		}),
-		{ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] }
+		{ icrc: [], ext: [], erc20: [], erc721: [], erc1155: [], spl: [] }
 	);
 
 export const saveAllCustomTokens = async ({
@@ -386,10 +391,11 @@ export const saveAllCustomTokens = async ({
 	$authIdentity: OptionIdentity;
 	$i18n: I18n;
 }): Promise<void> => {
-	const { icrc, erc20, erc721, erc1155, spl } = groupTogglableTokens(tokens);
+	const { icrc, ext, erc20, erc721, erc1155, spl } = groupTogglableTokens(tokens);
 
 	if (
 		icrc.length === 0 &&
+		ext.length === 0 &&
 		erc20.length === 0 &&
 		erc721.length === 0 &&
 		erc1155.length === 0 &&
@@ -447,6 +453,14 @@ export const saveAllCustomTokens = async ({
 					saveIcrcCustomTokens({
 						...commonParams,
 						tokens: icrc.map((t) => ({ ...t, networkKey: 'Icrc' }))
+					})
+				]
+			: []),
+		...(ext.length > 0
+			? [
+					saveIcrcCustomTokens({
+						...commonParams,
+						tokens: ext.map((t) => ({ ...t, networkKey: 'ExtV2' }))
 					})
 				]
 			: []),
