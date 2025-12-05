@@ -1103,6 +1103,7 @@
 				"review": "审查",
 				"saving": "正在保存...",
 				"updating": "正在更新代币列表",
+				"canister_id": "",
 				"ledger_canister_id": "账本 Canister ID",
 				"index_canister_id": "索引 Canister ID",
 				"minter_canister_id": "铸币 Canister ID",
@@ -1112,6 +1113,7 @@
 				"verifying": "正在验证代币详情...",
 				"add_the_token": "添加代币",
 				"info": "账本和索引 Canister ID 通常可在项目网站上找到。",
+				"info_ext": "",
 				"info_index": "索引 Canister ID 是可选的，但如果没有它，$oisy_short 将无法显示交易历史。",
 				"custom_tokens_not_supported": "所选网络不支持自定义代币。"
 			},

@@ -1103,6 +1103,7 @@
 				"review": "Aperçu",
 				"saving": "Enregistrement...",
 				"updating": "Mise à jour de la liste des tokens",
+				"canister_id": "",
 				"ledger_canister_id": "ID du canister du registre",
 				"index_canister_id": "ID du canister d'index",
 				"minter_canister_id": "ID du canister minter",
@@ -1112,6 +1113,7 @@
 				"verifying": "Vérification des détails du token...",
 				"add_the_token": "Ajouter le token",
 				"info": "Les ID de canister de registre et d'index sont généralement disponibles sur le site web du projet.",
+				"info_ext": "",
 				"info_index": "L'ID du canister d'index est facultatif, mais sans lui, $oisy_short ne peut pas afficher l'historique des transactions.",
 				"custom_tokens_not_supported": "Le réseau sélectionné ne prend pas en charge les tokens personnalisés."
 			},

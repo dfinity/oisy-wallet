@@ -1103,6 +1103,7 @@
 				"review": "Xem lại",
 				"saving": "Đang lưu...",
 				"updating": "Đang cập nhật danh sách token",
+				"canister_id": "",
 				"ledger_canister_id": "ID Canister ledger",
 				"index_canister_id": "ID Canister index",
 				"minter_canister_id": "ID Canister minter",
@@ -1112,6 +1113,7 @@
 				"verifying": "Đang xác minh chi tiết token...",
 				"add_the_token": "Thêm token",
 				"info": "ID canister ledger và index thường có sẵn trên trang web của dự án.",
+				"info_ext": "",
 				"info_index": "ID canister index là tùy chọn, nhưng nếu không có nó, $oisy_short không thể hiển thị lịch sử giao dịch.",
 				"custom_tokens_not_supported": "Mạng đã chọn không hỗ trợ token tùy chỉnh."
 			},

@@ -1103,6 +1103,7 @@
 				"review": "確認",
 				"saving": "保存中...",
 				"updating": "トークンリストを更新中",
+				"canister_id": "",
 				"ledger_canister_id": "台帳キャニスターID",
 				"index_canister_id": "インデックスキャニスターID",
 				"minter_canister_id": "ミントキャニスターID",
@@ -1112,6 +1113,7 @@
 				"verifying": "トークンの詳細を確認中...",
 				"add_the_token": "トークンを追加",
 				"info": "台帳およびインデックスキャニスターIDは通常、プロジェクトのウェブサイトで入手できます。",
+				"info_ext": "",
 				"info_index": "インデックスキャニスターIDはオプションですが、これがないと$oisy_shortは取引履歴を表示できません。",
 				"custom_tokens_not_supported": "選択したネットワークはカスタムトークンをサポートしていません。"
 			},

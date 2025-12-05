@@ -1103,6 +1103,7 @@
 				"review": "Rever",
 				"saving": "Salvando...",
 				"updating": "Atualizando lista de tokens",
+				"canister_id": "",
 				"ledger_canister_id": "ID do Canister Ledger",
 				"index_canister_id": "ID do Canister Index",
 				"minter_canister_id": "ID do Canister Minter",
@@ -1112,6 +1113,7 @@
 				"verifying": "Verificando detalhes do token...",
 				"add_the_token": "Adicionar o token",
 				"info": "Os IDs dos canisters Ledger e Index geralmente estão disponíveis no site do projeto.",
+				"info_ext": "",
 				"info_index": "O ID do canister Index é opcional, mas sem ele, $oisy_short não pode exibir o histórico de transações.",
 				"custom_tokens_not_supported": "A rede selecionada não suporta tokens personalizados."
 			},
