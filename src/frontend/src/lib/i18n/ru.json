@@ -1838,6 +1838,7 @@
 			"unsupported_token_staking": "Стейкинг не поддерживается для этого токена",
 			"provider": "Провайдер",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",
