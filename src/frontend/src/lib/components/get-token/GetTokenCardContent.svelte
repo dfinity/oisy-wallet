@@ -73,11 +73,11 @@
 	</div>
 
 	<div
-		class="text-lg font-bold sm:text-xl"
+		class="text-lg font-bold whitespace-nowrap sm:text-xl"
 		class:text-brand-primary-alt={positivePotentialTokenBalance}
 		class:text-disabled={!positivePotentialTokenBalance}
 	>
-		{`${positivePotentialTokenBalance && currentApy > 0 ? '+' : ''}`}{replacePlaceholders(
+		{`${positivePotentialTokenBalance && currentApy > 0 ? '+ ' : ''}`}{replacePlaceholders(
 			$i18n.stake.text.active_earning_per_year,
 			{
 				$amount: `${formatCurrency({

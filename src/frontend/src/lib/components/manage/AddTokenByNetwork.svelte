@@ -3,7 +3,7 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
-	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
+	import IcAddIcrcTokenForm from '$icp/components/tokens/IcAddIcrcTokenForm.svelte';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import AddTokenByNetworkToolbar from '$lib/components/manage/AddTokenByNetworkToolbar.svelte';
@@ -110,7 +110,7 @@
 		{/if}
 
 		{#if isIcpNetwork}
-			<IcAddTokenForm bind:ledgerCanisterId bind:indexCanisterId />
+			<IcAddIcrcTokenForm bind:ledgerCanisterId bind:indexCanisterId />
 		{:else if isEthereumNetwork || isEvmNetwork}
 			<EthAddTokenForm bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}

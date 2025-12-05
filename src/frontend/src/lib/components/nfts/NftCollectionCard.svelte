@@ -20,6 +20,7 @@
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
@@ -95,10 +96,12 @@
 				<span class="absolute z-0 h-full w-full bg-secondary-alt"></span>
 
 				{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
-					{#if index < 4 && nonNullish(nft.imageUrl)}
+					{@const nftDisplayImageUrl = getNftDisplayImageUrl(nft)}
+
+					{#if index < 4 && nonNullish(nftDisplayImageUrl)}
 						<div class="relative aspect-square overflow-hidden rounded-lg bg-secondary-alt">
 							<BgImg
-								imageUrl={nft?.imageUrl}
+								imageUrl={nftDisplayImageUrl}
 								shadow="inset"
 								size="cover"
 								styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"

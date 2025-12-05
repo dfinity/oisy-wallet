@@ -918,7 +918,16 @@
 			"url_or_code": "URL or the code",
 			"enter_or_paste_code": "Enter or paste code",
 			"scan": "Scan",
-			"pay": "Pay"
+			"pay": "Pay",
+			"pay_amount": "Pay $amount",
+			"go_to_assets": "Go to Assets",
+			"supported_tokens": "OpenCrypto pay supports the following tokens: BTC, ETH, WBTC, XMR, dEURO, ZCHF, USDT, USDC, DAI, etc...",
+			"no_supported_tokens": "You have no supported tokens",
+			"pay_with": "Pay with",
+			"select_token": "Select the token",
+			"select_different_token": "Select different token",
+			"tokens_available": "$amount tokens available",
+			"select_token_to_pay": "Select token to pay"
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid"
@@ -1039,6 +1048,17 @@
 		},
 		"onramper": {
 			"title": "Buy through Onramper"
+		}
+	},
+	"pay": {
+		"text": {
+			"pay": "Pay",
+			"dialog_title": "Pay with $oisy_name",
+			"dialog_description": "$oisy_name lets you pay instantly with crypto across supported chains. At any shop that uses <span class=\"font-bold\">OpenCryptoPay</span>, simply scan their payment QR code. Choose the token you want to pay with and confirm the transaction on-chain.",
+			"dialog_button": "Pay with $oisy_short"
+		},
+		"alt": {
+			"pay": "Dialog with information on how to pay"
 		}
 	},
 	"tokens": {
@@ -1801,7 +1821,7 @@
 			"apy": "APY",
 			"currentStaked": "Staked",
 			"currentEarning": "Actively earning",
-			"earningPotential": "Max. earning potential",
+			"earningPotential": "Missing earning potential",
 			"terms": "Terms"
 		},
 		"terms": {
@@ -1815,7 +1835,6 @@
 	},
 	"stake": {
 		"text": {
-			"stake_page_title": "$provider Staking",
 			"gldt_stake_page_description": "Stake GLDT tokens to earn rewards backed by physical gold",
 			"stake": "Stake $token_symbol",
 			"stake_now": "Stake now",
@@ -1831,9 +1850,11 @@
 			"executing_transaction": "Executing transaction...",
 			"unsupported_token_staking": "Staking for the selected token is not supported.",
 			"provider": "Staking terms provided by $provider",
-			"earning_potential": "Earning potential",
-			"active_earning": "Active earning",
+			"earning_potential": "Missing earning potential",
+			"active_earning": "Actively earning",
 			"active_earning_per_year": "$amount/year",
+			"unproductive_assets": "Unproductive assets",
+			"invested_assets": "Invested assets",
 			"visit_provider": "Visit website",
 			"current_apy_label": "Current APY",
 			"stake_review_subtitle": "You stake",
@@ -1873,7 +1894,9 @@
 			"gldt_stake_carousel_slide_cta": "Learn more"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens."
+			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens.",
+			"unexpected_error_on_unstake": "Something went wrong while unstaking tokens.",
+			"dissolvement_limit_reached": "You reached the maximum of $limit active unlock requests. Complete some before creating a new one.<br/>Note that you can always unstake using the ‘immediately’ option."
 		},
 		"terms": {
 			"gldt": {
