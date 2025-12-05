@@ -11,20 +11,17 @@ export interface ValidateTokenData {
 	token: ExtTokenWithoutId;
 }
 
-export const loadAndAssertAddCustomToken = async ({
+export const loadAndAssertAddCustomToken = ({
 	identity,
 	extTokens,
 	canisterId
 }: Partial<ExtCanisters> & {
 	identity: OptionIdentity;
 	extTokens: ExtToken[];
-}): Promise<{
+}): {
 	result: 'success' | 'error';
-	data?: {
-		token: ExtTokenWithoutId;
-		balance: bigint;
-	};
-}> => {
+	data?: ValidateTokenData;
+} => {
 	assertNonNullish(identity);
 
 	if (isNullish(canisterId)) {
@@ -48,7 +45,7 @@ export const loadAndAssertAddCustomToken = async ({
 	try {
 		const params = { identity, ...canisterIds };
 
-		const token = await loadMetadata(params);
+		const token = loadMetadata(params);
 
 		if (isNullish(token)) {
 			toastsError({
