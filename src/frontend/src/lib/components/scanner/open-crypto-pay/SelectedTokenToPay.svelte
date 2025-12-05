@@ -3,6 +3,7 @@
 	import { getContext } from 'svelte';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import OpenCryptoPayTokenAmount from '$lib/components/scanner/OpenCryptoPayTokenAmount.svelte';
+	import BottomSheetTokensList from '$lib/components/scanner/open-crypto-pay/BottomSheetTokensList.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -11,7 +12,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import BottomSheetTokensList from '$lib/components/scanner/open-crypto-pay/BottomSheetTokensList.svelte';
 
 	interface Props {
 		onSelectToken: () => void;
