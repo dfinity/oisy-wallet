@@ -1118,6 +1118,7 @@
 				"review": "Rivedi",
 				"saving": "Salvataggio...",
 				"updating": "Aggiornamento lista token",
+				"canister_id": "",
 				"ledger_canister_id": "ID Canister Ledger",
 				"index_canister_id": "ID Canister Index",
 				"minter_canister_id": "ID Canister Minter",

@@ -1118,6 +1118,7 @@
 				"review": "Zkontrolovat",
 				"saving": "Ukládání...",
 				"updating": "Aktualizace seznamu tokenů",
+				"canister_id": "",
 				"ledger_canister_id": "ID kanystru účetní knihy",
 				"index_canister_id": "ID kanystru indexu",
 				"minter_canister_id": "ID kanystru minteru",

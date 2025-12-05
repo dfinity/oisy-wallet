@@ -897,6 +897,7 @@ interface I18nTokens {
 			review: string;
 			saving: string;
 			updating: string;
+			canister_id: string;
 			ledger_canister_id: string;
 			index_canister_id: string;
 			minter_canister_id: string;

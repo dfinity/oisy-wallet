@@ -1118,6 +1118,7 @@
 				"review": "مراجعة",
 				"saving": "جاري الحفظ...",
 				"updating": "جاري تحديث قائمة التوكنات",
+				"canister_id": "",
 				"ledger_canister_id": "معرف حاوية السجل",
 				"index_canister_id": "معرف حاوية الفهرس",
 				"minter_canister_id": "معرف حاوية المينتر",

@@ -1118,6 +1118,7 @@
 				"review": "Rever",
 				"saving": "Salvando...",
 				"updating": "Atualizando lista de tokens",
+				"canister_id": "",
 				"ledger_canister_id": "ID do Canister Ledger",
 				"index_canister_id": "ID do Canister Index",
 				"minter_canister_id": "ID do Canister Minter",

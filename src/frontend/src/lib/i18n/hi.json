@@ -1118,6 +1118,7 @@
 				"review": "समीक्षा",
 				"saving": "सहेज रहा है...",
 				"updating": "टोकन सूची अपडेट कर रहा है",
+				"canister_id": "",
 				"ledger_canister_id": "लेज़र कैनिस्टर आईडी",
 				"index_canister_id": "इंडेक्स कैनिस्टर आईडी",
 				"minter_canister_id": "मिन्टर कैनिस्टर आईडी",
