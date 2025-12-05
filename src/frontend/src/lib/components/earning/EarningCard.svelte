@@ -53,16 +53,19 @@
 		{/snippet}
 
 		{#snippet title()}
-			<span>
-				{#each cardTitles as titlePath, i (`${titlePath}-${i}`)}
-					{#if i > 0}
-						<span> - </span>
-					{/if}
+			<div class="flex flex-row items-center gap-2">
+				<span>
+					{#each cardTitles as titlePath, i (`${titlePath}-${i}`)}
+						{#if i > 0}
+							<span>&nbsp;-&nbsp;</span>
+						{/if}
 
-					<span>{resolveText({ i18n: $i18n, path: titlePath })}</span>
-				{/each}
+						<span>{resolveText({ i18n: $i18n, path: titlePath })}</span>
+					{/each}
+				</span>
+
 				<Tag variant="info">{formatStakeApyNumber(maxApy)}%</Tag>
-			</span>
+			</div>
 		{/snippet}
 
 		{#snippet titleEnd()}
