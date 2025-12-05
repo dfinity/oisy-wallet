@@ -13,6 +13,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
+	import { getNftDisplayMediaStatus } from '$lib/utils/nft.utils';
 
 	interface Props {
 		nft?: Nft;
@@ -25,7 +26,7 @@
 	const { nft, children, showMessage = true, type, location }: Props = $props();
 
 	const mediaStatus = $derived(
-		nonNullish(nft) ? nft.mediaStatus.image : NftMediaStatusEnum.INVALID_DATA
+		nonNullish(nft) ? getNftDisplayMediaStatus(nft) : NftMediaStatusEnum.INVALID_DATA
 	);
 
 	const hasConsent: boolean | undefined = $derived(

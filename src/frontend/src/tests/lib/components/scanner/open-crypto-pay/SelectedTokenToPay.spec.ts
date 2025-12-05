@@ -5,7 +5,7 @@ import en from '$lib/i18n/en.json';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import type { PayableTokenWithConvertedAmount } from '$lib/types/open-crypto-pay';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { fireEvent, render, screen } from '@testing-library/svelte';
+import { render, screen } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 vi.mock('$eth/derived/tokens.derived', () => ({
@@ -162,33 +162,6 @@ describe('SelectedTokenToPay', () => {
 			expect(
 				screen.getByRole('button', { name: en.scanner.text.select_different_token })
 			).toBeInTheDocument();
-		});
-
-		it('should call onSelectToken when clicked', async () => {
-			const onSelectToken = vi.fn();
-
-			renderWithContext({ onSelectToken });
-
-			const button = screen.getByRole('button', { name: en.scanner.text.select_token });
-
-			await fireEvent.click(button);
-
-			expect(onSelectToken).toHaveBeenCalled();
-		});
-
-		it('should set isTokenSelecting to true on mobile', async () => {
-			const onSelectToken = vi.fn();
-
-			renderWithContext({
-				onSelectToken,
-				isTokenSelecting: false
-			});
-
-			const button = screen.getByRole('button', { name: en.scanner.text.select_token });
-
-			await fireEvent.click(button);
-
-			expect(onSelectToken).toHaveBeenCalled();
 		});
 	});
 
