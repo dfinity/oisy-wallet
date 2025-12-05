@@ -41,7 +41,7 @@
 {#if nonNullish(yearlyAmount)}
 	<span
 		class="whitespace-nowrap"
-		class:text-error-primary={!formatPositiveAmount}
+		class:text-brand-primary={!formatPositiveAmount}
 		class:text-success-primary={formatPositiveAmount && nonNullish(value) && value > 0}
 		class:text-tertiary={value === 0}
 		in:fade

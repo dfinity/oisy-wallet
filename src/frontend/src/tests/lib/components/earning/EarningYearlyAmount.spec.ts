@@ -69,7 +69,7 @@ describe('EarningYearlyAmount', () => {
 
 		const span = container.querySelector('span');
 
-		expect(span).toHaveClass('text-error-primary');
+		expect(span).toHaveClass('text-brand-primary');
 	});
 
 	it('applies text-tertiary when formatPositiveAmount is true but amount is 0', () => {
