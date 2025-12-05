@@ -9,6 +9,7 @@
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
+	import Pay from '$lib/components/pay/Pay.svelte';
 	import Scanner from '$lib/components/scanner/Scanner.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
@@ -16,6 +17,7 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalAboutWhyOisy,
+		modalPayDialogOpen,
 		modalUniversalScannerOpen,
 		modalWalletConnect
 	} from '$lib/derived/modal.derived';
@@ -29,7 +31,9 @@
 
 	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
 
-	let modalsOpen = $derived($modalWalletConnect || $modalUniversalScannerOpen);
+	let modalsOpen = $derived(
+		$modalWalletConnect || $modalUniversalScannerOpen || $modalPayDialogOpen
+	);
 
 	let biggerOverlay = $derived(menuOpen || networkSwitcherOpen || helpMenuOpen || modalsOpen);
 </script>
@@ -59,6 +63,8 @@
 
 			{#if UNIVERSAL_SCANNER_ENABLED}
 				<Scanner />
+
+				<Pay />
 			{/if}
 		{/if}
 

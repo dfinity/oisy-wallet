@@ -713,6 +713,7 @@ interface I18nScanner {
 		enter_or_paste_code: string;
 		scan: string;
 		pay: string;
+		pay_amount: string;
 		go_to_assets: string;
 		supported_tokens: string;
 		no_supported_tokens: string;
@@ -720,6 +721,7 @@ interface I18nScanner {
 		select_token: string;
 		select_different_token: string;
 		tokens_available: string;
+		select_token_to_pay: string;
 	};
 	error: { code_link_is_not_valid: string };
 }
@@ -831,6 +833,11 @@ interface I18nSwap {
 interface I18nBuy {
 	text: { buy: string; buy_dev: string };
 	onramper: { title: string };
+}
+
+interface I18nPay {
+	text: { pay: string; dialog_title: string; dialog_description: string; dialog_button: string };
+	alt: { pay: string };
 }
 
 interface I18nTokens {
@@ -1621,6 +1628,7 @@ interface I18n {
 	convert: I18nConvert;
 	swap: I18nSwap;
 	buy: I18nBuy;
+	pay: I18nPay;
 	tokens: I18nTokens;
 	nfts: I18nNfts;
 	fee: I18nFee;

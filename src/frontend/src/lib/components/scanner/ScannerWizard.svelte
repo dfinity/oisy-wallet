@@ -22,6 +22,8 @@
 	const onClose = () => modalStore.close();
 
 	setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
+
+	let isTokenSelecting = $state<boolean>(false);
 </script>
 
 <WizardModal bind:this={modal} {onClose} {steps} bind:currentStep>
@@ -33,7 +35,7 @@
 		{#if currentStep?.name === WizardStepsScanner.SCAN}
 			<ScannerCode onNext={() => modal?.next()} />
 		{:else if currentStep?.name === WizardStepsScanner.PAY}
-			<OpenCryptoPay />
+			<OpenCryptoPay onSelectToken={() => {}} bind:isTokenSelecting />
 		{/if}
 	{/key}
 </WizardModal>

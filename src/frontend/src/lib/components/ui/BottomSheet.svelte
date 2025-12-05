@@ -12,6 +12,7 @@
 		content: Snippet;
 		footer?: Snippet;
 		contentClass?: string;
+		testId?: string;
 		onClose?: () => void;
 	}
 
@@ -20,6 +21,7 @@
 		content,
 		footer,
 		contentClass = 'min-h-[30vh]',
+		testId,
 		onClose
 	}: Props = $props();
 
@@ -35,7 +37,7 @@
 </script>
 
 {#if visible}
-	<div class="fixed inset-0 z-14">
+	<div class="fixed inset-0 z-14" data-tid={testId}>
 		<BottomSheet transition>
 			{#snippet header()}
 				<div class="w-full p-4">

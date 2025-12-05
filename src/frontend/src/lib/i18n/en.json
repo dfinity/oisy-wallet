@@ -919,13 +919,15 @@
 			"enter_or_paste_code": "Enter or paste code",
 			"scan": "Scan",
 			"pay": "Pay",
+			"pay_amount": "Pay $amount",
 			"go_to_assets": "Go to Assets",
 			"supported_tokens": "OpenCrypto pay supports the following tokens: BTC, ETH, WBTC, XMR, dEURO, ZCHF, USDT, USDC, DAI, etc...",
 			"no_supported_tokens": "You have no supported tokens",
 			"pay_with": "Pay with",
 			"select_token": "Select the token",
 			"select_different_token": "Select different token",
-			"tokens_available": "$amount tokens available"
+			"tokens_available": "$amount tokens available",
+			"select_token_to_pay": "Select token to pay"
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid"
@@ -1046,6 +1048,17 @@
 		},
 		"onramper": {
 			"title": "Buy through Onramper"
+		}
+	},
+	"pay": {
+		"text": {
+			"pay": "Pay",
+			"dialog_title": "Pay with $oisy_name",
+			"dialog_description": "$oisy_name lets you pay instantly with crypto across supported chains. At any shop that uses <span class=\"font-bold\">OpenCryptoPay</span>, simply scan their payment QR code. Choose the token you want to pay with and confirm the transaction on-chain.",
+			"dialog_button": "Pay with $oisy_short"
+		},
+		"alt": {
+			"pay": "Dialog with information on how to pay"
 		}
 	},
 	"tokens": {
