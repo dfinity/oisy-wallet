@@ -149,7 +149,7 @@ describe('nft.utils', () => {
 	describe('getNftDisplayMediaStatus', () => {
 		const mockThumbnailUrl = 'http://example.com/thumbnail.png';
 
-		it('should use the thumbnail status if it if defined', () => {
+		it('should use the thumbnail status if it is defined', () => {
 			expect(
 				getNftDisplayMediaStatus({ ...mockValidErc721Nft, thumbnailUrl: mockThumbnailUrl })
 			).toBe(mockValidErc721Nft.mediaStatus.thumbnail);
