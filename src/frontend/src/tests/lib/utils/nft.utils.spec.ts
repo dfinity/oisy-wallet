@@ -10,6 +10,7 @@ import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import {
 	getNftDisplayId,
+	getNftDisplayImageUrl,
 	getNftIdentifier,
 	getTokensByNetwork,
 	isTokenFungible,
@@ -127,6 +128,20 @@ describe('nft.utils', () => {
 
 		it('should fallback to the normal ID if OISY ID is not defined', () => {
 			expect(getNftDisplayId(mockValidErc721Nft)).toBe(mockValidErc721Nft.id);
+		});
+	});
+
+	describe('getNftDisplayImageUrl', () => {
+		const mockThumbnailUrl = 'http://example.com/thumbnail.png';
+
+		it('should use the thumbnail URL if defined', () => {
+			expect(getNftDisplayImageUrl({ ...mockValidErc721Nft, thumbnailUrl: mockThumbnailUrl })).toBe(
+				mockThumbnailUrl
+			);
+		});
+
+		it('should fallback to the image URL if thumbnail is not defined', () => {
+			expect(getNftDisplayImageUrl(mockValidErc721Nft)).toBe(mockValidErc721Nft.imageUrl);
 		});
 	});
 });

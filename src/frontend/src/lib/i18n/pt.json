@@ -921,7 +921,11 @@
 			"pay": "",
 			"go_to_assets": "",
 			"supported_tokens": "",
-			"no_supported_tokens": ""
+			"no_supported_tokens": "",
+			"pay_with": "",
+			"select_token": "",
+			"select_different_token": "",
+			"tokens_available": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
@@ -1042,6 +1046,17 @@
 		},
 		"onramper": {
 			"title": "Comprar via Onramper"
+		}
+	},
+	"pay": {
+		"text": {
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": ""
+		},
+		"alt": {
+			"pay": ""
 		}
 	},
 	"tokens": {
@@ -1877,7 +1892,9 @@
 			"gldt_stake_carousel_slide_cta": ""
 		},
 		"error": {
-			"unexpected_error_on_withdraw": ""
+			"unexpected_error_on_withdraw": "",
+			"unexpected_error_on_unstake": "",
+			"dissolvement_limit_reached": ""
 		},
 		"terms": {
 			"gldt": {

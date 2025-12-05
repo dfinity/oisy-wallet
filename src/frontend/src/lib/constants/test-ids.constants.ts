@@ -53,6 +53,10 @@ export const NFT_PLACEHOLDER_UNSUPPORTED = 'nft-placeholder-unsupported';
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
 
+export const PAY_DIALOG = 'pay-dialog';
+export const PAY_DIALOG_PAY_BUTTON = 'pay-dialog-pay-button';
+export const PAY_DIALOG_BANNER = 'pay-dialog-banner';
+
 export const RECEIVE_TOKENS_MODAL_OPEN_BUTTON = 'receive-tokens-modal-open-button';
 export const RECEIVE_TOKENS_MODAL_DONE_BUTTON = 'receive-tokens-modal-done-button';
 export const RECEIVE_TOKENS_MODAL = 'receive-tokens-modal';
