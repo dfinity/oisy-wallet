@@ -316,3 +316,8 @@ export const modalUniversalScannerOpen: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'universal-scanner'
 );
+
+export const modalPayDialogOpen: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'pay-dialog'
+);
