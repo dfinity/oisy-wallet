@@ -29,7 +29,7 @@ export enum NftMediaStatusEnum {
 	INVALID_DATA = 'invalid_data'
 }
 
-const NftMediaStatusSchema = z.object({
+export const NftMediaStatusSchema = z.object({
 	image: z.enum(NftMediaStatusEnum),
 	thumbnail: z.enum(NftMediaStatusEnum)
 });
