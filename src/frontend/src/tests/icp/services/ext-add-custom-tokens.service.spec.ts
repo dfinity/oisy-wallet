@@ -82,7 +82,7 @@ describe('ext-add-custom-tokens.service', () => {
 			});
 		});
 
-		it('should return error if token already exits', () => {
+		it('should return error if token already exists', () => {
 			const result = loadAndAssertAddCustomToken({
 				identity: mockIdentity,
 				extTokens: [
