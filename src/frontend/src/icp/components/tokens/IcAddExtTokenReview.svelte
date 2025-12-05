@@ -83,7 +83,7 @@
 	</div>
 
 	{#if nonNullish(metadata)}
-		{@const { network: safeNetwork, ledgerCanisterId: safeLedgerCanisterId } = metadata.token}
+		{@const { network: safeNetwork, canisterId: safeCanisterId } = metadata.token}
 		<div in:fade>
 			<Value element="div" ref="network">
 				{#snippet label()}
@@ -94,10 +94,10 @@
 				{/snippet}
 			</Value>
 
-			<Value element="div" ref="ledgerId">
-				{#snippet label()}{$i18n.tokens.import.text.ledger_canister_id}{/snippet}
+			<Value element="div" ref="canisterId">
+				{#snippet label()}{$i18n.tokens.import.text.canister_id}{/snippet}
 				{#snippet content()}
-					{safeLedgerCanisterId}
+					{safeCanisterId}
 				{/snippet}
 			</Value>
 
