@@ -836,8 +836,14 @@ interface I18nBuy {
 }
 
 interface I18nPay {
-	text: { pay: string; dialog_title: string; dialog_description: string; dialog_button: string };
-	alt: { pay: string };
+	text: {
+		pay: string;
+		dialog_title: string;
+		dialog_description: string;
+		dialog_button: string;
+		where_you_can_pay: string;
+	};
+	alt: { pay: string; where_you_can_pay: string };
 }
 
 interface I18nTokens {
@@ -891,6 +897,7 @@ interface I18nTokens {
 			review: string;
 			saving: string;
 			updating: string;
+			canister_id: string;
 			ledger_canister_id: string;
 			index_canister_id: string;
 			minter_canister_id: string;
@@ -911,6 +918,7 @@ interface I18nTokens {
 			unexpected_index_ledger: string;
 			invalid_ledger_id: string;
 			missing_ledger_id: string;
+			missing_canister_id: string;
 			missing_contract_address: string;
 			missing_token_address: string;
 			no_network: string;
@@ -1466,6 +1474,7 @@ interface I18nStake {
 		unsupported_token_staking: string;
 		provider: string;
 		earning_potential: string;
+		earning_potential_hint: string;
 		active_earning: string;
 		active_earning_per_year: string;
 		unproductive_assets: string;

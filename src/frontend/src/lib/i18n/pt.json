@@ -1055,10 +1055,12 @@
 			"pay": "",
 			"dialog_title": "",
 			"dialog_description": "",
-			"dialog_button": ""
+			"dialog_button": "",
+			"where_you_can_pay": ""
 		},
 		"alt": {
-			"pay": ""
+			"pay": "",
+			"where_you_can_pay": ""
 		}
 	},
 	"tokens": {
@@ -1116,6 +1118,7 @@
 				"review": "Rever",
 				"saving": "Salvando...",
 				"updating": "Atualizando lista de tokens",
+				"canister_id": "",
 				"ledger_canister_id": "ID do Canister Ledger",
 				"index_canister_id": "ID do Canister Index",
 				"minter_canister_id": "ID do Canister Minter",
@@ -1136,6 +1139,7 @@
 				"unexpected_index_ledger": "Algo deu errado ao carregar o ID do Ledger relacionado ao canister Index.",
 				"invalid_ledger_id": "O ID do Ledger não está relacionado ao canister Index.",
 				"missing_ledger_id": "O ID do Ledger está faltando. Você forneceu um valor?",
+				"missing_canister_id": "",
 				"missing_contract_address": "O endereço do contrato está faltando. Você forneceu um valor?",
 				"missing_token_address": "O endereço do token está faltando. Você forneceu um valor?",
 				"no_network": "Nenhuma rede selecionada. Isso é inesperado."
@@ -1851,6 +1855,7 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",

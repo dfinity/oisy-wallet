@@ -1055,10 +1055,12 @@
 			"pay": "",
 			"dialog_title": "",
 			"dialog_description": "",
-			"dialog_button": ""
+			"dialog_button": "",
+			"where_you_can_pay": ""
 		},
 		"alt": {
-			"pay": ""
+			"pay": "",
+			"where_you_can_pay": ""
 		}
 	},
 	"tokens": {
@@ -1116,6 +1118,7 @@
 				"review": "审查",
 				"saving": "正在保存...",
 				"updating": "正在更新代币列表",
+				"canister_id": "",
 				"ledger_canister_id": "账本 Canister ID",
 				"index_canister_id": "索引 Canister ID",
 				"minter_canister_id": "铸币 Canister ID",
@@ -1136,6 +1139,7 @@
 				"unexpected_index_ledger": "加载与索引 Canister 相关的账本 ID 时出错。",
 				"invalid_ledger_id": "账本 ID 与索引 Canister 无关。",
 				"missing_ledger_id": "缺少账本 ID。您是否填写了值？",
+				"missing_canister_id": "",
 				"missing_contract_address": "缺少合约地址。您是否填写了值？",
 				"missing_token_address": "缺少代币地址。您是否填写了值？",
 				"no_network": "未选择网络。此为异常情况。"
@@ -1851,6 +1855,7 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",
