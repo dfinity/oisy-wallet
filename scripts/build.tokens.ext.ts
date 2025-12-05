@@ -1,8 +1,21 @@
 #!/usr/bin/env node
 
+import type { _SERVICE as ExtV2TokenService } from '$declarations/ext_v2_token/ext_v2_token.did';
+import { idlFactory as idlCertifiedFactoryExtV2Token } from '$declarations/ext_v2_token/ext_v2_token.factory.certified.did';
+import { idlFactory as idlFactoryExtV2Token } from '$declarations/ext_v2_token/ext_v2_token.factory.did';
 import type { EnvExtToken } from '$env/types/env-ext-token';
-import { jsonReplacer } from '@dfinity/utils';
+import type { CanisterIdText, CreateCanisterOptions } from '$lib/types/canister';
+import {
+	Canister,
+	createServices,
+	jsonReplacer,
+	nonNullish,
+	type QueryParams
+} from '@dfinity/utils';
+import { AnonymousIdentity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { agent } from './build.tokens.utils';
 import { EXT_COLLECTIONS_JSON_FILE } from './constants.mjs';
 
 const ACCEPTED_STANDARDS = ['ext'];
@@ -93,6 +106,42 @@ const readExistingCollections = (): EnvExtToken[] => {
 	return JSON.parse(content) as EnvExtToken[];
 };
 
+class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
+	static create({ ...options }: CreateCanisterOptions<ExtV2TokenService>): ExtV2TokenCanister {
+		const { service, certifiedService, canisterId } = createServices<ExtV2TokenService>({
+			options: {
+				...options,
+				agent
+			},
+			idlFactory: idlFactoryExtV2Token,
+			certifiedIdlFactory: idlCertifiedFactoryExtV2Token
+		});
+
+		return new ExtV2TokenCanister(canisterId, service, certifiedService);
+	}
+
+	extensions = ({ certified }: QueryParams) => this.caller({ certified }).ext_extensions();
+}
+
+const extensions = async (canisterId: CanisterIdText) => {
+	const { extensions } = ExtV2TokenCanister.create({
+		identity: new AnonymousIdentity(),
+		canisterId: Principal.fromText(canisterId)
+	});
+
+	return await extensions({ certified: false });
+};
+
+const checkActive = async ({ canisterId }: EnvExtToken): Promise<boolean> => {
+	try {
+		await extensions(canisterId);
+
+		return true;
+	} catch (_: unknown) {
+		return false;
+	}
+};
+
 const getCollections = async (): Promise<EnvExtToken[]> => {
 	const existingCollections = readExistingCollections();
 
@@ -107,7 +156,18 @@ const getCollections = async (): Promise<EnvExtToken[]> => {
 		return acc;
 	}, {});
 
-	return Object.values(collectionsMap).sort((a, b) => a.canisterId.localeCompare(b.canisterId));
+	// We filter out the inactive collections.
+	const activeCollections = (
+		await Promise.all(
+			Object.entries(collectionsMap).map(async ([, collection]) => {
+				const isActive = await checkActive(collection);
+
+				return isActive ? collection : undefined;
+			})
+		)
+	).filter(nonNullish);
+
+	return activeCollections.sort((a, b) => a.canisterId.localeCompare(b.canisterId));
 };
 
 try {
