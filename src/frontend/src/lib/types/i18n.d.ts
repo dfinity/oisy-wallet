@@ -911,6 +911,7 @@ interface I18nTokens {
 			unexpected_index_ledger: string;
 			invalid_ledger_id: string;
 			missing_ledger_id: string;
+			missing_canister_id: string;
 			missing_contract_address: string;
 			missing_token_address: string;
 			no_network: string;

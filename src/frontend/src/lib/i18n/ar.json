@@ -1136,6 +1136,7 @@
 				"unexpected_index_ledger": "حدث خطأ ما أثناء تحميل معرف السجل المرتبط بحاوية الفهرس.",
 				"invalid_ledger_id": "معرف السجل غير مرتبط بحاوية الفهرس.",
 				"missing_ledger_id": "معرف السجل مفقود. هل قدمت قيمة؟",
+				"missing_canister_id": "",
 				"missing_contract_address": "عنوان العقد مفقود. هل قدمت قيمة؟",
 				"missing_token_address": "عنوان التوكن مفقود. هل قدمت قيمة؟",
 				"no_network": "لم يتم تحديد أي شبكة. هذا غير متوقع."

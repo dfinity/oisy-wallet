@@ -1136,6 +1136,7 @@
 				"unexpected_index_ledger": "Qualcosa è andato storto durante il caricamento dell'ID Ledger relativo al canister Index.",
 				"invalid_ledger_id": "L'ID Ledger non è correlato al canister Index.",
 				"missing_ledger_id": "L'ID Ledger è mancante. Hai fornito un valore?",
+				"missing_canister_id": "",
 				"missing_contract_address": "L'indirizzo del contratto è mancante. Hai fornito un valore?",
 				"missing_token_address": "L'indirizzo del token è mancante. Hai fornito un valore?",
 				"no_network": "Nessuna rete selezionata. Questo è inatteso."

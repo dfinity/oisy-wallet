@@ -1136,6 +1136,7 @@
 				"unexpected_index_ledger": "Đã xảy ra lỗi trong khi tải ID ledger liên quan đến canister index.",
 				"invalid_ledger_id": "ID ledger không liên quan đến canister index.",
 				"missing_ledger_id": "Thiếu ID ledger. Bạn đã cung cấp giá trị chưa?",
+				"missing_canister_id": "",
 				"missing_contract_address": "Thiếu địa chỉ hợp đồng. Bạn đã cung cấp giá trị chưa?",
 				"missing_token_address": "Thiếu địa chỉ token. Bạn đã cung cấp giá trị chưa?",
 				"no_network": "Chưa chọn mạng. Điều này không mong muốn."

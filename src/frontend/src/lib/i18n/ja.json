@@ -1136,6 +1136,7 @@
 				"unexpected_index_ledger": "インデックスキャニスターに関連する台帳IDの読み込み中に予期しないエラーが発生しました。",
 				"invalid_ledger_id": "台帳IDがインデックスキャニスターに関連していません。",
 				"missing_ledger_id": "台帳IDがありません。値を入力しましたか？",
+				"missing_canister_id": "",
 				"missing_contract_address": "コントラクトアドレスがありません。値を入力しましたか？",
 				"missing_token_address": "トークンアドレスがありません。値を入力しましたか？",
 				"no_network": "ネットワークが選択されていません。これは予期しないエラーです。"

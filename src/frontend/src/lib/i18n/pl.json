@@ -1136,6 +1136,7 @@
 				"unexpected_index_ledger": "Coś poszło nie tak podczas ładowania identyfikatora rejestru związanego z kanistrem indeksu.",
 				"invalid_ledger_id": "Identyfikator rejestru nie jest powiązany z kanistrem indeksu.",
 				"missing_ledger_id": "Brakuje identyfikatora rejestru. Czy podałeś wartość?",
+				"missing_canister_id": "",
 				"missing_contract_address": "Brakuje adresu kontraktu. Czy podałeś wartość?",
 				"missing_token_address": "Brakuje adresu tokena. Czy podałeś wartość?",
 				"no_network": "Nie wybrano sieci. To nieoczekiwane."

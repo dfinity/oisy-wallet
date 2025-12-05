@@ -1136,6 +1136,7 @@
 				"unexpected_index_ledger": "加载与索引 Canister 相关的账本 ID 时出错。",
 				"invalid_ledger_id": "账本 ID 与索引 Canister 无关。",
 				"missing_ledger_id": "缺少账本 ID。您是否填写了值？",
+				"missing_canister_id": "",
 				"missing_contract_address": "缺少合约地址。您是否填写了值？",
 				"missing_token_address": "缺少代币地址。您是否填写了值？",
 				"no_network": "未选择网络。此为异常情况。"
