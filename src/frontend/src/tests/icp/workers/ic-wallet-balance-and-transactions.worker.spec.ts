@@ -533,7 +533,6 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 						created_at_time: []
 					}
 				],
-				fee_collector: [],
 				timestamp: 1n
 			}
 		};
