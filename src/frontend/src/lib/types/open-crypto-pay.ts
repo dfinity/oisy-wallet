@@ -63,7 +63,7 @@ export interface OpenCryptoPayResponse {
 	displayQr?: boolean;
 	recipient?: Recipient;
 	route?: string;
-	quote: Quote;
+	quote?: Quote;
 }
 
 export interface PaymentMethodData {
