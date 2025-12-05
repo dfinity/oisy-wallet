@@ -1138,6 +1138,7 @@
 				"unexpected_index_ledger": "Quelque chose s'est mal passé lors du chargement de l'ID du registre lié au canister d'index.",
 				"invalid_ledger_id": "L'ID du registre n'est pas lié au canister d'index.",
 				"missing_ledger_id": "L'ID du registre est manquant. Avez-vous fourni une valeur ?",
+				"missing_canister_id": "",
 				"missing_contract_address": "L'adresse du contrat est manquante. Avez-vous fourni une valeur ?",
 				"missing_token_address": "L'adresse du token est manquante. Avez-vous fourni une valeur ?",
 				"no_network": "Aucun réseau n'est sélectionné. Ceci est inattendu."
