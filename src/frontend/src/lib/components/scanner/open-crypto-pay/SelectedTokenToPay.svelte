@@ -11,6 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import BottomSheetTokensList from '$lib/components/scanner/open-crypto-pay/BottomSheetTokensList.svelte';
 
 	interface Props {
 		onSelectToken: () => void;
@@ -85,7 +86,6 @@
 			colorStyle="secondary-light"
 			fullWidth
 			onclick={() => {
-				onSelectToken();
 				// Set flag to open BottomSheet (mobile only)
 				isTokenSelecting = true;
 			}}>{selectButtonText}</Button
@@ -98,3 +98,10 @@
 		>
 	</Responsive>
 </div>
+
+{#if isTokenSelecting}
+	<BottomSheetTokensList
+		onClose={() => (isTokenSelecting = false)}
+		bind:visible={isTokenSelecting}
+	/>
+{/if}
