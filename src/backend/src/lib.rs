@@ -166,8 +166,7 @@ fn set_config(arg: InitArg) {
     mutate_state(|state| {
         state
             .config
-            .set(Some(Candid(config)))
-            .expect("setting config should succeed");
+            .set(Some(Candid(config)));
     });
 }
 
