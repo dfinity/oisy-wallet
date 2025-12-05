@@ -92,6 +92,7 @@
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsManageTokens.REVIEW}
 			<AddTokenReviewByNetwork
+				{isNftsPage}
 				modalNext={() => modal?.set(3)}
 				{network}
 				onBack={modal.back}

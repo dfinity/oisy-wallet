@@ -1118,6 +1118,7 @@
 				"review": "Xem lại",
 				"saving": "Đang lưu...",
 				"updating": "Đang cập nhật danh sách token",
+				"canister_id": "",
 				"ledger_canister_id": "ID Canister ledger",
 				"index_canister_id": "ID Canister index",
 				"minter_canister_id": "ID Canister minter",
@@ -1138,6 +1139,7 @@
 				"unexpected_index_ledger": "Đã xảy ra lỗi trong khi tải ID ledger liên quan đến canister index.",
 				"invalid_ledger_id": "ID ledger không liên quan đến canister index.",
 				"missing_ledger_id": "Thiếu ID ledger. Bạn đã cung cấp giá trị chưa?",
+				"missing_canister_id": "",
 				"missing_contract_address": "Thiếu địa chỉ hợp đồng. Bạn đã cung cấp giá trị chưa?",
 				"missing_token_address": "Thiếu địa chỉ token. Bạn đã cung cấp giá trị chưa?",
 				"no_network": "Chưa chọn mạng. Điều này không mong muốn."
@@ -1853,6 +1855,7 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",

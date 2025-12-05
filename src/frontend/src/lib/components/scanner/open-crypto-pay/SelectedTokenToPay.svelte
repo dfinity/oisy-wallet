@@ -3,6 +3,7 @@
 	import { getContext } from 'svelte';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import OpenCryptoPayTokenAmount from '$lib/components/scanner/OpenCryptoPayTokenAmount.svelte';
+	import BottomSheetTokensList from '$lib/components/scanner/open-crypto-pay/BottomSheetTokensList.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -85,7 +86,6 @@
 			colorStyle="secondary-light"
 			fullWidth
 			onclick={() => {
-				onSelectToken();
 				// Set flag to open BottomSheet (mobile only)
 				isTokenSelecting = true;
 			}}>{selectButtonText}</Button
@@ -98,3 +98,10 @@
 		>
 	</Responsive>
 </div>
+
+{#if isTokenSelecting}
+	<BottomSheetTokensList
+		onClose={() => (isTokenSelecting = false)}
+		bind:visible={isTokenSelecting}
+	/>
+{/if}

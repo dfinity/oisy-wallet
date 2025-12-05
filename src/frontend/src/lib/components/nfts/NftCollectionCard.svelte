@@ -20,7 +20,7 @@
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { nftsUrl } from '$lib/utils/nav.utils';
-	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
+	import { getNftDisplayImageUrl, getNftDisplayMediaStatus } from '$lib/utils/nft.utils';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
@@ -42,7 +42,8 @@
 	);
 
 	const previewNft = $derived(
-		collection.nfts.find((nft) => nft.mediaStatus !== NftMediaStatusEnum.OK) ?? collection.nfts[0]
+		collection.nfts.find((nft) => getNftDisplayMediaStatus(nft) !== NftMediaStatusEnum.OK) ??
+			collection.nfts[0]
 	);
 
 	const onClick = () => {
