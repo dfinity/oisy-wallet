@@ -74,7 +74,7 @@ export const stakeProvidersConfig: Record<StakeProvider, StakeProviderConfig> = 
 		url: 'https://app.gldt.org/earn/',
 		pageDescriptionKey: 'stake.text.gldt_stake_page_description',
 		card: {
-			title: 'earning.providers.goldDaoStaking.cardTitle',
+			titles: ['earning.cards.gldt.title1', 'earning.cards.gldt.title2'],
 			action: () => goto(AppPath.EarnGold)
 		}
 	}

@@ -19,7 +19,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
-	import { getNftDisplayId } from '$lib/utils/nft.utils';
+	import { getNftDisplayId, getNftDisplayImageUrl } from '$lib/utils/nft.utils';
 
 	interface Props {
 		nft: Nft;
@@ -97,7 +97,7 @@
 		>
 			<div class="h-full w-full">
 				<BgImg
-					imageUrl={nft?.imageUrl}
+					imageUrl={getNftDisplayImageUrl(nft)}
 					shadow="inset"
 					size="cover"
 					styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
