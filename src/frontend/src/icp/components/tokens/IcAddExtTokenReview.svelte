@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { blur, fade } from 'svelte/transition';
+	import { extTokens } from '$icp/derived/ext.derived';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import {
 		loadAndAssertAddCustomToken,
@@ -20,7 +21,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {extTokens} from "$icp/derived/ext.derived";
 
 	interface Props {
 		extCanisterId?: string;
@@ -29,12 +29,7 @@
 		onSave: () => void;
 	}
 
-	let {
-		extCanisterId,
-		metadata = $bindable(),
-		onBack,
-		onSave
-	}: Props = $props();
+	let { extCanisterId, metadata = $bindable(), onBack, onSave }: Props = $props();
 
 	let invalid = $derived(isNullish(metadata));
 
@@ -89,10 +84,7 @@
 	</div>
 
 	{#if nonNullish(metadata)}
-		{@const {
-			network: safeNetwork,
-			ledgerCanisterId: safeLedgerCanisterId,
-		} = metadata.token}
+		{@const { network: safeNetwork, ledgerCanisterId: safeLedgerCanisterId } = metadata.token}
 		<div in:fade>
 			<Value element="div" ref="network">
 				{#snippet label()}
@@ -109,8 +101,6 @@
 					{safeLedgerCanisterId}
 				{/snippet}
 			</Value>
-
-
 
 			<AddTokenWarning />
 		</div>

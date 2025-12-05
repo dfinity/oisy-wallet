@@ -16,5 +16,9 @@
 	<span class="text-brand-primary-alt">*</span>
 </label>
 <div>
-	<InputText name="canisterId" placeholder="_____-_____-_____-_____-cai" bind:value={extCanisterId} />
+	<InputText
+		name="canisterId"
+		placeholder="_____-_____-_____-_____-cai"
+		bind:value={extCanisterId}
+	/>
 </div>
