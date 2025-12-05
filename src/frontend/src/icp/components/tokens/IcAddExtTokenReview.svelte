@@ -34,8 +34,8 @@
 
 	const back = () => onBack();
 
-	onMount(async () => {
-		const { result, data } = await loadAndAssertAddCustomToken({
+	onMount(() => {
+		const { result, data } = loadAndAssertAddCustomToken({
 			canisterId: extCanisterId,
 			identity: $authIdentity,
 			extTokens: $extTokens
