@@ -1067,12 +1067,13 @@ describe('tokens.utils', () => {
 	describe('filterTokensByNft', () => {
 		const nft1 = { ...mockValidErc721Token, name: 'Cool Nft' };
 		const nft2 = { ...mockValidErc1155Token, name: 'Even cooler Nft' };
-		const tokens = [ETHEREUM_TOKEN, SOLANA_TOKEN, BONK_TOKEN, nft1, nft2];
+		const nft3 = { ...mockValidExtV2Token, name: 'Another cool Nft' };
+		const tokens = [ETHEREUM_TOKEN, SOLANA_TOKEN, BONK_TOKEN, nft1, nft2, nft3];
 
 		it('should return all tokens when no filter is provided', () => {
 			const result = filterTokensByNft({ tokens });
 
-			expect(result).toHaveLength(5);
+			expect(result).toHaveLength(6);
 			expect(result).toEqual(tokens);
 		});
 
@@ -1086,8 +1087,8 @@ describe('tokens.utils', () => {
 		it('should return all Nfts when filterNfts is true', () => {
 			const result = filterTokensByNft({ tokens, filterNfts: true });
 
-			expect(result).toHaveLength(2);
-			expect(result).toEqual([nft1, nft2]);
+			expect(result).toHaveLength(3);
+			expect(result).toEqual([nft1, nft2, nft3]);
 		});
 
 		it('should return an empty list if tokens is empty', () => {

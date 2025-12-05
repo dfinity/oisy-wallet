@@ -514,6 +514,6 @@ export const filterTokensByNft = ({
 	isNullish(filterNfts)
 		? tokens
 		: tokens.filter((t) => {
-				const isNft = isTokenErc1155(t) || isTokenErc721(t);
+				const isNft = isTokenErc1155(t) || isTokenErc721(t) || isTokenExtV2(t);
 				return filterNfts ? isNft : !isNft;
 			});
