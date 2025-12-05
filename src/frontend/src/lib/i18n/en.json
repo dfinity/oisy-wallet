@@ -919,6 +919,7 @@
 			"enter_or_paste_code": "Enter or paste code",
 			"scan": "Scan",
 			"pay": "Pay",
+			"pay_amount": "Pay $amount",
 			"go_to_assets": "Go to Assets",
 			"supported_tokens": "OpenCrypto pay supports the following tokens: BTC, ETH, WBTC, XMR, dEURO, ZCHF, USDT, USDC, DAI, etc...",
 			"no_supported_tokens": "You have no supported tokens",

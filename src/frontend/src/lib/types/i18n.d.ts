@@ -713,6 +713,7 @@ interface I18nScanner {
 		enter_or_paste_code: string;
 		scan: string;
 		pay: string;
+		pay_amount: string;
 		go_to_assets: string;
 		supported_tokens: string;
 		no_supported_tokens: string;
