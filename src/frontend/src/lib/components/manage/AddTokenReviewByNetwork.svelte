@@ -18,8 +18,10 @@
 	import type { Erc721Metadata } from '$eth/types/erc721';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import IcAddExtTokenReview from '$icp/components/tokens/IcAddExtTokenReview.svelte';
 	import IcAddIcrcTokenReview from '$icp/components/tokens/IcAddIcrcTokenReview.svelte';
-	import type { ValidateTokenData } from '$icp/services/ic-add-custom-tokens.service';
+	import type { ValidateTokenData as ValidateExtTokenData } from '$icp/services/ext-add-custom-tokens.service';
+	import type { ValidateTokenData as ValidateIcrcTokenData } from '$icp/services/ic-add-custom-tokens.service';
 	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import { TRACK_UNRECOGNISED_ERC_INTERFACE } from '$lib/constants/analytics.constants';
@@ -53,9 +55,19 @@
 		onSuccess: () => void;
 		onError: () => void;
 		onBack: () => void;
+		isNftsPage?: boolean;
 	}
 
-	let { network, tokenData, progress, modalNext, onSuccess, onError, onBack }: Props = $props();
+	let {
+		network,
+		tokenData,
+		progress,
+		modalNext,
+		onSuccess,
+		onError,
+		onBack,
+		isNftsPage = false
+	}: Props = $props();
 
 	const addIcrcToken = async () => {
 		if (isNullish(ledgerCanisterId)) {
@@ -233,24 +245,35 @@
 			identity: $authIdentity
 		});
 
-	let icrcMetadata: ValidateTokenData | undefined = $state();
+	let icrcMetadata: ValidateIcrcTokenData | undefined = $state();
+
+	let extMetadata: ValidateExtTokenData | undefined = $state();
 
 	let ethMetadata: Erc20Metadata | Erc721Metadata | undefined = $state();
 
 	let splMetadata: TokenMetadata | undefined = $state();
 
-	let { ledgerCanisterId, indexCanisterId, ethContractAddress, splTokenAddress } =
+	let { ledgerCanisterId, indexCanisterId, extCanisterId, ethContractAddress, splTokenAddress } =
 		$derived(tokenData);
 </script>
 
 {#if isNetworkIdICP(network?.id)}
-	<IcAddIcrcTokenReview
-		{indexCanisterId}
-		{ledgerCanisterId}
-		{onBack}
-		onSave={addIcrcToken}
-		bind:metadata={icrcMetadata}
-	/>
+	{#if isNftsPage}
+		<IcAddExtTokenReview
+			{extCanisterId}
+			{onBack}
+			onSave={addIcrcToken}
+			bind:metadata={extMetadata}
+		/>
+	{:else}
+		<IcAddIcrcTokenReview
+			{indexCanisterId}
+			{ledgerCanisterId}
+			{onBack}
+			onSave={addIcrcToken}
+			bind:metadata={icrcMetadata}
+		/>
+	{/if}
 {:else if nonNullish(network) && (isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id))}
 	<EthAddTokenReview
 		contractAddress={ethContractAddress}
