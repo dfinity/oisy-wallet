@@ -291,6 +291,8 @@
 	let indexCanisterId: string | undefined = $state();
 	let icrcMetadata: ValidateTokenData | undefined = $state();
 
+	let extCanisterId: string | undefined = $state();
+
 	let ethContractAddress: string | undefined = $state();
 	let ethMetadata: Erc20Metadata | Erc721Metadata | undefined = $state();
 
@@ -301,7 +303,8 @@
 	let tokenData: Partial<AddTokenData> = $state({});
 
 	$effect(() => {
-		({ ledgerCanisterId, indexCanisterId, ethContractAddress, splTokenAddress } = tokenData);
+		({ ledgerCanisterId, indexCanisterId, extCanisterId, ethContractAddress, splTokenAddress } =
+			tokenData);
 	});
 </script>
 

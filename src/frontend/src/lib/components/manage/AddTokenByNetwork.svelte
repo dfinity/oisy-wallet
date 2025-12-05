@@ -3,6 +3,7 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
+	import IcAddExtTokenForm from '$icp/components/tokens/IcAddExtTokenForm.svelte';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
@@ -54,20 +55,22 @@
 
 	let isSolanaNetwork = $derived(isNetworkIdSolana(network?.id));
 
-	let { ledgerCanisterId, indexCanisterId, ethContractAddress, splTokenAddress } =
+	let { ledgerCanisterId, indexCanisterId, extCanisterId, ethContractAddress, splTokenAddress } =
 		$derived(tokenData);
 
 	$effect(() => {
 		// Since we persist the values of relevant variables when switching networks, this ensures that
 		// only the data related to the selected network is passed.
 		if (isIcpNetwork) {
-			tokenData = {
-				ledgerCanisterId,
-				indexCanisterId:
-					nonNullish(indexCanisterId) && notEmptyString(indexCanisterId)
-						? indexCanisterId
-						: undefined
-			};
+			tokenData = isNftsPage
+				? { extCanisterId }
+				: {
+						ledgerCanisterId,
+						indexCanisterId:
+							nonNullish(indexCanisterId) && notEmptyString(indexCanisterId)
+								? indexCanisterId
+								: undefined
+					};
 		} else if (isEthereumNetwork || isEvmNetwork) {
 			tokenData = { ethContractAddress };
 		} else if (isSolanaNetwork) {
@@ -81,11 +84,13 @@
 
 	let invalidIc = $derived(isNullishOrEmpty(ledgerCanisterId));
 
+	let invalidExt = $derived(isNullishOrEmpty(extCanisterId));
+
 	let invalidSpl = $derived(isNullishOrEmpty(splTokenAddress));
 
 	let invalid = $derived(
 		isIcpNetwork
-			? invalidIc
+			? invalidIc && invalidExt
 			: isEthereumNetwork || isEvmNetwork
 				? invalidEth
 				: isSolanaNetwork
@@ -110,7 +115,11 @@
 		{/if}
 
 		{#if isIcpNetwork}
-			<IcAddTokenForm bind:ledgerCanisterId bind:indexCanisterId />
+			{#if isNftsPage}
+				<IcAddExtTokenForm bind:extCanisterId />
+			{:else}
+				<IcAddTokenForm bind:ledgerCanisterId bind:indexCanisterId />
+			{/if}
 		{:else if isEthereumNetwork || isEvmNetwork}
 			<EthAddTokenForm bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}
