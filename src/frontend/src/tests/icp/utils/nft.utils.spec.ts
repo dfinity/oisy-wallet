@@ -30,7 +30,10 @@ describe('nft.utils', () => {
 				name: `${mockValidExtV2Token.name} #${mockIndex + 1}`,
 				imageUrl: `https://${mockValidExtV2Token.canisterId}.raw.icp0.io/?index=123`,
 				thumbnailUrl: `https://${mockValidExtV2Token.canisterId}.raw.icp0.io/?index=123&type=thumbnail`,
-				mediaStatus: NftMediaStatusEnum.OK,
+				mediaStatus: {
+					image: NftMediaStatusEnum.OK,
+					thumbnail: NftMediaStatusEnum.OK
+				},
 				collection: {
 					...rest,
 					address: mockValidExtV2Token.canisterId
