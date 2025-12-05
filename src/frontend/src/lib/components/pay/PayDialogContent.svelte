@@ -6,7 +6,7 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
-<div class="flex flex-col gap-2 mt-2 mb-0">
+<div class="mt-2 mb-0 flex flex-col gap-2">
 	<p class="text-sm sm:text-base">
 		<Html text={replaceOisyPlaceholders($i18n.pay.text.dialog_description)} />
 	</p>
