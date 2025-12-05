@@ -86,7 +86,7 @@
 		<div class="text-sm">{$i18n.stake.text.earning_potential}</div>
 
 		<div
-			class="my-1 text-lg font-bold sm:text-xl"
+			class="my-1 text-lg font-bold whitespace-nowrap sm:text-xl"
 			class:text-brand-primary-alt={$enabledMainnetFungibleTokensUsdBalance > 0}
 			class:text-tertiary={$enabledMainnetFungibleTokensUsdBalance === 0}
 		>
