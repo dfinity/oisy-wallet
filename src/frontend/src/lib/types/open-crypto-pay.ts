@@ -92,9 +92,3 @@ export interface PayableTokenWithConvertedAmount extends PayableTokenWithFees {
 	feeInUSD: number;
 	sumInUSD: number;
 }
-
-export interface EthereumPaymentRequest {
-	address: string;
-	chainId: number;
-	value: bigint;
-}
