@@ -11,6 +11,7 @@ import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import {
 	getNftDisplayId,
 	getNftDisplayImageUrl,
+	getNftDisplayMediaStatus,
 	getNftIdentifier,
 	getTokensByNetwork,
 	isTokenFungible,
@@ -142,6 +143,22 @@ describe('nft.utils', () => {
 
 		it('should fallback to the image URL if thumbnail is not defined', () => {
 			expect(getNftDisplayImageUrl(mockValidErc721Nft)).toBe(mockValidErc721Nft.imageUrl);
+		});
+	});
+
+	describe('getNftDisplayMediaStatus', () => {
+		const mockThumbnailUrl = 'http://example.com/thumbnail.png';
+
+		it('should use the thumbnail status if it if defined', () => {
+			expect(
+				getNftDisplayMediaStatus({ ...mockValidErc721Nft, thumbnailUrl: mockThumbnailUrl })
+			).toBe(mockValidErc721Nft.mediaStatus.thumbnail);
+		});
+
+		it('should fallback to the image status if thumbnail is not defined', () => {
+			expect(getNftDisplayMediaStatus(mockValidErc721Nft)).toBe(
+				mockValidErc721Nft.mediaStatus.image
+			);
 		});
 	});
 });

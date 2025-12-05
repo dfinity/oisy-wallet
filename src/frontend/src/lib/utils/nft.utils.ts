@@ -46,5 +46,14 @@ export const getNftDisplayId = (nft: Nft): string => nft.oisyId ?? nft.id;
 export const getNftDisplayImageUrl = (nft: Nft): string | undefined =>
 	nft.thumbnailUrl ?? nft.imageUrl;
 
+/**
+ * Gets the media status to display for the given NFT.
+ *
+ * If the NFT has a thumbnail URL, the thumbnail status is returned.
+ * Otherwise, the image status is returned.
+ *
+ * @param nft - the NFT for which to get the display media status
+ * @returns the thumbnail status if defined, otherwise the image status
+ */
 export const getNftDisplayMediaStatus = (nft: Nft): NftMediaStatusEnum =>
 	nonNullish(nft.thumbnailUrl) ? nft.mediaStatus.thumbnail : nft.mediaStatus.image;
