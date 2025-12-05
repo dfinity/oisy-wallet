@@ -46,7 +46,10 @@ export const NftSchema = z.object({
 	balance: z.number().optional(),
 	collection: NftCollectionSchema,
 	acquiredAt: z.date().optional(),
-	mediaStatus: z.enum(NftMediaStatusEnum),
+	mediaStatus: {
+		image: z.enum(NftMediaStatusEnum),
+		thumbnail: z.enum(NftMediaStatusEnum)
+	},
 	...NftMetadataSchema.shape,
 	...NftAppearanceSchema.shape
 });
