@@ -1472,6 +1472,7 @@ interface I18nStake {
 		unsupported_token_staking: string;
 		provider: string;
 		earning_potential: string;
+		earning_potential_hint: string;
 		active_earning: string;
 		active_earning_per_year: string;
 		unproductive_assets: string;

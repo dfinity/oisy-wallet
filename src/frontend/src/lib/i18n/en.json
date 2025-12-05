@@ -1853,6 +1853,7 @@
 			"unsupported_token_staking": "Staking for the selected token is not supported.",
 			"provider": "Staking terms provided by $provider",
 			"earning_potential": "Missing earning potential",
+			"earning_potential_hint": "Based on the value of your not invested assets and the highest APY of the available earning opportunities.",
 			"active_earning": "Actively earning",
 			"active_earning_per_year": "$amount/year",
 			"unproductive_assets": "Unproductive assets",
