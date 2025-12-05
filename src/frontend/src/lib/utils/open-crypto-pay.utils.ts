@@ -1,10 +1,13 @@
+import { EthAddressObjectSchema } from '$eth/schema/address.schema';
 import { enrichEthEvmToken } from '$eth/utils/token.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
 import type {
 	Address,
+	EthereumPaymentRequest,
 	OpenCryptoPayResponse,
 	PayableToken,
 	PayableTokenWithConvertedAmount,
@@ -13,6 +16,7 @@ import type {
 	PrepareTokensParams
 } from '$lib/types/open-crypto-pay';
 import type { Token } from '$lib/types/token';
+import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
@@ -216,3 +220,71 @@ export const enrichTokensWithUsdAndBalance = ({
 
 		return acc;
 	}, []);
+
+/**
+ * Parses EIP-681 Ethereum URI with validation
+ * Format: ethereum:<address>[@<chainId>][?value=<amount>&...]
+ */
+export const parseEthereumUri = (uri: string): EthereumPaymentRequest | undefined => {
+	try {
+		// URI must start with the Ethereum scheme
+		if (!uri.startsWith('ethereum:')) {
+			return;
+		}
+
+		// Remove "ethereum:" prefix
+		const withoutScheme = uri.slice(9);
+
+		if (isNullishOrEmpty(withoutScheme)) {
+			return;
+		}
+
+		const [addressPart, queryString] = withoutScheme.split('?');
+		const [address, chainIdString] = addressPart.split('@');
+
+		// Validate Ethereum address format
+		const { success: isValidEthereumAddress } = EthAddressObjectSchema.safeParse(address);
+
+		if (!isValidEthereumAddress) {
+			return;
+		}
+
+		if (isNullishOrEmpty(chainIdString)) {
+			return;
+		}
+
+		const chainId = parseInt(chainIdString, 10);
+
+		if (isNaN(chainId) || chainId < 0) {
+			return;
+		}
+
+		if (isNullishOrEmpty(queryString)) {
+			return;
+		}
+
+		const params = new URLSearchParams(queryString);
+		const valueParam = params.get('value');
+
+		if (isNullishOrEmpty(valueParam)) {
+			return;
+		}
+
+		// Ensure value contains only digits (prevents BigInt errors)
+		if (!/^\d+$/.test(valueParam)) {
+			return;
+		}
+
+		// Reject negative values (should never occur but safe to check)
+		const value = BigInt(valueParam);
+
+		if (value < ZERO) {
+			return;
+		}
+
+		return { address, chainId, value };
+	} catch (err: unknown) {
+		// Future improvement: add error event
+		console.warn('Error parsing Ethereum URI:', err);
+	}
+};

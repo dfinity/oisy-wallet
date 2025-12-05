@@ -63,7 +63,7 @@ export interface OpenCryptoPayResponse {
 	displayQr?: boolean;
 	recipient?: Recipient;
 	route?: string;
-	quote?: Quote;
+	quote: Quote;
 }
 
 export interface PaymentMethodData {
@@ -91,4 +91,10 @@ export interface PayableTokenWithConvertedAmount extends PayableTokenWithFees {
 	amountInUSD: number;
 	feeInUSD: number;
 	sumInUSD: number;
+}
+
+export interface EthereumPaymentRequest {
+	address: string;
+	chainId: number;
+	value: bigint;
 }
