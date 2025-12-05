@@ -53,6 +53,10 @@ export const NFT_PLACEHOLDER_UNSUPPORTED = 'nft-placeholder-unsupported';
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
 
+export const PAY_DIALOG = 'pay-dialog';
+export const PAY_DIALOG_PAY_BUTTON = 'pay-dialog-pay-button';
+export const PAY_DIALOG_BANNER = 'pay-dialog-banner';
+
 export const RECEIVE_TOKENS_MODAL_OPEN_BUTTON = 'receive-tokens-modal-open-button';
 export const RECEIVE_TOKENS_MODAL_DONE_BUTTON = 'receive-tokens-modal-done-button';
 export const RECEIVE_TOKENS_MODAL = 'receive-tokens-modal';
@@ -181,6 +185,10 @@ export const REWARDS_STATUS_BUTTON = 'reward-status-button';
 export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
 export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
 export const REWARDS_NETWORK_MULTIPLIER_IMAGE = 'reward-network-multiplier-image';
+
+export const EARNING_CARD = 'earning-card';
+export const EARNING_NO_POSITION_PLACEHOLDER = 'earning-no-position-placeholder';
+export const EARNING_GOTO_BUTTON = 'earning-goto-button';
 
 export const WELCOME_MODAL_IMAGE_BANNER = 'welcome-modal-image-banner';
 export const WELCOME_MODAL_LEARN_MORE_ANCHOR = 'welcome-modal-learn-more-anchor';

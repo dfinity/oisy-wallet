@@ -13,8 +13,13 @@ export const NftMetadataSchema = z.object({
 	name: z.string().optional(),
 	id: NftIdSchema,
 	imageUrl: z.url().optional(),
+	thumbnailUrl: z.url().optional(),
 	description: z.string().optional(),
 	attributes: z.array(NftAttributeSchema).optional()
+});
+
+export const NftAppearanceSchema = z.object({
+	oisyId: NftIdSchema.optional()
 });
 
 export enum NftMediaStatusEnum {
@@ -39,10 +44,11 @@ export const NftCollectionSchema = z.object({
 
 export const NftSchema = z.object({
 	balance: z.number().optional(),
-	...NftMetadataSchema.shape,
 	collection: NftCollectionSchema,
 	acquiredAt: z.date().optional(),
-	mediaStatus: z.enum(NftMediaStatusEnum)
+	mediaStatus: z.enum(NftMediaStatusEnum),
+	...NftMetadataSchema.shape,
+	...NftAppearanceSchema.shape
 });
 
 export const OwnedContractSchema = z.object({

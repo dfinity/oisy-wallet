@@ -26,8 +26,10 @@ describe('nft.utils', () => {
 
 			expect(result).toStrictEqual({
 				id: result.id,
+				oisyId: (mockIndex + 1).toString(),
 				name: `${mockValidExtV2Token.name} #${mockIndex + 1}`,
 				imageUrl: `https://${mockValidExtV2Token.canisterId}.raw.icp0.io/?index=123`,
+				thumbnailUrl: `https://${mockValidExtV2Token.canisterId}.raw.icp0.io/?index=123&type=thumbnail`,
 				mediaStatus: NftMediaStatusEnum.OK,
 				collection: {
 					...rest,

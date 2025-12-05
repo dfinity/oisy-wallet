@@ -918,7 +918,16 @@
 			"url_or_code": "",
 			"enter_or_paste_code": "",
 			"scan": "",
-			"pay": ""
+			"pay": "",
+			"pay_amount": "",
+			"go_to_assets": "",
+			"supported_tokens": "",
+			"no_supported_tokens": "",
+			"pay_with": "",
+			"select_token": "",
+			"select_different_token": "",
+			"tokens_available": "",
+			"select_token_to_pay": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
@@ -1039,6 +1048,17 @@
 		},
 		"onramper": {
 			"title": "通过 Onramper 购买"
+		}
+	},
+	"pay": {
+		"text": {
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": ""
+		},
+		"alt": {
+			"pay": ""
 		}
 	},
 	"tokens": {
@@ -1781,11 +1801,13 @@
 			"tab_title": "",
 			"earning_opportunities": "",
 			"header_title": "",
-			"header_description": ""
+			"header_description": "",
+			"go_to_earn": ""
 		},
 		"cards": {
 			"gldt": {
-				"title": "",
+				"title1": "",
+				"title2": "",
 				"description": "",
 				"action": ""
 			},
@@ -1804,11 +1826,15 @@
 		},
 		"terms": {
 			"flexible": ""
+		},
+		"providers": {
+			"goldDaoStaking": {
+				"cardTitle": ""
+			}
 		}
 	},
 	"stake": {
 		"text": {
-			"stake_page_title": "",
 			"gldt_stake_page_description": "",
 			"stake": "",
 			"stake_now": "",
@@ -1827,6 +1853,8 @@
 			"earning_potential": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"unproductive_assets": "",
+			"invested_assets": "",
 			"visit_provider": "",
 			"current_apy_label": "",
 			"stake_review_subtitle": "",
@@ -1855,11 +1883,20 @@
 			"reward_claimed": "",
 			"staked": "",
 			"unstaked": "",
-			"title_empty": "",
-			"description_empty": ""
+			"title_empty_1": "",
+			"title_empty_2_usd": "",
+			"title_empty_2_apy": "",
+			"title_empty_3": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": "",
+			"gldt_stake_carousel_slide_title": "",
+			"gldt_stake_carousel_slide_cta": ""
 		},
 		"error": {
-			"unexpected_error_on_withdraw": ""
+			"unexpected_error_on_withdraw": "",
+			"unexpected_error_on_unstake": "",
+			"dissolvement_limit_reached": ""
 		},
 		"terms": {
 			"gldt": {

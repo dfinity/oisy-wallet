@@ -93,6 +93,18 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 	}
 );
 
+export const highestApyEarning: Readable<number> = derived(
+	[highestApyEarningData],
+	([$highestApyEarningData]) =>
+		!isNaN(Number($highestApyEarningData?.apy)) ? Number($highestApyEarningData?.apy) : 0
+);
+
+export const highestEarningPotentialUsd: Readable<number> = derived(
+	[highestApyEarning, enabledMainnetFungibleTokensUsdBalance],
+	([$highestApyEarning, $enabledMainnetFungibleTokensUsdBalance]) =>
+		($enabledMainnetFungibleTokensUsdBalance * $highestApyEarning) / 100
+);
+
 export const allEarningPositionsUsd: Readable<number> = derived([earningData], ([$earningData]) =>
 	Object.values($earningData).reduce<number>(
 		(acc, record) =>

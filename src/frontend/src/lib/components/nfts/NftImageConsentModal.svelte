@@ -30,6 +30,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import { getNftDisplayId } from '$lib/utils/nft.utils';
 	import { findNonFungibleToken, getNftCollectionUi } from '$lib/utils/nfts.utils';
 
 	interface Props {
@@ -216,7 +217,7 @@
 						{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 							{#if nonNullish(nft?.imageUrl)}
 								<span class="flex w-full items-start justify-end md:items-center">
-									#{nft.id} &nbsp;
+									#{getNftDisplayId(nft)} &nbsp;
 									<output class="truncate text-tertiary"
 										>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
 									>

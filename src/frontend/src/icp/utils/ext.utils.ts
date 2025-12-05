@@ -1,6 +1,8 @@
 import type { TokenIdentifier, TokenIndex } from '$declarations/ext_v2_token/ext_v2_token.did';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import type { EnvExtToken } from '$env/types/env-ext-token';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
-import type { ExtToken } from '$icp/types/ext-token';
+import type { ExtToken, ExtTokenWithoutId } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
 import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token.utils';
@@ -13,7 +15,7 @@ export const isTokenExtV2CustomToken = (token: Token): token is ExtCustomToken =
 	isTokenExtV2(token) && isTokenToggleable(token);
 
 // The minting number (that wallets, frontends, etc. usually show) is 1-based indexed, it's simply (TokenIndex + 1).
-const parseExtTokenIndex = (index: TokenIndex): TokenIndex => index + 1;
+export const parseExtTokenIndex = (index: TokenIndex): TokenIndex => index + 1;
 
 export const parseExtTokenName = ({
 	index,
@@ -61,3 +63,18 @@ export const extIndexToIdentifier = ({
 
 	return Principal.fromUint8Array(array).toText();
 };
+
+export const mapExtToken = ({
+	canisterId,
+	metadata: { name }
+}: EnvExtToken): ExtTokenWithoutId => ({
+	canisterId,
+	network: ICP_NETWORK,
+	name,
+	// Currently, we have no way to get a correct symbol metadata from the canister, so we use the name as a fallback.
+	symbol: name,
+	// For our current scopes, there is no need to have the correct decimals, since we are using this standard as NFT collections.
+	decimals: 0,
+	standard: 'extV2',
+	category: 'custom'
+});
