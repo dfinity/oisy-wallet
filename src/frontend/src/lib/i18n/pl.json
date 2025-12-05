@@ -1128,6 +1128,7 @@
 				"verifying": "Weryfikacja szczegółów tokena...",
 				"add_the_token": "Dodaj token",
 				"info": "Identyfikatory kanistrów rejestru i indeksu są zwykle dostępne na stronie internetowej projektu.",
+				"info_ext": "",
 				"info_index": "Identyfikator kanistra indeksu jest opcjonalny, ale bez niego $oisy_short nie może wyświetlić historii transakcji.",
 				"custom_tokens_not_supported": "Wybrana sieć nie obsługuje niestandardowych tokenów."
 			},

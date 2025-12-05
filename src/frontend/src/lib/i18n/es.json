@@ -1128,6 +1128,7 @@
 				"verifying": "Verificando detalles del token...",
 				"add_the_token": "Añadir el token",
 				"info": "Los ID de los canisters de Ledger e Índice suelen estar disponibles en el sitio web del proyecto.",
+				"info_ext": "",
 				"info_index": "El ID del Canister de Índice es opcional, pero sin él, $oisy_short no puede mostrar el historial de transacciones.",
 				"custom_tokens_not_supported": "La red seleccionada no admite tokens personalizados."
 			},

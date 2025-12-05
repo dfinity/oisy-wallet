@@ -1127,7 +1127,8 @@
 				"minter_canister_id_copied": "Minter Canister ID copied to clipboard.",
 				"verifying": "Verifying token details...",
 				"add_the_token": "Add the token",
-				"info": "Ledger and Index canister IDs are usually available on the project’s website. ",
+				"info": "Ledger and Index canister IDs are usually available on the project’s website.",
+				"info_ext": "Canister ID is usually available on the project’s website.",
 				"info_index": "The Index canister ID is optional, but without it, $oisy_short can’t display transaction history.",
 				"custom_tokens_not_supported": "The selected network does not support custom tokens."
 			},

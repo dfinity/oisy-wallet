@@ -907,6 +907,7 @@ interface I18nTokens {
 			verifying: string;
 			add_the_token: string;
 			info: string;
+			info_ext: string;
 			info_index: string;
 			custom_tokens_not_supported: string;
 		};

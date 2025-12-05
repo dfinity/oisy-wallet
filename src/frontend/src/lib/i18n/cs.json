@@ -1128,6 +1128,7 @@
 				"verifying": "Ověřování podrobností o tokenu...",
 				"add_the_token": "Přidat token",
 				"info": "ID kanystrů účetní knihy a indexu jsou obvykle k dispozici na webových stránkách projektu.",
+				"info_ext": "",
 				"info_index": "ID kanystru indexu je volitelné, ale bez něj nemůže $oisy_short zobrazit historii transakcí.",
 				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny."
 			},
