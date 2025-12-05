@@ -18,19 +18,13 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	let open = $state($modalPayDialogOpen);
-
 	const close = () => {
 		modalStore.close();
-
-		open = false;
 	};
 
 	const modalId = Symbol();
 
 	const openScanner = () => {
-		open = false;
-
 		modalStore.openUniversalScanner(modalId);
 	};
 </script>
@@ -72,7 +66,7 @@
 </Responsive>
 
 <Responsive down="sm">
-	<BottomSheet {footer} onClose={close} testId={PAY_DIALOG} bind:visible={open}>
+	<BottomSheet {footer} onClose={close} testId={PAY_DIALOG} visible={$modalPayDialogOpen}>
 		{#snippet content()}
 			{@render banner()}
 
