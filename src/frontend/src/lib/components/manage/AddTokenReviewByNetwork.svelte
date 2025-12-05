@@ -77,13 +77,31 @@
 			return;
 		}
 
-		await saveIcrc([
+		await saveIc([
 			{
 				...icrcMetadata,
 				enabled: true,
 				networkKey: 'Icrc',
 				ledgerCanisterId,
 				indexCanisterId
+			}
+		]);
+	};
+
+	const addExtToken = async () => {
+		if (isNullish(extCanisterId)) {
+			toastsError({
+				msg: { text: get(i18n).tokens.import.error.missing_canister_id }
+			});
+			return;
+		}
+
+		await saveIc([
+			{
+				...extMetadata,
+				enabled: true,
+				networkKey: 'ExtV2',
+				canisterId: extCanisterId
 			}
 		]);
 	};
@@ -184,7 +202,7 @@
 		]);
 	};
 
-	const saveIcrc = (tokens: SaveCustomTokenWithKey[]): Promise<void> =>
+	const saveIc = (tokens: SaveCustomTokenWithKey[]): Promise<void> =>
 		saveIcrcCustomTokens({
 			tokens,
 			progress,
@@ -259,8 +277,12 @@
 
 {#if isNetworkIdICP(network?.id)}
 	{#if isNftsPage}
-		<!-- TODO: add logic to add an EXT token -->
-		<IcAddExtTokenReview {extCanisterId} {onBack} onSave={() => {}} bind:metadata={extMetadata} />
+		<IcAddExtTokenReview
+			{extCanisterId}
+			{onBack}
+			onSave={addExtToken}
+			bind:metadata={extMetadata}
+		/>
 	{:else}
 		<IcAddIcrcTokenReview
 			{indexCanisterId}
