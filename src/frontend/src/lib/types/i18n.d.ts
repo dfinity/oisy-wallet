@@ -836,8 +836,14 @@ interface I18nBuy {
 }
 
 interface I18nPay {
-	text: { pay: string; dialog_title: string; dialog_description: string; dialog_button: string };
-	alt: { pay: string };
+	text: {
+		pay: string;
+		dialog_title: string;
+		dialog_description: string;
+		dialog_button: string;
+		where_you_can_pay: string;
+	};
+	alt: { pay: string; where_you_can_pay: string };
 }
 
 interface I18nTokens {

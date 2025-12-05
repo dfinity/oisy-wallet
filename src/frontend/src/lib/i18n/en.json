@@ -1055,10 +1055,12 @@
 			"pay": "Pay",
 			"dialog_title": "Pay with $oisy_name",
 			"dialog_description": "$oisy_name lets you pay instantly with crypto across supported chains. At any shop that uses <span class=\"font-bold\">OpenCryptoPay</span>, simply scan their payment QR code. Choose the token you want to pay with and confirm the transaction on-chain.",
-			"dialog_button": "Pay with $oisy_short"
+			"dialog_button": "Pay with $oisy_short",
+			"where_you_can_pay": "See where you can pay with $oisy_name"
 		},
 		"alt": {
-			"pay": "Dialog with information on how to pay"
+			"pay": "Dialog with information on how to pay",
+			"where_you_can_pay": "Open the OpenCryptoPay website to check where you can pay"
 		}
 	},
 	"tokens": {
