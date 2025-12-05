@@ -56,9 +56,11 @@
 					size={type === 'earnings-card' ? 210 : undefined}
 				/>
 
-				<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
-					<IconHelp size="18" />
-				</button>
+				{#if type !== 'earnings-card'}
+					<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
+						<IconHelp size="18" />
+					</button>
+				{/if}
 			{/if}
 		</div>
 
