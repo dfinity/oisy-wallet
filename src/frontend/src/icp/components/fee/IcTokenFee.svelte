@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import type { OptionIcToken } from '$icp/types/ic-token';
+	import { getTokenFee } from '$icp/utils/token.utils';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -8,7 +8,7 @@
 	const { sendToken, sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let fee = $derived(($sendToken as OptionIcToken)?.fee);
+	let fee = $derived(getTokenFee($sendToken));
 </script>
 
 <FeeDisplay

@@ -28,6 +28,10 @@
 	let menuOpen = $state(false);
 
 	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
+
+	let modalsOpen = $derived($modalWalletConnect || $modalUniversalScannerOpen);
+
+	let biggerOverlay = $derived(menuOpen || networkSwitcherOpen || helpMenuOpen || modalsOpen);
 </script>
 
 <header
@@ -38,22 +42,14 @@
 	class:1.5xl:z-10={$authSignedIn}
 	class:pb-10={$authNotSignedIn}
 	class:sm:pb-8={$authNotSignedIn}
-	class:z-3={!menuOpen &&
-		!networkSwitcherOpen &&
-		!helpMenuOpen &&
-		!$modalWalletConnect &&
-		!$modalUniversalScannerOpen}
-	class:z-4={menuOpen ||
-		networkSwitcherOpen ||
-		helpMenuOpen ||
-		$modalWalletConnect ||
-		$modalUniversalScannerOpen}
+	class:z-3={!biggerOverlay}
+	class:z-4={biggerOverlay}
 >
 	<div class="pointer-events-auto">
 		<OisyWalletLogoLink />
 	</div>
 
-	<div class="pointer-events-auto flex justify-end gap-2 md:gap-5">
+	<div class="pointer-events-auto flex justify-end gap-2 md:gap-3">
 		{#if $authSignedIn && !isRouteTransactions(page) && !nftsCollectionRoute}
 			<NetworksSwitcher bind:visible={networkSwitcherOpen} />
 		{/if}

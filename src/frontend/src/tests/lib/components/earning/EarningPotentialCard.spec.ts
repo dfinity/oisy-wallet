@@ -10,6 +10,7 @@ import * as formatUtils from '$lib/utils/format.utils';
 
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
+import en from '$tests/mocks/i18n.mock';
 import { readable } from 'svelte/store';
 
 const staticStore = <T>(v: T) => readable<T>(v);
@@ -37,14 +38,14 @@ describe('EarningPotentialCard', () => {
 	});
 
 	it('renders yearly earning amount with correct values', () => {
-		// Mock highest APY record
-		vi.spyOn(earningDerived, 'highestApyEarningData', 'get').mockReturnValue(
-			staticStore({ apy: '10', action: vi.fn() })
-		);
+		const mockTotalBalance = 1_000;
+		const mockApy = 10;
 
-		// Mock fungible USD balance
+		vi.spyOn(earningDerived, 'highestEarningPotentialUsd', 'get').mockReturnValue(
+			staticStore((mockTotalBalance * mockApy) / 100)
+		);
 		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
-			staticStore(1000)
+			staticStore(mockTotalBalance)
 		);
 
 		render(EarningPotentialCard);
@@ -53,42 +54,35 @@ describe('EarningPotentialCard', () => {
 		expect(screen.getByText(/\$100\.00/)).toBeInTheDocument();
 
 		// Summary shows "$1000.00"
-		expect(screen.getByText('$1000.00')).toBeInTheDocument();
+		expect(screen.getByText(`${en.stake.text.unproductive_assets}: $1000.00`)).toBeInTheDocument();
 	});
 
 	it('shows a plus sign when balance > 0 and APY > 0', () => {
-		vi.spyOn(earningDerived, 'highestApyEarningData', 'get').mockReturnValue(
-			staticStore({ apy: '15', action: vi.fn() })
+		const mockTotalBalance = 200;
+		const mockApy = 15;
+
+		vi.spyOn(earningDerived, 'highestEarningPotentialUsd', 'get').mockReturnValue(
+			staticStore((mockTotalBalance * mockApy) / 100)
 		);
 		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
-			staticStore(200)
+			staticStore(mockTotalBalance)
 		);
 
 		render(EarningPotentialCard);
 
-		// 200 * 15% = 30 -> "+$30.00"
-		expect(screen.getByText(/\+\$30\.00/)).toBeInTheDocument();
+		// 200 * 15% = 30 -> "+ $30.00"
+		expect(screen.getByText('+ $30.00/year')).toBeInTheDocument();
 	});
 
-	it('handles invalid APY gracefully', () => {
-		vi.spyOn(earningDerived, 'highestApyEarningData', 'get').mockReturnValue(
-			staticStore({ apy: 'abc', action: vi.fn() })
+	it('handles null earning potential gracefully', () => {
+		const mockTotalBalance = 1_000;
+		const mockApy = 0;
+
+		vi.spyOn(earningDerived, 'highestEarningPotentialUsd', 'get').mockReturnValue(
+			staticStore((mockTotalBalance * mockApy) / 100)
 		);
 		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
-			staticStore(1000)
-		);
-
-		render(EarningPotentialCard);
-
-		expect(screen.getByText(/\$0\.00/)).toBeInTheDocument();
-	});
-
-	it('handles missing highestApyEarningData gracefully', () => {
-		vi.spyOn(earningDerived, 'highestApyEarningData', 'get').mockReturnValue(
-			staticStore(undefined)
-		);
-		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
-			staticStore(1000)
+			staticStore(mockTotalBalance)
 		);
 
 		render(EarningPotentialCard);

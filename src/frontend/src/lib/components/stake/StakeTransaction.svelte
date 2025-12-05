@@ -19,9 +19,9 @@
 
 	const getToAddress = (transaction: StakingTransactionsUiWithToken): string | undefined =>
 		nonNullish(transaction.to)
-			? transaction.to.length > 0
+			? Array.isArray(transaction.to)
 				? transaction.to[0]
-				: (transaction.to as string)
+				: transaction.to
 			: undefined;
 
 	const getStatus = (transaction: StakingTransactionsUiWithToken) => {

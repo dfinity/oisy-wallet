@@ -18,6 +18,7 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { networkId } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { StakeProvider } from '$lib/types/stake';
 	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
 	import { networkUrl } from '$lib/utils/nav.utils';
@@ -43,7 +44,11 @@
 </script>
 
 <div class="flex flex-col gap-6 pb-6">
-	<StakeProviderContainer currentApy={$gldtStakeStore?.apy} provider={StakeProvider.GLDT}>
+	<StakeProviderContainer
+		currentApy={$gldtStakeStore?.apy}
+		pageTitle={`${$i18n.earning.cards.gldt.title1} - ${$i18n.earning.cards.gldt.title2}`}
+		provider={StakeProvider.GLDT}
+	>
 		{#snippet backButton()}
 			{#if EARNING_ENABLED}
 				<ButtonIcon

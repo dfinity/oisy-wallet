@@ -1,4 +1,5 @@
 import type { TokenIdentifier, TokenIndex } from '$declarations/ext_v2_token/ext_v2_token.did';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
 import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
@@ -7,10 +8,16 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { extIndexToIdentifier, isTokenExtV2, isTokenExtV2CustomToken } from '$icp/utils/ext.utils';
+import {
+	extIndexToIdentifier,
+	isTokenExtV2,
+	isTokenExtV2CustomToken,
+	mapExtToken
+} from '$icp/utils/ext.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenStandard } from '$lib/types/token';
 import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
+import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -111,6 +118,36 @@ describe('ext.utils', () => {
 			expect(() => extIndexToIdentifier({ collectionId, index })).toThrow(
 				'EXT token index -1 is out of bounds'
 			);
+		});
+	});
+
+	describe('mapExtToken', () => {
+		const mockName = 'Mock EXT Token';
+		const mockCanisterId = mockExtV2TokenCanisterId;
+		const mockParams = { canisterId: mockCanisterId, metadata: { name: mockName } };
+
+		const expected = {
+			canisterId: mockCanisterId,
+			network: ICP_NETWORK,
+			name: mockName,
+			symbol: mockName,
+			decimals: 0,
+			standard: 'extV2',
+			category: 'custom'
+		};
+
+		it('should correctly map an EXT token', () => {
+			expect(mapExtToken(mockParams)).toStrictEqual(expected);
+		});
+
+		it('should handle empty string as name', () => {
+			expect(
+				mapExtToken({ ...mockParams, metadata: { ...mockParams.metadata, name: '' } })
+			).toStrictEqual({
+				...expected,
+				name: '',
+				symbol: ''
+			});
 		});
 	});
 });

@@ -2,14 +2,12 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount, type Snippet, untrack } from 'svelte';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
-	import { infuraProviders } from '$eth/providers/infura.providers';
-	import { InfuraGasRest } from '$eth/rest/infura.rest';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import {
 		getCkErc20FeeData,
 		getErc20FeeData,
 		getEthFeeData,
-		type GetFeeData
+		getEthFeeDataWithProvider
 	} from '$eth/services/fee.services';
 	import {
 		encodeErc1155SafeTransfer,
@@ -28,7 +26,6 @@
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
-	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
@@ -85,29 +82,14 @@
 				return;
 			}
 
-			const params: GetFeeData = {
-				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress),
-				from: mapAddressStartsWith0x($ethAddress)
-			};
+			const { feeData, provider, params } = await getEthFeeDataWithProvider({
+				networkId: sendToken.network.id,
+				chainId: (sendToken.network as EthereumNetwork).chainId,
+				from: $ethAddress,
+				to: destination !== '' ? destination : $ethAddress
+			});
 
-			const { getFeeData, safeEstimateGas, estimateGas } = infuraProviders(sendToken.network.id);
-
-			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
-
-			const { getSuggestedFeeData } = new InfuraGasRest(
-				(sendToken.network as EthereumNetwork).chainId
-			);
-
-			const {
-				maxFeePerGas: suggestedMaxFeePerGas,
-				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
-			} = await getSuggestedFeeData();
-
-			const feeData = {
-				...feeDataRest,
-				maxFeePerGas: maxBigInt(maxFeePerGas, suggestedMaxFeePerGas) ?? null,
-				maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas) ?? null
-			};
+			const { safeEstimateGas, estimateGas } = provider;
 
 			const feeDataGas = getEthFeeData({
 				...params,

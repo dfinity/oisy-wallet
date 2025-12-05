@@ -21,7 +21,7 @@
 	import type { Erc721Metadata } from '$eth/types/erc721';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
+	import IcAddIcrcTokenReview from '$icp/components/tokens/IcAddIcrcTokenReview.svelte';
 	import type { ValidateTokenData } from '$icp/services/ic-add-custom-tokens.service';
 	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
@@ -318,7 +318,7 @@
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsManageTokens.REVIEW}
 			{#if isNetworkIdICP(network?.id)}
-				<IcAddTokenReview
+				<IcAddIcrcTokenReview
 					{indexCanisterId}
 					{ledgerCanisterId}
 					onBack={modal.back}

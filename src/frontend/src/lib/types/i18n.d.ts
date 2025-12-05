@@ -713,6 +713,13 @@ interface I18nScanner {
 		enter_or_paste_code: string;
 		scan: string;
 		pay: string;
+		go_to_assets: string;
+		supported_tokens: string;
+		no_supported_tokens: string;
+		pay_with: string;
+		select_token: string;
+		select_different_token: string;
+		tokens_available: string;
 	};
 	error: { code_link_is_not_valid: string };
 }
@@ -1417,9 +1424,10 @@ interface I18nEarning {
 		earning_opportunities: string;
 		header_title: string;
 		header_description: string;
+		go_to_earn: string;
 	};
 	cards: {
-		gldt: { title: string; description: string; action: string };
+		gldt: { title1: string; title2: string; description: string; action: string };
 		sprinkles: { title: string; description: string; action: string };
 	};
 	card_fields: {
@@ -1430,11 +1438,11 @@ interface I18nEarning {
 		terms: string;
 	};
 	terms: { flexible: string };
+	providers: { goldDaoStaking: { cardTitle: string } };
 }
 
 interface I18nStake {
 	text: {
-		stake_page_title: string;
 		gldt_stake_page_description: string;
 		stake: string;
 		stake_now: string;
@@ -1453,6 +1461,8 @@ interface I18nStake {
 		earning_potential: string;
 		active_earning: string;
 		active_earning_per_year: string;
+		unproductive_assets: string;
+		invested_assets: string;
 		visit_provider: string;
 		current_apy_label: string;
 		stake_review_subtitle: string;
@@ -1481,12 +1491,21 @@ interface I18nStake {
 		reward_claimed: string;
 		staked: string;
 		unstaked: string;
-		title_empty: string;
+		title_empty_1: string;
+		title_empty_2_usd: string;
+		title_empty_2_apy: string;
+		title_empty_3: string;
 		description_empty: string;
 		full_history: string;
 		recent_history: string;
+		gldt_stake_carousel_slide_title: string;
+		gldt_stake_carousel_slide_cta: string;
 	};
-	error: { unexpected_error_on_withdraw: string };
+	error: {
+		unexpected_error_on_withdraw: string;
+		unexpected_error_on_unstake: string;
+		dissolvement_limit_reached: string;
+	};
 	terms: {
 		gldt: {
 			item1_title: string;

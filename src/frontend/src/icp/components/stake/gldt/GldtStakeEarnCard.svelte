@@ -12,6 +12,7 @@
 	import GetTokenModal from '$lib/components/get-token/GetTokenModal.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import StakeModal from '$lib/components/stake/StakeModal.svelte';
+	import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
@@ -62,8 +63,6 @@
 			: 0
 	);
 
-	let getMoreTokensButtonDisabled = $derived(potentialGldtTokenBalance <= 0);
-
 	const enableStakingToken = async () => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
@@ -87,11 +86,11 @@
 		<div class="text-sm">{$i18n.stake.text.earning_potential}</div>
 
 		<div
-			class="my-1 text-lg font-bold sm:text-xl"
+			class="my-1 text-lg font-bold whitespace-nowrap sm:text-xl"
 			class:text-brand-primary-alt={$enabledMainnetFungibleTokensUsdBalance > 0}
 			class:text-tertiary={$enabledMainnetFungibleTokensUsdBalance === 0}
 		>
-			{`${$enabledMainnetFungibleTokensUsdBalance > 0 && currentApy > 0 ? '+' : ''}`}{replacePlaceholders(
+			{`${$enabledMainnetFungibleTokensUsdBalance > 0 && currentApy > 0 ? '+ ' : ''}`}{replacePlaceholders(
 				$i18n.stake.text.active_earning_per_year,
 				{
 					$amount: `${formatCurrency({
@@ -141,9 +140,9 @@
 		{#if nonNullish(gldtToken)}
 			<ButtonWithModal isOpen={$modalGetToken} onOpen={modalStore.openGetToken}>
 				{#snippet button(onclick)}
-					<Button disabled={gldtStakeButtonDisabled} fullWidth {onclick}>
+					<Button fullWidth {onclick}>
 						{replacePlaceholders(
-							getMoreTokensButtonDisabled
+							potentialGldtTokenBalance <= 0
 								? $i18n.stake.text.get_tokens
 								: $i18n.stake.text.get_tokens_with_amount,
 							{
@@ -155,11 +154,13 @@
 				{/snippet}
 
 				{#snippet modal()}
-					<GetTokenModal
-						{currentApy}
-						receiveAddress={$icrcAccountIdentifierText}
-						token={gldtToken}
-					/>
+					<SwapContexts>
+						<GetTokenModal
+							{currentApy}
+							receiveAddress={$icrcAccountIdentifierText}
+							token={gldtToken}
+						/>
+					</SwapContexts>
 				{/snippet}
 			</ButtonWithModal>
 
