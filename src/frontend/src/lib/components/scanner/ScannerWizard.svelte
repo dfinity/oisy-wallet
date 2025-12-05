@@ -65,13 +65,13 @@
 			<TokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
 		{/if}
 	{/key}
-</WizardModal>
 
-{#if isTokenSelecting}
-	<BottomSheetTokensList
-		onClose={() => {
-			goToStep(WizardStepsScanner.PAY);
-		}}
-		bind:visible={isTokenSelecting}
-	/>
-{/if}
+	{#if isTokenSelecting}
+		<BottomSheetTokensList
+			onClose={() => {
+				goToStep(WizardStepsScanner.PAY);
+			}}
+			bind:visible={isTokenSelecting}
+		/>
+	{/if}
+</WizardModal>
