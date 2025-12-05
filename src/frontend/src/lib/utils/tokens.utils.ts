@@ -16,6 +16,7 @@ import { isTokenErc20, isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { isTokenExtV2 } from '$icp/utils/ext.utils';
 import {
 	icTokenIcrcCustomToken,
 	isTokenDip20,
@@ -500,6 +501,6 @@ export const filterTokensByNft = ({
 	isNullish(filterNfts)
 		? tokens
 		: tokens.filter((t) => {
-				const isNft = isTokenErc1155(t) || isTokenErc721(t);
+				const isNft = isTokenErc1155(t) || isTokenErc721(t) || isTokenExtV2(t);
 				return filterNfts ? isNft : !isNft;
 			});
