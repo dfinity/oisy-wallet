@@ -164,9 +164,7 @@ pub struct State {
 fn set_config(arg: InitArg) {
     let config = Config::from(arg);
     mutate_state(|state| {
-        state
-            .config
-            .set(Some(Candid(config)));
+        state.config.set(Some(Candid(config)));
     });
 }
 
