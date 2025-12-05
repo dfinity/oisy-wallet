@@ -63,6 +63,8 @@ describe('PayDialog', () => {
 		expect(notEmptyString(text)).toBeTruthy();
 
 		expect(getByText(text.trim(), { exact: false })).toBeInTheDocument();
+
+		expect(getByText(replaceOisyPlaceholders(en.pay.text.where_you_can_pay))).toBeInTheDocument();
 	});
 
 	it('should render the button', () => {
