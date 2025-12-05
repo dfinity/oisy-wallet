@@ -5,7 +5,7 @@ export const EnvIcrcTokenMetadataSchema = z.object({
 	name: z.string(),
 	symbol: z.string(),
 	fee: z.bigint(),
-	alternativeName: z.optional(z.string()),
+	alternativeName: z.string().optional(),
 	url: z.optional(z.url())
 });
 
