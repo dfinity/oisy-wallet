@@ -57,7 +57,7 @@
 				<span>
 					{#each cardTitles as titlePath, i (`${titlePath}-${i}`)}
 						{#if i > 0}
-							<span>&nbsp;-&nbsp;</span>
+							<span>&nbsp;- </span>
 						{/if}
 
 						<span>{resolveText({ i18n: $i18n, path: titlePath })}</span>
