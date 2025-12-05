@@ -24,7 +24,9 @@
 
 	const { nft, children, showMessage = true, type, location }: Props = $props();
 
-	const mediaStatus = $derived(nonNullish(nft) ? nft.mediaStatus : NftMediaStatusEnum.INVALID_DATA);
+	const mediaStatus = $derived(
+		nonNullish(nft) ? nft.mediaStatus.image : NftMediaStatusEnum.INVALID_DATA
+	);
 
 	const hasConsent: boolean | undefined = $derived(
 		nonNullish(nft) ? nft.collection.allowExternalContentSource : false

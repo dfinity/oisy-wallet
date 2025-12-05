@@ -25,7 +25,10 @@ export const mapExtNft = async ({
 	const imageUrl = `https://${canisterId}.raw.icp0.io/?index=${index}`;
 	const thumbnailUrl = `${imageUrl}&type=thumbnail`;
 
-	const mediaStatus = await getMediaStatusOrCache(imageUrl);
+	const mediaStatus = {
+		image: await getMediaStatusOrCache(imageUrl),
+		thumbnail: await getMediaStatusOrCache(thumbnailUrl)
+	};
 
 	return {
 		id: parseNftId(identifier),
