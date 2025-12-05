@@ -919,6 +919,7 @@
 			"enter_or_paste_code": "",
 			"scan": "",
 			"pay": "",
+			"pay_amount": "",
 			"go_to_assets": "",
 			"supported_tokens": "",
 			"no_supported_tokens": "",
@@ -1047,6 +1048,17 @@
 		},
 		"onramper": {
 			"title": "ऑनराम्पर के माध्यम से खरीदें"
+		}
+	},
+	"pay": {
+		"text": {
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": ""
+		},
+		"alt": {
+			"pay": ""
 		}
 	},
 	"tokens": {

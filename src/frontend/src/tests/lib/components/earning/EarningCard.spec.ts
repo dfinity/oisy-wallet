@@ -34,9 +34,9 @@ describe('EarningCard', () => {
 	it('should render the provider title', () => {
 		const { getByText } = render(EarningCard, { props });
 
-		expect(
-			getByText(resolveText({ i18n: en, path: mockProviderUi.card.title }))
-		).toBeInTheDocument();
+		mockProviderUi.card.titles.forEach((title) => {
+			expect(getByText(resolveText({ i18n: en, path: title }))).toBeInTheDocument();
+		});
 	});
 
 	it('should render the tag with max APY', () => {
