@@ -49,6 +49,7 @@ import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import i18nMock from '$tests/mocks/i18n.mock';
 import {
 	mockIndexCanisterId,
@@ -886,27 +887,30 @@ describe('tokens.utils', () => {
 		it('should return empty arrays if no tokens passed', () => {
 			const result = groupTogglableTokens([]);
 
-			expect(result).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
+			expect(result).toEqual({ icrc: [], ext: [], erc20: [], erc721: [], erc1155: [], spl: [] });
 		});
 
 		it('should group the tokens correctly', () => {
 			const mockToggleableIcToken1 = { ...mockValidIcrcToken, name: 'token1', enabled: true };
 			const mockToggleableIcToken2 = { ...mockValidIcrcToken, name: 'token2', enabled: true };
+			const mockToggleableExtV2Token = { ...mockValidExtV2Token, enabled: true };
 			const mockToggleableErc20Token = { ...mockValidErc20Token, enabled: true };
 			const mockToggleableErc721Token = { ...mockValidErc721Token, enabled: true };
 			const mockToggleableErc1155Token = { ...mockValidErc1155Token, enabled: true };
 			const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
 
-			const { icrc, spl, erc20, erc721, erc1155 } = groupTogglableTokens([
+			const { icrc, ext, spl, erc20, erc721, erc1155 } = groupTogglableTokens([
 				mockToggleableSplToken,
 				mockToggleableErc20Token,
 				mockToggleableErc721Token,
 				mockToggleableErc1155Token,
 				mockToggleableIcToken1,
-				mockToggleableIcToken2
+				mockToggleableIcToken2,
+				mockToggleableExtV2Token
 			]);
 
 			expect(icrc).toEqual([mockToggleableIcToken1, mockToggleableIcToken2]);
+			expect(ext).toEqual([mockToggleableExtV2Token]);
 			expect(spl).toEqual([mockToggleableSplToken]);
 			expect(erc20).toEqual([mockToggleableErc20Token]);
 			expect(erc721).toEqual([mockToggleableErc721Token]);
@@ -932,14 +936,6 @@ describe('tokens.utils', () => {
 			vi.mock('$sol/services/manage-tokens.services', () => ({
 				saveSplCustomTokens: vi.fn().mockResolvedValue(undefined)
 			}));
-
-			vi.mock('$lib/utils/tokens.utils', async (importOriginal) => {
-				const actual: Record<string, unknown> = await importOriginal();
-				return {
-					...actual
-					//groupTogglableTokens: vi.fn()
-				};
-			});
 
 			vi.clearAllMocks();
 		});
@@ -974,6 +970,23 @@ describe('tokens.utils', () => {
 				expect.objectContaining({
 					tokens: expect.arrayContaining([
 						expect.objectContaining({ ...mockValidIcrcToken, networkKey: 'Icrc' })
+					]),
+					identity: mockIdentity
+				})
+			);
+		});
+
+		it('should call saveIcrcCustomTokens when EXT tokens are present', async () => {
+			await saveAllCustomTokens({
+				tokens: [mockValidExtV2Token],
+				$authIdentity: mockIdentity,
+				$i18n: i18nMock
+			});
+
+			expect(saveIcrcCustomTokens).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tokens: expect.arrayContaining([
+						expect.objectContaining({ ...mockValidExtV2Token, networkKey: 'ExtV2' })
 					]),
 					identity: mockIdentity
 				})
@@ -1054,12 +1067,13 @@ describe('tokens.utils', () => {
 	describe('filterTokensByNft', () => {
 		const nft1 = { ...mockValidErc721Token, name: 'Cool Nft' };
 		const nft2 = { ...mockValidErc1155Token, name: 'Even cooler Nft' };
-		const tokens = [ETHEREUM_TOKEN, SOLANA_TOKEN, BONK_TOKEN, nft1, nft2];
+		const nft3 = { ...mockValidExtV2Token, name: 'Another cool Nft' };
+		const tokens = [ETHEREUM_TOKEN, SOLANA_TOKEN, BONK_TOKEN, nft1, nft2, nft3];
 
 		it('should return all tokens when no filter is provided', () => {
 			const result = filterTokensByNft({ tokens });
 
-			expect(result).toHaveLength(5);
+			expect(result).toHaveLength(6);
 			expect(result).toEqual(tokens);
 		});
 
@@ -1073,8 +1087,8 @@ describe('tokens.utils', () => {
 		it('should return all Nfts when filterNfts is true', () => {
 			const result = filterTokensByNft({ tokens, filterNfts: true });
 
-			expect(result).toHaveLength(2);
-			expect(result).toEqual([nft1, nft2]);
+			expect(result).toHaveLength(3);
+			expect(result).toEqual([nft1, nft2, nft3]);
 		});
 
 		it('should return an empty list if tokens is empty', () => {
