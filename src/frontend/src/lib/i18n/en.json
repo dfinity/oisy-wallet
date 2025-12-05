@@ -1138,6 +1138,7 @@
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
+				"missing_canister_id": "The Canister ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
 				"missing_token_address": "The token address is missing. Did you provide a value?",
 				"no_network": "No network is selected. This is unexpected."

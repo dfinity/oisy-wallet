@@ -1138,6 +1138,7 @@
 				"unexpected_index_ledger": "Při načítání ID účetní knihy souvisejícího s kanystrem indexu se něco pokazilo.",
 				"invalid_ledger_id": "ID účetní knihy nesouvisí s kanystrem indexu.",
 				"missing_ledger_id": "Chybí ID účetní knihy. Zadali jste hodnotu?",
+				"missing_canister_id": "",
 				"missing_contract_address": "Chybí adresa smlouvy. Zadali jste hodnotu?",
 				"missing_token_address": "Chybí adresa tokenu. Zadali jste hodnotu?",
 				"no_network": "Není vybrána žádná síť. To je neočekávané."
