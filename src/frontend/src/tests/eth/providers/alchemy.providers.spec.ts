@@ -279,14 +279,20 @@ describe('alchemy.providers', () => {
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
 					},
-					mediaStatus: NftMediaStatusEnum.INVALID_DATA
+					mediaStatus: {
+						image: NftMediaStatusEnum.INVALID_DATA,
+						thumbnail: NftMediaStatusEnum.INVALID_DATA
+					}
 				},
 				{
 					id: parseNftId('2'),
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
 					},
-					mediaStatus: NftMediaStatusEnum.INVALID_DATA
+					mediaStatus: {
+						image: NftMediaStatusEnum.INVALID_DATA,
+						thumbnail: NftMediaStatusEnum.INVALID_DATA
+					}
 				}
 			]);
 		});
@@ -401,7 +407,10 @@ describe('alchemy.providers', () => {
 				collection: {
 					...mapTokenToCollection(mockValidErc1155Token)
 				},
-				mediaStatus: NftMediaStatusEnum.INVALID_DATA
+				mediaStatus: {
+					image: NftMediaStatusEnum.INVALID_DATA,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
 			});
 		});
 
