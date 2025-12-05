@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
+	import BottomSheetTokensList from '$lib/components/scanner/open-crypto-pay/BottomSheetTokensList.svelte';
+	import TokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,10 +15,7 @@
 		PAY_CONTEXT_KEY,
 		type PayContext
 	} from '$lib/stores/open-crypto-pay.store';
-	import { isNullish } from '@dfinity/utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import TokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
-	import BottomSheetTokensList from '$lib/components/scanner/open-crypto-pay/BottomSheetTokensList.svelte';
 
 	let steps = $derived<WizardSteps<WizardStepsScanner>>(scannerWizardSteps({ i18n: $i18n }));
 
@@ -44,10 +44,10 @@
 
 <WizardModal
 	bind:this={modal}
+	disablePointerEvents={currentStep?.name === WizardStepsScanner.TOKENS_LIST}
 	{onClose}
 	{steps}
 	bind:currentStep
-	disablePointerEvents={currentStep?.name === WizardStepsScanner.TOKENS_LIST}
 >
 	{#snippet title()}
 		{currentStep?.title}
