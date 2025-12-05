@@ -1,15 +1,59 @@
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
 import en from '$lib/i18n/en.json';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
-import type { OpenCryptoPayResponse } from '$lib/types/open-crypto-pay';
+import type {
+	OpenCryptoPayResponse,
+	PayableTokenWithConvertedAmount
+} from '$lib/types/open-crypto-pay';
+import * as formatUtils from '$lib/utils/format.utils';
+import * as i18nUtils from '$lib/utils/i18n.utils';
 import { render, screen } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
-vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
-	formatAddress: vi.fn()
+vi.mock('$eth/derived/tokens.derived', () => ({
+	enabledEthereumTokens: {
+		subscribe: vi.fn((callback) => {
+			callback([]);
+			return () => {};
+		})
+	}
 }));
 
-describe('PaymentDetails', () => {
+vi.mock('$evm/derived/tokens.derived', () => ({
+	enabledEvmTokens: {
+		subscribe: vi.fn((callback) => {
+			callback([]);
+			return () => {};
+		})
+	}
+}));
+
+vi.mock('$lib/derived/exchange.derived', () => ({
+	exchanges: {
+		subscribe: vi.fn((callback) => {
+			callback({});
+			return () => {};
+		})
+	}
+}));
+
+vi.mock('$lib/stores/balances.store', () => ({
+	balancesStore: {
+		subscribe: vi.fn((callback) => {
+			callback({});
+			return () => {};
+		})
+	}
+}));
+
+vi.mock('$eth/utils/token.utils', () => ({
+	enrichEthEvmToken: vi.fn(({ token }) => ({
+		...token
+	}))
+}));
+
+describe('OpenCryptoPay', () => {
 	const mockPaymentData: OpenCryptoPayResponse = {
 		id: 'pl_test123',
 		externalId: 'test-external',
@@ -54,52 +98,105 @@ describe('PaymentDetails', () => {
 		transferAmounts: []
 	};
 
-	const renderWithContext = (data: OpenCryptoPayResponse | undefined) =>
-		render(OpenCryptoPay, {
-			context: new Map([[PAY_CONTEXT_KEY, { data: writable(data) }]])
+	const mockEthToken: PayableTokenWithConvertedAmount = {
+		...ETHEREUM_TOKEN,
+		amount: '1.5',
+		minFee: 0.001,
+		tokenNetwork: 'Ethereum',
+		amountInUSD: 3000,
+		feeInUSD: 42,
+		sumInUSD: 3042,
+		fee: {
+			feeInWei: 300n,
+			feeData: {
+				maxFeePerGas: 12n,
+				maxPriorityFeePerGas: 7n
+			},
+			estimatedGasLimit: 25n
+		}
+	};
+
+	const createMockContext = ({
+		data,
+		selectedToken,
+		availableTokens
+	}: {
+		data: OpenCryptoPayResponse | undefined;
+		selectedToken: PayableTokenWithConvertedAmount | undefined;
+		availableTokens: PayableTokenWithConvertedAmount[];
+	}) => ({
+		data: writable(data),
+		selectedToken: writable(selectedToken),
+		availableTokens: writable(availableTokens)
+	});
+
+	const renderWithContext = ({
+		data = undefined,
+		selectedToken = undefined,
+		onSelectToken = vi.fn(),
+		isTokenSelecting = false,
+		availableTokens = []
+	}: {
+		data?: OpenCryptoPayResponse | undefined;
+		selectedToken?: PayableTokenWithConvertedAmount | undefined;
+		onSelectToken?: () => void;
+		isTokenSelecting?: boolean;
+		availableTokens?: PayableTokenWithConvertedAmount[];
+	} = {}) => {
+		const mockContext = createMockContext({ data, selectedToken, availableTokens });
+
+		return render(OpenCryptoPay, {
+			props: {
+				onSelectToken,
+				isTokenSelecting
+			},
+			context: new Map([[PAY_CONTEXT_KEY, mockContext]])
 		});
+	};
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.spyOn(formatUtils, 'formatCurrency').mockImplementation(() => `$15.50`);
+		vi.spyOn(i18nUtils, 'replacePlaceholders').mockImplementation(() => 'Pay $3,042.00');
+	});
 
 	describe('with payment data', () => {
 		it('should render payment amount and asset', () => {
-			const { container } = renderWithContext(mockPaymentData);
+			renderWithContext({ data: mockPaymentData });
 
-			expect(container.textContent).toContain('10');
-			expect(container.textContent).toContain('CHF');
-		});
-
-		it('should render display name', () => {
-			const { container } = renderWithContext(mockPaymentData);
-
-			expect(container.textContent).toContain('Test Shop');
+			expect(screen.getByText('10')).toBeInTheDocument();
+			expect(screen.getByText('CHF')).toBeInTheDocument();
 		});
 
 		it('should render recipient name', () => {
-			const { container } = renderWithContext(mockPaymentData);
+			renderWithContext({ data: mockPaymentData });
 
-			expect(container.textContent).toContain('Test Merchant');
+			expect(screen.getByText('Test Merchant')).toBeInTheDocument();
 		});
 
 		it('should render Pay button as disabled', () => {
-			renderWithContext(mockPaymentData);
+			renderWithContext({ data: mockPaymentData });
 
 			const payButton = screen.getByRole('button', { name: /pay/i });
 
-			expect(payButton).toBeInTheDocument();
-		});
-
-		it('should render powered by text', () => {
-			renderWithContext(mockPaymentData);
-
-			expect(screen.getByText(en.scanner.text.powered_by)).toBeInTheDocument();
+			expect(payButton).toBeDisabled();
 		});
 	});
 
 	describe('without payment data', () => {
 		it('should not render payment details when data is undefined', () => {
-			const { container } = renderWithContext(undefined);
+			renderWithContext();
 
-			expect(container.textContent).not.toContain('Test Shop');
-			expect(container.textContent).not.toContain('Test Merchant');
+			expect(screen.queryByText('Test Shop')).not.toBeInTheDocument();
+			expect(screen.queryByText('Test Merchant')).not.toBeInTheDocument();
+		});
+
+		it('should still render Pay button', () => {
+			vi.mocked(i18nUtils.replacePlaceholders).mockReturnValue('Pay');
+
+			renderWithContext();
+
+			expect(screen.getByRole('button', { name: 'Pay' })).toBeInTheDocument();
 		});
 	});
 
@@ -110,10 +207,10 @@ describe('PaymentDetails', () => {
 				displayName: undefined
 			};
 
-			const { container } = renderWithContext(dataWithoutDisplayName);
+			renderWithContext({ data: dataWithoutDisplayName });
 
-			expect(container.textContent).toContain('10');
-			expect(container.textContent).toContain('CHF');
+			expect(screen.getByText('10')).toBeInTheDocument();
+			expect(screen.getByText('CHF')).toBeInTheDocument();
 		});
 
 		it('should handle missing recipient', () => {
@@ -122,10 +219,9 @@ describe('PaymentDetails', () => {
 				recipient: undefined
 			};
 
-			const { container } = renderWithContext(dataWithoutRecipient);
+			renderWithContext({ data: dataWithoutRecipient });
 
-			expect(container.textContent).toContain('10');
-			expect(container.textContent).toContain('CHF');
+			expect(screen.queryByText('Test Merchant')).not.toBeInTheDocument();
 		});
 
 		it('should render with minimum required data', () => {
@@ -143,10 +239,10 @@ describe('PaymentDetails', () => {
 				transferAmounts: []
 			};
 
-			const { container } = renderWithContext(minimalData);
+			renderWithContext({ data: minimalData });
 
-			expect(container.textContent).toContain('0.001');
-			expect(container.textContent).toContain('BTC');
+			expect(screen.getByText('0.001')).toBeInTheDocument();
+			expect(screen.getByText('BTC')).toBeInTheDocument();
 		});
 	});
 
@@ -157,10 +253,10 @@ describe('PaymentDetails', () => {
 				requestedAmount: { asset: 'EUR', amount: '50' }
 			};
 
-			const { container } = renderWithContext(data);
+			renderWithContext({ data });
 
-			expect(container.textContent).toContain('50');
-			expect(container.textContent).toContain('EUR');
+			expect(screen.getByText('50')).toBeInTheDocument();
+			expect(screen.getByText('EUR')).toBeInTheDocument();
 		});
 
 		it('should render BTC with decimals', () => {
@@ -169,10 +265,10 @@ describe('PaymentDetails', () => {
 				requestedAmount: { asset: 'BTC', amount: '0.00123456' }
 			};
 
-			const { container } = renderWithContext(data);
+			renderWithContext({ data });
 
-			expect(container.textContent).toContain('0.00123456');
-			expect(container.textContent).toContain('BTC');
+			expect(screen.getByText('0.00123456')).toBeInTheDocument();
+			expect(screen.getByText('BTC')).toBeInTheDocument();
 		});
 
 		it('should render large amounts', () => {
@@ -181,9 +277,66 @@ describe('PaymentDetails', () => {
 				requestedAmount: { asset: 'CHF', amount: '1000000' }
 			};
 
-			const { container } = renderWithContext(data);
+			renderWithContext({ data });
 
-			expect(container.textContent).toContain('1000000');
+			expect(screen.getByText('1000000')).toBeInTheDocument();
+		});
+	});
+
+	describe('pay button with token', () => {
+		it('should show Pay with amount when token selected', () => {
+			vi.mocked(i18nUtils.replacePlaceholders).mockReturnValue('Pay $3,042.00');
+
+			renderWithContext({
+				data: mockPaymentData,
+				selectedToken: mockEthToken,
+				availableTokens: [mockEthToken]
+			});
+
+			expect(screen.getByRole('button', { name: 'Pay $3,042.00' })).toBeInTheDocument();
+		});
+
+		it('should call replacePlaceholders with correct params', () => {
+			vi.mocked(formatUtils.formatCurrency).mockReturnValue('$3,042.00');
+			vi.mocked(i18nUtils.replacePlaceholders).mockReturnValue('Pay $3,042.00');
+
+			renderWithContext({
+				data: mockPaymentData,
+				selectedToken: mockEthToken,
+				availableTokens: [mockEthToken]
+			});
+
+			expect(i18nUtils.replacePlaceholders).toHaveBeenCalledWith(en.scanner.text.pay_amount, {
+				$amount: '$3,042.00'
+			});
+		});
+
+		it('should show plain Pay text when no token selected', () => {
+			vi.mocked(i18nUtils.replacePlaceholders).mockReturnValue('Pay');
+
+			renderWithContext({ data: mockPaymentData });
+
+			expect(screen.getByRole('button', { name: 'Pay' })).toBeInTheDocument();
+		});
+	});
+
+	describe('fee display', () => {
+		it('should show fee when token selected', () => {
+			vi.mocked(formatUtils.formatCurrency).mockReturnValue('$42.00');
+
+			renderWithContext({
+				data: mockPaymentData,
+				selectedToken: mockEthToken,
+				availableTokens: [mockEthToken]
+			});
+
+			expect(screen.getByText(en.fee.text.fee)).toBeInTheDocument();
+		});
+
+		it('should not show fee when no token', () => {
+			renderWithContext({ data: mockPaymentData });
+
+			expect(screen.queryByText(en.fee.text.fee)).not.toBeInTheDocument();
 		});
 	});
 });
