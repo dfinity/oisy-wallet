@@ -90,7 +90,7 @@
 
 	let invalid = $derived(
 		isIcpNetwork
-			? invalidIc && invalidExt
+			? isNftsPage ? invalidExt : invalidIc
 			: isEthereumNetwork || isEvmNetwork
 				? invalidEth
 				: isSolanaNetwork
