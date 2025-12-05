@@ -53,7 +53,7 @@ describe('EarningYearlyAmount', () => {
 	it('renders with plus sign when showPlusSign is true', () => {
 		render(EarningYearlyAmount, { value: 10, showPlusSign: true });
 
-		expect(screen.getByText(getFormattedText('+$10.00'))).toBeInTheDocument();
+		expect(screen.getByText(getFormattedText('+ $10.00'))).toBeInTheDocument();
 	});
 
 	it('applies text-success-primary class for positive amount when formatPositiveAmount is true', () => {
@@ -64,12 +64,12 @@ describe('EarningYearlyAmount', () => {
 		expect(span).toHaveClass('text-success-primary');
 	});
 
-	it('applies text-brand-primary when formatPositiveAmount is false', () => {
+	it('applies text-error-primary when formatPositiveAmount is false', () => {
 		const { container } = render(EarningYearlyAmount, { value: 5, formatPositiveAmount: false });
 
 		const span = container.querySelector('span');
 
-		expect(span).toHaveClass('text-brand-primary');
+		expect(span).toHaveClass('text-error-primary');
 	});
 
 	it('applies text-tertiary when formatPositiveAmount is true but amount is 0', () => {

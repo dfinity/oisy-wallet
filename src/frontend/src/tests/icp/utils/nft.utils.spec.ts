@@ -29,7 +29,11 @@ describe('nft.utils', () => {
 				oisyId: (mockIndex + 1).toString(),
 				name: `${mockValidExtV2Token.name} #${mockIndex + 1}`,
 				imageUrl: `https://${mockValidExtV2Token.canisterId}.raw.icp0.io/?index=123`,
-				mediaStatus: NftMediaStatusEnum.OK,
+				thumbnailUrl: `https://${mockValidExtV2Token.canisterId}.raw.icp0.io/?index=123&type=thumbnail`,
+				mediaStatus: {
+					image: NftMediaStatusEnum.OK,
+					thumbnail: NftMediaStatusEnum.OK
+				},
 				collection: {
 					...rest,
 					address: mockValidExtV2Token.canisterId

@@ -12,6 +12,10 @@ describe('ScannerWizardSteps', () => {
 		{
 			name: WizardStepsScanner.PAY,
 			title: en.scanner.text.pay
+		},
+		{
+			name: WizardStepsScanner.TOKENS_LIST,
+			title: en.scanner.text.select_token_to_pay
 		}
 	];
 

@@ -13,6 +13,7 @@ export const NftMetadataSchema = z.object({
 	name: z.string().optional(),
 	id: NftIdSchema,
 	imageUrl: z.url().optional(),
+	thumbnailUrl: z.url().optional(),
 	description: z.string().optional(),
 	attributes: z.array(NftAttributeSchema).optional()
 });
@@ -27,6 +28,11 @@ export enum NftMediaStatusEnum {
 	NON_SUPPORTED_MEDIA_TYPE = 'non_supported_media_type',
 	INVALID_DATA = 'invalid_data'
 }
+
+export const NftMediaStatusSchema = z.object({
+	image: z.enum(NftMediaStatusEnum),
+	thumbnail: z.enum(NftMediaStatusEnum)
+});
 
 export const NftCollectionSchema = z.object({
 	...TokenSchema.pick({ id: true, standard: true, network: true }).shape,
@@ -45,7 +51,7 @@ export const NftSchema = z.object({
 	balance: z.number().optional(),
 	collection: NftCollectionSchema,
 	acquiredAt: z.date().optional(),
-	mediaStatus: z.enum(NftMediaStatusEnum),
+	mediaStatus: NftMediaStatusSchema,
 	...NftMetadataSchema.shape,
 	...NftAppearanceSchema.shape
 });

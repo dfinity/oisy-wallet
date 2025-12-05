@@ -1,3 +1,5 @@
+import { goto } from '$app/navigation';
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	WizardStepsClaimStakingReward,
 	WizardStepsStake,
@@ -71,6 +73,9 @@ export const stakeProvidersConfig: Record<StakeProvider, StakeProviderConfig> = 
 		logo: '/images/dapps/gold-dao-logo.svg',
 		url: 'https://app.gldt.org/earn/',
 		pageDescriptionKey: 'stake.text.gldt_stake_page_description',
-		cardTitle: 'earning.providers.goldDaoStaking.cardTitle'
+		card: {
+			titles: ['earning.cards.gldt.title1', 'earning.cards.gldt.title2'],
+			action: () => goto(AppPath.EarnGold)
+		}
 	}
 };
