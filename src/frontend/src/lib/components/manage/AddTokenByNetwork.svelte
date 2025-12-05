@@ -4,7 +4,7 @@
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
 	import IcAddExtTokenForm from '$icp/components/tokens/IcAddExtTokenForm.svelte';
-	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
+	import IcAddIcrcTokenForm from '$icp/components/tokens/IcAddIcrcTokenForm.svelte';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import AddTokenByNetworkToolbar from '$lib/components/manage/AddTokenByNetworkToolbar.svelte';
@@ -118,7 +118,7 @@
 			{#if isNftsPage}
 				<IcAddExtTokenForm bind:extCanisterId />
 			{:else}
-				<IcAddTokenForm bind:ledgerCanisterId bind:indexCanisterId />
+				<IcAddIcrcTokenForm bind:ledgerCanisterId bind:indexCanisterId />
 			{/if}
 		{:else if isEthereumNetwork || isEvmNetwork}
 			<EthAddTokenForm bind:contractAddress={ethContractAddress} />
