@@ -137,7 +137,10 @@ describe('alchemy.providers', () => {
 					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
-				mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE
+				mediaStatus: {
+					image: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
 			},
 			{
 				id: parseNftId('2'),
@@ -150,7 +153,10 @@ describe('alchemy.providers', () => {
 					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
-				mediaStatus: NftMediaStatusEnum.OK
+				mediaStatus: {
+					image: NftMediaStatusEnum.OK,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
 			},
 			{
 				id: parseNftId('3'),
@@ -163,7 +169,10 @@ describe('alchemy.providers', () => {
 					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
-				mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
+				mediaStatus: {
+					image: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
 			},
 			{
 				id: parseNftId('4'),
@@ -176,7 +185,10 @@ describe('alchemy.providers', () => {
 					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
-				mediaStatus: NftMediaStatusEnum.OK
+				mediaStatus: {
+					image: NftMediaStatusEnum.OK,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
 			}
 		];
 
@@ -326,7 +338,10 @@ describe('alchemy.providers', () => {
 				bannerMediaStatus: NftMediaStatusEnum.OK
 			},
 			description: 'lorem ipsum',
-			mediaStatus: NftMediaStatusEnum.OK
+			mediaStatus: {
+				image: NftMediaStatusEnum.OK,
+				thumbnail: NftMediaStatusEnum.INVALID_DATA
+			}
 		};
 
 		beforeEach(() => {
