@@ -4,7 +4,6 @@
 	import { setContext } from 'svelte';
 	import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
-	import BottomSheetTokensList from '$lib/components/scanner/open-crypto-pay/BottomSheetTokensList.svelte';
 	import TokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
@@ -65,13 +64,4 @@
 			<TokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
 		{/if}
 	{/key}
-
-	{#if isTokenSelecting}
-		<BottomSheetTokensList
-			onClose={() => {
-				goToStep(WizardStepsScanner.PAY);
-			}}
-			bind:visible={isTokenSelecting}
-		/>
-	{/if}
 </WizardModal>
