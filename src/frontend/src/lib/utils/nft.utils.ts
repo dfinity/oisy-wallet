@@ -1,6 +1,7 @@
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isTokenExtV2 } from '$icp/utils/ext.utils';
+import type { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type {
 	Nft,
 	NonFungibleToken,
@@ -8,6 +9,7 @@ import type {
 	NonFungibleTokensByNetwork
 } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 
 export const isTokenNonFungible = (token: Token): token is NonFungibleToken =>
 	isTokenErc721(token) || isTokenErc1155(token);
@@ -43,3 +45,6 @@ export const getNftDisplayId = (nft: Nft): string => nft.oisyId ?? nft.id;
  */
 export const getNftDisplayImageUrl = (nft: Nft): string | undefined =>
 	nft.thumbnailUrl ?? nft.imageUrl;
+
+export const getNftDisplayMediaStatus = (nft: Nft): NftMediaStatusEnum =>
+	nonNullish(nft.thumbnailUrl) ? nft.mediaStatus.thumbnail : nft.mediaStatus.image;

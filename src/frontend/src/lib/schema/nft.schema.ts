@@ -29,6 +29,11 @@ export enum NftMediaStatusEnum {
 	INVALID_DATA = 'invalid_data'
 }
 
+const NftMediaStatusSchema = z.object({
+	image: z.enum(NftMediaStatusEnum),
+	thumbnail: z.enum(NftMediaStatusEnum)
+});
+
 export const NftCollectionSchema = z.object({
 	...TokenSchema.pick({ id: true, standard: true, network: true }).shape,
 	address: z.string(),
@@ -46,10 +51,7 @@ export const NftSchema = z.object({
 	balance: z.number().optional(),
 	collection: NftCollectionSchema,
 	acquiredAt: z.date().optional(),
-	mediaStatus: {
-		image: z.enum(NftMediaStatusEnum),
-		thumbnail: z.enum(NftMediaStatusEnum)
-	},
+	mediaStatus: NftMediaStatusSchema,
 	...NftMetadataSchema.shape,
 	...NftAppearanceSchema.shape
 });
