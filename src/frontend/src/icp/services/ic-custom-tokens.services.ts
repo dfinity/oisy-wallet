@@ -1,4 +1,5 @@
 import { loadCustomTokens } from '$icp/services/icrc.services';
+import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -26,7 +27,11 @@ export const saveCustomTokens = async ({
 	// Hide tokens that have been disabled
 	const disabledTokens = tokens.filter(({ enabled }) => !enabled);
 	disabledTokens.forEach((token) =>
-		token.networkKey === 'Icrc' ? icrcCustomTokensStore.reset(token.ledgerCanisterId) : null
+		token.networkKey === 'Icrc'
+			? icrcCustomTokensStore.reset(token.ledgerCanisterId)
+			: token.networkKey === 'ExtV2'
+				? extCustomTokensStore.resetByIdentifier(token.canisterId)
+				: null
 	);
 
 	// Reload all custom tokens for simplicity reason.
