@@ -58,6 +58,7 @@
 					{#if i > 0}
 						<span> - </span>
 					{/if}
+
 					<span>{resolveText({ i18n: $i18n, path: titlePath })}</span>
 				{/each}
 				<Tag variant="info">{formatStakeApyNumber(maxApy)}%</Tag>
