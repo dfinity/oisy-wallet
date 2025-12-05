@@ -73,7 +73,7 @@
 	</div>
 
 	<div
-		class="text-lg font-bold sm:text-xl"
+		class="text-lg font-bold whitespace-nowrap sm:text-xl"
 		class:text-brand-primary-alt={positivePotentialTokenBalance}
 		class:text-disabled={!positivePotentialTokenBalance}
 	>
