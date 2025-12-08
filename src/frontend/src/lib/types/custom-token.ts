@@ -14,7 +14,7 @@ type CustomTokenNetworkKeys = BackendToken extends infer T
 		: never
 	: never;
 
-type TokenVariant<K extends CustomTokenNetworkKeys, T> = T & { networkKey: K };
+export type TokenVariant<K extends CustomTokenNetworkKeys, T> = T & { networkKey: K };
 
 export type IcrcSaveCustomToken = Pick<IcToken, 'ledgerCanisterId' | 'indexCanisterId'>;
 
@@ -26,7 +26,7 @@ export type ErcSaveCustomToken = Pick<Erc20Token, 'address'> &
 export type SplSaveCustomToken = Pick<SplToken, 'address' | 'decimals' | 'symbol'>;
 
 export type SaveCustomToken = UserTokenState &
-	(IcrcSaveCustomToken | ErcSaveCustomToken | SplSaveCustomToken);
+	(IcrcSaveCustomToken | ExtSaveCustomToken | ErcSaveCustomToken | SplSaveCustomToken);
 
 export type SaveCustomTokenWithKey = UserTokenState &
 	(
