@@ -701,7 +701,7 @@ interface I18nScanner {
 		scan_qr_code: string;
 		pay_to: string;
 		powered_by: string;
-		receipt: string;
+		recipient: string;
 		name: string;
 		address: string;
 		country: string;

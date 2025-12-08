@@ -907,7 +907,7 @@
 			"scan_qr_code": "Scan QR Code",
 			"pay_to": "Pay to $receipt",
 			"powered_by": "Powered by",
-			"receipt": "Receipt",
+			"recipient": "Recipient",
 			"name": "Name",
 			"address": "Address",
 			"country": "Country",
