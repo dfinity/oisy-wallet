@@ -7,13 +7,13 @@ import type { CertifiedData } from '$lib/types/store';
 import type { SyncState } from '$lib/types/sync';
 import { emit } from '$lib/utils/events.utils';
 import { jsonReviver } from '@dfinity/utils';
-import type { MinterInfo } from '@icp-sdk/canisters/cketh';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 import { get } from 'svelte/store';
 
 export const syncCkEthMinterInfo = ({ data: postMsgData, tokenId }: SyncCkMinterInfoSuccess) => {
 	const { json } = postMsgData;
 
-	const data: CertifiedData<MinterInfo> = JSON.parse(json, jsonReviver);
+	const data: CertifiedData<CkEthMinterDid.MinterInfo> = JSON.parse(json, jsonReviver);
 
 	ckEthMinterInfoStore.set({
 		id: tokenId,

@@ -11,13 +11,11 @@ import {
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
-	CkBTCMinterCanister,
+	CkBtcMinterCanister,
+	type CkBtcMinterDid,
 	type EstimateWithdrawalFee,
-	type MinterInfo,
-	type RetrieveBtcOk,
 	type RetrieveBtcStatusV2WithId,
-	type UpdateBalanceOk,
-	type Utxo
+	type UpdateBalanceOk
 } from '@icp-sdk/canisters/ckbtc';
 import { mock } from 'vitest-mock-extended';
 
@@ -26,12 +24,12 @@ vi.mock('$icp/utils/date.utils', () => ({
 }));
 
 describe('ckbtc-minter.api', () => {
-	const canisterMock = mock<CkBTCMinterCanister>();
+	const canisterMock = mock<CkBtcMinterCanister>();
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(CkBTCMinterCanister, 'create').mockImplementation(() => canisterMock);
+		vi.spyOn(CkBtcMinterCanister, 'create').mockImplementation(() => canisterMock);
 	});
 
 	describe('retrieveBtc', () => {
@@ -44,7 +42,7 @@ describe('ckbtc-minter.api', () => {
 			address: mockBtcAddress
 		};
 
-		const expected: RetrieveBtcOk = { block_index: 123n };
+		const expected: CkBtcMinterDid.RetrieveBtcOk = { block_index: 123n };
 
 		beforeEach(() => {
 			canisterMock.retrieveBtcWithApproval.mockResolvedValue(expected);
@@ -100,7 +98,7 @@ describe('ckbtc-minter.api', () => {
 			certified: true
 		};
 
-		const expected: MinterInfo = {
+		const expected: CkBtcMinterDid.MinterInfo = {
 			retrieve_btc_min_amount: 123n,
 			min_confirmations: 111,
 			kyt_fee: 456n
@@ -259,7 +257,7 @@ describe('ckbtc-minter.api', () => {
 			minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID
 		};
 
-		const expected: Utxo[] = [mockUtxo, mockUtxo];
+		const expected: CkBtcMinterDid.Utxo[] = [mockUtxo, mockUtxo];
 
 		beforeEach(() => {
 			canisterMock.getKnownUtxos.mockResolvedValue(expected);
