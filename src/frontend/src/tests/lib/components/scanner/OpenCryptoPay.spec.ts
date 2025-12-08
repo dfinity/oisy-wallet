@@ -330,13 +330,13 @@ describe('OpenCryptoPay', () => {
 				availableTokens: [mockEthToken]
 			});
 
-			expect(screen.getByText(en.fee.text.fee)).toBeInTheDocument();
+			expect(screen.getByText(en.fee.text.network_fee)).toBeInTheDocument();
 		});
 
 		it('should not show fee when no token', () => {
 			renderWithContext({ data: mockPaymentData });
 
-			expect(screen.queryByText(en.fee.text.fee)).not.toBeInTheDocument();
+			expect(screen.queryByText(en.fee.text.network_fee)).not.toBeInTheDocument();
 		});
 	});
 });
