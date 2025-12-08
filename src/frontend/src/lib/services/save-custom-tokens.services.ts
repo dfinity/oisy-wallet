@@ -24,7 +24,7 @@ const parseErcIdentifier = (
 
 const hideTokenByKey = (token: SaveCustomTokenWithKey) => {
 	if (token.networkKey === 'Icrc') {
-		icrcCustomTokensStore.reset(token.ledgerCanisterId);
+		icrcCustomTokensStore.resetByIdentifier(token.ledgerCanisterId);
 
 		return;
 	}

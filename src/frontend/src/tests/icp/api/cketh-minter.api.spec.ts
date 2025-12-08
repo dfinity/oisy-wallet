@@ -8,12 +8,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
-import {
-	CkETHMinterCanister,
-	type Eip1559TransactionPrice,
-	type RetrieveErc20Request,
-	type RetrieveEthRequest
-} from '@icp-sdk/canisters/cketh';
+import { CkEthMinterCanister, type CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
@@ -22,12 +17,12 @@ vi.mock('$icp/utils/date.utils', () => ({
 }));
 
 describe('cketh-minter.api', () => {
-	const canisterMock = mock<CkETHMinterCanister>();
+	const canisterMock = mock<CkEthMinterCanister>();
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(CkETHMinterCanister, 'create').mockImplementation(() => canisterMock);
+		vi.spyOn(CkEthMinterCanister, 'create').mockImplementation(() => canisterMock);
 	});
 
 	describe('withdrawEth', () => {
@@ -40,7 +35,7 @@ describe('cketh-minter.api', () => {
 			address: mockEthAddress
 		};
 
-		const expected: RetrieveEthRequest = { block_index: 123n };
+		const expected: CkEthMinterDid.RetrieveEthRequest = { block_index: 123n };
 
 		beforeEach(() => {
 			canisterMock.withdrawEth.mockResolvedValue(expected);
@@ -73,7 +68,10 @@ describe('cketh-minter.api', () => {
 			address: mockEthAddress
 		};
 
-		const expected: RetrieveErc20Request = { ckerc20_block_index: 123n, cketh_block_index: 456n };
+		const expected: CkEthMinterDid.RetrieveErc20Request = {
+			ckerc20_block_index: 123n,
+			cketh_block_index: 456n
+		};
 
 		beforeEach(() => {
 			canisterMock.withdrawErc20.mockResolvedValue(expected);
@@ -106,7 +104,7 @@ describe('cketh-minter.api', () => {
 			certified: true
 		};
 
-		const expected: Eip1559TransactionPrice = {
+		const expected: CkEthMinterDid.Eip1559TransactionPrice = {
 			max_priority_fee_per_gas: 123n,
 			max_fee_per_gas: 456n,
 			max_transaction_fee: 789n,
