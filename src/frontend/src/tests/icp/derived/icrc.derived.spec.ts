@@ -181,14 +181,16 @@ describe('icrc.derived', () => {
 		});
 
 		it('should ignore CK tokens', () => {
-			icrcCustomTokensStore.set({
-				data: {
-					...mockIcrcCustomToken3,
-					enabled: true,
-					ledgerCanisterId: ICRC_CK_TOKENS_LEDGER_CANISTER_IDS[0]
-				},
-				certified: false
-			});
+			icrcCustomTokensStore.setAll([
+				{
+					data: {
+						...mockIcrcCustomToken3,
+						enabled: true,
+						ledgerCanisterId: ICRC_CK_TOKENS_LEDGER_CANISTER_IDS[0]
+					},
+					certified: false
+				}
+			]);
 
 			const tokens = get(enabledIcrcLedgerCanisterIdsNoCk);
 
