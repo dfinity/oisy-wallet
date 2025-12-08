@@ -22,7 +22,7 @@ export const mapExtNft = async ({
 
 	const identifier = extIndexToIdentifier({ collectionId: Principal.fromText(canisterId), index });
 
-	const imageUrl = `https://${canisterId}.raw.icp0.io/?index=${index}`;
+	const imageUrl = `https://${canisterId}.raw.icp0.io/?tokenid=${identifier}`;
 	const thumbnailUrl = `${imageUrl}&type=thumbnail`;
 
 	const mediaStatus = {
