@@ -8,7 +8,7 @@ import {
 } from '$btc/utils/btc-utxos.utils';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import type { Utxo } from '@icp-sdk/canisters/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 describe('btc-utxos.utils', () => {
 	const createMockUtxo = ({
@@ -21,7 +21,7 @@ describe('btc-utxos.utils', () => {
 		height?: number;
 		txid?: Uint8Array;
 		vout?: number;
-	}): Utxo => ({
+	}): CkBtcMinterDid.Utxo => ({
 		value: BigInt(value),
 		height,
 		outpoint: {
