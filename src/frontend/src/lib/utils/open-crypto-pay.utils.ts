@@ -10,8 +10,10 @@ import type {
 	PayableTokenWithConvertedAmount,
 	PayableTokenWithFees,
 	PaymentMethodData,
-	PrepareTokensParams
+	PrepareTokensParams,
+	ValidatedPaymentData
 } from '$lib/types/open-crypto-pay';
+import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
 import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -216,3 +218,47 @@ export const enrichTokensWithUsdAndBalance = ({
 
 		return acc;
 	}, []);
+
+export const extractQuoteData = (data: OpenCryptoPayResponse) => {
+	if (isNullish(data.quote) || isNullish(data.callback)) {
+		throw new Error('Invalid OpenCryptoPay response data');
+	}
+
+	return {
+		quoteId: data.quote.id,
+		callback: data.callback
+	};
+};
+
+export const validateDecodedData = ({
+	decodedData,
+	fee
+}: {
+	decodedData: DecodedUrn | undefined;
+	fee: PayableTokenWithConvertedAmount['fee'];
+}): ValidatedPaymentData => {
+	const { destination, ethereumChainId, value } = decodedData ?? {};
+	const { feeData, estimatedGasLimit } = fee ?? {};
+
+	if (
+		isNullish(ethereumChainId) ||
+		isNullish(value) ||
+		isNullish(destination) ||
+		isNullish(feeData?.maxFeePerGas) ||
+		isNullish(feeData?.maxPriorityFeePerGas) ||
+		isNullish(estimatedGasLimit)
+	) {
+		throw new Error('Missing required payment data from URN');
+	}
+
+	return {
+		destination,
+		ethereumChainId,
+		value,
+		feeData: {
+			maxFeePerGas: feeData.maxFeePerGas,
+			maxPriorityFeePerGas: feeData.maxPriorityFeePerGas
+		},
+		estimatedGasLimit
+	};
+};

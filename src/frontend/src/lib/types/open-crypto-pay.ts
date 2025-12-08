@@ -92,3 +92,14 @@ export interface PayableTokenWithConvertedAmount extends PayableTokenWithFees {
 	feeInUSD: number;
 	sumInUSD: number;
 }
+
+export interface ValidatedPaymentData {
+	destination: string;
+	ethereumChainId: string;
+	value: number;
+	feeData: {
+		maxFeePerGas: bigint;
+		maxPriorityFeePerGas: bigint;
+	};
+	estimatedGasLimit: bigint;
+}
