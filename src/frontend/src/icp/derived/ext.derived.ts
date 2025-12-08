@@ -1,6 +1,5 @@
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
-import type { ExtTokenToggleable } from '$icp/types/ext-token-toggleable';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -14,7 +13,7 @@ export const extCustomTokens: Readable<ExtCustomToken[]> = derived(
 /**
  * The list of all EXT tokens.
  */
-export const extTokens: Readable<ExtTokenToggleable[]> = derived(
+export const extTokens: Readable<ExtCustomToken[]> = derived(
 	[extCustomTokens],
 	([$extCustomTokens]) => [...$extCustomTokens]
 );
@@ -22,9 +21,8 @@ export const extTokens: Readable<ExtTokenToggleable[]> = derived(
 /**
  * The list of all enabled EXT tokens.
  */
-export const enabledExtTokens: Readable<ExtTokenToggleable[]> = derived(
-	[extTokens],
-	([$extTokens]) => $extTokens.filter(({ enabled }) => enabled)
+export const enabledExtTokens: Readable<ExtCustomToken[]> = derived([extTokens], ([$extTokens]) =>
+	$extTokens.filter(({ enabled }) => enabled)
 );
 
 export const extCustomTokensInitialized: Readable<boolean> = derived(
