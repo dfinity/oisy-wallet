@@ -184,7 +184,7 @@
 					token: customToken
 				});
 
-				icrcCustomTokensStore.reset(tokenToDelete.ledgerCanisterId);
+				icrcCustomTokensStore.resetByIdentifier(tokenToDelete.ledgerCanisterId);
 				await deleteIdbIcToken({ identity: $authIdentity, token: customToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
@@ -277,7 +277,7 @@
 						close();
 
 						// the token needs to be reset to restart the worker with indexCanisterId
-						icrcCustomTokensStore.reset(tokenToEdit.ledgerCanisterId);
+						icrcCustomTokensStore.resetByIdentifier(tokenToEdit.ledgerCanisterId);
 
 						trackEvent({
 							name: TRACK_EDIT_TOKEN_SUCCESS,
