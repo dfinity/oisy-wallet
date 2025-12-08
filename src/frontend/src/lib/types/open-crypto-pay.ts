@@ -1,8 +1,6 @@
-import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
-import type { Identity } from '@icp-sdk/core/agent';
 
 export interface Address {
 	street?: string;
