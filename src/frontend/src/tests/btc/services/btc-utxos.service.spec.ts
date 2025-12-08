@@ -67,7 +67,7 @@ import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Amount } from '$lib/types/send';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { BitcoinNetwork, Utxo, get_utxos_response } from '@icp-sdk/canisters/ckbtc';
+import type { BitcoinDid, BitcoinNetwork, CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 // Mock environment variables
 vi.mock('$env/networks/networks.icrc.env', () => ({
@@ -82,7 +82,7 @@ describe('btc-utxos.service', () => {
 	const mockNetwork: BitcoinNetwork = 'mainnet';
 	const mockAmount: Amount = 0.001;
 
-	const mockUtxo: Utxo = {
+	const mockUtxo: CkBtcMinterDid.Utxo = {
 		value: 500000n,
 		height: 100,
 		outpoint: {
@@ -91,7 +91,7 @@ describe('btc-utxos.service', () => {
 		}
 	};
 
-	const mockUtxosResponse: get_utxos_response = {
+	const mockUtxosResponse: BitcoinDid.get_utxos_response = {
 		utxos: [mockUtxo],
 		tip_block_hash: new Uint8Array([5, 6, 7, 8]),
 		tip_height: 150,
@@ -312,7 +312,7 @@ describe('btc-utxos.service', () => {
 
 		it('should handle insufficient balance for fee scenario', async () => {
 			// Mock a scenario where there are UTXOs but insufficient balance for fee
-			const smallUtxo: Utxo = {
+			const smallUtxo: CkBtcMinterDid.Utxo = {
 				value: 10000n, // Small UTXO value
 				height: 100,
 				outpoint: {
@@ -321,7 +321,7 @@ describe('btc-utxos.service', () => {
 				}
 			};
 
-			const smallUtxosResponse: get_utxos_response = {
+			const smallUtxosResponse: BitcoinDid.get_utxos_response = {
 				...mockUtxosResponse,
 				utxos: [smallUtxo]
 			};
@@ -339,7 +339,7 @@ describe('btc-utxos.service', () => {
 		});
 
 		it('should handle multiple UTXOs correctly', async () => {
-			const mockUtxo2: Utxo = {
+			const mockUtxo2: CkBtcMinterDid.Utxo = {
 				value: 300000n,
 				height: 101,
 				outpoint: {
@@ -348,7 +348,7 @@ describe('btc-utxos.service', () => {
 				}
 			};
 
-			const multipleUtxosResponse: get_utxos_response = {
+			const multipleUtxosResponse: BitcoinDid.get_utxos_response = {
 				...mockUtxosResponse,
 				utxos: [mockUtxo, mockUtxo2]
 			};
