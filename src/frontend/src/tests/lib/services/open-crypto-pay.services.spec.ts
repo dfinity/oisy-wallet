@@ -4,15 +4,19 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { InfuraErc20Provider } from '$eth/providers/infura-erc20.providers';
 import * as infuraErc20ProvidersLib from '$eth/providers/infura-erc20.providers';
+import { getNonce } from '$eth/services/nonce.services';
 import * as payServices from '$eth/services/pay.services';
 import * as sendServicesLib from '$eth/services/send.services';
 import { ethPrepareTransaction } from '$eth/services/send.services';
 import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
+import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import {
 	buildTransactionBaseParams,
 	calculateTokensWithFees,
+	pay,
 	prepareErc20Transaction,
 	processOpenCryptoPayCode
 } from '$lib/services/open-crypto-pay.services';
@@ -23,13 +27,30 @@ import type {
 	TransactionBaseParams,
 	ValidatedPaymentData
 } from '$lib/types/open-crypto-pay';
+import { extractQuoteData } from '$lib/utils/open-crypto-pay.utils';
+import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 
 vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
 	decodeLNURL: vi.fn((lnurl: string) => {
 		if (lnurl === 'VALID_LNURL') {
 			return 'https://api.dfx.swiss/v1/lnurlp/pl_test123';
 		}
-	})
+	}),
+	extractQuoteData: vi.fn(() => ({
+		quoteId: 'mock-quote-id-123',
+		callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123'
+	})),
+	validateDecodedData: vi.fn(({ decodedData, fee }) => ({
+		destination: decodedData?.destination ?? '',
+		ethereumChainId: decodedData?.ethereumChainId ?? '1',
+		value: decodedData?.value ?? 0,
+		feeData: fee?.feeData ?? {
+			maxFeePerGas: 12n,
+			maxPriorityFeePerGas: 7n
+		},
+		estimatedGasLimit: fee?.estimatedGasLimit ?? 25000n
+	}))
 }));
 
 vi.mock('$lib/rest/open-crypto-pay.rest', () => ({
@@ -38,6 +59,18 @@ vi.mock('$lib/rest/open-crypto-pay.rest', () => ({
 
 vi.mock('$eth/services/pay.services', () => ({
 	calculateEthFee: vi.fn()
+}));
+
+vi.mock('$lib/api/signer.api', () => ({
+	signTransaction: vi.fn()
+}));
+
+vi.mock('$lib/utils/qr-code.utils', () => ({
+	decodeQrCodeUrn: vi.fn()
+}));
+
+vi.mock('$eth/services/nonce.services', () => ({
+	getNonce: vi.fn()
 }));
 
 describe('open-crypto-pay.service', () => {
@@ -690,6 +723,281 @@ describe('open-crypto-pay.service', () => {
 					token: mockToken
 				})
 			).rejects.toThrow('Failed to prepare transaction');
+		});
+	});
+
+	describe('pay', () => {
+		const mockToken: PayableTokenWithConvertedAmount = {
+			...ETHEREUM_TOKEN,
+			amount: '1.0',
+			minFee: 0.001,
+			tokenNetwork: 'Ethereum',
+			amountInUSD: 100,
+			feeInUSD: 10,
+			sumInUSD: 110,
+			fee: {
+				feeInWei: 300000n,
+				feeData: {
+					maxFeePerGas: 12n,
+					maxPriorityFeePerGas: 7n
+				},
+				estimatedGasLimit: 25000n
+			}
+		} as PayableTokenWithConvertedAmount;
+
+		const mockData: OpenCryptoPayResponse = {
+			id: 'pl_test123',
+			externalId: 'test-external',
+			mode: 'Multiple',
+			tag: 'payRequest',
+			callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123',
+			minSendable: 1000,
+			maxSendable: 10000,
+			metadata: '[["text/plain", "Test"]]',
+			displayName: 'Test Shop',
+			standard: 'OpenCryptoPay',
+			possibleStandards: ['OpenCryptoPay'],
+			displayQr: true,
+			requestedAmount: {
+				asset: 'CHF',
+				amount: '10'
+			},
+			transferAmounts: []
+		};
+
+		const from = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as EthAddress;
+		const mockRawTransaction = '0x02f8...';
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should complete payment flow successfully', async () => {
+			vi.mocked(extractQuoteData).mockReturnValue({
+				quoteId: 'mock-quote-id-123',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123'
+			});
+
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce({
+				uri: 'ethereum:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb?value=1000000000000'
+			});
+
+			vi.mocked(decodeQrCodeUrn).mockReturnValue({
+				prefix: 'ethereum',
+				destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+				value: 1000000000000,
+				ethereumChainId: '1'
+			});
+
+			vi.mocked(getNonce).mockResolvedValue(5);
+			vi.mocked(signTransaction).mockResolvedValue(mockRawTransaction);
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce(undefined);
+
+			await pay({
+				token: mockToken,
+				data: mockData,
+				from,
+				identity: mockIdentity,
+				quoteId: 'mock-quote-id-123',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123'
+			});
+
+			expect(extractQuoteData).toHaveBeenCalledExactlyOnceWith(mockData);
+			expect(signTransaction).toHaveBeenCalledOnce();
+			expect(fetchOpenCryptoPay).toHaveBeenCalledTimes(2);
+		});
+
+		it('should call extractQuoteData with correct data', async () => {
+			vi.mocked(extractQuoteData).mockReturnValue({
+				quoteId: 'test-quote',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/test'
+			});
+
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce({
+				uri: 'ethereum:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb?value=1000000000000'
+			});
+
+			vi.mocked(decodeQrCodeUrn).mockReturnValue({
+				prefix: 'ethereum',
+				destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+				value: 1000000000000,
+				ethereumChainId: '1'
+			});
+
+			vi.mocked(getNonce).mockResolvedValue(5);
+			vi.mocked(signTransaction).mockResolvedValue(mockRawTransaction);
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce(undefined);
+
+			await pay({
+				token: mockToken,
+				data: mockData,
+				from,
+				identity: mockIdentity,
+				quoteId: 'test-quote',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/test'
+			});
+
+			expect(extractQuoteData).toHaveBeenCalledWith(mockData);
+		});
+
+		it('should fetch payment URI with correct parameters', async () => {
+			vi.mocked(extractQuoteData).mockReturnValue({
+				quoteId: 'quote-123',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+			});
+
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce({
+				uri: 'ethereum:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb?value=1000000000000'
+			});
+
+			vi.mocked(decodeQrCodeUrn).mockReturnValue({
+				prefix: 'ethereum',
+				destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+				value: 1000000000000,
+				ethereumChainId: '1'
+			});
+
+			vi.mocked(getNonce).mockResolvedValue(5);
+			vi.mocked(signTransaction).mockResolvedValue(mockRawTransaction);
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce(undefined);
+
+			await pay({
+				token: mockToken,
+				data: mockData,
+				from,
+				identity: mockIdentity,
+				quoteId: 'quote-123',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+			});
+
+			expect(fetchOpenCryptoPay).toHaveBeenCalledWith(
+				'https://api.dfx.swiss/v1/lnurlp/cb/pl_test?quote=quote-123&method=Ethereum&asset=ETH'
+			);
+		});
+
+		it('should sign transaction with correct identity', async () => {
+			vi.mocked(extractQuoteData).mockReturnValue({
+				quoteId: 'quote-123',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+			});
+
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce({
+				uri: 'ethereum:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb?value=1000000000000'
+			});
+
+			vi.mocked(decodeQrCodeUrn).mockReturnValue({
+				prefix: 'ethereum',
+				destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+				value: 1000000000000,
+				ethereumChainId: '1'
+			});
+
+			vi.mocked(getNonce).mockResolvedValue(5);
+			vi.mocked(signTransaction).mockResolvedValue(mockRawTransaction);
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce(undefined);
+
+			await pay({
+				token: mockToken,
+				data: mockData,
+				from,
+				identity: mockIdentity,
+				quoteId: 'quote-123',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+			});
+
+			expect(signTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					identity: mockIdentity
+				})
+			);
+		});
+
+		it('should submit transaction with correct payment URI', async () => {
+			vi.mocked(extractQuoteData).mockReturnValue({
+				quoteId: 'quote-123',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+			});
+
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce({
+				uri: 'ethereum:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb?value=1000000000000'
+			});
+
+			vi.mocked(decodeQrCodeUrn).mockReturnValue({
+				prefix: 'ethereum',
+				destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+				value: 1000000000000,
+				ethereumChainId: '1'
+			});
+
+			vi.mocked(getNonce).mockResolvedValue(5);
+			vi.mocked(signTransaction).mockResolvedValue(mockRawTransaction);
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce(undefined);
+
+			await pay({
+				token: mockToken,
+				data: mockData,
+				from,
+				identity: mockIdentity,
+				quoteId: 'quote-123',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+			});
+
+			expect(fetchOpenCryptoPay).toHaveBeenNthCalledWith(
+				2,
+				'https://api.dfx.swiss/v1/lnurlp/tx/pl_test?quote=quote-123&method=Ethereum&hex=0x02f8...'
+			);
+		});
+
+		it('should handle payment errors', async () => {
+			vi.mocked(extractQuoteData).mockReturnValue({
+				quoteId: 'quote-123',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+			});
+
+			vi.mocked(fetchOpenCryptoPay).mockRejectedValue(new Error('Payment failed'));
+
+			await expect(
+				pay({
+					token: mockToken,
+					data: mockData,
+					from,
+					identity: mockIdentity,
+					quoteId: 'quote-123',
+					callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+				})
+			).rejects.toThrow('Payment failed');
+		});
+
+		it('should handle transaction signing errors', async () => {
+			vi.mocked(extractQuoteData).mockReturnValue({
+				quoteId: 'quote-123',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+			});
+
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce({
+				uri: 'ethereum:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb?value=1000000000000'
+			});
+
+			vi.mocked(decodeQrCodeUrn).mockReturnValue({
+				prefix: 'ethereum',
+				destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+				value: 1000000000000,
+				ethereumChainId: '1'
+			});
+
+			vi.mocked(getNonce).mockResolvedValue(5);
+			vi.mocked(signTransaction).mockRejectedValue(new Error('Signing failed'));
+
+			await expect(
+				pay({
+					token: mockToken,
+					data: mockData,
+					from,
+					identity: mockIdentity,
+					quoteId: 'quote-123',
+					callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+				})
+			).rejects.toThrow('Signing failed');
 		});
 	});
 });

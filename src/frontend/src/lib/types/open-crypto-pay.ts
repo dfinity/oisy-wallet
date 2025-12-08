@@ -1,6 +1,8 @@
+import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import type { Identity } from '@icp-sdk/core/agent';
 
 export interface Address {
 	street?: string;
@@ -102,6 +104,15 @@ export interface ValidatedPaymentData {
 		maxPriorityFeePerGas: bigint;
 	};
 	estimatedGasLimit: bigint;
+}
+
+export interface PayParams {
+	token: PayableTokenWithConvertedAmount;
+	data: OpenCryptoPayResponse;
+	from: EthAddress;
+	identity: Identity;
+	quoteId: string;
+	callback: string;
 }
 
 export interface TransactionBaseParams {
