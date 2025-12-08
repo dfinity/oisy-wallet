@@ -1,7 +1,9 @@
-import type { Erc20ContractAddress } from '$eth/types/erc20';
+import type { Erc20Token } from '$eth/types/erc20';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import type { ExtToken } from '$icp/types/ext-token';
+import { isTokenExtV2 } from '$icp/utils/ext.utils';
 import type { Token, TokenId } from '$lib/types/token';
-import type { SplTokenAddress } from '$sol/types/spl';
+import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -21,12 +23,14 @@ export const initDefaultTokensStore = <T extends Token>(): DefaultTokensStore<T>
 
 	const getIdentifier = <T extends Token>(
 		token: T
-	): string | Erc20ContractAddress['address'] | SplTokenAddress =>
+	): string | Erc20Token['address'] | SplToken['address'] | ExtToken['canisterId'] =>
 		isTokenSpl(token)
 			? token.address
 			: isTokenErc20(token)
 				? token.address
-				: `${token.id.description}`;
+				: isTokenExtV2(token)
+					? token.canisterId
+					: `${token.id.description}`;
 
 	return {
 		set,
