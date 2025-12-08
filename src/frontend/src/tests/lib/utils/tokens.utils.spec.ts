@@ -13,9 +13,9 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
-import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import * as appConstants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
@@ -43,7 +43,6 @@ import {
 	sumTokensUiUsdBalance,
 	sumTokensUiUsdStakeBalance
 } from '$lib/utils/tokens.utils';
-import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -924,17 +923,13 @@ describe('tokens.utils', () => {
 				toastsShow: vi.fn()
 			}));
 
-			vi.mock('$icp/services/manage-tokens.services', () => ({
-				saveIcrcCustomTokens: vi.fn().mockResolvedValue(undefined)
+			vi.mock('$lib/services/manage-tokens.services', () => ({
+				saveCustomTokensWithKey: vi.fn().mockResolvedValue(undefined)
 			}));
 
 			vi.mock('$eth/services/manage-tokens.services', () => ({
 				saveErc20UserTokens: vi.fn().mockResolvedValue(undefined),
 				saveErc20CustomTokens: vi.fn().mockResolvedValue(undefined)
-			}));
-
-			vi.mock('$sol/services/manage-tokens.services', () => ({
-				saveSplCustomTokens: vi.fn().mockResolvedValue(undefined)
 			}));
 
 			vi.clearAllMocks();
@@ -953,20 +948,19 @@ describe('tokens.utils', () => {
 				duration: 5000
 			});
 
-			expect(saveIcrcCustomTokens).not.toHaveBeenCalled();
+			expect(saveCustomTokensWithKey).not.toHaveBeenCalled();
 			expect(saveErc20UserTokens).not.toHaveBeenCalled();
 			expect(saveErc20CustomTokens).not.toHaveBeenCalled();
-			expect(saveSplCustomTokens).not.toHaveBeenCalled();
 		});
 
-		it('should call saveIcrcCustomTokens when ICRC tokens are present', async () => {
+		it('should call saveCustomTokensWithKey when ICRC tokens are present', async () => {
 			await saveAllCustomTokens({
 				tokens: [mockValidIcrcToken],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
 
-			expect(saveIcrcCustomTokens).toHaveBeenCalledWith(
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([
 						expect.objectContaining({ ...mockValidIcrcToken, networkKey: 'Icrc' })
@@ -976,14 +970,14 @@ describe('tokens.utils', () => {
 			);
 		});
 
-		it('should call saveIcrcCustomTokens when EXT tokens are present', async () => {
+		it('should call saveCustomTokensWithKey when EXT tokens are present', async () => {
 			await saveAllCustomTokens({
 				tokens: [mockValidExtV2Token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
 
-			expect(saveIcrcCustomTokens).toHaveBeenCalledWith(
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([
 						expect.objectContaining({ ...mockValidExtV2Token, networkKey: 'ExtV2' })
@@ -1027,7 +1021,7 @@ describe('tokens.utils', () => {
 			);
 		});
 
-		it('should call saveSplCustomTokens when SPL tokens are present', async () => {
+		it('should call saveCustomTokensWithKey when SPL tokens are present', async () => {
 			const token = { ...BONK_TOKEN, enabled: true } as unknown as TokenUi;
 
 			await saveAllCustomTokens({
@@ -1036,7 +1030,7 @@ describe('tokens.utils', () => {
 				$i18n: i18nMock
 			});
 
-			expect(saveSplCustomTokens).toHaveBeenCalledWith(
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([expect.objectContaining(token)]),
 					identity: mockIdentity
@@ -1058,7 +1052,7 @@ describe('tokens.utils', () => {
 				modalNext
 			});
 
-			expect(saveIcrcCustomTokens).toHaveBeenCalledWith(
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({ progress, onSuccess, modalNext })
 			);
 		});

@@ -1,10 +1,5 @@
 import { NFTS_ENABLED } from '$env/nft.env';
-import {
-	saveErc1155CustomTokens,
-	saveErc20CustomTokens,
-	saveErc20UserTokens,
-	saveErc721CustomTokens
-} from '$eth/services/manage-tokens.services';
+import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
@@ -14,7 +9,6 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20, isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
-import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenExtV2 } from '$icp/utils/ext.utils';
@@ -27,7 +21,10 @@ import {
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-import type { ManageTokensSaveParams } from '$lib/services/manage-tokens.services';
+import {
+	saveCustomTokensWithKey,
+	type ManageTokensSaveParams
+} from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
@@ -41,9 +38,9 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
+import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
-import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -450,7 +447,7 @@ export const saveAllCustomTokens = async ({
 	await Promise.allSettled([
 		...(icrc.length > 0
 			? [
-					saveIcrcCustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
 						tokens: icrc.map((t) => ({ ...t, networkKey: 'Icrc' }))
 					})
@@ -458,7 +455,7 @@ export const saveAllCustomTokens = async ({
 			: []),
 		...(ext.length > 0
 			? [
-					saveIcrcCustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
 						tokens: ext.map((t) => ({ ...t, networkKey: 'ExtV2' }))
 					})
@@ -479,25 +476,36 @@ export const saveAllCustomTokens = async ({
 			: []),
 		...(erc721.length > 0 && NFTS_ENABLED
 			? [
-					saveErc721CustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
-						tokens: erc721
+						tokens: erc721.map((t) => ({
+							...t,
+							chainId: t.network.chainId,
+							networkKey: 'Erc721'
+						}))
 					})
 				]
 			: []),
 		...(erc1155.length > 0 && NFTS_ENABLED
 			? [
-					saveErc1155CustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
-						tokens: erc1155
+						tokens: erc1155.map((t) => ({
+							...t,
+							chainId: t.network.chainId,
+							networkKey: 'Erc1155'
+						}))
 					})
 				]
 			: []),
 		...(spl.length > 0
 			? [
-					saveSplCustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
-						tokens: spl
+						tokens: spl.map((t) => ({
+							...t,
+							networkKey: isNetworkIdSOLDevnet(t.network.id) ? 'SplDevnet' : 'SplMainnet'
+						}))
 					})
 				]
 			: [])
