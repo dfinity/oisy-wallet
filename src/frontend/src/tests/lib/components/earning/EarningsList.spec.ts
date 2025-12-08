@@ -54,7 +54,7 @@ describe('EarningsList', () => {
 			gldtStakeStore.setPosition({ staked: mockStaked } as unknown as StakePositionResponse);
 
 			icrcCustomTokensStore.resetAll();
-			icrcCustomTokensStore.set({ data: mockGldtToken, certified: true });
+			icrcCustomTokensStore.setAll([{ data: mockGldtToken, certified: true }]);
 
 			exchangeStore.reset();
 			exchangeStore.set([{ [mockGldtToken.ledgerCanisterId]: { usd: 1 } }]);
@@ -76,7 +76,9 @@ describe('EarningsList', () => {
 
 		it('should render the placeholder if GLDT token is not enabled', () => {
 			icrcCustomTokensStore.resetAll();
-			icrcCustomTokensStore.set({ data: { ...mockGldtToken, enabled: false }, certified: true });
+			icrcCustomTokensStore.setAll([
+				{ data: { ...mockGldtToken, enabled: false }, certified: true }
+			]);
 
 			const { getByTestId } = render(EarningsList);
 
