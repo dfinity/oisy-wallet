@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
-	import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
+	import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
-	import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
+	import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
-	import type { ExtTokenToggleable } from '$icp/types/ext-token-toggleable';
+	import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 	import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+	import type { SplCustomToken } from '$sol/types/spl-custom-token';
 
 	type TokenToggleable =
 		| EthereumUserToken
-		| SplTokenToggleable
-		| Erc721TokenToggleable
-		| Erc1155TokenToggleable
-		| ExtTokenToggleable;
+		| SplCustomToken
+		| Erc721CustomToken
+		| Erc1155CustomToken
+		| ExtCustomToken;
 
 	interface Props {
 		token: TokenToggleable;
