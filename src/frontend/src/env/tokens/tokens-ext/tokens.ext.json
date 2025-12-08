@@ -1,5 +1,17 @@
 [
 	{
+		"canisterId": "5h2fc-zaaaa-aaaah-qcnjq-cai",
+		"metadata": {
+			"name": "ICPrime8s (SB manually added)"
+		}
+	},
+	{
+		"canisterId": "unssi-hiaaa-aaaah-qcmya-cai",
+		"metadata": {
+			"name": "IC Pets (SB manually added)"
+		}
+	},
+	{
 		"canisterId": "24ark-haaaa-aaaam-qazoa-cai",
 		"metadata": {
 			"name": "Crypto Wizards"
