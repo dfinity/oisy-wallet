@@ -81,7 +81,7 @@ describe('save-custom-tokens.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(icrcCustomTokensStore, 'reset');
+			vi.spyOn(icrcCustomTokensStore, 'resetByIdentifier');
 			vi.spyOn(extCustomTokensStore, 'resetByIdentifier');
 			vi.spyOn(erc20CustomTokensStore, 'resetByIdentifier');
 			vi.spyOn(erc721CustomTokensStore, 'resetByIdentifier');
