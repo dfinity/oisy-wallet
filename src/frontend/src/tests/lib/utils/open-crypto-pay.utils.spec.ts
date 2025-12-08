@@ -4,15 +4,23 @@ import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
-import type { Address, PayableTokenWithFees, PaymentMethodData } from '$lib/types/open-crypto-pay';
+import type {
+	Address,
+	OpenCryptoPayResponse,
+	PayableTokenWithFees,
+	PaymentMethodData
+} from '$lib/types/open-crypto-pay';
+import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
 import {
 	createPaymentMethodDataMap,
 	decodeLNURL,
 	enrichTokensWithUsdAndBalance,
+	extractQuoteData,
 	formatAddress,
 	mapTokenToPayableToken,
-	prepareBasePayableTokens
+	prepareBasePayableTokens,
+	validateDecodedData
 } from '$lib/utils/open-crypto-pay.utils';
 
 describe('open-crypto-pay.utils', () => {
@@ -1237,6 +1245,257 @@ describe('open-crypto-pay.utils', () => {
 			expect(result).toHaveLength(2);
 			expect(result[0].id).toBe(mockToken1.id);
 			expect(result[1].id).toBe(mockToken2.id);
+		});
+	});
+
+	describe('extractQuoteData', () => {
+		const validResponse: OpenCryptoPayResponse = {
+			id: 'pl_test123',
+			tag: 'payRequest',
+			callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123',
+			minSendable: 1000,
+			maxSendable: 10000,
+			metadata: '[]',
+			requestedAmount: {
+				asset: 'CHF',
+				amount: '10'
+			},
+			transferAmounts: [],
+			quote: {
+				id: 'quote123',
+				expiration: '2025-12-31T23:59:59.000Z',
+				payment: 'payment123'
+			}
+		};
+
+		it('should extract quote id and callback from valid response', () => {
+			const result = extractQuoteData(validResponse);
+
+			expect(result).toEqual({
+				quoteId: 'quote123',
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123'
+			});
+		});
+
+		it('should extract different quote id', () => {
+			const response = {
+				...validResponse,
+				quote: {
+					id: 'quote456',
+					expiration: '2025-12-31T23:59:59.000Z',
+					payment: 'payment456'
+				}
+			};
+
+			const result = extractQuoteData(response);
+
+			expect(result.quoteId).toBe('quote456');
+		});
+
+		it('should extract different callback', () => {
+			const response = {
+				...validResponse,
+				callback: 'https://api.different.com/callback'
+			};
+
+			const result = extractQuoteData(response);
+
+			expect(result.callback).toBe('https://api.different.com/callback');
+		});
+
+		it('should throw error when quote is null', () => {
+			const invalidResponse = {
+				...validResponse,
+				quote: null
+			} as unknown as OpenCryptoPayResponse;
+
+			expect(() => extractQuoteData(invalidResponse)).toThrow(
+				'Invalid OpenCryptoPay response data'
+			);
+		});
+
+		it('should throw error when quote is undefined', () => {
+			const invalidResponse = {
+				...validResponse,
+				quote: undefined
+			} as unknown as OpenCryptoPayResponse;
+
+			expect(() => extractQuoteData(invalidResponse)).toThrow(
+				'Invalid OpenCryptoPay response data'
+			);
+		});
+
+		it('should throw error when callback is null', () => {
+			const invalidResponse = {
+				...validResponse,
+				callback: null
+			} as unknown as OpenCryptoPayResponse;
+
+			expect(() => extractQuoteData(invalidResponse)).toThrow(
+				'Invalid OpenCryptoPay response data'
+			);
+		});
+
+		it('should throw error when callback is undefined', () => {
+			const invalidResponse = {
+				...validResponse,
+				callback: undefined
+			} as unknown as OpenCryptoPayResponse;
+
+			expect(() => extractQuoteData(invalidResponse)).toThrow(
+				'Invalid OpenCryptoPay response data'
+			);
+		});
+
+		it('should extract quote with additional properties', () => {
+			const response: OpenCryptoPayResponse = {
+				...validResponse,
+				quote: {
+					id: 'quote123',
+					expiration: '2025-12-31T23:59:59.000Z',
+					payment: 'payment123'
+				}
+			};
+
+			const result = extractQuoteData(response);
+
+			expect(result.quoteId).toBe('quote123');
+		});
+	});
+
+	describe('validateDecodedData', () => {
+		const validDecodedData: DecodedUrn = {
+			prefix: 'ethereum',
+			destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			ethereumChainId: '1',
+			value: 10000000000
+		};
+
+		const validFee = {
+			feeInWei: 300000n,
+			feeData: {
+				maxFeePerGas: 12n,
+				maxPriorityFeePerGas: 7n
+			},
+			estimatedGasLimit: 25000n
+		};
+
+		it('should validate and return correct data structure', () => {
+			const result = validateDecodedData({
+				decodedData: validDecodedData,
+				fee: validFee
+			});
+
+			expect(result).toEqual({
+				destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+				ethereumChainId: '1',
+				value: 10000000000,
+				feeData: {
+					maxFeePerGas: 12n,
+					maxPriorityFeePerGas: 7n
+				},
+				estimatedGasLimit: 25000n
+			});
+		});
+
+		it('should validate data with different values', () => {
+			const decodedData: DecodedUrn = {
+				prefix: 'ethereum',
+				destination: '0xcccccccccccccccccccccccccccccccccccccccc',
+				ethereumChainId: '137',
+				value: 200000
+			};
+
+			const fee = {
+				feeInWei: 500000n,
+				feeData: {
+					maxFeePerGas: 20n,
+					maxPriorityFeePerGas: 10n
+				},
+				estimatedGasLimit: 50000n
+			};
+
+			const result = validateDecodedData({
+				decodedData,
+				fee
+			});
+
+			expect(result.destination).toBe('0xcccccccccccccccccccccccccccccccccccccccc');
+			expect(result.ethereumChainId).toBe('137');
+			expect(result.value).toBe(200000);
+			expect(result.feeData.maxFeePerGas).toBe(20n);
+			expect(result.estimatedGasLimit).toBe(50000n);
+		});
+
+		it('should throw error when decodedData is undefined', () => {
+			expect(() =>
+				validateDecodedData({
+					decodedData: undefined,
+					fee: validFee
+				})
+			).toThrow('Missing required payment data from URN');
+		});
+
+		it('should throw error when ethereumChainId is missing', () => {
+			const invalidData: DecodedUrn = {
+				...validDecodedData,
+				ethereumChainId: undefined
+			};
+
+			expect(() =>
+				validateDecodedData({
+					decodedData: invalidData,
+					fee: validFee
+				})
+			).toThrow('Missing required payment data from URN');
+		});
+
+		it('should throw error when ethereumChainId is undefined', () => {
+			const invalidData: DecodedUrn = {
+				...validDecodedData,
+				ethereumChainId: undefined
+			};
+
+			expect(() =>
+				validateDecodedData({
+					decodedData: invalidData,
+					fee: validFee
+				})
+			).toThrow('Missing required payment data from URN');
+		});
+
+		it('should throw error when value is missing', () => {
+			const invalidData: DecodedUrn = {
+				...validDecodedData,
+				value: undefined
+			};
+
+			expect(() =>
+				validateDecodedData({
+					decodedData: invalidData,
+					fee: validFee
+				})
+			).toThrow('Missing required payment data from URN');
+		});
+
+		it('should throw error when fee is undefined', () => {
+			expect(() =>
+				validateDecodedData({
+					decodedData: validDecodedData,
+					fee: undefined
+				})
+			).toThrow('Missing required payment data from URN');
+		});
+
+		it('should preserve BigInt types', () => {
+			const result = validateDecodedData({
+				decodedData: validDecodedData,
+				fee: validFee
+			});
+
+			expect(typeof result.feeData.maxFeePerGas).toBe('bigint');
+			expect(typeof result.feeData.maxPriorityFeePerGas).toBe('bigint');
+			expect(typeof result.estimatedGasLimit).toBe('bigint');
 		});
 	});
 });
