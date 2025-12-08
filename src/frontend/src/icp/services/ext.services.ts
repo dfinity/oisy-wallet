@@ -1,10 +1,9 @@
 import type { CustomToken, ExtV2Token } from '$declarations/backend/backend.did';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	EXT_BUILTIN_TOKENS,
 	EXT_BUILTIN_TOKENS_INDEXED
 } from '$env/tokens/tokens-ext/tokens.ext.env';
-import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { EXT_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens-ext/tokens.ext.env';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { extDefaultTokensStore } from '$icp/stores/ext-default-tokens.store';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
