@@ -16,29 +16,27 @@ export interface DefaultTokensStore<T extends Token> extends Readable<DefaultTok
 	reset: () => void;
 }
 
+type Identifier = Erc20Token['address'] | SplToken['address'] | ExtToken['canisterId'];
+
 export const initDefaultTokensStore = <T extends Token>(): DefaultTokensStore<T> => {
 	const INITIAL: DefaultTokensData<T> = undefined;
 
 	const { subscribe, set, update } = writable<DefaultTokensData<T>>(INITIAL);
 
-	const getIdentifier = <T extends Token>(
-		token: T
-	): string | Erc20Token['address'] | SplToken['address'] | ExtToken['canisterId'] =>
+	const getIdentifier = <T extends Token>(token: T): Identifier | TokenId =>
 		isTokenSpl(token)
 			? token.address
 			: isTokenErc20(token)
 				? token.address
 				: isTokenExtV2(token)
 					? token.canisterId
-					: `${token.id.description}`;
+					: token.id;
 
 	return {
 		set,
 		add: (token: T) =>
 			update((state) => [
-				...(state ?? []).filter(
-					(data) => getIdentifier(data).toLowerCase() !== getIdentifier(token).toLowerCase()
-				),
+				...(state ?? []).filter((data) => getIdentifier(data) !== getIdentifier(token)),
 				token
 			]),
 		remove: (tokenId: TokenId) =>
