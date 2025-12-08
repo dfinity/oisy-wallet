@@ -1,13 +1,28 @@
+import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import type { InfuraErc20Provider } from '$eth/providers/infura-erc20.providers';
+import * as infuraErc20ProvidersLib from '$eth/providers/infura-erc20.providers';
 import * as payServices from '$eth/services/pay.services';
+import * as sendServicesLib from '$eth/services/send.services';
+import { ethPrepareTransaction } from '$eth/services/send.services';
+import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
+import { ZERO } from '$lib/constants/app.constants';
 import {
+	buildTransactionBaseParams,
 	calculateTokensWithFees,
+	prepareErc20Transaction,
 	processOpenCryptoPayCode
 } from '$lib/services/open-crypto-pay.services';
-import type { OpenCryptoPayResponse, PayableToken } from '$lib/types/open-crypto-pay';
+import type {
+	OpenCryptoPayResponse,
+	PayableToken,
+	PayableTokenWithConvertedAmount,
+	TransactionBaseParams,
+	ValidatedPaymentData
+} from '$lib/types/open-crypto-pay';
 
 vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
 	decodeLNURL: vi.fn((lnurl: string) => {
@@ -317,6 +332,364 @@ describe('open-crypto-pay.service', () => {
 
 			expect(result).toHaveLength(1);
 			expect(result[0].fee).toBeDefined();
+		});
+	});
+
+	describe('buildTransactionBaseParams', () => {
+		const userAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as EthAddress;
+
+		const validatedData: ValidatedPaymentData = {
+			destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			ethereumChainId: '1',
+			value: 1000000000000,
+			feeData: {
+				maxFeePerGas: 12n,
+				maxPriorityFeePerGas: 7n
+			},
+			estimatedGasLimit: 25000n
+		};
+
+		it('should build transaction params with correct structure', () => {
+			const result = buildTransactionBaseParams({
+				from: userAddress,
+				nonce: 5,
+				validatedData
+			});
+
+			expect(result).toEqual({
+				from: userAddress,
+				to: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+				amount: 1000000000000n,
+				maxPriorityFeePerGas: 7n,
+				maxFeePerGas: 12n,
+				nonce: 5,
+				gas: 25000n,
+				chainId: 1n
+			});
+		});
+
+		it('should convert string value to BigInt', () => {
+			const result = buildTransactionBaseParams({
+				from: userAddress,
+				nonce: 0,
+				validatedData
+			});
+
+			expect(result.amount).toBe(1000000000000n);
+			expect(typeof result.amount).toBe('bigint');
+		});
+
+		it('should convert string chainId to BigInt', () => {
+			const result = buildTransactionBaseParams({
+				from: userAddress,
+				nonce: 0,
+				validatedData
+			});
+
+			expect(result.chainId).toBe(1n);
+			expect(typeof result.chainId).toBe('bigint');
+		});
+
+		it('should handle different nonce values', () => {
+			const nonces = [0, 1, 5, 100, 999];
+
+			nonces.forEach((nonce) => {
+				const result = buildTransactionBaseParams({
+					from: userAddress,
+					nonce,
+					validatedData
+				});
+
+				expect(result.nonce).toBe(nonce);
+			});
+		});
+
+		it('should handle different from addresses', () => {
+			const addresses = [
+				'0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+				'0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+				'0xcccccccccccccccccccccccccccccccccccccccc'
+			];
+
+			addresses.forEach((address) => {
+				const result = buildTransactionBaseParams({
+					from: address,
+					nonce: 0,
+					validatedData
+				});
+
+				expect(result.from).toBe(address);
+			});
+		});
+
+		it('should handle different destination addresses', () => {
+			const data = {
+				...validatedData,
+				destination: '0xdddddddddddddddddddddddddddddddddddddddd'
+			};
+
+			const result = buildTransactionBaseParams({
+				from: userAddress,
+				nonce: 0,
+				validatedData: data
+			});
+
+			expect(result.to).toBe('0xdddddddddddddddddddddddddddddddddddddddd');
+		});
+
+		it('should handle different chain IDs', () => {
+			const chainIds = ['1', '137', '56', '42161'];
+
+			chainIds.forEach((chainId) => {
+				const data = { ...validatedData, ethereumChainId: chainId };
+
+				const result = buildTransactionBaseParams({
+					from: userAddress,
+					nonce: 0,
+					validatedData: data
+				});
+
+				expect(result.chainId).toBe(BigInt(chainId));
+			});
+		});
+
+		it('should handle zero value', () => {
+			const data = { ...validatedData, value: 0 };
+
+			const result = buildTransactionBaseParams({
+				from: userAddress,
+				nonce: 0,
+				validatedData: data
+			});
+
+			expect(result.amount).toBe(ZERO);
+		});
+
+		it('should preserve BigInt fee values', () => {
+			const data: ValidatedPaymentData = {
+				...validatedData,
+				feeData: {
+					maxFeePerGas: 999n,
+					maxPriorityFeePerGas: 888n
+				}
+			};
+
+			const result = buildTransactionBaseParams({
+				from: userAddress,
+				nonce: 0,
+				validatedData: data
+			});
+
+			expect(result.maxFeePerGas).toBe(999n);
+			expect(result.maxPriorityFeePerGas).toBe(888n);
+			expect(typeof result.maxFeePerGas).toBe('bigint');
+			expect(typeof result.maxPriorityFeePerGas).toBe('bigint');
+		});
+
+		it('should preserve BigInt gas limit', () => {
+			const data: ValidatedPaymentData = {
+				...validatedData,
+				estimatedGasLimit: 50000n
+			};
+
+			const result = buildTransactionBaseParams({
+				from: userAddress,
+				nonce: 0,
+				validatedData: data
+			});
+
+			expect(result.gas).toBe(50000n);
+			expect(typeof result.gas).toBe('bigint');
+		});
+	});
+
+	describe('prepareEthTransaction', () => {
+		const baseParams = {
+			to: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			from: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaa',
+			amount: 1000000000000000000n,
+			maxPriorityFeePerGas: 7n,
+			maxFeePerGas: 12n,
+			nonce: 5,
+			gas: 25000n,
+			chainId: 1n
+		};
+
+		it('should prepare transaction with all required fields', () => {
+			const result = ethPrepareTransaction(baseParams);
+
+			expect(result).toEqual({
+				to: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+				value: 1000000000000000000n,
+				chain_id: 1n,
+				nonce: 5n,
+				gas: 25000n,
+				max_fee_per_gas: 12n,
+				max_priority_fee_per_gas: 7n,
+				data: []
+			});
+		});
+	});
+
+	describe('prepareErc20Transaction', () => {
+		const baseParams: TransactionBaseParams = {
+			from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as EthAddress,
+			to: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			amount: 1000000000000000000n,
+			maxPriorityFeePerGas: 7n,
+			maxFeePerGas: 12n,
+			nonce: 5,
+			gas: 25000n,
+			chainId: 1n
+		};
+
+		const mockToken: PayableTokenWithConvertedAmount = {
+			...USDC_TOKEN,
+			amount: '100',
+			minFee: 0.0001,
+			tokenNetwork: 'Ethereum',
+			amountInUSD: 100,
+			feeInUSD: 10,
+			sumInUSD: 110,
+			fee: {
+				feeInWei: 300000n,
+				feeData: {
+					maxFeePerGas: 12n,
+					maxPriorityFeePerGas: 7n
+				},
+				estimatedGasLimit: 25000n
+			}
+		} as PayableTokenWithConvertedAmount;
+
+		const populateTransactionSpy = vi.fn();
+		const erc20PrepareTransactionSpy = vi.fn();
+
+		const mockErc20Provider = {
+			populateTransaction: populateTransactionSpy
+		} as unknown as InfuraErc20Provider;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(infuraErc20ProvidersLib, 'infuraErc20Providers').mockReturnValue(mockErc20Provider);
+			vi.spyOn(sendServicesLib, 'erc20PrepareTransaction').mockImplementation(
+				erc20PrepareTransactionSpy
+			);
+
+			erc20PrepareTransactionSpy.mockResolvedValue({} as EthSignTransactionRequest);
+		});
+
+		it('should call erc20PrepareTransaction with correct params', async () => {
+			const mockTransaction = {
+				type: 'erc20-transaction'
+			} as unknown as EthSignTransactionRequest;
+
+			erc20PrepareTransactionSpy.mockResolvedValue(mockTransaction);
+
+			const result = await prepareErc20Transaction({
+				baseParams,
+				token: mockToken
+			});
+
+			expect(erc20PrepareTransactionSpy).toHaveBeenCalledWith({
+				...baseParams,
+				token: mockToken,
+				populate: populateTransactionSpy
+			});
+			expect(result).toEqual(mockTransaction);
+		});
+
+		it('should get populate function from correct network', async () => {
+			await prepareErc20Transaction({
+				baseParams,
+				token: mockToken
+			});
+
+			expect(infuraErc20ProvidersLib.infuraErc20Providers).toHaveBeenCalledWith(
+				mockToken.network.id
+			);
+		});
+
+		it('should call erc20PrepareTransaction exactly once', async () => {
+			await prepareErc20Transaction({
+				baseParams,
+				token: mockToken
+			});
+
+			expect(erc20PrepareTransactionSpy).toHaveBeenCalledOnce();
+		});
+
+		it('should return transaction from erc20PrepareTransaction', async () => {
+			const expectedTransaction = {
+				to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+				value: ZERO,
+				data: '0xa9059cbb...',
+				nonce: baseParams.nonce
+			} as unknown as EthSignTransactionRequest;
+
+			erc20PrepareTransactionSpy.mockResolvedValue(expectedTransaction);
+
+			const result = await prepareErc20Transaction({
+				baseParams,
+				token: mockToken
+			});
+
+			expect(result).toEqual(expectedTransaction);
+		});
+
+		it('should handle different base params', async () => {
+			const differentParams: TransactionBaseParams = {
+				...baseParams,
+				amount: 2000000000n,
+				nonce: 15
+			};
+
+			await prepareErc20Transaction({
+				baseParams: differentParams,
+				token: mockToken
+			});
+
+			expect(erc20PrepareTransactionSpy).toHaveBeenCalledWith(
+				expect.objectContaining({
+					amount: 2000000000n,
+					nonce: 15
+				})
+			);
+		});
+
+		it('should handle erc20PrepareTransaction returning complex transaction', async () => {
+			const complexTransaction = {
+				to: 'test-address',
+				value: ZERO,
+				data: '0xa9059cbb00000000000000000000000000000000000000000000000000000000000000640000000000000000000000000000000000000000000000000de0b6b3a7640000',
+				nonce: baseParams.nonce,
+				gasLimit: baseParams.gas,
+				maxFeePerGas: baseParams.maxFeePerGas,
+				maxPriorityFeePerGas: baseParams.maxPriorityFeePerGas,
+				chainId: baseParams.chainId,
+				type: 2
+			} as unknown as EthSignTransactionRequest;
+
+			erc20PrepareTransactionSpy.mockResolvedValue(complexTransaction);
+
+			const result = await prepareErc20Transaction({
+				baseParams,
+				token: mockToken
+			});
+
+			expect(result).toEqual(complexTransaction);
+		});
+
+		it('should propagate errors from erc20PrepareTransaction', async () => {
+			const error = new Error('Failed to prepare transaction');
+			erc20PrepareTransactionSpy.mockRejectedValue(error);
+
+			await expect(
+				prepareErc20Transaction({
+					baseParams,
+					token: mockToken
+				})
+			).rejects.toThrow('Failed to prepare transaction');
 		});
 	});
 });

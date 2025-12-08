@@ -1,4 +1,8 @@
+import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
+import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { calculateEthFee } from '$eth/services/pay.services';
+import { erc20PrepareTransaction, ethPrepareTransaction } from '$eth/services/send.services';
+import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -6,7 +10,10 @@ import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import type {
 	OpenCryptoPayResponse,
 	PayableToken,
-	PayableTokenWithFees
+	PayableTokenWithConvertedAmount,
+	PayableTokenWithFees,
+	TransactionBaseParams,
+	ValidatedPaymentData
 } from '$lib/types/open-crypto-pay';
 import { decodeLNURL } from '$lib/utils/open-crypto-pay.utils';
 import { isEmptyString, isNullish } from '@dfinity/utils';
@@ -79,3 +86,41 @@ export const calculateTokensWithFees = async ({
 		return acc;
 	}, []);
 };
+
+export const buildTransactionBaseParams = ({
+	from,
+	nonce,
+	validatedData
+}: {
+	from: EthAddress;
+	nonce: number;
+	validatedData: ValidatedPaymentData;
+}): TransactionBaseParams => ({
+	from,
+	to: validatedData.destination,
+	amount: BigInt(validatedData.value),
+	maxPriorityFeePerGas: validatedData.feeData.maxPriorityFeePerGas,
+	maxFeePerGas: validatedData.feeData.maxFeePerGas,
+	nonce,
+	gas: validatedData.estimatedGasLimit,
+	chainId: BigInt(validatedData.ethereumChainId)
+});
+
+export const prepareEthTransaction = ({
+	baseParams
+}: {
+	baseParams: TransactionBaseParams;
+}): EthSignTransactionRequest => ethPrepareTransaction(baseParams);
+
+export const prepareErc20Transaction = ({
+	baseParams,
+	token
+}: {
+	baseParams: TransactionBaseParams;
+	token: PayableTokenWithConvertedAmount;
+}): Promise<EthSignTransactionRequest> =>
+	erc20PrepareTransaction({
+		...baseParams,
+		token,
+		populate: infuraErc20Providers(token.network.id).populateTransaction
+	});

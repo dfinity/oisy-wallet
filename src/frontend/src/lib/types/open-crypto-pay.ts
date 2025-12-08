@@ -103,3 +103,14 @@ export interface ValidatedPaymentData {
 	};
 	estimatedGasLimit: bigint;
 }
+
+export interface TransactionBaseParams {
+	from: string;
+	to: string;
+	amount: bigint;
+	maxPriorityFeePerGas: bigint;
+	maxFeePerGas: bigint;
+	nonce: number;
+	gas: bigint;
+	chainId: bigint;
+}
