@@ -28,8 +28,8 @@ import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/toke
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
-import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
@@ -43,7 +43,7 @@ import {
 } from '$lib/derived/all-tokens.derived';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
-import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -77,7 +77,7 @@ describe('all-tokens.derived', () => {
 		enabled: true
 	};
 
-	const mockErc20Token: Erc20TokenToggleable = {
+	const mockErc20Token: Erc20CustomToken = {
 		...mockValidErc20Token,
 		id: parseTokenId('DUM'),
 		address: mockEthAddress,
@@ -85,14 +85,14 @@ describe('all-tokens.derived', () => {
 		enabled: false
 	};
 
-	const mockErc721Token: Erc721TokenToggleable = {
+	const mockErc721Token: Erc721CustomToken = {
 		...mockValidErc721Token,
 		id: parseTokenId('KUM'),
 		address: mockEthAddress,
 		enabled: false
 	};
 
-	const mockSplToken: SplTokenToggleable = {
+	const mockSplToken: SplCustomToken = {
 		...mockValidSplToken,
 		enabled: true
 	};
@@ -420,7 +420,7 @@ describe('all-tokens.derived', () => {
 	});
 
 	describe('allCrossChainSwapTokens', () => {
-		const mockErc20Token: Erc20TokenToggleable = {
+		const mockErc20Token: Erc20CustomToken = {
 			...mockValidErc20Token,
 			id: parseTokenId('MOCK'),
 			address: mockEthAddress,

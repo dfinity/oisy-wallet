@@ -44,8 +44,8 @@ import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
-import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
+import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -350,7 +350,7 @@ export const groupTogglableTokens = (
 	erc20: (Erc20UserToken | Erc20CustomToken)[];
 	erc721: Erc721CustomToken[];
 	erc1155: Erc1155CustomToken[];
-	spl: SplTokenToggleable[];
+	spl: SplCustomToken[];
 } =>
 	tokens.reduce<{
 		icrc: IcrcCustomToken[];
@@ -358,7 +358,7 @@ export const groupTogglableTokens = (
 		erc20: Erc20UserToken[];
 		erc721: Erc721CustomToken[];
 		erc1155: Erc1155CustomToken[];
-		spl: SplTokenToggleable[];
+		spl: SplCustomToken[];
 	}>(
 		({ icrc, ext, erc20, erc721, erc1155, spl }, token) => ({
 			icrc: [
@@ -369,7 +369,7 @@ export const groupTogglableTokens = (
 			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
 			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
-			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
+			spl: [...spl, ...(isTokenSplCustomToken(token) ? [token] : [])]
 		}),
 		{ icrc: [], ext: [], erc20: [], erc721: [], erc1155: [], spl: [] }
 	);
