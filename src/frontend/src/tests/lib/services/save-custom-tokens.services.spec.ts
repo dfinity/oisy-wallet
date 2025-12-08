@@ -117,7 +117,9 @@ describe('save-custom-tokens.services', () => {
 
 			await saveCustomTokens({ ...mockParams, tokens });
 
-			expect(icrcCustomTokensStore.reset).toHaveBeenCalledExactlyOnceWith(mockLedgerCanisterId);
+			expect(icrcCustomTokensStore.resetByIdentifier).toHaveBeenCalledExactlyOnceWith(
+				mockLedgerCanisterId
+			);
 			expect(extCustomTokensStore.resetByIdentifier).toHaveBeenCalledExactlyOnceWith(
 				mockExtV2TokenCanisterId
 			);
