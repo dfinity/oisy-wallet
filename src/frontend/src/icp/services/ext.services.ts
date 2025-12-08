@@ -3,6 +3,8 @@ import {
 	EXT_BUILTIN_TOKENS,
 	EXT_BUILTIN_TOKENS_INDEXED
 } from '$env/tokens/tokens-ext/tokens.ext.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { EXT_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens-ext/tokens.ext.env';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { extDefaultTokensStore } from '$icp/stores/ext-default-tokens.store';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
@@ -14,7 +16,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { fromNullable, isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
+import { fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadExtTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -86,11 +88,12 @@ const loadCustomTokensWithMetadata = async (
 				// TODO: add the canister method to fetch metadata from the canister.
 				const metadata = EXT_BUILTIN_TOKENS_INDEXED.get(canisterIdText);
 
-				if (isNullish(metadata)) {
-					return;
-				}
-
-				const { symbol, ...rest } = metadata;
+				const { symbol, ...rest } = metadata ?? {
+					symbol: canisterIdText,
+					name: canisterIdText,
+					decimals: 0,
+					network: ICP_NETWORK
+				};
 
 				return {
 					...rest,

@@ -71,7 +71,7 @@
 			{#if nonNullish($selectedToken)}
 				<ModalValue>
 					{#snippet label()}
-						{$i18n.fee.text.fee}
+						{$i18n.fee.text.network_fee}
 					{/snippet}
 
 					{#snippet secondaryValue()}

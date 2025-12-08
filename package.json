@@ -56,7 +56,7 @@
 		"erc20:check": "vite-node scripts/check.tokens.erc20.ts",
 		"update:agent": "npm rm @icp-sdk/{core,auth} && npm i @icp-sdk/{core,auth}",
 		"update:ic-js": "npm rm @icp-sdk/canisters @dfinity/{zod-schemas,utils} && npm i @icp-sdk/canisters @dfinity/{zod-schemas,utils}",
-		"update:ic-js:next": "npm rm @icp-sdk/canisters @dfinity/{zod-schemas,utils} && npm i @icp-sdk/canisters @dfinity/{zod-schemas,utils}@next",
+		"update:ic-js:next": "npm rm @icp-sdk/canisters @dfinity/{zod-schemas,utils} && npm i @icp-sdk/canisters@next @dfinity/{zod-schemas,utils}@next",
 		"update:signer": "npm rm @dfinity/oisy-wallet-signer && npm i @dfinity/oisy-wallet-signer",
 		"update:signer:next": "npm rm @dfinity/oisy-wallet-signer && npm i @dfinity/oisy-wallet-signer@next",
 		"update:agent:ic-js": "npm run update:ic-js && npm run update:agent",
