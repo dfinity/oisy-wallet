@@ -5,5 +5,5 @@ import type { SplCustomToken } from '$sol/types/spl-custom-token';
 
 export const isTokenSpl = (token: Token): token is SplToken => token.standard === 'spl';
 
-export const isTokenSplToggleable = (token: Token): token is SplCustomToken =>
+export const isTokenSplCustomToken = (token: Token): token is SplCustomToken =>
 	isTokenSpl(token) && isTokenToggleable(token);

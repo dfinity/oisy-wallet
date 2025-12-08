@@ -45,7 +45,7 @@ import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
-import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
+import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -369,7 +369,7 @@ export const groupTogglableTokens = (
 			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
 			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
-			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
+			spl: [...spl, ...(isTokenSplCustomToken(token) ? [token] : [])]
 		}),
 		{ icrc: [], ext: [], erc20: [], erc721: [], erc1155: [], spl: [] }
 	);
