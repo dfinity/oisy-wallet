@@ -333,6 +333,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		erc20UserTokensStore.resetAll();
 		erc20UserTokensStore.setAll([...mockErc20CertifiedCustomTokens, ...mockAdditionalTokens]);
+		erc20CustomTokensStore.resetAll();
+		erc20CustomTokensStore.setAll([...mockErc20CertifiedCustomTokens, ...mockAdditionalTokens]);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
@@ -379,6 +381,11 @@ describe('LoaderMultipleEthTransactions', () => {
 			...mockErc20CertifiedCustomTokens,
 			...mockAdditionalCertifiedTokens
 		]);
+		erc20CustomTokensStore.resetAll();
+		erc20CustomTokensStore.setAll([
+			...mockErc20CertifiedCustomTokens,
+			...mockAdditionalCertifiedTokens
+		]);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
@@ -409,6 +416,12 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		erc20UserTokensStore.resetAll();
 		erc20UserTokensStore.setAll([
+			...mockErc20CertifiedCustomTokens,
+			...mockAdditionalCertifiedTokens,
+			...mockNewAdditionalTokens
+		]);
+		erc20CustomTokensStore.resetAll();
+		erc20CustomTokensStore.setAll([
 			...mockErc20CertifiedCustomTokens,
 			...mockAdditionalCertifiedTokens,
 			...mockNewAdditionalTokens
@@ -460,6 +473,11 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		erc20UserTokensStore.resetAll();
 		erc20UserTokensStore.setAll([
+			...mockErc20CertifiedCustomTokens,
+			...mockAdditionalCertifiedTokens
+		]);
+		erc20CustomTokensStore.resetAll();
+		erc20CustomTokensStore.setAll([
 			...mockErc20CertifiedCustomTokens,
 			...mockAdditionalCertifiedTokens
 		]);
