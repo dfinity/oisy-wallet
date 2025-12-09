@@ -722,6 +722,8 @@ interface I18nScanner {
 		select_different_token: string;
 		tokens_available: string;
 		select_token_to_pay: string;
+		pay_at_successful: string;
+		pay_at_failure: string;
 	};
 	error: { code_link_is_not_valid: string };
 }
