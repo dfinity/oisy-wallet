@@ -114,7 +114,7 @@ export interface PayParams {
 	identity: Identity;
 	quoteId: string;
 	callback: string;
-	progress: (step: ProgressStepsPayment) => void
+	progress: (step: ProgressStepsPayment) => void;
 }
 
 export interface TransactionBaseParams {

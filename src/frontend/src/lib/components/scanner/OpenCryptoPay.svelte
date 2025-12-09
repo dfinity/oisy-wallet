@@ -8,17 +8,17 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
+	import { pay } from '$lib/services/open-crypto-pay.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import { pay } from '$lib/services/open-crypto-pay.services';
-	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
 		onSelectToken: () => void;
