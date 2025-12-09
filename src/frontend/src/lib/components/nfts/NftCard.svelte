@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import {isNullish, nonNullish} from '@dfinity/utils';
 	import { goto } from '$app/navigation';
 	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
@@ -134,7 +134,7 @@
 
 	<span class="flex w-full flex-col gap-1 px-2 pb-2" class:text-disabled={disabled}>
 		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
-			{withCollectionLabel ? nft.collection.name : (nft.name ?? nft.collection.name)}
+			{withCollectionLabel || isNullish(nft.name) ? nft.collection.name : (nft.name)}
 		</span>
 		<span class="truncate text-xs" class:text-tertiary={!disabled}>
 			#{getNftDisplayId(nft)}
