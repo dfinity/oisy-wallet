@@ -127,9 +127,9 @@ export const erc20Tokens: Readable<Erc20CustomToken[]> = derived(
  */
 export const enabledErc20Tokens: Readable<Erc20CustomToken[]> = derived(
 	[enabledErc20DefaultTokens, enabledErc20CustomTokens],
-	([$enabledErc20DefaultTokens, $enabledErc20UserTokens]) => [
+	([$enabledErc20DefaultTokens, $enabledErc20CustomTokens]) => [
 		...$enabledErc20DefaultTokens,
-		...$enabledErc20UserTokens
+		...$enabledErc20CustomTokens
 	]
 );
 
