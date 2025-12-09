@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import IconOpenCryptoPay from '$lib/components/icons/IconOpenCryptoPay.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { getContext } from 'svelte';
+	import IconOpenCryptoPay from '$lib/components/icons/IconOpenCryptoPay.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		status: 'success' | 'failure';
@@ -19,8 +19,8 @@
 {#if nonNullish($selectedToken) && nonNullish($data?.displayName)}
 	<div
 		class="bg-pos-0 mb-6 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] pt-6 text-center text-primary-inverted md:rounded-[28px]"
-		class:bg-success-subtle-20={status === 'success'}
 		class:bg-error-subtle-20={status === 'failure'}
+		class:bg-success-subtle-20={status === 'success'}
 	>
 		<div>
 			<TokenLogo badge={{ type: 'network' }} data={$selectedToken} />
