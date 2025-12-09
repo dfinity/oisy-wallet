@@ -1056,7 +1056,11 @@
 			"dialog_title": "",
 			"dialog_description": "",
 			"dialog_button": "",
-			"where_you_can_pay": ""
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
 		},
 		"alt": {
 			"pay": "",

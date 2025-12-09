@@ -4,8 +4,10 @@
 	import { setContext } from 'svelte';
 	import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
+	import OpenCryptoPayProgress from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayProgress.svelte';
 	import TokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
+	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -21,6 +23,8 @@
 	let currentStep = $state<WizardStep<WizardStepsScanner> | undefined>();
 
 	let modal: WizardModal<WizardStepsScanner> | undefined = $state();
+
+	let payProgressStep = $state(ProgressStepsPayment.REQUEST_DETAILS);
 
 	const onClose = () => modalStore.close();
 
@@ -62,6 +66,8 @@
 			/>
 		{:else if currentStep?.name === WizardStepsScanner.TOKENS_LIST && !isTokenSelecting}
 			<TokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
+		{:else if currentStep?.name === WizardStepsScanner.PAYING}
+			<OpenCryptoPayProgress {payProgressStep} />
 		{/if}
 	{/key}
 </WizardModal>
