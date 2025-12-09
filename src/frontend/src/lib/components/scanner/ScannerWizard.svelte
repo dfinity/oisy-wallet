@@ -15,12 +15,16 @@
 		type PayContext
 	} from '$lib/stores/open-crypto-pay.store';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import OpenCryptoPayProgress from './open-crypto-pay/OpenCryptoPayProgress.svelte';
+	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 
 	let steps = $derived<WizardSteps<WizardStepsScanner>>(scannerWizardSteps({ i18n: $i18n }));
 
 	let currentStep = $state<WizardStep<WizardStepsScanner> | undefined>();
 
 	let modal: WizardModal<WizardStepsScanner> | undefined = $state();
+
+	let payProgressStep = $state(ProgressStepsPayment.REQUEST_DETAILS);
 
 	const onClose = () => modalStore.close();
 
@@ -62,6 +66,8 @@
 			/>
 		{:else if currentStep?.name === WizardStepsScanner.TOKENS_LIST && !isTokenSelecting}
 			<TokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
+		{:else if currentStep?.name === WizardStepsScanner.PAYING}
+			<OpenCryptoPayProgress {payProgressStep} />
 		{/if}
 	{/key}
 </WizardModal>
