@@ -73,7 +73,7 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 	const decodedUrn = {
 		prefix,
 		destination,
-		...(networkId && { networkId }),
+		...(networkId && { ethereumChainId: networkId }),
 		...(functionName && { functionName }),
 		...params
 	};
