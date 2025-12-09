@@ -12,7 +12,7 @@ import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
 export const isTokenNonFungible = (token: Token): token is NonFungibleToken =>
-	isTokenErc721(token) || isTokenErc1155(token);
+	isTokenErc721(token) || isTokenErc1155(token) || isTokenExtV2(token);
 
 export const isTokenFungible = (token: Token): boolean => !isTokenNonFungible(token);
 

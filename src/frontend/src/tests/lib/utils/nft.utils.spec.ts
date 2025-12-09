@@ -26,12 +26,12 @@ import {
 	MOCK_ERC721_TOKENS,
 	PUDGY_PENGUINS_TOKEN
 } from '$tests/mocks/erc721-tokens.mock';
-import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import { MOCK_EXT_TOKENS, mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('nft.utils', () => {
 	describe('isTokenNonFungible', () => {
-		it.each([...MOCK_ERC721_TOKENS, ...MOCK_ERC1155_TOKENS])(
+		it.each([...MOCK_ERC721_TOKENS, ...MOCK_ERC1155_TOKENS, ...MOCK_EXT_TOKENS])(
 			'should return true for token $name',
 			(token) => {
 				expect(isTokenNonFungible(token)).toBeTruthy();
@@ -66,7 +66,7 @@ describe('nft.utils', () => {
 			expect(isTokenFungible(token)).toBeTruthy();
 		});
 
-		it.each([...MOCK_ERC721_TOKENS, ...MOCK_ERC1155_TOKENS])(
+		it.each([...MOCK_ERC721_TOKENS, ...MOCK_ERC1155_TOKENS, ...MOCK_EXT_TOKENS])(
 			'should return false for token $name',
 			(token) => {
 				expect(isTokenFungible(token)).toBeFalsy();

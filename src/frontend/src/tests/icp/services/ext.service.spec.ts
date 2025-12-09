@@ -3,6 +3,7 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 import { loadCustomTokens, loadExtTokens } from '$icp/services/ext.services';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
+import { extDefaultTokensStore } from '$icp/stores/ext-default-tokens.store';
 import { listCustomTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -55,6 +56,7 @@ describe('ext.services', () => {
 
 			vi.spyOn(toastsStore, 'toastsError');
 
+			extDefaultTokensStore.reset();
 			extCustomTokensStore.resetAll();
 
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensExt);

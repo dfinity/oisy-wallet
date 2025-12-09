@@ -212,7 +212,7 @@ describe('tokens.derived', () => {
 			erc721CustomTokensStore.setAll([{ data: mockErc721CustomToken, certified: false }]);
 			erc1155CustomTokensStore.setAll([{ data: mockErc1155CustomToken, certified: false }]);
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
-			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			icrcCustomTokensStore.setAll([{ data: mockIcrcCustomToken, certified: false }]);
 			extCustomTokensStore.setAll([{ data: mockExtCustomToken, certified: false }]);
 			splDefaultTokensStore.add(mockSplDefaultToken);
 			splCustomTokensStore.setAll([{ data: mockSplCustomToken, certified: false }]);
@@ -324,7 +324,7 @@ describe('tokens.derived', () => {
 			erc721CustomTokensStore.setAll([{ data: mockErc721CustomToken, certified: false }]);
 			erc1155CustomTokensStore.setAll([{ data: mockErc1155CustomToken, certified: false }]);
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
-			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			icrcCustomTokensStore.setAll([{ data: mockIcrcCustomToken, certified: false }]);
 			extCustomTokensStore.setAll([{ data: mockExtCustomToken, certified: false }]);
 			splDefaultTokensStore.add(mockSplDefaultToken);
 			splCustomTokensStore.setAll([{ data: mockSplCustomToken, certified: false }]);
@@ -344,7 +344,6 @@ describe('tokens.derived', () => {
 				mockEr20UserToken,
 				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[10].id },
 				{ ...mockIcrcCustomToken, id: result[11].id },
-				{ ...mockExtCustomToken, id: result[12].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);
