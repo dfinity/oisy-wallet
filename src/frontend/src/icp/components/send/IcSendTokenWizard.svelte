@@ -2,7 +2,6 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import type { ProgressStep } from '$eth/types/send';
 	import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
@@ -99,7 +98,7 @@
 				tokenId: nft.id,
 				to: destination,
 				identity: $authIdentity,
-				progress: (step: ProgressStep) => (sendProgressStep = step)
+				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
 			});
 
 			trackEvent({
@@ -113,6 +112,8 @@
 					network: $sendToken.network.name
 				}
 			});
+
+			sendProgressStep = ProgressStepsSendIc.DONE;
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
