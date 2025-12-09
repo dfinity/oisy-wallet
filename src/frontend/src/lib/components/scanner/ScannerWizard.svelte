@@ -61,8 +61,10 @@
 			<ScannerCode onNext={() => modal?.next()} />
 		{:else if currentStep?.name === WizardStepsScanner.PAY}
 			<OpenCryptoPay
+				onPay={() => goToStep(WizardStepsScanner.PAYING)}
 				onSelectToken={() => goToStep(WizardStepsScanner.TOKENS_LIST)}
 				bind:isTokenSelecting
+				bind:payProgressStep
 			/>
 		{:else if currentStep?.name === WizardStepsScanner.TOKENS_LIST && !isTokenSelecting}
 			<TokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
