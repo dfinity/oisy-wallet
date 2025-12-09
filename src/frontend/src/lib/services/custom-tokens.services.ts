@@ -53,26 +53,41 @@ export const loadNetworkCustomTokens = async ({
 		if (nonNullish(cachedTokens)) {
 			// Principals are saved as Uint8Array in the IDB, so we need to parse them back to Principal
 			const parsePrincipal = (token: CustomToken): CustomToken => {
-				if (!('Icrc' in token.token)) {
-					return token;
+				if ('Icrc' in token.token) {
+					const { ledger_id: rawLedgerId, index_id: rawIndexId } = token.token.Icrc;
+
+					const ledgerId = Principal.from(rawLedgerId);
+					const indexId = nonNullish(fromNullable(rawIndexId))
+						? Principal.from(fromNullable(rawIndexId))
+						: undefined;
+
+					return {
+						...token,
+						token: {
+							Icrc: {
+								ledger_id: ledgerId,
+								index_id: toNullable(indexId)
+							}
+						}
+					};
 				}
 
-				const { ledger_id: rawLedgerId, index_id: rawIndexId } = token.token.Icrc;
+				if ('ExtV2' in token.token) {
+					const { canister_id: rawCanisterId } = token.token.ExtV2;
 
-				const ledgerId = Principal.from(rawLedgerId);
-				const indexId = nonNullish(fromNullable(rawIndexId))
-					? Principal.from(fromNullable(rawIndexId))
-					: undefined;
+					const canisterId = Principal.from(rawCanisterId);
 
-				return {
-					...token,
-					token: {
-						Icrc: {
-							ledger_id: ledgerId,
-							index_id: toNullable(indexId)
+					return {
+						...token,
+						token: {
+							ExtV2: {
+								canister_id: canisterId
+							}
 						}
-					}
-				};
+					};
+				}
+
+				return token;
 			};
 
 			return cachedTokens.map(parsePrincipal).filter(filterTokens);
