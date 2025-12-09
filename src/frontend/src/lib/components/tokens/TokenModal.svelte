@@ -5,7 +5,7 @@
 	import type { Snippet } from 'svelte';
 	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
-	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
+	import IcAddIcrcTokenForm from '$icp/components/tokens/IcAddIcrcTokenForm.svelte';
 	import { assertIndexLedgerId } from '$icp/services/ic-add-custom-tokens.service';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
@@ -184,7 +184,7 @@
 					token: customToken
 				});
 
-				icrcCustomTokensStore.reset(tokenToDelete.ledgerCanisterId);
+				icrcCustomTokensStore.resetByIdentifier(tokenToDelete.ledgerCanisterId);
 				await deleteIdbIcToken({ identity: $authIdentity, token: customToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
@@ -277,7 +277,7 @@
 						close();
 
 						// the token needs to be reset to restart the worker with indexCanisterId
-						icrcCustomTokensStore.reset(tokenToEdit.ledgerCanisterId);
+						icrcCustomTokensStore.resetByIdentifier(tokenToEdit.ledgerCanisterId);
 
 						trackEvent({
 							name: TRACK_EDIT_TOKEN_SUCCESS,
@@ -363,7 +363,7 @@
 					networkName={token.network.name}
 				/>
 
-				<IcAddTokenForm
+				<IcAddIcrcTokenForm
 					editMode
 					ledgerCanisterId={token.ledgerCanisterId}
 					bind:indexCanisterId={icrcTokenIndexCanisterId}

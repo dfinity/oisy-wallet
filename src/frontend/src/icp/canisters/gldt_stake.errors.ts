@@ -1,8 +1,15 @@
-import type { ManageStakePositionError } from '$declarations/gldt_stake/declarations/gldt_stake.did';
+import type { ManageStakePositionError } from '$declarations/gldt_stake/gldt_stake.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { GldtUnstakeDissolvementsLimitReached } from '$lib/types/errors';
 
 export const mapGldtStakeCanisterError = (err: ManageStakePositionError): CanisterInternalError => {
 	if ('StartDissolvingError' in err) {
+		if ('DissolvementsLimitReached' in err.StartDissolvingError) {
+			return new GldtUnstakeDissolvementsLimitReached(
+				err.StartDissolvingError.DissolvementsLimitReached
+			);
+		}
+
 		return new CanisterInternalError(
 			Object.values(err.StartDissolvingError)[0] ?? 'Failed to start dissolving'
 		);

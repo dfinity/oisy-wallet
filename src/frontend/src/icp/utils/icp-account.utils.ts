@@ -1,4 +1,4 @@
-import type { Icrcv2AccountId } from '$declarations/backend/declarations/backend.did';
+import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
 import { assertNever, nonNullish } from '@dfinity/utils';
 import {
 	AccountIdentifier,
@@ -78,6 +78,5 @@ export const tryToParseIcrcAccountStringToAccountIdentifierText = (
 		}).toHex();
 	} catch (_: unknown) {
 		// if parsing failed, we just return undefined and let consumers handle it
-		return;
 	}
 };

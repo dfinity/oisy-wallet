@@ -1,4 +1,4 @@
-import type { _SERVICE as XtcLedgerService } from '$declarations/xtc_ledger/declarations/xtc_ledger.did';
+import type { _SERVICE as XtcLedgerService } from '$declarations/xtc_ledger/xtc_ledger.did';
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { XtcLedgerTransferParams } from '$icp/types/xtc-ledger';
 import { CanisterInternalError } from '$lib/canisters/errors';

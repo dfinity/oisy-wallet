@@ -99,6 +99,7 @@
 		<IcSendTokenWizard
 			{currentStep}
 			{destination}
+			{nft}
 			{onBack}
 			{onClose}
 			{onNext}

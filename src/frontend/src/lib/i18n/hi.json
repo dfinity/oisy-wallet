@@ -8,6 +8,7 @@
 			"done": "हो गया",
 			"close": "बंद करें",
 			"change": "बदलें",
+			"continue": "",
 			"apply": "लागू करें",
 			"retry": "",
 			"refresh": "रीफ्रेश करें",
@@ -39,7 +40,8 @@
 			"confirm": "",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -54,7 +56,8 @@
 			"switch_language": "भाषा बदलें",
 			"switch_currency": "मुद्रा बदलें",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
@@ -383,12 +386,27 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"pacifica": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -614,6 +632,7 @@
 			"spl_custom_tokens": "SPL कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc20_user_token": "ERC20 ट्विन टोकन सक्षम करते समय त्रुटि।",
 			"icrc_custom_token": "ICRC कस्टम टोकन लोड करते समय त्रुटि।",
+			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "आपके वॉलेट को कुछ प्रारंभिक डेटा की आवश्यकता है जो अभी तक लोड नहीं हुआ है। कृपया पुनः प्रयास करें।",
 			"allow_signing": "आपके वॉलेट को साइन करने के लिए सेट करते समय एक समस्या हुई। आपको साइन आउट कर दिया गया है। यदि समस्या बनी रहती है, तो सहायता से संपर्क करें।",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -707,9 +726,11 @@
 				"display_account_id_qr": "ICP खाता आईडी को क्यूआर कोड के रूप में प्रदर्शित करें",
 				"account_id_copied": "ICP खाता आईडी क्लिपबोर्ड पर कॉपी की गई।",
 				"principal": "ICP प्रिंसिपल",
+				"principal_title": "",
 				"internet_computer_principal_copied": "इंटरनेट कंप्यूटर प्रिंसिपल क्लिपबोर्ड पर कॉपी किया गया।",
 				"display_internet_computer_principal_qr": "इंटरनेट कंप्यूटर प्रिंसिपल को क्यूआर कोड के रूप में प्रदर्शित करें",
 				"icp_account": "ICP खाता (एक्सचेंजों के लिए)",
+				"icp_account_title": "",
 				"icp_account_copied": "ICP खाता क्लिपबोर्ड पर कॉपी किया गया।",
 				"display_icp_account_qr": "ICP खाते को क्यूआर कोड के रूप में प्रदर्शित करें"
 			}
@@ -722,6 +743,7 @@
 				"learn_how_to_convert": "$token को $ckToken में कैसे बदलें जानें",
 				"metamask": "मेटामास्क से प्राप्त करें",
 				"ethereum": "एथेरियम",
+				"ethereum_title": "",
 				"ethereum_address": "पता",
 				"ethereum_address_copied": "एथेरियम पता क्लिपबोर्ड पर कॉपी किया गया।",
 				"display_ethereum_address_qr": "एथेरियम पते को क्यूआर कोड के रूप में प्रदर्शित करें"
@@ -739,8 +761,11 @@
 				"checking_incoming": "आने वाले BTC की जाँच की जा रही है...",
 				"refreshing_wallet": "वॉलेट रीफ़्रेश कर रहा है...",
 				"bitcoin_address": "बिटकॉइन",
+				"bitcoin_address_title": "",
 				"bitcoin_testnet_address": "बिटकॉइन (टेस्टनेट)",
+				"bitcoin_testnet_address_title": "",
 				"bitcoin_regtest_address": "बिटकॉइन (रेगटेस्ट)",
+				"bitcoin_regtest_address_title": "",
 				"display_bitcoin_address_qr": "बिटकॉइन पते को क्यूआर कोड के रूप में प्रदर्शित करें",
 				"bitcoin_address_copied": "बिटकॉइन पता क्लिपबोर्ड पर कॉपी किया गया।",
 				"from_network": "ckBTC प्राप्त करने के लिए इस पते पर BTC नेटवर्क पर बिटकॉइन स्थानांतरित करें।",
@@ -757,8 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "सोलाना पता",
+				"solana_address_title": "",
 				"solana_devnet_address": "सोलाना डेवनेट पता",
+				"solana_devnet_address_title": "",
 				"solana_local_address": "सोलाना स्थानीय पता",
+				"solana_local_address_title": "",
 				"solana_address_copied": "सोलाना पता क्लिपबोर्ड पर कॉपी किया गया",
 				"display_solana_address_qr": "सोलाना पते को क्यूआर कोड के रूप में प्रदर्शित करें"
 			}
@@ -876,7 +904,33 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": ""
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"recipient": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": "",
+			"pay_amount": "",
+			"go_to_assets": "",
+			"supported_tokens": "",
+			"no_supported_tokens": "",
+			"pay_with": "",
+			"select_token": "",
+			"select_different_token": "",
+			"tokens_available": "",
+			"select_token_to_pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -996,6 +1050,19 @@
 			"title": "ऑनराम्पर के माध्यम से खरीदें"
 		}
 	},
+	"pay": {
+		"text": {
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": "",
+			"where_you_can_pay": ""
+		},
+		"alt": {
+			"pay": "",
+			"where_you_can_pay": ""
+		}
+	},
 	"tokens": {
 		"text": {
 			"title": "टोकन",
@@ -1051,6 +1118,7 @@
 				"review": "समीक्षा",
 				"saving": "सहेज रहा है...",
 				"updating": "टोकन सूची अपडेट कर रहा है",
+				"canister_id": "",
 				"ledger_canister_id": "लेज़र कैनिस्टर आईडी",
 				"index_canister_id": "इंडेक्स कैनिस्टर आईडी",
 				"minter_canister_id": "मिन्टर कैनिस्टर आईडी",
@@ -1060,6 +1128,7 @@
 				"verifying": "टोकन विवरण सत्यापित कर रहा है...",
 				"add_the_token": "टोकन जोड़ें",
 				"info": "लेज़र और इंडेक्स कैनिस्टर आईडी आमतौर पर परियोजना की वेबसाइट पर उपलब्ध होती हैं।",
+				"info_ext": "",
 				"info_index": "इंडेक्स कैनिस्टर आईडी वैकल्पिक है, लेकिन इसके बिना, $oisy_short लेनदेन इतिहास प्रदर्शित नहीं कर सकता।",
 				"custom_tokens_not_supported": "चयनित नेटवर्क कस्टम टोकन का समर्थन नहीं करता है।"
 			},
@@ -1071,6 +1140,7 @@
 				"unexpected_index_ledger": "इंडेक्स कैनिस्टर से संबंधित लेज़र आईडी लोड करते समय कुछ गलत हो गया।",
 				"invalid_ledger_id": "लेज़र आईडी इंडेक्स कैनिस्टर से संबंधित नहीं है।",
 				"missing_ledger_id": "लेज़र आईडी गायब है। क्या आपने कोई मान प्रदान किया है?",
+				"missing_canister_id": "",
 				"missing_contract_address": "अनुबंध पता गायब है। क्या आपने कोई मान प्रदान किया है?",
 				"missing_token_address": "टोकन पता गायब है। क्या आपने कोई मान प्रदान किया है?",
 				"no_network": "कोई नेटवर्क नहीं चुना गया है। यह अप्रत्याशित है।"
@@ -1733,11 +1803,16 @@
 	"earning": {
 		"text": {
 			"title": "कमाएँ",
-			"earning_opportunities": ""
+			"tab_title": "",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": "",
+			"go_to_earn": ""
 		},
 		"cards": {
 			"gldt": {
-				"title": "",
+				"title1": "",
+				"title2": "",
 				"description": "",
 				"action": ""
 			},
@@ -1756,16 +1831,22 @@
 		},
 		"terms": {
 			"flexible": ""
+		},
+		"providers": {
+			"goldDaoStaking": {
+				"cardTitle": ""
+			}
 		}
 	},
 	"stake": {
 		"text": {
-			"stake_page_title": "",
 			"gldt_stake_page_description": "",
 			"stake": "",
+			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
 			"unstake": "",
+			"unstake_now": "",
 			"unstaking": "",
 			"unstake_token": "",
 			"enable_token_text": "",
@@ -1775,12 +1856,13 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"unproductive_assets": "",
+			"invested_assets": "",
 			"visit_provider": "",
-			"current_apy": "",
 			"current_apy_label": "",
-			"current_apy_info": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1792,10 +1874,81 @@
 			"immediate_dissolve_terms": "",
 			"amount_to_receive": "",
 			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
 			"claim_reward": "",
 			"claim_rewards": "",
+			"claim_reward_short": "",
 			"claim_now": "",
-			"claiming": ""
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty_1": "",
+			"title_empty_2_usd": "",
+			"title_empty_2_apy": "",
+			"title_empty_3": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": "",
+			"gldt_stake_carousel_slide_title": "",
+			"gldt_stake_carousel_slide_cta": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": "",
+			"unexpected_error_on_unstake": "",
+			"dissolvement_limit_reached": ""
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "",
+				"item1_description": "",
+				"item2_title_1": "",
+				"item2_title_2": "",
+				"item3_title": "",
+				"item3_description": "",
+				"item4_title": "",
+				"item4_description": "",
+				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
+			}
+		},
+		"alt": {
+			"placeholder_image": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
 		}
 	},
 	"temporal": {

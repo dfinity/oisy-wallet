@@ -56,7 +56,6 @@ export class BtcWalletWorker extends AppWorker implements WalletWorker {
 							 * **/
 							hideToast
 						});
-						return;
 				}
 			}
 		);

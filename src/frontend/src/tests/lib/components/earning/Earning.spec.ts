@@ -57,7 +57,7 @@ describe('EarningOpportunitiesPage', () => {
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
 			{
 				id: mockRewardCampaigns[mockRewardCampaigns.length - 1].id,
-				title: 'mock.rewards.title',
+				titles: ['mock.rewards.title'],
 				description: 'mock.rewards.description',
 				logo: '/img/logo1.svg',
 				fields: [],
@@ -65,7 +65,7 @@ describe('EarningOpportunitiesPage', () => {
 			},
 			{
 				id: 'gldt-staking',
-				title: 'mock.gldt.title',
+				titles: ['mock.gldt.title'],
 				description: 'mock.gldt.description',
 				logo: '/mock/logo.svg',
 				fields: [EarningCardFields.APY, EarningCardFields.CURRENT_STAKED],

@@ -69,7 +69,9 @@ export interface Modal<T> {
 		| 'gldt-stake'
 		| 'gldt-unstake'
 		| 'gldt-claim-staking-reward'
-		| 'universal-scanner';
+		| 'get-token'
+		| 'universal-scanner'
+		| 'pay-dialog';
 	data?: T;
 	id?: symbol;
 }
@@ -140,6 +142,8 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openGldtUnstake: (id: symbol) => void;
 	openGldtClaimStakingReward: (params: SetWithDataParams<ClaimStakingRewardParams>) => void;
 	openUniversalScanner: (id: symbol) => void;
+	openPayDialog: (id: symbol) => void;
+	openGetToken: (id: symbol) => void;
 	close: () => void;
 }
 
@@ -249,6 +253,8 @@ const initModalStore = <T>(): ModalStore<T> => {
 			setTypeWithData('gldt-claim-staking-reward')
 		),
 		openUniversalScanner: setType('universal-scanner'),
+		openPayDialog: setType('pay-dialog'),
+		openGetToken: setType('get-token'),
 		close: () => set(null),
 		subscribe
 	};

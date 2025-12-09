@@ -1,10 +1,16 @@
 import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import {
 	clearIdbBtcAddressMainnet,
+	clearIdbBtcAddressTestnet,
 	clearIdbEthAddress,
+	clearIdbSolAddressDevnet,
+	clearIdbSolAddressLocal,
 	clearIdbSolAddressMainnet,
 	deleteIdbBtcAddressMainnet,
+	deleteIdbBtcAddressTestnet,
 	deleteIdbEthAddress,
+	deleteIdbSolAddressDevnet,
+	deleteIdbSolAddressLocal,
 	deleteIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
 import { clearIdbBalances, deleteIdbBalances } from '$lib/api/idb-balances.api';
@@ -221,8 +227,11 @@ const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 const deleteIdbStoreList = [
 	// Addresses
 	deleteIdbBtcAddressMainnet,
+	deleteIdbBtcAddressTestnet,
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet,
+	deleteIdbSolAddressDevnet,
+	deleteIdbSolAddressLocal,
 	// Tokens
 	deleteIdbAllCustomTokens,
 	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
@@ -239,8 +248,11 @@ const deleteIdbStoreList = [
 const clearIdbStoreList = [
 	// Addresses
 	clearIdbBtcAddressMainnet,
+	clearIdbBtcAddressTestnet,
 	clearIdbEthAddress,
 	clearIdbSolAddressMainnet,
+	clearIdbSolAddressDevnet,
+	clearIdbSolAddressLocal,
 	// Tokens
 	clearIdbAllCustomTokens,
 	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete

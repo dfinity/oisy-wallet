@@ -12,13 +12,10 @@ import {
 	type IcCkInterface,
 	type IcFee,
 	type IcInterface,
-	type IcToken
+	type IcToken,
+	type IcTokenWithoutId
 } from '$icp/types/ic-token';
-import type {
-	IcTokenExtended,
-	IcTokenWithoutIdExtended,
-	IcrcCustomToken
-} from '$icp/types/icrc-custom-token';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -37,7 +34,7 @@ import {
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	metadata: IcrcTokenMetadataResponse;
 	category: TokenCategory;
-	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
+	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
 };
 
 const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
@@ -78,7 +75,7 @@ export const mapIcrcToken = ({
 	icrcCustomTokens,
 	ledgerCanisterId,
 	...rest
-}: IcrcLoadData): IcTokenExtended | undefined => {
+}: IcrcLoadData): IcToken | undefined => {
 	const token = mapOptionalToken(metadata);
 
 	if (isNullish(token)) {
@@ -137,7 +134,7 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	ledgerCanisterId
 }: {
 	ledgerCanisterId: CanisterIdText;
-	icrcCustomTokens: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
+	icrcCustomTokens: Record<LedgerCanisterIdText, IcTokenWithoutId>;
 }): IcrcTokenMetadataResponse | undefined => {
 	const token = icrcCustomTokens[ledgerCanisterId];
 

@@ -2,14 +2,18 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { icrcTokens, icrcCustomTokensNotInitialized } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { setCustomToken } from '$icp-eth/services/custom-token.services';
 	import { isGLDTToken } from '$icp-eth/utils/token.utils';
+	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
+	import GetTokenModal from '$lib/components/get-token/GetTokenModal.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import StakeModal from '$lib/components/stake/StakeModal.svelte';
+	import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
@@ -18,8 +22,8 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { modalGldtStake } from '$lib/derived/modal.derived';
-	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens.derived';
+	import { modalGetToken, modalGldtStake } from '$lib/derived/modal.derived';
+	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -82,26 +86,15 @@
 	{#snippet content()}
 		<div class="text-sm">{$i18n.stake.text.earning_potential}</div>
 
-		<div
-			class="my-1 text-lg font-bold sm:text-xl"
-			class:text-brand-primary-alt={$enabledMainnetFungibleTokensUsdBalance > 0}
-			class:text-tertiary={$enabledMainnetFungibleTokensUsdBalance === 0}
-		>
-			{`${$enabledMainnetFungibleTokensUsdBalance > 0 && currentApy > 0 ? '+' : ''}`}{replacePlaceholders(
-				$i18n.stake.text.active_earning_per_year,
-				{
-					$amount: `${formatCurrency({
-						value: ($enabledMainnetFungibleTokensUsdBalance * currentApy) / 100,
-						currency: $currentCurrency,
-						exchangeRate: $currencyExchangeStore,
-						language: $currentLanguage
-					})}`
-				}
-			)}
-		</div>
+		<EarningYearlyAmount
+			showAsNeutral
+			showPlusSign={$enabledMainnetFungibleTokensUsdBalance > 0 && currentApy > 0}
+			styleClass="my-1 text-lg font-bold sm:text-xl"
+			value={($enabledMainnetFungibleTokensUsdBalance * currentApy) / 100}
+		/>
 
 		{#if $icrcCustomTokensNotInitialized || nonNullish(gldtToken)}
-			<div class="flex justify-center gap-2 text-sm sm:text-base">
+			<div class="flex items-center justify-center gap-2 text-sm sm:text-base">
 				{#if $enabledMainnetFungibleTokensUsdBalance > 0}
 					<span class="font-bold">
 						{formatCurrency({
@@ -135,9 +128,35 @@
 
 	{#snippet buttons()}
 		{#if nonNullish(gldtToken)}
+			<ButtonWithModal isOpen={$modalGetToken} onOpen={modalStore.openGetToken}>
+				{#snippet button(onclick)}
+					<Button fullWidth {onclick}>
+						{replacePlaceholders(
+							potentialGldtTokenBalance <= 0
+								? $i18n.stake.text.get_tokens
+								: $i18n.stake.text.get_tokens_with_amount,
+							{
+								$token_symbol: gldtTokenSymbol,
+								$amount: `${potentialGldtTokenBalance}`
+							}
+						)}
+					</Button>
+				{/snippet}
+
+				{#snippet modal()}
+					<SwapContexts>
+						<GetTokenModal
+							{currentApy}
+							receiveAddress={$icrcAccountIdentifierText}
+							token={gldtToken}
+						/>
+					</SwapContexts>
+				{/snippet}
+			</ButtonWithModal>
+
 			<ButtonWithModal isOpen={$modalGldtStake} onOpen={modalStore.openGldtStake}>
 				{#snippet button(onclick)}
-					<Button disabled={gldtStakeButtonDisabled} fullWidth {onclick}>
+					<Button colorStyle="success" disabled={gldtStakeButtonDisabled} fullWidth {onclick}>
 						{replacePlaceholders(
 							gldtStakeButtonDisabled
 								? $i18n.stake.text.not_enough_to_stake

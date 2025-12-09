@@ -1,10 +1,10 @@
-import type { CustomToken, IcrcToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
+import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
+import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
+import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { balance, allowance as icrcAllowance, metadata } from '$icp/api/icrc-ledger.api';
-import { buildIndexedDip20Tokens } from '$icp/services/dip20-tokens.services';
-import { buildIndexedIcpTokens } from '$icp/services/icp-tokens.services';
-import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -163,9 +163,9 @@ const loadCustomIcrcTokensData = async ({
 	identity: OptionIdentity;
 }): Promise<IcrcCustomToken[]> => {
 	const indexedIcrcCustomTokens = {
-		...buildIndexedIcpTokens(),
-		...buildIndexedIcrcCustomTokens(),
-		...buildIndexedDip20Tokens()
+		...SUPPORTED_ICP_TOKENS_INDEXED,
+		...SNS_BUILTIN_TOKENS_INDEXED,
+		...DIP20_BUILTIN_TOKENS_INDEXED
 	};
 
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
@@ -233,7 +233,7 @@ const loadCustomIcrcTokensData = async ({
 
 				const ledgerCanisterId = ledger_id.toText();
 
-				icrcCustomTokensStore.reset(ledgerCanisterId);
+				icrcCustomTokensStore.resetByIdentifier(ledgerCanisterId);
 
 				// To avoid polluting the screen, we show the toast error only after the update call.
 				if (enabled && certified) {

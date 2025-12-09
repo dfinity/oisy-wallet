@@ -1,7 +1,4 @@
-import type {
-	StakePositionResponse,
-	TokenSymbol
-} from '$declarations/gldt_stake/declarations/gldt_stake.did';
+import type { StakePositionResponse, TokenSymbol } from '$declarations/gldt_stake/gldt_stake.did';
 import { manageStakePosition } from '$icp/api/gldt_stake.api';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { loadCustomTokens } from '$icp/services/icrc.services';
@@ -81,7 +78,7 @@ export const unstakeGldt = async ({
 	progress?.(ProgressStepsUnstake.UNSTAKE);
 
 	// TODO: replace "fraction" with "amount" when the gldt_stake canister allows that
-	const fraction = Math.round(Number((amount * 100n) / totalStakedAmount));
+	const fraction = Math.max(Math.round(Number((amount * 100n) / totalStakedAmount)), 1);
 	const response = await manageStakePosition({
 		identity,
 		positionParams: dissolveInstantly
@@ -130,6 +127,25 @@ export const claimGldtStakingReward = async ({
 		});
 		await loadCustomTokens({ identity });
 	}
+
+	await waitAndTriggerWallet();
+
+	return response;
+};
+
+export const withdrawGldtStakingDissolvedTokens = async ({
+	identity,
+	withdrawCompleted
+}: {
+	identity: Identity;
+	withdrawCompleted: () => void;
+}): Promise<StakePositionResponse | undefined> => {
+	const response = await manageStakePosition({
+		identity,
+		positionParams: { Withdraw: {} }
+	});
+
+	withdrawCompleted();
 
 	await waitAndTriggerWallet();
 

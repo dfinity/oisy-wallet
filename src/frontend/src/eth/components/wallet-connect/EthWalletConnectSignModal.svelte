@@ -36,8 +36,6 @@
 
 			return name;
 		}
-
-		return;
 	});
 
 	/**

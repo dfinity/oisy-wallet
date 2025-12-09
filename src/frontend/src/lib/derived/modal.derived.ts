@@ -61,6 +61,10 @@ export const modalGldtClaimStakingReward: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'gldt-claim-staking-reward'
 );
+export const modalGetToken: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'get-token'
+);
 export const modalGldtClaimStakingRewardData: Readable<ClaimStakingRewardParams | undefined> =
 	derived(modalStore, ($modalStore) =>
 		$modalStore?.type === 'gldt-claim-staking-reward'
@@ -311,4 +315,9 @@ export const modalNftFullscreenDisplayData: Readable<Nft | undefined> = derived(
 export const modalUniversalScannerOpen: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'universal-scanner'
+);
+
+export const modalPayDialogOpen: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'pay-dialog'
 );

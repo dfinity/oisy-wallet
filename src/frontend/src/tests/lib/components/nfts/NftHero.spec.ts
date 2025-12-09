@@ -3,6 +3,7 @@ import NftHero from '$lib/components/nfts/NftHero.svelte';
 import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 import { currentLanguage } from '$lib/derived/i18n.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { userSelectedNetworkStore } from '$lib/stores/settings.store';
@@ -105,6 +106,30 @@ describe('NftHero', () => {
 		assertNonNullish(imageElement);
 
 		expect(imageElement.getAttribute('src')).toContain(mockValidErc1155Nft.imageUrl);
+	});
+
+	it('should render the nft thumbnail in the banner if it exists', () => {
+		const thumbnailUrl =
+			'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/10.png';
+
+		// We need a different thumbnail url than the image url to test that the thumbnail is rendered instead of the image
+		expect(thumbnailUrl).not.toBe(mockValidErc1155Nft.imageUrl);
+
+		const { container } = render(NftHero, {
+			props: {
+				nft: {
+					...mockValidErc1155Nft,
+					thumbnailUrl,
+					mediaStatus: { ...mockValidErc1155Nft.mediaStatus, thumbnail: NftMediaStatusEnum.OK }
+				}
+			}
+		});
+
+		const imageElement: HTMLImageElement | null = container.querySelector('img');
+
+		assertNonNullish(imageElement);
+
+		expect(imageElement.getAttribute('src')).toContain(thumbnailUrl);
 	});
 
 	it('should render the hidden badge in the banner', () => {
