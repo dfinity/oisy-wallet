@@ -89,9 +89,8 @@
 				identity: $authIdentity,
 				progress
 			});
-		} catch (e: unknown) {
+		} catch (_: unknown) {
 			// TODO: add steps to redirect to Payment Failed screen and add event
-			console.warn(e);
 		}
 	};
 </script>
