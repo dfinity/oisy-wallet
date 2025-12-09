@@ -246,6 +246,10 @@ describe('exchange.derived', () => {
 				{ data: { ...mockErc20DefaultToken, enabled: true }, certified: false },
 				{ data: mockEr20UserToken, certified: false }
 			]);
+			erc20CustomTokensStore.setAll([
+				{ data: { ...mockErc20DefaultToken, enabled: true }, certified: false },
+				{ data: mockEr20UserToken, certified: false }
+			]);
 
 			icrcDefaultTokensStore.set({ data: mockCkBtcToken, certified: false });
 			icrcCustomTokensStore.setAll([
@@ -388,6 +392,12 @@ describe('exchange.derived', () => {
 
 		it('should return values for ERC20 token ICP', () => {
 			erc20UserTokensStore.setAll([
+				{
+					data: { ...mockErc20DefaultToken, exchange: 'icp', enabled: true },
+					certified: false
+				}
+			]);
+			erc20CustomTokensStore.setAll([
 				{
 					data: { ...mockErc20DefaultToken, exchange: 'icp', enabled: true },
 					certified: false
