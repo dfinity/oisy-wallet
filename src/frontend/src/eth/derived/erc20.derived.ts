@@ -59,10 +59,10 @@ const erc20CustomTokens: Readable<Erc20CustomToken[]> = derived(
 );
 
 const erc20DefaultTokensToggleable: Readable<Erc20CustomToken[]> = derived(
-	[erc20DefaultTokens, erc20UserTokens],
-	([$erc20DefaultTokens, $erc20UserTokens]) =>
+	[erc20DefaultTokens, erc20CustomTokens],
+	([$erc20DefaultTokens, $erc20CustomTokens]) =>
 		$erc20DefaultTokens.map(({ address, network, ...rest }) => {
-			const customToken = $erc20UserTokens.find(
+			const customToken = $erc20CustomTokens.find(
 				({ address: contractAddress, network: contractNetwork }) =>
 					contractAddress === address && network.chainId === contractNetwork.chainId
 			);
@@ -89,12 +89,12 @@ const enabledErc20DefaultTokens: Readable<Erc20CustomToken[]> = derived(
 
 /**
  * The list of ERC20 tokens enabled by the user - i.e. saved in the backend canister as enabled - minus those that duplicate default tokens.
- * We do so because the default statically configured are those to be used for various features. This is notably useful for ERC20 <> ckERC20 conversion given that tokens on both sides (ETH an IC) should know about each other ("Twin Token" links).
+ * We do so because the default statically configured ones are those to be used for various features. This is notably useful for ERC20 <> ckERC20 conversion given that tokens on both sides (ETH an IC) should know about each other ("Twin Token" links).
  */
-const erc20UserTokensToggleable: Readable<Erc20UserToken[]> = derived(
-	[erc20UserTokens, erc20DefaultTokens],
-	([$erc20UserTokens, $erc20DefaultTokens]) =>
-		$erc20UserTokens.filter(({ address, network }) =>
+const erc20CustomTokensToggleable: Readable<Erc20CustomToken[]> = derived(
+	[erc20CustomTokens, erc20DefaultTokens],
+	([$erc20CustomTokens, $erc20DefaultTokens]) =>
+		$erc20CustomTokens.filter(({ address, network }) =>
 			isNullish(
 				$erc20DefaultTokens.find(
 					({ address: defaultAddress, network: defaultNetwork }) =>
@@ -115,10 +115,10 @@ const enabledErc20CustomTokens: Readable<Erc20CustomToken[]> = derived(
  * The list of all ERC20 tokens.
  */
 export const erc20Tokens: Readable<Erc20CustomToken[]> = derived(
-	[erc20DefaultTokensToggleable, erc20UserTokensToggleable],
-	([$erc20DefaultTokensToggleable, $erc20UserTokensToggleable]) => [
+	[erc20DefaultTokensToggleable, erc20CustomTokensToggleable],
+	([$erc20DefaultTokensToggleable, $erc20CustomTokensToggleable]) => [
 		...$erc20DefaultTokensToggleable,
-		...$erc20UserTokensToggleable
+		...$erc20CustomTokensToggleable
 	]
 );
 
