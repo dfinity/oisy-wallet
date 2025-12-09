@@ -4,8 +4,10 @@
 	import { setContext } from 'svelte';
 	import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
+	import OpenCryptoPayProgress from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayProgress.svelte';
 	import TokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
+	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -15,8 +17,6 @@
 		type PayContext
 	} from '$lib/stores/open-crypto-pay.store';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import OpenCryptoPayProgress from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayProgress.svelte';
-	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 
 	let steps = $derived<WizardSteps<WizardStepsScanner>>(scannerWizardSteps({ i18n: $i18n }));
 
