@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import pepecoin from '$eth/assets/pepecoin.webp';
-import type { RequiredErc20Token } from '$eth/types/erc20';
+import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -10,7 +10,7 @@ export const PEPECOIN_SYMBOL = 'pepecoin';
 
 export const PEPECOIN_TOKEN_ID: TokenId = parseTokenId(PEPECOIN_SYMBOL);
 
-export const PEPECOIN_TOKEN: RequiredErc20Token = {
+export const PEPECOIN_TOKEN: RequiredAdditionalErc20Token = {
 	id: PEPECOIN_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
 	standard: 'erc20',
@@ -20,6 +20,5 @@ export const PEPECOIN_TOKEN: RequiredErc20Token = {
 	decimals: PEPECOIN_DECIMALS,
 	icon: pepecoin,
 	address: '0xA9E8aCf069C58aEc8825542845Fd754e41a9489A',
-	exchange: 'erc20',
-	neverCollapseInTokenGroup: false
+	exchange: 'erc20'
 };
