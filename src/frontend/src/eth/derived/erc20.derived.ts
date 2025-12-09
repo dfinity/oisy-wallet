@@ -91,7 +91,7 @@ const enabledErc20DefaultTokens: Readable<Erc20CustomToken[]> = derived(
  * The list of ERC20 tokens enabled by the user - i.e. saved in the backend canister as enabled - minus those that duplicate default tokens.
  * We do so because the default statically configured ones are those to be used for various features. This is notably useful for ERC20 <> ckERC20 conversion given that tokens on both sides (ETH an IC) should know about each other ("Twin Token" links).
  */
-const erc20CustomTokensToggleable: Readable<Erc20UserToken[]> = derived(
+const erc20CustomTokensToggleable: Readable<Erc20CustomToken[]> = derived(
 	[erc20CustomTokens, erc20DefaultTokens],
 	([$erc20CustomTokens, $erc20DefaultTokens]) =>
 		$erc20CustomTokens.filter(({ address, network }) =>
