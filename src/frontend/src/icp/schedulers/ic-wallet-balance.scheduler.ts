@@ -1,5 +1,10 @@
 import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
+import type {
+	PostMessageDataRequestDip20,
+	PostMessageDataRequestIcp,
+	PostMessageDataRequestIcrc
+} from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { isNullish, queryAndUpdate } from '@dfinity/utils';
 
@@ -9,7 +14,10 @@ interface IcrcBalanceStore {
 }
 
 export class IcWalletBalanceScheduler<
-	PostMessageDataRequest
+	PostMessageDataRequest extends
+		| PostMessageDataRequestIcrc
+		| PostMessageDataRequestIcp
+		| PostMessageDataRequestDip20
 > extends IcWalletScheduler<PostMessageDataRequest> {
 	private store: IcrcBalanceStore = {
 		balance: undefined

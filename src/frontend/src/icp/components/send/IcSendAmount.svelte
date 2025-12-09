@@ -5,6 +5,7 @@
 	import { isUserMintingAccount } from '$icp/services/icrc-minting.services';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import type { IcToken, OptionIcToken } from '$icp/types/ic-token';
+	import { getTokenFee } from '$icp/utils/token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -26,7 +27,7 @@
 	const { sendToken, sendTokenExchangeRate, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let fee = $derived(($sendToken as OptionIcToken)?.fee);
+	let fee = $derived(getTokenFee($sendToken));
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 

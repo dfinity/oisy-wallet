@@ -1,10 +1,11 @@
 import type {
 	SwapAmountsReply,
 	SwapAmountsTxReply
-} from '$declarations/kong_backend/declarations/kong_backend.did';
+} from '$declarations/kong_backend/kong_backend.did';
 import { dAppDescriptions } from '$env/dapp-descriptions.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
@@ -16,6 +17,7 @@ import {
 import { SwapError } from '$lib/services/swap-errors.services';
 import type { AmountString } from '$lib/types/amount';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
+import type { OptionAmount } from '$lib/types/send';
 import {
 	SwapProvider,
 	VeloraSwapTypes,
@@ -84,16 +86,20 @@ export const getKongIcTokenIdentifier = (token: Token): string =>
 
 export const mapIcpSwapResult = ({
 	swap,
-	slippage
+	slippage,
+	destToken
 }: {
 	swap: ICPSwapResult;
 	slippage: Slippage;
+	destToken: IcToken;
 }): SwapMappedResult => {
 	const parsedSlippage = Number(slippage);
 	const slippagePercentage = parsedSlippage > 0 ? parsedSlippage : SWAP_DEFAULT_SLIPPAGE_VALUE;
+	const receiveAmountNet = swap.receiveAmount - destToken.fee;
+
 	return {
 		provider: SwapProvider.ICP_SWAP,
-		receiveAmount: swap.receiveAmount,
+		receiveAmount: receiveAmountNet > 0 ? receiveAmountNet : ZERO,
 		receiveOutMinimum: calculateSlippage({
 			quoteAmount: swap.receiveAmount,
 			slippagePercentage
@@ -238,4 +244,36 @@ export const findSwapProvider = (
 			...swapProviderDetails
 		};
 	}
+};
+
+export const calculateValueDifference = ({
+	swapAmount,
+	receiveAmount,
+	sourceTokenExchangeRate,
+	destinationTokenExchangeRate
+}: {
+	swapAmount: OptionAmount;
+	receiveAmount?: number;
+	sourceTokenExchangeRate?: number;
+	destinationTokenExchangeRate?: number;
+}): number | undefined => {
+	const paidValue =
+		nonNullish(swapAmount) && nonNullish(sourceTokenExchangeRate)
+			? Number(swapAmount) * sourceTokenExchangeRate
+			: undefined;
+
+	if (isNullish(paidValue) || paidValue === 0) {
+		return;
+	}
+
+	const receivedValue =
+		nonNullish(receiveAmount) && nonNullish(destinationTokenExchangeRate)
+			? receiveAmount * destinationTokenExchangeRate
+			: undefined;
+
+	if (isNullish(receivedValue)) {
+		return;
+	}
+
+	return ((receivedValue - paidValue) / paidValue) * 100;
 };

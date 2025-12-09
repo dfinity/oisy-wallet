@@ -19,7 +19,8 @@ export const {
 	OISY_FIND_INTERNET_IDENTITY_URL,
 	OISY_FAQ_URL,
 	OISY_ACCESS_CONTROL_URL,
-	OISY_NFT_DOCS_URL
+	OISY_NFT_DOCS_URL,
+	OISY_HOW_TO_CONVERT_DOCS_URL
 } = safeParse({
 	schema: OisyMetadataSchema,
 	value: metadata,
@@ -40,10 +41,13 @@ export const {
 		OISY_FIND_INTERNET_IDENTITY_URL: '',
 		OISY_FAQ_URL: '',
 		OISY_ACCESS_CONTROL_URL: '',
-		OISY_NFT_DOCS_URL: ''
+		OISY_NFT_DOCS_URL: '',
+		OISY_HOW_TO_CONVERT_DOCS_URL: ''
 	}
 });
 
 export const OISY_URL = VITE_OISY_DOMAIN;
 export const OISY_ICON = `${OISY_URL}/favicons/icon-512x512.png`;
 export const OISY_URL_HOSTNAME = new URL(OISY_URL).hostname;
+
+export const IS_ICP_DOMAIN_URL = OISY_URL_HOSTNAME.endsWith('.icp0.io');

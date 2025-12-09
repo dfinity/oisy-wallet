@@ -49,6 +49,7 @@ describe('mapCkEthereumTransaction', () => {
 					spender: []
 				}
 			],
+			fee_collector: [],
 			timestamp: BigInt('1730723519954194000')
 		}
 	};

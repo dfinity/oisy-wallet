@@ -8,6 +8,7 @@
 			"done": "Hotovo",
 			"close": "Zavřít",
 			"change": "Změnit",
+			"continue": "",
 			"apply": "Použít",
 			"retry": "Zkusit znovu",
 			"refresh": "Aktualizovat",
@@ -39,7 +40,8 @@
 			"confirm": "",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -54,7 +56,8 @@
 			"switch_language": "Přepnout jazyk",
 			"switch_currency": "Přepnout měnu",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
@@ -68,7 +71,7 @@
 			"dapp_explorer": "Prozkoumat",
 			"activity": "Aktivita",
 			"airdrops": "Odměny",
-			"earning": "Vydělávat a odměny",
+			"earning": "Vydělávat",
 			"source_code_on_github": "Zdrojový kód na GitHubu",
 			"view_on_explorer": "Zobrazit v průzkumníku",
 			"source_code": "Zdrojový kód",
@@ -122,7 +125,6 @@
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -217,7 +219,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Hra",
 			"tools": "Nářadí",
-			"ai": "AI"
+			"ai": "AI",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -379,6 +382,31 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -604,6 +632,7 @@
 			"spl_custom_tokens": "Chyba při načítání vlastních tokenů SPL.",
 			"erc20_user_token": "Chyba při povolování dvojitého tokenu ERC20.",
 			"icrc_custom_token": "Chyba při načítání vlastního tokenu ICRC.",
+			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "Vaše peněženka vyžaduje některá počáteční data, která ještě nebyla načtena. Zkuste to prosím znovu.",
 			"allow_signing": "Při nastavování vaší peněženky pro podepisování došlo k problému. Byli jste odhlášeni. Pokud problém přetrvává, obraťte se na podporu.",
 			"waiting_for_allowed_cycles_aborted": "Příprava cyklů účetní knihy byla přerušena. Zkuste se prosím přihlásit později.",
@@ -697,9 +726,11 @@
 				"display_account_id_qr": "Zobrazit ID ICP Účtu jako QR kód",
 				"account_id_copied": "ID ICP Účtu zkopírováno do schránky.",
 				"principal": "Hlavní ICP ID",
+				"principal_title": "",
 				"internet_computer_principal_copied": "Hlavní ICP ID zkopírováno do schránky.",
 				"display_internet_computer_principal_qr": "Zobrazit Hlavní ICP ID jako QR kód",
 				"icp_account": "ID ICP Účtu (pro burzy)",
+				"icp_account_title": "",
 				"icp_account_copied": "ID ICP Účtu zkopírováno do schránky.",
 				"display_icp_account_qr": "Zobrazit ID ICP Účtu jako QR kód"
 			}
@@ -712,6 +743,7 @@
 				"learn_how_to_convert": "Zjistěte, jak převést $token na $ckToken",
 				"metamask": "Přijmout z Metamask",
 				"ethereum": "Ethereum",
+				"ethereum_title": "",
 				"ethereum_address": "Adresa",
 				"ethereum_address_copied": "Adresa Ethereum zkopírována do schránky.",
 				"display_ethereum_address_qr": "Zobrazit adresu Ethereum jako QR kód"
@@ -729,8 +761,11 @@
 				"checking_incoming": "Kontrola příchozích BTC...",
 				"refreshing_wallet": "Aktualizace peněženky...",
 				"bitcoin_address": "Bitcoin",
+				"bitcoin_address_title": "",
 				"bitcoin_testnet_address": "Bitcoin (Testnet)",
+				"bitcoin_testnet_address_title": "",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
+				"bitcoin_regtest_address_title": "",
 				"display_bitcoin_address_qr": "Zobrazit adresu Bitcoin jako QR kód",
 				"bitcoin_address_copied": "Adresa Bitcoin zkopírována do schránky.",
 				"from_network": "Převeďte Bitcoin na síti BTC na tuto adresu, abyste obdrželi ckBTC.",
@@ -747,8 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Adresa Solana",
+				"solana_address_title": "",
 				"solana_devnet_address": "Adresa Solana Devnet",
+				"solana_devnet_address_title": "",
 				"solana_local_address": "Místní adresa Solana",
+				"solana_local_address_title": "",
 				"solana_address_copied": "Adresa Solana zkopírována do schránky",
 				"display_solana_address_qr": "Zobrazit adresu Solana jako QR kód"
 			}
@@ -862,6 +900,37 @@
 			"solana_transaction_expired": "Vaše odeslaná transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže jej zkuste odeslat znovu.",
 			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně.",
 			"fee_calc_unsupported_standard": "Nelze vypočítat poplatek, protože poskytnutý standard tokenu není podporován."
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"recipient": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": "",
+			"pay_amount": "",
+			"go_to_assets": "",
+			"supported_tokens": "",
+			"no_supported_tokens": "",
+			"pay_with": "",
+			"select_token": "",
+			"select_different_token": "",
+			"tokens_available": "",
+			"select_token_to_pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -981,6 +1050,19 @@
 			"title": "Koupit přes Onramper"
 		}
 	},
+	"pay": {
+		"text": {
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": "",
+			"where_you_can_pay": ""
+		},
+		"alt": {
+			"pay": "",
+			"where_you_can_pay": ""
+		}
+	},
 	"tokens": {
 		"text": {
 			"title": "Tokeny",
@@ -1036,6 +1118,7 @@
 				"review": "Zkontrolovat",
 				"saving": "Ukládání...",
 				"updating": "Aktualizace seznamu tokenů",
+				"canister_id": "",
 				"ledger_canister_id": "ID kanystru účetní knihy",
 				"index_canister_id": "ID kanystru indexu",
 				"minter_canister_id": "ID kanystru minteru",
@@ -1045,6 +1128,7 @@
 				"verifying": "Ověřování podrobností o tokenu...",
 				"add_the_token": "Přidat token",
 				"info": "ID kanystrů účetní knihy a indexu jsou obvykle k dispozici na webových stránkách projektu.",
+				"info_ext": "",
 				"info_index": "ID kanystru indexu je volitelné, ale bez něj nemůže $oisy_short zobrazit historii transakcí.",
 				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny."
 			},
@@ -1056,6 +1140,7 @@
 				"unexpected_index_ledger": "Při načítání ID účetní knihy souvisejícího s kanystrem indexu se něco pokazilo.",
 				"invalid_ledger_id": "ID účetní knihy nesouvisí s kanystrem indexu.",
 				"missing_ledger_id": "Chybí ID účetní knihy. Zadali jste hodnotu?",
+				"missing_canister_id": "",
 				"missing_contract_address": "Chybí adresa smlouvy. Zadali jste hodnotu?",
 				"missing_token_address": "Chybí adresa tokenu. Zadali jste hodnotu?",
 				"no_network": "Není vybrána žádná síť. To je neočekávané."
@@ -1392,7 +1477,6 @@
 			"token_needs_enabling": "Pro zobrazení historie transakcí je třeba povolit token."
 		},
 		"error": {
-			"loading_transactions": "Chyba při načítání transakcí.",
 			"loading_transactions_symbol": "Chyba při načítání transakcí $symbol.",
 			"uncertified_transactions_removed": "Bylo identifikováno několik necertifikovaných transakcí, které byly následně odstraněny ze zobrazených seznamů.",
 			"loading_pending_ck_ethereum_transactions": "Při načítání nevyřízených transakcí $network se něco pokazilo.",
@@ -1718,21 +1802,51 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Vydělat"
+			"title": "Vydělat",
+			"tab_title": "",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": "",
+			"go_to_earn": ""
 		},
 		"cards": {
-			"gold_title": "Zlato",
-			"gold_description": "Staking GLDT",
-			"stablecoins_title": "Stablecoiny",
-			"stablecoins_description": "Již brzy",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Odměny OISY"
+			"gldt": {
+				"title1": "",
+				"title2": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
+		},
+		"providers": {
+			"goldDaoStaking": {
+				"cardTitle": ""
+			}
 		}
 	},
 	"stake": {
 		"text": {
+			"gldt_stake_page_description": "",
 			"stake": "",
+			"stake_now": "",
+			"stake_amount": "",
+			"not_enough_to_stake": "",
 			"unstake": "",
+			"unstake_now": "",
 			"unstaking": "",
 			"unstake_token": "",
 			"enable_token_text": "",
@@ -1742,11 +1856,13 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"unproductive_assets": "",
+			"invested_assets": "",
 			"visit_provider": "",
-			"current_apy": "",
-			"current_apy_info": "",
+			"current_apy_label": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1758,10 +1874,81 @@
 			"immediate_dissolve_terms": "",
 			"amount_to_receive": "",
 			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
 			"claim_reward": "",
 			"claim_rewards": "",
+			"claim_reward_short": "",
 			"claim_now": "",
-			"claiming": ""
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty_1": "",
+			"title_empty_2_usd": "",
+			"title_empty_2_apy": "",
+			"title_empty_3": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": "",
+			"gldt_stake_carousel_slide_title": "",
+			"gldt_stake_carousel_slide_cta": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": "",
+			"unexpected_error_on_unstake": "",
+			"dissolvement_limit_reached": ""
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "",
+				"item1_description": "",
+				"item2_title_1": "",
+				"item2_title_2": "",
+				"item3_title": "",
+				"item3_description": "",
+				"item4_title": "",
+				"item4_description": "",
+				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
+			}
+		},
+		"alt": {
+			"placeholder_image": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
 		}
 	},
 	"temporal": {

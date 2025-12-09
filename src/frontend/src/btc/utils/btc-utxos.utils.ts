@@ -1,9 +1,9 @@
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import type { Utxo } from '@dfinity/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 export interface UtxoSelectionResult {
-	selectedUtxos: Utxo[];
+	selectedUtxos: CkBtcMinterDid.Utxo[];
 	totalInputValue: bigint;
 	changeAmount: bigint;
 	sufficientFunds: boolean;
@@ -13,7 +13,7 @@ export interface UtxoSelectionResult {
 /**
  * Extracts transaction IDs from an array of UTXOs
  */
-export const extractUtxoTxIds = (utxos: Utxo[]): string[] =>
+export const extractUtxoTxIds = (utxos: CkBtcMinterDid.Utxo[]): string[] =>
 	utxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
 
 /**
@@ -50,7 +50,7 @@ export const calculateUtxoSelection = ({
 	amountSatoshis,
 	feeRateMiliSatoshisPerVByte
 }: {
-	availableUtxos: Utxo[];
+	availableUtxos: CkBtcMinterDid.Utxo[];
 	amountSatoshis: bigint;
 	feeRateMiliSatoshisPerVByte: bigint;
 }): UtxoSelectionResult => {
@@ -71,7 +71,7 @@ export const calculateUtxoSelection = ({
 		return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
 	});
 
-	const selectedUtxos: Utxo[] = [];
+	const selectedUtxos: CkBtcMinterDid.Utxo[] = [];
 	let totalInputValue = ZERO;
 	let estimatedFee = ZERO;
 
@@ -120,9 +120,9 @@ export const filterLockedUtxos = ({
 	utxos,
 	pendingUtxoTxIds
 }: {
-	utxos: Utxo[];
+	utxos: CkBtcMinterDid.Utxo[];
 	pendingUtxoTxIds: string[];
-}): Utxo[] =>
+}): CkBtcMinterDid.Utxo[] =>
 	utxos.filter((utxo) => {
 		const txIdHex = utxoTxIdToString(utxo.outpoint.txid);
 		return !pendingUtxoTxIds.includes(txIdHex);
@@ -135,12 +135,12 @@ export const filterAvailableUtxos = ({
 	utxos,
 	options
 }: {
-	utxos: Utxo[];
+	utxos: CkBtcMinterDid.Utxo[];
 	options: {
 		minConfirmations: number;
 		pendingUtxoTxIds: string[];
 	};
-}): Utxo[] => {
+}): CkBtcMinterDid.Utxo[] => {
 	const { minConfirmations, pendingUtxoTxIds } = options;
 
 	// First filter by confirmations to ensure transaction security

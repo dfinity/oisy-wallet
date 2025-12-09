@@ -1,4 +1,4 @@
-import type { CustomToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	hasSufficientIcrcAllowance,
@@ -24,8 +24,8 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
+import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';

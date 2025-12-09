@@ -24,7 +24,7 @@ export const USDT_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckUSDT',
 	groupData: USDT_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true,
+	neverCollapseInTokenGroup: true,
 	buy: {
 		onramperId: 'usdt_ethereum'
 	}

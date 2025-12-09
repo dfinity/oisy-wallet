@@ -1,6 +1,7 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import {
@@ -12,14 +13,15 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
-import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import * as appConstants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
+import type { StakeBalances } from '$lib/types/stake-balance';
 import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -37,14 +39,16 @@ import {
 	saveAllCustomTokens,
 	sortTokens,
 	sumMainnetTokensUsdBalancesPerNetwork,
-	sumTokensUiUsdBalance
+	sumMainnetTokensUsdStakeBalancesPerNetwork,
+	sumTokensUiUsdBalance,
+	sumTokensUiUsdStakeBalance
 } from '$lib/utils/tokens.utils';
-import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import i18nMock from '$tests/mocks/i18n.mock';
 import {
 	mockIndexCanisterId,
@@ -178,6 +182,8 @@ describe('tokens.utils', () => {
 	describe('pinTokensWithBalanceAtTop', () => {
 		const mockUsdValue = vi.mocked(usdValue);
 
+		const mockStakeBalances: StakeBalances = {};
+
 		beforeEach(() => {
 			vi.resetAllMocks();
 
@@ -196,6 +202,7 @@ describe('tokens.utils', () => {
 			const result = pinTokensWithBalanceAtTop({
 				$tokens: mockTokens,
 				$balances: newBalances,
+				$stakeBalances: mockStakeBalances,
 				$exchanges: mockExchanges
 			});
 
@@ -214,6 +221,7 @@ describe('tokens.utils', () => {
 			const result = pinTokensWithBalanceAtTop({
 				$tokens: mockTokens,
 				$balances: mockBalances,
+				$stakeBalances: mockStakeBalances,
 				$exchanges: newExchanges
 			});
 
@@ -234,6 +242,7 @@ describe('tokens.utils', () => {
 			const result = pinTokensWithBalanceAtTop({
 				$tokens: mockTokens,
 				$balances: newBalances,
+				$stakeBalances: mockStakeBalances,
 				$exchanges: mockExchanges
 			});
 
@@ -254,6 +263,7 @@ describe('tokens.utils', () => {
 			const result = pinTokensWithBalanceAtTop({
 				$tokens: mockTokens,
 				$balances: newBalances,
+				$stakeBalances: mockStakeBalances,
 				$exchanges: mockExchanges
 			});
 
@@ -273,6 +283,7 @@ describe('tokens.utils', () => {
 			const result = pinTokensWithBalanceAtTop({
 				$tokens: mockTokens,
 				$balances: newBalances,
+				$stakeBalances: mockStakeBalances,
 				$exchanges: mockExchanges
 			});
 
@@ -316,6 +327,50 @@ describe('tokens.utils', () => {
 		});
 	});
 
+	describe('sumTokensUiUsdStakeBalance', () => {
+		it('should correctly calculate USD total staking balance', () => {
+			const tokens: TokenUi[] = [
+				{ ...ICP_TOKEN, stakeUsdBalance: 50 },
+				{ ...BTC_MAINNET_TOKEN, stakeUsdBalance: 50 },
+				{ ...ETHEREUM_TOKEN, stakeUsdBalance: 100 }
+			];
+
+			const result = sumTokensUiUsdStakeBalance(tokens);
+
+			expect(result).toEqual(200);
+		});
+
+		it('should correctly calculate USD total staking balance when some tokens do not have it', () => {
+			const tokens: TokenUi[] = [
+				{ ...ICP_TOKEN, stakeUsdBalance: 50 },
+				{ ...BTC_MAINNET_TOKEN, stakeUsdBalance: 0 },
+				{ ...ETHEREUM_TOKEN }
+			];
+
+			const result = sumTokensUiUsdStakeBalance(tokens);
+
+			expect(result).toEqual(50);
+		});
+
+		it('should include claimable stake balance in the total', () => {
+			const tokens: TokenUi[] = [
+				{ ...ICP_TOKEN, stakeUsdBalance: 50, claimableStakeBalanceUsd: 10 },
+				{ ...BTC_MAINNET_TOKEN, stakeUsdBalance: 50 },
+				{ ...ETHEREUM_TOKEN, stakeUsdBalance: 100, claimableStakeBalanceUsd: 20 }
+			];
+
+			const result = sumTokensUiUsdStakeBalance(tokens);
+
+			expect(result).toEqual(230);
+		});
+
+		it('should correctly calculate USD total staking balance when tokens list is empty', () => {
+			const result = sumTokensUiUsdStakeBalance([]);
+
+			expect(result).toEqual(0);
+		});
+	});
+
 	describe('filterEnabledTokens', () => {
 		it('should correctly return filtered tokens when all tokens have "enabled" property', () => {
 			const ENABLED_ICP_TOKEN = { ...ICP_TOKEN, enabled: true };
@@ -349,49 +404,118 @@ describe('tokens.utils', () => {
 	});
 
 	describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
-		const mockUsdValue = vi.mocked(usdValue);
+		const mockTokens = [
+			{ ...ICP_TOKEN, usdBalance: Number(bn2Bi) },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: Number(bn1Bi) },
+			{ ...ETHEREUM_TOKEN, usdBalance: Number(bn3Bi) }
+		];
 
-		beforeEach(() => {
-			vi.resetAllMocks();
+		const mockTestnetToken = { ...BTC_TESTNET_TOKEN, usdBalance: Number(bn3Bi) };
 
-			mockUsdValue.mockImplementation(
-				({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
-			);
-		});
+		const mockAllTokens = [...mockTokens, mockTestnetToken];
 
 		it('should return a dictionary with correct balances for the list of mainnet and testnet tokens', () => {
-			const balances = {
-				...mockBalances,
-				[BTC_TESTNET_TOKEN.id]: { data: bn3Bi, certified }
-			};
-			const tokens = [...mockTokens, BTC_TESTNET_TOKEN];
-
-			const result = sumMainnetTokensUsdBalancesPerNetwork({
-				$tokens: tokens,
-				$balances: balances,
-				$exchanges: mockExchanges
-			});
+			const result = sumMainnetTokensUsdBalancesPerNetwork({ tokens: mockAllTokens });
 
 			expect(result).toEqual({
-				[BTC_MAINNET_NETWORK_ID]: Number(bn2Bi),
+				[BTC_MAINNET_NETWORK_ID]: Number(bn1Bi),
 				[ETHEREUM_NETWORK_ID]: Number(bn3Bi),
-				[ICP_NETWORK_ID]: Number(bn1Bi)
+				[ICP_NETWORK_ID]: Number(bn2Bi)
 			});
 		});
 
 		it('should return a dictionary with correct balances if all token balances are 0', () => {
-			const balances = {
-				[ICP_TOKEN.id]: { data: ZERO, certified },
-				[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
-				[ETHEREUM_TOKEN.id]: { data: ZERO, certified },
-				[BTC_TESTNET_TOKEN.id]: { data: ZERO, certified }
-			};
-			const tokens = [...mockTokens, BTC_TESTNET_TOKEN];
+			const tokens = mockAllTokens.map((t) => ({
+				...t,
+				usdBalance: Number(ZERO)
+			}));
 
-			const result = sumMainnetTokensUsdBalancesPerNetwork({
-				$tokens: tokens,
-				$balances: balances,
-				$exchanges: mockExchanges
+			const result = sumMainnetTokensUsdBalancesPerNetwork({ tokens });
+
+			expect(result).toEqual({
+				[BTC_MAINNET_NETWORK_ID]: Number(ZERO),
+				[ETHEREUM_NETWORK_ID]: Number(ZERO),
+				[ICP_NETWORK_ID]: Number(ZERO)
+			});
+		});
+
+		it('should return an empty dictionary if no mainnet tokens are in the list', () => {
+			const result = sumMainnetTokensUsdBalancesPerNetwork({ tokens: [mockTestnetToken] });
+
+			expect(result).toEqual({});
+		});
+
+		it('should return an empty dictionary if no tokens are provided', () => {
+			const result = sumMainnetTokensUsdBalancesPerNetwork({ tokens: [] });
+
+			expect(result).toEqual({});
+		});
+	});
+
+	describe('sumMainnetTokensUsdStakeBalancesPerNetwork', () => {
+		const mockTokens = [
+			{ ...ICP_TOKEN, stakeUsdBalance: Number(bn2Bi), claimableStakeBalanceUsd: Number(bn1Bi) },
+			{
+				...BTC_MAINNET_TOKEN,
+				stakeUsdBalance: Number(bn1Bi),
+				claimableStakeBalanceUsd: Number(bn3Bi)
+			},
+			{ ...ETHEREUM_TOKEN, stakeUsdBalance: Number(bn3Bi), claimableStakeBalanceUsd: Number(bn2Bi) }
+		];
+
+		const mockTestnetToken = {
+			...BTC_TESTNET_TOKEN,
+			stakeUsdBalance: Number(bn3Bi),
+			claimableStakeBalanceUsd: Number(bn2Bi)
+		};
+
+		const mockAllTokens = [...mockTokens, mockTestnetToken];
+
+		it('should return a dictionary with correct balances for the list of mainnet and testnet tokens', () => {
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({ tokens: mockAllTokens });
+
+			expect(result).toEqual({
+				[BTC_MAINNET_NETWORK_ID]: Number(bn1Bi + bn3Bi),
+				[ETHEREUM_NETWORK_ID]: Number(bn3Bi + bn2Bi),
+				[ICP_NETWORK_ID]: Number(bn2Bi + bn1Bi)
+			});
+		});
+
+		it('should handle missing stake balances', () => {
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
+				tokens: [...mockAllTokens, { ...BONK_TOKEN, claimableStakeBalanceUsd: 123 }]
+			});
+
+			expect(result).toEqual({
+				[BTC_MAINNET_NETWORK_ID]: Number(bn1Bi + bn3Bi),
+				[ETHEREUM_NETWORK_ID]: Number(bn3Bi + bn2Bi),
+				[ICP_NETWORK_ID]: Number(bn2Bi + bn1Bi),
+				[SOLANA_MAINNET_NETWORK_ID]: 123
+			});
+		});
+
+		it('should handle missing claimable balances', () => {
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
+				tokens: [...mockAllTokens, { ...BONK_TOKEN, stakeUsdBalance: 456 }]
+			});
+
+			expect(result).toEqual({
+				[BTC_MAINNET_NETWORK_ID]: Number(bn1Bi + bn3Bi),
+				[ETHEREUM_NETWORK_ID]: Number(bn3Bi + bn2Bi),
+				[ICP_NETWORK_ID]: Number(bn2Bi + bn1Bi),
+				[SOLANA_MAINNET_NETWORK_ID]: 456
+			});
+		});
+
+		it('should return a dictionary with correct balances if all token balances are 0', () => {
+			const tokens = mockAllTokens.map((t) => ({
+				...t,
+				stakeUsdBalance: Number(ZERO),
+				claimableStakeBalanceUsd: Number(ZERO)
+			}));
+
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({
+				tokens
 			});
 
 			expect(result).toEqual({
@@ -402,27 +526,13 @@ describe('tokens.utils', () => {
 		});
 
 		it('should return an empty dictionary if no mainnet tokens are in the list', () => {
-			const balances = {
-				...mockBalances,
-				[BTC_TESTNET_TOKEN.id]: { data: bn2Bi, certified }
-			};
-			const tokens = [BTC_TESTNET_TOKEN];
-
-			const result = sumMainnetTokensUsdBalancesPerNetwork({
-				$tokens: tokens,
-				$balances: balances,
-				$exchanges: mockExchanges
-			});
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({ tokens: [mockTestnetToken] });
 
 			expect(result).toEqual({});
 		});
 
 		it('should return an empty dictionary if no tokens are provided', () => {
-			const result = sumMainnetTokensUsdBalancesPerNetwork({
-				$tokens: [],
-				$balances: mockBalances,
-				$exchanges: mockExchanges
-			});
+			const result = sumMainnetTokensUsdStakeBalancesPerNetwork({ tokens: [] });
 
 			expect(result).toEqual({});
 		});
@@ -776,27 +886,30 @@ describe('tokens.utils', () => {
 		it('should return empty arrays if no tokens passed', () => {
 			const result = groupTogglableTokens([]);
 
-			expect(result).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
+			expect(result).toEqual({ icrc: [], ext: [], erc20: [], erc721: [], erc1155: [], spl: [] });
 		});
 
 		it('should group the tokens correctly', () => {
 			const mockToggleableIcToken1 = { ...mockValidIcrcToken, name: 'token1', enabled: true };
 			const mockToggleableIcToken2 = { ...mockValidIcrcToken, name: 'token2', enabled: true };
+			const mockToggleableExtV2Token = { ...mockValidExtV2Token, enabled: true };
 			const mockToggleableErc20Token = { ...mockValidErc20Token, enabled: true };
 			const mockToggleableErc721Token = { ...mockValidErc721Token, enabled: true };
 			const mockToggleableErc1155Token = { ...mockValidErc1155Token, enabled: true };
 			const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
 
-			const { icrc, spl, erc20, erc721, erc1155 } = groupTogglableTokens([
+			const { icrc, ext, spl, erc20, erc721, erc1155 } = groupTogglableTokens([
 				mockToggleableSplToken,
 				mockToggleableErc20Token,
 				mockToggleableErc721Token,
 				mockToggleableErc1155Token,
 				mockToggleableIcToken1,
-				mockToggleableIcToken2
+				mockToggleableIcToken2,
+				mockToggleableExtV2Token
 			]);
 
 			expect(icrc).toEqual([mockToggleableIcToken1, mockToggleableIcToken2]);
+			expect(ext).toEqual([mockToggleableExtV2Token]);
 			expect(spl).toEqual([mockToggleableSplToken]);
 			expect(erc20).toEqual([mockToggleableErc20Token]);
 			expect(erc721).toEqual([mockToggleableErc721Token]);
@@ -810,26 +923,14 @@ describe('tokens.utils', () => {
 				toastsShow: vi.fn()
 			}));
 
-			vi.mock('$icp/services/manage-tokens.services', () => ({
-				saveIcrcCustomTokens: vi.fn().mockResolvedValue(undefined)
+			vi.mock('$lib/services/manage-tokens.services', () => ({
+				saveCustomTokensWithKey: vi.fn().mockResolvedValue(undefined)
 			}));
 
 			vi.mock('$eth/services/manage-tokens.services', () => ({
 				saveErc20UserTokens: vi.fn().mockResolvedValue(undefined),
 				saveErc20CustomTokens: vi.fn().mockResolvedValue(undefined)
 			}));
-
-			vi.mock('$sol/services/manage-tokens.services', () => ({
-				saveSplCustomTokens: vi.fn().mockResolvedValue(undefined)
-			}));
-
-			vi.mock('$lib/utils/tokens.utils', async (importOriginal) => {
-				const actual: Record<string, unknown> = await importOriginal();
-				return {
-					...actual
-					//groupTogglableTokens: vi.fn()
-				};
-			});
 
 			vi.clearAllMocks();
 		});
@@ -847,23 +948,39 @@ describe('tokens.utils', () => {
 				duration: 5000
 			});
 
-			expect(saveIcrcCustomTokens).not.toHaveBeenCalled();
+			expect(saveCustomTokensWithKey).not.toHaveBeenCalled();
 			expect(saveErc20UserTokens).not.toHaveBeenCalled();
 			expect(saveErc20CustomTokens).not.toHaveBeenCalled();
-			expect(saveSplCustomTokens).not.toHaveBeenCalled();
 		});
 
-		it('should call saveIcrcCustomTokens when ICRC tokens are present', async () => {
+		it('should call saveCustomTokensWithKey when ICRC tokens are present', async () => {
 			await saveAllCustomTokens({
 				tokens: [mockValidIcrcToken],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
 
-			expect(saveIcrcCustomTokens).toHaveBeenCalledWith(
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([
 						expect.objectContaining({ ...mockValidIcrcToken, networkKey: 'Icrc' })
+					]),
+					identity: mockIdentity
+				})
+			);
+		});
+
+		it('should call saveCustomTokensWithKey when EXT tokens are present', async () => {
+			await saveAllCustomTokens({
+				tokens: [mockValidExtV2Token],
+				$authIdentity: mockIdentity,
+				$i18n: i18nMock
+			});
+
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tokens: expect.arrayContaining([
+						expect.objectContaining({ ...mockValidExtV2Token, networkKey: 'ExtV2' })
 					]),
 					identity: mockIdentity
 				})
@@ -904,7 +1021,7 @@ describe('tokens.utils', () => {
 			);
 		});
 
-		it('should call saveSplCustomTokens when SPL tokens are present', async () => {
+		it('should call saveCustomTokensWithKey when SPL tokens are present', async () => {
 			const token = { ...BONK_TOKEN, enabled: true } as unknown as TokenUi;
 
 			await saveAllCustomTokens({
@@ -913,7 +1030,7 @@ describe('tokens.utils', () => {
 				$i18n: i18nMock
 			});
 
-			expect(saveSplCustomTokens).toHaveBeenCalledWith(
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([expect.objectContaining(token)]),
 					identity: mockIdentity
@@ -935,7 +1052,7 @@ describe('tokens.utils', () => {
 				modalNext
 			});
 
-			expect(saveIcrcCustomTokens).toHaveBeenCalledWith(
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({ progress, onSuccess, modalNext })
 			);
 		});
@@ -944,12 +1061,13 @@ describe('tokens.utils', () => {
 	describe('filterTokensByNft', () => {
 		const nft1 = { ...mockValidErc721Token, name: 'Cool Nft' };
 		const nft2 = { ...mockValidErc1155Token, name: 'Even cooler Nft' };
-		const tokens = [ETHEREUM_TOKEN, SOLANA_TOKEN, BONK_TOKEN, nft1, nft2];
+		const nft3 = { ...mockValidExtV2Token, name: 'Another cool Nft' };
+		const tokens = [ETHEREUM_TOKEN, SOLANA_TOKEN, BONK_TOKEN, nft1, nft2, nft3];
 
 		it('should return all tokens when no filter is provided', () => {
 			const result = filterTokensByNft({ tokens });
 
-			expect(result).toHaveLength(5);
+			expect(result).toHaveLength(6);
 			expect(result).toEqual(tokens);
 		});
 
@@ -963,8 +1081,8 @@ describe('tokens.utils', () => {
 		it('should return all Nfts when filterNfts is true', () => {
 			const result = filterTokensByNft({ tokens, filterNfts: true });
 
-			expect(result).toHaveLength(2);
-			expect(result).toEqual([nft1, nft2]);
+			expect(result).toHaveLength(3);
+			expect(result).toEqual([nft1, nft2, nft3]);
 		});
 
 		it('should return an empty list if tokens is empty', () => {

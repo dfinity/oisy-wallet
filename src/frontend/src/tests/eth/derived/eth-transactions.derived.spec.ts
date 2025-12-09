@@ -7,12 +7,12 @@ import { ethAddressStore } from '$lib/stores/address.store';
 import { token } from '$lib/stores/token.store';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 import { get } from 'svelte/store';
 
 describe('eth-transactions.derived', () => {
 	const mockCkEthMinterInfo = {
-		data: { minimum_withdrawal_amount: [500n] } as CkEthMinterInfo,
+		data: { minimum_withdrawal_amount: [500n] } as CkEthMinterDid.MinterInfo,
 		certified: true
 	};
 	const transactions = createMockEthTransactions(5);

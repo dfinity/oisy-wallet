@@ -1,4 +1,4 @@
-import type { Event } from '$declarations/xtc_ledger/declarations/xtc_ledger.did';
+import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
 import { balance, transactions } from '$icp/api/xtc-ledger.api';
 import { IcWalletBalanceAndTransactionsScheduler } from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';

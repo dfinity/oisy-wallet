@@ -42,6 +42,7 @@
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
@@ -53,6 +54,7 @@
 			? mapTokenUi({
 					token: $pageToken,
 					$balances: $balancesStore,
+					$stakeBalances,
 					$exchanges
 				})
 			: undefined

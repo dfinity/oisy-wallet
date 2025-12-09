@@ -5,11 +5,11 @@ import { tokens } from '$lib/derived/tokens.derived';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import { decodeQrCode, decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { generateUrn } from '$tests/mocks/qr-generator.mock';
-import { decodePayment } from '@dfinity/ledger-icrc';
 import { assertNonNullish } from '@dfinity/utils';
+import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
 import { get } from 'svelte/store';
 
-vi.mock('@dfinity/ledger-icrc', () => ({
+vi.mock('@icp-sdk/canisters/ledger/icrc', () => ({
 	decodePayment: vi.fn()
 }));
 
@@ -54,6 +54,187 @@ describe('decodeUrn', () => {
 			}
 
 			expect(result).toEqual(expectedResult);
+		});
+	});
+
+	describe('decodeQrCodeUrn', () => {
+		const validAddress = '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC';
+
+		describe('valid URIs', () => {
+			it('should parse complete URI with all required fields', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=1000`);
+
+				expect(result).toEqual({
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					networkId: '1',
+					prefix: 'ethereum',
+					value: 1000
+				});
+			});
+
+			it('should parse URI with different chainId', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@137?value=1000`);
+
+				expect(result?.networkId).toBe('137');
+			});
+
+			it('should parse URI with large value', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=1000000000000000000`);
+
+				expect(result?.value).toBe(1000000000000000000);
+			});
+
+			it('should parse URI with zero value', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=0`);
+
+				expect(result?.value).toBe(0);
+			});
+
+			it('should parse URI with chainId zero', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@0?value=1000`);
+
+				expect(result?.networkId).toBe('0');
+			});
+
+			it('should preserve address case', () => {
+				const mixedCaseAddress = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+				const result = decodeQrCodeUrn(`ethereum:${mixedCaseAddress}@1?value=1000`);
+
+				expect(result?.destination).toBe(mixedCaseAddress);
+			});
+		});
+
+		describe('missing required fields', () => {
+			it('should return undefined when chainId is missing', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}?value=1000`);
+
+				expect(result).toEqual({
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					prefix: 'ethereum',
+					value: 1000
+				});
+			});
+
+			it('should return undefined when value is missing', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1`);
+
+				expect(result).toEqual({
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					networkId: '1',
+					prefix: 'ethereum'
+				});
+			});
+
+			it('should return undefined when both chainId and value are missing', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}`);
+
+				expect(result).toEqual({
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					prefix: 'ethereum'
+				});
+			});
+
+			it('should return undefined when address is missing', () => {
+				const result = decodeQrCodeUrn('ethereum:@1?value=1000');
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should return undefined when all fields are missing', () => {
+				const result = decodeQrCodeUrn('ethereum:');
+
+				expect(result).toBeUndefined();
+			});
+		});
+
+		describe('invalid chainId', () => {
+			it('should return undefined for negative chainId', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@-1?value=1000`);
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should return undefined for non-numeric chainId', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@abc?value=1000`);
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should return undefined for empty chainId', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@?value=1000`);
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should return undefined for chainId with whitespace', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@   ?value=1000`);
+
+				expect(result).toBeUndefined();
+			});
+		});
+
+		describe('invalid value', () => {
+			it('should return undefined for non-numeric value', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=abc`);
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should return undefined for empty value', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=`);
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should return undefined for value with whitespace', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=   `);
+
+				expect(result).toBeUndefined();
+			});
+		});
+
+		describe('edge cases', () => {
+			it('should handle URI with extra query parameters', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=1000&gas=21000`);
+
+				expect(result?.destination).toBe(validAddress);
+				expect(result?.networkId).toBe('1');
+				expect(result?.value).toBe(1000);
+			});
+
+			it('should handle URI with value as first parameter', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=1000&other=param`);
+
+				expect(result?.value).toBe(1000);
+			});
+
+			it('should handle URI with very large chainId', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@999999999?value=1000`);
+
+				expect(result?.networkId).toBe('999999999');
+			});
+
+			it('should handle URI with chainId having leading zeros', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@001?value=1000`);
+
+				expect(result?.networkId).toBe('001');
+			});
+
+			it('should handle URI with value having leading zeros', () => {
+				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=00100`);
+
+				expect(result?.value).toBe(100);
+			});
+		});
+
+		describe('malformed URIs', () => {
+			it('should not throw on unexpected input', () => {
+				expect(() => decodeQrCodeUrn('ethereum:???@@@')).not.toThrow();
+			});
+
+			it('should not throw on special characters', () => {
+				expect(() => decodeQrCodeUrn('ethereum:$%^&*()@1?value=1000')).not.toThrow();
+			});
 		});
 	});
 });

@@ -153,7 +153,7 @@ describe('VipRewardStateModal', () => {
 		});
 
 		it('should auto-enable GLDT token for Gold campaign and disabled token', () => {
-			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			icrcCustomTokensStore.setAll([{ data: mockIcrcCustomToken, certified: false }]);
 
 			const { container } = render(VipRewardStateModal, {
 				isSuccessful: true,
@@ -180,10 +180,12 @@ describe('VipRewardStateModal', () => {
 		});
 
 		it('should not open manage tokens modal for Gold campaign and enabled token', async () => {
-			icrcCustomTokensStore.set({
-				data: { ...mockIcrcCustomToken, enabled: true },
-				certified: false
-			});
+			icrcCustomTokensStore.setAll([
+				{
+					data: { ...mockIcrcCustomToken, enabled: true },
+					certified: false
+				}
+			]);
 
 			const { container } = render(VipRewardStateModal, {
 				isSuccessful: true,
@@ -219,7 +221,7 @@ describe('VipRewardStateModal', () => {
 		});
 
 		it('should not open manage tokens modal for VIP campaign and disabled token', async () => {
-			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			icrcCustomTokensStore.setAll([{ data: mockIcrcCustomToken, certified: false }]);
 
 			const { container } = render(VipRewardStateModal, {
 				isSuccessful: true,
@@ -238,10 +240,12 @@ describe('VipRewardStateModal', () => {
 		});
 
 		it('should not open manage tokens modal for VIP campaign and enabled token', async () => {
-			icrcCustomTokensStore.set({
-				data: { ...mockIcrcCustomToken, enabled: true },
-				certified: false
-			});
+			icrcCustomTokensStore.setAll([
+				{
+					data: { ...mockIcrcCustomToken, enabled: true },
+					certified: false
+				}
+			]);
 
 			const { container } = render(VipRewardStateModal, {
 				isSuccessful: true,

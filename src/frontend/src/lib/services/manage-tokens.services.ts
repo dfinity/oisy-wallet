@@ -9,6 +9,7 @@ import {
 } from '$lib/constants/analytics.constants';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
+import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
@@ -121,4 +122,17 @@ export const saveTokens = async <
 			metadata: mapIcErrorMetadata(err)
 		});
 	}
+};
+
+export const saveCustomTokensWithKey = async ({
+	tokens,
+	...rest
+}: {
+	tokens: SaveCustomTokenWithKey[];
+} & ManageTokensSaveParams) => {
+	await saveTokens({
+		...rest,
+		tokens,
+		save: saveCustomTokens
+	});
 };

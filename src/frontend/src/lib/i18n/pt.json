@@ -8,6 +8,7 @@
 			"done": "Concluído",
 			"close": "Fechar",
 			"change": "Alterar",
+			"continue": "",
 			"apply": "Aplicar",
 			"retry": "",
 			"refresh": "Atualizar",
@@ -39,7 +40,8 @@
 			"confirm": "",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
@@ -54,7 +56,8 @@
 			"switch_language": "Mudar linguagem",
 			"switch_currency": "Mudar moeda",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída",
@@ -68,7 +71,7 @@
 			"dapp_explorer": "Explorar",
 			"activity": "Atividade",
 			"airdrops": "Recompensas",
-			"earning": "Ganhar recompensas",
+			"earning": "Ganhar",
 			"source_code_on_github": "Código-fonte no GitHub",
 			"view_on_explorer": "Ver no explorador",
 			"source_code": "Código-fonte",
@@ -122,7 +125,6 @@
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -217,7 +219,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Jogo",
 			"tools": "Ferramentas",
-			"ai": ""
+			"ai": "",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -379,6 +382,31 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -604,6 +632,7 @@
 			"spl_custom_tokens": "Erro ao carregar o token personalizado SPL.",
 			"erc20_user_token": "Erro ao habilitar o token gêmeo ERC20.",
 			"icrc_custom_token": "Erro ao carregar o token personalizado ICRC.",
+			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "Sua carteira requer alguns dados iniciais que ainda não foram carregados. Por favor, tente novamente.",
 			"allow_signing": "Ocorreu um problema ao configurar sua carteira para assinar. Você foi desconectado. Se o problema persistir, entre em contato com o suporte.",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -697,9 +726,11 @@
 				"display_account_id_qr": "Exibir ID da Conta ICP como um código QR",
 				"account_id_copied": "ID da Conta ICP copiado para a área de transferência.",
 				"principal": "Principal ICP",
+				"principal_title": "Endereço da carteira ICP - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Principal Internet Computer copiado para a área de transferência.",
 				"display_internet_computer_principal_qr": "Exibir Principal Internet Computer como um código QR",
 				"icp_account": "Conta ICP (para exchanges)",
+				"icp_account_title": "Endereço da carteira ICP - Apenas por token ICP",
 				"icp_account_copied": "Conta ICP copiada para a área de transferência.",
 				"display_icp_account_qr": "Exibir Conta ICP como um código QR"
 			}
@@ -712,6 +743,7 @@
 				"learn_how_to_convert": "Saiba como converter $token para $ckToken",
 				"metamask": "Receber do Metamask",
 				"ethereum": "Ethereum",
+				"ethereum_title": "Endereço da carteira Ethereum",
 				"ethereum_address": "Endereço",
 				"ethereum_address_copied": "Endereço Ethereum copiado para a área de transferência.",
 				"display_ethereum_address_qr": "Exibir endereço Ethereum como um código QR"
@@ -729,8 +761,11 @@
 				"checking_incoming": "Verificando BTCs recebidos...",
 				"refreshing_wallet": "Atualizando carteira...",
 				"bitcoin_address": "Bitcoin",
+				"bitcoin_address_title": "Endereço da carteira Bitcoin",
 				"bitcoin_testnet_address": "Bitcoin (Testnet)",
+				"bitcoin_testnet_address_title": "Endereço da carteira Bitcoin (Testnet)",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
+				"bitcoin_regtest_address_title": "Endereço da carteira Bitcoin (Regtest)",
 				"display_bitcoin_address_qr": "Exibir Endereço Bitcoin como um código QR",
 				"bitcoin_address_copied": "Endereço Bitcoin copiado para a área de transferência.",
 				"from_network": "Transfira Bitcoin na rede BTC para este endereço para receber ckBTC.",
@@ -747,8 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Endereço Solana",
+				"solana_address_title": "Endereço da carteira Solana",
 				"solana_devnet_address": "Endereço Solana da Devnet",
+				"solana_devnet_address_title": "Endereço da carteira Solana Devnet",
 				"solana_local_address": "Endereço Solana Local",
+				"solana_local_address_title": "Endereço da carteira Solana Local",
 				"solana_address_copied": "Endereço Solana copiado para a área de transferência",
 				"display_solana_address_qr": "Exibir endereço Solana como QR code"
 			}
@@ -862,6 +900,37 @@
 			"solana_transaction_expired": "Sua transação de envio não foi processada pela rede Solana e expirou, provavelmente porque a taxa de prioridade fornecida não foi suficiente. Nós a atualizamos para o valor recomendado mais recente, então tente enviá-la novamente.",
 			"solana_confirmation_failed": "Não recebemos uma confirmação da transação que você acabou de criar. Aguarde alguns segundos e verifique a lista de transações do seu token para confirmar se a transação foi criada corretamente.",
 			"fee_calc_unsupported_standard": ""
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"recipient": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": "",
+			"pay_amount": "",
+			"go_to_assets": "",
+			"supported_tokens": "",
+			"no_supported_tokens": "",
+			"pay_with": "",
+			"select_token": "",
+			"select_different_token": "",
+			"tokens_available": "",
+			"select_token_to_pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -981,6 +1050,19 @@
 			"title": "Comprar via Onramper"
 		}
 	},
+	"pay": {
+		"text": {
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": "",
+			"where_you_can_pay": ""
+		},
+		"alt": {
+			"pay": "",
+			"where_you_can_pay": ""
+		}
+	},
 	"tokens": {
 		"text": {
 			"title": "Tokens",
@@ -1036,6 +1118,7 @@
 				"review": "Rever",
 				"saving": "Salvando...",
 				"updating": "Atualizando lista de tokens",
+				"canister_id": "",
 				"ledger_canister_id": "ID do Canister Ledger",
 				"index_canister_id": "ID do Canister Index",
 				"minter_canister_id": "ID do Canister Minter",
@@ -1045,6 +1128,7 @@
 				"verifying": "Verificando detalhes do token...",
 				"add_the_token": "Adicionar o token",
 				"info": "Os IDs dos canisters Ledger e Index geralmente estão disponíveis no site do projeto.",
+				"info_ext": "",
 				"info_index": "O ID do canister Index é opcional, mas sem ele, $oisy_short não pode exibir o histórico de transações.",
 				"custom_tokens_not_supported": "A rede selecionada não suporta tokens personalizados."
 			},
@@ -1056,6 +1140,7 @@
 				"unexpected_index_ledger": "Algo deu errado ao carregar o ID do Ledger relacionado ao canister Index.",
 				"invalid_ledger_id": "O ID do Ledger não está relacionado ao canister Index.",
 				"missing_ledger_id": "O ID do Ledger está faltando. Você forneceu um valor?",
+				"missing_canister_id": "",
 				"missing_contract_address": "O endereço do contrato está faltando. Você forneceu um valor?",
 				"missing_token_address": "O endereço do token está faltando. Você forneceu um valor?",
 				"no_network": "Nenhuma rede selecionada. Isso é inesperado."
@@ -1392,7 +1477,6 @@
 			"token_needs_enabling": "O token precisa de ser habilitado para visualizar o histórico de transações."
 		},
 		"error": {
-			"loading_transactions": "Erro ao carregar as transações.",
 			"loading_transactions_symbol": "Erro ao carregar as transações $symbol.",
 			"uncertified_transactions_removed": "Várias transações não certificadas foram identificadas e subsequentemente removidas das listas exibidas.",
 			"loading_pending_ck_ethereum_transactions": "Algo deu errado ao buscar as transações pendentes de $network.",
@@ -1718,21 +1802,51 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Ganhe"
+			"title": "Ganhe",
+			"tab_title": "",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": "",
+			"go_to_earn": ""
 		},
 		"cards": {
-			"gold_title": "Ouro",
-			"gold_description": "GLDT Staking",
-			"stablecoins_title": "Moedas estáveis (stablecoins)",
-			"stablecoins_description": "Em breve",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Recompensas OISY"
+			"gldt": {
+				"title1": "",
+				"title2": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
+		},
+		"providers": {
+			"goldDaoStaking": {
+				"cardTitle": ""
+			}
 		}
 	},
 	"stake": {
 		"text": {
+			"gldt_stake_page_description": "",
 			"stake": "",
+			"stake_now": "",
+			"stake_amount": "",
+			"not_enough_to_stake": "",
 			"unstake": "",
+			"unstake_now": "",
 			"unstaking": "",
 			"unstake_token": "",
 			"enable_token_text": "",
@@ -1742,11 +1856,13 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"unproductive_assets": "",
+			"invested_assets": "",
 			"visit_provider": "",
-			"current_apy": "",
-			"current_apy_info": "",
+			"current_apy_label": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1758,10 +1874,81 @@
 			"immediate_dissolve_terms": "",
 			"amount_to_receive": "",
 			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
 			"claim_reward": "",
 			"claim_rewards": "",
+			"claim_reward_short": "",
 			"claim_now": "",
-			"claiming": ""
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty_1": "",
+			"title_empty_2_usd": "",
+			"title_empty_2_apy": "",
+			"title_empty_3": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": "",
+			"gldt_stake_carousel_slide_title": "",
+			"gldt_stake_carousel_slide_cta": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": "",
+			"unexpected_error_on_unstake": "",
+			"dissolvement_limit_reached": ""
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "",
+				"item1_description": "",
+				"item2_title_1": "",
+				"item2_title_2": "",
+				"item3_title": "",
+				"item3_description": "",
+				"item4_title": "",
+				"item4_description": "",
+				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
+			}
+		},
+		"alt": {
+			"placeholder_image": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
 		}
 	},
 	"temporal": {

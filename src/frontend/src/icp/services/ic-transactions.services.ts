@@ -113,10 +113,6 @@ export const onLoadTransactionsError = ({
 			...(mapIcErrorMetadata(err) ?? {})
 		}
 	});
-
-	// We print the error to console just for debugging purposes
-	console.warn(`${get(i18n).transactions.error.loading_transactions}:`, err);
-	return;
 };
 
 export const onTransactionsCleanUp = (data: { tokenId: TokenId; transactionIds: string[] }) => {

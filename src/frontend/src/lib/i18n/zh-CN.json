@@ -8,6 +8,7 @@
 			"done": "完成",
 			"close": "关闭",
 			"change": "更改",
+			"continue": "",
 			"apply": "应用",
 			"retry": "重试",
 			"refresh": "刷新",
@@ -39,7 +40,8 @@
 			"confirm": "",
 			"more": "",
 			"less": "",
-			"ellipsis": ""
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "仅供测试使用！",
@@ -54,7 +56,8 @@
 			"switch_language": "切换语言",
 			"switch_currency": "切换货币",
 			"more": "",
-			"less": ""
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
 			"do_not_close": "交易完成前请勿关闭此标签页",
@@ -68,7 +71,7 @@
 			"dapp_explorer": "探索",
 			"activity": "活动",
 			"airdrops": "奖励",
-			"earning": "赚取与奖励",
+			"earning": "赚取",
 			"source_code_on_github": "GitHub 上的源代码",
 			"view_on_explorer": "在浏览器中查看",
 			"source_code": "源代码",
@@ -122,7 +125,6 @@
 			"preview": "$oisy_name 登录后的桌面和移动端预览图"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -217,7 +219,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "游戏",
 			"tools": "工具包",
-			"ai": "人工智能"
+			"ai": "人工智能",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -379,6 +382,31 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -604,6 +632,7 @@
 			"spl_custom_tokens": "加载 SPL 用户代币时出错。",
 			"erc20_user_token": "启用 ERC20 双生代币时出错。",
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
+			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
 			"waiting_for_allowed_cycles_aborted": "已中止周期账本准备。请稍后尝试登录。",
@@ -697,9 +726,11 @@
 				"display_account_id_qr": "将 ICP 账户 ID 显示为二维码",
 				"account_id_copied": "ICP 账户 ID 已复制到剪贴板。",
 				"principal": "ICP 主标识",
+				"principal_title": "",
 				"internet_computer_principal_copied": "Internet Computer 主标识已复制到剪贴板。",
 				"display_internet_computer_principal_qr": "将 Internet Computer 主标识显示为二维码",
 				"icp_account": "ICP 账户（用于交易所）",
+				"icp_account_title": "",
 				"icp_account_copied": "ICP 账户已复制到剪贴板。",
 				"display_icp_account_qr": "将 ICP 账户显示为二维码"
 			}
@@ -712,6 +743,7 @@
 				"learn_how_to_convert": "了解如何将 $token 转换为 $ckToken",
 				"metamask": "从 Metamask 接收",
 				"ethereum": "以太坊",
+				"ethereum_title": "",
 				"ethereum_address": "地址",
 				"ethereum_address_copied": "以太坊地址已复制到剪贴板。",
 				"display_ethereum_address_qr": "将以太坊地址显示为二维码"
@@ -729,8 +761,11 @@
 				"checking_incoming": "正在检查是否有 BTC 转入…",
 				"refreshing_wallet": "正在刷新钱包…",
 				"bitcoin_address": "比特币",
+				"bitcoin_address_title": "",
 				"bitcoin_testnet_address": "比特币（测试网）",
+				"bitcoin_testnet_address_title": "",
 				"bitcoin_regtest_address": "比特币（回归测试网）",
+				"bitcoin_regtest_address_title": "",
 				"display_bitcoin_address_qr": "将比特币地址显示为二维码",
 				"bitcoin_address_copied": "比特币地址已复制到剪贴板。",
 				"from_network": "将比特币通过 BTC 网络转入此地址以接收 ckBTC。",
@@ -747,8 +782,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Solana 地址",
+				"solana_address_title": "",
 				"solana_devnet_address": "Solana 开发网地址",
+				"solana_devnet_address_title": "",
 				"solana_local_address": "Solana 本地地址",
+				"solana_local_address_title": "",
 				"solana_address_copied": "Solana 地址已复制到剪贴板",
 				"display_solana_address_qr": "将 Solana 地址显示为二维码"
 			}
@@ -862,6 +900,37 @@
 			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重新发送。",
 			"solana_confirmation_failed": "Solana确认失败",
 			"fee_calc_unsupported_standard": "由于不支持所提供的令牌标准，因此无法计算费用。"
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"recipient": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": "",
+			"pay_amount": "",
+			"go_to_assets": "",
+			"supported_tokens": "",
+			"no_supported_tokens": "",
+			"pay_with": "",
+			"select_token": "",
+			"select_different_token": "",
+			"tokens_available": "",
+			"select_token_to_pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -981,6 +1050,19 @@
 			"title": "通过 Onramper 购买"
 		}
 	},
+	"pay": {
+		"text": {
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": "",
+			"where_you_can_pay": ""
+		},
+		"alt": {
+			"pay": "",
+			"where_you_can_pay": ""
+		}
+	},
 	"tokens": {
 		"text": {
 			"title": "代币",
@@ -1036,6 +1118,7 @@
 				"review": "审查",
 				"saving": "正在保存...",
 				"updating": "正在更新代币列表",
+				"canister_id": "",
 				"ledger_canister_id": "账本 Canister ID",
 				"index_canister_id": "索引 Canister ID",
 				"minter_canister_id": "铸币 Canister ID",
@@ -1045,6 +1128,7 @@
 				"verifying": "正在验证代币详情...",
 				"add_the_token": "添加代币",
 				"info": "账本和索引 Canister ID 通常可在项目网站上找到。",
+				"info_ext": "",
 				"info_index": "索引 Canister ID 是可选的，但如果没有它，$oisy_short 将无法显示交易历史。",
 				"custom_tokens_not_supported": "所选网络不支持自定义代币。"
 			},
@@ -1056,6 +1140,7 @@
 				"unexpected_index_ledger": "加载与索引 Canister 相关的账本 ID 时出错。",
 				"invalid_ledger_id": "账本 ID 与索引 Canister 无关。",
 				"missing_ledger_id": "缺少账本 ID。您是否填写了值？",
+				"missing_canister_id": "",
 				"missing_contract_address": "缺少合约地址。您是否填写了值？",
 				"missing_token_address": "缺少代币地址。您是否填写了值？",
 				"no_network": "未选择网络。此为异常情况。"
@@ -1392,7 +1477,6 @@
 			"token_needs_enabling": "需启用该代币才能查看交易历史。"
 		},
 		"error": {
-			"loading_transactions": "加载交易记录时出错。",
 			"loading_transactions_symbol": "加载 $symbol 的交易记录时出错。",
 			"uncertified_transactions_removed": "检测到一些未经认证的交易，已从显示列表中移除。",
 			"loading_pending_ck_ethereum_transactions": "获取 $network 待处理交易时发生错误。",
@@ -1718,21 +1802,51 @@
 	},
 	"earning": {
 		"text": {
-			"title": "赚取"
+			"title": "赚取",
+			"tab_title": "",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": "",
+			"go_to_earn": ""
 		},
 		"cards": {
-			"gold_title": "黄金",
-			"gold_description": "GLDT 质押",
-			"stablecoins_title": "稳定币",
-			"stablecoins_description": "即将推出",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "OISY 奖励"
+			"gldt": {
+				"title1": "",
+				"title2": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
+		},
+		"providers": {
+			"goldDaoStaking": {
+				"cardTitle": ""
+			}
 		}
 	},
 	"stake": {
 		"text": {
+			"gldt_stake_page_description": "",
 			"stake": "",
+			"stake_now": "",
+			"stake_amount": "",
+			"not_enough_to_stake": "",
 			"unstake": "",
+			"unstake_now": "",
 			"unstaking": "",
 			"unstake_token": "",
 			"enable_token_text": "",
@@ -1742,11 +1856,13 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"unproductive_assets": "",
+			"invested_assets": "",
 			"visit_provider": "",
-			"current_apy": "",
-			"current_apy_info": "",
+			"current_apy_label": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1758,10 +1874,81 @@
 			"immediate_dissolve_terms": "",
 			"amount_to_receive": "",
 			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
 			"claim_reward": "",
 			"claim_rewards": "",
+			"claim_reward_short": "",
 			"claim_now": "",
-			"claiming": ""
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty_1": "",
+			"title_empty_2_usd": "",
+			"title_empty_2_apy": "",
+			"title_empty_3": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": "",
+			"gldt_stake_carousel_slide_title": "",
+			"gldt_stake_carousel_slide_cta": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": "",
+			"unexpected_error_on_unstake": "",
+			"dissolvement_limit_reached": ""
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "",
+				"item1_description": "",
+				"item2_title_1": "",
+				"item2_title_2": "",
+				"item3_title": "",
+				"item3_description": "",
+				"item4_title": "",
+				"item4_description": "",
+				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
+			}
+		},
+		"alt": {
+			"placeholder_image": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
 		}
 	},
 	"temporal": {

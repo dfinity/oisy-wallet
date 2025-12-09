@@ -28,8 +28,8 @@ import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/toke
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
-import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
@@ -37,12 +37,13 @@ import * as appConstants from '$lib/constants/app.constants';
 import {
 	allCrossChainSwapTokens,
 	allDisabledKongSwapCompatibleIcrcTokens,
+	allFungibleTokens,
 	allKongSwapCompatibleIcrcTokens,
 	allTokens
 } from '$lib/derived/all-tokens.derived';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
-import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -76,7 +77,7 @@ describe('all-tokens.derived', () => {
 		enabled: true
 	};
 
-	const mockErc20Token: Erc20TokenToggleable = {
+	const mockErc20Token: Erc20CustomToken = {
 		...mockValidErc20Token,
 		id: parseTokenId('DUM'),
 		address: mockEthAddress,
@@ -84,20 +85,22 @@ describe('all-tokens.derived', () => {
 		enabled: false
 	};
 
-	const mockErc721Token: Erc721TokenToggleable = {
+	const mockErc721Token: Erc721CustomToken = {
 		...mockValidErc721Token,
 		id: parseTokenId('KUM'),
 		address: mockEthAddress,
 		enabled: false
 	};
 
-	const mockSplToken: SplTokenToggleable = {
+	const mockSplToken: SplCustomToken = {
 		...mockValidSplToken,
 		enabled: true
 	};
 
 	beforeEach(() => {
 		vi.resetAllMocks();
+
+		setupTestnetsStore('disabled');
 
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
@@ -292,6 +295,82 @@ describe('all-tokens.derived', () => {
 		});
 	});
 
+	describe('allFungibleTokens', () => {
+		it('should merge all tokens into a single array', () => {
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc20Token]);
+				return () => {};
+			});
+
+			vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc721Token]);
+				return () => {};
+			});
+
+			vi.spyOn(icrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken]);
+				return () => {};
+			});
+
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockSplToken]);
+				return () => {};
+			});
+
+			vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => [
+				mockIcrcToken2,
+				mockDip20Token
+			]);
+
+			const tokens = get(allFungibleTokens);
+			const tokenSymbols = tokens.map((token) => token.id.description);
+
+			expect(tokenSymbols).toEqual([
+				ICP_TOKEN.id.description,
+				BTC_MAINNET_TOKEN.id.description,
+				ETHEREUM_TOKEN.id.description,
+				SOLANA_TOKEN.id.description,
+				BASE_ETH_TOKEN.id.description,
+				BNB_MAINNET_TOKEN.id.description,
+				POL_MAINNET_TOKEN.id.description,
+				ARBITRUM_ETH_TOKEN.id.description,
+				mockErc20Token.id.description,
+				mockDip20Token.id.description,
+				mockIcrcToken2.id.description,
+				mockIcrcToken.id.description,
+				mockSplToken.id.description
+			]);
+		});
+
+		it('should not include non-fungible tokens', () => {
+			const disabledErc20Token = { ...mockErc20Token, enabled: false };
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([disabledErc20Token]);
+				return () => {};
+			});
+
+			const disabledErc721Token = { ...mockErc721Token, enabled: false };
+			vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([disabledErc721Token]);
+				return () => {};
+			});
+
+			const disabledSplToken = { ...mockSplToken, enabled: false };
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([disabledSplToken]);
+				return () => {};
+			});
+
+			const tokens = get(allFungibleTokens);
+			const tokenSymbols = tokens.map((token) => token.id.description);
+
+			expect(tokenSymbols).not.toContain(disabledErc721Token.id.description);
+
+			expect(tokenSymbols).toContain(disabledErc20Token.id.description);
+			expect(tokenSymbols).toContain(disabledSplToken.id.description);
+		});
+	});
+
 	describe('allDisabledKongSwapCompatibleIcrcTokens', () => {
 		beforeEach(() => {
 			vi.spyOn(allKongSwapCompatibleIcrcTokens, 'subscribe').mockImplementation((fn) => {
@@ -341,7 +420,7 @@ describe('all-tokens.derived', () => {
 	});
 
 	describe('allCrossChainSwapTokens', () => {
-		const mockErc20Token: Erc20TokenToggleable = {
+		const mockErc20Token: Erc20CustomToken = {
 			...mockValidErc20Token,
 			id: parseTokenId('MOCK'),
 			address: mockEthAddress,

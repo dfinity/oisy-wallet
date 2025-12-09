@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
@@ -24,7 +23,12 @@
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import { isRouteNfts, isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
+	import {
+		isRouteEarning,
+		isRouteNfts,
+		isRouteTokens,
+		isRouteTransactions
+	} from '$lib/utils/nav.utils';
 
 	interface Props {
 		children: Snippet;
@@ -37,9 +41,13 @@
 	let nftsRoute = $derived(isRouteNfts(page));
 	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
 
+	let earningRoute = $derived(isRouteEarning(page));
+
+	let assetsRoute = $derived(tokensRoute || nftsRoute || earningRoute);
+
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
-	let showHero = $derived((tokensRoute || nftsRoute || transactionsRoute) && !nftsCollectionRoute);
+	let showHero = $derived((assetsRoute || transactionsRoute) && !nftsCollectionRoute);
 
 	$effect(() => {
 		token.set(nftsCollectionRoute ? ($pageNonFungibleToken ?? $pageToken) : $pageToken); // we could be on the nfts page without a pageNonFungibleToken set
@@ -76,11 +84,9 @@
 				<SplitPane>
 					{#snippet menu()}
 						<NavigationMenu>
-							{#if tokensRoute || nftsRoute}
-								<Responsive up="xl">
-									<div transition:fade>
-										<DappsCarousel />
-									</div>
+							{#if assetsRoute}
+								<Responsive up="1.5xl">
+									<DappsCarousel />
 								</Responsive>
 							{/if}
 						</NavigationMenu>
@@ -91,6 +97,12 @@
 					{/if}
 
 					<Loaders>
+						{#if assetsRoute}
+							<Responsive down="xl">
+								<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
+							</Responsive>
+						{/if}
+
 						{@render children()}
 					</Loaders>
 				</SplitPane>
