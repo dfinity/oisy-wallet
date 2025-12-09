@@ -12,6 +12,7 @@ import {
 	getNftDisplayId,
 	getNftDisplayImageUrl,
 	getNftDisplayMediaStatus,
+	getNftDisplayName,
 	getNftIdentifier,
 	getTokensByNetwork,
 	isTokenFungible,
@@ -159,6 +160,42 @@ describe('nft.utils', () => {
 			expect(getNftDisplayMediaStatus(mockValidErc721Nft)).toBe(
 				mockValidErc721Nft.mediaStatus.image
 			);
+		});
+	});
+
+	describe('getNftDisplayName', () => {
+		it('should use the NFT name if defined', () => {
+			expect(
+				getNftDisplayName({ ...mockValidErc721Nft, id: parseNftId('123'), name: 'mock-name #123' })
+			).toBe('mock-name #123');
+		});
+
+		it('should append the ID to the NFT name if it is not there', () => {
+			expect(
+				getNftDisplayName({ ...mockValidErc721Nft, id: parseNftId('456'), name: 'mock-name #123' })
+			).toBe('mock-name #123 #456');
+		});
+
+		it('should use the collection name if the name is not defined', () => {
+			expect(
+				getNftDisplayName({
+					...mockValidErc721Nft,
+					id: parseNftId('123'),
+					name: undefined,
+					collection: { ...mockValidErc721Nft.collection, name: 'mock-collection-name' }
+				})
+			).toBe('mock-collection-name #123');
+		});
+
+		it('should fallback to the ID', () => {
+			expect(
+				getNftDisplayName({
+					...mockValidErc721Nft,
+					id: parseNftId('123'),
+					name: undefined,
+					collection: { ...mockValidErc721Nft.collection, name: undefined }
+				})
+			).toBe('#123');
 		});
 	});
 });
