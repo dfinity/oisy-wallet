@@ -134,11 +134,11 @@
 
 	<span class="flex w-full flex-col gap-1 px-2 pb-2" class:text-disabled={disabled}>
 		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
-			{withCollectionLabel ? nft.collection.name : nft.name}
+			{withCollectionLabel ? nft.collection.name : (nft.name ?? nft.collection.name)}
 		</span>
 		<span class="truncate text-xs" class:text-tertiary={!disabled}>
 			#{getNftDisplayId(nft)}
-			{#if withCollectionLabel}
+			{#if withCollectionLabel && nonNullish(nft.name)}
 				&ndash; {nft.name}
 			{/if}
 		</span>
