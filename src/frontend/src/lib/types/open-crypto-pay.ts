@@ -1,5 +1,6 @@
 import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
+import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -113,6 +114,7 @@ export interface PayParams {
 	identity: Identity;
 	quoteId: string;
 	callback: string;
+	progress: (step: ProgressStepsPayment) => void;
 }
 
 export interface TransactionBaseParams {

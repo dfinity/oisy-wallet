@@ -142,7 +142,7 @@
 			}
 		}
 
-		if (ethMetadata.decimals > 0) {
+		if (ethMetadata.decimals >= 0) {
 			await saveErc20Deprecated([
 				{ ...ethMetadata, ...newToken, network: network as EthereumNetwork }
 			]);

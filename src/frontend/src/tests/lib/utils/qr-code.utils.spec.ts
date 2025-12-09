@@ -45,7 +45,7 @@ describe('decodeUrn', () => {
 				amount
 			};
 			if (standard === 'ethereum' || standard === 'erc20') {
-				expectedResult.networkId = (token.network as EthereumNetwork).chainId.toString();
+				expectedResult.ethereumChainId = (token.network as EthereumNetwork).chainId.toString();
 			}
 			if (standard === 'erc20' && 'address' in token) {
 				expectedResult.functionName = 'transfer';
@@ -66,7 +66,7 @@ describe('decodeUrn', () => {
 
 				expect(result).toEqual({
 					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
-					networkId: '1',
+					ethereumChainId: '1',
 					prefix: 'ethereum',
 					value: 1000
 				});
@@ -75,7 +75,7 @@ describe('decodeUrn', () => {
 			it('should parse URI with different chainId', () => {
 				const result = decodeQrCodeUrn(`ethereum:${validAddress}@137?value=1000`);
 
-				expect(result?.networkId).toBe('137');
+				expect(result?.ethereumChainId).toBe('137');
 			});
 
 			it('should parse URI with large value', () => {
@@ -93,7 +93,7 @@ describe('decodeUrn', () => {
 			it('should parse URI with chainId zero', () => {
 				const result = decodeQrCodeUrn(`ethereum:${validAddress}@0?value=1000`);
 
-				expect(result?.networkId).toBe('0');
+				expect(result?.ethereumChainId).toBe('0');
 			});
 
 			it('should preserve address case', () => {
@@ -120,7 +120,7 @@ describe('decodeUrn', () => {
 
 				expect(result).toEqual({
 					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
-					networkId: '1',
+					ethereumChainId: '1',
 					prefix: 'ethereum'
 				});
 			});
@@ -198,7 +198,7 @@ describe('decodeUrn', () => {
 				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=1000&gas=21000`);
 
 				expect(result?.destination).toBe(validAddress);
-				expect(result?.networkId).toBe('1');
+				expect(result?.ethereumChainId).toBe('1');
 				expect(result?.value).toBe(1000);
 			});
 
@@ -211,13 +211,13 @@ describe('decodeUrn', () => {
 			it('should handle URI with very large chainId', () => {
 				const result = decodeQrCodeUrn(`ethereum:${validAddress}@999999999?value=1000`);
 
-				expect(result?.networkId).toBe('999999999');
+				expect(result?.ethereumChainId).toBe('999999999');
 			});
 
 			it('should handle URI with chainId having leading zeros', () => {
 				const result = decodeQrCodeUrn(`ethereum:${validAddress}@001?value=1000`);
 
-				expect(result?.networkId).toBe('001');
+				expect(result?.ethereumChainId).toBe('001');
 			});
 
 			it('should handle URI with value having leading zeros', () => {
