@@ -15,7 +15,7 @@
 		type PayContext
 	} from '$lib/stores/open-crypto-pay.store';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import OpenCryptoPayProgress from './open-crypto-pay/OpenCryptoPayProgress.svelte';
+	import OpenCryptoPayProgress from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayProgress.svelte';
 	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 
 	let steps = $derived<WizardSteps<WizardStepsScanner>>(scannerWizardSteps({ i18n: $i18n }));
