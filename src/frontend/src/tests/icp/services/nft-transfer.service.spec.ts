@@ -1,6 +1,6 @@
 import { transfer } from '$icp/api/ext-v2-token.api';
 import { transferExtV2 } from '$icp/services/nft-transfer.services';
-import { ProgressStepsSend as ProgressStepsSendEnum } from '$lib/enums/progress-steps';
+import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { bn3Bi } from '$tests/mocks/balances.mock';
 import { mockExtV2TokenCanisterId, mockExtV2TokenIdentifier } from '$tests/mocks/ext-v2-token.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
@@ -39,8 +39,8 @@ describe('nft-transfer.services', () => {
 			await transferExtV2(mockParams);
 
 			expect(mockProgress).toHaveBeenCalledTimes(2);
-			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendEnum.SIGN_TRANSFER);
-			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSendEnum.TRANSFER);
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSendIc.RELOAD);
 		});
 	});
 });
