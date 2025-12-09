@@ -17,7 +17,7 @@
 	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
-	import {getNftDisplayImageUrl, getNftDisplayName} from '$lib/utils/nft.utils';
+	import { getNftDisplayImageUrl, getNftDisplayName } from '$lib/utils/nft.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
@@ -50,7 +50,7 @@
 		return breadcrumbs;
 	});
 
-	const normalizedNftName = $derived(nonNullish(nft)? getNftDisplayName(nft) : undefined)
+	const normalizedNftName = $derived(nonNullish(nft) ? getNftDisplayName(nft) : undefined);
 
 	let nftDisplayImageUrl = $derived(nonNullish(nft) ? getNftDisplayImageUrl(nft) : undefined);
 </script>
