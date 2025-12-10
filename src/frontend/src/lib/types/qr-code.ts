@@ -41,4 +41,18 @@ export const DecodedUrnSchema = DecodedUrnBaseSchema.extend({
 	...StringParamsSchema
 }).catchall(z.union([z.string(), z.number(), z.bigint()]).optional());
 
+const NumericParamsSchemaBigInt = URN_NUMERIC_PARAMS.reduce(
+	(acc, param) => ({
+		...acc,
+		[param]: z.coerce.bigint().optional()
+	}),
+	{}
+);
+
+export const DecodedUrnBigIntSchema = DecodedUrnBaseSchema.extend({
+	...NumericParamsSchemaBigInt,
+	...StringParamsSchema
+}).catchall(z.union([z.string(), z.number(), z.bigint()]).optional());
+
 export type DecodedUrn = z.infer<typeof DecodedUrnSchema>;
+export type DecodedUrnBigInt = z.infer<typeof DecodedUrnBigIntSchema>;

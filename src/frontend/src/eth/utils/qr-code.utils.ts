@@ -27,7 +27,7 @@ export const decodeQrCode = ({
 		return { status: 'cancelled' };
 	}
 
-	const payment = decodeQrCodeUrn(code);
+	const payment = decodeQrCodeUrn({ urn: code });
 
 	if (isNullish(payment)) {
 		return { status: 'success', destination: code };
@@ -121,7 +121,9 @@ export const decodeQrCode = ({
 
 	const amount =
 		functionName === 'transfer' && nonNullish(uint256)
-			? +formatToken({ value: uint256, unitName: token.decimals })
+			? typeof uint256 === 'number'
+				? uint256
+				: Number(uint256)
 			: nonNullish(value)
 				? +formatToken({ value, unitName: token.decimals })
 				: undefined;

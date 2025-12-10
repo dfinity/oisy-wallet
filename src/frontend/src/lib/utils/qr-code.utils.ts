@@ -1,8 +1,10 @@
 import {
+	DecodedUrnBigIntSchema,
 	DecodedUrnSchema,
 	URN_NUMERIC_PARAMS,
 	URN_STRING_PARAMS,
 	type DecodedUrn,
+	type DecodedUrnBigInt,
 	type QrResponse,
 	type QrStatus
 } from '$lib/types/qr-code';
@@ -24,7 +26,13 @@ import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
  * @param {string} urn - The URN string to decode.
  * @returns {DecodedUrn | undefined} The decoded URN object, or undefined if the URN string does not match the expected pattern.
  */
-export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
+export const decodeQrCodeUrn = ({
+	urn,
+	isDFX = false
+}: {
+	urn: string;
+	isDFX?: boolean;
+}): DecodedUrn | DecodedUrnBigInt | undefined => {
 	const regex = /^([a-zA-Z]+):([a-zA-Z0-9\-.]+)(@(\d+))?(\/([a-zA-Z]+))?(\?(.*))?$/;
 
 	const match = urn.match(regex);
@@ -36,13 +44,21 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 
 	const processParam = ([key, value]: [string, string]) => {
 		if ((URN_NUMERIC_PARAMS as readonly string[]).includes(key)) {
-			return { [key]: value };
+			if (isDFX) {
+				return { [key]: value };
+			}
+			return { [key]: parseFloat(value) };
 		}
 
 		if ((URN_STRING_PARAMS as readonly string[]).includes(key)) {
 			return { [key]: value };
 		}
-
+		if (isDFX && !isNaN(parseFloat(value))) {
+			return { [key]: value };
+		}
+		if (!isNaN(parseFloat(value))) {
+			return { [key]: parseFloat(value) };
+		}
 		return { [key]: value };
 	};
 
@@ -62,7 +78,7 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 	};
 
 	const params = nonNullish(queryString) ? parseQueryString(queryString) : {};
-	// Conservatively, it returns nothing if the function is unable to decipher the query parameters
+
 	if (isNullish(params)) {
 		return undefined;
 	}
@@ -75,7 +91,18 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 		...params
 	};
 
+	if (isDFX) {
+		const result = DecodedUrnBigIntSchema.safeParse(decodedUrn);
+		if (!result.success) {
+			console.warn('QR code cannot be correctly parsed:', result.error);
+			return undefined;
+		}
+
+		return result.data;
+	}
+
 	const result = DecodedUrnSchema.safeParse(decodedUrn);
+
 	if (!result.success) {
 		console.warn('QR code cannot be correctly parsed:', result.error);
 		return undefined;
