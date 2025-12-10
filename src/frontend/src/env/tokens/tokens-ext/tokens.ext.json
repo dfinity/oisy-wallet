@@ -1,5 +1,11 @@
 [
 	{
+		"canisterId": "gikg4-eaaaa-aaaam-qaieq-cai",
+		"metadata": {
+			"name": "Mutant Space Apes"
+		}
+	},
+	{
 		"canisterId": "poyn6-dyaaa-aaaah-qcfzq-cai",
 		"metadata": {
 			"name": "Blockchain Heroes"
