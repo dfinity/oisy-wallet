@@ -21,9 +21,9 @@ import type {
 	PostMessageDataRequestIcrcStrict
 } from '$lib/types/post-message';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-import type { IcrcIndexNgDid } from '@icp-sdk/canisters/ledger/icrc';
+import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 
-type GetTransactions = IcrcIndexNgDid.GetTransactions;
+type GetTransactions = IcrcIndexDid.GetTransactions;
 
 type GetBalance = bigint;
 
@@ -50,8 +50,8 @@ const mapTransaction = ({
 	transaction,
 	jobData: { identity, data }
 }: {
-	transaction: Pick<IcrcIndexNgDid.TransactionWithId, 'id'> & {
-		transaction: IcrcIndexNgDid.Transaction;
+	transaction: Pick<IcrcIndexDid.TransactionWithId, 'id'> & {
+		transaction: IcrcIndexDid.Transaction;
 	};
 	jobData: SchedulerJobData<PostMessageDataRequestIcrc>;
 }): IcTransactionUi => {
@@ -137,8 +137,8 @@ const getBalanceAndTransactions = async (
 const MSG_SYNC_ICRC_WALLET = 'syncIcrcWallet';
 
 const initIcrcWalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTransactionsScheduler<
-	IcrcIndexNgDid.Transaction,
-	IcrcIndexNgDid.TransactionWithId,
+	IcrcIndexDid.Transaction,
+	IcrcIndexDid.TransactionWithId,
 	PostMessageDataRequestIcrcStrict
 > =>
 	new IcWalletBalanceAndTransactionsScheduler(
