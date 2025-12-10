@@ -99,7 +99,7 @@ describe('network utils', () => {
 			}
 		);
 
-		it('should return false for non-Ethereum network', () => {
+		it('should throw for non-Ethereum network', () => {
 			expect(() => assertIsNetworkEthereum(ICP_NETWORK)).toThrow(
 				`Network ${ICP_NETWORK.name} is not an Ethereum or EVM network`
 			);
