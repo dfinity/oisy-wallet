@@ -69,7 +69,7 @@ describe('EarningYearlyAmount', () => {
 
 		const span = container.querySelector('span');
 
-		expect(span).toHaveClass('text-brand-primary');
+		expect(span).toHaveClass('text-error-primary');
 	});
 
 	it('applies text-brand-primary-alt when showAsNeutral is true', () => {
