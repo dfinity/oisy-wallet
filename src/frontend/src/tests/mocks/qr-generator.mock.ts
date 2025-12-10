@@ -20,8 +20,6 @@ export const generateUrn = ({
 
 	const { name, standard, network } = token;
 
-	assertIsNetworkEthereum(network);
-
 	const tokenAddress: string | undefined =
 		'address' in token ? (token.address as string) : undefined;
 
@@ -35,6 +33,7 @@ export const generateUrn = ({
 	urn = `${prefix}:${destination}`;
 
 	if (standard === 'ethereum' || standard === 'erc20') {
+		assertIsNetworkEthereum(network);
 		urn += nonNullish(network) ? `@${network.chainId.toString()}` : '';
 	}
 
