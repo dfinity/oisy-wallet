@@ -125,7 +125,7 @@ export const decodeQrCode = ({
 				? uint256
 				: Number(uint256)
 			: nonNullish(value)
-				? +formatToken({ value, unitName: token.decimals })
+				? +formatToken({ value: BigInt(value), unitName: token.decimals })
 				: undefined;
 
 	return { status: 'success', destination, symbol: token.symbol, amount };
