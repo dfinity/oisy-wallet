@@ -62,7 +62,9 @@ export const decodeQrCodeUrn = ({
 		return { [key]: value };
 	};
 
-	const parseQueryString = (qs: string): { [key: string]: string | undefined } | undefined => {
+	const parseQueryString = (
+		qs: string
+	): { [key: string]: string | number | undefined } | undefined => {
 		try {
 			return [...new URLSearchParams(qs).entries()].reduce(
 				(acc, entry) => ({
