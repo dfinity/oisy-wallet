@@ -28,6 +28,9 @@ import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 
 export type IsNetworkIdUtil = (networkId: NetworkId | undefined) => boolean;
 
+export const isNetworkEthereum = (network: Network | undefined): network is EthereumNetwork =>
+	isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id);
+
 export const isNetworkICP = (network: Network | undefined): boolean => isNetworkIdICP(network?.id);
 
 export const isNetworkSolana = (network: Network | undefined): network is SolanaNetwork =>

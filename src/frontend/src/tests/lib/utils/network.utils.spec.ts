@@ -7,7 +7,10 @@ import {
 	BSC_MAINNET_NETWORK_ID,
 	SUPPORTED_BSC_NETWORK_IDS
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
-import { SUPPORTED_EVM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
+import {
+	SUPPORTED_EVM_NETWORKS,
+	SUPPORTED_EVM_NETWORK_IDS
+} from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import * as btcNetworkEnv from '$env/networks/networks.btc.env';
 import {
@@ -21,6 +24,7 @@ import {
 	ETHEREUM_NETWORK_ID,
 	SEPOLIA_NETWORK,
 	SEPOLIA_NETWORK_ID,
+	SUPPORTED_ETHEREUM_NETWORKS,
 	SUPPORTED_ETHEREUM_NETWORK_IDS
 } from '$env/networks/networks.eth.env';
 import {
@@ -47,6 +51,7 @@ import type { Token } from '$lib/types/token';
 import {
 	filterTokensForSelectedNetwork,
 	filterTokensForSelectedNetworks,
+	isNetworkEthereum,
 	isNetworkICP,
 	isNetworkIdArbitrum,
 	isNetworkIdBTCMainnet,
@@ -72,6 +77,19 @@ import {
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 
 describe('network utils', () => {
+	describe('isNetworkEthereum', () => {
+		it.each([...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS])(
+			'should return true for $name network',
+			(network) => {
+				expect(isNetworkEthereum(network)).toBeTruthy();
+			}
+		);
+
+		it('should return false for non-EthereumP network', () => {
+			expect(isNetworkEthereum(ICP_NETWORK)).toBeFalsy();
+		});
+	});
+
 	describe('isNetworkICP', () => {
 		it('should return true for ICP network', () => {
 			expect(isNetworkICP(ICP_NETWORK)).toBeTruthy();
