@@ -1,6 +1,8 @@
 import type {
 	Balance,
 	_SERVICE as ExtV2TokenService,
+	Metadata,
+	MetadataLegacy,
 	TokenIdentifier,
 	TokenIndex,
 	Transaction,
@@ -16,7 +18,7 @@ import { mapExtTokensListing, toUser } from '$icp/utils/ext-v2-token.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import { Canister, createServices, isNullish, toNullable, type QueryParams } from '@dfinity/utils';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { Principal } from '@icp-sdk/core/principal';
 
@@ -158,5 +160,57 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 		}
 
 		throw mapExtV2TokenTransferError(response);
+	};
+
+	/**
+	 * Returns the metadata of a specific token of the collection.
+	 *
+	 * It first tries to use the new `ext_metadata` endpoint, and if it fails,
+	 * it falls back to the legacy `metadata` endpoint for compatibility with older EXT canisters.
+	 * When both methods are not supported, it returns `undefined`.
+	 *
+	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#metadata
+	 *
+	 * @param {Object} params - The parameters for fetching the metadata.
+	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
+	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
+	 * @returns {Promise<MetadataLegacy | Metadata | undefined>} The metadata of the specified token or `undefined` if it does not exist.
+	 * @throws CanisterInternalError if the token identifier is invalid.
+	 */
+	metadata = async ({
+		tokenIdentifier: token,
+		certified
+	}: { tokenIdentifier: TokenIdentifier } & QueryParams): Promise<
+		MetadataLegacy | Metadata | undefined
+	> => {
+		const { metadata, ext_metadata } = this.caller({ certified });
+
+		const getMetadata = async () => {
+			try {
+				return await ext_metadata(token);
+			} catch (_: unknown) {
+				// Some legacy EXT canisters still do not support the new metadata endpoint.
+			}
+		};
+
+		const getLegacyMetadata = async () => {
+			try {
+				return await metadata(token);
+			} catch (_: unknown) {
+				// Some new EXT canisters still do not support the legacy metadata endpoint.
+			}
+		};
+
+		const response = (await getMetadata()) ?? (await getLegacyMetadata());
+
+		if (isNullish(response)) {
+			return;
+		}
+
+		if ('ok' in response) {
+			return response.ok;
+		}
+
+		throw mapExtV2TokenCommonError(response.err);
 	};
 }
