@@ -1,7 +1,11 @@
+import { loadCustomTokens as loadCustomErc1155Tokens } from '$eth/services/erc1155.services';
+import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
+import { loadCustomTokens as loadCustomErc721Tokens } from '$eth/services/erc721.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import { loadCustomTokens } from '$icp/services/icrc.services';
+import { loadCustomTokens as loadCustomExtTokens } from '$icp/services/ext.services';
+import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { setManyCustomTokens } from '$lib/api/backend.api';
@@ -14,6 +18,7 @@ import type {
 	TokenVariant
 } from '$lib/types/custom-token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { assertNever } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -82,5 +87,12 @@ export const saveCustomTokens = async ({
 	disabledTokens.forEach(hideTokenByKey);
 
 	// Reload all custom tokens for simplicity reason.
-	await loadCustomTokens({ identity });
+	await Promise.all([
+		loadCustomErc20Tokens({ identity }),
+		loadCustomErc721Tokens({ identity }),
+		loadCustomErc1155Tokens({ identity }),
+		loadCustomIcrcTokens({ identity }),
+		loadCustomExtTokens({ identity }),
+		loadCustomSplTokens({ identity })
+	]);
 };
