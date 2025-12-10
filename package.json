@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.8.8",
+	"version": "1.8.9",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -69,11 +69,11 @@
 	"dependencies": {
 		"@dfinity/gix-components": "^9.0.0-next-2025-11-07.2",
 		"@dfinity/oisy-wallet-signer": "^3.0.0-next-2025-12-03",
-		"@dfinity/utils": "^4.0.1-next-2025-12-08.1",
+		"@dfinity/utils": "^4.0.1-next-2025-12-10",
 		"@dfinity/verifiable-credentials": "^1.2.0",
-		"@dfinity/zod-schemas": "^3.0.1-next-2025-12-08.1",
+		"@dfinity/zod-schemas": "^3.0.1-next-2025-12-10",
 		"@icp-sdk/auth": "^4.2.0",
-		"@icp-sdk/canisters": "^2.0.1-next-2025-12-08.1",
+		"@icp-sdk/canisters": "^2.0.1-next-2025-12-10",
 		"@icp-sdk/core": "^4.2.1",
 		"@metamask/detect-provider": "^2.0.0",
 		"@noble/ed25519": "^2.3.0",

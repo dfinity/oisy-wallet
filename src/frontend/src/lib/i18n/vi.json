@@ -927,7 +927,9 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""

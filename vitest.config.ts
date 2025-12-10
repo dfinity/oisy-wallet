@@ -58,6 +58,10 @@ export default defineConfig(
 				{
 					find: '$declarations',
 					replacement: resolve(__dirname, 'src/declarations')
+				},
+				{
+					find: '@plausible-analytics/tracker',
+					replacement: resolve(__dirname, 'src/frontend/src/tests/mocks/plausible-tracker.mock')
 				}
 			]
 		},

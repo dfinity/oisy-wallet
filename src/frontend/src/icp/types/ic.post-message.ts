@@ -1,6 +1,6 @@
-import type { GetAccountIdentifierTransactionsResponse } from '@icp-sdk/canisters/ledger/icp';
-import type { IcrcIndexNgGetTransactions } from '@icp-sdk/canisters/ledger/icrc';
+import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+import type { IcrcIndexNgDid } from '@icp-sdk/canisters/ledger/icrc';
 
 export type GetTransactions =
-	| Omit<IcrcIndexNgGetTransactions, 'transactions'>
-	| Omit<GetAccountIdentifierTransactionsResponse, 'transactions'>;
+	| Omit<IcrcIndexNgDid.GetTransactions, 'transactions'>
+	| Omit<IcpIndexDid.GetAccountIdentifierTransactionsResponse, 'transactions'>;
