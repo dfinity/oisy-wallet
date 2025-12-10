@@ -488,7 +488,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should handle zero value', () => {
-			const data = { ...validatedData, value: 0 };
+			const data = { ...validatedData, value: ZERO };
 
 			const result = buildTransactionBaseParams({
 				from: userAddress,

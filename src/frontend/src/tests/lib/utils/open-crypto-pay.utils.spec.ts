@@ -10,7 +10,7 @@ import type {
 	PayableTokenWithFees,
 	PaymentMethodData
 } from '$lib/types/open-crypto-pay';
-import type { DecodedUrn } from '$lib/types/qr-code';
+import type { DecodedUrnBigInt } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
 import {
 	createPaymentMethodDataMap,
@@ -1364,11 +1364,11 @@ describe('open-crypto-pay.utils', () => {
 	});
 
 	describe('validateDecodedData', () => {
-		const validDecodedData: DecodedUrn = {
+		const validDecodedData: DecodedUrnBigInt = {
 			prefix: 'ethereum',
 			destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
 			ethereumChainId: '1',
-			value: 10000000000
+			value: 10000000000n
 		};
 
 		const validFee = {
@@ -1389,7 +1389,7 @@ describe('open-crypto-pay.utils', () => {
 			expect(result).toEqual({
 				destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
 				ethereumChainId: '1',
-				value: 10000000000,
+				value: 10000000000n,
 				feeData: {
 					maxFeePerGas: 12n,
 					maxPriorityFeePerGas: 7n
@@ -1399,11 +1399,11 @@ describe('open-crypto-pay.utils', () => {
 		});
 
 		it('should validate data with different values', () => {
-			const decodedData: DecodedUrn = {
+			const decodedData: DecodedUrnBigInt = {
 				prefix: 'ethereum',
 				destination: '0xcccccccccccccccccccccccccccccccccccccccc',
 				ethereumChainId: '137',
-				value: 200000
+				value: 200000n
 			};
 
 			const fee = {
@@ -1422,7 +1422,7 @@ describe('open-crypto-pay.utils', () => {
 
 			expect(result.destination).toBe('0xcccccccccccccccccccccccccccccccccccccccc');
 			expect(result.ethereumChainId).toBe('137');
-			expect(result.value).toBe(200000);
+			expect(result.value).toBe(200000n);
 			expect(result.feeData.maxFeePerGas).toBe(20n);
 			expect(result.estimatedGasLimit).toBe(50000n);
 		});
@@ -1437,7 +1437,7 @@ describe('open-crypto-pay.utils', () => {
 		});
 
 		it('should throw error when ethereumChainId is missing', () => {
-			const invalidData: DecodedUrn = {
+			const invalidData: DecodedUrnBigInt = {
 				...validDecodedData,
 				ethereumChainId: undefined
 			};
@@ -1451,7 +1451,7 @@ describe('open-crypto-pay.utils', () => {
 		});
 
 		it('should throw error when ethereumChainId is undefined', () => {
-			const invalidData: DecodedUrn = {
+			const invalidData: DecodedUrnBigInt = {
 				...validDecodedData,
 				ethereumChainId: undefined
 			};
@@ -1465,7 +1465,7 @@ describe('open-crypto-pay.utils', () => {
 		});
 
 		it('should throw error when value is missing', () => {
-			const invalidData: DecodedUrn = {
+			const invalidData: DecodedUrnBigInt = {
 				...validDecodedData,
 				value: undefined
 			};
