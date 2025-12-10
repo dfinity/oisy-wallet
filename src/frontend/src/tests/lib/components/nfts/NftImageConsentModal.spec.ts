@@ -1,5 +1,4 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
-import * as erc721TokenServices from '$eth/services/erc721-custom-tokens.services';
 import type { Erc721Token } from '$eth/types/erc721';
 import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
 import {
@@ -10,6 +9,7 @@ import * as authDerived from '$lib/derived/auth.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
+import * as saveTokenServices from '$lib/services/save-custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -54,7 +54,7 @@ const nftAzuki2 = {
 describe('NftImageConsentModal', () => {
 	// save util
 	const saveSpy = vi
-		.spyOn(erc721TokenServices, 'saveCustomTokens')
+		.spyOn(saveTokenServices, 'saveCustomTokens')
 		.mockReturnValue(new Promise((resolve) => resolve()));
 
 	// NFT utils: toggle & collection
@@ -112,12 +112,10 @@ describe('NftImageConsentModal', () => {
 	it.each(testCases)(
 		'$description should render correct buttons with actions',
 		async (testCase) => {
-			const token = {
-				id: { description: 'token-123' },
-				network: { id: { description: 'net-icp' } },
-				allowExternalContentSource: true,
-				standard: 'erc721'
-			} as Erc721Token;
+			const token: Erc721Token = {
+				...mockValidErc721Token,
+				allowExternalContentSource: true
+			};
 
 			findTokenSpy.mockReturnValue(token);
 
@@ -142,6 +140,8 @@ describe('NftImageConsentModal', () => {
 					tokens: [
 						{
 							...token,
+							chainId: token.network.chainId,
+							networkKey: 'Erc721',
 							allowExternalContentSource: testCase.buttonPrimarySaveCalledWith,
 							enabled: true
 						}
@@ -157,6 +157,8 @@ describe('NftImageConsentModal', () => {
 					tokens: [
 						{
 							...token,
+							chainId: token.network.chainId,
+							networkKey: 'Erc721',
 							allowExternalContentSource: testCase.buttonSecondarySaveCalledWith,
 							enabled: true
 						}
@@ -167,13 +169,11 @@ describe('NftImageConsentModal', () => {
 	);
 
 	it('should disable the primary button if collection is spam', async () => {
-		const token = {
-			id: { description: 'token-123' },
-			network: { id: { description: 'net-icp' } },
+		const token: Erc721Token = {
+			...mockValidErc721Token,
 			allowExternalContentSource: true,
-			standard: 'erc721',
 			section: CustomTokenSection.SPAM
-		} as Erc721Token;
+		};
 
 		findTokenSpy.mockReturnValue(token);
 
@@ -316,12 +316,10 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('should track event with "enable_media" when enable button is clicked', async () => {
-		const token = {
-			id: { description: 'token-123' },
-			network: { id: { description: 'base' } },
-			allowExternalContentSource: false,
-			standard: 'erc721'
-		} as Erc721Token;
+		const token: Erc721Token = {
+			...mockValidErc721Token,
+			allowExternalContentSource: false
+		};
 
 		findTokenSpy.mockReturnValue(token);
 
@@ -349,12 +347,10 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('should track event with "keep_media_disabled" when keep disabled button is clicked', async () => {
-		const token = {
-			id: { description: 'token-123' },
-			network: { id: { description: 'base' } },
-			allowExternalContentSource: false,
-			standard: 'erc721'
-		} as Erc721Token;
+		const token: Erc721Token = {
+			...mockValidErc721Token,
+			allowExternalContentSource: false
+		};
 
 		findTokenSpy.mockReturnValue(token);
 
@@ -382,12 +378,10 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('should track event with "disable_media" when disable button is clicked', async () => {
-		const token = {
-			id: { description: 'token-123' },
-			network: { id: { description: 'base' } },
-			allowExternalContentSource: true,
-			standard: 'erc721'
-		} as Erc721Token;
+		const token: Erc721Token = {
+			...mockValidErc721Token,
+			allowExternalContentSource: true
+		};
 
 		findTokenSpy.mockReturnValue(token);
 
@@ -412,12 +406,10 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('should track event with "keep_media_enabled" when keep enabled button is clicked', async () => {
-		const token = {
-			id: { description: 'token-123' },
-			network: { id: { description: 'base' } },
-			allowExternalContentSource: true,
-			standard: 'erc721'
-		} as Erc721Token;
+		const token: Erc721Token = {
+			...mockValidErc721Token,
+			allowExternalContentSource: true
+		};
 
 		findTokenSpy.mockReturnValue(token);
 
