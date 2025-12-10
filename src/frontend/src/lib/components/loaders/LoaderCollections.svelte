@@ -4,7 +4,6 @@
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-	import { NFTS_ENABLED } from '$env/nft.env';
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
@@ -109,7 +108,7 @@
 	};
 
 	const load = async ({ extTokens = false }: { extTokens?: boolean }) => {
-		if (!NFTS_ENABLED || isNullish($authIdentity)) {
+		if (isNullish($authIdentity)) {
 			return;
 		}
 

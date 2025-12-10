@@ -1,5 +1,4 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
-import * as nftEnv from '$env/nft.env';
 import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import {
 	ETHEREUM_TOKEN_ID,
@@ -149,8 +148,6 @@ describe('LoaderMultipleEthTransactions', () => {
 		erc1155CustomTokensStore.setAll(mockErc1155CertifiedCustomTokens);
 
 		ethTransactionsStore.reinitialize();
-
-		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 	});
 
 	afterEach(() => {
