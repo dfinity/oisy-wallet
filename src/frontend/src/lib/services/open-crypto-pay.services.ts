@@ -178,7 +178,7 @@ const preparePaymentTransaction = async ({
 	callback,
 	progress
 }: Omit<PayParams, 'identity' | 'data'>): Promise<EthSignTransactionRequest> => {
-	const uri = await fetchPaymentUri({
+	const urn = await fetchPaymentUri({
 		callback,
 		quoteId,
 		network: token.network.name,
@@ -187,7 +187,7 @@ const preparePaymentTransaction = async ({
 
 	progress(ProgressStepsPayment.CREATE_TRANSACTION);
 
-	const decodedData = decodeQrCodeUrn(uri);
+	const decodedData = decodeQrCodeUrn({ urn });
 	const validatedData = validateDecodedData({ decodedData, fee: token.fee });
 	const nonce = await getNonce({ from, networkId: token.network.id });
 	const baseParams = buildTransactionBaseParams({ from, nonce, validatedData });
