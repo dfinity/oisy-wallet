@@ -1,5 +1,6 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -7,6 +8,7 @@ import type { Network } from '$lib/types/network';
 import type {
 	Address,
 	OpenCryptoPayResponse,
+	PayableTokenWithConvertedAmount,
 	PayableTokenWithFees,
 	PaymentMethodData
 } from '$lib/types/open-crypto-pay';
@@ -1364,138 +1366,410 @@ describe('open-crypto-pay.utils', () => {
 	});
 
 	describe('validateDecodedData', () => {
-		const validDecodedData: DecodedUrn = {
-			prefix: 'ethereum',
-			destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-			ethereumChainId: '1',
-			value: 10000000000
-		};
+		describe('Native Transfers', () => {
+			const nativeToken = {
+				...ETHEREUM_TOKEN,
+				fee: {
+					feeData: {
+						maxFeePerGas: 50000000000n,
+						maxPriorityFeePerGas: 2000000000n
+					},
+					estimatedGasLimit: 21000n
+				}
+			} as unknown as PayableTokenWithConvertedAmount;
 
-		const validFee = {
-			feeInWei: 300000n,
-			feeData: {
-				maxFeePerGas: 12n,
-				maxPriorityFeePerGas: 7n
-			},
-			estimatedGasLimit: 25000n
-		};
+			it('should validate native transfer successfully', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					ethereumChainId: '1',
+					value: 1000000000000000000
+				};
 
-		it('should validate and return correct data structure', () => {
-			const result = validateDecodedData({
-				decodedData: validDecodedData,
-				fee: validFee
+				const result = validateDecodedData({
+					decodedData,
+					token: nativeToken,
+					amount: 1000000000000000000n
+				});
+
+				expect(result).toEqual({
+					address: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					feeData: {
+						maxFeePerGas: 50000000000n,
+						maxPriorityFeePerGas: 2000000000n
+					},
+					estimatedGasLimit: 21000n,
+					value: 1000000000000000000n,
+					ethereumChainId: 1n
+				});
 			});
 
-			expect(result).toEqual({
-				destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-				ethereumChainId: '1',
-				value: 10000000000,
-				feeData: {
-					maxFeePerGas: 12n,
-					maxPriorityFeePerGas: 7n
-				},
-				estimatedGasLimit: 25000n
+			it('should handle large native transfer amounts without precision loss', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					ethereumChainId: '1',
+					value: 10155880570000000000
+				};
+
+				const result = validateDecodedData({
+					decodedData,
+					token: nativeToken,
+					amount: 10155880570000000000n
+				});
+
+				expect(result.value).toBe(10155880570000000000n);
+			});
+
+			it('should throw error when native transfer has function name', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					ethereumChainId: '1',
+					value: 1000000000000000000,
+					functionName: 'transfer'
+				};
+
+				expect(() =>
+					validateDecodedData({
+						decodedData,
+						token: nativeToken,
+						amount: 1000000000000000000n
+					})
+				).toThrow('The received data is incomplete');
+			});
+
+			it('should throw error when native transfer missing value', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					ethereumChainId: '1'
+				};
+
+				expect(() =>
+					validateDecodedData({
+						decodedData,
+						token: nativeToken,
+						amount: 1000000000000000000n
+					})
+				).toThrow('The received data is incomplete');
+			});
+
+			it('should throw error when amount does not match URN value', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					ethereumChainId: '1',
+					value: 1000000000000000000
+				};
+
+				expect(() =>
+					validateDecodedData({
+						decodedData,
+						token: nativeToken,
+						amount: 2000000000000000000n
+					})
+				).toThrow('does not match the expected value');
+			});
+
+			it('should throw error when destination address is invalid', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: '0xINVALID',
+					ethereumChainId: '1',
+					value: 1000000000000000000
+				};
+
+				expect(() =>
+					validateDecodedData({
+						decodedData,
+						token: nativeToken,
+						amount: 1000000000000000000n
+					})
+				).toThrow('not a valid Ethereum address');
+			});
+
+			it('should handle zero amount for native transfer', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					ethereumChainId: '1',
+					value: 0
+				};
+
+				const result = validateDecodedData({
+					decodedData,
+					token: nativeToken,
+					amount: ZERO
+				});
+
+				expect(result.value).toBe(ZERO);
 			});
 		});
 
-		it('should validate data with different values', () => {
-			const decodedData: DecodedUrn = {
-				prefix: 'ethereum',
-				destination: '0xcccccccccccccccccccccccccccccccccccccccc',
-				ethereumChainId: '137',
-				value: 200000
-			};
+		describe('ERC20 Transfers', () => {
+			const erc20Token = {
+				...USDC_TOKEN,
+				fee: {
+					feeData: {
+						maxFeePerGas: 30000000000n,
+						maxPriorityFeePerGas: 1000000000n
+					},
+					estimatedGasLimit: 65000n
+				}
+			} as unknown as PayableTokenWithConvertedAmount;
 
-			const fee = {
-				feeInWei: 500000n,
-				feeData: {
-					maxFeePerGas: 20n,
-					maxPriorityFeePerGas: 10n
-				},
-				estimatedGasLimit: 50000n
-			};
+			it('should validate ERC20 transfer successfully', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: USDC_TOKEN.address,
+					ethereumChainId: String(USDC_TOKEN.network.chainId),
+					functionName: 'transfer',
+					address: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					uint256: 1000000
+				};
 
-			const result = validateDecodedData({
-				decodedData,
-				fee
+				const result = validateDecodedData({
+					decodedData,
+					token: erc20Token,
+					amount: 1000000n
+				});
+
+				expect(result).toEqual({
+					address: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					feeData: {
+						maxFeePerGas: 30000000000n,
+						maxPriorityFeePerGas: 1000000000n
+					},
+					estimatedGasLimit: 65000n,
+					ethereumChainId: USDC_TOKEN.network.chainId,
+					value: 1000000n
+				});
 			});
 
-			expect(result.destination).toBe('0xcccccccccccccccccccccccccccccccccccccccc');
-			expect(result.ethereumChainId).toBe('137');
-			expect(result.value).toBe(200000);
-			expect(result.feeData.maxFeePerGas).toBe(20n);
-			expect(result.estimatedGasLimit).toBe(50000n);
+			it('should handle large ERC20 amounts without precision loss', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: USDC_TOKEN.address,
+					ethereumChainId: String(USDC_TOKEN.network.chainId),
+					functionName: 'transfer',
+					address: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					uint256: 1000000000000000000
+				};
+
+				const result = validateDecodedData({
+					decodedData,
+					token: erc20Token,
+					amount: 1000000000000000000n
+				});
+
+				expect(result.value).toBe(1000000000000000000n);
+			});
+
+			it('should throw error when ERC20 missing address parameter', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: USDC_TOKEN.address,
+					ethereumChainId: String(USDC_TOKEN.network.chainId),
+					functionName: 'transfer',
+					uint256: 1000000
+				};
+
+				expect(() =>
+					validateDecodedData({
+						decodedData,
+						token: erc20Token,
+						amount: 1000000n
+					})
+				).toThrow('The received data is incomplete');
+			});
+
+			it('should throw error when ERC20 missing uint256 parameter', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: USDC_TOKEN.address,
+					ethereumChainId: String(USDC_TOKEN.network.chainId),
+					functionName: 'transfer',
+					address: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC'
+				};
+
+				expect(() =>
+					validateDecodedData({
+						decodedData,
+						token: erc20Token,
+						amount: 1000000n
+					})
+				).toThrow('The received data is incomplete');
+			});
+
+			it('should throw error when token contract address does not match', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: '0x0000000000000000000000000000000000000001',
+					ethereumChainId: String(USDC_TOKEN.network.chainId),
+					functionName: 'transfer',
+					address: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					uint256: 1000000
+				};
+
+				expect(() =>
+					validateDecodedData({
+						decodedData,
+						token: erc20Token,
+						amount: 1000000n
+					})
+				).toThrow('refers to a different token');
+			});
+
+			it('should throw error when ERC20 amount does not match', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: USDC_TOKEN.address,
+					ethereumChainId: String(USDC_TOKEN.network.chainId),
+					functionName: 'transfer',
+					address: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					uint256: 1000000
+				};
+
+				expect(() =>
+					validateDecodedData({
+						decodedData,
+						token: erc20Token,
+						amount: 2000000n
+					})
+				).toThrow('does not match the expected value');
+			});
+
+			it('should throw error when recipient address is invalid', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: USDC_TOKEN.address,
+					ethereumChainId: String(USDC_TOKEN.network.chainId),
+					functionName: 'transfer',
+					address: '0xINVALID',
+					uint256: 1000000
+				};
+
+				expect(() =>
+					validateDecodedData({
+						decodedData,
+						token: erc20Token,
+						amount: 1000000n
+					})
+				).toThrow('not a valid Ethereum address');
+			});
+
+			it('should handle case-insensitive token contract comparison', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: USDC_TOKEN.address,
+					ethereumChainId: String(USDC_TOKEN.network.chainId),
+					functionName: 'transfer',
+					address: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					uint256: 1000000
+				};
+
+				const result = validateDecodedData({
+					decodedData,
+					token: erc20Token,
+					amount: 1000000n
+				});
+
+				expect(result.address).toBe('0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC');
+			});
 		});
 
-		it('should throw error when decodedData is undefined', () => {
-			expect(() =>
-				validateDecodedData({
-					decodedData: undefined,
-					fee: validFee
-				})
-			).toThrow('Missing required payment data from URN');
-		});
+		describe('General Validation', () => {
+			const nativeToken = {
+				...ETHEREUM_TOKEN,
+				fee: {
+					feeData: {
+						maxFeePerGas: 50000000000n,
+						maxPriorityFeePerGas: 2000000000n
+					},
+					estimatedGasLimit: 21000n
+				}
+			} as unknown as PayableTokenWithConvertedAmount;
 
-		it('should throw error when ethereumChainId is missing', () => {
-			const invalidData: DecodedUrn = {
-				...validDecodedData,
-				ethereumChainId: undefined
-			};
+			it('should throw error when decodedData is undefined', () => {
+				expect(() =>
+					validateDecodedData({
+						decodedData: undefined,
+						token: nativeToken,
+						amount: 1000000000000000000n
+					})
+				).toThrow('The received data is incomplete');
+			});
 
-			expect(() =>
-				validateDecodedData({
-					decodedData: invalidData,
-					fee: validFee
-				})
-			).toThrow('Missing required payment data from URN');
-		});
-
-		it('should throw error when ethereumChainId is undefined', () => {
-			const invalidData: DecodedUrn = {
-				...validDecodedData,
-				ethereumChainId: undefined
-			};
-
-			expect(() =>
-				validateDecodedData({
-					decodedData: invalidData,
-					fee: validFee
-				})
-			).toThrow('Missing required payment data from URN');
-		});
-
-		it('should throw error when value is missing', () => {
-			const invalidData: DecodedUrn = {
-				...validDecodedData,
-				value: undefined
-			};
-
-			expect(() =>
-				validateDecodedData({
-					decodedData: invalidData,
-					fee: validFee
-				})
-			).toThrow('Missing required payment data from URN');
-		});
-
-		it('should throw error when fee is undefined', () => {
-			expect(() =>
-				validateDecodedData({
-					decodedData: validDecodedData,
+			it('should throw error when fee data is missing', () => {
+				const tokenWithoutFee = {
+					...nativeToken,
 					fee: undefined
-				})
-			).toThrow('Missing required payment data from URN');
-		});
+				};
 
-		it('should preserve BigInt types', () => {
-			const result = validateDecodedData({
-				decodedData: validDecodedData,
-				fee: validFee
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					ethereumChainId: '1',
+					value: 1000000000000000000
+				};
+
+				expect(() =>
+					validateDecodedData({
+						decodedData,
+						token: tokenWithoutFee as unknown as PayableTokenWithConvertedAmount,
+						amount: 1000000000000000000n
+					})
+				).toThrow('The received data is incomplete');
 			});
 
-			expect(typeof result.feeData.maxFeePerGas).toBe('bigint');
-			expect(typeof result.feeData.maxPriorityFeePerGas).toBe('bigint');
-			expect(typeof result.estimatedGasLimit).toBe('bigint');
+			it('should throw error when estimatedGasLimit is missing', () => {
+				const tokenWithIncompleteFee = {
+					...nativeToken,
+					fee: {
+						feeData: {
+							maxFeePerGas: 50000000000n,
+							maxPriorityFeePerGas: 2000000000n
+						},
+						estimatedGasLimit: undefined
+					}
+				};
+
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					ethereumChainId: '1',
+					value: 1000000000000000000
+				};
+
+				expect(() =>
+					validateDecodedData({
+						decodedData,
+						token: tokenWithIncompleteFee as unknown as PayableTokenWithConvertedAmount,
+						amount: 1000000000000000000n
+					})
+				).toThrow('The received data is incomplete');
+			});
+
+			it('should preserve BigInt types in result', () => {
+				const decodedData: DecodedUrn = {
+					prefix: 'ethereum',
+					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+					ethereumChainId: '1',
+					value: 1000000000000000000
+				};
+
+				const result = validateDecodedData({
+					decodedData,
+					token: nativeToken,
+					amount: 1000000000000000000n
+				});
+
+				expect(typeof result.feeData.maxFeePerGas).toBe('bigint');
+				expect(typeof result.feeData.maxPriorityFeePerGas).toBe('bigint');
+				expect(typeof result.estimatedGasLimit).toBe('bigint');
+				expect(typeof result.value).toBe('bigint');
+			});
 		});
 	});
 });

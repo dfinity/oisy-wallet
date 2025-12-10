@@ -1,6 +1,9 @@
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enrichEthEvmToken } from '$eth/utils/token.utils';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
 import type {
@@ -15,9 +18,11 @@ import type {
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
-import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
+import { isEthAddress } from '$lib/utils/account.utils';
+import { isNetworkEthereum, isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
+import { get } from 'svelte/store';
 
 /**
  * Decodes LNURL according to LNURL-01 standard
@@ -232,33 +237,158 @@ export const extractQuoteData = (data: OpenCryptoPayResponse) => {
 
 export const validateDecodedData = ({
 	decodedData,
-	fee
+	token,
+	amount
 }: {
 	decodedData: DecodedUrn | undefined;
-	fee: PayableTokenWithConvertedAmount['fee'];
+	token: PayableTokenWithConvertedAmount;
+	amount: bigint;
 }): ValidatedPaymentData => {
-	const { destination, ethereumChainId, value } = decodedData ?? {};
-	const { feeData, estimatedGasLimit } = fee ?? {};
+	const { feeData, estimatedGasLimit } = token.fee ?? {};
 
 	if (
-		isNullish(ethereumChainId) ||
-		isNullish(value) ||
-		isNullish(destination) ||
 		isNullish(feeData?.maxFeePerGas) ||
 		isNullish(feeData?.maxPriorityFeePerGas) ||
-		isNullish(estimatedGasLimit)
+		isNullish(estimatedGasLimit) ||
+		isNullish(decodedData)
 	) {
-		throw new Error('Missing required payment data from URN');
+		throw new Error(get(i18n).pay.error.data_is_incompleted);
+	}
+
+	return isDefaultEthereumToken(token)
+		? validateNativeTransfer({
+				decodedData,
+				amount,
+				maxFeePerGas: feeData.maxFeePerGas,
+				maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+				estimatedGasLimit,
+				token
+			})
+		: validateERC20Transfer({
+				decodedData,
+				token,
+				amount,
+				maxFeePerGas: feeData.maxFeePerGas,
+				maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+				estimatedGasLimit
+			});
+};
+
+// ============================================================================
+// NATIVE TRANSFER VALIDATION (ERC-681)
+// ============================================================================
+
+const validateNativeTransfer = ({
+	decodedData,
+	amount,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	estimatedGasLimit,
+	token
+}: {
+	decodedData: DecodedUrn;
+	amount: bigint;
+	token: PayableTokenWithConvertedAmount;
+	maxFeePerGas: bigint;
+	maxPriorityFeePerGas: bigint;
+	estimatedGasLimit: bigint;
+}): ValidatedPaymentData => {
+	const { functionName, value, destination } = decodedData;
+
+	const {
+		pay: {
+			error: { data_is_incompleted, amount_does_not_match, recipient_address_is_not_valid }
+		}
+	} = get(i18n);
+
+	if (
+		!isNetworkEthereum(token.network) ||
+		isNullish(destination) ||
+		nonNullish(functionName) ||
+		isNullish(value)
+	) {
+		throw new Error(data_is_incompleted);
+	}
+
+	if (amount !== BigInt(value.toString())) {
+		throw new Error(amount_does_not_match);
+	}
+
+	if (!isEthAddress(destination)) {
+		throw new Error(recipient_address_is_not_valid);
 	}
 
 	return {
-		destination,
-		ethereumChainId,
-		value,
+		address: destination,
 		feeData: {
-			maxFeePerGas: feeData.maxFeePerGas,
-			maxPriorityFeePerGas: feeData.maxPriorityFeePerGas
+			maxFeePerGas,
+			maxPriorityFeePerGas
 		},
-		estimatedGasLimit
+		estimatedGasLimit,
+		value: amount,
+		ethereumChainId: token.network.chainId
+	};
+};
+
+// ============================================================================
+// ERC20 TRANSFER VALIDATION (ERC-681)
+// ============================================================================
+
+const validateERC20Transfer = ({
+	decodedData,
+	token,
+	amount,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	estimatedGasLimit
+}: {
+	decodedData: DecodedUrn;
+	token: PayableTokenWithConvertedAmount;
+	amount: bigint;
+	maxFeePerGas: bigint;
+	maxPriorityFeePerGas: bigint;
+	estimatedGasLimit: bigint;
+}): ValidatedPaymentData => {
+	const { destination, address, uint256 } = decodedData;
+
+	const {
+		pay: {
+			error: {
+				data_is_incompleted,
+				amount_does_not_match,
+				recipient_address_is_not_valid,
+				token_address_mismatch
+			}
+		}
+	} = get(i18n);
+
+	if (!isTokenErc20(token) || isNullish(destination) || isNullish(address) || isNullish(uint256)) {
+		throw new Error(data_is_incompleted);
+	}
+
+	const tokenContractAddress = token.address.toLowerCase();
+	const urnContractAddress = destination.toLowerCase();
+
+	if (tokenContractAddress !== urnContractAddress) {
+		throw new Error(token_address_mismatch);
+	}
+
+	if (amount !== BigInt(uint256.toString())) {
+		throw new Error(amount_does_not_match);
+	}
+
+	if (!isEthAddress(address)) {
+		throw new Error(recipient_address_is_not_valid);
+	}
+
+	return {
+		address,
+		feeData: {
+			maxFeePerGas,
+			maxPriorityFeePerGas
+		},
+		estimatedGasLimit,
+		ethereumChainId: token.network.chainId,
+		value: amount
 	};
 };

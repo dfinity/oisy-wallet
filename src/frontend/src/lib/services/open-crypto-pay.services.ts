@@ -108,13 +108,13 @@ export const buildTransactionBaseParams = ({
 	validatedData: ValidatedPaymentData;
 }): TransactionBaseParams => ({
 	from,
-	to: validatedData.destination,
-	amount: BigInt(validatedData.value),
+	to: validatedData.address,
+	amount: validatedData.value,
 	maxPriorityFeePerGas: validatedData.feeData.maxPriorityFeePerGas,
 	maxFeePerGas: validatedData.feeData.maxFeePerGas,
 	nonce,
 	gas: validatedData.estimatedGasLimit,
-	chainId: BigInt(validatedData.ethereumChainId)
+	chainId: validatedData.ethereumChainId
 });
 
 export const prepareEthTransaction = ({
@@ -176,7 +176,8 @@ const preparePaymentTransaction = async ({
 	from,
 	quoteId,
 	callback,
-	progress
+	progress,
+	amount
 }: Omit<PayParams, 'identity' | 'data'>): Promise<EthSignTransactionRequest> => {
 	const uri = await fetchPaymentUri({
 		callback,
@@ -188,7 +189,7 @@ const preparePaymentTransaction = async ({
 	progress(ProgressStepsPayment.CREATE_TRANSACTION);
 
 	const decodedData = decodeQrCodeUrn(uri);
-	const validatedData = validateDecodedData({ decodedData, fee: token.fee });
+	const validatedData = validateDecodedData({ decodedData, token, amount });
 	const nonce = await getNonce({ from, networkId: token.network.id });
 	const baseParams = buildTransactionBaseParams({ from, nonce, validatedData });
 
@@ -202,7 +203,8 @@ export const pay = async ({
 	data,
 	from,
 	identity,
-	progress
+	progress,
+	amount
 }: Omit<PayParams, 'quoteId' | 'callback'>): Promise<void> => {
 	const { quoteId, callback } = extractQuoteData(data);
 
@@ -211,7 +213,8 @@ export const pay = async ({
 		from,
 		quoteId,
 		callback,
-		progress
+		progress,
+		amount
 	});
 
 	progress(ProgressStepsPayment.SIGN_TRANSACTION);

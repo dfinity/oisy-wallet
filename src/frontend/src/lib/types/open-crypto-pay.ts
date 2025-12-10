@@ -97,9 +97,9 @@ export interface PayableTokenWithConvertedAmount extends PayableTokenWithFees {
 }
 
 export interface ValidatedPaymentData {
-	destination: string;
-	ethereumChainId: string;
-	value: number;
+	address: string;
+	ethereumChainId: bigint;
+	value: bigint;
 	feeData: {
 		maxFeePerGas: bigint;
 		maxPriorityFeePerGas: bigint;
@@ -115,6 +115,7 @@ export interface PayParams {
 	quoteId: string;
 	callback: string;
 	progress: (step: ProgressStepsPayment) => void;
+	amount: bigint;
 }
 
 export interface TransactionBaseParams {

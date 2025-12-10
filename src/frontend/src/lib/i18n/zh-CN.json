@@ -1067,6 +1067,12 @@
 		"alt": {
 			"pay": "",
 			"where_you_can_pay": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		}
 	},
 	"tokens": {

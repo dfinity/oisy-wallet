@@ -1067,6 +1067,12 @@
 		"alt": {
 			"pay": "Dialog with information on how to pay",
 			"where_you_can_pay": "Open the Open&nbsp;CryptoPay website to check where you can pay"
+		},
+		"error": {
+			"data_is_incompleted": "The received data is incomplete. Some required details are missing.",
+			"amount_does_not_match": "The amount in the received data does not match the expected value.",
+			"recipient_address_is_not_valid": "The recipient address in the received data is not a valid Ethereum address.",
+			"token_address_mismatch": "The received data refers to a different token than expected."
 		}
 	},
 	"tokens": {

@@ -19,6 +19,7 @@
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		onSelectToken: () => void;
@@ -82,12 +83,18 @@
 		onPay();
 
 		try {
+			const amount = parseToken({
+				value: `${$selectedToken.amount}`,
+				unitName: $selectedToken.decimals
+			});
+
 			await pay({
 				token: $selectedToken,
 				data: $data,
 				from: $ethAddress,
 				identity: $authIdentity,
-				progress
+				progress,
+				amount
 			});
 		} catch (_: unknown) {
 			// TODO: add steps to redirect to Payment Failed screen and add event
