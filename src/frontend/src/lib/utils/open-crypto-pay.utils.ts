@@ -13,7 +13,7 @@ import type {
 	PrepareTokensParams,
 	ValidatedPaymentData
 } from '$lib/types/open-crypto-pay';
-import type { DecodedUrn } from '$lib/types/qr-code';
+import type { DecodedUrnBigInt } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
 import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -234,7 +234,7 @@ export const validateDecodedData = ({
 	decodedData,
 	fee
 }: {
-	decodedData: DecodedUrn | undefined;
+	decodedData: DecodedUrnBigInt | undefined;
 	fee: PayableTokenWithConvertedAmount['fee'];
 }): ValidatedPaymentData => {
 	const { destination, ethereumChainId, value } = decodedData ?? {};

@@ -20,6 +20,7 @@ import type {
 	TransactionBaseParams,
 	ValidatedPaymentData
 } from '$lib/types/open-crypto-pay';
+import type { DecodedUrnBigInt } from '$lib/types/qr-code';
 import {
 	decodeLNURL,
 	extractQuoteData,
@@ -109,7 +110,7 @@ export const buildTransactionBaseParams = ({
 }): TransactionBaseParams => ({
 	from,
 	to: validatedData.destination,
-	amount: BigInt(validatedData.value),
+	amount: validatedData.value,
 	maxPriorityFeePerGas: validatedData.feeData.maxPriorityFeePerGas,
 	maxFeePerGas: validatedData.feeData.maxFeePerGas,
 	nonce,
@@ -187,7 +188,7 @@ const preparePaymentTransaction = async ({
 
 	progress(ProgressStepsPayment.CREATE_TRANSACTION);
 
-	const decodedData = decodeQrCodeUrn({ urn });
+	const decodedData = decodeQrCodeUrn({ urn, isDFX: true }) as DecodedUrnBigInt;
 	const validatedData = validateDecodedData({ decodedData, fee: token.fee });
 	const nonce = await getNonce({ from, networkId: token.network.id });
 	const baseParams = buildTransactionBaseParams({ from, nonce, validatedData });

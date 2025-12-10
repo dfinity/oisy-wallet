@@ -99,7 +99,7 @@ export interface PayableTokenWithConvertedAmount extends PayableTokenWithFees {
 export interface ValidatedPaymentData {
 	destination: string;
 	ethereumChainId: string;
-	value: number;
+	value: bigint;
 	feeData: {
 		maxFeePerGas: bigint;
 		maxPriorityFeePerGas: bigint;

@@ -26,17 +26,14 @@ const NumericParamsSchema = URN_NUMERIC_PARAMS.reduce(
 );
 
 const StringParamsSchema = URN_STRING_PARAMS.reduce(
-	(acc, param) => ({
-		...acc,
-		[param]: z.string().optional()
-	}),
+	(acc, param) => ({ ...acc, [param]: z.string().optional() }),
 	{} as Record<(typeof URN_STRING_PARAMS)[number], z.ZodOptional<z.ZodString>>
 );
 
 export const DecodedUrnSchema = DecodedUrnBaseSchema.extend({
 	...NumericParamsSchema,
 	...StringParamsSchema
-}).catchall(z.union([z.string(), z.number(), z.bigint()]).optional());
+}).catchall(z.union([z.string(), z.number()]).optional());
 
 const NumericParamsSchemaBigInt = URN_NUMERIC_PARAMS.reduce(
 	(acc, param) => ({ ...acc, [param]: z.coerce.bigint().optional() }),

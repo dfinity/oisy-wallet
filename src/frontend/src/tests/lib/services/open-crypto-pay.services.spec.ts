@@ -375,7 +375,7 @@ describe('open-crypto-pay.service', () => {
 		const validatedData: ValidatedPaymentData = {
 			destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
 			ethereumChainId: '1',
-			value: 1000000000000,
+			value: 1000000000000n,
 			feeData: {
 				maxFeePerGas: 12n,
 				maxPriorityFeePerGas: 7n
