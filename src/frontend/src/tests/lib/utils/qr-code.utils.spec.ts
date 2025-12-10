@@ -17,7 +17,7 @@ vi.mock('@icp-sdk/canisters/ledger/icrc', () => ({
 describe('decodeUrn', () => {
 	const tokenList = get(tokens);
 	const destination = 'some-destination';
-	const amount = 123;
+	const amount = 1.23;
 
 	it('should return undefined for an invalid URN', () => {
 		const urn = 'invalidURN';
@@ -44,7 +44,7 @@ describe('decodeUrn', () => {
 			const expectedResult: DecodedUrn = {
 				prefix: expectedPrefix,
 				destination,
-				amount: BigInt(amount)
+				amount
 			};
 
 			if (standard === 'ethereum' || standard === 'erc20') {
@@ -72,7 +72,7 @@ describe('decodeUrn', () => {
 					destination: validAddress,
 					ethereumChainId: '1',
 					prefix: 'ethereum',
-					value: 1000n
+					value: 1000
 				});
 			});
 
@@ -95,7 +95,7 @@ describe('decodeUrn', () => {
 			it('should parse URI with zero value', () => {
 				const result = decodeQrCodeUrn({ urn: `ethereum:${validAddress}@1?value=0` });
 
-				expect(result?.value).toBe(ZERO);
+				expect(result?.value).toBe(0);
 			});
 
 			it('should parse URI with chainId zero', () => {
@@ -207,7 +207,7 @@ describe('decodeUrn', () => {
 				expect(result).toEqual({
 					destination: validAddress,
 					prefix: 'ethereum',
-					value: 1000n
+					value: 1000
 				});
 			});
 
@@ -327,7 +327,7 @@ describe('decodeUrn', () => {
 					urn: `ethereum:${validAddress}@1?value=1000&other=param`
 				});
 
-				expect(result?.value).toBe(1000n);
+				expect(result?.value).toBe(1000);
 			});
 
 			it('should handle URI with very large chainId', () => {
@@ -345,7 +345,7 @@ describe('decodeUrn', () => {
 			it('should handle URI with value having leading zeros', () => {
 				const result = decodeQrCodeUrn({ urn: `ethereum:${validAddress}@1?value=00100` });
 
-				expect(result?.value).toBe(100n);
+				expect(result?.value).toBe(100);
 			});
 
 			it('should handle URI with value having leading zeros in bigint mode', () => {

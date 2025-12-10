@@ -21,11 +21,8 @@ const DecodedUrnBaseSchema = z.object({
 });
 
 const NumericParamsSchema = URN_NUMERIC_PARAMS.reduce(
-	(acc, param) => ({
-		...acc,
-		[param]: z.coerce.bigint().optional()
-	}),
-	{} as Record<(typeof URN_NUMERIC_PARAMS)[number], z.ZodOptional<z.ZodBigInt>>
+	(acc, param) => ({ ...acc, [param]: z.number().optional() }),
+	{} as Record<(typeof URN_NUMERIC_PARAMS)[number], z.ZodOptional<z.ZodNumber>>
 );
 
 const StringParamsSchema = URN_STRING_PARAMS.reduce(
@@ -42,11 +39,8 @@ export const DecodedUrnSchema = DecodedUrnBaseSchema.extend({
 }).catchall(z.union([z.string(), z.number(), z.bigint()]).optional());
 
 const NumericParamsSchemaBigInt = URN_NUMERIC_PARAMS.reduce(
-	(acc, param) => ({
-		...acc,
-		[param]: z.coerce.bigint().optional()
-	}),
-	{}
+	(acc, param) => ({ ...acc, [param]: z.coerce.bigint().optional() }),
+	{} as Record<(typeof URN_NUMERIC_PARAMS)[number], z.ZodOptional<z.ZodBigInt>>
 );
 
 export const DecodedUrnBigIntSchema = DecodedUrnBaseSchema.extend({
