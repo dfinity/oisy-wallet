@@ -78,7 +78,6 @@ jobs:
         run: rm vitest.config.before.ts
 
       - name: Format
-        if: steps.check_changes.outputs.changes_detected == 'true'
         run: npm run format:file --file=vitest.config.ts
 
       - name: Check for Coverage Thresholds Changes
