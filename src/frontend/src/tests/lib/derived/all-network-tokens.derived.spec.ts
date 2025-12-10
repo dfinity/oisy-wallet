@@ -16,8 +16,8 @@ import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
-import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
@@ -27,7 +27,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
-import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -62,7 +62,7 @@ describe('all-network-tokens.derived', () => {
 		enabled: true
 	};
 
-	const mockErc20Token: Erc20TokenToggleable = {
+	const mockErc20Token: Erc20CustomToken = {
 		...mockValidErc20Token,
 		id: parseTokenId('DUM'),
 		address: mockEthAddress,
@@ -70,14 +70,14 @@ describe('all-network-tokens.derived', () => {
 		enabled: false
 	};
 
-	const mockErc721Token: Erc721TokenToggleable = {
+	const mockErc721Token: Erc721CustomToken = {
 		...mockValidErc721Token,
 		id: parseTokenId('KUM'),
 		address: mockEthAddress,
 		enabled: false
 	};
 
-	const mockSplToken: SplTokenToggleable = {
+	const mockSplToken: SplCustomToken = {
 		...mockValidSplToken,
 		enabled: true
 	};

@@ -2,7 +2,6 @@ import type { Token as BackendToken } from '$declarations/backend/backend.did';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { ExtToken } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
-import type { NonFungibleTokenAppearance } from '$lib/types/nft-ui';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable, UserTokenState } from '$lib/types/token-toggleable';
 import type { SplToken } from '$sol/types/spl';
@@ -14,7 +13,7 @@ type CustomTokenNetworkKeys = BackendToken extends infer T
 		: never
 	: never;
 
-type TokenVariant<K extends CustomTokenNetworkKeys, T> = T & { networkKey: K };
+export type TokenVariant<K extends CustomTokenNetworkKeys, T> = T & { networkKey: K };
 
 export type IcrcSaveCustomToken = Pick<IcToken, 'ledgerCanisterId' | 'indexCanisterId'>;
 
@@ -26,7 +25,7 @@ export type ErcSaveCustomToken = Pick<Erc20Token, 'address'> &
 export type SplSaveCustomToken = Pick<SplToken, 'address' | 'decimals' | 'symbol'>;
 
 export type SaveCustomToken = UserTokenState &
-	(IcrcSaveCustomToken | ErcSaveCustomToken | SplSaveCustomToken);
+	(IcrcSaveCustomToken | ExtSaveCustomToken | ErcSaveCustomToken | SplSaveCustomToken);
 
 export type SaveCustomTokenWithKey = UserTokenState &
 	(
@@ -36,7 +35,6 @@ export type SaveCustomTokenWithKey = UserTokenState &
 		| TokenVariant<'ExtV2', ExtSaveCustomToken>
 	);
 
-// TODO: Check if NonFungibleTokenAppearance is necessary, since it should be included in the generic T when needed
-export type CustomToken<T extends Token> = TokenToggleable<T> & NonFungibleTokenAppearance;
+export type CustomToken<T extends Token> = TokenToggleable<T>;
 
 export type LoadCustomTokenParams = QueryAndUpdateRequestParams & { useCache?: boolean };

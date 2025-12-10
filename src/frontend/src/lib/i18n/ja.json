@@ -907,7 +907,7 @@
 			"scan_qr_code": "",
 			"pay_to": "",
 			"powered_by": "",
-			"receipt": "",
+			"recipient": "",
 			"name": "",
 			"address": "",
 			"country": "",
@@ -927,7 +927,9 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
@@ -1056,7 +1058,11 @@
 			"dialog_title": "",
 			"dialog_description": "",
 			"dialog_button": "",
-			"where_you_can_pay": ""
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1128,6 +1134,7 @@
 				"verifying": "トークンの詳細を確認中...",
 				"add_the_token": "トークンを追加",
 				"info": "台帳およびインデックスキャニスターIDは通常、プロジェクトのウェブサイトで入手できます。",
+				"info_ext": "",
 				"info_index": "インデックスキャニスターIDはオプションですが、これがないと$oisy_shortは取引履歴を表示できません。",
 				"custom_tokens_not_supported": "選択したネットワークはカスタムトークンをサポートしていません。"
 			},

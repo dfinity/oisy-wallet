@@ -246,11 +246,25 @@ describe('exchange.derived', () => {
 				{ data: { ...mockErc20DefaultToken, enabled: true }, certified: false },
 				{ data: mockEr20UserToken, certified: false }
 			]);
+			erc20CustomTokensStore.setAll([
+				{ data: { ...mockErc20DefaultToken, enabled: true }, certified: false },
+				{ data: mockEr20UserToken, certified: false }
+			]);
 
 			icrcDefaultTokensStore.set({ data: mockCkBtcToken, certified: false });
-			icrcCustomTokensStore.set({ data: { ...mockCkBtcToken, enabled: true }, certified: false });
+			icrcCustomTokensStore.setAll([
+				{
+					data: { ...mockCkBtcToken, enabled: true },
+					certified: false
+				}
+			]);
 			icrcDefaultTokensStore.set({ data: mockCkEthToken, certified: false });
-			icrcCustomTokensStore.set({ data: { ...mockCkEthToken, enabled: true }, certified: false });
+			icrcCustomTokensStore.setAll([
+				{
+					data: { ...mockCkEthToken, enabled: true },
+					certified: false
+				}
+			]);
 
 			splDefaultTokensStore.add(mockSplDefaultToken);
 			splCustomTokensStore.setAll([
@@ -383,6 +397,12 @@ describe('exchange.derived', () => {
 					certified: false
 				}
 			]);
+			erc20CustomTokensStore.setAll([
+				{
+					data: { ...mockErc20DefaultToken, exchange: 'icp', enabled: true },
+					certified: false
+				}
+			]);
 
 			exchangeStore.set([
 				{ ethereum: ethPrice },
@@ -449,18 +469,22 @@ describe('exchange.derived', () => {
 				data: { ...mockCkBtcToken, exchangeCoinId: 'bitcoin' },
 				certified: false
 			});
-			icrcCustomTokensStore.set({
-				data: { ...mockCkBtcToken, exchangeCoinId: 'bitcoin', enabled: true },
-				certified: false
-			});
+			icrcCustomTokensStore.setAll([
+				{
+					data: { ...mockCkBtcToken, exchangeCoinId: 'bitcoin', enabled: true },
+					certified: false
+				}
+			]);
 			icrcDefaultTokensStore.set({
 				data: { ...mockCkEthToken, exchangeCoinId: 'ethereum' },
 				certified: false
 			});
-			icrcCustomTokensStore.set({
-				data: { ...mockCkEthToken, exchangeCoinId: 'ethereum', enabled: true },
-				certified: false
-			});
+			icrcCustomTokensStore.setAll([
+				{
+					data: { ...mockCkEthToken, exchangeCoinId: 'ethereum', enabled: true },
+					certified: false
+				}
+			]);
 
 			exchangeStore.set([
 				{ ethereum: ethPrice },
@@ -488,10 +512,12 @@ describe('exchange.derived', () => {
 				data: mockErc20Token,
 				certified: false
 			});
-			icrcCustomTokensStore.set({
-				data: { ...mockErc20Token, enabled: true },
-				certified: false
-			});
+			icrcCustomTokensStore.setAll([
+				{
+					data: { ...mockErc20Token, enabled: true },
+					certified: false
+				}
+			]);
 
 			const mockTwinTokenAddress = (mockErc20Token.twinToken as Partial<Erc20Token>).address;
 

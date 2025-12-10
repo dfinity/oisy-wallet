@@ -12,7 +12,7 @@ import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
 export const isTokenNonFungible = (token: Token): token is NonFungibleToken =>
-	isTokenErc721(token) || isTokenErc1155(token);
+	isTokenErc721(token) || isTokenErc1155(token) || isTokenExtV2(token);
 
 export const isTokenFungible = (token: Token): boolean => !isTokenNonFungible(token);
 
@@ -57,3 +57,34 @@ export const getNftDisplayImageUrl = (nft: Nft): string | undefined =>
  */
 export const getNftDisplayMediaStatus = (nft: Nft): NftMediaStatusEnum =>
 	nonNullish(nft.thumbnailUrl) ? nft.mediaStatus.thumbnail : nft.mediaStatus.image;
+
+/**
+ * Gets the display name for the given NFT.
+ *
+ * If the NFT has a name, it is returned.
+ * Otherwise, the collection name is returned.
+ * In either case, the ID is appended to the display name.
+ * If neither is available, the ID is returned.
+ *
+ * @param nft - the NFT for which to get the display name
+ * @returns the display name for the NFT
+ */
+export const getNftDisplayName = (nft: Nft): string => {
+	const {
+		name,
+		collection: { name: collectionName }
+	} = nft;
+
+	const idToUse = getNftDisplayId(nft);
+
+	if (nonNullish(name)) {
+		// sometimes NFT names include the number itself, in that case we do not display the number
+		return name.includes(`#${idToUse}`) ? name : `${name} #${idToUse}`;
+	}
+
+	if (nonNullish(collectionName)) {
+		return `${collectionName} #${idToUse}`;
+	}
+
+	return `#${idToUse}`;
+};

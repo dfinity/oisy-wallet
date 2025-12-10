@@ -6,6 +6,7 @@ import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
+import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -31,6 +32,17 @@ export const mockCustomTokens: CustomToken[] = [
 			}
 		},
 		version: toNullable(1n),
+		enabled: false,
+		section: toNullable(),
+		allow_external_content_source: toNullable()
+	},
+	{
+		token: {
+			ExtV2: {
+				canister_id: Principal.fromText(mockExtV2TokenCanisterId)
+			}
+		},
+		version: toNullable(10n),
 		enabled: false,
 		section: toNullable(),
 		allow_external_content_source: toNullable()

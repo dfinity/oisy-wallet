@@ -44,7 +44,7 @@ describe('earning.derived', () => {
 		gldtStakeStore.reset();
 
 		icrcCustomTokensStore.resetAll();
-		icrcCustomTokensStore.set({ data: mockGldtToken, certified: true });
+		icrcCustomTokensStore.setAll([{ data: mockGldtToken, certified: true }]);
 
 		balancesStore.reset(ICP_TOKEN.id);
 		balancesStore.set({

@@ -10,12 +10,8 @@ import {
 	toCandidAccount,
 	type GetBlocksParams,
 	type IcrcAccount,
-	type IcrcAllowance,
-	type IcrcBlockIndex,
-	type IcrcGetBlocksResult,
-	type IcrcStandardRecord,
-	type IcrcTokenMetadataResponse,
-	type IcrcTokens
+	type IcrcLedgerDid,
+	type IcrcTokenMetadataResponse
 } from '@icp-sdk/canisters/ledger/icrc';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -90,7 +86,7 @@ export const balance = async ({
 	owner: Principal;
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
-} & QueryParams): Promise<IcrcTokens> => {
+} & QueryParams): Promise<IcrcLedgerDid.Tokens> => {
 	assertNonNullish(identity);
 
 	const { balance } = await ledgerCanister({ identity, ...rest });
@@ -121,7 +117,7 @@ export const transfer = async ({
 	amount: bigint;
 	createdAt?: bigint;
 	ledgerCanisterId: CanisterIdText;
-}): Promise<IcrcBlockIndex> => {
+}): Promise<IcrcLedgerDid.BlockIndex> => {
 	assertNonNullish(identity);
 
 	const { transfer } = await ledgerCanister({ identity, ledgerCanisterId });
@@ -159,7 +155,7 @@ export const approve = async ({
 	spender: IcrcAccount;
 	expiresAt: bigint;
 	createdAt?: bigint;
-}): Promise<IcrcBlockIndex> => {
+}): Promise<IcrcLedgerDid.BlockIndex> => {
 	assertNonNullish(identity);
 
 	const { approve } = await ledgerCanister({ identity, ledgerCanisterId });
@@ -195,7 +191,7 @@ export const allowance = async ({
 		owner: IcrcAccount;
 		spender: IcrcAccount;
 	} & QueryParams
->): Promise<IcrcAllowance> => {
+>): Promise<IcrcLedgerDid.Allowance> => {
 	assertNonNullish(identity);
 	const { allowance } = await ledgerCanister({ identity, ledgerCanisterId });
 
@@ -214,7 +210,7 @@ export const getBlocks = async ({
 }: {
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
-} & GetBlocksParams): Promise<IcrcGetBlocksResult> => {
+} & GetBlocksParams): Promise<IcrcLedgerDid.GetBlocksResult> => {
 	assertNonNullish(identity);
 
 	const { getBlocks } = await ledgerCanister({ identity, ledgerCanisterId });
@@ -238,7 +234,7 @@ export const icrc1SupportedStandards = async ({
 }: {
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
-} & QueryParams): Promise<IcrcStandardRecord[]> => {
+} & QueryParams): Promise<IcrcLedgerDid.StandardRecord[]> => {
 	assertNonNullish(identity);
 
 	const { icrc1SupportedStandards } = await ledgerCanister({ identity, ledgerCanisterId });
@@ -262,7 +258,7 @@ export const icrc10SupportedStandards = async ({
 }: {
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
-} & QueryParams): Promise<IcrcStandardRecord[]> => {
+} & QueryParams): Promise<IcrcLedgerDid.StandardRecord[]> => {
 	assertNonNullish(identity);
 
 	const { icrc10SupportedStandards } = await ledgerCanister({ identity, ledgerCanisterId });

@@ -20,9 +20,7 @@ import {
 	IcrcLedgerCanister,
 	IcrcMetadataResponseEntries,
 	type IcrcAccount,
-	type IcrcAllowance,
-	type IcrcBlockIndex,
-	type IcrcGetBlocksResult,
+	type IcrcLedgerDid,
 	type IcrcTokenMetadataResponse
 } from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
@@ -188,7 +186,7 @@ describe('icrc-ledger.api', () => {
 			createdAt
 		};
 
-		const mockIndex: IcrcBlockIndex = 123n;
+		const mockIndex: IcrcLedgerDid.BlockIndex = 123n;
 
 		beforeEach(() => {
 			ledgerCanisterMock.transfer.mockResolvedValue(mockIndex);
@@ -249,7 +247,7 @@ describe('icrc-ledger.api', () => {
 			createdAt
 		};
 
-		const mockIndex: IcrcBlockIndex = 123n;
+		const mockIndex: IcrcLedgerDid.BlockIndex = 123n;
 
 		beforeEach(() => {
 			ledgerCanisterMock.approve.mockResolvedValue(mockIndex);
@@ -307,7 +305,7 @@ describe('icrc-ledger.api', () => {
 			identity: mockIdentity
 		};
 
-		const allowanceResponse: IcrcAllowance = {
+		const allowanceResponse: IcrcLedgerDid.Allowance = {
 			allowance: 1_000_000n,
 			expires_at: []
 		};
@@ -486,7 +484,7 @@ describe('icrc-ledger.api', () => {
 		};
 
 		const mockTotalBlocks = 123n;
-		const mockGetBlocksResponse: IcrcGetBlocksResult = {
+		const mockGetBlocksResponse: IcrcLedgerDid.GetBlocksResult = {
 			log_length: mockTotalBlocks,
 			blocks: [],
 			archived_blocks: []

@@ -15,7 +15,7 @@ import type { Token, TokenId } from '$lib/types/token';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockCkBtcMinterInfo, mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
-import type { PendingUtxo } from '@icp-sdk/canisters/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 	Array.from({ length: n }, () => ({
@@ -59,7 +59,7 @@ export const setupCkBtcPendingStores = () => {
 				{
 					...mockCkBtcPendingUtxoTransaction,
 					outpoint: { txid: [0], vout: '' }
-				} as unknown as PendingUtxo
+				} as unknown as CkBtcMinterDid.PendingUtxo
 			],
 			certified: true
 		}
