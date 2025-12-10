@@ -52,7 +52,7 @@ describe('decodeQrCode', () => {
 
 		expect(response).toEqual({ status: 'success', destination: urn });
 
-		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
+		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith({urn });
 	});
 
 	it('should return { status: "token_incompatible" } when tokens do not match', () => {
@@ -71,7 +71,7 @@ describe('decodeQrCode', () => {
 
 		expect(response).toEqual({ status: 'token_incompatible' });
 
-		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
+		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith({urn});
 	});
 
 	it('should return { status: "success", destination, token, amount } when everything matches', () => {
@@ -96,6 +96,6 @@ describe('decodeQrCode', () => {
 			amount
 		});
 
-		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
+		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith({urn});
 	});
 });
