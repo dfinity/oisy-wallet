@@ -3,8 +3,6 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
-import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import * as ethNftServices from '$eth/services/nft.services';
 import { loadNftsByNetwork as loadErcNftsByNetwork } from '$eth/services/nft.services';
 import * as icNftServices from '$icp/services/nft.services';
@@ -333,12 +331,12 @@ describe('nft.services', () => {
 	});
 
 	describe('updateNftSection', () => {
-		let erc721Spy: MockInstance;
-		let erc1155Spy: MockInstance;
+		let saveSpy: MockInstance;
 
 		beforeEach(() => {
-			erc721Spy = vi.spyOn(erc721CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
-			erc1155Spy = vi.spyOn(erc1155CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
+			vi.clearAllMocks();
+
+			saveSpy = vi.spyOn(saveCustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
 		});
 
 		afterEach(() => {
@@ -377,8 +375,7 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc721Spy).not.toHaveBeenCalled();
-			expect(erc1155Spy).not.toHaveBeenCalled();
+			expect(saveSpy).not.toHaveBeenCalled();
 		});
 
 		it('updates ERC721 token with section=HIDDEN (should disable allowExternalContentSource if allowExternalContentSoure is undefined)', async () => {
@@ -389,11 +386,13 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc721Spy).toHaveBeenCalledWith({
+			expect(saveSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						...base721,
+						chainId: base721.network.chainId,
+						networkKey: 'Erc721',
 						enabled: true,
 						section: CustomTokenSection.HIDDEN,
 						allowExternalContentSource: false
@@ -410,11 +409,13 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc721Spy).toHaveBeenCalledWith({
+			expect(saveSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						...base721,
+						chainId: base721.network.chainId,
+						networkKey: 'Erc721',
 						enabled: true,
 						section: CustomTokenSection.HIDDEN,
 						allowExternalContentSource: true
@@ -431,11 +432,13 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc721Spy).toHaveBeenCalledWith({
+			expect(saveSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						...base721,
+						chainId: base721.network.chainId,
+						networkKey: 'Erc721',
 						enabled: true,
 						section: CustomTokenSection.SPAM,
 						allowExternalContentSource: false
@@ -452,11 +455,13 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc1155Spy).toHaveBeenCalledWith({
+			expect(saveSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						...base1155,
+						chainId: base1155.network.chainId,
+						networkKey: 'Erc1155',
 						enabled: true,
 						section: CustomTokenSection.HIDDEN,
 						allowExternalContentSource: false
@@ -473,11 +478,13 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc1155Spy).toHaveBeenCalledWith({
+			expect(saveSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						...base1155,
+						chainId: base1155.network.chainId,
+						networkKey: 'Erc1155',
 						enabled: true,
 						section: CustomTokenSection.HIDDEN,
 						allowExternalContentSource: true
@@ -494,11 +501,13 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc1155Spy).toHaveBeenCalledWith({
+			expect(saveSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						...base1155,
+						chainId: base1155.network.chainId,
+						networkKey: 'Erc1155',
 						enabled: true,
 						section: CustomTokenSection.SPAM,
 						allowExternalContentSource: false
@@ -509,12 +518,12 @@ describe('nft.services', () => {
 	});
 
 	describe('updateNftMediaConsent', () => {
-		let erc721Spy: MockInstance;
-		let erc1155Spy: MockInstance;
+		let saveSpy: MockInstance;
 
 		beforeEach(() => {
-			erc721Spy = vi.spyOn(erc721CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
-			erc1155Spy = vi.spyOn(erc1155CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
+			vi.clearAllMocks();
+
+			saveSpy = vi.spyOn(saveCustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
 		});
 
 		afterEach(() => {
@@ -553,8 +562,7 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc721Spy).not.toHaveBeenCalled();
-			expect(erc1155Spy).not.toHaveBeenCalled();
+			expect(saveSpy).not.toHaveBeenCalled();
 		});
 
 		it('updates ERC721 token with allowExternalContentSource=true', async () => {
@@ -565,11 +573,13 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc721Spy).toHaveBeenCalledWith({
+			expect(saveSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						...base721,
+						chainId: base721.network.chainId,
+						networkKey: 'Erc721',
 						enabled: true,
 						allowExternalContentSource: true
 					}
@@ -585,11 +595,13 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc721Spy).toHaveBeenCalledWith({
+			expect(saveSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						...base721,
+						chainId: base721.network.chainId,
+						networkKey: 'Erc721',
 						enabled: true,
 						allowExternalContentSource: false
 					}
@@ -605,11 +617,13 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc1155Spy).toHaveBeenCalledWith({
+			expect(saveSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						...base1155,
+						chainId: base1155.network.chainId,
+						networkKey: 'Erc1155',
 						enabled: true,
 						allowExternalContentSource: true
 					}
@@ -625,11 +639,13 @@ describe('nft.services', () => {
 				$ethAddress: mockEthAddress
 			});
 
-			expect(erc1155Spy).toHaveBeenCalledWith({
+			expect(saveSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						...base1155,
+						chainId: base1155.network.chainId,
+						networkKey: 'Erc1155',
 						enabled: true,
 						allowExternalContentSource: false
 					}
