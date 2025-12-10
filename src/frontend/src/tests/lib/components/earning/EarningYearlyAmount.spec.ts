@@ -56,24 +56,32 @@ describe('EarningYearlyAmount', () => {
 		expect(screen.getByText(getFormattedText('+ $10.00'))).toBeInTheDocument();
 	});
 
-	it('applies text-success-primary class for positive amount when formatPositiveAmount is true', () => {
-		const { container } = render(EarningYearlyAmount, { value: 5, formatPositiveAmount: true });
+	it('applies text-success-primary class for positive amount when showAsSuccess is true', () => {
+		const { container } = render(EarningYearlyAmount, { value: 5, showAsSuccess: true });
 
 		const span = container.querySelector('span');
 
 		expect(span).toHaveClass('text-success-primary');
 	});
 
-	it('applies text-error-primary when formatPositiveAmount is false', () => {
-		const { container } = render(EarningYearlyAmount, { value: 5, formatPositiveAmount: false });
+	it('applies text-error-primary when showAsError is true', () => {
+		const { container } = render(EarningYearlyAmount, { value: 5, showAsError: true });
 
 		const span = container.querySelector('span');
 
 		expect(span).toHaveClass('text-brand-primary');
 	});
 
-	it('applies text-tertiary when formatPositiveAmount is true but amount is 0', () => {
-		const { container } = render(EarningYearlyAmount, { value: 0, formatPositiveAmount: true });
+	it('applies text-brand-primary-alt when showAsNeutral is true', () => {
+		const { container } = render(EarningYearlyAmount, { value: 5, showAsNeutral: true });
+
+		const span = container.querySelector('span');
+
+		expect(span).toHaveClass('text-brand-primary-alt');
+	});
+
+	it('applies text-tertiary when amount is 0', () => {
+		const { container } = render(EarningYearlyAmount, { value: 0 });
 
 		const span = container.querySelector('span');
 

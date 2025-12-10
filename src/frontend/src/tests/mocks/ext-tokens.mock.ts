@@ -22,3 +22,5 @@ export const mockValidExtV2Token2: ExtToken = {
 	standard: 'extV2',
 	canisterId: mockExtV2TokenCanisterId2
 };
+
+export const MOCK_EXT_TOKENS = [mockValidExtV2Token, mockValidExtV2Token2];

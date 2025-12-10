@@ -27,7 +27,7 @@ describe('stake.derived', () => {
 
 		gldtStakeStore.reset();
 
-		icrcCustomTokensStore.set({ data: mockGldtToken, certified: true });
+		icrcCustomTokensStore.setAll([{ data: mockGldtToken, certified: true }]);
 	});
 
 	describe('stakeBalances', () => {

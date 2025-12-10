@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -11,14 +12,25 @@
 
 	interface Props {
 		value?: number;
+		styleClass?: string;
 		showPlusSign?: boolean;
-		formatPositiveAmount?: boolean;
+		showAsNeutral?: boolean;
+		showAsError?: boolean;
+		showAsSuccess?: boolean;
 		fallback?: Snippet;
 	}
 
-	const { value, showPlusSign = false, formatPositiveAmount = false, fallback }: Props = $props();
+	const {
+		value,
+		showPlusSign = false,
+		styleClass,
+		showAsNeutral = false,
+		showAsSuccess = false,
+		showAsError = false,
+		fallback
+	}: Props = $props();
 
-	const formattedCurrency = $derived(
+	let formattedCurrency = $derived(
 		nonNullish(value)
 			? formatCurrency({
 					value,
@@ -29,25 +41,30 @@
 			: undefined
 	);
 
-	const yearlyAmount = $derived(
+	let yearlyAmount = $derived(
 		nonNullish(formattedCurrency)
 			? replacePlaceholders($i18n.stake.text.active_earning_per_year, {
 					$amount: `${formattedCurrency}`
 				})
 			: undefined
 	);
+
+	let positiveAmount = $derived(nonNullish(value) && value > 0);
 </script>
 
 {#if nonNullish(yearlyAmount)}
 	<span
-		class="whitespace-nowrap"
-		class:text-brand-primary={!formatPositiveAmount}
-		class:text-success-primary={formatPositiveAmount && nonNullish(value) && value > 0}
-		class:text-tertiary={value === 0}
+		class={`whitespace-nowrap ${styleClass ?? ''}`}
+		class:text-brand-primary-alt={positiveAmount && showAsNeutral}
+		class:text-error-primary={positiveAmount && showAsError}
+		class:text-success-primary={positiveAmount && showAsSuccess}
+		class:text-tertiary={!positiveAmount}
 		in:fade
 	>
 		{`${showPlusSign ? '+ ' : ''}${yearlyAmount}`}
 	</span>
 {:else if nonNullish(fallback)}
 	{@render fallback()}
+{:else}
+	<SkeletonText />
 {/if}

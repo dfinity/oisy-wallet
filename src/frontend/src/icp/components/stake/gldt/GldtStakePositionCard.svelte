@@ -5,6 +5,7 @@
 	import { icrcCustomTokensInitialized } from '$icp/derived/icrc.derived';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import type { IcToken } from '$icp/types/ic-token';
+	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import UnstakeModal from '$lib/components/stake/UnstakeModal.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -19,7 +20,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { calculateTokenUsdAmount, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -53,20 +53,11 @@
 	{#snippet content()}
 		<div class="text-sm">{$i18n.stake.text.active_earning}</div>
 
-		<div
-			class="my-1 text-lg font-bold sm:text-xl"
-			class:text-success-primary={stakedAmountUsd > 0}
-			class:text-tertiary={stakedAmountUsd === 0}
-		>
-			{replacePlaceholders($i18n.stake.text.active_earning_per_year, {
-				$amount: `${formatCurrency({
-					value: (stakedAmountUsd * currentApy) / 100,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
-				})}`
-			})}
-		</div>
+		<EarningYearlyAmount
+			showAsSuccess
+			styleClass="my-1 text-lg font-bold sm:text-xl"
+			value={(stakedAmountUsd * currentApy) / 100}
+		/>
 
 		<div class="flex items-center justify-center gap-2 text-sm sm:text-base">
 			{#if stakedAmountUsd > 0}

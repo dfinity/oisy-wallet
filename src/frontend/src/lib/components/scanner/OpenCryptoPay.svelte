@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import PayHero from '$lib/components/scanner/PayHero.svelte';
 	import ReceiptData from '$lib/components/scanner/PayReceiptData.svelte';
@@ -8,8 +8,12 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
+	import { pay } from '$lib/services/open-crypto-pay.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
@@ -19,9 +23,16 @@
 	interface Props {
 		onSelectToken: () => void;
 		isTokenSelecting: boolean;
+		payProgressStep: ProgressStepsPayment;
+		onPay: () => void;
 	}
 
-	let { onSelectToken, isTokenSelecting = $bindable() }: Props = $props();
+	let {
+		onSelectToken,
+		onPay,
+		isTokenSelecting = $bindable(),
+		payProgressStep = $bindable()
+	}: Props = $props();
 
 	const { data, selectedToken } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
@@ -55,6 +66,33 @@
 				})
 			: $i18n.scanner.text.pay
 	);
+
+	const progress = (step: ProgressStepsPayment) => (payProgressStep = step);
+
+	const fetchPay = async () => {
+		if (
+			isNullish($selectedToken) ||
+			isNullish($data) ||
+			isNullish($ethAddress) ||
+			isNullish($authIdentity)
+		) {
+			return;
+		}
+
+		onPay();
+
+		try {
+			await pay({
+				token: $selectedToken,
+				data: $data,
+				from: $ethAddress,
+				identity: $authIdentity,
+				progress
+			});
+		} catch (_: unknown) {
+			// TODO: add steps to redirect to Payment Failed screen and add event
+		}
+	};
 </script>
 
 <ContentWithToolbar>
@@ -71,7 +109,7 @@
 			{#if nonNullish($selectedToken)}
 				<ModalValue>
 					{#snippet label()}
-						{$i18n.fee.text.fee}
+						{$i18n.fee.text.network_fee}
 					{/snippet}
 
 					{#snippet secondaryValue()}
@@ -88,8 +126,7 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<!-- TODO: Implement payment logic and enable Pay button -->
-			<Button disabled={true} onclick={() => {}}>{payAmount}</Button>
+			<Button disabled={isNullish($selectedToken)} onclick={fetchPay}>{payAmount}</Button>
 		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

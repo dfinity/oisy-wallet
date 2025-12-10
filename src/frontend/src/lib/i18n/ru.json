@@ -907,7 +907,7 @@
 			"scan_qr_code": "",
 			"pay_to": "",
 			"powered_by": "",
-			"receipt": "",
+			"recipient": "",
 			"name": "",
 			"address": "",
 			"country": "",
@@ -927,7 +927,9 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
@@ -1056,7 +1058,11 @@
 			"dialog_title": "",
 			"dialog_description": "",
 			"dialog_button": "",
-			"where_you_can_pay": ""
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1128,6 +1134,7 @@
 				"verifying": "Проверка сведений о токене...",
 				"add_the_token": "Добавить токен",
 				"info": "ID контейнеров реестра и индекса обычно доступны на веб-сайте проекта.",
+				"info_ext": "",
 				"info_index": "ID контейнера индекса необязателен, но без него $oisy_short не может отображать историю транзакций.",
 				"custom_tokens_not_supported": "Выбранная сеть не поддерживает пользовательские токены."
 			},

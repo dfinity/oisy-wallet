@@ -43,6 +43,7 @@
 					<span class="font-bold">
 						{#if cardField === EarningCardFields.EARNING_POTENTIAL}
 							<EarningYearlyAmount
+								showAsError
 								showPlusSign
 								value={nonNullish(cardFields[cardField])
 									? Number(cardFields[cardField])
@@ -54,7 +55,7 @@
 							</EarningYearlyAmount>
 						{:else if cardField === EarningCardFields.CURRENT_EARNING}
 							<EarningYearlyAmount
-								formatPositiveAmount
+								showAsSuccess
 								value={nonNullish(cardFields[cardField]) &&
 								nonNullish(cardFields[EarningCardFields.APY])
 									? (Number(cardFields[cardField]) * Number(cardFields[EarningCardFields.APY])) /

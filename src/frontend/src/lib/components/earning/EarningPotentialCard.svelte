@@ -3,7 +3,6 @@
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { highestEarningPotentialUsd } from '$lib/derived/earning.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -33,13 +32,10 @@
 
 		<div class="my-1 text-lg font-bold sm:text-xl">
 			<EarningYearlyAmount
+				showAsError
 				showPlusSign={$highestEarningPotentialUsd > 0}
 				value={$highestEarningPotentialUsd}
-			>
-				{#snippet fallback()}
-					<SkeletonText />
-				{/snippet}
-			</EarningYearlyAmount>
+			/>
 		</div>
 
 		<div class="text-sm sm:text-base">
