@@ -18,7 +18,7 @@ import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	IcrcMetadataResponseEntries,
-	type IcrcStandardRecord,
+	type IcrcLedgerDid,
 	type IcrcTokenMetadataResponse
 } from '@icp-sdk/canisters/ledger/icrc';
 
@@ -409,7 +409,7 @@ describe('icrc.utils', () => {
 		});
 
 		it('returns true when ICRC-2 standard is supported', async () => {
-			const supportedStandards: IcrcStandardRecord[] = [
+			const supportedStandards: IcrcLedgerDid.StandardRecord[] = [
 				{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
 				{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' },
 				{ name: 'ICRC-3', url: 'https://github.com/dfinity/ICRC-3' }

@@ -12,6 +12,7 @@ import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import {
 	buildTransactionBaseParams,
@@ -743,7 +744,7 @@ describe('open-crypto-pay.service', () => {
 				},
 				estimatedGasLimit: 25000n
 			}
-		} as PayableTokenWithConvertedAmount;
+		};
 
 		const mockData: OpenCryptoPayResponse = {
 			id: 'pl_test123',
@@ -767,6 +768,7 @@ describe('open-crypto-pay.service', () => {
 
 		const from = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as EthAddress;
 		const mockRawTransaction = '0x02f8...';
+		const mockProgress = vi.fn();
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -798,13 +800,15 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				quoteId: 'mock-quote-id-123',
-				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123'
+				progress: mockProgress
 			});
 
 			expect(extractQuoteData).toHaveBeenCalledExactlyOnceWith(mockData);
 			expect(signTransaction).toHaveBeenCalledOnce();
-			expect(fetchOpenCryptoPay).toHaveBeenCalledTimes(2);
+			expect(mockProgress).toHaveBeenCalled();
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsPayment.CREATE_TRANSACTION);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsPayment.SIGN_TRANSACTION);
+			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsPayment.PAY);
 		});
 
 		it('should call extractQuoteData with correct data', async () => {
@@ -833,14 +837,13 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				quoteId: 'test-quote',
-				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/test'
+				progress: mockProgress
 			});
 
 			expect(extractQuoteData).toHaveBeenCalledWith(mockData);
 		});
 
-		it('should fetch payment URI with correct parameters', async () => {
+		it('should prepare payment transaction with correct parameters', async () => {
 			vi.mocked(extractQuoteData).mockReturnValue({
 				quoteId: 'quote-123',
 				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
@@ -866,8 +869,7 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				quoteId: 'quote-123',
-				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+				progress: mockProgress
 			});
 
 			expect(fetchOpenCryptoPay).toHaveBeenCalledWith(
@@ -901,8 +903,7 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				quoteId: 'quote-123',
-				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+				progress: mockProgress
 			});
 
 			expect(signTransaction).toHaveBeenCalledWith(
@@ -938,8 +939,7 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				quoteId: 'quote-123',
-				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+				progress: mockProgress
 			});
 
 			expect(fetchOpenCryptoPay).toHaveBeenNthCalledWith(
@@ -948,7 +948,7 @@ describe('open-crypto-pay.service', () => {
 			);
 		});
 
-		it('should handle payment errors', async () => {
+		it('should handle payment preparation errors', async () => {
 			vi.mocked(extractQuoteData).mockReturnValue({
 				quoteId: 'quote-123',
 				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
@@ -962,8 +962,7 @@ describe('open-crypto-pay.service', () => {
 					data: mockData,
 					from,
 					identity: mockIdentity,
-					quoteId: 'quote-123',
-					callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+					progress: mockProgress
 				})
 			).rejects.toThrow('Payment failed');
 		});
@@ -994,10 +993,11 @@ describe('open-crypto-pay.service', () => {
 					data: mockData,
 					from,
 					identity: mockIdentity,
-					quoteId: 'quote-123',
-					callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+					progress: mockProgress
 				})
 			).rejects.toThrow('Signing failed');
+
+			expect(mockProgress).toHaveBeenCalledTimes(2);
 		});
 	});
 });

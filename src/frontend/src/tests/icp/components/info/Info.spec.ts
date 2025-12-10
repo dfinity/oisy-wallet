@@ -45,7 +45,7 @@ describe('Info', () => {
 
 	const mockEnabledToken = (token: IcCkToken) => {
 		icrcDefaultTokensStore.set({ data: token, certified: false });
-		icrcCustomTokensStore.set({ data: { ...token, enabled: true }, certified: false });
+		icrcCustomTokensStore.setAll([{ data: { ...token, enabled: true }, certified: false }]);
 	};
 
 	beforeEach(() => {

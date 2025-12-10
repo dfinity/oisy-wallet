@@ -3,7 +3,7 @@ import { listCustomTokens } from '$lib/api/backend.api';
 import { getIdbAllCustomTokens, setIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { assertNever, fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
@@ -53,26 +53,51 @@ export const loadNetworkCustomTokens = async ({
 		if (nonNullish(cachedTokens)) {
 			// Principals are saved as Uint8Array in the IDB, so we need to parse them back to Principal
 			const parsePrincipal = (token: CustomToken): CustomToken => {
-				if (!('Icrc' in token.token)) {
+				if ('Icrc' in token.token) {
+					const { ledger_id: rawLedgerId, index_id: rawIndexId } = token.token.Icrc;
+
+					const ledgerId = Principal.from(rawLedgerId);
+					const indexId = nonNullish(fromNullable(rawIndexId))
+						? Principal.from(fromNullable(rawIndexId))
+						: undefined;
+
+					return {
+						...token,
+						token: {
+							Icrc: {
+								ledger_id: ledgerId,
+								index_id: toNullable(indexId)
+							}
+						}
+					};
+				}
+
+				if ('ExtV2' in token.token) {
+					const { canister_id: rawCanisterId } = token.token.ExtV2;
+
+					const canisterId = Principal.from(rawCanisterId);
+
+					return {
+						...token,
+						token: {
+							ExtV2: {
+								canister_id: canisterId
+							}
+						}
+					};
+				}
+
+				if (
+					'Erc20' in token.token ||
+					'Erc721' in token.token ||
+					'Erc1155' in token.token ||
+					'SplMainnet' in token.token ||
+					'SplDevnet' in token.token
+				) {
 					return token;
 				}
 
-				const { ledger_id: rawLedgerId, index_id: rawIndexId } = token.token.Icrc;
-
-				const ledgerId = Principal.from(rawLedgerId);
-				const indexId = nonNullish(fromNullable(rawIndexId))
-					? Principal.from(fromNullable(rawIndexId))
-					: undefined;
-
-				return {
-					...token,
-					token: {
-						Icrc: {
-							ledger_id: ledgerId,
-							index_id: toNullable(indexId)
-						}
-					}
-				};
+				assertNever(token.token, `Unexpected token type: ${token.token}`);
 			};
 
 			return cachedTokens.map(parsePrincipal).filter(filterTokens);

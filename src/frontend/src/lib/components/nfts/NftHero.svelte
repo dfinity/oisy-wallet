@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
@@ -17,7 +17,7 @@
 	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
-	import { getNftDisplayId, getNftDisplayImageUrl } from '$lib/utils/nft.utils';
+	import { getNftDisplayImageUrl, getNftDisplayName } from '$lib/utils/nft.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
@@ -50,29 +50,7 @@
 		return breadcrumbs;
 	});
 
-	const normalizedNftName = $derived.by(() => {
-		if (isNullish(nft)) {
-			return;
-		}
-
-		const {
-			name,
-			collection: { name: collectionName }
-		} = nft;
-
-		const idToUse = getNftDisplayId(nft);
-
-		if (nonNullish(name)) {
-			// sometimes NFT names include the number itself, in that case we do not display the number
-			return name.includes(`#${idToUse}`) ? name : `${name} #${idToUse}`;
-		}
-
-		if (nonNullish(collectionName)) {
-			return `${collectionName} #${idToUse}`;
-		}
-
-		return `#${idToUse}`;
-	});
+	const normalizedNftName = $derived(nonNullish(nft) ? getNftDisplayName(nft) : undefined);
 
 	let nftDisplayImageUrl = $derived(nonNullish(nft) ? getNftDisplayImageUrl(nft) : undefined);
 </script>
