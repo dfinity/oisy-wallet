@@ -120,10 +120,10 @@ export const decodeQrCode = ({
 	}
 
 	const amount =
-		functionName === 'transfer'
-			? uint256
+		functionName === 'transfer' && nonNullish(uint256)
+			? +formatToken({ value: uint256, unitName: token.decimals })
 			: nonNullish(value)
-				? +formatToken({ value: BigInt(value), unitName: token.decimals })
+				? +formatToken({ value, unitName: token.decimals })
 				: undefined;
 
 	return { status: 'success', destination, symbol: token.symbol, amount };

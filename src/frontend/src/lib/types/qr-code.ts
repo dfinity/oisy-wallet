@@ -21,12 +21,18 @@ const DecodedUrnBaseSchema = z.object({
 });
 
 const NumericParamsSchema = URN_NUMERIC_PARAMS.reduce(
-	(acc, param) => ({ ...acc, [param]: z.number().optional() }),
-	{} as Record<(typeof URN_NUMERIC_PARAMS)[number], z.ZodOptional<z.ZodNumber>>
+	(acc, param) => ({
+		...acc,
+		[param]: z.bigint().optional()
+	}),
+	{} as Record<(typeof URN_NUMERIC_PARAMS)[number], z.ZodOptional<z.ZodBigInt>>
 );
 
 const StringParamsSchema = URN_STRING_PARAMS.reduce(
-	(acc, param) => ({ ...acc, [param]: z.string().optional() }),
+	(acc, param) => ({
+		...acc,
+		[param]: z.string().optional()
+	}),
 	{} as Record<(typeof URN_STRING_PARAMS)[number], z.ZodOptional<z.ZodString>>
 );
 
