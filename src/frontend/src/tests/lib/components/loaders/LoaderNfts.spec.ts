@@ -1,4 +1,3 @@
-import * as nftEnv from '$env/nft.env';
 import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
@@ -122,8 +121,6 @@ describe('LoaderNfts', async () => {
 		extCustomTokensStore.resetAll();
 
 		nftStore.resetAll();
-
-		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');

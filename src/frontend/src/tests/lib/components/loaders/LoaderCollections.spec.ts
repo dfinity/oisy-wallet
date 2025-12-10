@@ -2,7 +2,6 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import * as nftEnv from '$env/nft.env';
 import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
@@ -56,8 +55,6 @@ describe('LoaderCollections', () => {
 
 		extCustomTokensSpy = vi.spyOn(extCustomTokens, 'saveCustomTokens');
 		extCustomTokensSpy.mockResolvedValue(undefined);
-
-		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 
 		mockAuthStore();
 
