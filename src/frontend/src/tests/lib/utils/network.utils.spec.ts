@@ -93,7 +93,7 @@ describe('network utils', () => {
 
 	describe('assertIsNetworkEthereum', () => {
 		it.each([...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS])(
-			'should return true for $name network',
+			'should not throw for $name network',
 			(network) => {
 				expect(() => assertIsNetworkEthereum(network)).not.toThrow();
 			}
