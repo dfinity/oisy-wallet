@@ -1,4 +1,3 @@
-import { NFTS_ENABLED } from '$env/nft.env';
 import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
@@ -474,7 +473,7 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc721.length > 0 && NFTS_ENABLED
+		...(erc721.length > 0
 			? [
 					saveCustomTokensWithKey({
 						...commonParams,
@@ -486,7 +485,7 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc1155.length > 0 && NFTS_ENABLED
+		...(erc1155.length > 0
 			? [
 					saveCustomTokensWithKey({
 						...commonParams,
