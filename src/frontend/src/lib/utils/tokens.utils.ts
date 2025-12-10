@@ -38,6 +38,7 @@ import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
+import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
@@ -273,7 +274,7 @@ export const filterTokens = <T extends Token>({
 			return true;
 		}
 
-		if (isTokenErc20(token) || isTokenSpl(token)) {
+		if (isTokenErc20(token) || isTokenErc721(token) || isTokenErc1155(token) || isTokenSpl(token)) {
 			return areAddressesPartiallyEqual({
 				address1: token.address,
 				address2: filter,
@@ -289,6 +290,12 @@ export const filterTokens = <T extends Token>({
 				(nonNullish(indexCanisterId) &&
 					indexCanisterId.toLowerCase().includes(filter.toLowerCase()))
 			);
+		}
+
+		if (isTokenExtV2(token)) {
+			const { canisterId } = token;
+
+			return canisterId.toLowerCase().includes(filter.toLowerCase());
 		}
 
 		return false;
@@ -521,6 +528,6 @@ export const filterTokensByNft = ({
 	isNullish(filterNfts)
 		? tokens
 		: tokens.filter((t) => {
-				const isNft = isTokenErc1155(t) || isTokenErc721(t) || isTokenExtV2(t);
+				const isNft = isTokenNonFungible(t);
 				return filterNfts ? isNft : !isNft;
 			});

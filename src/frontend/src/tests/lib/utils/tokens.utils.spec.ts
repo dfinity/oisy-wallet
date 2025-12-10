@@ -577,7 +577,10 @@ describe('tokens.utils', () => {
 			...mockTokens,
 			mockValidIcrcToken,
 			mockValidIcCkToken,
+			mockValidExtV2Token,
 			mockValidErc20Token,
+			mockValidErc721Token,
+			mockValidErc1155Token,
 			mockValidSplToken
 		];
 
@@ -602,23 +605,22 @@ describe('tokens.utils', () => {
 			expect(filterTokens({ tokens, filter: '' })).toStrictEqual(tokens);
 		});
 
-		it('should filter by address for ERC tokens', () => {
-			expect(filterTokens({ tokens, filter: mockValidErc20Token.address })).toStrictEqual([
-				mockValidErc20Token
-			]);
+		it.each([mockValidErc20Token, mockValidErc721Token, mockValidErc1155Token])(
+			'should filter by address for ERC tokens with standard $standard',
+			(token) => {
+				expect(filterTokens({ tokens, filter: token.address })).toStrictEqual([token]);
 
-			expect(
-				filterTokens({ tokens, filter: mockValidErc20Token.address.toLowerCase() })
-			).toStrictEqual([mockValidErc20Token]);
+				expect(filterTokens({ tokens, filter: token.address.toLowerCase() })).toStrictEqual([
+					token
+				]);
 
-			expect(
-				filterTokens({ tokens, filter: mockValidErc20Token.address.toUpperCase() })
-			).toStrictEqual([mockValidErc20Token]);
+				expect(filterTokens({ tokens, filter: token.address.toUpperCase() })).toStrictEqual([
+					token
+				]);
 
-			expect(
-				filterTokens({ tokens, filter: mockValidErc20Token.address.slice(0, 5) })
-			).toStrictEqual([mockValidErc20Token]);
-		});
+				expect(filterTokens({ tokens, filter: token.address.slice(0, 5) })).toStrictEqual([token]);
+			}
+		);
 
 		it('should filter by address for SPL tokens', () => {
 			expect(filterTokens({ tokens, filter: mockValidSplToken.address })).toStrictEqual([
@@ -682,6 +684,24 @@ describe('tokens.utils', () => {
 					filter: mockToken.indexCanisterId.slice(0, 5)
 				})
 			).toStrictEqual([mockToken]);
+		});
+
+		it('should filter by canister IDs for EXT tokens', () => {
+			expect(filterTokens({ tokens, filter: mockValidExtV2Token.canisterId })).toStrictEqual([
+				mockValidExtV2Token
+			]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidExtV2Token.canisterId.toLowerCase() })
+			).toStrictEqual([mockValidExtV2Token]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidExtV2Token.canisterId.toUpperCase() })
+			).toStrictEqual([mockValidExtV2Token]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidExtV2Token.canisterId.slice(0, 5) })
+			).toStrictEqual([mockValidExtV2Token]);
 		});
 
 		it('should not filter by network', () => {
