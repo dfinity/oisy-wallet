@@ -3,6 +3,7 @@ import type { EthereumNetwork } from '$eth/types/network';
 import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 import type { OptionToken, Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
+import { isNetworkEthereum } from '$lib/utils/network.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { hexStringToUint8Array, isNullish, nonNullish } from '@dfinity/utils';
 
@@ -90,7 +91,8 @@ export const decodeQrCode = ({
 		return (
 			ethereumTokens.find(
 				(token) =>
-					(token.network as EthereumNetwork).chainId.toString() === parsedEthereumChainId.toString()
+					isNetworkEthereum(token.network) &&
+					token.network.chainId.toString() === parsedEthereumChainId.toString()
 			) ?? undefined
 		);
 	};
