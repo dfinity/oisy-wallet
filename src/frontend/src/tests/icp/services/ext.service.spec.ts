@@ -62,6 +62,19 @@ describe('ext.services', () => {
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensExt);
 		});
 
+		it('should save the default tokens in the store', async () => {
+			await loadExtTokens({ identity: mockIdentity });
+
+			const tokens = get(extDefaultTokensStore);
+
+			EXT_BUILTIN_TOKENS.forEach((token, index) => {
+				expect(tokens).toContainEqual({
+					...token,
+					id: (tokens ?? [])[index].id
+				});
+			});
+		});
+
 		it('should save the custom tokens in the store', async () => {
 			await loadExtTokens({ identity: mockIdentity });
 

@@ -1,14 +1,16 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
-import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
-import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { EthereumNetwork } from '$eth/types/network';
+import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
+import type { ErcSaveCustomToken, TokenVariant } from '$lib/types/custom-token';
 import type { OwnedContract } from '$lib/types/nft';
+import type { UserTokenState } from '$lib/types/token-toggleable';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
+
+export type Erc721Variant = UserTokenState & TokenVariant<'Erc721', ErcSaveCustomToken>;
+export type Erc1155Variant = UserTokenState & TokenVariant<'Erc1155', ErcSaveCustomToken>;
 
 export const saveErcCustomTokens = async ({
 	contracts,
@@ -21,9 +23,7 @@ export const saveErcCustomTokens = async ({
 	network: EthereumNetwork;
 	identity: Identity;
 }) => {
-	const [erc721Tokens, erc1155Tokens] = contracts.reduce<
-		[SaveErc721CustomToken[], SaveErc1155CustomToken[]]
-	>(
+	const [erc721Tokens, erc1155Tokens] = contracts.reduce<[Erc721Variant[], Erc1155Variant[]]>(
 		(acc, { standard: rawStandard, address }) => {
 			const [erc721TokensAcc, erc1155TokensAcc] = acc;
 
@@ -52,9 +52,10 @@ export const saveErcCustomTokens = async ({
 					return acc;
 				}
 
-				const newToken: SaveErc721CustomToken = {
+				const newToken: Erc721Variant = {
 					address,
-					network,
+					chainId: network.chainId,
+					networkKey: 'Erc721',
 					enabled: true
 				};
 
@@ -86,9 +87,10 @@ export const saveErcCustomTokens = async ({
 					return acc;
 				}
 
-				const newToken: SaveErc1155CustomToken = {
+				const newToken: Erc1155Variant = {
 					address,
-					network,
+					chainId: network.chainId,
+					networkKey: 'Erc1155',
 					enabled: true
 				};
 
@@ -102,16 +104,14 @@ export const saveErcCustomTokens = async ({
 		[[], []]
 	);
 
-	await Promise.all([
-		erc721Tokens.length > 0 &&
-			saveErc721CustomTokens({
-				tokens: erc721Tokens as NonEmptyArray<SaveErc721CustomToken>,
-				identity
-			}),
-		erc1155Tokens.length > 0 &&
-			saveErc1155CustomTokens({
-				tokens: erc1155Tokens as NonEmptyArray<SaveErc1155CustomToken>,
-				identity
-			})
-	]);
+	const ercTokens = [...erc721Tokens, ...erc1155Tokens];
+
+	if (ercTokens.length === 0) {
+		return;
+	}
+
+	await saveCustomTokens({
+		tokens: ercTokens as NonEmptyArray<Erc721Variant | Erc1155Variant>,
+		identity
+	});
 };
