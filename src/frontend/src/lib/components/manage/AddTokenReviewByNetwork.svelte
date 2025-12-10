@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import { get } from 'svelte/store';
-	import { NFTS_ENABLED } from '$env/nft.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
 	import { isInterfaceErc721 } from '$eth/services/erc721.services';
@@ -118,28 +117,26 @@
 			enabled: true
 		};
 
-		if (NFTS_ENABLED) {
-			const isErc721 = await isInterfaceErc721({
-				address: ethContractAddress,
-				networkId: network.id
-			});
+		const isErc721 = await isInterfaceErc721({
+			address: ethContractAddress,
+			networkId: network.id
+		});
 
-			if (isErc721) {
-				await saveTokens([{ ...newToken, networkKey: 'Erc721' }]);
+		if (isErc721) {
+			await saveTokens([{ ...newToken, networkKey: 'Erc721' }]);
 
-				return;
-			}
+			return;
+		}
 
-			const isErc1155 = await isInterfaceErc1155({
-				address: ethContractAddress,
-				networkId: network.id
-			});
+		const isErc1155 = await isInterfaceErc1155({
+			address: ethContractAddress,
+			networkId: network.id
+		});
 
-			if (isErc1155) {
-				await saveTokens([{ ...newToken, networkKey: 'Erc1155' }]);
+		if (isErc1155) {
+			await saveTokens([{ ...newToken, networkKey: 'Erc1155' }]);
 
-				return;
-			}
+			return;
 		}
 
 		if (ethMetadata.decimals >= 0) {
