@@ -32,7 +32,7 @@
 
 		<div class="my-1 text-lg font-bold sm:text-xl">
 			<EarningYearlyAmount
-				showAsError
+				showAsNeutral
 				showPlusSign={$highestEarningPotentialUsd > 0}
 				value={$highestEarningPotentialUsd}
 			/>
