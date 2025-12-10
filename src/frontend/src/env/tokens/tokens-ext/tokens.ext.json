@@ -1,5 +1,11 @@
 [
 	{
+		"canisterId": "qv3zw-kqaaa-aaaap-aa27q-cai",
+		"metadata": {
+			"name": "Nyannyan"
+		}
+	},
+	{
 		"canisterId": "6tjeq-waaaa-aaaah-qcvzq-cai",
 		"metadata": {
 			"name": "IC8 🐣"
