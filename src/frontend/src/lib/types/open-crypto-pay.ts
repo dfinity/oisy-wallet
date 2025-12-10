@@ -1,6 +1,9 @@
+import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
+import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import type { Identity } from '@icp-sdk/core/agent';
 
 export interface Address {
 	street?: string;
@@ -91,4 +94,36 @@ export interface PayableTokenWithConvertedAmount extends PayableTokenWithFees {
 	amountInUSD: number;
 	feeInUSD: number;
 	sumInUSD: number;
+}
+
+export interface ValidatedPaymentData {
+	destination: string;
+	ethereumChainId: string;
+	value: number;
+	feeData: {
+		maxFeePerGas: bigint;
+		maxPriorityFeePerGas: bigint;
+	};
+	estimatedGasLimit: bigint;
+}
+
+export interface PayParams {
+	token: PayableTokenWithConvertedAmount;
+	data: OpenCryptoPayResponse;
+	from: EthAddress;
+	identity: Identity;
+	quoteId: string;
+	callback: string;
+	progress: (step: ProgressStepsPayment) => void;
+}
+
+export interface TransactionBaseParams {
+	from: string;
+	to: string;
+	amount: bigint;
+	maxPriorityFeePerGas: bigint;
+	maxFeePerGas: bigint;
+	nonce: number;
+	gas: bigint;
+	chainId: bigint;
 }

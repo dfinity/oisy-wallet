@@ -4,10 +4,7 @@ import { getAgent } from '$lib/actors/agents.ic';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
-import {
-	IndexCanister,
-	type GetAccountIdentifierTransactionsResponse
-} from '@icp-sdk/canisters/ledger/icp';
+import { IndexCanister, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import { Principal } from '@icp-sdk/core/principal';
 
 export const getTransactions = async ({
@@ -23,7 +20,7 @@ export const getTransactions = async ({
 	start?: bigint;
 	maxResults?: bigint;
 	indexCanisterId: IndexCanisterIdText;
-} & QueryParams): Promise<GetAccountIdentifierTransactionsResponse> => {
+} & QueryParams): Promise<IcpIndexDid.GetAccountIdentifierTransactionsResponse> => {
 	assertNonNullish(identity);
 
 	const agent = await getAgent({ identity });

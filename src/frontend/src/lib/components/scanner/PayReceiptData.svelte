@@ -15,7 +15,7 @@
 <CollapsibleBottomSheet buttonTestId="collapsible-btn">
 	{#snippet contentHeader()}
 		<ModalValue>
-			{#snippet label()}{$i18n.scanner.text.receipt}{/snippet}
+			{#snippet label()}{$i18n.scanner.text.recipient}{/snippet}
 
 			{#snippet mainValue()}{recipient?.name ?? '-'}{/snippet}
 		</ModalValue>

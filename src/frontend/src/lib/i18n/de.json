@@ -907,7 +907,7 @@
 			"scan_qr_code": "",
 			"pay_to": "",
 			"powered_by": "",
-			"receipt": "",
+			"recipient": "",
 			"name": "",
 			"address": "",
 			"country": "",
@@ -927,7 +927,9 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
@@ -1055,10 +1057,16 @@
 			"pay": "",
 			"dialog_title": "",
 			"dialog_description": "",
-			"dialog_button": ""
+			"dialog_button": "",
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
 		},
 		"alt": {
-			"pay": ""
+			"pay": "",
+			"where_you_can_pay": ""
 		}
 	},
 	"tokens": {
@@ -1116,6 +1124,7 @@
 				"review": "Überprüfen",
 				"saving": "Speichere...",
 				"updating": "Aktualisiere Token-Liste",
+				"canister_id": "",
 				"ledger_canister_id": "Ledger-Canister-ID",
 				"index_canister_id": "Index-Canister-ID",
 				"minter_canister_id": "Minter-Canister-ID",
@@ -1125,6 +1134,7 @@
 				"verifying": "Überprüfe Token-Details...",
 				"add_the_token": "Token hinzufügen",
 				"info": "Ledger- und Index-Canister-IDs sind normalerweise auf der Website des Projekts verfügbar.",
+				"info_ext": "",
 				"info_index": "Die Index-Canister-ID ist optional, aber ohne sie kann $oisy_short den Transaktionsverlauf nicht anzeigen.",
 				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
 			},
@@ -1136,6 +1146,7 @@
 				"unexpected_index_ledger": "Beim Laden der Ledger-ID im Zusammenhang mit dem Index-Canister ist etwas schiefgelaufen.",
 				"invalid_ledger_id": "Die Ledger-ID gehört nicht zum Index-Canister.",
 				"missing_ledger_id": "Die Ledger-ID fehlt. Hast du einen Wert angegeben?",
+				"missing_canister_id": "",
 				"missing_contract_address": "Die Vertragsadresse fehlt. Hast du einen Wert angegeben?",
 				"missing_token_address": "Die Token-Adresse fehlt. Hast du einen Wert angegeben?",
 				"no_network": "Kein Netzwerk ausgewählt. Das ist unerwartet."
@@ -1851,6 +1862,7 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",

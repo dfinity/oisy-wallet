@@ -37,7 +37,10 @@ export const mockValidErc721Nft: Nft = {
 		name: 'MyContract',
 		allowExternalContentSource: true
 	},
-	mediaStatus: NftMediaStatusEnum.OK
+	mediaStatus: {
+		image: NftMediaStatusEnum.OK,
+		thumbnail: NftMediaStatusEnum.INVALID_DATA
+	}
 };
 
 export const mockValidErc1155Nft: Nft = {
@@ -56,7 +59,10 @@ export const mockValidErc1155Nft: Nft = {
 		name: 'MyContract',
 		allowExternalContentSource: true
 	},
-	mediaStatus: NftMediaStatusEnum.OK,
+	mediaStatus: {
+		image: NftMediaStatusEnum.OK,
+		thumbnail: NftMediaStatusEnum.INVALID_DATA
+	},
 	acquiredAt: new Date('2023-01-01T00:00:00.000Z')
 };
 
@@ -69,7 +75,10 @@ export const mockValidExtNft: Nft = {
 		...mockValidExtV2Token,
 		address: mockValidExtV2Token.canisterId
 	},
-	mediaStatus: NftMediaStatusEnum.OK
+	mediaStatus: {
+		image: NftMediaStatusEnum.OK,
+		thumbnail: NftMediaStatusEnum.OK
+	}
 };
 
 export const mockNftCollectionUi: NftCollectionUi = {

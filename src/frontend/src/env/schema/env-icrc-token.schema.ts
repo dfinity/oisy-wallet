@@ -5,8 +5,8 @@ export const EnvIcrcTokenMetadataSchema = z.object({
 	name: z.string(),
 	symbol: z.string(),
 	fee: z.bigint(),
-	alternativeName: z.optional(z.string()),
-	url: z.optional(z.url())
+	alternativeName: z.string().optional(),
+	url: z.url().optional()
 });
 
 export const EnvIcrcTokenIconSchema = z.object({

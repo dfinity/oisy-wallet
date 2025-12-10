@@ -907,7 +907,7 @@
 			"scan_qr_code": "",
 			"pay_to": "",
 			"powered_by": "",
-			"receipt": "",
+			"recipient": "",
 			"name": "",
 			"address": "",
 			"country": "",
@@ -927,7 +927,9 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
@@ -1055,10 +1057,16 @@
 			"pay": "",
 			"dialog_title": "",
 			"dialog_description": "",
-			"dialog_button": ""
+			"dialog_button": "",
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
 		},
 		"alt": {
-			"pay": ""
+			"pay": "",
+			"where_you_can_pay": ""
 		}
 	},
 	"tokens": {
@@ -1116,6 +1124,7 @@
 				"review": "مراجعة",
 				"saving": "جاري الحفظ...",
 				"updating": "جاري تحديث قائمة التوكنات",
+				"canister_id": "",
 				"ledger_canister_id": "معرف حاوية السجل",
 				"index_canister_id": "معرف حاوية الفهرس",
 				"minter_canister_id": "معرف حاوية المينتر",
@@ -1125,6 +1134,7 @@
 				"verifying": "جاري التحقق من تفاصيل التوكن...",
 				"add_the_token": "أضف التوكن",
 				"info": "تتوفر معرفات حاوية السجل والفهرس عادةً على موقع المشروع.",
+				"info_ext": "",
 				"info_index": "معرف حاوية الفهرس اختياري، ولكن بدونه، لا يمكن لـ $oisy_short عرض سجل المعاملات.",
 				"custom_tokens_not_supported": "الشبكة المحددة لا تدعم التوكنات المخصصة."
 			},
@@ -1136,6 +1146,7 @@
 				"unexpected_index_ledger": "حدث خطأ ما أثناء تحميل معرف السجل المرتبط بحاوية الفهرس.",
 				"invalid_ledger_id": "معرف السجل غير مرتبط بحاوية الفهرس.",
 				"missing_ledger_id": "معرف السجل مفقود. هل قدمت قيمة؟",
+				"missing_canister_id": "",
 				"missing_contract_address": "عنوان العقد مفقود. هل قدمت قيمة؟",
 				"missing_token_address": "عنوان التوكن مفقود. هل قدمت قيمة؟",
 				"no_network": "لم يتم تحديد أي شبكة. هذا غير متوقع."
@@ -1851,6 +1862,7 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",

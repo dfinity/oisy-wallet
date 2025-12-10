@@ -167,7 +167,13 @@ describe('NftDisplayGuard', () => {
 
 	it('should render the different placeholders if mediaStatus of nft is INVALID_DATA', () => {
 		const { getByTestId } = render(NftDisplayGuard, {
-			nft: { ...getNftAzuki(true), mediaStatus: NftMediaStatusEnum.INVALID_DATA },
+			nft: {
+				...getNftAzuki(true),
+				mediaStatus: {
+					image: NftMediaStatusEnum.INVALID_DATA,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
+			},
 			children: mockSnippet,
 			showMessage: false,
 			type: 'card',
@@ -181,7 +187,13 @@ describe('NftDisplayGuard', () => {
 
 	it('should render the different placeholders if mediaStatus of nft is FILESIZE_LIMIT_EXCEEDED', () => {
 		const { getByTestId } = render(NftDisplayGuard, {
-			nft: { ...getNftAzuki(true), mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED },
+			nft: {
+				...getNftAzuki(true),
+				mediaStatus: {
+					image: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
+			},
 			children: mockSnippet,
 			showMessage: false,
 			type: 'card',
@@ -195,7 +207,13 @@ describe('NftDisplayGuard', () => {
 
 	it('should render the different placeholders if mediaStatus of nft is NON_SUPPORTED_MEDIA_TYPE', () => {
 		const { getByTestId } = render(NftDisplayGuard, {
-			nft: { ...getNftAzuki(true), mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE },
+			nft: {
+				...getNftAzuki(true),
+				mediaStatus: {
+					image: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
+			},
 			children: mockSnippet,
 			showMessage: false,
 			type: 'card',

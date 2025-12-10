@@ -907,7 +907,7 @@
 			"scan_qr_code": "",
 			"pay_to": "",
 			"powered_by": "",
-			"receipt": "",
+			"recipient": "",
 			"name": "",
 			"address": "",
 			"country": "",
@@ -927,7 +927,9 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
@@ -1055,10 +1057,16 @@
 			"pay": "",
 			"dialog_title": "",
 			"dialog_description": "",
-			"dialog_button": ""
+			"dialog_button": "",
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
 		},
 		"alt": {
-			"pay": ""
+			"pay": "",
+			"where_you_can_pay": ""
 		}
 	},
 	"tokens": {
@@ -1116,6 +1124,7 @@
 				"review": "समीक्षा",
 				"saving": "सहेज रहा है...",
 				"updating": "टोकन सूची अपडेट कर रहा है",
+				"canister_id": "",
 				"ledger_canister_id": "लेज़र कैनिस्टर आईडी",
 				"index_canister_id": "इंडेक्स कैनिस्टर आईडी",
 				"minter_canister_id": "मिन्टर कैनिस्टर आईडी",
@@ -1125,6 +1134,7 @@
 				"verifying": "टोकन विवरण सत्यापित कर रहा है...",
 				"add_the_token": "टोकन जोड़ें",
 				"info": "लेज़र और इंडेक्स कैनिस्टर आईडी आमतौर पर परियोजना की वेबसाइट पर उपलब्ध होती हैं।",
+				"info_ext": "",
 				"info_index": "इंडेक्स कैनिस्टर आईडी वैकल्पिक है, लेकिन इसके बिना, $oisy_short लेनदेन इतिहास प्रदर्शित नहीं कर सकता।",
 				"custom_tokens_not_supported": "चयनित नेटवर्क कस्टम टोकन का समर्थन नहीं करता है।"
 			},
@@ -1136,6 +1146,7 @@
 				"unexpected_index_ledger": "इंडेक्स कैनिस्टर से संबंधित लेज़र आईडी लोड करते समय कुछ गलत हो गया।",
 				"invalid_ledger_id": "लेज़र आईडी इंडेक्स कैनिस्टर से संबंधित नहीं है।",
 				"missing_ledger_id": "लेज़र आईडी गायब है। क्या आपने कोई मान प्रदान किया है?",
+				"missing_canister_id": "",
 				"missing_contract_address": "अनुबंध पता गायब है। क्या आपने कोई मान प्रदान किया है?",
 				"missing_token_address": "टोकन पता गायब है। क्या आपने कोई मान प्रदान किया है?",
 				"no_network": "कोई नेटवर्क नहीं चुना गया है। यह अप्रत्याशित है।"
@@ -1851,6 +1862,7 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",

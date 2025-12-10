@@ -10,6 +10,7 @@ import {
 	reloadEthereumTransactions
 } from '$eth/services/eth-transactions.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -45,6 +46,7 @@ describe('eth-transactions.services', () => {
 
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 		erc20UserTokensStore.setAll(mockErc20UserTokens);
+		erc20CustomTokensStore.setAll(mockErc20UserTokens);
 	});
 
 	describe('loadEthereumTransactions', () => {

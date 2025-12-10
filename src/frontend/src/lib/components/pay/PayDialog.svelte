@@ -33,7 +33,7 @@
 	<ImgBanner
 		alt={$i18n.pay.text.dialog_title}
 		src={CoverPayDialog}
-		styleClass="max-h-60 rounded-lg"
+		styleClass="max-h-60 rounded-lg mb-4"
 		testId={PAY_DIALOG_BANNER}
 	/>
 {/snippet}

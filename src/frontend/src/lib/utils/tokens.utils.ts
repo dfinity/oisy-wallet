@@ -1,10 +1,5 @@
 import { NFTS_ENABLED } from '$env/nft.env';
-import {
-	saveErc1155CustomTokens,
-	saveErc20CustomTokens,
-	saveErc20UserTokens,
-	saveErc721CustomTokens
-} from '$eth/services/manage-tokens.services';
+import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
@@ -14,8 +9,9 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20, isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
-import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
+import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { isTokenExtV2 } from '$icp/utils/ext.utils';
 import {
 	icTokenIcrcCustomToken,
 	isTokenDip20,
@@ -25,7 +21,10 @@ import {
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-import type { ManageTokensSaveParams } from '$lib/services/manage-tokens.services';
+import {
+	saveCustomTokensWithKey,
+	type ManageTokensSaveParams
+} from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
@@ -39,11 +38,11 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
+import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
-import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
-import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
+import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -344,29 +343,32 @@ export const groupTogglableTokens = (
 	tokens: Token[]
 ): {
 	icrc: IcrcCustomToken[];
+	ext: ExtCustomToken[];
 	erc20: (Erc20UserToken | Erc20CustomToken)[];
 	erc721: Erc721CustomToken[];
 	erc1155: Erc1155CustomToken[];
-	spl: SplTokenToggleable[];
+	spl: SplCustomToken[];
 } =>
 	tokens.reduce<{
 		icrc: IcrcCustomToken[];
+		ext: ExtCustomToken[];
 		erc20: Erc20UserToken[];
 		erc721: Erc721CustomToken[];
 		erc1155: Erc1155CustomToken[];
-		spl: SplTokenToggleable[];
+		spl: SplCustomToken[];
 	}>(
-		({ icrc, erc20, erc721, erc1155, spl }, token) => ({
+		({ icrc, ext, erc20, erc721, erc1155, spl }, token) => ({
 			icrc: [
 				...icrc,
 				...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
 			],
+			ext: [...ext, ...(isTokenExtV2(token) ? [token as ExtCustomToken] : [])],
 			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
 			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
-			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
+			spl: [...spl, ...(isTokenSplCustomToken(token) ? [token] : [])]
 		}),
-		{ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] }
+		{ icrc: [], ext: [], erc20: [], erc721: [], erc1155: [], spl: [] }
 	);
 
 export const saveAllCustomTokens = async ({
@@ -386,10 +388,11 @@ export const saveAllCustomTokens = async ({
 	$authIdentity: OptionIdentity;
 	$i18n: I18n;
 }): Promise<void> => {
-	const { icrc, erc20, erc721, erc1155, spl } = groupTogglableTokens(tokens);
+	const { icrc, ext, erc20, erc721, erc1155, spl } = groupTogglableTokens(tokens);
 
 	if (
 		icrc.length === 0 &&
+		ext.length === 0 &&
 		erc20.length === 0 &&
 		erc721.length === 0 &&
 		erc1155.length === 0 &&
@@ -444,9 +447,17 @@ export const saveAllCustomTokens = async ({
 	await Promise.allSettled([
 		...(icrc.length > 0
 			? [
-					saveIcrcCustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
 						tokens: icrc.map((t) => ({ ...t, networkKey: 'Icrc' }))
+					})
+				]
+			: []),
+		...(ext.length > 0
+			? [
+					saveCustomTokensWithKey({
+						...commonParams,
+						tokens: ext.map((t) => ({ ...t, networkKey: 'ExtV2' }))
 					})
 				]
 			: []),
@@ -465,25 +476,36 @@ export const saveAllCustomTokens = async ({
 			: []),
 		...(erc721.length > 0 && NFTS_ENABLED
 			? [
-					saveErc721CustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
-						tokens: erc721
+						tokens: erc721.map((t) => ({
+							...t,
+							chainId: t.network.chainId,
+							networkKey: 'Erc721'
+						}))
 					})
 				]
 			: []),
 		...(erc1155.length > 0 && NFTS_ENABLED
 			? [
-					saveErc1155CustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
-						tokens: erc1155
+						tokens: erc1155.map((t) => ({
+							...t,
+							chainId: t.network.chainId,
+							networkKey: 'Erc1155'
+						}))
 					})
 				]
 			: []),
 		...(spl.length > 0
 			? [
-					saveSplCustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
-						tokens: spl
+						tokens: spl.map((t) => ({
+							...t,
+							networkKey: isNetworkIdSOLDevnet(t.network.id) ? 'SplDevnet' : 'SplMainnet'
+						}))
 					})
 				]
 			: [])
@@ -500,6 +522,6 @@ export const filterTokensByNft = ({
 	isNullish(filterNfts)
 		? tokens
 		: tokens.filter((t) => {
-				const isNft = isTokenErc1155(t) || isTokenErc721(t);
+				const isNft = isTokenErc1155(t) || isTokenErc721(t) || isTokenExtV2(t);
 				return filterNfts ? isNft : !isNft;
 			});

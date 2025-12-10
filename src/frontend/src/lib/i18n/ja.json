@@ -907,7 +907,7 @@
 			"scan_qr_code": "",
 			"pay_to": "",
 			"powered_by": "",
-			"receipt": "",
+			"recipient": "",
 			"name": "",
 			"address": "",
 			"country": "",
@@ -927,7 +927,9 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
@@ -1055,10 +1057,16 @@
 			"pay": "",
 			"dialog_title": "",
 			"dialog_description": "",
-			"dialog_button": ""
+			"dialog_button": "",
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
 		},
 		"alt": {
-			"pay": ""
+			"pay": "",
+			"where_you_can_pay": ""
 		}
 	},
 	"tokens": {
@@ -1116,6 +1124,7 @@
 				"review": "確認",
 				"saving": "保存中...",
 				"updating": "トークンリストを更新中",
+				"canister_id": "",
 				"ledger_canister_id": "台帳キャニスターID",
 				"index_canister_id": "インデックスキャニスターID",
 				"minter_canister_id": "ミントキャニスターID",
@@ -1125,6 +1134,7 @@
 				"verifying": "トークンの詳細を確認中...",
 				"add_the_token": "トークンを追加",
 				"info": "台帳およびインデックスキャニスターIDは通常、プロジェクトのウェブサイトで入手できます。",
+				"info_ext": "",
 				"info_index": "インデックスキャニスターIDはオプションですが、これがないと$oisy_shortは取引履歴を表示できません。",
 				"custom_tokens_not_supported": "選択したネットワークはカスタムトークンをサポートしていません。"
 			},
@@ -1136,6 +1146,7 @@
 				"unexpected_index_ledger": "インデックスキャニスターに関連する台帳IDの読み込み中に予期しないエラーが発生しました。",
 				"invalid_ledger_id": "台帳IDがインデックスキャニスターに関連していません。",
 				"missing_ledger_id": "台帳IDがありません。値を入力しましたか？",
+				"missing_canister_id": "",
 				"missing_contract_address": "コントラクトアドレスがありません。値を入力しましたか？",
 				"missing_token_address": "トークンアドレスがありません。値を入力しましたか？",
 				"no_network": "ネットワークが選択されていません。これは予期しないエラーです。"
@@ -1851,6 +1862,7 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",
