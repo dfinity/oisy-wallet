@@ -36,20 +36,17 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 
 	const processParam = ([key, value]: [string, string]) => {
 		if ((URN_NUMERIC_PARAMS as readonly string[]).includes(key)) {
-			return { [key]: parseFloat(value) };
+			return { [key]: value };
 		}
+
 		if ((URN_STRING_PARAMS as readonly string[]).includes(key)) {
 			return { [key]: value };
 		}
-		if (!isNaN(parseFloat(value))) {
-			return { [key]: parseFloat(value) };
-		}
+
 		return { [key]: value };
 	};
 
-	const parseQueryString = (
-		qs: string
-	): { [key: string]: string | number | undefined } | undefined => {
+	const parseQueryString = (qs: string): { [key: string]: string | undefined } | undefined => {
 		try {
 			return [...new URLSearchParams(qs).entries()].reduce(
 				(acc, entry) => ({

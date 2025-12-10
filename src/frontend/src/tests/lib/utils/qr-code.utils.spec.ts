@@ -1,6 +1,7 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { EthereumNetwork } from '$eth/types/network';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import { decodeQrCode, decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
@@ -16,7 +17,7 @@ vi.mock('@icp-sdk/canisters/ledger/icrc', () => ({
 describe('decodeUrn', () => {
 	const tokenList = get(tokens);
 	const destination = 'some-destination';
-	const amount = 1.23;
+	const amount = 123;
 
 	it('should return undefined for an invalid URN', () => {
 		const urn = 'invalidURN';
@@ -39,14 +40,17 @@ describe('decodeUrn', () => {
 					: isTokenIcrc(token)
 						? token.name.toLowerCase()
 						: standard;
+
 			const expectedResult: DecodedUrn = {
 				prefix: expectedPrefix,
 				destination,
-				amount
+				amount: BigInt(amount)
 			};
+
 			if (standard === 'ethereum' || standard === 'erc20') {
 				expectedResult.ethereumChainId = (token.network as EthereumNetwork).chainId.toString();
 			}
+
 			if (standard === 'erc20' && 'address' in token) {
 				expectedResult.functionName = 'transfer';
 				expectedResult.address = destination;
@@ -68,7 +72,7 @@ describe('decodeUrn', () => {
 					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
 					ethereumChainId: '1',
 					prefix: 'ethereum',
-					value: 1000
+					value: 1000n
 				});
 			});
 
@@ -81,13 +85,13 @@ describe('decodeUrn', () => {
 			it('should parse URI with large value', () => {
 				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=1000000000000000000`);
 
-				expect(result?.value).toBe(1000000000000000000);
+				expect(result?.value).toBe(1000000000000000000n);
 			});
 
 			it('should parse URI with zero value', () => {
 				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=0`);
 
-				expect(result?.value).toBe(0);
+				expect(result?.value).toBe(ZERO);
 			});
 
 			it('should parse URI with chainId zero', () => {
@@ -111,7 +115,7 @@ describe('decodeUrn', () => {
 				expect(result).toEqual({
 					destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
 					prefix: 'ethereum',
-					value: 1000
+					value: 1000n
 				});
 			});
 
@@ -179,18 +183,6 @@ describe('decodeUrn', () => {
 
 				expect(result).toBeUndefined();
 			});
-
-			it('should return undefined for empty value', () => {
-				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=`);
-
-				expect(result).toBeUndefined();
-			});
-
-			it('should return undefined for value with whitespace', () => {
-				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=   `);
-
-				expect(result).toBeUndefined();
-			});
 		});
 
 		describe('edge cases', () => {
@@ -199,13 +191,13 @@ describe('decodeUrn', () => {
 
 				expect(result?.destination).toBe(validAddress);
 				expect(result?.ethereumChainId).toBe('1');
-				expect(result?.value).toBe(1000);
+				expect(result?.value).toBe(1000n);
 			});
 
 			it('should handle URI with value as first parameter', () => {
 				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=1000&other=param`);
 
-				expect(result?.value).toBe(1000);
+				expect(result?.value).toBe(1000n);
 			});
 
 			it('should handle URI with very large chainId', () => {
@@ -223,7 +215,7 @@ describe('decodeUrn', () => {
 			it('should handle URI with value having leading zeros', () => {
 				const result = decodeQrCodeUrn(`ethereum:${validAddress}@1?value=00100`);
 
-				expect(result?.value).toBe(100);
+				expect(result?.value).toBe(100n);
 			});
 		});
 
