@@ -82,7 +82,7 @@ describe('NftCollectionActionButtons', () => {
 		});
 	});
 
-	it('should set allowExternalContentSource to false on hide button click', async () => {
+	it('should set allowExternalContentSource to false on hide button click', () => {
 		const { container } = render(NftCollectionActionButtons, {
 			token: mockToken
 		});
@@ -108,7 +108,7 @@ describe('NftCollectionActionButtons', () => {
 		});
 	});
 
-	it('should set allowExternalContentSource to false on spam button click', async () => {
+	it('should set allowExternalContentSource to false on spam button click', () => {
 		const { container } = render(NftCollectionActionButtons, {
 			token: mockToken
 		});
