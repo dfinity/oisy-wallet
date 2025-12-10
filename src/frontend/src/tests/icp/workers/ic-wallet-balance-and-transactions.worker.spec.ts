@@ -22,14 +22,11 @@ import * as eventsUtils from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
-import {
-	IndexCanister,
-	type TransactionWithId as TransactionWithIdIcp
-} from '@icp-sdk/canisters/ledger/icp';
+import { IndexCanister, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import {
 	IcrcIndexNgCanister,
 	IcrcLedgerCanister,
-	type IcrcIndexNgTransactionWithId
+	type IcrcIndexNgDid
 } from '@icp-sdk/canisters/ledger/icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -321,7 +318,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	describe('icp-wallet.worker', () => {
 		const indexCanisterMock = mock<IndexCanister>();
 
-		const mockTransaction: TransactionWithIdIcp = {
+		const mockTransaction: IcpIndexDid.TransactionWithId = {
 			id: 123n,
 			transaction: {
 				memo: ZERO,
@@ -509,7 +506,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 		const indexCanisterMock = mock<IcrcIndexNgCanister>();
 
-		const mockTransaction: IcrcIndexNgTransactionWithId = {
+		const mockTransaction: IcrcIndexNgDid.TransactionWithId = {
 			id: 123n,
 			transaction: {
 				burn: [],

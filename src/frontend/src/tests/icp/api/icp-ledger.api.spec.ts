@@ -9,7 +9,7 @@ import {
 } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@icp-sdk/canisters/ledger/icp';
-import type { IcrcAccount, IcrcBlockIndex } from '@icp-sdk/canisters/ledger/icrc';
+import type { IcrcAccount, IcrcIndexNgDid } from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('$icp/utils/date.utils', () => ({
@@ -83,7 +83,7 @@ describe('icp-ledger.api', () => {
 			ledgerCanisterId: mockLedgerCanisterId
 		};
 
-		const mockIndex: IcrcBlockIndex = 123n;
+		const mockIndex: IcrcIndexNgDid.BlockIndex = 123n;
 
 		beforeEach(() => {
 			ledgerCanisterMock.icrc1Transfer.mockResolvedValue(mockIndex);
