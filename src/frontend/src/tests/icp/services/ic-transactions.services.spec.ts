@@ -24,10 +24,7 @@ import { bn1Bi } from '$tests/mocks/balances.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
-import type {
-	GetAccountIdentifierTransactionsResponse,
-	TransactionWithId
-} from '@icp-sdk/canisters/ledger/icp';
+import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -196,9 +193,9 @@ describe('ic-transactions.services', () => {
 								created_at_time: []
 							},
 							id: BigInt(transaction.id)
-						}) as TransactionWithId
+						}) as IcpIndexDid.TransactionWithId
 				)
-			} as GetAccountIdentifierTransactionsResponse);
+			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
 		});
 
 		it('should not load transactions if the last ID is not parseable', async () => {
@@ -327,8 +324,8 @@ describe('ic-transactions.services', () => {
 			icTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
 
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
-				transactions: [] as TransactionWithId[]
-			} as GetAccountIdentifierTransactionsResponse);
+				transactions: [] as IcpIndexDid.TransactionWithId[]
+			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
 
 			await loadNextIcTransactions(mockParams);
 
@@ -337,8 +334,8 @@ describe('ic-transactions.services', () => {
 
 		it('should call signalEnd if no transactions are returned', async () => {
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
-				transactions: [] as TransactionWithId[]
-			} as GetAccountIdentifierTransactionsResponse);
+				transactions: [] as IcpIndexDid.TransactionWithId[]
+			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
 
 			await loadNextIcTransactions(mockParams);
 

@@ -27,8 +27,8 @@ import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	IcrcMetadataResponseEntries,
 	mapTokenMetadata,
-	type IcrcTokenMetadataResponse,
-	type IcrcValue
+	type IcrcLedgerDid,
+	type IcrcTokenMetadataResponse
 } from '@icp-sdk/canisters/ledger/icrc';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
@@ -144,7 +144,9 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 
 	const { symbol, icon: tokenIcon, name, fee, decimals } = token;
 
-	const icon: [IcrcMetadataResponseEntries.LOGO, IcrcValue] | undefined = nonNullish(tokenIcon)
+	const icon: [IcrcMetadataResponseEntries.LOGO, IcrcLedgerDid.Value] | undefined = nonNullish(
+		tokenIcon
+	)
 		? [IcrcMetadataResponseEntries.LOGO, { Text: tokenIcon }]
 		: undefined;
 
