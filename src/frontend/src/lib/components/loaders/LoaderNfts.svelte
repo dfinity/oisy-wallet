@@ -30,7 +30,7 @@
 	const debounceLoad = debounce(onLoad);
 
 	$effect(() => {
-		[$enabledNonFungibleTokens, $authIdentity,$ethAddress];
+		[$enabledNonFungibleTokens, $authIdentity, $ethAddress];
 
 		untrack(() => debounceLoad());
 	});
