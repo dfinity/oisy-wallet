@@ -23,7 +23,7 @@
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import {assertIsNetworkEthereum} from "$lib/utils/network.utils";
+	import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 
 	interface Props {
 		contractAddress?: string;
@@ -52,7 +52,7 @@
 				({ symbol, name, network: tokenNetwork }) =>
 					(symbol.toLowerCase() === (metadata?.symbol?.toLowerCase() ?? '') ||
 						name.toLowerCase() === (metadata?.name?.toLowerCase() ?? '')) &&
-					tokenNetwork.chainId === (network).chainId
+					tokenNetwork.chainId === network.chainId
 			) !== undefined
 		) {
 			toastsError({
@@ -92,7 +92,7 @@
 						address1: address,
 						address2: contractAddress,
 						networkId: network.id
-					}) && tokenNetwork.chainId === (network).chainId
+					}) && tokenNetwork.chainId === network.chainId
 			) !== undefined
 		) {
 			toastsError({
