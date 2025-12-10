@@ -85,7 +85,7 @@ describe('network utils', () => {
 			}
 		);
 
-		it('should return false for non-EthereumP network', () => {
+		it('should return false for non-Ethereum network', () => {
 			expect(isNetworkEthereum(ICP_NETWORK)).toBeFalsy();
 		});
 	});
