@@ -127,7 +127,7 @@ describe('ext-metadata.services', () => {
 		});
 
 		it('should handle gracefully invalid UTF-8 blob metadata', async () => {
-			vi.spyOn(TextDecoder.prototype, 'decode').mockRejectedValue(new Error('Invalid UTF-8'));
+			vi.spyOn(TextDecoder.prototype, 'decode').mockImplementation(() => { throw new Error('Invalid UTF-8'); });
 
 			await expect(getExtMetadata(mockParams)).resolves.toStrictEqual({
 				attributes: undefined,
