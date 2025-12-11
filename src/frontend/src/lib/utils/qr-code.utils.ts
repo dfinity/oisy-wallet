@@ -78,6 +78,7 @@ export const decodeQrCodeUrn = ({ urn }: { urn: string }): DecodedUrn | undefine
 	};
 
 	const result = DecodedUrnSchema.safeParse(decodedUrn);
+
 	if (!result.success) {
 		console.warn('QR code cannot be correctly parsed:', result.error);
 		return;
