@@ -16,7 +16,7 @@ import type {
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
 import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
 
 /**
@@ -261,4 +261,29 @@ export const validateDecodedData = ({
 		},
 		estimatedGasLimit
 	};
+};
+
+export const getERC681Value = (uri: string): bigint | undefined => {
+	try {
+		const params = new URLSearchParams(uri.split('?')[1] || '');
+		const value = params.get('value') ?? params.get('uint256');
+
+		if (isEmptyString(value)) {
+			return;
+		}
+
+		if (value.includes('e') || value.includes('E') || value.includes('.')) {
+			const number = parseFloat(value);
+
+			if (!isFinite(number)) {
+				return;
+			}
+
+			return BigInt(number);
+		}
+
+		return BigInt(value);
+	} catch (_: unknown) {
+		// If it is not parseable, we can handle a nullish value
+	}
 };
