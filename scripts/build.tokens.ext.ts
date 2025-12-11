@@ -5,7 +5,7 @@ import { jsonReplacer } from '@dfinity/utils';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { EXT_COLLECTIONS_JSON_FILE } from './constants.mjs';
 
-const ACCEPTED_STANDARDS = ['ext'];
+const ACCEPTED_STANDARDS = ['ext', 'legacy1.5', 'legacy'];
 
 // This URL was extracted analysing the network request of https://toniq.io/
 const TONIQ_COLLECTION_LIST_URL =
