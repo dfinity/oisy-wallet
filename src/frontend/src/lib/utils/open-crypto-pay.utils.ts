@@ -273,7 +273,7 @@ export const getERC681Value = (uri: string): bigint | undefined => {
 		}
 
 		return BigInt(value);
-	} catch {
-		return undefined;
+	} catch (_: unknown) {
+		// If it is not parseable, we can handle a nullish value
 	}
 };
