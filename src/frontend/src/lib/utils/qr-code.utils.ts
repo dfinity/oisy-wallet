@@ -21,9 +21,9 @@ import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
  * - For ETH: https://eips.ethereum.org/EIPS/eip-681
  * - For BTC: https://github.com/bitcoin/bips/blob/master/bip-0021.mediawiki
  *
- * @param {string} urn - The URN string to decode.
+ * @param {Object} params - The parameters object.
+ * @param {string} params.urn - The URN string to decode.
  * @returns {DecodedUrn | undefined} The decoded URN object, or undefined if the URN string does not match the expected pattern.
- */
 export const decodeQrCodeUrn = ({ urn }: { urn: string }): DecodedUrn | undefined => {
 	const regex = /^([a-zA-Z]+):([a-zA-Z0-9\-.]+)(@(\d+))?(\/([a-zA-Z]+))?(\?(.*))?$/;
 
