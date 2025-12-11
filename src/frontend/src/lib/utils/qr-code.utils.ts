@@ -98,7 +98,7 @@ export const decodeQrCodeUrn = ({
 		const result = DecodedUrnBigIntSchema.safeParse(decodedUrn);
 		if (!result.success) {
 			console.warn('QR code cannot be correctly parsed:', result.error);
-			return undefined;
+			return;
 		}
 
 		return result.data;
