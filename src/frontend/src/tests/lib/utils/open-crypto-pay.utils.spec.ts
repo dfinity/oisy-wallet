@@ -1,5 +1,6 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -18,6 +19,7 @@ import {
 	enrichTokensWithUsdAndBalance,
 	extractQuoteData,
 	formatAddress,
+	getERC681Value,
 	mapTokenToPayableToken,
 	prepareBasePayableTokens,
 	validateDecodedData
@@ -1496,6 +1498,223 @@ describe('open-crypto-pay.utils', () => {
 			expect(typeof result.feeData.maxFeePerGas).toBe('bigint');
 			expect(typeof result.feeData.maxPriorityFeePerGas).toBe('bigint');
 			expect(typeof result.estimatedGasLimit).toBe('bigint');
+		});
+	});
+
+	describe('getERC681Value', () => {
+		describe('Native transfers (value parameter)', () => {
+			it('should extract value from native ETH transfer', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=660720000000000';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(660720000000000n);
+			});
+
+			it('should extract value from BNB transfer', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@56?value=1457070000000000';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1457070000000000n);
+			});
+
+			it('should extract zero value', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=0';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(ZERO);
+			});
+
+			it('should extract very large value', () => {
+				const uri =
+					'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=999999999999999999999';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(999999999999999999999n);
+			});
+
+			it('should extract value with maximum uint256', () => {
+				const maxUint256 =
+					'115792089237316195423570985008687907853269984665640564039457584007913129639935';
+				const uri = `ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=${maxUint256}`;
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(BigInt(maxUint256));
+			});
+		});
+
+		describe('ERC20 transfers (uint256 parameter)', () => {
+			const tokenContract = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
+			const recipient = '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC';
+
+			it('should extract uint256 from ERC20 transfer', () => {
+				const uri = `ethereum:${tokenContract}@8453/transfer?address=${recipient}&uint256=1251263`;
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1251263n);
+			});
+
+			it('should extract uint256 when parameters are in different order', () => {
+				const uri = `ethereum:${tokenContract}@8453/transfer?uint256=1251263&address=${recipient}`;
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1251263n);
+			});
+
+			it('should extract large uint256', () => {
+				const uri = `ethereum:${tokenContract}@8453/transfer?address=${recipient}&uint256=1000000000000000000`;
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1000000000000000000n);
+			});
+
+			it('should extract zero uint256', () => {
+				const uri = `ethereum:${tokenContract}@8453/transfer?address=${recipient}&uint256=0`;
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(ZERO);
+			});
+
+			it('should extract uint256 with additional parameters', () => {
+				const uri = `ethereum:${tokenContract}@8453/transfer?address=${recipient}&uint256=1251263&gas=21000`;
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1251263n);
+			});
+		});
+
+		describe('Missing or invalid parameters', () => {
+			it('should return undefined when no query string', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1';
+				const result = getERC681Value(uri);
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should return undefined when value and uint256 are missing', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?gas=21000';
+				const result = getERC681Value(uri);
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should return undefined for empty value', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=';
+				const result = getERC681Value(uri);
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should return undefined for empty uint256', () => {
+				const uri =
+					'ethereum:0x833589fcd6edb6e08f4c7c32d4f71b54bda02913@8453/transfer?address=0x9C2...&uint256=';
+				const result = getERC681Value(uri);
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should return undefined for invalid URI format', () => {
+				const uri = 'not-a-valid-uri';
+				const result = getERC681Value(uri);
+
+				expect(result).toBeUndefined();
+			});
+
+			it('should return undefined for empty string', () => {
+				const uri = '';
+				const result = getERC681Value(uri);
+
+				expect(result).toBeUndefined();
+			});
+		});
+
+		describe('Edge cases', () => {
+			it('should handle URI with multiple question marks', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000?extra=param';
+				const result = getERC681Value(uri);
+
+				// URLSearchParams treats everything after first ? as query string
+				expect(result).toBeDefined();
+			});
+
+			it('should handle URI with encoded characters', () => {
+				const uri =
+					'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000&extra=%20space';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1000n);
+			});
+
+			it('should prioritize value over uint256 when both present', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000&uint256=2000';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1000n);
+			});
+
+			it('should handle duplicate value parameters', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000&value=2000';
+				const result = getERC681Value(uri);
+
+				// URLSearchParams returns first occurrence
+				expect(result).toBe(1000n);
+			});
+
+			it('should handle value with leading zeros', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=00001000';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1000n);
+			});
+		});
+
+		describe('Real eth/evm examples', () => {
+			it('should extract 1 ETH', () => {
+				const uri =
+					'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000000';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1000000000000000000n);
+			});
+
+			it('should extract 0.001 ETH', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1000000000000000n);
+			});
+
+			it('should extract 1 USDC (6 decimals)', () => {
+				const uri =
+					'ethereum:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48@1/transfer?address=0x9C2...&uint256=1000000';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1000000n);
+			});
+
+			it('should extract 100 USDT (6 decimals)', () => {
+				const uri =
+					'ethereum:0xdAC17F958D2ee523a2206206994597C13D831ec7@1/transfer?address=0x9C2...&uint256=100000000';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(100000000n);
+			});
+		});
+
+		describe('Different blockchain networks', () => {
+			it('should extract from Ethereum mainnet (chainId 1)', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1000n);
+			});
+
+			it('should extract from BSC (chainId 56)', () => {
+				const uri =
+					'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@56?value=100000000000000000000';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(100000000000000000000n);
+			});
 		});
 	});
 });
