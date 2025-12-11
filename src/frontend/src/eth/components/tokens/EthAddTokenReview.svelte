@@ -11,7 +11,6 @@
 	import type { Erc1155Metadata } from '$eth/types/erc1155';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc721Metadata } from '$eth/types/erc721';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -24,6 +23,7 @@
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 
 	interface Props {
 		contractAddress?: string;
@@ -44,12 +44,15 @@
 			return;
 		}
 
+		// This does not happen at this point, but it is useful type-wise
+		assertIsNetworkEthereum(network);
+
 		if (
 			[...$erc20Tokens, ...$erc721Tokens]?.find(
 				({ symbol, name, network: tokenNetwork }) =>
 					(symbol.toLowerCase() === (metadata?.symbol?.toLowerCase() ?? '') ||
 						name.toLowerCase() === (metadata?.name?.toLowerCase() ?? '')) &&
-					tokenNetwork.chainId === (network as EthereumNetwork).chainId
+					tokenNetwork.chainId === network.chainId
 			) !== undefined
 		) {
 			toastsError({
@@ -79,6 +82,9 @@
 			return;
 		}
 
+		// This does not happen at this point, but it is useful type-wise
+		assertIsNetworkEthereum(network);
+
 		if (
 			[...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens]?.find(
 				({ address, network: tokenNetwork }) =>
@@ -86,7 +92,7 @@
 						address1: address,
 						address2: contractAddress,
 						networkId: network.id
-					}) && tokenNetwork.chainId === (network as EthereumNetwork).chainId
+					}) && tokenNetwork.chainId === network.chainId
 			) !== undefined
 		) {
 			toastsError({

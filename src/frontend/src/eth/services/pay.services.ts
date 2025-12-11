@@ -6,7 +6,6 @@ import {
 	type GetFeeData
 } from '$eth/services/fee.services';
 import type { OptionEthAddress } from '$eth/types/address';
-import type { EthereumNetwork } from '$eth/types/network';
 import type { EthFeeResult } from '$eth/types/pay';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -14,6 +13,7 @@ import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { PayableToken } from '$lib/types/open-crypto-pay';
 import { maxBigInt } from '$lib/utils/bigint.utils';
+import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -78,9 +78,13 @@ export const calculateEthFee = async ({
 		return;
 	}
 
+	const { network } = token;
+
+	assertIsNetworkEthereum(network);
+
 	const { feeData, provider, params } = await getEthFeeDataWithProvider({
-		networkId: token.network.id,
-		chainId: (token.network as EthereumNetwork).chainId,
+		networkId: network.id,
+		chainId: network.chainId,
 		from: userAddress,
 		to: userAddress
 	});
