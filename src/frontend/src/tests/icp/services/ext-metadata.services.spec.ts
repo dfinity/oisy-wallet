@@ -35,7 +35,7 @@ describe('ext-metadata.services', () => {
 			name: mockExtParsedMetadata.name,
 			description: mockExtParsedMetadata.description,
 			imageUrl: mockExtParsedMetadata.url,
-			thumbnailUrl: mockExtParsedMetadata.thumbnail,
+			thumbnailUrl: mockExtParsedMetadata.thumb,
 			attributes: mockExtParsedMetadata.attributes
 		};
 
