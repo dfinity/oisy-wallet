@@ -32,6 +32,14 @@ export type IsNetworkIdUtil = (networkId: NetworkId | undefined) => boolean;
 export const isNetworkEthereum = (network: Network | undefined): network is EthereumNetwork =>
 	isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id);
 
+export const assertIsNetworkEthereum: (
+	network: Network | undefined
+) => asserts network is EthereumNetwork = (network: Network | undefined): void => {
+	if (!isNetworkEthereum(network)) {
+		throw new Error(`Network ${network?.name ?? ''} is not an Ethereum or EVM network`);
+	}
+};
+
 export const isNetworkICP = (network: Network | undefined): boolean => isNetworkIdICP(network?.id);
 
 export const isNetworkSolana = (network: Network | undefined): network is SolanaNetwork =>
