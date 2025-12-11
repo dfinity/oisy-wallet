@@ -1,5 +1,7 @@
 import type {
 	Listing,
+	Metadata,
+	MetadataLegacy,
 	TokenIdentifier,
 	TokenIndex,
 	Transaction
@@ -12,6 +14,7 @@ import {
 	mockAccountIdentifierText2,
 	mockPrincipal
 } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 
 export const mockExtV2TokenCanisterId: CanisterIdText = 'oeee4-qaaaa-aaaak-qaaeq-cai';
 export const mockExtV2TokenCanisterId2: CanisterIdText = 'rhg63-2aaaa-aaaag-qcwhq-cai';
@@ -68,3 +71,18 @@ export const mockExtV2TokensListing: [TokenIndex, [] | [Listing], [] | [Uint8Arr
 ];
 
 export const mockExtV2TokenIndexes: TokenIndex[] = mapExtTokensListing(mockExtV2TokensListing);
+
+export const mockExtMetadata: Metadata = {
+	nonfungible: {
+		metadata: toNullable(),
+		name: 'Mock NFT',
+		thumbnail: 'https://example.com/thumbnail.png',
+		asset: 'https://example.com/asset.png'
+	}
+};
+
+export const mockExtLegacyMetadata: MetadataLegacy = {
+	nonfungible: {
+		metadata: toNullable()
+	}
+};
