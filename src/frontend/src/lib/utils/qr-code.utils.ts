@@ -24,12 +24,12 @@ import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
  * @param {string} urn - The URN string to decode.
  * @returns {DecodedUrn | undefined} The decoded URN object, or undefined if the URN string does not match the expected pattern.
  */
-export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
+export const decodeQrCodeUrn = ({ urn }: { urn: string }): DecodedUrn | undefined => {
 	const regex = /^([a-zA-Z]+):([a-zA-Z0-9\-.]+)(@(\d+))?(\/([a-zA-Z]+))?(\?(.*))?$/;
 
 	const match = urn.match(regex);
 	if (isNullish(match)) {
-		return undefined;
+		return;
 	}
 
 	const [_, prefix, destination, , networkId, , functionName, , queryString] = match;
@@ -60,14 +60,13 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 			);
 		} catch (error: unknown) {
 			console.warn('Invalid query string:', error);
-			return undefined;
 		}
 	};
 
 	const params = nonNullish(queryString) ? parseQueryString(queryString) : {};
 	// Conservatively, it returns nothing if the function is unable to decipher the query parameters
 	if (isNullish(params)) {
-		return undefined;
+		return;
 	}
 
 	const decodedUrn = {
@@ -81,7 +80,7 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 	const result = DecodedUrnSchema.safeParse(decodedUrn);
 	if (!result.success) {
 		console.warn('QR code cannot be correctly parsed:', result.error);
-		return undefined;
+		return;
 	}
 	return result.data;
 };

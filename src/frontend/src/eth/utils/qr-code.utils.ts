@@ -28,7 +28,7 @@ export const decodeQrCode = ({
 		return { status: 'cancelled' };
 	}
 
-	const payment = decodeQrCodeUrn(code);
+	const payment = decodeQrCodeUrn({ urn: code });
 
 	if (isNullish(payment)) {
 		return { status: 'success', destination: code };
