@@ -907,7 +907,7 @@
 			"scan_qr_code": "",
 			"pay_to": "",
 			"powered_by": "",
-			"receipt": "",
+			"recipient": "",
 			"name": "",
 			"address": "",
 			"country": "",
@@ -918,7 +918,18 @@
 			"url_or_code": "",
 			"enter_or_paste_code": "",
 			"scan": "",
-			"pay": ""
+			"pay": "",
+			"pay_amount": "",
+			"go_to_assets": "",
+			"supported_tokens": "",
+			"no_supported_tokens": "",
+			"pay_with": "",
+			"select_token": "",
+			"select_different_token": "",
+			"tokens_available": "",
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
@@ -1041,6 +1052,23 @@
 			"title": "شراء عبر Onramper"
 		}
 	},
+	"pay": {
+		"text": {
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": "",
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
+		},
+		"alt": {
+			"pay": "",
+			"where_you_can_pay": ""
+		}
+	},
 	"tokens": {
 		"text": {
 			"title": "التوكنات",
@@ -1096,6 +1124,7 @@
 				"review": "مراجعة",
 				"saving": "جاري الحفظ...",
 				"updating": "جاري تحديث قائمة التوكنات",
+				"canister_id": "",
 				"ledger_canister_id": "معرف حاوية السجل",
 				"index_canister_id": "معرف حاوية الفهرس",
 				"minter_canister_id": "معرف حاوية المينتر",
@@ -1105,6 +1134,7 @@
 				"verifying": "جاري التحقق من تفاصيل التوكن...",
 				"add_the_token": "أضف التوكن",
 				"info": "تتوفر معرفات حاوية السجل والفهرس عادةً على موقع المشروع.",
+				"info_ext": "",
 				"info_index": "معرف حاوية الفهرس اختياري، ولكن بدونه، لا يمكن لـ $oisy_short عرض سجل المعاملات.",
 				"custom_tokens_not_supported": "الشبكة المحددة لا تدعم التوكنات المخصصة."
 			},
@@ -1116,6 +1146,7 @@
 				"unexpected_index_ledger": "حدث خطأ ما أثناء تحميل معرف السجل المرتبط بحاوية الفهرس.",
 				"invalid_ledger_id": "معرف السجل غير مرتبط بحاوية الفهرس.",
 				"missing_ledger_id": "معرف السجل مفقود. هل قدمت قيمة؟",
+				"missing_canister_id": "",
 				"missing_contract_address": "عنوان العقد مفقود. هل قدمت قيمة؟",
 				"missing_token_address": "عنوان التوكن مفقود. هل قدمت قيمة؟",
 				"no_network": "لم يتم تحديد أي شبكة. هذا غير متوقع."
@@ -1778,13 +1809,16 @@
 	"earning": {
 		"text": {
 			"title": "اكسب",
+			"tab_title": "",
 			"earning_opportunities": "",
 			"header_title": "",
-			"header_description": ""
+			"header_description": "",
+			"go_to_earn": ""
 		},
 		"cards": {
 			"gldt": {
-				"title": "",
+				"title1": "",
+				"title2": "",
 				"description": "",
 				"action": ""
 			},
@@ -1803,16 +1837,22 @@
 		},
 		"terms": {
 			"flexible": ""
+		},
+		"providers": {
+			"goldDaoStaking": {
+				"cardTitle": ""
+			}
 		}
 	},
 	"stake": {
 		"text": {
-			"stake_page_title": "",
 			"gldt_stake_page_description": "",
 			"stake": "",
+			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
 			"unstake": "",
+			"unstake_now": "",
 			"unstaking": "",
 			"unstake_token": "",
 			"enable_token_text": "",
@@ -1822,8 +1862,11 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"unproductive_assets": "",
+			"invested_assets": "",
 			"visit_provider": "",
 			"current_apy_label": "",
 			"stake_review_subtitle": "",
@@ -1837,12 +1880,35 @@
 			"immediate_dissolve_terms": "",
 			"amount_to_receive": "",
 			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
 			"claim_reward": "",
 			"claim_rewards": "",
+			"claim_reward_short": "",
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": ""
+			"get_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty_1": "",
+			"title_empty_2_usd": "",
+			"title_empty_2_apy": "",
+			"title_empty_3": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": "",
+			"gldt_stake_carousel_slide_title": "",
+			"gldt_stake_carousel_slide_cta": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": "",
+			"unexpected_error_on_unstake": "",
+			"dissolvement_limit_reached": ""
 		},
 		"terms": {
 			"gldt": {
@@ -1869,6 +1935,9 @@
 				"fact_3_description": "",
 				"fact_3_description_fallback": ""
 			}
+		},
+		"alt": {
+			"placeholder_image": ""
 		}
 	},
 	"get_token": {

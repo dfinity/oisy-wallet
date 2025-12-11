@@ -1,15 +1,20 @@
-import * as nftEnv from '$env/nft.env';
 import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
+import * as extTokenApi from '$icp/api/ext-v2-token.api';
+import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
+import { mapExtNft } from '$icp/utils/nft.utils';
 import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { BUILD_AN_APE_TOKEN, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -25,8 +30,9 @@ vi.mock('@dfinity/utils', async () => {
 	};
 });
 
-describe('LoaderNfts', () => {
+describe('LoaderNfts', async () => {
 	let alchemyProvidersSpy: MockInstance;
+	let extGetTokensByOwnerSpy: MockInstance;
 
 	const mockGetNftsForOwner = vi.fn();
 
@@ -34,6 +40,9 @@ describe('LoaderNfts', () => {
 	const mockedEnabledGodsToken = { ...DE_GODS_TOKEN, enabled: true };
 	const mockedEnabledNyanToken = { ...NYAN_CAT_TOKEN, enabled: true };
 	const mockedEnabledApeToken = { ...BUILD_AN_APE_TOKEN, enabled: true };
+
+	const mockEnabledExtToken1 = { ...mockValidExtV2Token, enabled: true };
+	const mockEnabledExtToken2 = { ...mockValidExtV2Token2, enabled: true };
 
 	const mockErc721Nft1 = {
 		...mockValidErc721Nft,
@@ -91,6 +100,10 @@ describe('LoaderNfts', () => {
 		}
 	};
 
+	const mockExtNft1 = await mapExtNft({ index: 1, token: mockEnabledExtToken1 });
+	const mockExtNft2 = await mapExtNft({ index: 2, token: mockEnabledExtToken1 });
+	const mockExtNft3 = await mapExtNft({ index: 3, token: mockEnabledExtToken1 });
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
@@ -99,15 +112,20 @@ describe('LoaderNfts', () => {
 			getNftsByOwner: mockGetNftsForOwner
 		} as unknown as AlchemyProvider);
 
+		extGetTokensByOwnerSpy = vi.spyOn(extTokenApi, 'getTokensByOwner');
+		extGetTokensByOwnerSpy.mockResolvedValue([]);
+
 		erc721CustomTokensStore.resetAll();
 		erc1155CustomTokensStore.resetAll();
 
-		nftStore.resetAll();
+		extCustomTokensStore.resetAll();
 
-		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
+		nftStore.resetAll();
 
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
+
+		mockAuthStore();
 
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 	});
@@ -156,6 +174,39 @@ describe('LoaderNfts', () => {
 				});
 
 				expect(get(nftStore)).toEqual([mockErc1155Nft1, mockErc1155Nft2, mockErc1155Nft3]);
+			});
+		});
+
+		it('should add new EXT nfts', async () => {
+			extCustomTokensStore.setAll([
+				{ data: mockEnabledExtToken1, certified: false },
+				{ data: mockEnabledExtToken2, certified: false }
+			]);
+
+			extGetTokensByOwnerSpy.mockResolvedValueOnce([1, 2, 3]);
+
+			render(LoaderNfts);
+
+			await waitFor(() => {
+				expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(2);
+				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(1, {
+					identity: mockIdentity,
+					owner: mockPrincipal,
+					canisterId: mockEnabledExtToken1.canisterId
+				});
+				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(2, {
+					identity: mockIdentity,
+					owner: mockPrincipal,
+					canisterId: mockEnabledExtToken2.canisterId
+				});
+
+				const results = get(nftStore);
+
+				expect(results).toEqual([
+					{ ...mockExtNft1, id: results?.[0].id },
+					{ ...mockExtNft2, id: results?.[1].id },
+					{ ...mockExtNft3, id: results?.[2].id }
+				]);
 			});
 		});
 	});

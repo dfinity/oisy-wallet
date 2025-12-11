@@ -9,6 +9,7 @@ import * as formatUtils from '$lib/utils/format.utils';
 
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
+import en from '$tests/mocks/i18n.mock';
 import { readable } from 'svelte/store';
 
 const staticStore = <T>(v: T) => readable<T>(v);
@@ -49,7 +50,7 @@ describe('EarningPositionCard', () => {
 		expect(screen.getByText(/\$150\.00/)).toBeInTheDocument();
 
 		// total positions → "$2000.00"
-		expect(screen.getByText('$2000.00')).toBeInTheDocument();
+		expect(screen.getByText(`${en.stake.text.invested_assets}: $2000.00`)).toBeInTheDocument();
 	});
 
 	it('renders a plus sign for positive yearly earnings', () => {
@@ -80,6 +81,6 @@ describe('EarningPositionCard', () => {
 
 		render(EarningPositionCard);
 
-		expect(screen.getByText('$1234.00')).toBeInTheDocument();
+		expect(screen.getByText(`${en.stake.text.invested_assets}: $1234.00`)).toBeInTheDocument();
 	});
 });

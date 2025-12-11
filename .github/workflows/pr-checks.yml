@@ -58,14 +58,14 @@ jobs:
       contents: read
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
 
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -74,15 +74,28 @@ jobs:
 
       - name: Fetch base branch
         run: |
-          git fetch origin "$BASE_REF:$BASE_REF"
+          if [ -n "$BASE_REF" ]; then
+            git fetch origin "$BASE_REF:$BASE_REF"
+          fi
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
 
       - name: 'Check for changed files'
-        if: ${{ github.event_name != 'merge_group' }}
         id: file_check
         run: |
-          CHANGED_FILES=$(git diff "origin/$BASE_REF" HEAD --name-only | wc -l)
+          if [[ "$BASE_REV" =~ ^[0-9a-f]{40}$ ]]; then
+            # In merge groups, we need to fetch the specific commit as it might not be in the shallow clone.
+            # We check if BASE_REF is empty to avoid fetching from origin (which might be a fork) in PRs.
+            if [ -z "$BASE_REF" ]; then
+              git fetch --no-tags --depth=1 origin "$BASE_REV"
+            fi
+            BASE_SPEC="$BASE_REV"
+          else
+            git fetch --no-tags --depth=1 origin "$BASE_REV"
+            BASE_SPEC="origin/$BASE_REV"
+          fi
+
+          CHANGED_FILES=$(git diff "$BASE_SPEC" HEAD --name-only | wc -l)
           echo "Changed files: $CHANGED_FILES"
           if [ "$CHANGED_FILES" -eq "0" ]; then
             echo "No changes detected in PR!"
@@ -90,6 +103,7 @@ jobs:
           fi
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_REV: ${{ github.event.merge_group.base_sha || github.event.merge_group.base_ref || github.event.pull_request.base.sha || github.event.pull_request.base.ref || 'main' }}
 
   pr-checks-pass:
     if: always()
@@ -98,7 +112,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - uses: ./.github/actions/needs_success

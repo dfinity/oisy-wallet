@@ -103,5 +103,7 @@ export const WizardStepsGetToken = {
 
 export enum WizardStepsScanner {
 	SCAN = 'Scan',
-	PAY = 'Pay'
+	PAY = 'Pay',
+	TOKENS_LIST = 'Tokens List',
+	PAYING = 'Paying'
 }

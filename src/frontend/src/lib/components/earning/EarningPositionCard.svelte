@@ -1,7 +1,6 @@
 <script lang="ts">
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { allEarningPositionsUsd, allEarningYearlyAmountUsd } from '$lib/derived/earning.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -12,17 +11,14 @@
 
 <StakeContentCard>
 	{#snippet content()}
-		<div class="text-sm">{$i18n.stake.text.active_earning}</div>
+		<div class="text-sm font-bold">{$i18n.stake.text.active_earning}</div>
 
 		<div class="my-1 text-lg font-bold sm:text-xl">
-			<EarningYearlyAmount formatPositiveAmount value={$allEarningYearlyAmountUsd}>
-				{#snippet fallback()}
-					<SkeletonText />
-				{/snippet}
-			</EarningYearlyAmount>
+			<EarningYearlyAmount showAsSuccess value={$allEarningYearlyAmountUsd} />
 		</div>
 
-		<div class="flex justify-center gap-2 text-sm font-bold sm:text-base">
+		<div class="text-sm sm:text-base">
+			{$i18n.stake.text.invested_assets}:
 			{formatCurrency({
 				value: $allEarningPositionsUsd,
 				currency: $currentCurrency,

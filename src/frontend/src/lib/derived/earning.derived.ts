@@ -59,7 +59,7 @@ export const earningData: Readable<EarningData> = derived(
 						})
 					: undefined,
 				[EarningCardFields.TERMS]: $i18n.earning.terms.flexible,
-				action: () => goto(AppPath.EarningGold)
+				action: () => goto(AppPath.EarnGold)
 			}
 		};
 	}
@@ -91,6 +91,18 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 			return currentApy > highestApy ? record : highest;
 		}, undefined);
 	}
+);
+
+export const highestApyEarning: Readable<number> = derived(
+	[highestApyEarningData],
+	([$highestApyEarningData]) =>
+		!isNaN(Number($highestApyEarningData?.apy)) ? Number($highestApyEarningData?.apy) : 0
+);
+
+export const highestEarningPotentialUsd: Readable<number> = derived(
+	[highestApyEarning, enabledMainnetFungibleTokensUsdBalance],
+	([$highestApyEarning, $enabledMainnetFungibleTokensUsdBalance]) =>
+		($enabledMainnetFungibleTokensUsdBalance * $highestApyEarning) / 100
 );
 
 export const allEarningPositionsUsd: Readable<number> = derived([earningData], ([$earningData]) =>

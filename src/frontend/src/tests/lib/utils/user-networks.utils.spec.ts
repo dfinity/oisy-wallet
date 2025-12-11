@@ -6,6 +6,10 @@ import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
 
 describe('user-networks.utils', () => {
 	describe('mapUserNetworks', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
 		it('should convert UserNetworks to array of [NetworkSettingsFor, NetworkSettings]', () => {
 			expect(mapUserNetworks(mockUserNetworks)).toEqual(mockUserNetworksMap);
 		});

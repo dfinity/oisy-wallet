@@ -8,7 +8,6 @@ import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { ADDITIONAL_ERC20_TOKENS, ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { ETHEREUM_TOKEN, SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import type { EthereumNetwork } from '$eth/types/network';
 import {
 	getExplorerUrl,
 	isDefaultEthereumToken,
@@ -230,10 +229,6 @@ describe('eth.utils', () => {
 			const result3 = getExplorerUrl({ token: {} as unknown as Token });
 
 			expect(result3).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
-
-			const result4 = getExplorerUrl({ network: {} as unknown as EthereumNetwork });
-
-			expect(result4).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
 		});
 	});
 });

@@ -12,7 +12,7 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
-import type { Utxo } from '@icp-sdk/canisters/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 // Mock environment variables (same as btc-utxos.service.spec.ts)
 vi.mock('$env/networks/networks.icrc.env', () => ({
@@ -102,7 +102,7 @@ describe('btc-send.services', () => {
 	});
 
 	describe('validateUtxosForSend', () => {
-		const validUtxo: Utxo = {
+		const validUtxo: CkBtcMinterDid.Utxo = {
 			height: 100,
 			value: 100000n,
 			outpoint: {
@@ -375,7 +375,7 @@ describe('btc-send.services', () => {
 		});
 
 		it('should handle multiple UTXOs correctly', async () => {
-			const utxo2: Utxo = {
+			const utxo2: CkBtcMinterDid.Utxo = {
 				height: 200,
 				value: 50000n,
 				outpoint: {

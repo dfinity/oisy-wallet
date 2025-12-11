@@ -177,6 +177,7 @@
 			{allNetworksEnabled}
 			filteredNetworks={$filteredNetworks}
 			onNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
+			showStakeBalance={false}
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
 		<SwapProviderListModal

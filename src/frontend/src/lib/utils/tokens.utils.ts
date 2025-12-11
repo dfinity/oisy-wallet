@@ -1,10 +1,4 @@
-import { NFTS_ENABLED } from '$env/nft.env';
-import {
-	saveErc1155CustomTokens,
-	saveErc20CustomTokens,
-	saveErc20UserTokens,
-	saveErc721CustomTokens
-} from '$eth/services/manage-tokens.services';
+import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
@@ -14,8 +8,9 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20, isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
-import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
+import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { isTokenExtV2 } from '$icp/utils/ext.utils';
 import {
 	icTokenIcrcCustomToken,
 	isTokenDip20,
@@ -25,12 +20,16 @@ import {
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-import type { ManageTokensSaveParams } from '$lib/services/manage-tokens.services';
+import {
+	saveCustomTokensWithKey,
+	type ManageTokensSaveParams
+} from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { StakeBalances } from '$lib/types/stake-balance';
 import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -38,11 +37,12 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { calculateTokenUsdBalance, filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
+import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
+import { isTokenNonFungible } from '$lib/utils/nft.utils';
+import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
-import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
-import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
+import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -116,15 +116,17 @@ export const sortTokens = <T extends Token>({
 export const pinTokensWithBalanceAtTop = <T extends Token>({
 	$tokens,
 	$balances,
+	$stakeBalances,
 	$exchanges
 }: {
 	$tokens: T[];
 	$balances: CertifiedStoreData<BalancesData>;
+	$stakeBalances: StakeBalances;
 	$exchanges: ExchangesData;
 }): TokenUi<T>[] => {
 	// If balances data are nullish, there is no need to sort.
 	if (isNullish($balances)) {
-		return $tokens.map((token) => mapTokenUi({ token, $balances, $exchanges }));
+		return $tokens.map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges }));
 	}
 
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi<T>[], TokenUi<T>[]]>(
@@ -132,6 +134,7 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 			const tokenUI: TokenUi<T> = mapTokenUi<T>({
 				token,
 				$balances,
+				$stakeBalances,
 				$exchanges
 			});
 
@@ -165,37 +168,62 @@ export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
 	tokens.reduce((acc, token) => acc + (token.usdBalance ?? 0), 0);
 
 /**
+ * Calculates total USD stake balance of the provided UI tokens list, including claimable rewards.
+ *
+ * @param tokens - The list of UI tokens for total USD stake balance calculation.
+ * @returns The sum of UI tokens USD stake balance.
+ */
+export const sumTokensUiUsdStakeBalance = (tokens: TokenUi[]): number =>
+	tokens.reduce(
+		(acc, token) => acc + ((token.stakeUsdBalance ?? 0) + (token.claimableStakeBalanceUsd ?? 0)),
+		0
+	);
+
+/**
  * Calculates total USD balance of mainnet tokens per network from the provided tokens list.
  *
- * @param $tokens - The list of tokens for filtering by network env and total USD balance calculation.
- * @param $balancesStore - The balances' data for the tokens.
- * @param $exchanges - The exchange rates data for the tokens.
+ * @param tokens - The list of UI tokens for filtering by network env and total USD balance calculation.
  * @returns A NetworkId-number dictionary with total USD balance of mainnet tokens per network.
  *
  */
 export const sumMainnetTokensUsdBalancesPerNetwork = ({
-	$tokens,
-	$balances,
-	$exchanges
+	tokens
 }: {
-	$tokens: Token[];
-	$balances: CertifiedStoreData<BalancesData>;
-	$exchanges: ExchangesData;
+	tokens: TokenUi[];
 }): TokensTotalUsdBalancePerNetwork =>
-	nonNullish($exchanges) && nonNullish($balances)
-		? $tokens.reduce<TokensTotalUsdBalancePerNetwork>(
-				(acc, token) =>
-					token.network.env === 'mainnet'
-						? {
-								...acc,
-								[token.network.id]:
-									(acc[token.network.id] ?? 0) +
-									(calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0)
-							}
-						: acc,
-				{}
-			)
-		: {};
+	tokens.reduce<TokensTotalUsdBalancePerNetwork>(
+		(acc, { network: { id, env }, usdBalance }) =>
+			env === 'mainnet'
+				? {
+						...acc,
+						[id]: (acc[id] ?? 0) + (usdBalance ?? 0)
+					}
+				: acc,
+		{}
+	);
+
+/**
+ * Calculates total USD stake balance (including claimable rewards) of mainnet tokens per network from the provided tokens list.
+ *
+ * @param tokens - The list of UI tokens for filtering by network env and total USD stake balance calculation.
+ * @returns A NetworkId-number dictionary with total USD stake balance of mainnet tokens per network.
+ *
+ */
+export const sumMainnetTokensUsdStakeBalancesPerNetwork = ({
+	tokens
+}: {
+	tokens: TokenUi[];
+}): TokensTotalUsdBalancePerNetwork =>
+	tokens.reduce<TokensTotalUsdBalancePerNetwork>(
+		(acc, { network: { id, env }, stakeUsdBalance, claimableStakeBalanceUsd }) =>
+			env === 'mainnet'
+				? {
+						...acc,
+						[id]: (acc[id] ?? 0) + (stakeUsdBalance ?? 0) + (claimableStakeBalanceUsd ?? 0)
+					}
+				: acc,
+		{}
+	);
 
 /**
  * Filters and returns a list of "enabled" by user tokens
@@ -246,7 +274,7 @@ export const filterTokens = <T extends Token>({
 			return true;
 		}
 
-		if (isTokenErc20(token) || isTokenSpl(token)) {
+		if (isTokenErc20(token) || isTokenErc721(token) || isTokenErc1155(token) || isTokenSpl(token)) {
 			return areAddressesPartiallyEqual({
 				address1: token.address,
 				address2: filter,
@@ -262,6 +290,12 @@ export const filterTokens = <T extends Token>({
 				(nonNullish(indexCanisterId) &&
 					indexCanisterId.toLowerCase().includes(filter.toLowerCase()))
 			);
+		}
+
+		if (isTokenExtV2(token)) {
+			const { canisterId } = token;
+
+			return canisterId.toLowerCase().includes(filter.toLowerCase());
 		}
 
 		return false;
@@ -315,29 +349,32 @@ export const groupTogglableTokens = (
 	tokens: Token[]
 ): {
 	icrc: IcrcCustomToken[];
+	ext: ExtCustomToken[];
 	erc20: (Erc20UserToken | Erc20CustomToken)[];
 	erc721: Erc721CustomToken[];
 	erc1155: Erc1155CustomToken[];
-	spl: SplTokenToggleable[];
+	spl: SplCustomToken[];
 } =>
 	tokens.reduce<{
 		icrc: IcrcCustomToken[];
+		ext: ExtCustomToken[];
 		erc20: Erc20UserToken[];
 		erc721: Erc721CustomToken[];
 		erc1155: Erc1155CustomToken[];
-		spl: SplTokenToggleable[];
+		spl: SplCustomToken[];
 	}>(
-		({ icrc, erc20, erc721, erc1155, spl }, token) => ({
+		({ icrc, ext, erc20, erc721, erc1155, spl }, token) => ({
 			icrc: [
 				...icrc,
 				...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
 			],
+			ext: [...ext, ...(isTokenExtV2(token) ? [token as ExtCustomToken] : [])],
 			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
 			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
-			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
+			spl: [...spl, ...(isTokenSplCustomToken(token) ? [token] : [])]
 		}),
-		{ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] }
+		{ icrc: [], ext: [], erc20: [], erc721: [], erc1155: [], spl: [] }
 	);
 
 export const saveAllCustomTokens = async ({
@@ -357,10 +394,11 @@ export const saveAllCustomTokens = async ({
 	$authIdentity: OptionIdentity;
 	$i18n: I18n;
 }): Promise<void> => {
-	const { icrc, erc20, erc721, erc1155, spl } = groupTogglableTokens(tokens);
+	const { icrc, ext, erc20, erc721, erc1155, spl } = groupTogglableTokens(tokens);
 
 	if (
 		icrc.length === 0 &&
+		ext.length === 0 &&
 		erc20.length === 0 &&
 		erc721.length === 0 &&
 		erc1155.length === 0 &&
@@ -415,9 +453,17 @@ export const saveAllCustomTokens = async ({
 	await Promise.allSettled([
 		...(icrc.length > 0
 			? [
-					saveIcrcCustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
 						tokens: icrc.map((t) => ({ ...t, networkKey: 'Icrc' }))
+					})
+				]
+			: []),
+		...(ext.length > 0
+			? [
+					saveCustomTokensWithKey({
+						...commonParams,
+						tokens: ext.map((t) => ({ ...t, networkKey: 'ExtV2' }))
 					})
 				]
 			: []),
@@ -434,27 +480,38 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc721.length > 0 && NFTS_ENABLED
+		...(erc721.length > 0
 			? [
-					saveErc721CustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
-						tokens: erc721
+						tokens: erc721.map((t) => ({
+							...t,
+							chainId: t.network.chainId,
+							networkKey: 'Erc721'
+						}))
 					})
 				]
 			: []),
-		...(erc1155.length > 0 && NFTS_ENABLED
+		...(erc1155.length > 0
 			? [
-					saveErc1155CustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
-						tokens: erc1155
+						tokens: erc1155.map((t) => ({
+							...t,
+							chainId: t.network.chainId,
+							networkKey: 'Erc1155'
+						}))
 					})
 				]
 			: []),
 		...(spl.length > 0
 			? [
-					saveSplCustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
-						tokens: spl
+						tokens: spl.map((t) => ({
+							...t,
+							networkKey: isNetworkIdSOLDevnet(t.network.id) ? 'SplDevnet' : 'SplMainnet'
+						}))
 					})
 				]
 			: [])
@@ -471,6 +528,6 @@ export const filterTokensByNft = ({
 	isNullish(filterNfts)
 		? tokens
 		: tokens.filter((t) => {
-				const isNft = isTokenErc1155(t) || isTokenErc721(t);
+				const isNft = isTokenNonFungible(t);
 				return filterNfts ? isNft : !isNft;
 			});

@@ -1,11 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { Identity } from '@icp-sdk/core/agent';
-	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
-	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
-	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
-	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
@@ -27,14 +22,15 @@
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { loadNfts } from '$lib/services/nft.services';
+	import { updateNftMediaConsent } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
+	import type { Nft, NftCollection } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import { getNftDisplayId } from '$lib/utils/nft.utils';
 	import { findNonFungibleToken, getNftCollectionUi } from '$lib/utils/nfts.utils';
 
 	interface Props {
@@ -65,61 +61,16 @@
 
 	let saveLoading = $state(false);
 
-	const createSaveToken = ({
-		token,
-		allowMedia
-	}: {
-		token: NonFungibleToken;
-		allowMedia: boolean;
-	}) => ({
-		...token,
-		allowExternalContentSource: allowMedia,
-		enabled: true // must be true otherwise we couldn't see it at this point
-	});
-
-	const saveByStandard = async ({
-		token,
-		identity,
-		allowMedia
-	}: {
-		token: NonFungibleToken;
-		identity: Identity;
-		allowMedia: boolean;
-	}): Promise<NonFungibleToken | undefined> => {
-		if (isTokenErc721(token)) {
-			const saveToken = createSaveToken({ token, allowMedia });
-
-			await saveErc721CustomTokens({
-				tokens: [saveToken],
-				identity
-			});
-
-			return saveToken;
-		}
-
-		if (isTokenErc1155(token)) {
-			const saveToken = createSaveToken({ token, allowMedia });
-
-			await saveErc1155CustomTokens({
-				tokens: [saveToken],
-				identity
-			});
-
-			return saveToken;
-		}
-	};
-
 	const save = async (allowMedia: boolean) => {
 		saveLoading = true;
-		if (nonNullish(token) && nonNullish($authIdentity)) {
-			const saveToken = await saveByStandard({ token, identity: $authIdentity, allowMedia });
 
-			if (nonNullish(saveToken)) {
-				await loadNfts({
-					tokens: [saveToken],
-					walletAddress: $ethAddress
-				});
-			}
+		if (nonNullish(token)) {
+			await updateNftMediaConsent({
+				token,
+				$authIdentity,
+				allowMedia,
+				$ethAddress
+			});
 		}
 
 		saveLoading = false;
@@ -266,7 +217,7 @@
 						{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 							{#if nonNullish(nft?.imageUrl)}
 								<span class="flex w-full items-start justify-end md:items-center">
-									#{nft.id} &nbsp;
+									#{getNftDisplayId(nft)} &nbsp;
 									<output class="truncate text-tertiary"
 										>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
 									>

@@ -1,5 +1,7 @@
 import type {
 	Balance,
+	Metadata,
+	MetadataLegacy,
 	TokenIdentifier,
 	TokenIndex,
 	Transaction
@@ -47,7 +49,7 @@ export const transactions = async ({
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
  * @param {OptionIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.canisterId - The canister ID of the EXT v2 token.
- * @param {TokenIdentifier} params.tokenIdentifier - The token identifier as string.
+ * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
  * @param {QueryParams} params.rest - Additional query parameters.
  * @returns {Promise<Balance>} The user's balance for the specified token.
  */
@@ -82,17 +84,17 @@ export const balance = async ({
  * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#tokens_ext
  *
  * @param {Object} params - The parameters for fetching the tokens.
- * @param {Principal} params.owner - The principal of the owner whose tokens should be fetched.
+ * @param {boolean} [params.certified=true] - Whether the data should be certified.
  * @param {OptionIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.canisterId - The canister ID of the EXT v2 token.
- * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {Principal} params.owner - The principal of the owner whose tokens should be fetched.
  * @returns {Promise<TokenIndex[]>} The list of token indices owned by the user.
  * @throws CanisterInternalError if the token identifier is invalid.
  */
 export const getTokensByOwner = async ({
+	certified,
 	identity,
 	owner,
-	certified,
 	canisterId,
 	...rest
 }: CanisterApiFunctionParamsWithCanisterId<{ owner: Principal } & QueryParams>): Promise<
@@ -109,6 +111,76 @@ export const getTokensByOwner = async ({
 	});
 
 	return await getTokensByOwner({ certified, ...getIcrcAccount(owner) });
+};
+
+/**
+ * Transfer NFT of a collection from one user to another.
+ *
+ * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
+ *
+ * @param {Object} params - The parameters for the transfer.
+ * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {CanisterIdText} params.canisterId - The canister ID of the EXT v2 token.
+ * @param {Principal} params.from - The ICRC principal of the sender.
+ * @param {Principal} params.to - The ICRC principal of the receiver.
+ * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
+ * @param {bigint} params.amount - The amount to transfer.
+ */
+export const transfer = async ({
+	certified,
+	identity,
+	canisterId,
+	from,
+	to,
+	tokenIdentifier,
+	amount,
+	...rest
+}: CanisterApiFunctionParamsWithCanisterId<
+	{ from: Principal; to: Principal; tokenIdentifier: TokenIdentifier; amount: bigint } & QueryParams
+>) => {
+	const { transfer } = await extV2TokenCanister({
+		identity,
+		canisterId,
+		...rest
+	});
+
+	await transfer({ certified, from, to, tokenIdentifier, amount });
+};
+
+/**
+ * Returns the metadata of a specific token of the collection.
+ *
+ * It first tries to use the new `ext_metadata` endpoint, and if it fails,
+ * it falls back to the legacy `metadata` endpoint for compatibility with older EXT canisters.
+ * When both methods are not supported, it returns `undefined`.
+ *
+ * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#metadata
+ *
+ * @param {Object} params - The parameters for fetching the metadata.
+ * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {CanisterIdText} params.canisterId - The canister ID of the EXT v2 token.
+ * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
+ * @param {QueryParams} params.rest - Additional query parameters.
+ * @returns {Promise<MetadataLegacy | Metadata | undefined>} The metadata of the specified token or `undefined` if it does not exist.
+ */
+export const metadata = async ({
+	certified,
+	identity,
+	canisterId,
+	tokenIdentifier,
+	...rest
+}: CanisterApiFunctionParamsWithCanisterId<
+	{ tokenIdentifier: TokenIdentifier } & QueryParams
+>): Promise<MetadataLegacy | Metadata | undefined> => {
+	const { metadata } = await extV2TokenCanister({
+		identity,
+		canisterId,
+		...rest
+	});
+
+	return await metadata({ tokenIdentifier, certified });
 };
 
 const extV2TokenCanister = async ({

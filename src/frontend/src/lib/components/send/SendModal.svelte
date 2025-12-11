@@ -221,7 +221,10 @@
 					onSelectNetwork={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 				/>
 			{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
-				<ModalNetworksFilter onNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
+				<ModalNetworksFilter
+					onNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+					showStakeBalance={false}
+				/>
 			{:else if currentStep?.name === WizardStepsSend.DESTINATION}
 				<SendDestinationWizardStep
 					formCancelAction={isTransactionsPage || (isNftsPage && nonNullish($pageNft))

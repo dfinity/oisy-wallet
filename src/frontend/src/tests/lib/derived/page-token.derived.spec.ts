@@ -11,6 +11,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
@@ -28,6 +29,7 @@ import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { RequiredTokenWithLinkedData } from '$lib/types/token';
+import { getNftIdentifier } from '$lib/utils/nft.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
@@ -38,6 +40,7 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 describe('page-token.derived', () => {
@@ -95,6 +98,7 @@ describe('page-token.derived', () => {
 		it('should find ERC20 token', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
 			erc20UserTokensStore.setAll([{ data: mockToken, certified: true }]);
+			erc20CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
 			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
 			expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
@@ -205,6 +209,7 @@ describe('page-token.derived', () => {
 		it('should return the standard for ERC20 token', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
 			erc20UserTokensStore.setAll([{ data: mockToken, certified: true }]);
+			erc20CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
 			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
 			expect(get(pageTokenStandard)).toBe(mockToken.standard);
@@ -426,7 +431,11 @@ describe('page-token.derived', () => {
 				collectionId: `${mockNft.collection.network.name}-${mockNft.collection.address}`
 			});
 
-			expect(get(pageNonFungibleToken)?.address).toBe(mockNft.collection.address);
+			const result = get(pageNonFungibleToken);
+
+			assertNonNullish(result);
+
+			expect(getNftIdentifier(result)).toBe(mockNft.collection.address);
 		});
 	});
 });

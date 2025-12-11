@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { NFTS_ENABLED } from '$env/nft.env';
 	import { erc1155CustomTokensNotInitialized } from '$eth/derived/erc1155.derived';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { erc721CustomTokensNotInitialized } from '$eth/derived/erc721.derived';
 	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
+	import { extCustomTokensNotInitialized } from '$icp/derived/ext.derived';
+	import { loadExtTokens } from '$icp/services/ext.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
@@ -49,8 +50,8 @@
 				($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled)))
 	);
 	let loadErc20 = $derived(loadErc && $erc20UserTokensNotInitialized);
-	let loadErc721 = $derived(loadErc && $erc721CustomTokensNotInitialized && NFTS_ENABLED);
-	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized && NFTS_ENABLED);
+	let loadErc721 = $derived(loadErc && $erc721CustomTokensNotInitialized);
+	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized);
 
 	let loadSplMainnet = $derived(nonNullish($solAddressMainnet) && $networkSolanaMainnetEnabled);
 	let loadSplDevnet = $derived(
@@ -62,6 +63,8 @@
 	let loadSpl = $derived(
 		(loadSplMainnet || loadSplDevnet || loadSplLocal) && $splCustomTokensNotInitialized
 	);
+
+	let loadExt = $derived($extCustomTokensNotInitialized);
 
 	$effect(() => {
 		if (loadErc20) {
@@ -84,6 +87,12 @@
 	$effect(() => {
 		if (loadSpl) {
 			loadSplTokens({ identity: $authIdentity });
+		}
+	});
+
+	$effect(() => {
+		if (loadExt) {
+			loadExtTokens({ identity: $authIdentity });
 		}
 	});
 </script>

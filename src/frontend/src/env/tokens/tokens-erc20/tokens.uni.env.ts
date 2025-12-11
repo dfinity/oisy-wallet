@@ -24,5 +24,5 @@ export const UNI_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckUNI',
 	groupData: UNI_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true
+	neverCollapseInTokenGroup: true
 };

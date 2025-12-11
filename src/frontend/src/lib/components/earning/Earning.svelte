@@ -7,7 +7,7 @@
 </script>
 
 <RewardsEligibilityContext>
-	<div class="flex flex-col gap-5">
+	<div class="flex flex-col gap-6 pb-6">
 		<EarningHeader />
 		<StakeContentSection>
 			{#snippet title()}

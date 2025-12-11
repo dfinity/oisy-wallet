@@ -17,7 +17,7 @@ import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 import { isIcrcTokenToggleEnabled } from '$lib/utils/token-toggle.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
-import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
+import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -94,7 +94,7 @@ export const pageTokenToggleable: Readable<boolean> = derived([pageToken], ([$pa
 			: isTokenEthereumUserToken($pageToken)
 				? isNotDefaultEthereumToken($pageToken)
 				: isTokenSpl($pageToken)
-					? isTokenSplToggleable($pageToken)
+					? isTokenSplCustomToken($pageToken)
 					: false;
 	}
 

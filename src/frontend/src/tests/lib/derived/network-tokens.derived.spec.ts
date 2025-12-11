@@ -45,6 +45,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
@@ -94,6 +95,7 @@ describe('network-tokens.derived', () => {
 		erc721CustomTokensStore.resetAll();
 		erc20DefaultTokensStore.reset();
 		erc20UserTokensStore.resetAll();
+		erc20CustomTokensStore.resetAll();
 		icrcDefaultTokensStore.resetAll();
 		icrcCustomTokensStore.resetAll();
 		splDefaultTokensStore.reset();
@@ -198,6 +200,10 @@ describe('network-tokens.derived', () => {
 				setupTestnetsStore('enabled');
 
 				erc20UserTokensStore.setAll([
+					{ data: mockErc20UserToken, certified: false },
+					{ data: mockErc20SepoliaUserToken, certified: false }
+				]);
+				erc20CustomTokensStore.setAll([
 					{ data: mockErc20UserToken, certified: false },
 					{ data: mockErc20SepoliaUserToken, certified: false }
 				]);

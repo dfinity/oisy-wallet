@@ -78,7 +78,7 @@ export const unstakeGldt = async ({
 	progress?.(ProgressStepsUnstake.UNSTAKE);
 
 	// TODO: replace "fraction" with "amount" when the gldt_stake canister allows that
-	const fraction = Math.round(Number((amount * 100n) / totalStakedAmount));
+	const fraction = Math.max(Math.round(Number((amount * 100n) / totalStakedAmount)), 1);
 	const response = await manageStakePosition({
 		identity,
 		positionParams: dissolveInstantly
@@ -127,6 +127,25 @@ export const claimGldtStakingReward = async ({
 		});
 		await loadCustomTokens({ identity });
 	}
+
+	await waitAndTriggerWallet();
+
+	return response;
+};
+
+export const withdrawGldtStakingDissolvedTokens = async ({
+	identity,
+	withdrawCompleted
+}: {
+	identity: Identity;
+	withdrawCompleted: () => void;
+}): Promise<StakePositionResponse | undefined> => {
+	const response = await manageStakePosition({
+		identity,
+		positionParams: { Withdraw: {} }
+	});
+
+	withdrawCompleted();
 
 	await waitAndTriggerWallet();
 

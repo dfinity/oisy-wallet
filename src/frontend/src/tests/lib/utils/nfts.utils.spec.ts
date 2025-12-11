@@ -344,7 +344,6 @@ describe('nfts.utils', () => {
 		});
 
 		it('should map EXT token correctly', () => {
-			// @ts-expect-error Testing invalid input types
 			const result = mapTokenToCollection(mockValidExtV2Token);
 
 			expect(result).toEqual({
@@ -808,6 +807,23 @@ describe('nfts.utils', () => {
 			});
 
 			const result = await getMediaStatus('https://example.com/image.png');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
+		it('returns OK for valid gif under the size limit', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? '.gif;charset=utf-8'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/image.gif');
 
 			expect(result).toBe(NftMediaStatusEnum.OK);
 		});

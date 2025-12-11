@@ -111,6 +111,8 @@ describe('BtcConvertTokenWizard', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		mockPage.reset();
 		mockBtcPendingSentTransactionsStore();
 		mockprepareBtcSendApi();
