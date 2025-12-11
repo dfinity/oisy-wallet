@@ -18,6 +18,15 @@ import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
  * The URN string is expected to follow the pattern defined by the regex:
  * /^([a-zA-Z]+):([a-zA-Z0-9\-.]+)(@(\d+))?(\/([a-zA-Z]+))?(\?(.*))?$/
  *
+ *
+ * When the `isDFX` flag is enabled, all numeric values (e.g., `value`, `uint256`)
+ * are expected to be parsed and returned as **BigInt**, not as JavaScript `number`.
+ *
+ * JavaScript `number` cannot safely represent large integers used in blockchain
+ * environments (such as ERC-20 token amounts or values denominated in wei),
+ * because it is limited to 53 bits of precision. Any value exceeding this limit
+ * will be silently rounded and lose accuracy.
+ *
  * This regex pattern is inspired by multiple sources with each respective URN scheme:
  * - For IC: https://github.com/dfinity/ICRC/issues/22
  * - For ETH: https://eips.ethereum.org/EIPS/eip-681
@@ -44,6 +53,7 @@ export const decodeQrCodeUrn = ({
 
 	const processParam = ([key, value]: [string, string]) => {
 		if ((URN_NUMERIC_PARAMS as readonly string[]).includes(key)) {
+			// Treat numeric values as bigint when the isDFX flag is true, as described in the JSDoc above.
 			if (isDFX) {
 				return { [key]: value };
 			}
@@ -53,6 +63,8 @@ export const decodeQrCodeUrn = ({
 		if ((URN_STRING_PARAMS as readonly string[]).includes(key)) {
 			return { [key]: value };
 		}
+
+		// Treat numeric values as bigint when the isDFX flag is true, as described in the JSDoc above.
 		if (isDFX && !isNaN(parseFloat(value))) {
 			return { [key]: value };
 		}
