@@ -38,9 +38,11 @@ export const decodeQrCodeUrn = ({ urn }: { urn: string }): DecodedUrn | undefine
 		if ((URN_NUMERIC_PARAMS as readonly string[]).includes(key)) {
 			return { [key]: parseFloat(value) };
 		}
+
 		if ((URN_STRING_PARAMS as readonly string[]).includes(key)) {
 			return { [key]: value };
 		}
+
 		if (!isNaN(parseFloat(value))) {
 			return { [key]: parseFloat(value) };
 		}
