@@ -8,6 +8,8 @@ import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import {
+	mockExtLegacyMetadata,
+	mockExtMetadata,
 	mockExtV2TokenCanisterId,
 	mockExtV2TokenIdentifier,
 	mockExtV2TokenIndexes,
@@ -462,6 +464,107 @@ describe('ext-v2-token.canister', () => {
 			const res = transfer(mockParams);
 
 			await expect(res).rejects.toThrow(mockError);
+		});
+	});
+
+	describe('metadata', () => {
+		const mockParams = {
+			tokenIdentifier: mockExtV2TokenIdentifier,
+			certified
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should correctly call the ext_metadata method', async () => {
+			service.ext_metadata.mockResolvedValue({ ok: mockExtMetadata });
+			service.metadata.mockResolvedValue({ ok: mockExtLegacyMetadata });
+
+			const { metadata } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			const res = await metadata(mockParams);
+
+			expect(res).toEqual(mockExtMetadata);
+			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
+			expect(service.metadata).not.toHaveBeenCalled();
+		});
+
+		it('should fall back to the legacy metadata method if the first fails', async () => {
+			service.ext_metadata.mockRejectedValue(new Error('ext_metadata not supported'));
+			service.metadata.mockResolvedValue({ ok: mockExtLegacyMetadata });
+
+			const { metadata } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			const res = await metadata(mockParams);
+
+			expect(res).toEqual(mockExtLegacyMetadata);
+			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
+			expect(service.metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
+		});
+
+		it('should handle gracefully both methods failing', async () => {
+			service.ext_metadata.mockRejectedValue(new Error('ext_metadata not supported'));
+			service.metadata.mockRejectedValue(new Error('metadata not supported'));
+
+			const { metadata } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			const res = await metadata(mockParams);
+
+			expect(res).toBeUndefined();
+			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
+			expect(service.metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
+		});
+
+		it('should handle invalid token error', async () => {
+			service.ext_metadata.mockResolvedValue({
+				err: { InvalidToken: mockExtV2TokenIdentifier }
+			});
+
+			const { metadata } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			await expect(metadata(mockParams)).rejects.toThrow(
+				new CanisterInternalError(`The specified token is invalid: ${mockExtV2TokenIdentifier}`)
+			);
+
+			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
+		});
+
+		it('should handle other unexpected errors', async () => {
+			service.ext_metadata.mockResolvedValue({
+				err: { Other: 'other error' }
+			});
+
+			const { metadata } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			await expect(metadata(mockParams)).rejects.toThrow(new CanisterInternalError('other error'));
+
+			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
+		});
+
+		it('should handle a generic canister error', async () => {
+			// @ts-expect-error we test this on purpose
+			service.ext_metadata.mockResolvedValue({ err: { CanisterError: null } });
+
+			const { metadata } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			await expect(metadata(mockParams)).rejects.toThrow(
+				new CanisterInternalError('Unknown ExtV2TokenCanisterError')
+			);
+
+			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
 		});
 	});
 });

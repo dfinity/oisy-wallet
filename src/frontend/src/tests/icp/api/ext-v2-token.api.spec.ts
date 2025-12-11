@@ -1,7 +1,14 @@
-import { balance, getTokensByOwner, transactions, transfer } from '$icp/api/ext-v2-token.api';
+import {
+	balance,
+	getTokensByOwner,
+	metadata,
+	transactions,
+	transfer
+} from '$icp/api/ext-v2-token.api';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	mockExtMetadata,
 	mockExtV2TokenCanisterId,
 	mockExtV2TokenIdentifier,
 	mockExtV2Transactions
@@ -147,6 +154,38 @@ describe('ext-v2-token.api', () => {
 			await expect(transfer({ ...params, identity: null })).rejects.toThrow();
 
 			expect(tokenCanisterMock.transfer).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('metadata', () => {
+		const params = {
+			identity: mockIdentity,
+			canisterId: mockExtV2TokenCanisterId,
+			tokenIdentifier: mockExtV2TokenIdentifier
+		};
+
+		const expectedParams = {
+			tokenIdentifier: mockExtV2TokenIdentifier
+		};
+
+		beforeEach(() => {
+			tokenCanisterMock.metadata.mockResolvedValue(mockExtMetadata);
+		});
+
+		it('should call successfully metadata endpoint', async () => {
+			const result = await metadata(params);
+
+			expect(result).toEqual(mockExtMetadata);
+
+			expect(tokenCanisterMock.metadata).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should raise an error if identity is nullish', async () => {
+			await expect(metadata({ ...params, identity: undefined })).rejects.toThrow();
+
+			await expect(metadata({ ...params, identity: null })).rejects.toThrow();
+
+			expect(tokenCanisterMock.metadata).not.toHaveBeenCalled();
 		});
 	});
 });

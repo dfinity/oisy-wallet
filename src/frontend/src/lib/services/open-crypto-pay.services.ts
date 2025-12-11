@@ -188,7 +188,7 @@ const preparePaymentTransaction = async ({
 
 	progress(ProgressStepsPayment.CREATE_TRANSACTION);
 
-	const decodedData = decodeQrCodeUrn(uri);
+	const decodedData = decodeQrCodeUrn({ urn: uri });
 	const validatedData = validateDecodedData({ decodedData, token, amount });
 	const nonce = await getNonce({ from, networkId: token.network.id });
 	const baseParams = buildTransactionBaseParams({ from, nonce, validatedData });
