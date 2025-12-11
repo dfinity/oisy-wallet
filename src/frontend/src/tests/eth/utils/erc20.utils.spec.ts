@@ -6,7 +6,6 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import type { EthereumNetwork } from '$eth/types/network';
 import {
 	isTokenErc20,
 	isTokenErc20UserToken,
@@ -36,7 +35,7 @@ describe('erc20.utils', () => {
 			address: mockValidErc20Token.address,
 			exchange: mockValidErc20Token.exchange,
 			decimals: mockValidErc20Token.decimals,
-			network: mockValidErc20Token.network as EthereumNetwork,
+			network: mockValidErc20Token.network,
 			category: mockValidErc20Token.category
 		};
 
@@ -89,7 +88,7 @@ describe('erc20.utils', () => {
 			address: mockValidErc20Token.address,
 			exchange: mockValidErc20Token.exchange,
 			decimals: mockValidErc20Token.decimals,
-			network: mockValidErc20Token.network as EthereumNetwork,
+			network: mockValidErc20Token.network,
 			category: mockValidErc20Token.category
 		};
 
