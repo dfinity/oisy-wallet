@@ -2,7 +2,6 @@ import {
 	SUPPORTED_ETHEREUM_TOKEN_IDS,
 	type SUPPORTED_ETHEREUM_TOKENS
 } from '$env/tokens/tokens.eth.env';
-import type { EthereumNetwork } from '$eth/types/network';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import type { Network } from '$lib/types/network';
 import type { OptionToken, TokenId } from '$lib/types/token';
@@ -32,8 +31,8 @@ export const getExplorerUrl = ({
 	token?: OptionToken;
 	network?: Network;
 }): string =>
-	nonNullish((network as EthereumNetwork)?.explorerUrl)
-		? (network as EthereumNetwork).explorerUrl
-		: nonNullish((token?.network as EthereumNetwork)?.explorerUrl)
-			? (token?.network as EthereumNetwork).explorerUrl
+	nonNullish(network)
+		? network.explorerUrl
+		: nonNullish(token?.network)
+			? token.network.explorerUrl
 			: DEFAULT_ETHEREUM_NETWORK.explorerUrl;

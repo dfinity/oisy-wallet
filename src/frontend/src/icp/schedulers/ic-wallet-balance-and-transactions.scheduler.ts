@@ -13,7 +13,7 @@ import type {
 import type { CertifiedData } from '$lib/types/store';
 import { isNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
-import type { IcrcIndexNgDid } from '@icp-sdk/canisters/ledger/icrc';
+import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
@@ -27,15 +27,15 @@ interface IcWalletStore<T> {
 
 export type GetBalanceAndTransactions<
 	TWithId extends
-		| IcrcIndexNgDid.TransactionWithId
+		| IcrcIndexDid.TransactionWithId
 		| IcpIndexDid.TransactionWithId
 		| Dip20TransactionWithId
 > = GetTransactions & { transactions: TWithId[] };
 
 export class IcWalletBalanceAndTransactionsScheduler<
-	T extends IcrcIndexNgDid.Transaction | IcpIndexDid.Transaction | Event,
+	T extends IcrcIndexDid.Transaction | IcpIndexDid.Transaction | Event,
 	TWithId extends
-		| IcrcIndexNgDid.TransactionWithId
+		| IcrcIndexDid.TransactionWithId
 		| IcpIndexDid.TransactionWithId
 		| Dip20TransactionWithId,
 	PostMessageDataRequest extends
