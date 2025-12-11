@@ -10,7 +10,7 @@ const fromJson = (metadata: string): NftMetadataWithoutId | undefined => {
 
 		const name = 'name' in jsonMetadata ? jsonMetadata.name : undefined;
 		const imageUrl = 'url' in jsonMetadata ? jsonMetadata.url : undefined;
-		const thumbnailUrl = 'thumbnail' in jsonMetadata ? jsonMetadata.thumbnail : undefined;
+		const thumbnailUrl = 'thumb' in jsonMetadata ? jsonMetadata.thumb : undefined;
 		const description = 'description' in jsonMetadata ? jsonMetadata.description : undefined;
 		const attributes = 'attributes' in jsonMetadata ? jsonMetadata.attributes : undefined;
 
