@@ -811,6 +811,23 @@ describe('nfts.utils', () => {
 			expect(result).toBe(NftMediaStatusEnum.OK);
 		});
 
+		it('returns OK for valid gif under the size limit', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? '.gif;charset=utf-8'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/image.gif');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
 		it('returns INVALID_DATA for invalid URL', async () => {
 			const result = await getMediaStatus('not-a-url');
 

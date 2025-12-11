@@ -1,8 +1,8 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import type { EthereumNetwork } from '$eth/types/network';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { DecodedUrn } from '$lib/types/qr-code';
+import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 import { decodeQrCode, decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { generateUrn } from '$tests/mocks/qr-generator.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -45,7 +45,8 @@ describe('decodeUrn', () => {
 				amount
 			};
 			if (standard === 'ethereum' || standard === 'erc20') {
-				expectedResult.ethereumChainId = (token.network as EthereumNetwork).chainId.toString();
+				assertIsNetworkEthereum(token.network);
+				expectedResult.ethereumChainId = token.network.chainId.toString();
 			}
 			if (standard === 'erc20' && 'address' in token) {
 				expectedResult.functionName = 'transfer';
