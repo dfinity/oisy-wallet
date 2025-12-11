@@ -15,8 +15,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable, type QueryParams } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 
-metadataApi;
-
 vi.mock('$icp/api/ext-v2-token.api', () => ({
 	metadata: vi.fn()
 }));
