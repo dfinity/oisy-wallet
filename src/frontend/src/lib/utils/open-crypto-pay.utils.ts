@@ -369,12 +369,7 @@ export const validateERC20Transfer = ({
 		}
 	} = get(i18n);
 
-	if (
-		!isTokenErc20(token) ||
-		isNullish(destination) ||
-		isNullish(address) ||
-		isNullish(dfxValue)
-	) {
+	if (!isTokenErc20(token) || isNullish(destination) || isNullish(address) || isNullish(dfxValue)) {
 		throw new Error(data_is_incompleted);
 	}
 
