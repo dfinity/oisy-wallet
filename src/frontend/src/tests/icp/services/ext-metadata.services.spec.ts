@@ -115,7 +115,7 @@ describe('ext-metadata.services', () => {
 		});
 
 		it('should handle gracefully invalid JSON metadata', async () => {
-			vi.spyOn(JSON, 'parse').mockRejectedValue(new Error('Invalid JSON'));
+			vi.spyOn(JSON, 'parse').mockImplementation(() => { throw new Error('Invalid JSON'); });
 
 			await expect(getExtMetadata(mockParams)).resolves.toStrictEqual({
 				attributes: undefined,
