@@ -9,6 +9,7 @@
 
 <ContentWithToolbar styleClass="flex flex-col w-full">
 	<PaymentStatusHero status="failure" />
+
 	{#snippet toolbar()}
 		<Button fullWidth onclick={onClose}>{$i18n.scanner.text.try_again}</Button>
 	{/snippet}
