@@ -1,5 +1,11 @@
 [
 	{
+		"canisterId": "bzsui-sqaaa-aaaah-qce2a-cai",
+		"metadata": {
+			"name": "Poked Bots"
+		}
+	},
+	{
 		"canisterId": "gikg4-eaaaa-aaaam-qaieq-cai",
 		"metadata": {
 			"name": "Mutant Space Apes"
