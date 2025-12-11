@@ -28,14 +28,18 @@ export const mapExtNft = async ({
 
 	const defaultImageUrl = `https://${canisterId}.raw.icp0.io/?tokenid=${identifier}`;
 
-	const { imageUrl, thumbnailUrl, ...rest } = (await getExtMetadata({
+	const {
+		imageUrl: fetchedImageUrl,
+		thumbnailUrl: fetchedThumbnailUrl,
+		...rest
+	} = (await getExtMetadata({
 		canisterId,
 		tokenIdentifier: identifier,
 		identity
-	})) ?? {
-		imageUrl: defaultImageUrl,
-		thumbnailUrl: `${defaultImageUrl}&type=thumbnail`
-	};
+	})) ?? {};
+
+	const imageUrl = fetchedImageUrl ?? defaultImageUrl;
+	const thumbnailUrl = fetchedThumbnailUrl ?? `${defaultImageUrl}&type=thumbnail`;
 
 	const mediaStatus = {
 		image: await getMediaStatusOrCache(imageUrl),
