@@ -1,12 +1,10 @@
 import type { TokenIdentifier } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { metadata as metadataApi } from '$icp/api/ext-v2-token.api';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
-import type { NftMetadata } from '$lib/types/nft';
+import type { NftMetadataWithoutId } from '$lib/types/nft';
 import { isNullish, type QueryParams } from '@dfinity/utils';
 
-type MetadataWithoutId = Omit<NftMetadata, 'id'>;
-
-const fromJson = (metadata: string): MetadataWithoutId | undefined => {
+const fromJson = (metadata: string): NftMetadataWithoutId | undefined => {
 	try {
 		const jsonMetadata = JSON.parse(metadata);
 
@@ -28,7 +26,7 @@ const fromJson = (metadata: string): MetadataWithoutId | undefined => {
 	}
 };
 
-const fromBlob = (metadata: Uint8Array): MetadataWithoutId | undefined => {
+const fromBlob = (metadata: Uint8Array): NftMetadataWithoutId | undefined => {
 	try {
 		const decodedMetadata = new TextDecoder().decode(metadata);
 
@@ -42,7 +40,7 @@ export const getExtMetadata = async (
 	params: CanisterApiFunctionParamsWithCanisterId<
 		{ tokenIdentifier: TokenIdentifier } & QueryParams
 	>
-): Promise<MetadataWithoutId | undefined> => {
+): Promise<NftMetadataWithoutId | undefined> => {
 	const response = await metadataApi(params);
 
 	if (isNullish(response)) {
