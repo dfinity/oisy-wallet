@@ -9,6 +9,7 @@
 
 <ContentWithToolbar styleClass="flex flex-col w-full">
 	<PaymentStatusHero status="success" />
+	
 	{#snippet toolbar()}
 		<Button fullWidth onclick={onClose}>{$i18n.core.text.done}</Button>
 	{/snippet}
