@@ -269,7 +269,7 @@ export const getERC681Value = (uri: string): bigint | undefined => {
 		const value = params.get('value') ?? params.get('uint256');
 
 		if (isEmptyString(value)) {
-			return undefined;
+			return;
 		}
 
 		return BigInt(value);
