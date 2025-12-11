@@ -16,10 +16,14 @@ describe('nft.services', () => {
 		const mockTokenIndices2 = [4, 5];
 
 		const expected1 = await Promise.all(
-			mockTokenIndices1.map((index) => mapExtNft({ index, token: mockValidExtV2Token }))
+			mockTokenIndices1.map((index) =>
+				mapExtNft({ index, token: mockValidExtV2Token, identity: mockIdentity })
+			)
 		);
 		const expected2 = await Promise.all(
-			mockTokenIndices2.map((index) => mapExtNft({ index, token: mockValidExtV2Token2 }))
+			mockTokenIndices2.map((index) =>
+				mapExtNft({ index, token: mockValidExtV2Token2, identity: mockIdentity })
+			)
 		);
 		const expected = [...expected1, ...expected2];
 
