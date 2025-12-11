@@ -69,11 +69,11 @@ export const decodeQrCodeUrn = ({
 		if (isDFX && !isNaN(parseFloat(value))) {
 			return { [key]: value };
 		}
-    
+
 		if (!isNaN(parseFloat(value))) {
 			return { [key]: parseFloat(value) };
 		}
-    
+
 		return { [key]: value };
 	};
 
