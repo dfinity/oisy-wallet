@@ -32,7 +32,8 @@ import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
  * - For ETH: https://eips.ethereum.org/EIPS/eip-681
  * - For BTC: https://github.com/bitcoin/bips/blob/master/bip-0021.mediawiki
  *
- * @param {string} urn - The URN string to decode.
+ * @param {Object} params - The parameters object.
+ * @param {string} params.urn - The URN string to decode.
  * @returns {DecodedUrn | undefined} The decoded URN object, or undefined if the URN string does not match the expected pattern.
  */
 export const decodeQrCodeUrn = ({
@@ -46,7 +47,7 @@ export const decodeQrCodeUrn = ({
 
 	const match = urn.match(regex);
 	if (isNullish(match)) {
-		return undefined;
+		return;
 	}
 
 	const [_, prefix, destination, , networkId, , functionName, , queryString] = match;
@@ -68,9 +69,11 @@ export const decodeQrCodeUrn = ({
 		if (isDFX && !isNaN(parseFloat(value))) {
 			return { [key]: value };
 		}
+    
 		if (!isNaN(parseFloat(value))) {
 			return { [key]: parseFloat(value) };
 		}
+    
 		return { [key]: value };
 	};
 
@@ -87,7 +90,6 @@ export const decodeQrCodeUrn = ({
 			);
 		} catch (error: unknown) {
 			console.warn('Invalid query string:', error);
-			return undefined;
 		}
 	};
 
@@ -120,7 +122,7 @@ export const decodeQrCodeUrn = ({
 
 	if (!result.success) {
 		console.warn('QR code cannot be correctly parsed:', result.error);
-		return undefined;
+		return;
 	}
 	return result.data;
 };
