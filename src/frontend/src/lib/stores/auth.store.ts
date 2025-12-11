@@ -10,6 +10,7 @@ import {
 	TEST
 } from '$lib/constants/app.constants';
 import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
+import { InternetIdentityDomain } from '$lib/types/auth';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
@@ -25,7 +26,7 @@ export interface AuthStoreData {
 let authClient: Option<AuthClient>;
 
 export interface AuthSignInParams {
-	domain?: 'ic0.app' | 'internetcomputer.org';
+	domain?: InternetIdentityDomain;
 }
 
 export interface AuthStore extends Readable<AuthStoreData> {
@@ -99,7 +100,7 @@ const initAuthStore = (): AuthStore => {
 					? /apple/i.test(navigator?.vendor)
 						? `http://localhost:4943?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
 						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-					: `https://identity.${domain ?? 'internetcomputer.org'}`;
+					: `https://${domain ?? InternetIdentityDomain.VERSION_1_0}`;
 
 				await authClient.login({
 					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
