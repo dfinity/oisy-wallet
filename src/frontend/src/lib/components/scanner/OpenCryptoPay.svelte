@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import PayHero from '$lib/components/scanner/PayHero.svelte';
 	import ReceiptData from '$lib/components/scanner/PayReceiptData.svelte';
 	import SelectedTokenToPay from '$lib/components/scanner/open-crypto-pay/SelectedTokenToPay.svelte';
@@ -27,7 +28,6 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 
 	interface Props {
 		onSelectToken: () => void;
