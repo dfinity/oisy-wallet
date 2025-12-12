@@ -38,7 +38,7 @@ const findCustomToken = ({
  * @param {OptionIdentity} params.identity - The user's identity.
  * @returns {Promise<{ result: 'loaded' | 'skipped' | 'error' }>} The result of the operation.
  */
-export const autoLoadCustomToken = async ({
+export const autoLoadIcrcToken = async ({
 	icrcCustomTokens,
 	sendToken,
 	identity

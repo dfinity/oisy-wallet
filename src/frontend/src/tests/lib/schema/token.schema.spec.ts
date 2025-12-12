@@ -57,8 +57,8 @@ describe('token.schema', () => {
 			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
-		it('should validate "extV2" as a supported token standard', () => {
-			const validStandard = 'extV2';
+		it('should validate "ext" as a supported token standard', () => {
+			const validStandard = 'ext';
 
 			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});

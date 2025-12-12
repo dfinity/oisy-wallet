@@ -10,7 +10,7 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 	import type { IcCkToken } from '$icp/types/ic-token';
-	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
+	import { autoLoadErc20Token } from '$icp-eth/services/erc20-token.services';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalCkETHReceive } from '$lib/derived/modal.derived';
@@ -26,7 +26,7 @@
 	const sourceToken = $derived($ckEthereumTwinToken);
 
 	const openReceive = async (modalId: symbol) => {
-		const { result } = await autoLoadUserToken({
+		const { result } = await autoLoadErc20Token({
 			erc20UserTokens: $erc20UserTokens,
 			sendToken: $tokenWithFallback,
 			identity: $authIdentity

@@ -55,6 +55,7 @@
 
 	{#if isPrimaryIdentityVersion2}
 		<ButtonAuthenticateWithIndentityNumber
+			{fullWidth}
 			onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_1_0)}
 		/>
 	{/if}
