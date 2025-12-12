@@ -211,10 +211,11 @@ describe('nft.utils', () => {
 		it('should map NFT attributes correctly (input as list)', () => {
 			const mockAttributes: {
 				trait_type: string;
-				value?: Option<string | number>;
+				value?: Option<string | number | boolean>;
 			}[] = [
 				{ trait_type: 'Color', value: 'Blue' },
 				{ trait_type: 'Size', value: 'Large' },
+				{ trait_type: 'Tall', value: false },
 				{ trait_type: 'Arms', value: 2 },
 				{ trait_type: 'Legs', value: undefined },
 				{ trait_type: 'Hair', value: null },
@@ -226,6 +227,7 @@ describe('nft.utils', () => {
 			expect(mappedAttributes).toStrictEqual([
 				{ traitType: 'Color', value: 'Blue' },
 				{ traitType: 'Size', value: 'Large' },
+				{ traitType: 'Tall', value: 'false' },
 				{ traitType: 'Arms', value: '2' },
 				{ traitType: 'Legs' },
 				{ traitType: 'Hair' },
@@ -234,9 +236,10 @@ describe('nft.utils', () => {
 		});
 
 		it('should map NFT attributes correctly (input as object)', () => {
-			const mockAttributes: Record<string, Option<string | number>> = {
+			const mockAttributes: Record<string, Option<string | number | boolean>> = {
 				Color: 'Blue',
 				Size: 'Large',
+				Tall: false,
 				Arms: 2,
 				Legs: undefined,
 				Hair: null,
@@ -248,6 +251,7 @@ describe('nft.utils', () => {
 			expect(mappedAttributes).toStrictEqual([
 				{ traitType: 'Color', value: 'Blue' },
 				{ traitType: 'Size', value: 'Large' },
+				{ traitType: 'Tall', value: 'false' },
 				{ traitType: 'Arms', value: '2' },
 				{ traitType: 'Legs' },
 				{ traitType: 'Hair' },

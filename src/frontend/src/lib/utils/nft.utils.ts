@@ -95,9 +95,9 @@ export const mapNftAttributes = (
 	attributes:
 		| {
 				trait_type: string;
-				value?: Option<string | number>;
+				value?: Option<string | number | boolean>;
 		  }[]
-		| Record<string, Option<string | number>>
+		| Record<string, Option<string | number | boolean>>
 		| undefined
 		| null
 ): NftAttribute[] => {
