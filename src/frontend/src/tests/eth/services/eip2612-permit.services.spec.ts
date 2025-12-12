@@ -507,7 +507,7 @@ describe('EIP2612 Permit Services', () => {
 					value: mockValue,
 					identity: mockIdentity
 				})
-			).rejects.toThrow('Contract call failed');
+			).rejects.toThrowError('Contract call failed');
 		});
 
 		it('should throw error when signPrehash fails', async () => {
@@ -530,7 +530,7 @@ describe('EIP2612 Permit Services', () => {
 					value: mockValue,
 					identity: mockIdentity
 				})
-			).rejects.toThrow('Signing failed');
+			).rejects.toThrowError('Signing failed');
 		});
 	});
 });

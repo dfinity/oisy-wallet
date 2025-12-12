@@ -124,7 +124,7 @@ describe('erc-custom-tokens.services', () => {
 			const mockError = new Error('Failed to save tokens');
 			vi.mocked(saveCustomTokens).mockRejectedValueOnce(mockError);
 
-			await expect(saveErcCustomTokens(mockParams)).rejects.toThrow(mockError);
+			await expect(saveErcCustomTokens(mockParams)).rejects.toThrowError(mockError);
 
 			expect(saveCustomTokens).toHaveBeenCalledExactlyOnceWith({
 				tokens: expectedErcTokens,

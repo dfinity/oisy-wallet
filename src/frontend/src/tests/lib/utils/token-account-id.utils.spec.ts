@@ -69,7 +69,7 @@ describe('token-account-id.utils', () => {
 			// Create an empty object that doesn't match any valid TokenAccountId type
 			const invalidTokenAccountId = {} as TokenAccountId;
 
-			expect(() => getTokenAccountIdAddressString(invalidTokenAccountId)).toThrow();
+			expect(() => getTokenAccountIdAddressString(invalidTokenAccountId)).toThrowError();
 		});
 	});
 

@@ -46,7 +46,7 @@ describe('open-crypto-pay.utils', () => {
 		it('should decode LNURL to specific URL format', () => {
 			const result = decodeLNURL(mockLNURL);
 
-			expect(() => new URL(result)).not.toThrow();
+			expect(() => new URL(result)).not.toThrowError();
 
 			const url = new URL(result);
 
@@ -64,25 +64,25 @@ describe('open-crypto-pay.utils', () => {
 		it('should throw error for invalid LNURL format', () => {
 			const invalidLnurl = 'invalid-lnurl-string';
 
-			expect(() => decodeLNURL(invalidLnurl)).toThrow();
+			expect(() => decodeLNURL(invalidLnurl)).toThrowError();
 		});
 
 		it('should throw error for empty string', () => {
-			expect(() => decodeLNURL('')).toThrow();
+			expect(() => decodeLNURL('')).toThrowError();
 		});
 
 		it('should throw error for non-lnurl prefix', () => {
 			// Valid bech32 but wrong prefix
 			const btcAddress = 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq';
 
-			expect(() => decodeLNURL(btcAddress)).toThrow();
+			expect(() => decodeLNURL(btcAddress)).toThrowError();
 		});
 
 		it('should throw error for corrupted LNURL', () => {
 			// LNURL with some characters removed
 			const corruptedLnurl = 'lnurl1dp68gurn8ghj7ctsdyh8gct5wvhxxmmd';
 
-			expect(() => decodeLNURL(corruptedLnurl)).toThrow();
+			expect(() => decodeLNURL(corruptedLnurl)).toThrowError();
 		});
 
 		it('should decode and return valid UTF-8 string', () => {
@@ -1316,7 +1316,7 @@ describe('open-crypto-pay.utils', () => {
 				quote: null
 			} as unknown as OpenCryptoPayResponse;
 
-			expect(() => extractQuoteData(invalidResponse)).toThrow(
+			expect(() => extractQuoteData(invalidResponse)).toThrowError(
 				'Invalid OpenCryptoPay response data'
 			);
 		});
@@ -1327,7 +1327,7 @@ describe('open-crypto-pay.utils', () => {
 				quote: undefined
 			} as unknown as OpenCryptoPayResponse;
 
-			expect(() => extractQuoteData(invalidResponse)).toThrow(
+			expect(() => extractQuoteData(invalidResponse)).toThrowError(
 				'Invalid OpenCryptoPay response data'
 			);
 		});
@@ -1338,7 +1338,7 @@ describe('open-crypto-pay.utils', () => {
 				callback: null
 			} as unknown as OpenCryptoPayResponse;
 
-			expect(() => extractQuoteData(invalidResponse)).toThrow(
+			expect(() => extractQuoteData(invalidResponse)).toThrowError(
 				'Invalid OpenCryptoPay response data'
 			);
 		});
@@ -1349,7 +1349,7 @@ describe('open-crypto-pay.utils', () => {
 				callback: undefined
 			} as unknown as OpenCryptoPayResponse;
 
-			expect(() => extractQuoteData(invalidResponse)).toThrow(
+			expect(() => extractQuoteData(invalidResponse)).toThrowError(
 				'Invalid OpenCryptoPay response data'
 			);
 		});
@@ -1440,7 +1440,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: undefined,
 					fee: validFee
 				})
-			).toThrow('Missing required payment data from URN');
+			).toThrowError('Missing required payment data from URN');
 		});
 
 		it('should throw error when ethereumChainId is missing', () => {
@@ -1454,7 +1454,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: invalidData,
 					fee: validFee
 				})
-			).toThrow('Missing required payment data from URN');
+			).toThrowError('Missing required payment data from URN');
 		});
 
 		it('should throw error when ethereumChainId is undefined', () => {
@@ -1468,7 +1468,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: invalidData,
 					fee: validFee
 				})
-			).toThrow('Missing required payment data from URN');
+			).toThrowError('Missing required payment data from URN');
 		});
 
 		it('should throw error when value is missing', () => {
@@ -1482,7 +1482,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: invalidData,
 					fee: validFee
 				})
-			).toThrow('Missing required payment data from URN');
+			).toThrowError('Missing required payment data from URN');
 		});
 
 		it('should throw error when fee is undefined', () => {
@@ -1491,7 +1491,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: validDecodedData,
 					fee: undefined
 				})
-			).toThrow('Missing required payment data from URN');
+			).toThrowError('Missing required payment data from URN');
 		});
 
 		it('should preserve BigInt types', () => {

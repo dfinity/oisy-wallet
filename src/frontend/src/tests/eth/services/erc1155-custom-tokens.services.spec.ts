@@ -104,7 +104,7 @@ describe('erc1155-custom-tokens.services', () => {
 		it('should throw if the backend save fails', async () => {
 			vi.mocked(setManyCustomTokens).mockRejectedValueOnce(new Error('Backend save error'));
 
-			await expect(saveCustomTokens(mockParams)).rejects.toThrow('Backend save error');
+			await expect(saveCustomTokens(mockParams)).rejects.toThrowError('Backend save error');
 
 			expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsAddToken.SAVE);
 			expect(setManyCustomTokens).toHaveBeenCalledExactlyOnceWith({
@@ -120,7 +120,7 @@ describe('erc1155-custom-tokens.services', () => {
 		it('should throw if the backend load fails', async () => {
 			vi.mocked(loadCustomTokens).mockRejectedValueOnce(new Error('Backend load error'));
 
-			await expect(saveCustomTokens(mockParams)).rejects.toThrow('Backend load error');
+			await expect(saveCustomTokens(mockParams)).rejects.toThrowError('Backend load error');
 
 			expect(mockProgress).toHaveBeenCalledTimes(2);
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsAddToken.SAVE);

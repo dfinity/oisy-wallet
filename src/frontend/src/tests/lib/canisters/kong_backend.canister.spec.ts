@@ -129,7 +129,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swapAmounts(swapAmountsParams);
 
-			await expect(res).rejects.toThrow(new CanisterInternalError(errorResponse.Err));
+			await expect(res).rejects.toThrowError(new CanisterInternalError(errorResponse.Err));
 		});
 
 		it('should throw an error if swap_amounts throws', async () => {
@@ -143,7 +143,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swapAmounts(swapAmountsParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if swap_amounts returns an unexpected response', async () => {
@@ -156,7 +156,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swapAmounts(swapAmountsParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -195,7 +195,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swap(swapParams);
 
-			await expect(res).rejects.toThrow(new CanisterInternalError(errorResponse.Err));
+			await expect(res).rejects.toThrowError(new CanisterInternalError(errorResponse.Err));
 		});
 
 		it('should throw an error if swap_async throws', async () => {
@@ -209,7 +209,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swap(swapParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if swap_async returns an unexpected response', async () => {
@@ -222,7 +222,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swap(swapParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -251,7 +251,7 @@ describe('kong_backend.canister', () => {
 
 			const res = tokens();
 
-			await expect(res).rejects.toThrow(new CanisterInternalError(errorResponse.Err));
+			await expect(res).rejects.toThrowError(new CanisterInternalError(errorResponse.Err));
 		});
 
 		it('should throw an error if tokems throws', async () => {
@@ -265,7 +265,7 @@ describe('kong_backend.canister', () => {
 
 			const res = tokens();
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if tokens returns an unexpected response', async () => {
@@ -278,7 +278,7 @@ describe('kong_backend.canister', () => {
 
 			const res = tokens();
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 });

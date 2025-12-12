@@ -94,7 +94,7 @@ describe('exchange.services', () => {
 		it('should throw an error if the price query throws', async () => {
 			vi.mocked(simplePrice).mockRejectedValue(new Error('API error'));
 
-			await expect(exchangeRateUsdToCurrency(Currency.EUR)).rejects.toThrow('API error');
+			await expect(exchangeRateUsdToCurrency(Currency.EUR)).rejects.toThrowError('API error');
 		});
 	});
 

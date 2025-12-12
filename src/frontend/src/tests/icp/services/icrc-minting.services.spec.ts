@@ -60,7 +60,7 @@ describe('icrc-minting.services', () => {
 			const error = new Error('Test error');
 			vi.spyOn(icrcLedgerApi, 'getMintingAccount').mockRejectedValueOnce(error);
 
-			await expect(isUserMintingAccount(params)).rejects.toThrow(error);
+			await expect(isUserMintingAccount(params)).rejects.toThrowError(error);
 		});
 
 		it('should work with subaccounts in IcrcAccount', async () => {
