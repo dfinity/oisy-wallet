@@ -85,10 +85,10 @@ export default defineConfig(
 				// TODO: increase the thresholds slowly up to an acceptable 90% at least
 				thresholds: {
 					autoUpdate: true,
-					statements: 71.75,
+					statements: 71.8,
 					branches: 60.1,
 					functions: 67.5,
-					lines: 75.94
+					lines: 76.0
 				}
 			}
 		}
