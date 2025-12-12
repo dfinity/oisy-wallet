@@ -35,6 +35,12 @@ export type SaveCustomTokenWithKey = UserTokenState &
 		| TokenVariant<'ExtV2', ExtSaveCustomToken>
 	);
 
+export type SaveCustomErcVariant = UserTokenState &
+	TokenVariant<'Erc20' | 'Erc721' | 'Erc1155', ErcSaveCustomToken>;
+export type SaveCustomErc721Variant = UserTokenState & TokenVariant<'Erc721', ErcSaveCustomToken>;
+export type SaveCustomErc1155Variant = UserTokenState & TokenVariant<'Erc1155', ErcSaveCustomToken>;
+export type SaveCustomExtVariant = UserTokenState & TokenVariant<'ExtV2', ExtSaveCustomToken>;
+
 export type CustomToken<T extends Token> = TokenToggleable<T>;
 
 export type LoadCustomTokenParams = QueryAndUpdateRequestParams & { useCache?: boolean };

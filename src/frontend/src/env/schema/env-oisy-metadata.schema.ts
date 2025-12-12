@@ -18,5 +18,6 @@ export const OisyMetadataSchema = z.object({
 	OISY_FAQ_URL: z.url(),
 	OISY_ACCESS_CONTROL_URL: z.url(),
 	OISY_NFT_DOCS_URL: z.url(),
-	OISY_HOW_TO_CONVERT_DOCS_URL: z.url()
+	OISY_HOW_TO_CONVERT_DOCS_URL: z.url(),
+	OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL: z.url()
 });

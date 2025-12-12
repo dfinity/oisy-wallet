@@ -114,6 +114,7 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
+		sign_in_with_identity_number: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
@@ -724,8 +725,11 @@ interface I18nScanner {
 		select_token_to_pay: string;
 		pay_at_successful: string;
 		pay_at_failure: string;
+		try_again: string;
+		payment_confirmed: string;
+		payment_failed: string;
 	};
-	error: { code_link_is_not_valid: string };
+	error: { code_link_is_not_valid: string; data_is_incompleted: string };
 }
 
 interface I18nConvert {
@@ -848,6 +852,12 @@ interface I18nPay {
 		creating_transaction: string;
 		signing_transaction: string;
 		paying: string;
+	};
+	error: {
+		data_is_incompleted: string;
+		amount_does_not_match: string;
+		recipient_address_is_not_valid: string;
+		token_address_mismatch: string;
 	};
 	alt: { pay: string; where_you_can_pay: string };
 }
@@ -1418,6 +1428,7 @@ interface I18nTerms_of_use {
 		det: { article: string; possessive: string };
 		title: string;
 		instruction: string;
+		instruction_two_buttons: string;
 		body: string;
 	};
 	alt: { terms_of_use: string };

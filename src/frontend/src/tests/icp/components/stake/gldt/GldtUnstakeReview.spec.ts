@@ -93,7 +93,7 @@ describe('GldtUnstakeReview', () => {
 			context: mockContext()
 		});
 
-		expect(() => getByText(en.stake.text.included_dissolve_fee)).toThrow();
+		expect(() => getByText(en.stake.text.included_dissolve_fee)).toThrowError();
 	});
 
 	it('should display correct network name', () => {

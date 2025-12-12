@@ -139,7 +139,7 @@ describe('erc1155.services', () => {
 			const mockError = new Error('Error loading metadata');
 			vi.mocked(mockMetadata).mockRejectedValue(mockError);
 
-			await expect(loadErc1155Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc1155Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 
 			expect(get(erc1155CustomTokensStore)).toStrictEqual([]);
 
@@ -185,7 +185,7 @@ describe('erc1155.services', () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadErc1155Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc1155Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 	});
 

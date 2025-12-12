@@ -1,12 +1,10 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import * as extTokenApi from '$icp/api/ext-v2-token.api';
-import * as extCustomTokens from '$icp/services/ext-custom-tokens.services';
 import { listCustomTokens } from '$lib/api/backend.api';
 import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 import * as saveCustomTokens from '$lib/services/save-custom-tokens.services';
@@ -27,7 +25,6 @@ vi.mock('$lib/api/backend.api', () => ({
 describe('LoaderCollections', () => {
 	let alchemyProvidersSpy: MockInstance;
 	let extGetTokensByOwnerSpy: MockInstance;
-	let extCustomTokensSpy: MockInstance;
 	let saveCustomTokensSpy: MockInstance;
 
 	const mockGetTokensForOwner = vi.fn();
@@ -44,9 +41,6 @@ describe('LoaderCollections', () => {
 
 		extGetTokensByOwnerSpy = vi.spyOn(extTokenApi, 'getTokensByOwner');
 		extGetTokensByOwnerSpy.mockResolvedValue([]);
-
-		extCustomTokensSpy = vi.spyOn(extCustomTokens, 'saveCustomTokens');
-		extCustomTokensSpy.mockResolvedValue(undefined);
 
 		saveCustomTokensSpy = vi.spyOn(saveCustomTokens, 'saveCustomTokens');
 		saveCustomTokensSpy.mockResolvedValue(undefined);
@@ -102,7 +96,7 @@ describe('LoaderCollections', () => {
 
 		await waitFor(() => {
 			expect(extGetTokensByOwnerSpy).not.toHaveBeenCalled();
-			expect(extCustomTokensSpy).not.toHaveBeenCalled();
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 		});
 	});
 
@@ -125,12 +119,12 @@ describe('LoaderCollections', () => {
 				});
 			});
 
-			expect(extCustomTokensSpy).toHaveBeenCalledExactlyOnceWith({
+			expect(saveCustomTokensSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						canisterId: EXT_BUILTIN_TOKENS[0].canisterId,
-						network: ICP_NETWORK,
+						networkKey: 'ExtV2',
 						enabled: true
 					}
 				]
@@ -173,7 +167,7 @@ describe('LoaderCollections', () => {
 				});
 			});
 
-			expect(extCustomTokensSpy).not.toHaveBeenCalled();
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 
 			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
 		});
@@ -257,7 +251,7 @@ describe('LoaderCollections', () => {
 				});
 			});
 
-			expect(extCustomTokensSpy).not.toHaveBeenCalled();
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 
 			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
 		});
@@ -283,7 +277,7 @@ describe('LoaderCollections', () => {
 				});
 			});
 
-			expect(extCustomTokensSpy).not.toHaveBeenCalled();
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
 				`Error fetching EXT tokens from canister ${EXT_BUILTIN_TOKENS[0].canisterId}:`,
