@@ -12,7 +12,13 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { pay } from '$lib/services/open-crypto-pay.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -21,12 +27,6 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import {
-		PLAUSIBLE_EVENT_CONTEXTS,
-		PLAUSIBLE_EVENT_EVENTS_KEYS,
-		PLAUSIBLE_EVENTS
-	} from '$lib/enums/plausible';
-	import { trackEvent } from '$lib/services/analytics.services';
 
 	interface Props {
 		onSelectToken: () => void;
