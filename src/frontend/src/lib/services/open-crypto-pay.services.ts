@@ -176,6 +176,7 @@ const preparePaymentTransaction = async ({
 	from,
 	quoteId,
 	callback,
+	amount,
 	progress
 }: Omit<PayParams, 'identity' | 'data'>): Promise<EthSignTransactionRequest> => {
 	const uri = await fetchPaymentUri({
@@ -188,7 +189,7 @@ const preparePaymentTransaction = async ({
 	progress(ProgressStepsPayment.CREATE_TRANSACTION);
 
 	const decodedData = decodeQrCodeUrn({ urn: uri });
-	const validatedData = validateDecodedData({ decodedData, fee: token.fee });
+	const validatedData = validateDecodedData({ decodedData, token, amount, uri });
 	const nonce = await getNonce({ from, networkId: token.network.id });
 	const baseParams = buildTransactionBaseParams({ from, nonce, validatedData });
 
@@ -202,6 +203,7 @@ export const pay = async ({
 	data,
 	from,
 	identity,
+	amount,
 	progress
 }: Omit<PayParams, 'quoteId' | 'callback'>): Promise<void> => {
 	const { quoteId, callback } = extractQuoteData(data);
@@ -211,7 +213,8 @@ export const pay = async ({
 		from,
 		quoteId,
 		callback,
-		progress
+		progress,
+		amount
 	});
 
 	progress(ProgressStepsPayment.SIGN_TRANSACTION);

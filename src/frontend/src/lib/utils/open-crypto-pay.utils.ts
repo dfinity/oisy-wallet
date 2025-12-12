@@ -1,4 +1,5 @@
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enrichEthEvmToken } from '$eth/utils/token.utils';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -237,35 +238,39 @@ export const extractQuoteData = (data: OpenCryptoPayResponse) => {
 
 export const validateDecodedData = ({
 	decodedData,
-	fee
+	token,
+	amount,
+	uri
 }: {
 	decodedData: DecodedUrn | undefined;
-	fee: PayableTokenWithConvertedAmount['fee'];
+	token: PayableTokenWithConvertedAmount;
+	amount: bigint;
+	uri: string;
 }): ValidatedDFXPaymentData => {
-	const { destination, ethereumChainId, value } = decodedData ?? {};
-	const { feeData, estimatedGasLimit } = fee ?? {};
+	const { feeData, estimatedGasLimit } = token.fee ?? {};
 
 	if (
-		isNullish(ethereumChainId) ||
-		isNullish(value) ||
-		isNullish(destination) ||
 		isNullish(feeData?.maxFeePerGas) ||
 		isNullish(feeData?.maxPriorityFeePerGas) ||
-		isNullish(estimatedGasLimit)
+		isNullish(estimatedGasLimit) ||
+		isNullish(decodedData)
 	) {
 		throw new Error(get(i18n).scanner.error.data_is_incompleted);
 	}
 
-	return {
-		destination,
-		ethereumChainId: BigInt(ethereumChainId),
-		value: BigInt(value),
-		feeData: {
-			maxFeePerGas: feeData.maxFeePerGas,
-			maxPriorityFeePerGas: feeData.maxPriorityFeePerGas
-		},
-		estimatedGasLimit
+	const params = {
+		decodedData,
+		amount,
+		maxFeePerGas: feeData.maxFeePerGas,
+		maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+		estimatedGasLimit,
+		token,
+		uri
 	};
+
+	return isDefaultEthereumToken(token)
+		? validateNativeTransfer(params)
+		: validateERC20Transfer(params);
 };
 
 export const getERC681Value = (uri: string): bigint | undefined => {
