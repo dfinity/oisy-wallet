@@ -22,6 +22,7 @@ import { isEthAddress } from '$lib/utils/account.utils';
 import { isNetworkEthereum, isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
+import Decimal from 'decimal.js';
 import { get } from 'svelte/store';
 
 /**
@@ -288,13 +289,13 @@ export const getERC681Value = (uri: string): bigint | undefined => {
 		}
 
 		if (value.includes('e') || value.includes('E') || value.includes('.')) {
-			const number = parseFloat(value);
+			const decimal = new Decimal(value);
 
-			if (!isFinite(number)) {
+			if (!decimal.isFinite()) {
 				return;
 			}
 
-			return BigInt(number);
+			return BigInt(decimal.toString());
 		}
 
 		return BigInt(value);
