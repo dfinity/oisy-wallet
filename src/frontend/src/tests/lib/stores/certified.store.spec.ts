@@ -57,7 +57,7 @@ describe('certified.store', () => {
 			});
 
 			it('should not throw an error when resetting an unknown tokenId', () => {
-				expect(() => mockStore.reset(SEPOLIA_TOKEN_ID)).not.toThrow();
+				expect(() => mockStore.reset(SEPOLIA_TOKEN_ID)).not.toThrowError();
 			});
 		});
 	});

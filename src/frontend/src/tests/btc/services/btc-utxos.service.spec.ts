@@ -298,7 +298,7 @@ describe('btc-utxos.service', () => {
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockRejectedValue(apiError);
 
-			await expect(prepareBtcSend(defaultParams)).rejects.toThrow('Backend API error');
+			await expect(prepareBtcSend(defaultParams)).rejects.toThrowError('Backend API error');
 		});
 
 		it('should propagate errors from bitcoin API', async () => {
@@ -307,7 +307,7 @@ describe('btc-utxos.service', () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
 			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockRejectedValue(bitcoinApiError);
 
-			await expect(prepareBtcSend(defaultParams)).rejects.toThrow('Bitcoin API error');
+			await expect(prepareBtcSend(defaultParams)).rejects.toThrowError('Bitcoin API error');
 		});
 
 		it('should handle insufficient balance for fee scenario', async () => {
@@ -375,7 +375,7 @@ describe('btc-utxos.service', () => {
 					identity: mockIdentity,
 					network: mockNetwork
 				})
-			).rejects.toThrow('No fee percentiles available - cannot calculate transaction fee');
+			).rejects.toThrowError('No fee percentiles available - cannot calculate transaction fee');
 		});
 
 		it('should throw error when fee percentiles is null', async () => {
@@ -388,7 +388,7 @@ describe('btc-utxos.service', () => {
 					identity: mockIdentity,
 					network: mockNetwork
 				})
-			).rejects.toThrow('No fee percentiles available - cannot calculate transaction fee');
+			).rejects.toThrowError('No fee percentiles available - cannot calculate transaction fee');
 		});
 
 		it('should return minimum fee rate when calculated fee is too low', async () => {
@@ -582,7 +582,7 @@ describe('btc-utxos.service', () => {
 					identity: mockIdentity,
 					network: mockNetwork
 				})
-			).rejects.toThrow('Backend API error');
+			).rejects.toThrowError('Backend API error');
 		});
 
 		it('should handle very small non-zero fee that rounds to zero', async () => {
