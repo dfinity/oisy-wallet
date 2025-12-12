@@ -26,7 +26,7 @@ import type {
 	PayableToken,
 	PayableTokenWithConvertedAmount,
 	TransactionBaseParams,
-	ValidatedPaymentData
+	ValidatedDFXPaymentData
 } from '$lib/types/open-crypto-pay';
 import { extractQuoteData } from '$lib/utils/open-crypto-pay.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
@@ -139,21 +139,21 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should throw error for empty code', async () => {
-			await expect(processOpenCryptoPayCode('')).rejects.toThrowError('QR Code cannot be empty');
+			await expect(processOpenCryptoPayCode('')).rejects.toThrow('QR Code cannot be empty');
 		});
 
 		it('should throw error for whitespace-only code', async () => {
-			await expect(processOpenCryptoPayCode('   ')).rejects.toThrowError('QR Code cannot be empty');
+			await expect(processOpenCryptoPayCode('   ')).rejects.toThrow('QR Code cannot be empty');
 		});
 
 		it('should throw error for invalid URL format', async () => {
-			await expect(processOpenCryptoPayCode('not-a-valid-url')).rejects.toThrowError();
+			await expect(processOpenCryptoPayCode('not-a-valid-url')).rejects.toThrow();
 		});
 
 		it('should throw error for missing lightning parameter', async () => {
 			const codeWithoutLightning = 'https://app.dfx.swiss/pl/?other=param';
 
-			await expect(processOpenCryptoPayCode(codeWithoutLightning)).rejects.toThrowError(
+			await expect(processOpenCryptoPayCode(codeWithoutLightning)).rejects.toThrow(
 				'Missing lightning parameter'
 			);
 		});
@@ -161,7 +161,7 @@ describe('open-crypto-pay.service', () => {
 		it('should throw error when LNURL decoding fails', async () => {
 			const codeWithInvalidLnurl = 'https://app.dfx.swiss/pl/?lightning=INVALID_LNURL';
 
-			await expect(processOpenCryptoPayCode(codeWithInvalidLnurl)).rejects.toThrowError(
+			await expect(processOpenCryptoPayCode(codeWithInvalidLnurl)).rejects.toThrow(
 				'Failed to decode lightning parameter'
 			);
 		});
@@ -173,9 +173,7 @@ describe('open-crypto-pay.service', () => {
 
 			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 
-			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrowError(
-				'API request failed: 404'
-			);
+			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrow('API request failed: 404');
 
 			expect(fetchOpenCryptoPay).toHaveBeenCalledExactlyOnceWith(
 				'https://api.dfx.swiss/v1/lnurlp/pl_test123'
@@ -189,7 +187,7 @@ describe('open-crypto-pay.service', () => {
 
 			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 
-			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrowError('Network error');
+			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrow('Network error');
 			expect(fetchOpenCryptoPay).toHaveBeenCalledOnce();
 		});
 
@@ -374,10 +372,10 @@ describe('open-crypto-pay.service', () => {
 	describe('buildTransactionBaseParams', () => {
 		const userAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as EthAddress;
 
-		const validatedData: ValidatedPaymentData = {
+		const validatedData: ValidatedDFXPaymentData = {
 			destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-			ethereumChainId: '1',
-			value: 1000000000000,
+			ethereumChainId: 1n,
+			value: 1000000000000n,
 			feeData: {
 				maxFeePerGas: 12n,
 				maxPriorityFeePerGas: 7n
@@ -474,7 +472,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should handle different chain IDs', () => {
-			const chainIds = ['1', '137', '56', '42161'];
+			const chainIds = [1n, 137n, 56n, 42161n];
 
 			chainIds.forEach((chainId) => {
 				const data = { ...validatedData, ethereumChainId: chainId };
@@ -490,7 +488,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should handle zero value', () => {
-			const data = { ...validatedData, value: 0 };
+			const data = { ...validatedData, value: ZERO };
 
 			const result = buildTransactionBaseParams({
 				from: userAddress,
@@ -502,7 +500,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should preserve BigInt fee values', () => {
-			const data: ValidatedPaymentData = {
+			const data: ValidatedDFXPaymentData = {
 				...validatedData,
 				feeData: {
 					maxFeePerGas: 999n,
@@ -523,7 +521,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should preserve BigInt gas limit', () => {
-			const data: ValidatedPaymentData = {
+			const data: ValidatedDFXPaymentData = {
 				...validatedData,
 				estimatedGasLimit: 50000n
 			};
@@ -725,7 +723,7 @@ describe('open-crypto-pay.service', () => {
 					baseParams,
 					token: mockToken
 				})
-			).rejects.toThrowError('Failed to prepare transaction');
+			).rejects.toThrow('Failed to prepare transaction');
 		});
 	});
 
@@ -802,7 +800,8 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				progress: mockProgress
+				progress: mockProgress,
+				amount: 100000n
 			});
 
 			expect(extractQuoteData).toHaveBeenCalledExactlyOnceWith(mockData);
@@ -839,7 +838,8 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				progress: mockProgress
+				progress: mockProgress,
+				amount: 100000n
 			});
 
 			expect(extractQuoteData).toHaveBeenCalledWith(mockData);
@@ -871,7 +871,8 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				progress: mockProgress
+				progress: mockProgress,
+				amount: 100000n
 			});
 
 			expect(fetchOpenCryptoPay).toHaveBeenCalledWith(
@@ -905,7 +906,8 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				progress: mockProgress
+				progress: mockProgress,
+				amount: 100000n
 			});
 
 			expect(signTransaction).toHaveBeenCalledWith(
@@ -941,7 +943,8 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				progress: mockProgress
+				progress: mockProgress,
+				amount: 100000n
 			});
 
 			expect(fetchOpenCryptoPay).toHaveBeenNthCalledWith(
@@ -964,7 +967,8 @@ describe('open-crypto-pay.service', () => {
 					data: mockData,
 					from,
 					identity: mockIdentity,
-					progress: mockProgress
+					progress: mockProgress,
+					amount: 100000n
 				})
 			).rejects.toThrowError('Payment failed');
 		});
@@ -995,7 +999,8 @@ describe('open-crypto-pay.service', () => {
 					data: mockData,
 					from,
 					identity: mockIdentity,
-					progress: mockProgress
+					progress: mockProgress,
+					amount: 100000n
 				})
 			).rejects.toThrowError('Signing failed');
 

@@ -1,4 +1,5 @@
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enrichEthEvmToken } from '$eth/utils/token.utils';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -13,8 +14,7 @@ import type {
 	PayableTokenWithFees,
 	PaymentMethodData,
 	PrepareTokensParams,
-	ValidatedDFXPaymentData,
-	ValidatedPaymentData
+	ValidatedDFXPaymentData
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
@@ -237,35 +237,45 @@ export const extractQuoteData = (data: OpenCryptoPayResponse) => {
 
 export const validateDecodedData = ({
 	decodedData,
-	fee
+	token,
+	amount,
+	uri
 }: {
 	decodedData: DecodedUrn | undefined;
-	fee: PayableTokenWithConvertedAmount['fee'];
-}): ValidatedPaymentData => {
-	const { destination, ethereumChainId, value } = decodedData ?? {};
-	const { feeData, estimatedGasLimit } = fee ?? {};
+	token: PayableTokenWithConvertedAmount;
+	amount: bigint;
+	uri: string;
+}): ValidatedDFXPaymentData => {
+	const { feeData, estimatedGasLimit } = token.fee ?? {};
 
 	if (
-		isNullish(ethereumChainId) ||
-		isNullish(value) ||
-		isNullish(destination) ||
 		isNullish(feeData?.maxFeePerGas) ||
 		isNullish(feeData?.maxPriorityFeePerGas) ||
-		isNullish(estimatedGasLimit)
+		isNullish(estimatedGasLimit) ||
+		isNullish(decodedData)
 	) {
-		throw new Error('Missing required payment data from URN');
+		throw new Error(get(i18n).scanner.error.data_is_incompleted);
 	}
 
-	return {
-		destination,
-		ethereumChainId,
-		value,
-		feeData: {
-			maxFeePerGas: feeData.maxFeePerGas,
-			maxPriorityFeePerGas: feeData.maxPriorityFeePerGas
-		},
-		estimatedGasLimit
-	};
+	return isDefaultEthereumToken(token)
+		? validateNativeTransfer({
+				decodedData,
+				amount,
+				maxFeePerGas: feeData.maxFeePerGas,
+				maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+				estimatedGasLimit,
+				token,
+				uri
+			})
+		: validateERC20Transfer({
+				decodedData,
+				token,
+				amount,
+				maxFeePerGas: feeData.maxFeePerGas,
+				maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+				estimatedGasLimit,
+				uri
+			});
 };
 
 export const getERC681Value = (uri: string): bigint | undefined => {

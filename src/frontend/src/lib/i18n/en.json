@@ -933,7 +933,8 @@
 			"try_again": "Try again"
 		},
 		"error": {
-			"code_link_is_not_valid": "Code/link is not valid"
+			"code_link_is_not_valid": "Code/link is not valid",
+			"data_is_incompleted": "The received data is incomplete. Some required details are missing."
 		}
 	},
 	"convert": {
