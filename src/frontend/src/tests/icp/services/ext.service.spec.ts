@@ -95,7 +95,7 @@ describe('ext.services', () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadExtTokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadExtTokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 	});
 

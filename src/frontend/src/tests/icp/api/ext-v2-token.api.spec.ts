@@ -44,9 +44,9 @@ describe('ext-v2-token.api', () => {
 		});
 
 		it('should throw an error if identity is nullish', async () => {
-			await expect(transactions({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(transactions({ ...params, identity: undefined })).rejects.toThrowError();
 
-			await expect(transactions({ ...params, identity: null })).rejects.toThrow();
+			await expect(transactions({ ...params, identity: null })).rejects.toThrowError();
 		});
 	});
 
@@ -149,9 +149,9 @@ describe('ext-v2-token.api', () => {
 		});
 
 		it('should raise an error if identity is nullish', async () => {
-			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(transfer({ ...params, identity: undefined })).rejects.toThrowError();
 
-			await expect(transfer({ ...params, identity: null })).rejects.toThrow();
+			await expect(transfer({ ...params, identity: null })).rejects.toThrowError();
 
 			expect(tokenCanisterMock.transfer).not.toHaveBeenCalled();
 		});
@@ -181,9 +181,9 @@ describe('ext-v2-token.api', () => {
 		});
 
 		it('should raise an error if identity is nullish', async () => {
-			await expect(metadata({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(metadata({ ...params, identity: undefined })).rejects.toThrowError();
 
-			await expect(metadata({ ...params, identity: null })).rejects.toThrow();
+			await expect(metadata({ ...params, identity: null })).rejects.toThrowError();
 
 			expect(tokenCanisterMock.metadata).not.toHaveBeenCalled();
 		});

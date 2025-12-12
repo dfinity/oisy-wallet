@@ -18,6 +18,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { InternetIdentityDomain } from '$lib/types/auth';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -31,7 +32,7 @@
 	const onLegacySignIn = async () => {
 		onDone();
 
-		await signIn({ domain: 'ic0.app' });
+		await signIn({ domain: InternetIdentityDomain.VERSION_1_0_LEGACY });
 	};
 </script>
 

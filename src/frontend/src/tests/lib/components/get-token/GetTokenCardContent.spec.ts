@@ -42,7 +42,7 @@ describe('GetTokenCardContent', () => {
 			props
 		});
 
-		expect(() => getByText(ETHEREUM_TOKEN.symbol)).toThrow();
+		expect(() => getByText(ETHEREUM_TOKEN.symbol)).toThrowError();
 	});
 
 	it('should not display balance value if it is zero', () => {
@@ -53,7 +53,7 @@ describe('GetTokenCardContent', () => {
 			}
 		});
 
-		expect(() => getByText(ETHEREUM_TOKEN.symbol)).toThrow();
+		expect(() => getByText(ETHEREUM_TOKEN.symbol)).toThrowError();
 	});
 
 	it('displays balance value correctly if exchange is available', () => {

@@ -60,7 +60,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(retrieveBtc({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(retrieveBtc({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -87,7 +87,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(updateBalance({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(updateBalance({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -125,7 +125,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(minterInfo({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(minterInfo({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -150,7 +150,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(getBtcAddress({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(getBtcAddress({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -206,7 +206,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(estimateFee({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(estimateFee({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -247,7 +247,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(withdrawalStatuses({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(withdrawalStatuses({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -274,7 +274,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(getKnownUtxos({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(getKnownUtxos({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 });

@@ -117,6 +117,7 @@
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
+			"sign_in_with_identity_number": "",
 			"asset_types": "管理 BTC、SOL、ETH、ICP 等多种资产",
 			"instant_and_private": "内置 AI 助手 — 隐私保护为标准配置",
 			"advanced_cryptography": "先进加密技术保护 — 100% 链上"
@@ -929,10 +930,14 @@
 			"tokens_available": "",
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1063,6 +1068,12 @@
 			"creating_transaction": "",
 			"signing_transaction": "",
 			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1774,6 +1785,7 @@
 			},
 			"title": "",
 			"instruction": "点击此按钮即表示你同意$link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
