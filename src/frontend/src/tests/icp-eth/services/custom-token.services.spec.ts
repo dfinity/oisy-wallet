@@ -1,5 +1,5 @@
 import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/networks/networks.icrc.env';
-import { autoLoadCustomToken, setCustomToken } from '$icp-eth/services/custom-token.services';
+import { autoLoadIcrcToken, setCustomToken } from '$icp-eth/services/icrc-token.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { BackendCanister } from '$lib/canisters/backend.canister';
@@ -21,7 +21,7 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
-describe('custom-token.services', () => {
+describe('icrc-token.services', () => {
 	const backendCanisterMock = mock<BackendCanister>();
 	const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 
@@ -46,7 +46,7 @@ describe('custom-token.services', () => {
 		};
 
 		it('should return "skipped" when the token standard does not match', async () => {
-			const result = await autoLoadCustomToken({
+			const result = await autoLoadIcrcToken({
 				icrcCustomTokens: mockIcrcCustomTokens,
 				sendToken: mockValidToken,
 				identity: mockIdentity
@@ -77,7 +77,7 @@ describe('custom-token.services', () => {
 				const [first, ...rest] = customTokens;
 				const icrcCustomTokens = [{ ...first, indexCanisterId }, ...rest];
 
-				const { result } = await autoLoadCustomToken({
+				const { result } = await autoLoadIcrcToken({
 					icrcCustomTokens,
 					sendToken: mockSendToken,
 					identity: mockIdentity
@@ -159,7 +159,7 @@ describe('custom-token.services', () => {
 						['icrc1:fee', { Nat: mockValidSendToken.fee }]
 					]);
 
-					const { result } = await autoLoadCustomToken({
+					const { result } = await autoLoadIcrcToken({
 						icrcCustomTokens: mockIcrcCustomTokens,
 						sendToken: mockValidSendToken,
 						identity: mockIdentity
@@ -199,7 +199,7 @@ describe('custom-token.services', () => {
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([]);
 
-				const { result } = await autoLoadCustomToken({
+				const { result } = await autoLoadIcrcToken({
 					icrcCustomTokens: mockIcrcCustomTokens,
 					sendToken: mockValidSendToken,
 					identity: mockIdentity
@@ -219,7 +219,7 @@ describe('custom-token.services', () => {
 				const err = new Error('test');
 				backendCanisterMock.listCustomTokens.mockRejectedValue(err);
 
-				const { result } = await autoLoadCustomToken({
+				const { result } = await autoLoadIcrcToken({
 					icrcCustomTokens: mockIcrcCustomTokens,
 					sendToken: mockValidSendToken,
 					identity: mockIdentity
@@ -256,7 +256,7 @@ describe('custom-token.services', () => {
 					const err = new Error('test');
 					ledgerCanisterMock.metadata.mockRejectedValue(err);
 
-					const { result } = await autoLoadCustomToken({
+					const { result } = await autoLoadIcrcToken({
 						icrcCustomTokens: mockIcrcCustomTokens,
 						sendToken: mockValidSendToken,
 						identity: mockIdentity

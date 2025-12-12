@@ -6,7 +6,7 @@
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
-	import { autoLoadCustomToken } from '$icp-eth/services/custom-token.services';
+	import { autoLoadIcrcToken } from '$icp-eth/services/icrc-token.services';
 	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
@@ -73,7 +73,7 @@
 			return;
 		}
 
-		const { result: resultCustomToken } = await autoLoadCustomToken({
+		const { result: resultCustomToken } = await autoLoadIcrcToken({
 			icrcCustomTokens: $icrcTokens,
 			sendToken: $tokenWithFallback,
 			identity: $authIdentity

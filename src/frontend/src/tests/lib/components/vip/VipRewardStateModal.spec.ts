@@ -1,5 +1,5 @@
 import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
-import { setCustomToken } from '$icp-eth/services/custom-token.services';
+import { setCustomToken } from '$icp-eth/services/icrc-token.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
