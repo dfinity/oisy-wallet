@@ -929,7 +929,8 @@
 			"tokens_available": "",
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"pay_at_failure": "",
+			"try_again": ""
 		},
 		"error": {
 			"code_link_is_not_valid": ""
