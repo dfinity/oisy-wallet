@@ -274,12 +274,22 @@ export const getERC681Value = (uri: string): bigint | undefined => {
 		const value = params.get('value') ?? params.get('uint256');
 
 		if (isEmptyString(value)) {
-			return undefined;
+			return;
+		}
+
+		if (value.includes('e') || value.includes('E') || value.includes('.')) {
+			const number = parseFloat(value);
+
+			if (!isFinite(number)) {
+				return;
+			}
+
+			return BigInt(number);
 		}
 
 		return BigInt(value);
-	} catch {
-		return undefined;
+	} catch (_: unknown) {
+		// If it is not parseable, we can handle a nullish value
 	}
 };
 
@@ -369,12 +379,7 @@ export const validateERC20Transfer = ({
 		}
 	} = get(i18n);
 
-	if (
-		!isTokenErc20(token) ||
-		isNullish(destination) ||
-		isNullish(address) ||
-		isNullish(dfxValue)
-	) {
+	if (!isTokenErc20(token) || isNullish(destination) || isNullish(address) || isNullish(dfxValue)) {
 		throw new Error(data_is_incompleted);
 	}
 
