@@ -74,14 +74,14 @@
 			<TokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
 		{:else if currentStep?.name === WizardStepsScanner.PAYING}
 			<OpenCryptoPayProgress {payProgressStep} />
-		{:else if currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
+		{:else if currentStep?.name === WizardStepsScanner.PAYMENT_FAILED}
 			<PaymentFailed
 				onClose={() => {
 					reset();
 					goToStep(WizardStepsScanner.SCAN);
 				}}
 			/>
-		{:else if currentStep?.name === WizardStepsScanner.PAYMENT_FAILED}
+		{:else if currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
 			<PaymentSucceeded {onClose} />
 		{/if}
 	{/key}
