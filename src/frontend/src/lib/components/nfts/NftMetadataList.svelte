@@ -168,7 +168,8 @@
 	{#if nonNullish(nft?.attributes) && nft.attributes.length > 0}
 		<ListItem styleClass="text-tertiary">{$i18n.nfts.text.item_traits}</ListItem>
 		<div class="mt-2 flex flex-wrap gap-2">
-			{#each nft.attributes as trait, index (trait.traitType + index)}
+			{#each nft.attributes.sort((a, b) => a.traitType.localeCompare(b.traitType)
+			) as trait, index (trait.traitType + index)}
 				<div class="flex">
 					<Badge variant="nft-trait"
 						><span class="font-normal text-tertiary">{trait.traitType}</span><br /><span

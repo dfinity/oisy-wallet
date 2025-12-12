@@ -106,21 +106,17 @@ export const mapNftAttributes = (
 	}
 
 	if (Array.isArray(attributes)) {
-		return attributes
-			.map(({ trait_type: traitType, value }) => ({
-				traitType,
-				...(nonNullish(value) && { value: value.toString() })
-			}))
-			.sort((a, b) => a.traitType.localeCompare(b.traitType));
+		return attributes.map(({ trait_type: traitType, value }) => ({
+			traitType,
+			...(nonNullish(value) && { value: value.toString() })
+		}));
 	}
 
 	if (typeof attributes === 'object') {
-		return Object.entries(attributes)
-			.map(([traitType, value]) => ({
-				traitType,
-				...(nonNullish(value) && { value: value.toString() })
-			}))
-			.sort((a, b) => a.traitType.localeCompare(b.traitType));
+		return Object.entries(attributes).map(([traitType, value]) => ({
+			traitType,
+			...(nonNullish(value) && { value: value.toString() })
+		}));
 	}
 
 	return [];
