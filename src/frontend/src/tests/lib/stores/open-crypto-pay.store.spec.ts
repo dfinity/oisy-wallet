@@ -352,4 +352,80 @@ describe('OpenCryptoPayStore', () => {
 			expect(get(context.availableTokens)).toEqual([mockUsdcTokenWithFee]);
 		});
 	});
+
+	describe('failedPaymentError store', () => {
+		it('should initialize with undefined', () => {
+			const context = initPayContext();
+
+			expect(get(context.failedPaymentError)).toBeUndefined();
+		});
+
+		it('should set error message', () => {
+			const context = initPayContext();
+
+			context.failedPaymentError.set('Payment failed: insufficient funds');
+
+			expect(get(context.failedPaymentError)).toBe('Payment failed: insufficient funds');
+		});
+
+		it('should update error message', () => {
+			const context = initPayContext();
+
+			context.failedPaymentError.set('Network error');
+			context.failedPaymentError.set('Transaction rejected');
+
+			expect(get(context.failedPaymentError)).toBe('Transaction rejected');
+		});
+
+		it('should clear error by setting undefined', () => {
+			const context = initPayContext();
+
+			context.failedPaymentError.set('Some error');
+			context.failedPaymentError.set(undefined);
+
+			expect(get(context.failedPaymentError)).toBeUndefined();
+		});
+
+		it('should remain independent from other stores', () => {
+			const context = initPayContext();
+
+			context.setData(mockPaymentData);
+			context.setAvailableTokens([mockEthTokenWithFee]);
+			context.failedPaymentError.set('Payment error');
+
+			expect(get(context.data)).toEqual(mockPaymentData);
+			expect(get(context.availableTokens)).toEqual([mockEthTokenWithFee]);
+			expect(get(context.failedPaymentError)).toBe('Payment error');
+
+			context.failedPaymentError.set(undefined);
+
+			expect(get(context.data)).toEqual(mockPaymentData);
+			expect(get(context.availableTokens)).toEqual([mockEthTokenWithFee]);
+		});
+
+		it('should handle multiple error messages in sequence', () => {
+			const context = initPayContext();
+
+			const errors = [
+				'Network timeout',
+				'Invalid signature',
+				'Gas estimation failed',
+				'User rejected transaction'
+			];
+
+			errors.forEach((error) => {
+				context.failedPaymentError.set(error);
+
+				expect(get(context.failedPaymentError)).toBe(error);
+			});
+		});
+
+		it('should handle empty string as error', () => {
+			const context = initPayContext();
+
+			context.failedPaymentError.set('');
+
+			expect(get(context.failedPaymentError)).toBe('');
+		});
+	});
 });
