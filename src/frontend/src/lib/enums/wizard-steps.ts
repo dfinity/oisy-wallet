@@ -105,5 +105,7 @@ export enum WizardStepsScanner {
 	SCAN = 'Scan',
 	PAY = 'Pay',
 	TOKENS_LIST = 'Tokens List',
-	PAYING = 'Paying'
+	PAYING = 'Paying',
+	PAYMENT_CONFIRMED = 'Payment Confirmed',
+	PAYMENT_FAILED = 'Payment Failed'
 }
