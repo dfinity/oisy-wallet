@@ -107,7 +107,7 @@
 			const errorMessage = errorDetailToString(error) ?? $i18n.send.error.unexpected;
 
 			failedPaymentError.set(errorMessage);
-      
+
 			onPayFailed();
 		}
 	};
