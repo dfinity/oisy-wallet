@@ -85,7 +85,7 @@ describe('SendContacts', () => {
 
 		expect(() =>
 			getByText(shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address }))
-		).toThrow();
+		).toThrowError();
 		expect(
 			getByText(shortenWithMiddleEllipsis({ text: mockContactEthAddressUi.address }))
 		).toBeInTheDocument();
@@ -117,7 +117,7 @@ describe('SendContacts', () => {
 
 		expect(() =>
 			getByText(shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address }))
-		).toThrow();
+		).toThrowError();
 		expect(
 			getByText(shortenWithMiddleEllipsis({ text: mockContactEthAddressUi.address }))
 		).toBeInTheDocument();
@@ -159,7 +159,7 @@ describe('SendContacts', () => {
 
 		expect(() =>
 			getByText(shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address }))
-		).toThrow();
+		).toThrowError();
 		expect(
 			getByText(shortenWithMiddleEllipsis({ text: mockContactEthAddressUi.address }))
 		).toBeInTheDocument();

@@ -31,7 +31,7 @@ describe('blockchain.rest', () => {
 				})
 			) as unknown as typeof fetch;
 
-			await expect(btcAddressData({ btcAddress: mockBtcAddress })).rejects.toThrow(
+			await expect(btcAddressData({ btcAddress: mockBtcAddress })).rejects.toThrowError(
 				'Blockchain API response not ok.'
 			);
 

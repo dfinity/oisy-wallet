@@ -77,7 +77,7 @@ describe('OpenCryptoPay REST client', () => {
 
 			const validUrl = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 
-			await expect(fetchOpenCryptoPay(validUrl)).rejects.toThrow('Fetching OpenCryptoPay failed.');
+			await expect(fetchOpenCryptoPay(validUrl)).rejects.toThrowError('Fetching OpenCryptoPay failed.');
 		});
 	});
 });

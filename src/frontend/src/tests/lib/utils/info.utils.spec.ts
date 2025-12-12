@@ -28,7 +28,7 @@ describe('info.utils', () => {
 				writable: true
 			});
 
-			expect(() => saveHideInfo(key)).not.toThrow();
+			expect(() => saveHideInfo(key)).not.toThrowError();
 
 			Object.defineProperty(window, 'sessionStorage', {
 				value: originalSessionStorage,

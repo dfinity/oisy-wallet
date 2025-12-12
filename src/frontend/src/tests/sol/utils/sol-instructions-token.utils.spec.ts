@@ -81,7 +81,7 @@ describe('sol-instructions-token.utils', () => {
 		it('should raise an error if the instruction is missing the data', () => {
 			const { data: _, ...withoutData } = mockInstruction;
 
-			expect(() => parseSolTokenInstruction(withoutData)).toThrow(
+			expect(() => parseSolTokenInstruction(withoutData)).toThrowError(
 				'The instruction does not have any data'
 			);
 		});
@@ -89,7 +89,7 @@ describe('sol-instructions-token.utils', () => {
 		it('should raise an error if the instruction is missing the accounts', () => {
 			const { accounts: _, ...withoutAccounts } = mockInstruction;
 
-			expect(() => parseSolTokenInstruction(withoutAccounts as unknown as SolInstruction)).toThrow(
+			expect(() => parseSolTokenInstruction(withoutAccounts as unknown as SolInstruction)).toThrowError(
 				'The instruction does not have any accounts'
 			);
 		});
@@ -352,7 +352,7 @@ describe('sol-instructions-token.utils', () => {
 			// @ts-expect-error intentional for testing unknown discriminant
 			vi.mocked(identifyTokenInstruction).mockReturnValue('unknown-instruction');
 
-			expect(() => parseSolTokenInstruction(mockInstruction)).toThrow(
+			expect(() => parseSolTokenInstruction(mockInstruction)).toThrowError(
 				'Unknown Solana Token instruction: unknown-instruction'
 			);
 		});

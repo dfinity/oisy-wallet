@@ -139,7 +139,7 @@ describe('ext-custom-tokens.services', () => {
 		it('should throw if setManyCustomTokens fails', async () => {
 			vi.mocked(setManyCustomTokens).mockRejectedValue(new Error('Network error'));
 
-			await expect(saveCustomTokens(mockParams)).rejects.toThrow('Network error');
+			await expect(saveCustomTokens(mockParams)).rejects.toThrowError('Network error');
 
 			expect(progress).toHaveBeenCalledOnce();
 			expect(progress).toHaveBeenNthCalledWith(1, ProgressStepsAddToken.SAVE);
