@@ -802,7 +802,8 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				progress: mockProgress
+				progress: mockProgress,
+				amount: 100000n
 			});
 
 			expect(extractQuoteData).toHaveBeenCalledExactlyOnceWith(mockData);
@@ -839,7 +840,8 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				progress: mockProgress
+				progress: mockProgress,
+				amount: 100000n
 			});
 
 			expect(extractQuoteData).toHaveBeenCalledWith(mockData);
@@ -871,7 +873,8 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				progress: mockProgress
+				progress: mockProgress,
+				amount: 100000n
 			});
 
 			expect(fetchOpenCryptoPay).toHaveBeenCalledWith(
@@ -905,7 +908,8 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				progress: mockProgress
+				progress: mockProgress,
+				amount: 100000n
 			});
 
 			expect(signTransaction).toHaveBeenCalledWith(
@@ -941,7 +945,8 @@ describe('open-crypto-pay.service', () => {
 				data: mockData,
 				from,
 				identity: mockIdentity,
-				progress: mockProgress
+				progress: mockProgress,
+				amount: 100000n
 			});
 
 			expect(fetchOpenCryptoPay).toHaveBeenNthCalledWith(
@@ -964,7 +969,8 @@ describe('open-crypto-pay.service', () => {
 					data: mockData,
 					from,
 					identity: mockIdentity,
-					progress: mockProgress
+					progress: mockProgress,
+					amount: 100000n
 				})
 			).rejects.toThrowError('Payment failed');
 		});
@@ -995,7 +1001,8 @@ describe('open-crypto-pay.service', () => {
 					data: mockData,
 					from,
 					identity: mockIdentity,
-					progress: mockProgress
+					progress: mockProgress,
+					amount: 100000n
 				})
 			).rejects.toThrowError('Signing failed');
 
