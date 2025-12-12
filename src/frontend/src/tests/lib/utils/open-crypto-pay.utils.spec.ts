@@ -1440,7 +1440,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: undefined,
 					fee: validFee
 				})
-			).toThrowError('Missing required payment data from URN');
+			).toThrowError('The received data is incomplete. Some required details are missing.');
 		});
 
 		it('should throw error when ethereumChainId is missing', () => {
@@ -1454,7 +1454,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: invalidData,
 					fee: validFee
 				})
-			).toThrowError('Missing required payment data from URN');
+			).toThrowError('The received data is incomplete. Some required details are missing.');
 		});
 
 		it('should throw error when ethereumChainId is undefined', () => {
@@ -1468,7 +1468,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: invalidData,
 					fee: validFee
 				})
-			).toThrowError('Missing required payment data from URN');
+			).toThrowError('The received data is incomplete. Some required details are missing.');
 		});
 
 		it('should throw error when value is missing', () => {
@@ -1482,7 +1482,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: invalidData,
 					fee: validFee
 				})
-			).toThrowError('Missing required payment data from URN');
+			).toThrowError('The received data is incomplete. Some required details are missing.');
 		});
 
 		it('should throw error when fee is undefined', () => {
@@ -1491,7 +1491,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: validDecodedData,
 					fee: undefined
 				})
-			).toThrowError('Missing required payment data from URN');
+			).toThrowError('The received data is incomplete. Some required details are missing.');
 		});
 
 		it('should preserve BigInt types', () => {

@@ -726,7 +726,7 @@ interface I18nScanner {
 		pay_at_failure: string;
 		try_again: string;
 	};
-	error: { code_link_is_not_valid: string };
+	error: { code_link_is_not_valid: string; data_is_incompleted: string };
 }
 
 interface I18nConvert {
