@@ -18,7 +18,6 @@ import {
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { isIOS } from '@dfinity/gix-components';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
