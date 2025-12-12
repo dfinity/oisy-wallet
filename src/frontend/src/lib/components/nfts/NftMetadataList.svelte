@@ -33,8 +33,8 @@
 
 	const sortedAttributes = $derived(
 		nonNullish(nft?.attributes)
-			// eslint-disable-next-line local-rules/prefer-object-params -- This is a sorting function, so the parameters will be provided not as an object but as separate arguments.
-			? nft.attributes.toSorted((a, b) => a.traitType.localeCompare(b.traitType))
+			? // eslint-disable-next-line local-rules/prefer-object-params -- This is a sorting function, so the parameters will be provided not as an object but as separate arguments.
+				nft.attributes.toSorted((a, b) => a.traitType.localeCompare(b.traitType))
 			: []
 	);
 </script>
