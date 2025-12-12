@@ -19,9 +19,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { OisyReloadCollectionsEvent } from '$lib/types/custom-events';
-	import type {
-		SaveCustomExtVariant,
-	} from '$lib/types/custom-token';
+	import type { SaveCustomExtVariant } from '$lib/types/custom-token';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
