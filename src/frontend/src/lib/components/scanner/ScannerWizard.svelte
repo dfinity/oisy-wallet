@@ -6,6 +6,8 @@
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import OpenCryptoPayProgress from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayProgress.svelte';
 	import TokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
+	import PaymentFailed from '$lib/components/scanner/open-crypto-pay/PaymentFailed.svelte';
+	import PaymentSucceeded from '$lib/components/scanner/open-crypto-pay/PaymentSucceeded.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
@@ -28,7 +30,7 @@
 
 	const onClose = () => modalStore.close();
 
-	setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
+	const { reset } = setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
 
 	const goToStep = (stepName: WizardStepsScanner) => {
 		if (isNullish(modal)) {
@@ -70,6 +72,15 @@
 			<TokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
 		{:else if currentStep?.name === WizardStepsScanner.PAYING}
 			<OpenCryptoPayProgress {payProgressStep} />
+		{:else if currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
+			<PaymentFailed
+				onClose={() => {
+					reset();
+					goToStep(WizardStepsScanner.SCAN);
+				}}
+			/>
+		{:else if currentStep?.name === WizardStepsScanner.PAYMENT_FAILED}
+			<PaymentSucceeded {onClose} />
 		{/if}
 	{/key}
 </WizardModal>
