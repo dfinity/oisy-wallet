@@ -6,8 +6,8 @@
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
-	import { autoLoadIcrcToken } from '$icp-eth/services/icrc-token.services';
 	import { autoLoadErc20Token } from '$icp-eth/services/erc20-token.services';
+	import { autoLoadIcrcToken } from '$icp-eth/services/icrc-token.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
