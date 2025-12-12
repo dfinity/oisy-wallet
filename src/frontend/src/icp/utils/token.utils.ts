@@ -3,6 +3,6 @@ import { isTokenIc } from '$icp/utils/icrc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 
-// Tokens EXT v2 have zero fee
+// Tokens EXT have zero fee
 export const getTokenFee = <T extends Token>(token: Partial<T>): bigint | undefined =>
 	isTokenExt(token) ? ZERO : isTokenIc(token) ? token.fee : undefined;
