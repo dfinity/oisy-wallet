@@ -64,6 +64,8 @@
 		{:else if currentStep?.name === WizardStepsScanner.PAY}
 			<OpenCryptoPay
 				onPay={() => goToStep(WizardStepsScanner.PAYING)}
+				onPayFailed={() => goToStep(WizardStepsScanner.PAYMENT_FAILED)}
+				onPaySucceeded={() => goToStep(WizardStepsScanner.PAYMENT_CONFIRMED)}
 				onSelectToken={() => goToStep(WizardStepsScanner.TOKENS_LIST)}
 				bind:isTokenSelecting
 				bind:payProgressStep

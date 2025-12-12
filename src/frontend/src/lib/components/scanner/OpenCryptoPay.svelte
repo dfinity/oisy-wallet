@@ -26,11 +26,15 @@
 		isTokenSelecting: boolean;
 		payProgressStep: ProgressStepsPayment;
 		onPay: () => void;
+		onPaySucceeded: () => void;
+		onPayFailed: () => void;
 	}
 
 	let {
 		onSelectToken,
 		onPay,
+		onPaySucceeded,
+		onPayFailed,
 		isTokenSelecting = $bindable(),
 		payProgressStep = $bindable()
 	}: Props = $props();
@@ -96,8 +100,10 @@
 				progress,
 				amount
 			});
+
+			onPaySucceeded();
 		} catch (_: unknown) {
-			// TODO: add steps to redirect to Payment Failed screen and add event
+			onPayFailed();
 		}
 	};
 </script>
