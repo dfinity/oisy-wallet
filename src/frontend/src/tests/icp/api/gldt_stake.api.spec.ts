@@ -49,7 +49,7 @@ describe('gldt_stake.api', () => {
 				identity: null
 			});
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -71,7 +71,7 @@ describe('gldt_stake.api', () => {
 				identity: null
 			});
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -95,7 +95,7 @@ describe('gldt_stake.api', () => {
 				identity: null
 			});
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -117,7 +117,7 @@ describe('gldt_stake.api', () => {
 				identity: null
 			});
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -139,7 +139,7 @@ describe('gldt_stake.api', () => {
 				identity: null
 			});
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 });

@@ -41,7 +41,7 @@ describe('sol-instructions-compute-budget.utils', () => {
 		it('should raise an error if the instructions are missing the data', () => {
 			const { data: _, ...withoutData } = mockInstruction;
 
-			expect(() => parseSolComputeBudgetInstruction(withoutData)).toThrow(
+			expect(() => parseSolComputeBudgetInstruction(withoutData)).toThrowError(
 				'The instruction does not have any data'
 			);
 		});
@@ -112,7 +112,7 @@ describe('sol-instructions-compute-budget.utils', () => {
 			// @ts-expect-error intentional for testing unknown discriminant
 			vi.mocked(identifyComputeBudgetInstruction).mockReturnValue('unknown-instruction');
 
-			expect(() => parseSolComputeBudgetInstruction(mockInstruction)).toThrow(
+			expect(() => parseSolComputeBudgetInstruction(mockInstruction)).toThrowError(
 				'Unknown Solana Compute Budget instruction: unknown-instruction'
 			);
 		});

@@ -234,11 +234,11 @@ describe('decodeUrn', () => {
 
 		describe('malformed URIs', () => {
 			it('should not throw on unexpected input', () => {
-				expect(() => decodeQrCodeUrn({ urn: 'ethereum:???@@@' })).not.toThrow();
+				expect(() => decodeQrCodeUrn({ urn: 'ethereum:???@@@' })).not.toThrowError();
 			});
 
 			it('should not throw on special characters', () => {
-				expect(() => decodeQrCodeUrn({ urn: 'ethereum:$%^&*()@1?value=1000' })).not.toThrow();
+				expect(() => decodeQrCodeUrn({ urn: 'ethereum:$%^&*()@1?value=1000' })).not.toThrowError();
 			});
 		});
 	});
