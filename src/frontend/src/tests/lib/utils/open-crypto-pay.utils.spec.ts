@@ -1395,8 +1395,8 @@ describe('open-crypto-pay.utils', () => {
 
 			expect(result).toEqual({
 				destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-				ethereumChainId: '1',
-				value: 10000000000,
+				ethereumChainId: 1n,
+				value: 10000000000n,
 				feeData: {
 					maxFeePerGas: 12n,
 					maxPriorityFeePerGas: 7n
@@ -1428,8 +1428,8 @@ describe('open-crypto-pay.utils', () => {
 			});
 
 			expect(result.destination).toBe('0xcccccccccccccccccccccccccccccccccccccccc');
-			expect(result.ethereumChainId).toBe('137');
-			expect(result.value).toBe(200000);
+			expect(result.ethereumChainId).toBe(137n);
+			expect(result.value).toBe(200000n);
 			expect(result.feeData.maxFeePerGas).toBe(20n);
 			expect(result.estimatedGasLimit).toBe(50000n);
 		});
