@@ -3,7 +3,11 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { initPayContext } from '$lib/stores/open-crypto-pay.store';
-import type { OpenCryptoPayResponse, PayableTokenWithFees } from '$lib/types/open-crypto-pay';
+import type {
+	OpenCryptoPayResponse,
+	PayableTokenWithConvertedAmount,
+	PayableTokenWithFees
+} from '$lib/types/open-crypto-pay';
 import { get } from 'svelte/store';
 
 vi.mock('$eth/derived/tokens.derived', () => ({
@@ -120,6 +124,24 @@ describe('OpenCryptoPayStore', () => {
 				maxPriorityFeePerGas: 7n
 			},
 			estimatedGasLimit: 40n
+		}
+	};
+
+	const mockTokenWithConvertedAmount: PayableTokenWithConvertedAmount = {
+		...USDC_TOKEN,
+		amount: '100',
+		minFee: 0.0001,
+		tokenNetwork: 'Ethereum',
+		amountInUSD: 100,
+		feeInUSD: 10,
+		sumInUSD: 110,
+		fee: {
+			feeInWei: 300000n,
+			feeData: {
+				maxFeePerGas: 12n,
+				maxPriorityFeePerGas: 7n
+			},
+			estimatedGasLimit: 25000n
 		}
 	};
 
@@ -350,6 +372,121 @@ describe('OpenCryptoPayStore', () => {
 
 			expect(get(context.data)).toEqual(mockPaymentData);
 			expect(get(context.availableTokens)).toEqual([mockUsdcTokenWithFee]);
+		});
+	});
+
+	describe('reset store', () => {
+		it('should reset all stores to initial state', () => {
+			const context = initPayContext();
+
+			context.setData(mockPaymentData);
+			context.setAvailableTokens([mockEthTokenWithFee, mockUsdcTokenWithFee]);
+
+			context.reset();
+
+			expect(get(context.data)).toBeUndefined();
+			expect(get(context.availableTokens)).toEqual([]);
+			expect(get(context.selectedToken)).toBeUndefined();
+		});
+
+		it('should reset when stores are already empty', () => {
+			const context = initPayContext();
+
+			context.reset();
+
+			expect(get(context.data)).toBeUndefined();
+			expect(get(context.availableTokens)).toEqual([]);
+			expect(get(context.selectedToken)).toBeUndefined();
+		});
+
+		it('should reset after setting only data', () => {
+			const context = initPayContext();
+
+			context.setData(mockPaymentData);
+
+			expect(get(context.data)).toBeDefined();
+
+			context.reset();
+
+			expect(get(context.data)).toBeUndefined();
+		});
+
+		it('should reset after setting only tokens', () => {
+			const context = initPayContext();
+
+			context.setAvailableTokens([mockEthTokenWithFee]);
+
+			expect(get(context.availableTokens)).toHaveLength(1);
+
+			context.reset();
+
+			expect(get(context.availableTokens)).toEqual([]);
+		});
+
+		it('should reset user selection', () => {
+			const context = initPayContext();
+
+			context.setAvailableTokens([mockEthTokenWithFee, mockUsdcTokenWithFee]);
+			context.selectToken(mockTokenWithConvertedAmount);
+
+			expect(get(context.selectedToken)).toBeDefined();
+
+			context.reset();
+
+			expect(get(context.selectedToken)).toBeUndefined();
+		});
+
+		it('should allow multiple consecutive resets', () => {
+			const context = initPayContext();
+
+			context.setData(mockPaymentData);
+			context.setAvailableTokens([mockEthTokenWithFee]);
+
+			context.reset();
+			context.reset();
+			context.reset();
+
+			expect(get(context.data)).toBeUndefined();
+			expect(get(context.availableTokens)).toEqual([]);
+			expect(get(context.selectedToken)).toBeUndefined();
+		});
+
+		it('should allow setting new data after reset', () => {
+			const context = initPayContext();
+
+			context.setData(mockPaymentData);
+			context.setAvailableTokens([mockEthTokenWithFee]);
+
+			context.reset();
+
+			const newData: OpenCryptoPayResponse = {
+				...mockPaymentData,
+				displayName: 'After Reset'
+			};
+
+			context.setData(newData);
+			context.setAvailableTokens([mockUsdcTokenWithFee]);
+
+			expect(get(context.data)).toEqual(newData);
+			expect(get(context.availableTokens)).toEqual([mockUsdcTokenWithFee]);
+		});
+
+		it('should handle reset in for the hole workflow', () => {
+			const context = initPayContext();
+
+			context.setData(mockPaymentData);
+			context.setAvailableTokens([mockEthTokenWithFee, mockUsdcTokenWithFee]);
+			context.selectToken(mockTokenWithConvertedAmount);
+
+			expect(get(context.data)).toBeDefined();
+			expect(get(context.availableTokens)).toHaveLength(2);
+			expect(get(context.selectedToken)).toBeDefined();
+
+			context.reset();
+
+			expect(get(context.data)).toBeUndefined();
+			expect(get(context.availableTokens)).toEqual([]);
+			expect(get(context.selectedToken)).toBeUndefined();
 		});
 	});
 
