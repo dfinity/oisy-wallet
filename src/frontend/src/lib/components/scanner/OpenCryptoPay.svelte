@@ -27,11 +27,15 @@
 		isTokenSelecting: boolean;
 		payProgressStep: ProgressStepsPayment;
 		onPay: () => void;
+		onPaySucceeded: () => void;
+		onPayFailed: () => void;
 	}
 
 	let {
 		onSelectToken,
 		onPay,
+		onPaySucceeded,
+		onPayFailed,
 		isTokenSelecting = $bindable(),
 		payProgressStep = $bindable()
 	}: Props = $props();
@@ -97,10 +101,14 @@
 				progress,
 				amount
 			});
+
+			onPaySucceeded();
 		} catch (error: unknown) {
 			const errorMessage = errorDetailToString(error) ?? $i18n.send.error.unexpected;
 
 			failedPaymentError.set(errorMessage);
+      
+			onPayFailed();
 		}
 	};
 </script>
