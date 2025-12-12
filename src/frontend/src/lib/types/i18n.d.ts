@@ -725,6 +725,8 @@ interface I18nScanner {
 		pay_at_successful: string;
 		pay_at_failure: string;
 		try_again: string;
+		payment_confirmed: string;
+		payment_failed: string;
 	};
 	error: { code_link_is_not_valid: string; data_is_incompleted: string };
 }
