@@ -8,7 +8,6 @@ import {
 	TokenSchema,
 	TokenStandardCodeSchema,
 	TokenStandardSchema
-	TokenStandardCodeSchema
 } from '$lib/schema/token.schema';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -82,8 +81,8 @@ describe('token.schema', () => {
 			expect(() => TokenStandardCodeSchema.parse(invalidStandard)).toThrowError();
 		});
 	});
-  
-  describe('TokenStandardSchema', () => {
+
+	describe('TokenStandardSchema', () => {
 		it('should validate "ethereum" as a supported token standard', () => {
 			const validStandard = 'ethereum';
 
@@ -138,8 +137,6 @@ describe('token.schema', () => {
 			expect(() => TokenStandardCodeSchema.parse(invalidStandard)).toThrowError();
 		});
 	});
-  
-  
 
 	describe('TokenCategorySchema', () => {
 		it('should validate "default" as a supported token category', () => {

@@ -13,7 +13,6 @@ import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { i18n } from '$lib/stores/i18n.store';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { Nft, NftAttribute, NftId, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { Nft, NftId, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TokenStandardCode } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';

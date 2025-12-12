@@ -1,12 +1,12 @@
 import type {
-	TokenStandardSchema,
 	TokenAppearanceSchema,
 	TokenBuyableSchema,
 	TokenCategorySchema,
 	TokenIdSchema,
 	TokenMetadataSchema,
 	TokenSchema,
-	TokenStandardCodeSchema
+	TokenStandardCodeSchema,
+	TokenStandardSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
 import type { TokenGroup } from '$lib/types/token-group';
