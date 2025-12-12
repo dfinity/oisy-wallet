@@ -9,6 +9,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { get } from 'svelte/store';
@@ -52,13 +53,7 @@ export class InfuraErc721Provider extends InfuraErc165Provider {
 			return { id: tokenId, ...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }) };
 		}
 
-		const mappedAttributes =
-			'attributes' in metadata
-				? (metadata.attributes ?? []).map(({ trait_type: traitType, value }) => ({
-						traitType,
-						value: value.toString()
-					}))
-				: [];
+		const mappedAttributes = 'attributes' in metadata ? mapNftAttributes(metadata.attributes) : [];
 
 		return {
 			id: tokenId,
