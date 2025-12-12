@@ -36,7 +36,10 @@ describe('ext-metadata.services', () => {
 			description: mockExtParsedMetadata.description,
 			imageUrl: mockExtParsedMetadata.url,
 			thumbnailUrl: mockExtParsedMetadata.thumb,
-			attributes: mockExtParsedMetadata.attributes
+			attributes: mockExtParsedMetadata.attributes.map(({ trait_type, value }) => ({
+				traitType: trait_type,
+				value
+			}))
 		};
 
 		beforeEach(() => {
