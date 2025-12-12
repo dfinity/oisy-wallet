@@ -1,9 +1,9 @@
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { NonFungibleTokenAppearance } from '$lib/types/nft-ui';
-import type { RequiredToken, Token, TokenMetadata, TokenStandard } from '$lib/types/token';
+import type { RequiredToken, Token, TokenMetadata, TokenStandardCode } from '$lib/types/token';
 
-type Erc721Standard = Extract<TokenStandard, 'erc721'>;
+type Erc721Standard = Extract<TokenStandardCode, 'erc721'>;
 
 export type Erc721Token = Erc721Contract &
 	NonFungibleTokenAppearance &

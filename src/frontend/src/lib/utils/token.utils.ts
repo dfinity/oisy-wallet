@@ -13,7 +13,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { StakeBalances } from '$lib/types/stake-balance';
-import type { RequiredTokenWithLinkedData, Token, TokenStandard } from '$lib/types/token';
+import type { RequiredTokenWithLinkedData, Token, TokenStandardCode } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -41,7 +41,7 @@ export const getMaxTransactionAmount = ({
 	balance: OptionBalance;
 	fee?: bigint;
 	tokenDecimals: number;
-	tokenStandard: TokenStandard;
+	tokenStandard: TokenStandardCode;
 }): string => {
 	const value =
 		(balance ?? ZERO) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO);

@@ -2,7 +2,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
-import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import type { Token, TokenId, TokenStandardCode } from '$lib/types/token';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
@@ -65,7 +65,7 @@ export interface SendContext {
 	sendToken: SendStore;
 	sendTokenDecimals: Readable<number>;
 	sendTokenId: Readable<TokenId>;
-	sendTokenStandard: Readable<TokenStandard>;
+	sendTokenStandard: Readable<TokenStandardCode>;
 	sendTokenSymbol: Readable<string>;
 	sendBalance: Readable<OptionBalance>;
 	sendTokenExchangeRate: Readable<number | undefined>;

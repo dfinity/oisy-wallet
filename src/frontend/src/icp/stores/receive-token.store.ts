@@ -2,7 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
-import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import type { Token, TokenId, TokenStandardCode } from '$lib/types/token';
 import { isNetworkEthereum } from '$lib/utils/network.utils';
 import { derived, writable, type Readable } from 'svelte/store';
 
@@ -58,7 +58,7 @@ export type CloseModalAndResetToken = () => void;
 export interface ReceiveTokenContext {
 	token: ReceiveTokenStore;
 	tokenId: Readable<TokenId>;
-	tokenStandard: Readable<TokenStandard>;
+	tokenStandard: Readable<TokenStandardCode>;
 
 	ckEthereumTwinToken: Readable<Token>;
 	ckEthereumTwinTokenNetwork: Readable<EthereumNetwork>;
