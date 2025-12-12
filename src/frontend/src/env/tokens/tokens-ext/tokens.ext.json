@@ -60,6 +60,24 @@
 		}
 	},
 	{
+		"canisterId": "2glp2-eqaaa-aaaak-aajoa-cai",
+		"metadata": {
+			"name": "CrowdFund NFT"
+		}
+	},
+	{
+		"canisterId": "2iiif-4qaaa-aaaah-qcs5a-cai",
+		"metadata": {
+			"name": "ICSpliffsters"
+		}
+	},
+	{
+		"canisterId": "2l7rh-eiaaa-aaaah-qcvaa-cai",
+		"metadata": {
+			"name": "Vibesters"
+		}
+	},
+	{
 		"canisterId": "2mgdj-caaaa-aaaam-qavba-cai",
 		"metadata": {
 			"name": "Mecha Drip"
@@ -72,9 +90,21 @@
 		}
 	},
 	{
+		"canisterId": "2n77z-oyaaa-aaaao-aakuq-cai",
+		"metadata": {
+			"name": "Cool Bones"
+		}
+	},
+	{
 		"canisterId": "2nelu-kqaaa-aaaag-qkaia-cai",
 		"metadata": {
 			"name": "BoobsPunks"
+		}
+	},
+	{
+		"canisterId": "2oyfj-oyaaa-aaaae-qaeuq-cai",
+		"metadata": {
+			"name": "Hello World"
 		}
 	},
 	{
@@ -87,6 +117,24 @@
 		"canisterId": "2rvts-jiaaa-aaaag-qbmca-cai",
 		"metadata": {
 			"name": "DRGN"
+		}
+	},
+	{
+		"canisterId": "2s2iy-xaaaa-aaaah-qczoq-cai",
+		"metadata": {
+			"name": "Drakon NFT"
+		}
+	},
+	{
+		"canisterId": "2tvxo-eqaaa-aaaai-acjla-cai",
+		"metadata": {
+			"name": "IC Dream Whale"
+		}
+	},
+	{
+		"canisterId": "2v5zm-uaaaa-aaaae-qaewa-cai",
+		"metadata": {
+			"name": "Clown Skateboards"
 		}
 	},
 	{
@@ -105,6 +153,12 @@
 		"canisterId": "2xv54-tyaaa-aaaag-qbywa-cai",
 		"metadata": {
 			"name": "Gothic Skull"
+		}
+	},
+	{
+		"canisterId": "2zw3f-pqaaa-aaaaf-qakaa-cai",
+		"metadata": {
+			"name": "Nuance: xVALORIAN"
 		}
 	},
 	{
@@ -144,6 +198,18 @@
 		}
 	},
 	{
+		"canisterId": "3bqt5-gyaaa-aaaah-qcvha-cai",
+		"metadata": {
+			"name": "ICP.DOG"
+		}
+	},
+	{
+		"canisterId": "3cjkh-tqaaa-aaaam-qan6a-cai",
+		"metadata": {
+			"name": "KVHS Drafts"
+		}
+	},
+	{
 		"canisterId": "3e7gz-caaaa-aaaag-qbu7q-cai",
 		"metadata": {
 			"name": "ICPlanets"
@@ -162,6 +228,12 @@
 		}
 	},
 	{
+		"canisterId": "3ifmd-wqaaa-aaaah-qckda-cai",
+		"metadata": {
+			"name": "ICSnakes"
+		}
+	},
+	{
 		"canisterId": "3ilm3-3aaaa-aaaam-qavha-cai",
 		"metadata": {
 			"name": "Maths Art Collection"
@@ -174,9 +246,21 @@
 		}
 	},
 	{
+		"canisterId": "3kt53-zaaaa-aaaah-qczkq-cai",
+		"metadata": {
+			"name": "Crypto 90s"
+		}
+	},
+	{
 		"canisterId": "3l372-hyaaa-aaaag-qcpfa-cai",
 		"metadata": {
 			"name": "SOJY"
+		}
+	},
+	{
+		"canisterId": "3mttv-dqaaa-aaaah-qcn6q-cai",
+		"metadata": {
+			"name": "Dfinity Space Apes"
 		}
 	},
 	{
@@ -252,9 +336,33 @@
 		}
 	},
 	{
+		"canisterId": "4fcza-biaaa-aaaah-abi4q-cai",
+		"metadata": {
+			"name": "Finny EA Card"
+		}
+	},
+	{
+		"canisterId": "4fxe6-2qaaa-aaaah-qcz3q-cai",
+		"metadata": {
+			"name": "ICGiraffes"
+		}
+	},
+	{
 		"canisterId": "4fzsu-2aaaa-aaaag-qbupq-cai",
 		"metadata": {
 			"name": "Expressionism"
+		}
+	},
+	{
+		"canisterId": "4gbxl-byaaa-aaaak-aafuq-cai",
+		"metadata": {
+			"name": "ICPuppies Wearables"
+		}
+	},
+	{
+		"canisterId": "4ggk4-mqaaa-aaaae-qad6q-cai",
+		"metadata": {
+			"name": "ICP Flower"
 		}
 	},
 	{
@@ -288,6 +396,12 @@
 		}
 	},
 	{
+		"canisterId": "4kubm-wiaaa-aaaah-qcnoa-cai",
+		"metadata": {
+			"name": "TheSwordNFT - Ninjas"
+		}
+	},
+	{
 		"canisterId": "4m2zi-miaaa-aaaag-qbuoa-cai",
 		"metadata": {
 			"name": "D-Robot"
@@ -297,6 +411,18 @@
 		"canisterId": "4mm3y-hiaaa-aaaam-qaz3q-cai",
 		"metadata": {
 			"name": "Astro Samurai"
+		}
+	},
+	{
+		"canisterId": "4mupc-myaaa-aaaah-qcz2a-cai",
+		"metadata": {
+			"name": "IC Birds"
+		}
+	},
+	{
+		"canisterId": "4odun-ayaaa-aaaak-aarbq-cai",
+		"metadata": {
+			"name": "Sa-Chan"
 		}
 	},
 	{
@@ -315,6 +441,12 @@
 		"canisterId": "4q6dz-3iaaa-aaaag-qbuma-cai",
 		"metadata": {
 			"name": "DECEPTION.GIF"
+		}
+	},
+	{
+		"canisterId": "4qmvs-qyaaa-aaaal-ab2rq-cai",
+		"metadata": {
+			"name": "Plethora Items"
 		}
 	},
 	{
@@ -342,9 +474,27 @@
 		}
 	},
 	{
+		"canisterId": "4wiph-kyaaa-aaaam-qannq-cai",
+		"metadata": {
+			"name": "Martian Drip"
+		}
+	},
+	{
 		"canisterId": "4z5if-naaaa-aaaag-qbunq-cai",
 		"metadata": {
 			"name": "CHIBI"
+		}
+	},
+	{
+		"canisterId": "4zv6l-2aaaa-aaaaj-qauua-cai",
+		"metadata": {
+			"name": "The Emperor"
+		}
+	},
+	{
+		"canisterId": "527xj-ziaaa-aaaah-qcz7a-cai",
+		"metadata": {
+			"name": "Revolució"
 		}
 	},
 	{
@@ -360,6 +510,12 @@
 		}
 	},
 	{
+		"canisterId": "556r5-uqaaa-aaaah-qcz7q-cai",
+		"metadata": {
+			"name": "Dfinity Dragonz"
+		}
+	},
+	{
 		"canisterId": "55qhx-uaaaa-aaaag-qbulq-cai",
 		"metadata": {
 			"name": "COMIC"
@@ -372,9 +528,21 @@
 		}
 	},
 	{
+		"canisterId": "5h2fc-zaaaa-aaaah-qcnjq-cai",
+		"metadata": {
+			"name": "ICPrime8s"
+		}
+	},
+	{
 		"canisterId": "5i7j7-qiaaa-aaaak-qlqoa-cai",
 		"metadata": {
 			"name": "Innovation 5.0"
+		}
+	},
+	{
+		"canisterId": "5izaq-vyaaa-aaaah-qcz4a-cai",
+		"metadata": {
+			"name": "Dfinity Rats"
 		}
 	},
 	{
@@ -402,6 +570,12 @@
 		}
 	},
 	{
+		"canisterId": "5movr-diaaa-aaaak-aaftq-cai",
+		"metadata": {
+			"name": "ICPuppies"
+		}
+	},
+	{
 		"canisterId": "5nrjf-yaaaa-aaaag-qcxlq-cai",
 		"metadata": {
 			"name": "ALP"
@@ -420,6 +594,12 @@
 		}
 	},
 	{
+		"canisterId": "5pyge-yaaaa-aaaah-qcz4q-cai",
+		"metadata": {
+			"name": "ICNotes"
+		}
+	},
+	{
 		"canisterId": "5qtrn-4iaaa-aaaam-qa6ca-cai",
 		"metadata": {
 			"name": "EVERYDAY"
@@ -429,6 +609,24 @@
 		"canisterId": "5rspf-gaaaa-aaaag-qbygq-cai",
 		"metadata": {
 			"name": "OOPARTS"
+		}
+	},
+	{
+		"canisterId": "5stux-vyaaa-aaaam-qasoa-cai",
+		"metadata": {
+			"name": "Nuclear Radio"
+		}
+	},
+	{
+		"canisterId": "5t24r-yqaaa-aaaaj-qauta-cai",
+		"metadata": {
+			"name": "The Empress"
+		}
+	},
+	{
+		"canisterId": "5t44v-paaaa-aaaah-qcz6q-cai",
+		"metadata": {
+			"name": "ETH BUTTERFLY NFT"
 		}
 	},
 	{
@@ -486,9 +684,21 @@
 		}
 	},
 	{
+		"canisterId": "6eaq7-tiaaa-aaaam-qagsa-cai",
+		"metadata": {
+			"name": "DfinityPigs"
+		}
+	},
+	{
 		"canisterId": "6eh24-xiaaa-aaaag-qc3na-cai",
 		"metadata": {
 			"name": "ckBINGO"
+		}
+	},
+	{
+		"canisterId": "6fosk-kaaaa-aaaak-aawqq-cai",
+		"metadata": {
+			"name": "Kinic (Crowdfund)"
 		}
 	},
 	{
@@ -498,9 +708,33 @@
 		}
 	},
 	{
+		"canisterId": "6imyv-myaaa-aaaah-qcv3a-cai",
+		"metadata": {
+			"name": "Feminiverse"
+		}
+	},
+	{
 		"canisterId": "6jvsh-5aaaa-aaaag-qbt6a-cai",
 		"metadata": {
 			"name": "Pocket Monsters"
+		}
+	},
+	{
+		"canisterId": "6kdwg-paaaa-aaaap-qbuea-cai",
+		"metadata": {
+			"name": "ToyoWorld Founders Passes"
+		}
+	},
+	{
+		"canisterId": "6kk5l-syaaa-aaaaj-qau2q-cai",
+		"metadata": {
+			"name": "The Hierophant"
+		}
+	},
+	{
+		"canisterId": "6km5p-fiaaa-aaaah-qczxa-cai",
+		"metadata": {
+			"name": "IKUZO"
 		}
 	},
 	{
@@ -522,6 +756,12 @@
 		}
 	},
 	{
+		"canisterId": "6tjeq-waaaa-aaaah-qcvzq-cai",
+		"metadata": {
+			"name": "IC8 🐣"
+		}
+	},
+	{
 		"canisterId": "6tw2j-zqaaa-aaaag-qciha-cai",
 		"metadata": {
 			"name": "PIXAVATAR"
@@ -540,9 +780,21 @@
 		}
 	},
 	{
+		"canisterId": "6wghg-7yaaa-aaaam-qagra-cai",
+		"metadata": {
+			"name": "IC Baboons "
+		}
+	},
+	{
 		"canisterId": "6wgru-syaaa-aaaag-qbuba-cai",
 		"metadata": {
 			"name": "Bone Soup"
+		}
+	},
+	{
+		"canisterId": "6wih6-siaaa-aaaah-qczva-cai",
+		"metadata": {
+			"name": "IC BUCKS"
 		}
 	},
 	{
@@ -561,6 +813,12 @@
 		"canisterId": "736xk-wqaaa-aaaam-qazta-cai",
 		"metadata": {
 			"name": "STRUCTURE"
+		}
+	},
+	{
+		"canisterId": "73xld-saaaa-aaaah-qbjya-cai",
+		"metadata": {
+			"name": "Wing"
 		}
 	},
 	{
@@ -615,6 +873,12 @@
 		"canisterId": "7gipp-tyaaa-aaaag-qdk2a-cai",
 		"metadata": {
 			"name": "ICPretty Fish"
+		}
+	},
+	{
+		"canisterId": "7gvfz-3iaaa-aaaah-qcsbq-cai",
+		"metadata": {
+			"name": "Digms"
 		}
 	},
 	{
@@ -675,6 +939,12 @@
 		"canisterId": "7rozc-oyaaa-aaaag-qjq5a-cai",
 		"metadata": {
 			"name": "Blockchain Enlightenment."
+		}
+	},
+	{
+		"canisterId": "7sfim-liaaa-aaaah-qczta-cai",
+		"metadata": {
+			"name": "Nuclear Sheep"
 		}
 	},
 	{
@@ -768,6 +1038,12 @@
 		}
 	},
 	{
+		"canisterId": "ahl3d-xqaaa-aaaaj-qacca-cai",
+		"metadata": {
+			"name": "ICTuTs"
+		}
+	},
+	{
 		"canisterId": "aiai7-miaaa-aaaag-qbwoa-cai",
 		"metadata": {
 			"name": "Phenomenological"
@@ -810,6 +1086,12 @@
 		}
 	},
 	{
+		"canisterId": "aseks-myaaa-aaaam-qaqia-cai",
+		"metadata": {
+			"name": "Studly Dozen"
+		}
+	},
+	{
 		"canisterId": "attwk-5qaaa-aaaam-qa3za-cai",
 		"metadata": {
 			"name": "HELLION"
@@ -840,9 +1122,21 @@
 		}
 	},
 	{
+		"canisterId": "b5el6-hqaaa-aaaah-qcdhq-cai",
+		"metadata": {
+			"name": "Wild and West"
+		}
+	},
+	{
 		"canisterId": "b6lqu-zyaaa-aaaag-qbwla-cai",
 		"metadata": {
 			"name": "CLUB SINGULARITY"
+		}
+	},
+	{
+		"canisterId": "bapzn-kiaaa-aaaam-qaiva-cai",
+		"metadata": {
+			"name": "ICLands"
 		}
 	},
 	{
@@ -876,6 +1170,18 @@
 		}
 	},
 	{
+		"canisterId": "bid2t-gyaaa-aaaah-qcdea-cai",
+		"metadata": {
+			"name": "Haunted Hamsters"
+		}
+	},
+	{
+		"canisterId": "bkvll-jiaaa-aaaah-qcqnq-cai",
+		"metadata": {
+			"name": "2D Assassins!!!"
+		}
+	},
+	{
 		"canisterId": "bm3f5-6iaaa-aaaam-qa35q-cai",
 		"metadata": {
 			"name": "Orblings Emblem"
@@ -900,6 +1206,18 @@
 		}
 	},
 	{
+		"canisterId": "bsdmf-gyaaa-aaaak-acgka-cai",
+		"metadata": {
+			"name": "iUSD"
+		}
+	},
+	{
+		"canisterId": "btggw-4aaaa-aaaah-qcdgq-cai",
+		"metadata": {
+			"name": "IC Pumpkins"
+		}
+	},
+	{
 		"canisterId": "btiq4-4qaaa-aaaag-qbosq-cai",
 		"metadata": {
 			"name": "PSYCHEDELIC ∞"
@@ -912,15 +1230,33 @@
 		}
 	},
 	{
+		"canisterId": "bvckr-laaaa-aaaak-acgkq-cai",
+		"metadata": {
+			"name": "Cubetopia Founder’s Pass"
+		}
+	},
+	{
 		"canisterId": "bx6pk-jqaaa-aaaag-qbjpa-cai",
 		"metadata": {
 			"name": "CUBEBOT"
 		}
 	},
 	{
+		"canisterId": "bxdf4-baaaa-aaaah-qaruq-cai",
+		"metadata": {
+			"name": "ICPunks"
+		}
+	},
+	{
 		"canisterId": "byowe-niaaa-aaaag-qdiva-cai",
 		"metadata": {
 			"name": "Legend of Zeldoge"
+		}
+	},
+	{
+		"canisterId": "bzsui-sqaaa-aaaah-qce2a-cai",
+		"metadata": {
+			"name": "Poked Bots"
 		}
 	},
 	{
@@ -933,6 +1269,18 @@
 		"canisterId": "caij4-dqaaa-aaaag-qjvfa-cai",
 		"metadata": {
 			"name": "Personal DAO OG Pass"
+		}
+	},
+	{
+		"canisterId": "cchps-gaaaa-aaaak-qasaa-cai",
+		"metadata": {
+			"name": "Boxy Girl"
+		}
+	},
+	{
+		"canisterId": "cdvmq-aaaaa-aaaah-qcdoq-cai",
+		"metadata": {
+			"name": "Selay Karasu"
 		}
 	},
 	{
@@ -972,6 +1320,12 @@
 		}
 	},
 	{
+		"canisterId": "ckwhm-wiaaa-aaaah-qcdpa-cai",
+		"metadata": {
+			"name": "PatternBased"
+		}
+	},
+	{
 		"canisterId": "ckyrg-wyaaa-aaaag-qbo3a-cai",
 		"metadata": {
 			"name": "BABY A.I"
@@ -996,6 +1350,12 @@
 		}
 	},
 	{
+		"canisterId": "cnxby-3qaaa-aaaah-qcdpq-cai",
+		"metadata": {
+			"name": "Andre Wee"
+		}
+	},
+	{
 		"canisterId": "cokeu-yaaaa-aaaag-qjvea-cai",
 		"metadata": {
 			"name": "DAS - Scott Bateman"
@@ -1005,6 +1365,18 @@
 		"canisterId": "cppgk-uqaaa-aaaag-qb5sa-cai",
 		"metadata": {
 			"name": "Lion Warriors"
+		}
+	},
+	{
+		"canisterId": "crt3j-mqaaa-aaaah-qcdnq-cai",
+		"metadata": {
+			"name": "Neil White"
+		}
+	},
+	{
+		"canisterId": "ctt6t-faaaa-aaaah-qcpbq-cai",
+		"metadata": {
+			"name": "Infernal Vampire Colony Gen2"
 		}
 	},
 	{
@@ -1023,6 +1395,12 @@
 		"canisterId": "cw4lx-byaaa-aaaag-qboza-cai",
 		"metadata": {
 			"name": "ISOMETRIC ISLAND"
+		}
+	},
+	{
+		"canisterId": "cwu5z-wyaaa-aaaaj-qaoaq-cai",
+		"metadata": {
+			"name": "Saga Legends #1: The Magician"
 		}
 	},
 	{
@@ -1062,6 +1440,12 @@
 		}
 	},
 	{
+		"canisterId": "dcbuw-wyaaa-aaaam-qapfq-cai",
+		"metadata": {
+			"name": "Genesis Hats"
+		}
+	},
+	{
 		"canisterId": "deb2y-miaaa-aaaam-qa3rq-cai",
 		"metadata": {
 			"name": "Crown Membership"
@@ -1074,6 +1458,18 @@
 		}
 	},
 	{
+		"canisterId": "dhiaa-ryaaa-aaaae-qabva-cai",
+		"metadata": {
+			"name": "ETH Flower"
+		}
+	},
+	{
+		"canisterId": "dhyds-jaaaa-aaaao-aaiia-cai",
+		"metadata": {
+			"name": "Obsidian Tears"
+		}
+	},
+	{
 		"canisterId": "djuya-caaaa-aaaag-qbo5q-cai",
 		"metadata": {
 			"name": "Ogre King"
@@ -1083,6 +1479,12 @@
 		"canisterId": "dkdbc-2yaaa-aaaag-qbjaq-cai",
 		"metadata": {
 			"name": "Winter Fairytale"
+		}
+	},
+	{
+		"canisterId": "dknxi-2iaaa-aaaah-qceuq-cai",
+		"metadata": {
+			"name": "Dfinity Bulls"
 		}
 	},
 	{
@@ -1104,9 +1506,27 @@
 		}
 	},
 	{
+		"canisterId": "dtlqp-nqaaa-aaaak-abwna-cai",
+		"metadata": {
+			"name": "IC Apps"
+		}
+	},
+	{
 		"canisterId": "duh6j-eiaaa-aaaag-qbfoq-cai",
 		"metadata": {
 			"name": "𝐒𝐇𝐈𝐍𝐈𝐆𝐀𝐌𝐈"
+		}
+	},
+	{
+		"canisterId": "dur4z-piaaa-aaaam-qai3a-cai",
+		"metadata": {
+			"name": "ICode DAO NFT pass"
+		}
+	},
+	{
+		"canisterId": "dv6u3-vqaaa-aaaah-qcdlq-cai",
+		"metadata": {
+			"name": "Tyler & Dakota"
 		}
 	},
 	{
@@ -1116,9 +1536,27 @@
 		}
 	},
 	{
+		"canisterId": "dylar-wyaaa-aaaah-qcexq-cai",
+		"metadata": {
+			"name": "Flight"
+		}
+	},
+	{
 		"canisterId": "e2ung-3qaaa-aaaam-qa46q-cai",
 		"metadata": {
 			"name": "A-Crystal"
+		}
+	},
+	{
+		"canisterId": "e3izy-jiaaa-aaaah-qacbq-cai",
+		"metadata": {
+			"name": "Cronics"
+		}
+	},
+	{
+		"canisterId": "e4ca6-oiaaa-aaaai-acm2a-cai",
+		"metadata": {
+			"name": "3D Dream Whale"
 		}
 	},
 	{
@@ -1140,6 +1578,12 @@
 		}
 	},
 	{
+		"canisterId": "eb7r3-myaaa-aaaah-qcdya-cai",
+		"metadata": {
+			"name": "Iconic2021"
+		}
+	},
+	{
 		"canisterId": "ecqkr-sqaaa-aaaag-qbwuq-cai",
 		"metadata": {
 			"name": "IC Old Shoes"
@@ -1149,6 +1593,12 @@
 		"canisterId": "edhwj-dyaaa-aaaag-qb5fq-cai",
 		"metadata": {
 			"name": "ICFriends"
+		}
+	},
+	{
+		"canisterId": "eejma-naaaa-aaaak-aalda-cai",
+		"metadata": {
+			"name": "Cosmicrafts"
 		}
 	},
 	{
@@ -1164,9 +1614,21 @@
 		}
 	},
 	{
+		"canisterId": "ehr7n-3yaaa-aaaam-qaiia-cai",
+		"metadata": {
+			"name": "CLUB CANI"
+		}
+	},
+	{
 		"canisterId": "ems7u-lyaaa-aaaal-qnbma-cai",
 		"metadata": {
 			"name": "Motoko Monsters Gen 2"
+		}
+	},
+	{
+		"canisterId": "eosur-nqaaa-aaaam-qaijq-cai",
+		"metadata": {
+			"name": "Terence's Art Sale"
 		}
 	},
 	{
@@ -1179,6 +1641,18 @@
 		"canisterId": "epxa5-maaaa-aaaag-qjspq-cai",
 		"metadata": {
 			"name": "Puuupy"
+		}
+	},
+	{
+		"canisterId": "er7d4-6iaaa-aaaaj-qac2q-cai",
+		"metadata": {
+			"name": "MoonWalkers"
+		}
+	},
+	{
+		"canisterId": "erpx2-pyaaa-aaaah-qcqsq-cai",
+		"metadata": {
+			"name": "Voxel Assassins!!!"
 		}
 	},
 	{
@@ -1233,6 +1707,12 @@
 		"canisterId": "fojcx-iaaaa-aaaap-qhmbq-cai",
 		"metadata": {
 			"name": "SoZo Profiles"
+		}
+	},
+	{
+		"canisterId": "fooog-vqaaa-aaaap-aaznq-cai",
+		"metadata": {
+			"name": "Trax"
 		}
 	},
 	{
@@ -1302,6 +1782,12 @@
 		}
 	},
 	{
+		"canisterId": "gevsk-tqaaa-aaaah-qaoca-cai",
+		"metadata": {
+			"name": "ICmojis"
+		}
+	},
+	{
 		"canisterId": "gfjqg-miaaa-aaaag-qbcna-cai",
 		"metadata": {
 			"name": "G.O.A.T"
@@ -1338,6 +1824,12 @@
 		}
 	},
 	{
+		"canisterId": "gikg4-eaaaa-aaaam-qaieq-cai",
+		"metadata": {
+			"name": "Mutant Space Apes"
+		}
+	},
+	{
 		"canisterId": "gikqo-jaaaa-aaaag-qb2uq-cai",
 		"metadata": {
 			"name": "Earthquake Charity"
@@ -1359,6 +1851,12 @@
 		"canisterId": "gk4xe-lqaaa-aaaam-qa3na-cai",
 		"metadata": {
 			"name": "MechaFailed"
+		}
+	},
+	{
+		"canisterId": "gksxm-waaaa-aaaao-aapjq-cai",
+		"metadata": {
+			"name": "Catalyze"
 		}
 	},
 	{
@@ -1386,6 +1884,12 @@
 		}
 	},
 	{
+		"canisterId": "goei2-daaaa-aaaao-aaiua-cai",
+		"metadata": {
+			"name": "Obsidian Tears Items and Artifacts"
+		}
+	},
+	{
 		"canisterId": "gpjcv-dyaaa-aaaag-qa7ra-cai",
 		"metadata": {
 			"name": "CryptoNinjas Avatars"
@@ -1404,9 +1908,21 @@
 		}
 	},
 	{
+		"canisterId": "gtb2b-tiaaa-aaaah-qcxca-cai",
+		"metadata": {
+			"name": "D-City"
+		}
+	},
+	{
 		"canisterId": "guy65-yaaaa-aaaag-qbfta-cai",
 		"metadata": {
 			"name": "High Rise Building"
+		}
+	},
+	{
+		"canisterId": "gyuaf-kqaaa-aaaah-qceka-cai",
+		"metadata": {
+			"name": "Infernal Vampire Colony"
 		}
 	},
 	{
@@ -1578,6 +2094,12 @@
 		}
 	},
 	{
+		"canisterId": "i5a2q-4yaaa-aaaam-qafla-cai",
+		"metadata": {
+			"name": "Internet Creeps"
+		}
+	},
+	{
 		"canisterId": "i5gfn-uiaaa-aaaal-qi6ja-cai",
 		"metadata": {
 			"name": "Motoko Monsters"
@@ -1620,9 +2142,27 @@
 		}
 	},
 	{
+		"canisterId": "iohft-haaaa-aaaam-qar4q-cai",
+		"metadata": {
+			"name": "LIVING ABETZ "
+		}
+	},
+	{
 		"canisterId": "iqvyi-sqaaa-aaaag-qbqha-cai",
 		"metadata": {
 			"name": "3D ROOMS"
+		}
+	},
+	{
+		"canisterId": "ircsc-oyaaa-aaaam-qajga-cai",
+		"metadata": {
+			"name": "Galactic Guardians"
+		}
+	},
+	{
+		"canisterId": "issbt-caaaa-aaaap-aayeq-cai",
+		"metadata": {
+			"name": "ModClub"
 		}
 	},
 	{
@@ -1650,9 +2190,27 @@
 		}
 	},
 	{
+		"canisterId": "j3c2x-ciaaa-aaaak-aanxa-cai",
+		"metadata": {
+			"name": "IC Notes (CrowdFund NFT)"
+		}
+	},
+	{
+		"canisterId": "j3dqa-byaaa-aaaah-qcwfa-cai",
+		"metadata": {
+			"name": "ICPCS"
+		}
+	},
+	{
 		"canisterId": "j663c-yyaaa-aaaag-qju2q-cai",
 		"metadata": {
 			"name": "Crypto Circus Ticktz"
+		}
+	},
+	{
+		"canisterId": "j7n3m-7iaaa-aaaam-qarza-cai",
+		"metadata": {
+			"name": "LuMari"
 		}
 	},
 	{
@@ -1674,6 +2232,12 @@
 		}
 	},
 	{
+		"canisterId": "jeghr-iaaaa-aaaah-qco7q-cai",
+		"metadata": {
+			"name": "ICTurtles"
+		}
+	},
+	{
 		"canisterId": "jgict-maaaa-aaaam-qa5xq-cai",
 		"metadata": {
 			"name": "Margon ∞"
@@ -1686,9 +2250,21 @@
 		}
 	},
 	{
+		"canisterId": "jjeno-oyaaa-aaaak-aanua-cai",
+		"metadata": {
+			"name": "IC Whiskers - CrowdFund NFT"
+		}
+	},
+	{
 		"canisterId": "jk4ir-vaaaa-aaaag-qb4pa-cai",
 		"metadata": {
 			"name": "Puzzles"
+		}
+	},
+	{
+		"canisterId": "jkkkb-6aaaa-aaaam-qar2q-cai",
+		"metadata": {
+			"name": "DFOOTY"
 		}
 	},
 	{
@@ -1698,9 +2274,21 @@
 		}
 	},
 	{
+		"canisterId": "jntyp-yiaaa-aaaah-qcr3q-cai",
+		"metadata": {
+			"name": "ICPics"
+		}
+	},
+	{
 		"canisterId": "jq4wk-diaaa-aaaag-qju3q-cai",
 		"metadata": {
 			"name": "The Constructivists"
+		}
+	},
+	{
+		"canisterId": "jqa6g-6aaaa-aaaah-qc2iq-cai",
+		"metadata": {
+			"name": "Triad Boys Society"
 		}
 	},
 	{
@@ -1731,6 +2319,18 @@
 		"canisterId": "juyx2-lqaaa-aaaag-qbqba-cai",
 		"metadata": {
 			"name": "The Force Awakens"
+		}
+	},
+	{
+		"canisterId": "jv55j-riaaa-aaaal-abvnq-cai",
+		"metadata": {
+			"name": "Poked Bots Mutant Army"
+		}
+	},
+	{
+		"canisterId": "jxpyk-6iaaa-aaaam-qafma-cai",
+		"metadata": {
+			"name": "🌮 Taco NFTs"
 		}
 	},
 	{
@@ -1770,9 +2370,21 @@
 		}
 	},
 	{
+		"canisterId": "k4qsa-4aaaa-aaaah-qbvnq-cai",
+		"metadata": {
+			"name": "Faceted Meninas"
+		}
+	},
+	{
 		"canisterId": "k4zy3-vqaaa-aaaag-qbxwq-cai",
 		"metadata": {
 			"name": "PR0GR4M D1SRUPT0R"
+		}
+	},
+	{
+		"canisterId": "k5osr-jyaaa-aaaam-qaoxq-cai",
+		"metadata": {
+			"name": "\"THE\" EGGs"
 		}
 	},
 	{
@@ -1848,6 +2460,18 @@
 		}
 	},
 	{
+		"canisterId": "kss7i-hqaaa-aaaah-qbvmq-cai",
+		"metadata": {
+			"name": "ICelebrity"
+		}
+	},
+	{
+		"canisterId": "kt2l3-uiaaa-aaaam-qarta-cai",
+		"metadata": {
+			"name": "Vibrant Diamond"
+		}
+	},
+	{
 		"canisterId": "l2cqd-oaaaa-aaaam-qawja-cai",
 		"metadata": {
 			"name": "ICPlatypus"
@@ -1863,6 +2487,12 @@
 		"canisterId": "l7gnb-jiaaa-aaaag-qdc7q-cai",
 		"metadata": {
 			"name": "NFT Pass "
+		}
+	},
+	{
+		"canisterId": "lcgbg-kaaaa-aaaam-qaota-cai",
+		"metadata": {
+			"name": "PHASMA"
 		}
 	},
 	{
@@ -1914,6 +2544,12 @@
 		}
 	},
 	{
+		"canisterId": "llt6y-2iaaa-aaaam-qarxa-cai",
+		"metadata": {
+			"name": "Exploring IC"
+		}
+	},
+	{
 		"canisterId": "lmgot-3qaaa-aaaag-qazha-cai",
 		"metadata": {
 			"name": "Energy Ghosts"
@@ -1935,6 +2571,12 @@
 		"canisterId": "lvbdd-pyaaa-aaaag-qbqmq-cai",
 		"metadata": {
 			"name": "Dark of the Night"
+		}
+	},
+	{
+		"canisterId": "lxmol-ciaaa-aaaak-abpdq-cai",
+		"metadata": {
+			"name": "Internet Computer Footprint"
 		}
 	},
 	{
@@ -1995,6 +2637,12 @@
 		"canisterId": "mivz5-gyaaa-aaaag-qbp3a-cai",
 		"metadata": {
 			"name": "Steampunk GameBoy"
+		}
+	},
+	{
+		"canisterId": "mk3kn-pyaaa-aaaah-qcoda-cai",
+		"metadata": {
+			"name": "DfinityDeck:Paradigm"
 		}
 	},
 	{
@@ -2094,9 +2742,21 @@
 		}
 	},
 	{
+		"canisterId": "n6bj5-ryaaa-aaaan-qaaqq-cai",
+		"metadata": {
+			"name": "Weapons of Eimolad"
+		}
+	},
+	{
 		"canisterId": "nb3wh-2qaaa-aaaag-qbxeq-cai",
 		"metadata": {
 			"name": "RUG EXPOSED"
+		}
+	},
+	{
+		"canisterId": "nbg4r-saaaa-aaaah-qap7a-cai",
+		"metadata": {
+			"name": "Starverse"
 		}
 	},
 	{
@@ -2139,6 +2799,18 @@
 		"canisterId": "nfnjr-pqaaa-aaaag-qbqza-cai",
 		"metadata": {
 			"name": "Dexterity Nebula"
+		}
+	},
+	{
+		"canisterId": "nfvlz-jaaaa-aaaah-qcciq-cai",
+		"metadata": {
+			"name": "ICGhost 3D Scenes"
+		}
+	},
+	{
+		"canisterId": "nges7-giaaa-aaaaj-qaiya-cai",
+		"metadata": {
+			"name": "Saga Legends"
 		}
 	},
 	{
@@ -2196,6 +2868,12 @@
 		}
 	},
 	{
+		"canisterId": "o5l7c-tiaaa-aaaaf-qajwq-cai",
+		"metadata": {
+			"name": "Nuance: Scytale"
+		}
+	},
+	{
 		"canisterId": "o6lzt-kiaaa-aaaag-qbdza-cai",
 		"metadata": {
 			"name": "PC Heads"
@@ -2229,6 +2907,12 @@
 		"canisterId": "odyji-baaaa-aaaam-qa22a-cai",
 		"metadata": {
 			"name": "Robot Scientists"
+		}
+	},
+	{
+		"canisterId": "oeee4-qaaaa-aaaak-qaaeq-cai",
+		"metadata": {
+			"name": "Motoko Ghosts"
 		}
 	},
 	{
@@ -2274,6 +2958,12 @@
 		}
 	},
 	{
+		"canisterId": "owuqd-dyaaa-aaaah-qapxq-cai",
+		"metadata": {
+			"name": "ICPuzzle"
+		}
+	},
+	{
 		"canisterId": "oy5vn-3yaaa-aaaam-qa2yq-cai",
 		"metadata": {
 			"name": "IC FLOWERS"
@@ -2295,6 +2985,12 @@
 		"canisterId": "p4q27-cyaaa-aaaam-qa26q-cai",
 		"metadata": {
 			"name": "Caffesitas"
+		}
+	},
+	{
+		"canisterId": "p5jg7-6aaaa-aaaah-qcolq-cai",
+		"metadata": {
+			"name": "ICAliens"
 		}
 	},
 	{
@@ -2334,6 +3030,12 @@
 		}
 	},
 	{
+		"canisterId": "pk6rk-6aaaa-aaaae-qaazq-cai",
+		"metadata": {
+			"name": "BTC Flower"
+		}
+	},
+	{
 		"canisterId": "pkasq-3iaaa-aaaam-qa5aa-cai",
 		"metadata": {
 			"name": "Triana Divine"
@@ -2358,9 +3060,27 @@
 		}
 	},
 	{
+		"canisterId": "pnpu4-3aaaa-aaaah-qcceq-cai",
+		"metadata": {
+			"name": "Infinite Chimps"
+		}
+	},
+	{
+		"canisterId": "po6n2-uiaaa-aaaaj-qaiua-cai",
+		"metadata": {
+			"name": "dSquad"
+		}
+	},
+	{
 		"canisterId": "pow3u-diaaa-aaaag-qbinq-cai",
 		"metadata": {
 			"name": "A.C.A.P"
+		}
+	},
+	{
+		"canisterId": "poyn6-dyaaa-aaaah-qcfzq-cai",
+		"metadata": {
+			"name": "Blockchain Heroes"
 		}
 	},
 	{
@@ -2376,9 +3096,21 @@
 		}
 	},
 	{
+		"canisterId": "px5ub-qqaaa-aaaah-qcjxa-cai",
+		"metadata": {
+			"name": "Imagination Project"
+		}
+	},
+	{
 		"canisterId": "pycz7-baaaa-aaaag-qjtrq-cai",
 		"metadata": {
 			"name": "Zazas"
+		}
+	},
+	{
+		"canisterId": "pzd64-5yaaa-aaaap-ahljq-cai",
+		"metadata": {
+			"name": "Grapes of Wrath"
 		}
 	},
 	{
@@ -2400,9 +3132,21 @@
 		}
 	},
 	{
+		"canisterId": "q6hjz-kyaaa-aaaah-qcama-cai",
+		"metadata": {
+			"name": "ICPBunny"
+		}
+	},
+	{
 		"canisterId": "qa4il-3yaaa-aaaag-qcr4q-cai",
 		"metadata": {
 			"name": "OpenFPL Brand NFTs"
+		}
+	},
+	{
+		"canisterId": "qbc6i-daaaa-aaaah-qcywq-cai",
+		"metadata": {
+			"name": "Internet Humans"
 		}
 	},
 	{
@@ -2415,6 +3159,24 @@
 		"canisterId": "qfmve-5qaaa-aaaam-qa7kq-cai",
 		"metadata": {
 			"name": "\"FLEUR\""
+		}
+	},
+	{
+		"canisterId": "qjwjm-eaaaa-aaaah-qctga-cai",
+		"metadata": {
+			"name": "Dfinity Donkey"
+		}
+	},
+	{
+		"canisterId": "qjyju-jqaaa-aaaam-qamca-cai",
+		"metadata": {
+			"name": "Early Dog Trophies"
+		}
+	},
+	{
+		"canisterId": "qklen-ryaaa-aaaal-abixa-cai",
+		"metadata": {
+			"name": "Pixel Collection"
 		}
 	},
 	{
@@ -2484,6 +3246,12 @@
 		}
 	},
 	{
+		"canisterId": "r75rh-rqaaa-aaaah-qctda-cai",
+		"metadata": {
+			"name": "Eleos"
+		}
+	},
+	{
 		"canisterId": "rcabe-xiaaa-aaaag-qbvea-cai",
 		"metadata": {
 			"name": "Outcast II"
@@ -2502,6 +3270,12 @@
 		}
 	},
 	{
+		"canisterId": "ri5pt-5iaaa-aaaan-qactq-cai",
+		"metadata": {
+			"name": "Dwarf Elders of Eimolad"
+		}
+	},
+	{
 		"canisterId": "riut2-zyaaa-aaaag-qbsyq-cai",
 		"metadata": {
 			"name": "Mad Scientist "
@@ -2511,6 +3285,12 @@
 		"canisterId": "rldky-baaaa-aaaag-qbvfq-cai",
 		"metadata": {
 			"name": "Eshan & Jinora"
+		}
+	},
+	{
+		"canisterId": "rln4s-bqaaa-aaaah-qcyrq-cai",
+		"metadata": {
+			"name": "ICmoji Legends"
 		}
 	},
 	{
@@ -2556,9 +3336,21 @@
 		}
 	},
 	{
+		"canisterId": "rqiax-3iaaa-aaaah-qcyta-cai",
+		"metadata": {
+			"name": "DfinityDeck:Elements"
+		}
+	},
+	{
 		"canisterId": "rqqc7-5yaaa-aaaag-qbkcq-cai",
 		"metadata": {
 			"name": "TrollFace Meme"
+		}
+	},
+	{
+		"canisterId": "rr6wy-jqaaa-aaaak-aaiqa-cai",
+		"metadata": {
+			"name": "ICKitties Wearables"
 		}
 	},
 	{
@@ -2577,6 +3369,18 @@
 		"canisterId": "rvhvt-7qaaa-aaaag-qbzlq-cai",
 		"metadata": {
 			"name": "Helic of Earth"
+		}
+	},
+	{
+		"canisterId": "rw623-hyaaa-aaaah-qctcq-cai",
+		"metadata": {
+			"name": "OG MEDALS"
+		}
+	},
+	{
+		"canisterId": "rw7qm-eiaaa-aaaak-aaiqq-cai",
+		"metadata": {
+			"name": "ICKitties"
 		}
 	},
 	{
@@ -2601,6 +3405,12 @@
 		"canisterId": "s2fij-liaaa-aaaag-qa3zq-cai",
 		"metadata": {
 			"name": "The Messenger"
+		}
+	},
+	{
+		"canisterId": "s36wu-5qaaa-aaaah-qcyzq-cai",
+		"metadata": {
+			"name": "Boxy Dude"
 		}
 	},
 	{
@@ -2652,6 +3462,18 @@
 		}
 	},
 	{
+		"canisterId": "sjybn-raaaa-aaaah-qcy2q-cai",
+		"metadata": {
+			"name": "Flat Fiat"
+		}
+	},
+	{
+		"canisterId": "skjpp-haaaa-aaaae-qac7q-cai",
+		"metadata": {
+			"name": "Pineapple Punks"
+		}
+	},
+	{
 		"canisterId": "skx2h-piaaa-aaaag-qbnwa-cai",
 		"metadata": {
 			"name": "Bone Punkzz"
@@ -2667,6 +3489,12 @@
 		"canisterId": "soxrt-4iaaa-aaaag-qbvoa-cai",
 		"metadata": {
 			"name": "ANIME"
+		}
+	},
+	{
+		"canisterId": "sr4qi-vaaaa-aaaah-qcaaq-cai",
+		"metadata": {
+			"name": "Internet Astronauts"
 		}
 	},
 	{
@@ -2718,6 +3546,18 @@
 		}
 	},
 	{
+		"canisterId": "t2eok-gyaaa-aaaah-qclwq-cai",
+		"metadata": {
+			"name": "Tranquillity"
+		}
+	},
+	{
+		"canisterId": "t2mog-myaaa-aaaal-aas7q-cai",
+		"metadata": {
+			"name": "Pet bots"
+		}
+	},
+	{
 		"canisterId": "t3lq2-raaaa-aaaag-qbswa-cai",
 		"metadata": {
 			"name": "Monster Party"
@@ -2736,6 +3576,12 @@
 		}
 	},
 	{
+		"canisterId": "t64re-6iaaa-aaaam-qatpa-cai",
+		"metadata": {
+			"name": "Dionysus' Masks"
+		}
+	},
+	{
 		"canisterId": "t7l3o-caaaa-aaaag-qbkoa-cai",
 		"metadata": {
 			"name": "Whoops"
@@ -2745,6 +3591,18 @@
 		"canisterId": "tbzqh-2qaaa-aaaag-qbzfq-cai",
 		"metadata": {
 			"name": "Mountain Bitcoin"
+		}
+	},
+	{
+		"canisterId": "tco7x-piaaa-aaaam-qamiq-cai",
+		"metadata": {
+			"name": "3D motorcycles"
+		}
+	},
+	{
+		"canisterId": "tde7l-3qaaa-aaaah-qansa-cai",
+		"metadata": {
+			"name": "Cronic Wearables"
 		}
 	},
 	{
@@ -2769,6 +3627,12 @@
 		"canisterId": "tfpyv-wyaaa-aaaal-qbonq-cai",
 		"metadata": {
 			"name": "Baddest Ruffest"
+		}
+	},
+	{
+		"canisterId": "tgwaz-xyaaa-aaaah-qcura-cai",
+		"metadata": {
+			"name": "Frontliners"
 		}
 	},
 	{
@@ -2814,6 +3678,12 @@
 		}
 	},
 	{
+		"canisterId": "tnvo7-iaaaa-aaaah-qcy4q-cai",
+		"metadata": {
+			"name": "ICKoalas"
+		}
+	},
+	{
 		"canisterId": "trm6y-xqaaa-aaaag-qdafa-cai",
 		"metadata": {
 			"name": "Steampunk Infinity"
@@ -2838,6 +3708,18 @@
 		}
 	},
 	{
+		"canisterId": "tx72y-iaaaa-aaaam-qatoq-cai",
+		"metadata": {
+			"name": "Pyramidion: UFO"
+		}
+	},
+	{
+		"canisterId": "txr2a-fqaaa-aaaah-qcmkq-cai",
+		"metadata": {
+			"name": "Meme Cake"
+		}
+	},
+	{
 		"canisterId": "tzjbp-7qaaa-aaaag-qa37a-cai",
 		"metadata": {
 			"name": "IC Gora"
@@ -2847,6 +3729,12 @@
 		"canisterId": "u23qv-paaaa-aaaag-qbndq-cai",
 		"metadata": {
 			"name": "Dfty:Powerscuff Apes"
+		}
+	},
+	{
+		"canisterId": "u2kyg-aaaaa-aaaag-qc5ja-cai",
+		"metadata": {
+			"name": "BTC Flower Gen 2.0"
 		}
 	},
 	{
@@ -2976,6 +3864,12 @@
 		}
 	},
 	{
+		"canisterId": "unssi-hiaaa-aaaah-qcmya-cai",
+		"metadata": {
+			"name": "ICPets"
+		}
+	},
+	{
 		"canisterId": "uo5jc-zaaaa-aaaag-qbzuq-cai",
 		"metadata": {
 			"name": "Collie Bollie"
@@ -2991,6 +3885,12 @@
 		"canisterId": "urjwa-7yaaa-aaaag-qcreq-cai",
 		"metadata": {
 			"name": "Cyber Monkey"
+		}
+	},
+	{
+		"canisterId": "usprd-faaaa-aaaam-qauda-cai",
+		"metadata": {
+			"name": "IC Partymania"
 		}
 	},
 	{
@@ -3024,9 +3924,21 @@
 		}
 	},
 	{
+		"canisterId": "uvxj2-ayaaa-aaaak-aapqa-cai",
+		"metadata": {
+			"name": "Kreatives"
+		}
+	},
+	{
 		"canisterId": "uvyvh-dyaaa-aaaag-qbzwa-cai",
 		"metadata": {
 			"name": "ANIME5"
+		}
+	},
+	{
+		"canisterId": "uzhxd-ziaaa-aaaah-qanaq-cai",
+		"metadata": {
+			"name": "ICP News"
 		}
 	},
 	{
@@ -3039,6 +3951,12 @@
 		"canisterId": "v2ekv-yyaaa-aaaag-qjw2q-cai",
 		"metadata": {
 			"name": "GG Guitar Collection"
+		}
+	},
+	{
+		"canisterId": "v3b6z-ziaaa-aaaam-qam4q-cai",
+		"metadata": {
+			"name": "IC Genesis"
 		}
 	},
 	{
@@ -3102,6 +4020,12 @@
 		}
 	},
 	{
+		"canisterId": "vj752-6iaaa-aaaah-qcm6a-cai",
+		"metadata": {
+			"name": "Equanimity"
+		}
+	},
+	{
 		"canisterId": "vkqgq-aaaaa-aaaag-qbzsq-cai",
 		"metadata": {
 			"name": "New Era Tamagotchi"
@@ -3123,6 +4047,18 @@
 		"canisterId": "vvdfd-pyaaa-aaaag-qb6nq-cai",
 		"metadata": {
 			"name": "Dfinity Mask"
+		}
+	},
+	{
+		"canisterId": "vvvht-eyaaa-aaaam-qatya-cai",
+		"metadata": {
+			"name": "World of Tacos"
+		}
+	},
+	{
+		"canisterId": "vwc6r-4aaaa-aaaam-qaufa-cai",
+		"metadata": {
+			"name": "AOKI"
 		}
 	},
 	{
@@ -3174,6 +4110,12 @@
 		}
 	},
 	{
+		"canisterId": "wlea5-diaaa-aaaam-qatra-cai",
+		"metadata": {
+			"name": "Motoko Piñatas"
+		}
+	},
+	{
 		"canisterId": "wpe53-5iaaa-aaaag-qbzza-cai",
 		"metadata": {
 			"name": "NURSE S1"
@@ -3222,6 +4164,12 @@
 		}
 	},
 	{
+		"canisterId": "x4oqm-bqaaa-aaaam-qahaq-cai",
+		"metadata": {
+			"name": "DRIP BANG"
+		}
+	},
+	{
 		"canisterId": "x6mxl-caaaa-aaaag-qa4zq-cai",
 		"metadata": {
 			"name": "Say CORAL! 📸"
@@ -3243,6 +4191,12 @@
 		"canisterId": "xak4p-3qaaa-aaaag-qbvsq-cai",
 		"metadata": {
 			"name": "Pixel Mom"
+		}
+	},
+	{
+		"canisterId": "xcep7-sqaaa-aaaah-qcukq-cai",
+		"metadata": {
+			"name": "3D Assassins!!!"
 		}
 	},
 	{
@@ -3282,6 +4236,12 @@
 		}
 	},
 	{
+		"canisterId": "xgket-maaaa-aaaam-qatwq-cai",
+		"metadata": {
+			"name": "Calavera Collection"
+		}
+	},
+	{
 		"canisterId": "xh5oz-qiaaa-aaaag-qbkxq-cai",
 		"metadata": {
 			"name": "BlockC"
@@ -3291,6 +4251,12 @@
 		"canisterId": "xoirh-aaaaa-aaaag-qbvtq-cai",
 		"metadata": {
 			"name": "The Privateer"
+		}
+	},
+	{
+		"canisterId": "xphpx-xyaaa-aaaah-qcmta-cai",
+		"metadata": {
+			"name": "CYMAN"
 		}
 	},
 	{
@@ -3348,9 +4314,33 @@
 		}
 	},
 	{
+		"canisterId": "xzxhy-oiaaa-aaaah-qclnq-cai",
+		"metadata": {
+			"name": "YOLO Octopus"
+		}
+	},
+	{
+		"canisterId": "y2ga5-lyaaa-aaaae-qae2q-cai",
+		"metadata": {
+			"name": "Cherries"
+		}
+	},
+	{
+		"canisterId": "y3b7h-siaaa-aaaah-qcnwa-cai",
+		"metadata": {
+			"name": "ICats"
+		}
+	},
+	{
 		"canisterId": "y5phd-iiaaa-aaaag-qbuwa-cai",
 		"metadata": {
 			"name": "Fascinating Species"
+		}
+	},
+	{
+		"canisterId": "y5prr-fiaaa-aaaam-qagga-cai",
+		"metadata": {
+			"name": "DogFinity"
 		}
 	},
 	{
@@ -3432,6 +4422,12 @@
 		}
 	},
 	{
+		"canisterId": "yigae-jqaaa-aaaah-qczbq-cai",
+		"metadata": {
+			"name": "Earn Contracts"
+		}
+	},
+	{
 		"canisterId": "yl7pm-ryaaa-aaaag-qbtiq-cai",
 		"metadata": {
 			"name": "3D Macintosh"
@@ -3447,6 +4443,18 @@
 		"canisterId": "ym2d4-hyaaa-aaaag-qjpkq-cai",
 		"metadata": {
 			"name": "World Epoch"
+		}
+	},
+	{
+		"canisterId": "yrdz3-2yaaa-aaaah-qcvpa-cai",
+		"metadata": {
+			"name": "IC Dinos"
+		}
+	},
+	{
+		"canisterId": "ysmud-jqaaa-aaaam-qastq-cai",
+		"metadata": {
+			"name": "ICFantasyWorld"
 		}
 	},
 	{
@@ -3504,9 +4512,21 @@
 		}
 	},
 	{
+		"canisterId": "z7mqv-liaaa-aaaah-qcnqa-cai",
+		"metadata": {
+			"name": "ICircle - Pythagoras"
+		}
+	},
+	{
 		"canisterId": "zarfm-eaaaa-aaaag-qbh3a-cai",
 		"metadata": {
 			"name": "Emperor of Mars"
+		}
+	},
+	{
+		"canisterId": "zejmq-rqaaa-aaaah-qcnsq-cai",
+		"metadata": {
+			"name": "Interitus"
 		}
 	},
 	{
@@ -3519,6 +4539,12 @@
 		"canisterId": "zghjs-vqaaa-aaaam-qa62q-cai",
 		"metadata": {
 			"name": "Block Busters"
+		}
+	},
+	{
+		"canisterId": "zhibq-piaaa-aaaah-qcvka-cai",
+		"metadata": {
+			"name": "Panda Queen"
 		}
 	},
 	{
@@ -3570,15 +4596,39 @@
 		}
 	},
 	{
+		"canisterId": "zqpvh-hqaaa-aaaah-qczfq-cai",
+		"metadata": {
+			"name": "ICKitsune"
+		}
+	},
+	{
 		"canisterId": "zubiz-uaaaa-aaaag-qbmjq-cai",
 		"metadata": {
 			"name": "Boomers"
 		}
 	},
 	{
+		"canisterId": "zvycl-fyaaa-aaaah-qckmq-cai",
+		"metadata": {
+			"name": "ICApes"
+		}
+	},
+	{
+		"canisterId": "zydwz-laaaa-aaaam-qasuq-cai",
+		"metadata": {
+			"name": "Celestials"
+		}
+	},
+	{
 		"canisterId": "zyvuj-aaaaa-aaaag-qb7ba-cai",
 		"metadata": {
 			"name": "The Road Project"
+		}
+	},
+	{
+		"canisterId": "zzk67-giaaa-aaaaj-qaujq-cai",
+		"metadata": {
+			"name": "The High Priestess"
 		}
 	}
 ]

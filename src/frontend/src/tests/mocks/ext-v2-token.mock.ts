@@ -74,7 +74,7 @@ export const mockExtV2TokenIndexes: TokenIndex[] = mapExtTokensListing(mockExtV2
 
 export const mockExtMetadata: Metadata = {
 	nonfungible: {
-		metadata: toNullable(),
+		metadata: toNullable({ blob: new Uint8Array([1, 2, 3]) }),
 		name: 'Mock NFT',
 		thumbnail: 'https://example.com/thumbnail.png',
 		asset: 'https://example.com/asset.png'
@@ -83,6 +83,11 @@ export const mockExtMetadata: Metadata = {
 
 export const mockExtLegacyMetadata: MetadataLegacy = {
 	nonfungible: {
-		metadata: toNullable()
+		metadata: toNullable(new Uint8Array([4, 5, 6]))
 	}
 };
+
+export const mockExtDecodedMetadata =
+	'{"category": "Default", "thumb": "https://vofqk-yyaaa-aaaap-qa3na-cai.raw.ic0.app/file/5826.gif", "name": "Nyannyan #5826", "url": "https://vofqk-yyaaa-aaaap-qa3na-cai.raw.ic0.app/file/5826.gif", "timestamp": 1678871323381, "description": "", "attributes": [{"trait_type": "Background", "value": "SkyBlue"}, {"trait_type": "Body", "value": "British Shorthair"}, {"trait_type": "Accessory 2", "value": "Boom"}, {"trait_type": "Accessory 1", "value": "Lightning strike"}], "mimeType": "image"}';
+
+export const mockExtParsedMetadata = JSON.parse(mockExtDecodedMetadata);
