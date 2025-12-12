@@ -1808,7 +1808,7 @@ describe('open-crypto-pay.utils', () => {
 					...validParams,
 					uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1'
 				})
-			).toThrow();
+			).toThrowError();
 		});
 
 		it('should throw error when URI value cannot be parsed', () => {
@@ -1818,7 +1818,7 @@ describe('open-crypto-pay.utils', () => {
 					...validParams,
 					uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=invalid'
 				})
-			).toThrow();
+			).toThrowError();
 		});
 
 		it('should throw error when amount does not match URI value', () => {
@@ -1829,7 +1829,7 @@ describe('open-crypto-pay.utils', () => {
 					amount: 2000000000000000000n,
 					uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000000'
 				})
-			).toThrow();
+			).toThrowError();
 		});
 
 		it('should throw error when destination is not valid Ethereum address', () => {
@@ -1844,7 +1844,7 @@ describe('open-crypto-pay.utils', () => {
 					...validParams,
 					uri: 'ethereum:not-an-address@1?value=1000000000000000000'
 				})
-			).toThrow();
+			).toThrowError();
 		});
 
 		it('should preserve BigInt types', () => {
@@ -2000,7 +2000,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: invalidData,
 					...validParams
 				})
-			).toThrow();
+			).toThrowError();
 		});
 
 		it('should throw error when URI uint256 is missing', () => {
@@ -2010,7 +2010,7 @@ describe('open-crypto-pay.utils', () => {
 					...validParams,
 					uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}`
 				})
-			).toThrow();
+			).toThrowError();
 		});
 
 		it('should throw error when URI uint256 cannot be parsed', () => {
@@ -2020,7 +2020,7 @@ describe('open-crypto-pay.utils', () => {
 					...validParams,
 					uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}&uint256=invalid`
 				})
-			).toThrow();
+			).toThrowError();
 		});
 
 		it('should throw error when token contract mismatch', () => {
@@ -2034,7 +2034,7 @@ describe('open-crypto-pay.utils', () => {
 					decodedData: invalidData,
 					...validParams
 				})
-			).toThrow();
+			).toThrowError();
 		});
 
 		it('should throw error when amount does not match URI uint256', () => {
@@ -2045,7 +2045,7 @@ describe('open-crypto-pay.utils', () => {
 					amount: 2000000n,
 					uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}&uint256=1000000`
 				})
-			).toThrow();
+			).toThrowError();
 		});
 
 		it('should throw error when recipient address is not valid', () => {
@@ -2060,7 +2060,7 @@ describe('open-crypto-pay.utils', () => {
 					...validParams,
 					uri: `ethereum:${tokenContract}@1/transfer?address=not-an-address&uint256=1000000`
 				})
-			).toThrow();
+			).toThrowError();
 		});
 
 		it('should preserve BigInt types', () => {
