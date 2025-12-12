@@ -117,6 +117,7 @@
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
 			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain"
@@ -1784,6 +1785,7 @@
 			},
 			"title": "",
 			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
