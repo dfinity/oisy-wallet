@@ -86,7 +86,9 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Unexpected cycles response'));
+			await expect(res).rejects.toThrowError(
+				new CanisterInternalError('Unexpected cycles response')
+			);
 		});
 
 		it('should throw an error if transfer returns an InsufficientBalance error', async () => {

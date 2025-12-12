@@ -212,7 +212,9 @@ describe('swap.services', () => {
 				transaction: { ...mockTransactionParams, gas: null as unknown as string }
 			};
 
-			await expect(swap(paramsWithNullishGas)).rejects.toThrowError(en.send.error.erc20_data_undefined);
+			await expect(swap(paramsWithNullishGas)).rejects.toThrowError(
+				en.send.error.erc20_data_undefined
+			);
 
 			expect(mockSwapParams.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
 			expect(infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);

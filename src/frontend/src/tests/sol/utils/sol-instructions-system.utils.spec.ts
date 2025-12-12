@@ -65,9 +65,9 @@ describe('sol-instructions-system.utils', () => {
 		it('should raise an error if the instruction is missing the accounts', () => {
 			const { accounts: _, ...withoutAccounts } = mockInstruction;
 
-			expect(() => parseSolSystemInstruction(withoutAccounts as unknown as SolInstruction)).toThrowError(
-				'The instruction does not have any accounts'
-			);
+			expect(() =>
+				parseSolSystemInstruction(withoutAccounts as unknown as SolInstruction)
+			).toThrowError('The instruction does not have any accounts');
 		});
 
 		it('should parse a CreateAccount instruction', () => {

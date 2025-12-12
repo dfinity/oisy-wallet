@@ -143,7 +143,9 @@ describe('post-message.schema', () => {
 			expect(() =>
 				PostMessageDataRequestExchangeTimerSchema.parse(missingIcrcCanisterIds)
 			).toThrowError();
-			expect(() => PostMessageDataRequestExchangeTimerSchema.parse(missingSplAddresses)).toThrowError();
+			expect(() =>
+				PostMessageDataRequestExchangeTimerSchema.parse(missingSplAddresses)
+			).toThrowError();
 		});
 	});
 
@@ -278,7 +280,9 @@ describe('post-message.schema', () => {
 				btcAddress: mockBtcAddress
 			};
 
-			expect(() => PostMessageDataRequestIcCkBTCUpdateBalanceSchema.parse(invalidData)).toThrowError();
+			expect(() =>
+				PostMessageDataRequestIcCkBTCUpdateBalanceSchema.parse(invalidData)
+			).toThrowError();
 		});
 	});
 

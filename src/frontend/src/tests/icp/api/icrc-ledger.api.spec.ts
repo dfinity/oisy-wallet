@@ -558,7 +558,9 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(icrc1SupportedStandards({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(
+				icrc1SupportedStandards({ ...params, identity: undefined })
+			).rejects.toThrowError();
 		});
 	});
 
@@ -599,7 +601,9 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(icrc10SupportedStandards({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(
+				icrc10SupportedStandards({ ...params, identity: undefined })
+			).rejects.toThrowError();
 		});
 	});
 

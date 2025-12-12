@@ -149,7 +149,9 @@ describe('cketh-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(eip1559TransactionPrice({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(
+				eip1559TransactionPrice({ ...params, identity: undefined })
+			).rejects.toThrowError();
 		});
 	});
 });

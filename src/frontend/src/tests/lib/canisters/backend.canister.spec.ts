@@ -802,7 +802,9 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrowError(mapIcrc2ApproveError(response.Err.ApproveError));
+			await expect(allowSigning()).rejects.toThrowError(
+				mapIcrc2ApproveError(response.Err.ApproveError)
+			);
 		});
 
 		it('should throw a CanisterInternalError if FailedToContactCyclesLedger error is returned', async () => {
