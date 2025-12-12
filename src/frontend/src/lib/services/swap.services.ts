@@ -6,7 +6,7 @@ import type { EthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
-import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
+import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { hasSufficientIcrcAllowance, loadCustomTokens } from '$icp/services/icrc.services';
