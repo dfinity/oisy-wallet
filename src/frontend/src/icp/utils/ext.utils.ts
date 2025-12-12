@@ -8,11 +8,10 @@ import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token.utils';
 import { Principal } from '@icp-sdk/core/principal';
 
-export const isTokenExtV2 = (token: Partial<IcToken>): token is ExtToken =>
-	token.standard === 'extV2';
+export const isTokenExt = (token: Partial<IcToken>): token is ExtToken => token.standard === 'ext';
 
-export const isTokenExtV2CustomToken = (token: Token): token is ExtCustomToken =>
-	isTokenExtV2(token) && isTokenToggleable(token);
+export const isTokenExtCustomToken = (token: Token): token is ExtCustomToken =>
+	isTokenExt(token) && isTokenToggleable(token);
 
 // The minting number (that wallets, frontends, etc. usually show) is 1-based indexed, it's simply (TokenIndex + 1).
 export const parseExtTokenIndex = (index: TokenIndex): TokenIndex => index + 1;
@@ -67,6 +66,6 @@ export const mapExtToken = ({
 	symbol: name,
 	// For our current scopes, there is no need to have the correct decimals, since we are using this standard as NFT collections.
 	decimals: 0,
-	standard: 'extV2',
+	standard: 'ext',
 	category: 'custom'
 });
