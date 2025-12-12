@@ -1,12 +1,16 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+    import {getContext, untrack} from 'svelte';
+	import { icrcAccount } from '$icp/derived/ic.derived';
+	import { isUserMintingAccount } from '$icp/services/icrc-minting.services';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
+	import type { IcToken, OptionIcToken } from '$icp/types/ic-token';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -29,8 +33,31 @@
 
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
+	let isMintingAccount = $state(false);
+
+	const updateMintingAccountStatus = async () => {
+		isMintingAccount = await isUserMintingAccount({
+			identity: $authIdentity,
+			account: $icrcAccount,
+			token: $sendToken as IcToken
+		});
+	};
+
+	$effect(() => {
+        [$authIdentity, $icrcAccount, $sendToken];
+
+		console.log('updateMintingAccountStatus');
+        untrack(() => updateMintingAccountStatus());
+	});
+
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (isNullish(fee) || isNullish($sendToken)) {
+			return;
+		}
+
+		// If the user is the minting account, it does not require any balance to send tokens.
+		// Any token sent from a minting account is considered a Mint transaction.
+		if (isMintingAccount) {
 			return;
 		}
 
@@ -41,7 +68,7 @@
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
 
-			return undefined;
+			return;
 		};
 
 		return assertBalance();
