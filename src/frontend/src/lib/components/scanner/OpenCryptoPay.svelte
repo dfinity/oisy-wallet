@@ -27,9 +27,7 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import type { Erc20Token } from '$eth/types/erc20';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
-	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 
 	interface Props {
 		onSelectToken: () => void;
