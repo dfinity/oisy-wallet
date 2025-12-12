@@ -7,7 +7,7 @@
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { autoLoadCustomToken } from '$icp-eth/services/custom-token.services';
-	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
+	import { autoLoadErc20Token } from '$icp-eth/services/erc20-token.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
@@ -59,7 +59,7 @@
 		}
 
 		if ($networkICP) {
-			const { result: resultUserToken } = await autoLoadUserToken({
+			const { result: resultUserToken } = await autoLoadErc20Token({
 				erc20UserTokens: $erc20UserTokens,
 				sendToken: $tokenWithFallback,
 				identity: $authIdentity
