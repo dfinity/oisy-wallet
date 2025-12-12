@@ -20,7 +20,6 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { errorDetailToString } from '$lib/utils/error.utils';
 
 	interface Props {
 		onSelectToken: () => void;
