@@ -5,12 +5,12 @@ import {
 	CKETH_LEDGER_CANISTER_IDS
 } from '$env/networks/networks.icrc.env';
 import type { IcToken } from '$icp/types/ic-token';
-import { isTokenExtV2 } from '$icp/utils/ext.utils';
+import { isTokenExt } from '$icp/utils/ext.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NetworkId } from '$lib/types/network';
-import type { TokenStandard } from '$lib/types/token';
+import type { TokenStandardCode } from '$lib/types/token';
 import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
@@ -46,7 +46,7 @@ export const isInvalidDestinationIc = ({
 	networkId
 }: {
 	destination: string;
-	tokenStandard: TokenStandard;
+	tokenStandard: TokenStandardCode;
 	networkId?: NetworkId;
 }): boolean => {
 	if (isNullishOrEmpty(destination)) {
@@ -61,7 +61,7 @@ export const isInvalidDestinationIc = ({
 		return !isEthAddress(destination);
 	}
 
-	if (isTokenIcrc({ standard: tokenStandard }) || isTokenExtV2({ standard: tokenStandard })) {
+	if (isTokenIcrc({ standard: tokenStandard }) || isTokenExt({ standard: tokenStandard })) {
 		return invalidIcrcAddress(destination);
 	}
 

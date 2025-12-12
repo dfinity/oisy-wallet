@@ -114,6 +114,7 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
+		sign_in_with_identity_number: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
@@ -1427,6 +1428,7 @@ interface I18nTerms_of_use {
 		det: { article: string; possessive: string };
 		title: string;
 		instruction: string;
+		instruction_two_buttons: string;
 		body: string;
 	};
 	alt: { terms_of_use: string };

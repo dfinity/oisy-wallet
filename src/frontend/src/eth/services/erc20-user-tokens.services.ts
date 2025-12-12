@@ -1,7 +1,7 @@
 import { loadErc20UserTokens } from '$eth/services/erc20.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { SaveUserToken } from '$eth/types/erc20-user-token';
-import { toUserToken } from '$icp-eth/services/user-token.services';
+import { toUserToken } from '$icp-eth/services/erc20-token.services';
 import { setManyUserTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { SaveTokensParams } from '$lib/services/manage-tokens.services';

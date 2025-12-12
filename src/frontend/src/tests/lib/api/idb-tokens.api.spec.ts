@@ -1,7 +1,7 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
-import { toUserToken } from '$icp-eth/services/user-token.services';
+import { toUserToken } from '$icp-eth/services/erc20-token.services';
 import {
 	clearIdbAllCustomTokens,
 	clearIdbEthTokensDeprecated,

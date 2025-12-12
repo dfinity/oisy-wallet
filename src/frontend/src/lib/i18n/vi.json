@@ -117,6 +117,7 @@
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
 			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
 			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain"
@@ -1784,6 +1785,7 @@
 			},
 			"title": "",
 			"instruction": "Bằng cách nhấp vào nút này, bạn đồng ý với $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
