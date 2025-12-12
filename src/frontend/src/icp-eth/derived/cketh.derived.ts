@@ -18,7 +18,7 @@ import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionBalance } from '$lib/types/balance';
-import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import type { Token, TokenId, TokenStandardCode } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -30,7 +30,7 @@ export const ckEthereumTwinToken: Readable<Token> = derived(
 	([$tokenWithFallback]) => ($tokenWithFallback as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
 );
 
-export const ckEthereumTwinTokenStandard: Readable<TokenStandard> = derived(
+export const ckEthereumTwinTokenStandard: Readable<TokenStandardCode> = derived(
 	[ckEthereumTwinToken],
 	([{ standard }]) => standard
 );
