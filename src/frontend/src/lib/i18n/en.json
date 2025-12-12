@@ -930,7 +930,9 @@
 			"select_token_to_pay": "Select token to pay",
 			"pay_at_successful": "Paid at $receipt",
 			"pay_at_failure": "Failed to pay at $receipt",
-			"try_again": "Try again"
+			"try_again": "Try again",
+			"payment_confirmed": "Payment Confirmed",
+			"payment_failed": "Payment Failed"
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid",
