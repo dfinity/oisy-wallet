@@ -1547,6 +1547,67 @@ describe('open-crypto-pay.utils', () => {
 			});
 		});
 
+		describe('Scientific notation', () => {
+			it('should parse scientific notation with lowercase e', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1.23e18';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1230000000000000000n);
+			});
+
+			it('should parse scientific notation with uppercase E', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1.23E18';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1230000000000000000n);
+			});
+
+			it('should parse scientific notation - 2.014e18', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=2.014e18';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(2014000000000000000n);
+			});
+
+			it('should parse scientific notation - 1e18 (1 ETH)', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1e18';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1000000000000000000n);
+			});
+
+			it('should parse scientific notation - 5e6 (5 USDC)', () => {
+				const uri =
+					'ethereum:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48@1/transfer?address=0x9C2...&uint256=5e6';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(5000000n);
+			});
+
+			it('should parse scientific notation with decimal - 1.5e6', () => {
+				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1.5e6';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(1500000n);
+			});
+
+			it('should parse scientific notation - for large mount', () => {
+				const uri =
+					'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=123.123456789012345678e18';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(123123456789012345678n);
+			});
+
+			it('should parse maximum precision for ETH (18 decimals)', () => {
+				const uri =
+					'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=999.999999999999999999e18';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(999999999999999999999n);
+			});
+		});
+
 		describe('ERC20 transfers (uint256 parameter)', () => {
 			const tokenContract = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
 			const recipient = '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC';
