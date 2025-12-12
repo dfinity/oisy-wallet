@@ -13,8 +13,7 @@ import type {
 	PayableTokenWithFees,
 	PaymentMethodData,
 	PrepareTokensParams,
-	ValidatedDFXPaymentData,
-	ValidatedPaymentData
+	ValidatedDFXPaymentData
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
@@ -22,6 +21,7 @@ import { isEthAddress } from '$lib/utils/account.utils';
 import { isNetworkEthereum, isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
+import Decimal from 'decimal.js';
 import { get } from 'svelte/store';
 
 /**
@@ -241,7 +241,7 @@ export const validateDecodedData = ({
 }: {
 	decodedData: DecodedUrn | undefined;
 	fee: PayableTokenWithConvertedAmount['fee'];
-}): ValidatedPaymentData => {
+}): ValidatedDFXPaymentData => {
 	const { destination, ethereumChainId, value } = decodedData ?? {};
 	const { feeData, estimatedGasLimit } = fee ?? {};
 
@@ -253,13 +253,13 @@ export const validateDecodedData = ({
 		isNullish(feeData?.maxPriorityFeePerGas) ||
 		isNullish(estimatedGasLimit)
 	) {
-		throw new Error('Missing required payment data from URN');
+		throw new Error(get(i18n).scanner.error.data_is_incompleted);
 	}
 
 	return {
 		destination,
-		ethereumChainId,
-		value,
+		ethereumChainId: BigInt(ethereumChainId),
+		value: BigInt(value),
 		feeData: {
 			maxFeePerGas: feeData.maxFeePerGas,
 			maxPriorityFeePerGas: feeData.maxPriorityFeePerGas
@@ -278,13 +278,13 @@ export const getERC681Value = (uri: string): bigint | undefined => {
 		}
 
 		if (value.includes('e') || value.includes('E') || value.includes('.')) {
-			const number = parseFloat(value);
+			const decimal = new Decimal(value);
 
-			if (!isFinite(number)) {
+			if (!decimal.isFinite()) {
 				return;
 			}
 
-			return BigInt(number);
+			return BigInt(decimal.toString());
 		}
 
 		return BigInt(value);
