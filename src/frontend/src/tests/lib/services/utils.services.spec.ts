@@ -165,7 +165,7 @@ describe('utils.services', () => {
 				}
 			});
 
-			await expect(wrappedFunction({ param1: 'value1' })).rejects.toThrow(testError);
+			await expect(wrappedFunction({ param1: 'value1' })).rejects.toThrowError(testError);
 
 			expect(mockTrackEvent).toHaveBeenCalledWith({
 				name: errorEventName,

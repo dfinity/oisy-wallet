@@ -309,7 +309,7 @@ describe('alchemy.providers', () => {
 
 			await expect(
 				provider.getNftsByOwner({ address: mockEthAddress, tokens: [mockValidErc1155Token] })
-			).rejects.toThrow('Nfts Error');
+			).rejects.toThrowError('Nfts Error');
 
 			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
 		});
@@ -426,7 +426,7 @@ describe('alchemy.providers', () => {
 
 			await expect(
 				provider.getNftMetadata({ token: mockValidErc1155Token, tokenId: mockTokenId })
-			).rejects.toThrow('Nfts Error');
+			).rejects.toThrowError('Nfts Error');
 
 			expect(Alchemy.prototype.nft.getNftMetadata).toHaveBeenCalledOnce();
 		});
@@ -557,7 +557,7 @@ describe('alchemy.providers', () => {
 
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 
-			await expect(provider.getContractMetadata(mockEthAddress)).rejects.toThrow(
+			await expect(provider.getContractMetadata(mockEthAddress)).rejects.toThrowError(
 				'Invalid token standard'
 			);
 
@@ -578,7 +578,7 @@ describe('alchemy.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrow(
+			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrowError(
 				replacePlaceholders(en.init.error.no_alchemy_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})
