@@ -7,7 +7,7 @@
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import type { IcToken } from '$icp/types/ic-token';
-	import { setCustomToken } from '$icp-eth/services/custom-token.services';
+	import { setCustomToken } from '$icp-eth/services/icrc-token.services';
 	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import GetTokenModal from '$lib/components/get-token/GetTokenModal.svelte';

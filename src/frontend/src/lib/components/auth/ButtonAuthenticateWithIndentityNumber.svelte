@@ -6,13 +6,15 @@
 
 	interface Props {
 		onclick: () => void;
+		fullWidth?: boolean;
 	}
 
-	let { onclick }: Props = $props();
+	let { onclick, fullWidth }: Props = $props();
 </script>
 
 <div
-	class="mt-2 flex w-full items-center justify-center gap-2 text-sm font-bold text-brand-primary sm:w-80"
+	class="mt-2 flex w-full items-center justify-center gap-2 text-sm font-bold text-brand-primary"
+	class:sm:w-80={!fullWidth}
 >
 	<ExternalLink
 		ariaLabel={$i18n.auth.text.sign_in_with_identity_number}
