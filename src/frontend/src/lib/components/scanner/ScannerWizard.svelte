@@ -6,19 +6,19 @@
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import OpenCryptoPayProgress from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayProgress.svelte';
 	import TokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
+	import PaymentFailed from '$lib/components/scanner/open-crypto-pay/PaymentFailed.svelte';
+	import PaymentSucceeded from '$lib/components/scanner/open-crypto-pay/PaymentSucceeded.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import PaymentFailed from '$lib/components/scanner/open-crypto-pay/PaymentFailed.svelte';
-	import PaymentSucceeded from '$lib/components/scanner/open-crypto-pay/PaymentSucceeded.svelte';
 	import {
 		initPayContext,
 		PAY_CONTEXT_KEY,
 		type PayContext
 	} from '$lib/stores/open-crypto-pay.store';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	let steps = $derived<WizardSteps<WizardStepsScanner>>(scannerWizardSteps({ i18n: $i18n }));
 
@@ -30,7 +30,7 @@
 
 	const onClose = () => modalStore.close();
 
-	let { reset } = setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
+	const { reset } = setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
 
 	const goToStep = (stepName: WizardStepsScanner) => {
 		if (isNullish(modal)) {
