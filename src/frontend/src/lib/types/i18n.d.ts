@@ -850,6 +850,12 @@ interface I18nPay {
 		signing_transaction: string;
 		paying: string;
 	};
+	error: {
+		data_is_incompleted: string;
+		amount_does_not_match: string;
+		recipient_address_is_not_valid: string;
+		token_address_mismatch: string;
+	};
 	alt: { pay: string; where_you_can_pay: string };
 }
 

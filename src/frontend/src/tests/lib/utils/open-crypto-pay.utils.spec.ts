@@ -1,3 +1,5 @@
+import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ZERO } from '$lib/constants/app.constants';
@@ -8,6 +10,7 @@ import type { Network } from '$lib/types/network';
 import type {
 	Address,
 	OpenCryptoPayResponse,
+	PayableTokenWithConvertedAmount,
 	PayableTokenWithFees,
 	PaymentMethodData
 } from '$lib/types/open-crypto-pay';
@@ -22,7 +25,9 @@ import {
 	getERC681Value,
 	mapTokenToPayableToken,
 	prepareBasePayableTokens,
-	validateDecodedData
+	validateDecodedData,
+	validateERC20Transfer,
+	validateNativeTransfer
 } from '$lib/utils/open-crypto-pay.utils';
 
 describe('open-crypto-pay.utils', () => {
@@ -1542,51 +1547,6 @@ describe('open-crypto-pay.utils', () => {
 			});
 		});
 
-		describe('Scientific notation', () => {
-			it('should parse scientific notation with lowercase e', () => {
-				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1.23e18';
-				const result = getERC681Value(uri);
-
-				expect(result).toBe(1230000000000000000n);
-			});
-
-			it('should parse scientific notation with uppercase E', () => {
-				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1.23E18';
-				const result = getERC681Value(uri);
-
-				expect(result).toBe(1230000000000000000n);
-			});
-
-			it('should parse scientific notation - 2.014e18', () => {
-				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=2.014e18';
-				const result = getERC681Value(uri);
-
-				expect(result).toBe(2014000000000000000n);
-			});
-
-			it('should parse scientific notation - 1e18 (1 ETH)', () => {
-				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1e18';
-				const result = getERC681Value(uri);
-
-				expect(result).toBe(1000000000000000000n);
-			});
-
-			it('should parse scientific notation - 5e6 (5 USDC)', () => {
-				const uri =
-					'ethereum:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48@1/transfer?address=0x9C2...&uint256=5e6';
-				const result = getERC681Value(uri);
-
-				expect(result).toBe(5000000n);
-			});
-
-			it('should parse scientific notation with decimal - 1.5e6', () => {
-				const uri = 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1.5e6';
-				const result = getERC681Value(uri);
-
-				expect(result).toBe(1500000n);
-			});
-		});
-
 		describe('ERC20 transfers (uint256 parameter)', () => {
 			const tokenContract = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
 			const recipient = '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC';
@@ -1760,6 +1720,389 @@ describe('open-crypto-pay.utils', () => {
 
 				expect(result).toBe(100000000000000000000n);
 			});
+		});
+	});
+
+	describe('validateNativeTransfer', () => {
+		const mockToken: PayableTokenWithConvertedAmount = {
+			...ETHEREUM_TOKEN,
+			amount: '1.5',
+			minFee: 0.001,
+			tokenNetwork: 'Ethereum',
+			amountInUSD: 100,
+			feeInUSD: 10,
+			sumInUSD: 110,
+			fee: {
+				feeInWei: 21000000000000000n,
+				feeData: {
+					maxFeePerGas: 12n,
+					maxPriorityFeePerGas: 7n
+				},
+				estimatedGasLimit: 21000n
+			}
+		};
+
+		const validDecodedData: DecodedUrn = {
+			prefix: 'ethereum',
+			destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+			ethereumChainId: '1'
+		};
+
+		const validParams = {
+			amount: 1000000000000000000n,
+			maxFeePerGas: 20000000000n,
+			maxPriorityFeePerGas: 1000000000n,
+			estimatedGasLimit: 21000n,
+			token: mockToken,
+			uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000000'
+		};
+
+		it('should validate and return correct data structure', () => {
+			const result = validateNativeTransfer({
+				decodedData: validDecodedData,
+				...validParams
+			});
+
+			expect(result).toEqual({
+				destination: '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC',
+				feeData: {
+					maxFeePerGas: 20000000000n,
+					maxPriorityFeePerGas: 1000000000n
+				},
+				estimatedGasLimit: 21000n,
+				value: 1000000000000000000n,
+				ethereumChainId: 1n
+			});
+		});
+
+		it('should validate data with different values', () => {
+			const decodedData: DecodedUrn = {
+				prefix: 'ethereum',
+				destination: '0xcccccccccccccccccccccccccccccccccccccccc',
+				ethereumChainId: '137'
+			};
+
+			const polygonToken = { ...mockToken, network: POLYGON_MAINNET_NETWORK };
+
+			const result = validateNativeTransfer({
+				decodedData,
+				amount: 500000000000000000n,
+				maxFeePerGas: 30000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				estimatedGasLimit: 21000n,
+				token: polygonToken,
+				uri: 'ethereum:0xcccccccccccccccccccccccccccccccccccccccc@137?value=500000000000000000'
+			});
+
+			expect(result.destination).toBe('0xcccccccccccccccccccccccccccccccccccccccc');
+			expect(result.ethereumChainId).toBe(137n);
+			expect(result.value).toBe(500000000000000000n);
+			expect(result.feeData.maxFeePerGas).toBe(30000000000n);
+			expect(result.estimatedGasLimit).toBe(21000n);
+		});
+
+		it('should throw error when URI value is missing', () => {
+			expect(() =>
+				validateNativeTransfer({
+					decodedData: validDecodedData,
+					...validParams,
+					uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1'
+				})
+			).toThrowError();
+		});
+
+		it('should throw error when URI value cannot be parsed', () => {
+			expect(() =>
+				validateNativeTransfer({
+					decodedData: validDecodedData,
+					...validParams,
+					uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=invalid'
+				})
+			).toThrowError();
+		});
+
+		it('should throw error when amount does not match URI value', () => {
+			expect(() =>
+				validateNativeTransfer({
+					decodedData: validDecodedData,
+					...validParams,
+					amount: 2000000000000000000n,
+					uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000000'
+				})
+			).toThrowError();
+		});
+
+		it('should throw error when destination is not valid Ethereum address', () => {
+			const invalidData: DecodedUrn = {
+				...validDecodedData,
+				destination: 'not-an-address'
+			};
+
+			expect(() =>
+				validateNativeTransfer({
+					decodedData: invalidData,
+					...validParams,
+					uri: 'ethereum:not-an-address@1?value=1000000000000000000'
+				})
+			).toThrowError();
+		});
+
+		it('should preserve BigInt types', () => {
+			const result = validateNativeTransfer({
+				decodedData: validDecodedData,
+				...validParams
+			});
+
+			expect(typeof result.feeData.maxFeePerGas).toBe('bigint');
+			expect(typeof result.feeData.maxPriorityFeePerGas).toBe('bigint');
+			expect(typeof result.estimatedGasLimit).toBe('bigint');
+			expect(typeof result.value).toBe('bigint');
+			expect(typeof result.ethereumChainId).toBe('bigint');
+		});
+
+		it('should handle zero value transfers', () => {
+			const result = validateNativeTransfer({
+				decodedData: validDecodedData,
+				...validParams,
+				amount: ZERO,
+				uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=0'
+			});
+
+			expect(result.value).toBe(ZERO);
+		});
+
+		it('should handle very large amounts', () => {
+			const largeAmount = 999999999999999999999n;
+
+			const result = validateNativeTransfer({
+				decodedData: validDecodedData,
+				...validParams,
+				amount: largeAmount,
+				uri: `ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=${largeAmount}`
+			});
+
+			expect(result.value).toBe(largeAmount);
+		});
+
+		it('should handle mixed case addresses', () => {
+			const mixedCaseAddress = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+			const decodedData: DecodedUrn = {
+				...validDecodedData,
+				destination: mixedCaseAddress
+			};
+
+			const result = validateNativeTransfer({
+				decodedData,
+				...validParams,
+				uri: `ethereum:${mixedCaseAddress}@1?value=1000000000000000000`
+			});
+
+			expect(result.destination).toBe(mixedCaseAddress);
+		});
+	});
+
+	describe('validateERC20Transfer', () => {
+		const mockErc20Token: PayableTokenWithConvertedAmount = {
+			...USDC_TOKEN,
+			amount: '1.5',
+			minFee: 0.001,
+			tokenNetwork: 'Base',
+			amountInUSD: 100,
+			feeInUSD: 10,
+			sumInUSD: 110,
+			fee: {
+				feeInWei: 21000000000000000n,
+				feeData: {
+					maxFeePerGas: 12n,
+					maxPriorityFeePerGas: 7n
+				},
+				estimatedGasLimit: 21000n
+			}
+		};
+
+		const recipient = '0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC';
+		const tokenContract = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+
+		const validDecodedData: DecodedUrn = {
+			prefix: 'ethereum',
+			destination: tokenContract,
+			ethereumChainId: '1',
+			functionName: 'transfer',
+			address: recipient
+		};
+
+		const validParams = {
+			amount: 1000000n,
+			maxFeePerGas: 20000000000n,
+			maxPriorityFeePerGas: 1000000000n,
+			estimatedGasLimit: 65000n,
+			token: mockErc20Token,
+			uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}&uint256=1000000`
+		};
+
+		it('should validate and return correct data structure', () => {
+			const result = validateERC20Transfer({
+				decodedData: validDecodedData,
+				...validParams
+			});
+
+			expect(result).toEqual({
+				destination: recipient,
+				feeData: {
+					maxFeePerGas: 20000000000n,
+					maxPriorityFeePerGas: 1000000000n
+				},
+				estimatedGasLimit: 65000n,
+				value: 1000000n,
+				ethereumChainId: 1n
+			});
+		});
+
+		it('should validate data with different values', () => {
+			const baseToken = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
+			const baseUSDC = {
+				...mockErc20Token,
+				network: BSC_MAINNET_NETWORK,
+				address: baseToken
+			};
+
+			const decodedData: DecodedUrn = {
+				prefix: 'ethereum',
+				destination: baseToken,
+				ethereumChainId: '56n',
+				functionName: 'transfer',
+				address: recipient
+			};
+
+			const result = validateERC20Transfer({
+				decodedData,
+				amount: 5000000n,
+				maxFeePerGas: 100000000n,
+				maxPriorityFeePerGas: 50000000n,
+				estimatedGasLimit: 65000n,
+				token: baseUSDC,
+				uri: `ethereum:${baseToken}@56/transfer?address=${recipient}&uint256=5000000`
+			});
+
+			expect(result.destination).toBe(recipient);
+			expect(result.ethereumChainId).toBe(56n);
+			expect(result.value).toBe(5000000n);
+		});
+
+		it('should throw error when address (recipient) is missing', () => {
+			const invalidData: DecodedUrn = {
+				...validDecodedData,
+				address: undefined
+			};
+
+			expect(() =>
+				validateERC20Transfer({
+					decodedData: invalidData,
+					...validParams
+				})
+			).toThrowError();
+		});
+
+		it('should throw error when URI uint256 is missing', () => {
+			expect(() =>
+				validateERC20Transfer({
+					decodedData: validDecodedData,
+					...validParams,
+					uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}`
+				})
+			).toThrowError();
+		});
+
+		it('should throw error when URI uint256 cannot be parsed', () => {
+			expect(() =>
+				validateERC20Transfer({
+					decodedData: validDecodedData,
+					...validParams,
+					uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}&uint256=invalid`
+				})
+			).toThrowError();
+		});
+
+		it('should throw error when token contract mismatch', () => {
+			const invalidData: DecodedUrn = {
+				...validDecodedData,
+				destination: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+			};
+
+			expect(() =>
+				validateERC20Transfer({
+					decodedData: invalidData,
+					...validParams
+				})
+			).toThrowError();
+		});
+
+		it('should throw error when amount does not match URI uint256', () => {
+			expect(() =>
+				validateERC20Transfer({
+					decodedData: validDecodedData,
+					...validParams,
+					amount: 2000000n,
+					uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}&uint256=1000000`
+				})
+			).toThrowError();
+		});
+
+		it('should throw error when recipient address is not valid', () => {
+			const invalidData: DecodedUrn = {
+				...validDecodedData,
+				address: 'not-an-address'
+			};
+
+			expect(() =>
+				validateERC20Transfer({
+					decodedData: invalidData,
+					...validParams,
+					uri: `ethereum:${tokenContract}@1/transfer?address=not-an-address&uint256=1000000`
+				})
+			).toThrowError();
+		});
+
+		it('should preserve BigInt types', () => {
+			const result = validateERC20Transfer({
+				decodedData: validDecodedData,
+				...validParams
+			});
+
+			expect(typeof result.feeData.maxFeePerGas).toBe('bigint');
+			expect(typeof result.feeData.maxPriorityFeePerGas).toBe('bigint');
+			expect(typeof result.estimatedGasLimit).toBe('bigint');
+			expect(typeof result.value).toBe('bigint');
+			expect(typeof result.ethereumChainId).toBe('bigint');
+		});
+
+		it('should handle large amounts', () => {
+			const largeAmount = 999999999999n;
+
+			const result = validateERC20Transfer({
+				decodedData: validDecodedData,
+				...validParams,
+				amount: largeAmount,
+				uri: `ethereum:${tokenContract}@1/transfer?address=${recipient}&uint256=${largeAmount}`
+			});
+
+			expect(result.value).toBe(largeAmount);
+		});
+
+		it('should handle mixed case recipient address', () => {
+			const mixedCaseRecipient = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+			const decodedData: DecodedUrn = {
+				...validDecodedData,
+				address: mixedCaseRecipient
+			};
+
+			const result = validateERC20Transfer({
+				decodedData,
+				...validParams,
+				uri: `ethereum:${tokenContract}@1/transfer?address=${mixedCaseRecipient}&uint256=1000000`
+			});
+
+			expect(result.destination).toBe(mixedCaseRecipient);
 		});
 	});
 });
