@@ -17,6 +17,7 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -39,7 +40,7 @@
 		payProgressStep = $bindable()
 	}: Props = $props();
 
-	const { data, selectedToken } = getContext<PayContext>(PAY_CONTEXT_KEY);
+	const { data, selectedToken, failedPaymentError } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
 	let exchangeFeeBalance = $derived(
 		nonNullish($selectedToken)
@@ -102,7 +103,11 @@
 			});
 
 			onPaySucceeded();
-		} catch (_: unknown) {
+		} catch (error: unknown) {
+			const errorMessage = errorDetailToString(error) ?? $i18n.send.error.unexpected;
+
+			failedPaymentError.set(errorMessage);
+
 			onPayFailed();
 		}
 	};
