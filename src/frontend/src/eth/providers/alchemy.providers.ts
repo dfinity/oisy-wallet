@@ -14,7 +14,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftAttribute, NftId, NonFungibleToken, OwnedContract } from '$lib/types/nft';
-import type { TokenStandard } from '$lib/types/token';
+import type { TokenStandardCode } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import type { Option } from '$lib/types/utils';
 import { areAddressesEqual } from '$lib/utils/address.utils';
@@ -314,7 +314,7 @@ export class AlchemyProvider {
 			const newContract = {
 				address: ownedContract.address,
 				isSpam: ownedContract.isSpam,
-				standard: tokenStandard as TokenStandard
+				standard: tokenStandard as TokenStandardCode
 			};
 			acc.push(newContract);
 

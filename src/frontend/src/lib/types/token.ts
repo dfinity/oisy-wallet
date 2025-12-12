@@ -5,7 +5,7 @@ import type {
 	TokenIdSchema,
 	TokenMetadataSchema,
 	TokenSchema,
-	TokenStandardSchema
+	TokenStandardCodeSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
 import type { TokenGroup } from '$lib/types/token-group';
@@ -14,7 +14,7 @@ import type * as z from 'zod';
 
 export type TokenId = z.infer<typeof TokenIdSchema>;
 
-export type TokenStandard = z.infer<typeof TokenStandardSchema>;
+export type TokenStandardCode = z.infer<typeof TokenStandardCodeSchema>;
 
 export type TokenCategory = z.infer<typeof TokenCategorySchema>;
 
@@ -47,7 +47,7 @@ export type RequiredTokenWithLinkedData = RequiredToken<TokenWithLinkedData>;
 
 export type OptionToken = Option<Token>;
 export type OptionTokenId = Option<TokenId>;
-export type OptionTokenStandard = Option<TokenStandard>;
+export type OptionTokenStandard = Option<TokenStandardCode>;
 
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 

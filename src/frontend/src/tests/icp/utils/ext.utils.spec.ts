@@ -15,7 +15,7 @@ import {
 	mapExtToken
 } from '$icp/utils/ext.utils';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { TokenStandard } from '$lib/types/token';
+import type { TokenStandardCode } from '$lib/types/token';
 import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -25,7 +25,7 @@ describe('ext.utils', () => {
 	describe('isTokenExtV2', () => {
 		it.each(['extV2'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenExtV2({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+				isTokenExtV2({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
 			).toBeTruthy();
 		});
 
@@ -33,7 +33,7 @@ describe('ext.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenExtV2({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+					isTokenExtV2({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
 				).toBeFalsy();
 			}
 		);

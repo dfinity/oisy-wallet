@@ -5,7 +5,7 @@ import * as z from 'zod';
 
 export const TokenIdSchema = z.symbol().brand<'TokenId'>();
 
-export const TokenStandardSchema = z.enum([
+export const TokenStandardCodeSchema = z.enum([
 	'ethereum',
 	'erc20',
 	'erc721',
@@ -55,7 +55,7 @@ export const TokenBuyableSchema = z.object({
 export const TokenSchema = z.object({
 	id: TokenIdSchema,
 	network: NetworkSchema,
-	standard: TokenStandardSchema,
+	standard: TokenStandardCodeSchema,
 	category: TokenCategorySchema,
 	...TokenMetadataSchema.shape,
 	...TokenAppearanceSchema.shape,

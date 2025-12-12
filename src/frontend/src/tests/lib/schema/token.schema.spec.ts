@@ -6,7 +6,7 @@ import {
 	TokenIdSchema,
 	TokenMetadataSchema,
 	TokenSchema,
-	TokenStandardSchema
+	TokenStandardCodeSchema
 } from '$lib/schema/token.schema';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -25,59 +25,59 @@ describe('token.schema', () => {
 		});
 	});
 
-	describe('TokenStandardSchema', () => {
+	describe('TokenStandardCodeSchema', () => {
 		it('should validate "ethereum" as a supported token standard', () => {
 			const validStandard = 'ethereum';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "erc20" as a supported token standard', () => {
 			const validStandard = 'erc20';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "icp" as a supported token standard', () => {
 			const validStandard = 'icp';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "icrc" as a supported token standard', () => {
 			const validStandard = 'icrc';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "dip20" as a supported token standard', () => {
 			const validStandard = 'dip20';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "extV2" as a supported token standard', () => {
 			const validStandard = 'extV2';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "bitcoin" as a supported token standard', () => {
 			const validStandard = 'bitcoin';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should validate "solana" as a supported token standard', () => {
 			const validStandard = 'solana';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
 		it('should fail validation with an unsupported token standard', () => {
 			const invalidStandard = 'unsupported-standard';
 
-			expect(() => TokenStandardSchema.parse(invalidStandard)).toThrow();
+			expect(() => TokenStandardCodeSchema.parse(invalidStandard)).toThrow();
 		});
 	});
 

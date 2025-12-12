@@ -1,3 +1,4 @@
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { AppWorker } from '$lib/services/_worker.services';
 import {
 	solAddressDevnetStore,
@@ -17,6 +18,7 @@ import {
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { isIOS } from '@dfinity/gix-components';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -30,7 +32,13 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 
 		this.setOnMessage(
 			({ data: dataMsg }: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
-				const { msg, data } = dataMsg;
+				const { ref, msg, data } = dataMsg;
+
+				// This is an additional guard because it may happen that the worker is initialised as a singleton.
+				// In this case, we need to check if we should treat the message or if the message was intended for another worker.
+				if (ref !== `${this.data.tokenAddress ?? SOLANA_TOKEN.symbol}-${this.data.solanaNetwork}`) {
+					return;
+				}
 
 				switch (msg) {
 					case 'syncSolWallet':
@@ -88,7 +96,7 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 			tokenOwnerAddress
 		};
 
-		const worker = await AppWorker.getInstance();
+		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
 		return new SolWalletWorker(worker, tokenId, data);
 	}
 
