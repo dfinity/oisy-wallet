@@ -182,7 +182,7 @@ const preparePaymentTransaction = async ({
 	const uri = await fetchPaymentUri({
 		callback,
 		quoteId,
-		network: token.network.name,
+		network: token.network.pay?.openCryptoPay ?? token.network.name,
 		tokenSymbol: token.symbol
 	});
 
