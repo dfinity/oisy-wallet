@@ -225,13 +225,13 @@ describe('nft.utils', () => {
 			const mappedAttributes = mapNftAttributes(mockAttributes);
 
 			expect(mappedAttributes).toStrictEqual([
-				{ traitType: 'Color', value: 'Blue' },
-				{ traitType: 'Size', value: 'Large' },
-				{ traitType: 'Tall', value: 'false' },
 				{ traitType: 'Arms', value: '2' },
-				{ traitType: 'Legs' },
+				{ traitType: 'Color', value: 'Blue' },
+				{ traitType: 'Eyes' },
 				{ traitType: 'Hair' },
-				{ traitType: 'Eyes' }
+				{ traitType: 'Legs' },
+				{ traitType: 'Size', value: 'Large' },
+				{ traitType: 'Tall', value: 'false' }
 			]);
 		});
 
@@ -249,13 +249,13 @@ describe('nft.utils', () => {
 			const mappedAttributes = mapNftAttributes(mockAttributes);
 
 			expect(mappedAttributes).toStrictEqual([
-				{ traitType: 'Color', value: 'Blue' },
-				{ traitType: 'Size', value: 'Large' },
-				{ traitType: 'Tall', value: 'false' },
 				{ traitType: 'Arms', value: '2' },
-				{ traitType: 'Legs' },
+				{ traitType: 'Color', value: 'Blue' },
+				{ traitType: 'Eyes' },
 				{ traitType: 'Hair' },
-				{ traitType: 'Eyes' }
+				{ traitType: 'Legs' },
+				{ traitType: 'Size', value: 'Large' },
+				{ traitType: 'Tall', value: 'false' }
 			]);
 		});
 
