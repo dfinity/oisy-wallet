@@ -929,10 +929,14 @@
 			"tokens_available": "$amount tokens available",
 			"select_token_to_pay": "Select token to pay",
 			"pay_at_successful": "Paid at $receipt",
-			"pay_at_failure": "Failed to pay at $receipt"
+			"pay_at_failure": "Failed to pay at $receipt",
+			"try_again": "Try again",
+			"payment_confirmed": "Payment Confirmed",
+			"payment_failed": "Payment Failed"
 		},
 		"error": {
-			"code_link_is_not_valid": "Code/link is not valid"
+			"code_link_is_not_valid": "Code/link is not valid",
+			"data_is_incompleted": "The received data is incomplete. Some required details are missing."
 		}
 	},
 	"convert": {
@@ -1063,6 +1067,12 @@
 			"creating_transaction": "Creating transaction...",
 			"signing_transaction": "Signing transaction...",
 			"paying": "Paying..."
+		},
+		"error": {
+			"data_is_incompleted": "The received data is incomplete. Some required details are missing.",
+			"amount_does_not_match": "The amount in the received data does not match the expected value.",
+			"recipient_address_is_not_valid": "The recipient address in the received data is not a valid Ethereum address.",
+			"token_address_mismatch": "The received data refers to a different token than expected."
 		},
 		"alt": {
 			"pay": "Dialog with information on how to pay",

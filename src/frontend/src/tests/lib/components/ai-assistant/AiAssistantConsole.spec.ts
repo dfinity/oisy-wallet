@@ -44,7 +44,7 @@ describe('AiAssistantConsole', () => {
 		aiAssistantStore.appendMessage(message);
 
 		await waitFor(() => {
-			expect(() => getByText(en.ai_assistant.text.welcome_message)).toThrow();
+			expect(() => getByText(en.ai_assistant.text.welcome_message)).toThrowError();
 			expect(getByText(message.data.text ?? '')).toBeInTheDocument();
 		});
 	});

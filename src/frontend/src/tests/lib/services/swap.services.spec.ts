@@ -1225,7 +1225,7 @@ describe('swap.services', () => {
 					sourceToken,
 					destinationToken
 				})
-			).rejects.toThrow('No unused balance to withdraw');
+			).rejects.toThrowError('No unused balance to withdraw');
 
 			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
 			expect(icpSwapPool.withdraw).not.toHaveBeenCalled();

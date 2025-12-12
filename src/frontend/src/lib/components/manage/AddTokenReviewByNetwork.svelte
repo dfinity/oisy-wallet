@@ -8,7 +8,6 @@
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { SaveUserToken } from '$eth/types/erc20-user-token';
 	import type { Erc721Metadata } from '$eth/types/erc721';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddExtTokenReview from '$icp/components/tokens/IcAddExtTokenReview.svelte';
 	import IcAddIcrcTokenReview from '$icp/components/tokens/IcAddIcrcTokenReview.svelte';
 	import type { ValidateTokenData as ValidateExtTokenData } from '$icp/services/ext-add-custom-tokens.service';
@@ -26,6 +25,7 @@
 	import type { TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
+		assertIsNetworkEthereum,
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
@@ -109,11 +109,11 @@
 		}
 
 		// This does not happen at this point, but it is useful type-wise
-		assertNonNullish(network);
+		assertIsNetworkEthereum(network);
 
 		const newToken = {
 			address: ethContractAddress,
-			chainId: (network as EthereumNetwork).chainId,
+			chainId: network.chainId,
 			enabled: true
 		};
 
@@ -140,9 +140,7 @@
 		}
 
 		if (ethMetadata.decimals >= 0) {
-			await saveErc20Deprecated([
-				{ ...ethMetadata, ...newToken, network: network as EthereumNetwork }
-			]);
+			await saveErc20Deprecated([{ ...ethMetadata, ...newToken, network }]);
 
 			await saveTokens([{ ...newToken, networkKey: 'Erc20' }]);
 

@@ -1,16 +1,12 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import type { EthereumNetwork } from '$eth/types/network';
 import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
-import type { ErcSaveCustomToken, TokenVariant } from '$lib/types/custom-token';
+import type { SaveCustomErc1155Variant, SaveCustomErc721Variant } from '$lib/types/custom-token';
 import type { OwnedContract } from '$lib/types/nft';
-import type { UserTokenState } from '$lib/types/token-toggleable';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
-
-export type Erc721Variant = UserTokenState & TokenVariant<'Erc721', ErcSaveCustomToken>;
-export type Erc1155Variant = UserTokenState & TokenVariant<'Erc1155', ErcSaveCustomToken>;
 
 export const saveErcCustomTokens = async ({
 	contracts,
@@ -23,7 +19,9 @@ export const saveErcCustomTokens = async ({
 	network: EthereumNetwork;
 	identity: Identity;
 }) => {
-	const [erc721Tokens, erc1155Tokens] = contracts.reduce<[Erc721Variant[], Erc1155Variant[]]>(
+	const [erc721Tokens, erc1155Tokens] = contracts.reduce<
+		[SaveCustomErc721Variant[], SaveCustomErc1155Variant[]]
+	>(
 		(acc, { standard: rawStandard, address }) => {
 			const [erc721TokensAcc, erc1155TokensAcc] = acc;
 
@@ -52,7 +50,7 @@ export const saveErcCustomTokens = async ({
 					return acc;
 				}
 
-				const newToken: Erc721Variant = {
+				const newToken: SaveCustomErc721Variant = {
 					address,
 					chainId: network.chainId,
 					networkKey: 'Erc721',
@@ -87,7 +85,7 @@ export const saveErcCustomTokens = async ({
 					return acc;
 				}
 
-				const newToken: Erc1155Variant = {
+				const newToken: SaveCustomErc1155Variant = {
 					address,
 					chainId: network.chainId,
 					networkKey: 'Erc1155',
@@ -111,7 +109,7 @@ export const saveErcCustomTokens = async ({
 	}
 
 	await saveCustomTokens({
-		tokens: ercTokens as NonEmptyArray<Erc721Variant | Erc1155Variant>,
+		tokens: ercTokens as NonEmptyArray<SaveCustomErc721Variant | SaveCustomErc1155Variant>,
 		identity
 	});
 };

@@ -20,6 +20,14 @@ describe('ScannerWizardSteps', () => {
 		{
 			name: WizardStepsScanner.PAYING,
 			title: en.scanner.text.pay
+		},
+		{
+			name: WizardStepsScanner.PAYMENT_CONFIRMED,
+			title: en.scanner.text.payment_confirmed
+		},
+		{
+			name: WizardStepsScanner.PAYMENT_FAILED,
+			title: en.scanner.text.payment_failed
 		}
 	];
 

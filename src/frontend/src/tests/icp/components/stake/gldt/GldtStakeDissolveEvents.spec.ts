@@ -46,7 +46,7 @@ describe('GldtStakeDissolveEvents', () => {
 			context: mockContext(getEvents([]))
 		});
 
-		expect(() => getByText(en.stake.text.unlock_requests)).toThrow();
+		expect(() => getByText(en.stake.text.unlock_requests)).toThrowError();
 	});
 
 	it('does display the section if events are available', () => {

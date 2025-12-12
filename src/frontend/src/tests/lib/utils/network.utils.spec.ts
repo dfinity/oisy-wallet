@@ -49,6 +49,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import {
+	assertIsNetworkEthereum,
 	filterTokensForSelectedNetwork,
 	filterTokensForSelectedNetworks,
 	isNetworkEthereum,
@@ -87,6 +88,21 @@ describe('network utils', () => {
 
 		it('should return false for non-Ethereum network', () => {
 			expect(isNetworkEthereum(ICP_NETWORK)).toBeFalsy();
+		});
+	});
+
+	describe('assertIsNetworkEthereum', () => {
+		it.each([...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS])(
+			'should not throw for $name network',
+			(network) => {
+				expect(() => assertIsNetworkEthereum(network)).not.toThrowError();
+			}
+		);
+
+		it('should throw for non-Ethereum network', () => {
+			expect(() => assertIsNetworkEthereum(ICP_NETWORK)).toThrowError(
+				`Network ${ICP_NETWORK.name} is not an Ethereum or EVM network`
+			);
 		});
 	});
 

@@ -724,8 +724,11 @@ interface I18nScanner {
 		select_token_to_pay: string;
 		pay_at_successful: string;
 		pay_at_failure: string;
+		try_again: string;
+		payment_confirmed: string;
+		payment_failed: string;
 	};
-	error: { code_link_is_not_valid: string };
+	error: { code_link_is_not_valid: string; data_is_incompleted: string };
 }
 
 interface I18nConvert {
@@ -848,6 +851,12 @@ interface I18nPay {
 		creating_transaction: string;
 		signing_transaction: string;
 		paying: string;
+	};
+	error: {
+		data_is_incompleted: string;
+		amount_does_not_match: string;
+		recipient_address_is_not_valid: string;
+		token_address_mismatch: string;
 	};
 	alt: { pay: string; where_you_can_pay: string };
 }

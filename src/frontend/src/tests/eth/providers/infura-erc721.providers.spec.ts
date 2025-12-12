@@ -105,7 +105,7 @@ describe('infura-erc721.providers', () => {
 
 				const provider = new InfuraErc721Provider(infura);
 
-				await expect(provider.metadata(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.metadata(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -159,7 +159,7 @@ describe('infura-erc721.providers', () => {
 
 				const provider = new InfuraErc721Provider(infura);
 
-				await expect(provider.getNftMetadata(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.getNftMetadata(mockParams)).rejects.toThrowError(errorMessage);
 			});
 
 			it('should call the tokenURI method of the contract', async () => {
@@ -193,7 +193,7 @@ describe('infura-erc721.providers', () => {
 			});
 
 			it('should throw an error for an unsupported network ID', () => {
-				expect(() => infuraErc721Providers(ICP_NETWORK_ID)).toThrow(
+				expect(() => infuraErc721Providers(ICP_NETWORK_ID)).toThrowError(
 					replacePlaceholders(en.init.error.no_infura_erc721_provider, {
 						$network: ICP_NETWORK_ID.toString()
 					})
