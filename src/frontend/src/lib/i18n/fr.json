@@ -117,6 +117,7 @@
 			"logout": "Se déconnecter",
 			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
 			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
 			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain"
@@ -1784,6 +1785,7 @@
 			},
 			"title": "",
 			"instruction": "En cliquant sur ce bouton, vous acceptez les $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

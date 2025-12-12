@@ -117,6 +117,7 @@
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
+			"sign_in_with_identity_number": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": ""
@@ -1784,6 +1785,7 @@
 			},
 			"title": "",
 			"instruction": "",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
