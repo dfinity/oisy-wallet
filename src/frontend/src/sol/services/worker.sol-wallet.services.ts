@@ -96,7 +96,7 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 			tokenOwnerAddress
 		};
 
-		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
+		const worker = await AppWorker.getInstance();
 		return new SolWalletWorker(worker, tokenId, data);
 	}
 
