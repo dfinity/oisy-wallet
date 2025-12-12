@@ -20,22 +20,27 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { errorDetailToString } from '$lib/utils/error.utils';
 
 	interface Props {
 		onSelectToken: () => void;
 		isTokenSelecting: boolean;
 		payProgressStep: ProgressStepsPayment;
 		onPay: () => void;
+		onPaySucceeded: () => void;
+		onPayFailed: () => void;
 	}
 
 	let {
 		onSelectToken,
 		onPay,
+		onPaySucceeded,
+		onPayFailed,
 		isTokenSelecting = $bindable(),
 		payProgressStep = $bindable()
 	}: Props = $props();
 
-	const { data, selectedToken } = getContext<PayContext>(PAY_CONTEXT_KEY);
+	const { data, selectedToken, failedPaymentError } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
 	let exchangeFeeBalance = $derived(
 		nonNullish($selectedToken)
@@ -96,8 +101,10 @@
 				progress,
 				amount
 			});
+
+			onPaySucceeded();
 		} catch (_: unknown) {
-			// TODO: add steps to redirect to Payment Failed screen and add event
+			onPayFailed();
 		}
 	};
 </script>

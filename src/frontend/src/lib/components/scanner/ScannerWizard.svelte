@@ -63,6 +63,8 @@
 			<OpenCryptoPay
 				onPay={() => goToStep(WizardStepsScanner.PAYING)}
 				onSelectToken={() => goToStep(WizardStepsScanner.TOKENS_LIST)}
+				onPaySucceeded={() => goToStep(WizardStepsScanner.PAYMENT_CONFIRMED)}
+				onPayFailed={() => goToStep(WizardStepsScanner.PAYMENT_FAILED)}
 				bind:isTokenSelecting
 				bind:payProgressStep
 			/>
