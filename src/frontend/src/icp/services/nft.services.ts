@@ -28,7 +28,9 @@ export const loadNfts = async ({
 				canisterId
 			});
 
-			const promises = tokenIndices.map(async (index) => await mapExtNft({ index, token }));
+			const promises = tokenIndices.map(
+				async (index) => await mapExtNft({ index, token, identity })
+			);
 
 			return await Promise.all(promises);
 		} catch (error: unknown) {

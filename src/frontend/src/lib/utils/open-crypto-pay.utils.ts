@@ -398,4 +398,21 @@ export const validateERC20Transfer = ({
 		ethereumChainId: token.network.chainId,
 		value: amount
 	};
+			return;
+		}
+
+		if (value.includes('e') || value.includes('E') || value.includes('.')) {
+			const number = parseFloat(value);
+
+			if (!isFinite(number)) {
+				return;
+			}
+
+			return BigInt(number);
+		}
+
+		return BigInt(value);
+	} catch (_: unknown) {
+		// If it is not parseable, we can handle a nullish value
+	}
 };
