@@ -12,7 +12,13 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { pay } from '$lib/services/open-crypto-pay.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -87,6 +93,21 @@
 
 		onPay();
 
+		const trackEventBaseParams = {
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.OPEN_CRYPTOPAY,
+			event_subcontext: PLAUSIBLE_EVENT_CONTEXTS.DFX,
+			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.PRICE,
+			event_value: `${$data.requestedAmount.amount} ${$data.requestedAmount.asset}`,
+			token_symbol: $selectedToken.symbol,
+			token_network: $selectedToken.network.name,
+			token_name: $selectedToken.name,
+			token_standard: $selectedToken.standard,
+			token_id: `${$selectedToken.id.toString()}`,
+			token_usd_value: `${$selectedToken.amountInUSD}`
+		};
+
+		const startTime = performance.now();
+
 		const amount = parseToken({
 			value: `${$selectedToken.amount}`,
 			unitName: $selectedToken.decimals
@@ -102,9 +123,33 @@
 				amount
 			});
 
+			const duration = performance.now() - startTime;
+			const durationInSeconds = Math.round(duration / 1000);
+
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.PAY,
+				metadata: {
+					...trackEventBaseParams,
+					result_status: 'success',
+					result_duration_in_seconds: `${durationInSeconds}`
+				}
+			});
+
 			onPaySucceeded();
 		} catch (error: unknown) {
+			const duration = performance.now() - startTime;
+			const durationInSeconds = Math.round(duration / 1000);
 			const errorMessage = errorDetailToString(error) ?? $i18n.send.error.unexpected;
+
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.PAY,
+				metadata: {
+					...trackEventBaseParams,
+					result_status: 'error',
+					result_error: errorMessage,
+					result_duration_in_seconds: `${durationInSeconds}`
+				}
+			});
 
 			failedPaymentError.set(errorMessage);
 
