@@ -18,6 +18,7 @@ import type { Token } from '$lib/types/token';
 import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
+import Decimal from 'decimal.js';
 
 /**
  * Decodes LNURL according to LNURL-01 standard
@@ -273,13 +274,13 @@ export const getERC681Value = (uri: string): bigint | undefined => {
 		}
 
 		if (value.includes('e') || value.includes('E') || value.includes('.')) {
-			const number = parseFloat(value);
+			const decimal = new Decimal(value);
 
-			if (!isFinite(number)) {
+			if (!decimal.isFinite()) {
 				return;
 			}
 
-			return BigInt(number);
+			return BigInt(decimal.toString());
 		}
 
 		return BigInt(value);

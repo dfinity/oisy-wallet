@@ -1585,6 +1585,22 @@ describe('open-crypto-pay.utils', () => {
 
 				expect(result).toBe(1500000n);
 			});
+
+			it('should parse scientific notation - for large mount', () => {
+				const uri =
+					'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=123.123456789012345678e18';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(123123456789012345678n);
+			});
+
+			it('should parse maximum precision for ETH (18 decimals)', () => {
+				const uri =
+					'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=999.999999999999999999e18';
+				const result = getERC681Value(uri);
+
+				expect(result).toBe(999999999999999999999n);
+			});
 		});
 
 		describe('ERC20 transfers (uint256 parameter)', () => {
