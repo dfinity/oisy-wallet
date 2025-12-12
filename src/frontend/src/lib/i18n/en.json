@@ -930,6 +930,8 @@
 			"select_token_to_pay": "Select token to pay",
 			"pay_at_successful": "Paid at $receipt",
 			"pay_at_failure": "Failed to pay at $receipt",
+			"payment_confirmed": "Payment Confirmed",
+			"payment_failed": "Payment Failed",
 			"try_again": "Try again"
 		},
 		"error": {

@@ -18,6 +18,7 @@ export interface PayContext {
 	setData: (payData: OpenCryptoPayResponse) => void;
 	setAvailableTokens: (tokens: PayableTokenWithFees[]) => void;
 	selectToken: (token: PayableTokenWithConvertedAmount) => void;
+	resetStore: () => void;
 }
 
 export const initPayContext = (): PayContext => {
@@ -65,7 +66,11 @@ export const initPayContext = (): PayContext => {
 			availableTokens.set(tokens);
 			userSelection.set(undefined);
 		},
-		selectToken: (token: PayableTokenWithConvertedAmount) => userSelection.set(token)
+		selectToken: (token: PayableTokenWithConvertedAmount) => userSelection.set(token),
+		resetStore: () => {
+			setData(undefined);
+			(availableTokens.set([]), userSelection.set(undefined));
+		}
 	};
 };
 

@@ -930,6 +930,8 @@
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
 			"pay_at_failure": "",
+			"payment_confirmed": "",
+			"payment_failed": "",
 			"try_again": ""
 		},
 		"error": {

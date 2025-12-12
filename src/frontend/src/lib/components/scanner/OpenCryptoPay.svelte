@@ -19,17 +19,31 @@
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import PaymentStatusHero from './open-crypto-pay/PaymentStatusHero.svelte';
+	import { parseToken } from '$lib/utils/parse.utils';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_COUNT_SWAP_SUCCESS } from '$lib/constants/analytics.constants';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { errorDetailToString } from '$lib/utils/error.utils';
 
 	interface Props {
 		onSelectToken: () => void;
 		isTokenSelecting: boolean;
 		payProgressStep: ProgressStepsPayment;
+		onSuccessPay: () => void;
+		onFailedPay: () => void;
 		onPay: () => void;
 	}
 
 	let {
 		onSelectToken,
 		onPay,
+		onSuccessPay,
+		onFailedPay,
 		isTokenSelecting = $bindable(),
 		payProgressStep = $bindable()
 	}: Props = $props();
@@ -79,18 +93,69 @@
 			return;
 		}
 
+		const trackEventBaseParams = {
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.OPEN_CRYPTOPAY,
+			event_subcontext: PLAUSIBLE_EVENT_CONTEXTS.DFX,
+			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.PRICE,
+			event_value: `${$data.requestedAmount.amount} ${$data.requestedAmount.asset}`,
+			token_symbol: $selectedToken.symbol,
+			token_network: $selectedToken.network.name,
+			token_name: $selectedToken.name,
+			token_standard: $selectedToken.standard,
+			token_id: String($selectedToken.id),
+			token_usd_value: String($selectedToken.amountInUSD)
+		};
+
 		onPay();
 
+		const startTime = performance.now();
+
 		try {
+			const amount = parseToken({
+				value: `${$selectedToken.amount}`,
+				unitName: $selectedToken.decimals
+			});
+
 			await pay({
 				token: $selectedToken,
 				data: $data,
 				from: $ethAddress,
 				identity: $authIdentity,
-				progress
+				progress,
+				amount
 			});
-		} catch (_: unknown) {
-			// TODO: add steps to redirect to Payment Failed screen and add event
+
+			const duration = performance.now() - startTime;
+			const durationInSeconds = Math.round(duration / 1000);
+
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.PAY,
+				metadata: {
+					...trackEventBaseParams,
+					result_status: 'success',
+					result_duration_in_seconds: `${durationInSeconds}`
+				}
+			});
+
+			onSuccessPay();
+		} catch (error: unknown) {
+			const duration = performance.now() - startTime;
+
+			const durationInSeconds = Math.round(duration / 1000);
+
+			const errorMessage = errorDetailToString(error) ?? $i18n.send.error.unexpected;
+
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.PAY,
+				metadata: {
+					...trackEventBaseParams,
+					result_status: 'error',
+					result_error: errorMessage,
+					result_duration_in_seconds: `${durationInSeconds}`
+				}
+			});
+
+			onFailedPay();
 		}
 	};
 </script>
@@ -103,6 +168,9 @@
 				asset={$data.requestedAmount.asset}
 				receipt={$data.displayName}
 			/>
+
+			<PaymentStatusHero status="success" />
+			<PaymentStatusHero status="failure" />
 
 			<SelectedTokenToPay {onSelectToken} bind:isTokenSelecting />
 

@@ -28,7 +28,7 @@
 
 	const onClose = () => modalStore.close();
 
-	setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
+	let { resetStore } = setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
 
 	const goToStep = (stepName: WizardStepsScanner) => {
 		if (isNullish(modal)) {
@@ -63,6 +63,8 @@
 			<OpenCryptoPay
 				onPay={() => goToStep(WizardStepsScanner.PAYING)}
 				onSelectToken={() => goToStep(WizardStepsScanner.TOKENS_LIST)}
+				onSuccessPay={() => goToStep(WizardStepsScanner.PAYMENT_CONFIRMED)}
+				onFailedPay={() => goToStep(WizardStepsScanner.PAYMENT_FAILED)}
 				bind:isTokenSelecting
 				bind:payProgressStep
 			/>
@@ -70,6 +72,15 @@
 			<TokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
 		{:else if currentStep?.name === WizardStepsScanner.PAYING}
 			<OpenCryptoPayProgress {payProgressStep} />
+		{:else if currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
+			<PaymentFailed
+				onClose={() => {
+					resetStore();
+					goToStep(WizardStepsScanner.SCAN);
+				}}
+			/>
+		{:else if currentStep?.name === WizardStepsScanner.PAYMENT_FAILED}
+			<PaymentSucceeded {onClose} />
 		{/if}
 	{/key}
 </WizardModal>
