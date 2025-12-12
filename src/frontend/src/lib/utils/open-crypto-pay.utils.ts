@@ -258,25 +258,19 @@ export const validateDecodedData = ({
 		throw new Error(get(i18n).scanner.error.data_is_incompleted);
 	}
 
+	const params = {
+		decodedData,
+		amount,
+		maxFeePerGas: feeData.maxFeePerGas,
+		maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+		estimatedGasLimit,
+		token,
+		uri
+	};
+
 	return isDefaultEthereumToken(token)
-		? validateNativeTransfer({
-				decodedData,
-				amount,
-				maxFeePerGas: feeData.maxFeePerGas,
-				maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-				estimatedGasLimit,
-				token,
-				uri
-			})
-		: validateERC20Transfer({
-				decodedData,
-				token,
-				amount,
-				maxFeePerGas: feeData.maxFeePerGas,
-				maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-				estimatedGasLimit,
-				uri
-			});
+		? validateNativeTransfer(params)
+		: validateERC20Transfer(params);
 };
 
 export const getERC681Value = (uri: string): bigint | undefined => {
