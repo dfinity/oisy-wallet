@@ -253,7 +253,7 @@ export const validateDecodedData = ({
 		isNullish(feeData?.maxPriorityFeePerGas) ||
 		isNullish(estimatedGasLimit)
 	) {
-		throw new Error('Missing required payment data from URN');
+		throw new Error(get(i18n).scanner.error.data_is_incompleted);
 	}
 
 	return {
