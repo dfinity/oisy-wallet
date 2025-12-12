@@ -19,6 +19,10 @@ export const TokenStandardCodeSchema = z.enum([
 	'spl'
 ]);
 
+export const TokenStandardSchema = z.object({
+	code: TokenStandardCodeSchema
+});
+
 export const TokenCategorySchema = z.enum(['default', 'custom']);
 
 export const TokenMetadataSchema = z.object({
