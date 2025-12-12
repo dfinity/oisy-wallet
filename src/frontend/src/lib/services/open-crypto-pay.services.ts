@@ -18,7 +18,7 @@ import type {
 	PayableTokenWithConvertedAmount,
 	PayableTokenWithFees,
 	TransactionBaseParams,
-	ValidatedPaymentData
+	ValidatedDFXPaymentData
 } from '$lib/types/open-crypto-pay';
 import {
 	decodeLNURL,
@@ -105,16 +105,16 @@ export const buildTransactionBaseParams = ({
 }: {
 	from: EthAddress;
 	nonce: number;
-	validatedData: ValidatedPaymentData;
+	validatedData: ValidatedDFXPaymentData;
 }): TransactionBaseParams => ({
 	from,
 	to: validatedData.destination,
-	amount: BigInt(validatedData.value),
+	amount: validatedData.value,
 	maxPriorityFeePerGas: validatedData.feeData.maxPriorityFeePerGas,
 	maxFeePerGas: validatedData.feeData.maxFeePerGas,
 	nonce,
 	gas: validatedData.estimatedGasLimit,
-	chainId: BigInt(validatedData.ethereumChainId)
+	chainId: validatedData.ethereumChainId
 });
 
 export const prepareEthTransaction = ({

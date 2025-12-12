@@ -13,8 +13,7 @@ import type {
 	PayableTokenWithFees,
 	PaymentMethodData,
 	PrepareTokensParams,
-	ValidatedDFXPaymentData,
-	ValidatedPaymentData
+	ValidatedDFXPaymentData
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
@@ -242,7 +241,7 @@ export const validateDecodedData = ({
 }: {
 	decodedData: DecodedUrn | undefined;
 	fee: PayableTokenWithConvertedAmount['fee'];
-}): ValidatedPaymentData => {
+}): ValidatedDFXPaymentData => {
 	const { destination, ethereumChainId, value } = decodedData ?? {};
 	const { feeData, estimatedGasLimit } = fee ?? {};
 
@@ -259,8 +258,8 @@ export const validateDecodedData = ({
 
 	return {
 		destination,
-		ethereumChainId,
-		value,
+		ethereumChainId: BigInt(ethereumChainId),
+		value: BigInt(value),
 		feeData: {
 			maxFeePerGas: feeData.maxFeePerGas,
 			maxPriorityFeePerGas: feeData.maxPriorityFeePerGas

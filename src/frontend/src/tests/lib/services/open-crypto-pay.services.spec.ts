@@ -26,7 +26,7 @@ import type {
 	PayableToken,
 	PayableTokenWithConvertedAmount,
 	TransactionBaseParams,
-	ValidatedPaymentData
+	ValidatedDFXPaymentData
 } from '$lib/types/open-crypto-pay';
 import { extractQuoteData } from '$lib/utils/open-crypto-pay.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
@@ -374,10 +374,10 @@ describe('open-crypto-pay.service', () => {
 	describe('buildTransactionBaseParams', () => {
 		const userAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as EthAddress;
 
-		const validatedData: ValidatedPaymentData = {
+		const validatedData: ValidatedDFXPaymentData = {
 			destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-			ethereumChainId: '1',
-			value: 1000000000000,
+			ethereumChainId: 1n,
+			value: 1000000000000n,
 			feeData: {
 				maxFeePerGas: 12n,
 				maxPriorityFeePerGas: 7n
@@ -474,7 +474,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should handle different chain IDs', () => {
-			const chainIds = ['1', '137', '56', '42161'];
+			const chainIds = [1n, 137n, 56n, 42161n];
 
 			chainIds.forEach((chainId) => {
 				const data = { ...validatedData, ethereumChainId: chainId };
@@ -485,12 +485,12 @@ describe('open-crypto-pay.service', () => {
 					validatedData: data
 				});
 
-				expect(result.chainId).toBe(BigInt(chainId));
+				expect(result.chainId).toBe(chainId);
 			});
 		});
 
 		it('should handle zero value', () => {
-			const data = { ...validatedData, value: 0 };
+			const data = { ...validatedData, value: ZERO };
 
 			const result = buildTransactionBaseParams({
 				from: userAddress,
@@ -502,7 +502,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should preserve BigInt fee values', () => {
-			const data: ValidatedPaymentData = {
+			const data: ValidatedDFXPaymentData = {
 				...validatedData,
 				feeData: {
 					maxFeePerGas: 999n,
@@ -523,7 +523,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should preserve BigInt gas limit', () => {
-			const data: ValidatedPaymentData = {
+			const data: ValidatedDFXPaymentData = {
 				...validatedData,
 				estimatedGasLimit: 50000n
 			};
