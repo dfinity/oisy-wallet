@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { PRIMARY_INTERNET_IDENTITY_VERSION } from '$env/auth.env';
+	import ButtonAuthenticateWithIndentityNumber from '$lib/components/auth/ButtonAuthenticateWithIndentityNumber.svelte';
 	import SigningInHelpLink from '$lib/components/auth/SigningInHelpLink.svelte';
-	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -56,24 +54,9 @@
 	/>
 
 	{#if isPrimaryIdentityVersion2}
-		<div
-			class="mt-2 flex w-full items-center justify-center gap-2 text-sm font-bold text-brand-primary sm:w-80"
-		>
-			<ExternalLink
-				ariaLabel={$i18n.auth.text.sign_in_with_identity_number}
-				href={OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL}
-				iconVisible={false}
-			>
-				<IconHelp size="18" />
-			</ExternalLink>
-
-			<button
-				aria-label={$i18n.auth.text.sign_in_with_identity_number}
-				onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_1_0)}
-			>
-				{$i18n.auth.text.sign_in_with_identity_number}
-			</button>
-		</div>
+		<ButtonAuthenticateWithIndentityNumber
+			onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_1_0)}
+		/>
 	{/if}
 
 	<span
