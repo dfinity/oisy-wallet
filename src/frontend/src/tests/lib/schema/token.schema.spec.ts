@@ -134,7 +134,7 @@ describe('token.schema', () => {
 		it('should fail validation with an unsupported token standard', () => {
 			const invalidStandard = 'unsupported-standard';
 
-			expect(() => TokenStandardCodeSchema.parse(invalidStandard)).toThrowError();
+			expect(() => TokenStandardSchema.parse({ code: invalidStandard })).toThrowError();
 		});
 	});
 
