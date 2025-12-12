@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import PayHero from '$lib/components/scanner/PayHero.svelte';
 	import ReceiptData from '$lib/components/scanner/PayReceiptData.svelte';
 	import SelectedTokenToPay from '$lib/components/scanner/open-crypto-pay/SelectedTokenToPay.svelte';
@@ -103,7 +104,10 @@
 			token_name: $selectedToken.name,
 			token_standard: $selectedToken.standard,
 			token_id: `${$selectedToken.id.toString()}`,
-			token_usd_value: `${$selectedToken.amountInUSD}`
+			token_usd_value: `${$selectedToken.amountInUSD}`,
+			...(isTokenErc20($selectedToken) && {
+				token_address: $selectedToken.address
+			})
 		};
 
 		const startTime = performance.now();
