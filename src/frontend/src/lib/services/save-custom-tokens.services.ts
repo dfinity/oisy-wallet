@@ -12,20 +12,14 @@ import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { SaveTokensParams } from '$lib/services/manage-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
-import type {
-	ErcSaveCustomToken,
-	SaveCustomTokenWithKey,
-	TokenVariant
-} from '$lib/types/custom-token';
+import type { SaveCustomErcVariant, SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { assertNever } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-const parseErcIdentifier = (
-	token: TokenVariant<'Erc20' | 'Erc721' | 'Erc1155', ErcSaveCustomToken>
-) => `${token.address}#${token.chainId}`;
+const parseErcIdentifier = (token: SaveCustomErcVariant) => `${token.address}#${token.chainId}`;
 
 const hideTokenByKey = (token: SaveCustomTokenWithKey) => {
 	if (token.networkKey === 'Icrc') {
