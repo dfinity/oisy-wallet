@@ -27,6 +27,9 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import type { Erc20Token } from '$eth/types/erc20';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
+	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 
 	interface Props {
 		onSelectToken: () => void;
@@ -103,7 +106,10 @@
 			token_name: $selectedToken.name,
 			token_standard: $selectedToken.standard,
 			token_id: `${$selectedToken.id.toString()}`,
-			token_usd_value: `${$selectedToken.amountInUSD}`
+			token_usd_value: `${$selectedToken.amountInUSD}`,
+			...(isTokenErc20($selectedToken) && {
+				token_address: $selectedToken.address
+			})
 		};
 
 		const startTime = performance.now();
