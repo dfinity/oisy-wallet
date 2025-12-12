@@ -485,7 +485,7 @@ describe('open-crypto-pay.service', () => {
 					validatedData: data
 				});
 
-				expect(result.chainId).toBe(BigInt(chainId));
+				expect(result.chainId).toBe(chainId);
 			});
 		});
 
