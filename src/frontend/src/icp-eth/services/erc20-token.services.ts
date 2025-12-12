@@ -44,7 +44,7 @@ const findUserToken = ({
  * @param {OptionIdentity} params.identity - The user's identity.
  * @returns {Promise<{ result: 'loaded' | 'skipped' | 'error' }>} The result of the operation.
  */
-export const autoLoadUserToken = async ({
+export const autoLoadErc20Token = async ({
 	erc20UserTokens,
 	sendToken,
 	identity

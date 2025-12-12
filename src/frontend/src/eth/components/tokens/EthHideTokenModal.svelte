@@ -5,7 +5,7 @@
 	import { onMount } from 'svelte';
 	import { loadErc20UserTokens } from '$eth/services/erc20.services';
 	import type { OptionErc20UserToken } from '$eth/types/erc20-user-token';
-	import { setUserToken } from '$icp-eth/services/user-token.services';
+	import { setUserToken } from '$icp-eth/services/erc20-token.services';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import {
 		HIDE_TOKEN_MODAL_ROUTE,

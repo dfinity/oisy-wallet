@@ -10,7 +10,7 @@
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
-	import { toUserToken } from '$icp-eth/services/user-token.services';
+	import { toUserToken } from '$icp-eth/services/erc20-token.services';
 	import { removeCustomToken, removeUserToken, setCustomToken } from '$lib/api/backend.api';
 	import {
 		deleteIdbEthTokenDeprecated,
