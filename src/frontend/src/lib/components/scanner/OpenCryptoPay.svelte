@@ -39,7 +39,7 @@
 		payProgressStep = $bindable()
 	}: Props = $props();
 
-	const { data, selectedToken, failedPaymentError } = getContext<PayContext>(PAY_CONTEXT_KEY);
+	const { data, selectedToken } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
 	let exchangeFeeBalance = $derived(
 		nonNullish($selectedToken)
