@@ -117,6 +117,7 @@
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
+			"sign_in_with_identity_number": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": ""
@@ -1782,6 +1783,7 @@
 			},
 			"title": "",
 			"instruction": "",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
