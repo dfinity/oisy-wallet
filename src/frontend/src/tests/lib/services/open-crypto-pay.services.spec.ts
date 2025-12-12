@@ -173,7 +173,9 @@ describe('open-crypto-pay.service', () => {
 
 			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 
-			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrowError('API request failed: 404');
+			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrowError(
+				'API request failed: 404'
+			);
 
 			expect(fetchOpenCryptoPay).toHaveBeenCalledExactlyOnceWith(
 				'https://api.dfx.swiss/v1/lnurlp/pl_test123'
