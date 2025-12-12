@@ -107,7 +107,7 @@ describe('SolSendForm', () => {
 				context: mockContext
 			});
 
-			expect(() => getByText(en.fee.text.ata_fee)).toThrow();
+			expect(() => getByText(en.fee.text.ata_fee)).toThrowError();
 		});
 
 		it('should render ATA creation fee if it is not nullish', async () => {
@@ -137,7 +137,7 @@ describe('SolSendForm', () => {
 			// Wait for the fee to be loaded
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 
-			expect(() => getByText(en.fee.text.ata_fee)).toThrow();
+			expect(() => getByText(en.fee.text.ata_fee)).toThrowError();
 		}, 60000);
 	});
 });

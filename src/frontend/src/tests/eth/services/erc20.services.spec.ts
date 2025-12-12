@@ -236,21 +236,21 @@ describe('erc20.services', () => {
 			const mockError = new Error('Error loading metadata');
 			vi.mocked(mockMetadata).mockRejectedValue(mockError);
 
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 
 		it('should not throw error if list user tokens throws', async () => {
 			const mockError = new Error('Error loading user tokens');
 			vi.mocked(listUserTokens).mockRejectedValue(mockError);
 
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 
 		it('should not throw error if list custom tokens throws', async () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 
 		it('should reset both tokens stores on error', async () => {
