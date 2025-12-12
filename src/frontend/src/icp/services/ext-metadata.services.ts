@@ -2,6 +2,7 @@ import type { TokenIdentifier } from '$declarations/ext_v2_token/ext_v2_token.di
 import { metadata as metadataApi } from '$icp/api/ext-v2-token.api';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
 import type { NftMetadataWithoutId } from '$lib/types/nft';
+import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { isNullish, type QueryParams } from '@dfinity/utils';
 
 const fromJson = (metadata: string): NftMetadataWithoutId | undefined => {
@@ -12,7 +13,8 @@ const fromJson = (metadata: string): NftMetadataWithoutId | undefined => {
 		const imageUrl = 'url' in jsonMetadata ? jsonMetadata.url : undefined;
 		const thumbnailUrl = 'thumb' in jsonMetadata ? jsonMetadata.thumb : undefined;
 		const description = 'description' in jsonMetadata ? jsonMetadata.description : undefined;
-		const attributes = 'attributes' in jsonMetadata ? jsonMetadata.attributes : undefined;
+		const attributes =
+			'attributes' in jsonMetadata ? mapNftAttributes(jsonMetadata.attributes) : undefined;
 
 		return {
 			name,

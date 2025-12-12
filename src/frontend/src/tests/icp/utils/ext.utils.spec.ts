@@ -115,7 +115,7 @@ describe('ext.utils', () => {
 			const collectionId = Principal.fromText('oeee4-qaaaa-aaaak-qaaeq-cai');
 			const index = -1;
 
-			expect(() => extIndexToIdentifier({ collectionId, index })).toThrow(
+			expect(() => extIndexToIdentifier({ collectionId, index })).toThrowError(
 				'EXT token index -1 is out of bounds'
 			);
 		});

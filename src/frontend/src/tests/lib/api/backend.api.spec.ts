@@ -76,7 +76,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(listUserTokens({ ...mockParams, identity: undefined })).rejects.toThrow();
+			await expect(listUserTokens({ ...mockParams, identity: undefined })).rejects.toThrowError();
 		});
 
 		it('should throw an error if listUserTokens throws', async () => {
@@ -84,7 +84,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(listUserTokens(mockParams)).rejects.toThrow();
+			await expect(listUserTokens(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -106,7 +106,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(listCustomTokens({ ...mockParams, identity: undefined })).rejects.toThrow();
+			await expect(listCustomTokens({ ...mockParams, identity: undefined })).rejects.toThrowError();
 		});
 
 		it('should throw an error if listCustomTokens throws', async () => {
@@ -114,7 +114,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(listCustomTokens(mockParams)).rejects.toThrow();
+			await expect(listCustomTokens(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -139,7 +139,9 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(setManyCustomTokens({ ...mockParams, identity: undefined })).rejects.toThrow();
+			await expect(
+				setManyCustomTokens({ ...mockParams, identity: undefined })
+			).rejects.toThrowError();
 		});
 
 		it('should throw an error if setManyCustomTokens throws', async () => {
@@ -147,7 +149,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(setManyCustomTokens(mockParams)).rejects.toThrow();
+			await expect(setManyCustomTokens(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -174,7 +176,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(setCustomToken({ ...mockParams, identity: undefined })).rejects.toThrow();
+			await expect(setCustomToken({ ...mockParams, identity: undefined })).rejects.toThrowError();
 		});
 
 		it('should throw an error if setCustomToken throws', async () => {
@@ -182,7 +184,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(setCustomToken(mockParams)).rejects.toThrow();
+			await expect(setCustomToken(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -209,7 +211,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(removeUserToken({ ...mockParams, identity: undefined })).rejects.toThrow();
+			await expect(removeUserToken({ ...mockParams, identity: undefined })).rejects.toThrowError();
 		});
 
 		it('should throw an error if removeUserToken throws', async () => {
@@ -217,7 +219,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(removeUserToken(mockParams)).rejects.toThrow();
+			await expect(removeUserToken(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -242,7 +244,9 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(removeCustomToken({ ...mockParams, identity: undefined })).rejects.toThrow();
+			await expect(
+				removeCustomToken({ ...mockParams, identity: undefined })
+			).rejects.toThrowError();
 		});
 
 		it('should throw an error if removeCustomToken throws', async () => {
@@ -250,7 +254,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(removeCustomToken(mockParams)).rejects.toThrow();
+			await expect(removeCustomToken(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -273,7 +277,9 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(setManyUserTokens({ ...mockParams, identity: undefined })).rejects.toThrow();
+			await expect(
+				setManyUserTokens({ ...mockParams, identity: undefined })
+			).rejects.toThrowError();
 		});
 
 		it('should throw an error if setManyUserTokens throws', async () => {
@@ -281,7 +287,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(setManyUserTokens(mockParams)).rejects.toThrow();
+			await expect(setManyUserTokens(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -308,7 +314,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(setUserToken({ ...mockParams, identity: undefined })).rejects.toThrow();
+			await expect(setUserToken({ ...mockParams, identity: undefined })).rejects.toThrowError();
 		});
 
 		it('should throw an error if setUserToken throws', async () => {
@@ -316,7 +322,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(setUserToken(mockParams)).rejects.toThrow();
+			await expect(setUserToken(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -337,7 +343,9 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(createUserProfile({ ...mockParams, identity: undefined })).rejects.toThrow();
+			await expect(
+				createUserProfile({ ...mockParams, identity: undefined })
+			).rejects.toThrowError();
 		});
 
 		it('should throw an error if createUserProfile throws', async () => {
@@ -345,7 +353,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(createUserProfile(mockParams)).rejects.toThrow();
+			await expect(createUserProfile(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -379,7 +387,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(getUserProfile({ ...mockParams, identity: undefined })).rejects.toThrow();
+			await expect(getUserProfile({ ...mockParams, identity: undefined })).rejects.toThrowError();
 		});
 
 		it('should throw an error if getUserProfile throws', async () => {
@@ -387,7 +395,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(getUserProfile(mockParams)).rejects.toThrow();
+			await expect(getUserProfile(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -436,7 +444,9 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(addUserCredential({ ...mockParams, identity: undefined })).rejects.toThrow();
+			await expect(
+				addUserCredential({ ...mockParams, identity: undefined })
+			).rejects.toThrowError();
 		});
 
 		it('should throw an error if addUserCredential throws', async () => {
@@ -444,7 +454,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(addUserCredential(mockParams)).rejects.toThrow();
+			await expect(addUserCredential(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -478,7 +488,7 @@ describe('backend.api', () => {
 		it('should throw an error if identity is undefined', async () => {
 			await expect(
 				addPendingBtcTransaction({ ...mockParams, identity: undefined })
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 
 		it('should throw an error if addPendingBtcTransaction throws', async () => {
@@ -486,7 +496,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(addPendingBtcTransaction(mockParams)).rejects.toThrow();
+			await expect(addPendingBtcTransaction(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -521,7 +531,7 @@ describe('backend.api', () => {
 		it('should throw an error if identity is undefined', async () => {
 			await expect(
 				getPendingBtcTransactions({ ...mockParams, identity: undefined })
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 
 		it('should throw an error if getPendingBtcTransactions throws', async () => {
@@ -529,7 +539,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(getPendingBtcTransactions(mockParams)).rejects.toThrow();
+			await expect(getPendingBtcTransactions(mockParams)).rejects.toThrowError();
 		});
 	});
 
@@ -559,7 +569,7 @@ describe('backend.api', () => {
 		it('should throw an error if identity is undefined', async () => {
 			await expect(
 				updateUserExperimentalFeatureSettings({ ...mockParams, identity: undefined })
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 
 		it('should throw an error if addPendingBtcTransaction throws', async () => {
@@ -567,7 +577,7 @@ describe('backend.api', () => {
 				throw new Error('mock-error');
 			});
 
-			await expect(updateUserExperimentalFeatureSettings(mockParams)).rejects.toThrow();
+			await expect(updateUserExperimentalFeatureSettings(mockParams)).rejects.toThrowError();
 		});
 	});
 });

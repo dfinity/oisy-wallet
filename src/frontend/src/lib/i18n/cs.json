@@ -117,6 +117,7 @@
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
 			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain"
@@ -929,10 +930,14 @@
 			"tokens_available": "",
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1063,6 +1068,12 @@
 			"creating_transaction": "",
 			"signing_transaction": "",
 			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1774,6 +1785,7 @@
 			},
 			"title": "",
 			"instruction": "Kliknutím na toto tlačítko souhlasíte s $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

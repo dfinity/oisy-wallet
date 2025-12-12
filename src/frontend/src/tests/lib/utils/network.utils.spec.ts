@@ -95,12 +95,12 @@ describe('network utils', () => {
 		it.each([...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS])(
 			'should not throw for $name network',
 			(network) => {
-				expect(() => assertIsNetworkEthereum(network)).not.toThrow();
+				expect(() => assertIsNetworkEthereum(network)).not.toThrowError();
 			}
 		);
 
 		it('should throw for non-Ethereum network', () => {
-			expect(() => assertIsNetworkEthereum(ICP_NETWORK)).toThrow(
+			expect(() => assertIsNetworkEthereum(ICP_NETWORK)).toThrowError(
 				`Network ${ICP_NETWORK.name} is not an Ethereum or EVM network`
 			);
 		});

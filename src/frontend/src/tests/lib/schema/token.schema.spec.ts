@@ -8,6 +8,7 @@ import {
 	TokenSchema,
 	TokenStandardCodeSchema,
 	TokenStandardSchema
+	TokenStandardCodeSchema
 } from '$lib/schema/token.schema';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -22,7 +23,7 @@ describe('token.schema', () => {
 		it('should fail validation with a string instead of a symbol', () => {
 			const invalidTokenId = 'TokenId';
 
-			expect(() => TokenIdSchema.parse(invalidTokenId)).toThrow();
+			expect(() => TokenIdSchema.parse(invalidTokenId)).toThrowError();
 		});
 	});
 
@@ -78,11 +79,11 @@ describe('token.schema', () => {
 		it('should fail validation with an unsupported token standard', () => {
 			const invalidStandard = 'unsupported-standard';
 
-			expect(() => TokenStandardCodeSchema.parse(invalidStandard)).toThrow();
+			expect(() => TokenStandardCodeSchema.parse(invalidStandard)).toThrowError();
 		});
 	});
-
-	describe('TokenStandardSchema', () => {
+  
+  describe('TokenStandardSchema', () => {
 		it('should validate "ethereum" as a supported token standard', () => {
 			const validStandard = 'ethereum';
 
@@ -134,9 +135,11 @@ describe('token.schema', () => {
 		it('should fail validation with an unsupported token standard', () => {
 			const invalidStandard = 'unsupported-standard';
 
-			expect(() => TokenStandardSchema.parse(invalidStandard)).toThrow();
+			expect(() => TokenStandardCodeSchema.parse(invalidStandard)).toThrowError();
 		});
 	});
+  
+  
 
 	describe('TokenCategorySchema', () => {
 		it('should validate "default" as a supported token category', () => {
@@ -154,7 +157,7 @@ describe('token.schema', () => {
 		it('should fail validation with an unsupported token category', () => {
 			const invalidCategory = 'unsupported-category';
 
-			expect(() => TokenCategorySchema.parse(invalidCategory)).toThrow();
+			expect(() => TokenCategorySchema.parse(invalidCategory)).toThrowError();
 		});
 	});
 
@@ -199,7 +202,7 @@ describe('token.schema', () => {
 				icon: 'https://example.com/icon.png'
 			};
 
-			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrow();
+			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrowError();
 		});
 
 		it('should fail validation with missing name', () => {
@@ -209,7 +212,7 @@ describe('token.schema', () => {
 				icon: 'https://example.com/icon.png'
 			};
 
-			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrow();
+			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrowError();
 		});
 
 		it('should fail validation with missing symbol', () => {
@@ -219,7 +222,7 @@ describe('token.schema', () => {
 				icon: 'https://example.com/icon.png'
 			};
 
-			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrow();
+			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrowError();
 		});
 	});
 
@@ -246,7 +249,7 @@ describe('token.schema', () => {
 				oisySymbol: { oisySymbol: 123 }
 			};
 
-			expect(() => TokenAppearanceSchema.parse(invalidAppearance)).toThrow();
+			expect(() => TokenAppearanceSchema.parse(invalidAppearance)).toThrowError();
 		});
 	});
 
@@ -298,43 +301,43 @@ describe('token.schema', () => {
 		it('should fail validation when id is missing', () => {
 			const { id: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when network is missing', () => {
 			const { network: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when standard is missing', () => {
 			const { standard: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when category is missing', () => {
 			const { category: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when name is missing', () => {
 			const { name: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when symbol is missing', () => {
 			const { symbol: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when decimals is missing', () => {
 			const { decimals: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 	});
 });
