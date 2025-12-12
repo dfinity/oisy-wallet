@@ -10,7 +10,7 @@ import { isTokenErc20, isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { isTokenExtV2 } from '$icp/utils/ext.utils';
+import { isTokenExt } from '$icp/utils/ext.utils';
 import {
 	icTokenIcrcCustomToken,
 	isTokenDip20,
@@ -292,7 +292,7 @@ export const filterTokens = <T extends Token>({
 			);
 		}
 
-		if (isTokenExtV2(token)) {
+		if (isTokenExt(token)) {
 			const { canisterId } = token;
 
 			return canisterId.toLowerCase().includes(filter.toLowerCase());
@@ -368,7 +368,7 @@ export const groupTogglableTokens = (
 				...icrc,
 				...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
 			],
-			ext: [...ext, ...(isTokenExtV2(token) ? [token as ExtCustomToken] : [])],
+			ext: [...ext, ...(isTokenExt(token) ? [token as ExtCustomToken] : [])],
 			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
 			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
