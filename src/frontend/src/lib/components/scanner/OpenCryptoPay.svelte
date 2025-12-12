@@ -20,6 +20,7 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { errorDetailToString } from '$lib/utils/error.utils';
 
 	interface Props {
 		onSelectToken: () => void;
@@ -35,7 +36,7 @@
 		payProgressStep = $bindable()
 	}: Props = $props();
 
-	const { data, selectedToken } = getContext<PayContext>(PAY_CONTEXT_KEY);
+	const { data, selectedToken, failedPaymentError } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
 	let exchangeFeeBalance = $derived(
 		nonNullish($selectedToken)
@@ -96,8 +97,10 @@
 				progress,
 				amount
 			});
-		} catch (_: unknown) {
-			// TODO: add steps to redirect to Payment Failed screen and add event
+		} catch (error: unknown) {
+			const errorMessage = errorDetailToString(error) ?? $i18n.send.error.unexpected;
+
+			failedPaymentError.set(errorMessage);
 		}
 	};
 </script>
