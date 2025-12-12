@@ -4,12 +4,14 @@ import { isTokenExtV2 } from '$icp/utils/ext.utils';
 import type { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type {
 	Nft,
+	NftAttribute,
 	NonFungibleToken,
 	NonFungibleTokenIdentifier,
 	NonFungibleTokensByNetwork
 } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
-import { nonNullish } from '@dfinity/utils';
+import type { Option } from '$lib/types/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const isTokenNonFungible = (token: Token): token is NonFungibleToken =>
 	isTokenErc721(token) || isTokenErc1155(token) || isTokenExtV2(token);
@@ -87,4 +89,35 @@ export const getNftDisplayName = (nft: Nft): string => {
 	}
 
 	return `#${idToUse}`;
+};
+
+export const mapNftAttributes = (
+	attributes:
+		| {
+				trait_type: string;
+				value?: Option<string | number>;
+		  }[]
+		| Record<string, Option<string | number>>
+		| undefined
+		| null
+): NftAttribute[] => {
+	if (isNullish(attributes)) {
+		return [];
+	}
+
+	if (Array.isArray(attributes)) {
+		return attributes.map(({ trait_type: traitType, value }) => ({
+			traitType,
+			...(nonNullish(value) && { value: value.toString() })
+		}));
+	}
+
+	if (typeof attributes === 'object') {
+		return Object.entries(attributes).map(([traitType, value]) => ({
+			traitType,
+			...(nonNullish(value) && { value: value.toString() })
+		}));
+	}
+
+	return [];
 };

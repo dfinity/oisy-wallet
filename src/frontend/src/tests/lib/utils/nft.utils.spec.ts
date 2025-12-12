@@ -8,6 +8,7 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
+import type { Option } from '$lib/types/utils';
 import {
 	getNftDisplayId,
 	getNftDisplayImageUrl,
@@ -16,7 +17,8 @@ import {
 	getNftIdentifier,
 	getTokensByNetwork,
 	isTokenFungible,
-	isTokenNonFungible
+	isTokenNonFungible,
+	mapNftAttributes
 } from '$lib/utils/nft.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { MOCK_ERC1155_TOKENS, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
@@ -196,6 +198,78 @@ describe('nft.utils', () => {
 					collection: { ...mockValidErc721Nft.collection, name: undefined }
 				})
 			).toBe('#123');
+		});
+	});
+
+	describe('mapNftAttributes', () => {
+		it('should return an empty array for nullish inputs', () => {
+			expect(mapNftAttributes(undefined)).toStrictEqual([]);
+
+			expect(mapNftAttributes(null)).toStrictEqual([]);
+		});
+
+		it('should map NFT attributes correctly (input as list)', () => {
+			const mockAttributes: {
+				trait_type: string;
+				value?: Option<string | number>;
+			}[] = [
+				{ trait_type: 'Color', value: 'Blue' },
+				{ trait_type: 'Size', value: 'Large' },
+				{ trait_type: 'Arms', value: 2 },
+				{ trait_type: 'Legs', value: undefined },
+				{ trait_type: 'Hair', value: null },
+				{ trait_type: 'Eyes' }
+			];
+
+			const mappedAttributes = mapNftAttributes(mockAttributes);
+
+			expect(mappedAttributes).toStrictEqual([
+				{ traitType: 'Color', value: 'Blue' },
+				{ traitType: 'Size', value: 'Large' },
+				{ traitType: 'Arms', value: '2' },
+				{ traitType: 'Legs' },
+				{ traitType: 'Hair' },
+				{ traitType: 'Eyes' }
+			]);
+		});
+
+		it('should map NFT attributes correctly (input as object)', () => {
+			const mockAttributes: Record<string, Option<string | number>> = {
+				Color: 'Blue',
+				Size: 'Large',
+				Arms: 2,
+				Legs: undefined,
+				Hair: null,
+				Eyes: undefined
+			};
+
+			const mappedAttributes = mapNftAttributes(mockAttributes);
+
+			expect(mappedAttributes).toStrictEqual([
+				{ traitType: 'Color', value: 'Blue' },
+				{ traitType: 'Size', value: 'Large' },
+				{ traitType: 'Arms', value: '2' },
+				{ traitType: 'Legs' },
+				{ traitType: 'Hair' },
+				{ traitType: 'Eyes' }
+			]);
+		});
+
+		it('should return an empty array for inputs without attributes', () => {
+			expect(mapNftAttributes([])).toStrictEqual([]);
+
+			expect(mapNftAttributes({})).toStrictEqual([]);
+		});
+
+		it('should handle gracefully unsupported input types', () => {
+			// @ts-expect-error Testing an unsupported input type
+			expect(mapNftAttributes('invalid-input')).toStrictEqual([]);
+
+			// @ts-expect-error Testing an unsupported input type
+			expect(mapNftAttributes(123)).toStrictEqual([]);
+
+			// @ts-expect-error Testing an unsupported input type
+			expect(mapNftAttributes(456n)).toStrictEqual([]);
 		});
 	});
 });
