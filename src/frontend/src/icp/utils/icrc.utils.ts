@@ -96,7 +96,7 @@ export const mapIcrcToken = ({
 	return {
 		id: parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
-		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? 'icrc',
+		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? { code: 'icrc' },
 		symbol,
 		...(notEmptyString(icon) && { icon }),
 		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
@@ -159,12 +159,14 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	];
 };
 
-export const isTokenIcp = (token: Partial<IcToken>): token is IcToken => token.standard === 'icp';
+export const isTokenIcp = (token: Partial<IcToken>): token is IcToken =>
+	token.standard?.code === 'icp';
 
-export const isTokenIcrc = (token: Partial<IcToken>): token is IcToken => token.standard === 'icrc';
+export const isTokenIcrc = (token: Partial<IcToken>): token is IcToken =>
+	token.standard?.code === 'icrc';
 
 export const isTokenDip20 = (token: Partial<IcToken>): token is IcToken =>
-	token.standard === 'dip20';
+	token.standard?.code === 'dip20';
 
 export const isTokenIc = (token: Partial<IcToken>): token is IcToken =>
 	isTokenIcp(token) || isTokenIcrc(token) || isTokenDip20(token);

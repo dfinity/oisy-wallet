@@ -5,14 +5,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { NetworkId } from '$lib/types/network';
-	import type { TokenStandardCode } from '$lib/types/token';
+	import type {TokenStandard} from '$lib/types/token';
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	interface Props {
 		destination: string;
 		networkId?: NetworkId;
-		tokenStandard: TokenStandardCode;
+		tokenStandard: TokenStandard;
 		invalidDestination: boolean;
 		knownDestinations?: KnownDestinations;
 		networkContacts?: NetworkContacts;
