@@ -7,7 +7,8 @@ export enum PLAUSIBLE_EVENTS {
 	MEDIA_CONSENT = 'media_consent',
 	OPEN_MODAL = 'open_modal',
 	LOAD_CUSTOM_TOKENS = 'load_custom_tokens',
-	PAY = 'pay'
+	PAY = 'pay',
+	SIGN_IN_CANCELLED_HELP = 'sign_in_cancelled_help'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
