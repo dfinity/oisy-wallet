@@ -80,7 +80,7 @@ jobs:
 
       - name: Download backend.wasm.gz
         if: steps.changes.outputs.backend == 'true'
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: backend.wasm.gz
           path: .
@@ -164,7 +164,7 @@ jobs:
 
       - name: Download backend.wasm.gz
         if: (steps.changes.outputs.backend == 'true') && (steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true')
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: backend.wasm.gz
           path: .
