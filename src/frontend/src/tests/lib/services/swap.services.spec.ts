@@ -1474,7 +1474,7 @@ describe('swap.services', () => {
 					token_address: sourceToken.ledgerCanisterId,
 					token_name: sourceToken.name,
 					token_id: String(sourceToken.id),
-					token_standard: sourceToken.standard,
+					token_standard: sourceToken.standard.code,
 					token2_symbol: destinationToken.symbol,
 					token2_network: destinationToken.network.name,
 					token2_address: destinationToken.ledgerCanisterId,
