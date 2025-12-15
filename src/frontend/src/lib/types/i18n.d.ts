@@ -137,10 +137,12 @@ interface I18nAuth {
 		text: {
 			title: string;
 			description: string;
-			subtitle: string;
+			new_auth_version: string;
+			could_not_enter_identity_number: string;
 			lost_identity: string;
 			security: string;
 			got_confused: string;
+			no_signup_needed: string;
 			other: string;
 			feedback_text: string;
 			thanks_text: string;
