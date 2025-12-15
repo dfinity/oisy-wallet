@@ -115,7 +115,7 @@
 		"@vitest/coverage-v8": "^4.0.10",
 		"dotenv": "^17.2.3",
 		"fake-indexeddb": "^6.2.5",
-		"jsdom": "^27.1.0",
+		"jsdom": "^27.2.0",
 		"jsqr": "^1.4.0",
 		"pem-file": "^1.0.1",
 		"postcss": "^8.5.6",
