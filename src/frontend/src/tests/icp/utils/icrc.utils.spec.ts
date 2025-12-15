@@ -12,7 +12,7 @@ import {
 	sortIcTokens,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import type { TokenStandardCode } from '$lib/types/token';
+import type { TokenStandard, TokenStandardCode } from '$lib/types/token';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -196,7 +196,7 @@ describe('icrc.utils', () => {
 				icrcCustomTokens: {
 					[mockToken.ledgerCanisterId]: {
 						...mockToken,
-						standard: { code: undefined as unknown as TokenStandardCode }
+						standard: undefined as unknown as TokenStandard
 					}
 				}
 			});
