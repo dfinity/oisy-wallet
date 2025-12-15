@@ -30,7 +30,7 @@
 					token_name: collection.name ?? '',
 					token_address: collection.address,
 					token_network: collection.network.name,
-					token_standard: collection.standard
+					token_standard: collection.standard.code
 				}
 			});
 			modalStore.openNftImageConsent({ id: Symbol(), data: collection });

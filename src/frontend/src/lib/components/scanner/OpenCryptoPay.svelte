@@ -102,7 +102,7 @@
 			token_symbol: $selectedToken.symbol,
 			token_network: $selectedToken.network.name,
 			token_name: $selectedToken.name,
-			token_standard: $selectedToken.standard,
+			token_standard: $selectedToken.standard.code,
 			token_id: `${$selectedToken.id.toString()}`,
 			token_usd_value: `${$selectedToken.amountInUSD}`,
 			...(isTokenErc20($selectedToken) && {
