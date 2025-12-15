@@ -8,7 +8,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
-	import type {TokenStandard} from '$lib/types/token';
+	import type { TokenStandard } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	interface Props {
