@@ -144,7 +144,7 @@ jobs:
         # We disable the thresholds since we will check them in the next step, when all sharded reports are merged
         run: npm run test:coverage -- --reporter=blob --reporter=default --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --coverage.thresholds.0 --coverage.thresholds.autoUpdate=false
       - name: Upload Blob Coverage Report
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: vitest-coverage-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}-shard-${{ matrix.shardIndex }}
@@ -174,7 +174,7 @@ jobs:
       - name: Merge Coverage Reports
         run: npm run test:merge
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: vitest-coverage-merged-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -230,7 +230,7 @@ jobs:
         env:
           NETWORK: ${{ matrix.network }}
       - name: Upload Domain File
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ic-domains-${{ matrix.network }}
           path: ic-domain.${{ matrix.network }}.txt
