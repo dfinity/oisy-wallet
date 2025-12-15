@@ -6,7 +6,8 @@ import {
 	TokenIdSchema,
 	TokenMetadataSchema,
 	TokenSchema,
-	TokenStandardCodeSchema
+	TokenStandardCodeSchema,
+	TokenStandardSchema
 } from '$lib/schema/token.schema';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -78,6 +79,62 @@ describe('token.schema', () => {
 			const invalidStandard = 'unsupported-standard';
 
 			expect(() => TokenStandardCodeSchema.parse(invalidStandard)).toThrowError();
+		});
+	});
+
+	describe('TokenStandardSchema', () => {
+		it('should validate "ethereum" as a supported token standard', () => {
+			const validStandard = 'ethereum';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "erc20" as a supported token standard', () => {
+			const validStandard = 'erc20';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "icp" as a supported token standard', () => {
+			const validStandard = 'icp';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "icrc" as a supported token standard', () => {
+			const validStandard = 'icrc';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "dip20" as a supported token standard', () => {
+			const validStandard = 'dip20';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "ext" as a supported token standard', () => {
+			const validStandard = 'ext';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "bitcoin" as a supported token standard', () => {
+			const validStandard = 'bitcoin';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "solana" as a supported token standard', () => {
+			const validStandard = 'solana';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should fail validation with an unsupported token standard', () => {
+			const invalidStandard = 'unsupported-standard';
+
+			expect(() => TokenStandardSchema.parse({ code: invalidStandard })).toThrowError();
 		});
 	});
 

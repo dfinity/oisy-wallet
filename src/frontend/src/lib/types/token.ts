@@ -5,7 +5,8 @@ import type {
 	TokenIdSchema,
 	TokenMetadataSchema,
 	TokenSchema,
-	TokenStandardCodeSchema
+	TokenStandardCodeSchema,
+	TokenStandardSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
 import type { TokenGroup } from '$lib/types/token-group';
@@ -15,6 +16,8 @@ import type * as z from 'zod';
 export type TokenId = z.infer<typeof TokenIdSchema>;
 
 export type TokenStandardCode = z.infer<typeof TokenStandardCodeSchema>;
+
+export type TokenStandard = z.infer<typeof TokenStandardSchema>;
 
 export type TokenCategory = z.infer<typeof TokenCategorySchema>;
 
