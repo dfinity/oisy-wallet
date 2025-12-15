@@ -45,7 +45,7 @@ describe('kong_backend.canister', () => {
 	const sourceToken = ICP_TOKEN;
 	const destinationToken = {
 		...ICP_TOKEN,
-		standard: 'icrc',
+		standard: { code: 'icrc' },
 		ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
 		indexCanisterId: IC_CKETH_INDEX_CANISTER_ID,
 		minterCanisterId: IC_CKETH_MINTER_CANISTER_ID

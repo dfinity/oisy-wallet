@@ -282,7 +282,7 @@ export class AlchemyProvider {
 			const newContract = {
 				address: ownedContract.address,
 				isSpam: ownedContract.isSpam,
-				standard: { code: tokenStandard }
+				standard: tokenStandard
 			};
 			acc.push(newContract);
 

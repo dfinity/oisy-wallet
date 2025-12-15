@@ -193,7 +193,7 @@ describe('ext.services', () => {
 					data: {
 						...EXT_BUILTIN_TOKENS[0],
 						id: parseTokenId('mockToken'),
-						standard: 'ext',
+						standard: { code: 'ext' },
 						enabled: true
 					},
 					certified: false

@@ -25,7 +25,7 @@ describe('ext.utils', () => {
 	describe('isTokenExt', () => {
 		it.each(['ext'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenExt({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+				isTokenExt({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 			).toBeTruthy();
 		});
 
@@ -33,7 +33,7 @@ describe('ext.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenExt({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+					isTokenExt({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 				).toBeFalsy();
 			}
 		);

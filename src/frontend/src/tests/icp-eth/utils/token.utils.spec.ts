@@ -22,7 +22,7 @@ describe('token.utils', () => {
 			expect(
 				isGLDTToken({
 					...mockValidIcToken,
-					standard: 'icrc',
+					standard: { code: 'icrc' },
 					symbol: 'GLDT',
 					ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
 				} as Token)
@@ -39,7 +39,7 @@ describe('token.utils', () => {
 
 		it('should return false for ICRC tokens that is not token GLDT', () => {
 			expect(
-				isGLDTToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'not-GLDT' })
+				isGLDTToken({ ...mockValidIcToken, standard: { code: 'icrc' }, symbol: 'not-GLDT' })
 			).toBeFalsy();
 		});
 
@@ -62,7 +62,7 @@ describe('token.utils', () => {
 			expect(
 				isGoldaoToken({
 					...mockValidIcToken,
-					standard: 'icrc',
+					standard: { code: 'icrc' },
 					symbol: 'GOLDAO',
 					network: ICP_TOKEN.network,
 					ledgerCanisterId: GOLDAO_LEDGER_CANISTER_ID
@@ -79,7 +79,7 @@ describe('token.utils', () => {
 
 		it('should return false for ICRC tokens that are not GOLDAO', () => {
 			expect(
-				isGoldaoToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'not-GOLDAO' })
+				isGoldaoToken({ ...mockValidIcToken, standard: { code: 'icrc' }, symbol: 'not-GOLDAO' })
 			).toBeFalsy();
 		});
 
@@ -102,7 +102,7 @@ describe('token.utils', () => {
 			expect(
 				isVCHFToken({
 					...mockValidIcToken,
-					standard: 'icrc',
+					standard: { code: 'icrc' },
 					symbol: 'VCHF',
 					ledgerCanisterId: VCHF_LEDGER_CANISTER_ID
 				} as Token)
@@ -119,7 +119,7 @@ describe('token.utils', () => {
 
 		it('should return false for ICRC tokens that is not token VCHF', () => {
 			expect(
-				isVCHFToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'not-VCHF' })
+				isVCHFToken({ ...mockValidIcToken, standard: { code: 'icrc' }, symbol: 'not-VCHF' })
 			).toBeFalsy();
 		});
 
@@ -142,7 +142,7 @@ describe('token.utils', () => {
 			expect(
 				isVEURToken({
 					...mockValidIcToken,
-					standard: 'icrc',
+					standard: { code: 'icrc' },
 					symbol: 'VEUR',
 					ledgerCanisterId: VEUR_LEDGER_CANISTER_ID
 				} as Token)
@@ -159,7 +159,7 @@ describe('token.utils', () => {
 
 		it('should return false for ICRC tokens that is not token VEUR', () => {
 			expect(
-				isVEURToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'not-VEUR' })
+				isVEURToken({ ...mockValidIcToken, standard: { code: 'icrc' }, symbol: 'not-VEUR' })
 			).toBeFalsy();
 		});
 

@@ -11,7 +11,7 @@ export const mockValidExtV2Token: ExtToken = {
 	...mockValidToken,
 	id: parseTokenId('ExtV2TokenId'),
 	network: ICP_NETWORK,
-	standard: 'ext',
+	standard: { code: 'ext' },
 	canisterId: mockExtV2TokenCanisterId
 };
 
@@ -19,7 +19,7 @@ export const mockValidExtV2Token2: ExtToken = {
 	...mockValidToken,
 	id: parseTokenId('ExtV2TokenId2'),
 	network: ICP_NETWORK,
-	standard: 'ext',
+	standard: { code: 'ext' },
 	canisterId: mockExtV2TokenCanisterId2
 };
 

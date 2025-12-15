@@ -285,7 +285,7 @@ describe('page-token.derived', () => {
 		it('should return false if default Ethereum user token is toggleable', () => {
 			const mockToken = {
 				...mockErc20UserToken,
-				standard: 'ethereum' as const
+				standard: { code: 'ethereum' as const }
 			} as RequiredTokenWithLinkedData;
 
 			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {
@@ -302,7 +302,7 @@ describe('page-token.derived', () => {
 			const mockToken = {
 				...mockErc20UserToken,
 				category: 'custom' as const,
-				standard: 'ethereum' as const
+				standard: { code: 'ethereum' as const }
 			} as RequiredTokenWithLinkedData;
 
 			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {

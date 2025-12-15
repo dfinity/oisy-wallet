@@ -25,7 +25,7 @@ export const saveErcCustomTokens = async ({
 		(acc, { standard: rawStandard, address }) => {
 			const [erc721TokensAcc, erc1155TokensAcc] = acc;
 
-			const standard = rawStandard.code.toLowerCase();
+			const standard = rawStandard.toLowerCase();
 
 			if (standard === 'erc721') {
 				const existingToken = customTokens.find(({ token }) => {
