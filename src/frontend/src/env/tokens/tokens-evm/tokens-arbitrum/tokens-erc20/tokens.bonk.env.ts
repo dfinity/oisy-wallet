@@ -14,7 +14,7 @@ export const BONK_TOKEN_ID: TokenId = parseTokenId(BONK_SYMBOL);
 export const BONK_TOKEN: RequiredEvmErc20Token = {
 	id: BONK_TOKEN_ID,
 	network: ARBITRUM_MAINNET_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Bonk',
 	symbol: BONK_SYMBOL,

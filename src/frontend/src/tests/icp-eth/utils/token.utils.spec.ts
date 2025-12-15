@@ -32,7 +32,9 @@ describe('token.utils', () => {
 		it('should return false for token GLDT that is not ICRC token', () => {
 			expect(isGLDTToken({ ...mockValidIcToken, symbol: 'GLDT' })).toBeFalsy();
 
-			expect(isGLDTToken({ ...mockValidIcToken, standard: 'erc20', symbol: 'GLDT' })).toBeFalsy();
+			expect(
+				isGLDTToken({ ...mockValidIcToken, standard: { code: 'erc20' }, symbol: 'GLDT' })
+			).toBeFalsy();
 		});
 
 		it('should return false for ICRC tokens that is not token GLDT', () => {
@@ -71,7 +73,7 @@ describe('token.utils', () => {
 		it('should return false for GOLDAO symbol that is not an ICRC token', () => {
 			expect(isGoldaoToken({ ...mockValidIcToken, symbol: 'GOLDAO' })).toBeFalsy();
 			expect(
-				isGoldaoToken({ ...mockValidIcToken, standard: 'erc20', symbol: 'GOLDAO' })
+				isGoldaoToken({ ...mockValidIcToken, standard: { code: 'erc20' }, symbol: 'GOLDAO' })
 			).toBeFalsy();
 		});
 
@@ -110,7 +112,9 @@ describe('token.utils', () => {
 		it('should return false for token VCHF that is not ICRC token', () => {
 			expect(isVCHFToken({ ...mockValidIcToken, symbol: 'VCHF' })).toBeFalsy();
 
-			expect(isVCHFToken({ ...mockValidIcToken, standard: 'erc20', symbol: 'VCHF' })).toBeFalsy();
+			expect(
+				isVCHFToken({ ...mockValidIcToken, standard: { code: 'erc20' }, symbol: 'VCHF' })
+			).toBeFalsy();
 		});
 
 		it('should return false for ICRC tokens that is not token VCHF', () => {
@@ -148,7 +152,9 @@ describe('token.utils', () => {
 		it('should return false for token VEUR that is not ICRC token', () => {
 			expect(isVEURToken({ ...mockValidIcToken, symbol: 'VEUR' })).toBeFalsy();
 
-			expect(isVEURToken({ ...mockValidIcToken, standard: 'erc20', symbol: 'VEUR' })).toBeFalsy();
+			expect(
+				isVEURToken({ ...mockValidIcToken, standard: { code: 'erc20' }, symbol: 'VEUR' })
+			).toBeFalsy();
 		});
 
 		it('should return false for ICRC tokens that is not token VEUR', () => {

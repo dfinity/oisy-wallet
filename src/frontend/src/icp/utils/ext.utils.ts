@@ -66,6 +66,6 @@ export const mapExtToken = ({
 	symbol: name,
 	// For our current scopes, there is no need to have the correct decimals, since we are using this standard as NFT collections.
 	decimals: 0,
-	standard: 'ext',
+	standard: { code: 'ext' },
 	category: 'custom'
 });
