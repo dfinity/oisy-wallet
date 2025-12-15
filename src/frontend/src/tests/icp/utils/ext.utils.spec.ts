@@ -8,6 +8,7 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
+import type { ExtTokenWithoutId } from '$icp/types/ext-token';
 import {
 	extIndexToIdentifier,
 	isTokenExt,
@@ -126,13 +127,13 @@ describe('ext.utils', () => {
 		const mockCanisterId = mockExtV2TokenCanisterId;
 		const mockParams = { canisterId: mockCanisterId, metadata: { name: mockName } };
 
-		const expected = {
+		const expected: ExtTokenWithoutId = {
 			canisterId: mockCanisterId,
 			network: ICP_NETWORK,
 			name: mockName,
 			symbol: mockName,
 			decimals: 0,
-			standard: 'ext',
+			standard: { code: 'ext' },
 			category: 'custom'
 		};
 

@@ -183,7 +183,7 @@ describe('icrc-token.services', () => {
 								category: 'custom',
 								position: 4,
 								enabled: true,
-								standard: 'icrc',
+								standard: { code: 'icrc' },
 								version: 1n
 							})
 						}

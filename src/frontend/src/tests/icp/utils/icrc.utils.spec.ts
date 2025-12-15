@@ -186,7 +186,7 @@ describe('icrc.utils', () => {
 			expect(token).toStrictEqual({
 				...mockToken,
 				id: token?.id,
-				standard: 'bitcoin'
+				standard: { code: 'bitcoin' }
 			});
 		});
 
@@ -204,7 +204,7 @@ describe('icrc.utils', () => {
 			expect(token).toStrictEqual({
 				...mockToken,
 				id: token?.id,
-				standard: 'icrc'
+				standard: { code: 'icrc' }
 			});
 		});
 	});
