@@ -19,7 +19,7 @@ import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { Address } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
-import type { TokenId, TokenStandardCode } from '$lib/types/token';
+import type { TokenId, TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -35,7 +35,7 @@ export const loadEthereumTransactions = ({
 }: {
 	tokenId: TokenId;
 	networkId: NetworkId;
-	standard: TokenStandardCode;
+	standard: TokenStandard;
 	updateOnly?: boolean;
 	silent?: boolean;
 }): Promise<ResultSuccess> => {
@@ -51,7 +51,7 @@ export const loadEthereumTransactions = ({
 export const reloadEthereumTransactions = (params: {
 	tokenId: TokenId;
 	networkId: NetworkId;
-	standard: TokenStandardCode;
+	standard: TokenStandard;
 	silent?: boolean;
 }): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
@@ -126,7 +126,7 @@ const loadErcTransactions = async ({
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
-	standard: TokenStandardCode;
+	standard: TokenStandard;
 	updateOnly?: boolean;
 }): Promise<ResultSuccess> => {
 	const address = get(addressStore);
