@@ -175,7 +175,7 @@ describe('ext.services', () => {
 						id: (tokens ?? [])[0].data.id,
 						version: 1n,
 						enabled: true,
-						standard: { code: 'ext' },
+						standard: { code: 'ext', version: 'v2' },
 						category: 'custom',
 						canisterId: mockCanisterId,
 						symbol: mockCanisterId,
