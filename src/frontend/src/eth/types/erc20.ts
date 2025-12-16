@@ -15,7 +15,7 @@ type Erc20Standard = Extract<TokenStandardCode, 'erc20'>;
 export type Erc20Token = Erc20Contract &
 	Omit<Token, 'network' | 'standard'> & {
 		network: EthereumNetwork;
-		standard: { code: Erc20Standard };
+		standard: { code: Erc20Standard; version?: string };
 	};
 
 export type RequiredErc20Token = RequiredToken<Erc20Token>;
