@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type {Snippet} from "svelte";
-	import {nonNullish} from "@dfinity/utils";
-	import {i18n} from "$lib/stores/i18n.store";
+	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		src: string;
@@ -16,7 +16,7 @@
 		testId?: string;
 		onLoad?: () => void;
 		onError?: () => void;
-		fallback?: Snippet
+		fallback?: Snippet;
 	}
 
 	let {
@@ -32,7 +32,7 @@
 		testId,
 		onLoad,
 		onError,
-			fallback
+		fallback
 	}: Props = $props();
 </script>
 
@@ -56,7 +56,7 @@
 	<source {src} />
 	{#if nonNullish(fallback)}
 		{@render fallback()}
-	{:else }
+	{:else}
 		{$i18n.core.warning.video_not_supported}
 	{/if}
 </video>
