@@ -173,7 +173,7 @@ describe('page-token.derived', () => {
 			(token) => {
 				mockPage.mock({ token: token.name, network: token.network.id.description });
 
-				expect(get(pageTokenStandard)).toBe(token.standard);
+				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
 		);
 
@@ -187,7 +187,7 @@ describe('page-token.derived', () => {
 
 				mockPage.mock({ token: token.name, network: token.network.id.description });
 
-				expect(get(pageTokenStandard)).toBe(token.standard);
+				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
 		);
 
@@ -202,7 +202,7 @@ describe('page-token.derived', () => {
 
 				mockPage.mock({ token: token.name, network: token.network.id.description });
 
-				expect(get(pageTokenStandard)).toBe(token.standard);
+				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
 		);
 
@@ -212,7 +212,7 @@ describe('page-token.derived', () => {
 			erc20CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
 			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
-			expect(get(pageTokenStandard)).toBe(mockToken.standard);
+			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});
 
 		it('should return the standard for ICRC token', () => {
@@ -220,14 +220,14 @@ describe('page-token.derived', () => {
 			icrcCustomTokensStore.setAll([{ data: mockToken, certified: true }]);
 			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
-			expect(get(pageTokenStandard)).toBe(mockToken.standard);
+			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});
 
 		it('should return the standard for SPL token', () => {
 			const mockToken = JUP_TOKEN;
 			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
-			expect(get(pageTokenStandard)).toBe(mockToken.standard);
+			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});
 	});
 
