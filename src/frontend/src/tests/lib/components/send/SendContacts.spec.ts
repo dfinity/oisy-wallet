@@ -37,9 +37,14 @@ describe('SendContacts', () => {
 			]
 		]);
 
+	const props = {
+		onNext: vi.fn()
+	};
+
 	it('renders content if data is provided', () => {
 		const { getByText } = render(SendContacts, {
 			props: {
+				...props,
 				destination: '',
 				networkContacts: {
 					[getNetworkContactKey({
@@ -62,6 +67,7 @@ describe('SendContacts', () => {
 	it('renders filtered by address content if data is provided', () => {
 		const { getByText } = render(SendContacts, {
 			props: {
+				...props,
 				destination: mockContactEthAddressUi.address,
 				networkContacts: {
 					[getNetworkContactKey({
@@ -94,6 +100,7 @@ describe('SendContacts', () => {
 	it('renders filtered by contact name content if data is provided', () => {
 		const { getByText } = render(SendContacts, {
 			props: {
+				...props,
 				destination: contact2.name.toUpperCase(),
 				networkContacts: {
 					[getNetworkContactKey({
@@ -136,6 +143,7 @@ describe('SendContacts', () => {
 
 		const { getByText } = render(SendContacts, {
 			props: {
+				...props,
 				destination: contactWithLabel.addresses[0].label,
 				networkContacts: {
 					[getNetworkContactKey({
@@ -168,6 +176,7 @@ describe('SendContacts', () => {
 	it('renders empty state component if data is empty', () => {
 		const { getByText } = render(SendContacts, {
 			props: {
+				...props,
 				destination: mockBtcAddress
 			},
 			context: mockContext(BTC_MAINNET_TOKEN)

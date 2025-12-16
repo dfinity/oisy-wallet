@@ -30,7 +30,8 @@ describe('AiAssistantReviewSendSolToken', () => {
 		amount: sendAmount,
 		destination: mockSolAddress,
 		sendCompleted: false,
-		sendEnabled: true
+		sendEnabled: true,
+		onSendCompleted: vi.fn()
 	};
 	let sendSpy: MockInstance;
 

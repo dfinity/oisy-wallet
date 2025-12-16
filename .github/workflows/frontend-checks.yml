@@ -121,6 +121,8 @@ jobs:
         uses: ./.github/actions/prepare
       - name: Check
         run: npm run check
+      - name: Check tests
+        run: npm run check:tests
 
   test:
     runs-on: ubuntu-24.04
