@@ -131,10 +131,29 @@ describe('token.schema', () => {
 			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
 		});
 
+		it('should accept a version for the standard', () => {
+			const validStandard = 'ext';
+			const validVersion = 'legacy';
+
+			expect(TokenStandardSchema.parse({ code: validStandard, version: validVersion })).toEqual({
+				code: validStandard,
+				version: validVersion
+			});
+		});
+
 		it('should fail validation with an unsupported token standard', () => {
 			const invalidStandard = 'unsupported-standard';
 
 			expect(() => TokenStandardSchema.parse({ code: invalidStandard })).toThrowError();
+		});
+
+		it('should fail validation with an unsupported standard version', () => {
+			const validStandard = 'ext';
+			const invalidVersion = 123;
+
+			expect(() =>
+				TokenStandardSchema.parse({ code: validStandard, version: invalidVersion })
+			).toThrowError();
 		});
 	});
 
