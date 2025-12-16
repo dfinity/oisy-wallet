@@ -37,6 +37,7 @@
 	class:rounded-full={rounded}
 	aria-label={ariaLabel}
 	autoplay
+	playsinline
 	data-tid={testId}
 	{height}
 	loop
