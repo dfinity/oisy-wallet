@@ -2,7 +2,8 @@ import type { chat_message_v1 } from '$declarations/llm/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import {
 	AI_ASSISTANT_LLM_MODEL,
-	getAiAssistantToolsDescription
+	getAiAssistantToolsDescription,
+	TOOL_CALLS_LIMITS
 } from '$lib/constants/ai-assistant.constants';
 import {
 	AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
@@ -63,12 +64,22 @@ export const askLlm = async ({
 		identity
 	});
 	const toolResults: ToolResult[] = [];
+	const toolCallsCounters: Record<ToolResultType, number> = {
+		[ToolResultType.REVIEW_SEND_TOKENS]: 0,
+		[ToolResultType.SHOW_BALANCE]: 0,
+		[ToolResultType.SHOW_ALL_CONTACTS]: 0,
+		[ToolResultType.SHOW_FILTERED_CONTACTS]: 0
+	};
 
 	if (nonNullish(tool_calls) && tool_calls.length > 0) {
 		for (const toolCall of tool_calls) {
-			const result = executeTool({ toolCall, requestStartTimestamp });
+			const toolType = toolCall.function.name as ToolResultType;
 
-			nonNullish(result) && toolResults.push(result);
+			if (toolCallsCounters[toolType] < TOOL_CALLS_LIMITS[toolType]) {
+				const result = executeTool({ toolCall, requestStartTimestamp });
+				nonNullish(result) && toolResults.push(result);
+				toolCallsCounters[toolType] += 1;
+			}
 		}
 	} else {
 		trackEvent({
