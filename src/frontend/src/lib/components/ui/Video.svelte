@@ -42,7 +42,7 @@
 	loop
 	muted
 	onerror={onError}
-	onload={onLoad}
+	onloadeddata={onLoad}
 	playsinline
 	{role}
 	{width}
