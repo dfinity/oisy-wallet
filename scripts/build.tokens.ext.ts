@@ -61,8 +61,10 @@ const queryToniqData = async (): Promise<ToniqResponseData[]> => {
 };
 
 const parseToniqData = (data: ToniqResponseData[]): EnvExtToken[] =>
-	data.reduce<EnvExtToken[]>((acc, { id: canisterId, name, standard }) => {
-		if (!ACCEPTED_STANDARDS.includes(standard.toLowerCase())) {
+	data.reduce<EnvExtToken[]>((acc, { id: canisterId, name, standard: standardRaw }) => {
+		const standard = standardRaw.toLowerCase();
+
+		if (!ACCEPTED_STANDARDS.includes(standard)) {
 			return acc;
 		}
 
@@ -70,6 +72,7 @@ const parseToniqData = (data: ToniqResponseData[]): EnvExtToken[] =>
 			...acc,
 			{
 				canisterId,
+				standard,
 				metadata: {
 					name
 				}
