@@ -1,5 +1,6 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
+import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 import { i18n } from '$lib/stores/i18n.store';
 import * as modalStoreMod from '$lib/stores/modal.store';
 import { parseNftId } from '$lib/validation/nft.validation';
