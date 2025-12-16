@@ -48,7 +48,7 @@ describe('NftHero', () => {
 
 		expect(description).toBeInTheDocument();
 
-		const standard: HTMLElement | null = getByText(mockNftCollectionUi.collection.standard);
+		const standard: HTMLElement | null = getByText(mockNftCollectionUi.collection.standard.code);
 
 		expect(standard).toBeInTheDocument();
 

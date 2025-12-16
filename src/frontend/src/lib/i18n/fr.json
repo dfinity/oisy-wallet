@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,6 +118,7 @@
 			"logout": "Se déconnecter",
 			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
 			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
 			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain"
@@ -145,14 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "Vous rencontrez des problèmes d'authentification ?",
-				"description": "Nous avons remarqué que vous avez annulé l'authentification avec Internet Identity. Nous aimerions comprendre ce qui s'est passé afin d'améliorer votre expérience.",
-				"subtitle": "L'un des éléments suivants a-t-il causé le problème ?",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "J'ai perdu mon numéro Internet Identity",
 				"security": "J'étais préoccupé par la sécurité ou la confidentialité",
-				"got_confused": "Je me suis retrouvé confus pendant le processus",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "Autre...",
-				"feedback_text": "Vos commentaires nous aident à améliorer le portefeuille.",
+				"feedback_text": "",
 				"thanks_text": "Merci !",
 				"identity_new_identity": "Le portefeuille $oisy_short change le domaine Internet Identity en : <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"identity_legacy_description": "Par conséquent, votre numéro Internet Identity peut ne pas apparaître automatiquement, et vous devrez peut-être le saisir à nouveau.",
@@ -907,7 +911,7 @@
 			"scan_qr_code": "",
 			"pay_to": "",
 			"powered_by": "",
-			"receipt": "",
+			"recipient": "",
 			"name": "",
 			"address": "",
 			"country": "",
@@ -927,10 +931,16 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1056,7 +1066,17 @@
 			"dialog_title": "",
 			"dialog_description": "",
 			"dialog_button": "",
-			"where_you_can_pay": ""
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1128,6 +1148,7 @@
 				"verifying": "Vérification des détails du token...",
 				"add_the_token": "Ajouter le token",
 				"info": "Les ID de canister de registre et d'index sont généralement disponibles sur le site web du projet.",
+				"info_ext": "",
 				"info_index": "L'ID du canister d'index est facultatif, mais sans lui, $oisy_short ne peut pas afficher l'historique des transactions.",
 				"custom_tokens_not_supported": "Le réseau sélectionné ne prend pas en charge les tokens personnalisés."
 			},
@@ -1767,6 +1788,7 @@
 			},
 			"title": "",
 			"instruction": "En cliquant sur ce bouton, vous acceptez les $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

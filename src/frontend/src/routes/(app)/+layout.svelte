@@ -55,11 +55,15 @@
 
 	// Source: https://svelte.dev/blog/view-transitions
 	onNavigate((navigation) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore -- The ViewTransition api is still a "Candidate recommendation", so it's not embedded in TSs' definition yet
 		if (isNullish(document.startViewTransition)) {
 			return;
 		}
 
 		return new Promise((resolve) => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore -- The ViewTransition api is still a "Candidate recommendation", so it's not embedded in TSs' definition yet
 			document.startViewTransition(async () => {
 				resolve();
 				await navigation.complete;

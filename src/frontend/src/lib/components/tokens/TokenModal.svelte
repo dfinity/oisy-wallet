@@ -10,7 +10,7 @@
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
-	import { toUserToken } from '$icp-eth/services/user-token.services';
+	import { toUserToken } from '$icp-eth/services/erc20-token.services';
 	import { removeCustomToken, removeUserToken, setCustomToken } from '$lib/api/backend.api';
 	import {
 		deleteIdbEthTokenDeprecated,
@@ -184,7 +184,7 @@
 					token: customToken
 				});
 
-				icrcCustomTokensStore.reset(tokenToDelete.ledgerCanisterId);
+				icrcCustomTokensStore.resetByIdentifier(tokenToDelete.ledgerCanisterId);
 				await deleteIdbIcToken({ identity: $authIdentity, token: customToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
@@ -277,7 +277,7 @@
 						close();
 
 						// the token needs to be reset to restart the worker with indexCanisterId
-						icrcCustomTokensStore.reset(tokenToEdit.ledgerCanisterId);
+						icrcCustomTokensStore.resetByIdentifier(tokenToEdit.ledgerCanisterId);
 
 						trackEvent({
 							name: TRACK_EDIT_TOKEN_SUCCESS,

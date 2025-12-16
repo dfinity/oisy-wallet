@@ -33,6 +33,7 @@ import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
 import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
 import { geSwapEthTokenAddress } from '$lib/utils/swap.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -364,19 +365,21 @@ describe('swap.services', () => {
 	});
 
 	describe('fetchSwapAmountsEVM', () => {
-		const sourceToken = {
+		const sourceToken: Erc20Token = {
+			...mockValidErc20Token,
 			symbol: 'SRC',
 			decimals: 18,
-			network: { chainId: '1' },
+			network: { ...mockValidErc20Token.network, chainId: 1n },
 			address: '0xSrcAddress'
-		} as unknown as Erc20Token;
+		};
 
-		const destinationToken = {
+		const destinationToken: Erc20Token = {
+			...mockValidErc20Token,
 			symbol: 'DST',
 			decimals: 6,
-			network: { chainId: '137' },
+			network: { ...mockValidErc20Token.network, chainId: 137n },
 			address: '0xDestAddress'
-		} as unknown as Erc20Token;
+		};
 
 		const amount = BigInt('1000000000000000000');
 		const userEthAddress = '0xUser';
@@ -1225,7 +1228,7 @@ describe('swap.services', () => {
 					sourceToken,
 					destinationToken
 				})
-			).rejects.toThrow('No unused balance to withdraw');
+			).rejects.toThrowError('No unused balance to withdraw');
 
 			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
 			expect(icpSwapPool.withdraw).not.toHaveBeenCalled();
@@ -1289,21 +1292,23 @@ describe('swap.services', () => {
 	});
 
 	describe('trackEvent for swap-offer for evm tokens', () => {
-		const sourceToken = {
+		const sourceToken: Erc20Token = {
+			...mockValidErc20Token,
 			symbol: 'SRC',
 			decimals: 18,
-			network: { chainId: '1' },
+			network: { ...mockValidErc20Token.network, chainId: 1n },
 			address: '0xSrcAddress',
-			id: 1
-		} as unknown as Erc20Token;
+			id: parseTokenId('1')
+		};
 
-		const destinationToken = {
+		const destinationToken: Erc20Token = {
+			...mockValidErc20Token,
 			symbol: 'DST',
 			decimals: 6,
-			network: { chainId: '137' },
+			network: { ...mockValidErc20Token.network, chainId: 137n },
 			address: '0xDestAddress',
-			id: 2
-		} as unknown as Erc20Token;
+			id: parseTokenId('2')
+		};
 
 		const amount = BigInt('1000000000000000000');
 		const userEthAddress = '0xUser';
@@ -1474,12 +1479,12 @@ describe('swap.services', () => {
 					token_address: sourceToken.ledgerCanisterId,
 					token_name: sourceToken.name,
 					token_id: String(sourceToken.id),
-					token_standard: sourceToken.standard,
+					token_standard: sourceToken.standard.code,
 					token2_symbol: destinationToken.symbol,
 					token2_network: destinationToken.network.name,
 					token2_address: destinationToken.ledgerCanisterId,
 					token2_name: destinationToken.name,
-					token2_standard: destinationToken.standard,
+					token2_standard: destinationToken.standard.code,
 					token2_id: String(destinationToken.id)
 				})
 			});

@@ -58,6 +58,10 @@ export default defineConfig(
 				{
 					find: '$declarations',
 					replacement: resolve(__dirname, 'src/declarations')
+				},
+				{
+					find: '@plausible-analytics/tracker',
+					replacement: resolve(__dirname, 'src/frontend/src/tests/mocks/plausible-tracker.mock')
 				}
 			]
 		},
@@ -81,10 +85,10 @@ export default defineConfig(
 				// TODO: increase the thresholds slowly up to an acceptable 90% at least
 				thresholds: {
 					autoUpdate: true,
-					statements: 71,
-					branches: 59,
-					functions: 67,
-					lines: 75
+					statements: 71.8,
+					branches: 60.2,
+					functions: 67.5,
+					lines: 76.0
 				}
 			}
 		}

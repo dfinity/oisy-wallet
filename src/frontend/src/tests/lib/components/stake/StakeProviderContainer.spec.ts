@@ -19,7 +19,7 @@ describe('StakeProviderContainer', () => {
 
 		expect(getByTestId('content')).toBeInTheDocument();
 		expect(container).toHaveTextContent(pageTitle);
-		expect(() => getByText(en.stake.text.current_apy_label)).toThrow();
+		expect(() => getByText(en.stake.text.current_apy_label)).toThrowError();
 	});
 
 	it('renders data correctly if currentApy is provided', () => {

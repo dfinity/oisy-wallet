@@ -233,7 +233,7 @@ const loadCustomIcrcTokensData = async ({
 
 				const ledgerCanisterId = ledger_id.toText();
 
-				icrcCustomTokensStore.reset(ledgerCanisterId);
+				icrcCustomTokensStore.resetByIdentifier(ledgerCanisterId);
 
 				// To avoid polluting the screen, we show the toast error only after the update call.
 				if (enabled && certified) {

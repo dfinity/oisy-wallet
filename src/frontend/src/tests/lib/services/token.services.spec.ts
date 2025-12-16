@@ -53,7 +53,7 @@ describe('token.services', () => {
 
 			await expect(
 				loadTokenAndRun({ token: mockValidToken, callback: failingCallback })
-			).rejects.toThrow('Callback failed');
+			).rejects.toThrowError('Callback failed');
 
 			const tokenStore = get(token);
 
@@ -184,7 +184,7 @@ describe('token.services', () => {
 		it('should return "skipped" if token standard does not match expected standard', async () => {
 			const result = await autoLoadToken({
 				...params,
-				expectedSendTokenStandard: 'erc20' as const
+				expectedSendTokenStandard: { code: 'erc20' as const }
 			});
 
 			expect(result.result).toBe('skipped');

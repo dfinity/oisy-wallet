@@ -59,7 +59,7 @@ interface I18nCore {
 		less: string;
 		learn_more: string;
 	};
-	warning: { do_not_close: string; standalone_mode: string };
+	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 }
 
 interface I18nNavigation {
@@ -114,6 +114,7 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
+		sign_in_with_identity_number: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
@@ -136,10 +137,12 @@ interface I18nAuth {
 		text: {
 			title: string;
 			description: string;
-			subtitle: string;
+			new_auth_version: string;
+			could_not_enter_identity_number: string;
 			lost_identity: string;
 			security: string;
 			got_confused: string;
+			no_signup_needed: string;
 			other: string;
 			feedback_text: string;
 			thanks_text: string;
@@ -701,7 +704,7 @@ interface I18nScanner {
 		scan_qr_code: string;
 		pay_to: string;
 		powered_by: string;
-		receipt: string;
+		recipient: string;
 		name: string;
 		address: string;
 		country: string;
@@ -722,8 +725,13 @@ interface I18nScanner {
 		select_different_token: string;
 		tokens_available: string;
 		select_token_to_pay: string;
+		pay_at_successful: string;
+		pay_at_failure: string;
+		try_again: string;
+		payment_confirmed: string;
+		payment_failed: string;
 	};
-	error: { code_link_is_not_valid: string };
+	error: { code_link_is_not_valid: string; data_is_incompleted: string };
 }
 
 interface I18nConvert {
@@ -842,6 +850,16 @@ interface I18nPay {
 		dialog_description: string;
 		dialog_button: string;
 		where_you_can_pay: string;
+		request_payment_details: string;
+		creating_transaction: string;
+		signing_transaction: string;
+		paying: string;
+	};
+	error: {
+		data_is_incompleted: string;
+		amount_does_not_match: string;
+		recipient_address_is_not_valid: string;
+		token_address_mismatch: string;
 	};
 	alt: { pay: string; where_you_can_pay: string };
 }
@@ -907,6 +925,7 @@ interface I18nTokens {
 			verifying: string;
 			add_the_token: string;
 			info: string;
+			info_ext: string;
 			info_index: string;
 			custom_tokens_not_supported: string;
 		};
@@ -1411,6 +1430,7 @@ interface I18nTerms_of_use {
 		det: { article: string; possessive: string };
 		title: string;
 		instruction: string;
+		instruction_two_buttons: string;
 		body: string;
 	};
 	alt: { terms_of_use: string };

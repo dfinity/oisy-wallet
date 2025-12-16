@@ -1,5 +1,6 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
+import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import en from '$lib/i18n/en.json';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import type {
@@ -130,6 +131,13 @@ describe('OpenCryptoPay', () => {
 		availableTokens: writable(availableTokens)
 	});
 
+	const props = {
+		payProgressStep: ProgressStepsPayment.REQUEST_DETAILS,
+		onPay: vi.fn(),
+		onPaySucceeded: vi.fn(),
+		onPayFailed: vi.fn()
+	};
+
 	const renderWithContext = ({
 		data = undefined,
 		selectedToken = undefined,
@@ -147,6 +155,7 @@ describe('OpenCryptoPay', () => {
 
 		return render(OpenCryptoPay, {
 			props: {
+				...props,
 				onSelectToken,
 				isTokenSelecting
 			},
@@ -330,13 +339,13 @@ describe('OpenCryptoPay', () => {
 				availableTokens: [mockEthToken]
 			});
 
-			expect(screen.getByText(en.fee.text.fee)).toBeInTheDocument();
+			expect(screen.getByText(en.fee.text.network_fee)).toBeInTheDocument();
 		});
 
 		it('should not show fee when no token', () => {
 			renderWithContext({ data: mockPaymentData });
 
-			expect(screen.queryByText(en.fee.text.fee)).not.toBeInTheDocument();
+			expect(screen.queryByText(en.fee.text.network_fee)).not.toBeInTheDocument();
 		});
 	});
 });

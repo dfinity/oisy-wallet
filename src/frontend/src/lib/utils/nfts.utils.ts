@@ -320,7 +320,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			return NftMediaStatusEnum.OK;
 		}
 
-		if (!type.startsWith('image/') && !type.startsWith('video/')) {
+		if (!type.startsWith('image/') && !type.startsWith('.gif') && !type.startsWith('video/')) {
 			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
 		}
 

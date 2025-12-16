@@ -1,4 +1,4 @@
-import type { ProgressStepsSend } from '$lib/enums/progress-steps';
+import type { ProgressStepsSend, ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NftId, NonFungibleToken } from '$lib/types/nft';
 
@@ -11,11 +11,11 @@ export interface TransferParams {
 	data?: string;
 }
 
-export interface SendNftCommonParams {
+export interface SendNftCommonParams<Steps extends ProgressStepsSend | ProgressStepsSendIc> {
 	token: NonFungibleToken;
 	tokenId: NftId;
 	identity: OptionIdentity;
-	progress?: (step: ProgressStepsSend) => void;
+	progress?: (step: Steps) => void;
 }
 
 export class InsufficientFundsError extends Error {}

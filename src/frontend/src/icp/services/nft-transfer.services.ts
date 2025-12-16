@@ -1,8 +1,5 @@
 import { transfer } from '$icp/api/ext-v2-token.api';
-import {
-	ProgressStepsSend as ProgressStepsSendEnum,
-	type ProgressStepsSend
-} from '$lib/enums/progress-steps';
+import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -17,11 +14,11 @@ export const transferExtV2 = async ({
 	to: Principal;
 	tokenIdentifier: string;
 	amount: bigint;
-	progress?: (step: ProgressStepsSend) => void;
+	progress?: (step: ProgressStepsSendIc) => void;
 }) => {
-	progress?.(ProgressStepsSendEnum.SIGN_TRANSFER);
+	progress?.(ProgressStepsSendIc.SEND);
 
 	await transfer(rest);
 
-	progress?.(ProgressStepsSendEnum.TRANSFER);
+	progress?.(ProgressStepsSendIc.RELOAD);
 };

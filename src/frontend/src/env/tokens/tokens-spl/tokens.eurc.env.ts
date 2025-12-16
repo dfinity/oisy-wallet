@@ -15,7 +15,7 @@ export const EURC_TOKEN_ID: TokenId = parseTokenId(EURC_SYMBOL);
 export const EURC_TOKEN: RequiredSplToken = {
 	id: EURC_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Euro Coin',
 	symbol: EURC_SYMBOL,
@@ -36,7 +36,7 @@ export const DEVNET_EURC_TOKEN_ID: TokenId = parseTokenId(DEVNET_EURC_SYMBOL);
 export const DEVNET_EURC_TOKEN: RequiredSplToken = {
 	id: DEVNET_EURC_TOKEN_ID,
 	network: SOLANA_DEVNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'EURC (Devnet)',
 	symbol: DEVNET_EURC_SYMBOL,

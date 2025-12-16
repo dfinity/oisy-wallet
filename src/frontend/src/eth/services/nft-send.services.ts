@@ -1,6 +1,7 @@
 import { transferErc1155, transferErc721 } from '$eth/services/nft-transfer.services';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
+import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 import type { SendNftCommonParams, TransferParams } from '$lib/types/send';
 import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { isNullish } from '@dfinity/utils';
@@ -15,7 +16,7 @@ export const sendNft = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	progress
-}: SendNftCommonParams &
+}: SendNftCommonParams<ProgressStepsSend> &
 	Pick<TransferParams, 'from' | 'to' | 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
 		gas: bigint;
 	}) => {

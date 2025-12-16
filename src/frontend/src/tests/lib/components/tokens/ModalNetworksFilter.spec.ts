@@ -48,7 +48,7 @@ describe('ModalNetworksFilter', () => {
 		});
 
 		networks.forEach((network) => {
-			expect(() => getByText(network.name)).toThrow();
+			expect(() => getByText(network.name)).toThrowError();
 		});
 	});
 });

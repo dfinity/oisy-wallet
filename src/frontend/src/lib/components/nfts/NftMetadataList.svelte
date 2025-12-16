@@ -30,6 +30,13 @@
 	);
 
 	const allowMedia = $derived(collection?.allowExternalContentSource);
+
+	const sortedAttributes = $derived(
+		nonNullish(nft?.attributes)
+			? // eslint-disable-next-line local-rules/prefer-object-params -- This is a sorting function, so the parameters will be provided not as an object but as separate arguments.
+				nft.attributes.toSorted((a, b) => a.traitType.localeCompare(b.traitType))
+			: []
+	);
 </script>
 
 <List
@@ -112,7 +119,7 @@
 	<ListItem>
 		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.token_standard}</span>
 		{#if nonNullish(collection?.standard)}
-			<span class="uppercase">{collection.standard}</span>
+			<span class="uppercase">{collection.standard.code}</span>
 		{:else}
 			<span class="min-w-12">
 				<SkeletonText />
@@ -165,10 +172,10 @@
 			></ListItem
 		>
 	{/if}
-	{#if nonNullish(nft?.attributes) && nft.attributes.length > 0}
+	{#if sortedAttributes.length > 0}
 		<ListItem styleClass="text-tertiary">{$i18n.nfts.text.item_traits}</ListItem>
 		<div class="mt-2 flex flex-wrap gap-2">
-			{#each nft.attributes as trait, index (trait.traitType + index)}
+			{#each sortedAttributes as trait, index (trait.traitType + index)}
 				<div class="flex">
 					<Badge variant="nft-trait"
 						><span class="font-normal text-tertiary">{trait.traitType}</span><br /><span

@@ -3,7 +3,7 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { EnvSnsTokenSchema, EnvSnsTokensSchema } from '$env/schema/env-sns-token.schema';
 import snsTokens from '$env/tokens/tokens.sns.json';
 import type { EnvSnsToken } from '$env/types/env-sns-token';
-import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
+import type { IcTokenWithoutId } from '$icp/types/ic-token';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { get } from 'svelte/store';
@@ -11,7 +11,7 @@ import { get } from 'svelte/store';
 /**
  * @todo Add missing document and test for this function.
  */
-export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
+export const buildIcrcCustomTokens = (): IcTokenWithoutId[] => {
 	try {
 		return EnvSnsTokensSchema.parse(
 			snsTokens.map(
@@ -48,7 +48,7 @@ const mapIcrcCustomToken = ({
 	rootCanisterId,
 	metadata: { name, decimals, symbol, fee, alternativeName },
 	deprecated
-}: EnvSnsToken): IcTokenWithoutIdExtended => ({
+}: EnvSnsToken): IcTokenWithoutId => ({
 	ledgerCanisterId,
 	indexCanisterId,
 	network: ICP_NETWORK,
@@ -57,7 +57,7 @@ const mapIcrcCustomToken = ({
 	symbol,
 	exchangeCoinId: undefined,
 	position: Number.MAX_VALUE,
-	standard: 'icrc',
+	standard: { code: 'icrc' },
 	category: 'custom',
 	fee,
 	alternativeName,

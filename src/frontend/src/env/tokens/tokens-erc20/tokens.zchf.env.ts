@@ -14,7 +14,7 @@ export const ZCHF_TOKEN_ID: TokenId = parseTokenId(ZCHF_SYMBOL);
 export const ZCHF_TOKEN: RequiredAdditionalErc20Token = {
 	id: ZCHF_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Frankencoin',
 	symbol: ZCHF_SYMBOL,

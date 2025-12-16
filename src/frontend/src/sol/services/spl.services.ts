@@ -114,7 +114,7 @@ const loadCustomTokensWithMetadata = async (
 					network: tokenNetwork,
 					symbol: fromNullable(symbol) ?? '',
 					decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
-					standard: 'spl' as const,
+					standard: { code: 'spl' as const },
 					category: 'custom' as const,
 					enabled,
 					version

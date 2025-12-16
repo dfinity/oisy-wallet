@@ -411,7 +411,7 @@
 			"name": "PHASMA",
 			"symbol": "PHASMA",
 			"fee": {
-				"__bigint__": "100000000"
+				"__bigint__": "500000000000000000"
 			},
 			"alternativeName": "PHASMA",
 			"url": "https://phasma-lm0.caffeine.xyz"
@@ -580,6 +580,21 @@
 			},
 			"alternativeName": "TACO DAO",
 			"url": "https://tacodao.com"
+		}
+	},
+	{
+		"ledgerCanisterId": "kylwo-viaaa-aaaaq-aae7a-cai",
+		"rootCanisterId": "kwj3g-oyaaa-aaaaq-aae6a-cai",
+		"indexCanisterId": "bb4ce-dyaaa-aaaaq-aafaa-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Tendies",
+			"symbol": "TENDY",
+			"fee": {
+				"__bigint__": "420"
+			},
+			"alternativeName": "Tendies",
+			"url": "https://zdgud-kqaaa-aaaal-ajn4q-cai.icp0.io/"
 		}
 	}
 ]

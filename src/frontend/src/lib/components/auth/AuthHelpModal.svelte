@@ -6,7 +6,9 @@
 	import AuthHelpIdentityForm from '$lib/components/auth/AuthHelpIdentityForm.svelte';
 	import AuthHelpOtherForm from '$lib/components/auth/AuthHelpOtherForm.svelte';
 	import { authHelpWizardSteps } from '$lib/config/auth-help.config';
+	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { WizardStepsAuthHelp } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -31,10 +33,16 @@
 		}
 	});
 
-	const close = () =>
+	const close = () => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+			metadata: { event_value: 'close' }
+		});
+
 		closeModal(() => {
 			currentStep = undefined;
 		});
+	};
 
 	const onBack = () =>
 		nonNullish(modal)

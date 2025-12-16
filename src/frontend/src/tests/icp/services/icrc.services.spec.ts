@@ -135,7 +135,7 @@ describe('icrc.services', () => {
 						name: mockName,
 						network: ICP_NETWORK,
 						position: 4,
-						standard: 'icrc',
+						standard: { code: 'icrc' },
 						symbol: mockSymbol,
 						version: fromNullable(mockCustomToken.version)
 					})
@@ -668,7 +668,7 @@ describe('icrc.services', () => {
 					spender: mockSpender,
 					amount: mockAmount
 				})
-			).rejects.toThrow(err);
+			).rejects.toThrowError(err);
 		});
 	});
 });
