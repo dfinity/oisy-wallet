@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {

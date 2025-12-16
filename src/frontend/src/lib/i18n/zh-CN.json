@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "交易完成前请勿关闭此标签页",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {

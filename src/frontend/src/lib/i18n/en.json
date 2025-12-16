@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
-			"standalone_mode": "We improved how $oisy_short operates when it's installed on a home&nbsp;screen, like you have. If you encounter issues connecting $oisy_short or signing transactions, please remove $oisy_short from the home&nbsp;screen and install it again. On iPhones, make sure to deselect “Open as Web App”.<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>"
+			"standalone_mode": "We improved how $oisy_short operates when it's installed on a home&nbsp;screen, like you have. If you encounter issues connecting $oisy_short or signing transactions, please remove $oisy_short from the home&nbsp;screen and install it again. On iPhones, make sure to deselect “Open as Web App”.<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>",
+			"video_not_supported": "Your browser does not support video playback."
 		}
 	},
 	"navigation": {

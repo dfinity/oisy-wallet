@@ -1,4 +1,8 @@
 <script lang="ts">
+	import type {Snippet} from "svelte";
+	import {nonNullish} from "@dfinity/utils";
+	import {i18n} from "$lib/stores/i18n.store";
+
 	interface Props {
 		src: string;
 		ariaLabel?: string;
@@ -12,6 +16,7 @@
 		testId?: string;
 		onLoad?: () => void;
 		onError?: () => void;
+		fallback?: Snippet
 	}
 
 	let {
@@ -26,7 +31,8 @@
 		styleClass,
 		testId,
 		onLoad,
-		onError
+		onError,
+			fallback
 	}: Props = $props();
 </script>
 
@@ -48,4 +54,9 @@
 	{width}
 >
 	<source {src} />
+	{#if nonNullish(fallback)}
+		{@render fallback()}
+	{:else }
+		{$i18n.core.warning.video_not_supported}
+	{/if}
 </video>

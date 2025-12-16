@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {

@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
