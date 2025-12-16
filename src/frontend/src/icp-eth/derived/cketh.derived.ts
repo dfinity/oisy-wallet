@@ -92,7 +92,8 @@ export const ckErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
 export const ethToCkETHEnabled: Readable<boolean> = derived(
 	[tokenWithFallbackAsIcToken, selectedEthereumNetwork, ckEthereumNativeTokenEnabledNetwork],
 	([$tokenWithFallbackAsIcToken, $selectedEthereumNetwork, $ckEthereumNativeTokenEnabledNetwork]) =>
-		($tokenWithFallbackAsIcToken.standard === 'ethereum' && nonNullish($selectedEthereumNetwork)) ||
+		($tokenWithFallbackAsIcToken.standard.code === 'ethereum' &&
+			nonNullish($selectedEthereumNetwork)) ||
 		(isTokenCkEthLedger($tokenWithFallbackAsIcToken) &&
 			nonNullish($ckEthereumNativeTokenEnabledNetwork))
 );

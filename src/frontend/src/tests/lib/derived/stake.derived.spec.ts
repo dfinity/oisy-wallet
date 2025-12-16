@@ -7,19 +7,20 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { ZERO } from '$lib/constants/app.constants';
 import { stakeBalances } from '$lib/derived/stake.derived';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { get } from 'svelte/store';
 
-const mockGldtToken = {
+const mockGldtToken: IcrcCustomToken = {
+	...mockValidIcrcToken,
 	id: parseTokenId('GOLDAO'),
 	symbol: 'GLDT',
 	name: 'Gold DAO Token',
 	decimals: 8,
 	network: ICP_NETWORK,
-	address: '0xabc',
 	enabled: true,
-	standard: 'icrc',
+	standard: { code: 'icrc' },
 	ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
-} as unknown as IcrcCustomToken;
+};
 
 describe('stake.derived', () => {
 	beforeEach(() => {

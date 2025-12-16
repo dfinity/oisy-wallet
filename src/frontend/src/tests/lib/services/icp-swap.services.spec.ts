@@ -41,8 +41,8 @@ describe('icp-swap.services', () => {
 	describe('icpSwapAmounts', () => {
 		const params = {
 			identity: mockIdentity,
-			sourceToken: { ledgerCanisterId: 'token0', standard: 'icrc' } as IcToken,
-			destinationToken: { ledgerCanisterId: 'token1', standard: 'icrc' } as IcToken,
+			sourceToken: { ledgerCanisterId: 'token0', standard: { code: 'icrc' } } as IcToken,
+			destinationToken: { ledgerCanisterId: 'token1', standard: { code: 'icrc' } } as IcToken,
 			sourceAmount: 1000n
 		};
 

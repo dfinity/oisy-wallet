@@ -339,13 +339,13 @@ const fetchSwapAmountsICP = async ({
 		token_network: sourceToken.network.name,
 		token_address: (sourceToken as IcToken).ledgerCanisterId,
 		token_name: sourceToken.name,
-		token_standard: sourceToken.standard,
+		token_standard: sourceToken.standard.code,
 		token_id: String(sourceToken.id),
 		token2_symbol: destinationToken.symbol,
 		token2_network: destinationToken.network.name,
 		token2_address: (destinationToken as IcToken).ledgerCanisterId,
 		token2_name: destinationToken.name,
-		token2_standard: destinationToken.standard,
+		token2_standard: destinationToken.standard.code,
 		token2_id: String(destinationToken.id),
 		...(nonNullish(sourceTokenUsdValue) && {
 			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
@@ -444,8 +444,8 @@ export const fetchIcpSwap = async ({
 
 	const pool = await getPoolCanister({
 		identity,
-		token0: { address: sourceLedgerCanisterId, standard: sourceStandard },
-		token1: { address: destinationLedgerCanisterId, standard: destinationStandard },
+		token0: { address: sourceLedgerCanisterId, standard: sourceStandard.code },
+		token1: { address: destinationLedgerCanisterId, standard: destinationStandard.code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity,
 		fee: ICP_SWAP_POOL_FEE
 	});
@@ -798,13 +798,13 @@ const fetchVeloraSwapAmount = async ({
 		token_network: sourceToken.network.name,
 		token_address: sourceToken.address,
 		token_name: sourceToken.name,
-		token_standard: sourceToken.standard,
+		token_standard: sourceToken.standard.code,
 		token_id: String(sourceToken.id),
 		token2_symbol: destinationToken.symbol,
 		token2_network: destinationToken.network.name,
 		token2_address: destinationToken.address,
 		token2_name: destinationToken.name,
-		token2_standard: destinationToken.standard,
+		token2_standard: destinationToken.standard.code,
 		token2_id: String(destinationToken.id),
 		...(nonNullish(sourceTokenUsdValue) && {
 			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`

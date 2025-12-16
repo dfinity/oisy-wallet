@@ -15,7 +15,7 @@ export const BONK_TOKEN_ID: TokenId = parseTokenId(BONK_SYMBOL);
 export const BONK_TOKEN: RequiredSplToken = {
 	id: BONK_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Bonk',
 	symbol: BONK_SYMBOL,

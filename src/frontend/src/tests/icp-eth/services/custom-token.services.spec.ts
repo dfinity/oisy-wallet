@@ -42,7 +42,7 @@ describe('icrc-token.services', () => {
 		const mockValidSendToken = {
 			...mockValidIcToken,
 			twinTokenSymbol: mockIcrcCustomTokens[0].symbol,
-			standard: 'erc20' as const
+			standard: { code: 'erc20' as const }
 		};
 
 		it('should return "skipped" when the token standard does not match', async () => {
@@ -71,7 +71,7 @@ describe('icrc-token.services', () => {
 				const mockSendToken = {
 					...mockValidIcToken,
 					twinTokenSymbol: customTokens[0].symbol,
-					standard: 'erc20' as const
+					standard: { code: 'erc20' as const }
 				};
 
 				const [first, ...rest] = customTokens;
@@ -183,7 +183,7 @@ describe('icrc-token.services', () => {
 								category: 'custom',
 								position: 4,
 								enabled: true,
-								standard: 'icrc',
+								standard: { code: 'icrc' },
 								version: 1n
 							})
 						}

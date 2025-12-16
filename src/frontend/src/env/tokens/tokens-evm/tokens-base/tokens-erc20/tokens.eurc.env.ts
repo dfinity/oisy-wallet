@@ -17,7 +17,7 @@ export const EURC_TOKEN_ID: TokenId = parseTokenId(EURC_SYMBOL);
 export const EURC_TOKEN: RequiredEvmErc20Token = {
 	id: EURC_TOKEN_ID,
 	network: BASE_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Euro Coin',
 	symbol: EURC_SYMBOL,
@@ -35,7 +35,7 @@ export const SEPOLIA_EURC_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_EURC_SYMBOL);
 export const SEPOLIA_EURC_TOKEN: RequiredEvmErc20Token = {
 	id: SEPOLIA_EURC_TOKEN_ID,
 	network: BASE_SEPOLIA_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'EURC',
 	symbol: EURC_SYMBOL,

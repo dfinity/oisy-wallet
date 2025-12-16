@@ -22,7 +22,7 @@ describe('GldtStakeDissolveEvents', () => {
 	const gldtToken = {
 		...mockIcrcCustomToken,
 		id: Symbol('GLDT') as TokenId,
-		standard: 'icrc',
+		standard: { code: 'icrc' },
 		ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
 		symbol: 'GLDT'
 	} as IcToken;

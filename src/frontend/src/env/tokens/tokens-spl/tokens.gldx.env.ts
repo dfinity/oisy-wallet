@@ -14,7 +14,7 @@ export const GLDX_TOKEN_ID: TokenId = parseTokenId(GLDX_SYMBOL);
 export const GLDX_TOKEN: RequiredSpl2022Token = {
 	id: GLDX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Gold xStock',
 	symbol: GLDX_SYMBOL,

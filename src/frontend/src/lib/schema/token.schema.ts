@@ -59,7 +59,7 @@ export const TokenBuyableSchema = z.object({
 export const TokenSchema = z.object({
 	id: TokenIdSchema,
 	network: NetworkSchema,
-	standard: TokenStandardCodeSchema,
+	standard: TokenStandardSchema,
 	category: TokenCategorySchema,
 	...TokenMetadataSchema.shape,
 	...TokenAppearanceSchema.shape,

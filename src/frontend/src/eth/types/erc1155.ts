@@ -9,7 +9,7 @@ export type Erc1155Token = Erc1155Contract &
 	NonFungibleTokenAppearance &
 	Omit<Token, 'network' | 'standard'> & {
 		network: EthereumNetwork;
-		standard: Erc1155Standard;
+		standard: { code: Erc1155Standard };
 	};
 
 export type RequiredErc1155Token = RequiredToken<

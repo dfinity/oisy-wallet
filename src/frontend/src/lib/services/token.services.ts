@@ -6,7 +6,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import { token as tokenStore } from '$lib/stores/token.store';
 import type { SaveCustomToken } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Token, TokenStandardCode } from '$lib/types/token';
+import type { Token, TokenStandard } from '$lib/types/token';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
@@ -35,7 +35,7 @@ export type AutoLoadTokenParams<
 > = Omit<AutoLoadSingleTokenParams<T>, 'token'> & {
 	tokens: T[];
 	sendToken: K;
-	expectedSendTokenStandard: TokenStandardCode;
+	expectedSendTokenStandard: TokenStandard;
 	assertSendTokenData: (sendToken: K) => AutoLoadTokenResult | undefined;
 	findToken: (params: { tokens: T[]; sendToken: K }) => T | undefined;
 };
@@ -128,7 +128,7 @@ export const autoLoadToken = async <
 	loadTokens,
 	errorMessage
 }: AutoLoadTokenParams<T, K>): Promise<AutoLoadTokenResult> => {
-	if (sendToken.standard !== expectedSendTokenStandard) {
+	if (sendToken.standard.code !== expectedSendTokenStandard.code) {
 		return { result: 'skipped' };
 	}
 

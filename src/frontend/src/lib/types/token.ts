@@ -50,7 +50,7 @@ export type RequiredTokenWithLinkedData = RequiredToken<TokenWithLinkedData>;
 
 export type OptionToken = Option<Token>;
 export type OptionTokenId = Option<TokenId>;
-export type OptionTokenStandard = Option<TokenStandardCode>;
+export type OptionTokenStandardCode = Option<TokenStandardCode>;
 
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 

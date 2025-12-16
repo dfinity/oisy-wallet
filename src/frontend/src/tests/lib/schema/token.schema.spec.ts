@@ -272,7 +272,7 @@ describe('token.schema', () => {
 		const validTokenWithRequiredFields = {
 			id: parseTokenId('TokenId'),
 			network: mockNetwork,
-			standard: 'ethereum',
+			standard: { code: 'ethereum' },
 			category: 'default',
 			name: 'SampleToken',
 			symbol: 'STK',
