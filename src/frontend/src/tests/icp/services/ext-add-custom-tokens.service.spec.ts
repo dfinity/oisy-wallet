@@ -29,7 +29,7 @@ describe('ext-add-custom-tokens.service', () => {
 
 		const expectedToken: ExtTokenWithoutId = {
 			canisterId: mockCanisterId,
-			standard: { code: 'ext' },
+			standard: { code: 'ext', version: 'v2' },
 			category: 'custom',
 			name: expectedName,
 			symbol: expectedName,
