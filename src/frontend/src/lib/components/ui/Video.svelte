@@ -37,13 +37,13 @@
 	class:rounded-full={rounded}
 	aria-label={ariaLabel}
 	autoplay
-	playsinline
 	data-tid={testId}
 	{height}
 	loop
 	muted
 	onerror={onError}
 	onload={onLoad}
+	playsinline
 	{role}
 	{width}
 >
