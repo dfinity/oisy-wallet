@@ -18,7 +18,8 @@ describe('IcSendAmount', () => {
 
 	const props = {
 		amount: 1,
-		amountError: undefined
+		amountError: undefined,
+		onTokensList: vi.fn()
 	};
 	const newAmount = 10;
 

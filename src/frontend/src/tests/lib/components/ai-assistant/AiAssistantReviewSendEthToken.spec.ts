@@ -72,7 +72,8 @@ describe('AiAssistantReviewSendEthToken', () => {
 		nativeEthereumToken: ETHEREUM_TOKEN,
 		sendCompleted: false,
 		sourceNetwork: ETHEREUM_NETWORK,
-		sendEnabled: true
+		sendEnabled: true,
+		onSendCompleted: vi.fn()
 	};
 	let sendSpy: MockInstance;
 

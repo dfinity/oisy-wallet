@@ -32,7 +32,8 @@ describe('AiAssistantReviewSendBtcToken', () => {
 		amount: sendAmount,
 		destination: mockBtcAddress,
 		sendCompleted: false,
-		sendEnabled: true
+		sendEnabled: true,
+		onSendCompleted: vi.fn()
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });

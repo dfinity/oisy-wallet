@@ -21,7 +21,8 @@ describe('BtcSendAmount', () => {
 
 	const props = {
 		amount: 1000,
-		amountError: undefined
+		amountError: undefined,
+		onTokensList: vi.fn()
 	};
 	const newAmount = 10000;
 	const belowMinimumAmountInBtc = '0.000005'; // 500 satoshis in BTC terms (below 700 satoshis minimum)

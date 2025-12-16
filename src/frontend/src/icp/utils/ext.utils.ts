@@ -1,6 +1,6 @@
 import type { TokenIdentifier, TokenIndex } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import type { EnvExtToken } from '$env/types/env-ext-token';
+import type { EnvExtToken, EnvExtTokenStandardVersion } from '$env/types/env-ext-token';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { ExtToken, ExtTokenWithoutId } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
@@ -56,8 +56,18 @@ export const extIndexToIdentifier = ({
 	return Principal.fromUint8Array(array).toText();
 };
 
+const mapStandardVersion = (version: EnvExtTokenStandardVersion): string | undefined =>
+	version === 'ext'
+		? 'v2'
+		: version === 'legacy1.5'
+			? 'v1.5'
+			: version === 'legacy'
+				? 'v1'
+				: undefined;
+
 export const mapExtToken = ({
 	canisterId,
+	standardVersion,
 	metadata: { name }
 }: EnvExtToken): ExtTokenWithoutId => ({
 	canisterId,
@@ -67,6 +77,9 @@ export const mapExtToken = ({
 	symbol: name,
 	// For our current scopes, there is no need to have the correct decimals, since we are using this standard as NFT collections.
 	decimals: 0,
-	standard: { code: 'ext' },
+	standard: {
+		code: 'ext',
+		version: mapStandardVersion(standardVersion)
+	},
 	category: 'custom'
 });
