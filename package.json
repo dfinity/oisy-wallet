@@ -30,6 +30,7 @@
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"check:tests": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.spec.json --fail-on-warnings",
 		"test": "tsc --project tsconfig.spec.json --noEmit && vitest",
 		"test:coverage": "tsc --project tsconfig.spec.json --noEmit && vitest run --coverage",
 		"test:debug": "ALLOW_LOGGING_FOR_DEBUGGING=true npm run test",
