@@ -137,12 +137,39 @@ describe('ext.utils', () => {
 			name: mockName,
 			symbol: mockName,
 			decimals: 0,
-			standard: { code: 'ext' },
+			standard: { code: 'ext', version: 'v2' },
 			category: 'custom'
 		};
 
 		it('should correctly map an EXT token', () => {
 			expect(mapExtToken(mockParams)).toStrictEqual(expected);
+		});
+
+		it('should map other EXT versions', () => {
+			expect(mapExtToken({ ...mockParams, standardVersion: 'legacy1.5' })).toStrictEqual({
+				...expected,
+				standard: {
+					code: 'ext',
+					version: 'v1.5'
+				}
+			});
+
+			expect(mapExtToken({ ...mockParams, standardVersion: 'legacy' })).toStrictEqual({
+				...expected,
+				standard: {
+					code: 'ext',
+					version: 'v1'
+				}
+			});
+
+			// @ts-expect-error Testing invalid input types
+			expect(mapExtToken({ ...mockParams, standardVersion: 'another one' })).toStrictEqual({
+				...expected,
+				standard: {
+					code: 'ext',
+					version: undefined
+				}
+			});
 		});
 
 		it('should handle empty string as name', () => {
