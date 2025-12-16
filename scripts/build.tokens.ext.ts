@@ -72,7 +72,7 @@ const parseToniqData = (data: ToniqResponseData[]): EnvExtToken[] =>
 			...acc,
 			{
 				canisterId,
-				standard,
+				standardVersion: standard,
 				metadata: {
 					name
 				}
