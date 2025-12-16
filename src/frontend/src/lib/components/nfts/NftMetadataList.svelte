@@ -121,7 +121,7 @@
 		{#if nonNullish(collection?.standard)}
 			<span class="uppercase">{collection.standard.code}</span>
 			{#if nonNullish(collection.standard.version)}
-				{collection.standard.version}
+				<span>{collection.standard.version}</span>
 			{/if}
 		{:else}
 			<span class="min-w-12">

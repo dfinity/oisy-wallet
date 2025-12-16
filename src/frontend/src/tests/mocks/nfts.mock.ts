@@ -90,7 +90,7 @@ export const mockNftCollectionUi: NftCollectionUi = {
 		id: parseTokenId('testcollection'),
 		standard: {
 			...mockValidErc1155Token.standard,
-			version: 'mock-standard-version'
+			version: 'vMock'
 		},
 		allowExternalContentSource: true
 	}
