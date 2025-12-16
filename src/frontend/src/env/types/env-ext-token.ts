@@ -1,6 +1,6 @@
-import {
+import type {
 	EnvExtTokenStandardVersionSchema,
-	type EnvExtTokenSchema
+	EnvExtTokenSchema
 } from '$env/schema/env-ext-token.schema';
 import type * as z from 'zod';
 
