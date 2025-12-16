@@ -14,7 +14,7 @@
 	let explorerUrl = $derived(
 		nonNullish($pageToken)
 			? isTokenErc20($pageToken)
-				? `${getExplorerUrl({ token: $pageToken })}/token/${($pageToken).address}`
+				? `${getExplorerUrl({ token: $pageToken })}/token/${$pageToken.address}`
 				: notEmptyString($ethAddress)
 					? `${getExplorerUrl({ token: $pageToken })}/address/${$ethAddress}`
 					: undefined
