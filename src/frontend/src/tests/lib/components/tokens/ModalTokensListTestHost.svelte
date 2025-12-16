@@ -41,11 +41,7 @@
 	);
 </script>
 
-<ModalTokensList
-	networkSelectorViewOnly={false}
-	{onSelectNetworkFilter}
-	{onTokenButtonClick}
->
+<ModalTokensList networkSelectorViewOnly={false} {onSelectNetworkFilter} {onTokenButtonClick}>
 	{#snippet noResults()}
 		{#if renderNoResults}
 			<div data-tid={MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS}>No results custom message</div>
