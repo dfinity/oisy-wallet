@@ -20,7 +20,8 @@ describe('RewardsRequirements', () => {
 
 	const props = {
 		hasNetworkBonus: false,
-		networkBonusMultiplier: 3
+		networkBonusMultiplier: 3 as const,
+		reward: mockRewardCampaigns[0]
 	};
 
 	describe('IsEligible', () => {

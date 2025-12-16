@@ -42,7 +42,6 @@
 </script>
 
 <ModalTokensList
-	loading={false}
 	networkSelectorViewOnly={false}
 	{onSelectNetworkFilter}
 	{onTokenButtonClick}
