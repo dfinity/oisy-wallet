@@ -2,19 +2,19 @@ import { browser } from '$app/environment';
 import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 
 const toAbsUrl = (src: string): string | undefined => {
-	const v = src.trim();
+	const parsedSrc = src.trim();
 
-	if (isEmptyString(v)) {
+	if (isEmptyString(parsedSrc)) {
 		return;
 	}
 
 	// Ignore data URIs and fragments-only references
-	if (v.startsWith('data:') || v.startsWith('#')) {
+	if (parsedSrc.startsWith('data:') || parsedSrc.startsWith('#')) {
 		return;
 	}
 
 	try {
-		return new URL(v).toString();
+		return new URL(parsedSrc).toString();
 	} catch (_: unknown) {
 		// We do not really care to analyze the error at this point
 	}
