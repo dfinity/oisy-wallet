@@ -119,7 +119,7 @@
 	<ListItem>
 		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.token_standard}</span>
 		{#if nonNullish(collection?.standard)}
-			<span class="uppercase">{collection.standard}</span>
+			<span class="uppercase">{collection.standard.code}</span>
 		{:else}
 			<span class="min-w-12">
 				<SkeletonText />

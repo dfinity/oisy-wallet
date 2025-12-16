@@ -10,7 +10,7 @@ import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NetworkId } from '$lib/types/network';
-import type { TokenStandardCode } from '$lib/types/token';
+import type { TokenStandard } from '$lib/types/token';
 import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
@@ -46,7 +46,7 @@ export const isInvalidDestinationIc = ({
 	networkId
 }: {
 	destination: string;
-	tokenStandard: TokenStandardCode;
+	tokenStandard: TokenStandard;
 	networkId?: NetworkId;
 }): boolean => {
 	if (isNullishOrEmpty(destination)) {

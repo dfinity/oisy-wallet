@@ -51,7 +51,7 @@ export const autoLoadIcrcToken = async ({
 		tokens: icrcCustomTokens,
 		sendToken: sendToken as Erc20Token,
 		identity,
-		expectedSendTokenStandard: 'erc20',
+		expectedSendTokenStandard: { code: 'erc20' },
 		assertSendTokenData: assertErc20SendTokenData,
 		findToken: findCustomToken,
 		setToken: setCustomToken,

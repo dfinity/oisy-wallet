@@ -2,8 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
-		PLAUSIBLE_EVENT_CONTEXTS,
 		type PLAUSIBLE_EVENT_SOURCES,
+		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -34,7 +34,7 @@
 					token_name: collection.name ?? '',
 					token_address: collection.address,
 					token_network: collection.network.name,
-					token_standard: collection.standard
+					token_standard: collection.standard.code
 				}
 			});
 			modalStore.openNftImageConsent({ id: Symbol(), data: collection });

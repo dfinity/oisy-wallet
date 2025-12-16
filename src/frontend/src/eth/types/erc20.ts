@@ -13,7 +13,10 @@ import type { Option } from '$lib/types/utils';
 type Erc20Standard = Extract<TokenStandardCode, 'erc20'>;
 
 export type Erc20Token = Erc20Contract &
-	Omit<Token, 'network' | 'standard'> & { network: EthereumNetwork; standard: Erc20Standard };
+	Omit<Token, 'network' | 'standard'> & {
+		network: EthereumNetwork;
+		standard: { code: Erc20Standard; version?: string };
+	};
 
 export type RequiredErc20Token = RequiredToken<Erc20Token>;
 export type RequiredAdditionalErc20Token = Omit<RequiredErc20Token, keyof TokenLinkedData>;

@@ -43,7 +43,7 @@ describe('erc20.utils', () => {
 			expect(mapErc20Token(mockParams)).toEqual({
 				...mockValidErc20Token,
 				id: mockId,
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				name: 'TokenName',
 				symbol: 'ckICP',
 				icon: icpDark
@@ -96,7 +96,7 @@ describe('erc20.utils', () => {
 			expect(mapErc20UserToken(mockParams)).toEqual({
 				...mockValidErc20Token,
 				id: mockId,
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				name: 'TokenName',
 				symbol: 'ckICP',
 				enabled: true,

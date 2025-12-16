@@ -8,6 +8,7 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
+import type { ExtTokenWithoutId } from '$icp/types/ext-token';
 import {
 	extIndexToIdentifier,
 	isTokenExt,
@@ -25,7 +26,7 @@ describe('ext.utils', () => {
 	describe('isTokenExt', () => {
 		it.each(['ext'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenExt({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+				isTokenExt({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 			).toBeTruthy();
 		});
 
@@ -33,7 +34,7 @@ describe('ext.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenExt({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+					isTokenExt({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 				).toBeFalsy();
 			}
 		);
@@ -124,15 +125,19 @@ describe('ext.utils', () => {
 	describe('mapExtToken', () => {
 		const mockName = 'Mock EXT Token';
 		const mockCanisterId = mockExtV2TokenCanisterId;
-		const mockParams = { canisterId: mockCanisterId, metadata: { name: mockName } };
+		const mockParams = {
+			canisterId: mockCanisterId,
+			standardVersion: 'ext' as const,
+			metadata: { name: mockName }
+		};
 
-		const expected = {
+		const expected: ExtTokenWithoutId = {
 			canisterId: mockCanisterId,
 			network: ICP_NETWORK,
 			name: mockName,
 			symbol: mockName,
 			decimals: 0,
-			standard: 'ext',
+			standard: { code: 'ext' },
 			category: 'custom'
 		};
 

@@ -42,7 +42,7 @@ describe('eth.utils', () => {
 		});
 
 		it('should return false for a non-standard Ethereum user token', () => {
-			const token = { ...ETHEREUM_TOKEN, standard: 'erc20' as const };
+			const token = { ...ETHEREUM_TOKEN, standard: { code: 'erc20' as const } };
 
 			expect(isDefaultEthereumToken(token)).toBeFalsy();
 		});
@@ -50,7 +50,7 @@ describe('eth.utils', () => {
 		it('should return true for a default standard Ethereum token', () => {
 			const token = {
 				...WBTC_TOKEN,
-				standard: 'ethereum' as const,
+				standard: { code: 'ethereum' as const },
 				category: 'default' as const
 			};
 
@@ -86,7 +86,7 @@ describe('eth.utils', () => {
 		});
 
 		it('should return true for a non-standard Ethereum user token', () => {
-			const token = { ...ETHEREUM_TOKEN, standard: 'erc20' as const };
+			const token = { ...ETHEREUM_TOKEN, standard: { code: 'erc20' as const } };
 
 			expect(isNotDefaultEthereumToken(token)).toBeTruthy();
 		});
@@ -94,7 +94,7 @@ describe('eth.utils', () => {
 		it('should return false for a default standard Ethereum token', () => {
 			const token = {
 				...WBTC_TOKEN,
-				standard: 'ethereum' as const,
+				standard: { code: 'ethereum' as const },
 				category: 'default' as const
 			};
 

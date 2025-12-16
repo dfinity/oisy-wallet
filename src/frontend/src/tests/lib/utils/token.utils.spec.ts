@@ -51,7 +51,7 @@ describe('token.utils', () => {
 					balance,
 					fee,
 					tokenDecimals,
-					tokenStandard
+					tokenStandard: { code: tokenStandard }
 				});
 
 				expect(result).toBe((Number(balance - fee) / 10 ** tokenDecimals).toString());
@@ -64,7 +64,7 @@ describe('token.utils', () => {
 					fee: balance,
 					balance: fee,
 					tokenDecimals,
-					tokenStandard
+					tokenStandard: { code: tokenStandard }
 				});
 
 				expect(result).toBe('0');
@@ -77,7 +77,7 @@ describe('token.utils', () => {
 					balance: undefined,
 					fee: undefined,
 					tokenDecimals,
-					tokenStandard
+					tokenStandard: { code: tokenStandard }
 				});
 
 				expect(result).toBe('0');
@@ -90,7 +90,7 @@ describe('token.utils', () => {
 					balance: undefined,
 					fee,
 					tokenDecimals,
-					tokenStandard
+					tokenStandard: { code: tokenStandard }
 				});
 
 				expect(result).toBe('0');
@@ -99,7 +99,7 @@ describe('token.utils', () => {
 					balance,
 					fee: undefined,
 					tokenDecimals,
-					tokenStandard
+					tokenStandard: { code: tokenStandard }
 				});
 
 				expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
@@ -111,7 +111,7 @@ describe('token.utils', () => {
 				balance,
 				fee,
 				tokenDecimals,
-				tokenStandard: 'erc20'
+				tokenStandard: { code: 'erc20' }
 			});
 
 			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
@@ -122,7 +122,7 @@ describe('token.utils', () => {
 				balance,
 				fee,
 				tokenDecimals,
-				tokenStandard: 'spl'
+				tokenStandard: { code: 'spl' }
 			});
 
 			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());

@@ -14,7 +14,7 @@ export const XAUT_TOKEN_ID: TokenId = parseTokenId(XAUT_SYMBOL);
 export const XAUT_TOKEN: RequiredErc20Token = {
 	id: XAUT_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Tether Gold',
 	symbol: XAUT_SYMBOL,

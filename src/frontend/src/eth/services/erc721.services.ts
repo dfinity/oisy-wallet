@@ -149,7 +149,7 @@ const loadCustomTokensWithMetadata = async (
 						network,
 						symbol: metadata.symbol ?? '', // The symbol is used with the amount, no issue with having it empty for NFTs
 						decimals: 0, // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
-						standard: 'erc721' as const,
+						standard: { code: 'erc721' as const },
 						category: 'custom' as const,
 						enabled,
 						version,

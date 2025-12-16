@@ -8,7 +8,8 @@ import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token.utils';
 import { Principal } from '@icp-sdk/core/principal';
 
-export const isTokenExt = (token: Partial<IcToken>): token is ExtToken => token.standard === 'ext';
+export const isTokenExt = (token: Partial<IcToken>): token is ExtToken =>
+	token.standard?.code === 'ext';
 
 export const isTokenExtCustomToken = (token: Token): token is ExtCustomToken =>
 	isTokenExt(token) && isTokenToggleable(token);
@@ -66,6 +67,6 @@ export const mapExtToken = ({
 	symbol: name,
 	// For our current scopes, there is no need to have the correct decimals, since we are using this standard as NFT collections.
 	decimals: 0,
-	standard: 'ext',
+	standard: { code: 'ext' },
 	category: 'custom'
 });

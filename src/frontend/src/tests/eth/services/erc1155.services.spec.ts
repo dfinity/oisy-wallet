@@ -50,7 +50,7 @@ describe('erc1155.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc1155',
+				standard: { code: 'erc1155' },
 				category: 'custom',
 				version: 1n,
 				enabled: true,
@@ -64,7 +64,7 @@ describe('erc1155.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc1155',
+				standard: { code: 'erc1155' },
 				category: 'custom',
 				version: 2n,
 				enabled: true,
@@ -78,7 +78,7 @@ describe('erc1155.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc1155',
+				standard: { code: 'erc1155' },
 				category: 'custom',
 				version: undefined,
 				enabled: false,
@@ -237,7 +237,10 @@ describe('erc1155.services', () => {
 
 		it('should reset token store on error', async () => {
 			erc1155CustomTokensStore.setAll([
-				{ data: { ...SEPOLIA_PEPE_TOKEN, standard: 'erc1155', enabled: true }, certified: false }
+				{
+					data: { ...SEPOLIA_PEPE_TOKEN, standard: { code: 'erc1155' }, enabled: true },
+					certified: false
+				}
 			]);
 
 			vi.mocked(listCustomTokens).mockRejectedValue(new Error('Error loading custom tokens'));

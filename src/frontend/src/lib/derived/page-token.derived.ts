@@ -12,7 +12,7 @@ import { pageNft } from '$lib/derived/page-nft.derived';
 import { defaultFallbackToken } from '$lib/derived/token.derived';
 import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 import type { NonFungibleToken } from '$lib/types/nft';
-import type { OptionToken, OptionTokenStandard, Token } from '$lib/types/token';
+import type { OptionToken, OptionTokenStandardCode, Token } from '$lib/types/token';
 import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 import { isIcrcTokenToggleEnabled } from '$lib/utils/token-toggle.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
@@ -82,9 +82,9 @@ export const pageTokenWithFallback: Readable<Token> = derived(
 	([$pageToken, $defaultFallbackToken]) => $pageToken ?? $defaultFallbackToken
 );
 
-export const pageTokenStandard: Readable<OptionTokenStandard> = derived(
+export const pageTokenStandard: Readable<OptionTokenStandardCode> = derived(
 	[pageToken],
-	([$pageToken]) => $pageToken?.standard
+	([$pageToken]) => $pageToken?.standard.code
 );
 
 export const pageTokenToggleable: Readable<boolean> = derived([pageToken], ([$pageToken]) => {

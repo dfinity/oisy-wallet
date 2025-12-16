@@ -12,7 +12,7 @@ import {
 	sortIcTokens,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import type { TokenStandardCode } from '$lib/types/token';
+import type { TokenStandard, TokenStandardCode } from '$lib/types/token';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -179,14 +179,14 @@ describe('icrc.utils', () => {
 			const token = mapIcrcToken({
 				...mockParams,
 				icrcCustomTokens: {
-					[mockToken.ledgerCanisterId]: { ...mockToken, standard: 'bitcoin' }
+					[mockToken.ledgerCanisterId]: { ...mockToken, standard: { code: 'bitcoin' } }
 				}
 			});
 
 			expect(token).toStrictEqual({
 				...mockToken,
 				id: token?.id,
-				standard: 'bitcoin'
+				standard: { code: 'bitcoin' }
 			});
 		});
 
@@ -196,7 +196,7 @@ describe('icrc.utils', () => {
 				icrcCustomTokens: {
 					[mockToken.ledgerCanisterId]: {
 						...mockToken,
-						standard: undefined as unknown as TokenStandardCode
+						standard: undefined as unknown as TokenStandard
 					}
 				}
 			});
@@ -204,7 +204,7 @@ describe('icrc.utils', () => {
 			expect(token).toStrictEqual({
 				...mockToken,
 				id: token?.id,
-				standard: 'icrc'
+				standard: { code: 'icrc' }
 			});
 		});
 	});
@@ -301,7 +301,7 @@ describe('icrc.utils', () => {
 	describe('isTokenIcp', () => {
 		it.each(['icp'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenIcp({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+				isTokenIcp({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 			).toBeTruthy();
 		});
 
@@ -309,7 +309,7 @@ describe('icrc.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenIcp({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+					isTokenIcp({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 				).toBeFalsy();
 			}
 		);
@@ -318,7 +318,7 @@ describe('icrc.utils', () => {
 	describe('isTokenIcrc', () => {
 		it.each(['icrc'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenIcrc({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+				isTokenIcrc({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 			).toBeTruthy();
 		});
 
@@ -326,7 +326,7 @@ describe('icrc.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenIcrc({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+					isTokenIcrc({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 				).toBeFalsy();
 			}
 		);
@@ -335,7 +335,7 @@ describe('icrc.utils', () => {
 	describe('isTokenDip20', () => {
 		it.each(['dip20'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenDip20({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+				isTokenDip20({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 			).toBeTruthy();
 		});
 
@@ -343,7 +343,10 @@ describe('icrc.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenDip20({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+					isTokenDip20({
+						...mockIcrcCustomToken,
+						standard: { code: standard as TokenStandardCode }
+					})
 				).toBeFalsy();
 			}
 		);
@@ -354,7 +357,7 @@ describe('icrc.utils', () => {
 			'should return true for valid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenIc({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+					isTokenIc({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 				).toBeTruthy();
 			}
 		);
@@ -363,7 +366,7 @@ describe('icrc.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenIc({ ...mockIcrcCustomToken, standard: standard as TokenStandardCode })
+					isTokenIc({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 				).toBeFalsy();
 			}
 		);
@@ -374,7 +377,7 @@ describe('icrc.utils', () => {
 			expect(
 				icTokenIcrcCustomToken({
 					...mockIcrcCustomToken,
-					standard: standard as TokenStandardCode
+					standard: { code: standard as TokenStandardCode }
 				})
 			).toBeTruthy();
 		});
@@ -385,7 +388,7 @@ describe('icrc.utils', () => {
 				expect(
 					icTokenIcrcCustomToken({
 						...mockIcrcCustomToken,
-						standard: standard as TokenStandardCode
+						standard: { code: standard as TokenStandardCode }
 					})
 				).toBeFalsy();
 			}

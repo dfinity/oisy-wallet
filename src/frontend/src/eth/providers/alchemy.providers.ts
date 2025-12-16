@@ -14,7 +14,6 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftId, NonFungibleToken, OwnedContract } from '$lib/types/nft';
-import type { TokenStandardCode } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -272,9 +271,9 @@ export class AlchemyProvider {
 		return result.contracts.reduce<OwnedContract[]>((acc, ownedContract) => {
 			const tokenStandard =
 				ownedContract.tokenType === 'ERC721'
-					? 'erc721'
+					? ('erc721' as const)
 					: ownedContract.tokenType === 'ERC1155'
-						? 'erc1155'
+						? ('erc1155' as const)
 						: undefined;
 			if (isNullish(tokenStandard)) {
 				return acc;
@@ -283,7 +282,7 @@ export class AlchemyProvider {
 			const newContract = {
 				address: ownedContract.address,
 				isSpam: ownedContract.isSpam,
-				standard: tokenStandard as TokenStandardCode
+				standard: tokenStandard
 			};
 			acc.push(newContract);
 

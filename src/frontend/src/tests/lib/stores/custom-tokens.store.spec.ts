@@ -150,7 +150,7 @@ describe('custom-token.store', () => {
 				mockStore.setAll([{ data: { ...mockValidExtV2Token, enabled }, certified }]);
 				const extToken2 = {
 					...TRUMP_TOKEN,
-					standard: 'ext' as const,
+					standard: { code: 'ext' as const },
 					canisterId: mockValidExtV2Token.canisterId
 				};
 				mockStore.setAll([{ data: { ...extToken2, enabled }, certified }]);

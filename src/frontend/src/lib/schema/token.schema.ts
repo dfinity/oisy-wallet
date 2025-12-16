@@ -20,7 +20,8 @@ export const TokenStandardCodeSchema = z.enum([
 ]);
 
 export const TokenStandardSchema = z.object({
-	code: TokenStandardCodeSchema
+	code: TokenStandardCodeSchema,
+	version: z.string().optional()
 });
 
 export const TokenCategorySchema = z.enum(['default', 'custom']);
@@ -59,7 +60,7 @@ export const TokenBuyableSchema = z.object({
 export const TokenSchema = z.object({
 	id: TokenIdSchema,
 	network: NetworkSchema,
-	standard: TokenStandardCodeSchema,
+	standard: TokenStandardSchema,
 	category: TokenCategorySchema,
 	...TokenMetadataSchema.shape,
 	...TokenAppearanceSchema.shape,

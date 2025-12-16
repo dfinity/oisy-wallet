@@ -18,7 +18,7 @@ import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionBalance } from '$lib/types/balance';
-import type { Token, TokenId, TokenStandardCode } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -28,11 +28,6 @@ import { derived, type Readable } from 'svelte/store';
 export const ckEthereumTwinToken: Readable<Token> = derived(
 	[tokenWithFallback],
 	([$tokenWithFallback]) => ($tokenWithFallback as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
-);
-
-export const ckEthereumTwinTokenStandard: Readable<TokenStandardCode> = derived(
-	[ckEthereumTwinToken],
-	([{ standard }]) => standard
 );
 
 /**
@@ -97,7 +92,8 @@ export const ckErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
 export const ethToCkETHEnabled: Readable<boolean> = derived(
 	[tokenWithFallbackAsIcToken, selectedEthereumNetwork, ckEthereumNativeTokenEnabledNetwork],
 	([$tokenWithFallbackAsIcToken, $selectedEthereumNetwork, $ckEthereumNativeTokenEnabledNetwork]) =>
-		($tokenWithFallbackAsIcToken.standard === 'ethereum' && nonNullish($selectedEthereumNetwork)) ||
+		($tokenWithFallbackAsIcToken.standard.code === 'ethereum' &&
+			nonNullish($selectedEthereumNetwork)) ||
 		(isTokenCkEthLedger($tokenWithFallbackAsIcToken) &&
 			nonNullish($ckEthereumNativeTokenEnabledNetwork))
 );

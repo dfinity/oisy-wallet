@@ -18,7 +18,11 @@ export const generateUrn = ({
 }: GenerateUrnParams): string | undefined => {
 	let urn: string;
 
-	const { name, standard, network } = token;
+	const {
+		name,
+		standard: { code: standard },
+		network
+	} = token;
 
 	const tokenAddress: string | undefined =
 		'address' in token ? (token.address as string) : undefined;
