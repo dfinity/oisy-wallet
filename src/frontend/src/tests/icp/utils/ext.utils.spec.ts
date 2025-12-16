@@ -126,7 +126,7 @@ describe('ext.utils', () => {
 		const mockCanisterId = mockExtV2TokenCanisterId;
 		const mockParams = {
 			canisterId: mockCanisterId,
-			standard: 'ext',
+			standardVersion: 'ext' as const,
 			metadata: { name: mockName }
 		};
 

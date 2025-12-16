@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { EnvExtTokenStandardVersionSchema } from '$env/schema/env-ext-token.schema';
 import type { EnvExtToken } from '$env/types/env-ext-token';
 import { jsonReplacer } from '@dfinity/utils';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -62,9 +63,15 @@ const queryToniqData = async (): Promise<ToniqResponseData[]> => {
 
 const parseToniqData = (data: ToniqResponseData[]): EnvExtToken[] =>
 	data.reduce<EnvExtToken[]>((acc, { id: canisterId, name, standard: standardRaw }) => {
-		const standard = standardRaw.toLowerCase();
+		const parsedStandard = EnvExtTokenStandardVersionSchema.safeParse(standardRaw.toLowerCase());
 
-		if (!ACCEPTED_STANDARDS.includes(standard)) {
+		if (!parsedStandard.success) {
+			return acc;
+		}
+
+		const { data: standardVersion } = parsedStandard;
+
+		if (!ACCEPTED_STANDARDS.includes(standardVersion)) {
 			return acc;
 		}
 
@@ -72,7 +79,7 @@ const parseToniqData = (data: ToniqResponseData[]): EnvExtToken[] =>
 			...acc,
 			{
 				canisterId,
-				standardVersion: standard,
+				standardVersion,
 				metadata: {
 					name
 				}
