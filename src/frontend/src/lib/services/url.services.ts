@@ -22,9 +22,16 @@ const toAbsUrl = (src: string): string | undefined => {
 
 const unique = (xs: string[]): string[] => Array.from(new Set(xs));
 
-const isProbablySvg = ({ contentType, url }: { contentType: string; url: string }): boolean =>
-	contentType.toLowerCase().includes('image/svg+xml') ||
-	new URL(url).pathname.toLowerCase().endsWith('.svg');
+const isProbablySvg = ({ contentType, url }: { contentType: string; url: string }): boolean => {
+	if (contentType.toLowerCase().includes('image/svg+xml')) {
+		return true;
+	}
+	try {
+		return new URL(url).pathname.toLowerCase().endsWith('.svg');
+	} catch (_: unknown) {
+		return false;
+	}
+};
 
 const extractFromSvgText = (text: string): string[] => {
 	const doc = new DOMParser().parseFromString(text, 'text/html');
