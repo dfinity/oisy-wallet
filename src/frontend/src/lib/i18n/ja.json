@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "取引完了までタブを閉じないでください",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
