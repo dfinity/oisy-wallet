@@ -119,10 +119,10 @@
 	<ListItem>
 		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.token_standard}</span>
 		{#if nonNullish(collection?.standard)}
-			<span class="flex items-center gap-1">
+			<span >
 				<span class="uppercase">{collection.standard.code}</span>
 				{#if nonNullish(collection.standard.version)}
-					<span>{collection.standard.version}</span>
+				{collection.standard.version}
 				{/if}
 			</span>
 		{:else}
