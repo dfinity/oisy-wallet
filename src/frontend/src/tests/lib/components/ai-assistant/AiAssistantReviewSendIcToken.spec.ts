@@ -29,7 +29,8 @@ describe('AiAssistantReviewSendIcToken', () => {
 		amount: sendAmount,
 		destination: mockPrincipalText,
 		sendCompleted: false,
-		sendEnabled: true
+		sendEnabled: true,
+		onSendCompleted: vi.fn()
 	};
 	let sendSpy: MockInstance;
 
