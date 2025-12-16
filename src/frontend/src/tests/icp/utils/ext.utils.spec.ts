@@ -125,7 +125,11 @@ describe('ext.utils', () => {
 	describe('mapExtToken', () => {
 		const mockName = 'Mock EXT Token';
 		const mockCanisterId = mockExtV2TokenCanisterId;
-		const mockParams = { canisterId: mockCanisterId, metadata: { name: mockName } };
+		const mockParams = {
+			canisterId: mockCanisterId,
+			standardVersion: 'ext' as const,
+			metadata: { name: mockName }
+		};
 
 		const expected: ExtTokenWithoutId = {
 			canisterId: mockCanisterId,
