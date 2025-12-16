@@ -52,6 +52,14 @@ describe('NftHero', () => {
 
 		expect(standard).toBeInTheDocument();
 
+		assertNonNullish(mockNftCollectionUi.collection.standard.version);
+
+		const standardVersion: HTMLElement | null = getByText(
+			mockNftCollectionUi.collection.standard.version
+		);
+
+		expect(standardVersion).toBeInTheDocument();
+
 		const address: HTMLElement | null = getByText(
 			shortenWithMiddleEllipsis({ text: mockNftCollectionUi.collection.address })
 		);

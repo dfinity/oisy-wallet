@@ -88,6 +88,10 @@ export const mockNftCollectionUi: NftCollectionUi = {
 		name: 'Testcollection',
 		symbol: 'testcollection',
 		id: parseTokenId('testcollection'),
+		standard: {
+			...mockValidErc1155Token.standard,
+			version: 'mock-standard-version'
+		},
 		allowExternalContentSource: true
 	}
 };
