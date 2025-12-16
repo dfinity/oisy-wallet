@@ -6,7 +6,7 @@ const EnvExtTokenMetadataSchema = z.object({
 
 export const EnvExtTokenSchema = z.object({
 	canisterId: z.string(),
-	standard: z.string(),
+	standard: z.enum(['ext', 'legacy1.5', 'legacy']),
 	metadata: EnvExtTokenMetadataSchema
 });
 
