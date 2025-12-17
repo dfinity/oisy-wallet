@@ -1295,7 +1295,8 @@
 			"learn_more": "Learn more",
 			"token_id": "Token ID",
 			"go_to_collection": "Go to collection",
-			"could_not_update_section": "Could not update collection section. Please try again"
+			"could_not_update_section": "Could not update collection section. Please try again",
+			"media_stored_at_different_location": "The Media appears to be stored at a different location. To access it, you can use this link, after carefully reviewing it:"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
