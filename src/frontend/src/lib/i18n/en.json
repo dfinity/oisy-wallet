@@ -925,7 +925,7 @@
 			"pay": "Pay",
 			"pay_amount": "Pay $amount",
 			"go_to_assets": "Go to Assets",
-			"supported_tokens": "Open CryptoPay supports the following tokens: ETH, USDC, USDT, WBTC, XMR, dEURO, ZCHF, DAI, etc.",
+			"supported_tokens": "Open CryptoPay supports the following tokens: ETH, USDC, USDT, POL, ARB, WBTC, XMR, dEURO, ZCHF, etc.",
 			"no_supported_tokens": "You have no supported tokens",
 			"pay_with": "Pay with",
 			"select_token": "Select the token",
