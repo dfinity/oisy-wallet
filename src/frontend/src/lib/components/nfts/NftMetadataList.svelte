@@ -46,7 +46,7 @@
 	let additionalMediaUrl = $state<string | undefined>();
 
 	const updateAdditionalMediaUrl = async () => {
-		if (isNullish(nft?.imageUrl)) {
+		if (isNullish(nft?.imageUrl) || !allowMedia) {
 			return;
 		}
 
@@ -54,7 +54,7 @@
 	};
 
 	$effect(() => {
-		[nft];
+		[nft, allowMedia];
 
 		untrack(() => updateAdditionalMediaUrl());
 	});
