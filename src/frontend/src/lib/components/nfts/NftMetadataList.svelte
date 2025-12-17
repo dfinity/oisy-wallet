@@ -47,7 +47,7 @@
 
 	const updateAdditionalMediaUrl = async () => {
 		if (isNullish(nft?.imageUrl) || !allowMedia) {
-			additionalMediaUrl = undefined
+			additionalMediaUrl = undefined;
 
 			return;
 		}
