@@ -26,7 +26,7 @@ import {
 	parseShowBalanceToolArguments,
 	parseShowFilteredContactsToolArguments
 } from '$lib/utils/ai-assistant.utils';
-import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
@@ -144,9 +144,20 @@ export const executeTool = ({
 			tokens: get(enabledTokens)
 		});
 
-		additionalTrackingMetadata = {
-			requestedToken: result.token.symbol
-		};
+		// Note: both cases should not happen, still we prefer to handle them.
+		// 1. If all 3 addresses params are present, we consider it as an invalid parsing result; therefore, it's safer to reset it
+		// 2. If the token was not identified, we consider it as an invalid parsing result; therefore, it's safer to reset it
+		if (
+			isNullish(result) ||
+			(result.contactAddress && result.contact && result.address) ||
+			isNullish(result.token)
+		) {
+			result = undefined;
+		} else {
+			additionalTrackingMetadata = {
+				requestedToken: result.token.symbol
+			};
+		}
 	}
 
 	trackEvent({
