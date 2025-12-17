@@ -208,7 +208,7 @@
 							{additionalMediaUrl}
 						</output>
 
-						<div class="items-right">
+						<div class="items-end">
 							<AddressActions
 								copyAddress={additionalMediaUrl}
 								copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
