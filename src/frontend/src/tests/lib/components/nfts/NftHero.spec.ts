@@ -7,10 +7,11 @@ import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { userSelectedNetworkStore } from '$lib/stores/settings.store';
+import type { Nft } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { mockNftCollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -28,17 +29,27 @@ describe('NftHero', () => {
 	});
 
 	it('should render the nft data', () => {
+		const mockNft: Nft = {
+			...mockValidErc1155Nft,
+			description: 'Test description about the NFT',
+			collection: {
+				...mockValidErc1155Nft.collection,
+				standard: {
+					...mockValidErc1155Nft.collection.standard,
+					version: 'vMock'
+				}
+			}
+		};
+
 		const { getByText } = render(NftHero, {
 			props: {
-				nft: { ...mockValidErc1155Nft, description: 'Test description about the NFT' }
+				nft: mockNft
 			}
 		});
 
-		assertNonNullish(mockValidErc1155Nft.name);
+		assertNonNullish(mockNft.name);
 
-		const name: HTMLElement | null = getByText(
-			`${mockValidErc1155Nft.name} #${String(mockValidErc1155Nft.id)}`
-		);
+		const name: HTMLElement | null = getByText(`${mockNft.name} #${String(mockNft.id)}`);
 
 		expect(name).toBeInTheDocument();
 
@@ -48,40 +59,46 @@ describe('NftHero', () => {
 
 		expect(description).toBeInTheDocument();
 
-		const standard: HTMLElement | null = getByText(mockNftCollectionUi.collection.standard.code);
+		const standard: HTMLElement | null = getByText(mockNft.collection.standard.code);
 
 		expect(standard).toBeInTheDocument();
 
+		assertNonNullish(mockNft.collection.standard.version);
+
+		const standardVersion: HTMLElement | null = getByText(mockNft.collection.standard.version);
+
+		expect(standardVersion).toBeInTheDocument();
+
 		const address: HTMLElement | null = getByText(
-			shortenWithMiddleEllipsis({ text: mockNftCollectionUi.collection.address })
+			shortenWithMiddleEllipsis({ text: mockNft.collection.address })
 		);
 
 		expect(address).toBeInTheDocument();
 
-		const network: HTMLElement | null = getByText(mockNftCollectionUi.collection.network.name);
+		const network: HTMLElement | null = getByText(mockNft.collection.network.name);
 
 		expect(network).toBeInTheDocument();
 
-		assertNonNullish(mockValidErc1155Nft.imageUrl);
+		assertNonNullish(mockNft.imageUrl);
 
 		const imageUrl: HTMLElement | null = getByText(
-			shortenWithMiddleEllipsis({ text: mockValidErc1155Nft.imageUrl, splitLength: 20 })
+			shortenWithMiddleEllipsis({ text: mockNft.imageUrl, splitLength: 20 })
 		);
 
 		expect(imageUrl).toBeInTheDocument();
 
-		assertNonNullish(mockValidErc1155Nft.acquiredAt);
+		assertNonNullish(mockNft.acquiredAt);
 
 		const acquired_at: HTMLElement | null = getByText(
 			formatSecondsToDate({
-				seconds: mockValidErc1155Nft.acquiredAt.getTime() / 1000,
+				seconds: mockNft.acquiredAt.getTime() / 1000,
 				language: get(currentLanguage)
 			})
 		);
 
 		expect(acquired_at).toBeInTheDocument();
 
-		mockValidErc1155Nft.attributes?.forEach((attr) => {
+		mockNft.attributes?.forEach((attr) => {
 			const attrTypeEl: HTMLElement | null = getByText(attr.traitType);
 
 			expect(attrTypeEl).toBeInTheDocument();
