@@ -435,7 +435,7 @@ interface I18nInit {
 		erc1155_custom_tokens: string;
 		erc20_user_tokens: string;
 		spl_custom_tokens: string;
-		erc20_user_token: string;
+		erc20_custom_token: string;
 		icrc_custom_token: string;
 		ext_custom_tokens: string;
 		loading_wallet_timeout: string;

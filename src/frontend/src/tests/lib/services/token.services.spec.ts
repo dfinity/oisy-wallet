@@ -1,5 +1,4 @@
 import type { Erc20Token } from '$eth/types/erc20';
-import type { SaveUserToken } from '$eth/types/erc20-user-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import {
 	autoLoadSingleToken,
@@ -11,6 +10,7 @@ import {
 import { busy } from '$lib/stores/busy.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { token } from '$lib/stores/token.store';
+import type { SaveCustomToken } from '$lib/types/custom-token';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
@@ -152,7 +152,7 @@ describe('token.services', () => {
 
 		const mockErrorMessage = 'Error loading token';
 
-		let params: AutoLoadTokenParams<SaveUserToken, Erc20Token>;
+		let params: AutoLoadTokenParams<SaveCustomToken, Erc20Token>;
 
 		let spyToastsError: MockInstance;
 		let spyBusyStart: MockInstance;
