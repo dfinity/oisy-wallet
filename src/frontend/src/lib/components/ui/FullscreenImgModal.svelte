@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Backdrop } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import {onMount, untrack} from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import UnsupportedMediaType from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
@@ -30,7 +30,6 @@
 
 			const type = response.headers.get('Content-Type');
 
-
 			if (isNullish(type)) {
 				return null;
 			}
@@ -52,15 +51,12 @@
 	};
 
 	const updateMediaType = async () => {
-
-
 		mediaType = await getMediaType(imageSrc);
-
 	};
 
 	onMount(async () => {
 		await updateMediaType();
-	})
+	});
 
 	$effect(() => {
 		[imageSrc];
