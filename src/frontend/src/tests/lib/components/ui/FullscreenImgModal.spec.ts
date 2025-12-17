@@ -1,26 +1,90 @@
 import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
 import { modalStore } from '$lib/stores/modal.store';
-import { fireEvent, render } from '@testing-library/svelte';
+import { assertNonNullish } from '@dfinity/utils';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 describe('FullscreenImgModal', () => {
 	const closeSpy = vi.spyOn(modalStore, 'close').mockImplementation(() => {});
 
-	it('renders children inside the fullscreen modal container', () => {
-		const { container } = render(FullscreenImgModal, {
-			props: {
-				imageSrc: 'test-image.png'
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		global.fetch = vi.fn().mockResolvedValue({
+			headers: {
+				get: (h: string) => (h === 'Content-Type' ? 'image/png' : null)
+			}
+		});
+	});
+
+	it('renders image children inside the fullscreen modal container', async () => {
+		global.fetch = vi.fn().mockResolvedValue({
+			headers: {
+				get: (h: string) => (h === 'Content-Type' ? 'image/png' : null)
 			}
 		});
 
-		const child = container.querySelector('img');
+		const { container } = render(FullscreenImgModal, {
+			props: {
+				imageSrc: 'https://www.example.com/test-image.png'
+			}
+		});
 
-		expect(child).toBeInTheDocument();
+		await waitFor(() => {
+			const child: HTMLImageElement | null = container.querySelector('img');
+
+			assertNonNullish(child);
+
+			expect(child.getAttribute('src')).toBe('https://www.example.com/test-image.png');
+		});
+	});
+
+	it('renders gif children inside the fullscreen modal container', async () => {
+		global.fetch = vi.fn().mockResolvedValue({
+			headers: {
+				get: (h: string) => (h === 'Content-Type' ? '.gif;charset=utf-8' : null)
+			}
+		});
+
+		const { container } = render(FullscreenImgModal, {
+			props: {
+				imageSrc: 'https://www.example.com/test-gif.gif'
+			}
+		});
+
+		await waitFor(() => {
+			const child = container.querySelector('img');
+
+			assertNonNullish(child);
+
+			expect(child.getAttribute('src')).toBe('https://www.example.com/test-gif.gif');
+		});
+	});
+
+	it('renders video children inside the fullscreen modal container', async () => {
+		global.fetch = vi.fn().mockResolvedValue({
+			headers: {
+				get: (h: string) => (h === 'Content-Type' ? 'video/mp4' : null)
+			}
+		});
+
+		const { container } = render(FullscreenImgModal, {
+			props: {
+				imageSrc: 'https://www.example.com/test-video.mp4'
+			}
+		});
+
+		await waitFor(() => {
+			expect(container.querySelector('video')).toBeInTheDocument();
+			expect(container.querySelector('source')?.getAttribute('src')).toBe(
+				'https://www.example.com/test-video.mp4'
+			);
+		});
 	});
 
 	it('shows the close icon in the top-right corner', () => {
 		const { container } = render(FullscreenImgModal, {
 			props: {
-				imageSrc: 'test-image.png'
+				imageSrc: 'https://www.example.com/test-image.png'
 			}
 		});
 
@@ -32,7 +96,7 @@ describe('FullscreenImgModal', () => {
 	it('calls modalStore.close when backdrop is clicked', async () => {
 		const { getByTestId } = render(FullscreenImgModal, {
 			props: {
-				imageSrc: 'test-image.png'
+				imageSrc: 'https://www.example.com/test-image.png'
 			}
 		});
 
@@ -42,16 +106,18 @@ describe('FullscreenImgModal', () => {
 		expect(closeSpy).toHaveBeenCalledOnce();
 	});
 
-	it('applies max size constraints to the fullscreen-modal container', () => {
+	it('applies max size constraints to the fullscreen-modal container', async () => {
 		render(FullscreenImgModal, {
 			props: {
-				imageSrc: 'test-image.png'
+				imageSrc: 'https://www.example.com/test-image.png'
 			}
 		});
 
-		const container = document.querySelector('img');
+		await waitFor(() => {
+			const container = document.querySelector('img');
 
-		expect(container).toBeInTheDocument();
-		expect(container).toHaveClass('max-h-[90dvh]', 'max-w-[90dvw]');
+			expect(container).toBeInTheDocument();
+			expect(container).toHaveClass('max-h-[90dvh]', 'max-w-[90dvw]');
+		});
 	});
 });

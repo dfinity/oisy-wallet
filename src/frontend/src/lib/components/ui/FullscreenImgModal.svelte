@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Backdrop } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { untrack } from 'svelte';
+	import {onMount, untrack} from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import UnsupportedMediaType from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
@@ -30,13 +30,12 @@
 
 			const type = response.headers.get('Content-Type');
 
-			console.log(mediaUrl,type);
 
 			if (isNullish(type)) {
 				return null;
 			}
 
-			if (type.startsWith('image/')) {
+			if (type.startsWith('image/') || type.startsWith('.gif')) {
 				return MediaType.Img;
 			}
 
@@ -47,15 +46,21 @@
 			// The error here is caused by `fetch`, which can fail for various reasons (network error, CORS, DNS, etc).
 			// Empirically, it happens mostly for CORS policy block: we can't be sure that the media is valid or not.
 			// Ideally, we should load this data in a backend service to avoid CORS issues.
-
 		}
 
 		return null;
 	};
 
 	const updateMediaType = async () => {
+
+
 		mediaType = await getMediaType(imageSrc);
+
 	};
+
+	onMount(async () => {
+		await updateMediaType();
+	})
 
 	$effect(() => {
 		[imageSrc];
