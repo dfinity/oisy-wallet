@@ -28,7 +28,7 @@ describe('NftHero', () => {
 		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
 	});
 
-	it('should render the nft data', () => {
+	it('should render the nft data', async () => {
 		const mockNft: Nft = {
 			...mockValidErc1155Nft,
 			description: 'Test description about the NFT',
@@ -47,67 +47,69 @@ describe('NftHero', () => {
 			}
 		});
 
-		assertNonNullish(mockNft.name);
+		await waitFor(() => {
+			assertNonNullish(mockNft.name);
 
-		const name: HTMLElement | null = getByText(`${mockNft.name} #${String(mockNft.id)}`);
+			const name: HTMLElement | null = getByText(`${mockNft.name} #${String(mockNft.id)}`);
 
-		expect(name).toBeInTheDocument();
+			expect(name).toBeInTheDocument();
 
-		const description: HTMLElement | null = getByText('Test description about the NFT');
+			const description: HTMLElement | null = getByText('Test description about the NFT');
 
-		assertNonNullish(description);
+			assertNonNullish(description);
 
-		expect(description).toBeInTheDocument();
+			expect(description).toBeInTheDocument();
 
-		const standard: HTMLElement | null = getByText(mockNft.collection.standard.code);
+			const standard: HTMLElement | null = getByText(mockNft.collection.standard.code);
 
-		expect(standard).toBeInTheDocument();
+			expect(standard).toBeInTheDocument();
 
-		assertNonNullish(mockNft.collection.standard.version);
+			assertNonNullish(mockNft.collection.standard.version);
 
-		const standardVersion: HTMLElement | null = getByText(mockNft.collection.standard.version);
+			const standardVersion: HTMLElement | null = getByText(mockNft.collection.standard.version);
 
-		expect(standardVersion).toBeInTheDocument();
+			expect(standardVersion).toBeInTheDocument();
 
-		const address: HTMLElement | null = getByText(
-			shortenWithMiddleEllipsis({ text: mockNft.collection.address })
-		);
+			const address: HTMLElement | null = getByText(
+				shortenWithMiddleEllipsis({ text: mockNft.collection.address })
+			);
 
-		expect(address).toBeInTheDocument();
+			expect(address).toBeInTheDocument();
 
-		const network: HTMLElement | null = getByText(mockNft.collection.network.name);
+			const network: HTMLElement | null = getByText(mockNft.collection.network.name);
 
-		expect(network).toBeInTheDocument();
+			expect(network).toBeInTheDocument();
 
-		assertNonNullish(mockNft.imageUrl);
+			assertNonNullish(mockNft.imageUrl);
 
-		const imageUrl: HTMLElement | null = getByText(
-			shortenWithMiddleEllipsis({ text: mockNft.imageUrl, splitLength: 20 })
-		);
+			const imageUrl: HTMLElement | null = getByText(
+				shortenWithMiddleEllipsis({ text: mockNft.imageUrl, splitLength: 20 })
+			);
 
-		expect(imageUrl).toBeInTheDocument();
+			expect(imageUrl).toBeInTheDocument();
 
-		assertNonNullish(mockNft.acquiredAt);
+			assertNonNullish(mockNft.acquiredAt);
 
-		const acquired_at: HTMLElement | null = getByText(
-			formatSecondsToDate({
-				seconds: mockNft.acquiredAt.getTime() / 1000,
-				language: get(currentLanguage)
-			})
-		);
+			const acquired_at: HTMLElement | null = getByText(
+				formatSecondsToDate({
+					seconds: mockNft.acquiredAt.getTime() / 1000,
+					language: get(currentLanguage)
+				})
+			);
 
-		expect(acquired_at).toBeInTheDocument();
+			expect(acquired_at).toBeInTheDocument();
 
-		mockNft.attributes?.forEach((attr) => {
-			const attrTypeEl: HTMLElement | null = getByText(attr.traitType);
+			mockNft.attributes?.forEach((attr) => {
+				const attrTypeEl: HTMLElement | null = getByText(attr.traitType);
 
-			expect(attrTypeEl).toBeInTheDocument();
+				expect(attrTypeEl).toBeInTheDocument();
 
-			assertNonNullish(attr.value);
+				assertNonNullish(attr.value);
 
-			const attrValEl: HTMLElement | null = getByText(attr.value);
+				const attrValEl: HTMLElement | null = getByText(attr.value);
 
-			expect(attrValEl).toBeInTheDocument();
+				expect(attrValEl).toBeInTheDocument();
+			});
 		});
 	});
 
@@ -266,37 +268,41 @@ describe('NftHero', () => {
 		expect(firstBreadcrumElmt?.getAttribute('href')).not.toContain('network=');
 	});
 
-	it('should render the acquiredAt', () => {
-		const { queryByText } = render(NftHero, {
+	it('should render the acquiredAt', async () => {
+		const { getByText } = render(NftHero, {
 			props: {
 				nft: { ...mockValidErc1155Nft }
 			}
 		});
 
-		const acquired_at: HTMLElement | null = queryByText(
-			formatSecondsToDate({
-				seconds: (mockValidErc1155Nft.acquiredAt as Date).getTime() / 1000,
-				language: get(currentLanguage)
-			})
-		);
+		await waitFor(() => {
+			const acquired_at: HTMLElement | null = getByText(
+				formatSecondsToDate({
+					seconds: (mockValidErc1155Nft.acquiredAt as Date).getTime() / 1000,
+					language: get(currentLanguage)
+				})
+			);
 
-		expect(acquired_at).toBeInTheDocument();
+			expect(acquired_at).toBeInTheDocument();
+		});
 	});
 
-	it('should render a dash instead of the acquiredAt if the date is nullish or timestamp is 0', () => {
+	it('should render a dash instead of the acquiredAt if the date is nullish or timestamp is 0', async () => {
 		const { queryByText } = render(NftHero, {
 			props: {
 				nft: { ...mockValidErc1155Nft, acquiredAt: new Date(0) }
 			}
 		});
 
-		const acquired_at: HTMLElement | null = queryByText(
-			formatSecondsToDate({
-				seconds: (mockValidErc1155Nft.acquiredAt as Date).getTime() / 1000,
-				language: get(currentLanguage)
-			})
-		);
+		await waitFor(() => {
+			const acquired_at: HTMLElement | null = queryByText(
+				formatSecondsToDate({
+					seconds: (mockValidErc1155Nft.acquiredAt as Date).getTime() / 1000,
+					language: get(currentLanguage)
+				})
+			);
 
-		expect(acquired_at).not.toBeInTheDocument();
+			expect(acquired_at).not.toBeInTheDocument();
+		});
 	});
 });
