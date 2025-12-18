@@ -45,7 +45,11 @@ import {
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
-import type { Bridge, OptimalRate, SwapSide } from '@velora-dex/sdk';
+import {
+	mockVeloraBridgeSwapResponse,
+	mockVeloraDeltaSwapResponse
+} from '$tests/mocks/velora.mock';
+import type { OptimalRate, SwapSide } from '@velora-dex/sdk';
 
 describe('swap utils', () => {
 	const ICP_LP_FEE = 4271n;
@@ -390,25 +394,7 @@ describe('swap utils', () => {
 	describe('mapVeloraSwapResult', () => {
 		it('should map DeltaPrice swap result correctly (without bridgeInfo)', () => {
 			const mockDeltaSwap: DeltaSwapResponse = {
-				delta: {
-					srcToken: '0x123',
-					destToken: '0x456',
-					srcAmount: '1000',
-					destAmount: '900',
-					destAmountBeforeFee: '920',
-					gasCost: '50000',
-					gasCostBeforeFee: '48000',
-					gasCostUSD: '15.5',
-					gasCostUSDBeforeFee: '14.8',
-					srcUSD: '1000.0',
-					destUSD: '895.5',
-					destUSDBeforeFee: '915.2',
-					partner: 'PartnerName',
-					partnerFee: 0.25,
-					hmac: 'abcd1234',
-					bridge: {} as Bridge
-				},
-				deltaAddress: '0xdelta123'
+				...mockVeloraDeltaSwapResponse
 			};
 
 			const result = mapVeloraSwapResult(mockDeltaSwap);
@@ -421,32 +407,7 @@ describe('swap utils', () => {
 
 		it('should map BridgePrice swap result correctly (with bridgeInfo)', () => {
 			const mockBridgeSwap: DeltaSwapResponse = {
-				delta: {
-					srcToken: '0x123',
-					destToken: '0x456',
-					srcAmount: '1000',
-					destAmount: '900',
-					destAmountBeforeFee: '920',
-					gasCost: '50000',
-					gasCostBeforeFee: '48000',
-					gasCostUSD: '15.5',
-					gasCostUSDBeforeFee: '14.8',
-					srcUSD: '1000.0',
-					destUSD: '895.5',
-					destUSDBeforeFee: '915.2',
-					partner: 'PartnerName',
-					partnerFee: 0.25,
-					hmac: 'abcd1234',
-					bridge: {} as Bridge,
-					bridgeInfo: {
-						protocolName: 'Across',
-						destAmountAfterBridge: '800',
-						destUSDAfterBridge: '795.0',
-						fees: [],
-						estimatedTimeMs: 300000
-					}
-				},
-				deltaAddress: '0xdelta123'
+				...mockVeloraBridgeSwapResponse
 			};
 
 			const result = mapVeloraSwapResult(mockBridgeSwap);
