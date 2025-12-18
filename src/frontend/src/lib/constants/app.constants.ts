@@ -1,4 +1,3 @@
-import { browser } from '$app/environment';
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -128,7 +127,12 @@ export const GLDT_STAKE_CANISTER_ID = LOCAL
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
 
-const DOMAIN_URL_HOSTNAME = browser ? window.location.hostname : '';
+const DOMAIN_URL_HOSTNAME =
+	typeof window !== 'undefined'
+		? window.location.hostname
+		: typeof self !== 'undefined'
+			? self.location.hostname
+			: '';
 const IS_ICP_DOMAIN_URL = DOMAIN_URL_HOSTNAME.endsWith('.icp0.io');
 
 export const AUTH_ALTERNATIVE_ORIGINS = import.meta.env.VITE_AUTH_ALTERNATIVE_ORIGINS;
