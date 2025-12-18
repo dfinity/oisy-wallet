@@ -909,7 +909,7 @@
 	"scanner": {
 		"text": {
 			"scan_qr_code": "QR Code scannen",
-			"pay_to": "Bezahlung an $receipt",
+			"pay_to": "Zahlung an $receipt",
 			"powered_by": "",
 			"recipient": "Empfänger",
 			"name": "Name",
