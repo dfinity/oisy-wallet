@@ -11,6 +11,7 @@
 	import { MediaType } from '$lib/enums/media-type';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Option } from '$lib/types/utils';
+	import {getMediaType} from "$lib/utils/nfts.utils";
 
 	interface Props {
 		imageSrc: string;
@@ -22,7 +23,7 @@
 	// Value `undefined` means that we have not yet fetched the media type.
 	let mediaType = $state<Option<MediaType>>();
 
-	const getMediaType = async (mediaUrl: string): Promise<MediaType | null> => {
+	const fetchMediaType = async (mediaUrl: string): Promise<MediaType | null> => {
 		try {
 			const url = new URL(mediaUrl);
 
@@ -34,13 +35,9 @@
 				return null;
 			}
 
-			if (type.startsWith('image/') || type.startsWith('.gif')) {
-				return MediaType.Img;
-			}
+			return getMediaType(type) ?? null
 
-			if (type.startsWith('video/')) {
-				return MediaType.Video;
-			}
+
 		} catch (_: unknown) {
 			// The error here is caused by `fetch`, which can fail for various reasons (network error, CORS, DNS, etc).
 			// Empirically, it happens mostly for CORS policy block: we can't be sure that the media is valid or not.
@@ -51,7 +48,7 @@
 	};
 
 	const updateMediaType = async () => {
-		mediaType = await getMediaType(imageSrc);
+		mediaType = await fetchMediaType(imageSrc);
 	};
 
 	onMount(async () => {
