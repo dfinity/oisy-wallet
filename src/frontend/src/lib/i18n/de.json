@@ -915,7 +915,7 @@
 			"name": "Name",
 			"address": "Adresse",
 			"country": "Land",
-			"phone_number": "Telefon Number",
+			"phone_number": "Telefonnummer",
 			"email_address": "Email Adresse",
 			"website": "Webseite",
 			"enter_manually": "Manuell eingeben",
