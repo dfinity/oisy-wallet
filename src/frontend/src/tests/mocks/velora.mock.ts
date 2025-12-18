@@ -1,8 +1,8 @@
-import type { VeloraSwapDetails } from '$lib/types/swap';
+import type { DeltaSwapResponse, VeloraSwapDetails } from '$lib/types/swap';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { SwapSide } from '@paraswap/core/src/constants';
 import { ParaSwapVersion } from '@paraswap/core/src/types';
-import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
+import type { Bridge, BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
 
 const mockVeloraDeltaPrice: DeltaPrice = {
 	srcToken: mockEthAddress,
@@ -122,3 +122,58 @@ export const mockVeloraSwapDetails: VeloraSwapDetails = {
 	...mockVeloraBridgePrice,
 	...mockVeloraOptimalRate
 } as VeloraSwapDetails;
+
+export const mockVeloraDeltaSwapResponse: DeltaSwapResponse = {
+	delta: {
+		srcToken: '0x123',
+		destToken: '0x456',
+		srcAmount: '1000',
+		destAmount: '900',
+		destAmountBeforeFee: '920',
+		receivedDestAmount: '890',
+		receivedDestUSD: '910',
+		gasCost: '50000',
+		gasCostBeforeFee: '48000',
+		gasCostUSD: '15.5',
+		gasCostUSDBeforeFee: '14.8',
+		srcUSD: '1000.0',
+		destUSD: '895.5',
+		destUSDBeforeFee: '915.2',
+		partner: 'PartnerName',
+		partnerFee: 0.25,
+		hmac: 'abcd1234',
+		bridge: {} as Bridge
+	},
+	deltaAddress: '0xdelta123'
+};
+
+export const mockVeloraBridgeSwapResponse: DeltaSwapResponse = {
+	delta: {
+		srcToken: '0x123',
+		destToken: '0x456',
+		srcAmount: '1000',
+		destAmount: '900',
+		destAmountBeforeFee: '920',
+		receivedDestAmount: '890',
+		receivedDestUSD: '910',
+		gasCost: '50000',
+		gasCostBeforeFee: '48000',
+		gasCostUSD: '15.5',
+		gasCostUSDBeforeFee: '14.8',
+		srcUSD: '1000.0',
+		destUSD: '895.5',
+		destUSDBeforeFee: '915.2',
+		partner: 'PartnerName',
+		partnerFee: 0.25,
+		hmac: 'abcd1234',
+		bridge: {} as Bridge,
+		bridgeInfo: {
+			protocolName: 'Across',
+			destAmountAfterBridge: '800',
+			destUSDAfterBridge: '795.0',
+			fees: [],
+			estimatedTimeMs: 300000
+		}
+	},
+	deltaAddress: '0xdelta123'
+};
