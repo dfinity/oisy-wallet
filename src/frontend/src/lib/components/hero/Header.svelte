@@ -62,7 +62,7 @@
 
 			{#if UNIVERSAL_SCANNER_ENABLED}
 				<!-- TODO: Re-enable the scanner button when it includes WalletConnect -->
-				<!-- <Scanner />-->
+				<!-- <Scanner /> -->
 
 				<Pay />
 			{/if}
