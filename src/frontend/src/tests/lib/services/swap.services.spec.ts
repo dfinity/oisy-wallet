@@ -600,7 +600,7 @@ describe('swap.services', () => {
 				isGasless: true,
 				maxFeePerGas: BigInt(mockMaxFeePerGas),
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-				swapDetails: mockSwapDetails as VeloraSwapDetails
+				swapDetails: mockSwapDetails
 			});
 
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
@@ -625,7 +625,7 @@ describe('swap.services', () => {
 				isGasless: false,
 				maxFeePerGas: BigInt(mockMaxFeePerGas),
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-				swapDetails: mockSwapDetails as VeloraSwapDetails
+				swapDetails: mockSwapDetails
 			});
 
 			expect(mockProgress).not.toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
@@ -654,7 +654,7 @@ describe('swap.services', () => {
 				isGasless: false,
 				maxFeePerGas: BigInt(mockMaxFeePerGas),
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-				swapDetails: mockSwapDetails as VeloraSwapDetails
+				swapDetails: mockSwapDetails
 			});
 
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
