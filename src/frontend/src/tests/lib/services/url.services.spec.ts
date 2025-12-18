@@ -1,5 +1,6 @@
 import * as appEnvironment from '$app/environment';
-import { extractMediaUrls } from '$lib/services/url.services';
+import { MediaType } from '$lib/enums/media-type';
+import { extractMediaTypeAndSize, extractMediaUrls } from '$lib/services/url.services';
 import type { MockInstance } from 'vitest';
 
 describe('url.services', () => {
@@ -88,6 +89,112 @@ describe('url.services', () => {
 			global.fetch = mockFetch.mockRejectedValue(new Error('network error'));
 
 			await expect(extractMediaUrls(mockUrl)).resolves.toStrictEqual([]);
+		});
+	});
+
+	describe('extractMediaTypeAndSize', () => {
+		const mockUrl = 'https://example.com/test';
+
+		const mockSize = 123_456;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should return image media type and size for images', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type' ? 'image/png' : h === 'Content-Length' ? mockSize.toString() : null
+				}
+			});
+
+			await expect(extractMediaTypeAndSize(mockUrl)).resolves.toStrictEqual({
+				type: MediaType.Img,
+				size: mockSize
+			});
+		});
+
+		it('should return image media type and size for gif', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? '.gif;charset=utf-8'
+							: h === 'Content-Length'
+								? mockSize.toString()
+								: null
+				}
+			});
+
+			await expect(extractMediaTypeAndSize(mockUrl)).resolves.toStrictEqual({
+				type: MediaType.Img,
+				size: mockSize
+			});
+		});
+
+		it('should return video media type and size for video', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type' ? 'video/mp4' : h === 'Content-Length' ? mockSize.toString() : null
+				}
+			});
+
+			await expect(extractMediaTypeAndSize(mockUrl)).resolves.toStrictEqual({
+				type: MediaType.Video,
+				size: mockSize
+			});
+		});
+
+		it('should handle unmapped media types gracefully', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type' ? 'text/html' : h === 'Content-Length' ? mockSize.toString() : null
+				}
+			});
+
+			await expect(extractMediaTypeAndSize(mockUrl)).resolves.toStrictEqual({
+				type: MediaType.Other,
+				size: mockSize
+			});
+		});
+
+		it('should handle a missing content size', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) => (h === 'Content-Type' ? 'video/mp4' : null)
+				}
+			});
+
+			await expect(extractMediaTypeAndSize(mockUrl)).resolves.toStrictEqual({
+				type: MediaType.Video,
+				size: null
+			});
+		});
+
+		it('should handle fetching failures gracefully', async () => {
+			global.fetch = vi.fn().mockRejectedValueOnce(new Error('network error'));
+
+			await expect(extractMediaTypeAndSize(mockUrl)).resolves.toStrictEqual({
+				type: null,
+				size: null
+			});
+		});
+
+		it('should handle non-numeric content sizes gracefully', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type' ? 'image/png' : h === 'Content-Length' ? 'not-a-number' : null
+				}
+			});
+
+			await expect(extractMediaTypeAndSize(mockUrl)).resolves.toStrictEqual({
+				type: MediaType.Img,
+				size: null
+			});
 		});
 	});
 });
