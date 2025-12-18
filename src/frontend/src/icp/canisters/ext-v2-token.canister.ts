@@ -18,7 +18,14 @@ import { mapExtTokensListing, toUser } from '$icp/utils/ext-v2-token.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import {
+	Canister,
+	createServices,
+	isNullish,
+	nonNullish,
+	toNullable,
+	type QueryParams
+} from '@dfinity/utils';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { Principal } from '@icp-sdk/core/principal';
 
@@ -185,30 +192,40 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	> => {
 		const { metadata, ext_metadata } = this.caller({ certified });
 
-		const getMetadata = async (): Promise<Metadata | undefined> => {
+		const getMetadata = async () => {
 			try {
-				const response = await ext_metadata(token);
-
-				if ('ok' in response) {
-					return response.ok;
-				}
+				return await ext_metadata(token);
 			} catch (_: unknown) {
 				// Some legacy EXT canisters still do not support the new metadata endpoint.
 			}
 		};
 
-		const getLegacyMetadata = async (): Promise<MetadataLegacy | undefined> => {
+		const getLegacyMetadata = async () => {
 			try {
-				const response = await metadata(token);
-
-				if ('ok' in response) {
-					return response.ok;
-				}
+				return await metadata(token);
 			} catch (_: unknown) {
 				// Some new EXT canisters still do not support the legacy metadata endpoint.
 			}
 		};
 
-		return (await getMetadata()) ?? (await getLegacyMetadata());
+		const response = await getMetadata();
+
+		if (nonNullish(response) && 'ok' in response) {
+			return response.ok;
+		}
+
+		const legacyResponse = await getLegacyMetadata();
+
+		if (nonNullish(legacyResponse) && 'ok' in legacyResponse) {
+			return legacyResponse.ok;
+		}
+
+		const mergedResponse = response ?? legacyResponse;
+
+		if (isNullish(mergedResponse)) {
+			return;
+		}
+
+		throw mapExtV2TokenCommonError(mergedResponse.err);
 	};
 }

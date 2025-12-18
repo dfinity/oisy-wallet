@@ -511,6 +511,43 @@ describe('ext-v2-token.canister', () => {
 			expect(service.metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
 		});
 
+		it('should fall back to the legacy metadata method if the first returns an error response', async () => {
+			service.ext_metadata.mockResolvedValue({
+				err: { InvalidToken: mockExtV2TokenIdentifier }
+			});
+			service.metadata.mockResolvedValue({ ok: mockExtLegacyMetadata });
+
+			const { metadata } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			const res = await metadata(mockParams);
+
+			expect(res).toEqual(mockExtLegacyMetadata);
+			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
+			expect(service.metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
+		});
+
+		it('should use the response error from the first method and not from the legacy one', async () => {
+			service.ext_metadata.mockResolvedValue({
+				err: { Other: 'first method error' }
+			});
+			service.metadata.mockResolvedValue({
+				err: { InvalidToken: mockExtV2TokenIdentifier }
+			});
+
+			const { metadata } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			await expect(metadata(mockParams)).rejects.toThrowError(
+				new CanisterInternalError('first method error')
+			);
+
+			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
+			expect(service.metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
+		});
+
 		it('should handle gracefully both methods failing', async () => {
 			service.ext_metadata.mockRejectedValue(new Error('ext_metadata not supported'));
 			service.metadata.mockRejectedValue(new Error('metadata not supported'));
@@ -535,7 +572,9 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(metadata(mockParams)).resolves.toBeUndefined();
+			await expect(metadata(mockParams)).rejects.toThrowError(
+				new CanisterInternalError(`The specified token is invalid: ${mockExtV2TokenIdentifier}`)
+			);
 
 			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
 		});
@@ -549,7 +588,9 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(metadata(mockParams)).resolves.toBeUndefined();
+			await expect(metadata(mockParams)).rejects.toThrowError(
+				new CanisterInternalError('other error')
+			);
 
 			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
 		});
@@ -562,7 +603,9 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(metadata(mockParams)).resolves.toBeUndefined();
+			await expect(metadata(mockParams)).rejects.toThrowError(
+				new CanisterInternalError('Unknown ExtV2TokenCanisterError')
+			);
 
 			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
 		});
