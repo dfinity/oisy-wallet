@@ -177,5 +177,15 @@
 		"fee": {
 			"__bigint__": "100000"
 		}
+	},
+	"OHSHII": {
+		"ledgerCanisterId": "7rrmx-tyaaa-aaaal-qsraq-cai",
+		"indexCanisterId": "7yshl-fqaaa-aaaal-qsrba-cai",
+		"decimals": 8,
+		"name": "OhShii",
+		"symbol": "OHSHII",
+		"fee": {
+			"__bigint__": "1000000"
+		}
 	}
 }
