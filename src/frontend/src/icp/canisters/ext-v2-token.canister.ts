@@ -18,7 +18,7 @@ import { mapExtTokensListing, toUser } from '$icp/utils/ext-v2-token.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices, isNullish, toNullable, type QueryParams } from '@dfinity/utils';
+import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { Principal } from '@icp-sdk/core/principal';
 
@@ -185,32 +185,30 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	> => {
 		const { metadata, ext_metadata } = this.caller({ certified });
 
-		const getMetadata = async () => {
+		const getMetadata = async (): Promise<Metadata | undefined> => {
 			try {
-				return await ext_metadata(token);
+				const response = await ext_metadata(token);
+
+				if ('ok' in response) {
+					return response.ok;
+				}
 			} catch (_: unknown) {
 				// Some legacy EXT canisters still do not support the new metadata endpoint.
 			}
 		};
 
-		const getLegacyMetadata = async () => {
+		const getLegacyMetadata = async (): Promise<MetadataLegacy | undefined> => {
 			try {
-				return await metadata(token);
+				const response = await metadata(token);
+
+				if ('ok' in response) {
+					return response.ok;
+				}
 			} catch (_: unknown) {
 				// Some new EXT canisters still do not support the legacy metadata endpoint.
 			}
 		};
 
-		const response = (await getMetadata()) ?? (await getLegacyMetadata());
-
-		if (isNullish(response)) {
-			return;
-		}
-
-		if ('ok' in response) {
-			return response.ok;
-		}
-
-		throw mapExtV2TokenCommonError(response.err);
+		return (await getMetadata()) ?? (await getLegacyMetadata());
 	};
 }
