@@ -7,7 +7,6 @@ import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.et
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { MediaType } from '$lib/enums/media-type';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
@@ -22,7 +21,6 @@ import {
 	getEnabledNfts,
 	getMediaStatus,
 	getMediaStatusOrCache,
-	getMediaType,
 	getNftCollectionUi,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
@@ -788,22 +786,6 @@ describe('nfts.utils', () => {
 			});
 
 			expect(result).toBeUndefined();
-		});
-	});
-
-	describe('getMediaType', () => {
-		it('should return image for image content type', () => {
-			expect(getMediaType('image/png')).toBe(MediaType.Img);
-
-			expect(getMediaType('.gif;charset=utf-8')).toBe(MediaType.Img);
-		});
-
-		it('should return video for video content type', () => {
-			expect(getMediaType('video/mp4')).toBe(MediaType.Video);
-		});
-
-		it('should return undefined for another content type', () => {
-			expect(getMediaType('text/html')).toBeUndefined();
 		});
 	});
 
