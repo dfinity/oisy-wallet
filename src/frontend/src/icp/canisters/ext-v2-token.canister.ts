@@ -18,7 +18,14 @@ import { mapExtTokensListing, toUser } from '$icp/utils/ext-v2-token.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices, isNullish, toNullable, type QueryParams } from '@dfinity/utils';
+import {
+	Canister,
+	createServices,
+	isNullish,
+	nonNullish,
+	toNullable,
+	type QueryParams
+} from '@dfinity/utils';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { Principal } from '@icp-sdk/core/principal';
 
@@ -201,16 +208,24 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 			}
 		};
 
-		const response = (await getMetadata()) ?? (await getLegacyMetadata());
+		const response = await getMetadata();
 
-		if (isNullish(response)) {
-			return;
-		}
-
-		if ('ok' in response) {
+		if (nonNullish(response) && 'ok' in response) {
 			return response.ok;
 		}
 
-		throw mapExtV2TokenCommonError(response.err);
+		const legacyResponse = await getLegacyMetadata();
+
+		if (nonNullish(legacyResponse) && 'ok' in legacyResponse) {
+			return legacyResponse.ok;
+		}
+
+		const error = response?.err ?? legacyResponse?.err;
+
+		if (isNullish(error)) {
+			return;
+		}
+
+		throw mapExtV2TokenCommonError(error);
 	};
 }
