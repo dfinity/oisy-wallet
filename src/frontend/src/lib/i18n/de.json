@@ -1062,25 +1062,25 @@
 	},
 	"pay": {
 		"text": {
-			"pay": "",
-			"dialog_title": "",
-			"dialog_description": "",
-			"dialog_button": "",
-			"where_you_can_pay": "",
-			"request_payment_details": "",
-			"creating_transaction": "",
-			"signing_transaction": "",
-			"paying": ""
+			"pay": "Bezahlen",
+			"dialog_title": "Bezahlen mit $oisy_name",
+			"dialog_description": "Mit $oisy_name schnell und einfach bezahlen mit Tokens aus verschiedenen Netzwerken. In jedem Laden der <span class=\"font-bold\">Open&nbsp;CryptoPay</span> anbietet, einfach den Bezahlungs QR Code scannen. Wähle das gewünschte Token aus und bestätige die Zahlung.",
+			"dialog_button": "Bezahle mit $oisy_short",
+			"where_you_can_pay": "Siehe wo du überall mit $oisy_name bezahlen kannst",
+			"request_payment_details": "Zahlungsinformationen anfordern...",
+			"creating_transaction": "Transaktion erstellen...",
+			"signing_transaction": "Transaktion signieren...",
+			"paying": "Zahlung ausführen..."
 		},
 		"error": {
-			"data_is_incompleted": "",
-			"amount_does_not_match": "",
-			"recipient_address_is_not_valid": "",
-			"token_address_mismatch": ""
+			"data_is_incompleted": "Die empfangenen Daten sind unvollständig. Bitte versuche es erneut.",
+			"amount_does_not_match": "Der Betrag der benötigten Anzahl Tokens hat sich nachträglich geändert und die Transaktion wurde sicherheitshalber storniert.",
+			"recipient_address_is_not_valid": "Die erhaltenen Empfängeradresse ist nicht gülltig.",
+			"token_address_mismatch": "Das zur Zahlung freigegebene Token passt nicht zum geforderten Token."
 		},
 		"alt": {
-			"pay": "",
-			"where_you_can_pay": ""
+			"pay": "Dialog mit Informationen wie man bezahlt",
+			"where_you_can_pay": "Öffne die Open&nbsp;CryptoPay Webseite um nachzusehen, wo du überall bezahlen kannst."
 		}
 	},
 	"tokens": {
