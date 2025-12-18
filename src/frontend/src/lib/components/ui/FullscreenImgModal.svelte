@@ -11,7 +11,7 @@
 	import { MediaType } from '$lib/enums/media-type';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Option } from '$lib/types/utils';
-	import {getMediaType} from "$lib/utils/nfts.utils";
+	import { getMediaType } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		imageSrc: string;
@@ -35,9 +35,7 @@
 				return null;
 			}
 
-			return getMediaType(type) ?? null
-
-
+			return getMediaType(type) ?? null;
 		} catch (_: unknown) {
 			// The error here is caused by `fetch`, which can fail for various reasons (network error, CORS, DNS, etc).
 			// Empirically, it happens mostly for CORS policy block: we can't be sure that the media is valid or not.
