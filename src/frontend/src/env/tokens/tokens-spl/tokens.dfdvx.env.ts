@@ -14,7 +14,7 @@ export const DFDVX_TOKEN_ID: TokenId = parseTokenId(DFDVX_SYMBOL);
 export const DFDVX_TOKEN: RequiredSpl2022Token = {
 	id: DFDVX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'DFDV xStock',
 	symbol: DFDVX_SYMBOL,

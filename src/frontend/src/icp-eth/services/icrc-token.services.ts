@@ -38,7 +38,7 @@ const findCustomToken = ({
  * @param {OptionIdentity} params.identity - The user's identity.
  * @returns {Promise<{ result: 'loaded' | 'skipped' | 'error' }>} The result of the operation.
  */
-export const autoLoadCustomToken = async ({
+export const autoLoadIcrcToken = async ({
 	icrcCustomTokens,
 	sendToken,
 	identity
@@ -51,7 +51,7 @@ export const autoLoadCustomToken = async ({
 		tokens: icrcCustomTokens,
 		sendToken: sendToken as Erc20Token,
 		identity,
-		expectedSendTokenStandard: 'erc20',
+		expectedSendTokenStandard: { code: 'erc20' },
 		assertSendTokenData: assertErc20SendTokenData,
 		findToken: findCustomToken,
 		setToken: setCustomToken,

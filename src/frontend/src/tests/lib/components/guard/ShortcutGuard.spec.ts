@@ -1,7 +1,6 @@
 import ShortcutGuard from '$lib/components/guard/ShortcutGuard.svelte';
 import { isPrivacyMode } from '$lib/derived/settings.derived';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
-import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -14,7 +13,7 @@ describe('ShortcutGuard', () => {
 		});
 
 		it('should turn on and off privacy mode on keyboard click', () => {
-			render(ShortcutGuard, { children: mockSnippet });
+			render(ShortcutGuard);
 
 			expect(get(isPrivacyMode)).toBeFalsy();
 
@@ -28,7 +27,7 @@ describe('ShortcutGuard', () => {
 		});
 
 		it('should not turn on privacy mode when typing in input field', () => {
-			render(ShortcutGuard, { children: mockSnippet });
+			render(ShortcutGuard);
 
 			const input = document.createElement('input');
 			document.body.appendChild(input);
@@ -42,7 +41,7 @@ describe('ShortcutGuard', () => {
 		});
 
 		it('should not turn on privacy mode when ctrl + p is pressed', () => {
-			render(ShortcutGuard, { children: mockSnippet });
+			render(ShortcutGuard);
 
 			expect(get(isPrivacyMode)).toBeFalsy();
 

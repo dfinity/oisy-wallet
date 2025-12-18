@@ -175,7 +175,7 @@ describe('ext.services', () => {
 						id: (tokens ?? [])[0].data.id,
 						version: 1n,
 						enabled: true,
-						standard: 'extV2',
+						standard: { code: 'ext', version: 'v2' },
 						category: 'custom',
 						canisterId: mockCanisterId,
 						symbol: mockCanisterId,
@@ -193,7 +193,7 @@ describe('ext.services', () => {
 					data: {
 						...EXT_BUILTIN_TOKENS[0],
 						id: parseTokenId('mockToken'),
-						standard: 'extV2',
+						standard: { code: 'ext' },
 						enabled: true
 					},
 					certified: false

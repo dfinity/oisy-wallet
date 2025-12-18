@@ -210,6 +210,10 @@ export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_LOST_IDENTITY_BUTTON = 'help-auth-lost-identity-button';
 export const HELP_AUTH_SECURITY_BUTTON = 'help-auth-security-button';
 export const HELP_AUTH_GOT_CONFUSED_BUTTON = 'help-auth-got-confused-button';
+export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';
+export const HELP_AUTH_COULD_NOT_ENTER_IDENTITY_NUMBER_BUTTON =
+	'help-auth-could-not-enter-identity-number-button';
+export const HELP_AUTH_NO_SIGN_UP_NEEDED_BUTTON = 'help-auth-no-signup-needed-button';
 export const HELP_AUTH_OTHER_BUTTON = 'help-auth-other-button';
 export const HELP_AUTH_IDENTITY_IMAGE_BANNER = 'help-auth-identity-image-banner';
 export const HELP_AUTH_LEGACY_SIGN_IN_BUTTON = 'help-auth-legacy-sign-in-button';

@@ -99,7 +99,7 @@ const loadCustomTokensWithMetadata = async (
 					id: parseTokenId(symbol),
 					canisterId: canisterIdText,
 					symbol,
-					standard: 'extV2' as const,
+					standard: { code: 'ext' as const, version: 'v2' },
 					category: 'custom' as const,
 					enabled,
 					version,

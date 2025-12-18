@@ -44,7 +44,7 @@ describe('TokenModalContent', () => {
 		expect(getByText(mockValidIcrcToken.name)).toBeInTheDocument();
 
 		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
-		expect(getByText(mockValidIcrcToken.standard)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.standard.code)).toBeInTheDocument();
 
 		expect(getByText(en.tokens.import.text.index_canister_id)).toBeInTheDocument();
 		expect(getByText(mockIndexCanisterId)).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe('TokenModalContent', () => {
 		expect(getByText(mockValidIcrcToken.name)).toBeInTheDocument();
 
 		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
-		expect(getByText(mockValidIcrcToken.standard)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.standard.code)).toBeInTheDocument();
 
 		expect(getByText(en.tokens.import.text.index_canister_id)).toBeInTheDocument();
 		expect(getByText(en.tokens.details.missing_index_canister_id_label)).toBeInTheDocument();

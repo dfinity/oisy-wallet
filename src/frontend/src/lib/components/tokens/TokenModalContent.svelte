@@ -147,7 +147,7 @@
 					{/snippet}
 
 					{#snippet content()}
-						{token.standard}
+						{token.standard.code}
 					{/snippet}
 				</ModalListItem>
 			{/if}

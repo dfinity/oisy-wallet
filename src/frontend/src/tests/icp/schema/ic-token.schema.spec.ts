@@ -25,7 +25,7 @@ describe('ic-token.schema', () => {
 	const mockToken = {
 		id: parseTokenId('Test'),
 		network: mockNetwork,
-		standard: 'icp',
+		standard: { code: 'icp' },
 		category: 'default',
 		name: 'SampleToken',
 		symbol: 'STK',

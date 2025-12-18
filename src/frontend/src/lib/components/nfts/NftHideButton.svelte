@@ -52,7 +52,7 @@
 				token_name: token.name,
 				token_address: getNftIdentifier(token),
 				token_network: token.network.name,
-				token_standard: token.standard,
+				token_standard: token.standard.code,
 				result_status: status
 			}
 		});

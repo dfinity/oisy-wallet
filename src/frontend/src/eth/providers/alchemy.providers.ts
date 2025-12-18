@@ -13,12 +13,11 @@ import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { i18n } from '$lib/stores/i18n.store';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { Nft, NftAttribute, NftId, NonFungibleToken, OwnedContract } from '$lib/types/nft';
-import type { TokenStandard } from '$lib/types/token';
+import type { Nft, NftId, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
-import type { Option } from '$lib/types/utils';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { getMediaStatusOrCache, mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
@@ -141,37 +140,6 @@ export class AlchemyProvider {
 		});
 	}
 
-	private mapAttributes = (
-		attributes:
-			| {
-					trait_type: string;
-					value: Option<string | number>;
-			  }[]
-			| Record<string, Option<string | number>>
-			| undefined
-			| null
-	): NftAttribute[] => {
-		if (isNullish(attributes)) {
-			return [];
-		}
-
-		if (Array.isArray(attributes)) {
-			return attributes.map(({ trait_type: traitType, value }) => ({
-				traitType,
-				...(nonNullish(value) && { value: value.toString() })
-			}));
-		}
-
-		if (typeof attributes === 'object') {
-			return Object.entries(attributes).map(([traitType, value]) => ({
-				traitType,
-				...(nonNullish(value) && { value: value.toString() })
-			}));
-		}
-
-		return [];
-	};
-
 	private mapNftFromRpc = async ({
 		nft: {
 			tokenId,
@@ -190,7 +158,7 @@ export class AlchemyProvider {
 		nft: Omit<OwnedNft, 'balance'> & Partial<Pick<OwnedNft, 'balance'>>;
 		token: NonFungibleToken;
 	}): Promise<Nft> => {
-		const mappedAttributes = this.mapAttributes(attributes);
+		const mappedAttributes = mapNftAttributes(attributes);
 
 		const mediaStatus = {
 			image: await getMediaStatusOrCache(image?.originalUrl),
@@ -303,9 +271,9 @@ export class AlchemyProvider {
 		return result.contracts.reduce<OwnedContract[]>((acc, ownedContract) => {
 			const tokenStandard =
 				ownedContract.tokenType === 'ERC721'
-					? 'erc721'
+					? ('erc721' as const)
 					: ownedContract.tokenType === 'ERC1155'
-						? 'erc1155'
+						? ('erc1155' as const)
 						: undefined;
 			if (isNullish(tokenStandard)) {
 				return acc;
@@ -314,7 +282,7 @@ export class AlchemyProvider {
 			const newContract = {
 				address: ownedContract.address,
 				isSpam: ownedContract.isSpam,
-				standard: tokenStandard as TokenStandard
+				standard: tokenStandard
 			};
 			acc.push(newContract);
 

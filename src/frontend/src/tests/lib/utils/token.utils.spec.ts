@@ -12,7 +12,7 @@ import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { StakeBalances } from '$lib/types/stake-balance';
-import type { TokenStandard } from '$lib/types/token';
+import type { TokenStandardCode } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
@@ -34,7 +34,7 @@ import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 
 const tokenDecimals = 8;
-const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
+const tokenStandards: TokenStandardCode[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
 
 const balance = 1000000000n;
 const fee = 10000000n;
@@ -51,7 +51,7 @@ describe('token.utils', () => {
 					balance,
 					fee,
 					tokenDecimals,
-					tokenStandard
+					tokenStandard: { code: tokenStandard }
 				});
 
 				expect(result).toBe((Number(balance - fee) / 10 ** tokenDecimals).toString());
@@ -64,7 +64,7 @@ describe('token.utils', () => {
 					fee: balance,
 					balance: fee,
 					tokenDecimals,
-					tokenStandard
+					tokenStandard: { code: tokenStandard }
 				});
 
 				expect(result).toBe('0');
@@ -77,7 +77,7 @@ describe('token.utils', () => {
 					balance: undefined,
 					fee: undefined,
 					tokenDecimals,
-					tokenStandard
+					tokenStandard: { code: tokenStandard }
 				});
 
 				expect(result).toBe('0');
@@ -90,7 +90,7 @@ describe('token.utils', () => {
 					balance: undefined,
 					fee,
 					tokenDecimals,
-					tokenStandard
+					tokenStandard: { code: tokenStandard }
 				});
 
 				expect(result).toBe('0');
@@ -99,7 +99,7 @@ describe('token.utils', () => {
 					balance,
 					fee: undefined,
 					tokenDecimals,
-					tokenStandard
+					tokenStandard: { code: tokenStandard }
 				});
 
 				expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
@@ -111,7 +111,7 @@ describe('token.utils', () => {
 				balance,
 				fee,
 				tokenDecimals,
-				tokenStandard: 'erc20'
+				tokenStandard: { code: 'erc20' }
 			});
 
 			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
@@ -122,7 +122,7 @@ describe('token.utils', () => {
 				balance,
 				fee,
 				tokenDecimals,
-				tokenStandard: 'spl'
+				tokenStandard: { code: 'spl' }
 			});
 
 			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());

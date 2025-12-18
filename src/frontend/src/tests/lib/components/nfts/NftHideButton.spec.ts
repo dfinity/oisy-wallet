@@ -126,7 +126,7 @@ describe('NftHideButton', () => {
 				token_name: mockToken.name,
 				token_address: mockToken.address,
 				token_network: mockToken.network.name,
-				token_standard: mockToken.standard,
+				token_standard: mockToken.standard.code,
 				result_status: 'success'
 			}
 		});
@@ -153,7 +153,7 @@ describe('NftHideButton', () => {
 				token_name: mockToken.name,
 				token_address: mockToken.address,
 				token_network: mockToken.network.name,
-				token_standard: mockToken.standard,
+				token_standard: mockToken.standard.code,
 				result_status: 'success'
 			}
 		});
@@ -189,7 +189,7 @@ describe('NftHideButton', () => {
 				token_name: mockToken.name,
 				token_address: mockToken.address,
 				token_network: mockToken.network.name,
-				token_standard: mockToken.standard,
+				token_standard: mockToken.standard.code,
 				result_status: 'success'
 			}
 		});

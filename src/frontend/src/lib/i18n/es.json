@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,6 +118,7 @@
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
 			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena"
@@ -145,14 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "¿Tienes problemas con la autenticación?",
-				"description": "Notamos que cancelaste la autenticación con Internet Identity. Nos encantaría entender qué pasó para poder mejorar tu experiencia.",
-				"subtitle": "¿Alguna de las siguientes opciones causó el problema?",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "Perdí mi número de Internet Identity",
 				"security": "Me preocupaba la seguridad o la privacidad",
-				"got_confused": "Me confundí durante el proceso",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "Otro...",
-				"feedback_text": "Tus comentarios nos ayudan a mejorar la billetera.",
+				"feedback_text": "",
 				"thanks_text": "¡Gracias!",
 				"identity_new_identity": "$oisy_short Wallet cambia el dominio de Internet Identity a: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"identity_legacy_description": "Como resultado, tu número de Internet Identity podría no aparecer automáticamente, y puede que necesites volver a introducirlo.",
@@ -930,10 +934,13 @@
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
 			"pay_at_failure": "",
-			"try_again": ""
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1288,7 +1295,8 @@
 			"learn_more": "Saber más",
 			"token_id": "ID del Token",
 			"go_to_collection": "Ir a la colección",
-			"could_not_update_section": "No se pudo actualizar la sección de la colección. Por favor, inténtalo de nuevo"
+			"could_not_update_section": "No se pudo actualizar la sección de la colección. Por favor, inténtalo de nuevo",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Aún no hay NFTs",
@@ -1781,6 +1789,7 @@
 			},
 			"title": "",
 			"instruction": "Al hacer clic en este botón, aceptas los $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
