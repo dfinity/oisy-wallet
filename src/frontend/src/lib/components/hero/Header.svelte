@@ -10,7 +10,6 @@
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import Pay from '$lib/components/pay/Pay.svelte';
-	import Scanner from '$lib/components/scanner/Scanner.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.constants';
@@ -62,7 +61,8 @@
 			<WalletConnect />
 
 			{#if UNIVERSAL_SCANNER_ENABLED}
-				<Scanner />
+				<!-- TODO: Re-enable the scanner button when it includes WalletConnect -->
+				<!-- <Scanner />-->
 
 				<Pay />
 			{/if}
