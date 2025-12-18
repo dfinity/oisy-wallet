@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,6 +118,7 @@
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
 			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain"
@@ -145,14 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "Máte problémy s ověřením?",
-				"description": "Všimli jsme si, že jste zrušili ověření pomocí Internet Identity. Rádi bychom pochopili, co se stalo, abychom mohli váš zážitek vylepšit.",
-				"subtitle": "Způsobila problém některá z následujících příčin?",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "Ztratil jsem své číslo Internet Identity",
 				"security": "Měl jsem obavy o bezpečnost nebo soukromí",
-				"got_confused": "Během procesu jsem se ztratil",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "Jiné...",
-				"feedback_text": "Vaše zpětná vazba nám pomáhá vylepšovat peněženku.",
+				"feedback_text": "",
 				"thanks_text": "Děkuji!",
 				"identity_new_identity": "Peněženka $oisy_short přepíná doménu Internet Identity na: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"identity_legacy_description": "V důsledku toho se vaše číslo Internet Identity nemusí objevit automaticky a možná jej budete muset zadat znovu.",
@@ -930,10 +934,13 @@
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
 			"pay_at_failure": "",
-			"try_again": ""
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1064,6 +1071,12 @@
 			"creating_transaction": "",
 			"signing_transaction": "",
 			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1282,7 +1295,8 @@
 			"learn_more": "Zjistěte více",
 			"token_id": "Token ID",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Zatím žádné NFT",
@@ -1775,6 +1789,7 @@
 			},
 			"title": "",
 			"instruction": "Kliknutím na toto tlačítko souhlasíte s $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

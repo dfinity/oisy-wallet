@@ -13,7 +13,7 @@ import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 const assertIcrcSendTokenData = (sendToken: IcCkToken): AutoLoadTokenResult | undefined => {
-	if (sendToken.twinToken?.standard !== 'erc20') {
+	if (sendToken.twinToken?.standard.code !== 'erc20') {
 		return { result: 'skipped' };
 	}
 };
@@ -44,7 +44,7 @@ const findUserToken = ({
  * @param {OptionIdentity} params.identity - The user's identity.
  * @returns {Promise<{ result: 'loaded' | 'skipped' | 'error' }>} The result of the operation.
  */
-export const autoLoadUserToken = async ({
+export const autoLoadErc20Token = async ({
 	erc20UserTokens,
 	sendToken,
 	identity
@@ -57,7 +57,7 @@ export const autoLoadUserToken = async ({
 		tokens: erc20UserTokens,
 		sendToken: sendToken as IcCkToken,
 		identity,
-		expectedSendTokenStandard: 'icrc',
+		expectedSendTokenStandard: { code: 'icrc' },
 		assertSendTokenData: assertIcrcSendTokenData,
 		findToken: findUserToken,
 		setToken: setUserToken,

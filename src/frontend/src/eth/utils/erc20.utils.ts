@@ -13,7 +13,7 @@ type MapErc20TokenParams = Erc20Contract &
 
 export const mapErc20Token = ({ id, symbol, name, ...rest }: MapErc20TokenParams): Erc20Token => ({
 	id: id ?? parseTokenId(symbol),
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	name,
 	symbol,
 	icon: mapErc20Icon(symbol),
@@ -28,7 +28,7 @@ export const mapErc20UserToken = ({
 	...rest
 }: MapErc20TokenParams & UserTokenState): Erc20UserToken => ({
 	id: id ?? parseTokenId(`user-token#${symbol}#${network.chainId}`),
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	name,
 	symbol,
 	icon: mapErc20Icon(symbol),
@@ -47,10 +47,10 @@ export const mapErc20Icon = (symbol: string): string | undefined => {
 	}
 };
 
-export const isTokenErc20 = (token: Token): token is Erc20Token => token.standard === 'erc20';
+export const isTokenErc20 = (token: Token): token is Erc20Token => token.standard.code === 'erc20';
 
 export const isTokenEthereumUserToken = (token: Token): token is EthereumUserToken =>
-	(token.standard === 'ethereum' || isTokenErc20(token)) && isTokenToggleable(token);
+	(token.standard.code === 'ethereum' || isTokenErc20(token)) && isTokenToggleable(token);
 
 export const isTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
 	isTokenErc20(token) && isTokenToggleable(token) && 'address' in token && 'exchange' in token;

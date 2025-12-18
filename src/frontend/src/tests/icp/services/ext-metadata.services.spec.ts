@@ -3,6 +3,7 @@ import { metadata as metadataApi } from '$icp/api/ext-v2-token.api';
 import { getExtMetadata } from '$icp/services/ext-metadata.services';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
 import type { NftMetadataWithoutId } from '$lib/types/nft';
+import { mapNftAttributes } from '$lib/utils/nft.utils';
 import {
 	mockExtDecodedMetadata,
 	mockExtLegacyMetadata,
@@ -36,7 +37,7 @@ describe('ext-metadata.services', () => {
 			description: mockExtParsedMetadata.description,
 			imageUrl: mockExtParsedMetadata.url,
 			thumbnailUrl: mockExtParsedMetadata.thumb,
-			attributes: mockExtParsedMetadata.attributes
+			attributes: mapNftAttributes(mockExtParsedMetadata.attributes)
 		};
 
 		beforeEach(() => {

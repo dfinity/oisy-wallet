@@ -14,7 +14,7 @@ export const ACNX_TOKEN_ID: TokenId = parseTokenId(ACNX_SYMBOL);
 export const ACNX_TOKEN: RequiredSpl2022Token = {
 	id: ACNX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Accenture xStock',
 	symbol: ACNX_SYMBOL,

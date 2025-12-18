@@ -14,7 +14,7 @@ export const TRUMP_TOKEN_ID: TokenId = parseTokenId(TRUMP_SYMBOL);
 export const TRUMP_TOKEN: RequiredSplToken = {
 	id: TRUMP_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'OFFICIAL TRUMP',
 	symbol: TRUMP_SYMBOL,

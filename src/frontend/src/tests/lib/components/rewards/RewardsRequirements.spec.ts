@@ -18,10 +18,17 @@ describe('RewardsRequirements', () => {
 	const [firstCampaign] = mockCampaignEligibilities;
 	assertNonNullish(firstCampaign);
 
+	const props = {
+		hasNetworkBonus: false,
+		networkBonusMultiplier: 3 as const,
+		reward: mockRewardCampaigns[0]
+	};
+
 	describe('IsEligible', () => {
 		it('should not render badge if not eligible', () => {
 			const { queryByText } = render(RewardsRequirements, {
 				props: {
+					...props,
 					isEligible: false,
 					criteria: firstCampaign.criteria
 				}
@@ -33,6 +40,7 @@ describe('RewardsRequirements', () => {
 		it('should render badge if eligible', () => {
 			const { queryByText } = render(RewardsRequirements, {
 				props: {
+					...props,
 					isEligible: true,
 					criteria: firstCampaign.criteria
 				}
@@ -49,6 +57,7 @@ describe('RewardsRequirements', () => {
 		it('should render all requirements', () => {
 			const { container } = render(RewardsRequirements, {
 				props: {
+					...props,
 					isEligible: false,
 					criteria: firstCampaign.criteria
 				}

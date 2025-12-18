@@ -13,7 +13,7 @@ export const DAI_TOKEN_ID: TokenId = parseTokenId(DAI_SYMBOL);
 export const DAI_TOKEN: RequiredAdditionalErc20Token = {
 	id: DAI_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Dai Stablecoin',
 	symbol: DAI_SYMBOL,

@@ -135,7 +135,7 @@ describe('icrc.services', () => {
 						name: mockName,
 						network: ICP_NETWORK,
 						position: 4,
-						standard: 'icrc',
+						standard: { code: 'icrc' },
 						symbol: mockSymbol,
 						version: fromNullable(mockCustomToken.version)
 					})

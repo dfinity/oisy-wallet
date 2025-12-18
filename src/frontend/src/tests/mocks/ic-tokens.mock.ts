@@ -23,18 +23,18 @@ export const mockValidIcToken: IcToken = {
 export const mockValidIcrcToken: IcToken = {
 	...mockValidIcToken,
 	id: parseTokenId('IcrcTokenId'),
-	standard: 'icrc'
+	standard: { code: 'icrc' }
 };
 
 export const mockValidDip20Token: IcToken = {
 	...mockValidIcToken,
 	id: parseTokenId('Dip20TokenId'),
-	standard: 'dip20'
+	standard: { code: 'dip20' }
 };
 
 export const mockValidIcCkToken: IcCkToken = {
 	...mockValidIcToken,
-	twinToken: { ...mockValidToken, standard: 'erc20' },
+	twinToken: { ...mockValidToken, standard: { code: 'erc20' } },
 	feeLedgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
 	minterCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
 };

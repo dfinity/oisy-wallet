@@ -11,7 +11,7 @@ describe('ext-token.schema', () => {
 	const mockToken = {
 		id: parseTokenId('Test'),
 		network: ICP_NETWORK,
-		standard: 'extV2',
+		standard: { code: 'ext' },
 		category: 'default',
 		name: 'SampleToken',
 		symbol: 'STK',

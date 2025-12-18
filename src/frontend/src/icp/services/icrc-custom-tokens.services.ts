@@ -57,7 +57,7 @@ const mapIcrcCustomToken = ({
 	symbol,
 	exchangeCoinId: undefined,
 	position: Number.MAX_VALUE,
-	standard: 'icrc',
+	standard: { code: 'icrc' },
 	category: 'custom',
 	fee,
 	alternativeName,

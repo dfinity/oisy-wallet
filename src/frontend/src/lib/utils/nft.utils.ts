@@ -1,18 +1,20 @@
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
-import { isTokenExtV2 } from '$icp/utils/ext.utils';
+import { isTokenExt } from '$icp/utils/ext.utils';
 import type { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type {
 	Nft,
+	NftAttribute,
 	NonFungibleToken,
 	NonFungibleTokenIdentifier,
 	NonFungibleTokensByNetwork
 } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
-import { nonNullish } from '@dfinity/utils';
+import type { Option } from '$lib/types/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const isTokenNonFungible = (token: Token): token is NonFungibleToken =>
-	isTokenErc721(token) || isTokenErc1155(token) || isTokenExtV2(token);
+	isTokenErc721(token) || isTokenErc1155(token) || isTokenExt(token);
 
 export const isTokenFungible = (token: Token): boolean => !isTokenNonFungible(token);
 
@@ -23,7 +25,7 @@ export const getTokensByNetwork = (tokens: NonFungibleToken[]): NonFungibleToken
 	}, new Map());
 
 export const getNftIdentifier = (token: NonFungibleToken): NonFungibleTokenIdentifier =>
-	isTokenExtV2(token) ? token.canisterId : token.address;
+	isTokenExt(token) ? token.canisterId : token.address;
 
 /**
  * Gets the ID to display for the given NFT.
@@ -87,4 +89,35 @@ export const getNftDisplayName = (nft: Nft): string => {
 	}
 
 	return `#${idToUse}`;
+};
+
+export const mapNftAttributes = (
+	attributes:
+		| {
+				trait_type: string;
+				value?: Option<string | number | boolean>;
+		  }[]
+		| Record<string, Option<string | number | boolean>>
+		| undefined
+		| null
+): NftAttribute[] => {
+	if (isNullish(attributes)) {
+		return [];
+	}
+
+	if (Array.isArray(attributes)) {
+		return attributes.map(({ trait_type: traitType, value }) => ({
+			traitType,
+			...(nonNullish(value) && { value: value.toString() })
+		}));
+	}
+
+	if (typeof attributes === 'object') {
+		return Object.entries(attributes).map(([traitType, value]) => ({
+			traitType,
+			...(nonNullish(value) && { value: value.toString() })
+		}));
+	}
+
+	return [];
 };

@@ -241,7 +241,7 @@ const loadCustomTokensWithMetadata = async (
 							network,
 							symbol: tokenAddress,
 							decimals: ETHEREUM_DEFAULT_DECIMALS,
-							standard: 'erc20' as const,
+							standard: { code: 'erc20' as const },
 							category: 'custom' as const,
 							exchange: 'erc20' as const,
 							enabled,

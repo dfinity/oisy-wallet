@@ -283,8 +283,8 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				// @ts-expect-error we test this in purposes
 				await expect(
+					// @ts-expect-error we test this in purposes
 					getAccountInfo({ ...mockParams, network: 'unknown-network' })
 				).rejects.toThrowError(expectedUnknownNetworkError);
 			});

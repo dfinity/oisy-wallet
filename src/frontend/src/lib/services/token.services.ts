@@ -128,7 +128,7 @@ export const autoLoadToken = async <
 	loadTokens,
 	errorMessage
 }: AutoLoadTokenParams<T, K>): Promise<AutoLoadTokenResult> => {
-	if (sendToken.standard !== expectedSendTokenStandard) {
+	if (sendToken.standard.code !== expectedSendTokenStandard.code) {
 		return { result: 'skipped' };
 	}
 

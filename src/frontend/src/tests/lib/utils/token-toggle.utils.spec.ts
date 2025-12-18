@@ -21,7 +21,7 @@ describe('isIcrcCustomTokenDisabled', () => {
 	});
 
 	it('should check if icrc default token is disabled for token toggle', () => {
-		const token: IcrcCustomToken = { ...ICP_TOKEN, standard: 'icrc', enabled: false };
+		const token: IcrcCustomToken = { ...ICP_TOKEN, standard: { code: 'icrc' }, enabled: false };
 
 		expect(isIcrcTokenToggleDisabled(token)).toBeFalsy();
 	});
@@ -29,7 +29,7 @@ describe('isIcrcCustomTokenDisabled', () => {
 	it('should check if icrc custom token is disabled for token toggle', () => {
 		const token: IcrcCustomToken = {
 			...ICP_TOKEN,
-			standard: 'icrc',
+			standard: { code: 'icrc' },
 			category: 'custom',
 			enabled: false
 		};

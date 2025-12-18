@@ -1,12 +1,9 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import {
-	saveErcCustomTokens,
-	type Erc1155Variant,
-	type Erc721Variant
-} from '$eth/services/erc-custom-tokens.services';
+import { saveErcCustomTokens } from '$eth/services/erc-custom-tokens.services';
 import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
+import type { SaveCustomErc1155Variant, SaveCustomErc721Variant } from '$lib/types/custom-token';
 import type { OwnedContract } from '$lib/types/nft';
-import type { TokenStandard } from '$lib/types/token';
+import type { TokenStandardCode } from '$lib/types/token';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCustomTokensErc1155, mockCustomTokensErc721 } from '$tests/mocks/custom-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -42,14 +39,16 @@ describe('erc-custom-tokens.services', () => {
 			identity: mockIdentity
 		};
 
-		const expectedErc721Tokens: Erc721Variant[] = mockOwnedContractsErc721.map(({ address }) => ({
-			address,
-			chainId: mockNetwork.chainId,
-			networkKey: 'Erc721',
-			enabled: true
-		}));
+		const expectedErc721Tokens: SaveCustomErc721Variant[] = mockOwnedContractsErc721.map(
+			({ address }) => ({
+				address,
+				chainId: mockNetwork.chainId,
+				networkKey: 'Erc721',
+				enabled: true
+			})
+		);
 
-		const expectedErc1155Tokens: Erc1155Variant[] = mockOwnedContractsErc1155.map(
+		const expectedErc1155Tokens: SaveCustomErc1155Variant[] = mockOwnedContractsErc1155.map(
 			({ address }) => ({
 				address,
 				chainId: mockNetwork.chainId,
@@ -143,9 +142,9 @@ describe('erc-custom-tokens.services', () => {
 
 		it('should handle mixed-case standards', async () => {
 			const mixedCaseContracts: OwnedContract[] = [
-				{ ...mockOwnedContracts[0], standard: 'eRc721' as TokenStandard },
-				{ ...mockOwnedContracts[1], standard: 'ERC721' as TokenStandard },
-				{ ...mockOwnedContracts[2], standard: 'eRC1155' as TokenStandard }
+				{ ...mockOwnedContracts[0], standard: 'eRc721' as TokenStandardCode },
+				{ ...mockOwnedContracts[1], standard: 'ERC721' as TokenStandardCode },
+				{ ...mockOwnedContracts[2], standard: 'eRC1155' as TokenStandardCode }
 			];
 
 			await saveErcCustomTokens({ ...mockParams, contracts: mixedCaseContracts });

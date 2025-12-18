@@ -8,24 +8,25 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
+import type { ExtTokenWithoutId } from '$icp/types/ext-token';
 import {
 	extIndexToIdentifier,
-	isTokenExtV2,
-	isTokenExtV2CustomToken,
+	isTokenExt,
+	isTokenExtCustomToken,
 	mapExtToken
 } from '$icp/utils/ext.utils';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { TokenStandard } from '$lib/types/token';
+import type { TokenStandardCode } from '$lib/types/token';
 import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { Principal } from '@icp-sdk/core/principal';
 
 describe('ext.utils', () => {
-	describe('isTokenExtV2', () => {
-		it.each(['extV2'])('should return true for valid token standards: %s', (standard) => {
+	describe('isTokenExt', () => {
+		it.each(['ext'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenExtV2({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+				isTokenExt({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 			).toBeTruthy();
 		});
 
@@ -33,13 +34,13 @@ describe('ext.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenExtV2({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+					isTokenExt({ ...mockIcrcCustomToken, standard: { code: standard as TokenStandardCode } })
 				).toBeFalsy();
 			}
 		);
 	});
 
-	describe('isTokenExtV2CustomToken', () => {
+	describe('isTokenExtCustomToken', () => {
 		const mockTokens = [mockValidExtV2Token, mockValidExtV2Token2];
 
 		it.each(
@@ -48,13 +49,13 @@ describe('ext.utils', () => {
 				enabled: Math.random() < 0.5
 			}))
 		)('should return true for token $name that has the enabled field', (token) => {
-			expect(isTokenExtV2CustomToken(token)).toBeTruthy();
+			expect(isTokenExtCustomToken(token)).toBeTruthy();
 		});
 
 		it.each(mockTokens)(
 			'should return false for token $name that has not the enabled field',
 			(token) => {
-				expect(isTokenExtV2CustomToken(token)).toBeFalsy();
+				expect(isTokenExtCustomToken(token)).toBeFalsy();
 			}
 		);
 
@@ -69,7 +70,7 @@ describe('ext.utils', () => {
 			...EVM_ERC20_TOKENS,
 			...mockTokens
 		])('should return false for token $name', (token) => {
-			expect(isTokenExtV2CustomToken(token)).toBeFalsy();
+			expect(isTokenExtCustomToken(token)).toBeFalsy();
 		});
 	});
 
@@ -124,20 +125,51 @@ describe('ext.utils', () => {
 	describe('mapExtToken', () => {
 		const mockName = 'Mock EXT Token';
 		const mockCanisterId = mockExtV2TokenCanisterId;
-		const mockParams = { canisterId: mockCanisterId, metadata: { name: mockName } };
+		const mockParams = {
+			canisterId: mockCanisterId,
+			standardVersion: 'ext' as const,
+			metadata: { name: mockName }
+		};
 
-		const expected = {
+		const expected: ExtTokenWithoutId = {
 			canisterId: mockCanisterId,
 			network: ICP_NETWORK,
 			name: mockName,
 			symbol: mockName,
 			decimals: 0,
-			standard: 'extV2',
+			standard: { code: 'ext', version: 'v2' },
 			category: 'custom'
 		};
 
 		it('should correctly map an EXT token', () => {
 			expect(mapExtToken(mockParams)).toStrictEqual(expected);
+		});
+
+		it('should map other EXT versions', () => {
+			expect(mapExtToken({ ...mockParams, standardVersion: 'legacy1.5' })).toStrictEqual({
+				...expected,
+				standard: {
+					code: 'ext',
+					version: 'v1.5'
+				}
+			});
+
+			expect(mapExtToken({ ...mockParams, standardVersion: 'legacy' })).toStrictEqual({
+				...expected,
+				standard: {
+					code: 'ext',
+					version: 'v1'
+				}
+			});
+
+			// @ts-expect-error Testing invalid input types
+			expect(mapExtToken({ ...mockParams, standardVersion: 'another one' })).toStrictEqual({
+				...expected,
+				standard: {
+					code: 'ext',
+					version: undefined
+				}
+			});
 		});
 
 		it('should handle empty string as name', () => {

@@ -58,7 +58,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: 1n,
@@ -74,7 +74,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: 2n,
@@ -89,7 +89,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: undefined,
@@ -107,7 +107,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: 1n,
@@ -123,7 +123,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: 2n,
@@ -138,7 +138,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: undefined,

@@ -26,9 +26,14 @@ describe('SendDestinationTabs', () => {
 			]
 		]);
 
+	const props = {
+		onNext: vi.fn()
+	};
+
 	it('renders known destinations tab', () => {
 		const { getByText } = render(SendDestinationTabs, {
 			props: {
+				...props,
 				destination: '',
 				knownDestinations,
 				activeSendDestinationTab: 'recentlyUsed'
@@ -44,6 +49,7 @@ describe('SendDestinationTabs', () => {
 	it('renders contacts tab', () => {
 		const { getByText, container } = render(SendDestinationTabs, {
 			props: {
+				...props,
 				destination: '',
 				knownDestinations,
 				networkContacts: {
