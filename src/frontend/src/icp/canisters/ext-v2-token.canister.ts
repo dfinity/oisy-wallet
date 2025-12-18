@@ -220,12 +220,12 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 			return legacyResponse.ok;
 		}
 
-		const mergedResponse = response ?? legacyResponse;
+		const error = response?.err ?? legacyResponse?.err;
 
-		if (isNullish(mergedResponse)) {
+		if (isNullish(error)) {
 			return;
 		}
 
-		throw mapExtV2TokenCommonError(mergedResponse.err);
+		throw mapExtV2TokenCommonError(error);
 	};
 }
