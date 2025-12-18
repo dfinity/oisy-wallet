@@ -26,10 +26,7 @@ export const loadAndAssertAddCustomToken = async ({
 	icrcTokens: IcToken[];
 }): Promise<{
 	result: 'success' | 'error';
-	data?: {
-		token: IcTokenWithoutId;
-		balance: bigint;
-	};
+	data?: ValidateTokenData;
 }> => {
 	assertNonNullish(identity);
 

@@ -21,10 +21,10 @@ export const ICP_SYMBOL = 'ICP';
 
 export const ICP_TOKEN_ID: TokenId = parseTokenId(ICP_SYMBOL);
 
-export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated'>> = {
+export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'alternativeName'>> = {
 	id: ICP_TOKEN_ID,
 	network: ICP_NETWORK,
-	standard: 'icp',
+	standard: { code: 'icp' },
 	category: 'default',
 	exchangeCoinId: 'internet-computer',
 	position: 0,
@@ -48,10 +48,12 @@ export const TESTICP_SYMBOL = 'TESTICP';
 
 export const TESTICP_TOKEN_ID: TokenId = parseTokenId(TESTICP_SYMBOL);
 
-export const TESTICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'explorerUrl'>> = {
+export const TESTICP_TOKEN: RequiredToken<
+	Omit<IcToken, 'deprecated' | 'explorerUrl' | 'alternativeName'>
+> = {
 	id: TESTICP_TOKEN_ID,
 	network: ICP_PSEUDO_TESTNET_NETWORK,
-	standard: 'icp',
+	standard: { code: 'icp' },
 	category: 'default',
 	exchangeCoinId: 'internet-computer',
 	position: 0,
@@ -64,12 +66,13 @@ export const TESTICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'explorer
 	indexCanisterId: 'qcuy6-bqaaa-aaaai-aqmqq-cai'
 };
 
-export const SUPPORTED_ICP_TOKENS: RequiredToken<Omit<IcToken, 'deprecated' | 'explorerUrl'>>[] =
-	defineSupportedTokens({
-		mainnetFlag: true,
-		mainnetTokens: [ICP_TOKEN],
-		testnetTokens: [TESTICP_TOKEN]
-	});
+export const SUPPORTED_ICP_TOKENS: RequiredToken<
+	Omit<IcToken, 'deprecated' | 'explorerUrl' | 'alternativeName'>
+>[] = defineSupportedTokens({
+	mainnetFlag: true,
+	mainnetTokens: [ICP_TOKEN],
+	testnetTokens: [TESTICP_TOKEN]
+});
 
 export const SUPPORTED_ICP_TOKENS_INDEXED = buildIndexedIcTokens(SUPPORTED_ICP_TOKENS);
 

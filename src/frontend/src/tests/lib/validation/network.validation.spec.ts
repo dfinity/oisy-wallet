@@ -11,7 +11,7 @@ describe('network.validation', () => {
 		it('should fail to parse non-string input', () => {
 			const invalidInput = 123;
 
-			expect(() => parseNetworkId(invalidInput as unknown as string)).toThrow();
+			expect(() => parseNetworkId(invalidInput as unknown as string)).toThrowError();
 		});
 	});
 });

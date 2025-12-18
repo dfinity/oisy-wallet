@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import { GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE } from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -9,7 +10,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { formatCurrency } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -72,21 +72,10 @@
 		{$i18n.stake.text.earning_potential}:
 	</div>
 
-	<div
-		class="text-lg font-bold sm:text-xl"
-		class:text-brand-primary-alt={positivePotentialTokenBalance}
-		class:text-disabled={!positivePotentialTokenBalance}
-	>
-		{`${positivePotentialTokenBalance && currentApy > 0 ? '+ ' : ''}`}{replacePlaceholders(
-			$i18n.stake.text.active_earning_per_year,
-			{
-				$amount: `${formatCurrency({
-					value: (potentialTokensUsdBalance * currentApy) / 100,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
-				})}`
-			}
-		)}
-	</div>
+	<EarningYearlyAmount
+		showAsNeutral
+		showPlusSign={positivePotentialTokenBalance && currentApy > 0}
+		styleClass="text-lg font-bold sm:text-xl"
+		value={(potentialTokensUsdBalance * currentApy) / 100}
+	/>
 </div>

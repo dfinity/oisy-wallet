@@ -1,6 +1,9 @@
+import type { CustomToken } from '$declarations/backend/backend.did';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 import { loadCustomTokens, loadExtTokens } from '$icp/services/ext.services';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
+import { extDefaultTokensStore } from '$icp/stores/ext-default-tokens.store';
 import { listCustomTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -9,6 +12,8 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCustomTokensExt } from '$tests/mocks/custom-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 
@@ -51,9 +56,23 @@ describe('ext.services', () => {
 
 			vi.spyOn(toastsStore, 'toastsError');
 
+			extDefaultTokensStore.reset();
 			extCustomTokensStore.resetAll();
 
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensExt);
+		});
+
+		it('should save the default tokens in the store', async () => {
+			await loadExtTokens({ identity: mockIdentity });
+
+			const tokens = get(extDefaultTokensStore);
+
+			EXT_BUILTIN_TOKENS.forEach((token, index) => {
+				expect(tokens).toContainEqual({
+					...token,
+					id: (tokens ?? [])[index].id
+				});
+			});
 		});
 
 		it('should save the custom tokens in the store', async () => {
@@ -76,7 +95,7 @@ describe('ext.services', () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadExtTokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadExtTokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 	});
 
@@ -126,13 +145,55 @@ describe('ext.services', () => {
 			);
 		});
 
+		it('should use fallback metadata when the token is not mapped already', async () => {
+			const mockCanisterId = 'mock-canister-id-that-is-not-built-in';
+
+			const customTokens: CustomToken[] = [
+				{
+					version: toNullable(1n),
+					enabled: true,
+					token: {
+						ExtV2: {
+							canister_id: mockCanisterId as unknown as Principal
+						}
+					},
+					section: toNullable(),
+					allow_external_content_source: toNullable()
+				}
+			];
+
+			vi.mocked(listCustomTokens).mockResolvedValue(customTokens);
+
+			await loadCustomTokens({ identity: mockIdentity });
+
+			const tokens = get(extCustomTokensStore);
+
+			expect(tokens).toEqual([
+				{
+					certified: true,
+					data: {
+						id: (tokens ?? [])[0].data.id,
+						version: 1n,
+						enabled: true,
+						standard: { code: 'ext', version: 'v2' },
+						category: 'custom',
+						canisterId: mockCanisterId,
+						symbol: mockCanisterId,
+						name: mockCanisterId,
+						decimals: 0,
+						network: ICP_NETWORK
+					}
+				}
+			]);
+		});
+
 		it('should reset token store on error', async () => {
 			extCustomTokensStore.setAll([
 				{
 					data: {
 						...EXT_BUILTIN_TOKENS[0],
 						id: parseTokenId('mockToken'),
-						standard: 'extV2',
+						standard: { code: 'ext' },
 						enabled: true
 					},
 					certified: false

@@ -63,7 +63,7 @@ describe('PayReceiptData', () => {
 				expect(screen.getByText(en.scanner.text.phone_number)).toBeInTheDocument();
 			});
 
-			expect(screen.getByText(en.scanner.text.receipt)).toBeInTheDocument();
+			expect(screen.getByText(en.scanner.text.recipient)).toBeInTheDocument();
 			expect(screen.getByText(en.scanner.text.name)).toBeInTheDocument();
 			expect(screen.getByText(en.scanner.text.address)).toBeInTheDocument();
 			expect(screen.getByText(en.scanner.text.country)).toBeInTheDocument();

@@ -1,7 +1,9 @@
-import type { Erc20ContractAddress } from '$eth/types/erc20';
+import type { Erc20Token } from '$eth/types/erc20';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import type { ExtToken } from '$icp/types/ext-token';
+import { isTokenExt } from '$icp/utils/ext.utils';
 import type { Token, TokenId } from '$lib/types/token';
-import type { SplTokenAddress } from '$sol/types/spl';
+import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -14,27 +16,27 @@ export interface DefaultTokensStore<T extends Token> extends Readable<DefaultTok
 	reset: () => void;
 }
 
+type Identifier = Erc20Token['address'] | SplToken['address'] | ExtToken['canisterId'];
+
 export const initDefaultTokensStore = <T extends Token>(): DefaultTokensStore<T> => {
 	const INITIAL: DefaultTokensData<T> = undefined;
 
 	const { subscribe, set, update } = writable<DefaultTokensData<T>>(INITIAL);
 
-	const getIdentifier = <T extends Token>(
-		token: T
-	): string | Erc20ContractAddress['address'] | SplTokenAddress =>
+	const getIdentifier = <T extends Token>(token: T): Identifier | TokenId =>
 		isTokenSpl(token)
 			? token.address
 			: isTokenErc20(token)
 				? token.address
-				: `${token.id.description}`;
+				: isTokenExt(token)
+					? token.canisterId
+					: token.id;
 
 	return {
 		set,
 		add: (token: T) =>
 			update((state) => [
-				...(state ?? []).filter(
-					(data) => getIdentifier(data).toLowerCase() !== getIdentifier(token).toLowerCase()
-				),
+				...(state ?? []).filter((data) => getIdentifier(data) !== getIdentifier(token)),
 				token
 			]),
 		remove: (tokenId: TokenId) =>

@@ -21,14 +21,14 @@ jobs:
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -38,11 +38,33 @@ jobs:
       - name: Save current thresholds
         run: cp vitest.config.ts vitest.config.before.ts
 
-      - name: Test
-        run: npm run test:coverage
+      # There is an inconsistency in the merging of the sharded run reports, between the complete run and the sharded ones.
+      # It causes an issue when comparing the saved thresholds (complete run) with the coverage run in each PR (sharded run).
+      # So, for now, we run the sharded tests to save the new thresholds.
+      # Issue: https://github.com/vitest-dev/vitest/issues/8616 (note that it could be caused by our code or vitest)
+      # TODO: Re-instate the complete run when the issue is fixed.
+      # - name: Test
+      # run: npm run test:coverage
+
+      - name: Test (shards)
+        env:
+          SHARD_TOTAL: 20
+        run: |
+          for i in $(seq 1 "$SHARD_TOTAL"); do
+            echo "Running shard $i/$SHARD_TOTAL"
+            npm run test:coverage -- \
+              --reporter=blob \
+              --reporter=default \
+              --shard="$i/$SHARD_TOTAL" \
+              --coverage.thresholds.0 \
+              --coverage.thresholds.autoUpdate=false
+          done
+
+      - name: Test (merge)
+        run: npm run test:merge
 
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: vitest-coverage-threshold-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -55,6 +77,9 @@ jobs:
       - name: Remove old thresholds file
         run: rm vitest.config.before.ts
 
+      - name: Format
+        run: npm run format:file --file=vitest.config.ts
+
       - name: Check for Coverage Thresholds Changes
         id: check_changes
         run: |
@@ -63,10 +88,6 @@ jobs:
           else
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Format
-        if: steps.check_changes.outputs.changes_detected == 'true'
-        run: npm run format:file --file=vitest.config.ts
 
       - name: Stage Changes on main
         if: steps.check_changes.outputs.changes_detected == 'true'

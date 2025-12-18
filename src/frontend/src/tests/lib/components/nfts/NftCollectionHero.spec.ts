@@ -24,6 +24,10 @@ describe('NftCollectionHero', () => {
 
 	const mockToken: NonFungibleToken = {
 		...AZUKI_ELEMENTAL_BEANS_TOKEN,
+		standard: {
+			...AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
+			version: 'standard-version'
+		},
 		network: POLYGON_MAINNET_NETWORK,
 		description: 'Some descriptive text'
 	};
@@ -52,9 +56,15 @@ describe('NftCollectionHero', () => {
 
 		expect(description).toBeInTheDocument();
 
-		const standard: HTMLElement | null = getByText(mockToken.standard);
+		const standard: HTMLElement | null = getByText(mockToken.standard.code);
 
 		expect(standard).toBeInTheDocument();
+
+		assertNonNullish(mockToken.standard.version);
+
+		const standardVersion: HTMLElement | null = getByText(mockToken.standard.version);
+
+		expect(standardVersion).toBeInTheDocument();
 
 		const address: HTMLElement | null = getByText(
 			shortenWithMiddleEllipsis({ text: mockToken.address })

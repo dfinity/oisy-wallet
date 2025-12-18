@@ -274,7 +274,7 @@ describe('nfts.utils', () => {
 		it('should raise an error if URL is not a parseable URL', () => {
 			const url = 'invalid-url';
 
-			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrowError(mockError);
 		});
 
 		it('should return the same URL if not IPFS protocol', () => {
@@ -324,7 +324,7 @@ describe('nfts.utils', () => {
 		it('should not allow URL with localhost', () => {
 			const url = 'http://localhost:3000/some-data';
 
-			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrowError(mockError);
 		});
 	});
 
@@ -811,6 +811,40 @@ describe('nfts.utils', () => {
 			expect(result).toBe(NftMediaStatusEnum.OK);
 		});
 
+		it('returns OK for valid gif under the size limit', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? '.gif;charset=utf-8'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/image.gif');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
+		it('returns OK for valid video under the size limit', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'video/mp4'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/video.mp4');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
 		it('returns INVALID_DATA for invalid URL', async () => {
 			const result = await getMediaStatus('not-a-url');
 
@@ -839,7 +873,7 @@ describe('nfts.utils', () => {
 			global.fetch = vi.fn().mockResolvedValueOnce({
 				headers: {
 					get: (h: string) =>
-						h === 'Content-Type' ? 'video/mp4' : h === 'Content-Length' ? '100' : null
+						h === 'Content-Type' ? 'text/html' : h === 'Content-Length' ? '100' : null
 				}
 			});
 

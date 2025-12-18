@@ -18,7 +18,8 @@ describe('IcSendAmount', () => {
 
 	const props = {
 		amount: 1,
-		amountError: undefined
+		amountError: undefined,
+		onTokensList: vi.fn()
 	};
 	const newAmount = 10;
 
@@ -78,7 +79,7 @@ describe('IcSendAmount', () => {
 
 		await waitFor(() => {
 			expect(input?.value).toBe(`${newAmount}`);
-			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrow();
+			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrowError();
 		});
 	});
 });

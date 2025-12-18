@@ -2,6 +2,7 @@ import { listCustomTokens } from '$lib/api/backend.api';
 import * as idbTokensApi from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
+import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -111,13 +112,13 @@ describe('custom-tokens.services', () => {
 		it('should throw if listCustomTokens fails', async () => {
 			vi.mocked(listCustomTokens).mockRejectedValue(new Error('Backend error'));
 
-			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrow('Backend error');
+			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrowError('Backend error');
 		});
 
 		it('should throw if setIdbTokens fails', async () => {
 			mockSetIdbTokens.mockRejectedValue(new Error('IDB error'));
 
-			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrow('IDB error');
+			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrowError('IDB error');
 		});
 
 		it('should fetch the cached tokens if useCache is true and certified is false', async () => {
@@ -156,7 +157,7 @@ describe('custom-tokens.services', () => {
 			});
 		});
 
-		it('should parse correctly the cached ledger and index canister IDs from the custom tokens', async () => {
+		it('should parse correctly the cached ledger and index canister IDs from the ICRC custom tokens', async () => {
 			mockGetIdbTokens.mockResolvedValue([
 				{
 					token: {
@@ -179,6 +180,34 @@ describe('custom-tokens.services', () => {
 			});
 
 			expect(result).toStrictEqual(mockCustomTokens.slice(0, 1));
+
+			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should parse correctly the cached canister ID from the EXT custom tokens', async () => {
+			mockGetIdbTokens.mockResolvedValue([
+				{
+					token: {
+						ExtV2: {
+							canister_id: Principal.fromText(mockExtV2TokenCanisterId).toUint8Array()
+						}
+					},
+					version: toNullable(10n),
+					enabled: false,
+					section: toNullable(),
+					allow_external_content_source: toNullable()
+				}
+			]);
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(mockCustomTokens.slice(2, 3));
 
 			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 

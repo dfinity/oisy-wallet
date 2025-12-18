@@ -14,7 +14,7 @@ export const AMZNX_TOKEN_ID: TokenId = parseTokenId(AMZNX_SYMBOL);
 export const AMZNX_TOKEN: RequiredSpl2022Token = {
 	id: AMZNX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Amazon xStock',
 	symbol: AMZNX_SYMBOL,

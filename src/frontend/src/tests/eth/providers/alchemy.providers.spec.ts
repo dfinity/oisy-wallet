@@ -137,7 +137,10 @@ describe('alchemy.providers', () => {
 					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
-				mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE
+				mediaStatus: {
+					image: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
 			},
 			{
 				id: parseNftId('2'),
@@ -150,7 +153,10 @@ describe('alchemy.providers', () => {
 					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
-				mediaStatus: NftMediaStatusEnum.OK
+				mediaStatus: {
+					image: NftMediaStatusEnum.OK,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
 			},
 			{
 				id: parseNftId('3'),
@@ -163,7 +169,10 @@ describe('alchemy.providers', () => {
 					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
-				mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
+				mediaStatus: {
+					image: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
 			},
 			{
 				id: parseNftId('4'),
@@ -176,7 +185,10 @@ describe('alchemy.providers', () => {
 					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
-				mediaStatus: NftMediaStatusEnum.OK
+				mediaStatus: {
+					image: NftMediaStatusEnum.OK,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
 			}
 		];
 
@@ -267,14 +279,20 @@ describe('alchemy.providers', () => {
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
 					},
-					mediaStatus: NftMediaStatusEnum.INVALID_DATA
+					mediaStatus: {
+						image: NftMediaStatusEnum.INVALID_DATA,
+						thumbnail: NftMediaStatusEnum.INVALID_DATA
+					}
 				},
 				{
 					id: parseNftId('2'),
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
 					},
-					mediaStatus: NftMediaStatusEnum.INVALID_DATA
+					mediaStatus: {
+						image: NftMediaStatusEnum.INVALID_DATA,
+						thumbnail: NftMediaStatusEnum.INVALID_DATA
+					}
 				}
 			]);
 		});
@@ -291,7 +309,7 @@ describe('alchemy.providers', () => {
 
 			await expect(
 				provider.getNftsByOwner({ address: mockEthAddress, tokens: [mockValidErc1155Token] })
-			).rejects.toThrow('Nfts Error');
+			).rejects.toThrowError('Nfts Error');
 
 			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
 		});
@@ -326,7 +344,10 @@ describe('alchemy.providers', () => {
 				bannerMediaStatus: NftMediaStatusEnum.OK
 			},
 			description: 'lorem ipsum',
-			mediaStatus: NftMediaStatusEnum.OK
+			mediaStatus: {
+				image: NftMediaStatusEnum.OK,
+				thumbnail: NftMediaStatusEnum.INVALID_DATA
+			}
 		};
 
 		beforeEach(() => {
@@ -386,7 +407,10 @@ describe('alchemy.providers', () => {
 				collection: {
 					...mapTokenToCollection(mockValidErc1155Token)
 				},
-				mediaStatus: NftMediaStatusEnum.INVALID_DATA
+				mediaStatus: {
+					image: NftMediaStatusEnum.INVALID_DATA,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
 			});
 		});
 
@@ -402,7 +426,7 @@ describe('alchemy.providers', () => {
 
 			await expect(
 				provider.getNftMetadata({ token: mockValidErc1155Token, tokenId: mockTokenId })
-			).rejects.toThrow('Nfts Error');
+			).rejects.toThrowError('Nfts Error');
 
 			expect(Alchemy.prototype.nft.getNftMetadata).toHaveBeenCalledOnce();
 		});
@@ -533,7 +557,7 @@ describe('alchemy.providers', () => {
 
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 
-			await expect(provider.getContractMetadata(mockEthAddress)).rejects.toThrow(
+			await expect(provider.getContractMetadata(mockEthAddress)).rejects.toThrowError(
 				'Invalid token standard'
 			);
 
@@ -554,7 +578,7 @@ describe('alchemy.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrow(
+			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrowError(
 				replacePlaceholders(en.init.error.no_alchemy_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})

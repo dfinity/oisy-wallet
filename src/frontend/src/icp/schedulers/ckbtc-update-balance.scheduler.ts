@@ -18,8 +18,7 @@ import { assertNonNullish, isNullish, jsonReplacer, uint8ArrayToHexString } from
 import {
 	MinterNoNewUtxosError,
 	type BitcoinNetwork,
-	type PendingUtxo,
-	type UtxoStatus
+	type CkBtcMinterDid
 } from '@icp-sdk/canisters/ckbtc';
 
 export class CkBTCUpdateBalanceScheduler
@@ -164,7 +163,7 @@ export class CkBTCUpdateBalanceScheduler
 		return allUtxosTxids.some((txid) => !knownUtxosTxids.includes(txid));
 	}
 
-	private postUpdateOk(utxosStatuses: UtxoStatus[]) {
+	private postUpdateOk(utxosStatuses: CkBtcMinterDid.UtxoStatus[]) {
 		const data: CertifiedData<UtxoTxidText[]> = {
 			certified: true,
 			data: utxosStatuses
@@ -197,7 +196,7 @@ export class CkBTCUpdateBalanceScheduler
 	private postPendingUtxos(err: MinterNoNewUtxosError) {
 		const { pendingUtxos } = err;
 
-		const data: CertifiedData<PendingUtxo[]> = {
+		const data: CertifiedData<CkBtcMinterDid.PendingUtxo[]> = {
 			certified: true,
 			data: pendingUtxos
 		};

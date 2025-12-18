@@ -1,3 +1,4 @@
+import { IS_ICP_DOMAIN_URL } from '$lib/constants/oisy.constants';
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -128,11 +129,12 @@ export const GLDT_STAKE_CANISTER_ID = LOCAL
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
 
 export const AUTH_ALTERNATIVE_ORIGINS = import.meta.env.VITE_AUTH_ALTERNATIVE_ORIGINS;
-export const AUTH_DERIVATION_ORIGIN = BETA
-	? 'https://oisy.com'
-	: STAGING
-		? 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'
-		: undefined;
+export const AUTH_DERIVATION_ORIGIN =
+	BETA || (PROD && IS_ICP_DOMAIN_URL)
+		? 'https://oisy.com'
+		: STAGING
+			? 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'
+			: undefined;
 
 export const AUTH_POPUP_WIDTH = 576;
 export const AUTH_POPUP_HEIGHT = 625;

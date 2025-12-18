@@ -106,6 +106,6 @@ describe('AuthHelpIdentityForm', () => {
 		});
 
 		expect(onDoneMock).toHaveBeenCalledTimes(2);
-		expect(authSpy).toHaveBeenCalledWith({ domain: 'ic0.app' });
+		expect(authSpy).toHaveBeenCalledWith({ domain: 'identity.ic0.app' });
 	});
 });

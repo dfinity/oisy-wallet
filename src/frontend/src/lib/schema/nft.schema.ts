@@ -1,5 +1,5 @@
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { TokenSchema } from '$lib/schema/token.schema';
+import { TokenSchema, TokenStandardCodeSchema } from '$lib/schema/token.schema';
 import * as z from 'zod';
 
 export const NftIdSchema = z.string().brand<'NftId'>();
@@ -29,6 +29,11 @@ export enum NftMediaStatusEnum {
 	INVALID_DATA = 'invalid_data'
 }
 
+export const NftMediaStatusSchema = z.object({
+	image: z.enum(NftMediaStatusEnum),
+	thumbnail: z.enum(NftMediaStatusEnum)
+});
+
 export const NftCollectionSchema = z.object({
 	...TokenSchema.pick({ id: true, standard: true, network: true }).shape,
 	address: z.string(),
@@ -46,13 +51,13 @@ export const NftSchema = z.object({
 	balance: z.number().optional(),
 	collection: NftCollectionSchema,
 	acquiredAt: z.date().optional(),
-	mediaStatus: z.enum(NftMediaStatusEnum),
+	mediaStatus: NftMediaStatusSchema,
 	...NftMetadataSchema.shape,
 	...NftAppearanceSchema.shape
 });
 
 export const OwnedContractSchema = z.object({
-	...TokenSchema.pick({ standard: true }).shape,
+	standard: TokenStandardCodeSchema,
 	address: z.string(),
 	isSpam: z.boolean()
 });

@@ -42,7 +42,7 @@ describe('EarningsList', () => {
 			decimals: 8,
 			network: ICP_NETWORK,
 			enabled: true,
-			standard: 'icrc',
+			standard: { code: 'icrc' },
 			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
 			position: 1,
 			fee: 100n,
@@ -54,7 +54,7 @@ describe('EarningsList', () => {
 			gldtStakeStore.setPosition({ staked: mockStaked } as unknown as StakePositionResponse);
 
 			icrcCustomTokensStore.resetAll();
-			icrcCustomTokensStore.set({ data: mockGldtToken, certified: true });
+			icrcCustomTokensStore.setAll([{ data: mockGldtToken, certified: true }]);
 
 			exchangeStore.reset();
 			exchangeStore.set([{ [mockGldtToken.ledgerCanisterId]: { usd: 1 } }]);
@@ -76,7 +76,9 @@ describe('EarningsList', () => {
 
 		it('should render the placeholder if GLDT token is not enabled', () => {
 			icrcCustomTokensStore.resetAll();
-			icrcCustomTokensStore.set({ data: { ...mockGldtToken, enabled: false }, certified: true });
+			icrcCustomTokensStore.setAll([
+				{ data: { ...mockGldtToken, enabled: false }, certified: true }
+			]);
 
 			const { getByTestId } = render(EarningsList);
 

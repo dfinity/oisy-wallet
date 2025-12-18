@@ -40,7 +40,7 @@ describe('nonce.services', () => {
 			const mockError = new Error('Mock error');
 			getTransactionCountSpy.mockRejectedValueOnce(mockError);
 
-			await expect(getNonce(mockParams)).rejects.toThrow(mockError);
+			await expect(getNonce(mockParams)).rejects.toThrowError(mockError);
 		});
 
 		it('should accept an empty string as address', async () => {
