@@ -1321,8 +1321,8 @@
 			"zero_fee": "Kostenlos",
 			"total_fee": "Gesamtgebühr",
 			"ata_fee": "ATA-Gebühr",
-			"transaction_fees": "",
-			"network_fee": "",
+			"transaction_fees": "Transaktionsgebühr",
+			"network_fee": "Netzwerkgebühr",
 			"approval_fee": ""
 		},
 		"assertion": {
