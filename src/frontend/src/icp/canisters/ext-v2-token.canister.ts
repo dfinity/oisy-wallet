@@ -125,9 +125,6 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	/**
 	 * Get the list of collection's tokens owned by a specific user (legacy method).
 	 *
-	 * The metadata returned with each token is not the metadata that we need.
-	 * Please use the method `ext_metadata` instead.
-	 *
 	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#tokens
 	 *
 	 * @param {Object} params - The parameters for fetching the tokens.
