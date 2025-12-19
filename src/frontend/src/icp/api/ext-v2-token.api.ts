@@ -161,7 +161,7 @@ export const transfer = async ({
 		try {
 			await transferLegacy({ certified, from, to, tokenIdentifier, amount });
 		} catch (legacyErr: unknown) {
-			if (legacyErr instanceof CanisterInternalError) {
+			if (legacyErr instanceof CanisterInternalError && !(primaryErr instanceof CanisterInternalError)) {
 				throw legacyErr;
 			}
 
