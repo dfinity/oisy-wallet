@@ -139,13 +139,23 @@ export const transfer = async ({
 }: CanisterApiFunctionParamsWithCanisterId<
 	{ from: Principal; to: Principal; tokenIdentifier: TokenIdentifier; amount: bigint } & QueryParams
 >) => {
-	const { transfer } = await extV2TokenCanister({
+	const { transfer, transferLegacy } = await extV2TokenCanister({
 		identity,
 		canisterId,
 		...rest
 	});
 
-	await transfer({ certified, from, to, tokenIdentifier, amount });
+	// Some EXT tokens do not support the new `ext_transfer` endpoint, so we try to use the legacy one as fallback.
+	// However, if both raise an error, we re-throw the original one.
+	try {
+		await transfer({ certified, from, to, tokenIdentifier, amount });
+	} catch (err: unknown) {
+		try {
+			await transferLegacy({ certified, from, to, tokenIdentifier, amount });
+		} catch (_: unknown) {
+			throw err;
+		}
+	}
 };
 
 /**
