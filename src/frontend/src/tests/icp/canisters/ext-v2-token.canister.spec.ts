@@ -446,8 +446,8 @@ describe('ext-v2-token.canister', () => {
 			vi.clearAllMocks();
 		});
 
-		it('should correctly call the ext_transfer method', async () => {
-			service.ext_transfer.mockResolvedValue({ ok: 456n });
+		it('should correctly call the transfer method', async () => {
+			service.transfer.mockResolvedValue({ ok: 456n });
 
 			const { transfer } = await createExtV2TokenCanister({
 				serviceOverride: service
@@ -456,13 +456,13 @@ describe('ext-v2-token.canister', () => {
 			const res = await transfer(mockParams);
 
 			expect(res).toEqual(456n);
-			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle cannot notify error', async () => {
 			const mockAccountIdentifier = encodeIcrcAccount({ owner: mockParams.to });
 
-			service.ext_transfer.mockResolvedValue({
+			service.transfer.mockResolvedValue({
 				err: { CannotNotify: mockAccountIdentifier }
 			});
 
@@ -474,11 +474,11 @@ describe('ext-v2-token.canister', () => {
 				new CanisterInternalError(`Cannot notify account: ${mockAccountIdentifier}`)
 			);
 
-			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle insufficient balance error', async () => {
-			service.ext_transfer.mockResolvedValue({
+			service.transfer.mockResolvedValue({
 				err: { InsufficientBalance: null }
 			});
 
@@ -490,11 +490,11 @@ describe('ext-v2-token.canister', () => {
 				new CanisterInternalError('Insufficient balance for the transfer')
 			);
 
-			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle reject error', async () => {
-			service.ext_transfer.mockResolvedValue({
+			service.transfer.mockResolvedValue({
 				err: { Rejected: null }
 			});
 
@@ -506,13 +506,13 @@ describe('ext-v2-token.canister', () => {
 				new CanisterInternalError('The transfer was rejected')
 			);
 
-			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle unauthorized error', async () => {
 			const mockAccountIdentifier = encodeIcrcAccount({ owner: mockParams.from });
 
-			service.ext_transfer.mockResolvedValue({
+			service.transfer.mockResolvedValue({
 				err: { Unauthorized: mockAccountIdentifier }
 			});
 
@@ -524,11 +524,11 @@ describe('ext-v2-token.canister', () => {
 				new CanisterInternalError(`Unauthorized account: ${mockAccountIdentifier}`)
 			);
 
-			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle invalid token error', async () => {
-			service.ext_transfer.mockResolvedValue({
+			service.transfer.mockResolvedValue({
 				err: { InvalidToken: mockExtV2TokenIdentifier }
 			});
 
@@ -540,11 +540,11 @@ describe('ext-v2-token.canister', () => {
 				new CanisterInternalError(`The specified token is invalid: ${mockExtV2TokenIdentifier}`)
 			);
 
-			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle other unexpected errors', async () => {
-			service.ext_transfer.mockResolvedValue({
+			service.transfer.mockResolvedValue({
 				err: { Other: 'other error' }
 			});
 
@@ -556,12 +556,12 @@ describe('ext-v2-token.canister', () => {
 				new CanisterInternalError('other error')
 			);
 
-			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle a generic canister error', async () => {
 			// @ts-expect-error we test this on purpose
-			service.ext_transfer.mockResolvedValue({ err: { CanisterError: null } });
+			service.transfer.mockResolvedValue({ err: { CanisterError: null } });
 
 			const { transfer } = await createExtV2TokenCanister({
 				serviceOverride: service
@@ -571,12 +571,12 @@ describe('ext-v2-token.canister', () => {
 				new CanisterInternalError('Unknown ExtV2TokenCanisterError')
 			);
 
-			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
-		it('should throw an error if ext_transfer throws', async () => {
+		it('should throw an error if transfer throws', async () => {
 			const mockError = new Error('Test response error');
-			service.ext_transfer.mockRejectedValue(mockError);
+			service.transfer.mockRejectedValue(mockError);
 
 			const { transfer } = await createExtV2TokenCanister({
 				serviceOverride: service
@@ -588,7 +588,7 @@ describe('ext-v2-token.canister', () => {
 		});
 	});
 
-	describe('transferLegacy', () => {
+	describe('transferAlias', () => {
 		const mockParams = {
 			certified,
 			from: mockPrincipal,
@@ -611,143 +611,143 @@ describe('ext-v2-token.canister', () => {
 			vi.clearAllMocks();
 		});
 
-		it('should correctly call the transfer method', async () => {
-			service.transfer.mockResolvedValue({ ok: 456n });
+		it('should correctly call the ext_transfer method', async () => {
+			service.ext_transfer.mockResolvedValue({ ok: 456n });
 
-			const { transferLegacy } = await createExtV2TokenCanister({
+			const { transferAlias } = await createExtV2TokenCanister({
 				serviceOverride: service
 			});
 
-			const res = await transferLegacy(mockParams);
+			const res = await transferAlias(mockParams);
 
 			expect(res).toEqual(456n);
-			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle cannot notify error', async () => {
 			const mockAccountIdentifier = encodeIcrcAccount({ owner: mockParams.to });
 
-			service.transfer.mockResolvedValue({
+			service.ext_transfer.mockResolvedValue({
 				err: { CannotNotify: mockAccountIdentifier }
 			});
 
-			const { transferLegacy } = await createExtV2TokenCanister({
+			const { transferAlias } = await createExtV2TokenCanister({
 				serviceOverride: service
 			});
 
-			await expect(transferLegacy(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrowError(
 				new CanisterInternalError(`Cannot notify account: ${mockAccountIdentifier}`)
 			);
 
-			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle insufficient balance error', async () => {
-			service.transfer.mockResolvedValue({
+			service.ext_transfer.mockResolvedValue({
 				err: { InsufficientBalance: null }
 			});
 
-			const { transferLegacy } = await createExtV2TokenCanister({
+			const { transferAlias } = await createExtV2TokenCanister({
 				serviceOverride: service
 			});
 
-			await expect(transferLegacy(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('Insufficient balance for the transfer')
 			);
 
-			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle reject error', async () => {
-			service.transfer.mockResolvedValue({
+			service.ext_transfer.mockResolvedValue({
 				err: { Rejected: null }
 			});
 
-			const { transferLegacy } = await createExtV2TokenCanister({
+			const { transferAlias } = await createExtV2TokenCanister({
 				serviceOverride: service
 			});
 
-			await expect(transferLegacy(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('The transfer was rejected')
 			);
 
-			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle unauthorized error', async () => {
 			const mockAccountIdentifier = encodeIcrcAccount({ owner: mockParams.from });
 
-			service.transfer.mockResolvedValue({
+			service.ext_transfer.mockResolvedValue({
 				err: { Unauthorized: mockAccountIdentifier }
 			});
 
-			const { transferLegacy } = await createExtV2TokenCanister({
+			const { transferAlias } = await createExtV2TokenCanister({
 				serviceOverride: service
 			});
 
-			await expect(transferLegacy(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrowError(
 				new CanisterInternalError(`Unauthorized account: ${mockAccountIdentifier}`)
 			);
 
-			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle invalid token error', async () => {
-			service.transfer.mockResolvedValue({
+			service.ext_transfer.mockResolvedValue({
 				err: { InvalidToken: mockExtV2TokenIdentifier }
 			});
 
-			const { transferLegacy } = await createExtV2TokenCanister({
+			const { transferAlias } = await createExtV2TokenCanister({
 				serviceOverride: service
 			});
 
-			await expect(transferLegacy(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrowError(
 				new CanisterInternalError(`The specified token is invalid: ${mockExtV2TokenIdentifier}`)
 			);
 
-			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle other unexpected errors', async () => {
-			service.transfer.mockResolvedValue({
+			service.ext_transfer.mockResolvedValue({
 				err: { Other: 'other error' }
 			});
 
-			const { transferLegacy } = await createExtV2TokenCanister({
+			const { transferAlias } = await createExtV2TokenCanister({
 				serviceOverride: service
 			});
 
-			await expect(transferLegacy(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('other error')
 			);
 
-			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should handle a generic canister error', async () => {
 			// @ts-expect-error we test this on purpose
-			service.transfer.mockResolvedValue({ err: { CanisterError: null } });
+			service.ext_transfer.mockResolvedValue({ err: { CanisterError: null } });
 
-			const { transferLegacy } = await createExtV2TokenCanister({
+			const { transferAlias } = await createExtV2TokenCanister({
 				serviceOverride: service
 			});
 
-			await expect(transferLegacy(mockParams)).rejects.toThrowError(
+			await expect(transferAlias(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('Unknown ExtV2TokenCanisterError')
 			);
 
-			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(service.ext_transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
-		it('should throw an error if transfer throws', async () => {
+		it('should throw an error if ext_transfer throws', async () => {
 			const mockError = new Error('Test response error');
-			service.transfer.mockRejectedValue(mockError);
+			service.ext_transfer.mockRejectedValue(mockError);
 
-			const { transferLegacy } = await createExtV2TokenCanister({
+			const { transferAlias } = await createExtV2TokenCanister({
 				serviceOverride: service
 			});
 
-			const res = transferLegacy(mockParams);
+			const res = transferAlias(mockParams);
 
 			await expect(res).rejects.toThrowError(mockError);
 		});
