@@ -218,7 +218,7 @@ describe('ext-v2-token.canister', () => {
 		});
 
 		it('should handle an empty response', async () => {
-			service.tokens_ext.mockResolvedValue({ ok: mockExtV2TokensListing });
+			service.tokens_ext.mockResolvedValue({ ok: [] });
 
 			const { getTokensByOwner } = await createExtV2TokenCanister({
 				serviceOverride: service
@@ -226,7 +226,7 @@ describe('ext-v2-token.canister', () => {
 
 			const res = await getTokensByOwner(mockParams);
 
-			expect(res).toEqual(mockExtV2TokenIndexes);
+			expect(res).toEqual([]);
 			expect(service.tokens_ext).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
 		});
 
@@ -335,7 +335,7 @@ describe('ext-v2-token.canister', () => {
 		});
 
 		it('should handle an empty response', async () => {
-			service.tokens.mockResolvedValue({ ok: mockResponse });
+			service.tokens.mockResolvedValue({ ok: [] });
 
 			const { getTokensByOwnerLegacy } = await createExtV2TokenCanister({
 				serviceOverride: service
@@ -343,7 +343,7 @@ describe('ext-v2-token.canister', () => {
 
 			const res = await getTokensByOwnerLegacy(mockParams);
 
-			expect(res).toEqual(mockIdentifiers);
+			expect(res).toEqual([]);
 			expect(service.tokens).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
 		});
 
