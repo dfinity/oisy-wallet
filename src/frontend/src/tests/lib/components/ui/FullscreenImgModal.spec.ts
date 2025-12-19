@@ -15,7 +15,7 @@ describe('FullscreenImgModal', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.mocked(extractMediaTypeAndSize).mockResolvedValue({ type: null, size: null });
+		vi.mocked(extractMediaTypeAndSize).mockResolvedValue({ type: MediaType.Img, size: null });
 	});
 
 	it('renders image children inside the fullscreen modal container', async () => {
