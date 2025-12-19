@@ -869,7 +869,7 @@ describe('nfts.utils', () => {
 			expect(result).toBe(NftMediaStatusEnum.OK);
 		});
 
-		it('returns NON_SUPPORTED_MEDIA_TYPE for non-image type', async () => {
+		it('returns NON_SUPPORTED_MEDIA_TYPE for non-image and non-video type', async () => {
 			global.fetch = vi.fn().mockResolvedValueOnce({
 				headers: {
 					get: (h: string) =>
@@ -877,7 +877,7 @@ describe('nfts.utils', () => {
 				}
 			});
 
-			const result = await getMediaStatus('https://example.com/video.mp4');
+			const result = await getMediaStatus('https://example.com/page.html');
 
 			expect(result).toBe(NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
 		});
