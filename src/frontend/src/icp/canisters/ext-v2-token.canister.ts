@@ -128,7 +128,7 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	 * The metadata returned with each token is not the metadata that we need.
 	 * Please use the method `ext_metadata` instead.
 	 *
-	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#tokens_ext
+	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#tokens
 	 *
 	 * @param {Object} params - The parameters for fetching the tokens.
 	 * @param {Principal} params.owner - The ICRC principal of the user.
