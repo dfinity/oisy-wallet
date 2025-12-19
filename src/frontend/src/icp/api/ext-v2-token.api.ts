@@ -8,6 +8,7 @@ import type {
 } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
@@ -118,6 +119,13 @@ export const getTokensByOwner = async ({
  *
  * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
  *
+ * @remarks
+ * According to the EXT v2 specification, `ext_transfer` and the legacy transfer method
+ * are functionally equivalent. However, in practice, some canisters only implement
+ * the legacy endpoint. For this reason, this function first attempts to use
+ * `ext_transfer` and falls back to the legacy transfer method before propagating
+ * any error from the primary call.
+ *
  * @param {Object} params - The parameters for the transfer.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
  * @param {OptionIdentity} params.identity - The identity to use for the request.
@@ -139,13 +147,30 @@ export const transfer = async ({
 }: CanisterApiFunctionParamsWithCanisterId<
 	{ from: Principal; to: Principal; tokenIdentifier: TokenIdentifier; amount: bigint } & QueryParams
 >) => {
-	const { transfer } = await extV2TokenCanister({
+	const { transfer, transferLegacy } = await extV2TokenCanister({
 		identity,
 		canisterId,
 		...rest
 	});
 
-	await transfer({ certified, from, to, tokenIdentifier, amount });
+	// Some EXT tokens do not support the new `ext_transfer` endpoint, so we try to use the legacy one as fallback.
+	// However, if both raise an error, we throw the one that is most likely to represent the real transfer failure.
+	try {
+		await transfer({ certified, from, to, tokenIdentifier, amount });
+	} catch (primaryErr: unknown) {
+		try {
+			await transferLegacy({ certified, from, to, tokenIdentifier, amount });
+		} catch (legacyErr: unknown) {
+			if (
+				legacyErr instanceof CanisterInternalError &&
+				!(primaryErr instanceof CanisterInternalError)
+			) {
+				throw legacyErr;
+			}
+
+			throw primaryErr;
+		}
+	}
 };
 
 /**
