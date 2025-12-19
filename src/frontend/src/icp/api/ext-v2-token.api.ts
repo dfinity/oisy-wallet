@@ -8,6 +8,7 @@ import type {
 } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
@@ -83,6 +84,13 @@ export const balance = async ({
  *
  * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#tokens_ext
  *
+ * @remarks
+ * According to the EXT v2 specification, `tokens_ext` and the legacy `tokens` method
+ * are functionally equivalent. However, in practice, some canisters only implement
+ * the legacy endpoint. For this reason, this function first attempts to use
+ * `tokens_ext` and falls back to the legacy method before propagating
+ * any error from the primary call.
+ *
  * @param {Object} params - The parameters for fetching the tokens.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
  * @param {OptionIdentity} params.identity - The identity to use for the request.
@@ -104,13 +112,27 @@ export const getTokensByOwner = async ({
 		return [];
 	}
 
-	const { getTokensByOwner } = await extV2TokenCanister({
+	const { getTokensByOwner, getTokensByOwnerLegacy } = await extV2TokenCanister({
 		identity,
 		canisterId,
 		...rest
 	});
 
-	return await getTokensByOwner({ certified, ...getIcrcAccount(owner) });
+	// Some EXT tokens do not support the new `tokens_ext` endpoint, so we try to use the legacy one as fallback.
+	// However, if both raise an error, we throw the one that is most likely to represent the real failure.
+	try {
+		return await getTokensByOwner({ certified, ...getIcrcAccount(owner) });
+	} catch (primaryErr: unknown) {
+		try {
+			return await getTokensByOwnerLegacy({ certified, ...getIcrcAccount(owner) });
+		} catch (legacyErr: unknown) {
+			if (legacyErr instanceof CanisterInternalError) {
+				throw legacyErr;
+			}
+
+			throw primaryErr;
+		}
+	}
 };
 
 /**

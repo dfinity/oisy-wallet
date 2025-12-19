@@ -6,6 +6,7 @@ import {
 	transfer
 } from '$icp/api/ext-v2-token.api';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	mockExtMetadata,
@@ -100,6 +101,8 @@ describe('ext-v2-token.api', () => {
 
 		beforeEach(() => {
 			tokenCanisterMock.getTokensByOwner.mockResolvedValue(mockTokens);
+
+			tokenCanisterMock.getTokensByOwnerLegacy.mockResolvedValue(mockTokens);
 		});
 
 		it('should call successfully getTokensByOwner endpoint', async () => {
@@ -116,6 +119,50 @@ describe('ext-v2-token.api', () => {
 			await expect(getTokensByOwner({ ...params, identity: null })).resolves.toEqual([]);
 
 			expect(tokenCanisterMock.getTokensByOwner).not.toHaveBeenCalled();
+		});
+
+		it('should fallback to legacy method if first one fails', async () => {
+			tokenCanisterMock.getTokensByOwner.mockRejectedValueOnce(new Error('First error'));
+
+			await getTokensByOwner(params);
+
+			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.getTokensByOwnerLegacy).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
+		});
+
+		it('should raise the error of the legacy method if it is handled', async () => {
+			const mockError = new CanisterInternalError('Generic error');
+
+			tokenCanisterMock.getTokensByOwner.mockRejectedValueOnce(new Error('First error'));
+
+			tokenCanisterMock.getTokensByOwnerLegacy.mockRejectedValueOnce(mockError);
+
+			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError);
+
+			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.getTokensByOwnerLegacy).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
+		});
+
+		it('should raise the error of the first method if fallback fails', async () => {
+			const mockError = new Error('First error');
+
+			tokenCanisterMock.getTokensByOwner.mockRejectedValueOnce(mockError);
+
+			tokenCanisterMock.getTokensByOwnerLegacy.mockRejectedValueOnce(new Error('Legacy error'));
+
+			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError);
+
+			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.getTokensByOwnerLegacy).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
 		});
 	});
 
