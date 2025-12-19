@@ -38,11 +38,10 @@ describe('rest.services', () => {
 			const maxRetries = 3;
 
 			await expect(
-				async () =>
-					await retry({
-						request: mockFailedRequest,
-						maxRetries
-					})
+				retry({
+					request: mockFailedRequest,
+					maxRetries
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
@@ -82,12 +81,11 @@ describe('rest.services', () => {
 			const maxRetries = 2;
 
 			await expect(
-				async () =>
-					await retry({
-						request: mockFailedRequest,
-						onRetry: mockOnRetry,
-						maxRetries
-					})
+				retry({
+					request: mockFailedRequest,
+					onRetry: mockOnRetry,
+					maxRetries
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
@@ -96,12 +94,11 @@ describe('rest.services', () => {
 
 		it('should not retry if maxRetries is set to 0', async () => {
 			await expect(
-				async () =>
-					await retry({
-						request: mockFailedRequest,
-						onRetry: mockOnRetry,
-						maxRetries: 0
-					})
+				retry({
+					request: mockFailedRequest,
+					onRetry: mockOnRetry,
+					maxRetries: 0
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledOnce();
@@ -180,11 +177,10 @@ describe('rest.services', () => {
 			const maxRetries = 3;
 
 			await expect(
-				async () =>
-					await retryWithDelay({
-						request: mockFailedRequest,
-						maxRetries
-					})
+				retryWithDelay({
+					request: mockFailedRequest,
+					maxRetries
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
@@ -195,11 +191,10 @@ describe('rest.services', () => {
 
 		it('should call randomWait after each failed attempt', async () => {
 			await expect(
-				async () =>
-					await retryWithDelay({
-						request: mockFailedRequest,
-						maxRetries: 2
-					})
+				retryWithDelay({
+					request: mockFailedRequest,
+					maxRetries: 2
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(3);
@@ -208,11 +203,10 @@ describe('rest.services', () => {
 
 		it('should not retry if maxRetries is set to 0', async () => {
 			await expect(
-				async () =>
-					await retryWithDelay({
-						request: mockFailedRequest,
-						maxRetries: 0
-					})
+				retryWithDelay({
+					request: mockFailedRequest,
+					maxRetries: 0
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledOnce();
