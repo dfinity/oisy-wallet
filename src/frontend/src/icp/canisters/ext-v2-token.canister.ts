@@ -123,6 +123,38 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	};
 
 	/**
+	 * Get the list of collection's tokens owned by a specific user (legacy method).
+	 *
+	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#tokens
+	 *
+	 * @param {Object} params - The parameters for fetching the tokens.
+	 * @param {Principal} params.owner - The ICRC principal of the user.
+	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
+	 * @returns {Promise<TokenIndex[]>} The list of token indices owned by the user.
+	 * @throws CanisterInternalError if the token identifier is invalid.
+	 */
+	getTokensByOwnerLegacy = async ({
+		certified,
+		owner
+	}: IcrcAccount & QueryParams): Promise<TokenIndex[]> => {
+		const { tokens } = this.caller({ certified });
+
+		const response = await tokens(getAccountIdentifier(owner).toHex());
+
+		if ('ok' in response) {
+			return Array.from(response.ok);
+		}
+
+		// If the owner has no tokens in the collection, apparently it is returned as a generic `Other` error.
+		// Since we don't have a resilient way of distinguishing this from other errors, we manually compare the error message (case-insensitive).
+		if ('Other' in response.err && response.err.Other.toLowerCase() === 'no tokens') {
+			return [];
+		}
+
+		throw mapExtV2TokenCommonError(response.err);
+	};
+
+	/**
 	 * Transfer NFT of a collection from one user to another.
 	 *
 	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
@@ -161,6 +193,53 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 		};
 
 		const response = await ext_transfer(args);
+
+		if ('ok' in response) {
+			return response.ok;
+		}
+
+		throw mapExtV2TokenTransferError(response);
+	};
+
+	/**
+	 * Transfer NFT of a collection from one user to another (legacy method).
+	 *
+	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
+	 *
+	 * @param {Object} params - The parameters for the transfer.
+	 * @param {Principal} params.from - The ICRC principal of the sender.
+	 * @param {Principal} params.to - The ICRC principal of the receiver.
+	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
+	 * @param {bigint} params.amount - The amount to transfer.
+	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
+	 * @returns {Promise<Balance>} The new balance of the sender after the transfer.
+	 * @throws CanisterInternalError if the token identifier is invalid or if the transfer fails.
+	 */
+	transferLegacy = async ({
+		certified,
+		from,
+		to,
+		tokenIdentifier: token,
+		amount
+	}: {
+		from: Principal;
+		to: Principal;
+		tokenIdentifier: TokenIdentifier;
+		amount: bigint;
+	} & QueryParams): Promise<Balance> => {
+		const { transfer } = this.caller({ certified });
+
+		const args: TransferRequest = {
+			from: toUser(from),
+			to: toUser(to),
+			token,
+			amount,
+			notify: false,
+			memo: new Uint8Array(),
+			subaccount: toNullable()
+		};
+
+		const response = await transfer(args);
 
 		if ('ok' in response) {
 			return response.ok;
