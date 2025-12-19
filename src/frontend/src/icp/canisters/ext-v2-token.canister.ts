@@ -202,6 +202,53 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	};
 
 	/**
+	 * Transfer NFT of a collection from one user to another (legacy method).
+	 *
+	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
+	 *
+	 * @param {Object} params - The parameters for the transfer.
+	 * @param {Principal} params.from - The ICRC principal of the sender.
+	 * @param {Principal} params.to - The ICRC principal of the receiver.
+	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
+	 * @param {bigint} params.amount - The amount to transfer.
+	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
+	 * @returns {Promise<Balance>} The new balance of the sender after the transfer.
+	 * @throws CanisterInternalError if the token identifier is invalid or if the transfer fails.
+	 */
+	transferLegacy = async ({
+		certified,
+		from,
+		to,
+		tokenIdentifier: token,
+		amount
+	}: {
+		from: Principal;
+		to: Principal;
+		tokenIdentifier: TokenIdentifier;
+		amount: bigint;
+	} & QueryParams): Promise<Balance> => {
+		const { transfer } = this.caller({ certified });
+
+		const args: TransferRequest = {
+			from: toUser(from),
+			to: toUser(to),
+			token,
+			amount,
+			notify: false,
+			memo: new Uint8Array(),
+			subaccount: toNullable()
+		};
+
+		const response = await transfer(args);
+
+		if ('ok' in response) {
+			return response.ok;
+		}
+
+		throw mapExtV2TokenTransferError(response);
+	};
+
+	/**
 	 * Returns the metadata of a specific token of the collection.
 	 *
 	 * It first tries to use the new `ext_metadata` endpoint, and if it fails,
