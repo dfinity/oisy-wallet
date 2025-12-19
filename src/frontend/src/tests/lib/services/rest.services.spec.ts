@@ -38,8 +38,7 @@ describe('rest.services', () => {
 			const maxRetries = 3;
 
 			await expect(
-				async () =>
-					await retry({
+				retry({
 						request: mockFailedRequest,
 						maxRetries
 					})
@@ -82,8 +81,7 @@ describe('rest.services', () => {
 			const maxRetries = 2;
 
 			await expect(
-				async () =>
-					await retry({
+				retry({
 						request: mockFailedRequest,
 						onRetry: mockOnRetry,
 						maxRetries
@@ -96,8 +94,7 @@ describe('rest.services', () => {
 
 		it('should not retry if maxRetries is set to 0', async () => {
 			await expect(
-				async () =>
-					await retry({
+				retry({
 						request: mockFailedRequest,
 						onRetry: mockOnRetry,
 						maxRetries: 0
@@ -180,8 +177,7 @@ describe('rest.services', () => {
 			const maxRetries = 3;
 
 			await expect(
-				async () =>
-					await retryWithDelay({
+				retryWithDelay({
 						request: mockFailedRequest,
 						maxRetries
 					})
@@ -195,8 +191,7 @@ describe('rest.services', () => {
 
 		it('should call randomWait after each failed attempt', async () => {
 			await expect(
-				async () =>
-					await retryWithDelay({
+				retryWithDelay({
 						request: mockFailedRequest,
 						maxRetries: 2
 					})
@@ -208,8 +203,7 @@ describe('rest.services', () => {
 
 		it('should not retry if maxRetries is set to 0', async () => {
 			await expect(
-				async () =>
-					await retryWithDelay({
+				retryWithDelay({
 						request: mockFailedRequest,
 						maxRetries: 0
 					})
