@@ -126,7 +126,10 @@ export const getTokensByOwner = async ({
 		try {
 			return await getTokensByOwnerLegacy({ certified, ...getIcrcAccount(owner) });
 		} catch (legacyErr: unknown) {
-			if (legacyErr instanceof CanisterInternalError) {
+			if (
+				legacyErr instanceof CanisterInternalError &&
+				!(primaryErr instanceof CanisterInternalError)
+			) {
 				throw legacyErr;
 			}
 

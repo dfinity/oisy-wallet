@@ -149,6 +149,23 @@ describe('ext-v2-token.api', () => {
 			);
 		});
 
+		it('should raise the error of the first method if both errors are handled', async () => {
+			const mockError1 = new CanisterInternalError('First error');
+			const mockError2 = new CanisterInternalError('Legacy error');
+
+			tokenCanisterMock.getTokensByOwner.mockRejectedValueOnce(mockError1);
+
+			tokenCanisterMock.getTokensByOwnerLegacy.mockRejectedValueOnce(mockError2);
+
+			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError1);
+
+			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.getTokensByOwnerLegacy).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
+		});
+
 		it('should raise the error of the first method if fallback fails', async () => {
 			const mockError = new Error('First error');
 
