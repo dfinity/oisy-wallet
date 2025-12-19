@@ -61,7 +61,7 @@
 			<WalletConnect />
 
 			{#if UNIVERSAL_SCANNER_ENABLED}
-				<!-- TODO: Re-enable the scanner button when it includes WalletConnect -->
+				<!-- TODO: Re-enable the scanner button when it includes WalletConnect and remove the modal from pay button -->
 				<!-- <Scanner /> -->
 
 				<Pay />
