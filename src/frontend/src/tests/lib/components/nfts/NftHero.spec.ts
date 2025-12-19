@@ -195,7 +195,7 @@ describe('NftHero', () => {
 		);
 	});
 
-	it('should open the send modal in Nft send flow when send button is clicked', () => {
+	it('should open the send modal in Nft send flow when send button is clicked', async () => {
 		mockPage.mock({
 			network: mockValidErc1155Nft.collection.network as unknown as OptionString
 		});
@@ -216,7 +216,7 @@ describe('NftHero', () => {
 
 		fireEvent.click(nftSendButton);
 
-		waitFor(() => {
+		await waitFor(() => {
 			const modalTitle = getByTestId('modal-title');
 
 			expect(modalTitle).toHaveTextContent(get(i18n).send.text.select_nft);
@@ -225,7 +225,7 @@ describe('NftHero', () => {
 		expect(openSendSpy).toHaveBeenCalledOnce();
 	});
 
-	it('should render the root breadcrumb with network query param if userSelectedNetwork is defined', () => {
+	it('should render the root breadcrumb with network query param if userSelectedNetwork is defined', async () => {
 		mockPage.mock({
 			network: mockValidErc1155Nft.collection.network as unknown as OptionString
 		});
@@ -244,16 +244,18 @@ describe('NftHero', () => {
 			}
 		});
 
-		const firstBreadcrumElmt = container.querySelector(
-			'div.text-xs.font-bold a.no-underline:first-of-type'
-		);
+		await waitFor(() => {
+			const firstBreadcrumElmt = container.querySelector(
+				'div.text-xs.font-bold a.no-underline:first-of-type'
+			);
 
-		expect(firstBreadcrumElmt?.getAttribute('href')).toContain(
-			`network=${ETHEREUM_NETWORK_ID.description}`
-		);
+			expect(firstBreadcrumElmt?.getAttribute('href')).toContain(
+				`network=${ETHEREUM_NETWORK_ID.description}`
+			);
+		});
 	});
 
-	it('should render the root breadcrumb without network query param if userSelectedNetwork is not defined', () => {
+	it('should render the root breadcrumb without network query param if userSelectedNetwork is not defined', async () => {
 		mockPage.mock({
 			network: mockValidErc1155Nft.collection.network as unknown as OptionString
 		});
@@ -268,11 +270,13 @@ describe('NftHero', () => {
 			}
 		});
 
-		const firstBreadcrumElmt = container.querySelector(
-			'div.text-xs.font-bold a.no-underline:first-of-type'
-		);
+		await waitFor(() => {
+			const firstBreadcrumElmt = container.querySelector(
+				'div.text-xs.font-bold a.no-underline:first-of-type'
+			);
 
-		expect(firstBreadcrumElmt?.getAttribute('href')).not.toContain('network=');
+			expect(firstBreadcrumElmt?.getAttribute('href')).not.toContain('network=');
+		});
 	});
 
 	it('should render the acquiredAt', async () => {
