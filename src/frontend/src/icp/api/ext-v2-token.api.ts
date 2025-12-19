@@ -118,6 +118,13 @@ export const getTokensByOwner = async ({
  *
  * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
  *
+ * @remarks
+ * According to the EXT v2 specification, `ext_transfer` and the legacy transfer method
+ * are functionally equivalent. However, in practice, some canisters only implement
+ * the legacy endpoint. For this reason, this function first attempts to use
+ * `ext_transfer` and falls back to the legacy transfer method before propagating
+ * any error from the primary call.
+ *
  * @param {Object} params - The parameters for the transfer.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
  * @param {OptionIdentity} params.identity - The identity to use for the request.
