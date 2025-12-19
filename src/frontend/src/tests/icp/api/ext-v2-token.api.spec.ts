@@ -205,7 +205,7 @@ describe('ext-v2-token.api', () => {
 		beforeEach(() => {
 			tokenCanisterMock.transfer.mockResolvedValue(mockBalance);
 
-			tokenCanisterMock.transferLegacy.mockResolvedValue(mockBalance);
+			tokenCanisterMock.transferAlias.mockResolvedValue(mockBalance);
 		});
 
 		it('should call successfully transfer endpoint', async () => {
@@ -229,7 +229,7 @@ describe('ext-v2-token.api', () => {
 
 			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 
-			expect(tokenCanisterMock.transferLegacy).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(tokenCanisterMock.transferAlias).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should raise the error of the legacy transfer if it is handled', async () => {
@@ -237,13 +237,13 @@ describe('ext-v2-token.api', () => {
 
 			tokenCanisterMock.transfer.mockRejectedValueOnce(new Error('First transfer error'));
 
-			tokenCanisterMock.transferLegacy.mockRejectedValueOnce(mockError);
+			tokenCanisterMock.transferAlias.mockRejectedValueOnce(mockError);
 
 			await expect(transfer(params)).rejects.toThrowError(mockError);
 
 			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 
-			expect(tokenCanisterMock.transferLegacy).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(tokenCanisterMock.transferAlias).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should raise the error of the first transfer if both errors are handled', async () => {
@@ -252,13 +252,13 @@ describe('ext-v2-token.api', () => {
 
 			tokenCanisterMock.transfer.mockRejectedValueOnce(mockError1);
 
-			tokenCanisterMock.transferLegacy.mockRejectedValueOnce(mockError2);
+			tokenCanisterMock.transferAlias.mockRejectedValueOnce(mockError2);
 
 			await expect(transfer(params)).rejects.toThrowError(mockError1);
 
 			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 
-			expect(tokenCanisterMock.transferLegacy).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(tokenCanisterMock.transferAlias).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 
 		it('should raise the error of the first transfer if fallback fails', async () => {
@@ -266,13 +266,13 @@ describe('ext-v2-token.api', () => {
 
 			tokenCanisterMock.transfer.mockRejectedValueOnce(mockError);
 
-			tokenCanisterMock.transferLegacy.mockRejectedValueOnce(new Error('Legacy transfer error'));
+			tokenCanisterMock.transferAlias.mockRejectedValueOnce(new Error('Legacy transfer error'));
 
 			await expect(transfer(params)).rejects.toThrowError(mockError);
 
 			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 
-			expect(tokenCanisterMock.transferLegacy).toHaveBeenCalledExactlyOnceWith(expectedParams);
+			expect(tokenCanisterMock.transferAlias).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 	});
 

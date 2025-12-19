@@ -144,11 +144,11 @@ export const getTokensByOwner = async ({
  * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
  *
  * @remarks
- * According to the EXT v2 specification, `ext_transfer` and the legacy transfer method
- * are functionally equivalent. However, in practice, some canisters only implement
- * the legacy endpoint. For this reason, this function first attempts to use
- * `ext_transfer` and falls back to the legacy transfer method before propagating
- * any error from the primary call.
+ * The EXT v2 specification describes `transfer` and `ext_transfer` as equivalent transfer entrypoints,
+ * where the latter is an alias of the first one. To maximise compatibility,
+ * this function attempts `transfer` first and falls back to the alias endpoint when needed.
+ * If both attempts fail, it throws the error that is most likely to reflect the underlying
+ * transfer failure.
  *
  * @param {Object} params - The parameters for the transfer.
  * @param {boolean} [params.certified=true] - Whether the data should be certified.
@@ -171,19 +171,20 @@ export const transfer = async ({
 }: CanisterApiFunctionParamsWithCanisterId<
 	{ from: Principal; to: Principal; tokenIdentifier: TokenIdentifier; amount: bigint } & QueryParams
 >) => {
-	const { transfer, transferLegacy } = await extV2TokenCanister({
+	const { transfer, transferAlias } = await extV2TokenCanister({
 		identity,
 		canisterId,
 		...rest
 	});
 
-	// Some EXT tokens do not support the new `ext_transfer` endpoint, so we try to use the legacy one as fallback.
-	// However, if both raise an error, we throw the one that is most likely to represent the real transfer failure.
+	// Some canisters expose the transfer endpoint under alias name `ext_transfer` instead of `transfer`.
+	// We try `transfer` first and fall back to the alias for compatibility/insurance.
+	// If both raise an error, we throw the one most likely to represent the real transfer failure.
 	try {
 		await transfer({ certified, from, to, tokenIdentifier, amount });
 	} catch (primaryErr: unknown) {
 		try {
-			await transferLegacy({ certified, from, to, tokenIdentifier, amount });
+			await transferAlias({ certified, from, to, tokenIdentifier, amount });
 		} catch (legacyErr: unknown) {
 			if (
 				legacyErr instanceof CanisterInternalError &&
