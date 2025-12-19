@@ -4,6 +4,7 @@ import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 import { currentLanguage } from '$lib/derived/i18n.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { extractMediaUrls } from '$lib/services/url.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { userSelectedNetworkStore } from '$lib/stores/settings.store';
@@ -16,16 +17,29 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
+
+vi.mock('$lib/services/url.services', () => ({
+	extractMediaUrls: vi.fn()
+}));
 
 describe('NftHero', () => {
-	const openFullscreenSpy = vi
-		.spyOn(modalStore, 'openNftFullscreenDisplay')
-		.mockImplementation(() => {});
+	let openFullscreenSpy: MockInstance;
 
-	const openSendSpy = vi.spyOn(modalStore, 'openSend');
+	let openSendSpy: MockInstance;
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
+		vi.mocked(extractMediaUrls).mockResolvedValue([]);
+
 		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+
+		openFullscreenSpy = vi
+			.spyOn(modalStore, 'openNftFullscreenDisplay')
+			.mockImplementation(() => {});
+
+		openSendSpy = vi.spyOn(modalStore, 'openSend');
 	});
 
 	it('should render the nft data', async () => {
@@ -188,7 +202,7 @@ describe('NftHero', () => {
 		);
 	});
 
-	it('should open the send modal in Nft send flow when send button is clicked', () => {
+	it('should open the send modal in Nft send flow when send button is clicked', async () => {
 		mockPage.mock({
 			network: mockValidErc1155Nft.collection.network as unknown as OptionString
 		});
@@ -209,7 +223,7 @@ describe('NftHero', () => {
 
 		fireEvent.click(nftSendButton);
 
-		waitFor(() => {
+		await waitFor(() => {
 			const modalTitle = getByTestId('modal-title');
 
 			expect(modalTitle).toHaveTextContent(get(i18n).send.text.select_nft);
@@ -218,7 +232,7 @@ describe('NftHero', () => {
 		expect(openSendSpy).toHaveBeenCalledOnce();
 	});
 
-	it('should render the root breadcrumb with network query param if userSelectedNetwork is defined', () => {
+	it('should render the root breadcrumb with network query param if userSelectedNetwork is defined', async () => {
 		mockPage.mock({
 			network: mockValidErc1155Nft.collection.network as unknown as OptionString
 		});
@@ -237,16 +251,18 @@ describe('NftHero', () => {
 			}
 		});
 
-		const firstBreadcrumElmt = container.querySelector(
-			'div.text-xs.font-bold a.no-underline:first-of-type'
-		);
+		await waitFor(() => {
+			const firstBreadcrumElmt = container.querySelector(
+				'div.text-xs.font-bold a.no-underline:first-of-type'
+			);
 
-		expect(firstBreadcrumElmt?.getAttribute('href')).toContain(
-			`network=${ETHEREUM_NETWORK_ID.description}`
-		);
+			expect(firstBreadcrumElmt?.getAttribute('href')).toContain(
+				`network=${ETHEREUM_NETWORK_ID.description}`
+			);
+		});
 	});
 
-	it('should render the root breadcrumb without network query param if userSelectedNetwork is not defined', () => {
+	it('should render the root breadcrumb without network query param if userSelectedNetwork is not defined', async () => {
 		mockPage.mock({
 			network: mockValidErc1155Nft.collection.network as unknown as OptionString
 		});
@@ -261,11 +277,13 @@ describe('NftHero', () => {
 			}
 		});
 
-		const firstBreadcrumElmt = container.querySelector(
-			'div.text-xs.font-bold a.no-underline:first-of-type'
-		);
+		await waitFor(() => {
+			const firstBreadcrumElmt = container.querySelector(
+				'div.text-xs.font-bold a.no-underline:first-of-type'
+			);
 
-		expect(firstBreadcrumElmt?.getAttribute('href')).not.toContain('network=');
+			expect(firstBreadcrumElmt?.getAttribute('href')).not.toContain('network=');
+		});
 	});
 
 	it('should render the acquiredAt', async () => {
