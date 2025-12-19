@@ -1449,13 +1449,6 @@
 		}
 	},
 	{
-		"canisterId": "bxdf4-baaaa-aaaah-qaruq-cai",
-		"standardVersion": "legacy",
-		"metadata": {
-			"name": "ICPunks"
-		}
-	},
-	{
 		"canisterId": "byowe-niaaa-aaaag-qdiva-cai",
 		"standardVersion": "ext",
 		"metadata": {
