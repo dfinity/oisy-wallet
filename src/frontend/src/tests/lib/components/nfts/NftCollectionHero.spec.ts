@@ -7,6 +7,7 @@ import {
 	NFT_HIDDEN_BADGE
 } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { extractMediaUrls } from '$lib/services/url.services';
 import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
@@ -16,6 +17,10 @@ import { mockNftCollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
+
+vi.mock('$lib/services/url.services', () => ({
+	extractMediaUrls: vi.fn()
+}));
 
 describe('NftCollectionHero', () => {
 	const spamButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_SPAM}"]`;
@@ -33,6 +38,10 @@ describe('NftCollectionHero', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
+		vi.mocked(extractMediaUrls).mockResolvedValue([]);
+
 		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
 	});
 
