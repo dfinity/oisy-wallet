@@ -13,17 +13,17 @@
 	import type { Option } from '$lib/types/utils';
 
 	interface Props {
-		imageSrc: string;
+		mediaSrc: string;
 	}
 
-	let { imageSrc }: Props = $props();
+	let { mediaSrc }: Props = $props();
 
 	// Value `null` means that the media type is not supported, or it is not possible to fetch the type.
 	// Value `undefined` means that we have not yet fetched the media type.
 	let mediaType = $state<Option<MediaType>>();
 
 	const updateMediaType = async () => {
-		const { type } = await extractMediaTypeAndSize(imageSrc);
+		const { type } = await extractMediaTypeAndSize(mediaSrc);
 
 		mediaType = type;
 	};
@@ -33,7 +33,7 @@
 	});
 
 	$effect(() => {
-		[imageSrc];
+		[mediaSrc];
 
 		untrack(() => updateMediaType());
 	});
@@ -45,10 +45,10 @@
 	</div>
 	<div class="pointer-events-none absolute inset-0 z-9 grid place-items-center">
 		{#if mediaType === MediaType.Img}
-			<Img src={imageSrc} styleClass="rounded-lg w-auto h-auto block max-h-[90dvh] max-w-[90dvw]" />
+			<Img src={mediaSrc} styleClass="rounded-lg w-auto h-auto block max-h-[90dvh] max-w-[90dvw]" />
 		{:else if mediaType === MediaType.Video}
 			<Video
-				src={imageSrc}
+				src={mediaSrc}
 				styleClass="rounded-lg w-auto h-auto block max-h-[90dvh] max-w-[90dvw]"
 			/>
 		{:else if mediaType === null}

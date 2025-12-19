@@ -1,4 +1,4 @@
-import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
+import FullscreenMediaModal from '$lib/components/ui/FullscreenMediaModal.svelte';
 import { MediaType } from '$lib/enums/media-type';
 import { extractMediaTypeAndSize } from '$lib/services/url.services';
 import { modalStore } from '$lib/stores/modal.store';
@@ -9,7 +9,7 @@ vi.mock('$lib/services/url.services', () => ({
 	extractMediaTypeAndSize: vi.fn()
 }));
 
-describe('FullscreenImgModal', () => {
+describe('FullscreenMediaModal', () => {
 	const closeSpy = vi.spyOn(modalStore, 'close').mockImplementation(() => {});
 
 	beforeEach(() => {
@@ -21,9 +21,9 @@ describe('FullscreenImgModal', () => {
 	it('renders image children inside the fullscreen modal container', async () => {
 		vi.mocked(extractMediaTypeAndSize).mockResolvedValue({ type: MediaType.Img, size: null });
 
-		const { container } = render(FullscreenImgModal, {
+		const { container } = render(FullscreenMediaModal, {
 			props: {
-				imageSrc: 'https://www.example.com/test-image.png'
+				mediaSrc: 'https://www.example.com/test-image.png'
 			}
 		});
 
@@ -39,9 +39,9 @@ describe('FullscreenImgModal', () => {
 	it('renders video children inside the fullscreen modal container', async () => {
 		vi.mocked(extractMediaTypeAndSize).mockResolvedValue({ type: MediaType.Video, size: null });
 
-		const { container } = render(FullscreenImgModal, {
+		const { container } = render(FullscreenMediaModal, {
 			props: {
-				imageSrc: 'https://www.example.com/test-video.mp4'
+				mediaSrc: 'https://www.example.com/test-video.mp4'
 			}
 		});
 
@@ -54,9 +54,9 @@ describe('FullscreenImgModal', () => {
 	});
 
 	it('shows the close icon in the top-right corner', () => {
-		const { container } = render(FullscreenImgModal, {
+		const { container } = render(FullscreenMediaModal, {
 			props: {
-				imageSrc: 'https://www.example.com/test-image.png'
+				mediaSrc: 'https://www.example.com/test-image.png'
 			}
 		});
 
@@ -66,9 +66,9 @@ describe('FullscreenImgModal', () => {
 	});
 
 	it('calls modalStore.close when backdrop is clicked', async () => {
-		const { getByTestId } = render(FullscreenImgModal, {
+		const { getByTestId } = render(FullscreenMediaModal, {
 			props: {
-				imageSrc: 'https://www.example.com/test-image.png'
+				mediaSrc: 'https://www.example.com/test-image.png'
 			}
 		});
 
@@ -79,9 +79,9 @@ describe('FullscreenImgModal', () => {
 	});
 
 	it('applies max size constraints to the fullscreen-modal container', async () => {
-		render(FullscreenImgModal, {
+		render(FullscreenMediaModal, {
 			props: {
-				imageSrc: 'https://www.example.com/test-image.png'
+				mediaSrc: 'https://www.example.com/test-image.png'
 			}
 		});
 
