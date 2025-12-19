@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.8.9",
+	"version": "1.9.1",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -87,7 +87,7 @@
 		"@solana-program/token": "^0.8.0",
 		"@solana-program/token-2022": "^0.6.1",
 		"@solana/kit": "^5.0.0",
-		"@velora-dex/sdk": "^9.0.0",
+		"@velora-dex/sdk": "^9.1.0",
 		"alchemy-sdk": "^3.6.5",
 		"bech32": "^1.1.4",
 		"bitcoinjs-lib": "^6.1.7",
@@ -126,7 +126,7 @@
 		"prettier-plugin-svelte": "^3.4.0",
 		"prettier-plugin-tailwindcss": "^0.7.0",
 		"sass": "^1.94.0",
-		"svelte": "^5.43.4",
+		"svelte": "^5.43.7",
 		"svelte-check": "^4.3.4",
 		"tailwindcss": "4.1.17",
 		"tslib": "^2.8.1",

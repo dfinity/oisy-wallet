@@ -411,7 +411,7 @@
 			"name": "PHASMA",
 			"symbol": "PHASMA",
 			"fee": {
-				"__bigint__": "500000000000000000"
+				"__bigint__": "5000000000"
 			},
 			"alternativeName": "PHASMA",
 			"url": "https://phasma-lm0.caffeine.xyz"

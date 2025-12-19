@@ -1295,7 +1295,8 @@
 			"learn_more": "Saber más",
 			"token_id": "ID del Token",
 			"go_to_collection": "Ir a la colección",
-			"could_not_update_section": "No se pudo actualizar la sección de la colección. Por favor, inténtalo de nuevo"
+			"could_not_update_section": "No se pudo actualizar la sección de la colección. Por favor, inténtalo de nuevo",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Aún no hay NFTs",

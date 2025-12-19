@@ -1057,6 +1057,7 @@ interface I18nNfts {
 		token_id: string;
 		go_to_collection: string;
 		could_not_update_section: string;
+		media_stored_at_different_location: string;
 	};
 	alt: {
 		placeholder_image: string;

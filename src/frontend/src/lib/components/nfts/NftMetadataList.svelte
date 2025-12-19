@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { untrack } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -7,9 +9,12 @@
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import type { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
+	import { extractMediaUrls } from '$lib/services/url.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -37,6 +42,24 @@
 				nft.attributes.toSorted((a, b) => a.traitType.localeCompare(b.traitType))
 			: []
 	);
+
+	let additionalMediaUrl = $state<string | undefined>();
+
+	const updateAdditionalMediaUrl = async () => {
+		if (isNullish(nft?.imageUrl) || !allowMedia) {
+			additionalMediaUrl = undefined;
+
+			return;
+		}
+
+		[additionalMediaUrl] = await extractMediaUrls(nft.imageUrl);
+	};
+
+	$effect(() => {
+		[nft, allowMedia];
+
+		untrack(() => updateAdditionalMediaUrl());
+	});
 </script>
 
 <List
@@ -54,6 +77,7 @@
 			</span>
 		{/if}
 	</ListItem>
+
 	<ListItem>
 		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.collection_name}</span>
 		{#if nonNullish(collection?.name)}
@@ -72,6 +96,7 @@
 			</span>
 		{/if}
 	</ListItem>
+
 	{#if nonNullish(nft)}
 		<ListItem>
 			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.token_id}</span>
@@ -83,6 +108,7 @@
 			</span>
 		</ListItem>
 	{/if}
+
 	<ListItem>
 		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.collection_address}</span>
 		{#if nonNullish(collection?.address) && nonNullish(collection?.network)}
@@ -106,6 +132,7 @@
 			</span>
 		{/if}
 	</ListItem>
+
 	<ListItem>
 		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.display_preference}</span>
 		{#if nonNullish(collection)}
@@ -116,6 +143,7 @@
 			</span>
 		{/if}
 	</ListItem>
+
 	<ListItem>
 		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.token_standard}</span>
 		{#if nonNullish(collection?.standard)}
@@ -131,6 +159,7 @@
 			</span>
 		{/if}
 	</ListItem>
+
 	{#if nonNullish(nft)}
 		<ListItem>
 			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.received_at}</span>
@@ -145,6 +174,7 @@
 				<output>&ndash;</output>
 			{/if}
 		</ListItem>
+
 		<ListItem>
 			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.media_url}</span>
 			{#if nonNullish(nft?.imageUrl)}
@@ -169,14 +199,43 @@
 				</span>
 			{/if}
 		</ListItem>
+
+		{#if nonNullish(additionalMediaUrl)}
+			<div class="mt-2" in:slide={SLIDE_PARAMS}>
+				<MessageBox level="info">
+					<div class="flex flex-col gap-1 text-sm">
+						{$i18n.nfts.text.media_stored_at_different_location}
+
+						<output class="truncate text-tertiary">
+							{additionalMediaUrl}
+						</output>
+
+						<div class="items-end">
+							<AddressActions
+								copyAddress={additionalMediaUrl}
+								copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+									$address: additionalMediaUrl
+								})}
+								{...allowMedia && {
+									externalLink: additionalMediaUrl,
+									externalLinkAriaLabel: $i18n.nfts.text.open_in_new_tab
+								}}
+							/>
+						</div>
+					</div>
+				</MessageBox>
+			</div>
+		{/if}
 	{/if}
+
 	{#if nonNullish(collection) && isCollectionErc1155(collection) && nonNullish(nft?.balance)}
-		<ListItem
-			><span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.quantity}</span><span
+		<ListItem>
+			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.quantity}</span><span
 				class="uppercase">{nft.balance}</span
-			></ListItem
-		>
+			>
+		</ListItem>
 	{/if}
+
 	{#if sortedAttributes.length > 0}
 		<ListItem styleClass="text-tertiary">{$i18n.nfts.text.item_traits}</ListItem>
 		<div class="mt-2 flex flex-wrap gap-2">

@@ -1295,7 +1295,8 @@
 			"learn_more": "Подробнее",
 			"token_id": "ТокенID",
 			"go_to_collection": "Перейти к коллекции",
-			"could_not_update_section": "Не удалось обновить раздел"
+			"could_not_update_section": "Не удалось обновить раздел",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Пока нет NFT",
