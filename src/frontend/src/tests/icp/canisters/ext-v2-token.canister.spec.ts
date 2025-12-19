@@ -306,6 +306,123 @@ describe('ext-v2-token.canister', () => {
 		});
 	});
 
+	describe('getTokensByOwnerLegacy', () => {
+		const mockParams = {
+			certified,
+			...mockIcrcAccount
+		};
+
+		const mockIdentifiers = [1, 2, 3];
+		const mockResponse = Uint32Array.from(mockIdentifiers);
+
+		const expectedIcrcAddress = getAccountIdentifier(mockPrincipal).toHex();
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should correctly call the tokens method', async () => {
+			service.tokens.mockResolvedValue({ ok: mockResponse });
+
+			const { getTokensByOwnerLegacy } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			const res = await getTokensByOwnerLegacy(mockParams);
+
+			expect(res).toEqual(mockIdentifiers);
+			expect(service.tokens).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
+		});
+
+		it('should handle an empty response', async () => {
+			service.tokens.mockResolvedValue({ ok: mockResponse });
+
+			const { getTokensByOwnerLegacy } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			const res = await getTokensByOwnerLegacy(mockParams);
+
+			expect(res).toEqual(mockIdentifiers);
+			expect(service.tokens).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
+		});
+
+		it('should handle invalid token error', async () => {
+			service.tokens.mockResolvedValue({
+				err: { InvalidToken: mockExtV2TokenIdentifier }
+			});
+
+			const { getTokensByOwnerLegacy } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			await expect(getTokensByOwnerLegacy(mockParams)).rejects.toThrowError(
+				new CanisterInternalError(`The specified token is invalid: ${mockExtV2TokenIdentifier}`)
+			);
+
+			expect(service.tokens).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
+		});
+
+		it('should handle other unexpected errors', async () => {
+			service.tokens.mockResolvedValue({
+				err: { Other: 'other error' }
+			});
+
+			const { getTokensByOwnerLegacy } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			await expect(getTokensByOwnerLegacy(mockParams)).rejects.toThrowError(
+				new CanisterInternalError('other error')
+			);
+
+			expect(service.tokens).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
+		});
+
+		it('should return an empty list if it is a no-tokens Other error', async () => {
+			service.tokens.mockResolvedValue({
+				err: { Other: 'No tokens' }
+			});
+
+			const { getTokensByOwnerLegacy } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			const res = await getTokensByOwnerLegacy(mockParams);
+
+			expect(res).toEqual([]);
+			expect(service.tokens).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
+		});
+
+		it('should handle a generic canister error', async () => {
+			// @ts-expect-error we test this on purpose
+			service.tokens.mockResolvedValue({ err: { CanisterError: null } });
+
+			const { getTokensByOwnerLegacy } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			await expect(getTokensByOwnerLegacy(mockParams)).rejects.toThrowError(
+				new CanisterInternalError('Unknown ExtV2TokenCanisterError')
+			);
+
+			expect(service.tokens).toHaveBeenCalledExactlyOnceWith(expectedIcrcAddress);
+		});
+
+		it('should throw an error if tokens throws', async () => {
+			const mockError = new Error('Test response error');
+			service.tokens.mockRejectedValue(mockError);
+
+			const { getTokensByOwnerLegacy } = await createExtV2TokenCanister({
+				serviceOverride: service
+			});
+
+			const res = getTokensByOwnerLegacy(mockParams);
+
+			await expect(res).rejects.toThrowError(mockError);
+		});
+	});
+
 	describe('transfer', () => {
 		const mockParams = {
 			certified,

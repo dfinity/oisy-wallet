@@ -123,6 +123,41 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	};
 
 	/**
+	 * Get the list of collection's tokens owned by a specific user (legacy method).
+	 *
+	 * The metadata returned with each token is not the metadata that we need.
+	 * Please use the method `ext_metadata` instead.
+	 *
+	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#tokens_ext
+	 *
+	 * @param {Object} params - The parameters for fetching the tokens.
+	 * @param {Principal} params.owner - The ICRC principal of the user.
+	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
+	 * @returns {Promise<TokenIndex[]>} The list of token indices owned by the user.
+	 * @throws CanisterInternalError if the token identifier is invalid.
+	 */
+	getTokensByOwnerLegacy = async ({
+		certified,
+		owner
+	}: IcrcAccount & QueryParams): Promise<TokenIndex[]> => {
+		const { tokens } = this.caller({ certified });
+
+		const response = await tokens(getAccountIdentifier(owner).toHex());
+
+		if ('ok' in response) {
+			return Array.from(response.ok);
+		}
+
+		// If the owner has no tokens in the collection, apparently it is returned as a generic `Other` error.
+		// Since we don't have a resilient way of distinguishing this from other errors, we manually compare the error message (case-insensitive).
+		if ('Other' in response.err && response.err.Other.toLowerCase() === 'no tokens') {
+			return [];
+		}
+
+		throw mapExtV2TokenCommonError(response.err);
+	};
+
+	/**
 	 * Transfer NFT of a collection from one user to another.
 	 *
 	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
