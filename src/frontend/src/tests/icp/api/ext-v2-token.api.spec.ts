@@ -6,6 +6,7 @@ import {
 	transfer
 } from '$icp/api/ext-v2-token.api';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	mockExtMetadata,
@@ -162,6 +163,20 @@ describe('ext-v2-token.api', () => {
 			tokenCanisterMock.transfer.mockRejectedValueOnce(new Error('First transfer error'));
 
 			await transfer(params);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.transferLegacy).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should raise the error of the legacy transfer if it is handled', async () => {
+			const mockError = new CanisterInternalError('Insufficient balance for the transfer');
+
+			tokenCanisterMock.transfer.mockRejectedValueOnce(new Error('First transfer error'));
+
+			tokenCanisterMock.transferLegacy.mockRejectedValueOnce(mockError);
+
+			await expect(transfer(params)).rejects.toThrowError(mockError);
 
 			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 

@@ -8,6 +8,7 @@ import type {
 } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
@@ -153,14 +154,18 @@ export const transfer = async ({
 	});
 
 	// Some EXT tokens do not support the new `ext_transfer` endpoint, so we try to use the legacy one as fallback.
-	// However, if both raise an error, we re-throw the original one.
+	// However, if both raise an error, we throw the one that is most likely to represent the real transfer failure.
 	try {
 		await transfer({ certified, from, to, tokenIdentifier, amount });
-	} catch (err: unknown) {
+	} catch (primaryErr: unknown) {
 		try {
 			await transferLegacy({ certified, from, to, tokenIdentifier, amount });
-		} catch (_: unknown) {
-			throw err;
+		} catch (legacyErr: unknown) {
+			if (legacyErr instanceof CanisterInternalError) {
+				throw legacyErr;
+			}
+
+			throw primaryErr;
 		}
 	}
 };
