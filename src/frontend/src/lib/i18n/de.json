@@ -1075,7 +1075,7 @@
 		"error": {
 			"data_is_incompleted": "Die empfangenen Daten sind unvollständig. Bitte versuche es erneut.",
 			"amount_does_not_match": "Der Betrag der benötigten Anzahl Tokens hat sich nachträglich geändert und die Transaktion wurde sicherheitshalber storniert.",
-			"recipient_address_is_not_valid": "Die erhaltenen Empfängeradresse ist nicht gülltig.",
+			"recipient_address_is_not_valid": "Die erhaltenen Empfängeradresse ist nicht gültig.",
 			"token_address_mismatch": "Das zur Zahlung freigegebene Token passt nicht zum geforderten Token."
 		},
 		"alt": {
