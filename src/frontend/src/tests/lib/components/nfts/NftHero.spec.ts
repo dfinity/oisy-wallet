@@ -25,6 +25,8 @@ describe('NftHero', () => {
 	const openSendSpy = vi.spyOn(modalStore, 'openSend');
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
 	});
 
