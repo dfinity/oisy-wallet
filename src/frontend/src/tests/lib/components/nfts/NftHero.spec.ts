@@ -16,18 +16,23 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 describe('NftHero', () => {
-	const openFullscreenSpy = vi
-		.spyOn(modalStore, 'openNftFullscreenDisplay')
-		.mockImplementation(() => {});
+	let openFullscreenSpy: MockInstance;
 
-	const openSendSpy = vi.spyOn(modalStore, 'openSend');
+	let openSendSpy: MockInstance;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+
+		openFullscreenSpy = vi
+			.spyOn(modalStore, 'openNftFullscreenDisplay')
+			.mockImplementation(() => {});
+
+		openSendSpy = vi.spyOn(modalStore, 'openSend');
 	});
 
 	it('should render the nft data', async () => {
