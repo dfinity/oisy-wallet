@@ -60,7 +60,7 @@
 	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
 	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}
-		<FullscreenMediaModal imageSrc={$modalNftFullscreenDisplayData.imageUrl} />
+		<FullscreenMediaModal mediaSrc={$modalNftFullscreenDisplayData.imageUrl} />
 	{:else if $modalReceive && $modalReceiveId === getSymbol('menu-addresses')}
 		<ReceiveAddressModal infoCmp={ReceiveAddresses} />
 	{/if}

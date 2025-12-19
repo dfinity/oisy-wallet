@@ -23,7 +23,7 @@ describe('FullscreenMediaModal', () => {
 
 		const { container } = render(FullscreenMediaModal, {
 			props: {
-				imageSrc: 'https://www.example.com/test-image.png'
+				mediaSrc: 'https://www.example.com/test-image.png'
 			}
 		});
 
@@ -41,7 +41,7 @@ describe('FullscreenMediaModal', () => {
 
 		const { container } = render(FullscreenMediaModal, {
 			props: {
-				imageSrc: 'https://www.example.com/test-video.mp4'
+				mediaSrc: 'https://www.example.com/test-video.mp4'
 			}
 		});
 
@@ -56,7 +56,7 @@ describe('FullscreenMediaModal', () => {
 	it('shows the close icon in the top-right corner', () => {
 		const { container } = render(FullscreenMediaModal, {
 			props: {
-				imageSrc: 'https://www.example.com/test-image.png'
+				mediaSrc: 'https://www.example.com/test-image.png'
 			}
 		});
 
@@ -68,7 +68,7 @@ describe('FullscreenMediaModal', () => {
 	it('calls modalStore.close when backdrop is clicked', async () => {
 		const { getByTestId } = render(FullscreenMediaModal, {
 			props: {
-				imageSrc: 'https://www.example.com/test-image.png'
+				mediaSrc: 'https://www.example.com/test-image.png'
 			}
 		});
 
@@ -81,7 +81,7 @@ describe('FullscreenMediaModal', () => {
 	it('applies max size constraints to the fullscreen-modal container', async () => {
 		render(FullscreenMediaModal, {
 			props: {
-				imageSrc: 'https://www.example.com/test-image.png'
+				mediaSrc: 'https://www.example.com/test-image.png'
 			}
 		});
 
