@@ -39,9 +39,9 @@ describe('rest.services', () => {
 
 			await expect(
 				retry({
-						request: mockFailedRequest,
-						maxRetries
-					})
+					request: mockFailedRequest,
+					maxRetries
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
@@ -82,10 +82,10 @@ describe('rest.services', () => {
 
 			await expect(
 				retry({
-						request: mockFailedRequest,
-						onRetry: mockOnRetry,
-						maxRetries
-					})
+					request: mockFailedRequest,
+					onRetry: mockOnRetry,
+					maxRetries
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
@@ -95,10 +95,10 @@ describe('rest.services', () => {
 		it('should not retry if maxRetries is set to 0', async () => {
 			await expect(
 				retry({
-						request: mockFailedRequest,
-						onRetry: mockOnRetry,
-						maxRetries: 0
-					})
+					request: mockFailedRequest,
+					onRetry: mockOnRetry,
+					maxRetries: 0
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledOnce();
@@ -178,9 +178,9 @@ describe('rest.services', () => {
 
 			await expect(
 				retryWithDelay({
-						request: mockFailedRequest,
-						maxRetries
-					})
+					request: mockFailedRequest,
+					maxRetries
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
@@ -192,9 +192,9 @@ describe('rest.services', () => {
 		it('should call randomWait after each failed attempt', async () => {
 			await expect(
 				retryWithDelay({
-						request: mockFailedRequest,
-						maxRetries: 2
-					})
+					request: mockFailedRequest,
+					maxRetries: 2
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(3);
@@ -204,9 +204,9 @@ describe('rest.services', () => {
 		it('should not retry if maxRetries is set to 0', async () => {
 			await expect(
 				retryWithDelay({
-						request: mockFailedRequest,
-						maxRetries: 0
-					})
+					request: mockFailedRequest,
+					maxRetries: 0
+				})
 			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledOnce();
