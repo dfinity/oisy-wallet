@@ -335,7 +335,7 @@ describe('ext-v2-token.canister', () => {
 		});
 
 		it('should handle an empty response', async () => {
-			service.tokens.mockResolvedValue({ ok: [] });
+			service.tokens.mockResolvedValue({ ok: Uint32Array.from([]) });
 
 			const { getTokensByOwnerLegacy } = await createExtV2TokenCanister({
 				serviceOverride: service
