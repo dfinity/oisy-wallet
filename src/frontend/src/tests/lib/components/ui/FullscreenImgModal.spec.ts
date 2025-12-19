@@ -1,7 +1,13 @@
 import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
+import { MediaType } from '$lib/enums/media-type';
+import { extractMediaTypeAndSize } from '$lib/services/url.services';
 import { modalStore } from '$lib/stores/modal.store';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+
+vi.mock('$lib/services/url.services', () => ({
+	extractMediaTypeAndSize: vi.fn()
+}));
 
 describe('FullscreenImgModal', () => {
 	const closeSpy = vi.spyOn(modalStore, 'close').mockImplementation(() => {});
@@ -9,19 +15,11 @@ describe('FullscreenImgModal', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		global.fetch = vi.fn().mockResolvedValue({
-			headers: {
-				get: (h: string) => (h === 'Content-Type' ? 'image/png' : null)
-			}
-		});
+		vi.mocked(extractMediaTypeAndSize).mockResolvedValue({ type: null, size: null });
 	});
 
 	it('renders image children inside the fullscreen modal container', async () => {
-		global.fetch = vi.fn().mockResolvedValue({
-			headers: {
-				get: (h: string) => (h === 'Content-Type' ? 'image/png' : null)
-			}
-		});
+		vi.mocked(extractMediaTypeAndSize).mockResolvedValue({ type: MediaType.Img, size: null });
 
 		const { container } = render(FullscreenImgModal, {
 			props: {
@@ -38,34 +36,8 @@ describe('FullscreenImgModal', () => {
 		});
 	});
 
-	it('renders gif children inside the fullscreen modal container', async () => {
-		global.fetch = vi.fn().mockResolvedValue({
-			headers: {
-				get: (h: string) => (h === 'Content-Type' ? '.gif;charset=utf-8' : null)
-			}
-		});
-
-		const { container } = render(FullscreenImgModal, {
-			props: {
-				imageSrc: 'https://www.example.com/test-gif.gif'
-			}
-		});
-
-		await waitFor(() => {
-			const child = container.querySelector('img');
-
-			assertNonNullish(child);
-
-			expect(child.getAttribute('src')).toBe('https://www.example.com/test-gif.gif');
-		});
-	});
-
 	it('renders video children inside the fullscreen modal container', async () => {
-		global.fetch = vi.fn().mockResolvedValue({
-			headers: {
-				get: (h: string) => (h === 'Content-Type' ? 'video/mp4' : null)
-			}
-		});
+		vi.mocked(extractMediaTypeAndSize).mockResolvedValue({ type: MediaType.Video, size: null });
 
 		const { container } = render(FullscreenImgModal, {
 			props: {

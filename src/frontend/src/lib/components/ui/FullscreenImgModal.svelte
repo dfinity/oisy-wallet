@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Backdrop } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
 	import { onMount, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
@@ -9,9 +8,9 @@
 	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import Video from '$lib/components/ui/Video.svelte';
 	import { MediaType } from '$lib/enums/media-type';
+	import { extractMediaTypeAndSize } from '$lib/services/url.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Option } from '$lib/types/utils';
-	import { getMediaType } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		imageSrc: string;
@@ -23,30 +22,10 @@
 	// Value `undefined` means that we have not yet fetched the media type.
 	let mediaType = $state<Option<MediaType>>();
 
-	const fetchMediaType = async (mediaUrl: string): Promise<MediaType | null> => {
-		try {
-			const url = new URL(mediaUrl);
-
-			const response = await fetch(url.href, { method: 'HEAD' });
-
-			const type = response.headers.get('Content-Type');
-
-			if (isNullish(type)) {
-				return null;
-			}
-
-			return getMediaType(type) ?? null;
-		} catch (_: unknown) {
-			// The error here is caused by `fetch`, which can fail for various reasons (network error, CORS, DNS, etc).
-			// Empirically, it happens mostly for CORS policy block: we can't be sure that the media is valid or not.
-			// Ideally, we should load this data in a backend service to avoid CORS issues.
-		}
-
-		return null;
-	};
-
 	const updateMediaType = async () => {
-		mediaType = await fetchMediaType(imageSrc);
+		const { type } = await extractMediaTypeAndSize(imageSrc);
+
+		mediaType = type;
 	};
 
 	onMount(async () => {
