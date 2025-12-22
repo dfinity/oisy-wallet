@@ -131,7 +131,7 @@
 		"tailwindcss": "4.1.17",
 		"tslib": "^2.8.1",
 		"typescript": "^5.4.5",
-		"vite": "^7.2.2",
+		"vite": "^7.2.4",
 		"vite-node": "^5.1.0",
 		"vitest": "^4.0.10",
 		"vitest-mock-extended": "^3.1.0"
