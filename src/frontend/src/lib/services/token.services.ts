@@ -114,10 +114,7 @@ export const autoLoadSingleToken = async <T extends SaveUserToken | SaveCustomTo
  * @param {string} params.errorMessage - A message to display in case of an error.
  * @returns The result of the operation.
  */
-export const autoLoadToken = async <
-	T extends SaveUserToken | SaveCustomToken,
-	K extends Erc20Token | IcCkToken
->({
+export const autoLoadToken = async <T extends SaveCustomToken, K extends Erc20Token | IcCkToken>({
 	tokens,
 	sendToken,
 	identity,

@@ -634,7 +634,7 @@
 			"erc1155_custom_tokens": "ERC1155カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc20_user_tokens": "ERC20ユーザーがトークンを読み込み中にエラーが発生しました",
 			"spl_custom_tokens": "SPLカスタムトークンの読み込み中にエラーが発生しました。",
-			"erc20_user_token": "ERC20ツインの有効化中にエラーが発生しました",
+			"erc20_custom_token": "ERC20ツインの有効化中にエラーが発生しました",
 			"icrc_custom_token": "ICRCカスタムトークンの読み込み中にエラーが発生しました",
 			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "ウォレットにはまだロードされていない初期データが必要です。もう一度お試しください。",
