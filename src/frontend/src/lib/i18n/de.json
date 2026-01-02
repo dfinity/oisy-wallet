@@ -443,7 +443,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Berechtigungskriterien",
-			"network_bonus_info": "Jedes Netwerk das du aktiv benutzt gibt dir einen Multiplikator. Je mehr Netzwerke, desto mehr Belohnungen kannst du bekommen!",
+			"network_bonus_info": "Jedes Netzwerk das du aktiv benutzt gibt dir einen Multiplikator. Je mehr Netzwerke, desto mehr Belohnungen kannst du bekommen!",
 			"min_logins": "Melde Dich $loginsx Mal in den letzten $days Tagen an",
 			"min_transactions": "Führe $transactions Transaktionen in den letzten $days Tagen durch",
 			"min_total_assets_usd": "Halte Token im Wert von $usd USD zum Ausgabezeitpunkt",
@@ -1357,17 +1357,17 @@
 			"scan_qr": "QR-Code scannen",
 			"or_use_link": "oder WalletConnect-Link verwenden",
 			"proposer": "Anfragender",
-			"spender": "",
-			"application": "",
+			"spender": "Berechtigter",
+			"application": "Anwendung",
 			"review": "Erforderliche Berechtigungen für $chain_name ($key) prüfen",
 			"method": "Methode",
 			"methods": "Methoden",
 			"events": "Ereignisse",
 			"message": "Nachricht",
-			"expiration": "",
-			"token": "",
-			"network": "",
-			"amount": "",
+			"expiration": "Gültig bis",
+			"token": "Token",
+			"network": "Netzwerk",
+			"amount": "Betrag",
 			"hex_data": "HEX-Daten",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
 			"sign_message": "Nachricht signieren"
@@ -1440,7 +1440,7 @@
 			"for": "Für",
 			"for_copied": "Adresse in die Zwischenablage kopiert.",
 			"expiration": "Ablaufdatum",
-			"approve_label": ""
+			"approve_label": "Genehmige $approveAmount"
 		},
 		"status": {
 			"confirmed": "Bestätigt",
