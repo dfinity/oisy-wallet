@@ -28,7 +28,7 @@
 		fee
 	}: Props = $props();
 
-	let isZeroBalance = $derived($isIcMintingAccount && (isNullish(balance) || balance === ZERO));
+	let isZeroBalance = $derived(!$isIcMintingAccount && (isNullish(balance) || balance === ZERO));
 
 	let maxAmount = $derived(
 		nonNullish(token)
