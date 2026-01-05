@@ -66,8 +66,6 @@
 			if (total > ($sendBalance ?? ZERO)) {
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
-
-			
 		};
 
 		return assertBalance();
