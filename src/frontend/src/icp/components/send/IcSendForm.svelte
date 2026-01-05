@@ -3,6 +3,7 @@
 	import { getContext, type Snippet } from 'svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendForm from '$lib/components/send/SendForm.svelte';
@@ -60,6 +61,8 @@
 	{/snippet}
 
 	{#snippet fee()}
-		<IcTokenFee />
+		{#if !$isIcMintingAccount}
+			<IcTokenFee />
+		{/if}
 	{/snippet}
 </SendForm>
