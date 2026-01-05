@@ -1,3 +1,4 @@
+import * as authEnv from '$env/auth.env';
 import AuthHelpForm from '$lib/components/auth/AuthHelpForm.svelte';
 import {
 	HELP_AUTH_COULD_NOT_ENTER_IDENTITY_NUMBER_BUTTON,
@@ -15,6 +16,8 @@ import { i18n } from '$lib/stores/i18n.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+
+vi.spyOn(authEnv, 'PRIMARY_INTERNET_IDENTITY_VERSION', 'get').mockImplementation(() => '2.0');
 
 describe('AuthHelpForm', () => {
 	const imageBannerSelector = `img[data-tid="${HELP_AUTH_IMAGE_BANNER}"]`;
