@@ -22,7 +22,7 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
-	import { authNotSignedIn, authSignedIn , authIdentity } from '$lib/derived/auth.derived';
+	import { authNotSignedIn, authSignedIn, authIdentity } from '$lib/derived/auth.derived';
 	import { isAuthLocked } from '$lib/derived/locked.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
@@ -58,16 +58,20 @@
 	});
 
 	const updateIcMintingAccountStatus = async () => {
-		const isMintingAccount =
-			transactionsRoute && nonNullish($pageToken) && isTokenIc($pageToken)
-				? await isUserMintingAccount({
-						identity: $authIdentity,
-						account: $icrcAccount,
-						token: $pageToken
-					})
-				: false;
+		try {
+			const isMintingAccount =
+				transactionsRoute && nonNullish($pageToken) && isTokenIc($pageToken)
+					? await isUserMintingAccount({
+							identity: $authIdentity,
+							account: $icrcAccount,
+							token: $pageToken
+						})
+					: false;
 
-		isIcMintingAccount.set(isMintingAccount);
+			isIcMintingAccount.set(isMintingAccount);
+		} catch (_: unknown) {
+			isIcMintingAccount.set(false);
+		}
 	};
 
 	$effect(() => {
