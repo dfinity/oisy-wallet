@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { setContext, untrack } from 'svelte';
+	import { setContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { isErc20Icp } from '$eth/utils/token.utils';
-	import { icrcAccount } from '$icp/derived/ic.derived';
-	import { isUserMintingAccount } from '$icp/services/icrc-minting.services';
-	import type { IcToken } from '$icp/types/ic-token';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store.ts';
 	import {
 		isGLDTToken as isGLDTTokenUtil,
 		isVCHFToken as isVCHFTokenUtil,
@@ -21,7 +19,6 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
-	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		balance,
 		balanceZero,
@@ -80,28 +77,10 @@
 
 	let isNftsPage = $derived(isRouteNfts(page));
 
-	let isMintingAccount = $state(false);
-
-	const updateMintingAccountStatus = async () => {
-		isMintingAccount = isTransactionsPage
-			? await isUserMintingAccount({
-					identity: $authIdentity,
-					account: $icrcAccount,
-					token: $pageToken as IcToken
-				})
-			: false;
-	};
+	let hasNoUsableBalance = $derived(!$isIcMintingAccount && ($balanceZero || isNullish($balance)));
 
 	$effect(() => {
-		[$authIdentity, $icrcAccount, $pageToken, isTransactionsPage];
-
-		untrack(() => updateMintingAccountStatus());
-	});
-
-	$effect(() => {
-		outflowActionsDisabled.set(
-			isTransactionsPage && !isMintingAccount && ($balanceZero || isNullish($balance))
-		);
+		outflowActionsDisabled.set(isTransactionsPage && hasNoUsableBalance);
 	});
 
 	$effect(() => {
