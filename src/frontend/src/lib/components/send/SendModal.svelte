@@ -5,6 +5,7 @@
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
 	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
 	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
@@ -77,12 +78,12 @@
 
 	let steps = $derived(
 		isTransactionsPage
-			? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
+			? sendWizardStepsWithQrCodeScan({ i18n: $i18n, minting: $isIcMintingAccount })
 			: isNftsPage
 				? nonNullish($pageNft)
 					? sendNftsWizardStepsWithQrCodeScan({ i18n: $i18n })
 					: allSendNftsWizardSteps({ i18n: $i18n })
-				: allSendWizardSteps({ i18n: $i18n })
+				: allSendWizardSteps({ i18n: $i18n, minting: $isIcMintingAccount })
 	);
 
 	let currentStep = $state<WizardStep<WizardStepsSend> | undefined>();

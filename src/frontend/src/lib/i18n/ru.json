@@ -906,6 +906,13 @@
 			"fee_calc_unsupported_standard": "Не удалось рассчитать комиссию, так как предоставленный стандарт токена не поддерживается."
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
