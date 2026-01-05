@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { type Snippet, untrack } from 'svelte';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
+	import { icrcAccount } from '$icp/derived/ic.derived';
+	import { isUserMintingAccount } from '$icp/services/icrc-minting.services';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
+	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import LockPage from '$lib/components/auth/LockPage.svelte';
@@ -18,7 +22,7 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { authNotSignedIn, authSignedIn , authIdentity } from '$lib/derived/auth.derived';
 	import { isAuthLocked } from '$lib/derived/locked.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
@@ -51,6 +55,25 @@
 
 	$effect(() => {
 		token.set(nftsCollectionRoute ? ($pageNonFungibleToken ?? $pageToken) : $pageToken); // we could be on the nfts page without a pageNonFungibleToken set
+	});
+
+	const updateIcMintingAccountStatus = async () => {
+		const isMintingAccount =
+			transactionsRoute && nonNullish($pageToken) && isTokenIc($pageToken)
+				? await isUserMintingAccount({
+						identity: $authIdentity,
+						account: $icrcAccount,
+						token: $pageToken
+					})
+				: false;
+
+		isIcMintingAccount.set(isMintingAccount);
+	};
+
+	$effect(() => {
+		[$authIdentity, $icrcAccount, $pageToken, transactionsRoute];
+
+		untrack(() => updateIcMintingAccountStatus());
 	});
 
 	// Source: https://svelte.dev/blog/view-transitions
