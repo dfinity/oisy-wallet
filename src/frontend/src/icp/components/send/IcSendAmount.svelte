@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, } from 'svelte';
+	import { getContext } from 'svelte';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
@@ -11,7 +12,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
-	import {isIcMintingAccount} from "$icp/stores/ic-minting-account.store";
 
 	interface Props {
 		amount: OptionAmount;
@@ -29,9 +29,6 @@
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
-
-
-
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (isNullish(fee) || isNullish($sendToken)) {
