@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-    import {getContext, untrack} from 'svelte';
+	import { getContext, untrack } from 'svelte';
 	import { icrcAccount } from '$icp/derived/ic.derived';
 	import { isUserMintingAccount } from '$icp/services/icrc-minting.services';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
-	import type { IcToken, OptionIcToken } from '$icp/types/ic-token';
+	import type { IcToken } from '$icp/types/ic-token';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
@@ -44,10 +44,9 @@
 	};
 
 	$effect(() => {
-        [$authIdentity, $icrcAccount, $sendToken];
+		[$authIdentity, $icrcAccount, $sendToken];
 
-		console.log('updateMintingAccountStatus');
-        untrack(() => updateMintingAccountStatus());
+		untrack(() => updateMintingAccountStatus());
 	});
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
@@ -68,7 +67,7 @@
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
 
-			return;
+			
 		};
 
 		return assertBalance();

@@ -95,7 +95,6 @@
 	$effect(() => {
 		[$authIdentity, $icrcAccount, $pageToken, isTransactionsPage];
 
-		console.log('updateMintingAccountStatus 2');
 		untrack(() => updateMintingAccountStatus());
 	});
 
