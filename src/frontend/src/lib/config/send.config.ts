@@ -4,6 +4,7 @@ import type { WizardSteps } from '@dfinity/gix-components';
 
 interface SendWizardStepsParams extends WizardStepsParams {
 	converting?: boolean;
+	minting?: boolean;
 }
 
 const sendWizardStepsQrCodeScan = ({
@@ -26,7 +27,8 @@ const sendWizardStepsFilterNetworks = ({
 
 const sendWizardSteps = ({
 	i18n,
-	converting
+	converting,
+	minting
 }: SendWizardStepsParams): WizardSteps<WizardStepsSend> => [
 	{
 		name: WizardStepsSend.DESTINATION,
@@ -34,7 +36,7 @@ const sendWizardSteps = ({
 	},
 	{
 		name: WizardStepsSend.SEND,
-		title: i18n.send.text.send
+		title: minting ? i18n.mint.text.mint : i18n.send.text.send
 	},
 	{
 		name: WizardStepsSend.REVIEW,
@@ -42,7 +44,11 @@ const sendWizardSteps = ({
 	},
 	{
 		name: WizardStepsSend.SENDING,
-		title: converting ? i18n.convert.text.converting : i18n.send.text.sending
+		title: minting
+			? i18n.mint.text.minting
+			: converting
+				? i18n.convert.text.converting
+				: i18n.send.text.sending
 	}
 ];
 

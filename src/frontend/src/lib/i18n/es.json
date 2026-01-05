@@ -906,6 +906,13 @@
 			"fee_calc_unsupported_standard": "No se pudo calcular la comisión ya que el estándar de token proporcionado no es compatible."
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",

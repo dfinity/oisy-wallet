@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { sendSteps } from '$icp/constants/steps.constants';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -11,4 +12,7 @@
 	let { sendProgressStep = ProgressStepsSendIc.INITIALIZATION }: Props = $props();
 </script>
 
-<InProgressWizard progressStep={sendProgressStep} steps={sendSteps({ i18n: $i18n })} />
+<InProgressWizard
+	progressStep={sendProgressStep}
+	steps={sendSteps({ i18n: $i18n, minting: $isIcMintingAccount })}
+/>

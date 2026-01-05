@@ -906,6 +906,13 @@
 			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "Mint",
+			"minting": "Minting...",
+			"mint_review_subtitle": "You mint"
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Scan QR Code",
