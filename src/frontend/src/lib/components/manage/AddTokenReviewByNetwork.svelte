@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import { get } from 'svelte/store';
-	import { NFTS_ENABLED } from '$env/nft.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
 	import { isInterfaceErc721 } from '$eth/services/erc721.services';
@@ -9,7 +8,6 @@
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { SaveUserToken } from '$eth/types/erc20-user-token';
 	import type { Erc721Metadata } from '$eth/types/erc721';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddExtTokenReview from '$icp/components/tokens/IcAddExtTokenReview.svelte';
 	import IcAddIcrcTokenReview from '$icp/components/tokens/IcAddIcrcTokenReview.svelte';
 	import type { ValidateTokenData as ValidateExtTokenData } from '$icp/services/ext-add-custom-tokens.service';
@@ -27,6 +25,7 @@
 	import type { TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
+		assertIsNetworkEthereum,
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
@@ -110,42 +109,38 @@
 		}
 
 		// This does not happen at this point, but it is useful type-wise
-		assertNonNullish(network);
+		assertIsNetworkEthereum(network);
 
 		const newToken = {
 			address: ethContractAddress,
-			chainId: (network as EthereumNetwork).chainId,
+			chainId: network.chainId,
 			enabled: true
 		};
 
-		if (NFTS_ENABLED) {
-			const isErc721 = await isInterfaceErc721({
-				address: ethContractAddress,
-				networkId: network.id
-			});
+		const isErc721 = await isInterfaceErc721({
+			address: ethContractAddress,
+			networkId: network.id
+		});
 
-			if (isErc721) {
-				await saveTokens([{ ...newToken, networkKey: 'Erc721' }]);
+		if (isErc721) {
+			await saveTokens([{ ...newToken, networkKey: 'Erc721' }]);
 
-				return;
-			}
-
-			const isErc1155 = await isInterfaceErc1155({
-				address: ethContractAddress,
-				networkId: network.id
-			});
-
-			if (isErc1155) {
-				await saveTokens([{ ...newToken, networkKey: 'Erc1155' }]);
-
-				return;
-			}
+			return;
 		}
 
-		if (ethMetadata.decimals > 0) {
-			await saveErc20Deprecated([
-				{ ...ethMetadata, ...newToken, network: network as EthereumNetwork }
-			]);
+		const isErc1155 = await isInterfaceErc1155({
+			address: ethContractAddress,
+			networkId: network.id
+		});
+
+		if (isErc1155) {
+			await saveTokens([{ ...newToken, networkKey: 'Erc1155' }]);
+
+			return;
+		}
+
+		if (ethMetadata.decimals >= 0) {
+			await saveErc20Deprecated([{ ...ethMetadata, ...newToken, network }]);
 
 			await saveTokens([{ ...newToken, networkKey: 'Erc20' }]);
 

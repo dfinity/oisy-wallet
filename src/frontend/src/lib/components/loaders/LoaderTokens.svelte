@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { NFTS_ENABLED } from '$env/nft.env';
 	import { erc1155CustomTokensNotInitialized } from '$eth/derived/erc1155.derived';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { erc721CustomTokensNotInitialized } from '$eth/derived/erc721.derived';
@@ -51,8 +50,8 @@
 				($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled)))
 	);
 	let loadErc20 = $derived(loadErc && $erc20UserTokensNotInitialized);
-	let loadErc721 = $derived(loadErc && $erc721CustomTokensNotInitialized && NFTS_ENABLED);
-	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized && NFTS_ENABLED);
+	let loadErc721 = $derived(loadErc && $erc721CustomTokensNotInitialized);
+	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized);
 
 	let loadSplMainnet = $derived(nonNullish($solAddressMainnet) && $networkSolanaMainnetEnabled);
 	let loadSplDevnet = $derived(

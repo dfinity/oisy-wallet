@@ -12,7 +12,7 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import * as appConstants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
@@ -577,7 +577,10 @@ describe('tokens.utils', () => {
 			...mockTokens,
 			mockValidIcrcToken,
 			mockValidIcCkToken,
+			mockValidExtV2Token,
 			mockValidErc20Token,
+			mockValidErc721Token,
+			mockValidErc1155Token,
 			mockValidSplToken
 		];
 
@@ -602,23 +605,22 @@ describe('tokens.utils', () => {
 			expect(filterTokens({ tokens, filter: '' })).toStrictEqual(tokens);
 		});
 
-		it('should filter by address for ERC tokens', () => {
-			expect(filterTokens({ tokens, filter: mockValidErc20Token.address })).toStrictEqual([
-				mockValidErc20Token
-			]);
+		it.each([mockValidErc20Token, mockValidErc721Token, mockValidErc1155Token])(
+			'should filter by address for ERC tokens with standard $standard',
+			(token) => {
+				expect(filterTokens({ tokens, filter: token.address })).toStrictEqual([token]);
 
-			expect(
-				filterTokens({ tokens, filter: mockValidErc20Token.address.toLowerCase() })
-			).toStrictEqual([mockValidErc20Token]);
+				expect(filterTokens({ tokens, filter: token.address.toLowerCase() })).toStrictEqual([
+					token
+				]);
 
-			expect(
-				filterTokens({ tokens, filter: mockValidErc20Token.address.toUpperCase() })
-			).toStrictEqual([mockValidErc20Token]);
+				expect(filterTokens({ tokens, filter: token.address.toUpperCase() })).toStrictEqual([
+					token
+				]);
 
-			expect(
-				filterTokens({ tokens, filter: mockValidErc20Token.address.slice(0, 5) })
-			).toStrictEqual([mockValidErc20Token]);
-		});
+				expect(filterTokens({ tokens, filter: token.address.slice(0, 5) })).toStrictEqual([token]);
+			}
+		);
 
 		it('should filter by address for SPL tokens', () => {
 			expect(filterTokens({ tokens, filter: mockValidSplToken.address })).toStrictEqual([
@@ -682,6 +684,24 @@ describe('tokens.utils', () => {
 					filter: mockToken.indexCanisterId.slice(0, 5)
 				})
 			).toStrictEqual([mockToken]);
+		});
+
+		it('should filter by canister IDs for EXT tokens', () => {
+			expect(filterTokens({ tokens, filter: mockValidExtV2Token.canisterId })).toStrictEqual([
+				mockValidExtV2Token
+			]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidExtV2Token.canisterId.toLowerCase() })
+			).toStrictEqual([mockValidExtV2Token]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidExtV2Token.canisterId.toUpperCase() })
+			).toStrictEqual([mockValidExtV2Token]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidExtV2Token.canisterId.slice(0, 5) })
+			).toStrictEqual([mockValidExtV2Token]);
 		});
 
 		it('should not filter by network', () => {
@@ -928,8 +948,7 @@ describe('tokens.utils', () => {
 			}));
 
 			vi.mock('$eth/services/manage-tokens.services', () => ({
-				saveErc20UserTokens: vi.fn().mockResolvedValue(undefined),
-				saveErc20CustomTokens: vi.fn().mockResolvedValue(undefined)
+				saveErc20UserTokens: vi.fn().mockResolvedValue(undefined)
 			}));
 
 			vi.clearAllMocks();
@@ -950,7 +969,6 @@ describe('tokens.utils', () => {
 
 			expect(saveCustomTokensWithKey).not.toHaveBeenCalled();
 			expect(saveErc20UserTokens).not.toHaveBeenCalled();
-			expect(saveErc20CustomTokens).not.toHaveBeenCalled();
 		});
 
 		it('should call saveCustomTokensWithKey when ICRC tokens are present', async () => {
@@ -1004,7 +1022,7 @@ describe('tokens.utils', () => {
 			);
 		});
 
-		it('should call saveErc20CustomTokens when ERC20 tokens are present', async () => {
+		it('should call saveCustomTokensWithKey when ERC20 tokens are present', async () => {
 			const token = { ...mockValidErc20Token, enabled: true } as unknown as TokenUi;
 
 			await saveAllCustomTokens({
@@ -1013,7 +1031,7 @@ describe('tokens.utils', () => {
 				$i18n: i18nMock
 			});
 
-			expect(saveErc20CustomTokens).toHaveBeenCalledWith(
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([expect.objectContaining(token)]),
 					identity: mockIdentity

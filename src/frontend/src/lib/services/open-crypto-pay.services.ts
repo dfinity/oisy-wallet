@@ -8,6 +8,7 @@ import type { EthFeeResult } from '$eth/types/pay';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { signTransaction } from '$lib/api/signer.api';
+import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import { i18n } from '$lib/stores/i18n.store';
 import type {
@@ -17,7 +18,7 @@ import type {
 	PayableTokenWithConvertedAmount,
 	PayableTokenWithFees,
 	TransactionBaseParams,
-	ValidatedPaymentData
+	ValidatedDFXPaymentData
 } from '$lib/types/open-crypto-pay';
 import {
 	decodeLNURL,
@@ -104,16 +105,16 @@ export const buildTransactionBaseParams = ({
 }: {
 	from: EthAddress;
 	nonce: number;
-	validatedData: ValidatedPaymentData;
+	validatedData: ValidatedDFXPaymentData;
 }): TransactionBaseParams => ({
 	from,
 	to: validatedData.destination,
-	amount: BigInt(validatedData.value),
+	amount: validatedData.value,
 	maxPriorityFeePerGas: validatedData.feeData.maxPriorityFeePerGas,
 	maxFeePerGas: validatedData.feeData.maxFeePerGas,
 	nonce,
 	gas: validatedData.estimatedGasLimit,
-	chainId: BigInt(validatedData.ethereumChainId)
+	chainId: validatedData.ethereumChainId
 });
 
 export const prepareEthTransaction = ({
@@ -174,17 +175,21 @@ const preparePaymentTransaction = async ({
 	token,
 	from,
 	quoteId,
-	callback
+	callback,
+	amount,
+	progress
 }: Omit<PayParams, 'identity' | 'data'>): Promise<EthSignTransactionRequest> => {
 	const uri = await fetchPaymentUri({
 		callback,
 		quoteId,
-		network: token.network.name,
+		network: token.network.pay?.openCryptoPay ?? token.network.name,
 		tokenSymbol: token.symbol
 	});
 
-	const decodedData = decodeQrCodeUrn(uri);
-	const validatedData = validateDecodedData({ decodedData, fee: token.fee });
+	progress(ProgressStepsPayment.CREATE_TRANSACTION);
+
+	const decodedData = decodeQrCodeUrn({ urn: uri });
+	const validatedData = validateDecodedData({ decodedData, token, amount, uri });
 	const nonce = await getNonce({ from, networkId: token.network.id });
 	const baseParams = buildTransactionBaseParams({ from, nonce, validatedData });
 
@@ -193,15 +198,26 @@ const preparePaymentTransaction = async ({
 		: prepareErc20Transaction({ baseParams, token });
 };
 
-export const pay = async ({ token, data, from, identity }: PayParams): Promise<void> => {
+export const pay = async ({
+	token,
+	data,
+	from,
+	identity,
+	amount,
+	progress
+}: Omit<PayParams, 'quoteId' | 'callback'>): Promise<void> => {
 	const { quoteId, callback } = extractQuoteData(data);
 
 	const transaction = await preparePaymentTransaction({
 		token,
 		from,
 		quoteId,
-		callback
+		callback,
+		progress,
+		amount
 	});
+
+	progress(ProgressStepsPayment.SIGN_TRANSACTION);
 
 	const rawTransaction = await signTransaction({
 		identity,
@@ -209,10 +225,12 @@ export const pay = async ({ token, data, from, identity }: PayParams): Promise<v
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
+	progress(ProgressStepsPayment.PAY);
+
 	const apiUrl = getPaymentUri({
 		callback,
 		quoteId,
-		network: token.network.name,
+		network: token.network.pay?.openCryptoPay ?? token.network.name,
 		rawTransaction
 	});
 

@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,6 +118,7 @@
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
 			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
 			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain"
@@ -145,14 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "Gặp sự cố với xác thực?",
-				"description": "Chúng tôi nhận thấy bạn đã hủy xác thực bằng Internet Identity. Chúng tôi rất muốn hiểu điều gì đã xảy ra để có thể cải thiện trải nghiệm của bạn.",
-				"subtitle": "Có phải bất kỳ điều nào sau đây đã gây ra sự cố không?",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "Tôi bị mất số Internet Identity của mình",
 				"security": "Tôi lo lắng về bảo mật hoặc quyền riêng tư",
-				"got_confused": "Tôi đã bị nhầm lẫn trong quá trình này",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "Khác...",
-				"feedback_text": "Phản hồi của bạn giúp chúng tôi cải thiện ví.",
+				"feedback_text": "",
 				"thanks_text": "Cảm ơn bạn!",
 				"identity_new_identity": "Ví $oisy_short chuyển đổi tên miền Internet Identity thành: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"identity_legacy_description": "Do đó, số Internet Identity của bạn có thể không tự động xuất hiện và bạn có thể cần nhập lại.",
@@ -927,10 +931,16 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1056,7 +1066,17 @@
 			"dialog_title": "",
 			"dialog_description": "",
 			"dialog_button": "",
-			"where_you_can_pay": ""
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1275,7 +1295,8 @@
 			"learn_more": "Tìm hiểu thêm",
 			"token_id": "ID token",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Chưa có NFT nào",
@@ -1768,6 +1789,7 @@
 			},
 			"title": "",
 			"instruction": "Bằng cách nhấp vào nút này, bạn đồng ý với $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

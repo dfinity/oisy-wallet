@@ -6,7 +6,6 @@
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import { selectedEvmNetwork } from '$evm/derived/network.derived';
 	import { evmNativeToken } from '$evm/derived/token.derived';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
@@ -21,7 +20,8 @@
 		isNetworkIdICP,
 		isNetworkIdBitcoin,
 		isNetworkIdSolana,
-		isNetworkIdEvm
+		isNetworkIdEvm,
+		isNetworkEthereum
 	} from '$lib/utils/network.utils';
 	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
 
@@ -79,7 +79,7 @@
 			bind:amount
 			bind:sendProgressStep
 		/>
-	{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken)}
+	{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken) && isNetworkEthereum($sendToken.network)}
 		<EthSendTokenWizard
 			{currentStep}
 			{destination}
@@ -91,7 +91,7 @@
 			{onSendBack}
 			{onTokensList}
 			{selectedContact}
-			sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
+			sourceNetwork={$selectedEvmNetwork ?? $sendToken.network}
 			bind:amount
 			bind:sendProgressStep
 		/>

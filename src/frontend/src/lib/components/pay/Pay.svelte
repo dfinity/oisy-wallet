@@ -1,8 +1,9 @@
 <script lang="ts">
 	import IconPay from '$lib/components/icons/IconPay.svelte';
 	import PayDialog from '$lib/components/pay/PayDialog.svelte';
+	import ScannerWizard from '$lib/components/scanner/ScannerWizard.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import { modalPayDialogOpen } from '$lib/derived/modal.derived';
+	import { modalPayDialogOpen, modalUniversalScannerOpen } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
@@ -24,4 +25,7 @@
 
 {#if $modalPayDialogOpen}
 	<PayDialog />
+	<!-- TODO: Re-enable the scanner button when it includes WalletConnect and remove the modal from pay button -->
+{:else if $modalUniversalScannerOpen}
+	<ScannerWizard />
 {/if}

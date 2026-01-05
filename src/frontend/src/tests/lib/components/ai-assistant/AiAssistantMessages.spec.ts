@@ -14,10 +14,16 @@ describe('AiAssistantUserMessages', () => {
 		{ role: 'system', data: { text: systemMessage } }
 	] as ChatMessage[];
 
+	const props = {
+		messages,
+		onSendMessage: vi.fn(),
+		onRetry: vi.fn()
+	};
+
 	it('renders correctly if loading is false', async () => {
 		const { getByText } = render(AiAssistantMessages, {
 			props: {
-				messages,
+				...props,
 				loading: false
 			}
 		});
@@ -25,15 +31,15 @@ describe('AiAssistantUserMessages', () => {
 		await waitFor(() => {
 			expect(getByText(userMessage)).toBeInTheDocument();
 			expect(getByText(assistantMessage)).toBeInTheDocument();
-			expect(() => getByText(systemMessage)).toThrow();
-			expect(() => getByText(en.ai_assistant.text.loading)).toThrow();
+			expect(() => getByText(systemMessage)).toThrowError();
+			expect(() => getByText(en.ai_assistant.text.loading)).toThrowError();
 		});
 	});
 
 	it('renders correctly if loading is true', async () => {
 		const { getByText } = render(AiAssistantMessages, {
 			props: {
-				messages,
+				...props,
 				loading: true
 			}
 		});
@@ -42,7 +48,7 @@ describe('AiAssistantUserMessages', () => {
 			expect(getByText(userMessage)).toBeInTheDocument();
 			expect(getByText(assistantMessage)).toBeInTheDocument();
 			expect(getByText(en.ai_assistant.text.loading)).toBeInTheDocument();
-			expect(() => getByText(systemMessage)).toThrow();
+			expect(() => getByText(systemMessage)).toThrowError();
 		});
 	});
 });

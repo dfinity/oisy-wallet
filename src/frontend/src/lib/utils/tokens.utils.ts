@@ -1,5 +1,4 @@
-import { NFTS_ENABLED } from '$env/nft.env';
-import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
@@ -11,7 +10,7 @@ import { isTokenErc20, isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { isTokenExtV2 } from '$icp/utils/ext.utils';
+import { isTokenExt } from '$icp/utils/ext.utils';
 import {
 	icTokenIcrcCustomToken,
 	isTokenDip20,
@@ -39,6 +38,7 @@ import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
+import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
@@ -274,7 +274,7 @@ export const filterTokens = <T extends Token>({
 			return true;
 		}
 
-		if (isTokenErc20(token) || isTokenSpl(token)) {
+		if (isTokenErc20(token) || isTokenErc721(token) || isTokenErc1155(token) || isTokenSpl(token)) {
 			return areAddressesPartiallyEqual({
 				address1: token.address,
 				address2: filter,
@@ -290,6 +290,12 @@ export const filterTokens = <T extends Token>({
 				(nonNullish(indexCanisterId) &&
 					indexCanisterId.toLowerCase().includes(filter.toLowerCase()))
 			);
+		}
+
+		if (isTokenExt(token)) {
+			const { canisterId } = token;
+
+			return canisterId.toLowerCase().includes(filter.toLowerCase());
 		}
 
 		return false;
@@ -362,7 +368,7 @@ export const groupTogglableTokens = (
 				...icrc,
 				...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
 			],
-			ext: [...ext, ...(isTokenExtV2(token) ? [token as ExtCustomToken] : [])],
+			ext: [...ext, ...(isTokenExt(token) ? [token as ExtCustomToken] : [])],
 			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
 			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
@@ -468,13 +474,18 @@ export const saveAllCustomTokens = async ({
 						...commonParams,
 						tokens: erc20
 					}),
-					saveErc20CustomTokens({
+					saveCustomTokensWithKey({
 						...commonParams,
-						tokens: erc20CustomTokens
+						tokens: erc20CustomTokens.map((t) => ({
+							...t,
+							chainId: t.network.chainId,
+							// TODO: remove "as const" when UserToken is removed and we use directly `erc20`
+							networkKey: 'Erc20' as const
+						}))
 					})
 				]
 			: []),
-		...(erc721.length > 0 && NFTS_ENABLED
+		...(erc721.length > 0
 			? [
 					saveCustomTokensWithKey({
 						...commonParams,
@@ -486,7 +497,7 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc1155.length > 0 && NFTS_ENABLED
+		...(erc1155.length > 0
 			? [
 					saveCustomTokensWithKey({
 						...commonParams,
@@ -522,6 +533,6 @@ export const filterTokensByNft = ({
 	isNullish(filterNfts)
 		? tokens
 		: tokens.filter((t) => {
-				const isNft = isTokenErc1155(t) || isTokenErc721(t) || isTokenExtV2(t);
+				const isNft = isTokenNonFungible(t);
 				return filterNfts ? isNft : !isNft;
 			});

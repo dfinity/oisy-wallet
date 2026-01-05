@@ -14,7 +14,7 @@ export const UNHX_TOKEN_ID: TokenId = parseTokenId(UNHX_SYMBOL);
 export const UNHX_TOKEN: RequiredSpl2022Token = {
 	id: UNHX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'UnitedHealth xStock',
 	symbol: UNHX_SYMBOL,

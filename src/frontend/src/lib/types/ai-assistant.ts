@@ -1,7 +1,7 @@
 import type { Address } from '$lib/types/address';
 import type { ContactAddressUiWithId, ExtendedAddressContactUi } from '$lib/types/contact';
 import type { Network } from '$lib/types/network';
-import type { Token, TokenStandard } from '$lib/types/token';
+import type { Token, TokenStandardCode } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 
 export interface ChatMessageContent {
@@ -72,7 +72,7 @@ export interface ToolResult {
 export interface AiAssistantContactUi
 	extends Omit<ExtendedAddressContactUi, 'addresses' | 'image' | 'updateTimestampNs' | 'id'> {
 	addresses: (Omit<ContactAddressUiWithId, 'address'> & {
-		acceptedTokenStandards: TokenStandard[];
+		acceptedTokenStandards: TokenStandardCode[];
 	})[];
 }
 

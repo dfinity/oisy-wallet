@@ -1,9 +1,13 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { loadCustomTokens as loadCustomErc1155Tokens } from '$eth/services/erc1155.services';
+import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
+import { loadCustomTokens as loadCustomErc721Tokens } from '$eth/services/erc721.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import { loadCustomTokens } from '$icp/services/icrc.services';
+import { loadCustomTokens as loadCustomExtTokens } from '$icp/services/ext.services';
+import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { setManyCustomTokens } from '$lib/api/backend.api';
@@ -19,6 +23,7 @@ import type {
 } from '$lib/types/custom-token';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
@@ -31,7 +36,27 @@ vi.mock('$lib/api/backend.api', () => ({
 	setManyCustomTokens: vi.fn()
 }));
 
+vi.mock('$eth/services/erc20.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$eth/services/erc721.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$eth/services/erc1155.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
 vi.mock('$icp/services/icrc.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$icp/services/ext.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$sol/services/spl.services', () => ({
 	loadCustomTokens: vi.fn()
 }));
 
@@ -140,7 +165,12 @@ describe('save-custom-tokens.services', () => {
 		it('should reload custom tokens at the end', async () => {
 			await saveCustomTokens(mockParams);
 
-			expect(loadCustomTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomIcrcTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 		});
 
 		it('should fail if the setManyCustomTokens fails', async () => {
@@ -148,19 +178,24 @@ describe('save-custom-tokens.services', () => {
 
 			vi.mocked(setManyCustomTokens).mockRejectedValueOnce(mockError);
 
-			await expect(saveCustomTokens(mockParams)).rejects.toThrow(mockError);
+			await expect(saveCustomTokens(mockParams)).rejects.toThrowError(mockError);
 
 			expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsAddToken.SAVE);
 
-			expect(loadCustomTokens).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+			expect(loadCustomErc721Tokens).not.toHaveBeenCalled();
+			expect(loadCustomErc1155Tokens).not.toHaveBeenCalled();
+			expect(loadCustomIcrcTokens).not.toHaveBeenCalled();
+			expect(loadCustomExtTokens).not.toHaveBeenCalled();
+			expect(loadCustomSplTokens).not.toHaveBeenCalled();
 		});
 
-		it('should fail if the loadCustomTokens fails', async () => {
+		it('should fail if any loadCustomTokens fails', async () => {
 			const mockError = new Error('Mocked error when loading tokens');
 
-			vi.mocked(loadCustomTokens).mockRejectedValueOnce(mockError);
+			vi.mocked(loadCustomErc20Tokens).mockRejectedValueOnce(mockError);
 
-			await expect(saveCustomTokens(mockParams)).rejects.toThrow(mockError);
+			await expect(saveCustomTokens(mockParams)).rejects.toThrowError(mockError);
 		});
 	});
 });
