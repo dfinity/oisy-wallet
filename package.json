@@ -113,7 +113,7 @@
 		"@testing-library/svelte": "^5.2.8",
 		"@types/dom-view-transitions": "^1.0.6",
 		"@types/node": "^22.13.4",
-		"@vitest/coverage-v8": "^4.0.10",
+		"@vitest/coverage-v8": "^4.0.15",
 		"dotenv": "^17.2.3",
 		"fake-indexeddb": "^6.2.5",
 		"jsdom": "^27.2.0",
