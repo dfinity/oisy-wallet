@@ -127,7 +127,7 @@ const loadCustomTokensWithMetadata = async (
 
 		const customTokens: SplCustomToken[] = await nonExistingTokens.reduce<
 			Promise<SplCustomToken[]>
-		>(async (acc, token) => {
+		>(async (acc, { symbol: oldSymbol, name: oldName, ...token }) => {
 			const { network, address } = token;
 
 			const solNetwork = safeMapNetworkIdToNetwork(network.id);
@@ -149,8 +149,8 @@ const loadCustomTokensWithMetadata = async (
 				...metadata
 			} = (await getSplMetadata({ address, network: solNetwork })) ?? {};
 
-			const symbol = infoSymbol ?? metadataSymbol;
-			const name = infoName ?? metadataName;
+			const symbol = infoSymbol ?? metadataSymbol ?? oldSymbol;
+			const name = infoName ?? metadataName ?? oldName;
 
 			if (isNullish(symbol) || isNullish(name)) {
 				return acc;
