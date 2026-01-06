@@ -45,4 +45,24 @@ export class Dip721Canister extends Canister<Dip721Service> {
 
 		throw mapDip721NftError(response.Err);
 	};
+
+	/**
+	 * Returns the list of the token_identifier of the NFT associated with the principal.
+	 *
+	 * @link https://github.com/Psychedelic/DIP721/blob/develop/spec.md#ownertokenidentifiers
+	 */
+	getTokensByOwner = async ({
+		principal,
+		certified
+	}: { principal: Principal } & QueryParams): Promise<bigint[]> => {
+		const { ownerTokenIdentifiers } = this.caller({ certified });
+
+		const response = await ownerTokenIdentifiers(principal);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapDip721NftError(response.Err);
+	};
 }
