@@ -15,7 +15,7 @@ export const balance = async ({
 	identity,
 	canisterId,
 	...rest
-}: CanisterApiFunctionParamsWithCanisterId<QueryParams>): Promise<Balance> => {
+}: CanisterApiFunctionParamsWithCanisterId<QueryParams>): Promise<bigint> => {
 	if (isNullish(identity)) {
 		return ZERO;
 	}
