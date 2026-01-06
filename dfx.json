@@ -518,24 +518,7 @@
 			"type": "custom",
 			"build": "scripts/build.xtc_ledger.sh",
 			"candid": "target/xtc_ledger.did",
-			"wasm": "target/xtc_ledger.wasm.gz",
-			"specified_id": "aanaa-xaaaa-aaaah-aaeiq-cai",
-			"remote": {
-				"id": {
-					"test_be_1": "aanaa-xaaaa-aaaah-aaeiq-cai",
-					"test_fe_1": "aanaa-xaaaa-aaaah-aaeiq-cai",
-					"test_fe_2": "aanaa-xaaaa-aaaah-aaeiq-cai",
-					"test_fe_3": "aanaa-xaaaa-aaaah-aaeiq-cai",
-					"test_fe_4": "aanaa-xaaaa-aaaah-aaeiq-cai",
-					"test_fe_5": "aanaa-xaaaa-aaaah-aaeiq-cai",
-					"test_fe_6": "aanaa-xaaaa-aaaah-aaeiq-cai",
-					"audit": "aanaa-xaaaa-aaaah-aaeiq-cai",
-					"staging": "aanaa-xaaaa-aaaah-aaeiq-cai",
-					"beta": "aanaa-xaaaa-aaaah-aaeiq-cai",
-					"ic": "aanaa-xaaaa-aaaah-aaeiq-cai",
-					"e2e": "aanaa-xaaaa-aaaah-aaeiq-cai"
-				}
-			}
+			"wasm": "target/xtc_ledger.wasm.gz"
 		},
 		"rewards": {
 			"type": "custom",
