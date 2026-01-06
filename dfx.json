@@ -613,6 +613,12 @@
 			"build": "scripts/build.ext_v2_token.sh",
 			"candid": "target/ext_v2_token.did",
 			"wasm": "target/ext_v2_token.wasm.gz"
+		},
+		"dip721": {
+			"type": "custom",
+			"build": "scripts/build.dip721.sh",
+			"candid": "target/dip721.did",
+			"wasm": "target/dip721.wasm.gz"
 		}
 	},
 	"defaults": {
