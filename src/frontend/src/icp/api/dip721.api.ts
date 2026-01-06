@@ -1,4 +1,3 @@
-import type { Balance } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { Dip721Canister } from '$icp/canisters/dip721.canister';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
