@@ -7,7 +7,7 @@ print_help() {
 
 	- The Wasm and Candid files are downloaded.
 
-	The files are installed at at the locations defined for 'xtc_ledger' in 'dfx.json'.
+	The files are installed at the locations defined for 'xtc_ledger' in 'dfx.json'.
 	EOF
 }
 
