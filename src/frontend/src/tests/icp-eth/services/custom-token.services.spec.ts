@@ -8,7 +8,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken, mockIcrcCustomTokens } from '$tests/mocks/icrc-custom-tokens.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { isNullish, toNullable } from '@dfinity/utils';
 import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
@@ -159,6 +159,10 @@ describe('icrc-token.services', () => {
 						['icrc1:fee', { Nat: mockValidSendToken.fee }]
 					]);
 
+					const spyMintingAccount = ledgerCanisterMock.getMintingAccount.mockResolvedValue(
+						toNullable({ owner: mockPrincipal, subaccount: toNullable() })
+					);
+
 					const { result } = await autoLoadIcrcToken({
 						icrcCustomTokens: mockIcrcCustomTokens,
 						sendToken: mockValidSendToken,
@@ -170,6 +174,8 @@ describe('icrc-token.services', () => {
 					expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
 
 					expect(spyMetadata).toHaveBeenCalledWith({ certified: true });
+
+					expect(spyMintingAccount).toHaveBeenCalledWith({ certified: true });
 
 					const store = get(icrcCustomTokensStore);
 
