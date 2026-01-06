@@ -5,7 +5,7 @@ print_help() {
   cat <<-EOF
 	Creates the XTC Token installation files:
 
-	- The Wasm and Candid files are downloaded.
+	- The Candid file is downloaded.
 
 	The files are installed at the locations defined for 'xtc_ledger' in 'dfx.json'.
 	EOF
@@ -22,12 +22,8 @@ export XTC_BUILDENV
 XTC_REPO_URL="https://raw.githubusercontent.com/Psychedelic/dank/refs/heads/develop/candid"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${XTC_REPO_URL}/xtc.did"
-# shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
-# Fake wasm since we really don't need to deploy it
-WASM_URL="https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-v1.0.1/cycles-ledger.wasm.gz"
 
 CANDID_FILE="$(jq -r .canisters.xtc_ledger.candid dfx.json)"
-WASM_FILE="$(jq -r .canisters.xtc_ledger.wasm dfx.json)"
 
 download() {
   : 'Downloads a URL to a given file.'
@@ -46,13 +42,8 @@ download() {
 download candid
 
 ####
-# Downloads the Wasm file, if it does not exist already.
-download wasm
-
-####
 # Success
 cat <<EOF
 SUCCESS: The xtc_ledger installation files have been created:
 xtc_ledger candid:       $CANDID_FILE
-xtc_ledger Wasm:         $WASM_FILE
 EOF
