@@ -3,12 +3,12 @@ use std::sync::LazyLock;
 use candid::Principal;
 use shared::types::{
     custom_token::{
-        ChainId, CustomToken, ErcToken, ErcTokenId, ExtV2Token, IcrcToken, SplToken, SplTokenId,
-        Token,
+        ChainId, CustomToken, Dip721Token, ErcToken, ErcTokenId, ExtV2Token, IcrcToken, SplToken,
+        SplTokenId, Token,
     },
     TokenVersion,
 };
-use shared::types::custom_token::Dip721Token;
+
 use crate::utils::{
     assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
     mock::CALLER,
@@ -189,7 +189,6 @@ fn test_remove_custom_ext_v2_token() {
 fn test_remove_custom_di721_token() {
     test_remove_custom_token(&DIP721_TOKEN)
 }
-
 
 #[test]
 fn test_remove_custom_no_index_token() {
