@@ -19,9 +19,9 @@ print_help() {
 DIP721_BUILDENV="$DFX_NETWORK"
 export DIP721_BUILDENV
 
-DIP721_REPO_URL="https://raw.githubusercontent.com/Psychedelic/DIP721/refs/heads/develop/nft.did"
+DIP721_REPO_URL="https://raw.githubusercontent.com/Psychedelic/DIP721/refs/heads/develop"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
-CANDID_URL="${DIP721_REPO_URL}/dip721.did"
+CANDID_URL="${DIP721_REPO_URL}/nft.did"
 
 CANDID_FILE="$(jq -r .canisters.dip721.candid dfx.json)"
 
