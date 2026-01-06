@@ -3,6 +3,8 @@
 	import { type Component, type Snippet, untrack } from 'svelte';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import type { EthNonFungibleToken } from '$eth/types/nft';
+	import { isTokenErc } from '$eth/utils/erc.utils';
+	import { isTokenExt } from '$icp/utils/ext.utils';
 	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -34,8 +36,6 @@
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
-	import { isTokenExt } from '$icp/utils/ext.utils';
-	import { isTokenErc } from '$eth/utils/erc.utils';
 
 	interface Props {
 		displayAmount?: bigint;
