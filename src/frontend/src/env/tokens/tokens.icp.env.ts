@@ -2,6 +2,7 @@ import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import {
 	ICP_INDEX_CANISTER_ID,
 	ICP_LEDGER_CANISTER_ID,
+	ICP_MINTING_ACCOUNT,
 	ICP_NETWORK,
 	ICP_PSEUDO_TESTNET_NETWORK
 } from '$env/networks/networks.icp.env';
@@ -10,9 +11,11 @@ import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import { buildIndexedIcTokens } from '$icp/utils/ic-tokens.utils';
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { Principal } from '@icp-sdk/core/principal';
 
 /**
  * ICP
@@ -35,6 +38,7 @@ export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'alternativeN
 	fee: ICP_TRANSACTION_FEE_E8S,
 	ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
 	indexCanisterId: ICP_INDEX_CANISTER_ID,
+	mintingAccount: ICP_MINTING_ACCOUNT,
 	explorerUrl: ICP_EXPLORER_URL,
 	buy: {
 		onramperId: 'icp_icp'
@@ -63,7 +67,8 @@ export const TESTICP_TOKEN: RequiredToken<
 	icon: icpLight,
 	fee: 10_000n,
 	ledgerCanisterId: 'xafvr-biaaa-aaaai-aql5q-cai',
-	indexCanisterId: 'qcuy6-bqaaa-aaaai-aqmqq-cai'
+	indexCanisterId: 'qcuy6-bqaaa-aaaai-aqmqq-cai',
+	mintingAccount: getIcrcAccount(Principal.fromText('bnuz2-zaaaa-aaaal-arrba-cai'))
 };
 
 export const SUPPORTED_ICP_TOKENS: RequiredToken<
