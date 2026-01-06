@@ -31,7 +31,7 @@ export class Dip721Canister extends Canister<Dip721Service> {
 	 *
 	 * @link https://github.com/Psychedelic/DIP721/blob/develop/spec.md#balanceof
 	 */
-	balanceOf = async ({
+	balance = async ({
 		principal,
 		certified
 	}: { principal: Principal } & QueryParams): Promise<bigint> => {
