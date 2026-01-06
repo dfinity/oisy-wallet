@@ -27,7 +27,7 @@ describe('dip721.canister', () => {
 		vi.clearAllMocks();
 	});
 
-	describe('balanceOf', () => {
+	describe('balance', () => {
 		const mockParams = { principal: mockPrincipal, certified };
 
 		const mockBalance = 12345n;
@@ -39,9 +39,9 @@ describe('dip721.canister', () => {
 		it('should correctly call the balanceOf method', async () => {
 			service.balanceOf.mockResolvedValue({ Ok: mockBalance });
 
-			const { balanceOf } = await createDip721Canister({ serviceOverride: service });
+			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			const res = await balanceOf(mockParams);
+			const res = await balance(mockParams);
 
 			expect(res).toEqual(mockBalance);
 			expect(service.balanceOf).toHaveBeenCalledExactlyOnceWith(mockPrincipal);
@@ -50,9 +50,9 @@ describe('dip721.canister', () => {
 		it('should handle unauthorized operator error', async () => {
 			service.balanceOf.mockResolvedValue({ Err: { UnauthorizedOperator: null } });
 
-			const { balanceOf } = await createDip721Canister({ serviceOverride: service });
+			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balanceOf(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('Unauthorized operator')
 			);
 
@@ -62,9 +62,9 @@ describe('dip721.canister', () => {
 		it('should handle self transfer error', async () => {
 			service.balanceOf.mockResolvedValue({ Err: { SelfTransfer: null } });
 
-			const { balanceOf } = await createDip721Canister({ serviceOverride: service });
+			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balanceOf(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('Cannot transfer NFT to self')
 			);
 
@@ -74,9 +74,9 @@ describe('dip721.canister', () => {
 		it('should handle token not found error', async () => {
 			service.balanceOf.mockResolvedValue({ Err: { TokenNotFound: null } });
 
-			const { balanceOf } = await createDip721Canister({ serviceOverride: service });
+			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balanceOf(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('NFT token not found')
 			);
 
@@ -86,9 +86,9 @@ describe('dip721.canister', () => {
 		it('should handle unauthorized owner error', async () => {
 			service.balanceOf.mockResolvedValue({ Err: { UnauthorizedOwner: null } });
 
-			const { balanceOf } = await createDip721Canister({ serviceOverride: service });
+			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balanceOf(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('Unauthorized owner for the NFT')
 			);
 
@@ -98,9 +98,9 @@ describe('dip721.canister', () => {
 		it('should handle self approve error', async () => {
 			service.balanceOf.mockResolvedValue({ Err: { SelfApprove: null } });
 
-			const { balanceOf } = await createDip721Canister({ serviceOverride: service });
+			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balanceOf(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('Cannot approve self for the NFT')
 			);
 
@@ -110,9 +110,9 @@ describe('dip721.canister', () => {
 		it('should handle operator not found error', async () => {
 			service.balanceOf.mockResolvedValue({ Err: { OperatorNotFound: null } });
 
-			const { balanceOf } = await createDip721Canister({ serviceOverride: service });
+			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balanceOf(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('Operator not found for the NFT')
 			);
 
@@ -122,9 +122,9 @@ describe('dip721.canister', () => {
 		it('should handle existed NFT error', async () => {
 			service.balanceOf.mockResolvedValue({ Err: { ExistedNFT: null } });
 
-			const { balanceOf } = await createDip721Canister({ serviceOverride: service });
+			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balanceOf(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('NFT already exists')
 			);
 
@@ -134,9 +134,9 @@ describe('dip721.canister', () => {
 		it('should handle owner not found error', async () => {
 			service.balanceOf.mockResolvedValue({ Err: { OwnerNotFound: null } });
 
-			const { balanceOf } = await createDip721Canister({ serviceOverride: service });
+			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			await expect(balanceOf(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('Owner not found for the NFT')
 			);
 
@@ -147,11 +147,11 @@ describe('dip721.canister', () => {
 			// @ts-expect-error we test this on purpose
 			service.balanceOf.mockResolvedValue({ Err: { CanisterError: null } });
 
-			const { balanceOf } = await createDip721Canister({
+			const { balance } = await createDip721Canister({
 				serviceOverride: service
 			});
 
-			await expect(balanceOf(mockParams)).rejects.toThrowError(
+			await expect(balance(mockParams)).rejects.toThrowError(
 				new CanisterInternalError('Unknown Dip721CanisterError')
 			);
 
@@ -162,9 +162,9 @@ describe('dip721.canister', () => {
 			const mockError = new Error('Test response error');
 			service.balanceOf.mockRejectedValue(mockError);
 
-			const { balanceOf } = await createDip721Canister({ serviceOverride: service });
+			const { balance } = await createDip721Canister({ serviceOverride: service });
 
-			const res = balanceOf(mockParams);
+			const res = balance(mockParams);
 
 			await expect(res).rejects.toThrowError(mockError);
 
