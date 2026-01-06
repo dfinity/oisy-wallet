@@ -11,6 +11,7 @@ import * as appConstants from '$lib/constants/app.constants';
 import {
 	enabledFungibleTokensUi,
 	enabledMainnetFungibleIcTokensUsdBalance,
+	enabledMainnetFungibleTokensUi,
 	enabledMainnetFungibleTokensUsdBalance
 } from '$lib/derived/tokens-ui.derived';
 import { tokens } from '$lib/derived/tokens.derived';
@@ -45,6 +46,8 @@ describe('tokens-ui.derived', () => {
 
 	describe('enabledFungibleTokensUi', () => {
 		it('returns correct data', () => {
+			setupTestnetsStore('enabled');
+
 			expect(get(enabledFungibleTokensUi)).toStrictEqual(
 				get(tokens).map((token) =>
 					mapTokenUi({ token, $balances: {}, $stakeBalances: {}, $exchanges: {} })
@@ -54,6 +57,22 @@ describe('tokens-ui.derived', () => {
 
 		it('should not include NFTs', () => {
 			expect(get(enabledFungibleTokensUi).every(isTokenNonFungible)).toBeFalsy();
+		});
+	});
+
+	describe('enabledMainnetFungibleTokensUi', () => {
+		it('returns correct data', () => {
+			setupTestnetsStore('enabled');
+
+			expect(get(enabledMainnetFungibleTokensUi)).toStrictEqual(
+				get(tokens)
+					.filter(({ network: { env } }) => env !== 'testnet')
+					.map((token) => mapTokenUi({ token, $balances: {}, $stakeBalances: {}, $exchanges: {} }))
+			);
+		});
+
+		it('should not include NFTs', () => {
+			expect(get(enabledMainnetFungibleTokensUi).every(isTokenNonFungible)).toBeFalsy();
 		});
 	});
 

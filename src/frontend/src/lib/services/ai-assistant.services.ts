@@ -11,7 +11,7 @@ import {
 } from '$lib/constants/analytics.constants';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
 import { networks } from '$lib/derived/networks.derived';
-import { enabledFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
+import { enabledMainnetFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
@@ -129,7 +129,7 @@ export const executeTool = ({
 	} else if (name === ToolResultType.SHOW_BALANCE) {
 		result = parseShowBalanceToolArguments({
 			filterParams,
-			tokensUi: get(enabledFungibleTokensUi),
+			tokensUi: get(enabledMainnetFungibleTokensUi),
 			networks: get(networks)
 		});
 
