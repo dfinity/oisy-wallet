@@ -7,7 +7,7 @@ print_help() {
 
 	- The Candid file is downloaded.
 
-	The files are installed at at the locations defined for 'dip721' in 'dfx.json'.
+	The files are installed at the locations defined for 'dip721' in 'dfx.json'.
 	EOF
 }
 
