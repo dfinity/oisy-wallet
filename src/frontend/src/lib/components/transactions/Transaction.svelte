@@ -3,15 +3,20 @@
 	import { type Component, type Snippet, untrack } from 'svelte';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import type { EthNonFungibleToken } from '$eth/types/nft';
+	import { isTokenErc } from '$eth/utils/erc.utils';
+	import { isTokenExt } from '$icp/utils/ext.utils';
+	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
+	import TokenAsContact from '$lib/components/tokens/TokenAsContact.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
@@ -21,6 +26,7 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
@@ -29,6 +35,7 @@
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
 		displayAmount?: bigint;
@@ -78,6 +85,24 @@
 				: type === 'approve'
 					? approveSpender
 					: undefined
+	);
+
+	const putativeToken = $derived(
+		nonNullish(address)
+			? $allTokens.find((t) =>
+					areAddressesEqual({
+						address1: address,
+						address2: isTokenIc(t)
+							? t.ledgerCanisterId
+							: isTokenErc(t) || isTokenSpl(t)
+								? t.address
+								: isTokenExt(t)
+									? t.canisterId
+									: undefined,
+						networkId: t.network.id
+					})
+				)
+			: undefined
 	);
 
 	const contact = $derived(
@@ -218,7 +243,9 @@
 							<span class="shrink-0">{$i18n.transaction.text.for}</span>
 						{/if}
 
-						{#if nonNullish(contact)}
+						{#if nonNullish(putativeToken)}
+							<TokenAsContact token={putativeToken} />
+						{:else if nonNullish(contact)}
 							<ContactWithAvatar {contact} {contactAddress} />
 						{:else if nonNullish(address)}
 							<span class="flex inline-block max-w-38 min-w-0 flex-wrap items-center truncate">
