@@ -54,6 +54,6 @@ describe('IcSendReview', () => {
 			context: mockContext
 		});
 
-		expect(queryByText(en.fee.text.fee)).toBeInTheDocument();
+		expect(queryByText(en.fee.text.fee)).toBeNull();
 	});
 });
