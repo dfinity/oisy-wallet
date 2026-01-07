@@ -1,5 +1,6 @@
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { Address } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
@@ -73,7 +74,7 @@ export interface SendContext {
 	sendTokenExchangeRate: Readable<number | undefined>;
 	sendTokenNetworkId: Readable<NetworkId>;
 	sendBalance: Readable<OptionBalance>;
-	sendDestination: Writable<string>;
+	sendDestination: Writable<Address>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');
