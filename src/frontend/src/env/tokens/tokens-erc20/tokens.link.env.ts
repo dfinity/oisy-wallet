@@ -14,7 +14,7 @@ export const LINK_TOKEN_ID: TokenId = parseTokenId(LINK_SYMBOL);
 export const LINK_TOKEN: RequiredErc20Token = {
 	id: LINK_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'ChainLink Token',
 	symbol: LINK_SYMBOL,
@@ -37,7 +37,7 @@ export const SEPOLIA_LINK_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_LINK_SYMBOL);
 export const SEPOLIA_LINK_TOKEN: RequiredErc20Token = {
 	id: SEPOLIA_LINK_TOKEN_ID,
 	network: SEPOLIA_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'ChainLink Token',
 	symbol: LINK_SYMBOL,

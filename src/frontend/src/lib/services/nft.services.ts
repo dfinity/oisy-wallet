@@ -1,15 +1,13 @@
-import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
-import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
 import { loadNftsByNetwork as loadErcNftsByNetwork } from '$eth/services/nft.services';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
-import { saveCustomTokens as saveCustomExtToken } from '$icp/services/ext-custom-tokens.services';
 import { loadNfts as loadExtNfts } from '$icp/services/nft.services';
 import type { IcNonFungibleToken } from '$icp/types/nft';
-import { isTokenExtV2CustomToken } from '$icp/utils/ext.utils';
+import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -97,19 +95,19 @@ export const saveNftCustomToken = async ({
 	}
 
 	if (isTokenErc721CustomToken(token)) {
-		await saveCustomErc721Token({
+		await saveCustomTokens({
 			identity,
-			tokens: [token]
+			tokens: [{ ...token, chainId: token.network.chainId, networkKey: 'Erc721' }]
 		});
 	} else if (isTokenErc1155CustomToken(token)) {
-		await saveCustomErc1155Token({
+		await saveCustomTokens({
 			identity,
-			tokens: [token]
+			tokens: [{ ...token, chainId: token.network.chainId, networkKey: 'Erc1155' }]
 		});
-	} else if (isTokenExtV2CustomToken(token)) {
-		await saveCustomExtToken({
+	} else if (isTokenExtCustomToken(token)) {
+		await saveCustomTokens({
 			identity,
-			tokens: [token]
+			tokens: [{ ...token, networkKey: 'ExtV2' }]
 		});
 	}
 

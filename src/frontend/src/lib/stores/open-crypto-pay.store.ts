@@ -9,7 +9,7 @@ import type {
 } from '$lib/types/open-crypto-pay';
 import { enrichTokensWithUsdAndBalance } from '$lib/utils/open-crypto-pay.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { derived, writable, type Readable } from 'svelte/store';
+import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface PayContext {
 	data: Readable<OpenCryptoPayResponse | undefined>;
@@ -18,6 +18,8 @@ export interface PayContext {
 	setData: (payData: OpenCryptoPayResponse) => void;
 	setAvailableTokens: (tokens: PayableTokenWithFees[]) => void;
 	selectToken: (token: PayableTokenWithConvertedAmount) => void;
+	reset: () => void;
+	failedPaymentError: Writable<string | undefined>;
 }
 
 export const initPayContext = (): PayContext => {
@@ -60,12 +62,18 @@ export const initPayContext = (): PayContext => {
 		data,
 		availableTokens: tokensSorted,
 		selectedToken,
+		failedPaymentError: writable<string | undefined>(undefined),
 		setData,
 		setAvailableTokens: (tokens: PayableTokenWithFees[]) => {
 			availableTokens.set(tokens);
 			userSelection.set(undefined);
 		},
-		selectToken: (token: PayableTokenWithConvertedAmount) => userSelection.set(token)
+		selectToken: (token: PayableTokenWithConvertedAmount) => userSelection.set(token),
+		reset: () => {
+			setData(undefined);
+			availableTokens.set([]);
+			userSelection.set(undefined);
+		}
 	};
 };
 

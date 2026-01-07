@@ -3,8 +3,6 @@
 	import type { Identity } from '@icp-sdk/core/agent';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/backend.did';
-	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-	import { NFTS_ENABLED } from '$env/nft.env';
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
@@ -12,16 +10,16 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
-	import { saveCustomTokens as saveExtCustomTokens } from '$icp/services/ext-custom-tokens.services';
-	import type { SaveExtCustomToken } from '$icp/types/ext-custom-token';
 	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { COLLECTION_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { OisyReloadCollectionsEvent } from '$lib/types/custom-events';
+	import type { SaveCustomExtVariant } from '$lib/types/custom-token';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
@@ -96,20 +94,20 @@
 			return;
 		}
 
-		const extTokens: SaveExtCustomToken[] = canisterIds.map((canisterId) => ({
+		const extTokens: SaveCustomExtVariant[] = canisterIds.map((canisterId) => ({
 			canisterId,
-			network: ICP_NETWORK,
+			networkKey: 'ExtV2',
 			enabled: true
 		}));
 
-		await saveExtCustomTokens({
-			tokens: extTokens as NonEmptyArray<SaveExtCustomToken>,
+		await saveCustomTokens({
+			tokens: extTokens as NonEmptyArray<SaveCustomExtVariant>,
 			identity
 		});
 	};
 
 	const load = async ({ extTokens = false }: { extTokens?: boolean }) => {
-		if (!NFTS_ENABLED || isNullish($authIdentity)) {
+		if (isNullish($authIdentity)) {
 			return;
 		}
 

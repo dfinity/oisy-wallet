@@ -21,7 +21,7 @@ import type { Network } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-import type { PendingUtxo, RetrieveBtcStatusV2 } from '@icp-sdk/canisters/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 export const mapCkBTCTransaction = ({
 	transaction,
@@ -107,7 +107,7 @@ export const mapCkBTCPendingUtxo = ({
 	kytFee,
 	ledgerCanisterId
 }: {
-	utxo: PendingUtxo;
+	utxo: CkBtcMinterDid.PendingUtxo;
 	kytFee: bigint;
 } & Pick<IcToken, 'ledgerCanisterId'>): IcTransactionUi => {
 	const id = utxoTxIdToString(txid);
@@ -153,7 +153,7 @@ export const extendCkBTCTransaction = ({
 };
 
 const burnStatus = (
-	retrieveBtcStatus: RetrieveBtcStatusV2 | undefined
+	retrieveBtcStatus: CkBtcMinterDid.RetrieveBtcStatusV2 | undefined
 ): Required<Pick<IcTransactionUi, 'typeLabel'>> & Pick<IcTransactionUi, 'status'> => {
 	if (nonNullish(retrieveBtcStatus)) {
 		if ('Reimbursed' in retrieveBtcStatus || 'AmountTooLow' in retrieveBtcStatus) {

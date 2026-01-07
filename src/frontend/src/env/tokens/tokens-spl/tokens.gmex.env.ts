@@ -14,7 +14,7 @@ export const GMEX_TOKEN_ID: TokenId = parseTokenId(GMEX_SYMBOL);
 export const GMEX_TOKEN: RequiredSpl2022Token = {
 	id: GMEX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Gamestop xStock',
 	symbol: GMEX_SYMBOL,

@@ -14,7 +14,7 @@ export const CSCOX_TOKEN_ID: TokenId = parseTokenId(CSCOX_SYMBOL);
 export const CSCOX_TOKEN: RequiredSpl2022Token = {
 	id: CSCOX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Cisco xStock',
 	symbol: CSCOX_SYMBOL,

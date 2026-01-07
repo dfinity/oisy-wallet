@@ -14,7 +14,7 @@ export const HDX_TOKEN_ID: TokenId = parseTokenId(HDX_SYMBOL);
 export const HDX_TOKEN: RequiredSpl2022Token = {
 	id: HDX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Home Depot xStock',
 	symbol: HDX_SYMBOL,

@@ -59,7 +59,7 @@ interface I18nCore {
 		less: string;
 		learn_more: string;
 	};
-	warning: { do_not_close: string; standalone_mode: string };
+	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 }
 
 interface I18nNavigation {
@@ -114,6 +114,7 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
+		sign_in_with_identity_number: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
@@ -136,10 +137,12 @@ interface I18nAuth {
 		text: {
 			title: string;
 			description: string;
-			subtitle: string;
+			new_auth_version: string;
+			could_not_enter_identity_number: string;
 			lost_identity: string;
 			security: string;
 			got_confused: string;
+			no_signup_needed: string;
 			other: string;
 			feedback_text: string;
 			thanks_text: string;
@@ -696,12 +699,16 @@ interface I18nSend {
 	};
 }
 
+interface I18nMint {
+	text: { mint: string; minting: string; mint_review_subtitle: string };
+}
+
 interface I18nScanner {
 	text: {
 		scan_qr_code: string;
 		pay_to: string;
 		powered_by: string;
-		receipt: string;
+		recipient: string;
 		name: string;
 		address: string;
 		country: string;
@@ -722,8 +729,13 @@ interface I18nScanner {
 		select_different_token: string;
 		tokens_available: string;
 		select_token_to_pay: string;
+		pay_at_successful: string;
+		pay_at_failure: string;
+		try_again: string;
+		payment_confirmed: string;
+		payment_failed: string;
 	};
-	error: { code_link_is_not_valid: string };
+	error: { code_link_is_not_valid: string; data_is_incompleted: string };
 }
 
 interface I18nConvert {
@@ -842,6 +854,16 @@ interface I18nPay {
 		dialog_description: string;
 		dialog_button: string;
 		where_you_can_pay: string;
+		request_payment_details: string;
+		creating_transaction: string;
+		signing_transaction: string;
+		paying: string;
+	};
+	error: {
+		data_is_incompleted: string;
+		amount_does_not_match: string;
+		recipient_address_is_not_valid: string;
+		token_address_mismatch: string;
 	};
 	alt: { pay: string; where_you_can_pay: string };
 }
@@ -897,6 +919,7 @@ interface I18nTokens {
 			review: string;
 			saving: string;
 			updating: string;
+			canister_id: string;
 			ledger_canister_id: string;
 			index_canister_id: string;
 			minter_canister_id: string;
@@ -906,6 +929,7 @@ interface I18nTokens {
 			verifying: string;
 			add_the_token: string;
 			info: string;
+			info_ext: string;
 			info_index: string;
 			custom_tokens_not_supported: string;
 		};
@@ -917,6 +941,7 @@ interface I18nTokens {
 			unexpected_index_ledger: string;
 			invalid_ledger_id: string;
 			missing_ledger_id: string;
+			missing_canister_id: string;
 			missing_contract_address: string;
 			missing_token_address: string;
 			no_network: string;
@@ -1036,6 +1061,7 @@ interface I18nNfts {
 		token_id: string;
 		go_to_collection: string;
 		could_not_update_section: string;
+		media_stored_at_different_location: string;
 	};
 	alt: {
 		placeholder_image: string;
@@ -1409,6 +1435,7 @@ interface I18nTerms_of_use {
 		det: { article: string; possessive: string };
 		title: string;
 		instruction: string;
+		instruction_two_buttons: string;
 		body: string;
 	};
 	alt: { terms_of_use: string };
@@ -1472,6 +1499,7 @@ interface I18nStake {
 		unsupported_token_staking: string;
 		provider: string;
 		earning_potential: string;
+		earning_potential_hint: string;
 		active_earning: string;
 		active_earning_per_year: string;
 		unproductive_assets: string;
@@ -1630,6 +1658,7 @@ interface I18n {
 	networks: I18nNetworks;
 	receive: I18nReceive;
 	send: I18nSend;
+	mint: I18nMint;
 	scanner: I18nScanner;
 	convert: I18nConvert;
 	swap: I18nSwap;

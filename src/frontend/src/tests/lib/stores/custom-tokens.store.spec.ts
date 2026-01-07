@@ -23,6 +23,8 @@ import {
 	mockValidErc721Token
 } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { get } from 'svelte/store';
 
 describe('custom-token.store', () => {
@@ -148,7 +150,7 @@ describe('custom-token.store', () => {
 				mockStore.setAll([{ data: { ...mockValidExtV2Token, enabled }, certified }]);
 				const extToken2 = {
 					...TRUMP_TOKEN,
-					standard: 'extV2' as const,
+					standard: { code: 'ext' as const },
 					canisterId: mockValidExtV2Token.canisterId
 				};
 				mockStore.setAll([{ data: { ...extToken2, enabled }, certified }]);
@@ -277,6 +279,57 @@ describe('custom-token.store', () => {
 				});
 
 				expect(get(mockStore)).toEqual([]);
+			});
+		});
+
+		describe('resetByIdentifier', () => {
+			let mockTokens: CertifiedData<CustomToken<Token>>[];
+
+			beforeEach(() => {
+				const tokens = [
+					mockValidSplToken,
+					mockValidErc20Token,
+					mockValidIcrcToken,
+					mockValidExtV2Token,
+					ICP_TOKEN,
+					ETHEREUM_TOKEN,
+					SOLANA_TOKEN
+				];
+				mockTokens = tokens.map((token) => ({
+					data: { ...token, enabled },
+					certified
+				}));
+				mockStore.setAll(mockTokens);
+			});
+
+			it('should remove a token given its identifier', () => {
+				mockStore.resetByIdentifier(mockValidSplToken.address);
+
+				expect(get(mockStore)).toEqual(mockTokens.slice(1));
+
+				mockStore.resetByIdentifier(
+					`${mockValidErc20Token.address}#${mockValidErc20Token.network.chainId}`
+				);
+
+				expect(get(mockStore)).toEqual(mockTokens.slice(2));
+
+				mockStore.resetByIdentifier(mockValidIcrcToken.ledgerCanisterId);
+
+				expect(get(mockStore)).toEqual(mockTokens.slice(3));
+
+				mockStore.resetByIdentifier(mockValidExtV2Token.canisterId);
+
+				expect(get(mockStore)).toEqual(mockTokens.slice(4));
+
+				mockStore.resetByIdentifier(ICP_TOKEN.ledgerCanisterId);
+
+				expect(get(mockStore)).toEqual(mockTokens.slice(5));
+			});
+
+			it('should do nothing if the token does not exist', () => {
+				mockStore.resetByIdentifier('non-existing-token-identifier');
+
+				expect(get(mockStore)).toEqual(mockTokens);
 			});
 		});
 

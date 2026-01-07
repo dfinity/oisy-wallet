@@ -1,5 +1,6 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import IcSendForm from '$icp/components/send/IcSendForm.svelte';
+import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 import {
 	SEND_DESTINATION_SECTION,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -31,6 +32,10 @@ describe('IcSendForm', () => {
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
+	beforeEach(() => {
+		isIcMintingAccount.set(false);
+	});
+
 	it('should render all fields', () => {
 		const { container, getByTestId, getByText } = render(IcSendForm, {
 			props,
@@ -48,5 +53,16 @@ describe('IcSendForm', () => {
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 
 		expect(toolbar).not.toBeNull();
+	});
+
+	it('should not render the fee if the user is the minting account', () => {
+		isIcMintingAccount.set(true);
+
+		const { queryByText } = render(IcSendForm, {
+			props,
+			context: mockContext
+		});
+
+		expect(queryByText(en.fee.text.fee)).toBeNull();
 	});
 });

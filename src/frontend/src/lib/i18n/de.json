@@ -8,7 +8,7 @@
 			"done": "Fertig",
 			"close": "Schließen",
 			"change": "Ändern",
-			"continue": "",
+			"continue": "Weiterfahren",
 			"apply": "Anwenden",
 			"retry": "Erneut versuchen",
 			"refresh": "Aktualisieren",
@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,6 +118,7 @@
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
 			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain"
@@ -145,14 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "Probleme bei der Authentifizierung?",
-				"description": "Wir haben bemerkt, dass du die Authentifizierung mit Internet Identity abgebrochen hast. Wir würden gern verstehen, was passiert ist, um deine Erfahrung zu verbessern.",
-				"subtitle": "Wurde das Problem durch Folgendes verursacht?",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "Ich habe meine Internet Identity-Nummer verloren",
 				"security": "Ich war besorgt wegen Sicherheit oder Datenschutz",
-				"got_confused": "Ich war während des Prozesses verwirrt",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "Sonstiges...",
-				"feedback_text": "Dein Feedback hilft uns, die Wallet zu verbessern.",
+				"feedback_text": "",
 				"thanks_text": "Danke!",
 				"identity_new_identity": "$oisy_short Wallet wechselt die Internet Identity-Domain zu: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"identity_legacy_description": "Daher wird deine Internet Identity-Nummer möglicherweise nicht automatisch angezeigt und du musst sie möglicherweise erneut eingeben.",
@@ -558,7 +562,7 @@
 			"incubated_with": "Entwickelt mit",
 			"by": "von",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "$oisy_short Assistent"
 		},
 		"alt": {
@@ -902,35 +906,48 @@
 			"fee_calc_unsupported_standard": ""
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "",
-			"pay_to": "",
+			"scan_qr_code": "QR Code scannen",
+			"pay_to": "Zahlung an $receipt",
 			"powered_by": "",
-			"receipt": "",
-			"name": "",
-			"address": "",
-			"country": "",
-			"phone_number": "",
-			"email_address": "",
-			"website": "",
-			"enter_manually": "",
-			"url_or_code": "",
-			"enter_or_paste_code": "",
-			"scan": "",
-			"pay": "",
-			"pay_amount": "",
-			"go_to_assets": "",
-			"supported_tokens": "",
-			"no_supported_tokens": "",
-			"pay_with": "",
-			"select_token": "",
-			"select_different_token": "",
-			"tokens_available": "",
-			"select_token_to_pay": ""
+			"recipient": "Empfänger",
+			"name": "Name",
+			"address": "Adresse",
+			"country": "Land",
+			"phone_number": "Telefonnummer",
+			"email_address": "Email Adresse",
+			"website": "Webseite",
+			"enter_manually": "Manuell eingeben",
+			"url_or_code": "URL oder den Code",
+			"enter_or_paste_code": "Code hier einfügen oder eingeben",
+			"scan": "Einlesen",
+			"pay": "Bezahlen",
+			"pay_amount": "Bezahle $amount",
+			"go_to_assets": "Gehe zu Vermögen",
+			"supported_tokens": "Open CryptoPay unterstützt die folgenden Tokens: ETH, USDC, USDT, POL, ARB, WBTC, XMR, dEURO, ZCHF, etc.",
+			"no_supported_tokens": "Du hast keine der unterstützten Tokens.",
+			"pay_with": "Bezahle mit",
+			"select_token": "Wähle ein Token",
+			"select_different_token": "Wähle ein anderes Token",
+			"tokens_available": "$amount Tokens verfügbar",
+			"select_token_to_pay": "Wähle das Token um zu bezahlen",
+			"pay_at_successful": "Bezahlt an $receipt",
+			"pay_at_failure": "Bezahlung an $receipt ist fehlgeschlagen",
+			"try_again": "Erneut versuchen",
+			"payment_confirmed": "Bezahlung Erfolgreich",
+			"payment_failed": "Bezahlung Fehlgeschlagen"
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "Code/URL ist nicht gültig",
+			"data_is_incompleted": "Die erhaltenen Daten sind unvollständig. Bitte versuche es erneut."
 		}
 	},
 	"convert": {
@@ -1052,15 +1069,25 @@
 	},
 	"pay": {
 		"text": {
-			"pay": "",
-			"dialog_title": "",
-			"dialog_description": "",
-			"dialog_button": "",
-			"where_you_can_pay": ""
+			"pay": "Bezahlen",
+			"dialog_title": "Bezahlen mit $oisy_name",
+			"dialog_description": "Mit $oisy_name schnell und einfach bezahlen mit Tokens aus verschiedenen Netzwerken. In jedem Laden der <span class=\"font-bold\">Open&nbsp;CryptoPay</span> anbietet, einfach den Bezahlungs QR Code scannen. Wähle das gewünschte Token aus und bestätige die Zahlung.",
+			"dialog_button": "Bezahle mit $oisy_short",
+			"where_you_can_pay": "Siehe wo du überall mit $oisy_name bezahlen kannst",
+			"request_payment_details": "Zahlungsinformationen anfordern...",
+			"creating_transaction": "Transaktion erstellen...",
+			"signing_transaction": "Transaktion signieren...",
+			"paying": "Zahlung ausführen..."
+		},
+		"error": {
+			"data_is_incompleted": "Die empfangenen Daten sind unvollständig. Bitte versuche es erneut.",
+			"amount_does_not_match": "Der Betrag der benötigten Anzahl Tokens hat sich nachträglich geändert und die Transaktion wurde sicherheitshalber storniert.",
+			"recipient_address_is_not_valid": "Die erhaltenen Empfängeradresse ist nicht gültig.",
+			"token_address_mismatch": "Das zur Zahlung freigegebene Token passt nicht zum geforderten Token."
 		},
 		"alt": {
-			"pay": "",
-			"where_you_can_pay": ""
+			"pay": "Dialog mit Informationen wie man bezahlt",
+			"where_you_can_pay": "Öffne die Open&nbsp;CryptoPay Webseite um nachzusehen, wo du überall bezahlen kannst."
 		}
 	},
 	"tokens": {
@@ -1118,6 +1145,7 @@
 				"review": "Überprüfen",
 				"saving": "Speichere...",
 				"updating": "Aktualisiere Token-Liste",
+				"canister_id": "",
 				"ledger_canister_id": "Ledger-Canister-ID",
 				"index_canister_id": "Index-Canister-ID",
 				"minter_canister_id": "Minter-Canister-ID",
@@ -1127,6 +1155,7 @@
 				"verifying": "Überprüfe Token-Details...",
 				"add_the_token": "Token hinzufügen",
 				"info": "Ledger- und Index-Canister-IDs sind normalerweise auf der Website des Projekts verfügbar.",
+				"info_ext": "",
 				"info_index": "Die Index-Canister-ID ist optional, aber ohne sie kann $oisy_short den Transaktionsverlauf nicht anzeigen.",
 				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
 			},
@@ -1138,6 +1167,7 @@
 				"unexpected_index_ledger": "Beim Laden der Ledger-ID im Zusammenhang mit dem Index-Canister ist etwas schiefgelaufen.",
 				"invalid_ledger_id": "Die Ledger-ID gehört nicht zum Index-Canister.",
 				"missing_ledger_id": "Die Ledger-ID fehlt. Hast du einen Wert angegeben?",
+				"missing_canister_id": "",
 				"missing_contract_address": "Die Vertragsadresse fehlt. Hast du einen Wert angegeben?",
 				"missing_token_address": "Die Token-Adresse fehlt. Hast du einen Wert angegeben?",
 				"no_network": "Kein Netzwerk ausgewählt. Das ist unerwartet."
@@ -1272,7 +1302,8 @@
 			"learn_more": "Erfahre mehr",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
@@ -1297,8 +1328,8 @@
 			"zero_fee": "Kostenlos",
 			"total_fee": "Gesamtgebühr",
 			"ata_fee": "ATA-Gebühr",
-			"transaction_fees": "",
-			"network_fee": "",
+			"transaction_fees": "Transaktionsgebühr",
+			"network_fee": "Netzwerkgebühr",
 			"approval_fee": ""
 		},
 		"assertion": {
@@ -1765,6 +1796,7 @@
 			},
 			"title": "",
 			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
@@ -1853,6 +1885,7 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",

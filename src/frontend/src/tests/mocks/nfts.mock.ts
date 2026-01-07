@@ -18,7 +18,7 @@ export const getMockNonFungibleToken = (params: {
 		id: parseTokenId(String(index)),
 		name: params.names[index],
 		network: ETHEREUM_NETWORK,
-		standard: 'erc1155',
+		standard: { code: 'erc1155' },
 		symbol: params.names[index]
 	}));
 

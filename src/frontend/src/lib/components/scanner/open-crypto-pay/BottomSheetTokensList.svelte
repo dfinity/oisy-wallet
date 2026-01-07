@@ -11,7 +11,7 @@
 	let { onClose, visible = $bindable() }: Props = $props();
 </script>
 
-<BottomSheet {onClose} bind:visible>
+<BottomSheet bind:visible>
 	{#snippet content()}
 		<h3 class=" mb-2 text-center">{$i18n.scanner.text.select_token_to_pay}</h3>
 

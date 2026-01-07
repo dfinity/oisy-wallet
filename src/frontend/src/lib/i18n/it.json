@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,6 +118,7 @@
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Assistente AI integrato con privacy come standard",
 			"advanced_cryptography": "Protetto da crittografia avanzata – 100% on-chain"
@@ -145,14 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "Problemi con l'autenticazione?",
-				"description": "Abbiamo notato che hai annullato l'autenticazione con Internet Identity. Ci piacerebbe capire cosa è successo per migliorare la tua esperienza.",
-				"subtitle": "Quale delle seguenti cause ha causato il problema?",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "Ho perso il mio numero Internet Identity",
 				"security": "Ero preoccupato per la sicurezza o la privacy",
-				"got_confused": "Mi sono confuso durante il processo",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "Altro...",
-				"feedback_text": "Il tuo feedback ci aiuta a migliorare il wallet.",
+				"feedback_text": "",
 				"thanks_text": "Grazie!",
 				"identity_new_identity": "Il wallet $oisy_short cambia il dominio Internet Identity in: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"identity_legacy_description": "Di conseguenza, il tuo numero Internet Identity potrebbe non apparire automaticamente e potresti doverlo reinserire.",
@@ -558,7 +562,7 @@
 			"incubated_with": "Incubato con",
 			"by": "da",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "Assistente $oisy_short"
 		},
 		"alt": {
@@ -902,12 +906,19 @@
 			"fee_calc_unsupported_standard": ""
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
 			"pay_to": "",
 			"powered_by": "",
-			"receipt": "",
+			"recipient": "",
 			"name": "",
 			"address": "",
 			"country": "",
@@ -927,10 +938,16 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1056,7 +1073,17 @@
 			"dialog_title": "",
 			"dialog_description": "",
 			"dialog_button": "",
-			"where_you_can_pay": ""
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1118,6 +1145,7 @@
 				"review": "Rivedi",
 				"saving": "Salvataggio...",
 				"updating": "Aggiornamento lista token",
+				"canister_id": "",
 				"ledger_canister_id": "ID Canister Ledger",
 				"index_canister_id": "ID Canister Index",
 				"minter_canister_id": "ID Canister Minter",
@@ -1127,6 +1155,7 @@
 				"verifying": "Verifica dettagli token...",
 				"add_the_token": "Aggiungi il token",
 				"info": "Gli ID dei canister Ledger e Index sono di solito disponibili sul sito web del progetto.",
+				"info_ext": "",
 				"info_index": "L'ID del canister Index è opzionale, ma senza di esso, $oisy_short non può visualizzare la cronologia delle transazioni.",
 				"custom_tokens_not_supported": "La rete selezionata non supporta i token personalizzati."
 			},
@@ -1138,6 +1167,7 @@
 				"unexpected_index_ledger": "Qualcosa è andato storto durante il caricamento dell'ID Ledger relativo al canister Index.",
 				"invalid_ledger_id": "L'ID Ledger non è correlato al canister Index.",
 				"missing_ledger_id": "L'ID Ledger è mancante. Hai fornito un valore?",
+				"missing_canister_id": "",
 				"missing_contract_address": "L'indirizzo del contratto è mancante. Hai fornito un valore?",
 				"missing_token_address": "L'indirizzo del token è mancante. Hai fornito un valore?",
 				"no_network": "Nessuna rete selezionata. Questo è inatteso."
@@ -1272,7 +1302,8 @@
 			"learn_more": "",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
@@ -1765,6 +1796,7 @@
 			},
 			"title": "",
 			"instruction": "Cliccando su questo pulsante, accetti i $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
@@ -1853,6 +1885,7 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",

@@ -5,12 +5,12 @@ import {
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
+import { isTokenIc } from '$icp/utils/icrc.utils';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionBalance } from '$lib/types/balance';
-import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { StakeBalances } from '$lib/types/stake-balance';
 import type { RequiredTokenWithLinkedData, Token, TokenStandard } from '$lib/types/token';
@@ -44,7 +44,8 @@ export const getMaxTransactionAmount = ({
 	tokenStandard: TokenStandard;
 }): string => {
 	const value =
-		(balance ?? ZERO) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO);
+		(balance ?? ZERO) -
+		(tokenStandard.code !== 'erc20' && tokenStandard.code !== 'spl' ? fee : ZERO);
 
 	return value <= ZERO
 		? ZERO.toString()
@@ -74,15 +75,14 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 	defaultToken: T;
 	customToken: TokenToggleable<T> | undefined;
 }): TokenToggleable<T> => {
-	const ledgerCanisterId =
-		'ledgerCanisterId' in defaultToken &&
-		(defaultToken as { ledgerCanisterId: CanisterIdText }).ledgerCanisterId;
+	const ledgerCanisterId = isTokenIc(defaultToken) ? defaultToken.ledgerCanisterId : undefined;
 
 	const isEnabledByDefault =
-		ledgerCanisterId && ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
+		nonNullish(ledgerCanisterId) &&
+		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
 
 	const isSuggestedToken =
-		(ledgerCanisterId &&
+		(nonNullish(ledgerCanisterId) &&
 			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
 		(isTokenErc20(defaultToken) &&
 			ERC20_SUGGESTED_TOKENS.map(({ id }) => id).includes(defaultToken.id));
@@ -93,7 +93,9 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 			isEnabledByDefault ||
 			(isNullish(customToken?.enabled) && isSuggestedToken) ||
 			customToken?.enabled === true,
-		version: customToken?.version
+		version: customToken?.version,
+		section: customToken?.section,
+		allowExternalContentSource: customToken?.allowExternalContentSource
 	};
 };
 
