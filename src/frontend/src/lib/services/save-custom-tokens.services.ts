@@ -94,6 +94,7 @@ export const saveCustomTokens = async ({
 		loadCustomErc1155Tokens({ identity }),
 		loadCustomIcrcTokens({ identity }),
 		loadCustomExtTokens({ identity }),
+		// TODO: add loadCustomDip721Tokens here (and in the tests)
 		loadCustomSplTokens({ identity })
 	]);
 };
