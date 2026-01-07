@@ -1779,8 +1779,8 @@
 		"text": {
 			"license_agreement": "Лицензионное соглашение",
 			"det": {
-				"article": "статья",
-				"possessive": "притяжательный"
+				"article": "статья ",
+				"possessive": "притяжательный "
 			},
 			"title": "",
 			"body": ""
@@ -1809,8 +1809,8 @@
 		"text": {
 			"privacy_policy": "Rонфиденциальность",
 			"det": {
-				"article": "the",
-				"possessive": "our"
+				"article": "the ",
+				"possessive": "our "
 			},
 			"title": "",
 			"body": ""
