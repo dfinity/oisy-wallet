@@ -52,7 +52,7 @@ export const loadNfts = async ({
 			return await loadExtNfts({ token, identity });
 		}
 
-		assertNever(token, `Unsupported NFT IC token ${(token as Token).standard}`);
+		assertNever(token, `Unsupported NFT IC token ${(token as Token).standard.code}`);
 	});
 
 	return (await Promise.all(nftPromises)).flat();
