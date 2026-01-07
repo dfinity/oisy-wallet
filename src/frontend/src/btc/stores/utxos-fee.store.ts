@@ -1,6 +1,7 @@
 import type { UtxosFee } from '$btc/types/btc-send';
 import type { OptionAmount } from '$lib/types/send';
 import type { Option } from '$lib/types/utils';
+import type { BitcoinDid } from '@icp-sdk/canisters/ckbtc';
 import { writable, type Readable } from 'svelte/store';
 
 export type UtxosFeeStoreData = Option<{
@@ -8,6 +9,8 @@ export type UtxosFeeStoreData = Option<{
 	// We need to save the inputted amount for which UTXOs have been already fetched.
 	// It allows us to compare it with the new value to prevent a re-fetch on consumer component re-render.
 	amountForFee?: OptionAmount;
+	allUtxos?: BitcoinDid.utxo[];
+	feeRateFromPercentiles?: bigint;
 }>;
 
 export interface UtxosFeeStore extends Readable<UtxosFeeStoreData> {

@@ -1,12 +1,18 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
+	import UtxosFeeContext from '$btc/components/fee/UtxosFeeContext.svelte';
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
 	import { sendBtc, validateBtcSend } from '$btc/services/btc-send.services';
-	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
+	import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+	import {
+		initUtxosFeeStore,
+		UTXOS_FEE_CONTEXT_KEY,
+		type UtxosFeeContext as UtxosFeeContextType
+	} from '$btc/stores/utxos-fee.store';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
@@ -63,9 +69,7 @@
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
-
-	let utxosFee = $state<UtxosFee | undefined>();
+	const { store: utxosFeeStore } = getContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY);
 
 	let networkId = $derived($sendToken.network.id);
 
@@ -77,12 +81,9 @@
 				: $btcAddressMainnet) ?? ''
 	);
 
-	$effect(() => {
-		[amount];
+	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
 
-		// if amount changes, we want to re-fetch the utxos
-		utxosFee = undefined;
-	});
+	let amountError = $state(false);
 
 	const close = () => onClose();
 	const back = () => onSendBack();
@@ -113,7 +114,7 @@
 			return;
 		}
 
-		if (isNullish(utxosFee)) {
+		if (isNullish($utxosFeeStore?.utxosFee)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.utxos_fee_missing }
 			});
@@ -136,25 +137,20 @@
 		const sendTrackingEventMetadata = {
 			token: $sendToken.symbol,
 			network: `${networkId.description}`,
-			feeSatoshis: utxosFee.feeSatoshis.toString()
+			feeSatoshis: $utxosFeeStore.utxosFee.feeSatoshis.toString()
 		};
 
 		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED) {
 			// Validate UTXOs before proceeding
 			try {
 				await validateBtcSend({
-					utxosFee,
+					utxosFee: $utxosFeeStore.utxosFee,
 					source,
 					amount,
 					network,
 					identity: $authIdentity
 				});
-			} catch (err: unknown) {
-				// Handle BtcValidationError with specific toastsError for each type
-				if (err instanceof BtcValidationError) {
-					utxosFee.error = err.type;
-				}
-
+			} catch (_: unknown) {
 				trackEvent({
 					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
 					metadata: sendTrackingEventMetadata
@@ -172,7 +168,7 @@
 			await sendBtc({
 				destination,
 				amount,
-				utxosFee,
+				utxosFee: $utxosFeeStore.utxosFee,
 				network,
 				source,
 				identity: $authIdentity
@@ -202,24 +198,26 @@
 	};
 </script>
 
-{#key currentStep?.name}
-	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<BtcSendReview
-			{amount}
-			{destination}
-			{onBack}
-			onSend={send}
-			{selectedContact}
-			{source}
-			bind:utxosFee
-		/>
-	{:else if currentStep?.name === WizardStepsSend.SENDING}
-		<BtcSendProgress {sendProgressStep} />
-	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<BtcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
-			{#snippet cancel()}
-				<ButtonBack onclick={back} />
-			{/snippet}
-		</BtcSendForm>
-	{/if}
-{/key}
+<UtxosFeeContext {amount} {amountError} {networkId} {source}>
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSend.REVIEW}
+			<BtcSendReview {amount} {destination} {onBack} onSend={send} {selectedContact} {source} />
+		{:else if currentStep?.name === WizardStepsSend.SENDING}
+			<BtcSendProgress {sendProgressStep} />
+		{:else if currentStep?.name === WizardStepsSend.SEND}
+			<BtcSendForm
+				{onBack}
+				{onNext}
+				{onTokensList}
+				{selectedContact}
+				{source}
+				bind:destination
+				bind:amount
+			>
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />
+				{/snippet}
+			</BtcSendForm>
+		{/if}
+	{/key}
+</UtxosFeeContext>

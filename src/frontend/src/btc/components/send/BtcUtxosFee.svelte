@@ -3,7 +3,8 @@
 	import { getContext, onMount, onDestroy } from 'svelte';
 	import {
 		BTC_UTXOS_FEE_UPDATE_ENABLED,
-		BTC_UTXOS_FEE_UPDATE_INTERVAL
+		BTC_UTXOS_FEE_UPDATE_INTERVAL,
+		DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
 	} from '$btc/constants/btc.constants';
 	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 	import type { UtxosFee } from '$btc/types/btc-send';
@@ -34,16 +35,16 @@
 	const updatePrepareBtcSend = async () => {
 		try {
 			// all required params should be already defined at this stage
-			if (isNullish(amount) || isNullish(networkId) || isNullish($authIdentity)) {
+			if (isNullish(networkId) || isNullish($authIdentity)) {
 				return;
 			}
-
+			console.log('here');
 			const network = mapNetworkIdToBitcoinNetwork(networkId);
 			utxosFee = nonNullish(network)
 				? await prepareBtcSend({
 						identity: $authIdentity,
 						network,
-						amount,
+						amount: isNullish(amount) ? DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE : amount,
 						source
 					})
 				: undefined;
