@@ -7,6 +7,7 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIcrcAccount, mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import { IcrcIndexCanister, IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
@@ -29,6 +30,7 @@ describe('ic-add-custom-tokens.service', () => {
 		let spyLedgerId: MockInstance;
 		let spyGetTransactions: MockInstance;
 		let spyMetadata: MockInstance;
+		let spyMintingAccount: MockInstance;
 		let spyBalance: MockInstance;
 
 		const validParams = {
@@ -70,6 +72,12 @@ describe('ic-add-custom-tokens.service', () => {
 		});
 
 		describe('error', () => {
+			beforeEach(() => {
+				spyMintingAccount = ledgerCanisterMock.getMintingAccount.mockResolvedValue(
+					toNullable({ owner: mockPrincipal, subaccount: toNullable() })
+				);
+			});
+
 			it('should return error if identity is missing', async () => {
 				await expect(() =>
 					loadAndAssertAddCustomToken({
@@ -273,6 +281,14 @@ describe('ic-add-custom-tokens.service', () => {
 				});
 			};
 
+			const assertUpdateCallMintingAccount = async (params: LoadAndAssertAddCustomTokenParams) => {
+				await loadAndAssertAddCustomToken(params);
+
+				expect(spyMintingAccount).toHaveBeenNthCalledWith(1, {
+					certified: true
+				});
+			};
+
 			const assertLoadToken = async (params: LoadAndAssertAddCustomTokenParams) => {
 				const result = await loadAndAssertAddCustomToken(params);
 
@@ -338,6 +354,10 @@ describe('ic-add-custom-tokens.service', () => {
 					await assertUpdateCallMetadata(validParams);
 				});
 
+				it('should call with an update getMintingAccount to retrieve the minting account of the token', async () => {
+					await assertUpdateCallMintingAccount(validParams);
+				});
+
 				it('should successfully load a new token', async () => {
 					await assertLoadToken(validParams);
 				});
@@ -395,6 +415,10 @@ describe('ic-add-custom-tokens.service', () => {
 
 				it('should call with an update metadata to retrieve the details of the token', async () => {
 					await assertUpdateCallMetadata(validParamsWithIndex);
+				});
+
+				it('should call with an update getMintingAccount to retrieve the minting account of the token', async () => {
+					await assertUpdateCallMintingAccount(validParamsWithIndex);
 				});
 
 				it('should successfully load a new token', async () => {

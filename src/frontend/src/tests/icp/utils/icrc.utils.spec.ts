@@ -15,7 +15,7 @@ import {
 import type { TokenStandard, TokenStandardCode } from '$lib/types/token';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIcrcAccount, mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	IcrcMetadataResponseEntries,
 	type IcrcLedgerDid,
@@ -40,16 +40,14 @@ describe('icrc.utils', () => {
 			metadata: mockMetadata,
 			category: 'default',
 			ledgerCanisterId: mockValidIcToken.ledgerCanisterId,
+			mintingAccount: mockIcrcAccount,
 			position: 1,
 			icrcCustomTokens: {
 				[mockToken.ledgerCanisterId]: mockToken
 			}
 		};
 		const mockParamsWithUrlIcon: IcrcLoadData = {
-			metadata: mockMetadata,
-			category: 'default',
-			ledgerCanisterId: mockValidIcToken.ledgerCanisterId,
-			position: 1,
+			...mockParams,
 			icrcCustomTokens: {
 				[mockToken.ledgerCanisterId]: { ...mockToken, icon: 'https://icon.png' }
 			}
