@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,6 +118,7 @@
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Assistente AI integrato con privacy come standard",
 			"advanced_cryptography": "Protetto da crittografia avanzata – 100% on-chain"
@@ -145,14 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "Problemi con l'autenticazione?",
-				"description": "Abbiamo notato che hai annullato l'autenticazione con Internet Identity. Ci piacerebbe capire cosa è successo per migliorare la tua esperienza.",
-				"subtitle": "Quale delle seguenti cause ha causato il problema?",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "Ho perso il mio numero Internet Identity",
 				"security": "Ero preoccupato per la sicurezza o la privacy",
-				"got_confused": "Mi sono confuso durante il processo",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "Altro...",
-				"feedback_text": "Il tuo feedback ci aiuta a migliorare il wallet.",
+				"feedback_text": "",
 				"thanks_text": "Grazie!",
 				"identity_new_identity": "Il wallet $oisy_short cambia il dominio Internet Identity in: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"identity_legacy_description": "Di conseguenza, il tuo numero Internet Identity potrebbe non apparire automaticamente e potresti doverlo reinserire.",
@@ -558,7 +562,7 @@
 			"incubated_with": "Incubato con",
 			"by": "da",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "Assistente $oisy_short"
 		},
 		"alt": {
@@ -902,6 +906,20 @@
 			"fee_calc_unsupported_standard": ""
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
@@ -929,10 +947,14 @@
 			"tokens_available": "",
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1063,6 +1085,12 @@
 			"creating_transaction": "",
 			"signing_transaction": "",
 			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1281,7 +1309,8 @@
 			"learn_more": "",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
@@ -1476,6 +1505,8 @@
 			"title": "Transazioni",
 			"buy_or_receive": "Effettua la tua prima transazione, e compra o ricevi token ora!",
 			"transaction_history": "La cronologia delle tue transazioni apparirà qui",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "Le informazioni sulle transazioni BTC sono ottenute da terze parti centralizzate e devono essere verificate in modo indipendente.",
 			"transaction_history_unavailable": "Cronologia transazioni non disponibile",
 			"missing_index_canister_explanation": "Attualmente, $oisy_short non può mostrare la cronologia delle tue transazioni di token perché l'emittente non ha ancora fornito la funzione di tracciamento. Dovrebbe essere aggiunta presto. Nel frattempo, non preoccuparti — puoi comunque inviare e ricevere i tuoi token come al solito.",
@@ -1774,6 +1805,7 @@
 			},
 			"title": "",
 			"instruction": "Cliccando su questo pulsante, accetti i $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

@@ -45,7 +45,7 @@
 					token_name: nft.collection.name ?? '',
 					token_address: nft.collection.address,
 					token_network: nft.collection.network.name,
-					token_standard: nft.collection.standard
+					token_standard: nft.collection.standard.code
 				}
 			});
 

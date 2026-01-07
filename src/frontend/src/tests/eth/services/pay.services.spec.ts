@@ -224,7 +224,7 @@ describe('pay.services', () => {
 
 				const erc20Token = {
 					...baseToken,
-					standard: 'erc20',
+					standard: { code: 'erc20' },
 					address: '0x1234567890123456789012345678901234567890'
 				} as unknown as PayableToken;
 

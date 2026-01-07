@@ -55,7 +55,7 @@ describe('nft-send.services', () => {
 		it('should return early if token is not EXT v2 standard', async () => {
 			await sendNft({
 				...mockParams,
-				token: { ...mockValidExtV2Token, standard: 'icrc' }
+				token: { ...mockValidExtV2Token, standard: { code: 'icrc' } }
 			});
 
 			expect(transferExtV2).not.toHaveBeenCalled();

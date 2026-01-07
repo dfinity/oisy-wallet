@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,6 +118,7 @@
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
+			"sign_in_with_identity_number": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": ""
@@ -145,14 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "هل تواجه مشاكل في المصادقة؟",
-				"description": "لقد لاحظنا أنك ألغيت المصادقة باستخدام Internet Identity. نود أن نفهم ما حدث حتى نتمكن من تحسين تجربتك.",
-				"subtitle": "هل تسبب أي مما يلي في المشكلة؟",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "لقد فقدت رقم هويتي على الإنترنت",
 				"security": "كنت قلقًا بشأن الأمان أو الخصوصية",
-				"got_confused": "لقد ارتبكت أثناء العملية",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "أخرى...",
-				"feedback_text": "ملاحظاتك تساعدنا على جعل المحفظة أفضل.",
+				"feedback_text": "",
 				"thanks_text": "شكرًا لك!",
 				"identity_new_identity": "محفظة $oisy_short تحوّل نطاق هوية الإنترنت إلى: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"identity_legacy_description": "نتيجة لذلك، قد لا يظهر رقم هوية الإنترنت الخاص بك تلقائيًا، وقد تحتاج إلى إعادة إدخاله.",
@@ -558,7 +562,7 @@
 			"incubated_with": "احتضان مع",
 			"by": "بواسطة",
 			"dfinity_foundation": "مؤسسة DFINITY",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "مساعد $oisy_short"
 		},
 		"alt": {
@@ -902,6 +906,20 @@
 			"fee_calc_unsupported_standard": ""
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
@@ -929,10 +947,14 @@
 			"tokens_available": "",
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1063,6 +1085,12 @@
 			"creating_transaction": "",
 			"signing_transaction": "",
 			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1281,7 +1309,8 @@
 			"learn_more": "",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "لا توجد NFTs بعد",
@@ -1476,6 +1505,8 @@
 			"title": "المعاملات",
 			"buy_or_receive": "قم بأول معاملة لك، واشترِ أو استلم التوكنات الآن!",
 			"transaction_history": "سيظهر سجل معاملاتك هنا",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل.",
 			"transaction_history_unavailable": "سجل المعاملات غير متاح",
 			"missing_index_canister_explanation": "في الوقت الحالي، لا يستطيع $oisy_short عرض سجل معاملات التوكن الخاص بك لأن الجهة المصدرة لم توفر ميزة التتبع بعد. من المفترض أن تتم إضافتها قريبًا. في هذه الأثناء، لا تقلق - لا يزال بإمكانك إرسال واستلام التوكنات الخاصة بك كالمعتاد.",
@@ -1774,6 +1805,7 @@
 			},
 			"title": "",
 			"instruction": "",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

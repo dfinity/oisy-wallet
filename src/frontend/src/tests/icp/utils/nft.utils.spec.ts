@@ -1,12 +1,35 @@
+import { getExtMetadata } from '$icp/services/ext-metadata.services';
 import { extIndexToIdentifier } from '$icp/utils/ext.utils';
 import { mapExtNft } from '$icp/utils/nft.utils';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import type { NftMetadataWithoutId } from '$lib/types/nft';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
 import { SvelteMap } from 'svelte/reactivity';
 
+vi.mock(import('$icp/services/ext-metadata.services'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		getExtMetadata: vi.fn()
+	};
+});
+
 describe('nft.utils', () => {
 	describe('mapExtNft', () => {
+		const mockIndex = 123;
+
+		const mockIdentifier = extIndexToIdentifier({
+			collectionId: Principal.fromText(mockValidExtV2Token.canisterId),
+			index: mockIndex
+		});
+
+		const mockMetadata: NftMetadataWithoutId = {
+			imageUrl: 'https://example.com/image.png',
+			thumbnailUrl: 'https://example.com/thumbnail.png'
+		};
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -17,16 +40,43 @@ describe('nft.utils', () => {
 					get: () => null
 				}
 			});
+
+			vi.mocked(getExtMetadata).mockResolvedValue(mockMetadata);
 		});
 
 		it('should map correctly an EXT NFT', async () => {
-			const mockIndex = 123;
-			const mockIdentifier = extIndexToIdentifier({
-				collectionId: Principal.fromText(mockValidExtV2Token.canisterId),
-				index: mockIndex
+			const result = await mapExtNft({
+				index: mockIndex,
+				token: mockValidExtV2Token,
+				identity: mockIdentity
 			});
 
-			const result = await mapExtNft({ index: mockIndex, token: mockValidExtV2Token });
+			const { canisterId: _, ...rest } = mockValidExtV2Token;
+
+			expect(result).toStrictEqual({
+				id: result.id,
+				oisyId: (mockIndex + 1).toString(),
+				imageUrl: mockMetadata.imageUrl,
+				thumbnailUrl: mockMetadata.thumbnailUrl,
+				mediaStatus: {
+					image: NftMediaStatusEnum.OK,
+					thumbnail: NftMediaStatusEnum.OK
+				},
+				collection: {
+					...rest,
+					address: mockValidExtV2Token.canisterId
+				}
+			});
+		});
+
+		it('should handle correctly empty metadata from the service', async () => {
+			vi.mocked(getExtMetadata).mockResolvedValue(undefined);
+
+			const result = await mapExtNft({
+				index: mockIndex,
+				token: mockValidExtV2Token,
+				identity: mockIdentity
+			});
 
 			const { canisterId: _, ...rest } = mockValidExtV2Token;
 
@@ -47,9 +97,9 @@ describe('nft.utils', () => {
 		});
 
 		it('should raise an error if the index is negative', async () => {
-			await expect(mapExtNft({ index: -1, token: mockValidExtV2Token })).rejects.toThrow(
-				'EXT token index -1 is out of bounds'
-			);
+			await expect(
+				mapExtNft({ index: -1, token: mockValidExtV2Token, identity: mockIdentity })
+			).rejects.toThrowError('EXT token index -1 is out of bounds');
 		});
 	});
 });

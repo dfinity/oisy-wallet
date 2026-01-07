@@ -4,9 +4,11 @@ import type { NftCollection } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token.utils';
 
-export const isTokenErc1155 = (token: Token): token is Erc1155Token => token.standard === 'erc1155';
+export const isTokenErc1155 = (token: Token): token is Erc1155Token =>
+	token.standard.code === 'erc1155';
 
-export const isCollectionErc1155 = (collection: NftCollection) => collection.standard === 'erc1155';
+export const isCollectionErc1155 = (collection: NftCollection) =>
+	collection.standard.code === 'erc1155';
 
 export const isTokenErc1155CustomToken = (token: Token): token is Erc1155CustomToken =>
 	isTokenErc1155(token) && isTokenToggleable(token);

@@ -87,6 +87,21 @@ export const loadNetworkCustomTokens = async ({
 					};
 				}
 
+				if ('Dip721' in token.token) {
+					const { canister_id: rawCanisterId } = token.token.Dip721;
+
+					const canisterId = Principal.from(rawCanisterId);
+
+					return {
+						...token,
+						token: {
+							Dip721: {
+								canister_id: canisterId
+							}
+						}
+					};
+				}
+
 				if (
 					'Erc20' in token.token ||
 					'Erc721' in token.token ||

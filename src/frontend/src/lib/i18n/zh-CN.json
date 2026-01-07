@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "交易完成前请勿关闭此标签页",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,6 +118,7 @@
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
+			"sign_in_with_identity_number": "",
 			"asset_types": "管理 BTC、SOL、ETH、ICP 等多种资产",
 			"instant_and_private": "内置 AI 助手 — 隐私保护为标准配置",
 			"advanced_cryptography": "先进加密技术保护 — 100% 链上"
@@ -145,14 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "登录时遇到问题？",
-				"description": "我们注意到您取消了使用 Internet Identity 的登录。我们希望了解发生了什么，以改善您的体验。",
-				"subtitle": "是否以下原因导致了问题？",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "我丢失了我的 Internet Identity 编号",
 				"security": "我对安全或隐私存在顾虑",
-				"got_confused": "我在操作过程中感到困惑",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "其他……",
-				"feedback_text": "您的反馈有助于我们改进钱包。",
+				"feedback_text": "",
 				"thanks_text": "谢谢您！",
 				"identity_new_identity": "$oisy_short 钱包已切换 Internet Identity 域名为：<span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"identity_legacy_description": "因此，您的 Internet Identity 编号可能不会自动显示，您可能需要重新输入。",
@@ -558,7 +562,7 @@
 			"incubated_with": "孵化支持",
 			"by": "来自",
 			"dfinity_foundation": "DFINITY 基金会",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "AI助手控制台按钮"
 		},
 		"alt": {
@@ -902,6 +906,20 @@
 			"fee_calc_unsupported_standard": "由于不支持所提供的令牌标准，因此无法计算费用。"
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
@@ -929,10 +947,14 @@
 			"tokens_available": "",
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1063,6 +1085,12 @@
 			"creating_transaction": "",
 			"signing_transaction": "",
 			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1281,7 +1309,8 @@
 			"learn_more": "了解更多",
 			"token_id": "代币 ID",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "还没有 NFT",
@@ -1476,6 +1505,8 @@
 			"title": "交易记录",
 			"buy_or_receive": "进行您的第一次交易，现在购买或接收代币！",
 			"transaction_history": "您的交易历史将显示在此处",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "BTC 交易信息来自中心化第三方，建议您自行核实。",
 			"transaction_history_unavailable": "交易历史不可用",
 			"missing_index_canister_explanation": "目前，$oisy_short 无法显示您的代币交易历史，因为发行方尚未提供追踪功能。该功能应很快上线。与此同时，请放心，您仍然可以正常发送和接收代币。",
@@ -1774,6 +1805,7 @@
 			},
 			"title": "",
 			"instruction": "点击此按钮即表示你同意$link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

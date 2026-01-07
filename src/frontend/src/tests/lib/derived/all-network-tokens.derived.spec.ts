@@ -54,7 +54,7 @@ describe('all-network-tokens.derived', () => {
 
 	const mockDip20Token: IcrcCustomToken = {
 		...mockValidIcCkToken,
-		standard: 'dip20',
+		standard: { code: 'dip20' },
 		id: parseTokenId('XTC'),
 		symbol: 'XTC',
 		ledgerCanisterId: 'mock-ledger-canister-id',

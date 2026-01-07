@@ -14,7 +14,7 @@ export const RAY_TOKEN_ID: TokenId = parseTokenId(RAY_SYMBOL);
 export const RAY_TOKEN: RequiredSplToken = {
 	id: RAY_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Raydium',
 	symbol: RAY_SYMBOL,

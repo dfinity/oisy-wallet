@@ -8,7 +8,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions: {}
 
@@ -64,7 +64,7 @@ jobs:
         run: npm run test:merge
 
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: vitest-coverage-threshold-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -77,6 +77,9 @@ jobs:
       - name: Remove old thresholds file
         run: rm vitest.config.before.ts
 
+      - name: Format
+        run: npm run format:file --file=vitest.config.ts
+
       - name: Check for Coverage Thresholds Changes
         id: check_changes
         run: |
@@ -85,10 +88,6 @@ jobs:
           else
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Format
-        if: steps.check_changes.outputs.changes_detected == 'true'
-        run: npm run format:file --file=vitest.config.ts
 
       - name: Stage Changes on main
         if: steps.check_changes.outputs.changes_detected == 'true'

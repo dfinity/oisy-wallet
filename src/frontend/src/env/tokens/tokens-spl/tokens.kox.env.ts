@@ -14,7 +14,7 @@ export const KOX_TOKEN_ID: TokenId = parseTokenId(KOX_SYMBOL);
 export const KOX_TOKEN: RequiredSpl2022Token = {
 	id: KOX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Coca-Cola xStock',
 	symbol: KOX_SYMBOL,

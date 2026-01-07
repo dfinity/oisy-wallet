@@ -114,6 +114,7 @@ export interface PayParams {
 	identity: Identity;
 	quoteId: string;
 	callback: string;
+	amount: bigint;
 	progress: (step: ProgressStepsPayment) => void;
 }
 
@@ -126,4 +127,15 @@ export interface TransactionBaseParams {
 	nonce: number;
 	gas: bigint;
 	chainId: bigint;
+}
+
+export interface ValidatedDFXPaymentData {
+	destination: string;
+	ethereumChainId: bigint;
+	value: bigint;
+	feeData: {
+		maxFeePerGas: bigint;
+		maxPriorityFeePerGas: bigint;
+	};
+	estimatedGasLimit: bigint;
 }
