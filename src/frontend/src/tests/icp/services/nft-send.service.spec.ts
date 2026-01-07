@@ -1,12 +1,14 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { sendNft } from '$icp/services/nft-send.services';
-import { transferExtV2 } from '$icp/services/nft-transfer.services';
+import { transferDip721, transferExtV2 } from '$icp/services/nft-transfer.services';
+import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
-import { mockValidExtNft } from '$tests/mocks/nfts.mock';
+import { mockValidDip721Nft, mockValidExtNft } from '$tests/mocks/nfts.mock';
 
 vi.mock('$icp/services/nft-transfer.services', () => ({
-	transferExtV2: vi.fn()
+	transferExtV2: vi.fn(),
+	transferDip721: vi.fn()
 }));
 
 describe('nft-send.services', () => {
@@ -19,16 +21,6 @@ describe('nft-send.services', () => {
 			identity: mockIdentity,
 			progress: mockProgress,
 			to: mockPrincipal2.toText()
-		};
-
-		const expectedParams = {
-			identity: mockIdentity,
-			canisterId: mockValidExtV2Token.canisterId,
-			from: mockPrincipal,
-			to: mockPrincipal2,
-			tokenIdentifier: mockValidExtNft.id,
-			amount: 1n, // currently fixed at 1
-			progress: mockProgress
 		};
 
 		beforeEach(() => {
@@ -52,7 +44,7 @@ describe('nft-send.services', () => {
 			expect(transferExtV2).not.toHaveBeenCalled();
 		});
 
-		it('should return early if token is not EXT v2 standard', async () => {
+		it('should return early if token is not supported standard', async () => {
 			await sendNft({
 				...mockParams,
 				token: { ...mockValidExtV2Token, standard: { code: 'icrc' } }
@@ -62,9 +54,33 @@ describe('nft-send.services', () => {
 		});
 
 		it('should call the EXT transfer service', async () => {
+			const expectedParams = {
+				identity: mockIdentity,
+				canisterId: mockValidExtV2Token.canisterId,
+				from: mockPrincipal,
+				to: mockPrincipal2,
+				tokenIdentifier: mockValidExtNft.id,
+				amount: 1n, // currently fixed at 1
+				progress: mockProgress
+			};
+
 			await sendNft(mockParams);
 
 			expect(transferExtV2).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should call the DIP721 transfer service', async () => {
+			const expectedParams = {
+				identity: mockIdentity,
+				canisterId: mockValidDip721Token.canisterId,
+				to: mockPrincipal2,
+				tokenIdentifier: BigInt(mockValidDip721Nft.id),
+				progress: mockProgress
+			};
+
+			await sendNft({ ...mockParams, token: mockValidDip721Token, tokenId: mockValidDip721Nft.id });
+
+			expect(transferDip721).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 	});
 });

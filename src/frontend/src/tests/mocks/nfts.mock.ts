@@ -3,6 +3,7 @@ import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { Nft, NftCollectionUi, NonFungibleToken } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
@@ -74,6 +75,19 @@ export const mockValidExtNft: Nft = {
 	collection: {
 		...mockValidExtV2Token,
 		address: mockValidExtV2Token.canisterId
+	},
+	mediaStatus: {
+		image: NftMediaStatusEnum.OK,
+		thumbnail: NftMediaStatusEnum.OK
+	}
+};
+
+export const mockValidDip721Nft: Nft = {
+	name: 'Mock DIP721 NFT',
+	id: parseNftId('987654'),
+	collection: {
+		...mockValidDip721Token,
+		address: mockValidDip721Token.canisterId
 	},
 	mediaStatus: {
 		image: NftMediaStatusEnum.OK,
