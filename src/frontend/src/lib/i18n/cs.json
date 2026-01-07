@@ -461,22 +461,22 @@
 				"one_liner": "Vydělávejte BTC za aktivitu – a nyní i za <strong>pozvání přátel</strong>.<br/>Přihlaste se, provádějte transakce a držte tokeny, abyste se kvalifikovali na denní odměny. Doporučte přítele a získejte 10 % z hodnoty jeho odměn po celou dobu kampaně.",
 				"participate_title": "Vydělávejte BTC tím, že zůstanete aktivní - a nyní i tím, že pozvete ostatní.",
 				"description": "Splňte jednoduché týdenní požadavky. Přihlaste se, proveďte dvě transakce a držte alespoň 20 dolarů v tokenech, abyste zůstali způsobilí pro jednu z 50 denních BTC odměn.<br/><strong>Nyní s odměnami za doporučení:</strong> pozvěte přítele, aby si nasadil peněženku, a získejte 10 % z jeho Sprinkles po dobu 30 dnů. On si ponechá 100 % - vy vyděláte navíc.",
-				"campaign_href": "https://x.com/intent/post?text=Haven%E2%80%99t%20joined%20%40OISY%20Sprinkles%20yet%3F%0AThey%E2%80%99re%20dropping%20free%20%24BTC%20-%20all%20day%2C%20every%20day.%0AHead%20to%20OISY.com%20and%20try%20it%20for%20yourself.%20%F0%9F%9A%80%0A",
+				"campaign_href": "",
 				"win": {
 					"default": {
 						"title": "Gratulujeme k získání dnešních OISY Sprinkles!",
 						"description": "Sdílejte své vítězství na Twitteru a získejte další šanci na výhru.",
-						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
+						"share_href": ""
 					},
 					"jackpot": {
 						"title": "Gratulujeme k získání největších OISY Sprinkles dneška!",
 						"description": "Sdílejte své vítězství na Twitteru a získejte další šanci na výhru.",
-						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
+						"share_href": ""
 					},
 					"referral": {
 						"title": "Zde je malé poděkování",
 						"description": "Jeden z vašich doporučených uživatelů právě dostal nějaké sprinkles.",
-						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+						"share_href": ""
 					}
 				}
 			},
@@ -486,7 +486,7 @@
 				"one_liner": "Vydělávejte BTC za aktivitu – a nyní získejte <strong>zaručené</strong> Sprinkles za doporučení.<br/>Přihlaste se, provádějte transakce a držte tokeny, abyste se kvalifikovali na denní odměny. Doporučte 4 přátele a získejte odměnu přímo. Nejlepší doporučovatelé vyhrají ještě více.",
 				"participate_title": "Vydělávejte BTC tím, že zůstanete aktivní - a nyní i tím, že pozvete ostatní.",
 				"description": "Splňte jednoduché týdenní požadavky: přihlaste se, proveďte dvě transakce a držte alespoň 20 dolarů v tokenech, abyste zůstali způsobilí pro BTC odměny až do výše 50 dolarů každý den.<br>Nyní s odměnami za doporučení: pozvěte přítele, aby si založil peněženku, a oba získáte zaručené Sprinkles. Dostaňte se mezi 4 nejlepší doporučovatele a vyhrajte jackpot.",
-				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"campaign_href": "",
 				"welcome": {
 					"title": "Vítejte v $oisy_short!",
 					"subtitle": "Jste připraveni vydělávat?",
@@ -496,27 +496,27 @@
 					"default": {
 						"title": "Byli jste odměněni",
 						"description": "Vaše odměny právě dorazily do vaší peněženky<br>Nezapomeňte doporučovat a zůstat aktivní, abyste vyhráli více",
-						"share_href": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
+						"share_href": ""
 					},
 					"jackpot": {
 						"title": "Vyhráli jste jackpot",
 						"description": "Právě jste získali naši nejvyšší odměnu Sprinkles<br>Zůstaňte aktivní a pokračujte v doporučování, abyste vyhráli více",
-						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
+						"share_href": ""
 					},
 					"leaderboard": {
 						"title": "Dostali jste se na vrchol žebříčku",
 						"description": "V této sezóně jste se umístili mezi čtyřmi nejlepšími doporučovateli<br>Do vaší peněženky bylo přidáno 200 dolarů",
-						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+						"share_href": ""
 					},
 					"referrer": {
 						"title": "Teprve začínáte",
 						"description": "Vydělali jste 1 dolar.<br>Doporučte více - 4 nejlepší doporučovatelé získají 200 dolarů.<br>Jste blízko. Pokračujte.",
-						"share_href": "https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com"
+						"share_href": ""
 					},
 					"referee": {
 						"title": "Získejte více za doporučení",
 						"description": "Právě jste získali Sprinkles - stejně jako osoba, která vás doporučila.<br>Pošlete čtyřem přátelům a získejte 1 dolar.<br>4 nejlepší doporučovatelé vyhrají každý 200 dolarů.",
-						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+						"share_href": ""
 					}
 				}
 			},
@@ -526,7 +526,7 @@
 				"one_liner": "Získejte Sprinkles za aktivitu, doporučování ostatních a používání OISY napříč řetězci. Vaše akce zvyšují vaše odměny a aktivní doporučení je ještě více posilují.<br/>Navíc nyní více řetězců znamená větší šance na výhru.",
 				"participate_title": "Získejte tokeny za aktivitu a doporučení. Více řetězců znamená více šancí.",
 				"description": "Zůstaňte aktivní déle než 10 dní, abyste se kvalifikovali: často se přihlašujte, provádějte akce v peněžence a držte alespoň 20 $.<br/>Každý aktivní řetězec zvyšuje vaše šance pomocí multiplikátoru Multichain.<br/>Získejte 10 % od přátel, kteří se kvalifikují, a umístěte se mezi 3 nejlepšími, abyste vyhráli Super Sprinkle v hodnotě 200 $.",
-				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"campaign_href": "",
 				"welcome": {
 					"title": "Vítejte v $oisy_short!",
 					"subtitle": "Jste připraveni vydělávat?",
@@ -536,22 +536,22 @@
 					"default": {
 						"title": "Byli jste odměněni",
 						"description": "Vaše odměny právě dorazily do vaší peněženky<br>Nezapomeňte doporučovat a zůstat aktivní, abyste vyhráli více.",
-						"share_href": "https://x.com/intent/post?text=Just%20won%20some%20%24BTC%20on%20%40OISY%20Wallet.%0AIt%E2%80%99s%20free.%20It%E2%80%99s%20instant.%0AIt%E2%80%99s%20running%2024%2F7%20at%20OISY.com"
+						"share_href": ""
 					},
 					"jackpot": {
 						"title": "Vyhráli jste týdenní bonusový drop",
 						"description": "Právě jste získali jeden z našich týdenních bonusů.<br>Zůstaňte aktivní a doporučujte nás, abyste vyhráli více.",
-						"share_href": "https://x.com/intent/post?text=Huge%20%24BTC%20drop%20just%20landed%20in%20my%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThese%20big%20Sprinkles%20hit%20randomly%3A%20no%20lockups%2C%20no%20strings.%0A%0AOISY.com%20is%20literally%20giving%20out%20Bitcoin."
+						"share_href": ""
 					},
 					"leaderboard": {
 						"title": "Dostali jste se na vrchol žebříčku",
 						"description": "V této sezóně jste se umístili mezi čtyřmi nejlepšími doporučovateli<br>Do vaší peněženky bylo přidáno 200 dolarů",
-						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+						"share_href": ""
 					},
 					"referral": {
 						"title": "Zde je malé poděkování",
 						"description": "Jeden z vašich doporučených uživatelů právě dostal nějaké sprinkles.",
-						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+						"share_href": ""
 					}
 				}
 			}
