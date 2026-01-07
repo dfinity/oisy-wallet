@@ -24,6 +24,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -171,6 +172,23 @@
 					{token.decimals}
 				{/snippet}
 			</ModalListItem>
+
+			{#if isTokenIcrc(token)}
+				<ModalListItem>
+					{#snippet label()}
+						{$i18n.fee.text.fee}
+					{/snippet}
+
+					{#snippet content()}
+						{formatToken({
+							value: token.fee,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					{/snippet}
+				</ModalListItem>
+			{/if}
 		</List>
 
 		{#if nonNullish(onDeleteClick)}
