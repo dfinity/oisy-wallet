@@ -101,7 +101,7 @@
 
 <label for="to">{$i18n.transaction.text.status}</label>
 
-<span id="to" class="font-normal break-all first-letter:capitalize">
+<span id="to" class="font-normal break-all">
 	{#if nonNullish(status)}
 		<span in:fade>{$i18n.transaction.status[status]}</span>
 	{:else}
