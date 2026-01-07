@@ -8,7 +8,7 @@
 			"done": "Hecho",
 			"close": "Cerrar",
 			"change": "Cambiar",
-			"continue": "",
+			"continue": "Continuar",
 			"apply": "Aplicar",
 			"retry": "Reintentar",
 			"refresh": "Actualizar",
@@ -41,7 +41,7 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "Aprender mas"
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
@@ -57,7 +57,7 @@
 			"switch_currency": "Cambiar moneda",
 			"more": "Mas",
 			"less": "Menos",
-			"learn_more": ""
+			"learn_more": "Siga el enlace para obtener más información."
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
@@ -118,7 +118,7 @@
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
-			"sign_in_with_identity_number": "",
+			"sign_in_with_identity_number": "Inicia sesión con tu número de identidad",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
 			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena"
@@ -1286,8 +1286,8 @@
 			"review_button": "Revisar",
 			"collection_name": "Nombre de la colección",
 			"media_urls": "URLs de medios",
-			"media_url": "",
-			"received_at": "",
+			"media_url": "URL de medios",
+			"received_at": "Recibido en",
 			"display_preference": "Preferencia de visualización",
 			"review_preference": "Revisar preferencia",
 			"media_enabled": "Medios habilitados",
