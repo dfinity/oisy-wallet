@@ -28,7 +28,7 @@ describe('AiAssistantConsoleButton', () => {
 
 		const { getByTestId } = render(AiAssistantConsoleButton);
 
-		expect(() => getByTestId(AI_ASSISTANT_CONSOLE_BUTTON)).toThrow();
+		expect(() => getByTestId(AI_ASSISTANT_CONSOLE_BUTTON)).toThrowError();
 	});
 
 	it('does not render the button if user is not signed in', () => {
@@ -37,7 +37,7 @@ describe('AiAssistantConsoleButton', () => {
 
 		const { getByTestId } = render(AiAssistantConsoleButton);
 
-		expect(() => getByTestId(AI_ASSISTANT_CONSOLE_BUTTON)).toThrow();
+		expect(() => getByTestId(AI_ASSISTANT_CONSOLE_BUTTON)).toThrowError();
 	});
 
 	it('does not render the button if experimental feature setting is disabled', () => {
@@ -46,6 +46,6 @@ describe('AiAssistantConsoleButton', () => {
 
 		const { getByTestId } = render(AiAssistantConsoleButton);
 
-		expect(() => getByTestId(AI_ASSISTANT_CONSOLE_BUTTON)).toThrow();
+		expect(() => getByTestId(AI_ASSISTANT_CONSOLE_BUTTON)).toThrowError();
 	});
 });

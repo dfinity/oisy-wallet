@@ -22,8 +22,8 @@
 		</p>
 
 		<div class="mt-4 flex w-full flex-col gap-3 sm:flex-row">
-			<EarningPotentialCard />
 			<EarningPositionCard />
+			<EarningPotentialCard />
 		</div>
 	{/snippet}
 </StakeContentSection>

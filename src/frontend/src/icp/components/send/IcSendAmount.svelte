@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
@@ -34,14 +35,18 @@
 			return;
 		}
 
+		// If the user is the minting account, it does not require any balance to send tokens.
+		// Any token sent from a minting account is considered a Mint transaction.
+		if ($isIcMintingAccount) {
+			return;
+		}
+
 		const assertBalance = (): IcAmountAssertionError | undefined => {
 			const total = userAmount + (fee ?? ZERO);
 
 			if (total > ($sendBalance ?? ZERO)) {
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
-
-			return undefined;
 		};
 
 		return assertBalance();

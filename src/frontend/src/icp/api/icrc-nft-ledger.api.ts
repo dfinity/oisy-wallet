@@ -2,7 +2,7 @@ import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
-import { IcrcLedgerCanister, type IcrcStandardRecord } from '@icp-sdk/canisters/ledger/icrc';
+import { IcrcLedgerCanister, type IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -27,7 +27,7 @@ export const icrc10SupportedStandards = async ({
 }: {
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
-} & QueryParams): Promise<IcrcStandardRecord[]> => {
+} & QueryParams): Promise<IcrcLedgerDid.StandardRecord[]> => {
 	assertNonNullish(identity);
 
 	const { icrc10SupportedStandards } = await ledgerCanister({ identity, ledgerCanisterId });

@@ -13,7 +13,7 @@ export const MATIC_TOKEN_ID: TokenId = parseTokenId(MATIC_SYMBOL);
 export const MATIC_TOKEN: RequiredAdditionalErc20Token = {
 	id: MATIC_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Matic Token',
 	symbol: MATIC_SYMBOL,

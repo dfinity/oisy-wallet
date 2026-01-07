@@ -5,7 +5,6 @@ import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SolanaNetwork } from '$sol/types/network';
 import type { SplToken, SplTokenAddress } from '$sol/types/spl';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
-import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { derived, type Readable } from 'svelte/store';
 
 export const splDefaultTokens: Readable<SplToken[]> = derived(
@@ -43,7 +42,7 @@ const splCustomTokens: Readable<SplCustomToken[]> = derived(
 		}, []) ?? []
 );
 
-const splDefaultTokensToggleable: Readable<SplTokenToggleable[]> = derived(
+const splDefaultTokensToggleable: Readable<SplCustomToken[]> = derived(
 	[splDefaultTokens, splCustomTokens],
 	([$splDefaultTokens, $splCustomTokens]) =>
 		$splDefaultTokens.map(({ address, network, ...rest }) => {
@@ -67,7 +66,7 @@ const splDefaultTokensToggleable: Readable<SplTokenToggleable[]> = derived(
 /**
  * The list of default tokens that are enabled - i.e. the list of default SPL tokens minus those disabled by the user.
  */
-const enabledSplDefaultTokens: Readable<SplTokenToggleable[]> = derived(
+const enabledSplDefaultTokens: Readable<SplCustomToken[]> = derived(
 	[splDefaultTokensToggleable],
 	([$splDefaultTokensToggleable]) => $splDefaultTokensToggleable.filter(({ enabled }) => enabled)
 );
@@ -88,7 +87,7 @@ const enabledSplCustomTokens: Readable<SplCustomToken[]> = derived(
 /**
  * The list of all SPL tokens.
  */
-export const splTokens: Readable<SplTokenToggleable[]> = derived(
+export const splTokens: Readable<SplCustomToken[]> = derived(
 	[splDefaultTokensToggleable, splCustomTokensToggleable],
 	([$splDefaultTokensToggleable, $splCustomTokensToggleable]) => [
 		...$splDefaultTokensToggleable,
@@ -99,7 +98,7 @@ export const splTokens: Readable<SplTokenToggleable[]> = derived(
 /**
  * The list of SPL tokens that are either enabled by default (static config) or enabled by the users regardless if they are custom or default.
  */
-export const enabledSplTokens: Readable<SplTokenToggleable[]> = derived(
+export const enabledSplTokens: Readable<SplCustomToken[]> = derived(
 	[enabledSplDefaultTokens, enabledSplCustomTokens],
 	([$enabledSplDefaultTokens, $enabledSplCustomTokens]) => [
 		...$enabledSplDefaultTokens,

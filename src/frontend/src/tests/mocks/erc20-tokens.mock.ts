@@ -12,7 +12,7 @@ export const mockValidErc20Token: Erc20Token = {
 	...mockValidToken,
 	id: parseTokenId('Erc20TokenId'),
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	address: mockEthAddress,
 	exchange: 'erc20'
 };
@@ -31,7 +31,7 @@ export const createMockErc20Tokens = ({
 		symbol: `ERC20-${start + i + 1}-${networkEnv}`,
 		name: `Erc20Token${start + i + 1} ${networkEnv}`,
 		network: networkEnv === 'mainnet' ? ETHEREUM_NETWORK : SEPOLIA_NETWORK,
-		standard: 'erc20',
+		standard: { code: 'erc20' },
 		category: 'default',
 		decimals: 8,
 		address: `0x${start + i + 1}-${networkEnv}`,

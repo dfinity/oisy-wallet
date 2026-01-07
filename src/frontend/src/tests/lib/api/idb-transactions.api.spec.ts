@@ -198,7 +198,7 @@ describe('idb-transactions.api', () => {
 					...mockParams,
 					transactionsStoreData: get(ethTransactionsStore)
 				})
-			).resolves.not.toThrow();
+			).resolves.not.toThrowError();
 
 			expect(idbKeyval.set).toHaveBeenCalledTimes(2);
 		});

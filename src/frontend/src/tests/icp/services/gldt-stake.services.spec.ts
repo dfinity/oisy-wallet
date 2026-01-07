@@ -183,7 +183,7 @@ describe('gldt-stake.services', () => {
 
 			await expect(
 				withdrawGldtStakingDissolvedTokens(withdrawGldtStakingDissolvedTokensParams)
-			).rejects.toThrow('Error');
+			).rejects.toThrowError('Error');
 		});
 	});
 });

@@ -14,7 +14,7 @@ export const PEPE_TOKEN_ID: TokenId = parseTokenId(PEPE_SYMBOL);
 export const PEPE_TOKEN: RequiredErc20Token = {
 	id: PEPE_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Pepe',
 	symbol: PEPE_SYMBOL,
@@ -37,7 +37,7 @@ export const SEPOLIA_PEPE_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_PEPE_SYMBOL);
 export const SEPOLIA_PEPE_TOKEN: RequiredErc20Token = {
 	id: SEPOLIA_PEPE_TOKEN_ID,
 	network: SEPOLIA_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Pepe',
 	symbol: PEPE_SYMBOL,

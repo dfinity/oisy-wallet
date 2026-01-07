@@ -70,7 +70,7 @@ describe('sol-rpc.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(getAccountInfo({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(getAccountInfo({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 });

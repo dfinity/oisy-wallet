@@ -1,4 +1,3 @@
-import * as nftEnv from '$env/nft.env';
 import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
@@ -101,9 +100,21 @@ describe('LoaderNfts', async () => {
 		}
 	};
 
-	const mockExtNft1 = await mapExtNft({ index: 1, token: mockEnabledExtToken1 });
-	const mockExtNft2 = await mapExtNft({ index: 2, token: mockEnabledExtToken1 });
-	const mockExtNft3 = await mapExtNft({ index: 3, token: mockEnabledExtToken1 });
+	const mockExtNft1 = await mapExtNft({
+		index: 1,
+		token: mockEnabledExtToken1,
+		identity: mockIdentity
+	});
+	const mockExtNft2 = await mapExtNft({
+		index: 2,
+		token: mockEnabledExtToken1,
+		identity: mockIdentity
+	});
+	const mockExtNft3 = await mapExtNft({
+		index: 3,
+		token: mockEnabledExtToken1,
+		identity: mockIdentity
+	});
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -122,8 +133,6 @@ describe('LoaderNfts', async () => {
 		extCustomTokensStore.resetAll();
 
 		nftStore.resetAll();
-
-		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');

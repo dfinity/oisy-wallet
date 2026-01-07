@@ -1,5 +1,6 @@
 import { transferExtV2 } from '$icp/services/nft-transfer.services';
-import { isTokenExtV2 } from '$icp/utils/ext.utils';
+import { isTokenExt } from '$icp/utils/ext.utils';
+import type { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import type { SendNftCommonParams, TransferParams } from '$lib/types/send';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { isNullish } from '@dfinity/utils';
@@ -11,7 +12,7 @@ export const sendNft = async ({
 	identity,
 	progress,
 	to
-}: SendNftCommonParams & Pick<TransferParams, 'to'>) => {
+}: SendNftCommonParams<ProgressStepsSendIc> & Pick<TransferParams, 'to'>) => {
 	if (isNullish(identity)) {
 		return;
 	}
@@ -21,7 +22,7 @@ export const sendNft = async ({
 	} = token;
 
 	if (isNetworkIdICP(networkId)) {
-		if (isTokenExtV2(token)) {
+		if (isTokenExt(token)) {
 			await transferExtV2({
 				identity,
 				canisterId: token.canisterId,

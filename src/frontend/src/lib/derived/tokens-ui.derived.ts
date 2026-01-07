@@ -24,12 +24,18 @@ export const enabledFungibleTokensUi: Readable<TokenUi[]> = derived(
 		)
 );
 
-export const enabledMainnetFungibleTokensUsdBalance: Readable<number> = derived(
+/**
+ * All mainnet user-enabled fungible tokens with financial data.
+ */
+export const enabledMainnetFungibleTokensUi: Readable<TokenUi[]> = derived(
 	[enabledFungibleTokensUi],
 	([$enabledFungibleTokensUi]) =>
-		sumTokensUiUsdBalance(
-			$enabledFungibleTokensUi.filter(({ network: { env } }) => env !== 'testnet')
-		)
+		$enabledFungibleTokensUi.filter(({ network: { env } }) => env !== 'testnet')
+);
+
+export const enabledMainnetFungibleTokensUsdBalance: Readable<number> = derived(
+	[enabledMainnetFungibleTokensUi],
+	([$enabledMainnetFungibleTokensUi]) => sumTokensUiUsdBalance($enabledMainnetFungibleTokensUi)
 );
 
 export const enabledMainnetFungibleIcTokensUsdBalance: Readable<number> = derived(

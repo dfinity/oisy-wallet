@@ -7,7 +7,7 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIcrcAccount, mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { IcrcIndexNgCanister, IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
+import { IcrcIndexCanister, IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -16,7 +16,7 @@ import { mock } from 'vitest-mock-extended';
 describe('ic-add-custom-tokens.service', () => {
 	describe('loadAndAssertAddCustomToken', () => {
 		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
-		const indexCanisterMock = mock<IcrcIndexNgCanister>();
+		const indexCanisterMock = mock<IcrcIndexCanister>();
 
 		const mockLedgerCanisterId = 'zfcdd-tqaaa-aaaaq-aaaga-cai';
 		const mockIndexCanisterId = 'zlaol-iaaaa-aaaaq-aaaha-cai';
@@ -46,7 +46,7 @@ describe('ic-add-custom-tokens.service', () => {
 			id: parseTokenId('test'),
 			ledgerCanisterId: '2ouva-viaaa-aaaaq-aaamq-cai',
 			indexCanisterId: '2awyi-oyaaa-aaaaq-aaanq-cai',
-			standard: 'icp',
+			standard: { code: 'icp' },
 			category: 'custom',
 			position: Number.MAX_VALUE,
 			name: tokenName,
@@ -65,7 +65,7 @@ describe('ic-add-custom-tokens.service', () => {
 				.spyOn(IcrcLedgerCanister, 'create')
 				.mockImplementation(() => ledgerCanisterMock);
 			spyIndexCreate = vi
-				.spyOn(IcrcIndexNgCanister, 'create')
+				.spyOn(IcrcIndexCanister, 'create')
 				.mockImplementation(() => indexCanisterMock);
 		});
 
@@ -78,7 +78,7 @@ describe('ic-add-custom-tokens.service', () => {
 						ledgerCanisterId: mockLedgerCanisterId,
 						indexCanisterId: mockIndexCanisterId
 					})
-				).rejects.toThrow();
+				).rejects.toThrowError();
 			});
 
 			it('should return error if ledgerCanisterId is missing', async () => {
@@ -117,7 +117,7 @@ describe('ic-add-custom-tokens.service', () => {
 							id: parseTokenId('test'),
 							ledgerCanisterId: mockLedgerCanisterId,
 							indexCanisterId: mockIndexCanisterId,
-							standard: 'icp',
+							standard: { code: 'icp' },
 							category: 'custom',
 							position: 0,
 							name: 'Test',

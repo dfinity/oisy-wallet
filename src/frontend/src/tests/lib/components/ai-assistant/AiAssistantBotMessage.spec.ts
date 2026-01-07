@@ -6,7 +6,9 @@ describe('AiAssistantBotMessage', () => {
 		const content = 'content';
 		const { getByText } = render(AiAssistantBotMessage, {
 			props: {
-				content
+				content,
+				isLastItem: false,
+				onRetry: vi.fn()
 			}
 		});
 

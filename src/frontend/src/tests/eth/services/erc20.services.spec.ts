@@ -58,7 +58,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: 1n,
@@ -74,7 +74,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: 2n,
@@ -89,7 +89,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: undefined,
@@ -107,7 +107,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: 1n,
@@ -123,7 +123,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: 2n,
@@ -138,7 +138,7 @@ describe('erc20.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc20',
+				standard: { code: 'erc20' },
 				category: 'custom',
 				exchange: 'erc20',
 				version: undefined,
@@ -236,26 +236,27 @@ describe('erc20.services', () => {
 			const mockError = new Error('Error loading metadata');
 			vi.mocked(mockMetadata).mockRejectedValue(mockError);
 
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 
 		it('should not throw error if list user tokens throws', async () => {
 			const mockError = new Error('Error loading user tokens');
 			vi.mocked(listUserTokens).mockRejectedValue(mockError);
 
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 
 		it('should not throw error if list custom tokens throws', async () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 
 		it('should reset both tokens stores on error', async () => {
 			erc20DefaultTokensStore.add(SEPOLIA_PEPE_TOKEN);
 			erc20UserTokensStore.setAll([{ data: { ...EURC_TOKEN, enabled: true }, certified: false }]);
+			erc20CustomTokensStore.setAll([{ data: { ...EURC_TOKEN, enabled: true }, certified: false }]);
 
 			vi.mocked(mockMetadata).mockRejectedValue(new Error('Error loading metadata'));
 
@@ -263,6 +264,9 @@ describe('erc20.services', () => {
 
 			expect(get(erc20DefaultTokensStore)).toBeUndefined();
 			expect(get(erc20UserTokensStore)).toBeNull();
+			expect(get(erc20CustomTokensStore)).toStrictEqual([
+				{ data: { ...EURC_TOKEN, enabled: true }, certified: false }
+			]);
 		});
 
 		it('should display the toast on error', async () => {
@@ -296,6 +300,7 @@ describe('erc20.services', () => {
 			vi.spyOn(toastsStore, 'toastsErrorNoTrace');
 
 			erc20UserTokensStore.resetAll();
+			erc20CustomTokensStore.resetAll();
 
 			vi.mocked(listUserTokens).mockResolvedValue(mockUserTokens);
 

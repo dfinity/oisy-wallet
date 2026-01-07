@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,6 +118,7 @@
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
+			"sign_in_with_identity_number": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": ""
@@ -145,14 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "प्रमाणीकरण में समस्या आ रही है?",
-				"description": "हमने देखा कि आपने इंटरनेट आइडेंटिटी के साथ प्रमाणीकरण रद्द कर दिया है। हम यह समझना चाहेंगे कि क्या हुआ ताकि हम आपके अनुभव को बेहतर बना सकें।",
-				"subtitle": "क्या निम्न में से कोई समस्या का कारण था?",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "मैंने अपना इंटरनेट आइडेंटिटी नंबर खो दिया",
 				"security": "मुझे सुरक्षा या गोपनीयता के बारे में चिंता थी",
-				"got_confused": "प्रक्रिया के दौरान मैं भ्रमित हो गया",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "अन्य...",
-				"feedback_text": "आपकी प्रतिक्रिया हमें वॉलेट को बेहतर बनाने में मदद करती है।",
+				"feedback_text": "",
 				"thanks_text": "धन्यवाद!",
 				"identity_new_identity": "$oisy_short वॉलेट इंटरनेट आइडेंटिटी डोमेन को: <span class=\"font-bold\">identity.internetcomputer.org</span> पर स्विच करता है",
 				"identity_legacy_description": "परिणामस्वरूप, आपका इंटरनेट आइडेंटिटी नंबर स्वचालित रूप से दिखाई नहीं दे सकता है, और आपको इसे फिर से दर्ज करना पड़ सकता है।",
@@ -558,7 +562,7 @@
 			"incubated_with": "प्यार के साथ विकसित",
 			"by": "द्वारा",
 			"dfinity_foundation": "DFINITY फ़ाउंडेशन",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "$oisy_short सहायक"
 		},
 		"alt": {
@@ -902,12 +906,19 @@
 			"fee_calc_unsupported_standard": ""
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
 			"pay_to": "",
 			"powered_by": "",
-			"receipt": "",
+			"recipient": "",
 			"name": "",
 			"address": "",
 			"country": "",
@@ -927,10 +938,16 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1056,7 +1073,17 @@
 			"dialog_title": "",
 			"dialog_description": "",
 			"dialog_button": "",
-			"where_you_can_pay": ""
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1118,6 +1145,7 @@
 				"review": "समीक्षा",
 				"saving": "सहेज रहा है...",
 				"updating": "टोकन सूची अपडेट कर रहा है",
+				"canister_id": "",
 				"ledger_canister_id": "लेज़र कैनिस्टर आईडी",
 				"index_canister_id": "इंडेक्स कैनिस्टर आईडी",
 				"minter_canister_id": "मिन्टर कैनिस्टर आईडी",
@@ -1127,6 +1155,7 @@
 				"verifying": "टोकन विवरण सत्यापित कर रहा है...",
 				"add_the_token": "टोकन जोड़ें",
 				"info": "लेज़र और इंडेक्स कैनिस्टर आईडी आमतौर पर परियोजना की वेबसाइट पर उपलब्ध होती हैं।",
+				"info_ext": "",
 				"info_index": "इंडेक्स कैनिस्टर आईडी वैकल्पिक है, लेकिन इसके बिना, $oisy_short लेनदेन इतिहास प्रदर्शित नहीं कर सकता।",
 				"custom_tokens_not_supported": "चयनित नेटवर्क कस्टम टोकन का समर्थन नहीं करता है।"
 			},
@@ -1138,6 +1167,7 @@
 				"unexpected_index_ledger": "इंडेक्स कैनिस्टर से संबंधित लेज़र आईडी लोड करते समय कुछ गलत हो गया।",
 				"invalid_ledger_id": "लेज़र आईडी इंडेक्स कैनिस्टर से संबंधित नहीं है।",
 				"missing_ledger_id": "लेज़र आईडी गायब है। क्या आपने कोई मान प्रदान किया है?",
+				"missing_canister_id": "",
 				"missing_contract_address": "अनुबंध पता गायब है। क्या आपने कोई मान प्रदान किया है?",
 				"missing_token_address": "टोकन पता गायब है। क्या आपने कोई मान प्रदान किया है?",
 				"no_network": "कोई नेटवर्क नहीं चुना गया है। यह अप्रत्याशित है।"
@@ -1272,7 +1302,8 @@
 			"learn_more": "",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "अभी तक कोई NFTs नहीं",
@@ -1765,6 +1796,7 @@
 			},
 			"title": "",
 			"instruction": "",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
@@ -1853,6 +1885,7 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",

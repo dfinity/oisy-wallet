@@ -1,6 +1,8 @@
 import type { EthAddress } from '$eth/types/address';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { MediaType } from '$lib/enums/media-type';
 import { NftCollectionSchema, NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { extractMediaTypeAndSize } from '$lib/services/url.services';
 import type { NftSortingType } from '$lib/stores/settings.store';
 import type { NftError } from '$lib/types/errors';
 import type { NetworkId, OptionNetworkId } from '$lib/types/network';
@@ -307,10 +309,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			return NftMediaStatusEnum.INVALID_DATA;
 		}
 
-		const response = await fetch(url.href, { method: 'HEAD' });
-
-		const type = response.headers.get('Content-Type');
-		const size = response.headers.get('Content-Length');
+		const { type, size } = await extractMediaTypeAndSize(url.href);
 
 		if (isNullish(type) || isNullish(size)) {
 			// Not all servers return the Content-Type and Content-Length headers,
@@ -320,7 +319,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			return NftMediaStatusEnum.OK;
 		}
 
-		if (!type.startsWith('image/')) {
+		if (!(type === MediaType.Img) && !(type === MediaType.Video)) {
 			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
 		}
 

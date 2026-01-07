@@ -61,7 +61,8 @@
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,6 +118,7 @@
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
+			"sign_in_with_identity_number": "",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
 			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena"
@@ -145,14 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "¿Tienes problemas con la autenticación?",
-				"description": "Notamos que cancelaste la autenticación con Internet Identity. Nos encantaría entender qué pasó para poder mejorar tu experiencia.",
-				"subtitle": "¿Alguna de las siguientes opciones causó el problema?",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "Perdí mi número de Internet Identity",
 				"security": "Me preocupaba la seguridad o la privacidad",
-				"got_confused": "Me confundí durante el proceso",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "Otro...",
-				"feedback_text": "Tus comentarios nos ayudan a mejorar la billetera.",
+				"feedback_text": "",
 				"thanks_text": "¡Gracias!",
 				"identity_new_identity": "$oisy_short Wallet cambia el dominio de Internet Identity a: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"identity_legacy_description": "Como resultado, tu número de Internet Identity podría no aparecer automáticamente, y puede que necesites volver a introducirlo.",
@@ -558,7 +562,7 @@
 			"incubated_with": "Incubado con",
 			"by": "por",
 			"dfinity_foundation": "Fundación DFINITY",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "Asistente de $oisy_short"
 		},
 		"alt": {
@@ -902,12 +906,19 @@
 			"fee_calc_unsupported_standard": "No se pudo calcular la comisión ya que el estándar de token proporcionado no es compatible."
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
 			"pay_to": "",
 			"powered_by": "",
-			"receipt": "",
+			"recipient": "",
 			"name": "",
 			"address": "",
 			"country": "",
@@ -927,10 +938,16 @@
 			"select_token": "",
 			"select_different_token": "",
 			"tokens_available": "",
-			"select_token_to_pay": ""
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1056,7 +1073,17 @@
 			"dialog_title": "",
 			"dialog_description": "",
 			"dialog_button": "",
-			"where_you_can_pay": ""
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1118,6 +1145,7 @@
 				"review": "Revisar",
 				"saving": "Guardando...",
 				"updating": "Actualizando lista de tokens",
+				"canister_id": "",
 				"ledger_canister_id": "ID del Canister de Ledger",
 				"index_canister_id": "ID del Canister de Índice",
 				"minter_canister_id": "ID del Canister de Minter",
@@ -1127,6 +1155,7 @@
 				"verifying": "Verificando detalles del token...",
 				"add_the_token": "Añadir el token",
 				"info": "Los ID de los canisters de Ledger e Índice suelen estar disponibles en el sitio web del proyecto.",
+				"info_ext": "",
 				"info_index": "El ID del Canister de Índice es opcional, pero sin él, $oisy_short no puede mostrar el historial de transacciones.",
 				"custom_tokens_not_supported": "La red seleccionada no admite tokens personalizados."
 			},
@@ -1138,6 +1167,7 @@
 				"unexpected_index_ledger": "Algo salió mal al cargar el ID de Ledger relacionado con el canister de Índice.",
 				"invalid_ledger_id": "El ID de Ledger no está relacionado con el canister de Índice.",
 				"missing_ledger_id": "Falta el ID de Ledger. ¿Proporcionaste un valor?",
+				"missing_canister_id": "",
 				"missing_contract_address": "Falta la dirección del contrato. ¿Proporcionaste un valor?",
 				"missing_token_address": "Falta la dirección del token. ¿Proporcionaste un valor?",
 				"no_network": "No se ha seleccionado ninguna red. Esto es inesperado."
@@ -1272,7 +1302,8 @@
 			"learn_more": "Saber más",
 			"token_id": "ID del Token",
 			"go_to_collection": "Ir a la colección",
-			"could_not_update_section": "No se pudo actualizar la sección de la colección. Por favor, inténtalo de nuevo"
+			"could_not_update_section": "No se pudo actualizar la sección de la colección. Por favor, inténtalo de nuevo",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Aún no hay NFTs",
@@ -1765,6 +1796,7 @@
 			},
 			"title": "",
 			"instruction": "Al hacer clic en este botón, aceptas los $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
@@ -1853,6 +1885,7 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
 			"unproductive_assets": "",

@@ -18,21 +18,22 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
-const mockGldtToken = {
+const mockGldtToken: IcrcCustomToken = {
+	...mockValidIcrcToken,
 	id: parseTokenId('GOLDAO'),
 	symbol: 'GLDT',
 	name: 'Gold DAO Token',
 	decimals: 8,
 	network: ICP_NETWORK,
-	address: '0xabc',
 	enabled: true,
-	standard: 'icrc',
+	standard: { code: 'icrc' },
 	ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
-} as unknown as IcrcCustomToken;
+};
 
 describe('earning.derived', () => {
 	beforeEach(() => {
@@ -44,7 +45,7 @@ describe('earning.derived', () => {
 		gldtStakeStore.reset();
 
 		icrcCustomTokensStore.resetAll();
-		icrcCustomTokensStore.set({ data: mockGldtToken, certified: true });
+		icrcCustomTokensStore.setAll([{ data: mockGldtToken, certified: true }]);
 
 		balancesStore.reset(ICP_TOKEN.id);
 		balancesStore.set({

@@ -6,7 +6,7 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
+import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 
 describe('spl.utils', () => {
 	describe('isTokenSpl', () => {
@@ -27,10 +27,10 @@ describe('spl.utils', () => {
 		});
 	});
 
-	describe('isTokenSplToggleable', () => {
+	describe('isTokenSplCustomToken', () => {
 		describe('without enabled field', () => {
 			it.each(SPL_TOKENS)('should return false for SPL token $id', (token) => {
-				expect(isTokenSplToggleable(token)).toBeFalsy();
+				expect(isTokenSplCustomToken(token)).toBeFalsy();
 			});
 
 			it.each([
@@ -42,7 +42,7 @@ describe('spl.utils', () => {
 				...ERC20_TWIN_TOKENS,
 				...EVM_ERC20_TOKENS
 			])('should return false for token $id', (token) => {
-				expect(isTokenSplToggleable(token)).toBeFalsy();
+				expect(isTokenSplCustomToken(token)).toBeFalsy();
 			});
 		});
 
@@ -53,7 +53,7 @@ describe('spl.utils', () => {
 					enabled: Math.random() < 0.5
 				}))
 			)('should return true for SPL token $id', (token) => {
-				expect(isTokenSplToggleable(token)).toBeTruthy();
+				expect(isTokenSplCustomToken(token)).toBeTruthy();
 			});
 
 			it.each(
@@ -70,7 +70,7 @@ describe('spl.utils', () => {
 					enabled: Math.random() < 0.5
 				}))
 			)('should return false for token $id', (token) => {
-				expect(isTokenSplToggleable(token)).toBeFalsy();
+				expect(isTokenSplCustomToken(token)).toBeFalsy();
 			});
 		});
 	});

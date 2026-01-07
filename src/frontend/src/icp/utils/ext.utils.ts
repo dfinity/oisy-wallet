@@ -1,6 +1,6 @@
 import type { TokenIdentifier, TokenIndex } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import type { EnvExtToken } from '$env/types/env-ext-token';
+import type { EnvExtToken, EnvExtTokenStandardVersion } from '$env/types/env-ext-token';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { ExtToken, ExtTokenWithoutId } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
@@ -8,22 +8,14 @@ import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token.utils';
 import { Principal } from '@icp-sdk/core/principal';
 
-export const isTokenExtV2 = (token: Partial<IcToken>): token is ExtToken =>
-	token.standard === 'extV2';
+export const isTokenExt = (token: Partial<IcToken>): token is ExtToken =>
+	token.standard?.code === 'ext';
 
-export const isTokenExtV2CustomToken = (token: Token): token is ExtCustomToken =>
-	isTokenExtV2(token) && isTokenToggleable(token);
+export const isTokenExtCustomToken = (token: Token): token is ExtCustomToken =>
+	isTokenExt(token) && isTokenToggleable(token);
 
 // The minting number (that wallets, frontends, etc. usually show) is 1-based indexed, it's simply (TokenIndex + 1).
 export const parseExtTokenIndex = (index: TokenIndex): TokenIndex => index + 1;
-
-export const parseExtTokenName = ({
-	index,
-	token
-}: {
-	index: TokenIndex;
-	token: ExtToken;
-}): string => `${token.name} #${parseExtTokenIndex(index)}`;
 
 /**
  * Converts a token index to a token identifier.
@@ -64,8 +56,18 @@ export const extIndexToIdentifier = ({
 	return Principal.fromUint8Array(array).toText();
 };
 
+const mapStandardVersion = (version: EnvExtTokenStandardVersion): string | undefined =>
+	version === 'ext'
+		? 'v2'
+		: version === 'legacy1.5'
+			? 'v1.5'
+			: version === 'legacy'
+				? 'v1'
+				: undefined;
+
 export const mapExtToken = ({
 	canisterId,
+	standardVersion,
 	metadata: { name }
 }: EnvExtToken): ExtTokenWithoutId => ({
 	canisterId,
@@ -75,6 +77,9 @@ export const mapExtToken = ({
 	symbol: name,
 	// For our current scopes, there is no need to have the correct decimals, since we are using this standard as NFT collections.
 	decimals: 0,
-	standard: 'extV2',
+	standard: {
+		code: 'ext',
+		version: mapStandardVersion(standardVersion)
+	},
 	category: 'custom'
 });

@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 
+import { EnvExtTokenStandardVersionSchema } from '$env/schema/env-ext-token.schema';
 import type { EnvExtToken } from '$env/types/env-ext-token';
+import type { CanisterIdText } from '$lib/types/canister';
 import { jsonReplacer } from '@dfinity/utils';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { EXT_COLLECTIONS_JSON_FILE } from './constants.mjs';
 
-const ACCEPTED_STANDARDS = ['ext'];
+const ACCEPTED_STANDARDS = ['ext', 'legacy1.5', 'legacy'];
+
+const IGNORED_TOKEN_CANISTER_IDS: CanisterIdText[] = [
+	'bxdf4-baaaa-aaaah-qaruq-cai' // ICPunks
+];
 
 // This URL was extracted analysing the network request of https://toniq.io/
 const TONIQ_COLLECTION_LIST_URL =
@@ -61,8 +67,16 @@ const queryToniqData = async (): Promise<ToniqResponseData[]> => {
 };
 
 const parseToniqData = (data: ToniqResponseData[]): EnvExtToken[] =>
-	data.reduce<EnvExtToken[]>((acc, { id: canisterId, name, standard }) => {
-		if (!ACCEPTED_STANDARDS.includes(standard.toLowerCase())) {
+	data.reduce<EnvExtToken[]>((acc, { id: canisterId, name, standard: standardRaw }) => {
+		const parsedStandard = EnvExtTokenStandardVersionSchema.safeParse(standardRaw.toLowerCase());
+
+		if (!parsedStandard.success) {
+			return acc;
+		}
+
+		const { data: standardVersion } = parsedStandard;
+
+		if (!ACCEPTED_STANDARDS.includes(standardVersion)) {
 			return acc;
 		}
 
@@ -70,6 +84,7 @@ const parseToniqData = (data: ToniqResponseData[]): EnvExtToken[] =>
 			...acc,
 			{
 				canisterId,
+				standardVersion,
 				metadata: {
 					name
 				}
@@ -107,7 +122,9 @@ const getCollections = async (): Promise<EnvExtToken[]> => {
 		return acc;
 	}, {});
 
-	return Object.values(collectionsMap).sort((a, b) => a.canisterId.localeCompare(b.canisterId));
+	return Object.values(collectionsMap)
+		.filter(({ canisterId }) => !IGNORED_TOKEN_CANISTER_IDS.includes(canisterId))
+		.sort((a, b) => a.canisterId.localeCompare(b.canisterId));
 };
 
 try {

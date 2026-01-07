@@ -11,6 +11,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
@@ -97,6 +98,7 @@ describe('page-token.derived', () => {
 		it('should find ERC20 token', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
 			erc20UserTokensStore.setAll([{ data: mockToken, certified: true }]);
+			erc20CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
 			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
 			expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
@@ -171,7 +173,7 @@ describe('page-token.derived', () => {
 			(token) => {
 				mockPage.mock({ token: token.name, network: token.network.id.description });
 
-				expect(get(pageTokenStandard)).toBe(token.standard);
+				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
 		);
 
@@ -185,7 +187,7 @@ describe('page-token.derived', () => {
 
 				mockPage.mock({ token: token.name, network: token.network.id.description });
 
-				expect(get(pageTokenStandard)).toBe(token.standard);
+				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
 		);
 
@@ -200,16 +202,17 @@ describe('page-token.derived', () => {
 
 				mockPage.mock({ token: token.name, network: token.network.id.description });
 
-				expect(get(pageTokenStandard)).toBe(token.standard);
+				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
 		);
 
 		it('should return the standard for ERC20 token', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
 			erc20UserTokensStore.setAll([{ data: mockToken, certified: true }]);
+			erc20CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
 			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
-			expect(get(pageTokenStandard)).toBe(mockToken.standard);
+			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});
 
 		it('should return the standard for ICRC token', () => {
@@ -217,14 +220,14 @@ describe('page-token.derived', () => {
 			icrcCustomTokensStore.setAll([{ data: mockToken, certified: true }]);
 			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
-			expect(get(pageTokenStandard)).toBe(mockToken.standard);
+			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});
 
 		it('should return the standard for SPL token', () => {
 			const mockToken = JUP_TOKEN;
 			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
-			expect(get(pageTokenStandard)).toBe(mockToken.standard);
+			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});
 	});
 
@@ -282,7 +285,7 @@ describe('page-token.derived', () => {
 		it('should return false if default Ethereum user token is toggleable', () => {
 			const mockToken = {
 				...mockErc20UserToken,
-				standard: 'ethereum' as const
+				standard: { code: 'ethereum' as const }
 			} as RequiredTokenWithLinkedData;
 
 			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {
@@ -299,7 +302,7 @@ describe('page-token.derived', () => {
 			const mockToken = {
 				...mockErc20UserToken,
 				category: 'custom' as const,
-				standard: 'ethereum' as const
+				standard: { code: 'ethereum' as const }
 			} as RequiredTokenWithLinkedData;
 
 			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {

@@ -1,10 +1,15 @@
-<script lang="ts">
+<script lang="ts" module>
+	import type { CampaignCriterion } from '$lib/types/reward';
+
+	type T = CampaignCriterion;
+</script>
+
+<script generics="T extends CampaignCriterion = CampaignCriterion" lang="ts">
 	import { IconCheckCircleFill } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type {
-		CampaignCriterion,
 		HangoverCriterion,
 		MinLoginsCriterion,
 		MinTotalAssetsUsdCriterion,
@@ -13,7 +18,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		criterion: CampaignCriterion;
+		criterion: T;
 		testId?: string;
 		truncate?: boolean;
 	}

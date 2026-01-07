@@ -25,7 +25,7 @@
 		onClose
 	}: Props = $props();
 
-	const onBackdropClose = () => {
+	const handleClose = () => {
 		visible = false;
 
 		onClose?.();
@@ -43,7 +43,7 @@
 				<div class="w-full p-4">
 					<ButtonIcon
 						ariaLabel={$i18n.core.alt.close_details}
-						onclick={() => (visible = false)}
+						onclick={handleClose}
 						styleClass="text-disabled float-right"
 					>
 						{#snippet icon()}
@@ -62,6 +62,6 @@
 				</div>
 			{/if}
 		</BottomSheet>
-		<Backdrop on:nnsClose={onBackdropClose} />
+		<Backdrop on:nnsClose={handleClose} />
 	</div>
 {/if}

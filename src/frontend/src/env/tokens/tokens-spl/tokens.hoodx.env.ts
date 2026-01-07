@@ -14,7 +14,7 @@ export const HOODX_TOKEN_ID: TokenId = parseTokenId(HOODX_SYMBOL);
 export const HOODX_TOKEN: RequiredSpl2022Token = {
 	id: HOODX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Robinhood xStock',
 	symbol: HOODX_SYMBOL,

@@ -12,13 +12,10 @@ import {
 	type IcCkInterface,
 	type IcFee,
 	type IcInterface,
-	type IcToken
+	type IcToken,
+	type IcTokenWithoutId
 } from '$icp/types/ic-token';
-import type {
-	IcTokenExtended,
-	IcTokenWithoutIdExtended,
-	IcrcCustomToken
-} from '$icp/types/icrc-custom-token';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -30,14 +27,14 @@ import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	IcrcMetadataResponseEntries,
 	mapTokenMetadata,
-	type IcrcTokenMetadataResponse,
-	type IcrcValue
+	type IcrcLedgerDid,
+	type IcrcTokenMetadataResponse
 } from '@icp-sdk/canisters/ledger/icrc';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	metadata: IcrcTokenMetadataResponse;
 	category: TokenCategory;
-	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
+	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
 };
 
 const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
@@ -78,7 +75,7 @@ export const mapIcrcToken = ({
 	icrcCustomTokens,
 	ledgerCanisterId,
 	...rest
-}: IcrcLoadData): IcTokenExtended | undefined => {
+}: IcrcLoadData): IcToken | undefined => {
 	const token = mapOptionalToken(metadata);
 
 	if (isNullish(token)) {
@@ -99,7 +96,7 @@ export const mapIcrcToken = ({
 	return {
 		id: parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
-		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? 'icrc',
+		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? { code: 'icrc' },
 		symbol,
 		...(notEmptyString(icon) && { icon }),
 		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
@@ -137,7 +134,7 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	ledgerCanisterId
 }: {
 	ledgerCanisterId: CanisterIdText;
-	icrcCustomTokens: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
+	icrcCustomTokens: Record<LedgerCanisterIdText, IcTokenWithoutId>;
 }): IcrcTokenMetadataResponse | undefined => {
 	const token = icrcCustomTokens[ledgerCanisterId];
 
@@ -147,7 +144,9 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 
 	const { symbol, icon: tokenIcon, name, fee, decimals } = token;
 
-	const icon: [IcrcMetadataResponseEntries.LOGO, IcrcValue] | undefined = nonNullish(tokenIcon)
+	const icon: [IcrcMetadataResponseEntries.LOGO, IcrcLedgerDid.Value] | undefined = nonNullish(
+		tokenIcon
+	)
 		? [IcrcMetadataResponseEntries.LOGO, { Text: tokenIcon }]
 		: undefined;
 
@@ -160,12 +159,14 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	];
 };
 
-export const isTokenIcp = (token: Partial<IcToken>): token is IcToken => token.standard === 'icp';
+export const isTokenIcp = (token: Partial<IcToken>): token is IcToken =>
+	token.standard?.code === 'icp';
 
-export const isTokenIcrc = (token: Partial<IcToken>): token is IcToken => token.standard === 'icrc';
+export const isTokenIcrc = (token: Partial<IcToken>): token is IcToken =>
+	token.standard?.code === 'icrc';
 
 export const isTokenDip20 = (token: Partial<IcToken>): token is IcToken =>
-	token.standard === 'dip20';
+	token.standard?.code === 'dip20';
 
 export const isTokenIc = (token: Partial<IcToken>): token is IcToken =>
 	isTokenIcp(token) || isTokenIcrc(token) || isTokenDip20(token);

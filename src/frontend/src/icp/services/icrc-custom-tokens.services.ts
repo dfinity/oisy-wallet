@@ -3,15 +3,17 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { EnvSnsTokenSchema, EnvSnsTokensSchema } from '$env/schema/env-sns-token.schema';
 import snsTokens from '$env/tokens/tokens.sns.json';
 import type { EnvSnsToken } from '$env/types/env-sns-token';
-import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
+import type { IcTokenWithoutId } from '$icp/types/ic-token';
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 /**
  * @todo Add missing document and test for this function.
  */
-export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
+export const buildIcrcCustomTokens = (): IcTokenWithoutId[] => {
 	try {
 		return EnvSnsTokensSchema.parse(
 			snsTokens.map(
@@ -37,7 +39,7 @@ export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
 			err
 		});
 
-		// We display an error but, continue as this is not a blocker for the runtime usage of the wallet.
+		// We display an error but continue as this is not a blocker for the runtime usage of the wallet.
 		return [];
 	}
 };
@@ -46,18 +48,20 @@ const mapIcrcCustomToken = ({
 	ledgerCanisterId,
 	indexCanisterId,
 	rootCanisterId,
+	governanceCanisterId,
 	metadata: { name, decimals, symbol, fee, alternativeName },
 	deprecated
-}: EnvSnsToken): IcTokenWithoutIdExtended => ({
+}: EnvSnsToken): IcTokenWithoutId => ({
 	ledgerCanisterId,
 	indexCanisterId,
+	mintingAccount: getIcrcAccount(Principal.fromText(governanceCanisterId)),
 	network: ICP_NETWORK,
 	name,
 	decimals,
 	symbol,
 	exchangeCoinId: undefined,
 	position: Number.MAX_VALUE,
-	standard: 'icrc',
+	standard: { code: 'icrc' },
 	category: 'custom',
 	fee,
 	alternativeName,
