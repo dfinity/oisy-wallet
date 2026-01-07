@@ -55,6 +55,30 @@ export const getTokensByOwner = async ({
 	return await getTokensByOwner({ certified, principal });
 };
 
+/**
+ * Sends the caller's NFT token_identifier.
+ *
+ * @link https://github.com/Psychedelic/DIP721/blob/develop/spec.md#transfer
+ */
+export const transfer = async ({
+	certified,
+	identity,
+	canisterId,
+	to,
+	tokenIdentifier,
+	...rest
+}: CanisterApiFunctionParamsWithCanisterId<
+	{ to: Principal; tokenIdentifier: bigint } & QueryParams
+>) => {
+	const { transfer } = await dip721Canister({
+		identity,
+		canisterId,
+		...rest
+	});
+
+	await transfer({ certified, to, tokenIdentifier });
+};
+
 const dip721Canister = async ({
 	identity,
 	nullishIdentityErrorMessage,
