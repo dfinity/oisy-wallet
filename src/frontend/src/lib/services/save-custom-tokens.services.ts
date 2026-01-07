@@ -6,6 +6,7 @@ import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { loadCustomTokens as loadCustomExtTokens } from '$icp/services/ext.services';
 import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
+import { dip721CustomTokensStore } from '$icp/stores/dip721-custom-tokens.store';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { setManyCustomTokens } from '$lib/api/backend.api';
@@ -30,6 +31,12 @@ const hideTokenByKey = (token: SaveCustomTokenWithKey) => {
 
 	if (token.networkKey === 'ExtV2') {
 		extCustomTokensStore.resetByIdentifier(token.canisterId);
+
+		return;
+	}
+
+	if (token.networkKey === 'Dip721') {
+		dip721CustomTokensStore.resetByIdentifier(token.canisterId);
 
 		return;
 	}
