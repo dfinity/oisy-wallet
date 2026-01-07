@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
+	import { capitalizeFirstLetter } from '../../../tests/utils/string-utils';
 	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
@@ -16,9 +17,7 @@
 
 	let { formattedDate, transactions, testId }: Props = $props();
 
-	let capitalizedFormattedDate = $derived(
-		formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
-	);
+	let capitalizedFormattedDate = $derived(capitalizeFirstLetter(formattedDate));
 </script>
 
 {#if transactions.length > 0}
