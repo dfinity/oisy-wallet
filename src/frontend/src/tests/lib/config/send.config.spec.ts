@@ -72,6 +72,19 @@ describe('send.config', () => {
 		}
 	];
 
+	const expectedBurnConfig: WizardSteps<WizardStepsSend> = [
+		expectedBaseConfig[0],
+		{
+			name: WizardStepsSend.SEND,
+			title: en.burn.text.burn
+		},
+		expectedBaseConfig[2],
+		{
+			name: WizardStepsSend.SENDING,
+			title: en.burn.text.burning
+		}
+	];
+
 	const expectedQrCodeConfig: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.QR_CODE_SCAN,
@@ -137,14 +150,37 @@ describe('send.config', () => {
 			expect(steps).toStrictEqual([...expectedMintConfig, ...expectedQrCodeConfig]);
 		});
 
-		it('should prioritize minting over converting when both are true', () => {
+		it('should return the correct steps with expected text and state when burning is false', () => {
+			const steps = sendWizardStepsWithQrCodeScan({ ...mockParams, burning: false });
+
+			expect(steps).toStrictEqual([...expectedSendConfig, ...expectedQrCodeConfig]);
+		});
+
+		it('should return the correct steps with expected text and state when burning is true', () => {
+			const steps = sendWizardStepsWithQrCodeScan({ ...mockParams, burning: true });
+
+			expect(steps).toStrictEqual([...expectedBurnConfig, ...expectedQrCodeConfig]);
+		});
+
+		it('should prioritize minting over burning and converting when all are true', () => {
 			const steps = sendWizardStepsWithQrCodeScan({
 				...mockParams,
 				converting: true,
-				minting: true
+				minting: true,
+				burning: true
 			});
 
 			expect(steps).toStrictEqual([...expectedMintConfig, ...expectedQrCodeConfig]);
+		});
+
+		it('should prioritize burning over converting when both are true', () => {
+			const steps = sendWizardStepsWithQrCodeScan({
+				...mockParams,
+				converting: true,
+				burning: true
+			});
+
+			expect(steps).toStrictEqual([...expectedBurnConfig, ...expectedQrCodeConfig]);
 		});
 	});
 
@@ -199,12 +235,51 @@ describe('send.config', () => {
 			]);
 		});
 
-		it('should prioritize minting over converting when both are true', () => {
-			const steps = allSendWizardSteps({ ...mockParams, converting: true, minting: true });
+		it('should return the correct steps with expected text and state when burning is false', () => {
+			const steps = allSendWizardSteps({ ...mockParams, burning: false });
+
+			expect(steps).toStrictEqual([
+				...expectedAllSendConfig,
+				...expectedSendConfig,
+				...expectedQrCodeConfig
+			]);
+		});
+
+		it('should return the correct steps with expected text and state when burning is true', () => {
+			const steps = allSendWizardSteps({ ...mockParams, burning: true });
+
+			expect(steps).toStrictEqual([
+				...expectedAllSendConfig,
+				...expectedBurnConfig,
+				...expectedQrCodeConfig
+			]);
+		});
+
+		it('should prioritize minting over burning and converting when all are true', () => {
+			const steps = allSendWizardSteps({
+				...mockParams,
+				converting: true,
+				minting: true,
+				burning: true
+			});
 
 			expect(steps).toStrictEqual([
 				...expectedAllSendConfig,
 				...expectedMintConfig,
+				...expectedQrCodeConfig
+			]);
+		});
+
+		it('should prioritize burning over converting when both are true', () => {
+			const steps = allSendWizardSteps({
+				...mockParams,
+				converting: true,
+				burning: true
+			});
+
+			expect(steps).toStrictEqual([
+				...expectedAllSendConfig,
+				...expectedBurnConfig,
 				...expectedQrCodeConfig
 			]);
 		});

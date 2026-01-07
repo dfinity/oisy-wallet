@@ -703,6 +703,10 @@ interface I18nMint {
 	text: { mint: string; minting: string; mint_review_subtitle: string };
 }
 
+interface I18nBurn {
+	text: { burn: string; burning: string; burn_review_subtitle: string };
+}
+
 interface I18nScanner {
 	text: {
 		scan_qr_code: string;
@@ -1661,6 +1665,7 @@ interface I18n {
 	receive: I18nReceive;
 	send: I18nSend;
 	mint: I18nMint;
+	burn: I18nBurn;
 	scanner: I18nScanner;
 	convert: I18nConvert;
 	swap: I18nSwap;

@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 	import { setContext } from 'svelte';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
+	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
 	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
 	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
@@ -76,14 +78,22 @@
 	let amount = $state<number | undefined>();
 	let sendProgressStep = $state<ProgressStepsSend>(ProgressStepsSend.INITIALIZATION);
 
+	let burning = $derived(
+		notEmptyString(destination) &&
+			nonNullish($token) &&
+			isTokenIc($token) &&
+			nonNullish($token.mintingAccount) &&
+			destination === encodeIcrcAccount($token.mintingAccount)
+	);
+
 	let steps = $derived(
 		isTransactionsPage
-			? sendWizardStepsWithQrCodeScan({ i18n: $i18n, minting: $isIcMintingAccount })
+			? sendWizardStepsWithQrCodeScan({ i18n: $i18n, minting: $isIcMintingAccount, burning })
 			: isNftsPage
 				? nonNullish($pageNft)
 					? sendNftsWizardStepsWithQrCodeScan({ i18n: $i18n })
 					: allSendNftsWizardSteps({ i18n: $i18n })
-				: allSendWizardSteps({ i18n: $i18n, minting: $isIcMintingAccount })
+				: allSendWizardSteps({ i18n: $i18n, minting: $isIcMintingAccount, burning })
 	);
 
 	let currentStep = $state<WizardStep<WizardStepsSend> | undefined>();
