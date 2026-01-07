@@ -1,8 +1,9 @@
 import * as extTokenApi from '$icp/api/ext-v2-token.api';
-import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
+import { getTokensByOwner as getExtTokensByOwner } from '$icp/api/ext-v2-token.api';
 import { loadNfts } from '$icp/services/nft.services';
 import { mapExtNft } from '$icp/utils/nft.utils';
 import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 
 describe('nft.services', () => {
@@ -49,13 +50,13 @@ describe('nft.services', () => {
 
 			await expect(loadNfts({ ...mockParams, identity: undefined })).resolves.toEqual([]);
 
-			expect(getTokensByOwner).not.toHaveBeenCalled();
+			expect(getExtTokensByOwner).not.toHaveBeenCalled();
 		});
 
 		it('should return an empty array if the tokens list is empty', async () => {
 			await expect(loadNfts({ ...mockParams, tokens: [] })).resolves.toEqual([]);
 
-			expect(getTokensByOwner).not.toHaveBeenCalled();
+			expect(getExtTokensByOwner).not.toHaveBeenCalled();
 		});
 
 		it('should return an empty array if there are not tokens owned by the user', async () => {
@@ -63,10 +64,10 @@ describe('nft.services', () => {
 
 			await expect(loadNfts(mockParams)).resolves.toEqual([]);
 
-			expect(getTokensByOwner).toHaveBeenCalledTimes(mockParams.tokens.length);
+			expect(getExtTokensByOwner).toHaveBeenCalledTimes(mockParams.tokens.length);
 
 			mockParams.tokens.forEach(({ canisterId }) => {
-				expect(getTokensByOwner).toHaveBeenCalledWith({
+				expect(getExtTokensByOwner).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					owner: mockPrincipal,
 					canisterId
@@ -77,10 +78,10 @@ describe('nft.services', () => {
 		it('should return the list of NFTs owned by the user', async () => {
 			await expect(loadNfts(mockParams)).resolves.toEqual(expected);
 
-			expect(getTokensByOwner).toHaveBeenCalledTimes(mockParams.tokens.length);
+			expect(getExtTokensByOwner).toHaveBeenCalledTimes(mockParams.tokens.length);
 
 			mockParams.tokens.forEach(({ canisterId }) => {
-				expect(getTokensByOwner).toHaveBeenCalledWith({
+				expect(getExtTokensByOwner).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					owner: mockPrincipal,
 					canisterId
@@ -88,16 +89,16 @@ describe('nft.services', () => {
 			});
 		});
 
-		it('should handle errors gracefully', async () => {
+		it('should handle EXT service errors gracefully', async () => {
 			const mockError = new Error('Mock error');
 			vi.spyOn(extTokenApi, 'getTokensByOwner').mockRejectedValueOnce(mockError);
 
 			await expect(loadNfts(mockParams)).resolves.toEqual(expected2);
 
-			expect(getTokensByOwner).toHaveBeenCalledTimes(mockParams.tokens.length);
+			expect(getExtTokensByOwner).toHaveBeenCalledTimes(mockParams.tokens.length);
 
 			mockParams.tokens.forEach(({ canisterId }) => {
-				expect(getTokensByOwner).toHaveBeenCalledWith({
+				expect(getExtTokensByOwner).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					owner: mockPrincipal,
 					canisterId
@@ -108,6 +109,15 @@ describe('nft.services', () => {
 				`Error loading EXT tokens from collection ${mockValidExtV2Token.canisterId}:`,
 				mockError
 			);
+		});
+
+		it("should raise an error if the token's standard is not supported", async () => {
+			// @ts-expect-error we test this on purpose
+			await expect(loadNfts({ ...mockParams, tokens: [mockValidIcrcToken] })).rejects.toThrowError(
+				`Unsupported NFT IC token ${mockValidIcrcToken.standard}`
+			);
+
+			expect(getExtTokensByOwner).not.toHaveBeenCalled();
 		});
 	});
 });
