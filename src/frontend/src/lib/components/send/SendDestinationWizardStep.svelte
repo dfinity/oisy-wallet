@@ -66,7 +66,7 @@
 		selectedContact = undefined;
 	});
 
-	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenNetworkId, sendDestination } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const back = () => onBack();
 	const next = () => {
@@ -90,6 +90,10 @@
 	);
 
 	let testId = $derived(`${SEND_DESTINATION_WIZARD_STEP}-${$sendToken.network.name}`);
+
+	$effect(() => {
+		sendDestination.set(destination);
+	});
 </script>
 
 <ContentWithToolbar>

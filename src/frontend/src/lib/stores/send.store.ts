@@ -5,7 +5,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
-import { derived, writable, type Readable } from 'svelte/store';
+import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export type SendData = Token;
 
@@ -40,14 +40,16 @@ export const initSendContext = ({
 	const sendTokenSymbol = derived(sendToken, (token) => getTokenDisplaySymbol(token));
 	const sendTokenNetworkId = derived(sendToken, ({ network: { id: networkId } }) => networkId);
 
+	const sendTokenExchangeRate = derived([exchanges, sendToken], ([$exchanges, $sendToken]) =>
+		nonNullish($sendToken) ? $exchanges?.[$sendToken.id]?.usd : undefined
+	);
+
 	const sendBalance = derived(
 		[balancesStore, sendTokenId],
 		([$balanceStore, $sendTokenId]) => customSendBalance ?? $balanceStore?.[$sendTokenId]?.data
 	);
 
-	const sendTokenExchangeRate = derived([exchanges, sendToken], ([$exchanges, $sendToken]) =>
-		nonNullish($sendToken) ? $exchanges?.[$sendToken.id]?.usd : undefined
-	);
+	const sendDestination = writable<string>('');
 
 	return {
 		sendToken,
@@ -55,9 +57,10 @@ export const initSendContext = ({
 		sendTokenId,
 		sendTokenStandard,
 		sendTokenSymbol,
-		sendBalance,
 		sendTokenExchangeRate,
-		sendTokenNetworkId
+		sendTokenNetworkId,
+		sendBalance,
+		sendDestination
 	};
 };
 
@@ -67,9 +70,10 @@ export interface SendContext {
 	sendTokenId: Readable<TokenId>;
 	sendTokenStandard: Readable<TokenStandard>;
 	sendTokenSymbol: Readable<string>;
-	sendBalance: Readable<OptionBalance>;
 	sendTokenExchangeRate: Readable<number | undefined>;
 	sendTokenNetworkId: Readable<NetworkId>;
+	sendBalance: Readable<OptionBalance>;
+	sendDestination: Writable<string>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');
