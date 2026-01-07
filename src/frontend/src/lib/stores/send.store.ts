@@ -1,10 +1,13 @@
+import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { Address } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-import { nonNullish } from '@dfinity/utils';
+import { nonNullish, notEmptyString } from '@dfinity/utils';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export type SendData = Token;
@@ -49,7 +52,17 @@ export const initSendContext = ({
 		([$balanceStore, $sendTokenId]) => customSendBalance ?? $balanceStore?.[$sendTokenId]?.data
 	);
 
-	const sendDestination = writable<string>('');
+	const sendDestination = writable<Address>('');
+
+	const isIcBurning = derived(
+		[sendToken, sendDestination],
+		([$sendToken, $sendDestination]) =>
+			notEmptyString($sendDestination) &&
+			nonNullish($sendToken) &&
+			isTokenIc($sendToken) &&
+			nonNullish($sendToken.mintingAccount) &&
+			$sendDestination === encodeIcrcAccount($sendToken.mintingAccount)
+	);
 
 	return {
 		sendToken,
@@ -60,7 +73,8 @@ export const initSendContext = ({
 		sendTokenExchangeRate,
 		sendTokenNetworkId,
 		sendBalance,
-		sendDestination
+		sendDestination,
+		isIcBurning
 	};
 };
 
@@ -73,7 +87,8 @@ export interface SendContext {
 	sendTokenExchangeRate: Readable<number | undefined>;
 	sendTokenNetworkId: Readable<NetworkId>;
 	sendBalance: Readable<OptionBalance>;
-	sendDestination: Writable<string>;
+	sendDestination: Writable<Address>;
+	isIcBurning: Readable<boolean>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');
