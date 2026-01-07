@@ -28,6 +28,33 @@ export const balance = async ({
 	return await balance({ principal: identity.getPrincipal(), certified });
 };
 
+/**
+ * Returns the list of the token_identifier of the NFT associated with the principal.
+ *
+ * @link https://github.com/Psychedelic/DIP721/blob/develop/spec.md#ownertokenidentifiers
+ */
+export const getTokensByOwner = async ({
+	certified,
+	identity,
+	owner: principal,
+	canisterId,
+	...rest
+}: CanisterApiFunctionParamsWithCanisterId<{ owner: Principal } & QueryParams>): Promise<
+	bigint[]
+> => {
+	if (isNullish(identity)) {
+		return [];
+	}
+
+	const { getTokensByOwner } = await dip721Canister({
+		identity,
+		canisterId,
+		...rest
+	});
+
+	return await getTokensByOwner({ certified, principal });
+};
+
 const dip721Canister = async ({
 	identity,
 	nullishIdentityErrorMessage,

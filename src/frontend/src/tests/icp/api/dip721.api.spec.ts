@@ -1,5 +1,6 @@
-import { balance } from '$icp/api/dip721.api';
+import { balance, getTokensByOwner } from '$icp/api/dip721.api';
 import { Dip721Canister } from '$icp/canisters/dip721.canister';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
@@ -44,6 +45,50 @@ describe('dip721.api', () => {
 			await expect(balance({ ...params, identity: null })).resolves.toEqual(ZERO);
 
 			expect(tokenCanisterMock.balance).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('getTokensByOwner', () => {
+		const mockTokens = [123n, 456n, 789n];
+
+		const params = {
+			identity: mockIdentity,
+			owner: mockPrincipal,
+			canisterId: mockDip721TokenCanisterId
+		};
+
+		const expectedParams = {
+			principal: mockPrincipal
+		};
+
+		beforeEach(() => {
+			tokenCanisterMock.getTokensByOwner.mockResolvedValue(mockTokens);
+		});
+
+		it('should call successfully getTokensByOwner endpoint', async () => {
+			const result = await getTokensByOwner(params);
+
+			expect(result).toEqual(mockTokens);
+
+			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should return an empty array if identity is nullish', async () => {
+			await expect(getTokensByOwner({ ...params, identity: undefined })).resolves.toEqual([]);
+
+			await expect(getTokensByOwner({ ...params, identity: null })).resolves.toEqual([]);
+
+			expect(tokenCanisterMock.getTokensByOwner).not.toHaveBeenCalled();
+		});
+
+		it('should throw an error if getTokensByOwner fails', async () => {
+			const mockError = new CanisterInternalError('Generic error');
+
+			tokenCanisterMock.getTokensByOwner.mockRejectedValueOnce(mockError);
+
+			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError);
+
+			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 	});
 });
