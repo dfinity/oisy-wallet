@@ -31,9 +31,9 @@
 			"edit": "Editar",
 			"no_results": "Sin resultados",
 			"paste": "Pegar",
-			"to": "A", or "para"
+			"to": "A",
 			"add": "Añadir",
-			"more_items": " más articulos",
+			"more_items": "+$items artículos más",
 			"select": "Seleccionar",
 			"language": "Idioma",
 			"currency": "Moneda",
@@ -41,7 +41,7 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": "aprender mas"
+			"learn_more": "Aprender mas"
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
@@ -57,12 +57,12 @@
 			"switch_currency": "Cambiar moneda",
 			"more": "Mas",
 			"less": "Menos",
-			"learn_more": "aprender mas"
+			"learn_more": "Siga el enlace para obtener más información."
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
-			"standalone_mode": "modo independiente",
-			"video_not_supported": "video no compatible"
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -81,7 +81,7 @@
 			"support": "Soporte",
 			"confirm_navigate": "¿Estás seguro de que quieres salir?",
 			"vip_qr_code": "Códigos QR VIP",
-			"binance_qr_code": "QR de Binance ",
+			"binance_qr_code": "QR de Binance Clubhouse",
 			"refer_a_friend": "Recomienda a tus amigos",
 			"address_book": "Contactos",
 			"hide_balances": "Ocultar saldos",
@@ -118,7 +118,7 @@
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
-			"sign_in_with_identity_number": "Iniciar sesion con numero de identidad",
+			"sign_in_with_identity_number": "Inicia sesión con tu número de identidad",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
 			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena"
@@ -147,16 +147,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "Titulo",
-				"description": "descripcion",
-				"new_auth_version": "Nueva version de autenticación",
-				"could_not_enter_identity_number": "no se pudo ingresar el numero de identidad",
+				"title": "",
+				"description": "",
+				"new_auth_version": "",
+				"could_not_enter_identity_number": "",
 				"lost_identity": "Perdí mi número de Internet Identity",
 				"security": "Me preocupaba la seguridad o la privacidad",
-				"got_confused": "se confundio",
-				"no_signup_needed": "no necesita registro",
+				"got_confused": "",
+				"no_signup_needed": "",
 				"other": "Otro...",
-				"feedback_text": "retroalimentacion",
+				"feedback_text": "",
 				"thanks_text": "¡Gracias!",
 				"identity_new_identity": "$oisy_short Wallet cambia el dominio de Internet Identity a: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"identity_legacy_description": "Como resultado, tu número de Internet Identity podría no aparecer automáticamente, y puede que necesites volver a introducirlo.",
@@ -224,7 +224,7 @@
 			"game": "Juego",
 			"tools": "Herramientas",
 			"ai": "IA",
-			"nft": "nft"
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -562,7 +562,7 @@
 			"incubated_with": "Incubado con",
 			"by": "por",
 			"dfinity_foundation": "Fundación DFINITY",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "Asistente de $oisy_short"
 		},
 		"alt": {
@@ -908,41 +908,11 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "scanear codigo qr",
-			"pay_to": "pagar a",
-			"powered_by": "impulsado por",
-			"recipient": "destinatario",
-			"name": "nombre",
-			"address": "direccion",
-			"country": "pais",
-			"phone_number": "numero telefonico",
-			"email_address": "direccion de email",
-			"website": "sitio web",
-			"pay_to": "pagar a",
-			"powered_by": "impulsado por",
-			"recipient": "destinatario",
-			"url_or_code": "url o codigo",
-			"enter_or_paste_code": "ingresar o pegar codigo",
-			"scan": "scanear",
-			"pay": "pagar",
-			"pay_amount": "monto a pagar",
-			"go_to_assets": "ir a los activos",
-			"supported_tokens": "tokens compatibles",
-			"no_supported_tokens": "tokens no compatibles",
-			"pay_with": "pagar con",
-			"select_token": "seleccionar token",
-			"select_different_token": "seleccionar un token diferente",
-			"tokens_available": "tokens disponibles",
-			"select_token_to_pay": "seleccionar token para pagar",
-			"pay_at_successful": "pago éxito o pago exitoso o éxito al pagar",
-			"pay_at_failure": "pagar en caso de fallo",
-			"try_again": "intentar otra vez",
-			"payment_confirmed": "pago confirmado",
-			"payment_failed": "pago fallido"
+
 		},
 		"error": {
-			"code_link_is_not_valid": "el enlace del codigo no es valido",
-			"data_is_incompleted": "los datos estan incompletos"
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
