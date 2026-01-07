@@ -198,14 +198,11 @@ const loadCustomIcrcTokensData = async ({
 			ledgerCanisterId: ledgerCanisterIdText
 		});
 
+		const serviceParams = { ledgerCanisterId: ledgerCanisterIdText, identity, certified };
+
 		const data: IcrcLoadData = {
-			metadata: nonNullish(meta)
-				? meta
-				: await metadata({ ledgerCanisterId: ledgerCanisterIdText, identity, certified }),
-			mintingAccount: await getMintingAccount({
-				identity,
-				ledgerCanisterId: ledgerCanisterIdText
-			}),
+			metadata: nonNullish(meta) ? meta : await metadata(serviceParams),
+			mintingAccount: await getMintingAccount(serviceParams),
 			ledgerCanisterId: ledgerCanisterIdText,
 			...(nonNullish(indexCanisterId) && { indexCanisterId: indexCanisterId.toText() }),
 			position: ICRC_TOKENS.length + 1 + index,

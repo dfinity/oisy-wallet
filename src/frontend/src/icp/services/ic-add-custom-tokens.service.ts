@@ -137,10 +137,12 @@ const loadMetadata = async ({
 	...rest
 }: IcCanisters & { identity: Identity }): Promise<IcTokenWithoutId | undefined> => {
 	try {
+		const serviceParams = { ledgerCanisterId, identity, certified: true };
+
 		return mapIcrcToken({
 			ledgerCanisterId,
-			metadata: await metadata({ ledgerCanisterId, identity, certified: true }),
-			mintingAccount: await getMintingAccount({ identity, ledgerCanisterId }),
+			metadata: await metadata(serviceParams),
+			mintingAccount: await getMintingAccount(serviceParams),
 			exchangeCoinId: 'internet-computer',
 			// Position does not matter here
 			position: Number.MAX_VALUE,
