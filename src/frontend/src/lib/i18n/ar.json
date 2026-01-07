@@ -1498,6 +1498,8 @@
 			"title": "المعاملات",
 			"buy_or_receive": "قم بأول معاملة لك، واشترِ أو استلم التوكنات الآن!",
 			"transaction_history": "سيظهر سجل معاملاتك هنا",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل.",
 			"transaction_history_unavailable": "سجل المعاملات غير متاح",
 			"missing_index_canister_explanation": "في الوقت الحالي، لا يستطيع $oisy_short عرض سجل معاملات التوكن الخاص بك لأن الجهة المصدرة لم توفر ميزة التتبع بعد. من المفترض أن تتم إضافتها قريبًا. في هذه الأثناء، لا تقلق - لا يزال بإمكانك إرسال واستلام التوكنات الخاصة بك كالمعتاد.",

@@ -1498,6 +1498,8 @@
 			"title": "Transakce",
 			"buy_or_receive": "Udělejte svou první transakci a kupte nebo přijměte tokeny hned!",
 			"transaction_history": "Vaše historie transakcí se zobrazí zde",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "Informace o transakcích BTC jsou získány od centrálních třetích stran a měly by být nezávisle ověřeny.",
 			"transaction_history_unavailable": "Historie transakcí není k dispozici",
 			"missing_index_canister_explanation": "Momentálně nemůže $oisy_short zobrazit vaši minulou historii transakcí tokenů, protože vydavatel dosud neposkytl funkci sledování. Měla by být brzy přidána. Mezitím žádné obavy – stále můžete posílat a přijímat své tokeny jako obvykle.",

@@ -1498,6 +1498,8 @@
 			"title": "Transactions",
 			"buy_or_receive": "Make your first transaction, and buy or receive tokens now!",
 			"transaction_history": "Your transaction history will appear here",
+			"minter_transaction_history": "You are the minting account for this token",
+			"mint_burn_transactions_unavailable": "Unfortunately, Mint and Burn transactions can’t be loaded for this token.",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
 			"missing_index_canister_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer hasn’t provided the tracking feature yet. It should be added soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",

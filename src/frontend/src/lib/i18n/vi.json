@@ -1498,6 +1498,8 @@
 			"title": "Giao dịch",
 			"buy_or_receive": "Hãy thực hiện giao dịch đầu tiên và mua hoặc nhận token ngay bây giờ!",
 			"transaction_history": "Lịch sử giao dịch của bạn sẽ xuất hiện tại đây",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập.",
 			"transaction_history_unavailable": "Lịch sử giao dịch không khả dụng",
 			"missing_index_canister_explanation": "Hiện tại, $oisy_short không thể hiển thị lịch sử giao dịch token của bạn vì nhà phát hành chưa cung cấp tính năng theo dõi. Nó sẽ sớm được bổ sung. Trong thời gian chờ đợi, đừng lo lắng — bạn vẫn có thể gửi và nhận token của mình như bình thường.",

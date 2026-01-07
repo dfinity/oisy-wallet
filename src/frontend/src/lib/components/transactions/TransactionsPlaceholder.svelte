@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import IconOisyEmptyState from '$lib/components/icons/IconOisyEmptyState.svelte';
 	import { NO_TRANSACTIONS_PLACEHOLDER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -10,9 +11,15 @@
 	</div>
 
 	<div class="space-y-4">
-		<p class="m-0 text-center text-lg font-bold">{$i18n.transactions.text.transaction_history}</p>
+		<p class="m-0 text-center text-lg font-bold"
+			>{$isIcMintingAccount
+				? $i18n.transactions.text.minter_transaction_history
+				: $i18n.transactions.text.transaction_history}</p
+		>
 		<p class="m-0 text-center text-tertiary">
-			{$i18n.transactions.text.buy_or_receive}
+			{$isIcMintingAccount
+				? $i18n.transactions.text.mint_burn_transactions_unavailable
+				: $i18n.transactions.text.buy_or_receive}
 		</p>
 	</div>
 </div>
