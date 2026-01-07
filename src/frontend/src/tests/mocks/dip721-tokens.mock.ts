@@ -1,3 +1,15 @@
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import type { ExtToken } from '$icp/types/ext-token';
 import type { CanisterIdText } from '$lib/types/canister';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 export const mockDip721TokenCanisterId: CanisterIdText = 'qcg3w-tyaaa-aaaah-qakea-cai';
+
+export const mockValidDip721Token: ExtToken = {
+	...mockValidToken,
+	id: parseTokenId('Dip721TokenId'),
+	network: ICP_NETWORK,
+	standard: { code: 'dip721' },
+	canisterId: mockDip721TokenCanisterId
+};
