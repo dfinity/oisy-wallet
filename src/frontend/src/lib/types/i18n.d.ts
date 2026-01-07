@@ -1245,6 +1245,8 @@ interface I18nTransactions {
 		title: string;
 		buy_or_receive: string;
 		transaction_history: string;
+		minter_transaction_history: string;
+		mint_burn_transactions_unavailable: string;
 		mainnet_btc_transactions_info: string;
 		transaction_history_unavailable: string;
 		missing_index_canister_explanation: string;

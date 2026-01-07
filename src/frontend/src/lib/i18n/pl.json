@@ -1498,6 +1498,8 @@
 			"title": "Transakcje",
 			"buy_or_receive": "Dokonaj pierwszej transakcji i kup lub odbierz tokeny już teraz!",
 			"transaction_history": "Historia Twoich transakcji pojawi się tutaj",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "Informacje o transakcjach BTC są uzyskiwane od centralnych stron trzecich i powinny być niezależnie weryfikowane.",
 			"transaction_history_unavailable": "Historia transakcji niedostępna",
 			"missing_index_canister_explanation": "W tej chwili $oisy_short nie może wyświetlić Twojej historii transakcji tokenów, ponieważ emitent nie udostępnił jeszcze funkcji śledzenia. Powinna zostać dodana wkrótce. W międzyczasie nie martw się — nadal możesz wysyłać i odbierać swoje tokeny jak zwykle.",

@@ -1498,6 +1498,8 @@
 			"title": "交易记录",
 			"buy_or_receive": "进行您的第一次交易，现在购买或接收代币！",
 			"transaction_history": "您的交易历史将显示在此处",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "BTC 交易信息来自中心化第三方，建议您自行核实。",
 			"transaction_history_unavailable": "交易历史不可用",
 			"missing_index_canister_explanation": "目前，$oisy_short 无法显示您的代币交易历史，因为发行方尚未提供追踪功能。该功能应很快上线。与此同时，请放心，您仍然可以正常发送和接收代币。",

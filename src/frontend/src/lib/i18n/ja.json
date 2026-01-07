@@ -1498,6 +1498,8 @@
 			"title": "トランザクション",
 			"buy_or_receive": "最初の取引を行い、今すぐトークンを購入または受け取ってください！",
 			"transaction_history": "取引履歴がここに表示されます",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "BTC取引情報は中央集権型の第三者から取得されており、独自に確認する必要があります。",
 			"transaction_history_unavailable": "取引履歴は利用できません",
 			"missing_index_canister_explanation": "現在、$oisy_shortは発行元がまだ追跡機能を提供していないため、過去のトークン取引を表示できません。間もなく追加される予定です。それまではご心配なく — 通常通りトークンを送受信できます。",

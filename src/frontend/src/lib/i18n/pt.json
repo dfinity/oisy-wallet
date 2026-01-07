@@ -1498,6 +1498,8 @@
 			"title": "Transações",
 			"buy_or_receive": "Faça sua primeira transação, e compre ou receba tokens agora!",
 			"transaction_history": "O seu histórico de transações aparecerá aqui",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "As informações de transação BTC são obtidas a partir de terceiras partes centralizadas e devem ser verificadas independentemente.",
 			"transaction_history_unavailable": "Histórico de transações indisponível",
 			"missing_index_canister_explanation": "Atualmente, $oisy_short não pode exibir seu histórico de transações de tokens porque o emissor ainda não forneceu a função de rastreamento. Ela deve ser adicionada em breve. Enquanto isso, não se preocupe — você ainda pode enviar e receber seus tokens como de costume.",
