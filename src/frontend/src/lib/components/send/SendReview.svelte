@@ -50,7 +50,8 @@
 		...rest
 	}: Props = $props();
 
-	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenExchangeRate, isIcBurning } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
@@ -59,7 +60,9 @@
 			{#snippet subtitle()}
 				{$isIcMintingAccount
 					? $i18n.mint.text.mint_review_subtitle
-					: $i18n.send.text.send_review_subtitle}
+					: $isIcBurning
+						? $i18n.burn.text.burn_review_subtitle
+						: $i18n.send.text.send_review_subtitle}
 			{/snippet}
 		</SendTokenReview>
 	{:else}
@@ -85,7 +88,11 @@
 			<ButtonGroup testId="toolbar">
 				<ButtonBack onclick={onBack} />
 				<Button {disabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
-					{$isIcMintingAccount ? $i18n.mint.text.mint : $i18n.send.text.send}
+					{$isIcMintingAccount
+						? $i18n.mint.text.mint
+						: $isIcBurning
+							? $i18n.burn.text.burn
+							: $i18n.send.text.send}
 				</Button>
 			</ButtonGroup>
 		{/if}
