@@ -4,7 +4,12 @@ import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
 import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
-import { balance, allowance as icrcAllowance, metadata } from '$icp/api/icrc-ledger.api';
+import {
+	balance,
+	getMintingAccount,
+	allowance as icrcAllowance,
+	metadata
+} from '$icp/api/icrc-ledger.api';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -197,6 +202,10 @@ const loadCustomIcrcTokensData = async ({
 			metadata: nonNullish(meta)
 				? meta
 				: await metadata({ ledgerCanisterId: ledgerCanisterIdText, identity, certified }),
+			mintingAccount: await getMintingAccount({
+				identity,
+				ledgerCanisterId: ledgerCanisterIdText
+			}),
 			ledgerCanisterId: ledgerCanisterIdText,
 			...(nonNullish(indexCanisterId) && { indexCanisterId: indexCanisterId.toText() }),
 			position: ICRC_TOKENS.length + 1 + index,
