@@ -14,7 +14,10 @@ describe('mapIcrcData', () => {
 	};
 
 	const expected = {
-		TESTTOKEN: { ...token.TESTTOKEN, mintingAccount: decodeIcrcAccount(mockPrincipal.toText()) }
+		TESTTOKEN: {
+			...token.TESTTOKEN,
+			mintingAccount: decodeIcrcAccount(token.TESTTOKEN.mintingAccount)
+		}
 	};
 
 	const envs = [
