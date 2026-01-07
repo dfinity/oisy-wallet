@@ -906,6 +906,13 @@
 			"fee_calc_unsupported_standard": "指定されたトークン規格がサポートされていないため、手数料を計算できませんでした。"
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "QRコードをスキャン",
@@ -1491,6 +1498,8 @@
 			"title": "トランザクション",
 			"buy_or_receive": "最初のトランザクションを実行して、今すぐトークンを購入または受け取りましょう!",
 			"transaction_history": "トランザクション履歴がここに表示されます。",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "BTCトランザクション情報は中央集権型の第三者から取得されており、独自に確認する必要があります。",
 			"transaction_history_unavailable": "トランザクション履歴は利用できません。",
 			"missing_index_canister_explanation": "現在、$oisy_shortは発行者がまだトラッキング機能を提供していないため、過去のトークントランザクションを表示できません。近日中に追加される予定です。現状でもトークンの送受信は可能なので、ご安心ください。",
