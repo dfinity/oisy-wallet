@@ -1,8 +1,9 @@
 import { getExtMetadata } from '$icp/services/ext-metadata.services';
 import { extIndexToIdentifier } from '$icp/utils/ext.utils';
-import { mapExtNft } from '$icp/utils/nft.utils';
+import { mapDip721Nft, mapExtNft } from '$icp/utils/nft.utils';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { NftMetadataWithoutId } from '$lib/types/nft';
+import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
@@ -100,6 +101,31 @@ describe('nft.utils', () => {
 			await expect(
 				mapExtNft({ index: -1, token: mockValidExtV2Token, identity: mockIdentity })
 			).rejects.toThrowError('EXT token index -1 is out of bounds');
+		});
+	});
+
+	describe('mapDip721Nft', () => {
+		const mockIndex = 123n;
+
+		it('should map correctly a DIP721 NFT', () => {
+			const result = mapDip721Nft({
+				index: mockIndex,
+				token: mockValidDip721Token
+			});
+
+			const { canisterId: _, ...rest } = mockValidDip721Token;
+
+			expect(result).toStrictEqual({
+				id: result.id,
+				mediaStatus: {
+					image: NftMediaStatusEnum.INVALID_DATA,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				},
+				collection: {
+					...rest,
+					address: mockValidDip721Token.canisterId
+				}
+			});
 		});
 	});
 });
