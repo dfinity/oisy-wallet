@@ -1,4 +1,5 @@
-import { transferExtV2 } from '$icp/services/nft-transfer.services';
+import { transferDip721, transferExtV2 } from '$icp/services/nft-transfer.services';
+import { isTokenDip721 } from '$icp/utils/dip721.utils';
 import { isTokenExt } from '$icp/utils/ext.utils';
 import type { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import type { SendNftCommonParams, TransferParams } from '$lib/types/send';
@@ -30,6 +31,16 @@ export const sendNft = async ({
 				to: Principal.fromText(to),
 				tokenIdentifier: tokenId,
 				amount: 1n, // currently fixed at 1
+				progress
+			});
+		}
+
+		if (isTokenDip721(token)) {
+			await transferDip721({
+				identity,
+				canisterId: token.canisterId,
+				to: Principal.fromText(to),
+				tokenIdentifier: BigInt(tokenId),
 				progress
 			});
 		}
