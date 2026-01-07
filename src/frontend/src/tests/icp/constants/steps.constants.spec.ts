@@ -128,5 +128,18 @@ describe('steps.constants', () => {
 				mockSendStepReload
 			]);
 		});
+
+		it('should return the correct steps with expected text and state if it is burning', () => {
+			const steps = sendSteps({ ...mockParams, burning: true });
+
+			expect(steps).toEqual([
+				mockSendStepInitialization,
+				{
+					...mockSendStepSend,
+					text: en.burn.text.burning
+				},
+				mockSendStepReload
+			]);
+		});
 	});
 });
