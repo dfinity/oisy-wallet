@@ -8,6 +8,7 @@ import type {
 } from '$declarations/backend/backend.did';
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumChainId } from '$eth/types/network';
+import type { Dip721Token } from '$icp/types/dip721-token';
 import type {
 	Dip721SaveCustomToken,
 	ErcSaveCustomToken,
