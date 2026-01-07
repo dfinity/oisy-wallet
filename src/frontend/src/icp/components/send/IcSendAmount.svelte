@@ -21,10 +21,11 @@
 
 	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
 
-	const { sendToken, sendTokenExchangeRate, sendBalance } =
+	const { sendToken, sendTokenExchangeRate, sendBalance, isIcBurning } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let fee = $derived(getTokenFee($sendToken));
+	// An IC Burn transaction does not require a fee
+	let fee = $derived($isIcBurning ? ZERO : getTokenFee($sendToken));
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
