@@ -65,4 +65,25 @@ export class Dip721Canister extends Canister<Dip721Service> {
 
 		throw mapDip721NftError(response.Err);
 	};
+
+	/**
+	 * Sends the callers nft token_identifier and returns a nat that represents a transaction id that can be used at the transaction method.
+	 *
+	 * @link https://github.com/Psychedelic/DIP721/blob/develop/spec.md#transfer
+	 */
+	transfer = async ({
+		certified,
+		to,
+		tokenIdentifier
+	}: { to: Principal; tokenIdentifier: bigint } & QueryParams): Promise<bigint> => {
+		const { transfer } = this.caller({ certified });
+
+		const response = await transfer(to, tokenIdentifier);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapDip721NftError(response.Err);
+	};
 }

@@ -316,4 +316,56 @@ describe('dip721.canister', () => {
 			expect(service.ownerTokenIdentifiers).toHaveBeenCalledExactlyOnceWith(mockPrincipal);
 		});
 	});
+
+	describe('transfer', () => {
+		const mockTo = mockPrincipal;
+		const mockTokenId = 12345n;
+
+		const mockParams = { certified, to: mockTo, tokenIdentifier: mockTokenId };
+
+		const mockTransactionId = 123n;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should correctly call the transfer method', async () => {
+			service.transfer.mockResolvedValue({ Ok: mockTransactionId });
+
+			const { transfer } = await createDip721Canister({ serviceOverride: service });
+
+			const res = await transfer(mockParams);
+
+			expect(res).toEqual(mockTransactionId);
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(mockTo, mockTokenId);
+		});
+
+		it('should handle a generic canister error', async () => {
+			// @ts-expect-error we test this on purpose
+			service.transfer.mockResolvedValue({ Err: { CanisterError: null } });
+
+			const { transfer } = await createDip721Canister({
+				serviceOverride: service
+			});
+
+			await expect(transfer(mockParams)).rejects.toThrowError(
+				new CanisterInternalError('Unknown Dip721CanisterError')
+			);
+
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(mockTo, mockTokenId);
+		});
+
+		it('should throw an error if transfer throws', async () => {
+			const mockError = new Error('Test response error');
+			service.transfer.mockRejectedValue(mockError);
+
+			const { transfer } = await createDip721Canister({ serviceOverride: service });
+
+			const res = transfer(mockParams);
+
+			await expect(res).rejects.toThrowError(mockError);
+
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(mockTo, mockTokenId);
+		});
+	});
 });
