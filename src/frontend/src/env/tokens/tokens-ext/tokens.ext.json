@@ -1,5 +1,47 @@
 [
 	{
+		"canisterId": "bzsui-sqaaa-aaaah-qce2a-cai",
+		"metadata": {
+			"name": "Poked Bots"
+		}
+	},
+	{
+		"canisterId": "gikg4-eaaaa-aaaam-qaieq-cai",
+		"metadata": {
+			"name": "Mutant Space Apes"
+		}
+	},
+	{
+		"canisterId": "poyn6-dyaaa-aaaah-qcfzq-cai",
+		"metadata": {
+			"name": "Blockchain Heroes"
+		}
+	},
+	{
+		"canisterId": "qv3zw-kqaaa-aaaap-aa27q-cai",
+		"metadata": {
+			"name": "Nyannyan"
+		}
+	},
+	{
+		"canisterId": "6tjeq-waaaa-aaaah-qcvzq-cai",
+		"metadata": {
+			"name": "IC8 🐣"
+		}
+	},
+	{
+		"canisterId": "5h2fc-zaaaa-aaaah-qcnjq-cai",
+		"metadata": {
+			"name": "ICPrime8s"
+		}
+	},
+	{
+		"canisterId": "unssi-hiaaa-aaaah-qcmya-cai",
+		"metadata": {
+			"name": "ICPets"
+		}
+	},
+	{
 		"canisterId": "24ark-haaaa-aaaam-qazoa-cai",
 		"standardVersion": "ext",
 		"metadata": {
