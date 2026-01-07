@@ -647,5 +647,19 @@ describe('icrc-ledger.api', () => {
 		it('throws an error if identity is undefined', async () => {
 			await expect(getMintingAccount({ ...params, identity: undefined })).rejects.toThrowError();
 		});
+
+		it('returns undefined if getMintingAccount throws', async () => {
+			ledgerCanisterMock.getMintingAccount.mockRejectedValue(
+				new Error('Minting account not found')
+			);
+
+			const result = await getMintingAccount(params);
+
+			expect(result).toBeUndefined();
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
 	});
 });
