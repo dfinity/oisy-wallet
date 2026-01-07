@@ -2,6 +2,12 @@
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
+	import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+	import {
+		initUtxosFeeStore,
+		UTXOS_FEE_CONTEXT_KEY,
+		type UtxosFeeContext as UtxosFeeContextType
+	} from '$btc/stores/utxos-fee.store';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
@@ -99,6 +105,10 @@
 		})
 	);
 
+	setContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY, {
+		store: initUtxosFeeStore()
+	});
+
 	const reset = () => {
 		destination = '';
 		activeSendDestinationTab = 'recentlyUsed';
@@ -108,6 +118,8 @@
 		sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
 		currentStep = undefined;
+
+		btcPendingSentTransactionsStore.reset();
 	};
 
 	const close = () =>

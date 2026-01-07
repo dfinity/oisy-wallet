@@ -26,9 +26,7 @@
 			<span>{$i18n.send.error.no_pending_bitcoin_transaction}</span>
 		</MessageBox>
 	</div>
-{/if}
-
-{#if utxosFee?.error === BtcPrepareSendError.InsufficientBalance}
+{:else if utxosFee?.error === BtcPrepareSendError.InsufficientBalance}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
 			<span>{$i18n.send.assertion.insufficient_funds}</span>

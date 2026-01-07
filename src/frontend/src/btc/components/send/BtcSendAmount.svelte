@@ -2,7 +2,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
-	import { BtcAmountAssertionError } from '$btc/types/btc-send';
+	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
+	import {
+		BtcAmountAssertionError,
+		BtcPrepareSendError,
+		BtcSendValidationError
+	} from '$btc/types/btc-send';
 	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
 	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
@@ -31,6 +36,11 @@
 	const { sendBalance, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	const { store: storeUtxosFeeData } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
+
+	let utxosFee = $derived($storeUtxosFeeData?.utxosFee);
+	let satoshisFee = $derived(utxosFee?.feeSatoshis);
+
 	// TODO: Enable Max button by passing the `calculateMax` prop - https://dfinity.atlassian.net/browse/GIX-3114
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
@@ -46,11 +56,12 @@
 				})
 			);
 		}
-
-		if (userAmount > ($sendBalance ?? ZERO)) {
-			return new BtcAmountAssertionError($i18n.send.assertion.insufficient_funds);
-		}
 	};
+
+	/**
+	 * Reevaluate max amount if the user has used the "Max" button and the fees are changing.
+	 */
+	let amountSetToMax = $state(false);
 </script>
 
 <div class="mb-4">
@@ -62,6 +73,7 @@
 		onCustomErrorValidate={customValidate}
 		token={$sendToken}
 		bind:amount
+		bind:amountSetToMax
 		bind:error={amountError}
 	>
 		{#snippet title()}{$i18n.core.text.amount}{/snippet}
@@ -84,8 +96,10 @@
 				<MaxBalanceButton
 					balance={$sendBalance}
 					error={nonNullish(amountError)}
+					fee={satoshisFee ?? ZERO}
 					token={$sendToken}
 					bind:amount
+					bind:amountSetToMax
 				/>
 			{/if}
 		{/snippet}
