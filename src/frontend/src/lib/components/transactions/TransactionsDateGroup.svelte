@@ -15,15 +15,17 @@
 	}
 
 	let { formattedDate, transactions, testId }: Props = $props();
+
+	let capitalizedFormattedDate = $derived(
+		formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
+	);
 </script>
 
 {#if transactions.length > 0}
 	<div class="mb-5 flex flex-col gap-3" data-tid={testId}>
 		<StickyHeader>
 			{#snippet header()}
-				<span class="mb-3 flex text-lg font-medium text-tertiary first-letter:capitalize"
-					>{formattedDate}</span
-				>
+				<span class="mb-3 flex text-lg font-medium text-tertiary">{capitalizedFormattedDate}</span>
 			{/snippet}
 
 			{#each transactions as transactionUi, index (`${transactionUi.transaction.id}-${transactionUi.token.id.description}-${index}`)}
