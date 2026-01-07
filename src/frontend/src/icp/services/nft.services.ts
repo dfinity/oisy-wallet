@@ -1,9 +1,11 @@
-import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
+import { getTokensByOwner as getExtTokensByOwner } from '$icp/api/ext-v2-token.api';
 import type { IcNonFungibleToken } from '$icp/types/nft';
+import { isTokenExt } from '$icp/utils/ext.utils';
 import { mapExtNft } from '$icp/utils/nft.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Nft } from '$lib/types/nft';
-import { isNullish } from '@dfinity/utils';
+import type { Token } from '$lib/types/token';
+import { assertNever, isNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
 const loadExtNfts = async ({
@@ -18,7 +20,7 @@ const loadExtNfts = async ({
 	const owner = identity.getPrincipal();
 
 	try {
-		const tokenIndices = await getTokensByOwner({
+		const tokenIndices = await getExtTokensByOwner({
 			identity,
 			owner,
 			canisterId
@@ -45,7 +47,13 @@ export const loadNfts = async ({
 		return [];
 	}
 
-	const nftPromises = tokens.map(async (token) => await loadExtNfts({ token, identity }));
+	const nftPromises = tokens.map(async (token) => {
+		if (isTokenExt(token)) {
+			return await loadExtNfts({ token, identity });
+		}
+
+		assertNever(token, `Unsupported NFT IC token ${(token as Token).standard.code}`);
+	});
 
 	return (await Promise.all(nftPromises)).flat();
 };
