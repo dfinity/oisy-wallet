@@ -1498,6 +1498,8 @@
 			"title": "Transactions",
 			"buy_or_receive": "Effectuez votre première transaction, et achetez ou recevez des tokens maintenant !",
 			"transaction_history": "Votre historique de transactions apparaîtra ici",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "Les informations sur les transactions BTC sont obtenues auprès de tiers centraux et doivent être vérifiées indépendamment.",
 			"transaction_history_unavailable": "Historique des transactions indisponible",
 			"missing_index_canister_explanation": "Pour l'instant, $oisy_short ne peut pas afficher vos transactions de tokens passées car l'émetteur n'a pas encore fourni la fonctionnalité de suivi. Elle devrait être ajoutée bientôt. En attendant, ne vous inquiétez pas — vous pouvez toujours envoyer et recevoir vos tokens comme d'habitude.",
@@ -1847,7 +1849,7 @@
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
-				"description": "Utilisez OISY et GAGNEZ ! L'ép. 5 est en ligne \uD83C\uDF89",
+				"description": "Utilisez OISY et GAGNEZ ! L'ép. 5 est en ligne 🎉",
 				"action": "Vérifier le statut"
 			}
 		},
@@ -1999,7 +2001,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "Assistant IA $oisy_short",
-			"welcome_message": "Bonjour ! \uD83D\uDC4B Je suis votre concierge IA personnel. Comment puis-je vous aider ?",
+			"welcome_message": "Bonjour ! 👋 Je suis votre concierge IA personnel. Comment puis-je vous aider ?",
 			"action_button_contacts_title": "Afficher les contacts",
 			"action_button_contacts_subtitle": "Afficher vos contacts enregistrés",
 			"action_button_contacts_prompt": "Montrez-moi mes contacts.",
