@@ -2,6 +2,7 @@ import { listCustomTokens } from '$lib/api/backend.api';
 import * as idbTokensApi from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
+import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
@@ -208,6 +209,34 @@ describe('custom-tokens.services', () => {
 			});
 
 			expect(result).toStrictEqual(mockCustomTokens.slice(2, 3));
+
+			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should parse correctly the cached canister ID from the DIP721 custom tokens', async () => {
+			mockGetIdbTokens.mockResolvedValue([
+				{
+					token: {
+						Dip721: {
+							canister_id: Principal.fromText(mockDip721TokenCanisterId).toUint8Array()
+						}
+					},
+					version: toNullable(123n),
+					enabled: false,
+					section: toNullable(),
+					allow_external_content_source: toNullable()
+				}
+			]);
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(mockCustomTokens.slice(3, 4));
 
 			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 

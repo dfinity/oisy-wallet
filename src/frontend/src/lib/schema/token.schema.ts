@@ -13,6 +13,7 @@ export const TokenStandardCodeSchema = z.enum([
 	'icp',
 	'icrc',
 	'dip20',
+	'dip721',
 	'ext',
 	'bitcoin',
 	'solana',

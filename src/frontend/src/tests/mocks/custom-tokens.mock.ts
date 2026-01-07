@@ -5,6 +5,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
@@ -43,6 +44,17 @@ export const mockCustomTokens: CustomToken[] = [
 			}
 		},
 		version: toNullable(10n),
+		enabled: false,
+		section: toNullable(),
+		allow_external_content_source: toNullable()
+	},
+	{
+		token: {
+			Dip721: {
+				canister_id: Principal.fromText(mockDip721TokenCanisterId)
+			}
+		},
+		version: toNullable(123n),
 		enabled: false,
 		section: toNullable(),
 		allow_external_content_source: toNullable()
