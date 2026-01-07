@@ -1,9 +1,9 @@
-import { balance, getTokensByOwner } from '$icp/api/dip721.api';
+import { balance, getTokensByOwner, transfer } from '$icp/api/dip721.api';
 import { Dip721Canister } from '$icp/canisters/dip721.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
-import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { mock } from 'vitest-mock-extended';
 
 describe('dip721.api', () => {
@@ -89,6 +89,43 @@ describe('dip721.api', () => {
 			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError);
 
 			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+	});
+
+	describe('transfer', () => {
+		const mockTokenId = 987_456_123n;
+
+		const params = {
+			identity: mockIdentity,
+			owner: mockPrincipal,
+			canisterId: mockDip721TokenCanisterId,
+			to: mockPrincipal2,
+			tokenIdentifier: mockTokenId
+		};
+
+		const expectedParams = {
+			to: mockPrincipal2,
+			tokenIdentifier: mockTokenId
+		};
+
+		beforeEach(() => {
+			tokenCanisterMock.transfer.mockResolvedValue(123n);
+		});
+
+		it('should call successfully transfer endpoint', async () => {
+			await transfer(params);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should throw an error if transfer fails', async () => {
+			const mockError = new CanisterInternalError('Generic error');
+
+			tokenCanisterMock.transfer.mockRejectedValueOnce(mockError);
+
+			await expect(transfer(params)).rejects.toThrowError(mockError);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 	});
 });
