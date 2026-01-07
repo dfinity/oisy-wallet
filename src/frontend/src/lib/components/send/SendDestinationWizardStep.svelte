@@ -66,7 +66,8 @@
 		selectedContact = undefined;
 	});
 
-	const { sendToken, sendTokenNetworkId, sendDestination } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenNetworkId, sendDestination } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const back = () => onBack();
 	const next = () => {
