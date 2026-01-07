@@ -1069,25 +1069,25 @@
 	},
 	"pay": {
 		"text": {
-			"pay": "pagar",
-			"dialog_title": "Titulo del dialogo",
-			"dialog_description": "descripcion del dialogo",
-			"dialog_button": "boton de dialogo",
-			"where_you_can_pay": "donde puedes pagar",
-			"request_payment_details": "detalles de solicitud de pago",
-			"creating_transaction": "creando transaccion",
-			"signing_transaction": "transaccion de firma",
-			"paying": "pagando"
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": "",
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
 		},
 		"error": {
-			"data_is_incompleted": "los datos están incompletos ",
-			"amount_does_not_match": "la cantidad no coincide",
-			"recipient_address_is_not_valid": "la dirección de destinatario no es válida ",
-			"token_address_mismatch": "falta de coincidencia de la direccion del token"
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
 		},
 		"alt": {
-			"pay": "pagar",
-			"where_you_can_pay": "donde puedes pagar"
+			"pay": "",
+			"where_you_can_pay": ""
 		}
 	},
 	"tokens": {
@@ -1269,8 +1269,8 @@
 			"collections": "Colecciones",
 			"all_assets": "Todos los activos",
 			"address_copied": "Dirección $address copiada",
-			"collection_name_copied": " nombre coleccion de copiado",
-			"id_copied": "id copiado",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "No es spam",
 			"spam_warning": "¿Mover '$collection' a spam?",
@@ -1286,8 +1286,8 @@
 			"review_button": "Revisar",
 			"collection_name": "Nombre de la colección",
 			"media_urls": "URLs de medios",
-			"media_url": "url de medios",
-			"received_at": "recibido en",
+			"media_url": "URL de medios",
+			"received_at": "Recibido en",
 			"display_preference": "Preferencia de visualización",
 			"review_preference": "Revisar preferencia",
 			"media_enabled": "Medios habilitados",
@@ -1303,7 +1303,7 @@
 			"token_id": "ID del Token",
 			"go_to_collection": "Ir a la colección",
 			"could_not_update_section": "No se pudo actualizar la sección de la colección. Por favor, inténtalo de nuevo",
-			"media_stored_at_different_location": "medios almacenados en una ubicacion diferente"
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Aún no hay NFTs",
