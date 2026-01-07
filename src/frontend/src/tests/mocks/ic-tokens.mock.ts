@@ -4,6 +4,7 @@ import {
 } from '$env/networks/networks.icrc.env';
 import type { IcCanisters, IcCkToken, IcToken } from '$icp/types/ic-token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockIcrcAccount } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 export const mockLedgerCanisterId = IC_CKBTC_LEDGER_CANISTER_ID;
@@ -16,6 +17,7 @@ export const mockValidIcCanisters: IcCanisters = {
 export const mockValidIcToken: IcToken = {
 	...mockValidToken,
 	...mockValidIcCanisters,
+	mintingAccount: mockIcrcAccount,
 	fee: 123n,
 	position: 1
 };
