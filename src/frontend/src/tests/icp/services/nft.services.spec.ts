@@ -114,7 +114,7 @@ describe('nft.services', () => {
 		it("should raise an error if the token's standard is not supported", async () => {
 			// @ts-expect-error we test this on purpose
 			await expect(loadNfts({ ...mockParams, tokens: [mockValidIcrcToken] })).rejects.toThrowError(
-				`Unsupported NFT IC token ${mockValidIcrcToken.standard}`
+				`Unsupported NFT IC token ${mockValidIcrcToken.standard.code}`
 			);
 
 			expect(getExtTokensByOwner).not.toHaveBeenCalled();
