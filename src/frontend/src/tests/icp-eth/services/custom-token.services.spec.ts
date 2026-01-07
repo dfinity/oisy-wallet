@@ -21,7 +21,7 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
-describe('icrc-token.services', () => {
+describe('custom-token.services', () => {
 	const backendCanisterMock = mock<BackendCanister>();
 	const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 
