@@ -27,6 +27,17 @@ describe('TokenModalContent', () => {
 
 		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
 		expect(getByText(ICP_TOKEN.decimals)).toBeInTheDocument();
+
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
+		expect(
+			getByText(
+				`${formatToken({
+					value: ICP_TOKEN.fee,
+					unitName: ICP_TOKEN.decimals,
+					displayDecimals: ICP_TOKEN.decimals
+				})} ${ICP_TOKEN.symbol}`
+			)
+		).toBeInTheDocument();
 	});
 
 	it('renders all values correctly for ICRC token with index canister', () => {
