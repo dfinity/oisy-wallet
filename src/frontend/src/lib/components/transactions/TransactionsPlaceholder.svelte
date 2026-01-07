@@ -11,11 +11,11 @@
 	</div>
 
 	<div class="space-y-4">
-		<p class="m-0 text-center text-lg font-bold"
-			>{$isIcMintingAccount
+		<p class="m-0 text-center text-lg font-bold">
+			{$isIcMintingAccount
 				? $i18n.transactions.text.minter_transaction_history
-				: $i18n.transactions.text.transaction_history}</p
-		>
+				: $i18n.transactions.text.transaction_history}
+		</p>
 		<p class="m-0 text-center text-tertiary">
 			{$isIcMintingAccount
 				? $i18n.transactions.text.mint_burn_transactions_unavailable
