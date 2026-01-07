@@ -67,7 +67,7 @@ export class Dip721Canister extends Canister<Dip721Service> {
 	};
 
 	/**
-	 * Sends the callers nft token_identifier and returns a nat that represents a transaction id that can be used at the transaction method.
+	 * Sends the caller's NFT token_identifier and returns a nat that represents a transaction id that can be used at the transaction method.
 	 *
 	 * @link https://github.com/Psychedelic/DIP721/blob/develop/spec.md#transfer
 	 */
