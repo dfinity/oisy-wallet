@@ -2,12 +2,9 @@ import type { UserToken } from '$declarations/backend/backend.did';
 import { loadCustomTokens } from '$eth/services/erc20.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
-import type { Erc20UserToken, SaveUserToken } from '$eth/types/erc20-user-token';
+import type { SaveUserToken } from '$eth/types/erc20-user-token';
 import type { IcCkToken } from '$icp/types/ic-token';
-import {
-	setCustomToken as setCustomTokenApi,
-	setUserToken as setUserTokenApi
-} from '$lib/api/backend.api';
+import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -85,24 +82,6 @@ export const toUserToken = ({
 	version: toNullable(version),
 	enabled: toNullable(enabled)
 });
-
-export const setUserToken = async ({
-	token,
-	identity,
-	enabled
-}: {
-	identity: Identity;
-	token: Erc20UserToken;
-	enabled: boolean;
-}) =>
-	await setUserTokenApi({
-		identity,
-		token: toUserToken({
-			...token,
-			enabled
-		}),
-		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-	});
 
 export const setCustomToken = async ({
 	token,
