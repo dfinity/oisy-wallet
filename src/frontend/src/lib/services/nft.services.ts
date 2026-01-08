@@ -3,7 +3,7 @@ import type { OptionEthAddress } from '$eth/types/address';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
-import { loadNfts as loadExtNfts } from '$icp/services/nft.services';
+import { loadNfts as loadIcNfts } from '$icp/services/nft.services';
 import type { IcNonFungibleToken } from '$icp/types/nft';
 import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
@@ -42,7 +42,7 @@ export const loadNftsByNetwork = async ({
 	}
 
 	if (isNetworkIdICP(networkId)) {
-		return await loadExtNfts({
+		return await loadIcNfts({
 			// For now, it is acceptable to cast it since we checked before if the network is ICP.
 			tokens: tokens as IcNonFungibleToken[],
 			identity

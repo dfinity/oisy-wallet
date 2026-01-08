@@ -6,6 +6,7 @@ import {
 	transfer
 } from '$icp/api/ext-v2-token.api';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	mockExtMetadata,
@@ -100,6 +101,8 @@ describe('ext-v2-token.api', () => {
 
 		beforeEach(() => {
 			tokenCanisterMock.getTokensByOwner.mockResolvedValue(mockTokens);
+
+			tokenCanisterMock.getTokensByOwnerLegacy.mockResolvedValue(mockTokens);
 		});
 
 		it('should call successfully getTokensByOwner endpoint', async () => {
@@ -116,6 +119,67 @@ describe('ext-v2-token.api', () => {
 			await expect(getTokensByOwner({ ...params, identity: null })).resolves.toEqual([]);
 
 			expect(tokenCanisterMock.getTokensByOwner).not.toHaveBeenCalled();
+		});
+
+		it('should fallback to legacy method if first one fails', async () => {
+			tokenCanisterMock.getTokensByOwner.mockRejectedValueOnce(new Error('First error'));
+
+			await getTokensByOwner(params);
+
+			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.getTokensByOwnerLegacy).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
+		});
+
+		it('should raise the error of the legacy method if it is handled', async () => {
+			const mockError = new CanisterInternalError('Generic error');
+
+			tokenCanisterMock.getTokensByOwner.mockRejectedValueOnce(new Error('First error'));
+
+			tokenCanisterMock.getTokensByOwnerLegacy.mockRejectedValueOnce(mockError);
+
+			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError);
+
+			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.getTokensByOwnerLegacy).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
+		});
+
+		it('should raise the error of the first method if both errors are handled', async () => {
+			const mockError1 = new CanisterInternalError('First error');
+			const mockError2 = new CanisterInternalError('Legacy error');
+
+			tokenCanisterMock.getTokensByOwner.mockRejectedValueOnce(mockError1);
+
+			tokenCanisterMock.getTokensByOwnerLegacy.mockRejectedValueOnce(mockError2);
+
+			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError1);
+
+			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.getTokensByOwnerLegacy).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
+		});
+
+		it('should raise the error of the first method if fallback fails', async () => {
+			const mockError = new Error('First error');
+
+			tokenCanisterMock.getTokensByOwner.mockRejectedValueOnce(mockError);
+
+			tokenCanisterMock.getTokensByOwnerLegacy.mockRejectedValueOnce(new Error('Legacy error'));
+
+			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError);
+
+			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.getTokensByOwnerLegacy).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
 		});
 	});
 
@@ -140,6 +204,8 @@ describe('ext-v2-token.api', () => {
 
 		beforeEach(() => {
 			tokenCanisterMock.transfer.mockResolvedValue(mockBalance);
+
+			tokenCanisterMock.transferAlias.mockResolvedValue(mockBalance);
 		});
 
 		it('should call successfully transfer endpoint', async () => {
@@ -154,6 +220,59 @@ describe('ext-v2-token.api', () => {
 			await expect(transfer({ ...params, identity: null })).rejects.toThrowError();
 
 			expect(tokenCanisterMock.transfer).not.toHaveBeenCalled();
+		});
+
+		it('should fallback to legacy method if first transfer fails', async () => {
+			tokenCanisterMock.transfer.mockRejectedValueOnce(new Error('First transfer error'));
+
+			await transfer(params);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.transferAlias).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should raise the error of the legacy transfer if it is handled', async () => {
+			const mockError = new CanisterInternalError('Insufficient balance for the transfer');
+
+			tokenCanisterMock.transfer.mockRejectedValueOnce(new Error('First transfer error'));
+
+			tokenCanisterMock.transferAlias.mockRejectedValueOnce(mockError);
+
+			await expect(transfer(params)).rejects.toThrowError(mockError);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.transferAlias).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should raise the error of the first transfer if both errors are handled', async () => {
+			const mockError1 = new CanisterInternalError('First transfer error');
+			const mockError2 = new CanisterInternalError('Legacy transfer error');
+
+			tokenCanisterMock.transfer.mockRejectedValueOnce(mockError1);
+
+			tokenCanisterMock.transferAlias.mockRejectedValueOnce(mockError2);
+
+			await expect(transfer(params)).rejects.toThrowError(mockError1);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.transferAlias).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should raise the error of the first transfer if fallback fails', async () => {
+			const mockError = new Error('First transfer error');
+
+			tokenCanisterMock.transfer.mockRejectedValueOnce(mockError);
+
+			tokenCanisterMock.transferAlias.mockRejectedValueOnce(new Error('Legacy transfer error'));
+
+			await expect(transfer(params)).rejects.toThrowError(mockError);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(tokenCanisterMock.transferAlias).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 	});
 

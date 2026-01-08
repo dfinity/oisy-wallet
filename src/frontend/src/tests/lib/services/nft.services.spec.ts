@@ -6,7 +6,7 @@ import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import * as ethNftServices from '$eth/services/nft.services';
 import { loadNftsByNetwork as loadErcNftsByNetwork } from '$eth/services/nft.services';
 import * as icNftServices from '$icp/services/nft.services';
-import { loadNfts as loadExtNfts } from '$icp/services/nft.services';
+import { loadNfts as loadIcNfts } from '$icp/services/nft.services';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import {
 	loadNfts,
@@ -60,7 +60,7 @@ describe('nft.services', () => {
 			await expect(loadNftsByNetwork({ ...mockParams, tokens: [] })).resolves.toEqual([]);
 
 			expect(loadErcNftsByNetwork).not.toHaveBeenCalled();
-			expect(loadExtNfts).not.toHaveBeenCalled();
+			expect(loadIcNfts).not.toHaveBeenCalled();
 		});
 
 		it('should call the ETH NFT loader if the network is Ethereum', async () => {
@@ -74,7 +74,7 @@ describe('nft.services', () => {
 				walletAddress: mockEthAddress
 			});
 
-			expect(loadExtNfts).not.toHaveBeenCalled();
+			expect(loadIcNfts).not.toHaveBeenCalled();
 		});
 
 		it('should call the ETH NFT loader if the network is EVM', async () => {
@@ -88,7 +88,7 @@ describe('nft.services', () => {
 				walletAddress: mockEthAddress
 			});
 
-			expect(loadExtNfts).not.toHaveBeenCalled();
+			expect(loadIcNfts).not.toHaveBeenCalled();
 		});
 
 		it('should call the IC NFT loader if the network is ICP', async () => {
@@ -96,7 +96,7 @@ describe('nft.services', () => {
 				loadNftsByNetwork({ ...mockParams, networkId: ICP_NETWORK_ID })
 			).resolves.toEqual(mockIcNfts);
 
-			expect(loadExtNfts).toHaveBeenCalledExactlyOnceWith({
+			expect(loadIcNfts).toHaveBeenCalledExactlyOnceWith({
 				tokens: mockTokens,
 				identity: mockIdentity
 			});
@@ -113,7 +113,7 @@ describe('nft.services', () => {
 			).resolves.toEqual([]);
 
 			expect(loadErcNftsByNetwork).not.toHaveBeenCalled();
-			expect(loadExtNfts).not.toHaveBeenCalled();
+			expect(loadIcNfts).not.toHaveBeenCalled();
 		});
 	});
 
@@ -226,7 +226,7 @@ describe('nft.services', () => {
 
 			await loadNfts({ tokens, identity: mockIdentity, ethAddress: mockWalletAddress });
 
-			expect(loadExtNfts).toHaveBeenCalled();
+			expect(loadIcNfts).toHaveBeenCalled();
 			expect(get(nftStore)).toBeUndefined();
 		});
 

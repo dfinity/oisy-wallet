@@ -5,9 +5,10 @@ import type { EnvAdditionalIcrcTokensWithMetadata } from '$env/types/env-icrc-ad
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { isNullish, jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { getIndexPrincipal, loadMetadata, saveLogo } from './build.tokens.utils';
+import { getIndexPrincipal, getMintingAccount, loadMetadata, saveLogo } from './build.tokens.utils';
 import { ADDITIONAL_ICRC_JSON_FILE } from './constants.mjs';
 
 interface TokensAndIcons {
@@ -67,12 +68,17 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 				? putativeIndexCanisterPrincipal.toText()
 				: originalIndexCanisterId;
 
+			const mintingAccount = await getMintingAccount(ledgerCanisterId);
+
 			return {
 				tokens: {
 					...accTokens,
 					[key]: {
 						ledgerCanisterId,
 						...(nonNullish(indexCanisterId) ? { indexCanisterId } : {}),
+						...(nonNullish(mintingAccount)
+							? { mintingAccount: encodeIcrcAccount(mintingAccount) }
+							: {}),
 						...rest,
 						...metadata
 					}

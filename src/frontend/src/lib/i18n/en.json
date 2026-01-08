@@ -562,7 +562,7 @@
 			"incubated_with": "Incubated with",
 			"by": "by",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "$oisy_short Assistant"
 		},
 		"alt": {
@@ -904,6 +904,20 @@
 			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again.",
 			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
 			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
+		}
+	},
+	"mint": {
+		"text": {
+			"mint": "Mint",
+			"minting": "Minting...",
+			"mint_review_subtitle": "You mint"
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "Burn",
+			"burning": "Burning...",
+			"burn_review_subtitle": "You burn"
 		}
 	},
 	"scanner": {
@@ -1295,7 +1309,8 @@
 			"learn_more": "Learn more",
 			"token_id": "Token ID",
 			"go_to_collection": "Go to collection",
-			"could_not_update_section": "Could not update collection section. Please try again"
+			"could_not_update_section": "Could not update collection section. Please try again",
+			"media_stored_at_different_location": "The Media appears to be stored at a different location. To access it, you can use this link, after carefully reviewing it:"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
@@ -1490,6 +1505,8 @@
 			"title": "Transactions",
 			"buy_or_receive": "Make your first transaction, and buy or receive tokens now!",
 			"transaction_history": "Your transaction history will appear here",
+			"minter_transaction_history": "You are the minting account for this token",
+			"mint_burn_transactions_unavailable": "Unfortunately, Mint and Burn transactions can’t be loaded for this token.",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
 			"missing_index_canister_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer hasn’t provided the tracking feature yet. It should be added soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",

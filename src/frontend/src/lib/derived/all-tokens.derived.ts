@@ -65,33 +65,30 @@ export const allSwappableTokensDerived: Readable<IcTokenWithIcrc2Supported[]> = 
 
 export const allTokens = derived(
 	[
-		// The entire list of Erc20 tokens to display to the user.
-		erc20Tokens,
-		// The entire list of Erc721 tokens to display to the user.
-		erc721Tokens,
-		// The entire list of Erc1155 tokens to display to the user.
-		erc1155Tokens,
 		defaultIcpTokens,
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
+		enabledEvmTokens,
+		enabledSolanaTokens,
+		erc20Tokens,
+		erc721Tokens,
+		erc1155Tokens,
 		allIcrcTokens,
 		extTokens,
-		enabledSolanaTokens,
-		splTokens,
-		enabledEvmTokens
+		splTokens
 	],
 	([
-		$erc20Tokens,
-		$erc721Tokens,
-		$erc1155Tokens,
 		$defaultIcpTokens,
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
+		$enabledEvmTokens,
+		$enabledSolanaTokens,
+		$erc20Tokens,
+		$erc721Tokens,
+		$erc1155Tokens,
 		$allIcrcTokens,
 		$extTokens,
-		$enabledSolanaTokens,
-		$splTokens,
-		$enabledEvmTokens
+		$splTokens
 	]) => [
 		...$defaultIcpTokens.map((token) => ({ ...token, enabled: true })),
 		...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),

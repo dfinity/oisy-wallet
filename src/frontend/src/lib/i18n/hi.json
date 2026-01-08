@@ -562,7 +562,7 @@
 			"incubated_with": "प्यार के साथ विकसित",
 			"by": "द्वारा",
 			"dfinity_foundation": "DFINITY फ़ाउंडेशन",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "$oisy_short सहायक"
 		},
 		"alt": {
@@ -904,6 +904,20 @@
 			"solana_transaction_expired": "आपका लेनदेन सोलाना नेटवर्क द्वारा संसाधित नहीं किया गया था और समाप्त हो गया था, सबसे अधिक संभावना है क्योंकि प्रदान किया गया प्राथमिकता शुल्क पर्याप्त नहीं था। हमने इसे नवीनतम अनुशंसित राशि में अपडेट कर दिया है, इसलिए कृपया इसे फिर से भेजने का प्रयास करें।",
 			"solana_confirmation_failed": "हमें आपके द्वारा अभी बनाए गए लेनदेन के लिए कोई पुष्टि नहीं मिली। कृपया कुछ सेकंड प्रतीक्षा करें और फिर अपनी टोकन की लेनदेन सूची जांचें कि क्या आपका लेनदेन सही ढंग से बनाया गया था।",
 			"fee_calc_unsupported_standard": ""
+		}
+	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
 		}
 	},
 	"scanner": {
@@ -1295,7 +1309,8 @@
 			"learn_more": "",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "अभी तक कोई NFTs नहीं",
@@ -1490,6 +1505,8 @@
 			"title": "लेनदेन",
 			"buy_or_receive": "अपना पहला लेनदेन करें, और अब टोकन खरीदें या प्राप्त करें!",
 			"transaction_history": "आपका लेनदेन इतिहास यहाँ दिखाई देगा",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।",
 			"transaction_history_unavailable": "लेनदेन इतिहास अनुपलब्ध",
 			"missing_index_canister_explanation": "अभी, $oisy_short आपके पिछले टोकन लेनदेन को नहीं दिखा सकता है क्योंकि जारीकर्ता ने अभी तक ट्रैकिंग सुविधा प्रदान नहीं की है। इसे जल्द ही जोड़ा जाना चाहिए। इस बीच, चिंता न करें - आप अभी भी अपने टोकन सामान्य रूप से भेज और प्राप्त कर सकते हैं।",

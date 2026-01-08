@@ -699,6 +699,14 @@ interface I18nSend {
 	};
 }
 
+interface I18nMint {
+	text: { mint: string; minting: string; mint_review_subtitle: string };
+}
+
+interface I18nBurn {
+	text: { burn: string; burning: string; burn_review_subtitle: string };
+}
+
 interface I18nScanner {
 	text: {
 		scan_qr_code: string;
@@ -1057,6 +1065,7 @@ interface I18nNfts {
 		token_id: string;
 		go_to_collection: string;
 		could_not_update_section: string;
+		media_stored_at_different_location: string;
 	};
 	alt: {
 		placeholder_image: string;
@@ -1240,6 +1249,8 @@ interface I18nTransactions {
 		title: string;
 		buy_or_receive: string;
 		transaction_history: string;
+		minter_transaction_history: string;
+		mint_burn_transactions_unavailable: string;
 		mainnet_btc_transactions_info: string;
 		transaction_history_unavailable: string;
 		missing_index_canister_explanation: string;
@@ -1653,6 +1664,8 @@ interface I18n {
 	networks: I18nNetworks;
 	receive: I18nReceive;
 	send: I18nSend;
+	mint: I18nMint;
+	burn: I18nBurn;
 	scanner: I18nScanner;
 	convert: I18nConvert;
 	swap: I18nSwap;

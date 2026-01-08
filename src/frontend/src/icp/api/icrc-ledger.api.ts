@@ -278,9 +278,13 @@ export const getMintingAccount = async ({
 
 	const { getMintingAccount } = await ledgerCanister({ identity, ledgerCanisterId });
 
-	const account = await getMintingAccount({ certified });
+	try {
+		const account = await getMintingAccount({ certified });
 
-	return fromCandidAccount(fromDefinedNullable(account));
+		return fromCandidAccount(fromDefinedNullable(account));
+	} catch (_: unknown) {
+		// In case the method is not implemented, return undefined
+	}
 };
 
 const ledgerCanister = async ({

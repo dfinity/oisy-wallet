@@ -1,6 +1,7 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 import type { Token } from '$lib/types/token';
+import { formatToken } from '$lib/utils/format.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -26,6 +27,17 @@ describe('TokenModalContent', () => {
 
 		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
 		expect(getByText(ICP_TOKEN.decimals)).toBeInTheDocument();
+
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
+		expect(
+			getByText(
+				`${formatToken({
+					value: ICP_TOKEN.fee,
+					unitName: ICP_TOKEN.decimals,
+					displayDecimals: ICP_TOKEN.decimals
+				})} ${ICP_TOKEN.symbol}`
+			)
+		).toBeInTheDocument();
 	});
 
 	it('renders all values correctly for ICRC token with index canister', () => {
@@ -53,6 +65,17 @@ describe('TokenModalContent', () => {
 
 		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
 		expect(getByText(mockValidIcrcToken.decimals)).toBeInTheDocument();
+
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
+		expect(
+			getByText(
+				`${formatToken({
+					value: mockValidIcrcToken.fee,
+					unitName: mockValidIcrcToken.decimals,
+					displayDecimals: mockValidIcrcToken.decimals
+				})} ${mockValidIcrcToken.symbol}`
+			)
+		).toBeInTheDocument();
 	});
 
 	it('renders all values correctly for ICRC token without index canister', () => {
@@ -82,5 +105,16 @@ describe('TokenModalContent', () => {
 
 		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
 		expect(getByText(mockValidIcrcToken.decimals)).toBeInTheDocument();
+
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
+		expect(
+			getByText(
+				`${formatToken({
+					value: mockValidIcrcToken.fee,
+					unitName: mockValidIcrcToken.decimals,
+					displayDecimals: mockValidIcrcToken.decimals
+				})} ${mockValidIcrcToken.symbol}`
+			)
+		).toBeInTheDocument();
 	});
 });

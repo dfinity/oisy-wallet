@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
@@ -49,14 +50,19 @@
 		...rest
 	}: Props = $props();
 
-	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenExchangeRate, isIcBurning } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
 	{#if isNullish(nft)}
 		<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken}>
 			{#snippet subtitle()}
-				{$i18n.send.text.send_review_subtitle}
+				{$isIcMintingAccount
+					? $i18n.mint.text.mint_review_subtitle
+					: $isIcBurning
+						? $i18n.burn.text.burn_review_subtitle
+						: $i18n.send.text.send_review_subtitle}
 			{/snippet}
 		</SendTokenReview>
 	{:else}
@@ -82,7 +88,11 @@
 			<ButtonGroup testId="toolbar">
 				<ButtonBack onclick={onBack} />
 				<Button {disabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
-					{$i18n.send.text.send}
+					{$isIcMintingAccount
+						? $i18n.mint.text.mint
+						: $isIcBurning
+							? $i18n.burn.text.burn
+							: $i18n.send.text.send}
 				</Button>
 			</ButtonGroup>
 		{/if}

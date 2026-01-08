@@ -1600,15 +1600,15 @@ dependencies = [
 
 [[package]]
 name = "ic-canister-sig-creation"
-version = "1.2.0"
+version = "1.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c2c8c45cffce6d6fa681041dc5b58f07b025d9ebe95518244b509ea6281f478"
+checksum = "d8b2a507d1bebb111fc8c76098468e4de9c745e9b9ef160a079568ae1d6f7fef"
 dependencies = [
  "candid",
  "hex",
- "ic-cdk 0.17.2",
  "ic-certification 3.0.3",
  "ic-representation-independent-hash",
+ "ic0 1.0.1",
  "lazy_static",
  "serde",
  "serde_bytes",
@@ -1625,7 +1625,7 @@ checksum = "038ff230bf0fc8630943e3c52e989d248a7c89834ccb65da408fabc5817a475b"
 dependencies = [
  "candid",
  "ic-cdk-macros 0.15.0",
- "ic0",
+ "ic0 0.23.0",
  "serde",
  "serde_bytes",
 ]
@@ -1639,7 +1639,7 @@ dependencies = [
  "candid",
  "ic-cdk-executor",
  "ic-cdk-macros 0.17.2",
- "ic0",
+ "ic0 0.23.0",
  "serde",
  "serde_bytes",
 ]
@@ -1699,7 +1699,7 @@ checksum = "292b84c5b8e57e12bf26306be81ec145ab9641ab12317a6f88e5c22af55e7acd"
 dependencies = [
  "futures",
  "ic-cdk 0.17.2",
- "ic0",
+ "ic0 0.23.0",
  "serde",
  "serde_bytes",
  "slotmap",
@@ -1878,6 +1878,12 @@ name = "ic0"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8de254dd67bbd58073e23dc1c8553ba12fa1dc610a19de94ad2bbcd0460c067f"
+
+[[package]]
+name = "ic0"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1499d08fd5be8f790d477e1865d63bab6a8d748300e141270c4296e6d5fdd6bc"
 
 [[package]]
 name = "ic_principal"

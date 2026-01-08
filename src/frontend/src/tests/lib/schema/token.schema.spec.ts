@@ -57,6 +57,12 @@ describe('token.schema', () => {
 			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
+		it('should validate "dip721" as a supported token standard', () => {
+			const validStandard = 'dip721';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
 		it('should validate "ext" as a supported token standard', () => {
 			const validStandard = 'ext';
 
@@ -109,6 +115,12 @@ describe('token.schema', () => {
 
 		it('should validate "dip20" as a supported token standard', () => {
 			const validStandard = 'dip20';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "dip721" as a supported token standard', () => {
+			const validStandard = 'dip721';
 
 			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
 		});

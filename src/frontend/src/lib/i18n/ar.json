@@ -562,7 +562,7 @@
 			"incubated_with": "احتضان مع",
 			"by": "بواسطة",
 			"dfinity_foundation": "مؤسسة DFINITY",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "مساعد $oisy_short"
 		},
 		"alt": {
@@ -904,6 +904,20 @@
 			"solana_transaction_expired": "لم تتم معالجة معاملة الإرسال الخاصة بك بواسطة شبكة Solana وانتهت صلاحيتها، على الأرجح لأن رسوم الأولوية المقدمة لم تكن كافية. لقد قمنا بتحديثها إلى أحدث مبلغ موصى به، لذا يرجى محاولة إرسالها مرة أخرى.",
 			"solana_confirmation_failed": "لم نتلق تأكيدًا للمعاملة التي أنشأتها للتو. يرجى الانتظار بضع ثوانٍ ثم التحقق من قائمة معاملات التوكن الخاصة بك إذا تم إنشاء معاملتك بشكل صحيح.",
 			"fee_calc_unsupported_standard": ""
+		}
+	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
 		}
 	},
 	"scanner": {
@@ -1295,7 +1309,8 @@
 			"learn_more": "",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "لا توجد NFTs بعد",
@@ -1490,6 +1505,8 @@
 			"title": "المعاملات",
 			"buy_or_receive": "قم بأول معاملة لك، واشترِ أو استلم التوكنات الآن!",
 			"transaction_history": "سيظهر سجل معاملاتك هنا",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل.",
 			"transaction_history_unavailable": "سجل المعاملات غير متاح",
 			"missing_index_canister_explanation": "في الوقت الحالي، لا يستطيع $oisy_short عرض سجل معاملات التوكن الخاص بك لأن الجهة المصدرة لم توفر ميزة التتبع بعد. من المفترض أن تتم إضافتها قريبًا. في هذه الأثناء، لا تقلق - لا يزال بإمكانك إرسال واستلام التوكنات الخاصة بك كالمعتاد.",

@@ -30,30 +30,30 @@ import { derived, type Readable } from 'svelte/store';
 
 export const tokens: Readable<Token[]> = derived(
 	[
+		defaultIcpTokens,
+		enabledBitcoinTokens,
+		enabledEthereumTokens,
+		enabledEvmTokens,
+		enabledSolanaTokens,
 		erc20Tokens,
 		erc721Tokens,
 		erc1155Tokens,
 		sortedIcrcTokens,
-		splTokens,
-		defaultIcpTokens,
 		extTokens,
-		enabledEthereumTokens,
-		enabledBitcoinTokens,
-		enabledSolanaTokens,
-		enabledEvmTokens
+		splTokens
 	],
 	([
+		$defaultIcpTokens,
+		$enabledBitcoinTokens,
+		$enabledEthereumTokens,
+		$enabledEvmTokens,
+		$enabledSolanaTokens,
 		$erc20Tokens,
 		$erc721Tokens,
 		$erc1155Tokens,
 		$icrcTokens,
-		$splTokens,
-		$defaultIcpTokens,
 		$extTokens,
-		$enabledEthereumTokens,
-		$enabledBitcoinTokens,
-		$enabledSolanaTokens,
-		$enabledEvmTokens
+		$splTokens
 	]) => [
 		...$defaultIcpTokens,
 		...$enabledBitcoinTokens,

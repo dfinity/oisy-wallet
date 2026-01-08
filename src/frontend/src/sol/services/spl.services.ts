@@ -102,7 +102,7 @@ const loadCustomTokensWithMetadata = async (
 					return [[...accExisting, { ...existingToken, enabled, version }], accNonExisting];
 				}
 
-				const newToken = {
+				const newToken: SplCustomToken = {
 					id: parseCustomTokenId({
 						identifier: fromNullable(symbol) ?? tokenAddress,
 						chainId: tokenNetwork.chainId
@@ -127,22 +127,40 @@ const loadCustomTokensWithMetadata = async (
 
 		const customTokens: SplCustomToken[] = await nonExistingTokens.reduce<
 			Promise<SplCustomToken[]>
-		>(async (acc, token) => {
+		>(async (acc, { symbol: oldSymbol, name: oldName, ...token }) => {
 			const { network, address } = token;
 
 			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
-			const { owner, ...rest } = await getTokenInfo({ address, network: solNetwork });
+			const {
+				owner,
+				symbol: infoSymbol,
+				name: infoName,
+				...rest
+			} = await getTokenInfo({ address, network: solNetwork });
 
 			if (isNullish(owner)) {
 				return acc;
 			}
 
-			const metadata = await getSplMetadata({ address, network: solNetwork });
+			const {
+				symbol: metadataSymbol,
+				name: metadataName,
+				...metadata
+			} = (await getSplMetadata({ address, network: solNetwork })) ?? {};
+
+			const symbol = infoSymbol ?? metadataSymbol ?? oldSymbol;
+			const name = infoName ?? metadataName ?? oldName;
+
+			if (isNullish(symbol) || isNullish(name)) {
+				return acc;
+			}
 
 			const newToken: SplCustomToken = {
 				...token,
 				owner,
+				symbol,
+				name,
 				...rest,
 				...(nonNullish(metadata) ? hardenMetadata(metadata) : {})
 			};
@@ -172,7 +190,7 @@ export const getSplMetadata = async ({
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-}): Promise<Omit<TokenMetadata, 'decimals'> | undefined> => {
+}): Promise<Partial<Omit<TokenMetadata, 'decimals'>> | undefined> => {
 	try {
 		const metadataResult = await splMetadata({ tokenAddress: address, network });
 
