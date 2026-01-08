@@ -4,10 +4,16 @@ import * as extTokenApi from '$icp/api/ext-v2-token.api';
 import { getTokensByOwner as getExtTokensByOwner } from '$icp/api/ext-v2-token.api';
 import { loadNfts } from '$icp/services/nft.services';
 import { mapDip721Nft, mapExtNft } from '$icp/utils/nft.utils';
+import { TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR } from '$lib/constants/analytics.constants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
 
 describe('nft.services', () => {
 	describe('loadNfts', async () => {
@@ -157,10 +163,14 @@ describe('nft.services', () => {
 				});
 			});
 
-			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
-				`Error loading EXT tokens from collection ${mockValidExtV2Token.canisterId}:`,
-				mockError
-			);
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR,
+				metadata: {
+					error: mockError.message,
+					canisterId: mockValidExtV2Token.canisterId,
+					standard: mockValidExtV2Token.standard.code
+				}
+			});
 		});
 
 		it('should handle DIP721 service errors gracefully', async () => {
@@ -189,10 +199,14 @@ describe('nft.services', () => {
 				});
 			});
 
-			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
-				`Error loading DIP721 tokens from collection ${mockValidDip721Token.canisterId}:`,
-				mockError
-			);
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR,
+				metadata: {
+					error: mockError.message,
+					canisterId: mockValidDip721Token.canisterId,
+					standard: mockValidDip721Token.standard.code
+				}
+			});
 		});
 
 		it("should raise an error if the token's standard is not supported", async () => {
