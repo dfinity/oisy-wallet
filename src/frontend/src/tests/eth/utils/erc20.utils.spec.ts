@@ -10,8 +10,7 @@ import {
 	isTokenErc20,
 	isTokenErc20CustomToken,
 	isTokenEthereumUserToken,
-	mapErc20Token,
-	mapErc20UserToken
+	mapErc20Token
 } from '$eth/utils/erc20.utils';
 import icpDark from '$icp/assets/icp-dark.svg';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -74,62 +73,6 @@ describe('erc20.utils', () => {
 				const mixCaseSymbol = symbol.charAt(0).toUpperCase() + symbol.slice(1).toLowerCase();
 
 				expect(mapErc20Token({ ...mockParams, symbol: mixCaseSymbol }).icon).toBe(expectedIcon);
-			}
-		);
-	});
-
-	describe('mapErc20UserToken', () => {
-		const mockId = parseTokenId('mock-id');
-
-		const mockParams = {
-			id: mockId,
-			name: 'TokenName',
-			symbol: 'ckICP',
-			enabled: true,
-			address: mockValidErc20Token.address,
-			exchange: mockValidErc20Token.exchange,
-			decimals: mockValidErc20Token.decimals,
-			network: mockValidErc20Token.network,
-			category: mockValidErc20Token.category
-		};
-
-		it('should map an ERC20 user token correctly', () => {
-			expect(mapErc20UserToken(mockParams)).toEqual({
-				...mockValidErc20Token,
-				id: mockId,
-				standard: { code: 'erc20' },
-				name: 'TokenName',
-				symbol: 'ckICP',
-				enabled: true,
-				icon: icpDark
-			});
-		});
-
-		it('should map an ERC20 user token correctly when the id is not provided', () => {
-			const { id: _, ...params } = mockParams;
-
-			expect(mapErc20UserToken(params).id.description).toBe(
-				`user-token#ckICP#${params.network.chainId}`
-			);
-		});
-
-		it.each(iconCases)(
-			'should return correct icon for symbol %s and not case-sensitive',
-			// eslint-disable-next-line local-rules/prefer-object-params -- It is a simple list of cases
-			(symbol, expectedIcon) => {
-				expect(mapErc20UserToken({ ...mockParams, symbol }).icon).toBe(expectedIcon);
-
-				expect(mapErc20UserToken({ ...mockParams, symbol: symbol.toLowerCase() }).icon).toBe(
-					expectedIcon
-				);
-
-				expect(mapErc20UserToken({ ...mockParams, symbol: symbol.toUpperCase() }).icon).toBe(
-					expectedIcon
-				);
-
-				const mixCaseSymbol = symbol.charAt(0).toUpperCase() + symbol.slice(1).toLowerCase();
-
-				expect(mapErc20UserToken({ ...mockParams, symbol: mixCaseSymbol }).icon).toBe(expectedIcon);
 			}
 		);
 	});
