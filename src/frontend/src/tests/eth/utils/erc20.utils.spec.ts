@@ -8,6 +8,7 @@ import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import {
 	isTokenErc20,
+	isTokenErc20CustomToken,
 	isTokenErc20UserToken,
 	isTokenEthereumUserToken,
 	mapErc20Token,
@@ -16,6 +17,7 @@ import {
 import icpDark from '$icp/assets/icp-dark.svg';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
 
 describe('erc20.utils', () => {
 	const iconCases = [
@@ -150,6 +152,40 @@ describe('erc20.utils', () => {
 			...SPL_TOKENS
 		])('should return false for token $name', (token) => {
 			expect(isTokenErc20(token)).toBeFalsy();
+		});
+	});
+
+	describe('isTokenErc20CustomToken', () => {
+		const tokens = [...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS];
+
+		it.each(
+			tokens.map((token) => ({
+				...token,
+				enabled: Math.random() < 0.5
+			}))
+		)('should return true for token $name that has the enabled field', (token) => {
+			expect(isTokenErc20CustomToken(token)).toBeTruthy();
+		});
+
+		it.each(tokens)(
+			'should return false for token $name that has not the enabled field',
+			(token) => {
+				expect(isTokenErc20CustomToken(token)).toBeFalsy();
+			}
+		);
+
+		it.each([
+			ICP_TOKEN,
+			...SUPPORTED_BITCOIN_TOKENS,
+			...SUPPORTED_ETHEREUM_TOKENS,
+			...SUPPORTED_EVM_TOKENS,
+			...SUPPORTED_SOLANA_TOKENS,
+			...SPL_TOKENS,
+			...ERC20_TWIN_TOKENS,
+			...EVM_ERC20_TOKENS,
+			...MOCK_ERC721_TOKENS
+		])('should return false for token $name', (token) => {
+			expect(isTokenErc20CustomToken(token)).toBeFalsy();
 		});
 	});
 
