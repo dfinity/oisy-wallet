@@ -4,9 +4,7 @@
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
 	import { isInterfaceErc721 } from '$eth/services/erc721.services';
-	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
-	import type { SaveUserToken } from '$eth/types/erc20-user-token';
 	import type { Erc721Metadata } from '$eth/types/erc721';
 	import IcAddExtTokenReview from '$icp/components/tokens/IcAddExtTokenReview.svelte';
 	import IcAddIcrcTokenReview from '$icp/components/tokens/IcAddIcrcTokenReview.svelte';
@@ -140,8 +138,6 @@
 		}
 
 		if (ethMetadata.decimals >= 0) {
-			await saveErc20Deprecated([{ ...ethMetadata, ...newToken, network }]);
-
 			await saveTokens([{ ...newToken, networkKey: 'Erc20' }]);
 
 			return;
@@ -191,17 +187,6 @@
 
 	const saveTokens = (tokens: SaveCustomTokenWithKey[]): Promise<void> =>
 		saveCustomTokensWithKey({
-			tokens,
-			progress,
-			modalNext,
-			onSuccess,
-			onError,
-			identity: $authIdentity
-		});
-
-	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-	const saveErc20Deprecated = (tokens: SaveUserToken[]): Promise<void> =>
-		saveErc20UserTokens({
 			tokens,
 			progress,
 			modalNext,

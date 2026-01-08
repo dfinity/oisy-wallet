@@ -12,7 +12,6 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import * as appConstants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
@@ -968,7 +967,6 @@ describe('tokens.utils', () => {
 			});
 
 			expect(saveCustomTokensWithKey).not.toHaveBeenCalled();
-			expect(saveErc20UserTokens).not.toHaveBeenCalled();
 		});
 
 		it('should call saveCustomTokensWithKey when ICRC tokens are present', async () => {
