@@ -13,7 +13,7 @@ import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20Metadata } from '$eth/types/erc20';
-import { listCustomTokens, listUserTokens } from '$lib/api/backend.api';
+import { listCustomTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -123,7 +123,6 @@ describe('erc20.services', () => {
 			erc20UserTokensStore.resetAll();
 			erc20CustomTokensStore.resetAll();
 
-			vi.mocked(listUserTokens).mockResolvedValue(mockUserTokens);
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc20);
 
 			mockMetadata.mockImplementation(({ address }) =>
@@ -166,13 +165,6 @@ describe('erc20.services', () => {
 		it('should not throw error if metadata throws', async () => {
 			const mockError = new Error('Error loading metadata');
 			vi.mocked(mockMetadata).mockRejectedValue(mockError);
-
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
-		});
-
-		it('should not throw error if list user tokens throws', async () => {
-			const mockError = new Error('Error loading user tokens');
-			vi.mocked(listUserTokens).mockRejectedValue(mockError);
 
 			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
