@@ -1,12 +1,8 @@
-import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
-import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import type { Erc20CustomToken, SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
-import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
-import { isTokenErc20, isTokenErc20UserToken } from '$eth/utils/erc20.utils';
+import { isTokenErc20, isTokenErc20CustomToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
@@ -44,7 +40,6 @@ import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -350,7 +345,7 @@ export const groupTogglableTokens = (
 ): {
 	icrc: IcrcCustomToken[];
 	ext: ExtCustomToken[];
-	erc20: (Erc20UserToken | Erc20CustomToken)[];
+	erc20: Erc20CustomToken[];
 	erc721: Erc721CustomToken[];
 	erc1155: Erc1155CustomToken[];
 	spl: SplCustomToken[];
@@ -358,7 +353,7 @@ export const groupTogglableTokens = (
 	tokens.reduce<{
 		icrc: IcrcCustomToken[];
 		ext: ExtCustomToken[];
-		erc20: Erc20UserToken[];
+		erc20: Erc20CustomToken[];
 		erc721: Erc721CustomToken[];
 		erc1155: Erc1155CustomToken[];
 		spl: SplCustomToken[];
@@ -369,7 +364,7 @@ export const groupTogglableTokens = (
 				...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
 			],
 			ext: [...ext, ...(isTokenExt(token) ? [token as ExtCustomToken] : [])],
-			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
+			erc20: [...erc20, ...(isTokenErc20CustomToken(token) ? [token] : [])],
 			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
 			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
 			spl: [...spl, ...(isTokenSplCustomToken(token) ? [token] : [])]
@@ -421,35 +416,6 @@ export const saveAllCustomTokens = async ({
 		identity: $authIdentity
 	};
 
-	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-	const customTokens = get(erc20CustomTokensStore) ?? [];
-	const currentUserTokens = (get(erc20UserTokensStore) ?? []).map(({ data: token }) => token);
-	const erc20UserTokens = [...erc20, ...currentUserTokens].filter(
-		(token, index, self) =>
-			index ===
-			self.findIndex(
-				(t) => t.address === token.address && t.network.chainId === token.network.chainId
-			)
-	);
-	const erc20CustomTokens = erc20UserTokens.reduce<SaveErc20CustomToken[]>((acc, token) => {
-		const customToken = customTokens.find(
-			({
-				data: {
-					address,
-					network: { chainId }
-				}
-			}) => address === token.address && chainId === token.network.chainId
-		);
-
-		return [
-			...acc,
-			{
-				...token,
-				...(nonNullish(customToken) ? { version: customToken.data.version } : {})
-			}
-		];
-	}, []);
-
 	await Promise.allSettled([
 		...(icrc.length > 0
 			? [
@@ -469,18 +435,12 @@ export const saveAllCustomTokens = async ({
 			: []),
 		...(erc20.length > 0
 			? [
-					// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-					saveErc20UserTokens({
-						...commonParams,
-						tokens: erc20
-					}),
 					saveCustomTokensWithKey({
 						...commonParams,
-						tokens: erc20CustomTokens.map((t) => ({
+						tokens: erc20.map((t) => ({
 							...t,
 							chainId: t.network.chainId,
-							// TODO: remove "as const" when UserToken is removed and we use directly `erc20`
-							networkKey: 'Erc20' as const
+							networkKey: 'Erc20'
 						}))
 					})
 				]
