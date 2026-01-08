@@ -3,8 +3,7 @@ import type {
 	_SERVICE as BackendService,
 	CustomToken,
 	IcrcToken,
-	UserProfile,
-	UserToken
+	UserProfile
 } from '$declarations/backend/backend.did';
 
 import { BackendCanister } from '$lib/canisters/backend.canister';
@@ -124,16 +123,6 @@ describe('backend.canister', () => {
 		created_timestamp: 1n,
 		updated_timestamp: 1n
 	} as UserProfile;
-
-	const mockedUserToken = {
-		decimals: [],
-		version: [],
-		enabled: [],
-		chain_id: 1n,
-		contract_address: 'test_address',
-		symbol: []
-	} as UserToken;
-	const userTokens = [mockedUserToken];
 
 	const mockedCustomToken = {
 		token: {
