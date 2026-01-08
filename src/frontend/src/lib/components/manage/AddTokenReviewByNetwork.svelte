@@ -138,7 +138,6 @@
 		}
 
 		if (ethMetadata.decimals >= 0) {
-
 			await saveTokens([{ ...newToken, networkKey: 'Erc20' }]);
 
 			return;
@@ -195,8 +194,6 @@
 			onError,
 			identity: $authIdentity
 		});
-
-
 
 	let icrcMetadata: ValidateIcrcTokenData | undefined = $state();
 
