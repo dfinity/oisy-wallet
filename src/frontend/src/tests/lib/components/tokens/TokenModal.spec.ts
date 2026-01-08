@@ -29,8 +29,8 @@ vi.mock('$icp/services/icrc.services', () => ({
 }));
 
 describe('TokenModal', () => {
-	const mockRemoveUserToken = () =>
-		vi.spyOn(backendApi, 'removeUserToken').mockResolvedValue(undefined);
+	const mockRemoveCustomToken = () =>
+		vi.spyOn(backendApi, 'removeCustomToken').mockResolvedValue(undefined);
 	const mockSetCustomToken = () =>
 		vi.spyOn(backendApi, 'setCustomToken').mockResolvedValue(undefined);
 	const mockIcAddCustomTokensService = (result = true) =>
@@ -61,7 +61,7 @@ describe('TokenModal', () => {
 			}
 		});
 
-		const removeUserTokenMock = mockRemoveUserToken();
+		const removeCustomTokenMock = mockRemoveCustomToken();
 		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
 		mockAuthStore();
@@ -75,7 +75,7 @@ describe('TokenModal', () => {
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
 		await waitFor(() => {
-			expect(removeUserTokenMock).toHaveBeenCalledOnce();
+			expect(removeCustomTokenMock).toHaveBeenCalledOnce();
 			expect(toasts).toHaveBeenCalledOnce();
 			expect(gotoReplaceRoot).toHaveBeenCalledOnce();
 		});
@@ -193,7 +193,7 @@ describe('TokenModal', () => {
 			}
 		});
 
-		const removeUserTokenMock = mockRemoveUserToken();
+		const removeCustomTokenMock = mockRemoveCustomToken();
 		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
 		mockAuthStore();
@@ -206,7 +206,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
-		expect(removeUserTokenMock).not.toHaveBeenCalledOnce();
+		expect(removeCustomTokenMock).not.toHaveBeenCalledOnce();
 		expect(toasts).not.toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
 	});
@@ -222,7 +222,7 @@ describe('TokenModal', () => {
 			}
 		});
 
-		const removeUserTokenMock = mockRemoveUserToken();
+		const removeCustomTokenMock = mockRemoveCustomToken();
 		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
 
@@ -234,7 +234,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
-		expect(removeUserTokenMock).not.toHaveBeenCalledOnce();
+		expect(removeCustomTokenMock).not.toHaveBeenCalledOnce();
 		expect(toasts).not.toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
 	});
@@ -260,8 +260,8 @@ describe('TokenModal', () => {
 			}
 		});
 
-		const removeUserTokenMock = vi
-			.spyOn(backendApi, 'removeUserToken')
+		const removeCustomTokenMock = vi
+			.spyOn(backendApi, 'removeCustomToken')
 			.mockRejectedValue(new Error('test'));
 		const toastsError = mockToastsError();
 		const gotoReplaceRoot = mockGoToRoot();
@@ -275,7 +275,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
-		expect(removeUserTokenMock).toHaveBeenCalledOnce();
+		expect(removeCustomTokenMock).toHaveBeenCalledOnce();
 		expect(toastsError).toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
 	});
