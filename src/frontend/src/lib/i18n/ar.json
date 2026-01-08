@@ -634,7 +634,7 @@
 			"erc1155_custom_tokens": "",
 			"erc20_user_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20.",
 			"spl_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم SPL المخصصة.",
-			"erc20_user_token": "خطأ أثناء تفعيل التوكن التوأم ERC20.",
+			"erc20_custom_token": "خطأ أثناء تفعيل التوكن التوأم ERC20.",
 			"icrc_custom_token": "خطأ أثناء تحميل التوكن المخصص ICRC.",
 			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "تتطلب محفظتك بعض البيانات الأولية التي لم يتم تحميلها بعد. يرجى المحاولة مرة أخرى.",

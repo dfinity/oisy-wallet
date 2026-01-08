@@ -634,7 +634,7 @@
 			"erc1155_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC1155.",
 			"erc20_user_tokens": "Erreur lors du chargement des tokens utilisateur ERC20.",
 			"spl_custom_tokens": "Erreur lors du chargement des tokens personnalisés SPL.",
-			"erc20_user_token": "Erreur lors de l'activation du token jumeau ERC20.",
+			"erc20_custom_token": "Erreur lors de l'activation du token jumeau ERC20.",
 			"icrc_custom_token": "Erreur lors du chargement du token personnalisé ICRC.",
 			"ext_custom_tokens": "Erreur lors du chargement des tokens personnalisés EXT.",
 			"loading_wallet_timeout": "Votre portefeuille nécessite des données initiales qui n'ont pas encore été chargées. Veuillez réessayer.",

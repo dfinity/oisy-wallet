@@ -634,7 +634,7 @@
 			"erc1155_custom_tokens": "Error al cargar los tokens ERC1155 personalizados.",
 			"erc20_user_tokens": "Error al cargar los tokens de usuario ERC20.",
 			"spl_custom_tokens": "Error al cargar los tokens SPL personalizados.",
-			"erc20_user_token": "Error al habilitar el token gemelo ERC20.",
+			"erc20_custom_token": "Error al habilitar el token gemelo ERC20.",
 			"icrc_custom_token": "Error al cargar el token ICRC personalizado.",
 			"ext_custom_tokens": "",
 			"loading_wallet_timeout": "Tu billetera requiere algunos datos iniciales que aún no se han cargado. Por favor, inténtalo de nuevo.",
