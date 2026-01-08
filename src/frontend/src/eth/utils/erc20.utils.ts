@@ -50,11 +50,11 @@ export const mapErc20Icon = (symbol: string): string | undefined => {
 
 export const isTokenErc20 = (token: Token): token is Erc20Token => token.standard.code === 'erc20';
 
+export const isTokenErc20CustomToken = (token: Token): token is Erc20CustomToken =>
+	isTokenErc20(token) && isTokenToggleable(token);
+
 export const isTokenEthereumUserToken = (token: Token): token is EthereumUserToken =>
 	(token.standard.code === 'ethereum' || isTokenErc20(token)) && isTokenToggleable(token);
 
 export const isTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
 	isTokenErc20(token) && isTokenToggleable(token) && 'address' in token && 'exchange' in token;
-
-export const isTokenErc20CustomToken = (token: Token): token is Erc20CustomToken =>
-	isTokenErc20(token) && isTokenToggleable(token);
