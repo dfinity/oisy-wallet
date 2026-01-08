@@ -632,7 +632,6 @@
 			"erc20_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC20.",
 			"erc721_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC721.",
 			"erc1155_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC1155.",
-			"erc20_user_tokens": "Erreur lors du chargement des tokens utilisateur ERC20.",
 			"spl_custom_tokens": "Erreur lors du chargement des tokens personnalisés SPL.",
 			"erc20_custom_token": "Erreur lors de l'activation du token jumeau ERC20.",
 			"icrc_custom_token": "Erreur lors du chargement du token personnalisé ICRC.",
