@@ -50,55 +50,6 @@ describe('erc20.services', () => {
 		decimals: 4
 	};
 
-	const expectedUserTokens = [
-		{
-			certified: true,
-			data: {
-				standard: { code: 'erc20' },
-				category: 'custom',
-				exchange: 'erc20',
-				version: 1n,
-				enabled: true,
-				network: ETHEREUM_NETWORK,
-				address: mockEthAddress,
-				decimals: mockMetadata1.decimals,
-				name: mockMetadata1.name,
-				symbol: mockMetadata1.symbol,
-				icon: mockMetadata1.icon
-			}
-		},
-		{
-			certified: true,
-			data: {
-				standard: { code: 'erc20' },
-				category: 'custom',
-				exchange: 'erc20',
-				version: 2n,
-				enabled: true,
-				network: BASE_NETWORK,
-				address: mockEthAddress2.toUpperCase(),
-				decimals: mockMetadata2.decimals,
-				name: mockMetadata2.name,
-				symbol: mockMetadata2.symbol
-			}
-		},
-		{
-			certified: true,
-			data: {
-				standard: { code: 'erc20' },
-				category: 'custom',
-				exchange: 'erc20',
-				version: undefined,
-				enabled: false,
-				network: POLYGON_AMOY_NETWORK,
-				address: mockEthAddress3,
-				decimals: mockMetadata2.decimals,
-				name: mockMetadata2.name,
-				symbol: mockMetadata2.symbol
-			}
-		}
-	];
-
 	const expectedCustomTokens = [
 		{
 			certified: true,
