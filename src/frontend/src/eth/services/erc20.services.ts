@@ -25,7 +25,6 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Icon, mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
 import { listUserTokens } from '$lib/api/backend.api';
-import { getIdbEthTokensDeprecated, setIdbEthTokensDeprecated } from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
@@ -139,36 +138,19 @@ const loadUserTokensFromBackend = async ({
 }: {
 	identity: OptionIdentity;
 	certified: boolean;
-}): Promise<UserToken[]> => {
-	const contracts = await listUserTokens({
+}): Promise<UserToken[]> =>
+	await listUserTokens({
 		identity,
 		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	// Caching the custom tokens in the IDB if update call
-	if (certified && contracts.length > 0) {
-		await setIdbEthTokensDeprecated({ identity, tokens: contracts });
-	}
-
-	return contracts;
-};
-
 const loadNetworkUserTokens = async ({
 	identity,
-	certified,
-	useCache = false
+	certified
 }: LoadUserTokenParams): Promise<UserToken[]> => {
 	if (isNullish(identity)) {
 		return [];
-	}
-
-	if (useCache && !certified) {
-		const cachedTokens = await getIdbEthTokensDeprecated(identity.getPrincipal());
-
-		if (nonNullish(cachedTokens)) {
-			return cachedTokens;
-		}
 	}
 
 	return await loadUserTokensFromBackend({

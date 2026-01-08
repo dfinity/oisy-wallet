@@ -13,7 +13,6 @@
 	import { toUserToken } from '$icp-eth/services/erc20-token.services';
 	import { removeCustomToken, removeUserToken, setCustomToken } from '$lib/api/backend.api';
 	import {
-		deleteIdbEthTokenDeprecated,
 		deleteIdbIcToken,
 		deleteIdbSolToken
 	} from '$lib/api/idb-tokens.api';
@@ -167,7 +166,6 @@
 				});
 
 				erc20UserTokensStore.reset(tokenToDelete.id);
-				await deleteIdbEthTokenDeprecated({ identity: $authIdentity, token: userToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
 			} else if (isTokenIcrc(tokenToDelete)) {
