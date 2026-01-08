@@ -40,8 +40,8 @@ export interface SaveTokensParams<T> {
 export const saveTokens = async <
 	T extends
 		| SaveCustomTokenWithKey
-		| SaveSplCustomToken
 		| SaveErc20CustomToken
+		| SaveSplCustomToken
 		| SaveErc721CustomToken
 		| SaveErc1155CustomToken
 		| TokenToggleable<Token>
