@@ -29,7 +29,6 @@ import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/toke
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -191,7 +190,6 @@ describe('tokens.derived', () => {
 		vi.resetAllMocks();
 
 		erc20DefaultTokensStore.reset();
-		erc20UserTokensStore.resetAll();
 		erc20CustomTokensStore.resetAll();
 		erc721CustomTokensStore.resetAll();
 		erc1155CustomTokensStore.resetAll();
@@ -210,7 +208,6 @@ describe('tokens.derived', () => {
 	describe('tokens', () => {
 		it('should return all the non-testnet tokens by default', () => {
 			erc20DefaultTokensStore.add(mockErc20DefaultToken);
-			erc20UserTokensStore.setAll([{ data: mockEr20CustomToken, certified: false }]);
 			erc20CustomTokensStore.setAll([{ data: mockEr20CustomToken, certified: false }]);
 			erc721CustomTokensStore.setAll([{ data: mockErc721CustomToken, certified: false }]);
 			erc1155CustomTokensStore.setAll([{ data: mockErc1155CustomToken, certified: false }]);
@@ -323,7 +320,6 @@ describe('tokens.derived', () => {
 	describe('fungibleTokens', () => {
 		it('should return all fungible tokens', () => {
 			erc20DefaultTokensStore.add(mockErc20DefaultToken);
-			erc20UserTokensStore.setAll([{ data: mockEr20CustomToken, certified: false }]);
 			erc20CustomTokensStore.setAll([{ data: mockEr20CustomToken, certified: false }]);
 			erc721CustomTokensStore.setAll([{ data: mockErc721CustomToken, certified: false }]);
 			erc1155CustomTokensStore.setAll([{ data: mockErc1155CustomToken, certified: false }]);

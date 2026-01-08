@@ -11,9 +11,8 @@ import * as infuraProvidersModule from '$eth/providers/infura-erc20.providers';
 import { loadCustomTokens, loadErc20Tokens } from '$eth/services/erc20.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20Metadata } from '$eth/types/erc20';
-import { listCustomTokens, listUserTokens } from '$lib/api/backend.api';
+import { listCustomTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -28,7 +27,6 @@ import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/api/backend.api', () => ({
-	listUserTokens: vi.fn(),
 	listCustomTokens: vi.fn()
 }));
 
@@ -120,10 +118,8 @@ describe('erc20.services', () => {
 			vi.spyOn(toastsStore, 'toastsError');
 
 			erc20DefaultTokensStore.reset();
-			erc20UserTokensStore.resetAll();
 			erc20CustomTokensStore.resetAll();
 
-			vi.mocked(listUserTokens).mockResolvedValue(mockUserTokens);
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc20);
 
 			mockMetadata.mockImplementation(({ address }) =>
@@ -170,13 +166,6 @@ describe('erc20.services', () => {
 			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 
-		it('should not throw error if list user tokens throws', async () => {
-			const mockError = new Error('Error loading user tokens');
-			vi.mocked(listUserTokens).mockRejectedValue(mockError);
-
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
-		});
-
 		it('should not throw error if list custom tokens throws', async () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
@@ -186,7 +175,6 @@ describe('erc20.services', () => {
 
 		it('should reset both tokens stores on error', async () => {
 			erc20DefaultTokensStore.add(SEPOLIA_PEPE_TOKEN);
-			erc20UserTokensStore.setAll([{ data: { ...EURC_TOKEN, enabled: true }, certified: false }]);
 			erc20CustomTokensStore.setAll([{ data: { ...EURC_TOKEN, enabled: true }, certified: false }]);
 
 			vi.mocked(mockMetadata).mockRejectedValue(new Error('Error loading metadata'));

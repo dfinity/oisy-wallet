@@ -11,7 +11,6 @@ import {
 } from '$eth/services/eth-transactions.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
@@ -36,7 +35,7 @@ vi.mock('$lib/services/analytics.services', () => ({
 }));
 
 describe('eth-transactions.services', () => {
-	const mockErc20UserTokens = [USDC_TOKEN, LINK_TOKEN, PEPE_TOKEN].map((token) => ({
+	const mockErc20CustomTokens = [USDC_TOKEN, LINK_TOKEN, PEPE_TOKEN].map((token) => ({
 		data: { ...token, enabled: true },
 		certified: false
 	}));
@@ -45,8 +44,7 @@ describe('eth-transactions.services', () => {
 		vi.clearAllMocks();
 
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
-		erc20UserTokensStore.setAll(mockErc20UserTokens);
-		erc20CustomTokensStore.setAll(mockErc20UserTokens);
+		erc20CustomTokensStore.setAll(mockErc20CustomTokens);
 	});
 
 	describe('loadEthereumTransactions', () => {
