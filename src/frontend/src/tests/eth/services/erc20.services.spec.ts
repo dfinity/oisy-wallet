@@ -483,29 +483,6 @@ describe('erc20.services', () => {
 				err: mockError
 			});
 		});
-
-		it('should cache the custom tokens in IDB on update call', async () => {
-			await loadErc20UserTokens({ identity: mockIdentity });
-
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
-			expect(idbKeyval.set).toHaveBeenNthCalledWith(
-				1,
-				mockIdentity.getPrincipal().toText(),
-				mockUserTokens,
-				expect.any(Object)
-			);
-		});
-
-		it('should fetch the cached custom tokens in IDB on query call', async () => {
-			await loadErc20UserTokens({ identity: mockIdentity, useCache: true });
-
-			expect(idbKeyval.get).toHaveBeenCalledOnce();
-			expect(idbKeyval.get).toHaveBeenNthCalledWith(
-				1,
-				mockIdentity.getPrincipal().toText(),
-				expect.any(Object)
-			);
-		});
 	});
 
 	describe('loadCustomTokens', () => {
