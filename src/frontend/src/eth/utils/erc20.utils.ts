@@ -1,4 +1,5 @@
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import icpDark from '$icp/assets/icp-dark.svg';
@@ -54,3 +55,6 @@ export const isTokenEthereumUserToken = (token: Token): token is EthereumUserTok
 
 export const isTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
 	isTokenErc20(token) && isTokenToggleable(token) && 'address' in token && 'exchange' in token;
+
+export const isTokenErc20CustomToken = (token: Token): token is Erc20CustomToken =>
+	isTokenErc20(token) && isTokenToggleable(token);
