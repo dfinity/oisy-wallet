@@ -38,6 +38,3 @@ export const isTokenErc20CustomToken = (token: Token): token is Erc20CustomToken
 
 export const isTokenEthereumUserToken = (token: Token): token is EthereumUserToken =>
 	(token.standard.code === 'ethereum' || isTokenErc20(token)) && isTokenToggleable(token);
-
-export const isTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
-	isTokenErc20(token) && isTokenToggleable(token) && 'address' in token && 'exchange' in token;

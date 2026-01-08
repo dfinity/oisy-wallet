@@ -9,7 +9,6 @@ import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import {
 	isTokenErc20,
 	isTokenErc20CustomToken,
-	isTokenErc20UserToken,
 	isTokenEthereumUserToken,
 	mapErc20Token
 } from '$eth/utils/erc20.utils';
@@ -162,54 +161,5 @@ describe('erc20.utils', () => {
 				expect(isTokenEthereumUserToken(token)).toBeFalsy();
 			}
 		);
-	});
-
-	describe('isTokenErc20UserToken', () => {
-		const tokens = [...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS];
-
-		it.each(
-			tokens.map((token) => ({
-				...token,
-				enabled: Math.random() < 0.5
-			}))
-		)('should return true for token $name that has the enabled field', (token) => {
-			expect(isTokenErc20UserToken(token)).toBeTruthy();
-		});
-
-		it.each(
-			tokens.map(({ exchange: _, ...token }) => ({
-				...token,
-				enabled: Math.random() < 0.5
-			}))
-		)('should return false for token $name that has not the exchange field', (token) => {
-			expect(isTokenErc20UserToken(token)).toBeFalsy();
-		});
-
-		it.each(
-			tokens.map(({ address: _, ...token }) => ({
-				...token,
-				enabled: Math.random() < 0.5
-			}))
-		)('should return false for token $name that has not the address field', (token) => {
-			expect(isTokenErc20UserToken(token)).toBeFalsy();
-		});
-
-		it.each(tokens)(
-			'should return false for token $name that has not the enabled field',
-			(token) => {
-				expect(isTokenErc20UserToken(token)).toBeFalsy();
-			}
-		);
-
-		it.each([
-			ICP_TOKEN,
-			...SUPPORTED_BITCOIN_TOKENS,
-			...SUPPORTED_ETHEREUM_TOKENS,
-			...SUPPORTED_EVM_TOKENS,
-			...SUPPORTED_SOLANA_TOKENS,
-			...SPL_TOKENS
-		])('should return false for token $name', (token) => {
-			expect(isTokenErc20UserToken(token)).toBeFalsy();
-		});
 	});
 });

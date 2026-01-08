@@ -632,7 +632,6 @@
 			"erc20_custom_tokens": "ERC20 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc721_custom_tokens": "ERC721 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc1155_custom_tokens": "ERC1155 कस्टम टोकन लोड करते समय त्रुटि।",
-			"erc20_user_tokens": "ERC20 उपयोगकर्ता टोकन लोड करते समय त्रुटि।",
 			"spl_custom_tokens": "SPL कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc20_custom_token": "ERC20 ट्विन टोकन सक्षम करते समय त्रुटि।",
 			"icrc_custom_token": "ICRC कस्टम टोकन लोड करते समय त्रुटि।",
