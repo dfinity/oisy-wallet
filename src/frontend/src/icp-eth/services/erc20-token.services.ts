@@ -1,8 +1,6 @@
-import type { UserToken } from '$declarations/backend/backend.did';
 import { loadCustomTokens } from '$eth/services/erc20.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
-import type { SaveUserToken } from '$eth/types/erc20-user-token';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.services';
@@ -10,7 +8,6 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
-import { toNullable } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
@@ -66,22 +63,6 @@ export const autoLoadErc20Token = async ({
 		loadTokens: loadCustomTokens,
 		errorMessage: get(i18n).init.error.erc20_custom_token
 	});
-
-export const toUserToken = ({
-	address: contract_address,
-	network,
-	decimals,
-	symbol,
-	version,
-	enabled
-}: SaveUserToken): UserToken => ({
-	contract_address,
-	chain_id: network.chainId,
-	decimals: toNullable(decimals),
-	symbol: toNullable(symbol),
-	version: toNullable(version),
-	enabled: toNullable(enabled)
-});
 
 export const setCustomToken = async ({
 	token,
