@@ -40,7 +40,7 @@ const loadExtNfts = async ({
 	} catch (err: unknown) {
 		trackEvent({
 			name: TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR,
-			metadata: { ...mapIcErrorMetadata(err), canisterId, standard }
+			metadata: { ...(mapIcErrorMetadata(err) ?? {}), canisterId, standard }
 		});
 
 		return [];
@@ -74,7 +74,7 @@ const loadDip721Nfts = async ({
 	} catch (err: unknown) {
 		trackEvent({
 			name: TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR,
-			metadata: { ...mapIcErrorMetadata(err), canisterId, standard }
+			metadata: { ...(mapIcErrorMetadata(err) ?? {}), canisterId, standard }
 		});
 
 		return [];
