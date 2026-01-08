@@ -1005,23 +1005,6 @@ describe('tokens.utils', () => {
 			);
 		});
 
-		it('should call saveErc20UserTokens when ERC20 tokens are present', async () => {
-			const token = { ...mockValidErc20Token, enabled: true } as unknown as TokenUi;
-
-			await saveAllCustomTokens({
-				tokens: [token],
-				$authIdentity: mockIdentity,
-				$i18n: i18nMock
-			});
-
-			expect(saveErc20UserTokens).toHaveBeenCalledWith(
-				expect.objectContaining({
-					tokens: expect.arrayContaining([expect.objectContaining(token)]),
-					identity: mockIdentity
-				})
-			);
-		});
-
 		it('should call saveCustomTokensWithKey when ERC20 tokens are present', async () => {
 			const token = { ...mockValidErc20Token, enabled: true } as unknown as TokenUi;
 
