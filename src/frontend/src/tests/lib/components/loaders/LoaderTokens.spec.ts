@@ -101,7 +101,7 @@ describe('LoaderTokens', () => {
 		extNotInitStore.set(true);
 		splNotInitStore.set(true);
 
-		vi.spyOn(erc20Derived, 'erc20UserTokensNotInitialized', 'get').mockReturnValue(
+		vi.spyOn(erc20Derived, 'erc20CustomTokensNotInitialized', 'get').mockReturnValue(
 			erc20NotInitStore
 		);
 

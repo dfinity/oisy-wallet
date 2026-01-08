@@ -1,7 +1,6 @@
 import { enabledEthereumNetworksIds } from '$eth/derived/networks.derived';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import { enabledEvmNetworksIds } from '$evm/derived/networks.derived';
@@ -112,12 +111,12 @@ export const enabledErc20Tokens: Readable<Erc20CustomToken[]> = derived(
 	]
 );
 
-export const erc20UserTokensInitialized: Readable<boolean> = derived(
-	[erc20UserTokensStore],
-	([$erc20UserTokensStore]) => $erc20UserTokensStore !== undefined
+export const erc20CustomTokensInitialized: Readable<boolean> = derived(
+	[erc20CustomTokensStore],
+	([$erc20CustomTokensStore]) => $erc20CustomTokensStore !== undefined
 );
 
-export const erc20UserTokensNotInitialized: Readable<boolean> = derived(
-	[erc20UserTokensInitialized],
+export const erc20CustomTokensNotInitialized: Readable<boolean> = derived(
+	[erc20CustomTokensInitialized],
 	([$erc20TokensInitialized]) => !$erc20TokensInitialized
 );

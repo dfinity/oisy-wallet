@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { erc1155CustomTokensNotInitialized } from '$eth/derived/erc1155.derived';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { erc20CustomTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { erc721CustomTokensNotInitialized } from '$eth/derived/erc721.derived';
 	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
@@ -49,7 +49,7 @@
 				$networkEvmMainnetEnabled ||
 				($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled)))
 	);
-	let loadErc20 = $derived(loadErc && $erc20UserTokensNotInitialized);
+	let loadErc20 = $derived(loadErc && $erc20CustomTokensNotInitialized);
 	let loadErc721 = $derived(loadErc && $erc721CustomTokensNotInitialized);
 	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized);
 
