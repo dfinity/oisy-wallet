@@ -5,13 +5,13 @@
 	import { onMount } from 'svelte';
 	import { loadCustomTokens } from '$eth/services/erc20.services';
 	import type { OptionErc20UserToken } from '$eth/types/erc20-user-token';
-	import { setUserToken } from '$icp-eth/services/erc20-token.services';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import {
 		HIDE_TOKEN_MODAL_ROUTE,
 		TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
@@ -55,7 +55,17 @@
 			}
 		});
 
-		await setUserToken({ ...params, token: selectedToken, enabled: false });
+		await saveCustomTokens({
+			...params,
+			tokens: [
+				{
+					...selectedToken,
+					chainId: selectedToken.network.chainId,
+					networkKey: 'Erc20',
+					enabled: false
+				}
+			]
+		});
 	};
 
 	// TODO(GIX-2740): no call to Infura - remove only the selected token from stores
