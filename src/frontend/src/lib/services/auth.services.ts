@@ -14,12 +14,7 @@ import {
 	deleteIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
 import { clearIdbBalances, deleteIdbBalances } from '$lib/api/idb-balances.api';
-import {
-	clearIdbAllCustomTokens,
-	clearIdbEthTokensDeprecated,
-	deleteIdbAllCustomTokens,
-	deleteIdbEthTokensDeprecated
-} from '$lib/api/idb-tokens.api';
+import { clearIdbAllCustomTokens, deleteIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import {
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,
@@ -243,8 +238,6 @@ const deleteIdbStoreList = [
 	deleteIdbSolAddressLocal,
 	// Tokens
 	deleteIdbAllCustomTokens,
-	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-	deleteIdbEthTokensDeprecated,
 	// Transactions
 	deleteIdbBtcTransactions,
 	deleteIdbEthTransactions,
@@ -264,8 +257,6 @@ const clearIdbStoreList = [
 	clearIdbSolAddressLocal,
 	// Tokens
 	clearIdbAllCustomTokens,
-	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-	clearIdbEthTokensDeprecated,
 	// Transactions
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,

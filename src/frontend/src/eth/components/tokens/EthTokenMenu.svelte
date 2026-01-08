@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
+	import { erc20CustomTokensInitialized } from '$eth/derived/erc20.derived';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
@@ -23,7 +23,7 @@
 </script>
 
 <TokenMenu testId={TOKEN_MENU_ETH}>
-	{#if nonNullish(explorerUrl) && $erc20UserTokensInitialized}
+	{#if nonNullish(explorerUrl) && $erc20CustomTokensInitialized}
 		<div in:fade>
 			<ExternalLink
 				ariaLabel={$i18n.tokens.alt.open_etherscan}

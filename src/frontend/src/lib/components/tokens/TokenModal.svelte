@@ -12,11 +12,7 @@
 	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { toUserToken } from '$icp-eth/services/erc20-token.services';
 	import { removeCustomToken, removeUserToken, setCustomToken } from '$lib/api/backend.api';
-	import {
-		deleteIdbEthTokenDeprecated,
-		deleteIdbIcToken,
-		deleteIdbSolToken
-	} from '$lib/api/idb-tokens.api';
+	import { deleteIdbIcToken, deleteIdbSolToken } from '$lib/api/idb-tokens.api';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
@@ -167,7 +163,6 @@
 				});
 
 				erc20UserTokensStore.reset(tokenToDelete.id);
-				await deleteIdbEthTokenDeprecated({ identity: $authIdentity, token: userToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
 			} else if (isTokenIcrc(tokenToDelete)) {
