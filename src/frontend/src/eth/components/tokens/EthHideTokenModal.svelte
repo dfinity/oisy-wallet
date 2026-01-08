@@ -3,7 +3,7 @@
 	import type { Identity } from '@icp-sdk/core/agent';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
-	import { loadErc20UserTokens } from '$eth/services/erc20.services';
+	import { loadCustomTokens } from '$eth/services/erc20.services';
 	import type { OptionErc20UserToken } from '$eth/types/erc20-user-token';
 	import { setUserToken } from '$icp-eth/services/erc20-token.services';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
@@ -59,7 +59,7 @@
 	};
 
 	// TODO(GIX-2740): no call to Infura - remove only the selected token from stores
-	const onUpdateUi = (params: { identity: Identity }): Promise<void> => loadErc20UserTokens(params);
+	const onUpdateUi = (params: { identity: Identity }): Promise<void> => loadCustomTokens(params);
 </script>
 
 <HideTokenModal {fromRoute} {onAssertHide} {onHideToken} {onUpdateUi} />
