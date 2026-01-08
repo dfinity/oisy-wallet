@@ -21,7 +21,8 @@ pub fn add_to_user_token<T>(
             *existing_token = token.with_incremented_version();
         } else {
             ic_cdk::trap(&format!(
-                "Version mismatch, token update not allowed: {:?}",
+                "Version mismatch, token update not allowed. Existing token: {:?}, New token: {:?}",
+                existing_token,
                 token
             ));
         }
