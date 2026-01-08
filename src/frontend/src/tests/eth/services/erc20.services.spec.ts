@@ -196,22 +196,6 @@ describe('erc20.services', () => {
 			});
 		});
 
-		it('should save the user tokens in the store', async () => {
-			await loadErc20Tokens({ identity: mockIdentity });
-
-			const tokens = get(erc20UserTokensStore);
-
-			const expected = expectedUserTokens.map((token, index) => ({
-				...token,
-				data: {
-					...token.data,
-					id: (tokens ?? [])[index].data.id
-				}
-			}));
-
-			expect(tokens).toEqual(expected);
-		});
-
 		it('should save the custom tokens in the store', async () => {
 			await loadErc20Tokens({ identity: mockIdentity });
 
@@ -259,7 +243,6 @@ describe('erc20.services', () => {
 			await loadErc20Tokens({ identity: mockIdentity });
 
 			expect(get(erc20DefaultTokensStore)).toBeUndefined();
-			expect(get(erc20UserTokensStore)).toBeNull();
 			expect(get(erc20CustomTokensStore)).toStrictEqual([
 				{ data: { ...EURC_TOKEN, enabled: true }, certified: false }
 			]);
@@ -271,13 +254,8 @@ describe('erc20.services', () => {
 
 			await loadErc20Tokens({ identity: mockIdentity });
 
-			expect(toastsErrorNoTrace).toHaveBeenCalledTimes(2);
-			expect(toastsErrorNoTrace).toHaveBeenNthCalledWith(1, {
+			expect(toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.init.error.erc20_contracts },
-				err: mockError
-			});
-			expect(toastsErrorNoTrace).toHaveBeenNthCalledWith(2, {
-				msg: { text: en.init.error.erc20_user_tokens },
 				err: mockError
 			});
 		});
