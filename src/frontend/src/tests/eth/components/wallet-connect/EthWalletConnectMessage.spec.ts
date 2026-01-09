@@ -2,8 +2,8 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import EthWalletConnectMessage from '$eth/components/wallet-connect/EthWalletConnectMessage.svelte';
 import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import * as walletConnectUtils from '$eth/utils/wallet-connect.utils';
 import {
 	getSignParamsMessageTypedDataV4,
@@ -63,10 +63,10 @@ describe('EthWalletConnectMessage', () => {
 		vi.spyOn(walletConnectUtils, 'getSignParamsMessageTypedDataV4');
 
 		erc20DefaultTokensStore.reset();
-		erc20UserTokensStore.resetAll();
+		erc20CustomTokensStore.resetAll();
 
 		erc20DefaultTokensStore.add(USDC_TOKEN);
-		erc20UserTokensStore.setAll([{ data: { ...USDC_TOKEN, enabled: true }, certified: false }]);
+		erc20CustomTokensStore.setAll([{ data: { ...USDC_TOKEN, enabled: true }, certified: false }]);
 	});
 
 	it('should render the JSON parsed message', () => {
@@ -166,7 +166,7 @@ describe('EthWalletConnectMessage', () => {
 
 	it('should not render the token if it is not enabled', () => {
 		erc20DefaultTokensStore.reset();
-		erc20UserTokensStore.resetAll();
+		erc20CustomTokensStore.resetAll();
 
 		const { queryByText } = render(EthWalletConnectMessage, {
 			props: {

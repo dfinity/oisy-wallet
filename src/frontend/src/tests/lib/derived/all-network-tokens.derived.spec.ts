@@ -14,7 +14,6 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
@@ -96,7 +95,6 @@ describe('all-network-tokens.derived', () => {
 
 		erc721CustomTokensStore.resetAll();
 		erc20DefaultTokensStore.reset();
-		erc20UserTokensStore.resetAll();
 		icrcDefaultTokensStore.resetAll();
 		icrcCustomTokensStore.resetAll();
 		splDefaultTokensStore.reset();
