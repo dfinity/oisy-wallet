@@ -122,6 +122,7 @@ describe('erc20.services', () => {
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc20);
 
 			mockMetadata.mockImplementation(({ address }) =>
+				'Erc20' in mockCustomTokensErc20[0].token &&
 				address === mockCustomTokensErc20[0].token.Erc20.token_address
 					? mockMetadata1
 					: mockMetadata2
