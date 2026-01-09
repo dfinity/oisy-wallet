@@ -20,7 +20,6 @@ import { mockCustomTokensErc20 } from '$tests/mocks/custom-tokens.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockUserTokens } from '$tests/mocks/user-tokens.mock';
 import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
@@ -123,7 +122,10 @@ describe('erc20.services', () => {
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc20);
 
 			mockMetadata.mockImplementation(({ address }) =>
-				address === mockUserTokens[0].contract_address ? mockMetadata1 : mockMetadata2
+				'Erc20' in mockCustomTokensErc20[0].token &&
+				address === mockCustomTokensErc20[0].token.Erc20.token_address
+					? mockMetadata1
+					: mockMetadata2
 			);
 
 			infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraErc20Providers');
