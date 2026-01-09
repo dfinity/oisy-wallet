@@ -3,8 +3,7 @@ import type {
 	_SERVICE as BackendService,
 	CustomToken,
 	IcrcToken,
-	UserProfile,
-	UserToken
+	UserProfile
 } from '$declarations/backend/backend.did';
 
 import { BackendCanister } from '$lib/canisters/backend.canister';
@@ -125,16 +124,6 @@ describe('backend.canister', () => {
 		updated_timestamp: 1n
 	} as UserProfile;
 
-	const mockedUserToken = {
-		decimals: [],
-		version: [],
-		enabled: [],
-		chain_id: 1n,
-		contract_address: 'test_address',
-		symbol: []
-	} as UserToken;
-	const userTokens = [mockedUserToken];
-
 	const mockedCustomToken = {
 		token: {
 			Icrc: {
@@ -151,33 +140,6 @@ describe('backend.canister', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-	});
-
-	it('returns user tokens', async () => {
-		service.list_user_tokens.mockResolvedValue(userTokens);
-
-		const { listUserTokens } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = await listUserTokens(queryParams);
-
-		expect(res).toEqual(userTokens);
-	});
-
-	it('should throw an error if list_user_tokens throws', async () => {
-		service.list_user_tokens.mockImplementation(async () => {
-			await Promise.resolve();
-			throw mockResponseError;
-		});
-
-		const { listUserTokens } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = listUserTokens(queryParams);
-
-		await expect(res).rejects.toThrowError(mockResponseError);
 	});
 
 	it('returns custom tokens', async () => {
@@ -255,58 +217,6 @@ describe('backend.canister', () => {
 		});
 
 		const res = setCustomToken({ token: mockedCustomToken });
-
-		await expect(res).rejects.toThrowError(mockResponseError);
-	});
-
-	it('sets many user tokens', async () => {
-		const { setManyUserTokens } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = await setManyUserTokens({ tokens: userTokens });
-
-		expect(service.set_many_user_tokens).toHaveBeenCalledWith(userTokens);
-		expect(res).toEqual(undefined);
-	});
-
-	it('should throw an error if set_many_user_tokens throws', async () => {
-		service.set_many_user_tokens.mockImplementation(async () => {
-			await Promise.resolve();
-			throw mockResponseError;
-		});
-
-		const { setManyUserTokens } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = setManyUserTokens({ tokens: userTokens });
-
-		await expect(res).rejects.toThrowError(mockResponseError);
-	});
-
-	it('sets user token', async () => {
-		const { setUserToken } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = await setUserToken({ token: mockedUserToken });
-
-		expect(service.set_user_token).toHaveBeenCalledWith(mockedUserToken);
-		expect(res).toEqual(undefined);
-	});
-
-	it('should throw an error if set_user_token throws', async () => {
-		service.set_user_token.mockImplementation(async () => {
-			await Promise.resolve();
-			throw mockResponseError;
-		});
-
-		const { setUserToken } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = setUserToken({ token: mockedUserToken });
 
 		await expect(res).rejects.toThrowError(mockResponseError);
 	});
@@ -1360,45 +1270,6 @@ describe('backend.canister', () => {
 			});
 
 			const res = updateContact(mockContact);
-
-			await expect(res).rejects.toThrowError(mockResponseError);
-		});
-	});
-
-	describe('removeUserToken', () => {
-		it('should call remove_user_token method', async () => {
-			const params = {
-				chain_id: mockedUserToken.chain_id,
-				contract_address: mockedUserToken.contract_address
-			};
-			const response = undefined;
-
-			service.remove_user_token.mockResolvedValue(response);
-
-			const { removeUserToken } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = await removeUserToken(params);
-
-			expect(service.remove_user_token).toHaveBeenCalledWith(params);
-			expect(res).toEqual(response);
-		});
-
-		it('should throw an error if remove_user_token throws', async () => {
-			service.remove_user_token.mockImplementation(async () => {
-				await Promise.resolve();
-				throw mockResponseError;
-			});
-
-			const { removeUserToken } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = removeUserToken({
-				chain_id: mockedUserToken.chain_id,
-				contract_address: mockedUserToken.contract_address
-			});
 
 			await expect(res).rejects.toThrowError(mockResponseError);
 		});
