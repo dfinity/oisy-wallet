@@ -2,7 +2,7 @@ import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+import { isTokenEthereumCustomToken } from '$eth/utils/erc20.utils';
 import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
@@ -91,7 +91,7 @@ export const pageTokenToggleable: Readable<boolean> = derived([pageToken], ([$pa
 	if (nonNullish($pageToken)) {
 		return icTokenIcrcCustomToken($pageToken)
 			? isIcrcTokenToggleEnabled($pageToken)
-			: isTokenEthereumUserToken($pageToken)
+			: isTokenEthereumCustomToken($pageToken)
 				? isNotDefaultEthereumToken($pageToken)
 				: isTokenSpl($pageToken)
 					? isTokenSplCustomToken($pageToken)
