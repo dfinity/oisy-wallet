@@ -4,7 +4,7 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import { loadCustomTokens } from '$eth/services/erc20.services';
-	import type { OptionErc20UserToken } from '$eth/types/erc20-user-token';
+	import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import {
 		HIDE_TOKEN_MODAL_ROUTE,
@@ -23,10 +23,10 @@
 
 	let { fromRoute }: Props = $props();
 
-	let selectedToken = $state<OptionErc20UserToken>();
+	let selectedToken = $state<Erc20CustomToken | undefined>();
 
 	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
-	onMount(() => (selectedToken = $token as OptionErc20UserToken));
+	onMount(() => (selectedToken = $token as Erc20CustomToken));
 
 	const onAssertHide = (): { valid: boolean } => {
 		const contractAddress = selectedToken?.address;
