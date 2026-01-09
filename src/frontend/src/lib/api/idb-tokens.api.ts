@@ -1,5 +1,4 @@
 import { browser } from '$app/environment';
-import type { CustomToken, UserToken } from '$declarations/backend/backend.did';
 import type { DeleteIdbTokenParams, SetIdbTokensParams } from '$lib/types/idb-tokens';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -13,11 +12,11 @@ const idbTokensStore = (key: string): UseStore =>
 
 const idbAllCustomTokensStore = idbTokensStore('all');
 
-export const setIdbTokensStore = async <T extends CustomToken | UserToken>({
+export const setIdbTokensStore = async ({
 	identity,
 	tokens,
 	idbTokensStore
-}: SetIdbTokensParams<T> & {
+}: SetIdbTokensParams & {
 	idbTokensStore: UseStore;
 }) => {
 	if (isNullish(identity)) {
@@ -27,12 +26,12 @@ export const setIdbTokensStore = async <T extends CustomToken | UserToken>({
 	await idbSet(identity.getPrincipal().toText(), tokens, idbTokensStore);
 };
 
-export const setIdbAllCustomTokens = (params: SetIdbTokensParams<CustomToken>): Promise<void> =>
+export const setIdbAllCustomTokens = (params: SetIdbTokensParams): Promise<void> =>
 	setIdbTokensStore({ ...params, idbTokensStore: idbAllCustomTokensStore });
 
 export const getIdbAllCustomTokens = (
 	principal: Principal
-): Promise<SetIdbTokensParams<CustomToken>['tokens'] | undefined> =>
+): Promise<SetIdbTokensParams['tokens'] | undefined> =>
 	get(principal.toText(), idbAllCustomTokensStore);
 
 export const deleteIdbAllCustomTokens = (principal: Principal): Promise<void> =>
@@ -41,7 +40,7 @@ export const deleteIdbAllCustomTokens = (principal: Principal): Promise<void> =>
 export const deleteIdbEthToken = async ({
 	identity,
 	token
-}: DeleteIdbTokenParams<CustomToken>): Promise<void> => {
+}: DeleteIdbTokenParams): Promise<void> => {
 	if (isNullish(identity)) {
 		return;
 	}
@@ -76,7 +75,7 @@ export const deleteIdbEthToken = async ({
 export const deleteIdbIcToken = async ({
 	identity,
 	token
-}: DeleteIdbTokenParams<CustomToken>): Promise<void> => {
+}: DeleteIdbTokenParams): Promise<void> => {
 	if (isNullish(identity)) {
 		return;
 	}
@@ -108,7 +107,7 @@ export const deleteIdbIcToken = async ({
 export const deleteIdbSolToken = async ({
 	identity,
 	token
-}: DeleteIdbTokenParams<CustomToken>): Promise<void> => {
+}: DeleteIdbTokenParams): Promise<void> => {
 	if (isNullish(identity)) {
 		return;
 	}
