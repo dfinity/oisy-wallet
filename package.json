@@ -110,7 +110,7 @@
 		"@sveltejs/vite-plugin-svelte": "^6.2.1",
 		"@tailwindcss/postcss": "4.1.17",
 		"@testing-library/jest-dom": "^6.9.1",
-		"@testing-library/svelte": "^5.2.8",
+		"@testing-library/svelte": "^5.2.9",
 		"@types/dom-view-transitions": "^1.0.6",
 		"@types/node": "^22.13.4",
 		"@vitest/coverage-v8": "^4.0.15",
