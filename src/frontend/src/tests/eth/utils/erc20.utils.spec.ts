@@ -9,7 +9,7 @@ import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import {
 	isTokenErc20,
 	isTokenErc20CustomToken,
-	isTokenEthereumUserToken,
+	isTokenEthereumCustomToken,
 	mapErc20Token
 } from '$eth/utils/erc20.utils';
 import icpDark from '$icp/assets/icp-dark.svg';
@@ -131,7 +131,7 @@ describe('erc20.utils', () => {
 		});
 	});
 
-	describe('isTokenEthereumUserToken', () => {
+	describe('isTokenEthereumCustomToken', () => {
 		const tokens = [
 			...SUPPORTED_ETHEREUM_TOKENS,
 			...SUPPORTED_EVM_TOKENS,
@@ -145,20 +145,20 @@ describe('erc20.utils', () => {
 				enabled: Math.random() < 0.5
 			}))
 		)('should return true for token $name that has the enabled field', (token) => {
-			expect(isTokenEthereumUserToken(token)).toBeTruthy();
+			expect(isTokenEthereumCustomToken(token)).toBeTruthy();
 		});
 
 		it.each(tokens)(
 			'should return false for token $name that has not the enabled field',
 			(token) => {
-				expect(isTokenEthereumUserToken(token)).toBeFalsy();
+				expect(isTokenEthereumCustomToken(token)).toBeFalsy();
 			}
 		);
 
 		it.each([ICP_TOKEN, ...SUPPORTED_BITCOIN_TOKENS, ...SUPPORTED_SOLANA_TOKENS, ...SPL_TOKENS])(
 			'should return false for token $name',
 			(token) => {
-				expect(isTokenEthereumUserToken(token)).toBeFalsy();
+				expect(isTokenEthereumCustomToken(token)).toBeFalsy();
 			}
 		);
 	});
