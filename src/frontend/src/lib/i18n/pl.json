@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",
-			"test_banner_beta": ""
+			"test_banner_beta": "",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "logo $name",

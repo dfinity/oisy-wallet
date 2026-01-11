@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
-			"test_banner_beta": "This is a beta release. You may encounter bugs. Real assets are in play - please use with care."
+			"test_banner_beta": "This is a beta release. You may encounter bugs. Real assets are in play - please use with care.",
+			"internet_identity_banner_first_part": "$oisy_name now uses",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "Read more"
 		},
 		"alt": {
 			"logo": "$name logo",

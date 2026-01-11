@@ -11,6 +11,7 @@
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import LockPage from '$lib/components/auth/LockPage.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
+	import InternetIdentityBanner from '$lib/components/core/InternetIdentityBanner.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
@@ -109,6 +110,10 @@
 			class:min-h-[100dvh]={$authNotSignedIn}
 			class:overflow-x-hidden={$authNotSignedIn}
 		>
+			{#if $authNotSignedIn}
+				<InternetIdentityBanner />
+			{/if}
+
 			<Header />
 
 			<AuthGuard>

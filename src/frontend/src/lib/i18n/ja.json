@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
-			"test_banner_beta": "これはベータ版リリースです。不具合が発生する可能性があります。実際の資産が使用されますので、十分ご注意のうえご利用ください。"
+			"test_banner_beta": "これはベータ版リリースです。不具合が発生する可能性があります。実際の資産が使用されますので、十分ご注意のうえご利用ください。",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "$name ロゴ",

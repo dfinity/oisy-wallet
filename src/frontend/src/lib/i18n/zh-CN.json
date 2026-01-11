@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "仅供测试使用！",
-			"test_banner_beta": "这是测试版本。您可能会遇到错误。实际资产正在使用中 - 请谨慎使用。"
+			"test_banner_beta": "这是测试版本。您可能会遇到错误。实际资产正在使用中 - 请谨慎使用。",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "$name 标志",
