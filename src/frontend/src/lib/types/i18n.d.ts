@@ -120,7 +120,7 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
-		sign_in_with_identity_number: string;
+		legacy_login: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;

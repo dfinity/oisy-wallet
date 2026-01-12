@@ -121,7 +121,7 @@
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
-			"sign_in_with_identity_number": "",
+			"legacy_login": "",
 			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Assistente AI integrato con privacy come standard",
 			"advanced_cryptography": "Protetto da crittografia avanzata – 100% on-chain"
