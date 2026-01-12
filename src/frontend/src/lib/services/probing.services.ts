@@ -3,7 +3,7 @@ export interface ResolveGroup<T> {
 	onResolve: () => T;
 }
 
-export class EscalationError extends Error {}
+export class ResolveByProbingError extends Error {}
 
 /**
  * Resolves a value by probing groups of asynchronous checks in escalation order.
@@ -25,14 +25,14 @@ export class EscalationError extends Error {}
  * @returns The value returned by the first group's `onResolve` callback whose
  *          probes all resolve successfully.
  *
- * @throws {EscalationError}
+ * @throws {ResolveByProbingError}
  * Thrown when:
  * - no probing groups are provided, or
  * - all probing groups fail (i.e., at least one probe rejects in every group).
  */
 export const resolveByProbing = async <T>(groups: ResolveGroup<T>[]): Promise<T> => {
 	if (groups.length === 0) {
-		throw new EscalationError('No probing groups provided');
+		throw new ResolveByProbingError('No probing groups provided');
 	}
 
 	const errors: unknown[] = [];
@@ -47,7 +47,7 @@ export const resolveByProbing = async <T>(groups: ResolveGroup<T>[]): Promise<T>
 		}
 	}
 
-	throw new EscalationError(
+	throw new ResolveByProbingError(
 		`All probing groups failed: ${errors.map((e) => String(e)).join(' | ')}`
 	);
 };

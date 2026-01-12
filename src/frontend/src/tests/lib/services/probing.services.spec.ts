@@ -1,5 +1,5 @@
 import {
-	EscalationError,
+	ResolveByProbingError,
 	resolveByProbing,
 	type ResolveGroup
 } from '$lib/services/probing.services';
@@ -113,7 +113,7 @@ describe('probing.services', () => {
 			mockFn31.mockRejectedValue(new Error('Probe 3 failed'));
 
 			await expect(resolveByProbing(groups)).rejects.toThrowError(
-				new EscalationError(
+				new ResolveByProbingError(
 					'All probing groups failed: Error: Probe 1 failed | Error: Probe 2 failed | Error: Probe 3 failed'
 				)
 			);
