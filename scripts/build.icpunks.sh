@@ -3,7 +3,7 @@ set -euo pipefail
 
 print_help() {
   cat <<-EOF
-	Creates the DIP721 installation files:
+	Creates the ICPunks installation files:
 
 	- The Candid file is downloaded.
 
@@ -16,12 +16,12 @@ print_help() {
   exit 0
 }
 
-DIP721_BUILDENV="$DFX_NETWORK"
-export DIP721_BUILDENV
+ICPUNKS_BUILDENV="$DFX_NETWORK"
+export ICPUNKS_BUILDENV
 
-DIP721_REPO_URL="https://raw.githubusercontent.com/stopak/ICPunks/refs/heads/master/service/icpunks"
+ICPUNKS_REPO_URL="https://raw.githubusercontent.com/stopak/ICPunks/refs/heads/master/service/icpunks"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
-CANDID_URL="${DIP721_REPO_URL}/icpunks.did"
+CANDID_URL="${ICPUNKS_REPO_URL}/icpunks.did"
 
 CANDID_FILE="$(jq -r .canisters.icpunks.candid dfx.json)"
 
