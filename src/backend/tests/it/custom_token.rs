@@ -8,7 +8,7 @@ use shared::types::{
     },
     TokenVersion,
 };
-
+use shared::types::custom_token::IcPunksToken;
 use crate::utils::{
     assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
     mock::CALLER,
@@ -116,6 +116,15 @@ static DIP721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     section: None,
     allow_external_content_source: None,
 });
+static ICPUNKS_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::IcPunks(IcPunksToken {
+        canister_id: Principal::from_text("qcg3w-tyaaa-aaaah-qakea-cai").unwrap(),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
 static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
     vec![
         USER_TOKEN.clone(),
@@ -126,6 +135,7 @@ static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
         ERC1155_TOKEN.clone(),
         EXT_V2_TOKEN.clone(),
         DIP721_TOKEN.clone(),
+        ICPUNKS_TOKEN.clone(),
     ]
 });
 
@@ -188,6 +198,11 @@ fn test_remove_custom_ext_v2_token() {
 #[test]
 fn test_remove_custom_di721_token() {
     test_remove_custom_token(&DIP721_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_icpunks_token() {
+    test_remove_custom_token(&ICPUNKS_TOKEN)
 }
 
 #[test]

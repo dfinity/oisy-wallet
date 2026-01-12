@@ -569,6 +569,59 @@ mod contact_image {
             ]
         );
     }
+    
+        mod icpunks {
+        //! Tests for the icpunks module.
+        use candid::Principal;
+
+        use super::*;
+        use crate::{
+            types::custom_token::IcPunksToken,
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
+
+        fn canister_id1() -> Principal {
+            Principal::from_text("qcg3w-tyaaa-aaaah-qakea-cai").unwrap()
+        }
+        fn user_id() -> Principal {
+            Principal::from_text("tdb26-jop6k-aogll-7ltgs-eruif-6kk7m-qpktf-gdiqx-mxtrf-vb5e6-eqe")
+                .unwrap()
+        }
+
+        test_validate_on_deserialize!(
+            IcPunksToken,
+            vec![
+                TestVector {
+                    input: IcPunksToken {
+                        canister_id: canister_id1(),
+                    },
+                    valid: true,
+                    description: "IcPunksToken with valid canister_id",
+                },
+                TestVector {
+                    input: IcPunksToken {
+                        canister_id: Principal::anonymous(),
+                    },
+                    valid: false,
+                    description: "IcPunksToken with anonymous canister_id",
+                },
+                TestVector {
+                    input: IcPunksToken {
+                        canister_id: Principal::management_canister(),
+                    },
+                    valid: false,
+                    description: "IcPunksToken with the management canister as canister_id",
+                },
+                TestVector {
+                    input: IcPunksToken {
+                        canister_id: user_id(),
+                    },
+                    valid: false,
+                    description: "IcPunksToken with user or network principal as canister_id",
+                },
+            ]
+        );
+    }
 }
 
 mod token {
