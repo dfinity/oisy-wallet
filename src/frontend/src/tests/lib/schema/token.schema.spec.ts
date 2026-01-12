@@ -69,6 +69,12 @@ describe('token.schema', () => {
 			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
+		it('should validate "icpunks" as a supported token standard', () => {
+			const validStandard = 'icpunks';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
 		it('should validate "bitcoin" as a supported token standard', () => {
 			const validStandard = 'bitcoin';
 
@@ -129,6 +135,14 @@ describe('token.schema', () => {
 			const validStandard = 'ext';
 
 			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "icpunks" as a supported token standard', () => {
+			const validStandard = 'icpunks';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({
+				code: validStandard
+			});
 		});
 
 		it('should validate "bitcoin" as a supported token standard', () => {
