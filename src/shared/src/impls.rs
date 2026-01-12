@@ -667,7 +667,7 @@ impl Validate for Dip721Token {
 }
 
 impl Validate for IcPunksToken {
-    /// Verifies that a ICPunks token is valid.
+    /// Verifies that an `ICPunks` token is valid.
     ///
     /// - Checks that the canister principal is the type of principal used for a canister.
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>

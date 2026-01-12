@@ -29,7 +29,7 @@ pub struct Dip721Token {
     pub canister_id: CanisterId,
 }
 
-/// A token on the Internet Computer with an interface similar to the one if ICPunks.
+/// A token on the Internet Computer with an interface similar to the one of `ICPunks`.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[serde(remote = "Self")]
 pub struct IcPunksToken {
@@ -118,6 +118,6 @@ pub enum CustomTokenId {
     ExtV2(CanisterId) = 4,
     /// A DIP721 compliant token on the Internet Computer mainnet.
     Dip721(CanisterId) = 5,
-    /// A token on the Internet Computer with an interface similar to the one if ICPunks.
+    /// A token on the Internet Computer with an interface similar to the one of `ICPunks`.
     IcPunks(CanisterId) = 6,
 }
