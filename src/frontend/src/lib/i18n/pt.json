@@ -121,7 +121,7 @@
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
-			"sign_in_with_identity_number": "",
+			"legacy_login": "",
 			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
 			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
 			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain"

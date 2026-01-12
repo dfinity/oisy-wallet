@@ -121,7 +121,7 @@
 			"logout": "Log out",
 			"lock": "Lock",
 			"authenticate": "Open or Create",
-			"sign_in_with_identity_number": "Sign in with your identity number",
+			"legacy_login": "Legacy login",
 			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Built-in AI Assistant with privacy as standard",
 			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain"

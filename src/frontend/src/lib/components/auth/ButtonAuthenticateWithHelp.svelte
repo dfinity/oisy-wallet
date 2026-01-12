@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { PRIMARY_INTERNET_IDENTITY_VERSION } from '$env/auth.env';
-	import ButtonAuthenticateWithIndentityNumber from '$lib/components/auth/ButtonAuthenticateWithIndentityNumber.svelte';
 	import SigningInHelpLink from '$lib/components/auth/SigningInHelpLink.svelte';
+	import IconAstronautArrow from '$lib/components/icons/icon-astronaut/IconAstronautArrow.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
-	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
+	import { AUTH_SIGNING_IN_HELP_LINK, LOGIN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
@@ -43,22 +43,38 @@
 	class="flex w-full flex-col items-center md:items-start"
 	class:md:items-center={helpAlignment === 'center'}
 >
-	<ButtonAuthenticate
-		{fullWidth}
-		onclick={() =>
-			onAuthenticate(
-				isPrimaryIdentityVersion2
-					? InternetIdentityDomain.VERSION_2_0
-					: InternetIdentityDomain.VERSION_1_0
-			)}
-	/>
-
-	{#if isPrimaryIdentityVersion2}
-		<ButtonAuthenticateWithIndentityNumber
+	<div
+		class="flex w-full flex-col items-center justify-center md:justify-start"
+		class:sm:flex-row={!fullWidth}
+	>
+		<ButtonAuthenticate
 			{fullWidth}
-			onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_1_0)}
-		/>
-	{/if}
+			{isPrimaryIdentityVersion2}
+			onclick={() =>
+				onAuthenticate(
+					isPrimaryIdentityVersion2
+						? InternetIdentityDomain.VERSION_2_0
+						: InternetIdentityDomain.VERSION_1_0
+				)}
+			styleClass="bg-brand-primary text-primary-inverted"
+			testId={LOGIN_BUTTON}
+		>
+			{$i18n.auth.text.authenticate}
+			<IconAstronautArrow />
+		</ButtonAuthenticate>
+
+		{#if isPrimaryIdentityVersion2}
+			<ButtonAuthenticate
+				{fullWidth}
+				{isPrimaryIdentityVersion2}
+				onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_1_0)}
+				styleClass={`${!fullWidth ? 'sm:ml-3 sm:mt-0' : ''} mt-3 text-brand-primary bg-brand-subtle-10`}
+				testId={LOGIN_BUTTON}
+			>
+				{$i18n.auth.text.legacy_login}
+			</ButtonAuthenticate>
+		{/if}
+	</div>
 
 	<span
 		class="mt-4 flex flex-col text-sm text-tertiary"

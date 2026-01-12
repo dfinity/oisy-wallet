@@ -69,9 +69,7 @@ describe('ButtonAuthenticateWithHelp', () => {
 
 		const { getByText } = render(ButtonAuthenticateWithHelp);
 
-		const secondarySignInButton = getByText(
-			en.auth.text.sign_in_with_identity_number
-		) as HTMLButtonElement | null;
+		const secondarySignInButton = getByText(en.auth.text.legacy_login) as HTMLButtonElement | null;
 
 		expect(secondarySignInButton).toBeInTheDocument();
 

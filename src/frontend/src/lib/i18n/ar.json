@@ -121,7 +121,7 @@
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
-			"sign_in_with_identity_number": "",
+			"legacy_login": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": ""
