@@ -1,0 +1,132 @@
+type Time = int;
+
+//HttpRequest related types
+type HeaderField = record { text; text; };
+
+type HttpRequest = record {
+  method: text;
+  url: text;
+  headers: vec HeaderField;
+  body: blob;
+};
+
+type HttpResponse = record {
+  status_code: nat16;
+  headers: vec HeaderField;
+  body: blob;
+};
+
+type StreamingCallbackHttpResponse = record {
+  body: blob;
+  token: opt Token;
+};
+
+type Token = record {};
+
+type StreamingStrategy = variant {
+  Callback: record {
+    callback: func (Token) -> (StreamingCallbackHttpResponse) query;
+    token: Token;
+  };
+};
+
+type Property =
+ record {
+   name: text;
+   value: text;
+ };
+
+type MintRequest =
+ record {
+   contentType: text;
+   data: vec nat8;
+   desc: text;
+   name: text;
+   properties: vec Property;
+   url: text;
+   owner: principal;
+ };
+
+  type TransferRequest =
+  record {
+    to: principal;
+    token_id: nat;
+  };
+
+ type TokenDesc =
+ record {
+   desc: text;
+   id: nat;
+   name: text;
+   owner: principal;
+   properties: vec Property;
+   url: text;
+ };
+
+ type Listing =
+ record {
+   owner: principal;
+   price: nat64;
+   timestamp: Time;
+   tokenId: nat;
+ };
+
+  type ICPTs = record {e8s: nat64;};
+ type TransactionNotification =
+ record {
+   amount: ICPTs;
+   block_height: nat64;
+   from: principal;
+   from_subaccount: opt nat8;
+   memo: nat64;
+   to: principal;
+   to_subaccount: opt nat8;
+ };
+
+ type Result =
+ variant {
+   Err: text;
+   Ok: text;
+ };
+
+service : (text, text, nat, principal) -> {
+  get_storage_canister: () -> (principal) query;
+  get_ledger_canister: () -> (principal) query;
+  get_cycles: () -> (nat) query;
+
+  tx_enabled: () -> (bool) query;
+  set_tx_enabled: (bool) -> (bool);
+
+  name: () -> (text) query;
+  symbol: () -> (text) query;
+  description: () -> (text) query;
+  icon_url: () -> (text) query;
+  owner: () -> (principal) query;
+  total_supply: () -> (nat) query;
+  creators_fee: () -> (nat) query;
+
+  owner_of: (nat) -> (principal) query;
+  user_tokens: (principal) -> (vec nat) query;
+  data_of: (nat) -> (TokenDesc) query;
+
+  set_storage_canister: (principal) -> (bool);
+  add_genesis_record: () -> (nat);
+
+  set_ledger_canister: (principal) -> (bool);
+  set_owner: (principal) -> (bool);
+  set_description: (text) -> (bool);
+  set_icon_url: (text) -> (bool);
+
+  mint: (MintRequest) -> (nat);
+  multi_mint: (vec MintRequest) -> (vec nat);
+  transfer_to: (principal, nat) -> (bool);
+  multi_transfer_to: (vec TransferRequest) -> (vec bool);
+
+  get_listed_count: () -> (nat) query;
+  get_listed: (nat) -> (vec Listing) query;
+  list: (nat, nat64) -> (bool);
+  delist: (nat) -> (bool);
+  transaction_notification: (TransactionNotification) -> (Result);
+
+  http_request: (request: HttpRequest) -> (HttpResponse) query;
+}
