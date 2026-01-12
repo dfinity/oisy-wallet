@@ -359,6 +359,7 @@ export type Token =
 	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }
 	| { SplMainnet: SplToken }
+	| { IcPunks: ExtV2Token }
 	| { Erc1155: ErcToken }
 	| { Dip721: ExtV2Token };
 export type TokenAccountId =
