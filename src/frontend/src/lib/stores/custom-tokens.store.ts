@@ -14,8 +14,9 @@ import { writable, type Readable } from 'svelte/store';
 
 type CertifiedCustomTokensData<T extends Token> = Option<CertifiedData<CustomToken<T>>[]>;
 
-export interface CertifiedCustomTokensStore<T extends Token>
-	extends Readable<CertifiedCustomTokensData<T>> {
+export interface CertifiedCustomTokensStore<T extends Token> extends Readable<
+	CertifiedCustomTokensData<T>
+> {
 	setAll: (tokens: CertifiedData<CustomToken<T>>[]) => void;
 	reset: (tokenId: TokenId) => void;
 	resetByIdentifier: (identifier: Identifier) => void;

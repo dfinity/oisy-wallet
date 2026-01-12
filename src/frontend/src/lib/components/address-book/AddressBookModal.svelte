@@ -401,7 +401,7 @@
 				contact={currentContact}
 				disabled={loading}
 				isNewContact={isNullish(currentContact)}
-				onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
+				onAddContact={async (contact: Pick) => {
 					const createdContact = await callCreateContact({ name: contact.name });
 					if (modalData?.entrypoint) {
 						currentAddressIndex = undefined;
