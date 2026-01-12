@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
-			"test_banner_beta": "Это бета-версия. Пожалуйста, используйте с осторожностью."
+			"test_banner_beta": "Это бета-версия. Пожалуйста, используйте с осторожностью.",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "Логотип $name",

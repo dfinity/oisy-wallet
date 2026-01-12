@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
-			"test_banner_beta": "Đây là phiên bản thử nghiệm. Bạn có thể gặp một số lỗi. Tài sản thật đang được sử dụng - vui lòng cẩn trọng."
+			"test_banner_beta": "Đây là phiên bản thử nghiệm. Bạn có thể gặp một số lỗi. Tài sản thật đang được sử dụng - vui lòng cẩn trọng.",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "Logo $name",

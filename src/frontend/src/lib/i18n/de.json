@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
-			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können."
+			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können.",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "$name-Logo",

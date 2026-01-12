@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
-			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado."
+			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado.",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "Logotipo",
