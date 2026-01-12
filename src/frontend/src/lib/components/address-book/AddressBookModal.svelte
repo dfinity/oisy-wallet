@@ -273,6 +273,43 @@
 			callback();
 		}
 	};
+
+	const onAddContact = async (contact: Pick<ContactUi, 'name'>) => {
+		const createdContact = await callCreateContact({ name: contact.name });
+		if (modalData?.entrypoint) {
+			currentAddressIndex = undefined;
+			currentContact = createdContact;
+			gotoStep(AddressBookSteps.EDIT_ADDRESS);
+			previousStepName = AddressBookSteps.SAVE_ADDRESS;
+		} else {
+			if (nonNullish(createdContact)) {
+				currentContactId = createdContact.id;
+				gotoStep(AddressBookSteps.SHOW_CONTACT);
+			} else {
+				gotoStep(AddressBookSteps.ADDRESS_BOOK);
+			}
+		}
+	};
+
+	const onSaveContact = async (contact: ContactUi) => {
+		await callUpdateContact({ contact });
+		gotoStep(AddressBookSteps.EDIT_CONTACT);
+	};
+
+	const onSelectContact = (contact: ContactUi) => {
+		currentContact = contact;
+		currentAddressIndex = undefined;
+		gotoStep(AddressBookSteps.EDIT_ADDRESS);
+	};
+
+	const onSave = async (contact: ContactUi) => {
+		loading = true;
+		currentContact = contact;
+		currentAddressIndex = undefined;
+		const createdContact = await callCreateContact({ name: contact.name });
+		await callUpdateContact({ contact: { ...createdContact, ...contact } });
+		close();
+	};
 </script>
 
 <WizardModal
@@ -401,29 +438,11 @@
 				contact={currentContact}
 				disabled={loading}
 				isNewContact={isNullish(currentContact)}
-				onAddContact={async (contact: Pick) => {
-					const createdContact = await callCreateContact({ name: contact.name });
-					if (modalData?.entrypoint) {
-						currentAddressIndex = undefined;
-						currentContact = createdContact;
-						gotoStep(AddressBookSteps.EDIT_ADDRESS);
-						previousStepName = AddressBookSteps.SAVE_ADDRESS;
-					} else {
-						if (nonNullish(createdContact)) {
-							currentContactId = createdContact.id;
-							gotoStep(AddressBookSteps.SHOW_CONTACT);
-						} else {
-							gotoStep(AddressBookSteps.ADDRESS_BOOK);
-						}
-					}
-				}}
+				{onAddContact}
 				onClose={() => {
 					navigateToEntrypointOrCallback(handleClose);
 				}}
-				onSaveContact={async (contact: ContactUi) => {
-					await callUpdateContact({ contact });
-					gotoStep(AddressBookSteps.EDIT_CONTACT);
-				}}
+				{onSaveContact}
 				bind:title={editContactNameTitle}
 			/>
 		{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
@@ -483,24 +502,13 @@
 					currentContact = undefined;
 					gotoStep(AddressBookSteps.CREATE_CONTACT);
 				}}
-				onSelectContact={(contact: ContactUi) => {
-					currentContact = contact;
-					currentAddressIndex = undefined;
-					gotoStep(AddressBookSteps.EDIT_ADDRESS);
-				}}
+				{onSelectContact}
 			/>
 		{:else if currentStep?.name === AddressBookSteps.CREATE_CONTACT}
 			<CreateContactStep
 				disabled={loading}
 				onBack={() => gotoStep(AddressBookSteps.SAVE_ADDRESS)}
-				onSave={async (contact: ContactUi) => {
-					loading = true;
-					currentContact = contact;
-					currentAddressIndex = undefined;
-					const createdContact = await callCreateContact({ name: contact.name });
-					await callUpdateContact({ contact: { ...createdContact, ...contact } });
-					close();
-				}}
+				{onSave}
 			/>
 		{:else if currentStep?.name === AddressBookSteps.QR_CODE_SCAN}
 			<AddressBookQrCodeStep
