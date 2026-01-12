@@ -102,6 +102,21 @@ export const loadNetworkCustomTokens = async ({
 					};
 				}
 
+				if ('IcPunks' in token.token) {
+					const { canister_id: rawCanisterId } = token.token.IcPunks;
+
+					const canisterId = Principal.from(rawCanisterId);
+
+					return {
+						...token,
+						token: {
+							IcPunks: {
+								canister_id: canisterId
+							}
+						}
+					};
+				}
+
 				if (
 					'Erc20' in token.token ||
 					'Erc721' in token.token ||

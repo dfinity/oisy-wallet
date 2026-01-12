@@ -9,6 +9,7 @@ import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
+import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -55,6 +56,17 @@ export const mockCustomTokens: CustomToken[] = [
 			}
 		},
 		version: toNullable(123n),
+		enabled: false,
+		section: toNullable(),
+		allow_external_content_source: toNullable()
+	},
+	{
+		token: {
+			IcPunks: {
+				canister_id: Principal.fromText(mockIcPunksCanisterId)
+			}
+		},
+		version: toNullable(999n),
 		enabled: false,
 		section: toNullable(),
 		allow_external_content_source: toNullable()

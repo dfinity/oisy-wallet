@@ -6,6 +6,7 @@ import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
+import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -237,6 +238,34 @@ describe('custom-tokens.services', () => {
 			});
 
 			expect(result).toStrictEqual(mockCustomTokens.slice(3, 4));
+
+			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should parse correctly the cached canister ID from the ICPunks custom tokens', async () => {
+			mockGetIdbTokens.mockResolvedValue([
+				{
+					token: {
+						IcPunks: {
+							canister_id: Principal.fromText(mockIcPunksCanisterId).toUint8Array()
+						}
+					},
+					version: toNullable(999n),
+					enabled: false,
+					section: toNullable(),
+					allow_external_content_source: toNullable()
+				}
+			]);
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(mockCustomTokens.slice(4, 5));
 
 			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 
