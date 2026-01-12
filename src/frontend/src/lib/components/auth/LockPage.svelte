@@ -18,12 +18,11 @@
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 	const modalId = Symbol();
 	const imgStyleClass = 'h-full object-contain mx-auto object-top';
+	const isPrimaryIdentityVersion2 = PRIMARY_INTERNET_IDENTITY_VERSION === '2.0';
 
-	const handleUnlock = async () => {
+	const handleUnlock = async (domain: InternetIdentityDomain) => {
 		const { success } = await signIn({
-			...(PRIMARY_INTERNET_IDENTITY_VERSION === '2.0' && {
-				domain: InternetIdentityDomain.VERSION_2_0
-			})
+			domain
 		});
 
 		if (success === 'ok') {
@@ -75,17 +74,35 @@
 				<Button
 					fullWidth
 					innerStyleClass="items-center justify-center"
-					onclick={handleUnlock}
+					onclick={() =>
+						handleUnlock(
+							isPrimaryIdentityVersion2
+								? InternetIdentityDomain.VERSION_2_0
+								: InternetIdentityDomain.VERSION_1_0
+						)}
 					styleClass="mb-3 w-full"
 				>
 					{$i18n.lock.text.unlock}
 					<IconKey />
 				</Button>
+				{#if isPrimaryIdentityVersion2}
+					<Button
+						colorStyle="secondary-light"
+						fullWidth
+						innerStyleClass="items-center justify-center"
+						onclick={() => handleUnlock(InternetIdentityDomain.VERSION_1_0)}
+						styleClass="mb-3 w-full"
+					>
+						{$i18n.lock.text.unlock_with_legacy_login}
+						<IconKey />
+					</Button>
+				{/if}
 				<Button
 					colorStyle="secondary-light"
 					fullWidth
 					innerStyleClass="items-center justify-center"
 					onclick={handleLogout}
+					transparent={isPrimaryIdentityVersion2}
 				>
 					{$i18n.lock.text.logout}
 					<IconLogout />

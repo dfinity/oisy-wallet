@@ -46,7 +46,9 @@ describe('LockPage', () => {
 
 		await fireEvent.click(unlockButton);
 
-		expect(signInMock).toHaveBeenCalledWith({});
+		expect(signInMock).toHaveBeenCalledWith({
+			domain: InternetIdentityDomain.VERSION_1_0
+		});
 		expect(authLocked.unlock).toHaveBeenCalledWith({
 			source: 'login from lock page'
 		});
