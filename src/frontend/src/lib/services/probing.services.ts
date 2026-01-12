@@ -1,11 +1,15 @@
-interface ResolveGroup<T> {
+export interface ResolveGroup<T> {
 	probes: Array<() => Promise<unknown>>;
 	onResolve: () => T;
 }
 
-class EscalationError extends Error {}
+export class EscalationError extends Error {}
 
 export const resolveByProbing = async <T>(groups: ResolveGroup<T>[]): Promise<T> => {
+	if (groups.length === 0) {
+		throw new EscalationError('No probing groups provided');
+	}
+
 	const errors: unknown[] = [];
 
 	for (const { probes, onResolve } of groups) {
