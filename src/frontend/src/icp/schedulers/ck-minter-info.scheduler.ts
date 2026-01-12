@@ -10,9 +10,9 @@ import { assertNonNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 
-export class CkMinterInfoScheduler<T extends CkBtcMinterDid.MinterInfo | CkEthMinterDid.MinterInfo>
-	implements Scheduler<PostMessageDataRequestIcCk>
-{
+export class CkMinterInfoScheduler<
+	T extends CkBtcMinterDid.MinterInfo | CkEthMinterDid.MinterInfo
+> implements Scheduler<PostMessageDataRequestIcCk> {
 	private timer = new SchedulerTimer('syncCkMinterInfoStatus');
 
 	constructor(

@@ -21,9 +21,7 @@ import {
 	type CkBtcMinterDid
 } from '@icp-sdk/canisters/ckbtc';
 
-export class CkBTCUpdateBalanceScheduler
-	implements Scheduler<PostMessageDataRequestIcCkBTCUpdateBalance>
-{
+export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestIcCkBTCUpdateBalance> {
 	private timer = new SchedulerTimer('syncCkBTCUpdateBalanceStatus');
 
 	private btcAddress: string | undefined;
