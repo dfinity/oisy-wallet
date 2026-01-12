@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
+	import IconSocialLogin from '$lib/components/icons/IconSocialLogin.svelte';
 	import IconScanFace from '$lib/components/icons/lucide/IconScanFace.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
@@ -19,6 +21,11 @@
 		{
 			label: $i18n.auth.text.advanced_cryptography,
 			icon: IconShieldCheck
+		},
+		{
+			label: $i18n.auth.text.social_login,
+			icon: IconScanFace,
+			endIcon: IconSocialLogin
 		}
 	]);
 </script>
@@ -38,12 +45,20 @@
 	</div>
 
 	<div class="mb-7 flex flex-col items-center gap-2 md:items-start md:gap-3 md:text-lg">
-		{#each infoList as { label, icon: IconCmp } (label)}
+		{#each infoList as { label, icon: IconCmp, endIcon: EndIconCmp } (label)}
 			<div class="flex items-center gap-4">
 				<div class="hidden md:block">
 					<IconCmp />
 				</div>
-				{label}
+
+				<div>
+					{label}
+					{#if nonNullish(EndIconCmp)}
+						<span class="inline-block align-text-top">
+							<EndIconCmp />
+						</span>
+					{/if}
+				</div>
 			</div>
 		{/each}
 	</div>

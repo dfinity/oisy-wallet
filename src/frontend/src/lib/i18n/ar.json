@@ -124,7 +124,8 @@
 			"legacy_login": "",
 			"asset_types": "",
 			"instant_and_private": "",
-			"advanced_cryptography": ""
+			"advanced_cryptography": "",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"

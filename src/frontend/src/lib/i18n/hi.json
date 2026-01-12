@@ -124,7 +124,8 @@
 			"legacy_login": "",
 			"asset_types": "",
 			"instant_and_private": "",
-			"advanced_cryptography": ""
+			"advanced_cryptography": "",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
