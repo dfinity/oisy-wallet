@@ -569,8 +569,8 @@ mod contact_image {
             ]
         );
     }
-    
-        mod icpunks {
+
+    mod icpunks {
         //! Tests for the icpunks module.
         use candid::Principal;
 
