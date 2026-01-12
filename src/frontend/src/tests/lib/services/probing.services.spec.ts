@@ -107,7 +107,7 @@ describe('probing.services', () => {
 			expect(mockFn33).not.toHaveBeenCalled();
 		});
 
-		it('should trows if all probes fail', async () => {
+		it('should throw if all probes fail', async () => {
 			mockFn11.mockRejectedValue(new Error('Probe 1 failed'));
 			mockFn2.mockRejectedValue(new Error('Probe 2 failed'));
 			mockFn31.mockRejectedValue(new Error('Probe 3 failed'));
