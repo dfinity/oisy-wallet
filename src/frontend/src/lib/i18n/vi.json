@@ -124,7 +124,8 @@
 			"legacy_login": "",
 			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
 			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
-			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain"
+			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"

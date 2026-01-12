@@ -124,7 +124,8 @@
 			"legacy_login": "",
 			"asset_types": "管理 BTC、SOL、ETH、ICP 等多种资产",
 			"instant_and_private": "内置 AI 助手 — 隐私保护为标准配置",
-			"advanced_cryptography": "先进加密技术保护 — 100% 链上"
+			"advanced_cryptography": "先进加密技术保护 — 100% 链上",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "$oisy_name 登录后的桌面和移动端预览图"

@@ -124,7 +124,8 @@
 			"legacy_login": "",
 			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
 			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
-			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain"
+			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular"

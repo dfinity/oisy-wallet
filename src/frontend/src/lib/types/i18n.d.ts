@@ -124,6 +124,7 @@ interface I18nAuth {
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
+		social_login: string;
 	};
 	alt: { preview: string };
 	message: { session_locked: string };
