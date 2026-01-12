@@ -14,7 +14,7 @@
 		ariaLabel: $i18n.core.info.internet_identity_banner_button,
 		href: OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL,
 		iconVisible: false,
-		styleClass: 'text-primary-inverted-alt font-bold'
+		styleClass: 'text-primary-inverted-alt font-bold hover:text-primary-inverted-alt/60 transition'
 	};
 </script>
 
