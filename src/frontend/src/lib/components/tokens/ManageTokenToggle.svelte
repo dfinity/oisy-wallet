@@ -8,13 +8,15 @@
 	import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
+	import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
 
 	type TokenToggleable =
 		| Erc20CustomToken
 		| SplCustomToken
 		| Erc721CustomToken
 		| Erc1155CustomToken
-		| ExtCustomToken;
+		| ExtCustomToken
+		| IcPunksCustomToken;
 
 	interface Props {
 		token: TokenToggleable;
