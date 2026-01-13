@@ -637,6 +637,7 @@
 			"erc20_custom_token": "Błąd podczas włączania tokena bliźniaczego ERC20.",
 			"icrc_custom_token": "Błąd podczas ładowania niestandardowego tokena ICRC.",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Twój portfel wymaga danych początkowych, które nie zostały jeszcze załadowane. Spróbuj ponownie.",
 			"allow_signing": "Wystąpił problem podczas konfigurowania portfela do podpisywania. Zostałeś wylogowany. Jeśli problem będzie się powtarzał, skontaktuj się z pomocą techniczną.",
 			"waiting_for_allowed_cycles_aborted": "",
