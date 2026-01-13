@@ -9,6 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
 	import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
+	import type { Dip721CustomToken } from '$icp/types/dip721-custom-token';
 
 	type TokenToggleable =
 		| Erc20CustomToken

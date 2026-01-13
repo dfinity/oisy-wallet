@@ -1,3 +1,4 @@
+import type { Dip721CustomToken } from '$icp/types/dip721-custom-token';
 import type { Dip721Token } from '$icp/types/dip721-token';
 import type { IcToken } from '$icp/types/ic-token';
 import type { Token } from '$lib/types/token';
