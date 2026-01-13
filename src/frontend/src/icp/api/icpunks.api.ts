@@ -25,6 +25,25 @@ export const getTokensByOwner = async ({
 	return await getTokensByOwner({ certified, principal });
 };
 
+export const transfer = async ({
+	certified,
+	identity,
+	canisterId,
+	to,
+	tokenIdentifier,
+	...rest
+}: CanisterApiFunctionParamsWithCanisterId<
+	{ to: Principal; tokenIdentifier: bigint } & QueryParams
+>) => {
+	const { transfer } = await icPunksCanister({
+		identity,
+		canisterId,
+		...rest
+	});
+
+	await transfer({ certified, to, tokenIdentifier });
+};
+
 const icPunksCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
