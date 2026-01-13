@@ -8,10 +8,12 @@ import {
 	metadata as extMetadata
 } from '$icp/api/ext-v2-token.api';
 import { detectNftCanisterStandard } from '$icp/services/ic-standard.services';
+import { extIndexToIdentifier } from '$icp/utils/ext.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import * as probingServices from '$lib/services/probing.services';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { Principal } from '@icp-sdk/core/principal';
 
 vi.mock('$icp/api/ext-v2-token.api', () => ({
 	balance: vi.fn(),
@@ -30,6 +32,11 @@ describe('ic-standard.services', () => {
 			identity: mockIdentity,
 			canisterId: mockLedgerCanisterId
 		};
+
+		const tokenIdentifier = extIndexToIdentifier({
+			collectionId: Principal.fromText(params.canisterId),
+			index: 0
+		});
 
 		const expected = {
 			certified: false,
@@ -55,7 +62,7 @@ describe('ic-standard.services', () => {
 
 			expect(extBalance).toHaveBeenCalledExactlyOnceWith({
 				...expected,
-				tokenIdentifier: '0'
+				tokenIdentifier
 			});
 			expect(extGetTokensByOwner).toHaveBeenCalledExactlyOnceWith({
 				...expected,
@@ -63,7 +70,7 @@ describe('ic-standard.services', () => {
 			});
 			expect(extMetadata).toHaveBeenCalledExactlyOnceWith({
 				...expected,
-				tokenIdentifier: '0'
+				tokenIdentifier
 			});
 
 			expect(dip721Balance).not.toHaveBeenCalled();
@@ -77,7 +84,7 @@ describe('ic-standard.services', () => {
 
 			expect(extBalance).toHaveBeenCalledExactlyOnceWith({
 				...expected,
-				tokenIdentifier: '0'
+				tokenIdentifier
 			});
 			expect(extGetTokensByOwner).toHaveBeenCalledExactlyOnceWith({
 				...expected,
@@ -85,7 +92,7 @@ describe('ic-standard.services', () => {
 			});
 			expect(extMetadata).toHaveBeenCalledExactlyOnceWith({
 				...expected,
-				tokenIdentifier: '0'
+				tokenIdentifier
 			});
 
 			expect(dip721Balance).toHaveBeenCalledExactlyOnceWith(expected);
@@ -103,7 +110,7 @@ describe('ic-standard.services', () => {
 
 			expect(extBalance).toHaveBeenCalledExactlyOnceWith({
 				...expected,
-				tokenIdentifier: '0'
+				tokenIdentifier
 			});
 			expect(extGetTokensByOwner).toHaveBeenCalledExactlyOnceWith({
 				...expected,
@@ -111,7 +118,7 @@ describe('ic-standard.services', () => {
 			});
 			expect(extMetadata).toHaveBeenCalledExactlyOnceWith({
 				...expected,
-				tokenIdentifier: '0'
+				tokenIdentifier
 			});
 
 			expect(dip721Balance).toHaveBeenCalledExactlyOnceWith(expected);
@@ -141,7 +148,7 @@ describe('ic-standard.services', () => {
 
 			expect(extBalance).toHaveBeenCalledExactlyOnceWith({
 				...expected,
-				tokenIdentifier: '0'
+				tokenIdentifier
 			});
 			expect(extGetTokensByOwner).toHaveBeenCalledExactlyOnceWith({
 				...expected,
@@ -149,7 +156,7 @@ describe('ic-standard.services', () => {
 			});
 			expect(extMetadata).toHaveBeenCalledExactlyOnceWith({
 				...expected,
-				tokenIdentifier: '0'
+				tokenIdentifier
 			});
 
 			expect(dip721Balance).not.toHaveBeenCalled();

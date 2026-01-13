@@ -4,6 +4,7 @@
 	import IconSocialLogin from '$lib/components/icons/IconSocialLogin.svelte';
 	import IconScanFace from '$lib/components/icons/lucide/IconScanFace.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import IconSparkles from '$lib/components/icons/lucide/IconSparkles.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import InviteRewardsBanner from '$lib/components/ui/InviteRewardsBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -16,7 +17,7 @@
 		},
 		{
 			label: $i18n.auth.text.instant_and_private,
-			icon: IconScanFace
+			icon: IconSparkles
 		},
 		{
 			label: $i18n.auth.text.advanced_cryptography,
