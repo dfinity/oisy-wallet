@@ -2,7 +2,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import { isTokenErc } from '$eth/utils/erc.utils';
 import type { ExtToken } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
-import { isTokenExt } from '$icp/utils/ext.utils';
+import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { CertifiedData } from '$lib/types/store';
@@ -39,7 +39,7 @@ export const initCertifiedCustomTokensStore = <
 			? token.address
 			: isTokenErc(token)
 				? `${token.address}#${token.network.chainId}`
-				: isTokenExt(token)
+				: isTokenIcNft(token)
 					? token.canisterId
 					: isTokenIc(token)
 						? token.ledgerCanisterId
