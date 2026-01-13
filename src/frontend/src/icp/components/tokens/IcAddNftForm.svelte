@@ -32,6 +32,7 @@
 
 		if (isEmptyString(canisterId)) {
 			standardNotRecognized = false;
+
 			return;
 		}
 
