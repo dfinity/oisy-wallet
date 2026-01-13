@@ -1993,50 +1993,50 @@
 	},
 	"temporal": {
 		"seconds_to_duration": {
-			"year": "",
-			"year_plural": "",
-			"month": "",
-			"month_plural": "",
-			"day": "",
-			"day_plural": "",
-			"hour": "",
-			"hour_plural": "",
-			"minute": "",
-			"minute_plural": "",
-			"second": "",
-			"second_plural": ""
+			"year": "年（单数）",
+			"year_plural": "年（复数）",
+			"month": "月（单数）",
+			"month_plural": "月（复数）",
+			"day": "天（单数）",
+			"day_plural": "天（复数）",
+			"hour": "小时（单数）",
+			"hour_plural": "小时（复数）",
+			"minute": "分钟（单数）",
+			"minute_plural": "分钟（复数）",
+			"second": "秒（单数）",
+			"second_plural": "秒（复数）"
 		}
 	},
 	"ai_assistant": {
 		"text": {
-			"title": "",
-			"welcome_message": "",
-			"action_button_contacts_title": "",
-			"action_button_contacts_subtitle": "",
-			"action_button_contacts_prompt": "",
-			"action_button_send_tokens_title": "",
-			"action_button_send_tokens_subtitle": "",
-			"action_button_send_tokens_prompt": "",
+			"title": "$oisy_short AI 助手",
+			"welcome_message": "你好！ 👋 我是你的个人 AI 礼宾。有啥我能帮你？",
+			"action_button_contacts_title": "显示联系人",
+			"action_button_contacts_subtitle": "展示你保存的联系人",
+			"action_button_contacts_prompt": "给我看看我的联系人。",
+			"action_button_send_tokens_title": "发送资产",
+			"action_button_send_tokens_subtitle": "几秒内完成发送设置",
+			"action_button_send_tokens_prompt": "我想发送代币。",
 			"action_button_show_balance_title": "",
 			"action_button_show_balance_subtitle": "",
 			"action_button_show_balance_prompt": "",
-			"select_contact_message": "",
-			"send_to_message": "",
-			"send_message": "",
-			"send_message_input_placeholder": "",
+			"select_contact_message": "选择一个联系人以开始发送流程：",
+			"send_to_message": "发送给 $contact_name ($address_info)。",
+			"send_message": "发送消息",
+			"send_message_input_placeholder": "你想做什么？",
 			"send_token_on_network_message": "",
 			"send_token_message": "",
 			"send_on_network_message": "",
-			"send_token_succeeded": "",
+			"send_token_succeeded": "交易已完成！",
 			"show_total_balance_tool_card_title": "",
-			"no_contacts_found_message": "",
-			"loading": "",
-			"reset_chat_history": "",
-			"feature_description": ""
+			"no_contacts_found_message": "抱歉，我在你的地址簿中找不到合适的联系人。",
+			"loading": "思考中...",
+			"reset_chat_history": "重置聊天记录",
+			"feature_description": "AI 助手可让你咨询通用加密主题、获取特定 OISY 功能的帮助，并发送代币。请注意，不会将你的或你联系人的地址等敏感数据发送给助手，且所有交易都必须由用户确认。该功能仍处于测试阶段，我们会定期推出新功能。"
 		},
 		"errors": {
-			"unknown": "",
-			"no_response": ""
+			"unknown": "抱歉，从大语言模型中获取反馈出错",
+			"no_response": "抱歉，我没有从大语言模型中获取反馈"
 		}
 	}
 }
