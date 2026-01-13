@@ -17,7 +17,7 @@ import type { TokenStandardCode } from '$lib/types/token';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
-type AcceptedStandards = Extract<TokenStandardCode, 'ext' | 'dip721'>;
+type AcceptedStandards = Extract<TokenStandardCode, 'ext' | 'dip721' | 'icpunks'>;
 
 export const detectNftCanisterStandard = async ({
 	identity,
