@@ -3,8 +3,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import AuthHelpForm from '$lib/components/auth/AuthHelpForm.svelte';
-	import AuthHelpIdentityForm from '$lib/components/auth/AuthHelpIdentityForm.svelte';
-	import AuthHelpOtherForm from '$lib/components/auth/AuthHelpOtherForm.svelte';
+	import AuthHelpLegacyIdentityForm from '$lib/components/auth/AuthHelpLegacyIdentityForm.svelte';
+	import AuthHelpNewIdentityForm from '$lib/components/auth/AuthHelpNewIdentityForm.svelte';
 	import { authHelpWizardSteps } from '$lib/config/auth-help.config';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { WizardStepsAuthHelp } from '$lib/enums/wizard-steps';
@@ -29,7 +29,7 @@
 
 	onMount(() => {
 		if (usesIdentityHelp && nonNullish(modal) && nonNullish(steps)) {
-			goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY });
+			goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_NEW_IDENTITY });
 		}
 	});
 
@@ -44,18 +44,13 @@
 		});
 	};
 
-	const onBack = () =>
-		nonNullish(modal)
-			? goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.OVERVIEW })
-			: undefined;
-	const onLostIdentity = () =>
-		nonNullish(modal)
-			? goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY })
-			: undefined;
-	const onOther = () =>
-		nonNullish(modal)
-			? goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_OTHER })
-			: undefined;
+	const onWizardStepChange = (stepName: WizardStepsAuthHelp) =>
+		nonNullish(modal) ? goToWizardStep({ modal, steps, stepName }) : undefined;
+
+	const onBack = () => onWizardStepChange(WizardStepsAuthHelp.OVERVIEW);
+	const onOpenLegacyIdentityHelp = () =>
+		onWizardStepChange(WizardStepsAuthHelp.HELP_LEGACY_IDENTITY);
+	const onOpenNewIdentityHelp = () => onWizardStepChange(WizardStepsAuthHelp.HELP_NEW_IDENTITY);
 </script>
 
 <WizardModal bind:this={modal} onClose={close} {steps} bind:currentStep>
@@ -65,11 +60,11 @@
 
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsAuthHelp.OVERVIEW}
-			<AuthHelpForm {onLostIdentity} {onOther} />
-		{:else if currentStep?.name === WizardStepsAuthHelp.HELP_IDENTITY}
-			<AuthHelpIdentityForm hideBack={usesIdentityHelp} {onBack} onDone={close} />
-		{:else if currentStep?.name === WizardStepsAuthHelp.HELP_OTHER}
-			<AuthHelpOtherForm {onBack} onDone={close} />
+			<AuthHelpForm {onOpenLegacyIdentityHelp} {onOpenNewIdentityHelp} />
+		{:else if currentStep?.name === WizardStepsAuthHelp.HELP_LEGACY_IDENTITY}
+			<AuthHelpLegacyIdentityForm hideBack={usesIdentityHelp} {onBack} onDone={close} />
+		{:else if currentStep?.name === WizardStepsAuthHelp.HELP_NEW_IDENTITY}
+			<AuthHelpNewIdentityForm hideBack={usesIdentityHelp} {onBack} onDone={close} />
 		{/if}
 	{/key}
 </WizardModal>

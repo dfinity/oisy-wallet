@@ -1,14 +1,15 @@
 import * as authEnv from '$env/auth.env';
 import AuthHelpForm from '$lib/components/auth/AuthHelpForm.svelte';
 import {
-	HELP_AUTH_COULD_NOT_ENTER_IDENTITY_NUMBER_BUTTON,
-	HELP_AUTH_GOT_CONFUSED_BUTTON,
+	HELP_AUTH_ASSET_CONTROL_LINK,
 	HELP_AUTH_IMAGE_BANNER,
+	HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK,
+	HELP_AUTH_INTRODUCTION_LINK,
 	HELP_AUTH_LOST_IDENTITY_BUTTON,
 	HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,
-	HELP_AUTH_NO_SIGN_UP_NEEDED_BUTTON,
-	HELP_AUTH_OTHER_BUTTON,
-	HELP_AUTH_SECURITY_BUTTON
+	HELP_AUTH_PRIVATE_KEY_LINK,
+	HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK,
+	HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import * as analytics from '$lib/services/analytics.services';
@@ -22,18 +23,19 @@ vi.spyOn(authEnv, 'PRIMARY_INTERNET_IDENTITY_VERSION', 'get').mockImplementation
 describe('AuthHelpForm', () => {
 	const imageBannerSelector = `img[data-tid="${HELP_AUTH_IMAGE_BANNER}"]`;
 	const lostIdentityButtonSelector = `button[data-tid="${HELP_AUTH_LOST_IDENTITY_BUTTON}"]`;
-	const securityButtonSelector = `button[data-tid="${HELP_AUTH_SECURITY_BUTTON}"]`;
-	const gotConfusedButtonSelector = `button[data-tid="${HELP_AUTH_GOT_CONFUSED_BUTTON}"]`;
-	const otherButtonSelector = `button[data-tid="${HELP_AUTH_OTHER_BUTTON}"]`;
 	const newIdentityVersionButtonSelector = `button[data-tid="${HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON}"]`;
-	const noSignUpNeededButtonSelector = `button[data-tid="${HELP_AUTH_NO_SIGN_UP_NEEDED_BUTTON}"]`;
-	const couldNotEnterIdentityNumberButtonSelector = `button[data-tid="${HELP_AUTH_COULD_NOT_ENTER_IDENTITY_NUMBER_BUTTON}"]`;
+	const useIdentityNumberButtonSelector = `button[data-tid="${HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON}"]`;
+	const switchToNewInternetIdentityLinkSelector = `a[data-tid="${HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK}"]`;
+	const introductionLinkSelector = `a[data-tid="${HELP_AUTH_INTRODUCTION_LINK}"]`;
+	const privateKeyLinkSelector = `a[data-tid="${HELP_AUTH_PRIVATE_KEY_LINK}"]`;
+	const assetControlLinkSelector = `a[data-tid="${HELP_AUTH_ASSET_CONTROL_LINK}"]`;
+	const internetIdentityHelpCenterLinkSelector = `a[data-tid="${HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK}"]`;
 
 	it('should render auth help form content', () => {
 		const { container, getByText } = render(AuthHelpForm, {
 			props: {
-				onLostIdentity: vi.fn(),
-				onOther: vi.fn()
+				onOpenNewIdentityHelp: vi.fn(),
+				onOpenLegacyIdentityHelp: vi.fn()
 			}
 		});
 
@@ -41,50 +43,57 @@ describe('AuthHelpForm', () => {
 
 		expect(imageBanner).toBeInTheDocument();
 
+		expect(getByText(get(i18n).auth.help.text.description)).toBeInTheDocument();
+
 		const newIdentityVersionButton: HTMLButtonElement | null = container.querySelector(
 			newIdentityVersionButtonSelector
 		);
 
 		expect(newIdentityVersionButton).toBeInTheDocument();
-		expect(getByText(get(i18n).auth.help.text.new_auth_version)).toBeInTheDocument();
+		expect(getByText(get(i18n).auth.help.text.login_page_looks_different)).toBeInTheDocument();
 
-		const couldNotEnterIdentityNumberButton: HTMLButtonElement | null = container.querySelector(
-			couldNotEnterIdentityNumberButtonSelector
+		const useIdentityNumberButton: HTMLButtonElement | null = container.querySelector(
+			useIdentityNumberButtonSelector
 		);
 
-		expect(couldNotEnterIdentityNumberButton).toBeInTheDocument();
-		expect(getByText(get(i18n).auth.help.text.could_not_enter_identity_number)).toBeInTheDocument();
+		expect(useIdentityNumberButton).toBeInTheDocument();
+		expect(getByText(get(i18n).auth.help.text.use_identity_number)).toBeInTheDocument();
 
 		const lostIdentityButton: HTMLButtonElement | null = container.querySelector(
 			lostIdentityButtonSelector
 		);
 
 		expect(lostIdentityButton).toBeInTheDocument();
-		expect(getByText(get(i18n).auth.help.text.lost_identity)).toBeInTheDocument();
+		expect(getByText(get(i18n).auth.help.text.lost_identity_number)).toBeInTheDocument();
 
-		const securityButton: HTMLButtonElement | null =
-			container.querySelector(securityButtonSelector);
+		expect(getByText(get(i18n).auth.help.text.useful_links)).toBeInTheDocument();
 
-		expect(securityButton).toBeInTheDocument();
-		expect(getByText(get(i18n).auth.help.text.security)).toBeInTheDocument();
-
-		const gotConfusedButton: HTMLButtonElement | null =
-			container.querySelector(gotConfusedButtonSelector);
-
-		expect(gotConfusedButton).toBeInTheDocument();
-		expect(getByText(get(i18n).auth.help.text.got_confused)).toBeInTheDocument();
-
-		const noSignUpNeededButton: HTMLButtonElement | null = container.querySelector(
-			noSignUpNeededButtonSelector
+		const switchToNewInternetIdentityLink: HTMLAnchorElement | null = container.querySelector(
+			switchToNewInternetIdentityLinkSelector
 		);
 
-		expect(noSignUpNeededButton).toBeInTheDocument();
-		expect(getByText(get(i18n).auth.help.text.no_signup_needed)).toBeInTheDocument();
+		expect(switchToNewInternetIdentityLink).toBeInTheDocument();
 
-		const otherButton: HTMLButtonElement | null = container.querySelector(otherButtonSelector);
+		const introductionLink: HTMLAnchorElement | null =
+			container.querySelector(introductionLinkSelector);
 
-		expect(otherButton).toBeInTheDocument();
-		expect(getByText(get(i18n).auth.help.text.other)).toBeInTheDocument();
+		expect(introductionLink).toBeInTheDocument();
+
+		const privateKeyLink: HTMLAnchorElement | null =
+			container.querySelector(privateKeyLinkSelector);
+
+		expect(privateKeyLink).toBeInTheDocument();
+
+		const assetControlLink: HTMLAnchorElement | null =
+			container.querySelector(assetControlLinkSelector);
+
+		expect(assetControlLink).toBeInTheDocument();
+
+		const internetIdentityHelpCenterLink: HTMLAnchorElement | null = container.querySelector(
+			internetIdentityHelpCenterLinkSelector
+		);
+
+		expect(internetIdentityHelpCenterLink).toBeInTheDocument();
 
 		expect(
 			getByText(replaceOisyPlaceholders(get(i18n).auth.help.text.feedback_text))
@@ -94,19 +103,19 @@ describe('AuthHelpForm', () => {
 
 	it('should call correct function on button click', async () => {
 		const trackingEventKey = 'main_page_button';
-		const onLostIdentityMock = vi.fn();
-		const onOtherMock = vi.fn();
+		const onOpenNewIdentityHelpMock = vi.fn();
+		const onOpenLegacyIdentityHelpMock = vi.fn();
 		const analyticSpy = vi.spyOn(analytics, 'trackEvent');
 
 		const { container } = render(AuthHelpForm, {
 			props: {
-				onLostIdentity: onLostIdentityMock,
-				onOther: onOtherMock
+				onOpenNewIdentityHelp: onOpenNewIdentityHelpMock,
+				onOpenLegacyIdentityHelp: onOpenLegacyIdentityHelpMock
 			}
 		});
 
-		expect(onLostIdentityMock).not.toHaveBeenCalled();
-		expect(onOtherMock).not.toHaveBeenCalled();
+		expect(onOpenNewIdentityHelpMock).not.toHaveBeenCalled();
+		expect(onOpenLegacyIdentityHelpMock).not.toHaveBeenCalled();
 		expect(analyticSpy).not.toHaveBeenCalled();
 
 		const newIdentityVersionButton: HTMLButtonElement | null = container.querySelector(
@@ -118,29 +127,29 @@ describe('AuthHelpForm', () => {
 		await waitFor(() => {
 			newIdentityVersionButton?.click();
 
-			expect(onLostIdentityMock).toHaveBeenCalledOnce();
+			expect(onOpenNewIdentityHelpMock).toHaveBeenCalledOnce();
 		});
 
 		expect(analyticSpy).toHaveBeenCalledWith({
 			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-			metadata: { event_key: trackingEventKey, event_value: 'new_auth_version' }
+			metadata: { event_key: trackingEventKey, event_value: 'login_page_looks_different' }
 		});
 
-		const couldNotEnterIdentityNumberButton: HTMLButtonElement | null = container.querySelector(
-			couldNotEnterIdentityNumberButtonSelector
+		const useIdentityNumberButton: HTMLButtonElement | null = container.querySelector(
+			useIdentityNumberButtonSelector
 		);
 
-		expect(couldNotEnterIdentityNumberButton).toBeInTheDocument();
+		expect(useIdentityNumberButton).toBeInTheDocument();
 
 		await waitFor(() => {
-			couldNotEnterIdentityNumberButton?.click();
+			useIdentityNumberButton?.click();
 
-			expect(onLostIdentityMock).toHaveBeenCalledTimes(2);
+			expect(onOpenNewIdentityHelpMock).toHaveBeenCalledTimes(2);
 		});
 
 		expect(analyticSpy).toHaveBeenCalledWith({
 			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-			metadata: { event_key: trackingEventKey, event_value: 'could_not_enter_identity_number' }
+			metadata: { event_key: trackingEventKey, event_value: 'use_identity_number' }
 		});
 
 		const lostIdentityButton: HTMLButtonElement | null = container.querySelector(
@@ -152,76 +161,12 @@ describe('AuthHelpForm', () => {
 		await waitFor(() => {
 			lostIdentityButton?.click();
 
-			expect(onLostIdentityMock).toHaveBeenCalledTimes(3);
+			expect(onOpenLegacyIdentityHelpMock).toHaveBeenCalledOnce();
 		});
 
 		expect(analyticSpy).toHaveBeenCalledWith({
 			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-			metadata: { event_key: trackingEventKey, event_value: 'lost_identity' }
-		});
-
-		const securityButton: HTMLButtonElement | null =
-			container.querySelector(securityButtonSelector);
-
-		expect(securityButton).toBeInTheDocument();
-
-		await waitFor(() => {
-			securityButton?.click();
-
-			expect(onOtherMock).toHaveBeenCalledOnce();
-		});
-
-		expect(analyticSpy).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-			metadata: { event_key: trackingEventKey, event_value: 'security' }
-		});
-
-		const gotConfusedButton: HTMLButtonElement | null =
-			container.querySelector(gotConfusedButtonSelector);
-
-		expect(gotConfusedButton).toBeInTheDocument();
-
-		await waitFor(() => {
-			gotConfusedButton?.click();
-
-			expect(onOtherMock).toHaveBeenCalledTimes(2);
-		});
-
-		expect(analyticSpy).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-			metadata: { event_key: trackingEventKey, event_value: 'got_confused' }
-		});
-
-		const noSignUpNeededButton: HTMLButtonElement | null = container.querySelector(
-			noSignUpNeededButtonSelector
-		);
-
-		expect(noSignUpNeededButton).toBeInTheDocument();
-
-		await waitFor(() => {
-			noSignUpNeededButton?.click();
-
-			expect(onLostIdentityMock).toHaveBeenCalledTimes(4);
-		});
-
-		expect(analyticSpy).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-			metadata: { event_key: trackingEventKey, event_value: 'no_signup_needed' }
-		});
-
-		const otherButton: HTMLButtonElement | null = container.querySelector(otherButtonSelector);
-
-		expect(otherButton).toBeInTheDocument();
-
-		await waitFor(() => {
-			otherButton?.click();
-
-			expect(onOtherMock).toHaveBeenCalledTimes(3);
-		});
-
-		expect(analyticSpy).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-			metadata: { event_key: trackingEventKey, event_value: 'other' }
+			metadata: { event_key: trackingEventKey, event_value: 'lost_identity_number' }
 		});
 	});
 });
