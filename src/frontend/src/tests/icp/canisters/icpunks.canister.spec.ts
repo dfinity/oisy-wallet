@@ -59,4 +59,39 @@ describe('icpunks.canister', () => {
 			expect(service.user_tokens).toHaveBeenCalledExactlyOnceWith(mockPrincipal);
 		});
 	});
+
+	describe('transfer', () => {
+		const mockTo = mockPrincipal;
+		const mockTokenId = 12345n;
+
+		const mockParams = { certified, to: mockTo, tokenIdentifier: mockTokenId };
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should correctly call the transfer_to method', async () => {
+			service.transfer_to.mockResolvedValue(true);
+
+			const { transfer } = await createIcPunksCanister({ serviceOverride: service });
+
+			const res = await transfer(mockParams);
+
+			expect(res).toBeTruthy();
+			expect(service.transfer_to).toHaveBeenCalledExactlyOnceWith(mockTo, mockTokenId);
+		});
+
+		it('should throw an error if transfer_to throws', async () => {
+			const mockError = new Error('Test response error');
+			service.transfer_to.mockRejectedValue(mockError);
+
+			const { transfer } = await createIcPunksCanister({ serviceOverride: service });
+
+			const res = transfer(mockParams);
+
+			await expect(res).rejects.toThrowError(mockError);
+
+			expect(service.transfer_to).toHaveBeenCalledExactlyOnceWith(mockTo, mockTokenId);
+		});
+	});
 });

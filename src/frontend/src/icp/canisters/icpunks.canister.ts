@@ -34,4 +34,14 @@ export class IcPunksCanister extends Canister<IcPunksService> {
 
 		return await user_tokens(principal);
 	};
+
+	transfer = async ({
+		certified,
+		to,
+		tokenIdentifier
+	}: { to: Principal; tokenIdentifier: bigint } & QueryParams): Promise<boolean> => {
+		const { transfer_to } = this.caller({ certified });
+
+		return await transfer_to(to, tokenIdentifier);
+	};
 }
