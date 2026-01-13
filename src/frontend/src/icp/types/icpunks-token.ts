@@ -1,6 +1,6 @@
 import type {
-	IcPunksTokenWithoutIdSchema,
-	IcPunksTokenSchema
+	IcPunksTokenSchema,
+	IcPunksTokenWithoutIdSchema
 } from '$icp/schema/icpunks-token.schema';
 import type * as z from 'zod';
 
