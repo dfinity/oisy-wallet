@@ -5,6 +5,7 @@
 	import { isTokenErc20CustomToken } from '$eth/utils/erc20.utils';
 	import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
+	import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
 	import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
 	import { isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
 	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
@@ -13,7 +14,6 @@
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import { isTokenSplCustomToken } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
-	import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
 
 	interface Props {
 		token: Token;
