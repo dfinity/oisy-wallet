@@ -34,7 +34,6 @@ describe('icpunks.utils', () => {
 		const mockCanisterId = mockIcPunksCanisterId;
 		const mockParams = {
 			canisterId: mockCanisterId,
-			standardVersion: 'icpunks' as const,
 			metadata: { name: mockName }
 		};
 
