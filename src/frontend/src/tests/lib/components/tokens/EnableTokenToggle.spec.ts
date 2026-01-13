@@ -5,10 +5,12 @@ import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.constants';
 import type { Token } from '$lib/types/token';
 import * as tokenToggleUtils from '$lib/utils/token-toggle.utils';
+import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('EnableTokenToggle', () => {
@@ -19,6 +21,8 @@ describe('EnableTokenToggle', () => {
 	const mockToggleableErc721Token = { ...mockValidErc721Token, enabled: true };
 	const mockToggleableErc1155Token = { ...mockValidErc1155Token, enabled: true };
 	const mockToggleableExtToken = { ...mockValidExtV2Token, enabled: true };
+	const mockToggleableDip721Token = { ...mockValidDip721Token, enabled: true };
+	const mockToggleableIcPunksToken = { ...mockValidIcPunksToken, enabled: true };
 	const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
 	const mockToggleableBtcToken = { ...BTC_MAINNET_TOKEN, enabled: true };
 	const mockToggleableSolToken = { ...SOLANA_TOKEN, enabled: true };
@@ -69,6 +73,22 @@ describe('EnableTokenToggle', () => {
 		});
 
 		expect(getByTestId(getTestIdForToggle(mockToggleableExtToken))).toBeInTheDocument();
+	});
+
+	it('renders toggle DIP721 token', () => {
+		const { getByTestId } = render(EnableTokenToggle, {
+			props: { token: mockToggleableDip721Token, onToggle: mockOnToggle }
+		});
+
+		expect(getByTestId(getTestIdForToggle(mockToggleableDip721Token))).toBeInTheDocument();
+	});
+
+	it('renders toggle ICPunks token', () => {
+		const { getByTestId } = render(EnableTokenToggle, {
+			props: { token: mockToggleableIcPunksToken, onToggle: mockOnToggle }
+		});
+
+		expect(getByTestId(getTestIdForToggle(mockToggleableIcPunksToken))).toBeInTheDocument();
 	});
 
 	it('should call onToggle on clicking it', async () => {
