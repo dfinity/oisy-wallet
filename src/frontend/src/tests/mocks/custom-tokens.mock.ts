@@ -4,6 +4,7 @@ import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.po
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
+import { IC_PUNKS_BUILTIN_TOKENS } from '$env/tokens/tokens-icpunks/tokens.icpunks.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
@@ -232,6 +233,20 @@ export const mockCustomTokensExt: CustomToken[] = [
 		token: {
 			ExtV2: {
 				canister_id: Principal.fromText(EXT_BUILTIN_TOKENS[2].canisterId)
+			}
+		},
+		section: toNullable(),
+		allow_external_content_source: toNullable()
+	}
+];
+
+export const mockCustomTokensIcPunks: CustomToken[] = [
+	{
+		version: toNullable(1n),
+		enabled: true,
+		token: {
+			IcPunks: {
+				canister_id: Principal.fromText(IC_PUNKS_BUILTIN_TOKENS[0].canisterId)
 			}
 		},
 		section: toNullable(),

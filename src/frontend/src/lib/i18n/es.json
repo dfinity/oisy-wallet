@@ -637,6 +637,7 @@
 			"erc20_custom_token": "Error al habilitar el token gemelo ERC20.",
 			"icrc_custom_token": "Error al cargar el token ICRC personalizado.",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Tu billetera requiere algunos datos iniciales que aún no se han cargado. Por favor, inténtalo de nuevo.",
 			"allow_signing": "Ocurrió un problema al configurar tu billetera para firmar. Has sido desconectado. Si el problema persiste, contacta con el soporte.",
 			"waiting_for_allowed_cycles_aborted": "Preparación del ledger de ciclos abortada. Por favor, intenta iniciar sesión más tarde",

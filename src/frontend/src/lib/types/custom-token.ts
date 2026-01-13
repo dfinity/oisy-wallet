@@ -31,7 +31,14 @@ export type ErcSaveCustomToken = Pick<Erc20Token, 'address'> &
 export type SplSaveCustomToken = Pick<SplToken, 'address' | 'decimals' | 'symbol'>;
 
 export type SaveCustomToken = CustomTokenState &
-	(IcrcSaveCustomToken | ExtSaveCustomToken | ErcSaveCustomToken | SplSaveCustomToken);
+	(
+		| IcrcSaveCustomToken
+		| ExtSaveCustomToken
+		| Dip721SaveCustomToken
+		| IcPunksSaveCustomToken
+		| ErcSaveCustomToken
+		| SplSaveCustomToken
+	);
 
 export type SaveCustomTokenWithKey = CustomTokenState &
 	(

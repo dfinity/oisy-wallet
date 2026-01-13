@@ -637,6 +637,7 @@
 			"erc20_custom_token": "خطأ أثناء تفعيل التوكن التوأم ERC20.",
 			"icrc_custom_token": "خطأ أثناء تحميل التوكن المخصص ICRC.",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "تتطلب محفظتك بعض البيانات الأولية التي لم يتم تحميلها بعد. يرجى المحاولة مرة أخرى.",
 			"allow_signing": "حدثت مشكلة أثناء إعداد محفظتك للتوقيع. تم تسجيل خروجك. إذا استمرت المشكلة، يرجى الاتصال بالدعم.",
 			"waiting_for_allowed_cycles_aborted": "",
