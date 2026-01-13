@@ -17,7 +17,11 @@
 		icPunksCanisterId?: string;
 	}
 
-	let { extCanisterId = $bindable(), dip721CanisterId = $bindable(),	icPunksCanisterId = $bindable()	}: Props = $props();
+	let {
+		extCanisterId = $bindable(),
+		dip721CanisterId = $bindable(),
+		icPunksCanisterId = $bindable()
+	}: Props = $props();
 
 	let canisterId = $state<CanisterIdText | undefined>();
 
