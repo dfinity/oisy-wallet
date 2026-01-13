@@ -20,7 +20,6 @@ import { isTokenIc } from '$icp/utils/icrc.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
-import { isTokenFungible } from '$lib/utils/nft.utils';
 import { filterEnabledTokens } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
@@ -29,52 +28,37 @@ import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const tokens: Readable<Token[]> = derived(
+export const nativeTokens: Readable<Token[]> = derived(
 	[
 		defaultIcpTokens,
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		enabledEvmTokens,
-		enabledSolanaTokens,
-		erc20Tokens,
-		erc721Tokens,
-		erc1155Tokens,
-		sortedIcrcTokens,
-		extTokens,
-		icPunksTokens,
-		splTokens
+		enabledSolanaTokens
 	],
 	([
 		$defaultIcpTokens,
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$enabledEvmTokens,
-		$enabledSolanaTokens,
-		$erc20Tokens,
-		$erc721Tokens,
-		$erc1155Tokens,
-		$icrcTokens,
-		$extTokens,
-		$icPunksTokens,
-		$splTokens
+		$enabledSolanaTokens
 	]) => [
 		...$defaultIcpTokens,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
-		...$enabledEvmTokens,
-		...$erc20Tokens,
-		...$erc721Tokens,
-		...$erc1155Tokens,
-		...$icrcTokens,
-		...$extTokens,
-		...$icPunksTokens,
-		...$splTokens
+		...$enabledEvmTokens
 	]
 );
 
-export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
-	$tokens.filter(isTokenFungible)
+export const fungibleTokens: Readable<Token[]> = derived(
+	[nativeTokens, erc20Tokens, sortedIcrcTokens, splTokens],
+	([$nativeTokens, $erc20Tokens, $icrcTokens, $splTokens]) => [
+		...$nativeTokens,
+		...$erc20Tokens,
+		...$icrcTokens,
+		...$splTokens
+	]
 );
 
 export const nonFungibleTokens: Readable<NonFungibleToken[]> = derived(
@@ -85,6 +69,11 @@ export const nonFungibleTokens: Readable<NonFungibleToken[]> = derived(
 		...$extTokens,
 		...$icPunksTokens
 	]
+);
+
+export const tokens: Readable<Token[]> = derived(
+	[fungibleTokens, nonFungibleTokens],
+	([$fungibleTokens, $nonFungibleTokens]) => [...$fungibleTokens, ...$nonFungibleTokens]
 );
 
 export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>

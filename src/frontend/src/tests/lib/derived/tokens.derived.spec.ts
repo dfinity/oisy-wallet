@@ -241,14 +241,14 @@ describe('tokens.derived', () => {
 				ARBITRUM_ETH_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20CustomToken,
-				{ ...mockErc721CustomToken, id: result[10].id },
-				{ ...mockErc1155CustomToken, id: result[11].id },
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[12].id },
-				{ ...mockIcrcCustomToken, id: result[13].id },
-				{ ...mockExtCustomToken, id: result[14].id },
-				{ ...mockIcPunksCustomToken, id: result[15].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[10].id },
+				{ ...mockIcrcCustomToken, id: result[11].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
-				mockSplCustomToken
+				mockSplCustomToken,
+				{ ...mockErc721CustomToken, id: result[14].id },
+				{ ...mockErc1155CustomToken, id: result[15].id },
+				{ ...mockExtCustomToken, id: result[16].id },
+				{ ...mockIcPunksCustomToken, id: result[17].id }
 			]);
 		});
 
