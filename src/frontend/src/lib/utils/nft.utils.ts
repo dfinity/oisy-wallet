@@ -1,6 +1,5 @@
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
-import { isTokenExt } from '$icp/utils/ext.utils';
 import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import type { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type {
@@ -26,7 +25,7 @@ export const getTokensByNetwork = (tokens: NonFungibleToken[]): NonFungibleToken
 	}, new Map());
 
 export const getNftIdentifier = (token: NonFungibleToken): NonFungibleTokenIdentifier =>
-	isTokenExt(token) ? token.canisterId : token.address;
+	isTokenIcNft(token) ? token.canisterId : token.address;
 
 /**
  * Gets the ID to display for the given NFT.

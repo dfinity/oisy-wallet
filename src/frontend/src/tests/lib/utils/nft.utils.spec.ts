@@ -21,6 +21,7 @@ import {
 	mapNftAttributes
 } from '$lib/utils/nft.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { MOCK_ERC1155_TOKENS, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import {
 	AZUKI_ELEMENTAL_BEANS_TOKEN,
@@ -29,6 +30,7 @@ import {
 	PUDGY_PENGUINS_TOKEN
 } from '$tests/mocks/erc721-tokens.mock';
 import { MOCK_EXT_TOKENS, mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('nft.utils', () => {
@@ -120,6 +122,14 @@ describe('nft.utils', () => {
 
 		it('should return the canisterId for EXT tokens', () => {
 			expect(getNftIdentifier(mockValidExtV2Token)).toBe(mockValidExtV2Token.canisterId);
+		});
+
+		it('should return the canisterId for DIP721 tokens', () => {
+			expect(getNftIdentifier(mockValidDip721Token)).toBe(mockValidDip721Token.canisterId);
+		});
+
+		it('should return the ICPunks for EXT tokens', () => {
+			expect(getNftIdentifier(mockValidIcPunksToken)).toBe(mockValidIcPunksToken.canisterId);
 		});
 	});
 
