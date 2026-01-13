@@ -13,6 +13,7 @@
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import { isTokenSplCustomToken } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
+	import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
 
 	interface Props {
 		token: Token;
@@ -24,7 +25,7 @@
 
 {#if icTokenIcrcCustomToken(token)}
 	<IcManageTokenToggle onIcToken={(t) => onToggle(t)} {token} />
-{:else if isTokenErc20CustomToken(token) || isTokenSplCustomToken(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token) || isTokenExtCustomToken(token) || isTokenIcPunksCustomToken(token)}
+{:else if isTokenErc20CustomToken(token) || isTokenSplCustomToken(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token) || isTokenExtCustomToken(token) || isTokenDip721CustomToken(token) || isTokenIcPunksCustomToken(token)}
 	<ManageTokenToggle onShowOrHideToken={(t) => onToggle(t)} {token} />
 {:else if isBitcoinToken(token)}
 	<BtcManageTokenToggle />

@@ -16,6 +16,7 @@
 		| Erc721CustomToken
 		| Erc1155CustomToken
 		| ExtCustomToken
+		| Dip721CustomToken
 		| IcPunksCustomToken;
 
 	interface Props {
