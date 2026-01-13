@@ -47,7 +47,7 @@ describe('icpunks.utils', () => {
 			category: 'custom'
 		};
 
-		it('should correctly map an EXT token', () => {
+		it('should correctly map an ICPunks token', () => {
 			expect(mapIcPunksToken(mockParams)).toStrictEqual(expected);
 		});
 
