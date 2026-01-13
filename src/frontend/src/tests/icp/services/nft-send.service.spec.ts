@@ -1,14 +1,20 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { sendNft } from '$icp/services/nft-send.services';
-import { transferDip721, transferExtV2 } from '$icp/services/nft-transfer.services';
+import {
+	transferDip721,
+	transferExtV2,
+	transferIcPunks
+} from '$icp/services/nft-transfer.services';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
-import { mockValidDip721Nft, mockValidExtNft } from '$tests/mocks/nfts.mock';
+import { mockValidDip721Nft, mockValidExtNft, mockValidIcPunksNft } from '$tests/mocks/nfts.mock';
 
 vi.mock('$icp/services/nft-transfer.services', () => ({
 	transferExtV2: vi.fn(),
-	transferDip721: vi.fn()
+	transferDip721: vi.fn(),
+	transferIcPunks: vi.fn()
 }));
 
 describe('nft-send.services', () => {
@@ -33,6 +39,8 @@ describe('nft-send.services', () => {
 			await sendNft({ ...mockParams, identity: null });
 
 			expect(transferExtV2).not.toHaveBeenCalled();
+			expect(transferDip721).not.toHaveBeenCalled();
+			expect(transferIcPunks).not.toHaveBeenCalled();
 		});
 
 		it('should return early if network is not ICP', async () => {
@@ -42,6 +50,8 @@ describe('nft-send.services', () => {
 			});
 
 			expect(transferExtV2).not.toHaveBeenCalled();
+			expect(transferDip721).not.toHaveBeenCalled();
+			expect(transferIcPunks).not.toHaveBeenCalled();
 		});
 
 		it('should return early if token is not supported standard', async () => {
@@ -51,6 +61,8 @@ describe('nft-send.services', () => {
 			});
 
 			expect(transferExtV2).not.toHaveBeenCalled();
+			expect(transferDip721).not.toHaveBeenCalled();
+			expect(transferIcPunks).not.toHaveBeenCalled();
 		});
 
 		it('should call the EXT transfer service', async () => {
@@ -67,6 +79,10 @@ describe('nft-send.services', () => {
 			await sendNft(mockParams);
 
 			expect(transferExtV2).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(transferDip721).not.toHaveBeenCalled();
+
+			expect(transferIcPunks).not.toHaveBeenCalled();
 		});
 
 		it('should call the DIP721 transfer service', async () => {
@@ -81,6 +97,32 @@ describe('nft-send.services', () => {
 			await sendNft({ ...mockParams, token: mockValidDip721Token, tokenId: mockValidDip721Nft.id });
 
 			expect(transferDip721).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(transferExtV2).not.toHaveBeenCalled();
+
+			expect(transferIcPunks).not.toHaveBeenCalled();
+		});
+
+		it('should call the ICPunks transfer service', async () => {
+			const expectedParams = {
+				identity: mockIdentity,
+				canisterId: mockValidIcPunksToken.canisterId,
+				to: mockPrincipal2,
+				tokenIdentifier: BigInt(mockValidIcPunksNft.id),
+				progress: mockProgress
+			};
+
+			await sendNft({
+				...mockParams,
+				token: mockValidIcPunksToken,
+				tokenId: mockValidIcPunksNft.id
+			});
+
+			expect(transferIcPunks).toHaveBeenCalledExactlyOnceWith(expectedParams);
+
+			expect(transferExtV2).not.toHaveBeenCalled();
+
+			expect(transferDip721).not.toHaveBeenCalled();
 		});
 	});
 });
