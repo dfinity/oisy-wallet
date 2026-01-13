@@ -20,7 +20,7 @@ describe('icpunks.derived', () => {
 			icPunksCustomTokensStore.setAll([{ data: mockIcPunksCustomToken1, certified: false }]);
 		});
 
-		it('should return all EXT custom tokens', () => {
+		it('should return all ICPunks custom tokens', () => {
 			const result = get(icPunksCustomTokens);
 
 			expect(result).toEqual([mockIcPunksCustomToken1]);
