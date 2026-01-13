@@ -7,6 +7,7 @@ import {
 	getTokensByOwner as extGetTokensByOwner,
 	metadata as extMetadata
 } from '$icp/api/ext-v2-token.api';
+import { extIndexToIdentifier } from '$icp/utils/ext.utils';
 import {
 	ResolveByProbingError,
 	resolveByProbing,
@@ -14,6 +15,7 @@ import {
 } from '$lib/services/probing.services';
 import type { TokenStandardCode } from '$lib/types/token';
 import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 type AcceptedStandards = Extract<TokenStandardCode, 'ext' | 'dip721'>;
 
@@ -34,12 +36,17 @@ export const detectNftCanisterStandard = async ({
 		canisterId
 	};
 
-	// The token identifier is not really important, since we only want to check if the method works for the canister.
+	// The EXT token identifier is not really important, since we only want to check if the method works for the canister.
+	const extTokenIdentifier = extIndexToIdentifier({
+		collectionId: Principal.fromText(canisterId),
+		index: 0
+	});
+
 	const extCanister: ResolveGroup<AcceptedStandards> = {
 		probes: [
-			() => extBalance({ ...baseParams, tokenIdentifier: '0' }),
+			() => extBalance({ ...baseParams, tokenIdentifier: extTokenIdentifier }),
 			() => extGetTokensByOwner({ ...baseParams, owner: identity.getPrincipal() }),
-			() => extMetadata({ ...baseParams, tokenIdentifier: '0' })
+			() => extMetadata({ ...baseParams, tokenIdentifier: extTokenIdentifier })
 		],
 		onResolve: () => 'ext'
 	};
