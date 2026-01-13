@@ -16,3 +16,5 @@ export const IcPunksTokenSchema = z.object({
 	...NonFungibleTokenAppearanceSchema.shape,
 	...IcPunksInterfaceSchema.shape
 });
+
+export const IcPunksTokenWithoutIdSchema = IcPunksTokenSchema.omit({ id: true }).strict();
