@@ -10,7 +10,7 @@
 	import { extCustomTokensNotInitialized } from '$icp/derived/ext.derived';
 	import { icPunksCustomTokensNotInitialized } from '$icp/derived/icpunks.derived';
 	import { loadExtTokens } from '$icp/services/ext.services';
-	import { loadIcPunksTokens } from '$icp/services/icpunks.services.ts';
+	import { loadIcPunksTokens } from '$icp/services/icpunks.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
