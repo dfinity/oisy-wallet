@@ -7,6 +7,7 @@ import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.stor
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { loadCustomTokens as loadCustomExtTokens } from '$icp/services/ext.services';
+import { loadCustomTokens as loadCustomIcPunksTokens } from '$icp/services/icpunks.services';
 import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
 import { dip721CustomTokensStore } from '$icp/stores/dip721-custom-tokens.store';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
@@ -59,6 +60,10 @@ vi.mock('$icp/services/icrc.services', () => ({
 }));
 
 vi.mock('$icp/services/ext.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$icp/services/icpunks.services', () => ({
 	loadCustomTokens: vi.fn()
 }));
 
@@ -192,6 +197,7 @@ describe('save-custom-tokens.services', () => {
 			expect(loadCustomErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadCustomIcrcTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadCustomExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomIcPunksTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadCustomSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 		});
 
@@ -209,6 +215,7 @@ describe('save-custom-tokens.services', () => {
 			expect(loadCustomErc1155Tokens).not.toHaveBeenCalled();
 			expect(loadCustomIcrcTokens).not.toHaveBeenCalled();
 			expect(loadCustomExtTokens).not.toHaveBeenCalled();
+			expect(loadCustomIcPunksTokens).not.toHaveBeenCalled();
 			expect(loadCustomSplTokens).not.toHaveBeenCalled();
 		});
 

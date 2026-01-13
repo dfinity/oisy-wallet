@@ -43,6 +43,7 @@ import {
 	sumTokensUiUsdStakeBalance
 } from '$lib/utils/tokens.utils';
 import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
+import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
@@ -54,6 +55,7 @@ import {
 	mockValidIcCkToken,
 	mockValidIcrcToken
 } from '$tests/mocks/ic-tokens.mock';
+import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
@@ -577,6 +579,8 @@ describe('tokens.utils', () => {
 			mockValidIcrcToken,
 			mockValidIcCkToken,
 			mockValidExtV2Token,
+			mockValidDip721Token,
+			mockValidIcPunksToken,
 			mockValidErc20Token,
 			mockValidErc721Token,
 			mockValidErc1155Token,
@@ -701,6 +705,42 @@ describe('tokens.utils', () => {
 			expect(
 				filterTokens({ tokens, filter: mockValidExtV2Token.canisterId.slice(0, 5) })
 			).toStrictEqual([mockValidExtV2Token]);
+		});
+
+		it('should filter by canister IDs for DIP721 tokens', () => {
+			expect(filterTokens({ tokens, filter: mockValidDip721Token.canisterId })).toStrictEqual([
+				mockValidDip721Token
+			]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidDip721Token.canisterId.toLowerCase() })
+			).toStrictEqual([mockValidDip721Token]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidDip721Token.canisterId.toUpperCase() })
+			).toStrictEqual([mockValidDip721Token]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidDip721Token.canisterId.slice(0, 5) })
+			).toStrictEqual([mockValidDip721Token]);
+		});
+
+		it('should filter by canister IDs for ICPunks tokens', () => {
+			expect(filterTokens({ tokens, filter: mockValidIcPunksToken.canisterId })).toStrictEqual([
+				mockValidIcPunksToken
+			]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidIcPunksToken.canisterId.toLowerCase() })
+			).toStrictEqual([mockValidIcPunksToken]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidIcPunksToken.canisterId.toUpperCase() })
+			).toStrictEqual([mockValidIcPunksToken]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidIcPunksToken.canisterId.slice(0, 5) })
+			).toStrictEqual([mockValidIcPunksToken]);
 		});
 
 		it('should not filter by network', () => {
@@ -905,30 +945,45 @@ describe('tokens.utils', () => {
 		it('should return empty arrays if no tokens passed', () => {
 			const result = groupTogglableTokens([]);
 
-			expect(result).toEqual({ icrc: [], ext: [], erc20: [], erc721: [], erc1155: [], spl: [] });
+			expect(result).toEqual({
+				icrc: [],
+				ext: [],
+				dip721: [],
+				icpunks: [],
+				erc20: [],
+				erc721: [],
+				erc1155: [],
+				spl: []
+			});
 		});
 
 		it('should group the tokens correctly', () => {
 			const mockToggleableIcToken1 = { ...mockValidIcrcToken, name: 'token1', enabled: true };
 			const mockToggleableIcToken2 = { ...mockValidIcrcToken, name: 'token2', enabled: true };
 			const mockToggleableExtV2Token = { ...mockValidExtV2Token, enabled: true };
+			const mockToggleableDip721Token = { ...mockValidDip721Token, enabled: true };
+			const mockToggleableIcPunksToken = { ...mockValidIcPunksToken, enabled: true };
 			const mockToggleableErc20Token = { ...mockValidErc20Token, enabled: true };
 			const mockToggleableErc721Token = { ...mockValidErc721Token, enabled: true };
 			const mockToggleableErc1155Token = { ...mockValidErc1155Token, enabled: true };
 			const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
 
-			const { icrc, ext, spl, erc20, erc721, erc1155 } = groupTogglableTokens([
+			const { icrc, ext, dip721, icpunks, spl, erc20, erc721, erc1155 } = groupTogglableTokens([
 				mockToggleableSplToken,
 				mockToggleableErc20Token,
 				mockToggleableErc721Token,
 				mockToggleableErc1155Token,
 				mockToggleableIcToken1,
 				mockToggleableIcToken2,
-				mockToggleableExtV2Token
+				mockToggleableExtV2Token,
+				mockToggleableDip721Token,
+				mockToggleableIcPunksToken
 			]);
 
 			expect(icrc).toEqual([mockToggleableIcToken1, mockToggleableIcToken2]);
 			expect(ext).toEqual([mockToggleableExtV2Token]);
+			expect(dip721).toEqual([mockToggleableDip721Token]);
+			expect(icpunks).toEqual([mockToggleableIcPunksToken]);
 			expect(spl).toEqual([mockToggleableSplToken]);
 			expect(erc20).toEqual([mockToggleableErc20Token]);
 			expect(erc721).toEqual([mockToggleableErc721Token]);
@@ -997,6 +1052,40 @@ describe('tokens.utils', () => {
 				expect.objectContaining({
 					tokens: expect.arrayContaining([
 						expect.objectContaining({ ...mockValidExtV2Token, networkKey: 'ExtV2' })
+					]),
+					identity: mockIdentity
+				})
+			);
+		});
+
+		it('should call saveCustomTokensWithKey when DIP721 tokens are present', async () => {
+			await saveAllCustomTokens({
+				tokens: [mockValidDip721Token],
+				$authIdentity: mockIdentity,
+				$i18n: i18nMock
+			});
+
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tokens: expect.arrayContaining([
+						expect.objectContaining({ ...mockValidDip721Token, networkKey: 'Dip721' })
+					]),
+					identity: mockIdentity
+				})
+			);
+		});
+
+		it('should call saveCustomTokensWithKey when ICPunks tokens are present', async () => {
+			await saveAllCustomTokens({
+				tokens: [mockValidIcPunksToken],
+				$authIdentity: mockIdentity,
+				$i18n: i18nMock
+			});
+
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tokens: expect.arrayContaining([
+						expect.objectContaining({ ...mockValidIcPunksToken, networkKey: 'IcPunks' })
 					]),
 					identity: mockIdentity
 				})

@@ -5,9 +5,9 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 // TODO: Find some DIP721 examples; the canisters below belong to other standards.
-export const mockDip721TokenCanisterId: CanisterIdText = 'qcg3w-tyaaa-aaaah-qakea-cai';
+export const mockDip721TokenCanisterId: CanisterIdText = 'fl5nr-xiaaa-aaaai-qbjmq-cai';
 export const mockDip721TokenCanisterId2: CanisterIdText = '4nvhy-3qaaa-aaaah-qcnoq-cai';
-export const mockDip721TokenCanisterId3: CanisterIdText = 'fl5nr-xiaaa-aaaai-qbjmq-cai';
+export const mockDip721TokenCanisterId3: CanisterIdText = 'qcg3w-tyaaa-aaaah-qakea-cai';
 
 export const mockValidDip721Token: ExtToken = {
 	...mockValidToken,
