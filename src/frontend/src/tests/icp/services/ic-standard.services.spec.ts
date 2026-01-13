@@ -7,6 +7,7 @@ import {
 	getTokensByOwner as extGetTokensByOwner,
 	metadata as extMetadata
 } from '$icp/api/ext-v2-token.api';
+import { getTokensByOwner as icPunksGetTokensByOwner } from '$icp/api/icpunks.api';
 import { detectNftCanisterStandard } from '$icp/services/ic-standard.services';
 import { extIndexToIdentifier } from '$icp/utils/ext.utils';
 import { ZERO } from '$lib/constants/app.constants';
@@ -23,6 +24,10 @@ vi.mock('$icp/api/ext-v2-token.api', () => ({
 
 vi.mock('$icp/api/dip721.api', () => ({
 	balance: vi.fn(),
+	getTokensByOwner: vi.fn()
+}));
+
+vi.mock('$icp/api/icpunks.api', () => ({
 	getTokensByOwner: vi.fn()
 }));
 
@@ -53,6 +58,8 @@ describe('ic-standard.services', () => {
 
 			vi.mocked(dip721Balance).mockResolvedValue(ZERO);
 			vi.mocked(dip721GetTokensByOwner).mockResolvedValue([]);
+
+			vi.mocked(icPunksGetTokensByOwner).mockResolvedValue([]);
 		});
 
 		it('should detect an EXT canister', async () => {
@@ -75,6 +82,8 @@ describe('ic-standard.services', () => {
 
 			expect(dip721Balance).not.toHaveBeenCalled();
 			expect(dip721GetTokensByOwner).not.toHaveBeenCalled();
+
+			expect(icPunksGetTokensByOwner).not.toHaveBeenCalled();
 		});
 
 		it('should detect a DIP721 canister', async () => {
@@ -100,11 +109,45 @@ describe('ic-standard.services', () => {
 				...expected,
 				owner: mockIdentity.getPrincipal()
 			});
+
+			expect(icPunksGetTokensByOwner).not.toHaveBeenCalled();
+		});
+
+		it('should detect an ICPunks canister', async () => {
+			vi.mocked(extBalance).mockRejectedValue(new Error('Not an EXT canister'));
+			vi.mocked(dip721Balance).mockRejectedValue(new Error('Not a DIP721 canister'));
+
+			await expect(detectNftCanisterStandard(params)).resolves.toBe('icpunks');
+
+			expect(extBalance).toHaveBeenCalledExactlyOnceWith({
+				...expected,
+				tokenIdentifier
+			});
+			expect(extGetTokensByOwner).toHaveBeenCalledExactlyOnceWith({
+				...expected,
+				owner: mockIdentity.getPrincipal()
+			});
+			expect(extMetadata).toHaveBeenCalledExactlyOnceWith({
+				...expected,
+				tokenIdentifier
+			});
+
+			expect(dip721Balance).toHaveBeenCalledExactlyOnceWith(expected);
+			expect(dip721GetTokensByOwner).toHaveBeenCalledExactlyOnceWith({
+				...expected,
+				owner: mockIdentity.getPrincipal()
+			});
+
+			expect(icPunksGetTokensByOwner).toHaveBeenCalledExactlyOnceWith({
+				...expected,
+				owner: mockIdentity.getPrincipal()
+			});
 		});
 
 		it('should return undefined for unrecognized canisters', async () => {
 			vi.mocked(extBalance).mockRejectedValue(new Error('Not an EXT canister'));
 			vi.mocked(dip721Balance).mockRejectedValue(new Error('Not a DIP721 canister'));
+			vi.mocked(icPunksGetTokensByOwner).mockRejectedValue(new Error('Not an ICPunks canister'));
 
 			await expect(detectNftCanisterStandard(params)).resolves.toBeUndefined();
 
@@ -126,6 +169,11 @@ describe('ic-standard.services', () => {
 				...expected,
 				owner: mockIdentity.getPrincipal()
 			});
+
+			expect(icPunksGetTokensByOwner).toHaveBeenCalledExactlyOnceWith({
+				...expected,
+				owner: mockIdentity.getPrincipal()
+			});
 		});
 
 		it('should throw any other error from the service', async () => {
@@ -141,6 +189,8 @@ describe('ic-standard.services', () => {
 
 			expect(dip721Balance).not.toHaveBeenCalled();
 			expect(dip721GetTokensByOwner).not.toHaveBeenCalled();
+
+			expect(icPunksGetTokensByOwner).not.toHaveBeenCalled();
 		});
 
 		it('should prioritize EXT over any other standard', async () => {
@@ -161,6 +211,8 @@ describe('ic-standard.services', () => {
 
 			expect(dip721Balance).not.toHaveBeenCalled();
 			expect(dip721GetTokensByOwner).not.toHaveBeenCalled();
+
+			expect(icPunksGetTokensByOwner).not.toHaveBeenCalled();
 		});
 	});
 });
