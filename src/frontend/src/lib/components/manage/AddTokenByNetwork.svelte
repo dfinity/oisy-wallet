@@ -55,15 +55,23 @@
 
 	let isSolanaNetwork = $derived(isNetworkIdSolana(network?.id));
 
-	let { ledgerCanisterId, indexCanisterId, extCanisterId, ethContractAddress, splTokenAddress } =
-		$derived(tokenData);
+	let {
+		ledgerCanisterId,
+		indexCanisterId,
+		extCanisterId,
+		dip721CanisterId,
+		ethContractAddress,
+		splTokenAddress
+	} = $derived(tokenData);
 
 	$effect(() => {
 		// Since we persist the values of relevant variables when switching networks, this ensures that
 		// only the data related to the selected network is passed.
 		if (isIcpNetwork) {
 			tokenData = isNftsPage
-				? { extCanisterId }
+				? nonNullish(extCanisterId)
+					? { extCanisterId }
+					: { dip721CanisterId }
 				: {
 						ledgerCanisterId,
 						indexCanisterId:
@@ -118,7 +126,7 @@
 
 		{#if isIcpNetwork}
 			{#if isNftsPage}
-				<IcAddNftForm bind:extCanisterId />
+				<IcAddNftForm bind:extCanisterId bind:dip721CanisterId />
 			{:else}
 				<IcAddIcrcTokenForm bind:ledgerCanisterId bind:indexCanisterId />
 			{/if}
