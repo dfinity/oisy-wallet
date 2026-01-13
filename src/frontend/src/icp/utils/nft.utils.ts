@@ -2,6 +2,7 @@ import type { TokenIndex } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { getExtMetadata } from '$icp/services/ext-metadata.services';
 import type { Dip721Token } from '$icp/types/dip721-token';
 import type { ExtToken } from '$icp/types/ext-token';
+import type { IcPunksToken } from '$icp/types/icpunks-token';
 import { extIndexToIdentifier, parseExtTokenIndex } from '$icp/utils/ext.utils';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { Nft, NftCollection } from '$lib/types/nft';
@@ -75,5 +76,24 @@ export const mapDip721Nft = ({ index, token }: { index: bigint; token: Dip721Tok
 		id: parseNftId(index.toString()),
 		mediaStatus,
 		collection: mapDip721Collection(token)
+	};
+};
+
+const mapIcPunksCollection = ({ canisterId, ...rest }: IcPunksToken): NftCollection => ({
+	...rest,
+	address: canisterId
+});
+
+// TODO: Fetch metadata of the NFT
+export const mapIcPunksNft = ({ index, token }: { index: bigint; token: IcPunksToken }): Nft => {
+	const mediaStatus = {
+		image: NftMediaStatusEnum.INVALID_DATA,
+		thumbnail: NftMediaStatusEnum.INVALID_DATA
+	};
+
+	return {
+		id: parseNftId(index.toString()),
+		mediaStatus,
+		collection: mapIcPunksCollection(token)
 	};
 };

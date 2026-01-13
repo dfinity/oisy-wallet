@@ -1,10 +1,11 @@
 import { getExtMetadata } from '$icp/services/ext-metadata.services';
 import { extIndexToIdentifier } from '$icp/utils/ext.utils';
-import { mapDip721Nft, mapExtNft } from '$icp/utils/nft.utils';
+import { mapDip721Nft, mapExtNft, mapIcPunksNft } from '$icp/utils/nft.utils';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { NftMetadataWithoutId } from '$lib/types/nft';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
 import { SvelteMap } from 'svelte/reactivity';
@@ -124,6 +125,31 @@ describe('nft.utils', () => {
 				collection: {
 					...rest,
 					address: mockValidDip721Token.canisterId
+				}
+			});
+		});
+	});
+
+	describe('mapIcPunksNft', () => {
+		const mockIndex = 123n;
+
+		it('should map correctly an ICPunks NFT', () => {
+			const result = mapIcPunksNft({
+				index: mockIndex,
+				token: mockValidIcPunksToken
+			});
+
+			const { canisterId: _, ...rest } = mockValidIcPunksToken;
+
+			expect(result).toStrictEqual({
+				id: result.id,
+				mediaStatus: {
+					image: NftMediaStatusEnum.INVALID_DATA,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				},
+				collection: {
+					...rest,
+					address: mockValidIcPunksToken.canisterId
 				}
 			});
 		});
