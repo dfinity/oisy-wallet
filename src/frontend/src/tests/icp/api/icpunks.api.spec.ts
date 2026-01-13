@@ -1,8 +1,8 @@
-import { getTokensByOwner } from '$icp/api/icpunks.api';
+import { getTokensByOwner, transfer } from '$icp/api/icpunks.api';
 import { IcPunksCanister } from '$icp/canisters/icpunks.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
-import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { mock } from 'vitest-mock-extended';
 
 describe('icpunks.api', () => {
@@ -55,6 +55,43 @@ describe('icpunks.api', () => {
 			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError);
 
 			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+	});
+
+	describe('transfer', () => {
+		const mockTokenId = 987_456_123n;
+
+		const params = {
+			identity: mockIdentity,
+			owner: mockPrincipal,
+			canisterId: mockIcPunksCanisterId,
+			to: mockPrincipal2,
+			tokenIdentifier: mockTokenId
+		};
+
+		const expectedParams = {
+			to: mockPrincipal2,
+			tokenIdentifier: mockTokenId
+		};
+
+		beforeEach(() => {
+			tokenCanisterMock.transfer.mockResolvedValue(true);
+		});
+
+		it('should call successfully transfer endpoint', async () => {
+			await transfer(params);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should throw an error if transfer fails', async () => {
+			const mockError = new CanisterInternalError('Generic error');
+
+			tokenCanisterMock.transfer.mockRejectedValueOnce(mockError);
+
+			await expect(transfer(params)).rejects.toThrowError(mockError);
+
+			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 	});
 });
