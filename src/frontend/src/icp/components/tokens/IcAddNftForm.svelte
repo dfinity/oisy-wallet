@@ -5,6 +5,7 @@
 	import { detectNftCanisterStandard } from '$icp/services/ic-standard.services';
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { MANAGE_TOKENS_IC_ADD_NFT_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -79,7 +80,12 @@
 	<span class="text-brand-primary-alt">*</span>
 </label>
 <div>
-	<InputText name="canisterId" placeholder="_____-_____-_____-_____-cai" bind:value={canisterId} />
+	<InputText
+		name="canisterId"
+		placeholder="_____-_____-_____-_____-cai"
+		testId={MANAGE_TOKENS_IC_ADD_NFT_INPUT}
+		bind:value={canisterId}
+	/>
 </div>
 
 {#if standardNotRecognized}
