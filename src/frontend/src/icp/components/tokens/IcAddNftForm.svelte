@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { assertNever, debounce, isEmptyString, isNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import { detectNftCanisterStandard } from '$icp/services/ic-standard.services';
 	import InputText from '$lib/components/ui/InputText.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import type { CanisterIdText } from '$lib/types/canister';
 
 	interface Props {
@@ -17,8 +19,11 @@
 
 	let canisterId = $state<CanisterIdText | undefined>();
 
+	let standardNotRecognized = $state(false);
+
 	const updateCanisterId = async () => {
 		extCanisterId = undefined;
+		dip721CanisterId = undefined;
 
 		if (isNullish($authIdentity)) {
 			return;
@@ -33,8 +38,16 @@
 			canisterId
 		});
 
+		if (isNullish(standard)) {
+			standardNotRecognized = true;
+
+			return;
+		}
+
 		if (standard === 'ext') {
 			extCanisterId = canisterId;
+
+			standardNotRecognized = false;
 
 			return;
 		}
@@ -42,13 +55,7 @@
 		if (standard === 'dip721') {
 			dip721CanisterId = canisterId;
 
-			return;
-		}
-
-		if (isNullish(standard)) {
-			toastsError({
-				msg: { text: $i18n.tokens.import.error.unrecognized_nft_canister_id_standard }
-			});
+			standardNotRecognized = false;
 
 			return;
 		}
@@ -74,3 +81,11 @@
 <div>
 	<InputText name="canisterId" placeholder="_____-_____-_____-_____-cai" bind:value={canisterId} />
 </div>
+
+{#if standardNotRecognized}
+	<div class="mt-6" transition:slide={SLIDE_PARAMS}>
+		<MessageBox level="warning">
+			{$i18n.tokens.import.error.unrecognized_nft_canister_id_standard}
+		</MessageBox>
+	</div>
+{/if}
