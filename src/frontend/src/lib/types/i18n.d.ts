@@ -144,37 +144,31 @@ interface I18nAuth {
 		text: {
 			title: string;
 			description: string;
-			new_auth_version: string;
-			could_not_enter_identity_number: string;
-			lost_identity: string;
-			security: string;
-			got_confused: string;
-			no_signup_needed: string;
-			other: string;
+			login_page_looks_different: string;
+			use_identity_number: string;
+			lost_identity_number: string;
 			feedback_text: string;
 			thanks_text: string;
+			useful_links: string;
 			identity_new_identity: string;
-			identity_legacy_description: string;
+			switch_to_new_internet_identity: string;
+			identity_legacy_identity_title: string;
+			identity_legacy_identity_item_1: string;
+			identity_legacy_identity_item_2: string;
+			identity_new_identity_title: string;
+			identity_new_identity_item_1: string;
+			identity_new_identity_item_2: string;
+			identity_new_identity_link: string;
 			identity_legacy_sign_in: string;
 			identity_learn_more: string;
-			other_title: string;
-			other_description: string;
-			other_introduction: string;
-			other_docs: string;
-			other_private_key: string;
-			other_asset_control: string;
+			oisy_introduction: string;
+			private_key: string;
+			asset_control: string;
+			internet_identity_help_center: string;
 			need_help: string;
 			sign_in: string;
 		};
-		alt: {
-			internet_identity: string;
-			identity_learn_more: string;
-			other_introduction: string;
-			other_docs: string;
-			other_private_key: string;
-			other_asset_control: string;
-			sign_in: string;
-		};
+		alt: { internet_identity: string };
 	};
 }
 
