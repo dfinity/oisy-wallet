@@ -7,6 +7,7 @@ import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenExt } from '$icp/utils/ext.utils';
+import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import {
 	icTokenIcrcCustomToken,
 	isTokenDip20,
@@ -287,7 +288,7 @@ export const filterTokens = <T extends Token>({
 			);
 		}
 
-		if (isTokenExt(token)) {
+		if (isTokenIcNft(token)) {
 			const { canisterId } = token;
 
 			return canisterId.toLowerCase().includes(filter.toLowerCase());

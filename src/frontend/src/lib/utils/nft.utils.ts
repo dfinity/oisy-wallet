@@ -1,6 +1,7 @@
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isTokenExt } from '$icp/utils/ext.utils';
+import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import type { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type {
 	Nft,
@@ -14,7 +15,7 @@ import type { Option } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const isTokenNonFungible = (token: Token): token is NonFungibleToken =>
-	isTokenErc721(token) || isTokenErc1155(token) || isTokenExt(token);
+	isTokenErc721(token) || isTokenErc1155(token) || isTokenIcNft(token);
 
 export const isTokenFungible = (token: Token): boolean => !isTokenNonFungible(token);
 
