@@ -163,6 +163,7 @@ export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
 export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
 export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
+export const MANAGE_TOKENS_IC_ADD_NFT_INPUT = 'manage-tokens-ic-add-nft-input';
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';

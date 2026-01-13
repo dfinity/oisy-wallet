@@ -3,8 +3,8 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
-	import IcAddExtTokenForm from '$icp/components/tokens/IcAddExtTokenForm.svelte';
 	import IcAddIcrcTokenForm from '$icp/components/tokens/IcAddIcrcTokenForm.svelte';
+	import IcAddNftForm from '$icp/components/tokens/IcAddNftForm.svelte';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import AddTokenByNetworkToolbar from '$lib/components/manage/AddTokenByNetworkToolbar.svelte';
@@ -118,7 +118,7 @@
 
 		{#if isIcpNetwork}
 			{#if isNftsPage}
-				<IcAddExtTokenForm bind:extCanisterId />
+				<IcAddNftForm bind:extCanisterId />
 			{:else}
 				<IcAddIcrcTokenForm bind:ledgerCanisterId bind:indexCanisterId />
 			{/if}

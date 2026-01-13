@@ -1172,6 +1172,7 @@
 				"unexpected_ledger": "Coś poszło nie tak podczas sprawdzania poprawności kanistra rejestru.",
 				"unexpected_index": "Coś poszło nie tak podczas sprawdzania poprawności kanistra indeksu.",
 				"unexpected_index_ledger": "Coś poszło nie tak podczas ładowania identyfikatora rejestru związanego z kanistrem indeksu.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "Identyfikator rejestru nie jest powiązany z kanistrem indeksu.",
 				"missing_ledger_id": "Brakuje identyfikatora rejestru. Czy podałeś wartość?",
 				"missing_canister_id": "",

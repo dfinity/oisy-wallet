@@ -1172,6 +1172,7 @@
 				"unexpected_ledger": "حدث خطأ ما أثناء التحقق من صحة حاوية السجل.",
 				"unexpected_index": "حدث خطأ ما أثناء التحقق من صحة حاوية الفهرس.",
 				"unexpected_index_ledger": "حدث خطأ ما أثناء تحميل معرف السجل المرتبط بحاوية الفهرس.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "معرف السجل غير مرتبط بحاوية الفهرس.",
 				"missing_ledger_id": "معرف السجل مفقود. هل قدمت قيمة؟",
 				"missing_canister_id": "",

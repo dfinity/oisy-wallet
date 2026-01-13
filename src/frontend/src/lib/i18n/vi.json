@@ -1172,6 +1172,7 @@
 				"unexpected_ledger": "Đã xảy ra lỗi trong khi xác thực ledger canister.",
 				"unexpected_index": "Đã xảy ra lỗi trong khi xác thực index canister.",
 				"unexpected_index_ledger": "Đã xảy ra lỗi trong khi tải ID ledger liên quan đến canister index.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "ID ledger không liên quan đến canister index.",
 				"missing_ledger_id": "Thiếu ID ledger. Bạn đã cung cấp giá trị chưa?",
 				"missing_canister_id": "",

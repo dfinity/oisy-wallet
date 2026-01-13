@@ -944,6 +944,7 @@ interface I18nTokens {
 			unexpected_ledger: string;
 			unexpected_index: string;
 			unexpected_index_ledger: string;
+			unrecognized_nft_canister_id_standard: string;
 			invalid_ledger_id: string;
 			missing_ledger_id: string;
 			missing_canister_id: string;
