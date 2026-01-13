@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { isEmptyString, isNullish } from '@dfinity/utils';
+	import { assertNever, debounce, isEmptyString, isNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { detectNftCanisterStandard } from '$icp/services/ic-standard.services';
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { CanisterIdText } from '$lib/types/canister';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { CanisterIdText } from '$lib/types/canister';
 
 	interface Props {
 		extCanisterId?: string;
+		dip721CanisterId?: string;
 	}
 
-	let { extCanisterId = $bindable() }: Props = $props();
+	let { extCanisterId = $bindable(), dip721CanisterId = $bindable() }: Props = $props();
 
 	let canisterId = $state<CanisterIdText | undefined>();
 
@@ -34,17 +35,33 @@
 
 		if (standard === 'ext') {
 			extCanisterId = canisterId;
+
+			return;
 		}
 
-					toastsError({
+		if (standard === 'dip721') {
+			dip721CanisterId = canisterId;
+
+			return;
+		}
+
+		if (isNullish(standard)) {
+			toastsError({
 				msg: { text: $i18n.tokens.import.error.unrecognized_nft_canister_id_standard }
 			});
+
+			return;
+		}
+
+		assertNever(standard, `Unmapped IC NFT collection standard: ${standard}`);
 	};
+
+	const debounceUpdateCanisterId = debounce(updateCanisterId);
 
 	$effect(() => {
 		[$authIdentity, canisterId];
 
-		untrack(() => updateCanisterId());
+		untrack(() => debounceUpdateCanisterId());
 	});
 </script>
 
