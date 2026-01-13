@@ -5,6 +5,7 @@ import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { loadNfts as loadIcNfts } from '$icp/services/nft.services';
 import type { IcNonFungibleToken } from '$icp/types/nft';
+import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
 import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
 import { isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
@@ -106,10 +107,23 @@ export const saveNftCustomToken = async ({
 				}
 			]
 		});
-	} else if (isTokenExtCustomToken(token) || isTokenIcPunksCustomToken(token)) {
+	} else if (
+		isTokenExtCustomToken(token) ||
+		isTokenDip721CustomToken(token) ||
+		isTokenIcPunksCustomToken(token)
+	) {
 		await saveCustomTokens({
 			identity,
-			tokens: [{ ...token, networkKey: isTokenExtCustomToken(token) ? 'ExtV2' : 'IcPunks' }]
+			tokens: [
+				{
+					...token,
+					networkKey: isTokenExtCustomToken(token)
+						? 'ExtV2'
+						: isTokenDip721CustomToken(token)
+							? 'Dip721'
+							: 'IcPunks'
+				}
+			]
 		});
 	}
 
