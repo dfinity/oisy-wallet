@@ -1,12 +1,12 @@
 import * as z from 'zod';
 
-const EnvExtTokenMetadataSchema = z.object({
+const EnvIcPunksTokenMetadataSchema = z.object({
 	name: z.string()
 });
 
 export const EnvIcPunksTokenSchema = z.object({
 	canisterId: z.string(),
-	metadata: EnvExtTokenMetadataSchema
+	metadata: EnvIcPunksTokenMetadataSchema
 });
 
 export const EnvIcPunksTokensSchema = z.array(EnvIcPunksTokenSchema);
