@@ -25,6 +25,7 @@ import { NYAN_CAT_TOKEN, mockValidErc1155Token } from '$tests/mocks/erc1155-toke
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft, mockValidExtNft } from '$tests/mocks/nfts.mock';
 import { get } from 'svelte/store';
@@ -321,6 +322,24 @@ describe('nft.services', () => {
 					{
 						...mockValidExtV2Token,
 						networkKey: 'ExtV2',
+						enabled: true
+					}
+				]
+			});
+		});
+
+		it('should save an ICPunks custom token', async () => {
+			await saveNftCustomToken({
+				...mockParams,
+				token: { ...mockValidIcPunksToken, enabled: true }
+			});
+
+			expect(saveSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...mockValidIcPunksToken,
+						networkKey: 'IcPunks',
 						enabled: true
 					}
 				]
