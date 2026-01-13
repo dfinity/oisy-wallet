@@ -1,15 +1,15 @@
 import * as authEnv from '$env/auth.env';
 import AuthHelpForm from '$lib/components/auth/AuthHelpForm.svelte';
 import {
+	HELP_AUTH_ASSET_CONTROL_LINK,
 	HELP_AUTH_IMAGE_BANNER,
+	HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK,
+	HELP_AUTH_INTRODUCTION_LINK,
 	HELP_AUTH_LOST_IDENTITY_BUTTON,
 	HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,
-	HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON,
-	HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK,
-	HELP_AUTH_INTRODUCTION_LINK,
 	HELP_AUTH_PRIVATE_KEY_LINK,
-	HELP_AUTH_ASSET_CONTROL_LINK,
-	HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK
+	HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK,
+	HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import * as analytics from '$lib/services/analytics.services';
@@ -74,9 +74,8 @@ describe('AuthHelpForm', () => {
 
 		expect(switchToNewInternetIdentityLink).toBeInTheDocument();
 
-		const introductionLink: HTMLAnchorElement | null = container.querySelector(
-			introductionLinkSelector
-		);
+		const introductionLink: HTMLAnchorElement | null =
+			container.querySelector(introductionLinkSelector);
 
 		expect(introductionLink).toBeInTheDocument();
 

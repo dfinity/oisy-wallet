@@ -61,9 +61,7 @@ describe('AuthHelpNewIdentityForm', () => {
 		);
 
 		expect(switchToNewInternetIdentityLink).toBeInTheDocument();
-		expect(switchToNewInternetIdentityLink?.href).toBe(
-			OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL
-		);
+		expect(switchToNewInternetIdentityLink?.href).toBe(OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL);
 
 		const internetIdentityHelpCenterLink: HTMLAnchorElement | null = container.querySelector(
 			internetIdentityHelpCenterLinkSelector
