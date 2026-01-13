@@ -12,6 +12,7 @@ import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { extTokens } from '$icp/derived/ext.derived';
+import { icPunksTokens } from '$icp/derived/icpunks.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
@@ -40,6 +41,7 @@ export const tokens: Readable<Token[]> = derived(
 		erc1155Tokens,
 		sortedIcrcTokens,
 		extTokens,
+		icPunksTokens,
 		splTokens
 	],
 	([
@@ -53,6 +55,7 @@ export const tokens: Readable<Token[]> = derived(
 		$erc1155Tokens,
 		$icrcTokens,
 		$extTokens,
+		$icPunksTokens,
 		$splTokens
 	]) => [
 		...$defaultIcpTokens,
@@ -65,6 +68,7 @@ export const tokens: Readable<Token[]> = derived(
 		...$erc1155Tokens,
 		...$icrcTokens,
 		...$extTokens,
+		...$icPunksTokens,
 		...$splTokens
 	]
 );
@@ -74,11 +78,12 @@ export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =
 );
 
 export const nonFungibleTokens: Readable<NonFungibleToken[]> = derived(
-	[erc721Tokens, erc1155Tokens, extTokens],
-	([$erc721Tokens, $erc1155Tokens, $extTokens]) => [
+	[erc721Tokens, erc1155Tokens, extTokens, icPunksTokens],
+	([$erc721Tokens, $erc1155Tokens, $extTokens, $icPunksTokens]) => [
 		...$erc721Tokens,
 		...$erc1155Tokens,
-		...$extTokens
+		...$extTokens,
+		...$icPunksTokens
 	]
 );
 
