@@ -637,6 +637,7 @@
 			"erc20_custom_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"ext_custom_tokens": "Error while loading the EXT custom tokens.",
+			"icpunks_custom_tokens": "Error while loading the ICPunks custom tokens.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
 			"waiting_for_allowed_cycles_aborted": "Aborted cycles ledger preperation. Please try to login later",
