@@ -28,7 +28,7 @@ import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-const nativeTokens: Readable<Token[]> = derived(
+export const nativeTokens: Readable<Token[]> = derived(
 	[
 		defaultIcpTokens,
 		enabledBitcoinTokens,
