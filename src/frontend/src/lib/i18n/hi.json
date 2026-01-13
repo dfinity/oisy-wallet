@@ -1176,6 +1176,7 @@
 				"unexpected_ledger": "लेज़र कैनिस्टर को सत्यापित करते समय कुछ गलत हो गया।",
 				"unexpected_index": "इंडेक्स कैनिस्टर को सत्यापित करते समय कुछ गलत हो गया।",
 				"unexpected_index_ledger": "इंडेक्स कैनिस्टर से संबंधित लेज़र आईडी लोड करते समय कुछ गलत हो गया।",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "लेज़र आईडी इंडेक्स कैनिस्टर से संबंधित नहीं है।",
 				"missing_ledger_id": "लेज़र आईडी गायब है। क्या आपने कोई मान प्रदान किया है?",
 				"missing_canister_id": "",

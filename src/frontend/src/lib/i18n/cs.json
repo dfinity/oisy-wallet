@@ -1176,6 +1176,7 @@
 				"unexpected_ledger": "Při ověřování kanystru účetní knihy se něco pokazilo.",
 				"unexpected_index": "Při ověřování kanystru indexu se něco pokazilo.",
 				"unexpected_index_ledger": "Při načítání ID účetní knihy souvisejícího s kanystrem indexu se něco pokazilo.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "ID účetní knihy nesouvisí s kanystrem indexu.",
 				"missing_ledger_id": "Chybí ID účetní knihy. Zadali jste hodnotu?",
 				"missing_canister_id": "Chybí ID kanistru. Zadali jste hodnotu?",

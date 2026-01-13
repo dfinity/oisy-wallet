@@ -1176,6 +1176,7 @@
 				"unexpected_ledger": "验证账本 Canister 时发生错误。",
 				"unexpected_index": "验证索引 Canister 时发生错误。",
 				"unexpected_index_ledger": "加载与索引 Canister 相关的账本 ID 时出错。",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "账本 ID 与索引 Canister 无关。",
 				"missing_ledger_id": "缺少账本 ID。您是否填写了值？",
 				"missing_canister_id": "",

@@ -1176,6 +1176,7 @@
 				"unexpected_ledger": "Algo salió mal al validar el canister de Ledger.",
 				"unexpected_index": "Algo salió mal al validar el canister de Índice.",
 				"unexpected_index_ledger": "Algo salió mal al cargar el ID de Ledger relacionado con el canister de Índice.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "El ID de Ledger no está relacionado con el canister de Índice.",
 				"missing_ledger_id": "Falta el ID de Ledger. ¿Proporcionaste un valor?",
 				"missing_canister_id": "",
