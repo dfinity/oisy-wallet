@@ -128,7 +128,7 @@ describe('nft.utils', () => {
 			expect(getNftIdentifier(mockValidDip721Token)).toBe(mockValidDip721Token.canisterId);
 		});
 
-		it('should return the ICPunks for EXT tokens', () => {
+		it('should return the canisterId for ICPunks tokens', () => {
 			expect(getNftIdentifier(mockValidIcPunksToken)).toBe(mockValidIcPunksToken.canisterId);
 		});
 	});
