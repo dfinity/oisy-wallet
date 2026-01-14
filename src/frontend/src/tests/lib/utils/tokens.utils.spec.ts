@@ -1025,8 +1025,10 @@ describe('tokens.utils', () => {
 		});
 
 		it('should call saveCustomTokensWithKey when ICRC tokens are present', async () => {
+			const token = { ...mockValidIcrcToken, enabled: true };
+
 			await saveAllCustomTokens({
-				tokens: [mockValidIcrcToken],
+				tokens: [token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -1034,7 +1036,7 @@ describe('tokens.utils', () => {
 			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([
-						expect.objectContaining({ ...mockValidIcrcToken, networkKey: 'Icrc' })
+						expect.objectContaining({ ...token, networkKey: 'Icrc' })
 					]),
 					identity: mockIdentity
 				})
@@ -1042,8 +1044,10 @@ describe('tokens.utils', () => {
 		});
 
 		it('should call saveCustomTokensWithKey when EXT tokens are present', async () => {
+			const token = { ...mockValidExtV2Token, enabled: true };
+
 			await saveAllCustomTokens({
-				tokens: [mockValidExtV2Token],
+				tokens: [token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -1051,7 +1055,7 @@ describe('tokens.utils', () => {
 			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([
-						expect.objectContaining({ ...mockValidExtV2Token, networkKey: 'ExtV2' })
+						expect.objectContaining({ ...token, networkKey: 'ExtV2' })
 					]),
 					identity: mockIdentity
 				})
@@ -1059,8 +1063,10 @@ describe('tokens.utils', () => {
 		});
 
 		it('should call saveCustomTokensWithKey when DIP721 tokens are present', async () => {
+			const token = { ...mockValidDip721Token, enabled: true };
+
 			await saveAllCustomTokens({
-				tokens: [mockValidDip721Token],
+				tokens: [token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -1068,7 +1074,7 @@ describe('tokens.utils', () => {
 			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([
-						expect.objectContaining({ ...mockValidDip721Token, networkKey: 'Dip721' })
+						expect.objectContaining({ ...token, networkKey: 'Dip721' })
 					]),
 					identity: mockIdentity
 				})
@@ -1076,8 +1082,10 @@ describe('tokens.utils', () => {
 		});
 
 		it('should call saveCustomTokensWithKey when ICPunks tokens are present', async () => {
+			const token = { ...mockValidIcPunksToken, enabled: true };
+
 			await saveAllCustomTokens({
-				tokens: [mockValidIcPunksToken],
+				tokens: [token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -1085,7 +1093,7 @@ describe('tokens.utils', () => {
 			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([
-						expect.objectContaining({ ...mockValidIcPunksToken, networkKey: 'IcPunks' })
+						expect.objectContaining({ ...token, networkKey: 'IcPunks' })
 					]),
 					identity: mockIdentity
 				})
@@ -1127,12 +1135,14 @@ describe('tokens.utils', () => {
 		});
 
 		it('should pass progress, onSuccess and modalNext along when provided', async () => {
+			const token = { ...mockValidIcrcToken, enabled: true };
+
 			const progress = vi.fn();
 			const onSuccess = vi.fn();
 			const modalNext = vi.fn();
 
 			await saveAllCustomTokens({
-				tokens: [mockValidIcrcToken],
+				tokens: [token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock,
 				progress,
