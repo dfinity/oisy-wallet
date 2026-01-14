@@ -9,6 +9,7 @@ import { defaultFallbackToken } from '$lib/derived/token.derived';
 import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { OptionToken, OptionTokenStandardCode, Token } from '$lib/types/token';
+import { getPageTokenIdentifier } from '$lib/utils/nav.utils';
 import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 import { isIcrcTokenToggleEnabled } from '$lib/utils/token-toggle.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
@@ -23,10 +24,15 @@ export const pageToken: Readable<OptionToken> = derived(
 	[routeToken, routeNetwork, nativeTokens, enabledErc20Tokens, enabledIcrcTokens, enabledSplTokens],
 	([$routeToken, $routeNetwork, $nativeTokens, $erc20Tokens, $icrcTokens, $splTokens]) =>
 		nonNullish($routeToken)
-			? [...$nativeTokens, ...$erc20Tokens, ...$icrcTokens, ...$splTokens].find(
-					({ name, network: { id: networkId } }) =>
-						name === $routeToken && networkId.description === $routeNetwork
-				)
+			? [...$nativeTokens, ...$erc20Tokens, ...$icrcTokens, ...$splTokens].find((token) => {
+					const {
+						network: { id: networkId }
+					} = token;
+
+					const identifier = getPageTokenIdentifier(token);
+
+					return identifier === $routeToken && networkId.description === $routeNetwork;
+				})
 			: undefined
 );
 

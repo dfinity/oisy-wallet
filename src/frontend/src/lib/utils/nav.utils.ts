@@ -1,5 +1,7 @@
 import { browser } from '$app/environment';
 import { goto, pushState } from '$app/navigation';
+import { isTokenErc } from '$eth/utils/erc.utils';
+import { isTokenIc } from '$icp/utils/icrc.utils';
 import {
 	AppPath,
 	COLLECTION_PARAM,
@@ -15,6 +17,7 @@ import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
@@ -67,19 +70,30 @@ export const isRouteEarn = ({ route: { id } }: Page): boolean => isEarnPath(id);
 
 export const isRouteEarnGold = ({ route: { id } }: Page): boolean => isEarnGoldPath(id);
 
+export const getPageTokenIdentifier = (token: Token): string =>
+	isTokenErc(token) || isTokenSpl(token)
+		? token.address
+		: isTokenIc(token)
+			? token.ledgerCanisterId
+			: token.name;
+
 const tokenUrl = ({
-	token: {
-		name,
-		network: { id: networkId }
-	},
+	token,
 	path
 }: {
 	token: Token;
 	path: AppPath.Transactions | undefined;
-}): string =>
-	`${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(
-		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
+}): string => {
+	const {
+		network: { id: networkId }
+	} = token;
+
+	const identifier = getPageTokenIdentifier(token);
+
+	return `${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(
+		identifier.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
 	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
+};
 
 export const networkParam = (networkId: NetworkId | undefined): string =>
 	isNullish(networkId) ? '' : `${NETWORK_PARAM}=${networkId.description}`;
