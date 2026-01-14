@@ -36,7 +36,6 @@ export const onExchangeMessage = async ({
 			return;
 		case 'startExchangeTimer':
 			await startExchangeTimer(payload);
-			return;
 	}
 };
 

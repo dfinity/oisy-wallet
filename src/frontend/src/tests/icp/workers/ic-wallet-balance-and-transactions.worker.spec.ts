@@ -21,13 +21,13 @@ import type {
 import * as eventsUtils from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { IndexCanister, type TransactionWithId as TransactionWithIdIcp } from '@dfinity/ledger-icp';
+import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
+import { IcpIndexCanister, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import {
-	IcrcIndexNgCanister,
+	IcrcIndexCanister,
 	IcrcLedgerCanister,
-	type IcrcIndexNgTransactionWithId
-} from '@dfinity/ledger-icrc';
-import { arrayOfNumberToUint8Array, jsonReplacer, toNullable } from '@dfinity/utils';
+	type IcrcIndexDid
+} from '@icp-sdk/canisters/ledger/icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
@@ -95,13 +95,16 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 	const mockPostMessage = ({
 		msg,
+		ref,
 		...rest
 	}: {
 		transaction: IcTransactionUi;
 		certified: boolean;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
+		ref?: string;
 	}) => ({
 		msg,
+		ref,
 		data: mockPostMessageData(rest)
 	});
 
@@ -154,8 +157,17 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
+		const ref = isNullish(startData)
+			? undefined
+			: 'ledgerCanisterId' in startData
+				? startData.ledgerCanisterId
+				: 'indexCanisterId' in startData
+					? startData.indexCanisterId
+					: startData.canisterId;
+
 		const mockPostMessageNoTransactionsNotCertified = {
 			msg,
+			ref,
 			data: {
 				wallet: {
 					balance: {
@@ -170,6 +182,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 		const mockPostMessageNoTransactionsCertified = {
 			msg,
+			ref,
 			data: {
 				wallet: {
 					balance: {
@@ -237,6 +250,14 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
+		const ref = isNullish(startData)
+			? undefined
+			: 'ledgerCanisterId' in startData
+				? startData.ledgerCanisterId
+				: 'indexCanisterId' in startData
+					? startData.indexCanisterId
+					: startData.canisterId;
+
 		return {
 			setup: () => {
 				scheduler = initScheduler(startData);
@@ -262,6 +283,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledTimes(5);
 
 					expect(postMessageMock).toHaveBeenCalledWith({
+						ref,
 						msg: `${msg}CleanUp`,
 						data: {
 							transactionIds: [`${mockRogueId}`]
@@ -282,6 +304,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
 					expect(postMessageMock).toHaveBeenCalledWith({
+						ref,
 						msg: `${msg}Error`,
 						data: {
 							error: err
@@ -293,9 +316,9 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	};
 
 	describe('icp-wallet.worker', () => {
-		const indexCanisterMock = mock<IndexCanister>();
+		const indexCanisterMock = mock<IcpIndexCanister>();
 
-		const mockTransaction: TransactionWithIdIcp = {
+		const mockTransaction: IcpIndexDid.TransactionWithId = {
 			id: 123n,
 			transaction: {
 				memo: ZERO,
@@ -324,7 +347,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		};
 
 		beforeEach(() => {
-			vi.spyOn(IndexCanister, 'create').mockImplementation(() => indexCanisterMock);
+			vi.spyOn(IcpIndexCanister, 'create').mockImplementation(() => indexCanisterMock);
 		});
 
 		describe('with transactions', () => {
@@ -334,8 +357,18 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 			let scheduler: IcWalletScheduler<PostMessageDataRequestIcp>;
 
-			const mockPostMessageNotCertified = mockPostMessage({ msg, transaction, certified: false });
-			const mockPostMessageCertified = mockPostMessage({ msg, transaction, certified: true });
+			const mockPostMessageNotCertified = mockPostMessage({
+				msg,
+				ref: startData.indexCanisterId,
+				transaction,
+				certified: false
+			});
+			const mockPostMessageCertified = mockPostMessage({
+				msg,
+				ref: startData.indexCanisterId,
+				transaction,
+				certified: true
+			});
 
 			beforeEach(() => {
 				scheduler = initScheduler(startData);
@@ -471,9 +504,9 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 	describe('icrc-wallet.worker', () => {
 		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
-		const indexCanisterMock = mock<IcrcIndexNgCanister>();
+		const indexCanisterMock = mock<IcrcIndexCanister>();
 
-		const mockTransaction: IcrcIndexNgTransactionWithId = {
+		const mockTransaction: IcrcIndexDid.TransactionWithId = {
 			id: 123n,
 			transaction: {
 				burn: [],
@@ -497,6 +530,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 						created_at_time: []
 					}
 				],
+				fee_collector: [],
 				timestamp: 1n
 			}
 		};
@@ -514,7 +548,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 		beforeEach(() => {
 			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
-			vi.spyOn(IcrcIndexNgCanister, 'create').mockImplementation(() => indexCanisterMock);
+			vi.spyOn(IcrcIndexCanister, 'create').mockImplementation(() => indexCanisterMock);
 
 			spyGetBalance = ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
 		});
@@ -526,8 +560,18 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 			let scheduler: IcWalletScheduler<PostMessageDataRequestIcrc>;
 
-			const mockPostMessageNotCertified = mockPostMessage({ msg, transaction, certified: false });
-			const mockPostMessageCertified = mockPostMessage({ msg, transaction, certified: true });
+			const mockPostMessageNotCertified = mockPostMessage({
+				msg,
+				ref: startData.ledgerCanisterId,
+				transaction,
+				certified: false
+			});
+			const mockPostMessageCertified = mockPostMessage({
+				msg,
+				ref: startData.ledgerCanisterId,
+				transaction,
+				certified: true
+			});
 
 			beforeEach(() => {
 				scheduler = initScheduler(startData);
@@ -692,6 +736,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				expect(postMessageMock).toHaveBeenCalledTimes(3);
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 				expect(postMessageMock).toHaveBeenNthCalledWith(2, {
+					ref: startData.ledgerCanisterId,
 					msg: `${msg}Error`,
 					data: {
 						error: new Error(
@@ -815,8 +860,18 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 			let scheduler: IcWalletScheduler<PostMessageDataRequestDip20>;
 
-			const mockPostMessageNotCertified = mockPostMessage({ msg, transaction, certified: false });
-			const mockPostMessageCertified = mockPostMessage({ msg, transaction, certified: true });
+			const mockPostMessageNotCertified = mockPostMessage({
+				msg,
+				ref: startData.canisterId,
+				transaction,
+				certified: false
+			});
+			const mockPostMessageCertified = mockPostMessage({
+				msg,
+				ref: startData.canisterId,
+				transaction,
+				certified: true
+			});
 
 			beforeEach(() => {
 				scheduler = initScheduler(startData);

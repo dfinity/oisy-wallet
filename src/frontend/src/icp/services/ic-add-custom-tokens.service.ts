@@ -1,6 +1,6 @@
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { getLedgerId, getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
-import { balance, metadata } from '$icp/api/icrc-ledger.api';
+import { balance, getMintingAccount, metadata } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcToken, IcTokenWithoutId } from '$icp/types/ic-token';
 import { mapIcrcToken } from '$icp/utils/icrc.utils';
 import { ZERO } from '$lib/constants/app.constants';
@@ -26,10 +26,7 @@ export const loadAndAssertAddCustomToken = async ({
 	icrcTokens: IcToken[];
 }): Promise<{
 	result: 'success' | 'error';
-	data?: {
-		token: IcTokenWithoutId;
-		balance: bigint;
-	};
+	data?: ValidateTokenData;
 }> => {
 	assertNonNullish(identity);
 
@@ -140,9 +137,12 @@ const loadMetadata = async ({
 	...rest
 }: IcCanisters & { identity: Identity }): Promise<IcTokenWithoutId | undefined> => {
 	try {
+		const serviceParams = { ledgerCanisterId, identity, certified: true };
+
 		return mapIcrcToken({
 			ledgerCanisterId,
-			metadata: await metadata({ ledgerCanisterId, identity, certified: true }),
+			metadata: await metadata(serviceParams),
+			mintingAccount: await getMintingAccount(serviceParams),
 			exchangeCoinId: 'internet-computer',
 			// Position does not matter here
 			position: Number.MAX_VALUE,

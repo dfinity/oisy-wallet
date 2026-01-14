@@ -1,5 +1,4 @@
 import type { Erc20Token } from '$eth/types/erc20';
-import type { SaveUserToken } from '$eth/types/erc20-user-token';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { busy } from '$lib/stores/busy.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -21,7 +20,7 @@ export const loadTokenAndRun = async ({
 	await callback();
 };
 
-export interface AutoLoadSingleTokenParams<T extends SaveUserToken | SaveCustomToken> {
+export interface AutoLoadSingleTokenParams<T extends SaveCustomToken> {
 	token: T | undefined;
 	identity: OptionIdentity;
 	setToken: (params: { identity: Identity; token: T; enabled: boolean }) => Promise<void>;
@@ -29,10 +28,10 @@ export interface AutoLoadSingleTokenParams<T extends SaveUserToken | SaveCustomT
 	errorMessage: string;
 }
 
-export type AutoLoadTokenParams<
-	T extends SaveUserToken | SaveCustomToken,
-	K extends Erc20Token | IcCkToken
-> = Omit<AutoLoadSingleTokenParams<T>, 'token'> & {
+export type AutoLoadTokenParams<T extends SaveCustomToken, K extends Erc20Token | IcCkToken> = Omit<
+	AutoLoadSingleTokenParams<T>,
+	'token'
+> & {
 	tokens: T[];
 	sendToken: K;
 	expectedSendTokenStandard: TokenStandard;
@@ -55,7 +54,7 @@ export interface AutoLoadTokenResult {
  * @param {string} params.errorMessage - A message to display in case of an error.
  * @returns The result of the operation.
  */
-export const autoLoadSingleToken = async <T extends SaveUserToken | SaveCustomToken>({
+export const autoLoadSingleToken = async <T extends SaveCustomToken>({
 	token,
 	identity,
 	setToken,
@@ -114,10 +113,7 @@ export const autoLoadSingleToken = async <T extends SaveUserToken | SaveCustomTo
  * @param {string} params.errorMessage - A message to display in case of an error.
  * @returns The result of the operation.
  */
-export const autoLoadToken = async <
-	T extends SaveUserToken | SaveCustomToken,
-	K extends Erc20Token | IcCkToken
->({
+export const autoLoadToken = async <T extends SaveCustomToken, K extends Erc20Token | IcCkToken>({
 	tokens,
 	sendToken,
 	identity,
@@ -128,7 +124,7 @@ export const autoLoadToken = async <
 	loadTokens,
 	errorMessage
 }: AutoLoadTokenParams<T, K>): Promise<AutoLoadTokenResult> => {
-	if (sendToken.standard !== expectedSendTokenStandard) {
+	if (sendToken.standard.code !== expectedSendTokenStandard.code) {
 		return { result: 'skipped' };
 	}
 

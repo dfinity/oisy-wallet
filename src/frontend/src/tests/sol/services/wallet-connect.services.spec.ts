@@ -139,7 +139,7 @@ describe('wallet-connect.services', () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = ICP_NETWORK_ID;
 
-			await expect(decode({ base64EncodedTransactionMessage, networkId })).rejects.toThrow(
+			await expect(decode({ base64EncodedTransactionMessage, networkId })).rejects.toThrowError(
 				`No Solana network for network ${networkId.description}`
 			);
 		});

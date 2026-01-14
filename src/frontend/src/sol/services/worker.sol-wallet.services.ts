@@ -1,3 +1,4 @@
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { AppWorker } from '$lib/services/_worker.services';
 import {
 	solAddressDevnetStore,
@@ -30,7 +31,13 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 
 		this.setOnMessage(
 			({ data: dataMsg }: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
-				const { msg, data } = dataMsg;
+				const { ref, msg, data } = dataMsg;
+
+				// This is an additional guard because it may happen that the worker is initialised as a singleton.
+				// In this case, we need to check if we should treat the message or if the message was intended for another worker.
+				if (ref !== `${this.data.tokenAddress ?? SOLANA_TOKEN.symbol}-${this.data.solanaNetwork}`) {
+					return;
+				}
 
 				switch (msg) {
 					case 'syncSolWallet':
@@ -46,7 +53,6 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 							error: data.error,
 							hideToast: true
 						});
-						return;
 				}
 			}
 		);

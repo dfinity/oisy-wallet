@@ -190,7 +190,7 @@ describe('idb-balances.api', () => {
 					...mockParams,
 					balancesStoreData: get(balancesStore)
 				})
-			).resolves.not.toThrow();
+			).resolves.not.toThrowError();
 
 			expect(idbKeyval.set).toHaveBeenCalledTimes(mockTokens.length);
 		});

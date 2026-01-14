@@ -34,7 +34,8 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 		alchemyJsonRpcUrl: 'https://eth-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'ethereum' },
-	buy: { onramperId: 'ethereum' }
+	buy: { onramperId: 'ethereum' },
+	pay: { openCryptoPay: 'Ethereum' }
 };
 
 export const SEPOLIA_NETWORK_SYMBOL = 'SepoliaETH';

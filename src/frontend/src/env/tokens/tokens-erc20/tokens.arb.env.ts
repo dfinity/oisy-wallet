@@ -14,7 +14,7 @@ export const ARB_TOKEN_ID: TokenId = parseTokenId(ARB_SYMBOL);
 export const ARB_TOKEN: RequiredAdditionalErc20Token = {
 	id: ARB_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Arbitrum',
 	symbol: ARB_SYMBOL,

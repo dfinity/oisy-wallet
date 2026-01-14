@@ -3,7 +3,7 @@ import type {
 	PoolData,
 	Result_8,
 	_SERVICE as SwapFactoryService
-} from '$declarations/icp_swap_factory/declarations/icp_swap_factory.did';
+} from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ICPSwapFactoryCanister } from '$lib/canisters/icp-swap-factory.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -73,7 +73,7 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrow(
+			await expect(result).rejects.toThrowError(
 				new CanisterInternalError('Internal error: Failed to find pool')
 			);
 		});
@@ -87,7 +87,7 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 
 		it('throws error for unexpected structure', async () => {
@@ -98,7 +98,7 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrow();
+			await expect(result).rejects.toThrowError();
 		});
 	});
 });

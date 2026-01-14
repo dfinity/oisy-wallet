@@ -29,17 +29,27 @@ describe('nonce.services', () => {
 
 		it('should return the nonce as last transaction count', async () => {
 			await expect(getNonce(mockParams)).resolves.toBe(mockCount);
+
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 		});
 
 		it('should raise an error when the provider fails', async () => {
 			const mockError = new Error('Mock error');
 			getTransactionCountSpy.mockRejectedValueOnce(mockError);
 
-			await expect(getNonce(mockParams)).rejects.toThrow(mockError);
+			await expect(getNonce(mockParams)).rejects.toThrowError(mockError);
 		});
 
 		it('should accept an empty string as address', async () => {
 			await expect(getNonce({ ...mockParams, from: '' })).resolves.toBe(mockCount);
+
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: '',
+				tag: 'pending'
+			});
 		});
 	});
 });

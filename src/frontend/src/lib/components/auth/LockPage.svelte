@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { themeStore } from '@dfinity/gix-components';
+	import { PRIMARY_INTERNET_IDENTITY_VERSION } from '$env/auth.env';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import IconKey from '$lib/components/icons/IconKey.svelte';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
@@ -11,14 +12,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { InternetIdentityDomain } from '$lib/types/auth';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 	const modalId = Symbol();
 	const imgStyleClass = 'h-full object-contain mx-auto object-top';
+	const isPrimaryIdentityVersion2 = PRIMARY_INTERNET_IDENTITY_VERSION === '2.0';
 
-	const handleUnlock = async () => {
-		const { success } = await signIn({});
+	const handleUnlock = async (domain: InternetIdentityDomain) => {
+		const { success } = await signIn({
+			domain
+		});
 
 		if (success === 'ok') {
 			authLocked.unlock({ source: 'login from lock page' });
@@ -69,17 +74,35 @@
 				<Button
 					fullWidth
 					innerStyleClass="items-center justify-center"
-					onclick={handleUnlock}
+					onclick={() =>
+						handleUnlock(
+							isPrimaryIdentityVersion2
+								? InternetIdentityDomain.VERSION_2_0
+								: InternetIdentityDomain.VERSION_1_0
+						)}
 					styleClass="mb-3 w-full"
 				>
 					{$i18n.lock.text.unlock}
 					<IconKey />
 				</Button>
+				{#if isPrimaryIdentityVersion2}
+					<Button
+						colorStyle="secondary-light"
+						fullWidth
+						innerStyleClass="items-center justify-center"
+						onclick={() => handleUnlock(InternetIdentityDomain.VERSION_1_0)}
+						styleClass="mb-3 w-full"
+					>
+						{$i18n.lock.text.unlock_with_legacy_login}
+						<IconKey />
+					</Button>
+				{/if}
 				<Button
 					colorStyle="secondary-light"
 					fullWidth
 					innerStyleClass="items-center justify-center"
 					onclick={handleLogout}
+					transparent={isPrimaryIdentityVersion2}
 				>
 					{$i18n.lock.text.logout}
 					<IconLogout />

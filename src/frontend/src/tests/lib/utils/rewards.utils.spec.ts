@@ -1,4 +1,4 @@
-import type { EligibilityReport } from '$declarations/rewards/declarations/rewards.did';
+import type { EligibilityReport } from '$declarations/rewards/rewards.did';
 import {
 	SPRINKLES_SEASON_1_EPISODE_3_ID,
 	SPRINKLES_SEASON_1_EPISODE_4_ID,

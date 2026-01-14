@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
+	import { PRIMARY_INTERNET_IDENTITY_VERSION } from '$env/auth.env';
 	import SigningInHelpLink from '$lib/components/auth/SigningInHelpLink.svelte';
+	import IconAstronautArrow from '$lib/components/icons/icon-astronaut/IconAstronautArrow.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
-	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
+	import { AUTH_SIGNING_IN_HELP_LINK, LOGIN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { InternetIdentityDomain } from '$lib/types/auth';
 	import { componentToHtml } from '$lib/utils/component.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -21,8 +24,12 @@
 
 	const modalId = Symbol();
 
-	const onclick = async () => {
-		const { success } = await signIn({});
+	const isPrimaryIdentityVersion2 = PRIMARY_INTERNET_IDENTITY_VERSION === '2.0';
+
+	const onAuthenticate = async (domain: InternetIdentityDomain) => {
+		const { success } = await signIn({
+			domain
+		});
 
 		if (success === 'ok') {
 			authLocked.unlock({ source: 'login from landing page' });
@@ -36,7 +43,38 @@
 	class="flex w-full flex-col items-center md:items-start"
 	class:md:items-center={helpAlignment === 'center'}
 >
-	<ButtonAuthenticate {fullWidth} {onclick} />
+	<div
+		class="flex w-full flex-col items-center justify-center md:justify-start"
+		class:sm:flex-row={!fullWidth}
+	>
+		<ButtonAuthenticate
+			{fullWidth}
+			{isPrimaryIdentityVersion2}
+			onclick={() =>
+				onAuthenticate(
+					isPrimaryIdentityVersion2
+						? InternetIdentityDomain.VERSION_2_0
+						: InternetIdentityDomain.VERSION_1_0
+				)}
+			styleClass="bg-brand-primary text-primary-inverted"
+			testId={LOGIN_BUTTON}
+		>
+			{$i18n.auth.text.authenticate}
+			<IconAstronautArrow />
+		</ButtonAuthenticate>
+
+		{#if isPrimaryIdentityVersion2}
+			<ButtonAuthenticate
+				{fullWidth}
+				{isPrimaryIdentityVersion2}
+				onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_1_0)}
+				styleClass={`${!fullWidth ? 'sm:ml-3 sm:mt-0' : ''} mt-3 text-brand-primary bg-brand-subtle-10`}
+				testId={LOGIN_BUTTON}
+			>
+				{$i18n.auth.text.legacy_login}
+			</ButtonAuthenticate>
+		{/if}
+	</div>
 
 	<span
 		class="mt-4 flex flex-col text-sm text-tertiary"
@@ -46,9 +84,14 @@
 	>
 		<span class="inline-block">
 			<Html
-				text={replacePlaceholders($i18n.terms_of_use.text.instruction, {
-					$link: componentToHtml({ Component: TermsOfUseLink })
-				})}
+				text={replacePlaceholders(
+					isPrimaryIdentityVersion2
+						? $i18n.terms_of_use.text.instruction_two_buttons
+						: $i18n.terms_of_use.text.instruction,
+					{
+						$link: componentToHtml({ Component: TermsOfUseLink })
+					}
+				)}
 			/>
 		</span>
 

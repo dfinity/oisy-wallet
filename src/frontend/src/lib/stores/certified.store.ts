@@ -9,8 +9,9 @@ export type WritableUpdateStore<T, Id extends symbol = TokenId> = Pick<
 
 export type CertifiedStoreData<T, Id extends symbol = TokenId> = Record<Id, T | null> | undefined;
 
-export interface CertifiedStore<T, Id extends symbol = TokenId>
-	extends Readable<CertifiedStoreData<T, Id>> {
+export interface CertifiedStore<T, Id extends symbol = TokenId> extends Readable<
+	CertifiedStoreData<T, Id>
+> {
 	reset: (id: Id) => void;
 	reinitialize: () => void;
 }

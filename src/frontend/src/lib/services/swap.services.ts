@@ -1,4 +1,4 @@
-import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
+import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { swap } from '$eth/services/swap.services';
@@ -6,7 +6,7 @@ import type { EthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
-import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
+import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { hasSufficientIcrcAllowance, loadCustomTokens } from '$icp/services/icrc.services';
@@ -339,13 +339,13 @@ const fetchSwapAmountsICP = async ({
 		token_network: sourceToken.network.name,
 		token_address: (sourceToken as IcToken).ledgerCanisterId,
 		token_name: sourceToken.name,
-		token_standard: sourceToken.standard,
+		token_standard: sourceToken.standard.code,
 		token_id: String(sourceToken.id),
 		token2_symbol: destinationToken.symbol,
 		token2_network: destinationToken.network.name,
 		token2_address: (destinationToken as IcToken).ledgerCanisterId,
 		token2_name: destinationToken.name,
-		token2_standard: destinationToken.standard,
+		token2_standard: destinationToken.standard.code,
 		token2_id: String(destinationToken.id),
 		...(nonNullish(sourceTokenUsdValue) && {
 			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
@@ -444,8 +444,8 @@ export const fetchIcpSwap = async ({
 
 	const pool = await getPoolCanister({
 		identity,
-		token0: { address: sourceLedgerCanisterId, standard: sourceStandard },
-		token1: { address: destinationLedgerCanisterId, standard: destinationStandard },
+		token0: { address: sourceLedgerCanisterId, standard: sourceStandard.code },
+		token1: { address: destinationLedgerCanisterId, standard: destinationStandard.code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity,
 		fee: ICP_SWAP_POOL_FEE
 	});
@@ -798,13 +798,13 @@ const fetchVeloraSwapAmount = async ({
 		token_network: sourceToken.network.name,
 		token_address: sourceToken.address,
 		token_name: sourceToken.name,
-		token_standard: sourceToken.standard,
+		token_standard: sourceToken.standard.code,
 		token_id: String(sourceToken.id),
 		token2_symbol: destinationToken.symbol,
 		token2_network: destinationToken.network.name,
 		token2_address: destinationToken.address,
 		token2_name: destinationToken.name,
-		token2_standard: destinationToken.standard,
+		token2_standard: destinationToken.standard.code,
 		token2_id: String(destinationToken.id),
 		...(nonNullish(sourceTokenUsdValue) && {
 			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`

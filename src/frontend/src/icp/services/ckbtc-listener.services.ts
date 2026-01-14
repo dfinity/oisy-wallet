@@ -15,8 +15,8 @@ import type { SyncState } from '$lib/types/sync';
 import type { TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import type { MinterInfo, PendingUtxo } from '@dfinity/ckbtc';
 import { jsonReviver } from '@dfinity/utils';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 export const syncBtcStatuses = ({
@@ -66,7 +66,7 @@ export const syncBtcPendingUtxos = ({
 }) => {
 	const { json } = postMsgData;
 
-	const data: CertifiedData<PendingUtxo[]> = JSON.parse(json, jsonReviver);
+	const data: CertifiedData<CkBtcMinterDid.PendingUtxo[]> = JSON.parse(json, jsonReviver);
 
 	ckBtcPendingUtxosStore.set({
 		id: tokenId,
@@ -90,7 +90,7 @@ export const syncBtcAddress = ({
 export const syncCkBtcMinterInfo = ({ data: postMsgData, tokenId }: SyncCkMinterInfoSuccess) => {
 	const { json } = postMsgData;
 
-	const data: CertifiedData<MinterInfo> = JSON.parse(json, jsonReviver);
+	const data: CertifiedData<CkBtcMinterDid.MinterInfo> = JSON.parse(json, jsonReviver);
 
 	ckBtcMinterInfoStore.set({
 		id: tokenId,
