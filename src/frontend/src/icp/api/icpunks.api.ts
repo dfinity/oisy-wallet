@@ -1,3 +1,4 @@
+import type { TokenDesc } from '$declarations/icpunks/icpunks.did';
 import { IcPunksCanister } from '$icp/canisters/icpunks.canister';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
@@ -42,6 +43,24 @@ export const transfer = async ({
 	});
 
 	await transfer({ certified, to, tokenIdentifier });
+};
+
+export const metadata = async ({
+	certified,
+	identity,
+	canisterId,
+	tokenIdentifier,
+	...rest
+}: CanisterApiFunctionParamsWithCanisterId<
+	{ tokenIdentifier: bigint } & QueryParams
+>): Promise<TokenDesc> => {
+	const { metadata } = await icPunksCanister({
+		identity,
+		canisterId,
+		...rest
+	});
+
+	return await metadata({ certified, tokenIdentifier });
 };
 
 const icPunksCanister = async ({

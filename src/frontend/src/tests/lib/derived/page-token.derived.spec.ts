@@ -26,6 +26,7 @@ import {
 } from '$lib/derived/page-token.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { RequiredTokenWithLinkedData } from '$lib/types/token';
 import { getNftIdentifier } from '$lib/utils/nft.utils';
@@ -395,7 +396,10 @@ describe('page-token.derived', () => {
 	});
 
 	describe('pageNonFungibleToken', () => {
-		const mockNonFungibleToken: NonFungibleToken = mockValidErc721Token;
+		const mockNonFungibleToken: CustomToken<NonFungibleToken> = {
+			...mockValidErc721Token,
+			enabled: true
+		};
 		const mockNft = {
 			...mockValidErc721Nft,
 			collection: mapTokenToCollection(mockNonFungibleToken)

@@ -171,7 +171,7 @@ export const isTokenDip20 = (token: Partial<IcToken>): token is IcToken =>
 export const isTokenIc = (token: Partial<IcToken>): token is IcToken =>
 	isTokenIcp(token) || isTokenIcrc(token) || isTokenDip20(token);
 
-export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
+export const isTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
 	isTokenIc(token) && isTokenToggleable(token);
 
 const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>

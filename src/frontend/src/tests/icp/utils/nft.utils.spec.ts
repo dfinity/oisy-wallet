@@ -1,10 +1,13 @@
+import { metadata as getIcPunksMetadata } from '$icp/api/icpunks.api';
 import { getExtMetadata } from '$icp/services/ext-metadata.services';
 import { extIndexToIdentifier } from '$icp/utils/ext.utils';
 import { mapDip721Nft, mapExtNft, mapIcPunksNft } from '$icp/utils/nft.utils';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { NftMetadataWithoutId } from '$lib/types/nft';
+import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
+import { mockIcPunksMetadata } from '$tests/mocks/icpunks-token.mock';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
@@ -15,6 +18,14 @@ vi.mock(import('$icp/services/ext-metadata.services'), async (importOriginal) =>
 	return {
 		...actual,
 		getExtMetadata: vi.fn()
+	};
+});
+
+vi.mock(import('$icp/api/icpunks.api'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		metadata: vi.fn()
 	};
 });
 
@@ -133,20 +144,76 @@ describe('nft.utils', () => {
 	describe('mapIcPunksNft', () => {
 		const mockIndex = 123n;
 
-		it('should map correctly an ICPunks NFT', () => {
-			const result = mapIcPunksNft({
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(SvelteMap.prototype, 'get').mockReturnValue(undefined); // invalidate cache
+
+			global.fetch = vi.fn().mockResolvedValue({
+				headers: {
+					get: () => null
+				}
+			});
+
+			vi.mocked(getIcPunksMetadata).mockResolvedValue(mockIcPunksMetadata);
+		});
+
+		it('should map correctly an ICPunks NFT', async () => {
+			const result = await mapIcPunksNft({
 				index: mockIndex,
-				token: mockValidIcPunksToken
+				token: mockValidIcPunksToken,
+				identity: mockIdentity
 			});
 
 			const { canisterId: _, ...rest } = mockValidIcPunksToken;
 
 			expect(result).toStrictEqual({
 				id: result.id,
+				name: mockIcPunksMetadata.name,
+				description: mockIcPunksMetadata.desc,
+				imageUrl: `https://${mockValidIcPunksToken.canisterId}.raw.icp0.io${mockIcPunksMetadata.url}`,
 				mediaStatus: {
-					image: NftMediaStatusEnum.INVALID_DATA,
+					image: NftMediaStatusEnum.OK,
 					thumbnail: NftMediaStatusEnum.INVALID_DATA
 				},
+				attributes: mapNftAttributes(
+					mockIcPunksMetadata.properties.map(({ name: trait_type, value }) => ({
+						trait_type,
+						value
+					}))
+				),
+				collection: {
+					...rest,
+					address: mockValidIcPunksToken.canisterId
+				}
+			});
+		});
+
+		it('should handle correctly an empty description', async () => {
+			vi.mocked(getIcPunksMetadata).mockResolvedValue({ ...mockIcPunksMetadata, desc: '' });
+
+			const result = await mapIcPunksNft({
+				index: mockIndex,
+				token: mockValidIcPunksToken,
+				identity: mockIdentity
+			});
+
+			const { canisterId: _, ...rest } = mockValidIcPunksToken;
+
+			expect(result).toStrictEqual({
+				id: result.id,
+				name: mockIcPunksMetadata.name,
+				imageUrl: `https://${mockValidIcPunksToken.canisterId}.raw.icp0.io${mockIcPunksMetadata.url}`,
+				mediaStatus: {
+					image: NftMediaStatusEnum.OK,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				},
+				attributes: mapNftAttributes(
+					mockIcPunksMetadata.properties.map(({ name: trait_type, value }) => ({
+						trait_type,
+						value
+					}))
+				),
 				collection: {
 					...rest,
 					address: mockValidIcPunksToken.canisterId

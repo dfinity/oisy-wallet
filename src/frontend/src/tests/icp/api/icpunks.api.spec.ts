@@ -1,6 +1,7 @@
-import { getTokensByOwner, transfer } from '$icp/api/icpunks.api';
+import { getTokensByOwner, metadata, transfer } from '$icp/api/icpunks.api';
 import { IcPunksCanister } from '$icp/canisters/icpunks.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { mockIcPunksMetadata } from '$tests/mocks/icpunks-token.mock';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { mock } from 'vitest-mock-extended';
@@ -92,6 +93,43 @@ describe('icpunks.api', () => {
 			await expect(transfer(params)).rejects.toThrowError(mockError);
 
 			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+	});
+
+	describe('metadata', () => {
+		const mockTokenId = 987_456_123n;
+
+		const params = {
+			identity: mockIdentity,
+			owner: mockPrincipal,
+			canisterId: mockIcPunksCanisterId,
+			tokenIdentifier: mockTokenId
+		};
+
+		const expectedParams = {
+			tokenIdentifier: mockTokenId
+		};
+
+		beforeEach(() => {
+			tokenCanisterMock.metadata.mockResolvedValue(mockIcPunksMetadata);
+		});
+
+		it('should call successfully metadata endpoint', async () => {
+			const result = await metadata(params);
+
+			expect(result).toStrictEqual(mockIcPunksMetadata);
+
+			expect(tokenCanisterMock.metadata).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+
+		it('should throw an error if metadata fails', async () => {
+			const mockError = new CanisterInternalError('Generic error');
+
+			tokenCanisterMock.metadata.mockRejectedValueOnce(mockError);
+
+			await expect(metadata(params)).rejects.toThrowError(mockError);
+
+			expect(tokenCanisterMock.metadata).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
 	});
 });
