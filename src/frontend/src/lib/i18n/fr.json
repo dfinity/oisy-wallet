@@ -121,7 +121,7 @@
 			"logout": "Se déconnecter",
 			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
-			"legacy_login": "",
+			"legacy_login": "Connexion legacy",
 			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
 			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
 			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain",
@@ -1786,46 +1786,46 @@
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "License Agreement",
+			"license_agreement": "Contrat de licence",
 			"det": {
-				"article": "the ",
-				"possessive": "our "
+				"article": "le ",
+				"possessive": "notre "
 			},
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"license_agreement": "The $oisy_name License Agreement"
+			"license_agreement": ""
 		}
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "Terms of Use",
+			"terms_of_use": "Conditions d'utilisation",
 			"det": {
-				"article": "the ",
-				"possessive": "our "
+				"article": "les ",
+				"possessive": "nos "
 			},
 			"title": "",
-			"instruction": "By clicking this button, you agree to the $link",
-			"instruction_two_buttons": "By clicking on one of these buttons, you agree to the $link",
+			"instruction": "En cliquant sur ce bouton, vous acceptez les $link",
+			"instruction_two_buttons": "En cliquant sur l'un des boutons, vous acceptez les $link",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": "Terms of Use Link"
+			"terms_of_use": ""
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "Privacy Policy",
+			"privacy_policy": "Politique de confidentialité",
 			"det": {
-				"article": "the ",
-				"possessive": "our "
+				"article": "la ",
+				"possessive": "notre "
 			},
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": "Privacy Policy Link"
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
