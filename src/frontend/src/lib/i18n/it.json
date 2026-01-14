@@ -46,9 +46,9 @@
 		"info": {
 			"test_banner": "Solo a scopo di test!",
 			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"internet_identity_banner_first_part": "$oisy_name ora utilizza",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "Saperne di più"
 		},
 		"alt": {
 			"logo": "Logo di $name",
@@ -121,11 +121,11 @@
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
-			"legacy_login": "",
+			"legacy_login": "Accesso legacy",
 			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Assistente AI integrato con privacy come standard",
 			"advanced_cryptography": "Protetto da crittografia avanzata – 100% on-chain",
-			"social_login": ""
+			"social_login": "Accesso immediato e privato + login social"
 		},
 		"alt": {
 			"preview": "Anteprima di $oisy_name una volta effettuato l'accesso, sia su desktop che su mobile"
@@ -151,16 +151,16 @@
 		},
 		"help": {
 			"text": {
-				"title": "",
-				"description": "",
-				"login_page_looks_different": "",
-				"use_identity_number": "",
-				"lost_identity_number": "",
-				"feedback_text": "",
+				"title": "Il processo di accesso è stato interrotto",
+				"description": "Sembra che tu abbia annullato l'accesso o la registrazione. Ci piacerebbe capire cosa è successo, così da poter migliorare la tua esperienza.",
+				"login_page_looks_different": "Perché la pagina di accesso ha un aspetto diverso?",
+				"use_identity_number": "Voglio usare il mio numero di Internet Identity",
+				"lost_identity_number": "Ho perso il mio numero di Internet Identity",
+				"feedback_text": "Il tuo feedback ci aiuta a migliorare $oisy_short.",
 				"thanks_text": "Grazie!",
-				"useful_links": "",
+				"useful_links": "Collegamenti utili",
 				"identity_new_identity": "Il wallet $oisy_short cambia il dominio Internet Identity in: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"switch_to_new_internet_identity": "",
+				"switch_to_new_internet_identity": "$oisy_name è passato a Internet Identity 2.0",
 				"identity_legacy_identity_title": "",
 				"identity_legacy_identity_item_1": "",
 				"identity_legacy_identity_item_2": "",
