@@ -165,7 +165,7 @@
 				"identity_legacy_identity_item_1": "Rivedi l'elenco dei numeri di Internet Identity che hai utilizzato in precedenza in <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> o <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
 				"identity_legacy_identity_item_2": "Osserva il numero all'inizio di una frase di recupero che potresti aver salvato in precedenza.",
 				"identity_new_identity_title": "$oisy_name ora utilizza Internet Identity 2.0, che offre diversi miglioramenti e consente di collegare la propria identità ai propri dati di accesso su Google, Apple o Microsoft.",
-				"identity_new_identity_item_1": "Per migrare la tua identità esistente, clicca sul link "Update your identity" nella parte superiore della nuova pagina di accesso e segui i passaggi.",
+				"identity_new_identity_item_1": "Per migrare la tua identità esistente, clicca sul link “Upgrade your Identity” nella parte superiore della nuova pagina di accesso e segui i passaggi.",
 				"identity_new_identity_item_2": "Puoi continuare a utilizzare la pagina di accesso legacy con il tuo numero di Internet Identity. Clicca sul link qui sotto per accedere alla schermata di accesso legacy.",
 				"identity_new_identity_link": "Scopri di più su Internet Identity 2.0 su OISY Docs (in inglese)",
 				"identity_legacy_sign_in": "Accedi con il vecchio dominio Internet Identity (legacy)",
