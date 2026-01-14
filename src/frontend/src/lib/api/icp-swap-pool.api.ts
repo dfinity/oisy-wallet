@@ -1,4 +1,4 @@
-import type { PoolMetadata } from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
+import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import { ICPSwapPoolCanister } from '$lib/canisters/icp-swap-pool.canister';
 import type {
 	ICPSwapDepositWithdrawParams,
@@ -6,9 +6,9 @@ import type {
 	ICPSwapQuoteSwapParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 const getPoolCanister = async ({
 	identity,

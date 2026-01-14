@@ -2,8 +2,8 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import EthWalletConnectMessage from '$eth/components/wallet-connect/EthWalletConnectMessage.svelte';
 import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import * as walletConnectUtils from '$eth/utils/wallet-connect.utils';
 import {
 	getSignParamsMessageTypedDataV4,
@@ -63,10 +63,10 @@ describe('EthWalletConnectMessage', () => {
 		vi.spyOn(walletConnectUtils, 'getSignParamsMessageTypedDataV4');
 
 		erc20DefaultTokensStore.reset();
-		erc20UserTokensStore.resetAll();
+		erc20CustomTokensStore.resetAll();
 
 		erc20DefaultTokensStore.add(USDC_TOKEN);
-		erc20UserTokensStore.setAll([{ data: { ...USDC_TOKEN, enabled: true }, certified: false }]);
+		erc20CustomTokensStore.setAll([{ data: { ...USDC_TOKEN, enabled: true }, certified: false }]);
 	});
 
 	it('should render the JSON parsed message', () => {
@@ -80,7 +80,7 @@ describe('EthWalletConnectMessage', () => {
 			request.params.request.params
 		);
 
-		expect(getByText(`${en.wallet_connect.text.message}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.message)).toBeInTheDocument();
 
 		expect(getByText('{ ... }')).toBeInTheDocument();
 	});
@@ -92,7 +92,7 @@ describe('EthWalletConnectMessage', () => {
 			}
 		});
 
-		expect(getByText(`${en.wallet_connect.text.application}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.application)).toBeInTheDocument();
 
 		expect(getByText('https://app.uniswap.org')).toBeInTheDocument();
 	});
@@ -104,7 +104,7 @@ describe('EthWalletConnectMessage', () => {
 			}
 		});
 
-		expect(getByText(`${en.wallet_connect.text.method}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.method)).toBeInTheDocument();
 
 		expect(getByText(SESSION_REQUEST_ETH_SIGN_V4)).toBeInTheDocument();
 	});
@@ -116,13 +116,13 @@ describe('EthWalletConnectMessage', () => {
 			}
 		});
 
-		expect(getByText(`${en.wallet_connect.text.token}:`)).toBeInTheDocument();
-		expect(getByText(`${en.wallet_connect.text.network}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.token)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.network)).toBeInTheDocument();
 
 		expect(getByText(USDC_TOKEN.symbol)).toBeInTheDocument();
 		expect(getByText(USDC_TOKEN.network.name)).toBeInTheDocument();
 
-		expect(getByText(`${en.wallet_connect.text.amount}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.amount)).toBeInTheDocument();
 
 		expect(
 			getByText(
@@ -142,7 +142,7 @@ describe('EthWalletConnectMessage', () => {
 			}
 		});
 
-		expect(getByText(`${en.wallet_connect.text.spender}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.spender)).toBeInTheDocument();
 
 		expect(getByText('0x66a9893cc07d91d95644aedd05d03f95e1dba8af')).toBeInTheDocument();
 	});
@@ -159,14 +159,14 @@ describe('EthWalletConnectMessage', () => {
 			language: Languages.ENGLISH
 		});
 
-		expect(getByText(`${en.wallet_connect.text.expiration}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.expiration)).toBeInTheDocument();
 
 		expect(getByText(expected)).toBeInTheDocument();
 	});
 
 	it('should not render the token if it is not enabled', () => {
 		erc20DefaultTokensStore.reset();
-		erc20UserTokensStore.resetAll();
+		erc20CustomTokensStore.resetAll();
 
 		const { queryByText } = render(EthWalletConnectMessage, {
 			props: {
@@ -174,8 +174,8 @@ describe('EthWalletConnectMessage', () => {
 			}
 		});
 
-		expect(queryByText(`${en.wallet_connect.text.token}:`)).not.toBeInTheDocument();
-		expect(queryByText(`${en.wallet_connect.text.network}:`)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.token)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.network)).not.toBeInTheDocument();
 
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
 		expect(queryByText(USDC_TOKEN.network.name)).not.toBeInTheDocument();
@@ -256,7 +256,7 @@ describe('EthWalletConnectMessage', () => {
 			request.params.request.params
 		);
 
-		expect(getByText(`${en.wallet_connect.text.message}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.message)).toBeInTheDocument();
 
 		expect(queryByText('{ ... }')).not.toBeInTheDocument();
 

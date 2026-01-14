@@ -4,11 +4,16 @@ import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+import { infuraProviders, type InfuraProvider } from '$eth/providers/infura.providers';
+import { InfuraGasRest } from '$eth/rest/infura.rest';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
+import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { Network, NetworkId } from '$lib/types/network';
+import type { TransactionFeeData } from '$lib/types/transaction';
+import { maxBigInt } from '$lib/utils/bigint.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 
 export interface GetFeeData {
@@ -97,4 +102,45 @@ export const getCkErc20FeeData = async ({
 	}
 
 	return estimateGasForApprove;
+};
+
+export const getEthFeeDataWithProvider = async ({
+	networkId,
+	chainId,
+	from,
+	to
+}: {
+	networkId: NetworkId;
+	chainId: bigint;
+	from: EthAddress;
+	to: EthAddress;
+}): Promise<{
+	feeData: Omit<TransactionFeeData, 'gas'>;
+	provider: InfuraProvider;
+	params: GetFeeData;
+}> => {
+	const params: GetFeeData = {
+		to: mapAddressStartsWith0x(to),
+		from: mapAddressStartsWith0x(from)
+	};
+
+	const provider = infuraProviders(networkId);
+	const { getFeeData } = provider;
+
+	const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
+
+	const { getSuggestedFeeData } = new InfuraGasRest(chainId);
+
+	const {
+		maxFeePerGas: suggestedMaxFeePerGas,
+		maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
+	} = await getSuggestedFeeData();
+
+	const feeData = {
+		...feeDataRest,
+		maxFeePerGas: maxBigInt(maxFeePerGas, suggestedMaxFeePerGas) ?? null,
+		maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas) ?? null
+	};
+
+	return { feeData, provider, params };
 };

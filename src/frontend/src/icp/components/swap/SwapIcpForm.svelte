@@ -18,6 +18,7 @@
 		sourceTokenFee?: bigint;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 	}
@@ -29,6 +30,7 @@
 		sourceTokenFee,
 		isSwapAmountsLoading,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext
 	}: Props = $props();
@@ -73,7 +75,7 @@
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider showSelectButton {slippageValue} on:icShowProviderList />
+				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
 				<SwapFees />
 			</div>
 		{/if}

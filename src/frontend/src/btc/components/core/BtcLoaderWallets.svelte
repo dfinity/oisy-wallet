@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
+	import { BtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -48,7 +48,7 @@
 	);
 
 	const initWalletWorker: InitWalletWorkerFn = ({ token }) =>
-		initBtcWalletWorker({
+		BtcWalletWorker.init({
 			token,
 			...(isNetworkIdBTCMainnet(token.network.id) && {
 				minterCanisterId: ckBtcToken?.minterCanisterId

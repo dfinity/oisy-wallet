@@ -8,9 +8,9 @@ import { render } from '@testing-library/svelte';
 
 describe('NftsCollectionList', () => {
 	const mockNfts = [
-		{ ...mockValidErc1155Nft, name: 'Null', id: parseNftId(0) },
-		{ ...mockValidErc1155Nft, name: 'Eins', id: parseNftId(1) },
-		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId(2) }
+		{ ...mockValidErc1155Nft, name: 'Null', id: parseNftId('0') },
+		{ ...mockValidErc1155Nft, name: 'Eins', id: parseNftId('1') },
+		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId('2') }
 	];
 
 	const mockCollections: NftCollectionUi[] = [
@@ -43,7 +43,7 @@ describe('NftsCollectionList', () => {
 				`${AppPath.Nfts}${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
 			);
 
-			const img = links.item(i).querySelector('.bg-brand-light-alt');
+			const img = links.item(i).querySelector('.bg-brand-subtle-10');
 
 			assertNonNullish(img);
 		}

@@ -56,7 +56,7 @@ describe('infura-erc1155.providers', () => {
 			const mockSupportsInterface = vi.fn();
 			const mockUri = vi.fn();
 
-			const tokenId = parseNftId(12345);
+			const tokenId = parseNftId('12345');
 
 			const mockParams = {
 				contractAddress,
@@ -218,7 +218,7 @@ describe('infura-erc1155.providers', () => {
 
 				const provider = new InfuraErc1155Provider(infura);
 
-				await expect(provider.getNftMetadata(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.getNftMetadata(mockParams)).rejects.toThrowError(errorMessage);
 			});
 
 			it('should handle nullish metadata gracefully', async () => {
@@ -237,7 +237,7 @@ describe('infura-erc1155.providers', () => {
 		describe('balanceOf', () => {
 			const mockBalanceOf = vi.fn();
 
-			const tokenId = parseNftId(12345);
+			const tokenId = parseNftId('12345');
 
 			const mockParams = {
 				contractAddress,
@@ -272,7 +272,7 @@ describe('infura-erc1155.providers', () => {
 
 				const provider = new InfuraErc1155Provider(infura);
 
-				await expect(provider.balanceOf(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.balanceOf(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -288,7 +288,7 @@ describe('infura-erc1155.providers', () => {
 			});
 
 			it('should throw an error for an unsupported network ID', () => {
-				expect(() => infuraErc1155Providers(ICP_NETWORK_ID)).toThrow(
+				expect(() => infuraErc1155Providers(ICP_NETWORK_ID)).toThrowError(
 					replacePlaceholders(en.init.error.no_infura_erc1155_provider, {
 						$network: ICP_NETWORK_ID.toString()
 					})

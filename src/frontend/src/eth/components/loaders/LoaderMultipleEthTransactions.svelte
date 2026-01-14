@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
-	import { NFTS_ENABLED } from '$env/nft.env';
+	import { type Snippet, untrack } from 'svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { batchLoadTransactions } from '$eth/services/eth-transactions-batch.services';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -10,7 +9,10 @@
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { enabledErc20Tokens, enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
+	import {
+		enabledErc20Tokens,
+		enabledNonFungibleTokensWithoutSpam
+	} from '$lib/derived/tokens.derived';
 	import { syncTransactionsFromCache } from '$lib/services/listener.services';
 
 	interface Props {
@@ -25,7 +27,7 @@
 		...$enabledEthereumTokens,
 		...$enabledErc20Tokens,
 		...$enabledEvmTokens,
-		...(NFTS_ENABLED ? $enabledNonFungibleTokens : [])
+		...$enabledNonFungibleTokensWithoutSpam
 	]);
 
 	const onLoad = async () => {
@@ -35,7 +37,17 @@
 
 		loading = true;
 
-		const loader = batchLoadTransactions({ tokens });
+		// Even if it had a bit of complexity, we prefer to prioritise the tokens that have empty transaction store,
+		// because they are more likely the ones that are still not loaded.
+		// eslint-disable-next-line local-rules/prefer-object-params -- This is a sorting function, so the parameters will be provided not as an object but as separate arguments.
+		const sortedTokens = tokens.toSorted((a, b) => {
+			const aIsNull = isNullish($ethTransactionsStore?.[a.id]);
+			const bIsNull = isNullish($ethTransactionsStore?.[b.id]);
+
+			return Number(!aIsNull) - Number(!bIsNull);
+		});
+
+		const loader = batchLoadTransactions({ tokens: sortedTokens });
 
 		for await (const _ of loader) {
 			// We don't need to use the results
@@ -49,10 +61,10 @@
 	$effect(() => {
 		[tokens];
 
-		debounceLoad();
+		untrack(() => debounceLoad());
 	});
 
-	onMount(async () => {
+	const loadFromCache = async () => {
 		const principal = $authIdentity?.getPrincipal();
 
 		if (isNullish(principal)) {
@@ -74,9 +86,17 @@
 				});
 			})
 		);
+	};
+
+	const debounceLoadFromCache = debounce(loadFromCache);
+
+	$effect(() => {
+		[tokens, $authIdentity];
+
+		untrack(() => debounceLoadFromCache());
 	});
 </script>
 
-<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad}>
-	{@render children()}
-</IntervalLoader>
+{@render children()}
+
+<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad} />

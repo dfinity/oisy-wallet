@@ -8,7 +8,7 @@
 		sendProgressStep?: string;
 	}
 
-	let { sendProgressStep = $bindable(ProgressStepsSendBtc.INITIALIZATION) }: Props = $props();
+	let { sendProgressStep = ProgressStepsSendBtc.INITIALIZATION }: Props = $props();
 
 	let steps = $derived<ProgressSteps>([
 		{

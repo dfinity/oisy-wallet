@@ -1,10 +1,12 @@
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+import { stakeBalances } from '$lib/derived/stake.derived';
 import {
 	enabledFungibleTokens,
 	enabledNonFungibleTokens,
 	tokensToPin
 } from '$lib/derived/tokens.derived';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
@@ -29,6 +31,12 @@ export const enabledNonFungibleNetworkTokens: Readable<NonFungibleToken[]> = der
 	filterTokensForSelectedNetwork
 );
 
+export const enabledNonFungibleNetworkTokensWithoutSpam: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleNetworkTokens],
+	([$enabledNonFungibleNetworkTokens]) =>
+		$enabledNonFungibleNetworkTokens.filter(({ section }) => section != CustomTokenSection.SPAM)
+);
+
 /**
  * Fungible network tokens sorted by market cap, with the ones to pin at the top of the list.
  */
@@ -41,11 +49,12 @@ export const combinedDerivedSortedFungibleNetworkTokens: Readable<Token[]> = der
  * All fungible tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
  */
 export const combinedDerivedSortedFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[combinedDerivedSortedFungibleNetworkTokens, balancesStore, exchanges],
-	([$enabledNetworkTokens, $balances, $exchanges]) =>
+	[combinedDerivedSortedFungibleNetworkTokens, balancesStore, stakeBalances, exchanges],
+	([$enabledNetworkTokens, $balances, $stakeBalances, $exchanges]) =>
 		pinTokensWithBalanceAtTop({
 			$tokens: $enabledNetworkTokens,
 			$balances,
+			$stakeBalances,
 			$exchanges
 		})
 );

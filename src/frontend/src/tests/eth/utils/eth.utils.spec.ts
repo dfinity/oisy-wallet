@@ -8,7 +8,6 @@ import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { ADDITIONAL_ERC20_TOKENS, ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { ETHEREUM_TOKEN, SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import type { EthereumNetwork } from '$eth/types/network';
 import {
 	getExplorerUrl,
 	isDefaultEthereumToken,
@@ -43,7 +42,7 @@ describe('eth.utils', () => {
 		});
 
 		it('should return false for a non-standard Ethereum user token', () => {
-			const token = { ...ETHEREUM_TOKEN, standard: 'erc20' as const };
+			const token = { ...ETHEREUM_TOKEN, standard: { code: 'erc20' as const } };
 
 			expect(isDefaultEthereumToken(token)).toBeFalsy();
 		});
@@ -51,7 +50,7 @@ describe('eth.utils', () => {
 		it('should return true for a default standard Ethereum token', () => {
 			const token = {
 				...WBTC_TOKEN,
-				standard: 'ethereum' as const,
+				standard: { code: 'ethereum' as const },
 				category: 'default' as const
 			};
 
@@ -87,7 +86,7 @@ describe('eth.utils', () => {
 		});
 
 		it('should return true for a non-standard Ethereum user token', () => {
-			const token = { ...ETHEREUM_TOKEN, standard: 'erc20' as const };
+			const token = { ...ETHEREUM_TOKEN, standard: { code: 'erc20' as const } };
 
 			expect(isNotDefaultEthereumToken(token)).toBeTruthy();
 		});
@@ -95,7 +94,7 @@ describe('eth.utils', () => {
 		it('should return false for a default standard Ethereum token', () => {
 			const token = {
 				...WBTC_TOKEN,
-				standard: 'ethereum' as const,
+				standard: { code: 'ethereum' as const },
 				category: 'default' as const
 			};
 
@@ -230,10 +229,6 @@ describe('eth.utils', () => {
 			const result3 = getExplorerUrl({ token: {} as unknown as Token });
 
 			expect(result3).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
-
-			const result4 = getExplorerUrl({ network: {} as unknown as EthereumNetwork });
-
-			expect(result4).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
 		});
 	});
 });

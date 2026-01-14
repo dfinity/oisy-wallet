@@ -58,6 +58,10 @@ export default defineConfig(
 				{
 					find: '$declarations',
 					replacement: resolve(__dirname, 'src/declarations')
+				},
+				{
+					find: '@plausible-analytics/tracker',
+					replacement: resolve(__dirname, 'src/frontend/src/tests/mocks/plausible-tracker.mock')
 				}
 			]
 		},
@@ -72,15 +76,19 @@ export default defineConfig(
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['src/frontend/src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
-				include: ['src/frontend/src'],
-				exclude: ['src/frontend/src/routes/**/+page.ts', 'src/frontend/src/tests/**/*'],
+				include: ['src/frontend/src/**/*.{ts,svelte}'],
+				exclude: [
+					'src/frontend/src/routes/**/+page.ts',
+					'src/frontend/src/tests/**/*',
+					'src/frontend/src/**/*.d.ts'
+				],
 				// TODO: increase the thresholds slowly up to an acceptable 90% at least
 				thresholds: {
 					autoUpdate: true,
-					statements: 79.9,
-					branches: 86.48,
-					functions: 74.14,
-					lines: 79.9
+					statements: 71.0,
+					branches: 59.6,
+					functions: 65.7,
+					lines: 76.0
 				}
 			}
 		}

@@ -14,7 +14,7 @@ export const MAX_TOKEN_ID: TokenId = parseTokenId(MAX_SYMBOL);
 export const MAX_TOKEN: RequiredSpl2022Token = {
 	id: MAX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Mastercard xStock',
 	symbol: MAX_SYMBOL,

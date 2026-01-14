@@ -1,5 +1,3 @@
-import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
-import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import type {
 	AddUserCredentialResult,
 	AllowSigningResponse,
@@ -11,10 +9,10 @@ import type {
 	GetAllowedCyclesResponse,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
-	UserProfile,
-	UserToken,
-	UserTokenId
-} from '$declarations/backend/declarations/backend.did';
+	UserProfile
+} from '$declarations/backend/backend.did';
+import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
+import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
@@ -62,12 +60,6 @@ export class BackendCanister extends Canister<BackendService> {
 		return new BackendCanister(canisterId, service, certifiedService);
 	}
 
-	listUserTokens = ({ certified = true }: QueryParams): Promise<UserToken[]> => {
-		const { list_user_tokens } = this.caller({ certified });
-
-		return list_user_tokens();
-	};
-
 	listCustomTokens = ({ certified = true }: QueryParams): Promise<CustomToken[]> => {
 		const { list_custom_tokens } = this.caller({ certified });
 
@@ -84,24 +76,6 @@ export class BackendCanister extends Canister<BackendService> {
 		const { set_custom_token } = this.caller({ certified: true });
 
 		return set_custom_token(token);
-	};
-
-	setManyUserTokens = ({ tokens }: { tokens: UserToken[] }): Promise<void> => {
-		const { set_many_user_tokens } = this.caller({ certified: true });
-
-		return set_many_user_tokens(tokens);
-	};
-
-	setUserToken = ({ token }: { token: UserToken }): Promise<void> => {
-		const { set_user_token } = this.caller({ certified: true });
-
-		return set_user_token(token);
-	};
-
-	removeUserToken = (params: UserTokenId): Promise<void> => {
-		const { remove_user_token } = this.caller({ certified: true });
-
-		return remove_user_token(params);
 	};
 
 	removeCustomToken = ({ token }: { token: CustomToken }): Promise<void> => {

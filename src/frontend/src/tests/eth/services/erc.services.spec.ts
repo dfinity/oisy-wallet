@@ -10,7 +10,7 @@ global.fetch = vi.fn();
 describe('erc.services', () => {
 	describe('fetchMetadataFromUri', () => {
 		const contractAddress = EURC_TOKEN.address;
-		const tokenId = parseNftId(12345);
+		const tokenId = parseNftId('12345');
 		const metadataUrl = 'ipfs://metadata-hash';
 		const expectedMetadataUrl = new URL('https://ipfs.io/ipfs/metadata-hash');
 

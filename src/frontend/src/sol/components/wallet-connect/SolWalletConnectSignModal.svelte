@@ -153,21 +153,23 @@
 		</WalletConnectModalTitle>
 	{/snippet}
 
-	{#if currentStep?.name === WizardStepsSign.SIGNING}
-		<InProgressWizard
-			progressStep={signProgressStep}
-			steps={walletConnectSignSteps({ i18n: $i18n, signWithSending })}
-		/>
-	{:else if currentStep?.name === WizardStepsSign.REVIEW}
-		<SolWalletConnectSignReview
-			{amount}
-			{application}
-			{data}
-			destination={destination ?? ''}
-			onApprove={sign}
-			onReject={reject}
-			source={address ?? ''}
-			{token}
-		/>
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSign.SIGNING}
+			<InProgressWizard
+				progressStep={signProgressStep}
+				steps={walletConnectSignSteps({ i18n: $i18n, signWithSending })}
+			/>
+		{:else if currentStep?.name === WizardStepsSign.REVIEW}
+			<SolWalletConnectSignReview
+				{amount}
+				{application}
+				{data}
+				destination={destination ?? ''}
+				onApprove={sign}
+				onReject={reject}
+				source={address ?? ''}
+				{token}
+			/>
+		{/if}
+	{/key}
 </WizardModal>

@@ -7,13 +7,13 @@ import type {
 	UserData,
 	UserSnapshot,
 	VipReward
-} from '$declarations/rewards/declarations/rewards.did';
+} from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import { REWARDS_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { RewardClaimApiResponse } from '$lib/types/reward';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 let canister: RewardCanister | undefined = undefined;
 

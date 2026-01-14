@@ -46,6 +46,7 @@
 		currentStep?: WizardStep;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -59,6 +60,7 @@
 		currentStep,
 		isSwapAmountsLoading,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext,
 		onBack
@@ -240,29 +242,32 @@
 </script>
 
 <IcTokenFeeContext token={$sourceToken as IcToken}>
-	{#if currentStep?.name === WizardStepsSwap.SWAP}
-		<SwapIcpForm
-			{isSwapAmountsLoading}
-			{onClose}
-			{onNext}
-			{onShowTokensList}
-			{sourceTokenFee}
-			on:icShowProviderList
-			bind:swapAmount
-			bind:receiveAmount
-			bind:slippageValue
-		/>
-	{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-		<SwapReview {onBack} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount}>
-			{#snippet swapFees()}
-				<SwapFees />
-			{/snippet}
-		</SwapReview>
-	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-		<SwapProgress
-			swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ICP_SWAP}
-			bind:swapProgressStep
-			bind:failedSteps={swapFailedProgressSteps}
-		/>
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSwap.SWAP}
+			<SwapIcpForm
+				{isSwapAmountsLoading}
+				{onClose}
+				{onNext}
+				{onShowProviderList}
+				{onShowTokensList}
+				{sourceTokenFee}
+				bind:swapAmount
+				bind:receiveAmount
+				bind:slippageValue
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
+			<SwapReview {onBack} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount}>
+				{#snippet swapFees()}
+					<SwapFees />
+				{/snippet}
+			</SwapReview>
+		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
+			<SwapProgress
+				{swapProgressStep}
+				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
+					SwapProvider.ICP_SWAP}
+				bind:failedSteps={swapFailedProgressSteps}
+			/>
+		{/if}
+	{/key}
 </IcTokenFeeContext>

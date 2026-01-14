@@ -1,4 +1,6 @@
 import type {
+	POST_MESSAGE_REQUESTS,
+	PostMessageCommonSchema,
 	PostMessageDataErrorSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestDip20Schema,
@@ -24,13 +26,14 @@ import type {
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
 	PostMessageSyncStateSchema,
+	inferPostMessageSchedulerSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 import type * as z from 'zod';
 import type { ZodType } from 'zod';
 
 export type PostMessageDataRequest = z.infer<typeof PostMessageDataRequestSchema>;
-type PostMessageDataResponseLoose = z.infer<typeof PostMessageDataResponseLooseSchema>;
+export type PostMessageDataResponseLoose = z.infer<typeof PostMessageDataResponseLooseSchema>;
 
 export type PostMessageDataRequestExchangeTimer = z.infer<
 	typeof PostMessageDataRequestExchangeTimerSchema
@@ -94,6 +97,19 @@ export type PostMessageDataResponsePowProtectorNextAllowance = z.infer<
 	typeof PostMessageDataResponsePowProtectorNextAllowanceSchema
 >;
 
+export type PostMessageCommon = z.infer<typeof PostMessageCommonSchema>;
+
 export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponseLoose> = z.infer<
 	ReturnType<typeof inferPostMessageSchema<ZodType<T>>>
+>;
+
+export type PostMessageScheduler<T extends PostMessageDataResponseLoose> = z.infer<
+	ReturnType<typeof inferPostMessageSchedulerSchema<ZodType<T>>>
+>;
+
+export type PostMessageRequest = (typeof POST_MESSAGE_REQUESTS)[number];
+
+export type PostMessageRequestMap = Record<
+	PostMessageRequest,
+	(data: MessageEvent<PostMessage<PostMessageDataRequest>>) => Promise<void>
 >;

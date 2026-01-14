@@ -53,6 +53,16 @@
 		syncInProgress = false;
 	};
 
+	const scheduleNext = (): void => {
+		timer = setTimeout(async () => {
+			await sync();
+
+			if (nonNullish(timer)) {
+				scheduleNext();
+			}
+		}, USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
+	};
+
 	const startTimer = async () => {
 		if (nonNullish(timer)) {
 			return;
@@ -60,7 +70,7 @@
 
 		await sync();
 
-		timer = setInterval(sync, USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
+		scheduleNext();
 	};
 
 	const stopTimer = () => {
@@ -68,7 +78,7 @@
 			return;
 		}
 
-		clearInterval(timer);
+		clearTimeout(timer);
 		timer = undefined;
 	};
 

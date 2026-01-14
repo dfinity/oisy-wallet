@@ -3,8 +3,7 @@
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import { POW_FEATURE_ENABLED } from '$env/pow.env';
-	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
-	import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
+	import { PowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { powProtectorSteps } from '$lib/config/pow.config';
@@ -27,9 +26,9 @@
 	let cyclesAllowanceSpent = $state<boolean>(false);
 	let checkInterval = $state<NodeJS.Timeout | undefined>();
 	let checkAttempts = $state<number>(0);
-	let powWorker = $state<PowProtectorWorkerInitResult | undefined>();
+	let powWorker = $state<PowProtectorWorker | undefined>();
 
-	// Initialize with default value, but it will be reactively updated from the store
+	// Initialise with the default value, but it will be reactively updated from the store
 	let progressStep = $state(ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE);
 
 	// Subscribe to the store and update progressStep reactively
@@ -47,13 +46,13 @@
 					progressStep = ProgressStepsPowProtectorLoader.GRANT_CYCLES;
 					break;
 				default:
-					// Fallback to initialization if unknown value
+					// Fallback to initialisation if it is an unknown value
 					console.error('Unknown value: ', progressStoreData.progress);
 			}
 		}
 	});
 
-	// Using $derived for reactive steps array from config
+	// Using $derived for a reactive steps array from config
 	let steps = $derived(powProtectorSteps({ i18n: $i18n }));
 
 	/**
@@ -76,21 +75,21 @@
 
 	/**
 	 * Is periodically checks if the user has sufficient cycles for POW protection.
-	 * It will either clear the interval when cycles are sufficient, or sign out the user
+	 * It will either clear the interval when cycles are enough or sign out the user
 	 * if maximum retry attempts are exceeded.
 	 */
 	const checkCycles = async (): Promise<void> => {
 		// Increment attempt counter to track how many times we've checked
 		checkAttempts++;
 
-		// Check current cycles status and update the reactive state
+		// Check the current cycles status and update the reactive state
 		cyclesAllowanceSpent = await isCyclesAllowanceSpent();
 
 		if (cyclesAllowanceSpent) {
 			if (checkAttempts >= POW_MAX_CHECK_ATTEMPTS) {
 				// Failure: Too many failed attempts, clean up and sign out user
 				stopPolling();
-				// Sign out with appropriate error message about cycle waiting timeout
+				// Sign out with the appropriate error message about cycle waiting timeout
 				await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
 			}
 		} else {
@@ -104,7 +103,7 @@
 			try {
 				// Run the worker in the background that continuously checks if the user has sufficient cycles and requests/solves
 				// a challenge to grant cycles when needed
-				powWorker = await initPowProtectorWorker();
+				powWorker = await PowProtectorWorker.init();
 				powWorker.start();
 			} catch (error) {
 				// Log error but don't crash
@@ -115,7 +114,7 @@
 
 	onMount(async () => {
 		if (POW_FEATURE_ENABLED) {
-			// Always initialize the worker regardless of cycles status
+			// Always initialise the worker regardless of cycles status
 			console.warn('Initializing POW worker');
 			await initWorker();
 
@@ -126,7 +125,7 @@
 				if (cyclesAllowanceSpent) {
 					// Count this as the first attempt
 					checkAttempts = 1;
-					// If the user does not have any cycles amount granted, we need to poll until he has
+					// If the user does not have any cycles' amount granted, we need to poll until he has
 					startPolling();
 				}
 			} catch (error) {
@@ -139,7 +138,7 @@
 
 	onDestroy(() => {
 		if (POW_FEATURE_ENABLED) {
-			// Clear interval if component is destroyed
+			// Clear interval if the component is destroyed
 			stopPolling();
 
 			// Stop the worker if it was started

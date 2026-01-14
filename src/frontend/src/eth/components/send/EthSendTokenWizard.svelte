@@ -7,6 +7,7 @@
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
+	import { sendNft } from '$eth/services/nft-send.services';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -25,8 +26,7 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
-		TRACK_COUNT_ETH_NFT_SEND_ERROR,
-		TRACK_COUNT_ETH_NFT_SEND_SUCCESS,
+		TRACK_NFT_SEND,
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.constants';
@@ -35,7 +35,6 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { sendNft } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -99,6 +98,8 @@
 			)
 		})
 	);
+
+	let customNonce = $state<number | undefined>();
 
 	/**
 	 * Fee context store
@@ -189,8 +190,8 @@
 			await sendNft({
 				token: $sendToken as NonFungibleToken,
 				tokenId: nft.id,
-				toAddress: destination,
-				fromAddress: $ethAddress,
+				to: destination,
+				from: $ethAddress,
 				identity: $authIdentity,
 				gas,
 				maxFeePerGas,
@@ -199,24 +200,29 @@
 			});
 
 			trackEvent({
-				name: TRACK_COUNT_ETH_NFT_SEND_SUCCESS,
+				name: TRACK_NFT_SEND,
 				metadata: {
+					resultStatus: 'success',
 					token: $sendToken.symbol,
-					collection: nft.collection.name ?? nft.collection.address,
+					collection: nft.collection.name ?? '',
+					address: nft.collection.address,
 					tokenId: String(nft.id),
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
+					network: sourceNetwork.name
 				}
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
-				name: TRACK_COUNT_ETH_NFT_SEND_ERROR,
+				name: TRACK_NFT_SEND,
 				metadata: {
+					resultStatus: 'error',
 					token: $sendToken.symbol,
-					collection: nft.collection.name ?? nft.collection.address,
+					collection: nft.collection.name ?? '',
+					address: nft.collection.address,
 					tokenId: String(nft.id),
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
+					network: sourceNetwork.name,
+					error: (err as Error).message
 				}
 			});
 
@@ -281,6 +287,14 @@
 
 		onNext();
 
+		const sendTrackingEventMetadata = {
+			token: $sendToken.symbol,
+			network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`,
+			maxFeePerGas: maxFeePerGas.toString(),
+			maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+			gas: gas.toString()
+		};
+
 		try {
 			await executeSend({
 				from: $ethAddress,
@@ -294,6 +308,7 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
+				customNonce,
 				sourceNetwork,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
@@ -301,20 +316,14 @@
 
 			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_SUCCESS,
-				metadata: {
-					token: $sendToken.symbol,
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_ERROR,
-				metadata: {
-					token: $sendToken.symbol,
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
@@ -341,33 +350,36 @@
 	sendTokenId={$sendTokenId}
 	{sourceNetwork}
 >
-	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<EthSendReview
-			{amount}
-			{destination}
-			{nft}
-			{onBack}
-			onSend={nonNullish(nft) ? nftSend : send}
-			{selectedContact}
-		/>
-	{:else if currentStep?.name === WizardStepsSend.SENDING}
-		<InProgressWizard
-			progressStep={sendProgressStep}
-			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
-		/>
-	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<EthSendForm
-			{nativeEthereumToken}
-			{onBack}
-			{onNext}
-			{onTokensList}
-			{selectedContact}
-			bind:destination
-			bind:amount
-		>
-			{#snippet cancel()}
-				<ButtonBack onclick={back} />
-			{/snippet}
-		</EthSendForm>
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSend.REVIEW}
+			<EthSendReview
+				{amount}
+				{destination}
+				{nft}
+				{onBack}
+				onSend={nonNullish(nft) ? nftSend : send}
+				{selectedContact}
+			/>
+		{:else if currentStep?.name === WizardStepsSend.SENDING}
+			<InProgressWizard
+				progressStep={sendProgressStep}
+				steps={sendSteps({ i18n: $i18n, sendWithApproval })}
+			/>
+		{:else if currentStep?.name === WizardStepsSend.SEND}
+			<EthSendForm
+				{nativeEthereumToken}
+				{onBack}
+				{onNext}
+				{onTokensList}
+				{selectedContact}
+				bind:destination
+				bind:customNonce
+				bind:amount
+			>
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />
+				{/snippet}
+			</EthSendForm>
+		{/if}
+	{/key}
 </EthFeeContext>

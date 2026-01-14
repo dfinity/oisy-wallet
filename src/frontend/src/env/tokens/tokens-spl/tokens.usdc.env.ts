@@ -15,7 +15,7 @@ export const USDC_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
 export const USDC_TOKEN: RequiredSplToken = {
 	id: USDC_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'USD Coin',
 	symbol: USDC_SYMBOL,
@@ -36,7 +36,7 @@ export const DEVNET_USDC_TOKEN_ID: TokenId = parseTokenId(DEVNET_USDC_SYMBOL);
 export const DEVNET_USDC_TOKEN: RequiredSplToken = {
 	id: DEVNET_USDC_TOKEN_ID,
 	network: SOLANA_DEVNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'USDC (Devnet)',
 	symbol: DEVNET_USDC_SYMBOL,

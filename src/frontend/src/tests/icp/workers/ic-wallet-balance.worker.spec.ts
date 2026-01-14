@@ -1,12 +1,31 @@
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
-import * as authClientApi from '$lib/api/auth-client.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
+import type {
+	PostMessageDataRequestDip20,
+	PostMessageDataRequestIcp,
+	PostMessageDataRequestIcrc
+} from '$lib/types/post-message';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
+import { isNullish } from '@dfinity/utils';
+import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+
+vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
+	const authClientProvider = vi.fn().mockReturnValue({
+		loadIdentity: vi.fn()
+	});
+
+	return {
+		...(await importActual()),
+		AuthClientProvider: Object.assign(authClientProvider, {
+			getInstance: authClientProvider
+		})
+	};
+});
 
 describe('ic-wallet-balance.worker', () => {
 	let spyGetBalance: MockInstance;
@@ -40,12 +59,15 @@ describe('ic-wallet-balance.worker', () => {
 
 	const mockPostMessage = ({
 		msg,
+		ref,
 		...rest
 	}: {
 		certified: boolean;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
+		ref?: string;
 	}) => ({
 		msg,
+		ref,
 		data: mockPostMessageData(rest)
 	});
 
@@ -63,7 +85,8 @@ describe('ic-wallet-balance.worker', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
+		const provider = AuthClientProvider.getInstance();
+		vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
 	});
 
 	afterEach(() => {
@@ -75,7 +98,12 @@ describe('ic-wallet-balance.worker', () => {
 		window.postMessage = originalPostmessage;
 	});
 
-	const initWithBalance = <PostMessageDataRequest>({
+	const initWithBalance = <
+		PostMessageDataRequest extends
+			| PostMessageDataRequestIcrc
+			| PostMessageDataRequestIcp
+			| PostMessageDataRequestDip20
+	>({
 		initScheduler,
 		msg,
 		startData = undefined
@@ -88,8 +116,16 @@ describe('ic-wallet-balance.worker', () => {
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
-		const mockPostMessageNotCertified = mockPostMessage({ msg, certified: false });
-		const mockPostMessageCertified = mockPostMessage({ msg, certified: true });
+		const ref = isNullish(startData)
+			? undefined
+			: 'ledgerCanisterId' in startData
+				? startData.ledgerCanisterId
+				: 'indexCanisterId' in startData
+					? startData.indexCanisterId
+					: startData.canisterId;
+
+		const mockPostMessageNotCertified = mockPostMessage({ msg, ref, certified: false });
+		const mockPostMessageCertified = mockPostMessage({ msg, ref, certified: true });
 
 		return {
 			setup: () => {
@@ -190,7 +226,12 @@ describe('ic-wallet-balance.worker', () => {
 		};
 	};
 
-	const initOtherScenarios = <PostMessageDataRequest>({
+	const initOtherScenarios = <
+		PostMessageDataRequest extends
+			| PostMessageDataRequestIcrc
+			| PostMessageDataRequestIcp
+			| PostMessageDataRequestDip20
+	>({
 		initScheduler,
 		startData = undefined,
 		initErrorMock,
@@ -228,6 +269,13 @@ describe('ic-wallet-balance.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
 					expect(postMessageMock).toHaveBeenCalledWith({
+						ref: isNullish(startData)
+							? undefined
+							: 'ledgerCanisterId' in startData
+								? startData.ledgerCanisterId
+								: 'indexCanisterId' in startData
+									? startData.indexCanisterId
+									: startData.canisterId,
 						msg: `${msg}Error`,
 						data: {
 							error: err

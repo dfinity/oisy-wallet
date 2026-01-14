@@ -21,7 +21,7 @@
 
 {#if showGradient}
 	<div
-		class="bg-linear-to-b relative z-0 mb-2 rounded-xl py-0.5 pl-1.5 pr-0.5"
+		class="relative z-0 mb-2 rounded-xl bg-linear-to-b py-0.5 pr-0.5 pl-1.5"
 		class:from-arbitrum-0={isNetworkIdArbitrum(tokenNetworkId)}
 		class:from-base-0={isNetworkIdBase(tokenNetworkId)}
 		class:from-bsc-0={isNetworkIdBsc(tokenNetworkId)}
@@ -36,7 +36,7 @@
 		class:to-polygon-100={isNetworkIdPolygon(tokenNetworkId)}
 	>
 		{@render tokenInput?.()}
-		<div class="-z-1 absolute inset-0.5 left-1.5 rounded-xl bg-secondary"></div>
+		<div class="absolute inset-0.5 left-1.5 -z-1 rounded-xl bg-secondary"></div>
 	</div>
 {:else}
 	<div class="mb-2">

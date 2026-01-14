@@ -8,13 +8,9 @@ import type {
 } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import {
-	CkETHOrchestratorCanister,
-	type ManagedCanisters,
-	type OrchestratorInfo
-} from '@dfinity/cketh';
-import { Principal } from '@dfinity/principal';
 import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+import { CkEthOrchestratorCanister, type CkEthOrchestratorDid } from '@icp-sdk/canisters/cketh';
+import { Principal } from '@icp-sdk/core/principal';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { agent, loadMetadata, saveLogo } from './build.tokens.utils';
@@ -47,8 +43,8 @@ const orchestratorInfo = async ({
 	orchestratorId: canisterId
 }: {
 	orchestratorId: Principal;
-}): Promise<OrchestratorInfo> => {
-	const { getOrchestratorInfo } = CkETHOrchestratorCanister.create({
+}): Promise<CkEthOrchestratorDid.OrchestratorInfo> => {
+	const { getOrchestratorInfo } = CkEthOrchestratorCanister.create({
 		agent,
 		canisterId
 	});
@@ -67,7 +63,7 @@ const buildOrchestratorInfo = async (orchestratorId: Principal): Promise<TokensA
 			index,
 			ckerc20_token_symbol,
 			erc20_contract: { address: erc20ContractAddress }
-		}: ManagedCanisters
+		}: CkEthOrchestratorDid.ManagedCanisters
 	): EnvCkErc20TokensRaw => {
 		const ledgerCanister = fromNullable(ledger);
 		const indexCanister = fromNullable(index);

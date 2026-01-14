@@ -32,6 +32,16 @@ export default [
 		}
 	},
 
+	// TODO: re-enable this rule when we fix all the warnings that it causes.
+	{
+		rules: {
+			'svelte/no-navigation-without-resolve': 'off',
+			'vitest/no-conditional-expect': 'off',
+			'vitest/no-disabled-tests': 'off',
+			'vitest/no-standalone-expect': 'off'
+		}
+	},
+
 	{
 		ignores: [
 			'**/.DS_Store',

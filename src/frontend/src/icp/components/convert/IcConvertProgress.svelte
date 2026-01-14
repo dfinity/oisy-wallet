@@ -11,7 +11,7 @@
 		convertProgressStep?: string;
 	}
 
-	let { convertProgressStep = $bindable(ProgressStepsSend.INITIALIZATION) }: Props = $props();
+	let { convertProgressStep = ProgressStepsSend.INITIALIZATION }: Props = $props();
 
 	const { destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>

@@ -7,41 +7,55 @@
 	import InvalidDataImage from '$lib/components/icons/nfts/InvalidData.svelte';
 	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
-	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import { getNftDisplayMediaStatus } from '$lib/utils/nft.utils';
 
 	interface Props {
 		nft?: Nft;
 		children: Snippet;
 		showMessage?: boolean;
 		type: 'hero-banner' | 'card' | 'card-selectable' | 'nft-display' | 'nft-logo';
+		location?: { source: string; subSource: string };
 	}
 
-	const { nft, children, showMessage = true, type }: Props = $props();
+	const { nft, children, showMessage = true, type, location }: Props = $props();
 
-	const mediaStatus = $derived(nonNullish(nft) ? nft.mediaStatus : NftMediaStatusEnum.INVALID_DATA);
+	const mediaStatus = $derived(
+		nonNullish(nft) ? getNftDisplayMediaStatus(nft) : NftMediaStatusEnum.INVALID_DATA
+	);
 
 	const hasConsent: boolean | undefined = $derived(
-		nonNullish(nft)
-			? getAllowMediaForNft({
-					tokens: $nonFungibleTokens,
-					networkId: nft.collection.network.id,
-					address: nft.collection.address
-				})
-			: false
+		nonNullish(nft) ? nft.collection.allowExternalContentSource : false
 	);
 
 	const handleConsent = () => {
 		if (nonNullish(nft)) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.OPEN_MODAL,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+					event_subcontext: 'media_review',
+					location_source: location?.source ?? '',
+					location_subsource: location?.subSource ?? '',
+					token_name: nft.collection.name ?? '',
+					token_address: nft.collection.address,
+					token_network: nft.collection.network.name,
+					token_standard: nft.collection.standard.code
+				}
+			});
+
 			modalStore.openNftImageConsent({ id: Symbol('NftImageConsentModal'), data: nft.collection });
 		}
 	};
 
 	const isLoading = $derived(isNullish(nft));
+
+	let hoveredReviewButton = $derived(type === 'card' && nonNullish(hasConsent));
 </script>
 
 {#if nonNullish(hasConsent) && hasConsent}
@@ -73,9 +87,16 @@
 			{/if}
 			{#if type !== 'card-selectable' && type !== 'nft-logo'}
 				<span
-					class="max-h-full overflow-hidden opacity-100 transition-all duration-300 ease-in-out group-hover:max-h-full group-hover:opacity-100"
-					class:lg:max-h-0={type === 'card' && nonNullish(hasConsent)}
-					class:lg:opacity-0={type === 'card' && nonNullish(hasConsent)}
+					class="overflow-hidden"
+					class:duration-300={hoveredReviewButton}
+					class:ease-in-out={hoveredReviewButton}
+					class:lg:group-hover:max-h-full={hoveredReviewButton}
+					class:lg:group-hover:opacity-100={hoveredReviewButton}
+					class:max-h-0={hoveredReviewButton}
+					class:max-h-full={!hoveredReviewButton}
+					class:opacity-0={hoveredReviewButton}
+					class:opacity-100={!hoveredReviewButton}
+					class:transition-all={hoveredReviewButton}
 				>
 					<Button
 						colorStyle="secondary-light"

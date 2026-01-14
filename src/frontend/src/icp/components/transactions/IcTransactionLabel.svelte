@@ -10,8 +10,8 @@
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
-		label: string | undefined;
-		type: IcTransactionType | undefined;
+		label?: string;
+		type?: IcTransactionType;
 		token: OptionToken;
 		amount?: bigint;
 	}

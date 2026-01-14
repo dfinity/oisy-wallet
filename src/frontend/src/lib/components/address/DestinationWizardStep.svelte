@@ -52,22 +52,23 @@
 	<DestinationWizardStepSection
 		isActive={activeAddressType === 'default'}
 		label={$i18n.convert.text.default_destination}
-		on:click={() => (activeAddressType = 'default')}
+		onClick={() => (activeAddressType = 'default')}
 	/>
 
 	<DestinationWizardStepSection
 		isActive={activeAddressType === 'custom'}
 		label={$i18n.convert.text.custom_destination}
-		on:click={() => (activeAddressType = 'custom')}
+		onClick={() => (activeAddressType = 'custom')}
 	>
-		<IcSendDestination
-			slot="content"
-			{networkId}
-			{onQRCodeScan}
-			{tokenStandard}
-			bind:destination
-			bind:invalidDestination
-		/>
+		{#snippet content()}
+			<IcSendDestination
+				{networkId}
+				{onQRCodeScan}
+				{tokenStandard}
+				bind:destination
+				bind:invalidDestination
+			/>
+		{/snippet}
 	</DestinationWizardStepSection>
 
 	{#snippet toolbar()}

@@ -1,6 +1,6 @@
-import type { Identity } from '@dfinity/agent';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { Principal } from '@dfinity/principal';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 // These tests are done with real addresses from our test wallets
 describe('btc-address.services integration', () => {
@@ -39,11 +39,10 @@ describe('btc-address.services integration', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-
-		vi.stubEnv('VITE_FRONTEND_DERIVATION_ENABLED', 'true');
 	});
 
 	afterEach(() => {
+		vi.unstubAllGlobals();
 		vi.unstubAllEnvs();
 	});
 
@@ -89,6 +88,12 @@ describe('btc-address.services integration', () => {
 						vi.stubGlobal('VITE_DFX_NETWORK', env);
 
 						vi.resetModules();
+
+						const addressEnv = await import('$env/address.env');
+
+						vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockImplementation(
+							() => true
+						);
 
 						const constants = await import('$lib/constants/app.constants');
 						const { getBtcAddress } = await import('$btc/services/btc-address.services');
@@ -146,6 +151,12 @@ describe('btc-address.services integration', () => {
 						vi.stubGlobal('VITE_DFX_NETWORK', env);
 
 						vi.resetModules();
+
+						const addressEnv = await import('$env/address.env');
+
+						vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockImplementation(
+							() => true
+						);
 
 						const constants = await import('$lib/constants/app.constants');
 						const { getBtcAddress } = await import('$btc/services/btc-address.services');

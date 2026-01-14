@@ -30,8 +30,7 @@
 
 	// TODO: The Metamask button currently does not support sending ERC20 tokens - it always populates an ETH transaction.
 	// We aim to fix this, but for now, the functionality is commented out.
-	let tokenStandardEth = true;
-	$: tokenStandardEth = $pageTokenStandard === 'ethereum';
+	let tokenStandardEth = $derived($pageTokenStandard === 'ethereum');
 </script>
 
 {#if $metamaskAvailable && $networkEthereum && tokenStandardEth}

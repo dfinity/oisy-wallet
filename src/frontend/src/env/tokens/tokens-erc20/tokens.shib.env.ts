@@ -14,7 +14,7 @@ export const SHIB_TOKEN_ID: TokenId = parseTokenId(SHIB_SYMBOL);
 export const SHIB_TOKEN: RequiredErc20Token = {
 	id: SHIB_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'SHIBA INU',
 	symbol: SHIB_SYMBOL,
@@ -24,7 +24,7 @@ export const SHIB_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckSHIB',
 	groupData: SHIB_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true,
+	neverCollapseInTokenGroup: true,
 	buy: {
 		onramperId: 'shib_ethereum'
 	}

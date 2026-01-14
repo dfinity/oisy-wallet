@@ -16,7 +16,7 @@
 	}
 
 	let {
-		convertProgressStep = $bindable(ProgressStepsSend.INITIALIZATION),
+		convertProgressStep = ProgressStepsSend.INITIALIZATION,
 		destination = '',
 		nativeEthereumToken,
 		sourceTokenId

@@ -1,4 +1,4 @@
-import type { PendingTransaction } from '$declarations/backend/declarations/backend.did';
+import type { PendingTransaction } from '$declarations/backend/backend.did';
 import type { AlwaysCertifiedData } from '$lib/types/store';
 import { writable, type Readable } from 'svelte/store';
 

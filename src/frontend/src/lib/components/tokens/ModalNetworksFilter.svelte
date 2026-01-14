@@ -4,6 +4,7 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { MODAL_FILTER_NETWORKS } from '$lib/constants/test-ids.constants';
 	import { networks } from '$lib/derived/networks.derived';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -14,10 +15,16 @@
 	interface Props {
 		allNetworksEnabled?: boolean;
 		filteredNetworks?: Network[];
+		showStakeBalance?: boolean;
 		onNetworkFilter: () => void;
 	}
 
-	let { allNetworksEnabled, filteredNetworks, onNetworkFilter }: Props = $props();
+	let {
+		allNetworksEnabled,
+		filteredNetworks,
+		showStakeBalance = true,
+		onNetworkFilter
+	}: Props = $props();
 
 	const { setFilterNetwork, filterNetwork } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
@@ -34,13 +41,14 @@
 	};
 </script>
 
-<ContentWithToolbar>
+<ContentWithToolbar testId={MODAL_FILTER_NETWORKS}>
 	<NetworkSwitcherList
 		{allNetworksEnabled}
-		delayOnNetworkSelect={false}
 		labelsSize="lg"
 		onSelected={onNetworkSelect}
 		selectedNetworkId={$filterNetwork?.id}
+		{showStakeBalance}
+		showTestnets={false}
 		supportedNetworks={filteredNetworks}
 	/>
 

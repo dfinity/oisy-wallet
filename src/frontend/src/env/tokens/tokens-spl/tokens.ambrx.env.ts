@@ -14,7 +14,7 @@ export const AMBRX_TOKEN_ID: TokenId = parseTokenId(AMBRX_SYMBOL);
 export const AMBRX_TOKEN: RequiredSpl2022Token = {
 	id: AMBRX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Amber xStock',
 	symbol: AMBRX_SYMBOL,

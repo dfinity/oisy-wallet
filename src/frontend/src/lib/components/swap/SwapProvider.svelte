@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
-	import SwapBestRateBadge from '$lib/components/swap/SwapBestRateBadge.svelte';
+	import { getContext } from 'svelte';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
 	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
+	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -25,11 +25,12 @@
 	interface Props {
 		slippageValue: OptionAmount;
 		showSelectButton?: boolean;
+		onShowProviderList?: () => void;
 	}
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let { showSelectButton = false, slippageValue }: Props = $props();
+	let { showSelectButton = false, slippageValue, onShowProviderList }: Props = $props();
 
 	let displayURL = $state<OptionString>(null);
 
@@ -50,8 +51,6 @@
 			displayURL = null;
 		}
 	});
-
-	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish(swapDApp) && nonNullish(selectedProvider) && nonNullish($swapAmountsStore)}
@@ -62,9 +61,7 @@
 					<div class="flex justify-center gap-2">
 						{$i18n.swap.text.swap_provider}
 						{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1 && !isInBottomSheet && showSelectButton}
-							<Button link onclick={() => dispatch('icShowProviderList')}
-								>{$i18n.swap.text.select}</Button
-							>
+							<Button link onclick={onShowProviderList}>{$i18n.swap.text.select}</Button>
 						{/if}
 					</div>
 				{/snippet}
@@ -72,7 +69,7 @@
 				{#snippet mainValue()}
 					<div class="flex items-start gap-3">
 						{#if isBestRate && $swapAmountsStore.swaps.length > 1}
-							<SwapBestRateBadge />
+							<BestRateBadge />
 						{/if}
 						<div class="flex gap-2">
 							<div class="mt-1">

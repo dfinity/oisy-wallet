@@ -10,26 +10,27 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		currentStep: WizardStep | undefined;
+		currentStep?: WizardStep;
 		formCancelAction?: 'back' | 'close';
+		onBack: () => void;
+		onConvert: () => void;
+		onQrCode: () => void;
 	}
 
-	let { currentStep, formCancelAction = 'close' }: Props = $props();
+	let { currentStep, formCancelAction = 'close', onBack, onConvert, onQrCode }: Props = $props();
 </script>
 
-{#if currentStep?.name === WizardStepsHowToConvert.INFO}
-	<HowToConvertEthereumInfo {formCancelAction} on:icQRCode on:icConvert on:icBack />
-{:else if currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
-	<ReceiveAddressQrCode
-		address={$ethAddress ?? ''}
-		addressToken={ETHEREUM_TOKEN}
-		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
-		network={ETHEREUM_NETWORK}
-		qrCodeAction={{
-			enabled: true,
-			ariaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr
-		}}
-		testId={HOW_TO_CONVERT_ETHEREUM_QR_CODE}
-		on:icBack
-	/>
-{/if}
+{#key currentStep?.name}
+	{#if currentStep?.name === WizardStepsHowToConvert.INFO}
+		<HowToConvertEthereumInfo {formCancelAction} {onBack} {onConvert} {onQrCode} />
+	{:else if currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
+		<ReceiveAddressQrCode
+			address={$ethAddress ?? ''}
+			addressToken={ETHEREUM_TOKEN}
+			copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
+			network={ETHEREUM_NETWORK}
+			{onBack}
+			testId={HOW_TO_CONVERT_ETHEREUM_QR_CODE}
+		/>
+	{/if}
+{/key}

@@ -32,7 +32,7 @@
 						{address.label}
 					</div>
 				{/if}
-				<div class="break-all text-sm text-primary">
+				<div class="text-sm break-all text-primary">
 					{address.address}
 				</div>
 			</div>
