@@ -95,7 +95,9 @@ const loadIcPunksNfts = async ({
 			canisterId
 		});
 
-		const promises = tokenIndices.map(async (index) => await mapIcPunksNft({ index, token }));
+		const promises = tokenIndices.map(
+			async (index) => await mapIcPunksNft({ index, token, identity })
+		);
 
 		return await Promise.all(promises);
 	} catch (err: unknown) {
