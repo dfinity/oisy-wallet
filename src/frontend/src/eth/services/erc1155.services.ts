@@ -6,7 +6,9 @@ import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers'
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import type { Erc721ContractAddress } from '$eth/types/erc721';
+import type {
+ Erc721ContractAddress           
+  } from '$eth/types/erc721';
 import type { EthereumChainId } from '$eth/types/network';
 import {
 	PLAUSIBLE_EVENTS,
