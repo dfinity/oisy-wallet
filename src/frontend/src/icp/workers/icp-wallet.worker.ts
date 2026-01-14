@@ -5,18 +5,14 @@ import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-tra
 import { mapIcpTransaction, mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessage, PostMessageDataRequestIcp } from '$lib/types/post-message';
-import type {
-	GetAccountIdentifierTransactionsResponse,
-	Transaction,
-	TransactionWithId
-} from '@dfinity/ledger-icp';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 
 const getBalanceAndTransactions = ({
 	identity,
 	certified,
 	data
-}: SchedulerJobParams<PostMessageDataRequestIcp>): Promise<GetAccountIdentifierTransactionsResponse> => {
+}: SchedulerJobParams<PostMessageDataRequestIcp>): Promise<IcpIndexDid.GetAccountIdentifierTransactionsResponse> => {
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
 
 	return getTransactions({
@@ -33,15 +29,15 @@ const mapTransaction = ({
 	transaction,
 	jobData: { identity }
 }: {
-	transaction: Pick<TransactionWithId, 'id'> & {
-		transaction: Transaction & IcTransactionAddOnsInfo;
+	transaction: Pick<IcpIndexDid.TransactionWithId, 'id'> & {
+		transaction: IcpIndexDid.Transaction & IcTransactionAddOnsInfo;
 	};
 	jobData: SchedulerJobData<PostMessageDataRequestIcp>;
 }): IcTransactionUi => mapIcpTransaction({ transaction, identity });
 
 const initIcpWalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTransactionsScheduler<
-	Transaction,
-	TransactionWithId,
+	IcpIndexDid.Transaction,
+	IcpIndexDid.TransactionWithId,
 	PostMessageDataRequestIcp
 > =>
 	new IcWalletBalanceAndTransactionsScheduler(

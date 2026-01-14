@@ -1,13 +1,17 @@
-import type { Icrcv2AccountId } from '$declarations/backend/declarations/backend.did';
-import { AccountIdentifier, isIcpAccountIdentifier, SubAccount } from '@dfinity/ledger-icp';
+import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
+import { assertNever, nonNullish } from '@dfinity/utils';
+import {
+	AccountIdentifier,
+	SubAccount,
+	isIcpAccountIdentifier
+} from '@icp-sdk/canisters/ledger/icp';
 import {
 	decodeIcrcAccount,
 	encodeIcrcAccount,
 	fromCandidAccount,
 	toCandidAccount
-} from '@dfinity/ledger-icrc';
-import type { Principal } from '@dfinity/principal';
-import { assertNever, nonNullish } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ledger/icrc';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export const getAccountIdentifier = (principal: Principal): AccountIdentifier =>
 	AccountIdentifier.fromPrincipal({ principal, subAccount: undefined });
@@ -74,6 +78,5 @@ export const tryToParseIcrcAccountStringToAccountIdentifierText = (
 		}).toHex();
 	} catch (_: unknown) {
 		// if parsing failed, we just return undefined and let consumers handle it
-		return;
 	}
 };

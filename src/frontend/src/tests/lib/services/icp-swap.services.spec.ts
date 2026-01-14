@@ -1,7 +1,7 @@
-import type { PoolMetadata } from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
+import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcrc } from '$icp/services/ic-send.services';
-import { loadCustomTokens } from '$icp/services/icrc.services';
+import { hasSufficientIcrcAllowance, loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { setCustomToken } from '$lib/api/backend.api';
@@ -26,7 +26,7 @@ import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 
 const mockPool = {
 	canisterId: Principal.fromText('aaaaa-aa'),
@@ -41,8 +41,8 @@ describe('icp-swap.services', () => {
 	describe('icpSwapAmounts', () => {
 		const params = {
 			identity: mockIdentity,
-			sourceToken: { ledgerCanisterId: 'token0', standard: 'icrc' } as IcToken,
-			destinationToken: { ledgerCanisterId: 'token1', standard: 'icrc' } as IcToken,
+			sourceToken: { ledgerCanisterId: 'token0', standard: { code: 'icrc' } } as IcToken,
+			destinationToken: { ledgerCanisterId: 'token1', standard: { code: 'icrc' } } as IcToken,
 			sourceAmount: 1000n
 		};
 
@@ -132,7 +132,9 @@ describe('icp-swap.services', () => {
 			vi.mocked(setCustomToken).mockResolvedValue();
 			vi.mocked(loadCustomTokens).mockResolvedValue();
 
-			await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).resolves.not.toThrow();
+			await expect(
+				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })
+			).resolves.not.toThrowError();
 
 			expect(swapArgs.progress).toHaveBeenCalledTimes(3);
 			expect(swapArgs.progress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SWAP);
@@ -143,10 +145,32 @@ describe('icp-swap.services', () => {
 			expect(deposit).toHaveBeenCalled();
 			expect(swapIcp).toHaveBeenCalled();
 			expect(withdraw).toHaveBeenCalled();
+			expect(hasSufficientIcrcAllowance).not.toHaveBeenCalled();
 		});
 
-		it('Success swap for ICRC2', async () => {
+		it('Success swap for ICRC2 with sufficient allowance', async () => {
 			vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
+			vi.mocked(hasSufficientIcrcAllowance).mockResolvedValue(true);
+
+			vi.mocked(depositFrom).mockResolvedValue(1n);
+			vi.mocked(swapIcp).mockResolvedValue(1n);
+			vi.mocked(withdraw).mockResolvedValue(1n);
+			vi.mocked(waitAndTriggerWallet).mockResolvedValue();
+
+			await expect(
+				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })
+			).resolves.not.toThrowError();
+
+			expect(hasSufficientIcrcAllowance).toHaveBeenCalled();
+			expect(approve).not.toHaveBeenCalled();
+			expect(depositFrom).toHaveBeenCalled();
+			expect(swapIcp).toHaveBeenCalled();
+			expect(withdraw).toHaveBeenCalled();
+		});
+
+		it('Success swap for ICRC2 with insufficient allowance', async () => {
+			vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
+			vi.mocked(hasSufficientIcrcAllowance).mockResolvedValue(false);
 
 			vi.mocked(approve).mockResolvedValue(1n);
 			vi.mocked(depositFrom).mockResolvedValue(1n);
@@ -154,18 +178,43 @@ describe('icp-swap.services', () => {
 			vi.mocked(withdraw).mockResolvedValue(1n);
 			vi.mocked(waitAndTriggerWallet).mockResolvedValue();
 
-			await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })).resolves.not.toThrow();
+			await expect(
+				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })
+			).resolves.not.toThrowError();
 
+			expect(hasSufficientIcrcAllowance).toHaveBeenCalled();
 			expect(approve).toHaveBeenCalled();
 			expect(depositFrom).toHaveBeenCalled();
 			expect(swapIcp).toHaveBeenCalled();
 			expect(withdraw).toHaveBeenCalled();
 		});
 
+		it('Success swap for ICRC2 when allowance check fails', async () => {
+			vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
+			vi.mocked(hasSufficientIcrcAllowance).mockRejectedValue(new Error('Network error'));
+
+			vi.mocked(approve).mockResolvedValue(1n);
+			vi.mocked(depositFrom).mockResolvedValue(1n);
+			vi.mocked(swapIcp).mockResolvedValue(1n);
+			vi.mocked(withdraw).mockResolvedValue(1n);
+			vi.mocked(waitAndTriggerWallet).mockResolvedValue();
+
+			await expect(
+				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })
+			).resolves.not.toThrowError();
+
+			expect(hasSufficientIcrcAllowance).toHaveBeenCalled();
+			// Should still proceed with approval on error (safe fallback)
+			expect(approve).toHaveBeenCalled();
+			expect(depositFrom).toHaveBeenCalled();
+		});
+
 		it('Swap failed. Pool not found', async () => {
 			vi.mocked(getPoolCanister).mockRejectedValue(new Error('Swap failed. Pool not found.'));
 
-			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrow(en.swap.error.pool_not_found);
+			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrowError(
+				en.swap.error.pool_not_found
+			);
 		});
 
 		it('Swap failed. Deposit failed', async () => {
@@ -173,7 +222,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(sendIcrc).mockResolvedValue(1n);
 			vi.mocked(deposit).mockRejectedValue(new Error('fail'));
 
-			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrow(en.swap.error.deposit_error);
+			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrowError(en.swap.error.deposit_error);
 		});
 
 		it('Swap failed. Withdraw Success', async () => {
@@ -183,7 +232,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(swapIcp).mockRejectedValue(new Error('swap fail'));
 			vi.mocked(withdraw).mockResolvedValue(1n);
 
-			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrow(
+			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrowError(
 				en.swap.error.swap_failed_withdraw_success
 			);
 		});

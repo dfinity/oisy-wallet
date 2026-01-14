@@ -2,16 +2,21 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { type Component, type Snippet, untrack } from 'svelte';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
-	import { isTokenErc721 } from '$eth/utils/erc721.utils';
+	import type { EthNonFungibleToken } from '$eth/types/nft';
+	import { isTokenErc } from '$eth/utils/erc.utils';
+	import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
+	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
+	import TokenAsContact from '$lib/components/tokens/TokenAsContact.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
@@ -21,13 +26,16 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
+	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
 		displayAmount?: bigint;
@@ -43,6 +51,8 @@
 		children: Snippet;
 		onClick?: () => void;
 		approveSpender?: string;
+		timeOnly?: boolean;
+		testId?: string;
 	}
 
 	const {
@@ -58,7 +68,9 @@
 		tokenId,
 		children,
 		onClick,
-		approveSpender
+		approveSpender,
+		timeOnly = true,
+		testId
 	}: Props = $props();
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
@@ -73,6 +85,24 @@
 				: type === 'approve'
 					? approveSpender
 					: undefined
+	);
+
+	const putativeToken = $derived(
+		nonNullish(address)
+			? $allTokens.find((t) =>
+					areAddressesEqual({
+						address1: address,
+						address2: isTokenIc(t)
+							? t.ledgerCanisterId
+							: isTokenErc(t) || isTokenSpl(t)
+								? t.address
+								: isTokenIcNft(t)
+									? t.canisterId
+									: undefined,
+						networkId: t.network.id
+					})
+				)
+			: undefined
 	);
 
 	const contact = $derived(
@@ -106,10 +136,18 @@
 			return;
 		}
 
+		if (!isNetworkIdEthereum(network.id) && !isNetworkIdEvm(network.id)) {
+			return;
+		}
+
 		try {
 			const { getNftMetadata } = alchemyProviders(network.id);
 
-			fetchedNft = await getNftMetadata({ token, tokenId: parseNftId(String(tokenId)) });
+			fetchedNft = await getNftMetadata({
+				// For now, it is acceptable to cast it since we checked before if the network is Ethereum or EVM.
+				token: token as EthNonFungibleToken,
+				tokenId: parseNftId(String(tokenId))
+			});
 		} catch (_: unknown) {
 			fetchedNft = undefined;
 		}
@@ -124,11 +162,11 @@
 	const nft = $derived(existingNft ?? fetchedNft);
 </script>
 
-<button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
+<button class={`contents ${styleClass ?? ''}`} data-tid={testId} onclick={onClick}>
 	<span class="block w-full rounded-xl px-2 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin withGap>
 			<span class="flex min-w-0 flex-1 basis-0 items-center gap-1">
-				<span class="truncate first-letter:capitalize">
+				<span class="truncate">
 					{@render children()}
 				</span>
 
@@ -162,7 +200,7 @@
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(displayAmount) && !isTokenErc721(token)}
+				{#if nonNullish(displayAmount)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
@@ -186,7 +224,7 @@
 								minute: '2-digit',
 								hour12: false
 							},
-							timeOnly: true
+							timeOnly
 						})}
 					</span>
 				{/if}
@@ -194,7 +232,7 @@
 
 			{#snippet description()}
 				<span
-					class="flex min-w-0 flex-col items-start items-center text-xs text-primary sm:flex-row sm:text-sm"
+					class="flex min-w-0 flex-col items-center items-start text-xs text-primary sm:flex-row sm:text-sm"
 				>
 					<span class="inline-flex min-w-0 items-center gap-1">
 						{#if type === 'send'}
@@ -205,10 +243,12 @@
 							<span class="shrink-0">{$i18n.transaction.text.for}</span>
 						{/if}
 
-						{#if nonNullish(contact)}
+						{#if nonNullish(putativeToken)}
+							<TokenAsContact token={putativeToken} />
+						{:else if nonNullish(contact)}
 							<ContactWithAvatar {contact} {contactAddress} />
 						{:else if nonNullish(address)}
-							<span class="max-w-38 inline-block flex min-w-0 flex-wrap items-center truncate">
+							<span class="flex inline-block max-w-38 min-w-0 flex-wrap items-center truncate">
 								{shortenWithMiddleEllipsis({ text: address })}
 							</span>
 						{/if}

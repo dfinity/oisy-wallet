@@ -14,7 +14,7 @@ export const ABTX_TOKEN_ID: TokenId = parseTokenId(ABTX_SYMBOL);
 export const ABTX_TOKEN: RequiredSpl2022Token = {
 	id: ABTX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Abbott xStock',
 	symbol: ABTX_SYMBOL,

@@ -39,8 +39,22 @@ import { mockSolSignedTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { SignatureBytes } from '@solana/keys';
-import { getBase58Encoder, type Rpc, type SolanaRpcApi } from '@solana/kit';
+import {
+	getBase58Encoder,
+	isTransactionMessageWithBlockhashLifetime,
+	type Rpc,
+	type SolanaRpcApi
+} from '@solana/kit';
 import type { MockInstance } from 'vitest';
+
+vi.mock(import('@solana/kit'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		isTransactionMessageWithBlockhashLifetime:
+			vi.fn() as unknown as typeof isTransactionMessageWithBlockhashLifetime
+	};
+});
 
 vi.mock(import('$sol/utils/sol-transactions.utils'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -98,7 +112,8 @@ describe('wallet-connect.services', () => {
 		vi.spyOn(solTransactionsUtils, 'decodeTransactionMessage').mockImplementation(
 			() => mockSolSignedTransaction
 		);
-		vi.spyOn(solTransactionsUtils, 'transactionMessageHasBlockhashLifetime').mockReturnValue(true);
+
+		vi.mocked(isTransactionMessageWithBlockhashLifetime).mockReturnValue(true);
 
 		vi.spyOn(solSendServices, 'setLifetimeAndFeePayerToTransaction').mockResolvedValue(
 			mockTransactionMessage as unknown as SolTransactionMessage
@@ -124,7 +139,7 @@ describe('wallet-connect.services', () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = ICP_NETWORK_ID;
 
-			await expect(decode({ base64EncodedTransactionMessage, networkId })).rejects.toThrow(
+			await expect(decode({ base64EncodedTransactionMessage, networkId })).rejects.toThrowError(
 				`No Solana network for network ${networkId.description}`
 			);
 		});

@@ -17,7 +17,7 @@ export const BNB_MAINNET_TOKEN_ID: TokenId = parseTokenId(BNB_MAINNET_SYMBOL);
 export const BNB_MAINNET_TOKEN: RequiredToken = {
 	id: BNB_MAINNET_TOKEN_ID,
 	network: BSC_MAINNET_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
 	name: 'BNB',
 	symbol: BNB_MAINNET_SYMBOL,
@@ -35,7 +35,7 @@ export const BNB_TESTNET_TOKEN_ID: TokenId = parseTokenId(BNB_TESTNET_SYMBOL);
 export const BNB_TESTNET_TOKEN: RequiredToken = {
 	id: BNB_TESTNET_TOKEN_ID,
 	network: BSC_TESTNET_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
 	name: 'BNB (Testnet)',
 	symbol: BNB_TESTNET_SYMBOL,

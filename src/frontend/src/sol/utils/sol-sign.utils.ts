@@ -11,7 +11,8 @@ import {
 	type SignatureDictionary,
 	type Transaction,
 	type TransactionPartialSigner,
-	type TransactionWithLifetime
+	type TransactionWithLifetime,
+	type TransactionWithinSizeLimit
 } from '@solana/kit';
 
 export interface CreateSignerParams {
@@ -32,7 +33,7 @@ export const signTransaction = async ({
 		identity,
 		derivationPath,
 		keyId: SOLANA_KEY_ID,
-		message: Array.from(transaction.messageBytes)
+		message: Uint8Array.from(transaction.messageBytes)
 	});
 
 	return { [address]: Uint8Array.from(signedBytes) } as SignatureDictionary;
@@ -60,7 +61,7 @@ export const createSigner = ({
 	const signer: TransactionPartialSigner = {
 		address: solAddress(address),
 		signTransactions: async (
-			transactions: (Transaction & TransactionWithLifetime)[]
+			transactions: (Transaction & TransactionWithinSizeLimit & TransactionWithLifetime)[]
 		): Promise<SignatureDictionary[]> =>
 			await signTransactions({ identity, transactions, address, network })
 	};

@@ -14,7 +14,8 @@ import {
 	exchangeRateSPLToUsd,
 	exchangeRateUsdToCurrency
 } from '$lib/services/exchange.services';
-import type { CoingeckoErc20PriceParams, CoingeckoPlatformId } from '$lib/types/coingecko';
+import type { CoingeckoPlatformId } from '$lib/types/coingecko';
+import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
 import type {
 	PostMessage,
 	PostMessageDataRequestExchangeTimer,
@@ -35,7 +36,6 @@ export const onExchangeMessage = async ({
 			return;
 		case 'startExchangeTimer':
 			await startExchangeTimer(payload);
-			return;
 	}
 };
 

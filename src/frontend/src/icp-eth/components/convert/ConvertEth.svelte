@@ -2,12 +2,12 @@
 	import { isNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-	import { erc20UserTokens } from '$eth/derived/erc20.derived';
+	import { erc20CustomTokens } from '$eth/derived/erc20.derived';
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
-	import { autoLoadCustomToken } from '$icp-eth/services/custom-token.services';
-	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
+	import { autoLoadErc20Token } from '$icp-eth/services/erc20-token.services';
+	import { autoLoadIcrcToken } from '$icp-eth/services/icrc-token.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
@@ -59,13 +59,13 @@
 		}
 
 		if ($networkICP) {
-			const { result: resultUserToken } = await autoLoadUserToken({
-				erc20UserTokens: $erc20UserTokens,
+			const { result } = await autoLoadErc20Token({
+				erc20CustomTokens: $erc20CustomTokens,
 				sendToken: $tokenWithFallback,
 				identity: $authIdentity
 			});
 
-			if (resultUserToken === 'error') {
+			if (result === 'error') {
 				return;
 			}
 
@@ -73,13 +73,13 @@
 			return;
 		}
 
-		const { result: resultCustomToken } = await autoLoadCustomToken({
+		const { result } = await autoLoadIcrcToken({
 			icrcCustomTokens: $icrcTokens,
 			sendToken: $tokenWithFallback,
 			identity: $authIdentity
 		});
 
-		if (resultCustomToken === 'error') {
+		if (result === 'error') {
 			return;
 		}
 

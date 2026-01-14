@@ -13,18 +13,19 @@ updates:
     schedule:
       interval: weekly
     cooldown:
-      default-days: 7
+      default-days: 30
 
   - package-ecosystem: npm
     directory: '/'
     schedule:
       interval: weekly
     cooldown:
-      default-days: 7
+      default-days: 30
     allow:
       - dependency-type: all
     ignore:
       - dependency-name: '@dfinity/*'
+      - dependency-name: '@icp-sdk/*'
       - dependency-name: '@types/*'
       - dependency-name: 'typescript'
     open-pull-requests-limit: 10
@@ -36,3 +37,8 @@ updates:
           - '@solana-program/token'
           - '@solana-program/token-2022'
           - '@solana/kit'
+      vitest-group:
+        patterns:
+          - 'vitest'
+          - 'vitest-mock-extended'
+          - '@vitest/coverage-v8'

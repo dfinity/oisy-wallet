@@ -1,29 +1,21 @@
-import type { CustomToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken } from '$declarations/backend/backend.did';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
-import { toUserToken } from '$icp-eth/services/user-token.services';
 import {
 	clearIdbAllCustomTokens,
-	clearIdbEthTokensDeprecated,
 	deleteIdbAllCustomTokens,
 	deleteIdbEthToken,
-	deleteIdbEthTokenDeprecated,
-	deleteIdbEthTokensDeprecated,
 	deleteIdbIcToken,
 	deleteIdbSolToken,
 	getIdbAllCustomTokens,
-	getIdbEthTokensDeprecated,
 	setIdbTokensStore
 } from '$lib/api/idb-tokens.api';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
-import {
-	createMockErc20CustomTokens,
-	createMockErc20UserTokens
-} from '$tests/mocks/erc20-tokens.mock';
+import { createMockErc20CustomTokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 
@@ -152,76 +144,12 @@ describe('idb-tokens.api', () => {
 		});
 	});
 
-	describe('getIdbEthTokensDeprecated', () => {
-		it('should get ETH tokens', async () => {
-			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
-
-			const result = await getIdbEthTokensDeprecated(mockPrincipal);
-
-			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
-		});
-	});
-
 	describe('deleteIdbAllCustomTokens', () => {
 		it('should delete all custom tokens', async () => {
 			await deleteIdbAllCustomTokens(mockPrincipal);
 
 			expect(idbKeyval.del).toHaveBeenCalledOnce();
 			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
-		});
-	});
-
-	describe('deleteIdbEthTokensDeprecated', () => {
-		it('should delete ETH tokens', async () => {
-			await deleteIdbEthTokensDeprecated(mockPrincipal);
-
-			expect(idbKeyval.del).toHaveBeenCalledOnce();
-			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
-		});
-	});
-
-	describe('deleteIdbEthTokenDeprecated', () => {
-		it('should delete provided ETH token', async () => {
-			const [tokenToDelete, ...rest] = createMockErc20UserTokens({ n: 3, networkEnv: 'mainnet' });
-			const restUserTokens = rest.map(({ data }) => toUserToken(data));
-			const userTokenToDelete = toUserToken(tokenToDelete.data);
-
-			vi.mocked(idbKeyval.get).mockResolvedValue([userTokenToDelete, ...restUserTokens]);
-
-			await deleteIdbEthTokenDeprecated({
-				identity: mockIdentity,
-				token: userTokenToDelete
-			});
-
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
-			expect(idbKeyval.set).toHaveBeenNthCalledWith(
-				1,
-				mockIdentity.getPrincipal().toText(),
-				restUserTokens,
-				mockIdbTokensStore
-			);
-		});
-
-		it('should not delete anything if provided ETH token is not in the IDB', async () => {
-			const [tokenToDelete, ...rest] = createMockErc20UserTokens({ n: 3, networkEnv: 'mainnet' });
-			const restUserTokens = rest.map(({ data }) => toUserToken(data));
-			const userTokenToDelete = toUserToken(tokenToDelete.data);
-
-			vi.mocked(idbKeyval.get).mockResolvedValue(restUserTokens);
-
-			await deleteIdbEthTokenDeprecated({
-				identity: mockIdentity,
-				token: userTokenToDelete
-			});
-
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
-			expect(idbKeyval.set).toHaveBeenNthCalledWith(
-				1,
-				mockIdentity.getPrincipal().toText(),
-				restUserTokens,
-				mockIdbTokensStore
-			);
 		});
 	});
 
@@ -374,14 +302,6 @@ describe('idb-tokens.api', () => {
 	describe('clearIdbAllCustomTokens', () => {
 		it('should clear all custom tokens', async () => {
 			await clearIdbAllCustomTokens();
-
-			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
-		});
-	});
-
-	describe('clearIdbEthTokensDeprecated', () => {
-		it('should clear deprecated ETH tokens', async () => {
-			await clearIdbEthTokensDeprecated();
 
 			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
 		});

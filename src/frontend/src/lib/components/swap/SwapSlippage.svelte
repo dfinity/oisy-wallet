@@ -53,7 +53,7 @@
 	};
 </script>
 
-<div class="mb-2 mt-6 flex items-center">
+<div class="mt-6 mb-2 flex items-center">
 	<span class="text-sm text-tertiary">{$i18n.swap.text.max_slippage}</span>
 
 	<button
@@ -90,10 +90,10 @@
 						{name}
 						decimals={SWAP_SLIPPAGE_VALUE_DECIMALS}
 						error={slippageValueError}
+						{onBlur}
+						{onFocus}
 						onInput={() => {}}
 						bind:value={slippageValue}
-						on:focus={onFocus}
-						on:blur={onBlur}
 					>
 						{#snippet innerEnd()}
 							<span class="text-tertiary">%</span>

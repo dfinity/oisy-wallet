@@ -1,7 +1,8 @@
-import type { PoolMetadata } from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
-import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
+import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
+import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { createPermit } from '$eth/services/eip2612-permit.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
@@ -32,12 +33,14 @@ import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
 import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
 import { geSwapEthTokenAddress } from '$lib/utils/swap.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
+import { mockVeloraSwapDetails } from '$tests/mocks/velora.mock';
 import { constructSimpleSDK } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 
@@ -76,7 +79,7 @@ vi.mock('@velora-dex/sdk', () => ({
 	constructSimpleSDK: vi.fn()
 }));
 
-vi.mock('$eth/services/send.services', () => ({
+vi.mock('$eth/services/approve.services', () => ({
 	approve: vi.fn(),
 	erc20ContractAllowance: vi.fn()
 }));
@@ -107,6 +110,10 @@ vi.mock('$lib/utils/swap.utils', async (importOriginal) => {
 	};
 });
 
+vi.mock('$eth/services/eip2612-permit.services', () => ({
+	createPermit: vi.fn()
+}));
+
 describe('swap.services', () => {
 	describe('fetchSwapAmounts', () => {
 		const mockTokens = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
@@ -126,7 +133,7 @@ describe('swap.services', () => {
 				slippage: 0.5
 			} as SwapAmountsReply;
 			const icpSwapResponse = {
-				receiveAmount: 975
+				receiveAmount: 975n
 			} as unknown as ICPSwapAmountReply;
 
 			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
@@ -152,7 +159,9 @@ describe('swap.services', () => {
 			expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
 
 			expect(icpSwapResult).toBeDefined();
-			expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
+			expect(icpSwapResult?.receiveAmount).toBe(
+				icpSwapResponse.receiveAmount - destinationToken.fee
+			);
 		});
 
 		it('should make a call oly to icpSwap if icrc2 is false', async () => {
@@ -191,7 +200,7 @@ describe('swap.services', () => {
 				slippage: 0.5
 			} as SwapAmountsReply;
 			const icpSwapResponse = {
-				receiveAmount: 975
+				receiveAmount: 975n
 			} as unknown as ICPSwapAmountReply;
 
 			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
@@ -219,7 +228,9 @@ describe('swap.services', () => {
 			expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
 
 			expect(icpSwapResult).toBeDefined();
-			expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
+			expect(icpSwapResult?.receiveAmount).toBe(
+				icpSwapResponse.receiveAmount - destinationToken.fee
+			);
 		});
 
 		it('should handle provider failures gracefully (e.g., rejected promises)', async () => {
@@ -355,19 +366,21 @@ describe('swap.services', () => {
 	});
 
 	describe('fetchSwapAmountsEVM', () => {
-		const sourceToken = {
+		const sourceToken: Erc20Token = {
+			...mockValidErc20Token,
 			symbol: 'SRC',
 			decimals: 18,
-			network: { chainId: '1' },
+			network: { ...mockValidErc20Token.network, chainId: 1n },
 			address: '0xSrcAddress'
-		} as unknown as Erc20Token;
+		};
 
-		const destinationToken = {
+		const destinationToken: Erc20Token = {
+			...mockValidErc20Token,
 			symbol: 'DST',
 			decimals: 6,
-			network: { chainId: '137' },
+			network: { ...mockValidErc20Token.network, chainId: 137n },
 			address: '0xDestAddress'
-		} as unknown as Erc20Token;
+		};
 
 		const amount = BigInt('1000000000000000000');
 		const userEthAddress = '0xUser';
@@ -487,89 +500,8 @@ describe('swap.services', () => {
 		const mockMaxFeePerGas = '20000000000';
 		const mockMaxPriorityFeePerGas = '2000000000';
 
-		const mockSwapDetails = {
-			srcToken: mockEthAddress,
-			destToken: '0xDestinationToken',
-			srcAmount: '1000000000000000000',
-			destAmount: '900000000',
-			destAmountBeforeFee: '920000000',
-			gasCost: '50000',
-			gasCostBeforeFee: '48000',
-			gasCostUSD: '15.5',
-			gasCostUSDBeforeFee: '14.8',
-			srcUSD: '1000.0',
-			destUSD: '895.5',
-			destUSDBeforeFee: '915.2',
-			partner: 'PartnerName',
-			partnerFee: 0.25,
-			hmac: 'abcd1234',
-			// BridgePrice properties
-			destAmountAfterBridge: '800000000',
-			destUSDAfterBridge: '795.0',
-			bridgeFee: '50',
-			bridgeFeeUSD: '50.0',
-			poolAddress: '0xpool123',
-			bridge: {
-				destinationChainId: 1,
-				outputToken: '0xoutput456',
-				protocolSelector: 'bridge_protocol',
-				scalingFactor: 1000000,
-				protocolData: '0xprotocol_data'
-			},
-			bridgeInfo: {
-				destAmountAfterBridge: '800000000',
-				destUSDAfterBridge: '795.0',
-				bridgeFee: '50',
-				bridgeFeeUSD: '50.0',
-				poolAddress: '0xpool123',
-				protocolName: 'bridge_protocol',
-				fees: [
-					{
-						name: 'bridge_fee',
-						amount: '50',
-						amountUSD: '50.0',
-						feeToken: '0xoutput456',
-						amountInSrcToken: '50',
-						amountInUSD: '50.0'
-					}
-				],
-				estimatedTimeMs: 300000
-			},
-			// OptimalRate properties
-			blockNumber: 12345,
-			networkFee: '1000000000000000000',
-			networkFeeUSD: '100.0',
-			network: 1,
-			srcDecimals: 18,
-			destDecimals: 6,
-			bestRoute: [
-				{
-					percent: 100,
-					swaps: [
-						{
-							srcToken: mockEthAddress,
-							srcDecimals: 18,
-							destToken: '0xDestinationToken',
-							destDecimals: 6,
-							exchange: 'uniswap_v2',
-							percent: 100,
-							swapExchanges: [
-								{
-									exchange: 'uniswap_v2',
-									percent: 100,
-									srcAmount: '1000000000000000000',
-									destAmount: '900000000'
-								}
-							]
-						}
-					]
-				}
-			],
-			side: 'SELL' as const,
-			version: '2',
-			contractMethod: 'swap',
-			tokenTransferProxy: '0xTokenTransferProxy',
-			contractAddress: '0xSwapContract'
+		const mockSwapDetails: VeloraSwapDetails = {
+			...mockVeloraSwapDetails
 		};
 
 		const mockProgress = vi.fn();
@@ -624,9 +556,15 @@ describe('swap.services', () => {
 				status: 'EXECUTED',
 				order: { bridge: { destinationChainId: 0 } }
 			});
+
+			vi.mocked(createPermit).mockResolvedValue({
+				nonce: '0',
+				deadline: 1234567890,
+				encodedPermit: '0xpermitdata'
+			});
 		});
 
-		it('should execute delta swap successfully', async () => {
+		it('should execute delta swap successfully when isGasless is false', async () => {
 			await fetchVeloraDeltaSwap({
 				identity: mockIdentity,
 				progress: mockProgress,
@@ -639,17 +577,37 @@ describe('swap.services', () => {
 				destinationNetwork: mockDestinationNetwork,
 				userAddress: mockUserAddress,
 				gas: BigInt(mockGas),
+				isGasless: false,
 				maxFeePerGas: BigInt(mockMaxFeePerGas),
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-				swapDetails: mockSwapDetails as VeloraSwapDetails
+				swapDetails: mockSwapDetails
 			});
 
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
-			expect(mockDeltaContractGetDeltaContract).toHaveBeenCalled();
-			expect(mockDeltaContractPostDeltaOrder).toHaveBeenCalledWith({
-				order: { order: 'mock-order-data' },
-				signature: 'mock-signature'
+			expect(createPermit).not.toHaveBeenCalled();
+		});
+
+		it('should execute delta swap successfully when isGasless is true', async () => {
+			await fetchVeloraDeltaSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				receiveAmount: mockReceiveAmount,
+				slippageValue: mockSlippageValue,
+				destinationNetwork: mockDestinationNetwork,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				isGasless: true,
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails
 			});
+
+			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+			expect(createPermit).toHaveBeenCalled();
 		});
 
 		it('should handle delta contract not found', async () => {
@@ -667,9 +625,10 @@ describe('swap.services', () => {
 				destinationNetwork: mockDestinationNetwork,
 				userAddress: mockUserAddress,
 				gas: BigInt(mockGas),
+				isGasless: false,
 				maxFeePerGas: BigInt(mockMaxFeePerGas),
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-				swapDetails: mockSwapDetails as VeloraSwapDetails
+				swapDetails: mockSwapDetails
 			});
 
 			expect(mockProgress).not.toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
@@ -695,9 +654,10 @@ describe('swap.services', () => {
 				destinationNetwork: mockDestinationNetwork,
 				userAddress: mockUserAddress,
 				gas: BigInt(mockGas),
+				isGasless: false,
 				maxFeePerGas: BigInt(mockMaxFeePerGas),
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-				swapDetails: mockSwapDetails as VeloraSwapDetails
+				swapDetails: mockSwapDetails
 			});
 
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
@@ -798,6 +758,7 @@ describe('swap.services', () => {
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
 				swapDetails: mockSwapDetails as VeloraSwapDetails,
 				receiveAmount: BigInt(1000),
+				isGasless: false,
 				destinationNetwork: SEPOLIA_NETWORK
 			});
 
@@ -825,6 +786,7 @@ describe('swap.services', () => {
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
 				swapDetails: mockSwapDetails as VeloraSwapDetails,
 				receiveAmount: BigInt(1000),
+				isGasless: false,
 				destinationNetwork: SEPOLIA_NETWORK
 			});
 
@@ -1186,7 +1148,7 @@ describe('swap.services', () => {
 					sourceToken,
 					destinationToken
 				})
-			).rejects.toThrow('No unused balance to withdraw');
+			).rejects.toThrowError('No unused balance to withdraw');
 
 			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
 			expect(icpSwapPool.withdraw).not.toHaveBeenCalled();
@@ -1250,21 +1212,23 @@ describe('swap.services', () => {
 	});
 
 	describe('trackEvent for swap-offer for evm tokens', () => {
-		const sourceToken = {
+		const sourceToken: Erc20Token = {
+			...mockValidErc20Token,
 			symbol: 'SRC',
 			decimals: 18,
-			network: { chainId: '1' },
+			network: { ...mockValidErc20Token.network, chainId: 1n },
 			address: '0xSrcAddress',
-			id: 1
-		} as unknown as Erc20Token;
+			id: parseTokenId('1')
+		};
 
-		const destinationToken = {
+		const destinationToken: Erc20Token = {
+			...mockValidErc20Token,
 			symbol: 'DST',
 			decimals: 6,
-			network: { chainId: '137' },
+			network: { ...mockValidErc20Token.network, chainId: 137n },
 			address: '0xDestAddress',
-			id: 2
-		} as unknown as Erc20Token;
+			id: parseTokenId('2')
+		};
 
 		const amount = BigInt('1000000000000000000');
 		const userEthAddress = '0xUser';
@@ -1435,12 +1399,12 @@ describe('swap.services', () => {
 					token_address: sourceToken.ledgerCanisterId,
 					token_name: sourceToken.name,
 					token_id: String(sourceToken.id),
-					token_standard: sourceToken.standard,
+					token_standard: sourceToken.standard.code,
 					token2_symbol: destinationToken.symbol,
 					token2_network: destinationToken.network.name,
 					token2_address: destinationToken.ledgerCanisterId,
 					token2_name: destinationToken.name,
-					token2_standard: destinationToken.standard,
+					token2_standard: destinationToken.standard.code,
 					token2_id: String(destinationToken.id)
 				})
 			});

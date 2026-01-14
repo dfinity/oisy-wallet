@@ -1,4 +1,4 @@
-import type { ContactImage, ImageMimeType } from '$declarations/backend/declarations/backend.did';
+import type { ContactImage, ImageMimeType } from '$declarations/backend/backend.did';
 import { dataUrlToImage, imageToDataUrl } from '$lib/utils/contact-image.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 
@@ -20,7 +20,7 @@ describe('contact-image.utils', () => {
 		const sampleDataUrl = `data:image/png;base64,${btoa(String.fromCharCode(10, 20, 30, 40))}`;
 
 		it('should throw error for invalid data URL', () => {
-			expect(() => dataUrlToImage('invalid-url')).toThrow('Invalid data URL');
+			expect(() => dataUrlToImage('invalid-url')).toThrowError('Invalid data URL');
 		});
 
 		it('should correctly parse valid data URL', () => {

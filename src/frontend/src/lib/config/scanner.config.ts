@@ -1,0 +1,32 @@
+import { WizardStepsScanner } from '$lib/enums/wizard-steps';
+import type { WizardStepsParams } from '$lib/types/steps';
+import type { WizardSteps } from '@dfinity/gix-components';
+
+export const scannerWizardSteps = ({
+	i18n
+}: WizardStepsParams): WizardSteps<WizardStepsScanner> => [
+	{
+		name: WizardStepsScanner.SCAN,
+		title: i18n.scanner.text.scan_qr_code
+	},
+	{
+		name: WizardStepsScanner.PAY,
+		title: i18n.scanner.text.pay
+	},
+	{
+		name: WizardStepsScanner.TOKENS_LIST,
+		title: i18n.scanner.text.select_token_to_pay
+	},
+	{
+		name: WizardStepsScanner.PAYING,
+		title: i18n.scanner.text.pay
+	},
+	{
+		name: WizardStepsScanner.PAYMENT_CONFIRMED,
+		title: i18n.scanner.text.payment_confirmed
+	},
+	{
+		name: WizardStepsScanner.PAYMENT_FAILED,
+		title: i18n.scanner.text.payment_failed
+	}
+];

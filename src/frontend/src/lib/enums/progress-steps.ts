@@ -117,3 +117,24 @@ export enum ProgressStepsStake {
 	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }
+
+export enum ProgressStepsUnstake {
+	INITIALIZATION = 'initialization',
+	UNSTAKE = 'unstake',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
+export enum ProgressStepsClaimStakingReward {
+	INITIALIZATION = 'initialization',
+	CLAIM = 'claim',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
+export enum ProgressStepsPayment {
+	REQUEST_DETAILS = 'request_details',
+	CREATE_TRANSACTION = 'create_transaction',
+	SIGN_TRANSACTION = 'sign_transaction',
+	PAY = 'pay'
+}

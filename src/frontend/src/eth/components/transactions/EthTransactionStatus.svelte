@@ -16,8 +16,6 @@
 
 	let { blockNumber, token }: Props = $props();
 
-	//TODO: upgrade component to svelte 5 and check if async works properly in onMount component
-
 	let listener = $state<WebSocketListener | undefined>();
 
 	let currentBlockNumber = $state<number | undefined>();
@@ -101,7 +99,7 @@
 
 <label for="to">{$i18n.transaction.text.status}</label>
 
-<span id="to" class="break-all font-normal first-letter:capitalize">
+<span id="to" class="font-normal break-all">
 	{#if nonNullish(status)}
 		<span in:fade>{$i18n.transaction.status[status]}</span>
 	{:else}

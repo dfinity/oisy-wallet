@@ -10,17 +10,19 @@ import { token } from '$lib/stores/token.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockCkBtcMinterInfo, mockPendingUtxo } from '$tests/mocks/ckbtc.mock';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 
 export const setupCkBTCStores = (): TokenId => {
 	const tokenId: TokenId = parseTokenId('test');
 
 	const mockToken: IcCkToken = {
+		...mockValidIcCkToken,
 		id: tokenId,
-		standard: 'icrc',
+		standard: { code: 'icrc' },
 		ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
 		indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID,
 		minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID
-	} as unknown as IcCkToken;
+	};
 
 	token.set(mockToken);
 

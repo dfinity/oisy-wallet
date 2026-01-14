@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { delMany, keys, type UseStore } from 'idb-keyval';
 
 export const delMultiKeysByPrincipal = async ({

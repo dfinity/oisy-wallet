@@ -1,4 +1,4 @@
-import type { CustomToken, ErcToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken, ErcToken } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
@@ -6,6 +6,12 @@ import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721ContractAddress } from '$eth/types/erc721';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_NFT
+} from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -14,7 +20,13 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
-import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	fromNullable,
+	isNullish,
+	nonNullish,
+	queryAndUpdate
+} from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const isInterfaceErc721 = async ({
@@ -61,81 +73,112 @@ const loadErc721CustomTokens = async (params: LoadCustomTokenParams): Promise<Cu
 		filterTokens: ({ token }) => 'Erc721' in token
 	});
 
+const safeLoadMetadata = async ({
+	networkId,
+	address
+}: {
+	networkId: NetworkId;
+	address: Erc721ContractAddress['address'];
+}) => {
+	try {
+		const { getContractMetadata } = alchemyProviders(networkId);
+
+		return await getContractMetadata(address);
+	} catch (err: unknown) {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_NFT.ERC721,
+				token_address: address,
+				token_network: `${networkId.description}`
+			},
+			warning: `Error loading metadata for custom ERC721 token ${address} on network ${networkId.description}. ${err}`
+		});
+	}
+};
+
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
 ): Promise<Erc721CustomToken[]> => {
-	const loadCustomContracts = async (): Promise<Erc721CustomToken[]> => {
-		const erc721CustomTokens: CustomToken[] = await loadErc721CustomTokens(params);
+	const erc721CustomTokens: CustomToken[] = await loadErc721CustomTokens(params);
 
-		const customTokenPromises = erc721CustomTokens
-			.filter(
-				(customToken): customToken is CustomToken & { token: { Erc721: ErcToken } } =>
-					'Erc721' in customToken.token
-			)
-			.map(
-				async ({
-					token,
-					enabled,
-					version: versionNullable,
-					section: sectionNullable,
-					allow_external_content_source: allowExternalContentSourceNullable
-				}) => {
-					const version = fromNullable(versionNullable);
-					const section = fromNullable(sectionNullable);
-					const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
-					const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+	const customTokenPromises = erc721CustomTokens
+		.filter(
+			(customToken): customToken is CustomToken & { token: { Erc721: ErcToken } } =>
+				'Erc721' in customToken.token
+		)
+		.map(
+			async ({
+				token,
+				enabled,
+				version: versionNullable,
+				section: sectionNullable,
+				allow_external_content_source: allowExternalContentSourceNullable
+			}) => {
+				const version = fromNullable(versionNullable);
+				const section = fromNullable(sectionNullable);
+				const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
+				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
-					const {
-						Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
-					} = token;
+				const {
+					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
+				} = token;
 
-					const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
-						({ chainId }) => tokenChainId === chainId
-					);
+				const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
+					({ chainId }) => tokenChainId === chainId
+				);
 
-					// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
-					assertNonNullish(
-						network,
-						`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
-					);
+				// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
+				assertNonNullish(
+					network,
+					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
+				);
 
-					const { getContractMetadata } = alchemyProviders(network.id);
-					const metadata = await getContractMetadata(tokenAddress);
+				const metadata = await safeLoadMetadata({ networkId: network.id, address: tokenAddress });
 
-					const { symbol } = metadata;
-
-					assertNonNullish(
-						symbol,
-						`Inconsistency in token data: no symbol found for token ${tokenAddress}`
-					);
-
-					return {
-						...{
-							id: parseCustomTokenId({ identifier: symbol, chainId: network.chainId }),
-							name: tokenAddress,
-							address: tokenAddress,
-							network,
-							symbol,
-							decimals: 0, // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
-							standard: 'erc721' as const,
-							category: 'custom' as const,
-							enabled,
-							version,
-							...(nonNullish(mappedSection) && {
-								section: mappedSection
-							}),
-							allowExternalContentSource
-						},
-						...metadata
-					};
+				if (isNullish(metadata)) {
+					return;
 				}
-			);
 
-		return Promise.all(customTokenPromises);
-	};
+				return {
+					...{
+						id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
+						name: tokenAddress,
+						address: tokenAddress,
+						network,
+						symbol: metadata.symbol ?? '', // The symbol is used with the amount, no issue with having it empty for NFTs
+						decimals: 0, // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
+						standard: { code: 'erc721' as const },
+						category: 'custom' as const,
+						enabled,
+						version,
+						...(nonNullish(mappedSection) && {
+							section: mappedSection
+						}),
+						allowExternalContentSource
+					},
+					...metadata
+				};
+			}
+		);
 
-	const customContracts = await loadCustomContracts();
-	return await Promise.all(customContracts);
+	const customTokens = await Promise.allSettled(customTokenPromises);
+
+	return customTokens.reduce<Erc721CustomToken[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		if (result.status === 'rejected' && params.certified) {
+			toastsError({
+				msg: { text: get(i18n).init.error.erc721_custom_tokens },
+				err: result.reason
+			});
+		}
+
+		return acc;
+	}, []);
 };
 
 const loadCustomTokenData = ({

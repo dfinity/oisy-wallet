@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
 	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
@@ -20,6 +19,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getNftDisplayId, getNftDisplayImageUrl } from '$lib/utils/nft.utils';
 
 	interface Props {
 		nft: Nft;
@@ -30,7 +30,7 @@
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
 		source?: 'default' | typeof NFT_LIST_ROUTE | typeof NFT_COLLECTION_ROUTE;
-		fromRoute?: NavigationTarget | null;
+		withCollectionLabel?: boolean;
 	}
 
 	let {
@@ -42,14 +42,14 @@
 		type = 'default',
 		onSelect,
 		source = 'default',
-		fromRoute
+		withCollectionLabel = false
 	}: Props = $props();
 
 	const onClick = () => {
 		if (type === 'card-selectable' && nonNullish(onSelect) && !disabled) {
 			onSelect(nft);
 		}
-		if (type === 'card-link' && !disabled && nonNullish(fromRoute)) {
+		if (type === 'card-link' && !disabled) {
 			trackEvent({
 				name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 				metadata: {
@@ -64,16 +64,13 @@
 				}
 			});
 
-			const url = nftsUrl({ nft, fromRoute });
-			if (nonNullish(url)) {
-				goto(url);
-			}
+			goto(nftsUrl({ nft }));
 		}
 	};
 </script>
 
 <button
-	class="block w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
+	class="flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
 	class:bg-primary={type === 'default'}
 	class:cursor-default={type === 'default'}
 	class:cursor-not-allowed={disabled}
@@ -84,7 +81,7 @@
 	onclick={onClick}
 >
 	<span
-		class="relative block aspect-square overflow-hidden rounded-xl bg-secondary-alt"
+		class="relative block aspect-square h-full w-full overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
 		<NftDisplayGuard
@@ -100,7 +97,7 @@
 		>
 			<div class="h-full w-full">
 				<BgImg
-					imageUrl={nft?.imageUrl}
+					imageUrl={getNftDisplayImageUrl(nft)}
 					shadow="inset"
 					size="cover"
 					styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
@@ -110,18 +107,18 @@
 		</NftDisplayGuard>
 
 		{#if isHidden}
-			<div class="absolute left-2 top-2 invert dark:invert-0">
+			<div class="absolute top-2 left-2 invert dark:invert-0">
 				<IconEyeOff size="24" />
 			</div>
 		{/if}
 
 		{#if isSpam}
-			<div class="absolute left-2 top-2 text-warning-primary">
+			<div class="absolute top-2 left-2 text-warning-primary">
 				<IconAlertOctagon size="24" />
 			</div>
 		{/if}
 
-		<span class="absolute bottom-2 right-2 block flex items-center gap-1">
+		<span class="absolute right-2 bottom-2 block flex items-center gap-1">
 			{#if isCollectionErc1155(nft.collection) && type !== 'default'}
 				<Badge testId={`${testId}-balance`} variant="outline">{nft.balance}x</Badge>
 			{/if}
@@ -135,13 +132,13 @@
 		</span>
 	</span>
 
-	<span class="flex w-full flex-col gap-1 p-2" class:text-disabled={disabled}>
+	<span class="flex w-full flex-col gap-1 px-2 pb-2" class:text-disabled={disabled}>
 		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
-			{source !== NFT_LIST_ROUTE ? nft.name : nft.collection.name}
+			{withCollectionLabel || isNullish(nft.name) ? nft.collection.name : nft.name}
 		</span>
 		<span class="truncate text-xs" class:text-tertiary={!disabled}>
-			#{nft.id}
-			{#if source === NFT_LIST_ROUTE}
+			#{getNftDisplayId(nft)}
+			{#if withCollectionLabel && nonNullish(nft.name)}
 				&ndash; {nft.name}
 			{/if}
 		</span>

@@ -59,11 +59,11 @@
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackSortingEvent({ order: 'asc', type: 'date' });
-						setSorting({ order: 'asc', type: 'date' });
+						trackSortingEvent({ order: 'desc', type: 'date' });
+						setSorting({ order: 'desc', type: 'date' });
 					}}
 					selectable
-					selected={$nftSortType === 'date' && $nftSortOrder === 'asc'}
+					selected={$nftSortType === 'date' && $nftSortOrder === 'desc'}
 				>
 					{$i18n.nfts.text.recents_first}
 				</ListItemButton>
@@ -71,11 +71,11 @@
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackSortingEvent({ order: 'desc', type: 'date' });
-						setSorting({ order: 'desc', type: 'date' });
+						trackSortingEvent({ order: 'asc', type: 'date' });
+						setSorting({ order: 'asc', type: 'date' });
 					}}
 					selectable
-					selected={$nftSortType === 'date' && $nftSortOrder === 'desc'}
+					selected={$nftSortType === 'date' && $nftSortOrder === 'asc'}
 				>
 					{$i18n.nfts.text.oldest_first}
 				</ListItemButton>

@@ -17,7 +17,7 @@ export const USDC_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
 export const USDC_TOKEN: RequiredEvmErc20Token = {
 	id: USDC_TOKEN_ID,
 	network: POLYGON_MAINNET_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'USD Coin',
 	symbol: USDC_SYMBOL,
@@ -38,7 +38,7 @@ export const AMOY_USDC_TOKEN_ID: TokenId = parseTokenId(AMOY_USDC_SYMBOL);
 export const AMOY_USDC_TOKEN: RequiredEvmErc20Token = {
 	id: AMOY_USDC_TOKEN_ID,
 	network: POLYGON_AMOY_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'USDC',
 	symbol: USDC_SYMBOL,

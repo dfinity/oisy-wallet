@@ -7,6 +7,7 @@
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import {
 		ETH_FEE_CONTEXT_KEY,
 		initEthFeeContext,
@@ -14,10 +15,11 @@
 		type EthFeeContext as FeeContextType
 	} from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
@@ -43,6 +45,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { isNetworkEthereum } from '$lib/utils/network.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -74,8 +77,14 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, failedSwapError, sourceTokenExchangeRate } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		failedSwapError,
+		sourceTokenExchangeRate,
+		setIsTokenPermitSupported,
+		isSourceTokenPermitSupported
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -122,6 +131,28 @@
 				: undefined;
 	});
 
+	$effect(() => {
+		if (
+			isNullish($sourceToken) ||
+			!isTokenErc20($sourceToken) ||
+			isNullish($ethAddress) ||
+			nonNullish($isSourceTokenPermitSupported)
+		) {
+			return;
+		}
+		(async () => {
+			const { isErc20SupportsPermit } = infuraErc20Providers($sourceToken.network.id);
+			const isPermitSupported = await isErc20SupportsPermit({
+				contractAddress: $sourceToken.address,
+				userAddress: $ethAddress
+			});
+			setIsTokenPermitSupported({
+				address: $sourceToken.address,
+				isPermitSupported
+			});
+		})();
+	});
+
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 	let feeContext = $state<EthFeeContext | undefined>();
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
@@ -141,6 +172,12 @@
 	const isApproveNeeded = $derived<boolean>(
 		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.MARKET &&
 			isNotDefaultEthereumToken($sourceToken)
+	);
+
+	const isGasless = $derived<boolean>(
+		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.DELTA &&
+			nonNullish($isSourceTokenPermitSupported) &&
+			$isSourceTokenPermitSupported
 	);
 
 	let sourceTokenUsdValue = $derived(
@@ -175,7 +212,9 @@
 			isNullish($ethAddress) ||
 			isNullish(maxFeePerGas) ||
 			isNullish(maxPriorityFeePerGas) ||
-			isNullish(gas)
+			isNullish(gas) ||
+			!isNetworkEthereum($sourceToken.network) ||
+			!isNetworkEthereum($destinationToken.network)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -195,14 +234,15 @@
 				sourceToken: $sourceToken as Erc20Token,
 				destinationToken: $destinationToken as Erc20Token,
 				swapAmount,
-				sourceNetwork: $sourceToken.network as EthereumNetwork,
+				sourceNetwork: $sourceToken.network,
 				receiveAmount: $swapAmountsStore?.selectedProvider?.receiveAmount,
 				slippageValue,
-				destinationNetwork: $destinationToken.network as EthereumNetwork,
+				destinationNetwork: $destinationToken.network,
 				userAddress: $ethAddress,
 				gas,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
+				isGasless: $isSourceTokenPermitSupported ?? false,
 				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
 			};
 
@@ -255,7 +295,7 @@
 	};
 </script>
 
-{#if nonNullish($sourceToken) && nonNullish(nativeEthereumToken)}
+{#if nonNullish($sourceToken) && nonNullish(nativeEthereumToken) && isNetworkEthereum($sourceToken.network)}
 	<EthFeeContext
 		bind:this={feeContext}
 		amount={swapAmount}
@@ -263,12 +303,13 @@
 		observe={currentStep?.name !== WizardStepsSwap.SWAPPING}
 		sendToken={$sourceToken}
 		sendTokenId={$sourceToken.id}
-		sourceNetwork={$sourceToken.network as EthereumNetwork}
+		sourceNetwork={$sourceToken.network}
 	>
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSwap.SWAP}
 				<SwapEthForm
 					{isApproveNeeded}
+					{isGasless}
 					{isSwapAmountsLoading}
 					{nativeEthereumToken}
 					{onClose}
@@ -289,11 +330,15 @@
 					{swapAmount}
 				>
 					{#snippet swapFees()}
-						<EthFeeDisplay>
-							{#snippet label()}
-								<Html text={$i18n.fee.text.total_fee} />
-							{/snippet}
-						</EthFeeDisplay>
+						{#if isGasless}
+							<SwapGaslessFee />
+						{:else}
+							<EthFeeDisplay>
+								{#snippet label()}
+									<Html text={$i18n.fee.text.total_fee} />
+								{/snippet}
+							</EthFeeDisplay>
+						{/if}
 					{/snippet}
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}

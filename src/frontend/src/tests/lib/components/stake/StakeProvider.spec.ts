@@ -7,13 +7,15 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import { StakeProvider as StakeProviderType } from '$lib/types/stake';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 describe('StakeProvider', () => {
 	const mockContext = () =>
 		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: ICP_TOKEN })]]);
 	const props = {
-		provider: StakeProviderType.GLDT
+		provider: StakeProviderType.GLDT,
+		terms: [mockSnippet]
 	};
 
 	it('renders provided provider data correctly', () => {

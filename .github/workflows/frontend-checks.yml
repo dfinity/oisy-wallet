@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         continue-on-error: true
         id: app-token
         with:
@@ -29,7 +29,7 @@ jobs:
           CAN_ADD_COMMIT: ${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}
       - name: Checkout for pull request
         if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -37,20 +37,20 @@ jobs:
           persist-credentials: false
       - name: Checkout
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Restore Prettier Cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         with:
           path: ./node_modules/.cache/prettier/.prettier-cache
           key: ${{ runner.os }}-prettier-cache-format-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
           restore-keys: |
             ${{ runner.os }}-prettier-cache-format-
       - name: Restore ESLint Cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         with:
           path: .eslintcache
           key: ${{ runner.os }}-eslint-cache-format-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
@@ -85,20 +85,20 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Restore Prettier Cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         with:
           path: ./node_modules/.cache/prettier/.prettier-cache
           key: ${{ runner.os }}-prettier-cache-lint-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
           restore-keys: |
             ${{ runner.os }}-prettier-cache-lint-
       - name: Restore ESLint Cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         with:
           path: .eslintcache
           key: ${{ runner.os }}-eslint-cache-lint-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
@@ -114,13 +114,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Check
         run: npm run check
+      - name: Check tests
+        run: npm run check:tests
 
   test:
     runs-on: ubuntu-24.04
@@ -133,7 +135,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Prepare
@@ -144,7 +146,7 @@ jobs:
         # We disable the thresholds since we will check them in the next step, when all sharded reports are merged
         run: npm run test:coverage -- --reporter=blob --reporter=default --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --coverage.thresholds.0 --coverage.thresholds.autoUpdate=false
       - name: Upload Blob Coverage Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: vitest-coverage-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}-shard-${{ matrix.shardIndex }}
@@ -160,13 +162,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Download Blob Coverage Reports
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           path: .vitest-reports
           pattern: vitest-coverage-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}-shard-*
@@ -174,7 +176,7 @@ jobs:
       - name: Merge Coverage Reports
         run: npm run test:merge
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: vitest-coverage-merged-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -190,7 +192,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Prepare
@@ -212,7 +214,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Prepare
@@ -230,7 +232,7 @@ jobs:
         env:
           NETWORK: ${{ matrix.network }}
       - name: Upload Domain File
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ic-domains-${{ matrix.network }}
           path: ic-domain.${{ matrix.network }}.txt
@@ -244,13 +246,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Download All Domain Files
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           path: ic-domains
           pattern: ic-domains-*
@@ -268,7 +270,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - uses: ./.github/actions/needs_success

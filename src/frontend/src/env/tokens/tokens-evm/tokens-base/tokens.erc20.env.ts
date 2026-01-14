@@ -9,6 +9,7 @@ import {
 	USDC_TOKEN
 } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { WETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.weth.env';
+import { ZCHF_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.zchf.env';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 
@@ -18,7 +19,8 @@ const BASE_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [
 	EURC_TOKEN,
 	SPX_TOKEN,
 	USDC_TOKEN,
-	WETH_TOKEN
+	WETH_TOKEN,
+	ZCHF_TOKEN
 ];
 
 export const BASE_ERC20_TOKENS: RequiredEvmErc20Token[] = defineSupportedTokens({

@@ -68,7 +68,13 @@ describe('icrc.derived', () => {
 			const tokens = get(enabledIcrcTokens);
 
 			expect(tokens).toStrictEqual([
-				{ ...mockIcrcDefaultToken2, enabled: true, version: 3n },
+				{
+					...mockIcrcDefaultToken2,
+					enabled: true,
+					version: 3n,
+					section: undefined,
+					allowExternalContentSource: undefined
+				},
 				mockIcrcCustomToken1,
 				mockIcrcCustomToken3
 			]);
@@ -78,7 +84,13 @@ describe('icrc.derived', () => {
 			icrcCustomTokensStore.resetAll();
 			icrcCustomTokensStore.setAll([
 				{
-					data: { ...mockIcrcDefaultToken1, enabled: true, version: 1n },
+					data: {
+						...mockIcrcDefaultToken1,
+						enabled: true,
+						version: 1n,
+						section: undefined,
+						allowExternalContentSource: undefined
+					},
 					certified: false
 				}
 			]);
@@ -86,8 +98,20 @@ describe('icrc.derived', () => {
 			const tokens = get(enabledIcrcTokens);
 
 			expect(tokens).toStrictEqual([
-				{ ...mockIcrcDefaultToken1, enabled: true, version: 1n },
-				{ ...mockIcrcDefaultToken1, enabled: true, version: 1n }
+				{
+					...mockIcrcDefaultToken1,
+					enabled: true,
+					version: 1n,
+					section: undefined,
+					allowExternalContentSource: undefined
+				},
+				{
+					...mockIcrcDefaultToken1,
+					enabled: true,
+					version: 1n,
+					section: undefined,
+					allowExternalContentSource: undefined
+				}
 			]);
 		});
 
@@ -157,14 +181,16 @@ describe('icrc.derived', () => {
 		});
 
 		it('should ignore CK tokens', () => {
-			icrcCustomTokensStore.set({
-				data: {
-					...mockIcrcCustomToken3,
-					enabled: true,
-					ledgerCanisterId: ICRC_CK_TOKENS_LEDGER_CANISTER_IDS[0]
-				},
-				certified: false
-			});
+			icrcCustomTokensStore.setAll([
+				{
+					data: {
+						...mockIcrcCustomToken3,
+						enabled: true,
+						ledgerCanisterId: ICRC_CK_TOKENS_LEDGER_CANISTER_IDS[0]
+					},
+					certified: false
+				}
+			]);
 
 			const tokens = get(enabledIcrcLedgerCanisterIdsNoCk);
 

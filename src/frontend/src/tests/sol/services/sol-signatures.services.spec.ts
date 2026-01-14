@@ -212,7 +212,7 @@ describe('sol-signatures.services', () => {
 		it('should handle RPC errors gracefully', async () => {
 			spyFetchSignatures.mockRejectedValue(mockError);
 
-			await expect(getSolSignatures(mockParams)).rejects.toThrow(mockError);
+			await expect(getSolSignatures(mockParams)).rejects.toThrowError(mockError);
 		});
 	});
 
@@ -338,7 +338,7 @@ describe('sol-signatures.services', () => {
 					address: mockSolAddress,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 	});
 });

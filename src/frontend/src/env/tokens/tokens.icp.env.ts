@@ -2,6 +2,7 @@ import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import {
 	ICP_INDEX_CANISTER_ID,
 	ICP_LEDGER_CANISTER_ID,
+	ICP_MINTING_ACCOUNT,
 	ICP_NETWORK,
 	ICP_PSEUDO_TESTNET_NETWORK
 } from '$env/networks/networks.icp.env';
@@ -9,9 +10,12 @@ import icpLight from '$icp/assets/icp-light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
+import { buildIndexedIcTokens } from '$icp/utils/ic-tokens.utils';
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { Principal } from '@icp-sdk/core/principal';
 
 /**
  * ICP
@@ -20,10 +24,10 @@ export const ICP_SYMBOL = 'ICP';
 
 export const ICP_TOKEN_ID: TokenId = parseTokenId(ICP_SYMBOL);
 
-export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated'>> = {
+export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'alternativeName'>> = {
 	id: ICP_TOKEN_ID,
 	network: ICP_NETWORK,
-	standard: 'icp',
+	standard: { code: 'icp' },
 	category: 'default',
 	exchangeCoinId: 'internet-computer',
 	position: 0,
@@ -34,6 +38,7 @@ export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated'>> = {
 	fee: ICP_TRANSACTION_FEE_E8S,
 	ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
 	indexCanisterId: ICP_INDEX_CANISTER_ID,
+	mintingAccount: ICP_MINTING_ACCOUNT,
 	explorerUrl: ICP_EXPLORER_URL,
 	buy: {
 		onramperId: 'icp_icp'
@@ -47,10 +52,12 @@ export const TESTICP_SYMBOL = 'TESTICP';
 
 export const TESTICP_TOKEN_ID: TokenId = parseTokenId(TESTICP_SYMBOL);
 
-export const TESTICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'explorerUrl'>> = {
+export const TESTICP_TOKEN: RequiredToken<
+	Omit<IcToken, 'deprecated' | 'explorerUrl' | 'alternativeName'>
+> = {
 	id: TESTICP_TOKEN_ID,
 	network: ICP_PSEUDO_TESTNET_NETWORK,
-	standard: 'icp',
+	standard: { code: 'icp' },
 	category: 'default',
 	exchangeCoinId: 'internet-computer',
 	position: 0,
@@ -60,15 +67,19 @@ export const TESTICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'explorer
 	icon: icpLight,
 	fee: 10_000n,
 	ledgerCanisterId: 'xafvr-biaaa-aaaai-aql5q-cai',
-	indexCanisterId: 'qcuy6-bqaaa-aaaai-aqmqq-cai'
+	indexCanisterId: 'qcuy6-bqaaa-aaaai-aqmqq-cai',
+	mintingAccount: getIcrcAccount(Principal.fromText('bnuz2-zaaaa-aaaal-arrba-cai'))
 };
 
-export const SUPPORTED_ICP_TOKENS: RequiredToken<Omit<IcToken, 'deprecated' | 'explorerUrl'>>[] =
-	defineSupportedTokens({
-		mainnetFlag: true,
-		mainnetTokens: [ICP_TOKEN],
-		testnetTokens: [TESTICP_TOKEN]
-	});
+export const SUPPORTED_ICP_TOKENS: RequiredToken<
+	Omit<IcToken, 'deprecated' | 'explorerUrl' | 'alternativeName'>
+>[] = defineSupportedTokens({
+	mainnetFlag: true,
+	mainnetTokens: [ICP_TOKEN],
+	testnetTokens: [TESTICP_TOKEN]
+});
+
+export const SUPPORTED_ICP_TOKENS_INDEXED = buildIndexedIcTokens(SUPPORTED_ICP_TOKENS);
 
 export const SUPPORTED_ICP_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = SUPPORTED_ICP_TOKENS.map(
 	({ ledgerCanisterId }) => ledgerCanisterId

@@ -27,19 +27,32 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
+import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
+import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { IcToken } from '$icp/types/ic-token';
+import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appConstants from '$lib/constants/app.constants';
-import { enabledUniqueTokensSymbols, fungibleTokens, tokens } from '$lib/derived/tokens.derived';
+import {
+	enabledNonFungibleTokensBySectionHidden,
+	enabledNonFungibleTokensBySectionSpam,
+	enabledNonFungibleTokensWithoutSection,
+	enabledNonFungibleTokensWithoutSpam,
+	enabledUniqueTokensSymbols,
+	fungibleTokens,
+	tokens
+} from '$lib/derived/tokens.derived';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
@@ -47,7 +60,9 @@ import type { SplToken } from '$sol/types/spl';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -61,9 +76,9 @@ describe('tokens.derived', () => {
 		address: `${mockValidErc20Token.address}1`
 	};
 
-	const mockEr20UserToken: Erc20UserToken = {
+	const mockEr20CustomToken: Erc20CustomToken = {
 		...mockValidErc20Token,
-		id: parseTokenId('Erc20UserTokenId'),
+		id: parseTokenId('Erc20CustomTokenId'),
 		symbol: 'EUTK',
 		address: `${mockValidErc20Token.address}2`,
 		version: undefined,
@@ -100,21 +115,97 @@ describe('tokens.derived', () => {
 		enabled: true
 	};
 
+	const mockExtCustomToken: ExtCustomToken = {
+		...mockValidExtV2Token,
+		version: 7n,
+		enabled: true
+	};
+
+	const mockIcPunksCustomToken: IcPunksCustomToken = {
+		...mockValidIcPunksToken,
+		version: 1n,
+		enabled: true
+	};
+
 	const mockSplDefaultToken: SplToken = {
 		...mockValidSplToken,
 		id: parseTokenId('SplDefaultTokenId1'),
 		symbol: 'SplDefaultTokenId1'
 	};
 
+	const erc721EnabledNoSection = {
+		...mockErc721CustomToken,
+		enabled: true,
+		section: undefined
+	};
+
+	const erc721DisabledNoSection = {
+		...mockErc721CustomToken,
+		enabled: false,
+		section: undefined
+	};
+
+	const erc1155EnabledNoSection = {
+		...mockErc1155CustomToken,
+		enabled: true,
+		section: undefined
+	};
+
+	const erc1155DisabledNoSection = {
+		...mockErc1155CustomToken,
+		enabled: false,
+		section: undefined
+	};
+
+	const erc721EnabledSpam = {
+		...mockErc721CustomToken,
+		enabled: true,
+		section: CustomTokenSection.SPAM
+	};
+
+	const erc721DisabledSpam = {
+		...mockErc721CustomToken,
+		enabled: false,
+		section: CustomTokenSection.SPAM
+	};
+
+	const erc1155EnabledHidden = {
+		...mockErc1155CustomToken,
+		enabled: true,
+		section: CustomTokenSection.HIDDEN
+	};
+
+	const erc1155DisabledHidden = {
+		...mockErc1155CustomToken,
+		enabled: false,
+		section: CustomTokenSection.HIDDEN
+	};
+
+	const mockErc721CustomTokens = [
+		erc721EnabledNoSection,
+		erc721DisabledNoSection,
+		erc721EnabledSpam,
+		erc721DisabledSpam
+	].map((token) => ({ data: token, certified: false }));
+
+	const mockErc1155CustomTokens = [
+		erc1155EnabledNoSection,
+		erc1155DisabledNoSection,
+		erc1155EnabledHidden,
+		erc1155DisabledHidden
+	].map((token) => ({ data: token, certified: false }));
+
 	beforeEach(() => {
 		vi.resetAllMocks();
 
 		erc20DefaultTokensStore.reset();
-		erc20UserTokensStore.resetAll();
+		erc20CustomTokensStore.resetAll();
 		erc721CustomTokensStore.resetAll();
 		erc1155CustomTokensStore.resetAll();
 		icrcDefaultTokensStore.resetAll();
 		icrcCustomTokensStore.resetAll();
+		extCustomTokensStore.resetAll();
+		icPunksCustomTokensStore.resetAll();
 		splDefaultTokensStore.reset();
 		splCustomTokensStore.resetAll();
 
@@ -127,11 +218,13 @@ describe('tokens.derived', () => {
 	describe('tokens', () => {
 		it('should return all the non-testnet tokens by default', () => {
 			erc20DefaultTokensStore.add(mockErc20DefaultToken);
-			erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
+			erc20CustomTokensStore.setAll([{ data: mockEr20CustomToken, certified: false }]);
 			erc721CustomTokensStore.setAll([{ data: mockErc721CustomToken, certified: false }]);
 			erc1155CustomTokensStore.setAll([{ data: mockErc1155CustomToken, certified: false }]);
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
-			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			icrcCustomTokensStore.setAll([{ data: mockIcrcCustomToken, certified: false }]);
+			extCustomTokensStore.setAll([{ data: mockExtCustomToken, certified: false }]);
+			icPunksCustomTokensStore.setAll([{ data: mockIcPunksCustomToken, certified: false }]);
 			splDefaultTokensStore.add(mockSplDefaultToken);
 			splCustomTokensStore.setAll([{ data: mockSplCustomToken, certified: false }]);
 
@@ -147,13 +240,15 @@ describe('tokens.derived', () => {
 				POL_MAINNET_TOKEN,
 				ARBITRUM_ETH_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
-				mockEr20UserToken,
-				{ ...mockErc721CustomToken, id: result[10].id },
-				{ ...mockErc1155CustomToken, id: result[11].id },
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[12].id },
-				{ ...mockIcrcCustomToken, id: result[13].id },
+				mockEr20CustomToken,
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[10].id },
+				{ ...mockIcrcCustomToken, id: result[11].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
-				mockSplCustomToken
+				mockSplCustomToken,
+				{ ...mockErc721CustomToken, id: result[14].id },
+				{ ...mockErc1155CustomToken, id: result[15].id },
+				{ ...mockExtCustomToken, id: result[16].id },
+				{ ...mockIcPunksCustomToken, id: result[17].id }
 			]);
 		});
 
@@ -237,11 +332,13 @@ describe('tokens.derived', () => {
 	describe('fungibleTokens', () => {
 		it('should return all fungible tokens', () => {
 			erc20DefaultTokensStore.add(mockErc20DefaultToken);
-			erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
+			erc20CustomTokensStore.setAll([{ data: mockEr20CustomToken, certified: false }]);
 			erc721CustomTokensStore.setAll([{ data: mockErc721CustomToken, certified: false }]);
 			erc1155CustomTokensStore.setAll([{ data: mockErc1155CustomToken, certified: false }]);
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
-			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			icrcCustomTokensStore.setAll([{ data: mockIcrcCustomToken, certified: false }]);
+			extCustomTokensStore.setAll([{ data: mockExtCustomToken, certified: false }]);
+			icPunksCustomTokensStore.setAll([{ data: mockIcPunksCustomToken, certified: false }]);
 			splDefaultTokensStore.add(mockSplDefaultToken);
 			splCustomTokensStore.setAll([{ data: mockSplCustomToken, certified: false }]);
 
@@ -257,7 +354,7 @@ describe('tokens.derived', () => {
 				POL_MAINNET_TOKEN,
 				ARBITRUM_ETH_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
-				mockEr20UserToken,
+				mockEr20CustomToken,
 				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[10].id },
 				{ ...mockIcrcCustomToken, id: result[11].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
@@ -278,6 +375,85 @@ describe('tokens.derived', () => {
 				BNB_MAINNET_TOKEN.symbol,
 				POL_MAINNET_TOKEN.symbol
 			]);
+		});
+	});
+
+	describe('enabledNonFungibleTokensWithoutSection', () => {
+		beforeEach(() => {
+			erc721CustomTokensStore.setAll(mockErc721CustomTokens);
+			erc1155CustomTokensStore.setAll(mockErc1155CustomTokens);
+		});
+
+		it('should return all enabled non-fungible tokens without section', () => {
+			expect(get(enabledNonFungibleTokensWithoutSection)).toStrictEqual([
+				erc721EnabledNoSection,
+				erc1155EnabledNoSection
+			]);
+		});
+
+		it('should fallback to an empty list', () => {
+			erc721CustomTokensStore.resetAll();
+			erc1155CustomTokensStore.resetAll();
+
+			expect(get(enabledNonFungibleTokensWithoutSection)).toStrictEqual([]);
+		});
+	});
+
+	describe('enabledNonFungibleTokensBySectionHidden', () => {
+		beforeEach(() => {
+			erc721CustomTokensStore.setAll(mockErc721CustomTokens);
+			erc1155CustomTokensStore.setAll(mockErc1155CustomTokens);
+		});
+
+		it('should return all enabled non-fungible tokens marked as hidden', () => {
+			expect(get(enabledNonFungibleTokensBySectionHidden)).toStrictEqual([erc1155EnabledHidden]);
+		});
+
+		it('should fallback to an empty list', () => {
+			erc721CustomTokensStore.resetAll();
+			erc1155CustomTokensStore.resetAll();
+
+			expect(get(enabledNonFungibleTokensBySectionHidden)).toStrictEqual([]);
+		});
+	});
+
+	describe('enabledNonFungibleTokensBySectionSpam', () => {
+		beforeEach(() => {
+			erc721CustomTokensStore.setAll(mockErc721CustomTokens);
+			erc1155CustomTokensStore.setAll(mockErc1155CustomTokens);
+		});
+
+		it('should return all enabled non-fungible tokens marked as spam', () => {
+			expect(get(enabledNonFungibleTokensBySectionSpam)).toStrictEqual([erc721EnabledSpam]);
+		});
+
+		it('should fallback to an empty list', () => {
+			erc721CustomTokensStore.resetAll();
+			erc1155CustomTokensStore.resetAll();
+
+			expect(get(enabledNonFungibleTokensBySectionSpam)).toStrictEqual([]);
+		});
+	});
+
+	describe('enabledNonFungibleTokensWithoutSpam', () => {
+		beforeEach(() => {
+			erc721CustomTokensStore.setAll(mockErc721CustomTokens);
+			erc1155CustomTokensStore.setAll(mockErc1155CustomTokens);
+		});
+
+		it('should return all enabled non-fungible tokens not marked as spam', () => {
+			expect(get(enabledNonFungibleTokensWithoutSpam)).toStrictEqual([
+				erc721EnabledNoSection,
+				erc1155EnabledNoSection,
+				erc1155EnabledHidden
+			]);
+		});
+
+		it('should fallback to an empty list', () => {
+			erc721CustomTokensStore.resetAll();
+			erc1155CustomTokensStore.resetAll();
+
+			expect(get(enabledNonFungibleTokensWithoutSpam)).toStrictEqual([]);
 		});
 	});
 });

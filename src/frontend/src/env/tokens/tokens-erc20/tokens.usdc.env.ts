@@ -14,7 +14,7 @@ export const USDC_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
 export const USDC_TOKEN: RequiredErc20Token = {
 	id: USDC_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'USD Coin',
 	symbol: USDC_SYMBOL,
@@ -24,7 +24,7 @@ export const USDC_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckUSDC',
 	groupData: USDC_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true,
+	neverCollapseInTokenGroup: true,
 	buy: {
 		onramperId: 'usdc_ethereum'
 	}
@@ -37,7 +37,7 @@ export const SEPOLIA_USDC_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_USDC_SYMBOL);
 export const SEPOLIA_USDC_TOKEN: RequiredErc20Token = {
 	id: SEPOLIA_USDC_TOKEN_ID,
 	network: SEPOLIA_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'USDC',
 	symbol: USDC_SYMBOL,

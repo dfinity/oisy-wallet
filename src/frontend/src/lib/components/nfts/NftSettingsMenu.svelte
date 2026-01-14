@@ -19,6 +19,7 @@
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		nftGroupByCollectionStore,
 		showHiddenStore,
@@ -65,6 +66,13 @@
 			}
 		});
 	};
+
+	const manageTokensId = Symbol();
+
+	const openManageTokens = () => {
+		modalStore.openManageTokens({ id: manageTokensId });
+		visible = false;
+	};
 </script>
 
 <ButtonIcon
@@ -109,7 +117,7 @@
 			</ListItem>
 		</List>
 
-		<span class="mb-2 mt-3 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
+		<span class="mt-3 mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
 
 		<List condensed noPadding>
 			<ListItem>
@@ -135,6 +143,16 @@
 					{/snippet}
 					{#snippet action()}
 						<NftsShowSpamToggle />
+					{/snippet}
+				</LogoButton>
+			</ListItem>
+			<ListItem>
+				<LogoButton fullWidth onClick={openManageTokens}>
+					{#snippet logo()}
+						<IconManage />
+					{/snippet}
+					{#snippet title()}
+						<span class="text-sm font-normal">{$i18n.tokens.manage.text.title_nft}</span>
 					{/snippet}
 				</LogoButton>
 			</ListItem>

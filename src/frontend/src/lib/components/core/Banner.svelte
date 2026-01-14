@@ -10,7 +10,9 @@
 </script>
 
 {#if STAGING && envBannerVisible}
-	<div class="test-banner flex justify-between gap-4">
+	<div
+		class="test-banner fixed top-0 left-1/2 flex max-w-screen-md -translate-x-1/2 justify-between gap-4 border-4 border-solid border-black bg-error-primary"
+	>
 		<span class="flex items-center justify-center gap-4">
 			<IconWarning size="48px" />
 			<h3 class="clamp-4">{$i18n.core.info.test_banner}</h3>
@@ -19,7 +21,7 @@
 	</div>
 {:else if BETA && envBannerVisible}
 	<div
-		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
+		class="fixed top-6 left-[50%] z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
 	>
 		<WarningBanner>
 			<span class="w-full px-2">{$i18n.core.info.test_banner_beta}</span>
@@ -32,24 +34,14 @@
 
 <style lang="scss">
 	div.test-banner {
-		position: fixed;
-		top: 0;
-		left: 50%;
-		transform: translate(-50%, 0);
-
 		z-index: calc(var(--overlay-z-index) + 10);
-
-		background: var(--color-background-error-primary);
 
 		padding: var(--padding-2x) var(--padding-3x);
 		margin: var(--padding-3x) 0;
 
 		border-radius: var(--border-radius);
 
-		border: 4px solid black;
-
 		width: calc(100% - var(--padding-4x));
-		max-width: 768px;
 
 		box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.1215686275);
 	}
