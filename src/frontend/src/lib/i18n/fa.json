@@ -1513,9 +1513,7 @@
 			"loading_token_with_network": "توکن $token در شبکه $network بارگذاری نشد زیرا در لیست توکن‌های شما نیست.",
 			"loading_token": "لینک ارائه شده به یک توکن نامعتبر است."
 		}
-	}
-}
-{
+	},
 	"about": {
 		"why_oisy": {
 			"text": {
