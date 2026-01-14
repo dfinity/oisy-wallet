@@ -1,77 +1,33 @@
-import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
-import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { isTokenEthereumCustomToken } from '$eth/utils/erc20.utils';
 import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
-import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import { pageNft } from '$lib/derived/page-nft.derived';
 import { defaultFallbackToken } from '$lib/derived/token.derived';
-import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { OptionToken, OptionTokenStandardCode, Token } from '$lib/types/token';
 import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 import { isIcrcTokenToggleEnabled } from '$lib/utils/token-toggle.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
-import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
  * A token derived from the route URL - i.e. if the URL contains a query parameters "token", then this store tries to derive the object from it.
  */
 export const pageToken: Readable<OptionToken> = derived(
-	[
-		routeToken,
-		routeNetwork,
-		enabledBitcoinTokens,
-		enabledEthereumTokens,
-		enabledSolanaTokens,
-		enabledEvmTokens,
-		enabledErc20Tokens,
-		enabledIcrcTokens,
-		enabledSplTokens
-	],
-	([
-		$routeToken,
-		$routeNetwork,
-		$enabledBitcoinTokens,
-		$enabledEthereumTokens,
-		$enabledSolanaTokens,
-		$enabledEvmTokens,
-		$erc20Tokens,
-		$icrcTokens,
-		$splTokens
-	]) => {
-		if (isNullish($routeToken)) {
-			return undefined;
-		}
-
-		if ($routeToken === ICP_TOKEN.name) {
-			return ICP_TOKEN;
-		}
-
-		if ($routeToken === TESTICP_TOKEN.name) {
-			return TESTICP_TOKEN;
-		}
-
-		return [
-			...$enabledBitcoinTokens,
-			...$enabledEthereumTokens,
-			...$enabledSolanaTokens,
-			...$enabledEvmTokens,
-			...$erc20Tokens,
-			...$icrcTokens,
-			...$splTokens
-		].find(
-			({ name, network: { id: networkId } }) =>
-				name === $routeToken && networkId.description === $routeNetwork
-		);
-	}
+	[routeToken, routeNetwork, nativeTokens, enabledErc20Tokens, enabledIcrcTokens, enabledSplTokens],
+	([$routeToken, $routeNetwork, $nativeTokens, $erc20Tokens, $icrcTokens, $splTokens]) =>
+		nonNullish($routeToken)
+			? [...$nativeTokens, ...$erc20Tokens, ...$icrcTokens, ...$splTokens].find(
+					({ name, network: { id: networkId } }) =>
+						name === $routeToken && networkId.description === $routeNetwork
+				)
+			: undefined
 );
 
 /**
