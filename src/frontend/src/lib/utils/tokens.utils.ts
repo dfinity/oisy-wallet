@@ -8,10 +8,10 @@ import type { Dip721CustomToken } from '$icp/types/dip721-custom-token';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { isTokenDip721 } from '$icp/utils/dip721.utils';
-import { isTokenExt } from '$icp/utils/ext.utils';
+import { isTokenDip721, isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
+import { isTokenExt, isTokenExtCustomToken } from '$icp/utils/ext.utils';
 import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
-import { isTokenIcPunks } from '$icp/utils/icpunks.utils';
+import { isTokenIcPunks, isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
 import {
 	icTokenIcrcCustomToken,
 	isTokenDip20,
@@ -21,13 +21,11 @@ import {
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-import {
-	saveCustomTokensWithKey,
-	type ManageTokensSaveParams
-} from '$lib/services/manage-tokens.services';
+import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
+import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { StakeBalances } from '$lib/types/stake-balance';
@@ -40,7 +38,7 @@ import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
-import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
+import { filterEnabledToken, isTokenToggleable, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
@@ -383,6 +381,54 @@ export const groupTogglableTokens = (
 		{ icrc: [], ext: [], dip721: [], icpunks: [], erc20: [], erc721: [], erc1155: [], spl: [] }
 	);
 
+const normaliseTokenForSave = (token: Token): SaveCustomTokenWithKey | undefined => {
+	if ((isTokenIcrc(token) || isTokenDip20(token)) && isTokenToggleable(token)) {
+		return { ...token, networkKey: 'Icrc' };
+	}
+
+	if (isTokenExtCustomToken(token)) {
+		return { ...token, networkKey: 'ExtV2' };
+	}
+
+	if (isTokenDip721CustomToken(token)) {
+		return { ...token, networkKey: 'Dip721' };
+	}
+
+	if (isTokenIcPunksCustomToken(token)) {
+		return { ...token, networkKey: 'IcPunks' };
+	}
+
+	if (isTokenErc20CustomToken(token)) {
+		return { ...token, chainId: token.network.chainId, networkKey: 'Erc20' };
+	}
+
+	if (isTokenErc721CustomToken(token)) {
+		return { ...token, chainId: token.network.chainId, networkKey: 'Erc721' };
+	}
+
+	if (isTokenErc1155CustomToken(token)) {
+		return { ...token, chainId: token.network.chainId, networkKey: 'Erc1155' };
+	}
+
+	if (isTokenSplCustomToken(token)) {
+		return {
+			...token,
+			networkKey: isNetworkIdSOLDevnet(token.network.id) ? 'SplDevnet' : 'SplMainnet'
+		};
+	}
+};
+
+const normalizeTokensForSave = (tokens: Token[]): SaveCustomTokenWithKey[] =>
+	tokens.reduce<SaveCustomTokenWithKey[]>((acc, token) => {
+		const normalizedToken = normaliseTokenForSave(token);
+
+		if (nonNullish(normalizedToken)) {
+			acc.push(normalizedToken);
+		}
+
+		return acc;
+	}, []);
+
 export const saveAllCustomTokens = async ({
 	tokens,
 	progress,
@@ -400,18 +446,9 @@ export const saveAllCustomTokens = async ({
 	$authIdentity: OptionIdentity;
 	$i18n: I18n;
 }): Promise<void> => {
-	const { icrc, ext, dip721, icpunks, erc20, erc721, erc1155, spl } = groupTogglableTokens(tokens);
+	const tokensWithKey = normalizeTokensForSave(tokens);
 
-	if (
-		icrc.length === 0 &&
-		ext.length === 0 &&
-		dip721.length === 0 &&
-		icpunks.length === 0 &&
-		erc20.length === 0 &&
-		erc721.length === 0 &&
-		erc1155.length === 0 &&
-		spl.length === 0
-	) {
+	if (tokensWithKey.length === 0) {
 		toastsShow({
 			text: $i18n.tokens.manage.info.no_changes,
 			level: 'info',
@@ -421,95 +458,14 @@ export const saveAllCustomTokens = async ({
 		return;
 	}
 
-	const commonParams: ManageTokensSaveParams = {
+	await saveCustomTokensWithKey({
+		tokens: tokensWithKey,
 		progress,
 		modalNext,
 		onSuccess,
 		onError,
 		identity: $authIdentity
-	};
-
-	await Promise.allSettled([
-		...(icrc.length > 0
-			? [
-					saveCustomTokensWithKey({
-						...commonParams,
-						tokens: icrc.map((t) => ({ ...t, networkKey: 'Icrc' }))
-					})
-				]
-			: []),
-		...(ext.length > 0
-			? [
-					saveCustomTokensWithKey({
-						...commonParams,
-						tokens: ext.map((t) => ({ ...t, networkKey: 'ExtV2' }))
-					})
-				]
-			: []),
-		...(dip721.length > 0
-			? [
-					saveCustomTokensWithKey({
-						...commonParams,
-						tokens: dip721.map((t) => ({ ...t, networkKey: 'Dip721' }))
-					})
-				]
-			: []),
-		...(icpunks.length > 0
-			? [
-					saveCustomTokensWithKey({
-						...commonParams,
-						tokens: icpunks.map((t) => ({ ...t, networkKey: 'IcPunks' }))
-					})
-				]
-			: []),
-		...(erc20.length > 0
-			? [
-					saveCustomTokensWithKey({
-						...commonParams,
-						tokens: erc20.map((t) => ({
-							...t,
-							chainId: t.network.chainId,
-							networkKey: 'Erc20'
-						}))
-					})
-				]
-			: []),
-		...(erc721.length > 0
-			? [
-					saveCustomTokensWithKey({
-						...commonParams,
-						tokens: erc721.map((t) => ({
-							...t,
-							chainId: t.network.chainId,
-							networkKey: 'Erc721'
-						}))
-					})
-				]
-			: []),
-		...(erc1155.length > 0
-			? [
-					saveCustomTokensWithKey({
-						...commonParams,
-						tokens: erc1155.map((t) => ({
-							...t,
-							chainId: t.network.chainId,
-							networkKey: 'Erc1155'
-						}))
-					})
-				]
-			: []),
-		...(spl.length > 0
-			? [
-					saveCustomTokensWithKey({
-						...commonParams,
-						tokens: spl.map((t) => ({
-							...t,
-							networkKey: isNetworkIdSOLDevnet(t.network.id) ? 'SplDevnet' : 'SplMainnet'
-						}))
-					})
-				]
-			: [])
-	]);
+	});
 };
 
 export const filterTokensByNft = ({
