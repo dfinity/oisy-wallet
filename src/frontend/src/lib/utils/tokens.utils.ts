@@ -6,10 +6,10 @@ import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
 import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
 import {
-	icTokenIcrcCustomToken,
 	isTokenDip20,
 	isTokenIc,
-	isTokenIcrc
+	isTokenIcrc,
+	isTokenIcrcCustomToken
 } from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
@@ -257,7 +257,7 @@ export const filterTokens = <T extends Token>({
 		}
 
 		if (
-			icTokenIcrcCustomToken(token) &&
+			isTokenIcrcCustomToken(token) &&
 			nonNullish(token.alternativeName) &&
 			token.alternativeName.toLowerCase().includes(filter.toLowerCase())
 		) {

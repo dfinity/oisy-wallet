@@ -2,7 +2,7 @@ import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { isTokenEthereumCustomToken } from '$eth/utils/erc20.utils';
 import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
-import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+import { isTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import { pageNft } from '$lib/derived/page-nft.derived';
 import { defaultFallbackToken } from '$lib/derived/token.derived';
@@ -45,7 +45,7 @@ export const pageTokenStandard: Readable<OptionTokenStandardCode> = derived(
 
 export const pageTokenToggleable: Readable<boolean> = derived([pageToken], ([$pageToken]) => {
 	if (nonNullish($pageToken)) {
-		return icTokenIcrcCustomToken($pageToken)
+		return isTokenIcrcCustomToken($pageToken)
 			? isIcrcTokenToggleEnabled($pageToken)
 			: isTokenEthereumCustomToken($pageToken)
 				? isNotDefaultEthereumToken($pageToken)
