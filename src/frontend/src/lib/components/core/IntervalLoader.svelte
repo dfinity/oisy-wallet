@@ -1,31 +1,39 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		onLoad: () => Promise<void>;
 		interval: number;
 		skipInitialLoad?: boolean;
-		children?: Snippet;
 	}
 
-	let { onLoad, interval, skipInitialLoad = false, children }: Props = $props();
+	let { onLoad, interval, skipInitialLoad = false }: Props = $props();
 
 	// A reference to the `onLoad` function that will be scheduled repeatedly.
 	// We set this only after the initial load has finished, to avoid race conditions.
 	let scheduledLoad = $state<typeof onLoad | undefined>();
 
+	let timer: NodeJS.Timeout | undefined;
+
 	const startTimer = (): NodeJS.Timeout | undefined =>
-		setInterval(async () => {
+		setTimeout(async () => {
+			const isTimer = nonNullish(timer);
+
 			await scheduledLoad?.();
+
+			if (isTimer) {
+				timer = startTimer();
+			}
 		}, interval);
 
-	const stopTimer = (timer: NodeJS.Timeout | undefined) => {
+	const stopTimer = () => {
 		if (isNullish(timer)) {
 			return;
 		}
 
-		clearInterval(timer);
+		clearTimeout(timer);
+		timer = undefined;
 	};
 
 	// Lifecycle: on component mount
@@ -51,10 +59,8 @@
 	// By returning a clean-up function here, Svelte guarantees that the timer
 	// will always be stopped after this mount finishes and only when the component unmounts.
 	onMount(() => {
-		const interval = startTimer();
+		timer = startTimer();
 
-		return () => stopTimer(interval);
+		return () => stopTimer();
 	});
 </script>
-
-{@render children?.()}

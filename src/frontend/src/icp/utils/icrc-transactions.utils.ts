@@ -7,19 +7,19 @@ import type {
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import {
-	encodeIcrcAccount,
-	fromCandidAccount,
-	type IcrcTransactionWithId
-} from '@dfinity/ledger-icrc';
-import {
 	fromNullable,
 	fromNullishNullable,
 	isNullish,
 	jsonReplacer,
 	nonNullish
 } from '@dfinity/utils';
+import {
+	encodeIcrcAccount,
+	fromCandidAccount,
+	type IcrcIndexDid
+} from '@icp-sdk/canisters/ledger/icrc';
 
-export const mapTransactionIcrcToSelf = (tx: IcrcTransactionWithId): IcrcTransaction[] => {
+export const mapTransactionIcrcToSelf = (tx: IcrcIndexDid.TransactionWithId): IcrcTransaction[] => {
 	const { transaction, id } = tx;
 	const { transfer: t } = transaction;
 

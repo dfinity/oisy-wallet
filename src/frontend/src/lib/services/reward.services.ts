@@ -5,7 +5,7 @@ import type {
 	RewardInfo,
 	SetReferrerResponse,
 	VipReward
-} from '$declarations/rewards/declarations/rewards.did';
+} from '$declarations/rewards/rewards.did';
 import type { IcToken } from '$icp/types/ic-token';
 import {
 	claimVipReward as claimVipRewardApi,
@@ -38,8 +38,8 @@ import type {
 } from '$lib/types/reward';
 import type { ResultSuccess } from '$lib/types/utils';
 import { INITIAL_REWARD_RESULT, mapEligibilityReport } from '$lib/utils/rewards.utils';
-import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 const queryEligibilityReport = async (params: {

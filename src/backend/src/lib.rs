@@ -7,8 +7,7 @@ use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
     btc_user_pending_tx_state::StoredPendingTransaction, state::with_btc_pending_transactions,
 };
-use ic_cdk::{api::time, eprintln};
-use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
+use ic_cdk::{api::time, eprintln, export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
@@ -114,7 +113,7 @@ thread_local! {
 
     static STATE: RefCell<State> = RefCell::new(
         MEMORY_MANAGER.with(|mm| State {
-            config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
+            config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
             // Use `UserProfileModel` to access and manage access to these states
@@ -165,10 +164,7 @@ pub struct State {
 fn set_config(arg: InitArg) {
     let config = Config::from(arg);
     mutate_state(|state| {
-        state
-            .config
-            .set(Some(Candid(config)))
-            .expect("setting config should succeed");
+        state.config.set(Some(Candid(config)));
     });
 }
 
@@ -970,7 +966,9 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
     read_state(|s| {
         s.user_profile
             .iter()
-            .map(|((_updated, StoredPrincipal(principal)), user)| {
+            .map(|entry| {
+                let (_updated, StoredPrincipal(principal)) = *entry.key();
+                let user = entry.value();
                 (principal, user.created_timestamp)
             })
             .collect()

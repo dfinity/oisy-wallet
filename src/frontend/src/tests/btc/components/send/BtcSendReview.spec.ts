@@ -31,7 +31,9 @@ describe('BtcSendReview', () => {
 		source: mockBtcAddress,
 		amount: 0.0001,
 		networkId: BTC_MAINNET_TOKEN.network.id,
-		utxosFee: mockUtxosFee
+		utxosFee: mockUtxosFee,
+		onBack: vi.fn(),
+		onSend: vi.fn()
 	};
 	const mockBtcPendingSendTransactionsStatusStore = (
 		status:

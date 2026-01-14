@@ -190,24 +190,26 @@
 		{sourceNetwork}
 	>
 		<CkEthLoader nativeTokenId={$sendTokenId}>
-			{#if currentStep?.name === WizardStepsSend.SENDING}
-				<SendProgress
-					progressStep={sendProgressStep}
-					steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
-				/>
-			{:else if currentStep?.name === WizardStepsSend.REVIEW}
-				<EthWalletConnectSendReview
-					{amount}
-					{application}
-					{data}
-					{destination}
-					{erc20Approve}
-					onApprove={send}
-					onReject={reject}
-					{sourceNetwork}
-					{targetNetwork}
-				/>
-			{/if}
+			{#key currentStep?.name}
+				{#if currentStep?.name === WizardStepsSend.SENDING}
+					<SendProgress
+						progressStep={sendProgressStep}
+						steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
+					/>
+				{:else if currentStep?.name === WizardStepsSend.REVIEW}
+					<EthWalletConnectSendReview
+						{amount}
+						{application}
+						{data}
+						{destination}
+						{erc20Approve}
+						onApprove={send}
+						onReject={reject}
+						{sourceNetwork}
+						{targetNetwork}
+					/>
+				{/if}
+			{/key}
 		</CkEthLoader>
 	</EthFeeContext>
 </WizardModal>

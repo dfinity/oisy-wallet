@@ -5,7 +5,7 @@ import * as z from 'zod';
 
 export const TokenIdSchema = z.symbol().brand<'TokenId'>();
 
-export const TokenStandardSchema = z.enum([
+export const TokenStandardCodeSchema = z.enum([
 	'ethereum',
 	'erc20',
 	'erc721',
@@ -13,10 +13,18 @@ export const TokenStandardSchema = z.enum([
 	'icp',
 	'icrc',
 	'dip20',
+	'dip721',
+	'ext',
+	'icpunks', // This standard can be applied to all NFT IC tokens with a similar interface to ICPunks (for example, ICats)
 	'bitcoin',
 	'solana',
 	'spl'
 ]);
+
+export const TokenStandardSchema = z.object({
+	code: TokenStandardCodeSchema,
+	version: z.string().optional()
+});
 
 export const TokenCategorySchema = z.enum(['default', 'custom']);
 
@@ -40,7 +48,7 @@ const TokenOisyNameSchema = z.object({
 export const TokenAppearanceSchema = z.object({
 	oisySymbol: TokenOisySymbolSchema.optional(),
 	oisyName: TokenOisyNameSchema.optional(),
-	alwaysShowInTokenGroup: z.boolean().optional()
+	neverCollapseInTokenGroup: z.boolean().optional()
 });
 
 const TokenBuySchema = z.object({

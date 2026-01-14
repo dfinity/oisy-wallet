@@ -1,6 +1,6 @@
 import * as constants from '$lib/constants/app.constants';
 import { authStore } from '$lib/stores/auth.store';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
+import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { get } from 'svelte/store';
 
 describe('auth.store', () => {
@@ -8,7 +8,7 @@ describe('auth.store', () => {
 		const identity = Ed25519KeyIdentity.generate();
 
 		it('should set the identity for testing', () => {
-			expect(() => authStore.setForTesting(identity)).not.toThrow();
+			expect(() => authStore.setForTesting(identity)).not.toThrowError();
 
 			const storeIdentity = get(authStore).identity;
 
@@ -18,7 +18,7 @@ describe('auth.store', () => {
 		it('should throw an error if not TEST environment', () => {
 			const spy = vi.spyOn(constants, 'TEST', 'get').mockReturnValue(false);
 
-			expect(() => authStore.setForTesting(identity)).toThrow(
+			expect(() => authStore.setForTesting(identity)).toThrowError(
 				'This function should only be used in npm run test environment'
 			);
 

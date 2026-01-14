@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount, type Snippet, untrack } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
@@ -22,12 +22,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { hasUrlCode } from '$lib/stores/url-code.store';
 	import { isOngoingCampaign } from '$lib/utils/rewards.utils';
-
-	interface Props {
-		children?: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	const rewardModalId = Symbol();
 	const welcomeModalId = Symbol();
@@ -106,8 +100,6 @@
 		}
 	});
 </script>
-
-{@render children?.()}
 
 {#if $modalRewardState && nonNullish($modalRewardStateData)}
 	<RewardStateModal

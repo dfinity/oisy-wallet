@@ -21,7 +21,7 @@ import type { NftId } from '$lib/types/nft';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import {
 	EtherscanProvider as EtherscanProviderLib,
 	Network,
@@ -58,7 +58,7 @@ export class EtherscanProvider {
 			action: 'txlist',
 			address,
 			startblock: startBlock ?? 0,
-			endblock: endBlock ?? 99999999,
+			...(nonNullish(endBlock) ? { endblock: endBlock } : {}),
 			sort: 'asc'
 		};
 
@@ -100,7 +100,7 @@ export class EtherscanProvider {
 			action: 'txlistinternal',
 			address,
 			startblock: startBlock ?? 0,
-			endblock: endBlock ?? 99999999,
+			...(nonNullish(endBlock) ? { endblock: endBlock } : {}),
 			sort: 'asc'
 		};
 
@@ -151,7 +151,6 @@ export class EtherscanProvider {
 			contractAddress,
 			address,
 			startblock: 0,
-			endblock: 99999999,
 			sort: 'desc'
 		};
 
@@ -203,7 +202,6 @@ export class EtherscanProvider {
 			contractAddress,
 			address,
 			startblock: 0,
-			endblock: 99999999,
 			sort: 'desc'
 		};
 
@@ -254,7 +252,6 @@ export class EtherscanProvider {
 			contractAddress,
 			address,
 			startblock: 0,
-			endblock: 99999999,
 			sort: 'desc'
 		};
 
@@ -306,7 +303,6 @@ export class EtherscanProvider {
 			address,
 			contractaddress: contractAddress,
 			startblock: 0,
-			endblock: 99999999,
 			sort: 'desc'
 		};
 
@@ -319,7 +315,7 @@ export class EtherscanProvider {
 			throw new Error(result);
 		}
 
-		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseNftId(parseInt(TokenId)));
+		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseNftId(TokenId));
 	};
 }
 

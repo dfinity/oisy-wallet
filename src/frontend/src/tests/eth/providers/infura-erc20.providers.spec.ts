@@ -2,15 +2,16 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import { ERC20_ABI } from '$eth/constants/erc20.constants';
+import { ERC20_ABI, ERC20_PERMIT_ABI } from '$eth/constants/erc20.constants';
 import { InfuraErc20Provider, infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+import type { EthAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
 import { ZERO } from '$lib/constants/app.constants';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Contract, type ContractTransaction } from 'ethers/contract';
-import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
+import { InfuraProvider, InfuraProvider as InfuraProviderLib } from 'ethers/providers';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'
@@ -115,7 +116,7 @@ describe('infura-erc20.providers', () => {
 
 				const provider = new InfuraErc20Provider(infura);
 
-				await expect(provider.metadata(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.metadata(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -167,7 +168,7 @@ describe('infura-erc20.providers', () => {
 
 				const provider = new InfuraErc20Provider(infura);
 
-				await expect(provider.balance(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.balance(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -349,7 +350,7 @@ describe('infura-erc20.providers', () => {
 
 				const provider = new InfuraErc20Provider(infura);
 
-				await expect(provider.populateTransaction(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.populateTransaction(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -417,7 +418,7 @@ describe('infura-erc20.providers', () => {
 
 				const provider = new InfuraErc20Provider(infura);
 
-				await expect(provider.populateApprove(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.populateApprove(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -471,7 +472,7 @@ describe('infura-erc20.providers', () => {
 
 				const provider = new InfuraErc20Provider(infura);
 
-				await expect(provider.allowance(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.allowance(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -528,6 +529,126 @@ describe('infura-erc20.providers', () => {
 				expect(mockDecimals).toHaveBeenCalledOnce();
 			});
 		});
+
+		describe('isErc20SupportsPermit', () => {
+			const mockUserAddress = '0x1234567890123456789012345678901234567890' as EthAddress;
+			const mockContractAddress = '0x0987654321098765432109876543210987654321';
+
+			it('should return true when contract supports permit (both nonces and DOMAIN_SEPARATOR succeed)', async () => {
+				const mockNonces = vi.fn().mockResolvedValue(BigInt(0));
+				const mockDomainSeparator = vi.fn().mockResolvedValue('0xabcd...');
+				const mockVersion = vi.fn().mockResolvedValue('2');
+
+				mockContract.prototype.nonces =
+					mockNonces as unknown as typeof mockContract.prototype.nonces;
+				mockContract.prototype.DOMAIN_SEPARATOR =
+					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+				mockContract.prototype.version =
+					mockVersion as unknown as typeof mockContract.prototype.version;
+
+				const provider = new InfuraErc20Provider('sepolia');
+				const result = await provider.isErc20SupportsPermit({
+					contractAddress: mockContractAddress,
+					userAddress: mockUserAddress
+				});
+
+				expect(result).toBeTruthy();
+				expect(mockNonces).toHaveBeenCalledWith(mockUserAddress);
+				expect(mockDomainSeparator).toHaveBeenCalled();
+			});
+
+			it('should return false when nonces method throws error', async () => {
+				const mockNonces = vi.fn().mockRejectedValue(new Error('Method not found'));
+				const mockDomainSeparator = vi.fn().mockResolvedValue('0xabcd...');
+				const mockVersion = vi.fn().mockResolvedValue('2');
+
+				mockContract.prototype.nonces =
+					mockNonces as unknown as typeof mockContract.prototype.nonces;
+				mockContract.prototype.DOMAIN_SEPARATOR =
+					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+				mockContract.prototype.version =
+					mockVersion as unknown as typeof mockContract.prototype.version;
+
+				const provider = new InfuraErc20Provider('sepolia');
+				const result = await provider.isErc20SupportsPermit({
+					contractAddress: mockContractAddress,
+					userAddress: mockUserAddress
+				});
+
+				expect(result).toBeFalsy();
+				expect(mockNonces).toHaveBeenCalledWith(mockUserAddress);
+			});
+
+			it('should return false when DOMAIN_SEPARATOR method throws error', async () => {
+				const mockNonces = vi.fn().mockResolvedValue(BigInt(0));
+				const mockDomainSeparator = vi.fn().mockRejectedValue(new Error('Method not found'));
+				const mockVersion = vi.fn().mockResolvedValue('2');
+
+				mockContract.prototype.nonces =
+					mockNonces as unknown as typeof mockContract.prototype.nonces;
+				mockContract.prototype.DOMAIN_SEPARATOR =
+					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+				mockContract.prototype.version =
+					mockVersion as unknown as typeof mockContract.prototype.version;
+
+				const provider = new InfuraErc20Provider('sepolia');
+				const result = await provider.isErc20SupportsPermit({
+					contractAddress: mockContractAddress,
+					userAddress: mockUserAddress
+				});
+
+				expect(result).toBeFalsy();
+				expect(mockDomainSeparator).toHaveBeenCalled();
+			});
+
+			it('should return false when both methods throw errors', async () => {
+				const mockNonces = vi.fn().mockRejectedValue(new Error('nonces not found'));
+				const mockDomainSeparator = vi
+					.fn()
+					.mockRejectedValue(new Error('DOMAIN_SEPARATOR not found'));
+				const mockVersion = vi.fn().mockResolvedValue('2');
+
+				mockContract.prototype.nonces =
+					mockNonces as unknown as typeof mockContract.prototype.nonces;
+				mockContract.prototype.DOMAIN_SEPARATOR =
+					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+				mockContract.prototype.version =
+					mockVersion as unknown as typeof mockContract.prototype.version;
+
+				const provider = new InfuraErc20Provider('sepolia');
+				const result = await provider.isErc20SupportsPermit({
+					contractAddress: mockContractAddress,
+					userAddress: mockUserAddress
+				});
+
+				expect(result).toBeFalsy();
+			});
+
+			it('should use ERC20_PERMIT_ABI for contract instantiation', async () => {
+				const mockNonces = vi.fn().mockResolvedValue(BigInt(0));
+				const mockDomainSeparator = vi.fn().mockResolvedValue('0xabcd...');
+				const mockVersion = vi.fn().mockResolvedValue('2');
+
+				mockContract.prototype.nonces =
+					mockNonces as unknown as typeof mockContract.prototype.nonces;
+				mockContract.prototype.DOMAIN_SEPARATOR =
+					mockDomainSeparator as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+				mockContract.prototype.version =
+					mockVersion as unknown as typeof mockContract.prototype.version;
+
+				const provider = new InfuraErc20Provider('sepolia');
+				await provider.isErc20SupportsPermit({
+					contractAddress: mockContractAddress,
+					userAddress: mockUserAddress
+				});
+
+				expect(Contract).toHaveBeenCalledWith(
+					mockContractAddress,
+					ERC20_PERMIT_ABI,
+					expect.any(InfuraProvider)
+				);
+			});
+		});
 	});
 
 	describe('infuraErc20Providers', () => {
@@ -542,7 +663,7 @@ describe('infura-erc20.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => infuraErc20Providers(ICP_NETWORK_ID)).toThrow(
+			expect(() => infuraErc20Providers(ICP_NETWORK_ID)).toThrowError(
 				replacePlaceholders(en.init.error.no_infura_erc20_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})

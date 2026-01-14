@@ -44,7 +44,7 @@ describe('IntervalLoader', () => {
 
 		const n = 5;
 
-		vi.advanceTimersByTime(interval * 5 + interval / 2);
+		await vi.advanceTimersByTimeAsync(interval * 5 + interval / 2);
 
 		expect(onLoad).toHaveBeenCalledTimes(n + 1);
 	});

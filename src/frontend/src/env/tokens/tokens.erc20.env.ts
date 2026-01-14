@@ -14,6 +14,7 @@ import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.
 import { MATIC_TOKEN } from '$env/tokens/tokens-erc20/tokens.matic.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { PEPECOIN_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepecoin.env';
 import { RNDR_TOKEN } from '$env/tokens/tokens-erc20/tokens.rndr.env';
 import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
 import { SPX_TOKEN } from '$env/tokens/tokens-erc20/tokens.spx.env';
@@ -25,6 +26,7 @@ import { WEETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.weeth.env';
 import { WETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.weth.env';
 import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
 import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
+import { ZCHF_TOKEN } from '$env/tokens/tokens-erc20/tokens.zchf.env';
 import type {
 	Erc20Contract,
 	RequiredAdditionalErc20Token,
@@ -65,10 +67,12 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	FLOKI_TOKEN,
 	JASMY_TOKEN,
 	MATIC_TOKEN,
+	PEPECOIN_TOKEN,
 	RNDR_TOKEN,
 	SPX_TOKEN,
 	WEETH_TOKEN,
-	WETH_TOKEN
+	WETH_TOKEN,
+	ZCHF_TOKEN
 ];
 
 /**

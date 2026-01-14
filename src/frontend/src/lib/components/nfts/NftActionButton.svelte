@@ -8,16 +8,18 @@
 		icon: Snippet;
 		onclick: MouseEventHandler<HTMLButtonElement>;
 		label: string;
+		loading?: boolean;
 		colorStyle?: Extract<ButtonColorStyle, 'primary' | 'tertiary-alt'>;
 		testId?: string;
 	}
 
-	let { icon, onclick, label, colorStyle = 'tertiary-alt', testId }: Props = $props();
+	let { icon, onclick, label, loading, colorStyle = 'tertiary-alt', testId }: Props = $props();
 </script>
 
 <Button
 	{colorStyle}
 	innerStyleClass="h-5"
+	{loading}
 	{onclick}
 	paddingSmall
 	styleClass="rounded-lg border-brand-subtle-30 p-2"

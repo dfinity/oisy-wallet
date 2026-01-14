@@ -14,7 +14,7 @@ export const UNI_TOKEN_ID: TokenId = parseTokenId(UNI_SYMBOL);
 export const UNI_TOKEN: RequiredErc20Token = {
 	id: UNI_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Uniswap',
 	symbol: UNI_SYMBOL,
@@ -24,5 +24,5 @@ export const UNI_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckUNI',
 	groupData: UNI_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true
+	neverCollapseInTokenGroup: true
 };

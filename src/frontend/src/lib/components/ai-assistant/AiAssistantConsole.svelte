@@ -147,10 +147,10 @@
 </script>
 
 <div
-	class="pointer-events-auto fixed bottom-0 right-0 flex h-full min-h-full w-full flex-col justify-between rounded-2xl bg-primary md:bottom-6 md:right-8 md:h-[calc(100vh-7.25rem)] md:min-h-[25rem] md:w-[22.5rem]"
+	class="pointer-events-auto fixed right-0 bottom-0 flex h-full min-h-full w-full flex-col justify-between rounded-2xl bg-primary md:right-8 md:bottom-6 md:h-[calc(100vh-7.25rem)] md:min-h-[25rem] md:w-[22.5rem]"
 	transition:fade
 >
-	<div class="border-b-1 flex items-center justify-between border-brand-subtle-10 px-4 py-2">
+	<div class="flex items-center justify-between border-b-1 border-brand-subtle-10 px-4 py-2">
 		<IconAiAssistant />
 
 		<h5 class="mx-2 w-full">{replaceOisyPlaceholders($i18n.ai_assistant.text.title)}</h5>
@@ -178,7 +178,7 @@
 
 	<div
 		bind:this={messagesContainer}
-		class="h-full overflow-y-auto overflow-x-hidden px-4 py-6"
+		class="h-full overflow-x-hidden overflow-y-auto px-4 py-6"
 		onscroll={handleMessagesContainerScroll}
 	>
 		{#if !loading && messagesToDisplay.length <= 0}

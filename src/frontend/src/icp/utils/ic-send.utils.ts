@@ -5,6 +5,7 @@ import {
 	CKETH_LEDGER_CANISTER_IDS
 } from '$env/networks/networks.icrc.env';
 import type { IcToken } from '$icp/types/ic-token';
+import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -60,7 +61,7 @@ export const isInvalidDestinationIc = ({
 		return !isEthAddress(destination);
 	}
 
-	if (isTokenIcrc({ standard: tokenStandard })) {
+	if (isTokenIcrc({ standard: tokenStandard }) || isTokenIcNft({ standard: tokenStandard })) {
 		return invalidIcrcAddress(destination);
 	}
 

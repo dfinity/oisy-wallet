@@ -3,7 +3,8 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
-	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
+	import IcAddIcrcTokenForm from '$icp/components/tokens/IcAddIcrcTokenForm.svelte';
+	import IcAddNftForm from '$icp/components/tokens/IcAddNftForm.svelte';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import AddTokenByNetworkToolbar from '$lib/components/manage/AddTokenByNetworkToolbar.svelte';
@@ -27,9 +28,16 @@
 		tokenData: Partial<AddTokenData>;
 		onBack: () => void;
 		onNext: () => void;
+		isNftsPage?: boolean;
 	}
 
-	let { network = $bindable(), tokenData = $bindable(), onBack, onNext }: Props = $props();
+	let {
+		network = $bindable(),
+		tokenData = $bindable(),
+		onBack,
+		onNext,
+		isNftsPage = false
+	}: Props = $props();
 
 	let networkName = $state<string | undefined>(network?.name);
 
@@ -47,20 +55,31 @@
 
 	let isSolanaNetwork = $derived(isNetworkIdSolana(network?.id));
 
-	let { ledgerCanisterId, indexCanisterId, ethContractAddress, splTokenAddress } =
-		$derived(tokenData);
+	let {
+		ledgerCanisterId,
+		indexCanisterId,
+		extCanisterId,
+		dip721CanisterId,
+		icPunksCanisterId,
+		ethContractAddress,
+		splTokenAddress
+	} = $derived(tokenData);
 
 	$effect(() => {
 		// Since we persist the values of relevant variables when switching networks, this ensures that
 		// only the data related to the selected network is passed.
 		if (isIcpNetwork) {
-			tokenData = {
-				ledgerCanisterId,
-				indexCanisterId:
-					nonNullish(indexCanisterId) && notEmptyString(indexCanisterId)
-						? indexCanisterId
-						: undefined
-			};
+			tokenData = isNftsPage
+				? nonNullish(extCanisterId)
+					? { extCanisterId }
+					: { dip721CanisterId }
+				: {
+						ledgerCanisterId,
+						indexCanisterId:
+							nonNullish(indexCanisterId) && notEmptyString(indexCanisterId)
+								? indexCanisterId
+								: undefined
+					};
 		} else if (isEthereumNetwork || isEvmNetwork) {
 			tokenData = { ethContractAddress };
 		} else if (isSolanaNetwork) {
@@ -74,11 +93,21 @@
 
 	let invalidIc = $derived(isNullishOrEmpty(ledgerCanisterId));
 
+	let invalidExt = $derived(isNullishOrEmpty(extCanisterId));
+
+	let invalidDip721 = $derived(isNullishOrEmpty(dip721CanisterId));
+
+	let invalidIcPunks = $derived(isNullishOrEmpty(icPunksCanisterId));
+
+	let invalidIcNft = $derived(invalidExt && invalidDip721 && invalidIcPunks);
+
 	let invalidSpl = $derived(isNullishOrEmpty(splTokenAddress));
 
 	let invalid = $derived(
 		isIcpNetwork
-			? invalidIc
+			? isNftsPage
+				? invalidIcNft
+				: invalidIc
 			: isEthereumNetwork || isEvmNetwork
 				? invalidEth
 				: isSolanaNetwork
@@ -91,7 +120,7 @@
 	// filter out BTC networks - they do not have custom tokens
 	let availableNetworks = $derived(
 		($selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets).filter(
-			({ id }) => !isNetworkIdBitcoin(id)
+			({ id, supportsNft }) => !isNetworkIdBitcoin(id) && (!isNftsPage || supportsNft)
 		)
 	);
 </script>
@@ -103,7 +132,11 @@
 		{/if}
 
 		{#if isIcpNetwork}
-			<IcAddTokenForm bind:ledgerCanisterId bind:indexCanisterId />
+			{#if isNftsPage}
+				<IcAddNftForm bind:extCanisterId bind:dip721CanisterId bind:icPunksCanisterId />
+			{:else}
+				<IcAddIcrcTokenForm bind:ledgerCanisterId bind:indexCanisterId />
+			{/if}
 		{:else if isEthereumNetwork || isEvmNetwork}
 			<EthAddTokenForm bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}

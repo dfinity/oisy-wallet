@@ -5,16 +5,27 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let totalFee: bigint | undefined;
-	export let destinationTokenFee: bigint | undefined = undefined;
-	export let minFee: bigint | undefined = undefined;
-	export let ethereumEstimateFee: bigint | undefined = undefined;
-	export let exchangeValueUnit: DisplayUnit = 'usd';
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		totalFee?: bigint;
+		destinationTokenFee?: bigint;
+		minFee?: bigint;
+		ethereumEstimateFee?: bigint;
+		exchangeValueUnit?: DisplayUnit;
+	}
 
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let {
+		sendAmount = $bindable(),
+		receiveAmount = $bindable(),
+		totalFee,
+		destinationTokenFee,
+		minFee,
+		ethereumEstimateFee,
+		exchangeValueUnit = $bindable('usd')
+	}: Props = $props();
+
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 </script>
 
 <div class="relative">
@@ -30,7 +41,7 @@
 	</div>
 
 	<div
-		class="absolute bottom-0 left-0 right-0 top-0 m-auto flex h-9 w-9 items-center justify-center rounded-lg border border-solid border-secondary bg-surface shadow-sm"
+		class="absolute top-0 right-0 bottom-0 left-0 m-auto flex h-9 w-9 items-center justify-center rounded-lg border border-solid border-secondary bg-surface shadow-sm"
 	>
 		<IconMoveDown />
 	</div>

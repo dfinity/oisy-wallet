@@ -16,4 +16,13 @@ describe('StakeContentCard', () => {
 		expect(getByTestId('content')).toBeInTheDocument();
 		expect(getByTestId('buttons')).toBeInTheDocument();
 	});
+
+	it('should not render buttons if they are not provided', () => {
+		const { getByTestId, queryByTestId } = render(StakeContentCard, {
+			props: { content: createMockSnippet('content') }
+		});
+
+		expect(getByTestId('content')).toBeInTheDocument();
+		expect(queryByTestId('buttons')).not.toBeInTheDocument();
+	});
 });

@@ -1,12 +1,5 @@
-import { themeVariables } from '$lib/styles/tailwind/theme-variables';
-import defaultTheme from 'tailwindcss/defaultTheme';
-
-const ALL_SCREENS = { ...defaultTheme.screens, ...themeVariables.screens };
-export type ScreensKeyType = keyof typeof ALL_SCREENS;
-export interface AvailableScreen {
-	screen: ScreensKeyType;
-	width: number;
-}
+import { ALL_SCREENS } from '$lib/constants/screens.constants';
+import type { AvailableScreen, ScreensKeyType } from '$lib/types/screens';
 
 export const MIN_SCREEN: ScreensKeyType = 'xs';
 export const MAX_SCREEN: ScreensKeyType = '2.5xl';

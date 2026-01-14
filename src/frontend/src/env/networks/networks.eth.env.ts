@@ -26,6 +26,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	chainId: 1n,
 	icon: ethereumIcon,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'mainnet',
 		alchemy: 'mainnet',
@@ -33,7 +34,8 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 		alchemyJsonRpcUrl: 'https://eth-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'ethereum' },
-	buy: { onramperId: 'ethereum' }
+	buy: { onramperId: 'ethereum' },
+	pay: { openCryptoPay: 'Ethereum' }
 };
 
 export const SEPOLIA_NETWORK_SYMBOL = 'SepoliaETH';
@@ -47,6 +49,7 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	chainId: 11155111n,
 	icon: sepoliaIcon,
 	explorerUrl: SEPOLIA_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'sepolia',
 		alchemy: 'sepolia',

@@ -31,7 +31,7 @@ describe('erc1155.utils', () => {
 		});
 	});
 
-	describe('isTokenErc721UserToken', () => {
+	describe('isTokenErc1155CustomToken', () => {
 		it.each(
 			MOCK_ERC1155_TOKENS.map((token) => ({
 				...token,

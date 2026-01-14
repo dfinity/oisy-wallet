@@ -14,6 +14,7 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('UtxosFeeContext', () => {
@@ -34,10 +35,13 @@ describe('UtxosFeeContext', () => {
 	const props = {
 		source,
 		amount,
-		networkId
+		networkId,
+		children: mockSnippet
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		mockPage.reset();
 		store = initUtxosFeeStore();
 		store.reset();

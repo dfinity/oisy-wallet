@@ -15,6 +15,10 @@ const NetworkBuySchema = z.object({
 	onramperId: OnramperNetworkIdSchema
 });
 
+const NetworkPaySchema = z.object({
+	openCryptoPay: z.string()
+});
+
 export const NetworkAppMetadataSchema = z.object({
 	explorerUrl: UrlSchema
 });
@@ -41,6 +45,9 @@ export const NetworkSchema = z.object({
 	env: NetworkEnvironmentSchema,
 	name: z.string(),
 	icon: IconSchema.optional(),
+	explorerUrl: UrlSchema,
 	exchange: NetworkExchangeSchema.optional(),
-	buy: NetworkBuySchema.optional()
+	buy: NetworkBuySchema.optional(),
+	pay: NetworkPaySchema.optional(),
+	supportsNft: z.boolean().optional()
 });

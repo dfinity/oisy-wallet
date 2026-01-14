@@ -3,9 +3,8 @@ import type {
 	_SERVICE as BackendService,
 	CustomToken,
 	IcrcToken,
-	UserProfile,
-	UserToken
-} from '$declarations/backend/declarations/backend.did';
+	UserProfile
+} from '$declarations/backend/backend.did';
 
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import {
@@ -28,10 +27,10 @@ import {
 } from '$tests/mocks/user-experimental-features.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import { mockDefinedUserAgreements, mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
-import type { ActorSubclass } from '@dfinity/agent';
-import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import { mapIcrc2ApproveError } from '@icp-sdk/canisters/ledger/icp';
+import type { ActorSubclass } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
@@ -75,7 +74,7 @@ describe('backend.canister', () => {
 	};
 
 	const btcAddPendingTransactionParams = {
-		txId: [1, 2, 3],
+		txId: Uint8Array.from([1, 2, 3]),
 		network: { testnet: null },
 		address: mockBtcAddress,
 		utxos: [
@@ -83,7 +82,7 @@ describe('backend.canister', () => {
 				height: 1000,
 				value: 1n,
 				outpoint: {
-					txid: [1, 2, 3],
+					txid: Uint8Array.from([1, 2, 3]),
 					vout: 1
 				}
 			}
@@ -125,16 +124,6 @@ describe('backend.canister', () => {
 		updated_timestamp: 1n
 	} as UserProfile;
 
-	const mockedUserToken = {
-		decimals: [],
-		version: [],
-		enabled: [],
-		chain_id: 1n,
-		contract_address: 'test_address',
-		symbol: []
-	} as UserToken;
-	const userTokens = [mockedUserToken];
-
 	const mockedCustomToken = {
 		token: {
 			Icrc: {
@@ -151,33 +140,6 @@ describe('backend.canister', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-	});
-
-	it('returns user tokens', async () => {
-		service.list_user_tokens.mockResolvedValue(userTokens);
-
-		const { listUserTokens } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = await listUserTokens(queryParams);
-
-		expect(res).toEqual(userTokens);
-	});
-
-	it('should throw an error if list_user_tokens throws', async () => {
-		service.list_user_tokens.mockImplementation(async () => {
-			await Promise.resolve();
-			throw mockResponseError;
-		});
-
-		const { listUserTokens } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = listUserTokens(queryParams);
-
-		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	it('returns custom tokens', async () => {
@@ -204,7 +166,7 @@ describe('backend.canister', () => {
 
 		const res = listCustomTokens(queryParams);
 
-		await expect(res).rejects.toThrow(mockResponseError);
+		await expect(res).rejects.toThrowError(mockResponseError);
 	});
 
 	it('sets many custom tokens', async () => {
@@ -230,7 +192,7 @@ describe('backend.canister', () => {
 
 		const res = setManyCustomTokens({ tokens: customTokens });
 
-		await expect(res).rejects.toThrow(mockResponseError);
+		await expect(res).rejects.toThrowError(mockResponseError);
 	});
 
 	it('sets custom token', async () => {
@@ -256,59 +218,7 @@ describe('backend.canister', () => {
 
 		const res = setCustomToken({ token: mockedCustomToken });
 
-		await expect(res).rejects.toThrow(mockResponseError);
-	});
-
-	it('sets many user tokens', async () => {
-		const { setManyUserTokens } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = await setManyUserTokens({ tokens: userTokens });
-
-		expect(service.set_many_user_tokens).toHaveBeenCalledWith(userTokens);
-		expect(res).toEqual(undefined);
-	});
-
-	it('should throw an error if set_many_user_tokens throws', async () => {
-		service.set_many_user_tokens.mockImplementation(async () => {
-			await Promise.resolve();
-			throw mockResponseError;
-		});
-
-		const { setManyUserTokens } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = setManyUserTokens({ tokens: userTokens });
-
-		await expect(res).rejects.toThrow(mockResponseError);
-	});
-
-	it('sets user token', async () => {
-		const { setUserToken } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = await setUserToken({ token: mockedUserToken });
-
-		expect(service.set_user_token).toHaveBeenCalledWith(mockedUserToken);
-		expect(res).toEqual(undefined);
-	});
-
-	it('should throw an error if set_user_token throws', async () => {
-		service.set_user_token.mockImplementation(async () => {
-			await Promise.resolve();
-			throw mockResponseError;
-		});
-
-		const { setUserToken } = await createBackendCanister({
-			serviceOverride: service
-		});
-
-		const res = setUserToken({ token: mockedUserToken });
-
-		await expect(res).rejects.toThrow(mockResponseError);
+		await expect(res).rejects.toThrowError(mockResponseError);
 	});
 
 	it('creates user profile', async () => {
@@ -335,7 +245,7 @@ describe('backend.canister', () => {
 
 		const res = createUserProfile();
 
-		await expect(res).rejects.toThrow(mockResponseError);
+		await expect(res).rejects.toThrowError(mockResponseError);
 	});
 
 	it('returns user profile success response', async () => {
@@ -376,7 +286,7 @@ describe('backend.canister', () => {
 
 		const res = getUserProfile(queryParams);
 
-		await expect(res).rejects.toThrow(mockResponseError);
+		await expect(res).rejects.toThrowError(mockResponseError);
 	});
 
 	it('adds user credentials with success response', async () => {
@@ -420,7 +330,7 @@ describe('backend.canister', () => {
 
 		const res = addUserCredential(addUserCredentialParams);
 
-		await expect(res).rejects.toThrow(mockResponseError);
+		await expect(res).rejects.toThrowError(mockResponseError);
 	});
 
 	describe('btc_add_pending_transaction', () => {
@@ -450,7 +360,7 @@ describe('backend.canister', () => {
 
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(errorResponse.Err.InternalError.msg)
 			);
 		});
@@ -465,7 +375,7 @@ describe('backend.canister', () => {
 
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError('Unknown BtcAddPendingTransactionError')
 			);
 		});
@@ -482,7 +392,7 @@ describe('backend.canister', () => {
 
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if btc_add_pending_transaction returns an unexpected response', async () => {
@@ -495,7 +405,7 @@ describe('backend.canister', () => {
 
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -535,7 +445,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(errorResponse.Err.InternalError.msg)
 			);
 		});
@@ -552,7 +462,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if btc_get_pending_transactions returns an unexpected response', async () => {
@@ -565,7 +475,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -601,7 +511,7 @@ describe('backend.canister', () => {
 
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(errorResponse.Err.InternalError.msg)
 			);
 		});
@@ -615,7 +525,7 @@ describe('backend.canister', () => {
 
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(
 					'Selecting utxos fee is not possible - pending transactions found.'
 				)
@@ -632,7 +542,7 @@ describe('backend.canister', () => {
 
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
 			);
 		});
@@ -649,7 +559,7 @@ describe('backend.canister', () => {
 
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if btc_select_user_utxos_fee returns an unexpected response', async () => {
@@ -662,7 +572,7 @@ describe('backend.canister', () => {
 
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -693,7 +603,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getAllowedCycles()).rejects.toThrow(
+			await expect(getAllowedCycles()).rejects.toThrowError(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -708,7 +618,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getAllowedCycles()).rejects.toThrow(new CanisterInternalError(errorMsg));
+			await expect(getAllowedCycles()).rejects.toThrowError(new CanisterInternalError(errorMsg));
 		});
 
 		it('should throw CanisterInternalError with custom message when a generic canister error is returned', async () => {
@@ -719,7 +629,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getAllowedCycles()).rejects.toThrow(
+			await expect(getAllowedCycles()).rejects.toThrowError(
 				new CanisterInternalError('Unknown GetAllowedCyclesError')
 			);
 		});
@@ -733,7 +643,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getAllowedCycles()).rejects.toThrow(
+			await expect(getAllowedCycles()).rejects.toThrowError(
 				new CanisterInternalError('Some unknown error')
 			);
 		});
@@ -748,7 +658,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getAllowedCycles()).rejects.toThrow(mockResponseError);
+			await expect(getAllowedCycles()).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -786,7 +696,7 @@ describe('backend.canister', () => {
 
 			const res = allowSigning();
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		// We do not test all types of ApproveError:
@@ -802,7 +712,9 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(mapIcrc2ApproveError(response.Err.ApproveError));
+			await expect(allowSigning()).rejects.toThrowError(
+				mapIcrc2ApproveError(response.Err.ApproveError)
+			);
 		});
 
 		it('should throw a CanisterInternalError if FailedToContactCyclesLedger error is returned', async () => {
@@ -814,7 +726,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(
+			await expect(allowSigning()).rejects.toThrowError(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -875,7 +787,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(new CanisterInternalError(errorMsg));
+			await expect(allowSigning()).rejects.toThrowError(new CanisterInternalError(errorMsg));
 		});
 
 		it('should throw a CanisterInternalError with message if unrecognized error is returned', async () => {
@@ -887,7 +799,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(
+			await expect(allowSigning()).rejects.toThrowError(
 				new CanisterInternalError('An uknown error occurred.')
 			);
 		});
@@ -920,7 +832,7 @@ describe('backend.canister', () => {
 				Err: { ChallengeInProgress: null }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
 				new PowCreateChallengeError(
 					'Challenge is already in progress.',
 					CreateChallengeEnum.ChallengeInProgress
@@ -935,7 +847,7 @@ describe('backend.canister', () => {
 				Err: { RandomnessError: 'Failed to generate randomness' }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
 				new CanisterInternalError('Could not generate randomness.')
 			);
 
@@ -947,7 +859,7 @@ describe('backend.canister', () => {
 				Err: { MissingUserProfile: null }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
 				new CanisterInternalError('User profile is missing.')
 			);
 
@@ -960,7 +872,7 @@ describe('backend.canister', () => {
 				Err: { Other: errorMsg }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
 				new CanisterInternalError('An other error occurred.')
 			);
 
@@ -971,7 +883,7 @@ describe('backend.canister', () => {
 			// @ts-expect-error we test this in purposes
 			service.create_pow_challenge.mockResolvedValue({ Err: { CanisterError: null } });
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
 				new CanisterInternalError('An uknown error occurred.')
 			);
 
@@ -1010,7 +922,7 @@ describe('backend.canister', () => {
 
 			const res = addUserHiddenDappId({ dappId: 'test-dapp-id' });
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -1049,7 +961,7 @@ describe('backend.canister', () => {
 				showTestnets: true
 			});
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -1088,7 +1000,7 @@ describe('backend.canister', () => {
 				networks: mockUserNetworks
 			});
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -1127,7 +1039,7 @@ describe('backend.canister', () => {
 				experimentalFeatures: mockUserExperimentalFeatures
 			});
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -1194,7 +1106,7 @@ describe('backend.canister', () => {
 				agreements: mockUserAgreements
 			});
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -1227,7 +1139,7 @@ describe('backend.canister', () => {
 
 			const res = getContact(1n);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -1260,7 +1172,7 @@ describe('backend.canister', () => {
 
 			const res = getContacts();
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -1293,7 +1205,7 @@ describe('backend.canister', () => {
 
 			const res = createContact('John');
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -1325,7 +1237,7 @@ describe('backend.canister', () => {
 
 			const res = deleteContact(1n);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -1359,46 +1271,7 @@ describe('backend.canister', () => {
 
 			const res = updateContact(mockContact);
 
-			await expect(res).rejects.toThrow(mockResponseError);
-		});
-	});
-
-	describe('removeUserToken', () => {
-		it('should call remove_user_token method', async () => {
-			const params = {
-				chain_id: mockedUserToken.chain_id,
-				contract_address: mockedUserToken.contract_address
-			};
-			const response = undefined;
-
-			service.remove_user_token.mockResolvedValue(response);
-
-			const { removeUserToken } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = await removeUserToken(params);
-
-			expect(service.remove_user_token).toHaveBeenCalledWith(params);
-			expect(res).toEqual(response);
-		});
-
-		it('should throw an error if remove_user_token throws', async () => {
-			service.remove_user_token.mockImplementation(async () => {
-				await Promise.resolve();
-				throw mockResponseError;
-			});
-
-			const { removeUserToken } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = removeUserToken({
-				chain_id: mockedUserToken.chain_id,
-				contract_address: mockedUserToken.contract_address
-			});
-
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -1435,7 +1308,7 @@ describe('backend.canister', () => {
 				token: mockedCustomToken
 			});
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -1447,7 +1320,7 @@ describe('backend.canister', () => {
 		it('should return fee percentiles with success response', async () => {
 			const response = {
 				Ok: {
-					fee_percentiles: [5n, 10n, 15n, 20n, 30n]
+					fee_percentiles: BigUint64Array.from([5n, 10n, 15n, 20n, 30n])
 				}
 			};
 
@@ -1474,7 +1347,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(errorResponse.Err.InternalError.msg)
 			);
 		});
@@ -1490,7 +1363,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(
 					'Selecting utxos fee is not possible - pending transactions found.'
 				)
@@ -1507,7 +1380,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
 			);
 		});
@@ -1524,7 +1397,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if btc_get_current_fee_percentiles returns an unexpected response', async () => {
@@ -1537,7 +1410,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 });

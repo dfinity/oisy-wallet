@@ -5,6 +5,7 @@ import type {
 	TokenIdSchema,
 	TokenMetadataSchema,
 	TokenSchema,
+	TokenStandardCodeSchema,
 	TokenStandardSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
@@ -13,6 +14,8 @@ import type { Option, RequiredExcept } from '$lib/types/utils';
 import type * as z from 'zod';
 
 export type TokenId = z.infer<typeof TokenIdSchema>;
+
+export type TokenStandardCode = z.infer<typeof TokenStandardCodeSchema>;
 
 export type TokenStandard = z.infer<typeof TokenStandardSchema>;
 
@@ -47,11 +50,15 @@ export type RequiredTokenWithLinkedData = RequiredToken<TokenWithLinkedData>;
 
 export type OptionToken = Option<Token>;
 export type OptionTokenId = Option<TokenId>;
-export type OptionTokenStandard = Option<TokenStandard>;
+export type OptionTokenStandardCode = Option<TokenStandardCode>;
 
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 
 export interface TokenFinancialData {
 	balance?: Exclude<OptionBalance, undefined>;
 	usdBalance?: number;
+	stakeBalance?: bigint;
+	stakeUsdBalance?: number;
+	claimableStakeBalance?: bigint;
+	claimableStakeBalanceUsd?: number;
 }

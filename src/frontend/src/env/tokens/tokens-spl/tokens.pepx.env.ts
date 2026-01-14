@@ -14,7 +14,7 @@ export const PEPX_TOKEN_ID: TokenId = parseTokenId(PEPX_SYMBOL);
 export const PEPX_TOKEN: RequiredSpl2022Token = {
 	id: PEPX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'PepsiCo xStock',
 	symbol: PEPX_SYMBOL,

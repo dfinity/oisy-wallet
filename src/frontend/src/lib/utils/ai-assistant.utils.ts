@@ -1,4 +1,3 @@
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type {
 	AiAssistantContactUiMap,
@@ -14,7 +13,7 @@ import type { RequiredTokenWithLinkedData, Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
-import { jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
+import { isNullish, jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const parseToAiAssistantContacts = (
 	extendedAddressContacts: ExtendedAddressContactUiMap
@@ -67,7 +66,7 @@ export const parseToAiAssistantTokens = (tokens: Token[]): AiAssistantToken[] =>
 				name,
 				symbol,
 				standard,
-				networkId: networkId.description ?? ''
+				networkId: `${networkId.description}`
 			}
 		];
 	}, []);
@@ -120,7 +119,7 @@ export const parseReviewSendTokensToolArguments = ({
 	filterParams: ToolCallArgument[];
 	tokens: Token[];
 	extendedAddressContacts: ExtendedAddressContactUiMap;
-}): ReviewSendTokensToolResult => {
+}): ReviewSendTokensToolResult | undefined => {
 	const {
 		selectedContactAddressIdFilter,
 		amountNumberFilter,
@@ -171,11 +170,14 @@ export const parseReviewSendTokensToolArguments = ({
 		{ contact: undefined, contactAddress: undefined }
 	);
 
-	const tokenWithFallback =
-		tokens.find(
-			({ id, network: { id: networkId } }) =>
-				id.description === tokenSymbolFilter && networkId.description === networkIdFilter
-		) ?? ICP_TOKEN;
+	const token = tokens.find(
+		({ id, network: { id: networkId } }) =>
+			id.description === tokenSymbolFilter && networkId.description === networkIdFilter
+	);
+
+	if (isNullish(token)) {
+		return;
+	}
 
 	const parsedAmount = Number(amountNumberFilter);
 
@@ -184,7 +186,7 @@ export const parseReviewSendTokensToolArguments = ({
 		contactAddress,
 		address: addressFilter,
 		amount: parsedAmount,
-		token: tokenWithFallback,
+		token,
 		sendCompleted: false,
 		id: crypto.randomUUID().toString()
 	};

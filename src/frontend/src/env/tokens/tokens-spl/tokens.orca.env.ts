@@ -14,7 +14,7 @@ export const ORCA_TOKEN_ID: TokenId = parseTokenId(ORCA_SYMBOL);
 export const ORCA_TOKEN: RequiredSplToken = {
 	id: ORCA_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Orca',
 	symbol: ORCA_SYMBOL,

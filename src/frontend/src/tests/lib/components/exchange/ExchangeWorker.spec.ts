@@ -1,10 +1,6 @@
 import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 import { Currency } from '$lib/enums/currency';
-import * as exchangeServices from '$lib/services/worker.exchange.services';
-import {
-	initExchangeWorker,
-	type ExchangeWorker as ExchangeWorkerType
-} from '$lib/services/worker.exchange.services';
+import { ExchangeWorker as ExchangeWorkerObj } from '$lib/services/worker.exchange.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { currencyStore } from '$lib/stores/currency.store';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
@@ -15,11 +11,11 @@ describe('ExchangeWorker', () => {
 	const startExchangeTimer = vi.fn();
 	const destroy = vi.fn();
 
-	const mockWorker: ExchangeWorkerType = {
+	const mockWorker: ExchangeWorkerObj = {
 		stopExchangeTimer,
 		startExchangeTimer,
 		destroy
-	};
+	} as unknown as ExchangeWorkerObj;
 
 	const waitTimer = () => vi.advanceTimersByTimeAsync(500 * 10);
 
@@ -27,7 +23,7 @@ describe('ExchangeWorker', () => {
 		vi.useFakeTimers();
 		vi.clearAllMocks();
 
-		vi.spyOn(exchangeServices, 'initExchangeWorker').mockResolvedValue(mockWorker);
+		vi.spyOn(ExchangeWorkerObj, 'init').mockResolvedValue(mockWorker);
 	});
 
 	afterEach(() => {
@@ -39,7 +35,7 @@ describe('ExchangeWorker', () => {
 
 		await waitTimer();
 
-		expect(initExchangeWorker).toHaveBeenCalledOnce();
+		expect(ExchangeWorkerObj.init).toHaveBeenCalledOnce();
 	});
 
 	it('should start the worker once when mounted', async () => {

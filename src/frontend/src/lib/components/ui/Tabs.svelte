@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import type { TabVariant } from '$lib/types/style';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
@@ -11,6 +13,7 @@
 		children?: Snippet;
 		styleClass?: string;
 		tabVariant?: TabVariant;
+		trackEventName?: string;
 	}
 
 	let {
@@ -18,13 +21,25 @@
 		activeTab = $bindable(),
 		tabs,
 		styleClass,
-		tabVariant = 'default'
+		tabVariant = 'default',
+		trackEventName
 	}: Props = $props();
 
 	const handleClick = ({ id, path }: { id: string; path?: string }): void => {
 		if (isNullish(path)) {
 			activeTab = id;
 		} else {
+			if (nonNullish(trackEventName)) {
+				trackEvent({
+					name: trackEventName,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.ASSETS_TAB,
+						event_value: id,
+						location_source: PLAUSIBLE_EVENT_SOURCES.ASSETS_PAGE
+					}
+				});
+			}
+
 			goto(path);
 		}
 	};

@@ -1,10 +1,6 @@
-import {
-	authClientStorage,
-	createAuthClient,
-	safeCreateAuthClient
-} from '$lib/api/auth-client.api';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 import {
 	AUTH_MAX_TIME_TO_LIVE,
@@ -13,14 +9,14 @@ import {
 	INTERNET_IDENTITY_CANISTER_ID,
 	TEST
 } from '$lib/constants/app.constants';
-import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
+import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
+import { InternetIdentityDomain } from '$lib/types/auth';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
-import type { Identity } from '@dfinity/agent';
-import { KEY_STORAGE_KEY, type AuthClient } from '@dfinity/auth-client';
-import type { ECDSAKeyIdentity } from '@dfinity/identity';
+import type { AuthClient } from '@icp-sdk/auth/client';
+import type { Identity } from '@icp-sdk/core/agent';
 import { writable, type Readable } from 'svelte/store';
 
 export interface AuthStoreData {
@@ -30,7 +26,7 @@ export interface AuthStoreData {
 let authClient: Option<AuthClient>;
 
 export interface AuthSignInParams {
-	domain?: 'ic0.app' | 'internetcomputer.org';
+	domain?: InternetIdentityDomain;
 }
 
 export interface AuthStore extends Readable<AuthStoreData> {
@@ -42,16 +38,18 @@ export interface AuthStore extends Readable<AuthStoreData> {
 }
 
 const initAuthStore = (): AuthStore => {
-	const { subscribe, set, update } = writable<AuthStoreData>({
+	const { subscribe, set } = writable<AuthStoreData>({
 		identity: undefined
 	});
 
-	// With different tabs opened of OISy in the same browser, it may happen that separate authClient objects are out-of-sync among themselves.
+	// With different tabs opened of OISY in the same browser, it may happen that separate authClient objects are out-of-sync among themselves.
 	// To avoid issues, we use this method to pick the most up-to-date authClient object, since the data are cached in IndexedDB.
 	const pickAuthClient = async (): Promise<AuthClient> => {
 		if (nonNullish(authClient) && (await authClient.isAuthenticated())) {
 			return authClient;
 		}
+
+		const { createAuthClient, safeCreateAuthClient } = AuthClientProvider.getInstance();
 
 		const refreshed = await createAuthClient();
 
@@ -66,49 +64,10 @@ const initAuthStore = (): AuthStore => {
 		return await safeCreateAuthClient();
 	};
 
-	/**
-	 * ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
-	 * ⚠️          **Warning:**       ⚠️
-	 * ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
-	 *
-	 * When multiple OISY tabs are open in the same browser, each creates a new `authClient`
-	 * object with its own key pair. Since keys are stored in IndexedDB (IDB) as a security
-	 * measure to avoid key injection, the last loaded tab overwrites the cached keys.
-	 *
-	 * This causes a problem: if a user logs in on a tab that is not the "latest" one
-	 * (without refreshing first), the existing `authClient` in that tab uses a key pair
-	 * different from the one currently cached in IDB. It will then request a delegation for
-	 * those non-cached keys, and store that delegation in IDB too. As a result, the cache
-	 * ends up with a delegation that does not match the cached key.
-	 *
-	 * Later, if we recreate the `authClient` (e.g. inside a worker) or refresh another tab,
-	 * the mismatch between keys and delegation leads to invalid signatures and errors.
-	 *
-	 * To prevent this, we must ensure that after login, the correct key is always cached in
-	 * IDB, overwriting any previously stored key. This guarantees that delegation and keys
-	 * remain in sync.
-	 *
-	 * TODO: Remove this when `authClient` will handle it by itself during login.
-	 */
-	const overwriteStoredIdentityKey = async () => {
-		try {
-			assertNonNullish(authClient);
-
-			const key = authClient['_key'];
-
-			await authClientStorage.set(KEY_STORAGE_KEY, (key as ECDSAKeyIdentity).getKeyPair());
-		} catch (_: unknown) {
-			// In the unlikely event of an error while setting a value in IndexedDB,
-			// we log out the user and refresh the page to prevent potential conflicts.
-
-			await authStore.signOut();
-
-			window.location.reload();
-		}
-	};
-
 	const sync = async ({ forceSync }: { forceSync: boolean }) => {
-		authClient = forceSync ? await createAuthClient() : await pickAuthClient();
+		authClient = forceSync
+			? await AuthClientProvider.getInstance().createAuthClient()
+			: await pickAuthClient();
 
 		const isAuthenticated: boolean = await authClient.isAuthenticated();
 
@@ -141,24 +100,19 @@ const initAuthStore = (): AuthStore => {
 					? /apple/i.test(navigator?.vendor)
 						? `http://localhost:4943?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
 						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-					: `https://identity.${domain ?? 'internetcomputer.org'}`;
+					: `https://${domain ?? InternetIdentityDomain.VERSION_1_0}${domain === InternetIdentityDomain.VERSION_2_0 ? '/?feature_flag_guided_upgrade=true' : ''}`;
 
 				await authClient.login({
 					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
-					onSuccess: async () => {
-						await overwriteStoredIdentityKey();
-
-						update((state: AuthStoreData) => ({
-							...state,
-							identity: authClient?.getIdentity()
-						}));
+					onSuccess: () => {
+						set({ identity: authClient?.getIdentity() });
 
 						try {
 							// If the user has more than one tab open in the same browser,
 							// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
 							// This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
 							// To mitigate this, we use a BroadcastChannel to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
-							const bc = new AuthBroadcastChannel();
+							const bc = AuthBroadcastChannel.getInstance();
 							bc.postLoginSuccess();
 						} catch (err: unknown) {
 							// We don't really care if the broadcast channel fails to open or if it fails to post messages.
@@ -177,17 +131,15 @@ const initAuthStore = (): AuthStore => {
 			}),
 
 		signOut: async () => {
-			const client: AuthClient = authClient ?? (await createAuthClient());
+			const client: AuthClient =
+				authClient ?? (await AuthClientProvider.getInstance().createAuthClient());
 
 			await client.logout();
 
 			// This fixes a "sign in -> sign-out -> sign in again" flow without reloading the window.
 			authClient = null;
 
-			update((state: AuthStoreData) => ({
-				...state,
-				identity: null
-			}));
+			set({ identity: null });
 		},
 
 		/**
@@ -219,3 +171,5 @@ const initAuthStore = (): AuthStore => {
 export const authStore = initAuthStore();
 
 export const authRemainingTimeStore = writable<number | undefined>(undefined);
+
+export const authLoggedInAnotherTabStore = writable<boolean>(false);

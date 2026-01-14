@@ -1,6 +1,5 @@
 import type * as PowEnv from '$env/pow.env';
-import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
-import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
+import { PowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 import PowProtector from '$lib/components/pow/PowProtector.svelte';
 import { POW_CHECK_INTERVAL_MS, POW_MAX_CHECK_ATTEMPTS } from '$lib/constants/pow.constants';
 import { POW_PROTECTOR_MODAL } from '$lib/constants/test-ids.constants';
@@ -22,10 +21,6 @@ vi.mock('$env/pow.env', () => ({
 	}
 }));
 
-vi.mock('$icp/services/worker.pow-protection.services', () => ({
-	initPowProtectorWorker: vi.fn()
-}));
-
 vi.mock('$lib/services/auth.services', () => ({
 	errorSignOut: vi.fn()
 }));
@@ -43,12 +38,11 @@ vi.mock('@dfinity/utils', async () => {
 });
 
 describe('PowProtector', () => {
-	const mockWorker: PowProtectorWorkerInitResult = {
+	const mockWorker: PowProtectorWorker = {
 		start: vi.fn(),
-		stop: vi.fn(),
 		trigger: vi.fn(),
 		destroy: vi.fn()
-	};
+	} as unknown as PowProtectorWorker;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -62,7 +56,7 @@ describe('PowProtector', () => {
 		});
 
 		// Default mocks
-		vi.mocked(initPowProtectorWorker).mockResolvedValue(mockWorker);
+		vi.spyOn(PowProtectorWorker, 'init').mockResolvedValue(mockWorker);
 		// Default: cycles allowance is NOT spent (user has sufficient cycles)
 		vi.mocked(isCyclesAllowanceSpent).mockResolvedValue(false);
 	});
@@ -102,7 +96,7 @@ describe('PowProtector', () => {
 				expect(getByText('Mock Snippet')).toBeInTheDocument();
 			});
 
-			expect(initPowProtectorWorker).not.toHaveBeenCalled();
+			expect(PowProtectorWorker.init).not.toHaveBeenCalled();
 			expect(isCyclesAllowanceSpent).not.toHaveBeenCalled();
 		});
 	});
@@ -114,7 +108,7 @@ describe('PowProtector', () => {
 			// Flush microtasks to allow onMount to complete
 			await flushMicrotasks();
 
-			expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+			expect(PowProtectorWorker.init).toHaveBeenCalledOnce();
 			expect(mockWorker.start).toHaveBeenCalledOnce();
 		});
 
@@ -182,9 +176,11 @@ describe('PowProtector', () => {
 					$theme: 'light'
 				});
 
-				const banner = getByAltText(altText);
+				await waitFor(() => {
+					const banner = getByAltText(altText);
 
-				expect(banner).toBeInTheDocument();
+					expect(banner).toBeInTheDocument();
+				});
 			});
 
 			it('should display the POW protector title and description', async () => {
@@ -337,7 +333,7 @@ describe('PowProtector', () => {
 
 				await flushMicrotasks();
 
-				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+				expect(PowProtectorWorker.init).toHaveBeenCalledOnce();
 				expect(mockWorker.start).toHaveBeenCalledOnce();
 
 				// Verify polling started
@@ -361,14 +357,14 @@ describe('PowProtector', () => {
 
 			it('should handle worker initialization failure gracefully', async () => {
 				const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-				vi.mocked(initPowProtectorWorker).mockRejectedValue(new Error('Worker init failed'));
+				vi.mocked(PowProtectorWorker.init).mockRejectedValue(new Error('Worker init failed'));
 
 				render(PowProtector, { children: mockSnippet });
 
 				await flushMicrotasks();
 
 				// Should still render the component even if worker fails
-				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+				expect(PowProtectorWorker.init).toHaveBeenCalledOnce();
 				expect(consoleErrorSpy).toHaveBeenCalledWith(
 					'Failed to initialize POW worker:',
 					expect.any(Error)
@@ -393,7 +389,7 @@ describe('PowProtector', () => {
 					expect.any(Error)
 				);
 				// Should still initialize the worker even if cycle check fails
-				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+				expect(PowProtectorWorker.init).toHaveBeenCalledOnce();
 
 				consoleErrorSpy.mockRestore();
 			});
@@ -403,7 +399,7 @@ describe('PowProtector', () => {
 
 				await flushMicrotasks();
 
-				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+				expect(PowProtectorWorker.init).toHaveBeenCalledOnce();
 
 				// Trigger a re-render
 				rerender({ children: mockSnippet });
@@ -411,7 +407,7 @@ describe('PowProtector', () => {
 				await flushMicrotasks();
 
 				// Should still only be called once
-				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+				expect(PowProtectorWorker.init).toHaveBeenCalledOnce();
 			});
 		});
 	});

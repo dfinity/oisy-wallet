@@ -44,7 +44,7 @@ describe('env.utils', () => {
 
 		['not_a_json', 'yes', 'no', 'a'].forEach((value) => {
 			it(`should throw for malformed JSON string "${value}"`, () => {
-				expect(() => parseBoolEnvVar(value)).toThrow(
+				expect(() => parseBoolEnvVar(value)).toThrowError(
 					expect.objectContaining({
 						message: expect.stringContaining(`"${value}" is not valid JSON`)
 					})
@@ -53,7 +53,7 @@ describe('env.utils', () => {
 		});
 
 		it('should throw for empty strings', () => {
-			expect(() => parseBoolEnvVar('')).toThrow(
+			expect(() => parseBoolEnvVar('')).toThrowError(
 				"[parseBoolEnvVar] Empty string received as environment variable. Verify that all the environment variables that are being set in the deployment CI workflow exist as secrets in GitHub. If you don't want to set it as GitHub secret, remove it from the workflow: it will default to 'false'."
 			);
 		});
@@ -86,7 +86,7 @@ describe('env.utils', () => {
 
 		['not_a_json', 'yes', 'no', 'a'].forEach((value) => {
 			it(`should throw for malformed JSON string "${value}"`, () => {
-				expect(() => parseBoolEnvVar(value)).toThrow(
+				expect(() => parseBoolEnvVar(value)).toThrowError(
 					expect.objectContaining({
 						message: expect.stringContaining(`"${value}" is not valid JSON`)
 					})
@@ -95,7 +95,7 @@ describe('env.utils', () => {
 		});
 
 		it('should throw for empty strings', () => {
-			expect(() => parseBoolEnvVar('')).toThrow(
+			expect(() => parseBoolEnvVar('')).toThrowError(
 				"[parseBoolEnvVar] Empty string received as environment variable. Verify that all the environment variables that are being set in the deployment CI workflow exist as secrets in GitHub. If you don't want to set it as GitHub secret, remove it from the workflow: it will default to 'false'."
 			);
 		});

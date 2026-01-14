@@ -1,6 +1,7 @@
 import {
+	allSendNftsWizardSteps,
 	allSendWizardSteps,
-	sendWizardSteps,
+	sendNftsWizardStepsWithQrCodeScan,
 	sendWizardStepsWithQrCodeScan
 } from '$lib/config/send.config';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -31,11 +32,56 @@ describe('send.config', () => {
 		}
 	];
 
+	const expectedNftBaseConfig: WizardSteps<WizardStepsSend> = [
+		{
+			name: WizardStepsSend.DESTINATION,
+			title: en.send.text.send
+		},
+		{
+			name: WizardStepsSend.REVIEW,
+			title: en.send.text.review
+		}
+	];
+
+	const expectedNftSendConfig: WizardSteps<WizardStepsSend> = [
+		...expectedNftBaseConfig,
+		{
+			name: WizardStepsSend.SENDING,
+			title: en.send.text.sending
+		}
+	];
+
 	const expectedConvertConfig: WizardSteps<WizardStepsSend> = [
 		...expectedBaseConfig,
 		{
 			name: WizardStepsSend.SENDING,
 			title: en.convert.text.converting
+		}
+	];
+
+	const expectedMintConfig: WizardSteps<WizardStepsSend> = [
+		expectedBaseConfig[0],
+		{
+			name: WizardStepsSend.SEND,
+			title: en.mint.text.mint
+		},
+		expectedBaseConfig[2],
+		{
+			name: WizardStepsSend.SENDING,
+			title: en.mint.text.minting
+		}
+	];
+
+	const expectedBurnConfig: WizardSteps<WizardStepsSend> = [
+		expectedBaseConfig[0],
+		{
+			name: WizardStepsSend.SEND,
+			title: en.burn.text.burn
+		},
+		expectedBaseConfig[2],
+		{
+			name: WizardStepsSend.SENDING,
+			title: en.burn.text.burning
 		}
 	];
 
@@ -46,40 +92,32 @@ describe('send.config', () => {
 		}
 	];
 
-	const expectedAllSendConfig: WizardSteps<WizardStepsSend> = [
-		{
-			name: WizardStepsSend.TOKENS_LIST,
-			title: en.send.text.select_token
-		},
+	const expectedFilterNetworksConfig: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.FILTER_NETWORKS,
 			title: en.send.text.select_network_filter
 		}
 	];
 
+	const expectedAllSendConfig: WizardSteps<WizardStepsSend> = [
+		{
+			name: WizardStepsSend.TOKENS_LIST,
+			title: en.send.text.select_token
+		},
+		...expectedFilterNetworksConfig
+	];
+
+	const expectedNftAllSendConfig: WizardSteps<WizardStepsSend> = [
+		{
+			name: WizardStepsSend.NFTS_LIST,
+			title: en.send.text.select_nft
+		},
+		...expectedFilterNetworksConfig
+	];
+
 	const mockParams = {
 		i18n: en
 	};
-
-	describe('sendWizardSteps', () => {
-		it('should return the correct steps with expected text and state', () => {
-			const steps = sendWizardSteps(mockParams);
-
-			expect(steps).toStrictEqual(expectedSendConfig);
-		});
-
-		it('should return the correct steps with expected text and state when converting is false', () => {
-			const steps = sendWizardSteps({ ...mockParams, converting: false });
-
-			expect(steps).toStrictEqual(expectedSendConfig);
-		});
-
-		it('should return the correct steps with expected text and state when converting is true', () => {
-			const steps = sendWizardSteps({ ...mockParams, converting: true });
-
-			expect(steps).toStrictEqual(expectedConvertConfig);
-		});
-	});
 
 	describe('sendWizardStepsWithQrCodeScan', () => {
 		it('should return the correct steps with expected text and state', () => {
@@ -98,6 +136,51 @@ describe('send.config', () => {
 			const steps = sendWizardStepsWithQrCodeScan({ ...mockParams, converting: true });
 
 			expect(steps).toStrictEqual([...expectedConvertConfig, ...expectedQrCodeConfig]);
+		});
+
+		it('should return the correct steps with expected text and state when minting is false', () => {
+			const steps = sendWizardStepsWithQrCodeScan({ ...mockParams, minting: false });
+
+			expect(steps).toStrictEqual([...expectedSendConfig, ...expectedQrCodeConfig]);
+		});
+
+		it('should return the correct steps with expected text and state when minting is true', () => {
+			const steps = sendWizardStepsWithQrCodeScan({ ...mockParams, minting: true });
+
+			expect(steps).toStrictEqual([...expectedMintConfig, ...expectedQrCodeConfig]);
+		});
+
+		it('should return the correct steps with expected text and state when burning is false', () => {
+			const steps = sendWizardStepsWithQrCodeScan({ ...mockParams, burning: false });
+
+			expect(steps).toStrictEqual([...expectedSendConfig, ...expectedQrCodeConfig]);
+		});
+
+		it('should return the correct steps with expected text and state when burning is true', () => {
+			const steps = sendWizardStepsWithQrCodeScan({ ...mockParams, burning: true });
+
+			expect(steps).toStrictEqual([...expectedBurnConfig, ...expectedQrCodeConfig]);
+		});
+
+		it('should prioritize minting over burning and converting when all are true', () => {
+			const steps = sendWizardStepsWithQrCodeScan({
+				...mockParams,
+				converting: true,
+				minting: true,
+				burning: true
+			});
+
+			expect(steps).toStrictEqual([...expectedMintConfig, ...expectedQrCodeConfig]);
+		});
+
+		it('should prioritize burning over converting when both are true', () => {
+			const steps = sendWizardStepsWithQrCodeScan({
+				...mockParams,
+				converting: true,
+				burning: true
+			});
+
+			expect(steps).toStrictEqual([...expectedBurnConfig, ...expectedQrCodeConfig]);
 		});
 	});
 
@@ -128,6 +211,95 @@ describe('send.config', () => {
 			expect(steps).toStrictEqual([
 				...expectedAllSendConfig,
 				...expectedConvertConfig,
+				...expectedQrCodeConfig
+			]);
+		});
+
+		it('should return the correct steps with expected text and state when minting is false', () => {
+			const steps = allSendWizardSteps({ ...mockParams, minting: false });
+
+			expect(steps).toStrictEqual([
+				...expectedAllSendConfig,
+				...expectedSendConfig,
+				...expectedQrCodeConfig
+			]);
+		});
+
+		it('should return the correct steps with expected text and state when minting is true', () => {
+			const steps = allSendWizardSteps({ ...mockParams, minting: true });
+
+			expect(steps).toStrictEqual([
+				...expectedAllSendConfig,
+				...expectedMintConfig,
+				...expectedQrCodeConfig
+			]);
+		});
+
+		it('should return the correct steps with expected text and state when burning is false', () => {
+			const steps = allSendWizardSteps({ ...mockParams, burning: false });
+
+			expect(steps).toStrictEqual([
+				...expectedAllSendConfig,
+				...expectedSendConfig,
+				...expectedQrCodeConfig
+			]);
+		});
+
+		it('should return the correct steps with expected text and state when burning is true', () => {
+			const steps = allSendWizardSteps({ ...mockParams, burning: true });
+
+			expect(steps).toStrictEqual([
+				...expectedAllSendConfig,
+				...expectedBurnConfig,
+				...expectedQrCodeConfig
+			]);
+		});
+
+		it('should prioritize minting over burning and converting when all are true', () => {
+			const steps = allSendWizardSteps({
+				...mockParams,
+				converting: true,
+				minting: true,
+				burning: true
+			});
+
+			expect(steps).toStrictEqual([
+				...expectedAllSendConfig,
+				...expectedMintConfig,
+				...expectedQrCodeConfig
+			]);
+		});
+
+		it('should prioritize burning over converting when both are true', () => {
+			const steps = allSendWizardSteps({
+				...mockParams,
+				converting: true,
+				burning: true
+			});
+
+			expect(steps).toStrictEqual([
+				...expectedAllSendConfig,
+				...expectedBurnConfig,
+				...expectedQrCodeConfig
+			]);
+		});
+	});
+
+	describe('sendNftsWizardStepsWithQrCodeScan', () => {
+		it('should return the correct steps with expected text and state', () => {
+			const steps = sendNftsWizardStepsWithQrCodeScan(mockParams);
+
+			expect(steps).toStrictEqual([...expectedNftSendConfig, ...expectedQrCodeConfig]);
+		});
+	});
+
+	describe('allSendNftsWizardSteps', () => {
+		it('should return the correct steps with expected text and state', () => {
+			const steps = allSendNftsWizardSteps(mockParams);
+
+			expect(steps).toStrictEqual([
+				...expectedNftAllSendConfig,
+				...expectedNftSendConfig,
 				...expectedQrCodeConfig
 			]);
 		});
