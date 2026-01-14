@@ -1,4 +1,4 @@
-import type { _SERVICE as IcPunksService } from '$declarations/icpunks/icpunks.did';
+import type { _SERVICE as IcPunksService, TokenDesc } from '$declarations/icpunks/icpunks.did';
 import { idlFactory as idlCertifiedFactoryIcPunks } from '$declarations/icpunks/icpunks.factory.certified.did';
 import { idlFactory as idlFactoryIcPunks } from '$declarations/icpunks/icpunks.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
@@ -43,5 +43,14 @@ export class IcPunksCanister extends Canister<IcPunksService> {
 		const { transfer_to } = this.caller({ certified });
 
 		return await transfer_to(to, tokenIdentifier);
+	};
+
+	metadata = async ({
+		certified,
+		tokenIdentifier
+	}: { tokenIdentifier: bigint } & QueryParams): Promise<TokenDesc> => {
+		const { data_of } = this.caller({ certified });
+
+		return await data_of(tokenIdentifier);
 	};
 }
