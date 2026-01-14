@@ -18,6 +18,7 @@ import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
 import { filterEnabledTokens } from '$lib/utils/tokens.utils';
@@ -61,7 +62,7 @@ export const fungibleTokens: Readable<Token[]> = derived(
 	]
 );
 
-export const nonFungibleTokens: Readable<NonFungibleToken[]> = derived(
+export const nonFungibleTokens: Readable<CustomToken<NonFungibleToken>[]> = derived(
 	[erc721Tokens, erc1155Tokens, extTokens, icPunksTokens],
 	([$erc721Tokens, $erc1155Tokens, $extTokens, $icPunksTokens]) => [
 		...$erc721Tokens,
