@@ -23,7 +23,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
-export interface ManageTokensSaveParams {
+interface ManageTokensSaveParams {
 	progress?: (step: ProgressStepsAddToken) => void;
 	modalNext?: () => void;
 	onSuccess?: () => void;

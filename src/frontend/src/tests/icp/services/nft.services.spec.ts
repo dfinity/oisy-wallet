@@ -14,6 +14,17 @@ import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 
+vi.mock(import('$icp/api/icpunks.api'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	const { mockIcPunksMetadata } = await import('$tests/mocks/icpunks-token.mock');
+
+	return {
+		...actual,
+		metadata: vi.fn().mockResolvedValue(mockIcPunksMetadata)
+	};
+});
+
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
 }));
@@ -48,7 +59,9 @@ describe('nft.services', () => {
 			mockTokenIndices3.map((index) => mapDip721Nft({ index, token: mockValidDip721Token }))
 		);
 		const expected4 = await Promise.all(
-			mockTokenIndices4.map((index) => mapIcPunksNft({ index, token: mockValidIcPunksToken }))
+			mockTokenIndices4.map((index) =>
+				mapIcPunksNft({ index, token: mockValidIcPunksToken, identity: mockIdentity })
+			)
 		);
 		const expected = [...expected1, ...expected2, ...expected3, ...expected4];
 

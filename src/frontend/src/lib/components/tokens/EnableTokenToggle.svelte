@@ -8,7 +8,7 @@
 	import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
 	import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
 	import { isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
-	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+	import { isTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import type { Token } from '$lib/types/token';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
@@ -23,7 +23,7 @@
 	const { token, onToggle }: Props = $props();
 </script>
 
-{#if icTokenIcrcCustomToken(token)}
+{#if isTokenIcrcCustomToken(token)}
 	<IcManageTokenToggle onIcToken={(t) => onToggle(t)} {token} />
 {:else if isTokenErc20CustomToken(token) || isTokenSplCustomToken(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token) || isTokenExtCustomToken(token) || isTokenDip721CustomToken(token) || isTokenIcPunksCustomToken(token)}
 	<ManageTokenToggle onShowOrHideToken={(t) => onToggle(t)} {token} />

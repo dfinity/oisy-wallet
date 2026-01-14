@@ -1,23 +1,18 @@
-import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
-import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
-import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
-import { extTokens } from '$icp/derived/ext.derived';
-import { icPunksTokens } from '$icp/derived/icpunks.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
-import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
+import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { Token } from '$lib/types/token';
 import { isTokenFungible } from '$lib/utils/nft.utils';
 import { splTokens } from '$sol/derived/spl.derived';
-import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -64,47 +59,14 @@ export const allSwappableTokensDerived: Readable<IcTokenWithIcrc2Supported[]> = 
 	([$swappableTokensStore]) => $swappableTokensStore ?? []
 );
 
-export const allTokens = derived(
-	[
-		defaultIcpTokens,
-		enabledBitcoinTokens,
-		enabledEthereumTokens,
-		enabledEvmTokens,
-		enabledSolanaTokens,
-		erc20Tokens,
-		erc721Tokens,
-		erc1155Tokens,
-		allIcrcTokens,
-		extTokens,
-		icPunksTokens,
-		splTokens
-	],
-	([
-		$defaultIcpTokens,
-		$enabledBitcoinTokens,
-		$enabledEthereumTokens,
-		$enabledEvmTokens,
-		$enabledSolanaTokens,
-		$erc20Tokens,
-		$erc721Tokens,
-		$erc1155Tokens,
-		$allIcrcTokens,
-		$extTokens,
-		$icPunksTokens,
-		$splTokens
-	]) => [
-		...$defaultIcpTokens.map((token) => ({ ...token, enabled: true })),
-		...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
-		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-		...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })),
-		...$enabledEvmTokens.map((token) => ({ ...token, enabled: true })),
+export const allTokens: Readable<CustomToken<Token>[]> = derived(
+	[nativeTokens, erc20Tokens, allIcrcTokens, splTokens, nonFungibleTokens],
+	([$nativeTokens, $erc20Tokens, $allIcrcTokens, $splTokens, $nonFungibleTokens]) => [
+		...$nativeTokens.map((token) => ({ ...token, enabled: true })),
 		...$erc20Tokens,
-		...$erc721Tokens,
-		...$erc1155Tokens,
 		...$allIcrcTokens,
-		...$extTokens,
-		...$icPunksTokens,
-		...$splTokens
+		...$splTokens,
+		...$nonFungibleTokens
 	]
 );
 
