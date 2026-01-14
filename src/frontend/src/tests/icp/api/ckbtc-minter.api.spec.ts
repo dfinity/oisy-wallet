@@ -11,14 +11,12 @@ import {
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
-	CkBTCMinterCanister,
+	CkBtcMinterCanister,
+	type CkBtcMinterDid,
 	type EstimateWithdrawalFee,
-	type MinterInfo,
-	type RetrieveBtcOk,
 	type RetrieveBtcStatusV2WithId,
-	type UpdateBalanceOk,
-	type Utxo
-} from '@dfinity/ckbtc';
+	type UpdateBalanceOk
+} from '@icp-sdk/canisters/ckbtc';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('$icp/utils/date.utils', () => ({
@@ -26,12 +24,12 @@ vi.mock('$icp/utils/date.utils', () => ({
 }));
 
 describe('ckbtc-minter.api', () => {
-	const canisterMock = mock<CkBTCMinterCanister>();
+	const canisterMock = mock<CkBtcMinterCanister>();
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(CkBTCMinterCanister, 'create').mockImplementation(() => canisterMock);
+		vi.spyOn(CkBtcMinterCanister, 'create').mockImplementation(() => canisterMock);
 	});
 
 	describe('retrieveBtc', () => {
@@ -44,7 +42,7 @@ describe('ckbtc-minter.api', () => {
 			address: mockBtcAddress
 		};
 
-		const expected: RetrieveBtcOk = { block_index: 123n };
+		const expected: CkBtcMinterDid.RetrieveBtcOk = { block_index: 123n };
 
 		beforeEach(() => {
 			canisterMock.retrieveBtcWithApproval.mockResolvedValue(expected);
@@ -62,7 +60,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(retrieveBtc({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(retrieveBtc({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -89,7 +87,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(updateBalance({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(updateBalance({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -100,7 +98,7 @@ describe('ckbtc-minter.api', () => {
 			certified: true
 		};
 
-		const expected: MinterInfo = {
+		const expected: CkBtcMinterDid.MinterInfo = {
 			retrieve_btc_min_amount: 123n,
 			min_confirmations: 111,
 			kyt_fee: 456n
@@ -127,7 +125,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(minterInfo({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(minterInfo({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -152,7 +150,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(getBtcAddress({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(getBtcAddress({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -208,7 +206,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(estimateFee({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(estimateFee({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -249,7 +247,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(withdrawalStatuses({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(withdrawalStatuses({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -259,7 +257,7 @@ describe('ckbtc-minter.api', () => {
 			minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID
 		};
 
-		const expected: Utxo[] = [mockUtxo, mockUtxo];
+		const expected: CkBtcMinterDid.Utxo[] = [mockUtxo, mockUtxo];
 
 		beforeEach(() => {
 			canisterMock.getKnownUtxos.mockResolvedValue(expected);
@@ -276,7 +274,7 @@ describe('ckbtc-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(getKnownUtxos({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(getKnownUtxos({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 });

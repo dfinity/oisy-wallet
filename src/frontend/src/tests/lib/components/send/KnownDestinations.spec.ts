@@ -21,9 +21,14 @@ describe('KnownDestinations', () => {
 			]
 		]);
 
+	const props = {
+		onNext: vi.fn()
+	};
+
 	it('renders content if data is provided', () => {
 		const { getByText } = render(KnownDestinations, {
 			props: {
+				...props,
 				destination: '',
 				knownDestinations
 			},
@@ -38,6 +43,7 @@ describe('KnownDestinations', () => {
 	it('renders filtered content if data is provided', () => {
 		const { getByText } = render(KnownDestinations, {
 			props: {
+				...props,
 				destination: mockBtcAddress,
 				knownDestinations
 			},
@@ -45,13 +51,14 @@ describe('KnownDestinations', () => {
 		});
 
 		expect(getByText(shortenWithMiddleEllipsis({ text: mockBtcAddress }))).toBeInTheDocument();
-		expect(() => getByText(shortenWithMiddleEllipsis({ text: mockEthAddress }))).toThrow();
-		expect(() => getByText(shortenWithMiddleEllipsis({ text: mockSolAddress }))).toThrow();
+		expect(() => getByText(shortenWithMiddleEllipsis({ text: mockEthAddress }))).toThrowError();
+		expect(() => getByText(shortenWithMiddleEllipsis({ text: mockSolAddress }))).toThrowError();
 	});
 
 	it('renders empty state component if data is empty', () => {
 		const { getByText } = render(KnownDestinations, {
 			props: {
+				...props,
 				destination: mockBtcAddress
 			},
 			context: mockContext(BTC_MAINNET_TOKEN)

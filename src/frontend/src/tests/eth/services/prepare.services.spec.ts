@@ -33,7 +33,7 @@ describe('prepare.services', () => {
 		});
 
 		it('should raise an error if the data are nullish', () => {
-			expect(() => prepare({ ...mockParams, data: undefined })).toThrow(
+			expect(() => prepare({ ...mockParams, data: undefined })).toThrowError(
 				en.send.error.erc20_data_undefined
 			);
 		});

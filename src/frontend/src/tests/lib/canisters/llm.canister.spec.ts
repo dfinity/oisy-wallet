@@ -2,7 +2,7 @@ import type {
 	_SERVICE as LlmService,
 	chat_request_v1,
 	chat_response_v1
-} from '$declarations/llm/declarations/llm.did';
+} from '$declarations/llm/llm.did';
 import { LlmCanister } from '$lib/canisters/llm.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -64,7 +64,7 @@ describe('llm.canister', () => {
 
 			const res = chat(params);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 });

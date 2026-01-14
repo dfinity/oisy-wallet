@@ -56,9 +56,11 @@
 					size={type === 'earnings-card' ? 210 : undefined}
 				/>
 
-				<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
-					<IconHelp size="18" />
-				</button>
+				{#if type !== 'earnings-card'}
+					<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
+						<IconHelp size="18" />
+					</button>
+				{/if}
 			{/if}
 		</div>
 
@@ -77,7 +79,11 @@
 	<ul class="list-none">
 		{#each criteria as criterion, i (criterion)}
 			<li class="flex gap-2 pt-1">
-				<RewardRequirement {criterion} testId={`${REWARDS_REQUIREMENTS_STATUS}-${i}`} />
+				<RewardRequirement
+					{criterion}
+					testId={`${REWARDS_REQUIREMENTS_STATUS}-${i}`}
+					truncate={type === 'earnings-card'}
+				/>
 			</li>
 		{/each}
 	</ul>

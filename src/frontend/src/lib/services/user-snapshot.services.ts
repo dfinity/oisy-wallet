@@ -7,7 +7,7 @@ import type {
 	AccountSnapshotFor as RcAccountSnapshotFor,
 	TransactionType as RcTransactionType,
 	Transaction_Any
-} from '$declarations/rewards/declarations/rewards.did';
+} from '$declarations/rewards/rewards.did';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
@@ -18,6 +18,7 @@ import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
+import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
 import {
 	NANO_SECONDS_IN_MILLISECOND,
@@ -168,6 +169,10 @@ const toTokenSymbol = (token: Token): string => {
 		return `nft#${token.name}#${token.address}#${token.section ?? ''}`;
 	}
 
+	if (isTokenIcNft(token)) {
+		return `nft#${token.name}#${token.canisterId}#${token.section ?? ''}`;
+	}
+
 	const { id: tokenId } = token;
 
 	// This does not happen, but we need it to make it type-safe
@@ -266,7 +271,7 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 
 	return allTokens.reduce<AccountSnapshotFor[]>((acc, token) => {
 		const balance =
-			isTokenErc721(token) || isTokenErc1155(token)
+			isTokenErc721(token) || isTokenErc1155(token) || isTokenIcNft(token)
 				? getNftBalance({ nfts: nftStoreTokens, token })
 				: balances[token.id]?.data;
 

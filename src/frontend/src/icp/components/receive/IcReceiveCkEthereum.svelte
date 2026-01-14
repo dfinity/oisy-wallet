@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
-	import { erc20UserTokens } from '$eth/derived/erc20.derived';
+	import { erc20CustomTokens } from '$eth/derived/erc20.derived';
 	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
 	import {
@@ -10,7 +10,7 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 	import type { IcCkToken } from '$icp/types/ic-token';
-	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
+	import { autoLoadErc20Token } from '$icp-eth/services/erc20-token.services';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalCkETHReceive } from '$lib/derived/modal.derived';
@@ -26,8 +26,8 @@
 	const sourceToken = $derived($ckEthereumTwinToken);
 
 	const openReceive = async (modalId: symbol) => {
-		const { result } = await autoLoadUserToken({
-			erc20UserTokens: $erc20UserTokens,
+		const { result } = await autoLoadErc20Token({
+			erc20CustomTokens: $erc20CustomTokens,
 			sendToken: $tokenWithFallback,
 			identity: $authIdentity
 		});

@@ -8,6 +8,7 @@ import * as currencyExchange from '$lib/stores/currency-exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { CurrencyExchangeData } from '$lib/types/currency';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { render, screen } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -52,26 +53,42 @@ describe('EarningYearlyAmount', () => {
 	it('renders with plus sign when showPlusSign is true', () => {
 		render(EarningYearlyAmount, { value: 10, showPlusSign: true });
 
-		expect(screen.getByText(getFormattedText('+$10.00'))).toBeInTheDocument();
+		expect(screen.getByText(getFormattedText('+ $10.00'))).toBeInTheDocument();
 	});
 
-	it('applies text-success-primary class for positive amount when formatPositiveAmount is true', () => {
-		const { container } = render(EarningYearlyAmount, { value: 5, formatPositiveAmount: true });
+	it('applies text-success-primary class for positive amount when showAsSuccess is true', () => {
+		const { container } = render(EarningYearlyAmount, { value: 5, showAsSuccess: true });
 
 		const span = container.querySelector('span');
 
 		expect(span).toHaveClass('text-success-primary');
 	});
 
-	it('applies text-brand-primary when formatPositiveAmount is false', () => {
-		const { container } = render(EarningYearlyAmount, { value: 5, formatPositiveAmount: false });
+	it('applies text-error-primary when showAsError is true', () => {
+		const { container } = render(EarningYearlyAmount, { value: 5, showAsError: true });
 
 		const span = container.querySelector('span');
 
-		expect(span).toHaveClass('text-brand-primary');
+		expect(span).toHaveClass('text-error-primary');
 	});
 
-	it('renders nothing if value is null or undefined', () => {
+	it('applies text-brand-primary-alt when showAsNeutral is true', () => {
+		const { container } = render(EarningYearlyAmount, { value: 5, showAsNeutral: true });
+
+		const span = container.querySelector('span');
+
+		expect(span).toHaveClass('text-brand-primary-alt');
+	});
+
+	it('applies text-tertiary when amount is 0', () => {
+		const { container } = render(EarningYearlyAmount, { value: 0 });
+
+		const span = container.querySelector('span');
+
+		expect(span).toHaveClass('text-tertiary');
+	});
+
+	it('renders nothing if value is null or undefined and no fallback is provided', () => {
 		const { container, rerender } = render(EarningYearlyAmount, {
 			value: undefined
 		});
@@ -81,5 +98,14 @@ describe('EarningYearlyAmount', () => {
 		rerender({ value: null as unknown as number });
 
 		expect(container.textContent?.trim()).toBe('');
+	});
+
+	it('renders fallback if provided', () => {
+		const { queryByTestId } = render(EarningYearlyAmount, {
+			value: undefined,
+			fallback: createMockSnippet('fallback')
+		});
+
+		expect(queryByTestId('fallback')).toBeInTheDocument();
 	});
 });

@@ -14,7 +14,7 @@ export const MCDX_TOKEN_ID: TokenId = parseTokenId(MCDX_SYMBOL);
 export const MCDX_TOKEN: RequiredSpl2022Token = {
 	id: MCDX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: "McDonald's xStock",
 	symbol: MCDX_SYMBOL,

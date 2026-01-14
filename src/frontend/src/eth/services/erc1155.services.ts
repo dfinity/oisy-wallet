@@ -1,4 +1,4 @@
-import type { CustomToken, ErcToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken, ErcToken } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
@@ -87,7 +87,7 @@ const safeLoadMetadata = async ({
 	address
 }: {
 	networkId: NetworkId;
-	address: Erc721ContractAddress['address'];
+	address: Erc1155ContractAddress['address'];
 }) => {
 	try {
 		const { getContractMetadata } = alchemyProviders(networkId);
@@ -104,8 +104,6 @@ const safeLoadMetadata = async ({
 			},
 			warning: `Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}. ${err}`
 		});
-
-		return;
 	}
 };
 
@@ -160,7 +158,7 @@ const loadCustomTokensWithMetadata = async (
 						network,
 						symbol: metadata.symbol ?? '', // The symbol is used with the amount, no issue with having it empty for NFTs
 						decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
-						standard: 'erc1155' as const,
+						standard: { code: 'erc1155' as const },
 						category: 'custom' as const,
 						enabled,
 						version,

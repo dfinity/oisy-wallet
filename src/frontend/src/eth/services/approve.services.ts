@@ -1,6 +1,7 @@
-import type { EthSignTransactionRequest } from '$declarations/signer/declarations/signer.did';
+import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
+import { getNonce } from '$eth/services/nonce.services';
 import { prepare } from '$eth/services/prepare.services';
 import type { EthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -169,13 +170,16 @@ export const approve = async ({
 	to,
 	minterInfo,
 	amount,
+	customNonce,
 	sourceNetwork,
 	// TODO: Refactor to accept an `onProgress(step)` callback instead of requiring manual `progress(progressSteps.step)` calls
 	progress,
 	shouldSwapWithApproval,
 	progressSteps = ProgressStepsSend,
 	...rest
-}: ApproveParams): Promise<{
+}: ApproveParams & {
+	customNonce?: number;
+}): Promise<{
 	transactionNeededApproval: boolean;
 	hash?: string;
 	nonce: number;
@@ -185,9 +189,7 @@ export const approve = async ({
 
 	const { id: networkId } = sourceNetwork;
 
-	const { getTransactionCount } = infuraProviders(networkId);
-
-	const nonce = await getTransactionCount(from);
+	const nonce = customNonce ?? (await getNonce({ from, networkId }));
 
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 

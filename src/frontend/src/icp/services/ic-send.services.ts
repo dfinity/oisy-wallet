@@ -23,8 +23,8 @@ import type { NetworkId } from '$lib/types/network';
 import { invalidIcpAddress } from '$lib/utils/account.utils';
 import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import type { BlockHeight } from '@dfinity/ledger-icp';
-import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
+import type { BlockHeight } from '@icp-sdk/canisters/ledger/icp';
+import { decodeIcrcAccount, type IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
@@ -111,7 +111,7 @@ export const sendIcrc = ({
 	identity,
 	ledgerCanisterId,
 	progress
-}: IcSendParams): Promise<IcrcBlockIndex> => {
+}: IcSendParams): Promise<IcrcLedgerDid.BlockIndex> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 
 	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.

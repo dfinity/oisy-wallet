@@ -1,4 +1,4 @@
-import type { CustomToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	hasSufficientIcrcAllowance,
@@ -23,9 +23,9 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
+import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
@@ -91,6 +91,7 @@ describe('icrc.services', () => {
 
 		describe('success', () => {
 			let spyMetadata: MockInstance;
+			let spyMintingAccount: MockInstance;
 
 			beforeEach(() => {
 				spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
@@ -99,6 +100,10 @@ describe('icrc.services', () => {
 					['icrc1:decimals', { Nat: mockDecimals }],
 					['icrc1:fee', { Nat: mockFee }]
 				]);
+
+				spyMintingAccount = ledgerCanisterMock.getMintingAccount.mockResolvedValue(
+					toNullable({ owner: mockPrincipal, subaccount: toNullable() })
+				);
 			});
 
 			const testLoadCustomTokens = async ({
@@ -135,7 +140,7 @@ describe('icrc.services', () => {
 						name: mockName,
 						network: ICP_NETWORK,
 						position: 4,
-						standard: 'icrc',
+						standard: { code: 'icrc' },
 						symbol: mockSymbol,
 						version: fromNullable(mockCustomToken.version)
 					})
@@ -212,6 +217,14 @@ describe('icrc.services', () => {
 				});
 
 				expect(spyMetadata).not.toHaveBeenCalled();
+
+				expect(spyMintingAccount).toHaveBeenCalledTimes(2);
+				expect(spyMintingAccount).toHaveBeenNthCalledWith(1, {
+					certified: false
+				});
+				expect(spyMintingAccount).toHaveBeenNthCalledWith(2, {
+					certified: true
+				});
 			});
 
 			it('should call metadata with query and certified', async () => {
@@ -224,6 +237,20 @@ describe('icrc.services', () => {
 					certified: false
 				});
 				expect(spyMetadata).toHaveBeenNthCalledWith(2, {
+					certified: true
+				});
+			});
+
+			it('should call minting account with query and certified', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
+
+				expect(spyMintingAccount).toHaveBeenCalledTimes(2);
+				expect(spyMintingAccount).toHaveBeenNthCalledWith(1, {
+					certified: false
+				});
+				expect(spyMintingAccount).toHaveBeenNthCalledWith(2, {
 					certified: true
 				});
 			});
@@ -668,7 +695,7 @@ describe('icrc.services', () => {
 					spender: mockSpender,
 					amount: mockAmount
 				})
-			).rejects.toThrow(err);
+			).rejects.toThrowError(err);
 		});
 	});
 });

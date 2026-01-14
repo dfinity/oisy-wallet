@@ -10,7 +10,6 @@ import {
 	BTC_REGTEST_TOKEN,
 	BTC_TESTNET_TOKEN
 } from '$env/tokens/tokens.btc.env';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { TOKEN_MENU_BTC_BUTTON } from '$lib/constants/test-ids.constants';
 import {
 	btcAddressMainnetStore,
@@ -45,7 +44,6 @@ describe('BtcTokenMenu', () => {
 
 	it('external link forwards to correct mainnet explorer', async () => {
 		mockPage.mockToken(BTC_MAINNET_TOKEN);
-		erc20UserTokensStore.reset(BTC_MAINNET_TOKEN.id);
 		btcAddressMainnetStore.set({ certified: true, data: mockAddressMainnet });
 
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementationOnce(() => true);
@@ -66,7 +64,6 @@ describe('BtcTokenMenu', () => {
 
 	it('external link forwards to correct testnet explorer', async () => {
 		mockPage.mockToken(BTC_TESTNET_TOKEN);
-		erc20UserTokensStore.reset(BTC_TESTNET_TOKEN.id);
 		btcAddressTestnetStore.set({ certified: true, data: mockAddressTestnet });
 
 		const { container } = render(BtcTokenMenu);
@@ -85,7 +82,6 @@ describe('BtcTokenMenu', () => {
 
 	it('external link forwards to correct regtest explorer', async () => {
 		mockPage.mockToken(BTC_REGTEST_TOKEN);
-		erc20UserTokensStore.reset(BTC_REGTEST_TOKEN.id);
 		btcAddressRegtestStore.set({ certified: true, data: mockAddressRegtest });
 
 		const { container } = render(BtcTokenMenu);

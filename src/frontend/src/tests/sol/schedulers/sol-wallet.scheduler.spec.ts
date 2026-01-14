@@ -1,4 +1,5 @@
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
@@ -64,12 +65,15 @@ describe('sol-wallet.scheduler', () => {
 
 	const mockPostMessage = ({
 		withTransactions,
+		ref,
 		isSpl
 	}: {
 		withTransactions: boolean;
+		ref?: string;
 		isSpl: boolean;
 	}) => ({
 		msg: 'syncSolWallet',
+		ref,
 		data: {
 			wallet: {
 				balance: {
@@ -132,6 +136,10 @@ describe('sol-wallet.scheduler', () => {
 	}): TestUtil => {
 		const scheduler: SolWalletScheduler = new SolWalletScheduler();
 
+		const ref = nonNullish(startData)
+			? `${startData.tokenAddress ?? SOLANA_TOKEN.symbol}-${startData.solanaNetwork}`
+			: undefined;
+
 		const isSpl = nonNullish(startData?.tokenAddress) && nonNullish(startData?.tokenOwnerAddress);
 
 		return {
@@ -159,7 +167,7 @@ describe('sol-wallet.scheduler', () => {
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(
 						2,
-						mockPostMessage({ withTransactions: true, isSpl })
+						mockPostMessage({ withTransactions: true, isSpl, ref })
 					);
 					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 
@@ -221,7 +229,7 @@ describe('sol-wallet.scheduler', () => {
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(
 						2,
-						mockPostMessage({ withTransactions: true, isSpl })
+						mockPostMessage({ withTransactions: true, isSpl, ref })
 					);
 					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 				});
@@ -244,6 +252,7 @@ describe('sol-wallet.scheduler', () => {
 
 					expect(postMessageMock).toHaveBeenCalledWith({
 						msg: 'syncSolWalletError',
+						ref,
 						data: {
 							error: err
 						}
