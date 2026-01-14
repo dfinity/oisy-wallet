@@ -61,8 +61,7 @@
 		},
 		"warning": {
 			"do_not_close": "تا زمان انجام تراکنش این تب را نبندید",
-			"standalone_mode": "ما عملکرد $oisy_short را هنگام نصب روی صفحه اصلی (مانند وضعیت فعلی شما) بهبود بخشیدیم. اگر با مشکلاتی در اتصال $oisy_short یا امضای تراکنش‌ها مواجه شدید، لطفاً آن را از صفحه اصلی حذف و دوباره نصب کنید. در آیفون‌ها، مطمئن شوید گزینه «Open as Web App» را انتخاب نکرده‌اید.
-<a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">بیشتر بخوانید",
+			"standalone_mode": "ما عملکرد $oisy_short را هنگام نصب روی صفحه اصلی (مانند وضعیت فعلی شما) بهبود بخشیدیم. اگر با مشکلاتی در اتصال $oisy_short یا امضای تراکنش‌ها مواجه شدید، لطفاً آن را از صفحه اصلی حذف و دوباره نصب کنید. در آیفون‌ها، مطمئن شوید گزینه «Open as Web App» را انتخاب نکرده‌اید.<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">بیشتر بخوانید</a>",
 			"video_not_supported": "مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند."
 		}
 	},
