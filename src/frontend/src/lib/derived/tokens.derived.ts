@@ -13,7 +13,7 @@ import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { extTokens } from '$icp/derived/ext.derived';
 import { icPunksTokens } from '$icp/derived/icpunks.derived';
-import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
+import { icrcChainFusionDefaultTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
@@ -52,7 +52,7 @@ export const nativeTokens: Readable<Token[]> = derived(
 );
 
 export const fungibleTokens: Readable<Token[]> = derived(
-	[nativeTokens, erc20Tokens, sortedIcrcTokens, splTokens],
+	[nativeTokens, erc20Tokens, icrcTokens, splTokens],
 	([$nativeTokens, $erc20Tokens, $icrcTokens, $splTokens]) => [
 		...$nativeTokens,
 		...$erc20Tokens,
