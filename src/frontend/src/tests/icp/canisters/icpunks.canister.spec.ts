@@ -1,6 +1,7 @@
 import type { _SERVICE as IcPunksService } from '$declarations/icpunks/icpunks.did';
 import { IcPunksCanister } from '$icp/canisters/icpunks.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mockIcPunksMetadata } from '$tests/mocks/icpunks-token.mock';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
@@ -92,6 +93,40 @@ describe('icpunks.canister', () => {
 			await expect(res).rejects.toThrowError(mockError);
 
 			expect(service.transfer_to).toHaveBeenCalledExactlyOnceWith(mockTo, mockTokenId);
+		});
+	});
+
+	describe('metadata', () => {
+		const mockTokenId = 12345n;
+
+		const mockParams = { certified, tokenIdentifier: mockTokenId };
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should correctly call the data_of method', async () => {
+			service.data_of.mockResolvedValue(mockIcPunksMetadata);
+
+			const { metadata } = await createIcPunksCanister({ serviceOverride: service });
+
+			const res = await metadata(mockParams);
+
+			expect(res).toStrictEqual(mockIcPunksMetadata);
+			expect(service.data_of).toHaveBeenCalledExactlyOnceWith(mockTokenId);
+		});
+
+		it('should throw an error if data_of throws', async () => {
+			const mockError = new Error('Test response error');
+			service.data_of.mockRejectedValue(mockError);
+
+			const { metadata } = await createIcPunksCanister({ serviceOverride: service });
+
+			const res = metadata(mockParams);
+
+			await expect(res).rejects.toThrowError(mockError);
+
+			expect(service.data_of).toHaveBeenCalledExactlyOnceWith(mockTokenId);
 		});
 	});
 });
