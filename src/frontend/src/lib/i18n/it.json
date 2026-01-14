@@ -1807,7 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "Cliccando su questo pulsante, accetti i $link",
-			"instruction_two_buttons": "",
+			"instruction_two_buttons": "Cliccando su uno di questi pulsante, accetti i $link",
 			"body": ""
 		},
 		"alt": {
