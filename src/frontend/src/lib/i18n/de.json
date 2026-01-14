@@ -1807,7 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
-			"instruction_two_buttons": "",
+			"instruction_two_buttons": "Durch Klicken einer dieser Schaltflächen stimmst du den $link zu",
 			"body": ""
 		},
 		"alt": {
