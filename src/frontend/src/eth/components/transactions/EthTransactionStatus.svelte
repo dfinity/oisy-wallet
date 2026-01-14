@@ -16,7 +16,6 @@
 
 	let { blockNumber, token }: Props = $props();
 
-
 	let listener = $state<WebSocketListener | undefined>();
 
 	let currentBlockNumber = $state<number | undefined>();
