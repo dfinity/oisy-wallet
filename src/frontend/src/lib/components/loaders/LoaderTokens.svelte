@@ -68,13 +68,11 @@
 		(loadSplMainnet || loadSplDevnet || loadSplLocal) && $splCustomTokensNotInitialized
 	);
 
-
 	let loadExt = $derived($extCustomTokensNotInitialized);
 
 	let loadIcPunks = $derived($icPunksCustomTokensNotInitialized);
-  
-  
-  	let ercNetworkChainIds = $derived([
+
+	let ercNetworkChainIds = $derived([
 		...$enabledEthereumNetworksChainIds,
 		...$enabledEvmNetworksChainIds
 	]);

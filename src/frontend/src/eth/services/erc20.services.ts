@@ -20,12 +20,7 @@ import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store'
 import type { Erc20ContractAddress } from '$eth/types/address';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
-import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
-import { mapErc20Icon, mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
-import { listUserTokens } from '$lib/api/backend.api';
-import { getIdbEthTokensDeprecated, setIdbEthTokensDeprecated } from '$lib/api/idb-tokens.api';
-import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Icon, mapErc20Token } from '$eth/utils/erc20.utils';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -45,7 +40,10 @@ export const loadErc20Tokens = async ({
 	identity: OptionIdentity;
 	networkChainIds: EthereumChainId[];
 }): Promise<void> => {
-	await Promise.all([loadDefaultErc20Tokens(), loadCustomTokens({ identity, networkChainIds, useCache: true })]);
+	await Promise.all([
+		loadDefaultErc20Tokens(),
+		loadCustomTokens({ identity, networkChainIds, useCache: true })
+	]);
 };
 
 const ALL_DEFAULT_ERC20_TOKENS = [
@@ -105,8 +103,6 @@ export const loadCustomTokens = ({
 		},
 		identity
 	});
-
-
 
 const loadErc20CustomTokens = async ({
 	networkChainIds,
