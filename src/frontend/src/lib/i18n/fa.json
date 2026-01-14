@@ -656,9 +656,7 @@
 		"alt": {
 			"toggle_privacy_mode": "روشن و خاموش کردن حالت حریم خصوصی"
 		}
-	}
-}
-{
+	},
 	"settings": {
 		"text": {
 			"title": "تنظیمات",
