@@ -17,7 +17,7 @@ export const POL_MAINNET_TOKEN_ID: TokenId = parseTokenId(POL_MAINNET_SYMBOL);
 export const POL_MAINNET_TOKEN: RequiredToken = {
 	id: POL_MAINNET_TOKEN_ID,
 	network: POLYGON_MAINNET_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
 	name: 'POL (prev. MATIC)',
 	symbol: POL_MAINNET_SYMBOL,
@@ -35,7 +35,7 @@ export const POL_AMOY_TOKEN_ID: TokenId = parseTokenId(POL_AMOY_SYMBOL);
 export const POL_AMOY_TOKEN: RequiredToken = {
 	id: POL_AMOY_TOKEN_ID,
 	network: POLYGON_AMOY_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
 	name: 'POL (Amoy Testnet)',
 	symbol: POL_AMOY_SYMBOL,

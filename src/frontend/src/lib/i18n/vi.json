@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
-			"test_banner_beta": "Đây là phiên bản thử nghiệm. Bạn có thể gặp một số lỗi. Tài sản thật đang được sử dụng - vui lòng cẩn trọng."
+			"test_banner_beta": "Đây là phiên bản thử nghiệm. Bạn có thể gặp một số lỗi. Tài sản thật đang được sử dụng - vui lòng cẩn trọng.",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "Logo $name",
@@ -61,7 +64,8 @@
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,9 +121,11 @@
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
+			"legacy_login": "",
 			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
 			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
-			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain"
+			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"
@@ -145,36 +151,34 @@
 		},
 		"help": {
 			"text": {
-				"title": "Gặp sự cố với xác thực?",
-				"description": "Chúng tôi nhận thấy bạn đã hủy xác thực bằng Internet Identity. Chúng tôi rất muốn hiểu điều gì đã xảy ra để có thể cải thiện trải nghiệm của bạn.",
-				"subtitle": "Có phải bất kỳ điều nào sau đây đã gây ra sự cố không?",
-				"lost_identity": "Tôi bị mất số Internet Identity của mình",
-				"security": "Tôi lo lắng về bảo mật hoặc quyền riêng tư",
-				"got_confused": "Tôi đã bị nhầm lẫn trong quá trình này",
-				"other": "Khác...",
-				"feedback_text": "Phản hồi của bạn giúp chúng tôi cải thiện ví.",
+				"title": "",
+				"description": "",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"lost_identity_number": "",
+				"feedback_text": "",
 				"thanks_text": "Cảm ơn bạn!",
+				"useful_links": "",
 				"identity_new_identity": "Ví $oisy_short chuyển đổi tên miền Internet Identity thành: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "Do đó, số Internet Identity của bạn có thể không tự động xuất hiện và bạn có thể cần nhập lại.",
+				"switch_to_new_internet_identity": "",
+				"identity_legacy_identity_title": "",
+				"identity_legacy_identity_item_1": "",
+				"identity_legacy_identity_item_2": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"identity_new_identity_item_2": "",
+				"identity_new_identity_link": "",
 				"identity_legacy_sign_in": "Đăng nhập bằng tên miền Internet Identity cũ",
 				"identity_learn_more": "Tìm hiểu thêm trên Tài liệu $oisy_short",
-				"other_title": "Cảm ơn bạn đã phản hồi!",
-				"other_description": "Dưới đây là một số tài nguyên hữu ích về <span class=\"font-bold\">bảo mật</span> và <span class=\"font-bold\">quyền riêng tư</span> trong $oisy_short và Internet Identity. Chúng tôi hy vọng chúng sẽ giúp bạn đưa ra quyết định sáng suốt:",
-				"other_introduction": "Giới thiệu về $oisy_short",
-				"other_docs": "Tài liệu $oisy_short: Internet Identity",
-				"other_private_key": "Ai kiểm soát private key cho các tài sản gốc?",
-				"other_asset_control": "Kiểm soát tài sản, Phục hồi và Quản trị trong Ví $oisy_short",
+				"oisy_introduction": "",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "Cần giúp đỡ",
 				"sign_in": "đăng nhập?"
 			},
 			"alt": {
-				"internet_identity": "Hình ảnh mới của Internet Identity",
-				"identity_learn_more": "Tìm hiểu thêm về Internet Identity cũ",
-				"other_introduction": "Mở giới thiệu về $oisy_short",
-				"other_docs": "Mở tài liệu $oisy_short: Internet Identity",
-				"other_private_key": "Nhận trợ giúp về người kiểm soát khóa riêng tư cho các tài sản gốc",
-				"other_asset_control": "Nhận thông tin về Kiểm soát tài sản, Phục hồi và Quản trị trong Ví $oisy_short",
-				"sign_in": "Cần giúp đỡ để đăng nhập?"
+				"internet_identity": "Hình ảnh mới của Internet Identity"
 			}
 		}
 	},
@@ -183,6 +187,7 @@
 			"title_part_1": "Mở khóa để tiếp tục",
 			"title_part_2": "Trước đó, bạn đã khóa ví để giữ an toàn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
 			"unlock": "Mở khóa",
+			"unlock_with_legacy_login": "",
 			"logout": "Đăng xuất",
 			"logout_clear_cash_message": "Đăng xuất sẽ xóa tất cả dữ liệu được lưu trong bộ nhớ đệm",
 			"learn_more": "Tìm hiểu thêm"
@@ -558,7 +563,7 @@
 			"incubated_with": "Được hỗ trợ với",
 			"by": "bởi",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "Trợ lý $oisy_short"
 		},
 		"alt": {
@@ -628,11 +633,11 @@
 			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
 			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",
 			"erc1155_custom_tokens": "Lỗi khi tải các token ERC1155.",
-			"erc20_user_tokens": "Lỗi khi tải các token người dùng ERC20.",
 			"spl_custom_tokens": "Lỗi khi tải các token tùy chỉnh SPL.",
-			"erc20_user_token": "Lỗi khi bật token đôi ERC20.",
+			"erc20_custom_token": "Lỗi khi bật token đôi ERC20.",
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
 			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
 			"waiting_for_allowed_cycles_aborted": "Đã hủy bỏ quá trình chuẩn bị cycles ledger. Vui lòng thử đăng nhập lại sau.",
@@ -902,6 +907,20 @@
 			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
@@ -929,10 +948,14 @@
 			"tokens_available": "",
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1064,6 +1087,12 @@
 			"signing_transaction": "",
 			"paying": ""
 		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
+		},
 		"alt": {
 			"pay": "",
 			"where_you_can_pay": ""
@@ -1144,6 +1173,7 @@
 				"unexpected_ledger": "Đã xảy ra lỗi trong khi xác thực ledger canister.",
 				"unexpected_index": "Đã xảy ra lỗi trong khi xác thực index canister.",
 				"unexpected_index_ledger": "Đã xảy ra lỗi trong khi tải ID ledger liên quan đến canister index.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "ID ledger không liên quan đến canister index.",
 				"missing_ledger_id": "Thiếu ID ledger. Bạn đã cung cấp giá trị chưa?",
 				"missing_canister_id": "",
@@ -1281,7 +1311,8 @@
 			"learn_more": "Tìm hiểu thêm",
 			"token_id": "ID token",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Chưa có NFT nào",
@@ -1476,6 +1507,8 @@
 			"title": "Giao dịch",
 			"buy_or_receive": "Hãy thực hiện giao dịch đầu tiên và mua hoặc nhận token ngay bây giờ!",
 			"transaction_history": "Lịch sử giao dịch của bạn sẽ xuất hiện tại đây",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập.",
 			"transaction_history_unavailable": "Lịch sử giao dịch không khả dụng",
 			"missing_index_canister_explanation": "Hiện tại, $oisy_short không thể hiển thị lịch sử giao dịch token của bạn vì nhà phát hành chưa cung cấp tính năng theo dõi. Nó sẽ sớm được bổ sung. Trong thời gian chờ đợi, đừng lo lắng — bạn vẫn có thể gửi và nhận token của mình như bình thường.",
@@ -1774,6 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "Bằng cách nhấp vào nút này, bạn đồng ý với $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

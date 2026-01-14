@@ -50,7 +50,12 @@ describe('NftsList', () => {
 				writable([mockNonFungibleToken1, mockNonFungibleToken2])
 			);
 			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
-				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+				writable(
+					[mockNonFungibleToken1, mockNonFungibleToken2].map((token) => ({
+						...token,
+						enabled: true
+					}))
+				)
 			);
 
 			const { container } = render(NftsList);
@@ -72,8 +77,8 @@ describe('NftsList', () => {
 			);
 			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
 				writable([
-					{ ...mockNonFungibleToken1, section: CustomTokenSection.HIDDEN },
-					{ ...mockNonFungibleToken2, section: CustomTokenSection.HIDDEN }
+					{ ...mockNonFungibleToken1, enabled: true, section: CustomTokenSection.HIDDEN },
+					{ ...mockNonFungibleToken2, enabled: true, section: CustomTokenSection.HIDDEN }
 				])
 			);
 
@@ -97,8 +102,8 @@ describe('NftsList', () => {
 
 			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
 				writable([
-					{ ...mockNonFungibleToken1, section: CustomTokenSection.SPAM },
-					{ ...mockNonFungibleToken2, section: CustomTokenSection.SPAM }
+					{ ...mockNonFungibleToken1, enabled: true, section: CustomTokenSection.SPAM },
+					{ ...mockNonFungibleToken2, enabled: true, section: CustomTokenSection.SPAM }
 				])
 			);
 
@@ -128,7 +133,12 @@ describe('NftsList', () => {
 				writable([mockNonFungibleToken1, mockNonFungibleToken2])
 			);
 			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
-				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+				writable(
+					[mockNonFungibleToken1, mockNonFungibleToken2].map((token) => ({
+						...token,
+						enabled: true
+					}))
+				)
 			);
 
 			const { container } = render(NftsList);
@@ -148,8 +158,8 @@ describe('NftsList', () => {
 			);
 			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
 				writable([
-					{ ...mockNonFungibleToken1, section: CustomTokenSection.HIDDEN },
-					{ ...mockNonFungibleToken2, section: CustomTokenSection.HIDDEN }
+					{ ...mockNonFungibleToken1, enabled: true, section: CustomTokenSection.HIDDEN },
+					{ ...mockNonFungibleToken2, enabled: true, section: CustomTokenSection.HIDDEN }
 				])
 			);
 
@@ -170,8 +180,8 @@ describe('NftsList', () => {
 			);
 			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
 				writable([
-					{ ...mockNonFungibleToken1, section: CustomTokenSection.SPAM },
-					{ ...mockNonFungibleToken2, section: CustomTokenSection.SPAM }
+					{ ...mockNonFungibleToken1, enabled: true, section: CustomTokenSection.SPAM },
+					{ ...mockNonFungibleToken2, enabled: true, section: CustomTokenSection.SPAM }
 				])
 			);
 
@@ -201,8 +211,8 @@ describe('NftsList', () => {
 		);
 		vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
 			writable([
-				{ ...mockNonFungibleToken1, section: CustomTokenSection.SPAM },
-				{ ...mockNonFungibleToken2, section: CustomTokenSection.SPAM }
+				{ ...mockNonFungibleToken1, enabled: true, section: CustomTokenSection.SPAM },
+				{ ...mockNonFungibleToken2, enabled: true, section: CustomTokenSection.SPAM }
 			])
 		);
 

@@ -245,7 +245,10 @@ describe('ic-transactions.services', () => {
 		});
 
 		it('should load transactions with the correct parameters for ICRC tokens', async () => {
-			await loadNextIcTransactions({ ...mockParams, token: { ...mockToken, standard: 'icrc' } });
+			await loadNextIcTransactions({
+				...mockParams,
+				token: { ...mockToken, standard: { code: 'icrc' } }
+			});
 
 			expect(getTransactionsIcrc).toHaveBeenCalledTimes(2);
 			expect(getTransactionsIcrc).toHaveBeenNthCalledWith(1, {

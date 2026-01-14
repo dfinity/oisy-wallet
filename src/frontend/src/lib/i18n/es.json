@@ -8,7 +8,7 @@
 			"done": "Hecho",
 			"close": "Cerrar",
 			"change": "Cambiar",
-			"continue": "",
+			"continue": "Continuar",
 			"apply": "Aplicar",
 			"retry": "Reintentar",
 			"refresh": "Actualizar",
@@ -41,11 +41,14 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "Aprender mas"
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
-			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado."
+			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado.",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "Logotipo",
@@ -57,11 +60,12 @@
 			"switch_currency": "Cambiar moneda",
 			"more": "Mas",
 			"less": "Menos",
-			"learn_more": ""
+			"learn_more": "Siga el enlace para obtener más información."
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,9 +121,11 @@
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
+			"legacy_login": "",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
-			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena"
+			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil"
@@ -145,36 +151,34 @@
 		},
 		"help": {
 			"text": {
-				"title": "¿Tienes problemas con la autenticación?",
-				"description": "Notamos que cancelaste la autenticación con Internet Identity. Nos encantaría entender qué pasó para poder mejorar tu experiencia.",
-				"subtitle": "¿Alguna de las siguientes opciones causó el problema?",
-				"lost_identity": "Perdí mi número de Internet Identity",
-				"security": "Me preocupaba la seguridad o la privacidad",
-				"got_confused": "Me confundí durante el proceso",
-				"other": "Otro...",
-				"feedback_text": "Tus comentarios nos ayudan a mejorar la billetera.",
+				"title": "",
+				"description": "",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"lost_identity_number": "",
+				"feedback_text": "",
 				"thanks_text": "¡Gracias!",
+				"useful_links": "",
 				"identity_new_identity": "$oisy_short Wallet cambia el dominio de Internet Identity a: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "Como resultado, tu número de Internet Identity podría no aparecer automáticamente, y puede que necesites volver a introducirlo.",
+				"switch_to_new_internet_identity": "",
+				"identity_legacy_identity_title": "",
+				"identity_legacy_identity_item_1": "",
+				"identity_legacy_identity_item_2": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"identity_new_identity_item_2": "",
+				"identity_new_identity_link": "",
 				"identity_legacy_sign_in": "Iniciar sesión con el dominio antiguo de Internet Identity",
 				"identity_learn_more": "Más información en los Docs de $oisy_short",
-				"other_title": "¡Gracias por tus comentarios!",
-				"other_description": "Aquí tienes algunos recursos útiles sobre <span class=\"font-bold\">seguridad</span> y <span class=\"font-bold\">privacidad</span> en $oisy_short e Internet Identity. Esperamos que te ayuden a tomar una decisión informada:",
-				"other_introduction": "Introducción a $oisy_short",
-				"other_docs": "Docs de $oisy_short: Internet Identity",
-				"other_private_key": "¿Quién controla la clave privada para los activos nativos?",
-				"other_asset_control": "Control de Activos, Recuperación y Gobernanza en $oisy_short Wallet",
+				"oisy_introduction": "",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "Necesito ayuda",
 				"sign_in": "¿ iniciar sesión?"
 			},
 			"alt": {
-				"internet_identity": "Imagen de la nueva Internet Identity",
-				"identity_learn_more": "Más información sobre la antigua Internet Identity",
-				"other_introduction": "Abrir Introducción a $oisy_short",
-				"other_docs": "Abrir docs de $oisy_short: Internet Identity",
-				"other_private_key": "Obtener ayuda sobre quién controla la clave privada para los activos nativos",
-				"other_asset_control": "Obtener información sobre Control de Activos, Recuperación y Gobernanza en $oisy_short Wallet",
-				"sign_in": "¿Necesitas ayuda para iniciar sesión?"
+				"internet_identity": "Imagen de la nueva Internet Identity"
 			}
 		}
 	},
@@ -183,6 +187,7 @@
 			"title_part_1": "Desbloquear para continuar",
 			"title_part_2": "Anteriormente bloqueaste tu billetera para mantenerla segura. Continúa donde lo dejaste o cierra sesión.",
 			"unlock": "Desbloquear",
+			"unlock_with_legacy_login": "",
 			"logout": "Cerrar sesión",
 			"logout_clear_cash_message": "Cerrar sesión borrará todos los datos en caché",
 			"learn_more": "Saber más"
@@ -558,7 +563,7 @@
 			"incubated_with": "Incubado con",
 			"by": "por",
 			"dfinity_foundation": "Fundación DFINITY",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "Asistente de $oisy_short"
 		},
 		"alt": {
@@ -628,11 +633,11 @@
 			"erc20_custom_tokens": "Error al cargar los tokens ERC20 personalizados.",
 			"erc721_custom_tokens": "Error al cargar los tokens ERC721 personalizados.",
 			"erc1155_custom_tokens": "Error al cargar los tokens ERC1155 personalizados.",
-			"erc20_user_tokens": "Error al cargar los tokens de usuario ERC20.",
 			"spl_custom_tokens": "Error al cargar los tokens SPL personalizados.",
-			"erc20_user_token": "Error al habilitar el token gemelo ERC20.",
+			"erc20_custom_token": "Error al habilitar el token gemelo ERC20.",
 			"icrc_custom_token": "Error al cargar el token ICRC personalizado.",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Tu billetera requiere algunos datos iniciales que aún no se han cargado. Por favor, inténtalo de nuevo.",
 			"allow_signing": "Ocurrió un problema al configurar tu billetera para firmar. Has sido desconectado. Si el problema persiste, contacta con el soporte.",
 			"waiting_for_allowed_cycles_aborted": "Preparación del ledger de ciclos abortada. Por favor, intenta iniciar sesión más tarde",
@@ -902,6 +907,20 @@
 			"fee_calc_unsupported_standard": "No se pudo calcular la comisión ya que el estándar de token proporcionado no es compatible."
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
@@ -929,10 +948,14 @@
 			"tokens_available": "",
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1064,6 +1087,12 @@
 			"signing_transaction": "",
 			"paying": ""
 		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
+		},
 		"alt": {
 			"pay": "",
 			"where_you_can_pay": ""
@@ -1144,6 +1173,7 @@
 				"unexpected_ledger": "Algo salió mal al validar el canister de Ledger.",
 				"unexpected_index": "Algo salió mal al validar el canister de Índice.",
 				"unexpected_index_ledger": "Algo salió mal al cargar el ID de Ledger relacionado con el canister de Índice.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "El ID de Ledger no está relacionado con el canister de Índice.",
 				"missing_ledger_id": "Falta el ID de Ledger. ¿Proporcionaste un valor?",
 				"missing_canister_id": "",
@@ -1265,8 +1295,8 @@
 			"review_button": "Revisar",
 			"collection_name": "Nombre de la colección",
 			"media_urls": "URLs de medios",
-			"media_url": "",
-			"received_at": "",
+			"media_url": "URL de medios",
+			"received_at": "Recibido en",
 			"display_preference": "Preferencia de visualización",
 			"review_preference": "Revisar preferencia",
 			"media_enabled": "Medios habilitados",
@@ -1281,7 +1311,8 @@
 			"learn_more": "Saber más",
 			"token_id": "ID del Token",
 			"go_to_collection": "Ir a la colección",
-			"could_not_update_section": "No se pudo actualizar la sección de la colección. Por favor, inténtalo de nuevo"
+			"could_not_update_section": "No se pudo actualizar la sección de la colección. Por favor, inténtalo de nuevo",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Aún no hay NFTs",
@@ -1476,6 +1507,8 @@
 			"title": "Transacciones",
 			"buy_or_receive": "¡Realiza tu primera transacción, y compra o recibe tokens ahora!",
 			"transaction_history": "Tu historial de transacciones aparecerá aquí",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "La información de las transacciones de BTC se obtiene de terceros centrales y debe ser verificada de forma independiente.",
 			"transaction_history_unavailable": "Historial de transacciones no disponible",
 			"missing_index_canister_explanation": "En este momento, $oisy_short no puede mostrar tus transacciones de tokens pasadas porque el emisor aún no ha proporcionado la función de seguimiento. Debería añadirse pronto. Mientras tanto, no te preocupes — puedes seguir enviando y recibiendo tus tokens como de costumbre.",
@@ -1774,6 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "Al hacer clic en este botón, aceptas los $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

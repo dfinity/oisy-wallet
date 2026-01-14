@@ -1,7 +1,11 @@
 import type {
 	CustomToken,
+	// The backend declarations are not exporting Dip721Token because it is structurally identical to ExtV2Token
+	ExtV2Token as Dip721Token,
 	ErcToken,
 	ExtV2Token,
+	// The backend declarations are not exporting IcPunksToken because it is structurally identical to ExtV2Token
+	ExtV2Token as IcPunksToken,
 	IcrcToken,
 	SplToken,
 	Token
@@ -9,8 +13,10 @@ import type {
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumChainId } from '$eth/types/network';
 import type {
+	Dip721SaveCustomToken,
 	ErcSaveCustomToken,
 	ExtSaveCustomToken,
+	IcPunksSaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
@@ -34,6 +40,14 @@ const toIcrcCustomToken = ({
 });
 
 const toExtV2CustomToken = ({ canisterId }: ExtSaveCustomToken): ExtV2Token => ({
+	canister_id: Principal.fromText(canisterId)
+});
+
+const toDip721CustomToken = ({ canisterId }: Dip721SaveCustomToken): Dip721Token => ({
+	canister_id: Principal.fromText(canisterId)
+});
+
+const toIcPunksCustomToken = ({ canisterId }: IcPunksSaveCustomToken): IcPunksToken => ({
 	canister_id: Principal.fromText(canisterId)
 });
 
@@ -71,6 +85,14 @@ export const toCustomToken = ({
 
 		if (networkKey === 'ExtV2') {
 			return { ExtV2: toExtV2CustomToken(rest) };
+		}
+
+		if (networkKey === 'Dip721') {
+			return { Dip721: toDip721CustomToken(rest) };
+		}
+
+		if (networkKey === 'IcPunks') {
+			return { IcPunks: toIcPunksCustomToken(rest) };
 		}
 
 		if (networkKey === 'Erc20') {

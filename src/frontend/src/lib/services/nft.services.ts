@@ -1,15 +1,15 @@
-import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
-import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
 import { loadNftsByNetwork as loadErcNftsByNetwork } from '$eth/services/nft.services';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
-import { saveCustomTokens as saveCustomExtToken } from '$icp/services/ext-custom-tokens.services';
-import { loadNfts as loadExtNfts } from '$icp/services/nft.services';
+import { loadNfts as loadIcNfts } from '$icp/services/nft.services';
 import type { IcNonFungibleToken } from '$icp/types/nft';
-import { isTokenExtV2CustomToken } from '$icp/utils/ext.utils';
+import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
+import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
+import { isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -44,7 +44,7 @@ export const loadNftsByNetwork = async ({
 	}
 
 	if (isNetworkIdICP(networkId)) {
-		return await loadExtNfts({
+		return await loadIcNfts({
 			// For now, it is acceptable to cast it since we checked before if the network is ICP.
 			tokens: tokens as IcNonFungibleToken[],
 			identity
@@ -96,20 +96,34 @@ export const saveNftCustomToken = async ({
 		return;
 	}
 
-	if (isTokenErc721CustomToken(token)) {
-		await saveCustomErc721Token({
+	if (isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token)) {
+		await saveCustomTokens({
 			identity,
-			tokens: [token]
+			tokens: [
+				{
+					...token,
+					chainId: token.network.chainId,
+					networkKey: isTokenErc721CustomToken(token) ? 'Erc721' : 'Erc1155'
+				}
+			]
 		});
-	} else if (isTokenErc1155CustomToken(token)) {
-		await saveCustomErc1155Token({
+	} else if (
+		isTokenExtCustomToken(token) ||
+		isTokenDip721CustomToken(token) ||
+		isTokenIcPunksCustomToken(token)
+	) {
+		await saveCustomTokens({
 			identity,
-			tokens: [token]
-		});
-	} else if (isTokenExtV2CustomToken(token)) {
-		await saveCustomExtToken({
-			identity,
-			tokens: [token]
+			tokens: [
+				{
+					...token,
+					networkKey: isTokenExtCustomToken(token)
+						? 'ExtV2'
+						: isTokenDip721CustomToken(token)
+							? 'Dip721'
+							: 'IcPunks'
+				}
+			]
 		});
 	}
 

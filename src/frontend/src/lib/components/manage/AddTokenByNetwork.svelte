@@ -3,8 +3,8 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
-	import IcAddExtTokenForm from '$icp/components/tokens/IcAddExtTokenForm.svelte';
 	import IcAddIcrcTokenForm from '$icp/components/tokens/IcAddIcrcTokenForm.svelte';
+	import IcAddNftForm from '$icp/components/tokens/IcAddNftForm.svelte';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import AddTokenByNetworkToolbar from '$lib/components/manage/AddTokenByNetworkToolbar.svelte';
@@ -55,15 +55,24 @@
 
 	let isSolanaNetwork = $derived(isNetworkIdSolana(network?.id));
 
-	let { ledgerCanisterId, indexCanisterId, extCanisterId, ethContractAddress, splTokenAddress } =
-		$derived(tokenData);
+	let {
+		ledgerCanisterId,
+		indexCanisterId,
+		extCanisterId,
+		dip721CanisterId,
+		icPunksCanisterId,
+		ethContractAddress,
+		splTokenAddress
+	} = $derived(tokenData);
 
 	$effect(() => {
 		// Since we persist the values of relevant variables when switching networks, this ensures that
 		// only the data related to the selected network is passed.
 		if (isIcpNetwork) {
 			tokenData = isNftsPage
-				? { extCanisterId }
+				? nonNullish(extCanisterId)
+					? { extCanisterId }
+					: { dip721CanisterId }
 				: {
 						ledgerCanisterId,
 						indexCanisterId:
@@ -86,12 +95,18 @@
 
 	let invalidExt = $derived(isNullishOrEmpty(extCanisterId));
 
+	let invalidDip721 = $derived(isNullishOrEmpty(dip721CanisterId));
+
+	let invalidIcPunks = $derived(isNullishOrEmpty(icPunksCanisterId));
+
+	let invalidIcNft = $derived(invalidExt && invalidDip721 && invalidIcPunks);
+
 	let invalidSpl = $derived(isNullishOrEmpty(splTokenAddress));
 
 	let invalid = $derived(
 		isIcpNetwork
 			? isNftsPage
-				? invalidExt
+				? invalidIcNft
 				: invalidIc
 			: isEthereumNetwork || isEvmNetwork
 				? invalidEth
@@ -118,7 +133,7 @@
 
 		{#if isIcpNetwork}
 			{#if isNftsPage}
-				<IcAddExtTokenForm bind:extCanisterId />
+				<IcAddNftForm bind:extCanisterId bind:dip721CanisterId bind:icPunksCanisterId />
 			{:else}
 				<IcAddIcrcTokenForm bind:ledgerCanisterId bind:indexCanisterId />
 			{/if}

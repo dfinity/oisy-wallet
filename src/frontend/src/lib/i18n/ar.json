@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
-			"test_banner_beta": ""
+			"test_banner_beta": "",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "شعار $name",
@@ -61,7 +64,8 @@
 		},
 		"warning": {
 			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,9 +121,11 @@
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
+			"legacy_login": "",
 			"asset_types": "",
 			"instant_and_private": "",
-			"advanced_cryptography": ""
+			"advanced_cryptography": "",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
@@ -145,36 +151,34 @@
 		},
 		"help": {
 			"text": {
-				"title": "هل تواجه مشاكل في المصادقة؟",
-				"description": "لقد لاحظنا أنك ألغيت المصادقة باستخدام Internet Identity. نود أن نفهم ما حدث حتى نتمكن من تحسين تجربتك.",
-				"subtitle": "هل تسبب أي مما يلي في المشكلة؟",
-				"lost_identity": "لقد فقدت رقم هويتي على الإنترنت",
-				"security": "كنت قلقًا بشأن الأمان أو الخصوصية",
-				"got_confused": "لقد ارتبكت أثناء العملية",
-				"other": "أخرى...",
-				"feedback_text": "ملاحظاتك تساعدنا على جعل المحفظة أفضل.",
+				"title": "",
+				"description": "",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"lost_identity_number": "",
+				"feedback_text": "",
 				"thanks_text": "شكرًا لك!",
+				"useful_links": "",
 				"identity_new_identity": "محفظة $oisy_short تحوّل نطاق هوية الإنترنت إلى: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "نتيجة لذلك، قد لا يظهر رقم هوية الإنترنت الخاص بك تلقائيًا، وقد تحتاج إلى إعادة إدخاله.",
+				"switch_to_new_internet_identity": "",
+				"identity_legacy_identity_title": "",
+				"identity_legacy_identity_item_1": "",
+				"identity_legacy_identity_item_2": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"identity_new_identity_item_2": "",
+				"identity_new_identity_link": "",
 				"identity_legacy_sign_in": "تسجيل الدخول باستخدام نطاق هوية الإنترنت القديم",
 				"identity_learn_more": "تعرف على المزيد في وثائق $oisy_short",
-				"other_title": "شكرًا لك على ملاحظاتك!",
-				"other_description": "إليك بعض الموارد المفيدة حول <span class=\"font-bold\">الأمان</span> و<span class=\"font-bold\">الخصوصية</span> في $oisy_short وهوية الإنترنت. نأمل أن تساعدك في اتخاذ قرار مستنير:",
-				"other_introduction": "مقدمة $oisy_short",
-				"other_docs": "وثائق $oisy_short: هوية الإنترنت",
-				"other_private_key": "من يتحكم في المفتاح الخاص للأصول الأصلية؟",
-				"other_asset_control": "التحكم في الأصول، الاسترداد، والحوكمة في محفظة $oisy_short",
+				"oisy_introduction": "",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "هل تحتاج مساعدة في",
 				"sign_in": "تسجيل الدخول؟"
 			},
 			"alt": {
-				"internet_identity": "صورة لهوية الإنترنت الجديدة",
-				"identity_learn_more": "تعرف على المزيد حول هوية الإنترنت القديمة",
-				"other_introduction": "افتح مقدمة $oisy_short",
-				"other_docs": "افتح وثائق $oisy_short: هوية الإنترنت",
-				"other_private_key": "احصل على مساعدة حول من يتحكم في المفتاح الخاص للأصول الأصلية",
-				"other_asset_control": "احصل على معلومات حول التحكم في الأصول، الاسترداد، والحوكمة في محفظة $oisy_short",
-				"sign_in": "هل تحتاج بعض المساعدة لتسجيل الدخول؟"
+				"internet_identity": "صورة لهوية الإنترنت الجديدة"
 			}
 		}
 	},
@@ -183,6 +187,7 @@
 			"title_part_1": "",
 			"title_part_2": "",
 			"unlock": "",
+			"unlock_with_legacy_login": "",
 			"logout": "",
 			"logout_clear_cash_message": "",
 			"learn_more": ""
@@ -558,7 +563,7 @@
 			"incubated_with": "احتضان مع",
 			"by": "بواسطة",
 			"dfinity_foundation": "مؤسسة DFINITY",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "مساعد $oisy_short"
 		},
 		"alt": {
@@ -628,11 +633,11 @@
 			"erc20_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20 المخصصة.",
 			"erc721_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC721 المخصصة.",
 			"erc1155_custom_tokens": "",
-			"erc20_user_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20.",
 			"spl_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم SPL المخصصة.",
-			"erc20_user_token": "خطأ أثناء تفعيل التوكن التوأم ERC20.",
+			"erc20_custom_token": "خطأ أثناء تفعيل التوكن التوأم ERC20.",
 			"icrc_custom_token": "خطأ أثناء تحميل التوكن المخصص ICRC.",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "تتطلب محفظتك بعض البيانات الأولية التي لم يتم تحميلها بعد. يرجى المحاولة مرة أخرى.",
 			"allow_signing": "حدثت مشكلة أثناء إعداد محفظتك للتوقيع. تم تسجيل خروجك. إذا استمرت المشكلة، يرجى الاتصال بالدعم.",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -902,6 +907,20 @@
 			"fee_calc_unsupported_standard": ""
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
@@ -929,10 +948,14 @@
 			"tokens_available": "",
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1064,6 +1087,12 @@
 			"signing_transaction": "",
 			"paying": ""
 		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
+		},
 		"alt": {
 			"pay": "",
 			"where_you_can_pay": ""
@@ -1144,6 +1173,7 @@
 				"unexpected_ledger": "حدث خطأ ما أثناء التحقق من صحة حاوية السجل.",
 				"unexpected_index": "حدث خطأ ما أثناء التحقق من صحة حاوية الفهرس.",
 				"unexpected_index_ledger": "حدث خطأ ما أثناء تحميل معرف السجل المرتبط بحاوية الفهرس.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "معرف السجل غير مرتبط بحاوية الفهرس.",
 				"missing_ledger_id": "معرف السجل مفقود. هل قدمت قيمة؟",
 				"missing_canister_id": "",
@@ -1281,7 +1311,8 @@
 			"learn_more": "",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "لا توجد NFTs بعد",
@@ -1476,6 +1507,8 @@
 			"title": "المعاملات",
 			"buy_or_receive": "قم بأول معاملة لك، واشترِ أو استلم التوكنات الآن!",
 			"transaction_history": "سيظهر سجل معاملاتك هنا",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل.",
 			"transaction_history_unavailable": "سجل المعاملات غير متاح",
 			"missing_index_canister_explanation": "في الوقت الحالي، لا يستطيع $oisy_short عرض سجل معاملات التوكن الخاص بك لأن الجهة المصدرة لم توفر ميزة التتبع بعد. من المفترض أن تتم إضافتها قريبًا. في هذه الأثناء، لا تقلق - لا يزال بإمكانك إرسال واستلام التوكنات الخاصة بك كالمعتاد.",
@@ -1774,6 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

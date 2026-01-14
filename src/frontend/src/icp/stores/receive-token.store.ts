@@ -3,6 +3,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import { isNetworkEthereum } from '$lib/utils/network.utils';
 import { derived, writable, type Readable } from 'svelte/store';
 
 export type ReceiveTokenStoreData = IcToken;
@@ -37,9 +38,8 @@ export const initReceiveTokenContext = ({
 		(token) => (token as IcCkToken).twinToken ?? ETHEREUM_TOKEN
 	);
 
-	const ckEthereumTwinTokenNetwork = derived(
-		[ckEthereumTwinToken],
-		([{ network }]) => (network as EthereumNetwork | undefined) ?? ETHEREUM_NETWORK
+	const ckEthereumTwinTokenNetwork = derived([ckEthereumTwinToken], ([{ network }]) =>
+		isNetworkEthereum(network) ? network : ETHEREUM_NETWORK
 	);
 
 	return {

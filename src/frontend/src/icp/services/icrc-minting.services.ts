@@ -7,7 +7,7 @@ import { encodeIcrcAccount, type IcrcAccount } from '@icp-sdk/canisters/ledger/i
 export const isUserMintingAccount = async ({
 	identity,
 	account,
-	token: { ledgerCanisterId }
+	token: { ledgerCanisterId, mintingAccount: tokenMintingAccount }
 }: {
 	identity: OptionIdentity;
 	account: IcrcAccount | undefined;
@@ -17,10 +17,12 @@ export const isUserMintingAccount = async ({
 		return false;
 	}
 
-	const mintingAccount = await getMintingAccount({
-		identity,
-		ledgerCanisterId
-	});
+	const mintingAccount =
+		tokenMintingAccount ??
+		(await getMintingAccount({
+			identity,
+			ledgerCanisterId
+		}));
 
 	if (isNullish(mintingAccount)) {
 		return false;

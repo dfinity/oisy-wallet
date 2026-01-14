@@ -3,7 +3,6 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
@@ -11,6 +10,7 @@ import * as appConstants from '$lib/constants/app.constants';
 import {
 	enabledFungibleTokensUi,
 	enabledMainnetFungibleIcTokensUsdBalance,
+	enabledMainnetFungibleTokensUi,
 	enabledMainnetFungibleTokensUsdBalance
 } from '$lib/derived/tokens-ui.derived';
 import { tokens } from '$lib/derived/tokens.derived';
@@ -29,7 +29,6 @@ describe('tokens-ui.derived', () => {
 		vi.resetAllMocks();
 
 		erc20DefaultTokensStore.reset();
-		erc20UserTokensStore.resetAll();
 		erc721CustomTokensStore.resetAll();
 		erc1155CustomTokensStore.resetAll();
 		icrcDefaultTokensStore.resetAll();
@@ -45,6 +44,8 @@ describe('tokens-ui.derived', () => {
 
 	describe('enabledFungibleTokensUi', () => {
 		it('returns correct data', () => {
+			setupTestnetsStore('enabled');
+
 			expect(get(enabledFungibleTokensUi)).toStrictEqual(
 				get(tokens).map((token) =>
 					mapTokenUi({ token, $balances: {}, $stakeBalances: {}, $exchanges: {} })
@@ -54,6 +55,22 @@ describe('tokens-ui.derived', () => {
 
 		it('should not include NFTs', () => {
 			expect(get(enabledFungibleTokensUi).every(isTokenNonFungible)).toBeFalsy();
+		});
+	});
+
+	describe('enabledMainnetFungibleTokensUi', () => {
+		it('returns correct data', () => {
+			setupTestnetsStore('enabled');
+
+			expect(get(enabledMainnetFungibleTokensUi)).toStrictEqual(
+				get(tokens)
+					.filter(({ network: { env } }) => env !== 'testnet')
+					.map((token) => mapTokenUi({ token, $balances: {}, $stakeBalances: {}, $exchanges: {} }))
+			);
+		});
+
+		it('should not include NFTs', () => {
+			expect(get(enabledMainnetFungibleTokensUi).every(isTokenNonFungible)).toBeFalsy();
 		});
 	});
 

@@ -10,7 +10,7 @@ export const mockValidSplToken: SplToken = {
 	...mockValidToken,
 	id: parseTokenId('SplTokenId'),
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	address: mockSplAddress,
 	owner: TOKEN_PROGRAM_ADDRESS
 };

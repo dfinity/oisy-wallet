@@ -8,7 +8,7 @@
 			"done": "Fertig",
 			"close": "Schließen",
 			"change": "Ändern",
-			"continue": "",
+			"continue": "Weiterfahren",
 			"apply": "Anwenden",
 			"retry": "Erneut versuchen",
 			"refresh": "Aktualisieren",
@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
-			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können."
+			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können.",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "$name-Logo",
@@ -61,7 +64,8 @@
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,9 +121,11 @@
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
+			"legacy_login": "",
 			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
-			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain"
+			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil"
@@ -145,36 +151,34 @@
 		},
 		"help": {
 			"text": {
-				"title": "Probleme bei der Authentifizierung?",
-				"description": "Wir haben bemerkt, dass du die Authentifizierung mit Internet Identity abgebrochen hast. Wir würden gern verstehen, was passiert ist, um deine Erfahrung zu verbessern.",
-				"subtitle": "Wurde das Problem durch Folgendes verursacht?",
-				"lost_identity": "Ich habe meine Internet Identity-Nummer verloren",
-				"security": "Ich war besorgt wegen Sicherheit oder Datenschutz",
-				"got_confused": "Ich war während des Prozesses verwirrt",
-				"other": "Sonstiges...",
-				"feedback_text": "Dein Feedback hilft uns, die Wallet zu verbessern.",
+				"title": "",
+				"description": "",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"lost_identity_number": "",
+				"feedback_text": "",
 				"thanks_text": "Danke!",
+				"useful_links": "",
 				"identity_new_identity": "$oisy_short Wallet wechselt die Internet Identity-Domain zu: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "Daher wird deine Internet Identity-Nummer möglicherweise nicht automatisch angezeigt und du musst sie möglicherweise erneut eingeben.",
+				"switch_to_new_internet_identity": "",
+				"identity_legacy_identity_title": "",
+				"identity_legacy_identity_item_1": "",
+				"identity_legacy_identity_item_2": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"identity_new_identity_item_2": "",
+				"identity_new_identity_link": "",
 				"identity_legacy_sign_in": "Mit der Legacy-Internet-Identity-Domain anmelden",
 				"identity_learn_more": "Mehr erfahren in den $oisy_short Docs",
-				"other_title": "Danke für dein Feedback!",
-				"other_description": "Hier sind einige hilfreiche Ressourcen zu <span class=\"font-bold\">Sicherheit</span> und <span class=\"font-bold\">Datenschutz</span> in $oisy_short und Internet Identity. Wir hoffen, sie helfen Dir, eine informierte Entscheidung zu treffen:",
-				"other_introduction": "$oisy_short Einführung",
-				"other_docs": "$oisy_short-Dokumentation: Internet Identity",
-				"other_private_key": "Wer kontrolliert den privaten Schlüssel für die nativen Assets?",
-				"other_asset_control": "Asset-Kontrolle, Wiederherstellung und Governance in $oisy_short Wallet",
+				"oisy_introduction": "",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "Brauchst du Hilfe bei",
 				"sign_in": "Anmeldung?"
 			},
 			"alt": {
-				"internet_identity": "Bild der neuen Internet Identity",
-				"identity_learn_more": "Mehr über die Legacy Internet Identity erfahren",
-				"other_introduction": "$oisy_short Einführung öffnen",
-				"other_docs": "$oisy_short-Dokumentation: Internet Identity öffnen",
-				"other_private_key": "Hilfe dazu, wer den privaten Schlüssel für die nativen Assets kontrolliert",
-				"other_asset_control": "Informationen zu Asset-Kontrolle, Wiederherstellung und Governance in $oisy_short Wallet erhalten",
-				"sign_in": "Hilfe bei der Anmeldung?"
+				"internet_identity": "Bild der neuen Internet Identity"
 			}
 		}
 	},
@@ -183,6 +187,7 @@
 			"title_part_1": "Deine Wallet ist gesichert",
 			"title_part_2": "Du hast deine Wallet gesperrt. Entsperre sie um fortzufahren, oder logge dich aus.",
 			"unlock": "Entsperren",
+			"unlock_with_legacy_login": "",
 			"logout": "Ausloggen",
 			"logout_clear_cash_message": "Ausloggen wird alle lokal gecachten Daten löschen",
 			"learn_more": "Erfahre mehr"
@@ -558,7 +563,7 @@
 			"incubated_with": "Entwickelt mit",
 			"by": "von",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "$oisy_short Assistent"
 		},
 		"alt": {
@@ -628,11 +633,11 @@
 			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
 			"erc1155_custom_tokens": "Fehler beim Laden der ERC1155-Benutzertoken.",
-			"erc20_user_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"spl_custom_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
-			"erc20_user_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
+			"erc20_custom_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
 			"allow_signing": "Ein Problem trat auf beim Einrichten deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -902,37 +907,55 @@
 			"fee_calc_unsupported_standard": ""
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "",
-			"pay_to": "",
+			"scan_qr_code": "QR Code scannen",
+			"pay_to": "Zahlung an $receipt",
 			"powered_by": "",
-			"recipient": "",
-			"name": "",
-			"address": "",
-			"country": "",
-			"phone_number": "",
-			"email_address": "",
-			"website": "",
-			"enter_manually": "",
-			"url_or_code": "",
-			"enter_or_paste_code": "",
-			"scan": "",
-			"pay": "",
-			"pay_amount": "",
-			"go_to_assets": "",
-			"supported_tokens": "",
-			"no_supported_tokens": "",
-			"pay_with": "",
-			"select_token": "",
-			"select_different_token": "",
-			"tokens_available": "",
-			"select_token_to_pay": "",
-			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"recipient": "Empfänger",
+			"name": "Name",
+			"address": "Adresse",
+			"country": "Land",
+			"phone_number": "Telefonnummer",
+			"email_address": "Email Adresse",
+			"website": "Webseite",
+			"enter_manually": "Manuell eingeben",
+			"url_or_code": "URL oder den Code",
+			"enter_or_paste_code": "Code hier einfügen oder eingeben",
+			"scan": "Einlesen",
+			"pay": "Bezahlen",
+			"pay_amount": "Bezahle $amount",
+			"go_to_assets": "Gehe zu Vermögen",
+			"supported_tokens": "Open CryptoPay unterstützt die folgenden Tokens: ETH, USDC, USDT, POL, ARB, WBTC, XMR, dEURO, ZCHF, etc.",
+			"no_supported_tokens": "Du hast keine der unterstützten Tokens.",
+			"pay_with": "Bezahle mit",
+			"select_token": "Wähle ein Token",
+			"select_different_token": "Wähle ein anderes Token",
+			"tokens_available": "$amount Tokens verfügbar",
+			"select_token_to_pay": "Wähle das Token um zu bezahlen",
+			"pay_at_successful": "Bezahlt an $receipt",
+			"pay_at_failure": "Bezahlung an $receipt ist fehlgeschlagen",
+			"try_again": "Erneut versuchen",
+			"payment_confirmed": "Bezahlung Erfolgreich",
+			"payment_failed": "Bezahlung Fehlgeschlagen"
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "Code/URL ist nicht gültig",
+			"data_is_incompleted": "Die erhaltenen Daten sind unvollständig. Bitte versuche es erneut."
 		}
 	},
 	"convert": {
@@ -1054,19 +1077,25 @@
 	},
 	"pay": {
 		"text": {
-			"pay": "",
-			"dialog_title": "",
-			"dialog_description": "",
-			"dialog_button": "",
-			"where_you_can_pay": "",
-			"request_payment_details": "",
-			"creating_transaction": "",
-			"signing_transaction": "",
-			"paying": ""
+			"pay": "Bezahlen",
+			"dialog_title": "Bezahlen mit $oisy_name",
+			"dialog_description": "Mit $oisy_name schnell und einfach bezahlen mit Tokens aus verschiedenen Netzwerken. In jedem Laden der <span class=\"font-bold\">Open&nbsp;CryptoPay</span> anbietet, einfach den Bezahlungs QR Code scannen. Wähle das gewünschte Token aus und bestätige die Zahlung.",
+			"dialog_button": "Bezahle mit $oisy_short",
+			"where_you_can_pay": "Siehe wo du überall mit $oisy_name bezahlen kannst",
+			"request_payment_details": "Zahlungsinformationen anfordern...",
+			"creating_transaction": "Transaktion erstellen...",
+			"signing_transaction": "Transaktion signieren...",
+			"paying": "Zahlung ausführen..."
+		},
+		"error": {
+			"data_is_incompleted": "Die empfangenen Daten sind unvollständig. Bitte versuche es erneut.",
+			"amount_does_not_match": "Der Betrag der benötigten Anzahl Tokens hat sich nachträglich geändert und die Transaktion wurde sicherheitshalber storniert.",
+			"recipient_address_is_not_valid": "Die erhaltenen Empfängeradresse ist nicht gültig.",
+			"token_address_mismatch": "Das zur Zahlung freigegebene Token passt nicht zum geforderten Token."
 		},
 		"alt": {
-			"pay": "",
-			"where_you_can_pay": ""
+			"pay": "Dialog mit Informationen wie man bezahlt",
+			"where_you_can_pay": "Öffne die Open&nbsp;CryptoPay Webseite um nachzusehen, wo du überall bezahlen kannst."
 		}
 	},
 	"tokens": {
@@ -1144,6 +1173,7 @@
 				"unexpected_ledger": "Beim Validieren des Ledger-Canisters ist etwas schiefgelaufen.",
 				"unexpected_index": "Beim Validieren des Index-Canisters ist etwas schiefgelaufen.",
 				"unexpected_index_ledger": "Beim Laden der Ledger-ID im Zusammenhang mit dem Index-Canister ist etwas schiefgelaufen.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "Die Ledger-ID gehört nicht zum Index-Canister.",
 				"missing_ledger_id": "Die Ledger-ID fehlt. Hast du einen Wert angegeben?",
 				"missing_canister_id": "",
@@ -1281,7 +1311,8 @@
 			"learn_more": "Erfahre mehr",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
@@ -1306,8 +1337,8 @@
 			"zero_fee": "Kostenlos",
 			"total_fee": "Gesamtgebühr",
 			"ata_fee": "ATA-Gebühr",
-			"transaction_fees": "",
-			"network_fee": "",
+			"transaction_fees": "Transaktionsgebühr",
+			"network_fee": "Netzwerkgebühr",
 			"approval_fee": ""
 		},
 		"assertion": {
@@ -1476,6 +1507,8 @@
 			"title": "Transaktionen",
 			"buy_or_receive": "Mache deine erste Transaktion und kaufe oder empfange jetzt Token!",
 			"transaction_history": "Deine Transaktionshistorie erscheint hier",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "BTC-Transaktionsinformationen stammen von zentralen Drittanbietern und sollten eigenständig überprüft werden.",
 			"transaction_history_unavailable": "Transaktionshistorie nicht verfügbar",
 			"missing_index_canister_explanation": "Im Moment kann $oisy_short deine vergangenen Token-Transaktionen nicht anzeigen, da der Aussteller die Verfolgungsfunktion noch nicht bereitgestellt hat. Diese sollte bald hinzugefügt werden. In der Zwischenzeit keine Sorge – Du kannst deine Token weiterhin wie gewohnt senden und empfangen.",
@@ -1774,6 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

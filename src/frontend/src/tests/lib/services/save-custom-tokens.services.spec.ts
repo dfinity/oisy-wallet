@@ -1,29 +1,41 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { loadCustomTokens as loadCustomErc1155Tokens } from '$eth/services/erc1155.services';
+import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
+import { loadCustomTokens as loadCustomErc721Tokens } from '$eth/services/erc721.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import { loadCustomTokens } from '$icp/services/icrc.services';
+import { loadCustomTokens as loadCustomExtTokens } from '$icp/services/ext.services';
+import { loadCustomTokens as loadCustomIcPunksTokens } from '$icp/services/icpunks.services';
+import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
+import { dip721CustomTokensStore } from '$icp/stores/dip721-custom-tokens.store';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
+import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { SaveTokensParams } from '$lib/services/manage-tokens.services';
 import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import type {
+	Dip721SaveCustomToken,
 	ErcSaveCustomToken,
 	ExtSaveCustomToken,
+	IcPunksSaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
+import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
+import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSplAddress } from '$tests/mocks/sol.mock';
 
@@ -31,7 +43,31 @@ vi.mock('$lib/api/backend.api', () => ({
 	setManyCustomTokens: vi.fn()
 }));
 
+vi.mock('$eth/services/erc20.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$eth/services/erc721.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$eth/services/erc1155.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
 vi.mock('$icp/services/icrc.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$icp/services/ext.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$icp/services/icpunks.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$sol/services/spl.services', () => ({
 	loadCustomTokens: vi.fn()
 }));
 
@@ -43,6 +79,12 @@ describe('save-custom-tokens.services', () => {
 		};
 		const mockExtToken: ExtSaveCustomToken = {
 			canisterId: mockExtV2TokenCanisterId
+		};
+		const mockDip721Token: Dip721SaveCustomToken = {
+			canisterId: mockDip721TokenCanisterId
+		};
+		const mockIcPunksToken: IcPunksSaveCustomToken = {
+			canisterId: mockIcPunksCanisterId
 		};
 		const mockErc20Token: ErcSaveCustomToken = {
 			address: mockEthAddress,
@@ -64,6 +106,8 @@ describe('save-custom-tokens.services', () => {
 		const mockTokens: SaveCustomTokenWithKey[] = [
 			{ ...mockIcrcToken, networkKey: 'Icrc', enabled: true },
 			{ ...mockExtToken, networkKey: 'ExtV2', enabled: true },
+			{ ...mockDip721Token, networkKey: 'Dip721', enabled: true },
+			{ ...mockIcPunksToken, networkKey: 'IcPunks', enabled: true },
 			{ ...mockErc20Token, networkKey: 'Erc20', enabled: true },
 			{ ...mockErc721Token, networkKey: 'Erc721', enabled: true },
 			{ ...mockErc1155Token, networkKey: 'Erc1155', enabled: true },
@@ -83,6 +127,8 @@ describe('save-custom-tokens.services', () => {
 
 			vi.spyOn(icrcCustomTokensStore, 'resetByIdentifier');
 			vi.spyOn(extCustomTokensStore, 'resetByIdentifier');
+			vi.spyOn(dip721CustomTokensStore, 'resetByIdentifier');
+			vi.spyOn(icPunksCustomTokensStore, 'resetByIdentifier');
 			vi.spyOn(erc20CustomTokensStore, 'resetByIdentifier');
 			vi.spyOn(erc721CustomTokensStore, 'resetByIdentifier');
 			vi.spyOn(erc1155CustomTokensStore, 'resetByIdentifier');
@@ -123,6 +169,12 @@ describe('save-custom-tokens.services', () => {
 			expect(extCustomTokensStore.resetByIdentifier).toHaveBeenCalledExactlyOnceWith(
 				mockExtV2TokenCanisterId
 			);
+			expect(dip721CustomTokensStore.resetByIdentifier).toHaveBeenCalledExactlyOnceWith(
+				mockDip721TokenCanisterId
+			);
+			expect(icPunksCustomTokensStore.resetByIdentifier).toHaveBeenCalledExactlyOnceWith(
+				mockIcPunksCanisterId
+			);
 			expect(erc20CustomTokensStore.resetByIdentifier).toHaveBeenCalledExactlyOnceWith(
 				`${mockEthAddress}#${ETHEREUM_NETWORK.chainId}`
 			);
@@ -140,7 +192,13 @@ describe('save-custom-tokens.services', () => {
 		it('should reload custom tokens at the end', async () => {
 			await saveCustomTokens(mockParams);
 
-			expect(loadCustomTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomIcrcTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomIcPunksTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 		});
 
 		it('should fail if the setManyCustomTokens fails', async () => {
@@ -148,19 +206,25 @@ describe('save-custom-tokens.services', () => {
 
 			vi.mocked(setManyCustomTokens).mockRejectedValueOnce(mockError);
 
-			await expect(saveCustomTokens(mockParams)).rejects.toThrow(mockError);
+			await expect(saveCustomTokens(mockParams)).rejects.toThrowError(mockError);
 
 			expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsAddToken.SAVE);
 
-			expect(loadCustomTokens).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+			expect(loadCustomErc721Tokens).not.toHaveBeenCalled();
+			expect(loadCustomErc1155Tokens).not.toHaveBeenCalled();
+			expect(loadCustomIcrcTokens).not.toHaveBeenCalled();
+			expect(loadCustomExtTokens).not.toHaveBeenCalled();
+			expect(loadCustomIcPunksTokens).not.toHaveBeenCalled();
+			expect(loadCustomSplTokens).not.toHaveBeenCalled();
 		});
 
-		it('should fail if the loadCustomTokens fails', async () => {
+		it('should fail if any loadCustomTokens fails', async () => {
 			const mockError = new Error('Mocked error when loading tokens');
 
-			vi.mocked(loadCustomTokens).mockRejectedValueOnce(mockError);
+			vi.mocked(loadCustomErc20Tokens).mockRejectedValueOnce(mockError);
 
-			await expect(saveCustomTokens(mockParams)).rejects.toThrow(mockError);
+			await expect(saveCustomTokens(mockParams)).rejects.toThrowError(mockError);
 		});
 	});
 });

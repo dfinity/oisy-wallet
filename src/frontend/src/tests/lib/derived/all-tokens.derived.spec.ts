@@ -69,7 +69,7 @@ describe('all-tokens.derived', () => {
 
 	const mockDip20Token: IcrcCustomToken = {
 		...mockValidIcCkToken,
-		standard: 'dip20',
+		standard: { code: 'dip20' },
 		id: parseTokenId('XTC'),
 		symbol: 'XTC',
 		ledgerCanisterId: 'mock-ledger-canister-id',
@@ -171,11 +171,11 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
-				mockErc721Token.id.description,
 				mockDip20Token.id.description,
 				mockIcrcToken2.id.description,
 				mockIcrcToken.id.description,
-				mockSplToken.id.description
+				mockSplToken.id.description,
+				mockErc721Token.id.description
 			]);
 		});
 

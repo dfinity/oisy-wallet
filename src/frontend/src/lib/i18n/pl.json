@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",
-			"test_banner_beta": ""
+			"test_banner_beta": "",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "logo $name",
@@ -61,7 +64,8 @@
 		},
 		"warning": {
 			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,9 +121,11 @@
 			"logout": "Wyloguj",
 			"lock": "Zablokuj",
 			"authenticate": "Otwórz lub Utwórz",
+			"legacy_login": "",
 			"asset_types": "Zarządzaj aktywami w BTC, SOL, ETH, ICP i innych kryptowalutach",
 			"instant_and_private": "Wbudowany asystent AI z ochroną prywatności w standardzie",
-			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain"
+			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie"
@@ -145,36 +151,34 @@
 		},
 		"help": {
 			"text": {
-				"title": "Masz problemy z uwierzytelnieniem?",
-				"description": "Zauważyliśmy, że anulowałeś uwierzytelnienie za pomocą Internet Identity. Chcielibyśmy zrozumieć, co się stało, abyśmy mogli ulepszyć Twoje odczucia.",
-				"subtitle": "Czy któryś z poniższych czynników spowodował problem?",
-				"lost_identity": "Zgubiłem numer Internet Identity",
-				"security": "Martwiłem się o bezpieczeństwo lub prywatność",
-				"got_confused": "Zdezorientowałem się podczas procesu",
-				"other": "Inne...",
-				"feedback_text": "Twoja opinia pomaga nam ulepszać portfel.",
+				"title": "",
+				"description": "",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"lost_identity_number": "",
+				"feedback_text": "",
 				"thanks_text": "Dziękuję!",
+				"useful_links": "",
 				"identity_new_identity": "Portfel $oisy_short przełącza domenę Internet Identity na: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "W rezultacie Twój numer Internet Identity może nie pojawić się automatycznie i może być konieczne jego ponowne wprowadzenie.",
+				"switch_to_new_internet_identity": "",
+				"identity_legacy_identity_title": "",
+				"identity_legacy_identity_item_1": "",
+				"identity_legacy_identity_item_2": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"identity_new_identity_item_2": "",
+				"identity_new_identity_link": "",
 				"identity_legacy_sign_in": "Zaloguj się za pomocą starszej domeny Internet Identity",
 				"identity_learn_more": "Dowiedz się więcej w dokumentacji $oisy_short",
-				"other_title": "Dziękujemy za Twoją opinię!",
-				"other_description": "Oto kilka przydatnych źródeł na temat <span class=\"font-bold\">bezpieczeństwa</span> i <span class=\"font-bold\">prywatności</span> w $oisy_short i Internet Identity. Mamy nadzieję, że pomogą Ci podjąć świadomą decyzję:",
-				"other_introduction": "Wprowadzenie do $oisy_short",
-				"other_docs": "Dokumentacja $oisy_short: Internet Identity",
-				"other_private_key": "Kto kontroluje klucz prywatny do zasobów natywnych?",
-				"other_asset_control": "Kontrola aktywów, odzyskiwanie i zarządzanie w portfelu $oisy_short",
+				"oisy_introduction": "",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "Potrzebujesz pomocy",
 				"sign_in": "w logowaniu?"
 			},
 			"alt": {
-				"internet_identity": "Obraz nowej tożsamości internetowej",
-				"identity_learn_more": "Dowiedz się więcej o starszej tożsamości internetowej",
-				"other_introduction": "Otwórz wprowadzenie do $oisy_short",
-				"other_docs": "Otwórz dokumentację $oisy_short: Internet Identity",
-				"other_private_key": "Uzyskaj pomoc na temat tego, kto kontroluje klucz prywatny do zasobów natywnych",
-				"other_asset_control": "Uzyskaj informacje na temat kontroli aktywów, odzyskiwania i zarządzania w portfelu $oisy_short",
-				"sign_in": "Potrzebujesz pomocy w logowaniu?"
+				"internet_identity": "Obraz nowej tożsamości internetowej"
 			}
 		}
 	},
@@ -183,6 +187,7 @@
 			"title_part_1": "Odblokuj, aby kontynuować",
 			"title_part_2": "Wcześniej zablokowałeś swój portfel, aby go zabezpieczyć. Wznów od miejsca, w którym skończyłeś, lub wyloguj się.",
 			"unlock": "Odblokuj",
+			"unlock_with_legacy_login": "",
 			"logout": "Wyloguj",
 			"logout_clear_cash_message": "Wylogowanie usunie wszystkie dane z pamięci podręcznej",
 			"learn_more": "Dowiedz się więcej"
@@ -558,7 +563,7 @@
 			"incubated_with": "Inkubowany z",
 			"by": "przez",
 			"dfinity_foundation": "Fundacja DFINITY",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "Asystent $oisy_short"
 		},
 		"alt": {
@@ -628,11 +633,11 @@
 			"erc20_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC20.",
 			"erc721_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC721.",
 			"erc1155_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC1155.",
-			"erc20_user_tokens": "Błąd podczas ładowania tokenów użytkownika ERC20.",
 			"spl_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów SPL.",
-			"erc20_user_token": "Błąd podczas włączania tokena bliźniaczego ERC20.",
+			"erc20_custom_token": "Błąd podczas włączania tokena bliźniaczego ERC20.",
 			"icrc_custom_token": "Błąd podczas ładowania niestandardowego tokena ICRC.",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Twój portfel wymaga danych początkowych, które nie zostały jeszcze załadowane. Spróbuj ponownie.",
 			"allow_signing": "Wystąpił problem podczas konfigurowania portfela do podpisywania. Zostałeś wylogowany. Jeśli problem będzie się powtarzał, skontaktuj się z pomocą techniczną.",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -902,6 +907,20 @@
 			"fee_calc_unsupported_standard": ""
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
@@ -929,10 +948,14 @@
 			"tokens_available": "",
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1064,6 +1087,12 @@
 			"signing_transaction": "",
 			"paying": ""
 		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
+		},
 		"alt": {
 			"pay": "",
 			"where_you_can_pay": ""
@@ -1144,6 +1173,7 @@
 				"unexpected_ledger": "Coś poszło nie tak podczas sprawdzania poprawności kanistra rejestru.",
 				"unexpected_index": "Coś poszło nie tak podczas sprawdzania poprawności kanistra indeksu.",
 				"unexpected_index_ledger": "Coś poszło nie tak podczas ładowania identyfikatora rejestru związanego z kanistrem indeksu.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "Identyfikator rejestru nie jest powiązany z kanistrem indeksu.",
 				"missing_ledger_id": "Brakuje identyfikatora rejestru. Czy podałeś wartość?",
 				"missing_canister_id": "",
@@ -1281,7 +1311,8 @@
 			"learn_more": "",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Jeszcze brak NFT",
@@ -1476,6 +1507,8 @@
 			"title": "Transakcje",
 			"buy_or_receive": "Dokonaj pierwszej transakcji i kup lub odbierz tokeny już teraz!",
 			"transaction_history": "Historia Twoich transakcji pojawi się tutaj",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "Informacje o transakcjach BTC są uzyskiwane od centralnych stron trzecich i powinny być niezależnie weryfikowane.",
 			"transaction_history_unavailable": "Historia transakcji niedostępna",
 			"missing_index_canister_explanation": "W tej chwili $oisy_short nie może wyświetlić Twojej historii transakcji tokenów, ponieważ emitent nie udostępnił jeszcze funkcji śledzenia. Powinna zostać dodana wkrótce. W międzyczasie nie martw się — nadal możesz wysyłać i odbierać swoje tokeny jak zwykle.",
@@ -1774,6 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "Klikając ten przycisk, zgadzasz się na $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

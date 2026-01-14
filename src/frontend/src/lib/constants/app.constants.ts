@@ -1,4 +1,3 @@
-import { IS_ICP_DOMAIN_URL } from '$lib/constants/oisy.constants';
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -128,6 +127,14 @@ export const GLDT_STAKE_CANISTER_ID = LOCAL
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
 
+const DOMAIN_URL_HOSTNAME =
+	typeof window !== 'undefined'
+		? window.location.hostname
+		: typeof self !== 'undefined'
+			? self.location.hostname
+			: '';
+const IS_ICP_DOMAIN_URL = DOMAIN_URL_HOSTNAME.endsWith('.icp0.io');
+
 export const AUTH_ALTERNATIVE_ORIGINS = import.meta.env.VITE_AUTH_ALTERNATIVE_ORIGINS;
 export const AUTH_DERIVATION_ORIGIN =
 	BETA || (PROD && IS_ICP_DOMAIN_URL)
@@ -137,7 +144,9 @@ export const AUTH_DERIVATION_ORIGIN =
 			: undefined;
 
 export const AUTH_POPUP_WIDTH = 576;
-export const AUTH_POPUP_HEIGHT = 625;
+// we need to temporarily increase the height so II 2.0 in "guided mode" fits the popup
+// TODO: revert to 625 after II provides a fix on their end
+export const AUTH_POPUP_HEIGHT = 826;
 export const VC_POPUP_WIDTH = AUTH_POPUP_WIDTH;
 // Screen to allow credential presentation is longer than the authentication screen.
 export const VC_POPUP_HEIGHT = 900;

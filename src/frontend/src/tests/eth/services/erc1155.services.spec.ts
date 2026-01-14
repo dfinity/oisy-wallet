@@ -50,7 +50,7 @@ describe('erc1155.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc1155',
+				standard: { code: 'erc1155' },
 				category: 'custom',
 				version: 1n,
 				enabled: true,
@@ -64,7 +64,7 @@ describe('erc1155.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc1155',
+				standard: { code: 'erc1155' },
 				category: 'custom',
 				version: 2n,
 				enabled: true,
@@ -78,7 +78,7 @@ describe('erc1155.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc1155',
+				standard: { code: 'erc1155' },
 				category: 'custom',
 				version: undefined,
 				enabled: false,
@@ -139,7 +139,7 @@ describe('erc1155.services', () => {
 			const mockError = new Error('Error loading metadata');
 			vi.mocked(mockMetadata).mockRejectedValue(mockError);
 
-			await expect(loadErc1155Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc1155Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 
 			expect(get(erc1155CustomTokensStore)).toStrictEqual([]);
 
@@ -185,7 +185,7 @@ describe('erc1155.services', () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadErc1155Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc1155Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 	});
 
@@ -237,7 +237,10 @@ describe('erc1155.services', () => {
 
 		it('should reset token store on error', async () => {
 			erc1155CustomTokensStore.setAll([
-				{ data: { ...SEPOLIA_PEPE_TOKEN, standard: 'erc1155', enabled: true }, certified: false }
+				{
+					data: { ...SEPOLIA_PEPE_TOKEN, standard: { code: 'erc1155' }, enabled: true },
+					certified: false
+				}
 			]);
 
 			vi.mocked(listCustomTokens).mockRejectedValue(new Error('Error loading custom tokens'));
