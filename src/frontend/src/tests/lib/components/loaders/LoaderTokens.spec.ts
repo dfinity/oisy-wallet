@@ -5,7 +5,9 @@ import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 import { loadErc20Tokens } from '$eth/services/erc20.services';
 import { loadErc721Tokens } from '$eth/services/erc721.services';
 import * as extDerived from '$icp/derived/ext.derived';
+import * as icPunksDerived from '$icp/derived/icpunks.derived';
 import { loadExtTokens } from '$icp/services/ext.services';
+import { loadIcPunksTokens } from '$icp/services/icpunks.services';
 import { loadIcrcTokens } from '$icp/services/icrc.services';
 import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 import * as appConstants from '$lib/constants/app.constants';
@@ -62,6 +64,10 @@ vi.mock('$icp/services/ext.services', () => ({
 	loadExtTokens: vi.fn()
 }));
 
+vi.mock('$icp/services/icpunks.services', () => ({
+	loadIcPunksTokens: vi.fn()
+}));
+
 vi.mock('$sol/services/spl.services', () => ({
 	loadSplTokens: vi.fn()
 }));
@@ -77,6 +83,7 @@ describe('LoaderTokens', () => {
 	const erc721InitStore = writable(false);
 	const erc1155InitStore = writable(false);
 	const extNotInitStore = writable(true);
+	const icPunksNotInitStore = writable(true);
 	const splNotInitStore = writable(true);
 
 	beforeEach(() => {
@@ -99,6 +106,7 @@ describe('LoaderTokens', () => {
 		erc721InitStore.set(false);
 		erc1155InitStore.set(false);
 		extNotInitStore.set(true);
+		icPunksNotInitStore.set(true);
 		splNotInitStore.set(true);
 
 		vi.spyOn(erc20Derived, 'erc20CustomTokensNotInitialized', 'get').mockReturnValue(
@@ -123,6 +131,10 @@ describe('LoaderTokens', () => {
 
 		vi.spyOn(extDerived, 'extCustomTokensNotInitialized', 'get').mockReturnValue(extNotInitStore);
 
+		vi.spyOn(icPunksDerived, 'icPunksCustomTokensNotInitialized', 'get').mockReturnValue(
+			icPunksNotInitStore
+		);
+
 		vi.spyOn(splDerived, 'splCustomTokensNotInitialized', 'get').mockReturnValue(splNotInitStore);
 	});
 
@@ -139,6 +151,14 @@ describe('LoaderTokens', () => {
 
 		await waitFor(() => {
 			expect(loadExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+		});
+	});
+
+	it('should always load ICPunks tokens', async () => {
+		render(LoaderTokens, { children: mockSnippet });
+
+		await waitFor(() => {
+			expect(loadIcPunksTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 		});
 	});
 
@@ -163,6 +183,7 @@ describe('LoaderTokens', () => {
 			expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadIcPunksTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 		});
 	});
@@ -292,6 +313,20 @@ describe('LoaderTokens', () => {
 
 			await waitFor(() => {
 				expect(loadExtTokens).not.toHaveBeenCalled();
+			});
+		});
+	});
+
+	describe('ICPunks tokens', () => {
+		it('should not load ICPunks tokens if the stores are already initialized', async () => {
+			setupUserNetworksStore('allEnabled');
+
+			icPunksNotInitStore.set(false);
+
+			render(LoaderTokens, { children: mockSnippet });
+
+			await waitFor(() => {
+				expect(loadIcPunksTokens).not.toHaveBeenCalled();
 			});
 		});
 	});
