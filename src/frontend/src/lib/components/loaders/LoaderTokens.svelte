@@ -8,7 +8,9 @@
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { extCustomTokensNotInitialized } from '$icp/derived/ext.derived';
+	import { icPunksCustomTokensNotInitialized } from '$icp/derived/icpunks.derived';
 	import { loadExtTokens } from '$icp/services/ext.services';
+	import { loadIcPunksTokens } from '$icp/services/icpunks.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
@@ -66,6 +68,8 @@
 
 	let loadExt = $derived($extCustomTokensNotInitialized);
 
+	let loadIcPunks = $derived($icPunksCustomTokensNotInitialized);
+
 	$effect(() => {
 		if (loadErc20) {
 			loadErc20Tokens({ identity: $authIdentity });
@@ -93,6 +97,12 @@
 	$effect(() => {
 		if (loadExt) {
 			loadExtTokens({ identity: $authIdentity });
+		}
+	});
+
+	$effect(() => {
+		if (loadIcPunks) {
+			loadIcPunksTokens({ identity: $authIdentity });
 		}
 	});
 </script>
