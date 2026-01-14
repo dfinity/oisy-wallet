@@ -6,6 +6,7 @@ import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { extTokens } from '$icp/derived/ext.derived';
+import { icPunksTokens } from '$icp/derived/icpunks.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
@@ -75,6 +76,7 @@ export const allTokens = derived(
 		erc1155Tokens,
 		allIcrcTokens,
 		extTokens,
+		icPunksTokens,
 		splTokens
 	],
 	([
@@ -88,6 +90,7 @@ export const allTokens = derived(
 		$erc1155Tokens,
 		$allIcrcTokens,
 		$extTokens,
+		$icPunksTokens,
 		$splTokens
 	]) => [
 		...$defaultIcpTokens.map((token) => ({ ...token, enabled: true })),
@@ -100,6 +103,7 @@ export const allTokens = derived(
 		...$erc1155Tokens,
 		...$allIcrcTokens,
 		...$extTokens,
+		...$icPunksTokens,
 		...$splTokens
 	]
 );

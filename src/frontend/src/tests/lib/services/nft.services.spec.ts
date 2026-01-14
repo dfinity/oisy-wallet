@@ -21,6 +21,7 @@ import type { NonFungibleToken } from '$lib/types/nft';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { NYAN_CAT_TOKEN, mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -322,6 +323,24 @@ describe('nft.services', () => {
 					{
 						...mockValidExtV2Token,
 						networkKey: 'ExtV2',
+						enabled: true
+					}
+				]
+			});
+		});
+
+		it('should save a DIP721 custom token', async () => {
+			await saveNftCustomToken({
+				...mockParams,
+				token: { ...mockValidDip721Token, enabled: true }
+			});
+
+			expect(saveSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...mockValidDip721Token,
+						networkKey: 'Dip721',
 						enabled: true
 					}
 				]
