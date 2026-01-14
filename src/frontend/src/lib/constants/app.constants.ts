@@ -144,7 +144,9 @@ export const AUTH_DERIVATION_ORIGIN =
 			: undefined;
 
 export const AUTH_POPUP_WIDTH = 576;
-export const AUTH_POPUP_HEIGHT = 625;
+// we need to temporarily increase the height so II 2.0 in "guided mode" fits the popup
+// TODO: revert to 625 after II provides a fix on their end
+export const AUTH_POPUP_HEIGHT = 790;
 export const VC_POPUP_WIDTH = AUTH_POPUP_WIDTH;
 // Screen to allow credential presentation is longer than the authentication screen.
 export const VC_POPUP_HEIGHT = 900;
