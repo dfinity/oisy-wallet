@@ -32,7 +32,6 @@ import {
 	filterTokens,
 	filterTokensByNft,
 	findToken,
-	groupTogglableTokens,
 	pinEnabledTokensAtTop,
 	pinTokensWithBalanceAtTop,
 	saveAllCustomTokens,
@@ -938,56 +937,6 @@ describe('tokens.utils', () => {
 					expect(defineEnabledTokens(params)).toEqual([...mainnetTokens, ...testnetTokens]);
 				});
 			});
-		});
-	});
-
-	describe('groupTogglableTokens', () => {
-		it('should return empty arrays if no tokens passed', () => {
-			const result = groupTogglableTokens([]);
-
-			expect(result).toEqual({
-				icrc: [],
-				ext: [],
-				dip721: [],
-				icpunks: [],
-				erc20: [],
-				erc721: [],
-				erc1155: [],
-				spl: []
-			});
-		});
-
-		it('should group the tokens correctly', () => {
-			const mockToggleableIcToken1 = { ...mockValidIcrcToken, name: 'token1', enabled: true };
-			const mockToggleableIcToken2 = { ...mockValidIcrcToken, name: 'token2', enabled: true };
-			const mockToggleableExtV2Token = { ...mockValidExtV2Token, enabled: true };
-			const mockToggleableDip721Token = { ...mockValidDip721Token, enabled: true };
-			const mockToggleableIcPunksToken = { ...mockValidIcPunksToken, enabled: true };
-			const mockToggleableErc20Token = { ...mockValidErc20Token, enabled: true };
-			const mockToggleableErc721Token = { ...mockValidErc721Token, enabled: true };
-			const mockToggleableErc1155Token = { ...mockValidErc1155Token, enabled: true };
-			const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
-
-			const { icrc, ext, dip721, icpunks, spl, erc20, erc721, erc1155 } = groupTogglableTokens([
-				mockToggleableSplToken,
-				mockToggleableErc20Token,
-				mockToggleableErc721Token,
-				mockToggleableErc1155Token,
-				mockToggleableIcToken1,
-				mockToggleableIcToken2,
-				mockToggleableExtV2Token,
-				mockToggleableDip721Token,
-				mockToggleableIcPunksToken
-			]);
-
-			expect(icrc).toEqual([mockToggleableIcToken1, mockToggleableIcToken2]);
-			expect(ext).toEqual([mockToggleableExtV2Token]);
-			expect(dip721).toEqual([mockToggleableDip721Token]);
-			expect(icpunks).toEqual([mockToggleableIcPunksToken]);
-			expect(spl).toEqual([mockToggleableSplToken]);
-			expect(erc20).toEqual([mockToggleableErc20Token]);
-			expect(erc721).toEqual([mockToggleableErc721Token]);
-			expect(erc1155).toEqual([mockToggleableErc1155Token]);
 		});
 	});
 
