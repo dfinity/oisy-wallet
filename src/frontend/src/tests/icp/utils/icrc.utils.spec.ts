@@ -2,12 +2,12 @@ import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
-	icTokenIcrcCustomToken,
 	isIcrcTokenSupportIcrc2,
 	isTokenDip20,
 	isTokenIc,
 	isTokenIcp,
 	isTokenIcrc,
+	isTokenIcrcCustomToken,
 	mapIcrcToken,
 	sortIcTokens,
 	type IcrcLoadData
@@ -370,10 +370,10 @@ describe('icrc.utils', () => {
 		);
 	});
 
-	describe('icTokenIcrcCustomToken', () => {
+	describe('isTokenIcrcCustomToken', () => {
 		it.each(['icp', 'icrc'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				icTokenIcrcCustomToken({
+				isTokenIcrcCustomToken({
 					...mockIcrcCustomToken,
 					standard: { code: standard as TokenStandardCode }
 				})
@@ -384,7 +384,7 @@ describe('icrc.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					icTokenIcrcCustomToken({
+					isTokenIcrcCustomToken({
 						...mockIcrcCustomToken,
 						standard: { code: standard as TokenStandardCode }
 					})
@@ -393,15 +393,15 @@ describe('icrc.utils', () => {
 		);
 
 		it('should return true is the token has the prop `enabled`', () => {
-			expect(icTokenIcrcCustomToken({ ...mockIcrcCustomToken, enabled: true })).toBeTruthy();
+			expect(isTokenIcrcCustomToken({ ...mockIcrcCustomToken, enabled: true })).toBeTruthy();
 
-			expect(icTokenIcrcCustomToken({ ...mockIcrcCustomToken, enabled: false })).toBeTruthy();
+			expect(isTokenIcrcCustomToken({ ...mockIcrcCustomToken, enabled: false })).toBeTruthy();
 		});
 
 		it('should return false is the token has no prop `enabled`', () => {
 			const { enabled: _, ...mockIcrcCustomTokenWithoutEnabled } = mockIcrcCustomToken;
 
-			expect(icTokenIcrcCustomToken(mockIcrcCustomTokenWithoutEnabled)).toBeFalsy();
+			expect(isTokenIcrcCustomToken(mockIcrcCustomTokenWithoutEnabled)).toBeFalsy();
 		});
 	});
 
