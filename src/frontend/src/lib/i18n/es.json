@@ -46,9 +46,9 @@
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
 			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado.",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"internet_identity_banner_first_part": "$oisy_name ahora utiliza",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "Leer mas"
 		},
 		"alt": {
 			"logo": "Logotipo",
@@ -121,11 +121,11 @@
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
-			"legacy_login": "",
+			"legacy_login": "Acceso de legado",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
 			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena",
-			"social_login": ""
+			"social_login": "Acceso instantáneo y privado + inicio de sesión social"
 		},
 		"alt": {
 			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil"
@@ -1807,7 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "Al hacer clic en este botón, aceptas los $link",
-			"instruction_two_buttons": "",
+			"instruction_two_buttons": "Al hacer clic en uno de los botones, aceptas los $link",
 			"body": ""
 		},
 		"alt": {
