@@ -494,7 +494,7 @@ describe('icrc.utils', () => {
 			position: 1
 		};
 
-		it('should return the token as it is if it is not a isIcCkInterface', () => {
+		it('should return the token as it is if it is not an IcCkInterface', () => {
 			const token = mockToken;
 
 			expect(token).not.toHaveProperty('minterCanisterId');
