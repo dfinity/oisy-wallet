@@ -16,8 +16,6 @@
 
 	let { blockNumber, token }: Props = $props();
 
-	//TODO: upgrade component to svelte 5 and check if async works properly in onMount component
-
 	let listener = $state<WebSocketListener | undefined>();
 
 	let currentBlockNumber = $state<number | undefined>();

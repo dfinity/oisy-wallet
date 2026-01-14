@@ -36,6 +36,8 @@ vi.mock('$lib/derived/networks.derived', async () => {
 vi.mock('$lib/derived/tokens.derived', async () => {
 	const { readable } = await import('svelte/store');
 	return {
+		nativeTokens: readable([ETHEREUM_TOKEN]),
+		nonFungibleTokens: readable([]),
 		enabledTokens: readable([ETHEREUM_TOKEN])
 	};
 });

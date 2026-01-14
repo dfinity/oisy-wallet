@@ -1,22 +1,15 @@
-import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20, isTokenErc20CustomToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
-import type { Dip721CustomToken } from '$icp/types/dip721-custom-token';
-import type { ExtCustomToken } from '$icp/types/ext-custom-token';
-import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { isTokenDip721, isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
-import { isTokenExt, isTokenExtCustomToken } from '$icp/utils/ext.utils';
+import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
+import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
 import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
-import { isTokenIcPunks, isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
+import { isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
 import {
-	icTokenIcrcCustomToken,
 	isTokenDip20,
 	isTokenIc,
-	isTokenIcrc
+	isTokenIcrc,
+	isTokenIcrcCustomToken
 } from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
@@ -40,7 +33,6 @@ import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { filterEnabledToken, isTokenToggleable, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
-import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -265,7 +257,7 @@ export const filterTokens = <T extends Token>({
 		}
 
 		if (
-			icTokenIcrcCustomToken(token) &&
+			isTokenIcrcCustomToken(token) &&
 			nonNullish(token.alternativeName) &&
 			token.alternativeName.toLowerCase().includes(filter.toLowerCase())
 		) {
@@ -341,44 +333,6 @@ export const defineEnabledTokens = <T extends Token>({
 		...($testnetsEnabled ? [...testnetTokens, ...(LOCAL ? localTokens : [])] : [])
 	].filter(({ network: { id: networkId } }) =>
 		isUserNetworkEnabled({ userNetworks: $userNetworks, networkId })
-	);
-
-export const groupTogglableTokens = (
-	tokens: Token[]
-): {
-	icrc: IcrcCustomToken[];
-	ext: ExtCustomToken[];
-	dip721: Dip721CustomToken[];
-	icpunks: IcPunksCustomToken[];
-	erc20: Erc20CustomToken[];
-	erc721: Erc721CustomToken[];
-	erc1155: Erc1155CustomToken[];
-	spl: SplCustomToken[];
-} =>
-	tokens.reduce<{
-		icrc: IcrcCustomToken[];
-		ext: ExtCustomToken[];
-		dip721: Dip721CustomToken[];
-		icpunks: IcPunksCustomToken[];
-		erc20: Erc20CustomToken[];
-		erc721: Erc721CustomToken[];
-		erc1155: Erc1155CustomToken[];
-		spl: SplCustomToken[];
-	}>(
-		({ icrc, ext, dip721, icpunks, erc20, erc721, erc1155, spl }, token) => ({
-			icrc: [
-				...icrc,
-				...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
-			],
-			ext: [...ext, ...(isTokenExt(token) ? [token as ExtCustomToken] : [])],
-			dip721: [...dip721, ...(isTokenDip721(token) ? [token as Dip721CustomToken] : [])],
-			icpunks: [...icpunks, ...(isTokenIcPunks(token) ? [token as ExtCustomToken] : [])],
-			erc20: [...erc20, ...(isTokenErc20CustomToken(token) ? [token] : [])],
-			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
-			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
-			spl: [...spl, ...(isTokenSplCustomToken(token) ? [token] : [])]
-		}),
-		{ icrc: [], ext: [], dip721: [], icpunks: [], erc20: [], erc721: [], erc1155: [], spl: [] }
 	);
 
 const normaliseTokenForSave = (token: Token): SaveCustomTokenWithKey | undefined => {

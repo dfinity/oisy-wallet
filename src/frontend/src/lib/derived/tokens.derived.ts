@@ -13,11 +13,12 @@ import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { extTokens } from '$icp/derived/ext.derived';
 import { icPunksTokens } from '$icp/derived/icpunks.derived';
-import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
+import { icrcChainFusionDefaultTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
 import { filterEnabledTokens } from '$lib/utils/tokens.utils';
@@ -52,7 +53,7 @@ export const nativeTokens: Readable<Token[]> = derived(
 );
 
 export const fungibleTokens: Readable<Token[]> = derived(
-	[nativeTokens, erc20Tokens, sortedIcrcTokens, splTokens],
+	[nativeTokens, erc20Tokens, icrcTokens, splTokens],
 	([$nativeTokens, $erc20Tokens, $icrcTokens, $splTokens]) => [
 		...$nativeTokens,
 		...$erc20Tokens,
@@ -61,7 +62,7 @@ export const fungibleTokens: Readable<Token[]> = derived(
 	]
 );
 
-export const nonFungibleTokens: Readable<NonFungibleToken[]> = derived(
+export const nonFungibleTokens: Readable<CustomToken<NonFungibleToken>[]> = derived(
 	[erc721Tokens, erc1155Tokens, extTokens, icPunksTokens],
 	([$erc721Tokens, $erc1155Tokens, $extTokens, $icPunksTokens]) => [
 		...$erc721Tokens,

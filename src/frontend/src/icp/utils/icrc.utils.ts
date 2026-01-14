@@ -37,7 +37,7 @@ export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
 };
 
-const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
+export const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
 	[BITCAT_LEDGER_CANISTER_ID]: 'BITCAT',
 	[FORSETISCN_LEDGER_CANISTER_ID]: 'FORSETISCN',
 	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE',
@@ -171,7 +171,7 @@ export const isTokenDip20 = (token: Partial<IcToken>): token is IcToken =>
 export const isTokenIc = (token: Partial<IcToken>): token is IcToken =>
 	isTokenIcp(token) || isTokenIcrc(token) || isTokenDip20(token);
 
-export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
+export const isTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
 	isTokenIc(token) && isTokenToggleable(token);
 
 const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>
@@ -192,7 +192,6 @@ export const isIcrcTokenSupportIcrc2 = async ({
 	return supportedStandards.some(({ name }) => name === IcTokenStandards.icrc2);
 };
 
-// TODO: create tests
 export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 	...token,
 	...(isIcCkInterface(token) && nonNullish(token.twinToken)
@@ -205,7 +204,6 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 		: {})
 });
 
-// TODO: create tests
 export const mapTokenOisySymbol = (token: IcInterface): IcInterface => ({
 	...token,
 	...(nonNullish(CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId])
