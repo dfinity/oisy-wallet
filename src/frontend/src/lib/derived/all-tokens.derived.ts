@@ -9,6 +9,7 @@ import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { Token } from '$lib/types/token';
 import { isTokenFungible } from '$lib/utils/nft.utils';
 import { splTokens } from '$sol/derived/spl.derived';
@@ -58,7 +59,7 @@ export const allSwappableTokensDerived: Readable<IcTokenWithIcrc2Supported[]> = 
 	([$swappableTokensStore]) => $swappableTokensStore ?? []
 );
 
-export const allTokens = derived(
+export const allTokens: Readable<CustomToken<Token>[]> = derived(
 	[nativeTokens, erc20Tokens, allIcrcTokens, splTokens, nonFungibleTokens],
 	([$nativeTokens, $erc20Tokens, $allIcrcTokens, $splTokens, $nonFungibleTokens]) => [
 		...$nativeTokens.map((token) => ({ ...token, enabled: true })),
