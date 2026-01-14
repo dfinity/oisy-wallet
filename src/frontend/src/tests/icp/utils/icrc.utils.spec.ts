@@ -1,6 +1,13 @@
-import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
-import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import {
+	GHOSTNODE_LEDGER_CANISTER_ID,
+	IC_CKBTC_LEDGER_CANISTER_ID,
+	IC_CKBTC_MINTER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
+import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
+import {
+	CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID,
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	icTokenIcrcCustomToken,
 	isIcrcTokenSupportIcrc2,
@@ -9,11 +16,13 @@ import {
 	isTokenIcp,
 	isTokenIcrc,
 	mapIcrcToken,
+	mapTokenOisyName,
+	mapTokenOisySymbol,
 	sortIcTokens,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
 import type { TokenStandard, TokenStandardCode } from '$lib/types/token';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockLedgerCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIcrcAccount, mockIdentity } from '$tests/mocks/identity.mock';
 import {
@@ -475,6 +484,71 @@ describe('icrc.utils', () => {
 			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
+			});
+		});
+	});
+
+	describe('mapTokenOisyName', () => {
+		const mockToken: IcInterface = {
+			ledgerCanisterId: mockLedgerCanisterId,
+			position: 1
+		};
+
+		it('should return the token as it is if it is not a isIcCkInterface', () => {
+			const token = mockToken;
+
+			expect(token).not.toHaveProperty('minterCanisterId');
+			expect(token).not.toHaveProperty('twinToken');
+
+			expect(mapTokenOisyName(token)).toStrictEqual(token);
+		});
+
+		it('should return the token as it is if there is no twin token', () => {
+			const token: IcCkInterface = {
+				...mockToken,
+				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID
+			};
+
+			expect(token).not.toHaveProperty('twinToken');
+
+			expect(mapTokenOisyName(token)).toStrictEqual(token);
+		});
+
+		it('should return the token with OISY name if there is a twin token', () => {
+			const token: IcCkInterface = {
+				...mockToken,
+				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
+				twinToken: ETHEREUM_TOKEN
+			};
+
+			expect(mapTokenOisyName(token)).toStrictEqual({
+				...token,
+				oisyName: {
+					prefix: 'ck',
+					oisyName: ETHEREUM_TOKEN.name
+				}
+			});
+		});
+	});
+
+	describe('mapTokenOisySymbol', () => {
+		const mockToken: IcInterface = {
+			ledgerCanisterId: mockLedgerCanisterId,
+			position: 1
+		};
+
+		it('should return the token as it is if there is no custom symbol', () => {
+			expect(mapTokenOisySymbol(mockToken)).toStrictEqual(mockToken);
+		});
+
+		it('should return the token with OISY symbol if there is a custom symbol', () => {
+			const token = { ...mockToken, ledgerCanisterId: GHOSTNODE_LEDGER_CANISTER_ID };
+
+			expect(mapTokenOisySymbol(token)).toStrictEqual({
+				...token,
+				oisySymbol: {
+					oisySymbol: CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[GHOSTNODE_LEDGER_CANISTER_ID]
+				}
 			});
 		});
 	});
