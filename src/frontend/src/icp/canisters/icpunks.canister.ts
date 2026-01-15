@@ -3,6 +3,7 @@ import { idlFactory as idlCertifiedFactoryIcPunks } from '$declarations/icpunks/
 import { idlFactory as idlFactoryIcPunks } from '$declarations/icpunks/icpunks.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import type { TokenMetadata } from '$lib/types/token';
 import { Canister, createServices, type QueryParams } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 
@@ -52,5 +53,21 @@ export class IcPunksCanister extends Canister<IcPunksService> {
 		const { data_of } = this.caller({ certified });
 
 		return await data_of(tokenIdentifier);
+	};
+
+	collectionMetadata = async ({
+		certified
+	}: QueryParams): Promise<Omit<TokenMetadata, 'decimals'>> => {
+		const { symbol, name, description, icon_url } = this.caller({ certified });
+
+		const [collectionSymbol, collectionName, collectionDescription, collectionIconUrl] =
+			await Promise.all([symbol(), name(), description(), icon_url()]);
+
+		return {
+			symbol: collectionSymbol,
+			name: collectionName,
+			description: collectionDescription,
+			...(collectionIconUrl !== 'None' && { icon: collectionIconUrl })
+		};
 	};
 }

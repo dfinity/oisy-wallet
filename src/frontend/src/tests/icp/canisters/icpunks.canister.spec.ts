@@ -129,4 +129,121 @@ describe('icpunks.canister', () => {
 			expect(service.data_of).toHaveBeenCalledExactlyOnceWith(mockTokenId);
 		});
 	});
+
+	describe('collectionMetadata', () => {
+		const mockSymbol = 'ICPU';
+		const mockName = 'ICPunks';
+		const mockDescription = 'ICPunks NFT Collection';
+		const mockIconUrl = 'https://example.com/icon.png';
+
+		const mockParams = { certified };
+
+		const expected = {
+			symbol: mockSymbol,
+			name: mockName,
+			description: mockDescription,
+			icon: mockIconUrl
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			service.symbol.mockResolvedValue(mockSymbol);
+			service.name.mockResolvedValue(mockName);
+			service.description.mockResolvedValue(mockDescription);
+			service.icon_url.mockResolvedValue(mockIconUrl);
+		});
+
+		it('should correctly call the metadata methods', async () => {
+			const { collectionMetadata } = await createIcPunksCanister({ serviceOverride: service });
+
+			const res = await collectionMetadata(mockParams);
+
+			expect(res).toStrictEqual(expected);
+			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
+			expect(service.name).toHaveBeenCalledExactlyOnceWith();
+			expect(service.description).toHaveBeenCalledExactlyOnceWith();
+			expect(service.icon_url).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it('should ignore an icon URL that is nullish', async () => {
+			service.icon_url.mockResolvedValue('None');
+
+			const { collectionMetadata } = await createIcPunksCanister({ serviceOverride: service });
+
+			const res = await collectionMetadata(mockParams);
+
+			const { icon: _, ...expectedWithoutIcon } = expected;
+
+			expect(res).toStrictEqual(expectedWithoutIcon);
+			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
+			expect(service.name).toHaveBeenCalledExactlyOnceWith();
+			expect(service.description).toHaveBeenCalledExactlyOnceWith();
+			expect(service.icon_url).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it('should throw an error if symbol throws', async () => {
+			const mockError = new Error('Symbol method error');
+			service.symbol.mockRejectedValue(mockError);
+
+			const { collectionMetadata } = await createIcPunksCanister({ serviceOverride: service });
+
+			const res = collectionMetadata(mockParams);
+
+			await expect(res).rejects.toThrowError(mockError);
+
+			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
+			expect(service.name).toHaveBeenCalledExactlyOnceWith();
+			expect(service.description).toHaveBeenCalledExactlyOnceWith();
+			expect(service.icon_url).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it('should throw an error if name throws', async () => {
+			const mockError = new Error('Name method error');
+			service.name.mockRejectedValue(mockError);
+
+			const { collectionMetadata } = await createIcPunksCanister({ serviceOverride: service });
+
+			const res = collectionMetadata(mockParams);
+
+			await expect(res).rejects.toThrowError(mockError);
+
+			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
+			expect(service.name).toHaveBeenCalledExactlyOnceWith();
+			expect(service.description).toHaveBeenCalledExactlyOnceWith();
+			expect(service.icon_url).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it('should throw an error if description throws', async () => {
+			const mockError = new Error('Description method error');
+			service.description.mockRejectedValue(mockError);
+
+			const { collectionMetadata } = await createIcPunksCanister({ serviceOverride: service });
+
+			const res = collectionMetadata(mockParams);
+
+			await expect(res).rejects.toThrowError(mockError);
+
+			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
+			expect(service.name).toHaveBeenCalledExactlyOnceWith();
+			expect(service.description).toHaveBeenCalledExactlyOnceWith();
+			expect(service.icon_url).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it('should throw an error if icon_url throws', async () => {
+			const mockError = new Error('Icon URL method error');
+			service.icon_url.mockRejectedValue(mockError);
+
+			const { collectionMetadata } = await createIcPunksCanister({ serviceOverride: service });
+
+			const res = collectionMetadata(mockParams);
+
+			await expect(res).rejects.toThrowError(mockError);
+
+			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
+			expect(service.name).toHaveBeenCalledExactlyOnceWith();
+			expect(service.description).toHaveBeenCalledExactlyOnceWith();
+			expect(service.icon_url).toHaveBeenCalledExactlyOnceWith();
+		});
+	});
 });
