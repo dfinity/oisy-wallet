@@ -7,6 +7,8 @@ import type { TokenMetadata } from '$lib/types/token';
 import { Canister, createServices, type QueryParams } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 
+const NONE_VALUE = 'None';
+
 // This class can be used for all the IC NFT collection canisters that have an interface similar to ICPunks
 export class IcPunksCanister extends Canister<IcPunksService> {
 	static async create({
@@ -67,7 +69,7 @@ export class IcPunksCanister extends Canister<IcPunksService> {
 			symbol: collectionSymbol,
 			name: collectionName,
 			description: collectionDescription,
-			...(collectionIconUrl !== 'None' && { icon: collectionIconUrl })
+			...(collectionIconUrl !== NONE_VALUE && { icon: collectionIconUrl })
 		};
 	};
 }
