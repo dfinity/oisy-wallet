@@ -54,8 +54,8 @@ fn stats_returns_correct_number_of_users() {
     let expected_stats = Stats {
         user_profile_count: expected_users.len() as u64,
         user_timestamps_count: expected_users.len() as u64,
-        user_token_count: NUM_USERS_WITH_TOKENS as u64,
-        custom_token_count: 0,
+        user_token_count: 0,
+        custom_token_count: NUM_USERS_WITH_TOKENS as u64,
     };
 
     let caller = controller();
