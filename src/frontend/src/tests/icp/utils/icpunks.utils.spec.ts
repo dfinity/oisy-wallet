@@ -76,18 +76,19 @@ describe('icpunks.utils', () => {
 	});
 
 	describe('mapIcPunksToken', () => {
+		const mockSymbol = 'MOCKPUNKS';
 		const mockName = 'Mock ICPunks Token';
 		const mockCanisterId = mockIcPunksCanisterId;
 		const mockParams = {
 			canisterId: mockCanisterId,
-			metadata: { name: mockName }
+			metadata: { symbol: mockSymbol, name: mockName }
 		};
 
 		const expected: IcPunksTokenWithoutId = {
 			canisterId: mockCanisterId,
 			network: ICP_NETWORK,
 			name: mockName,
-			symbol: mockName,
+			symbol: mockSymbol,
 			decimals: 0,
 			standard: { code: 'icpunks' },
 			category: 'custom'
