@@ -55,9 +55,6 @@ export const getExtMetadata = async (
 
 	const { nonfungible } = response;
 
-	// EXT V2
-
-	// EXT Legacy
 	const { metadata: nullableMetadata } = nonfungible;
 
 	// We cannot use `fromNullable` here since it is a nullable of different types

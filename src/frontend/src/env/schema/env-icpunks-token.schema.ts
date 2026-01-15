@@ -1,6 +1,7 @@
 import * as z from 'zod';
 
 const EnvIcPunksTokenMetadataSchema = z.object({
+	symbol: z.string(),
 	name: z.string()
 });
 
