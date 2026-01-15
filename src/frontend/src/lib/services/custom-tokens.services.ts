@@ -130,7 +130,11 @@ export const loadNetworkCustomTokens = async ({
 				assertNever(token.token, `Unexpected token type: ${token.token}`);
 			};
 
-			return cachedTokens.map(parsePrincipal).filter(filterTokens);
+			return cachedTokens.reduce<CustomToken[]>((acc, token) => {
+				const parsed = parsePrincipal(token);
+
+				return filterTokens(parsed) ? [...acc, parsed] : acc;
+			}, []);
 		}
 	}
 
