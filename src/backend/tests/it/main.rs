@@ -7,7 +7,6 @@ mod pow;
 mod settings;
 mod signer;
 mod stats;
-mod upgrade;
 mod user_credentials;
 mod user_profile;
 mod utils;

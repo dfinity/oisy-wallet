@@ -5,11 +5,6 @@ pub const CONTROLLER: &str = "l3lfs-gak7g-xrbil-j4v4h-aztjn-4jyki-wprso-m27h3-ib
 /// A normal user, without any special permissions.
 pub const USER_1: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
 
-pub const SEPOLIA_CHAIN_ID: u64 = 11155111;
-
-pub const WEENUS_CONTRACT_ADDRESS: &str = "0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9";
-pub const WEENUS_DECIMALS: u8 = 18;
-pub const WEENUS_SYMBOL: &str = "Weenus";
 
 // TODO: Use a VP from DECIDE AI. We can't yet, because they don't create valid credentials yet.
 // This is a VP of ProofOfUniqueness from the dummy issuer
