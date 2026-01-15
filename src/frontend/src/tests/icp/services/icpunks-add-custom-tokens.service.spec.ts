@@ -126,6 +126,12 @@ describe('icpunks-add-custom-tokens.service', () => {
 			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: get(i18n).tokens.import.error.loading_metadata }
 			});
+
+			expect(collectionMetadata).toHaveBeenCalledExactlyOnceWith({
+				canisterId: mockCanisterId,
+				identity: mockIdentity,
+				certified: true
+			});
 		});
 	});
 });
