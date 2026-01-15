@@ -19,7 +19,7 @@ static ICRC_TOKEN: LazyLock<IcrcToken> = LazyLock::new(|| IcrcToken {
     index_id: Some(Principal::from_text("dnqcx-eyaaa-aaaaq-aacrq-cai").unwrap()),
 });
 static USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
-    token: Token::Icrc(crate::custom_token::ICRC_TOKEN.clone()),
+    token: Token::Icrc(ICRC_TOKEN.clone()),
     enabled: true,
     version: None,
     section: None,
