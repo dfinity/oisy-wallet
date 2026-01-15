@@ -10,9 +10,11 @@
 	}
 
 	let { data, children }: Props = $props();
+
+	let { balance } = $derived(data);
 </script>
 
-{#if data.balance === undefined || $exchangeNotInitialized}
+{#if balance === undefined || $exchangeNotInitialized}
 	<span class="mt-1 block w-full max-w-[50px]"><SkeletonText /></span>
 {:else}
 	{@render children()}
