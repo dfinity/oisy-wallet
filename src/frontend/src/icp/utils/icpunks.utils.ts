@@ -14,13 +14,12 @@ export const isTokenIcPunksCustomToken = (token: Token): token is IcPunksCustomT
 
 export const mapIcPunksToken = ({
 	canisterId,
-	metadata: { name }
+	metadata: { name, symbol }
 }: EnvIcPunksToken): IcPunksTokenWithoutId => ({
 	canisterId,
 	network: ICP_NETWORK,
 	name,
-	// Currently, we have no way to get a correct symbol metadata from the canister, so we use the name as a fallback.
-	symbol: name,
+	symbol,
 	// For our current scopes, there is no need to have the correct decimals, since we are using this standard as NFT collections.
 	decimals: 0,
 	standard: {

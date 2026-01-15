@@ -38,7 +38,7 @@ describe('icpunks-add-custom-tokens.service', () => {
 			standard: { code: 'icpunks' },
 			category: 'custom',
 			name: mockFetchedMetadata.name,
-			symbol: mockFetchedMetadata.name,
+			symbol: mockFetchedMetadata.symbol,
 			decimals: 0,
 			network: ICP_NETWORK
 		};
