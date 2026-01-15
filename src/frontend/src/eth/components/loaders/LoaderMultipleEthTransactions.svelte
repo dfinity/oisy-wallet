@@ -22,6 +22,14 @@
 	let { children }: Props = $props();
 
 	let loading = $state(false);
+	let timer = $state<NodeJS.Timeout | undefined>();
+
+	const resetTimer = () => {
+		if (nonNullish(timer)) {
+			clearTimeout(timer);
+			timer = undefined;
+		}
+	};
 
 	let tokens = $derived([
 		...$enabledEthereumTokens,
@@ -32,6 +40,14 @@
 
 	const onLoad = async () => {
 		if (loading) {
+			resetTimer();
+
+			timer = setTimeout(() => {
+				resetTimer();
+
+				onLoad();
+			}, 500);
+
 			return;
 		}
 
@@ -71,10 +87,6 @@
 			return;
 		}
 
-		if (loading) {
-			return;
-		}
-
 		loading = true;
 
 		await Promise.allSettled(
@@ -94,8 +106,6 @@
 		);
 
 		loading = false;
-
-		await onLoad();
 	};
 
 	const debounceLoadFromCache = debounce(loadFromCache);
