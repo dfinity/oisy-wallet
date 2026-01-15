@@ -1,4 +1,4 @@
-import { getTokensByOwner, metadata, transfer } from '$icp/api/icpunks.api';
+import { collectionMetadata, getTokensByOwner, metadata, transfer } from '$icp/api/icpunks.api';
 import { IcPunksCanister } from '$icp/canisters/icpunks.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { mockIcPunksMetadata } from '$tests/mocks/icpunks-token.mock';
@@ -130,6 +130,43 @@ describe('icpunks.api', () => {
 			await expect(metadata(params)).rejects.toThrowError(mockError);
 
 			expect(tokenCanisterMock.metadata).toHaveBeenCalledExactlyOnceWith(expectedParams);
+		});
+	});
+
+	describe('collectionMetadata', () => {
+		const mockMetadata = {
+			symbol: 'ICPUNKS',
+			name: 'ICPUNKS Collection',
+			description: 'A collection of ICPUNKS NFTs',
+			icon: 'https://example.com/icon.png'
+		};
+
+		const params = {
+			identity: mockIdentity,
+			owner: mockPrincipal,
+			canisterId: mockIcPunksCanisterId
+		};
+
+		beforeEach(() => {
+			tokenCanisterMock.collectionMetadata.mockResolvedValue(mockMetadata);
+		});
+
+		it('should call successfully collectionMetadata endpoint', async () => {
+			const result = await collectionMetadata(params);
+
+			expect(result).toStrictEqual(mockMetadata);
+
+			expect(tokenCanisterMock.collectionMetadata).toHaveBeenCalledExactlyOnceWith({});
+		});
+
+		it('should throw an error if collectionMetadata fails', async () => {
+			const mockError = new CanisterInternalError('Generic error');
+
+			tokenCanisterMock.collectionMetadata.mockRejectedValueOnce(mockError);
+
+			await expect(collectionMetadata(params)).rejects.toThrowError(mockError);
+
+			expect(tokenCanisterMock.collectionMetadata).toHaveBeenCalledExactlyOnceWith({});
 		});
 	});
 });
