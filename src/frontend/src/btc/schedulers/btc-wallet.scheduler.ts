@@ -150,9 +150,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				})),
 				latestBitcoinBlockHeight
 			};
-		} catch (error) {
-			// We don't want to disrupt the user experience if we can't fetch the transactions or latest block height.
-			console.error('Error fetching BTC transactions data:', error);
+		} catch (_: unknown) {
 			// TODO: Return an error instead of an empty array.
 			return {
 				transactions: [],
