@@ -22,6 +22,14 @@
 	let { children }: Props = $props();
 
 	let loading = $state(false);
+	let timer = $state<NodeJS.Timeout | undefined>();
+
+	const resetTimer = () => {
+		if (nonNullish(timer)) {
+			clearTimeout(timer);
+			timer = undefined;
+		}
+	};
 
 	let tokens = $derived([
 		...$enabledEthereumTokens,
@@ -32,6 +40,14 @@
 
 	const onLoad = async () => {
 		if (loading) {
+			resetTimer();
+
+			timer = setTimeout(() => {
+				resetTimer();
+
+				onLoad();
+			}, 500);
+
 			return;
 		}
 
@@ -71,6 +87,8 @@
 			return;
 		}
 
+		loading = true;
+
 		await Promise.allSettled(
 			tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
 				if (nonNullish($ethTransactionsStore?.[tokenId])) {
@@ -86,6 +104,8 @@
 				});
 			})
 		);
+
+		loading = false;
 	};
 
 	const debounceLoadFromCache = debounce(loadFromCache);
