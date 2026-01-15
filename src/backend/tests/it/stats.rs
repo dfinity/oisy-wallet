@@ -1,14 +1,17 @@
 //! `PocketIc` tests for the `stats()` API.
 
 use std::sync::LazyLock;
+
 use candid::Principal;
-use shared::types::{user_profile::OisyUser, Stats};
-use shared::types::custom_token::{CustomToken, IcrcToken, Token};
-use crate::{
-    utils::{
-        mock::USER_1,
-        pocketic::{controller, BackendBuilder, PicCanisterTrait},
-    },
+use shared::types::{
+    custom_token::{CustomToken, IcrcToken, Token},
+    user_profile::OisyUser,
+    Stats,
+};
+
+use crate::utils::{
+    mock::USER_1,
+    pocketic::{controller, BackendBuilder, PicCanisterTrait},
 };
 
 static ICRC_TOKEN: LazyLock<IcrcToken> = LazyLock::new(|| IcrcToken {
