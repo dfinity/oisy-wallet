@@ -4,7 +4,6 @@
 	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { SvelteMap } from 'svelte/reactivity';
-	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
@@ -117,8 +116,6 @@
 
 	let ios = $derived(isIOS());
 
-	let fadeParams = $derived(ios ? { duration: 0 } : undefined);
-
 	let flipParams = $derived({ duration: ios ? 0 : 250 });
 
 	const tokenKey = ({ id: tokenId, network: { id: networkId } }: TokenUi): string =>
@@ -139,7 +136,6 @@
 					class:pointer-events-none={animating}
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
-					transition:fade={fadeParams}
 					animate:flip={flipParams}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
@@ -193,7 +189,6 @@
 							class:pointer-events-none={animating}
 							onanimationend={handleAnimationEnd}
 							onanimationstart={handleAnimationStart}
-							transition:fade={fadeParams}
 							animate:flip={flipParams}
 						>
 							<div class="transition duration-300 hover:bg-primary">
