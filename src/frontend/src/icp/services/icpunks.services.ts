@@ -8,6 +8,7 @@ import {
 	IC_PUNKS_BUILTIN_TOKENS,
 	IC_PUNKS_BUILTIN_TOKENS_INDEXED
 } from '$env/tokens/tokens-icpunks/tokens.icpunks.env';
+import { collectionMetadata } from '$icp/api/icpunks.api';
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icPunksDefaultTokensStore } from '$icp/stores/icpunks-default-tokens.store';
 import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
@@ -79,7 +80,6 @@ const loadCustomTokensWithMetadata = async (
 				version: versionNullable,
 				section: sectionNullable,
 				allow_external_content_source: allowExternalContentSourceNullable
-				// eslint-disable-next-line require-await -- We are going to add an async function to fetch the metadata
 			}) => {
 				const version = fromNullable(versionNullable);
 				const section = fromNullable(sectionNullable);
@@ -87,25 +87,25 @@ const loadCustomTokensWithMetadata = async (
 				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
 				const {
-					IcPunks: { canister_id: canisterId }
+					IcPunks: { canister_id: rawCanisterId }
 				} = token;
 
-				const canisterIdText = canisterId.toString();
+				const canisterId = rawCanisterId.toString();
 
-				// TODO: add the canister method to fetch metadata from the canister.
-				const metadata = IC_PUNKS_BUILTIN_TOKENS_INDEXED.get(canisterIdText);
-
-				const { symbol, ...rest } = metadata ?? {
-					symbol: canisterIdText,
-					name: canisterIdText,
-					decimals: 0,
-					network: ICP_NETWORK
-				};
+				const { symbol, ...rest } =
+					IC_PUNKS_BUILTIN_TOKENS_INDEXED.get(canisterId) ??
+					(await collectionMetadata({
+						canisterId,
+						certified: params.certified,
+						identity: params.identity
+					}));
 
 				return {
+					decimals: 0,
+					network: ICP_NETWORK,
 					...rest,
 					id: parseTokenId(symbol),
-					canisterId: canisterIdText,
+					canisterId,
 					symbol,
 					standard: { code: 'icpunks' as const },
 					category: 'custom' as const,
