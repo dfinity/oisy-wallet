@@ -1,18 +1,10 @@
-import type { BtcAddress } from '$declarations/backend/declarations/backend.did';
-import {
-	btcAddressMainnet,
-	btcAddressRegtest,
-	btcAddressTestnet
-} from '$lib/derived/address.derived';
-import type { NetworkId } from '$lib/types/network';
-import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
+import type { BtcAddress } from '$declarations/backend/backend.did';
+import { assertNever } from '@dfinity/utils';
 import {
 	BtcAddressType,
 	parseBtcAddress as parseBtcAddressCkbtc,
 	type BtcAddressInfo
-} from '@dfinity/ckbtc';
-import { assertNever } from '@dfinity/utils';
-import { get } from 'svelte/store';
+} from '@icp-sdk/canisters/ckbtc';
 
 const createBtcAddressFromAddressInfo = ({ info }: { info: BtcAddressInfo }): BtcAddress => {
 	switch (info.type) {
@@ -37,7 +29,7 @@ export const parseBtcAddress = (address: string): BtcAddress | undefined => {
 		const info = parseBtcAddressCkbtc({ address });
 		return createBtcAddressFromAddressInfo({ info });
 	} catch (_: unknown) {
-		return;
+		return undefined;
 	}
 };
 
@@ -60,15 +52,3 @@ export const getBtcAddressString = (address: BtcAddress): string => {
 
 	assertNever(address, `Unexpected BtcAddress: ${address}`);
 };
-
-/**
- * Get the BTC source address for a given network ID
- * @param networkId - The network ID
- * @returns The source address string
- */
-export const getBtcSourceAddress = (networkId: NetworkId | undefined): string =>
-	(isNetworkIdBTCTestnet(networkId)
-		? get(btcAddressTestnet)
-		: isNetworkIdBTCRegtest(networkId)
-			? get(btcAddressRegtest)
-			: get(btcAddressMainnet)) ?? '';

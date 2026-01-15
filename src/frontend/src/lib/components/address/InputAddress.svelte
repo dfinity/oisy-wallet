@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { ComponentProps } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import type { ZodError } from 'zod';
 	import QrButton from '$lib/components/common/QrButton.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
+	import Input, { type InputProps } from '$lib/components/ui/Input.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -29,7 +28,7 @@
 		parseError = $bindable(),
 		disabled,
 		...props
-	}: InputAddressProps & ComponentProps<Input> = $props();
+	}: InputAddressProps & InputProps = $props();
 
 	let tokenAccountIdParseResult = $derived(TokenAccountIdSchema.safeParse(value));
 
@@ -62,14 +61,14 @@
 
 {#snippet qrButton()}
 	{#if nonNullish(onQRCodeScan) && !disabled}
-		<QrButton on:click={onQRCodeScan} />
+		<QrButton onClick={onQRCodeScan} />
 	{/if}
 {/snippet}
 
 <div
 	style={`--input-custom-border-color: ${borderColor}; --input-padding-inner-end: 100px; ${disabled ? '--input-background: var(--color-background-disabled);' : ''}`}
 >
-	<Input {disabled} innerEnd={qrButton} inputType="text" bind:value {...props}></Input>
+	<Input {disabled} innerEnd={qrButton} inputType="text" bind:value {...props} />
 
 	<div class="text-md pt-2">
 		{#if error}

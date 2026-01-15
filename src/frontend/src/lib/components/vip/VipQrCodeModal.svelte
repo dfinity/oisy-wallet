@@ -2,8 +2,8 @@
 	import { Modal, QRCode } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
-	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import IconBinanceYellow from '$lib/components/icons/IconBinanceYellow.svelte';
+	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -113,13 +113,15 @@
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
-					<div slot="logo" class="flex items-center justify-center rounded-full bg-primary p-2">
-						{#if codeType === QrCodeType.VIP}
-							<IconAstronautHelmet testId={VIP_QR_CODE_ICON} />
-						{:else}
-							<IconBinanceYellow size="44" testId={VIP_QR_CODE_BINANCE_ICON} />
-						{/if}
-					</div>
+					{#snippet logo()}
+						<div class="flex items-center justify-center rounded-full bg-primary p-2">
+							{#if codeType === QrCodeType.VIP}
+								<IconAstronautHelmet testId={VIP_QR_CODE_ICON} />
+							{:else}
+								<IconBinanceYellow size="44" testId={VIP_QR_CODE_BINANCE_ICON} />
+							{/if}
+						</div>
+					{/snippet}
 				</QRCode>
 			{/if}
 		</div>

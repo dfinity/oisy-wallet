@@ -101,16 +101,16 @@ describe('currency.derived', () => {
 			{ currency: Currency.CNY, language: Languages.CHINESE_SIMPLIFIED, expected: '¥' }
 		];
 
-		beforeEach(() => {
+		beforeEach(async () => {
 			currencyStore.switchCurrency(Currency.USD);
-			i18n.switchLang(Languages.ENGLISH);
+			await i18n.switchLang(Languages.ENGLISH);
 		});
 
 		it.each(testCases)(
 			`should return $expected for $currency in $language`,
-			({ currency, language, expected }) => {
+			async ({ currency, language, expected }) => {
 				currencyStore.switchCurrency(currency);
-				i18n.switchLang(language);
+				await i18n.switchLang(language);
 
 				expect(get(currentCurrencySymbol)).toEqual(expected);
 			}
@@ -130,16 +130,16 @@ describe('currency.derived', () => {
 			{ currency: Currency.JPY, language: Languages.CHINESE_SIMPLIFIED, expected: 0 }
 		];
 
-		beforeEach(() => {
+		beforeEach(async () => {
 			currencyStore.switchCurrency(Currency.USD);
-			i18n.switchLang(Languages.ENGLISH);
+			await i18n.switchLang(Languages.ENGLISH);
 		});
 
 		it.each(testCases)(
 			`should return $expected for $currency in $language`,
-			({ currency, language, expected }) => {
+			async ({ currency, language, expected }) => {
 				currencyStore.switchCurrency(currency);
-				i18n.switchLang(language);
+				await i18n.switchLang(language);
 
 				expect(get(currentCurrencyDecimals)).toEqual(expected);
 			}

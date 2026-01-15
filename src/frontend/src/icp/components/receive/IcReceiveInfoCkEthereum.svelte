@@ -38,7 +38,7 @@
 		{/snippet}
 
 		{#snippet content()}
-			<p class="break-normal py-2 text-tertiary">
+			<p class="py-2 break-normal text-tertiary">
 				{replacePlaceholders(
 					replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
 					{

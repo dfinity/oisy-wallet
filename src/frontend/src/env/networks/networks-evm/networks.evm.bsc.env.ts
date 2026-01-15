@@ -23,6 +23,7 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 	chainId: 56n,
 	icon: bscMainnetIcon,
 	explorerUrl: BSC_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'bnb',
 		alchemy: 'bnb',
@@ -30,7 +31,8 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'binance-smart-chain' },
-	buy: { onramperId: 'bsc' }
+	buy: { onramperId: 'bsc' },
+	pay: { openCryptoPay: 'BinanceSmartChain' }
 };
 
 export const BSC_TESTNET_NETWORK_SYMBOL = 'BSC (Testnet)';
@@ -44,6 +46,7 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 	chainId: 97n,
 	icon: bscTestnetIcon,
 	explorerUrl: BSC_TESTNET_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'bnbt',
 		alchemy: 'bnbt',

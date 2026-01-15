@@ -1,8 +1,11 @@
 <script lang="ts">
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
-	import { currentCurrencySymbol } from '$lib/derived/currency.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SwapMappedResult, SwapProvider } from '$lib/types/swap';
+	import { formatCurrency } from '$lib/utils/format.utils';
 
 	interface Props {
 		provider: Extract<SwapMappedResult, { provider: SwapProvider.VELORA }>;
@@ -38,7 +41,12 @@
 		{/snippet}
 
 		{#snippet mainValue()}
-			{$currentCurrencySymbol}0
+			{formatCurrency({
+				value: 0,
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage
+			})}
 		{/snippet}
 	</ModalValue>
 {/if}

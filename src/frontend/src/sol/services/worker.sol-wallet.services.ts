@@ -1,3 +1,4 @@
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { AppWorker } from '$lib/services/_worker.services';
 import {
 	solAddressDevnetStore,
@@ -7,6 +8,7 @@ import {
 import type { WalletWorker } from '$lib/types/listener';
 import type { PostMessage, PostMessageDataRequestSol } from '$lib/types/post-message';
 import type { Token, TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 import {
 	syncWallet,
@@ -21,34 +23,39 @@ import { get } from 'svelte/store';
 
 export class SolWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		tokenId: TokenId,
 		private readonly data: PostMessageDataRequestSol
 	) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({ data: dataMsg }: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
+				const { ref, msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncSolWallet':
-					syncWallet({
-						tokenId,
-						data: data as SolPostMessageDataResponseWallet
-					});
+				// This is an additional guard because it may happen that the worker is initialised as a singleton.
+				// In this case, we need to check if we should treat the message or if the message was intended for another worker.
+				if (ref !== `${this.data.tokenAddress ?? SOLANA_TOKEN.symbol}-${this.data.solanaNetwork}`) {
 					return;
+				}
 
-				case 'syncSolWalletError':
-					syncWalletError({
-						tokenId,
-						error: data.error,
-						hideToast: true
-					});
-					return;
+				switch (msg) {
+					case 'syncSolWallet':
+						syncWallet({
+							tokenId,
+							data: data as SolPostMessageDataResponseWallet
+						});
+						return;
+
+					case 'syncSolWalletError':
+						syncWalletError({
+							tokenId,
+							error: data.error,
+							hideToast: true
+						});
+				}
 			}
-		};
+		);
 	}
 
 	static async init({ token }: { token: Token }): Promise<SolWalletWorker> {
@@ -99,10 +106,10 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestSol>>({
 			msg: 'startSolWalletTimer',
 			data: this.data
-		} as PostMessage<PostMessageDataRequestSol>);
+		});
 	};
 
 	stop = () => {
@@ -110,9 +117,9 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestSol>>({
 			msg: 'triggerSolWalletTimer',
 			data: this.data
-		} as PostMessage<PostMessageDataRequestSol>);
+		});
 	};
 }

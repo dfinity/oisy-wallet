@@ -20,7 +20,8 @@
 
 	interface Props {
 		amount: OptionAmount;
-		destination: Address;
+		disabled?: boolean;
+		destination?: Address;
 		totalFee?: bigint;
 		onCustomValidate?: (userAmount: bigint) => TokenActionErrorType;
 		onClose: () => void;
@@ -31,6 +32,7 @@
 
 	let {
 		amount = $bindable(),
+		disabled,
 		destination,
 		totalFee,
 		onCustomValidate,
@@ -48,7 +50,9 @@
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
-	let invalid = $derived(invalidAmount(amount) || nonNullish(errorType));
+	let invalid = $derived(
+		invalidAmount(amount) || Number(amount) === 0 || nonNullish(errorType) || disabled
+	);
 </script>
 
 <ContentWithToolbar>
@@ -90,13 +94,15 @@
 		</TokenInput>
 	</div>
 
-	<div class="mb-8">
-		<SendReviewDestination {destination} />
-	</div>
-
-	{@render provider?.()}
+	{#if nonNullish(destination)}
+		<div class="mb-8">
+			<SendReviewDestination {destination} />
+		</div>
+	{/if}
 
 	{@render fee?.()}
+
+	{@render provider?.()}
 
 	{#snippet toolbar()}
 		<ButtonGroup testId="toolbar">

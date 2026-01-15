@@ -29,21 +29,24 @@
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { OptionToken, Token } from '$lib/types/token';
 
-	export let token: OptionToken;
-	export let ckEthereumNativeToken: Token;
+	interface Props {
+		token: OptionToken;
+		ckEthereumNativeToken: Token;
+	}
+
+	let { token, ckEthereumNativeToken }: Props = $props();
 
 	let listener: WebSocketListener | undefined = undefined;
 
 	let loadBalance: OptionBalance = undefined;
 
-	let twinToken: Token | undefined;
-	$: twinToken = nonNullish(token) && isIcCkToken(token) ? token.twinToken : undefined;
+	let twinToken = $derived(nonNullish(token) && isIcCkToken(token) ? token.twinToken : undefined);
 
-	let toContractAddress = '';
-	$: toContractAddress =
-		nonNullish(twinToken) && twinToken.standard === 'erc20'
+	let toContractAddress = $derived(
+		nonNullish(twinToken) && twinToken.standard.code === 'erc20'
 			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '')
-			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '');
+			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '')
+	);
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 	const loadPendingTransactions = async () => {
@@ -135,14 +138,21 @@
 		});
 	};
 
-	$: (async () => await init({ toAddress: toContractAddress, twinToken }))();
+	$effect(() => {
+		(async () => await init({ toAddress: toContractAddress, twinToken }))();
+	});
 
 	const debounceLoadPendingTransactions = debounce(loadPendingTransactions, 1000);
 
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
-	$: ($balance, toContractAddress, debounceLoadPendingTransactions());
+
+	$effect(() => {
+		[$balance, toContractAddress];
+
+		debounceLoadPendingTransactions();
+	});
 
 	onDestroy(async () => {
 		isDestroyed = true;
@@ -150,5 +160,3 @@
 		listener = undefined;
 	});
 </script>
-
-<slot />

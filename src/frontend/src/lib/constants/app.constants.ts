@@ -1,6 +1,6 @@
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
-import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const APP_VERSION = VITE_APP_VERSION;
 
@@ -127,15 +127,26 @@ export const GLDT_STAKE_CANISTER_ID = LOCAL
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
 
+const DOMAIN_URL_HOSTNAME =
+	typeof window !== 'undefined'
+		? window.location.hostname
+		: typeof self !== 'undefined'
+			? self.location.hostname
+			: '';
+const IS_ICP_DOMAIN_URL = DOMAIN_URL_HOSTNAME.endsWith('.icp0.io');
+
 export const AUTH_ALTERNATIVE_ORIGINS = import.meta.env.VITE_AUTH_ALTERNATIVE_ORIGINS;
-export const AUTH_DERIVATION_ORIGIN = BETA
-	? 'https://oisy.com'
-	: STAGING
-		? 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'
-		: undefined;
+export const AUTH_DERIVATION_ORIGIN =
+	BETA || (PROD && IS_ICP_DOMAIN_URL)
+		? 'https://oisy.com'
+		: STAGING
+			? 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'
+			: undefined;
 
 export const AUTH_POPUP_WIDTH = 576;
-export const AUTH_POPUP_HEIGHT = 625;
+// we need to temporarily increase the height so II 2.0 in "guided mode" fits the popup
+// TODO: revert to 625 after II provides a fix on their end
+export const AUTH_POPUP_HEIGHT = 826;
 export const VC_POPUP_WIDTH = AUTH_POPUP_WIDTH;
 // Screen to allow credential presentation is longer than the authentication screen.
 export const VC_POPUP_HEIGHT = 900;
@@ -145,7 +156,7 @@ export const AUTH_TIMER_INTERVAL = 1000;
 // From FI team:
 // On mainnet, the index runs its indexing function every second. The time to see a new transaction in the index is <=1 second plus the time required by the indexing function
 // (however)
-// ICP Index has not been upgraded yet so right now for ICP is variable between 0 and 2 seconds. Leo has changed the ckBTC and ckETH to run every second, and we want to change the ICP one too eventually. We just didn't get to work on it yet
+// ICP Index has not been upgraded yet, so right now for ICP it is variable between 0 and 2 seconds. Leo has changed the ckBTC and ckETH to run every second, and we want to change the ICP one too eventually. We just didn't get to work on it yet
 export const INDEX_RELOAD_DELAY = 2000;
 
 // Date and time
@@ -162,6 +173,7 @@ export const MILLISECONDS_IN_DAY = SECONDS_IN_DAY * MILLISECONDS_IN_SECOND;
 export const NANO_SECONDS_IN_MILLISECOND = 1_000_000n;
 export const NANO_SECONDS_IN_SECOND = NANO_SECONDS_IN_MILLISECOND * 1_000n;
 export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_SECOND * 60n;
+export const NANO_SECONDS_IN_HALF_MINUTE = NANO_SECONDS_IN_SECOND * 30n;
 
 // For some use case we want to display some amount to a maximal number of decimals which is not related to the number of decimals of the selected token.
 // Just a value that looks good visually.
@@ -171,7 +183,8 @@ export const EIGHT_DECIMALS = 8;
 export const ZERO = 0n;
 
 // NFTs
-export const NFT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 2 * 1000; // 2 minutes in milliseconds
+export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1000; // 20 seconds in milliseconds
+export const NFT_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1000; // 20 seconds in milliseconds
 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds

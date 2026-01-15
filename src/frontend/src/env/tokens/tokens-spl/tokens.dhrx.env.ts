@@ -14,7 +14,7 @@ export const DHRX_TOKEN_ID: TokenId = parseTokenId(DHRX_SYMBOL);
 export const DHRX_TOKEN: RequiredSpl2022Token = {
 	id: DHRX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Danaher xStock',
 	symbol: DHRX_SYMBOL,

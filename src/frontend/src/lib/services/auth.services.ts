@@ -1,19 +1,20 @@
 import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import {
 	clearIdbBtcAddressMainnet,
+	clearIdbBtcAddressTestnet,
 	clearIdbEthAddress,
+	clearIdbSolAddressDevnet,
+	clearIdbSolAddressLocal,
 	clearIdbSolAddressMainnet,
 	deleteIdbBtcAddressMainnet,
+	deleteIdbBtcAddressTestnet,
 	deleteIdbEthAddress,
+	deleteIdbSolAddressDevnet,
+	deleteIdbSolAddressLocal,
 	deleteIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
 import { clearIdbBalances, deleteIdbBalances } from '$lib/api/idb-balances.api';
-import {
-	clearIdbAllCustomTokens,
-	clearIdbEthTokensDeprecated,
-	deleteIdbAllCustomTokens,
-	deleteIdbEthTokensDeprecated
-} from '$lib/api/idb-tokens.api';
+import { clearIdbAllCustomTokens, deleteIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import {
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,
@@ -34,11 +35,16 @@ import {
 	TRACK_SIGN_OUT_WITH_WARNING
 } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
-import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
+import {
+	authLoggedInAnotherTabStore,
+	authStore,
+	type AuthSignInParams
+} from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { AUTH_LOCK_KEY } from '$lib/stores/locked.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
+import { InternetIdentityDomain } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { ToastMsg } from '$lib/types/toast';
 import { emit } from '$lib/utils/events.utils';
@@ -47,8 +53,8 @@ import { replaceHistory } from '$lib/utils/route.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
-import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 export const signIn = async (
@@ -56,21 +62,33 @@ export const signIn = async (
 ): Promise<{ success: 'ok' | 'cancelled' | 'error'; err?: unknown }> => {
 	busy.show();
 
+	const trackingMetadata = {
+		domain: params.domain ?? InternetIdentityDomain.VERSION_1_0
+	};
+
 	try {
-		await authStore.signIn(params);
+		const fn = get(authLoggedInAnotherTabStore)
+			? () => authStore.forceSync()
+			: () => authStore.signIn(params);
+
+		await fn();
 
 		trackEvent({
-			name: TRACK_COUNT_SIGN_IN_SUCCESS
+			name: TRACK_COUNT_SIGN_IN_SUCCESS,
+			metadata: trackingMetadata
 		});
 
 		// We clean previous messages in case the user was signed out automatically before signing-in again.
 		toastsClean();
 
+		authLoggedInAnotherTabStore.set(false);
+
 		return { success: 'ok' };
 	} catch (err: unknown) {
 		if (err === 'UserInterrupt') {
 			trackEvent({
-				name: TRACK_SIGN_IN_CANCELLED_COUNT
+				name: TRACK_SIGN_IN_CANCELLED_COUNT,
+				metadata: trackingMetadata
 			});
 
 			// We do not display an error if the user explicitly cancelled the process of sign-in
@@ -79,7 +97,8 @@ export const signIn = async (
 
 		if (err instanceof AuthClientNotInitializedError) {
 			trackEvent({
-				name: TRACK_SIGN_IN_UNDEFINED_AUTH_CLIENT_ERROR
+				name: TRACK_SIGN_IN_UNDEFINED_AUTH_CLIENT_ERROR,
+				metadata: trackingMetadata
 			});
 
 			toastsError({
@@ -90,7 +109,8 @@ export const signIn = async (
 		}
 
 		trackEvent({
-			name: TRACK_SIGN_IN_ERROR_COUNT
+			name: TRACK_SIGN_IN_ERROR_COUNT,
+			metadata: trackingMetadata
 		});
 
 		toastsError({
@@ -100,6 +120,8 @@ export const signIn = async (
 
 		return { success: 'error', err };
 	} finally {
+		await disconnectWalletConnect();
+
 		busy.stop();
 	}
 };
@@ -209,12 +231,13 @@ const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 const deleteIdbStoreList = [
 	// Addresses
 	deleteIdbBtcAddressMainnet,
+	deleteIdbBtcAddressTestnet,
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet,
+	deleteIdbSolAddressDevnet,
+	deleteIdbSolAddressLocal,
 	// Tokens
 	deleteIdbAllCustomTokens,
-	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-	deleteIdbEthTokensDeprecated,
 	// Transactions
 	deleteIdbBtcTransactions,
 	deleteIdbEthTransactions,
@@ -227,12 +250,13 @@ const deleteIdbStoreList = [
 const clearIdbStoreList = [
 	// Addresses
 	clearIdbBtcAddressMainnet,
+	clearIdbBtcAddressTestnet,
 	clearIdbEthAddress,
 	clearIdbSolAddressMainnet,
+	clearIdbSolAddressDevnet,
+	clearIdbSolAddressLocal,
 	// Tokens
 	clearIdbAllCustomTokens,
-	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-	clearIdbEthTokensDeprecated,
 	// Transactions
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,

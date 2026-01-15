@@ -8,13 +8,13 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { NFT_COLLECTION_DESCRIPTION } from '$lib/constants/analytics.constants';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
-	import { findNonFungibleToken, getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection?: NftCollection;
@@ -33,14 +33,12 @@
 	);
 
 	const hasConsent: boolean | undefined = $derived(
-		nonNullish(collection)
-			? getAllowMediaForNft({
-					tokens: $nonFungibleTokens,
-					networkId: collection.network.id,
-					address: collection.address
-				})
-			: false
+		nonNullish(collection) ? collection.allowExternalContentSource : false
 	);
+
+	const gotoCollection = (): void => {
+		goto(nftsUrl({ collection }));
+	};
 </script>
 
 {#if nonNullish(collection)}
@@ -55,7 +53,7 @@
 					<Button
 						ariaLabel={$i18n.nfts.alt.go_to_collection}
 						link
-						onclick={() => goto(`${AppPath.Nfts}${collection.network.name}-${collection.address}`)}
+						onclick={gotoCollection}
 						paddingSmall
 						styleClass="inline-block text-sm"
 					>
@@ -75,8 +73,8 @@
 
 		{#if nonNullish(token)}
 			<div class="mt-6 flex w-full gap-2">
-				<span><NftSpamButton source={NFT_COLLECTION_DESCRIPTION} {token} /></span>
-				<span><NftHideButton source={NFT_COLLECTION_DESCRIPTION} {token} /></span>
+				<span><NftSpamButton source={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE} {token} /></span>
+				<span><NftHideButton source={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE} {token} /></span>
 			</div>
 		{/if}
 	</div>

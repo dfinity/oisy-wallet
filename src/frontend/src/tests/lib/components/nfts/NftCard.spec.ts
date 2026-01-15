@@ -1,7 +1,13 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
-import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
+import { NFT_COLLECTION_ROUTE, NFT_LIST_ROUTE } from '$lib/constants/analytics.constants';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SOURCES,
+	PLAUSIBLE_EVENT_VALUES
+} from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
-import * as nftsUtils from '$lib/utils/nfts.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -21,10 +27,6 @@ describe('NftCard', () => {
 	const networkLogoSelector = `div[data-tid="${testId}-network-light-container"]`;
 	const balanceSelector = `span[data-tid="${testId}-balance"]`;
 
-	beforeAll(() => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
-	});
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
@@ -34,7 +36,8 @@ describe('NftCard', () => {
 			props: {
 				nft: mockValidErc1155Nft,
 				testId,
-				type: 'card-link'
+				type: 'card-link',
+				source: NFT_COLLECTION_ROUTE
 			}
 		});
 
@@ -61,7 +64,8 @@ describe('NftCard', () => {
 			props: {
 				nft: { ...mockValidErc721Nft, imageUrl: undefined },
 				testId,
-				type: 'card-link'
+				type: 'card-link',
+				source: NFT_LIST_ROUTE
 			}
 		});
 
@@ -74,8 +78,8 @@ describe('NftCard', () => {
 		expect(networkLogo).toBeInTheDocument();
 
 		assertNonNullish(mockValidErc721Nft.name);
+		assertNonNullish(mockValidErc721Nft.collection.name);
 
-		expect(getByText(mockValidErc721Nft.name)).toBeInTheDocument();
 		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
 	});
 
@@ -123,8 +127,7 @@ describe('NftCard', () => {
 				nft: mockValidErc721Nft,
 				testId,
 				type: 'card-link',
-				isSpam: true,
-				source: 'gallery'
+				isSpam: true
 			}
 		});
 
@@ -134,15 +137,16 @@ describe('NftCard', () => {
 		button.click();
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_OPEN,
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				collection_name: mockValidErc721Nft.collection.name,
-				collection_address: mockValidErc721Nft.collection.address,
-				network: mockValidErc721Nft.collection.network.name,
-				standard: mockValidErc721Nft.collection.standard,
-				nft_id: mockValidErc721Nft.id.toString(),
-				source: 'gallery',
-				nftStatus: 'spam'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_value: PLAUSIBLE_EVENT_VALUES.NFT_PAGE,
+				location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
+				token_network: mockValidErc721Nft.collection.network.name,
+				token_address: mockValidErc721Nft.collection.address,
+				token_symbol: mockValidErc721Nft.collection.symbol,
+				token_name: mockValidErc721Nft.name,
+				token_id: mockValidErc721Nft.id
 			}
 		});
 	});
@@ -153,8 +157,7 @@ describe('NftCard', () => {
 				nft: mockValidErc721Nft,
 				testId,
 				type: 'card-link',
-				isHidden: true,
-				source: 'collection-view'
+				isHidden: true
 			}
 		});
 
@@ -164,15 +167,16 @@ describe('NftCard', () => {
 		button.click();
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_OPEN,
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				collection_name: mockValidErc721Nft.collection.name,
-				collection_address: mockValidErc721Nft.collection.address,
-				network: mockValidErc721Nft.collection.network.name,
-				standard: mockValidErc721Nft.collection.standard,
-				nft_id: mockValidErc721Nft.id.toString(),
-				source: 'collection-view',
-				nftStatus: 'hidden'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_value: PLAUSIBLE_EVENT_VALUES.NFT_PAGE,
+				location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
+				token_network: mockValidErc721Nft.collection.network.name,
+				token_address: mockValidErc721Nft.collection.address,
+				token_symbol: mockValidErc721Nft.collection.symbol,
+				token_name: mockValidErc721Nft.name,
+				token_id: mockValidErc721Nft.id
 			}
 		});
 	});
@@ -182,8 +186,7 @@ describe('NftCard', () => {
 			props: {
 				nft: mockValidErc721Nft,
 				testId,
-				type: 'card-link',
-				source: 'home'
+				type: 'card-link'
 			}
 		});
 
@@ -193,15 +196,75 @@ describe('NftCard', () => {
 		button.click();
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_OPEN,
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				collection_name: mockValidErc721Nft.collection.name,
-				collection_address: mockValidErc721Nft.collection.address,
-				network: mockValidErc721Nft.collection.network.name,
-				standard: mockValidErc721Nft.collection.standard,
-				nft_id: mockValidErc721Nft.id.toString(),
-				source: 'home'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_value: PLAUSIBLE_EVENT_VALUES.NFT_PAGE,
+				location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
+				token_network: mockValidErc721Nft.collection.network.name,
+				token_address: mockValidErc721Nft.collection.address,
+				token_symbol: mockValidErc721Nft.collection.symbol,
+				token_name: mockValidErc721Nft.name,
+				token_id: mockValidErc721Nft.id
 			}
 		});
+	});
+
+	it('should render nft name when withCollectionLabel is false (default)', () => {
+		const { getByText, queryByText } = render(NftCard, {
+			props: {
+				nft: mockValidErc721Nft,
+				testId,
+				type: 'card-link'
+			}
+		});
+
+		assertNonNullish(mockValidErc721Nft.name);
+		assertNonNullish(mockValidErc721Nft.collection.name);
+
+		// Should show nft.name as the main label
+		expect(getByText(mockValidErc721Nft.name)).toBeInTheDocument();
+
+		// Should NOT show collection name in title
+		expect(queryByText(mockValidErc721Nft.collection.name)).toBeNull();
+
+		// Subtitle should just be the id
+		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
+		expect(queryByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeNull();
+	});
+
+	it('should render collection name and nft name when withCollectionLabel is true', () => {
+		const { getByText } = render(NftCard, {
+			props: {
+				nft: mockValidErc721Nft,
+				testId,
+				type: 'card-link',
+				withCollectionLabel: true
+			}
+		});
+
+		assertNonNullish(mockValidErc721Nft.name);
+		assertNonNullish(mockValidErc721Nft.collection.name);
+
+		// Should show collection name instead of nft name as title
+		expect(getByText(mockValidErc721Nft.collection.name)).toBeInTheDocument();
+
+		// Subtitle should show both id and nft name
+		expect(getByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
+	});
+
+	it('should render first the OISY NFT ID', () => {
+		const mockOisyId = parseNftId('mock-oisy-id');
+
+		const { getByText } = render(NftCard, {
+			props: {
+				nft: { ...mockValidErc721Nft, oisyId: mockOisyId },
+				testId,
+				type: 'card-link',
+				withCollectionLabel: true
+			}
+		});
+
+		expect(getByText(`#${mockOisyId} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
 	});
 });

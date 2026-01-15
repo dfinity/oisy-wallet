@@ -1,14 +1,15 @@
 import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
-import { TRACK_NFT_SPAM_HIDE_ACTION } from '$lib/constants/analytics.constants';
 import {
 	CONFIRMATION_MODAL,
 	NFT_COLLECTION_ACTION_HIDE,
 	NFT_COLLECTION_ACTION_UNHIDE
 } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as nftsServices from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
+import { screensStore } from '$lib/stores/screens.store';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
@@ -26,6 +27,8 @@ describe('NftHideButton', () => {
 	beforeEach(() => {
 		nftStore.resetAll();
 		vi.clearAllMocks();
+
+		screensStore.set('md');
 	});
 
 	it('renders Unhide button when token.section is HIDDEN', () => {
@@ -104,58 +107,64 @@ describe('NftHideButton', () => {
 
 	it('should track event with "hide" action when hide button is clicked', async () => {
 		nftStore.addAll([mockNft]);
-		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
+		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(undefined);
 
 		const { getByTestId } = render(NftHideButton, {
-			props: { token: mockToken, source: 'collection-view' }
+			props: { token: mockToken, source: 'collection' }
 		});
 
 		const hideBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
 		await fireEvent.click(hideBtn);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_SPAM_HIDE_ACTION,
+			name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
 			metadata: {
-				source: 'collection-view',
-				collection_name: mockToken.name,
-				collection_address: mockToken.address,
-				network: mockToken.network.name,
-				standard: mockToken.standard,
-				action: 'hide'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: 'collection',
+				event_value: 'hide',
+				location_source: 'collection',
+				token_name: mockToken.name,
+				token_address: mockToken.address,
+				token_network: mockToken.network.name,
+				token_standard: mockToken.standard.code,
+				result_status: 'success'
 			}
 		});
 	});
 
-	it('should track event with "unhide" action when unhide button is clicked', async () => {
+	it('should track event with "show" action when unhide button is clicked', async () => {
 		const hiddenToken = { ...mockToken, section: CustomTokenSection.HIDDEN };
-		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
+		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(undefined);
 
 		const { getByTestId } = render(NftHideButton, {
-			props: { token: hiddenToken, source: 'hidden-tab' }
+			props: { token: hiddenToken, source: 'collection' }
 		});
 
 		const unhideBtn = getByTestId(NFT_COLLECTION_ACTION_UNHIDE);
 		await fireEvent.click(unhideBtn);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_SPAM_HIDE_ACTION,
+			name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
 			metadata: {
-				source: 'hidden-tab',
-				collection_name: hiddenToken.name,
-				collection_address: hiddenToken.address,
-				network: hiddenToken.network.name,
-				standard: hiddenToken.standard,
-				action: 'unhide'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: 'collection',
+				event_value: 'show',
+				location_source: 'collection',
+				token_name: mockToken.name,
+				token_address: mockToken.address,
+				token_network: mockToken.network.name,
+				token_standard: mockToken.standard.code,
+				result_status: 'success'
 			}
 		});
 	});
 
 	it('should track event when confirm button is clicked in modal for multiple NFTs', async () => {
 		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId('123') }]);
-		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
+		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(undefined);
 
 		const { getByTestId } = render(NftHideButton, {
-			props: { token: mockToken, source: 'gallery' }
+			props: { token: mockToken, source: 'collection' }
 		});
 
 		const hideBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
@@ -171,14 +180,17 @@ describe('NftHideButton', () => {
 		await fireEvent.click(confirmBtn);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_SPAM_HIDE_ACTION,
+			name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
 			metadata: {
-				source: 'gallery',
-				collection_name: mockToken.name,
-				collection_address: mockToken.address,
-				network: mockToken.network.name,
-				standard: mockToken.standard,
-				action: 'hide'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: 'collection',
+				event_value: 'hide',
+				location_source: 'collection',
+				token_name: mockToken.name,
+				token_address: mockToken.address,
+				token_network: mockToken.network.name,
+				token_standard: mockToken.standard.code,
+				result_status: 'success'
 			}
 		});
 	});

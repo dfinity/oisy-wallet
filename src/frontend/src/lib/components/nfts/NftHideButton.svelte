@@ -5,14 +5,15 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
-	import { TRACK_NFT_SPAM_HIDE_ACTION } from '$lib/constants/analytics.constants';
 	import {
 		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_HIDE,
 		NFT_COLLECTION_ACTION_UNHIDE
 	} from '$lib/constants/test-ids.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { updateNftSection } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,6 +21,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getNftIdentifier } from '$lib/utils/nft.utils';
 	import { findNftsByToken } from '$lib/utils/nfts.utils';
 
 	interface Props {
@@ -33,24 +35,41 @@
 		nonNullish($nftStore) ? findNftsByToken({ nfts: $nftStore, token }).length > 1 : false
 	);
 
+	const trackNftCategorizeEvent = ({
+		value,
+		status
+	}: {
+		value?: CustomTokenSection;
+		status: string;
+	}) => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: 'collection',
+				event_value: nonNullish(value) ? 'hide' : 'show',
+				location_source: source,
+				token_name: token.name,
+				token_address: getNftIdentifier(token),
+				token_network: token.network.name,
+				token_standard: token.standard.code,
+				result_status: status
+			}
+		});
+	};
+
 	let loading = $state(false);
 
 	const updateSection = async (section?: CustomTokenSection) => {
 		loading = true;
+
 		try {
-			trackEvent({
-				name: TRACK_NFT_SPAM_HIDE_ACTION,
-				metadata: {
-					source: source ?? '',
-					collection_name: token.name,
-					collection_address: token.address,
-					network: token.network.name,
-					standard: token.standard,
-					action: nonNullish(section) ? 'hide' : 'unhide'
-				}
-			});
-			await updateNftSection({ section, token, $authIdentity });
+			await updateNftSection({ section, token, $authIdentity, $ethAddress });
+
+			trackNftCategorizeEvent({ value: section, status: 'success' });
 		} catch (_: unknown) {
+			trackNftCategorizeEvent({ value: section, status: 'error' });
+
 			toastsError({ msg: { text: $i18n.nfts.text.could_not_update_section } });
 		} finally {
 			loading = false;

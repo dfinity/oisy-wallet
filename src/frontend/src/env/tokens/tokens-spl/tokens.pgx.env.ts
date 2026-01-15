@@ -14,7 +14,7 @@ export const PGX_TOKEN_ID: TokenId = parseTokenId(PGX_SYMBOL);
 export const PGX_TOKEN: RequiredSpl2022Token = {
 	id: PGX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Procter & Gamble xStock',
 	symbol: PGX_SYMBOL,

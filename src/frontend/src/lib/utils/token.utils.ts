@@ -5,13 +5,14 @@ import {
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
+import { isTokenIc } from '$icp/utils/icrc.utils';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionBalance } from '$lib/types/balance';
-import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { StakeBalances } from '$lib/types/stake-balance';
 import type { RequiredTokenWithLinkedData, Token, TokenStandard } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -43,7 +44,8 @@ export const getMaxTransactionAmount = ({
 	tokenStandard: TokenStandard;
 }): string => {
 	const value =
-		(balance ?? ZERO) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO);
+		(balance ?? ZERO) -
+		(tokenStandard.code !== 'erc20' && tokenStandard.code !== 'spl' ? fee : ZERO);
 
 	return value <= ZERO
 		? ZERO.toString()
@@ -64,7 +66,7 @@ export const getMaxTransactionAmount = ({
  * In addition to those, we display also:
  * - The tokens that have been enabled by the user
  *
- * That is why the `enabled` flag is either enabled for a subset of ledgerCanisterIds or if user has set an enabled custom token in the backend.
+ * That is why the `enabled` flag is either enabled for a subset of ledgerCanisterIds or if the user has set an enabled custom token in the backend.
  */
 export const mapDefaultTokenToToggleable = <T extends Token>({
 	defaultToken,
@@ -73,15 +75,14 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 	defaultToken: T;
 	customToken: TokenToggleable<T> | undefined;
 }): TokenToggleable<T> => {
-	const ledgerCanisterId =
-		'ledgerCanisterId' in defaultToken &&
-		(defaultToken as { ledgerCanisterId: CanisterIdText }).ledgerCanisterId;
+	const ledgerCanisterId = isTokenIc(defaultToken) ? defaultToken.ledgerCanisterId : undefined;
 
 	const isEnabledByDefault =
-		ledgerCanisterId && ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
+		nonNullish(ledgerCanisterId) &&
+		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
 
 	const isSuggestedToken =
-		(ledgerCanisterId &&
+		(nonNullish(ledgerCanisterId) &&
 			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
 		(isTokenErc20(defaultToken) &&
 			ERC20_SUGGESTED_TOKENS.map(({ id }) => id).includes(defaultToken.id));
@@ -92,7 +93,9 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 			isEnabledByDefault ||
 			(isNullish(customToken?.enabled) && isSuggestedToken) ||
 			customToken?.enabled === true,
-		version: customToken?.version
+		version: customToken?.version,
+		section: customToken?.section,
+		allowExternalContentSource: customToken?.allowExternalContentSource
 	};
 };
 
@@ -100,7 +103,7 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
  * Calculates USD balance for the provided token.
  *
  * @param token - Token for which USD balance will be calculated.
- * @param $balancesStore - The balances data for the tokens.
+ * @param $balancesStore - The balances' data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns The USD balance or undefined in case the number cannot be calculated.
  *
@@ -140,33 +143,63 @@ export const calculateTokenUsdAmount = ({
 		: undefined;
 };
 
-/** Maps a Token object to a TokenUi object, meaning it adds the balance and the USD balance to the token.
+/**
+ * Maps a Token object to a TokenUi object.
+ *
+ * It adds the balance and the USD balance to the token, including the staking and claimable rewards.
  *
  * @param token - The given token.
- * @param $balancesStore - The balances data for the tokens.
+ * @param $balancesStore - The balance data for the tokens.
+ * @param $stakeBalances - The stake balances data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns The token UI.
  */
 export const mapTokenUi = <T extends Token>({
 	token,
 	$balances,
+	$stakeBalances,
 	$exchanges
 }: {
 	token: T;
 	$balances: CertifiedStoreData<BalancesData>;
+	$stakeBalances: StakeBalances;
 	$exchanges: ExchangesData;
-}): TokenUi<T> => ({
-	...token,
-	// There is a difference between undefined and null for the balance.
-	// The balance is undefined if the balance store is not initiated or the specific balance loader for the token is not initiated.
-	// If the balance loader was initiated at some point, it will either contain data or be null, but not undefined.
-	balance: mapCertifiedData($balances?.[token.id]),
-	usdBalance: calculateTokenUsdBalance({
-		token,
-		$balances,
-		$exchanges
-	})
-});
+}): TokenUi<T> => {
+	const { staked, claimable } = $stakeBalances[token.id] ?? {};
+
+	return {
+		...token,
+		// There is a difference between undefined and null for the balance.
+		// The balance is undefined if the balance store is not initiated or the specific balance loader for the token is not initiated.
+		// If the balance loader was initiated at some point, it will either contain data or be null, but not undefined.
+		balance: mapCertifiedData($balances?.[token.id]),
+		usdBalance: calculateTokenUsdBalance({
+			token,
+			$balances,
+			$exchanges
+		}),
+		...(nonNullish(staked)
+			? {
+					stakeBalance: staked,
+					stakeUsdBalance: calculateTokenUsdAmount({
+						amount: staked,
+						token,
+						$exchanges
+					})
+				}
+			: {}),
+		...(nonNullish(claimable)
+			? {
+					claimableStakeBalance: claimable,
+					claimableStakeBalanceUsd: calculateTokenUsdAmount({
+						amount: claimable,
+						token,
+						$exchanges
+					})
+				}
+			: {})
+	};
+};
 
 export const sumBalances = ([balance1, balance2]: TokenUi['balance'][]): TokenUi['balance'] =>
 	nonNullish(balance1) && nonNullish(balance2)
@@ -228,3 +261,13 @@ export const findTwinToken = ({
  */
 export const getTokenDisplaySymbol = (token: Token | CardData): string =>
 	token.oisySymbol?.oisySymbol ?? token.symbol;
+
+export const isTokenToggleable = <T extends Token>(token: T): token is TokenToggleable<T> =>
+	'enabled' in token;
+
+/**
+ * Checks if a token is specifically defined as enabled/disabled, otherwise it defaults to true.
+ * This is useful for native tokens that will never have the `enabled` prop.
+ */
+export const filterEnabledToken = <T extends Token>(token: T): boolean =>
+	isTokenToggleable(token) ? token.enabled : true;

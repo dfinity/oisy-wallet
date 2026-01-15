@@ -5,16 +5,14 @@
 	Usage: <Responsive up="xs" down="md">Content will be rendered between xs and md including xs and md</Responsive>
 	*/
 
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy, type Snippet, untrack } from 'svelte';
-	import { writable } from 'svelte/store';
+	import type { Snippet } from 'svelte';
+	import { screensStore } from '$lib/stores/screens.store';
+	import type { ScreensKeyType } from '$lib/types/screens';
 	import {
 		AVAILABLE_SCREENS,
 		filterScreens,
-		getActiveScreen,
 		MAX_SCREEN,
 		MIN_SCREEN,
-		type ScreensKeyType,
 		shouldDisplayForScreen
 	} from '$lib/utils/screens.utils';
 
@@ -26,51 +24,13 @@
 
 	let { up = MIN_SCREEN, down = MAX_SCREEN, children }: Props = $props();
 
-	let innerWidth = $state(0);
-	const debouncedWidth = writable(0);
-	let timeoutHandle = $state<NodeJS.Timeout | undefined>();
-
-	const updateWidth = () => {
-		if (nonNullish(timeoutHandle)) {
-			clearTimeout(timeoutHandle);
-		}
-
-		timeoutHandle = setTimeout(() => {
-			debouncedWidth.set(innerWidth);
-		}, 50); // debounce width on screen size change so we don't calculate all the time
-	};
-
-	$effect(() => {
-		[innerWidth];
-
-		untrack(() => updateWidth());
-	});
-
-	let activeScreen = $derived(
-		getActiveScreen({
-			screenWidth: $debouncedWidth,
-			availableScreensSortedByWidth: AVAILABLE_SCREENS
-		})
-	);
-
 	let display = $derived(
 		shouldDisplayForScreen({
 			filteredScreens: filterScreens({ availableScreens: AVAILABLE_SCREENS, up, down }),
-			activeScreen
+			activeScreen: $screensStore
 		})
 	);
-
-	onDestroy(() => {
-		if (isNullish(timeoutHandle)) {
-			return;
-		}
-
-		clearTimeout(timeoutHandle);
-		timeoutHandle = undefined;
-	});
 </script>
-
-<svelte:window bind:innerWidth />
 
 {#if display}
 	{@render children()}

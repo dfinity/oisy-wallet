@@ -10,39 +10,41 @@ import type {
 	PostMessageDataResponsePowProtectorNextAllowance,
 	PostMessageDataResponsePowProtectorProgress
 } from '$lib/types/post-message';
+import type { WorkerData } from '$lib/types/worker';
 
 // TODO: add tests for POW worker/scheduler
 export class PowProtectorWorker extends AppWorker {
-	private constructor(worker: Worker) {
+	private constructor(worker: WorkerData) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<
-				| PostMessageDataResponsePowProtectorProgress
-				| PostMessageDataResponsePowProtectorNextAllowance
-				| PostMessageDataResponseError
-			>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					| PostMessageDataResponsePowProtectorProgress
+					| PostMessageDataResponsePowProtectorNextAllowance
+					| PostMessageDataResponseError
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncPowProgress': {
-					syncPowProgress({
-						data: data as PostMessageDataResponsePowProtectorProgress
-					});
-					return;
-				}
-				case 'syncPowNextAllowance': {
-					// Check if data.data exists and has proper structure
-					syncPowNextAllowance({
-						data: data as PostMessageDataResponsePowProtectorNextAllowance
-					});
-					return;
+				switch (msg) {
+					case 'syncPowProgress': {
+						syncPowProgress({
+							data: data as PostMessageDataResponsePowProtectorProgress
+						});
+						return;
+					}
+					case 'syncPowNextAllowance': {
+						// Check if data.data exists and has proper structure
+						syncPowNextAllowance({
+							data: data as PostMessageDataResponsePowProtectorNextAllowance
+						});
+					}
 				}
 			}
-		};
+		);
 	}
 
 	static async init(): Promise<PowProtectorWorker> {
@@ -57,14 +59,14 @@ export class PowProtectorWorker extends AppWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequest>>({
 			msg: 'startPowProtectionTimer'
-		} as PostMessage<PostMessageDataRequest>);
+		});
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequest>>({
 			msg: 'triggerPowProtectionTimer'
-		} as PostMessage<PostMessageDataRequest>);
+		});
 	};
 }

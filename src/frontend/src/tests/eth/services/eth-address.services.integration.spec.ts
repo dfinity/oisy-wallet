@@ -1,5 +1,5 @@
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 // These tests are done with real addresses from our test wallets
 describe('eth-address.services integration', () => {
@@ -38,11 +38,10 @@ describe('eth-address.services integration', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-
-		vi.stubEnv('VITE_FRONTEND_DERIVATION_ENABLED', 'true');
 	});
 
 	afterEach(() => {
+		vi.unstubAllGlobals();
 		vi.unstubAllEnvs();
 	});
 
@@ -85,6 +84,10 @@ describe('eth-address.services integration', () => {
 					vi.stubGlobal('VITE_DFX_NETWORK', env);
 
 					vi.resetModules();
+
+					const addressEnv = await import('$env/address.env');
+
+					vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockImplementation(() => true);
 
 					const constants = await import('$lib/constants/app.constants');
 					const { getEthAddress } = await import('$eth/services/eth-address.services');

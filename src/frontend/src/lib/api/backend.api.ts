@@ -8,10 +8,8 @@ import type {
 	GetAllowedCyclesResponse,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
-	UserProfile,
-	UserToken,
-	UserTokenId
-} from '$declarations/backend/declarations/backend.did';
+	UserProfile
+} from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
@@ -33,19 +31,10 @@ import type {
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 let canister: BackendCanister | undefined = undefined;
-
-export const listUserTokens = async ({
-	identity,
-	certified
-}: CanisterApiFunctionParams<QueryParams>): Promise<UserToken[]> => {
-	const { listUserTokens } = await backendCanister({ identity });
-
-	return listUserTokens({ certified });
-};
 
 export const listCustomTokens = async ({
 	identity,
@@ -78,15 +67,6 @@ export const setCustomToken = async ({
 	return setCustomToken({ token });
 };
 
-export const removeUserToken = async ({
-	identity,
-	...restParams
-}: CanisterApiFunctionParams<UserTokenId>): Promise<void> => {
-	const { removeUserToken } = await backendCanister({ identity });
-
-	return removeUserToken(restParams);
-};
-
 export const removeCustomToken = async ({
 	identity,
 	...restParams
@@ -94,26 +74,6 @@ export const removeCustomToken = async ({
 	const { removeCustomToken } = await backendCanister({ identity });
 
 	return removeCustomToken(restParams);
-};
-
-export const setManyUserTokens = async ({
-	identity,
-	tokens
-}: CanisterApiFunctionParams<{ tokens: UserToken[] }>): Promise<void> => {
-	const { setManyUserTokens } = await backendCanister({ identity });
-
-	return setManyUserTokens({ tokens });
-};
-
-export const setUserToken = async ({
-	token,
-	identity
-}: CanisterApiFunctionParams<{
-	token: UserToken;
-}>): Promise<void> => {
-	const { setUserToken } = await backendCanister({ identity });
-
-	return setUserToken({ token });
 };
 
 export const createUserProfile = async ({

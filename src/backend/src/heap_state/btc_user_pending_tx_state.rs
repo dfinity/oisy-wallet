@@ -8,7 +8,7 @@ const MAX_PENDING_TRANSACTIONS: usize = 1000;
 #[allow(dead_code)]
 const MAX_ADDRESS_COUNT_PER_USER: usize = 20;
 #[allow(dead_code)]
-const DAY_IN_NS: u64 = 24 * 60 * 60 * 1_000_000_000;
+const HOUR_IN_NS: u64 = 60 * 60 * 1_000_000_000;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct StoredPendingTransaction {
@@ -113,7 +113,7 @@ impl BtcUserPendingTransactions {
                     .into_iter()
                     .filter(|pending_transaction| {
                         let is_old =
-                            pending_transaction.created_at_timestamp_ns + DAY_IN_NS < now_ns;
+                            pending_transaction.created_at_timestamp_ns + HOUR_IN_NS < now_ns;
                         let all_utxos_found = pending_transaction
                             .utxos
                             .iter()
@@ -347,7 +347,7 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         let yesterday_ns = 1_000_000;
-        let now_ns = yesterday_ns + DAY_IN_NS;
+        let now_ns = yesterday_ns + HOUR_IN_NS;
 
         let old_transaction = StoredPendingTransaction {
             txid: vec![1, 2, 3],

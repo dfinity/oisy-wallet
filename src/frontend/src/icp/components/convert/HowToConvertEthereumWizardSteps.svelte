@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { createEventDispatcher } from 'svelte';
 	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
@@ -11,25 +10,26 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		currentStep: WizardStep | undefined;
+		currentStep?: WizardStep;
 		formCancelAction?: 'back' | 'close';
+		onBack: () => void;
+		onConvert: () => void;
+		onQrCode: () => void;
 	}
 
-	let { currentStep, formCancelAction = 'close' }: Props = $props();
-
-	const dispatch = createEventDispatcher();
+	let { currentStep, formCancelAction = 'close', onBack, onConvert, onQrCode }: Props = $props();
 </script>
 
 {#key currentStep?.name}
 	{#if currentStep?.name === WizardStepsHowToConvert.INFO}
-		<HowToConvertEthereumInfo {formCancelAction} on:icQRCode on:icConvert on:icBack />
+		<HowToConvertEthereumInfo {formCancelAction} {onBack} {onConvert} {onQrCode} />
 	{:else if currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
 		<ReceiveAddressQrCode
 			address={$ethAddress ?? ''}
 			addressToken={ETHEREUM_TOKEN}
 			copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
 			network={ETHEREUM_NETWORK}
-			onBack={() => dispatch('icBack')}
+			{onBack}
 			testId={HOW_TO_CONVERT_ETHEREUM_QR_CODE}
 		/>
 	{/if}

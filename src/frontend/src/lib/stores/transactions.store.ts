@@ -33,8 +33,9 @@ export type TransactionsData<T extends TransactionTypes> =
 	| CertifiedTransaction<T>[]
 	| NullableCertifiedTransactions;
 
-export interface TransactionsStore<T extends TransactionTypes>
-	extends CertifiedStore<TransactionsData<T>> {
+export interface TransactionsStore<T extends TransactionTypes> extends CertifiedStore<
+	TransactionsData<T>
+> {
 	set: (params: TransactionsStoreParams<T>) => void;
 	add: (params: TransactionsStoreParams<T>) => void;
 	prepend: (params: TransactionsStoreParams<T>) => void;

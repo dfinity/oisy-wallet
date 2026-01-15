@@ -21,7 +21,7 @@ describe('TransactionsSkeletons', () => {
 		});
 
 		Array.from({ length: 5 }).forEach((_, i) => {
-			expect(() => getByTestId(`skeleton-card-${i}`)).toThrow();
+			expect(() => getByTestId(`skeleton-card-${i}`)).toThrowError();
 		});
 	});
 });

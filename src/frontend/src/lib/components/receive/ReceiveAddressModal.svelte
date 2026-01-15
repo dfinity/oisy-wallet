@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type IcReceiveInfoCkBtc from '$icp/components/receive/IcReceiveInfoCkBtc.svelte';
 	import type IcReceiveInfoIcp from '$icp/components/receive/IcReceiveInfoIcp.svelte';
 	import type IcReceiveInfoIcrc from '$icp/components/receive/IcReceiveInfoIcrc.svelte';
@@ -15,11 +14,16 @@
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 
-	export let infoCmp:
-		| typeof ReceiveAddresses
-		| typeof IcReceiveInfoCkBtc
-		| typeof IcReceiveInfoIcp
-		| typeof IcReceiveInfoIcrc;
+	interface Props {
+		infoCmp:
+			| typeof ReceiveAddresses
+			| typeof IcReceiveInfoCkBtc
+			| typeof IcReceiveInfoIcp
+			| typeof IcReceiveInfoIcrc;
+		onClose?: () => void;
+	}
+
+	let { infoCmp: InfoCmp, onClose }: Props = $props();
 
 	const steps: WizardSteps<WizardStepsReceiveAddress> = [
 		{
@@ -32,33 +36,41 @@
 		}
 	];
 
-	let currentStep: WizardStep<WizardStepsReceiveAddress> | undefined;
-	let modal: WizardModal<WizardStepsReceiveAddress>;
+	let currentStep = $state<WizardStep<WizardStepsReceiveAddress> | undefined>();
+	let modal = $state<WizardModal<WizardStepsReceiveAddress>>();
 
-	let address: undefined | string;
-	let addressLabel: undefined | string;
-	let addressToken: Token | undefined;
-	let copyAriaLabel: string | undefined;
+	let address = $state<undefined | string>();
+	let addressLabel = $state<undefined | string>();
+	let addressToken = $state<Token | undefined>();
+	let copyAriaLabel = $state<string | undefined>();
 
 	const displayQRCode = (detail: ReceiveQRCode) => {
+		if (isNullish(modal)) {
+			return;
+		}
+
 		({ address, addressLabel, addressToken, copyAriaLabel } = detail);
+
 		modal.next();
 	};
 
 	const displayAddresses = () => {
+		if (isNullish(modal)) {
+			return;
+		}
+
 		modal.back();
+
 		address = undefined;
 		addressLabel = undefined;
 		addressToken = undefined;
 		copyAriaLabel = undefined;
 	};
-
-	const dispatch = createEventDispatcher();
 </script>
 
 <WizardModal
 	bind:this={modal}
-	onClose={() => closeModal(() => dispatch('nnsClose'))}
+	onClose={() => closeModal(() => onClose?.())}
 	{steps}
 	testId={RECEIVE_TOKENS_MODAL}
 	bind:currentStep
@@ -82,7 +94,7 @@
 				onBack={displayAddresses}
 			/>
 		{:else}
-			<svelte:component this={infoCmp} onQRCode={displayQRCode} />
+			<InfoCmp onQRCode={displayQRCode} />
 		{/if}
 	{/key}
 </WizardModal>

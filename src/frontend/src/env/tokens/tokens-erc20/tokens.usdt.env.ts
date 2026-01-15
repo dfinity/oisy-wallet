@@ -14,7 +14,7 @@ export const USDT_TOKEN_ID: TokenId = parseTokenId(USDT_SYMBOL);
 export const USDT_TOKEN: RequiredErc20Token = {
 	id: USDT_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Tether USD',
 	symbol: USDT_SYMBOL,
@@ -24,7 +24,7 @@ export const USDT_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckUSDT',
 	groupData: USDT_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true,
+	neverCollapseInTokenGroup: true,
 	buy: {
 		onramperId: 'usdt_ethereum'
 	}

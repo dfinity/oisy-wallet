@@ -17,6 +17,8 @@
 		styleClass?: string;
 		autofocus?: boolean;
 		onInput: () => void;
+		onBlur: () => void;
+		onFocus: () => void;
 	}
 
 	let {
@@ -32,7 +34,9 @@
 		testId,
 		styleClass = '',
 		autofocus = false,
-		onInput
+		onInput,
+		onBlur,
+		onFocus
 	}: Props = $props();
 </script>
 
@@ -48,12 +52,12 @@
 		{decimals}
 		{disabled}
 		{innerEnd}
+		{onBlur}
+		{onFocus}
 		{onInput}
 		{placeholder}
 		{testId}
 		bind:value
-		on:focus
-		on:blur
 	/>
 </div>
 

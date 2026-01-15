@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
+	import { isIOS, Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -7,21 +7,23 @@
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
+	import ResponsiveListener from '$lib/components/ui/ResponsiveListener.svelte';
 	import {
 		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.constants';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
+	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
-	import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
-	import { authStore } from '$lib/stores/auth.store';
+	import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	interface Props {
 		children: Snippet;
@@ -104,36 +106,40 @@
 		}
 
 		const spinner = document.querySelector('body > #app-spinner');
-		spinner?.remove();
+
+		// Due to an issue in mobile safari we cleanly detach all running animations and request an animation frame to be sure all animations are halted to safely remove the dom element
+		if (nonNullish(spinner) && spinner instanceof HTMLElement) {
+			// stop animation first
+			spinner.style.animation = 'none';
+			spinner.style.transition = 'none';
+
+			// let the browser flush compositing state
+			requestAnimationFrame(() => {
+				spinner.remove();
+			});
+		}
 	});
 
 	const handleBroadcastLoginSuccess = async () => {
-		const wasPreviouslyAuthenticated = $authSignedIn;
-
-		await authStore.forceSync();
+		authLoggedInAnotherTabStore.set(true);
 
 		if ($authNotSignedIn) {
 			return;
 		}
 
-		if (!wasPreviouslyAuthenticated) {
-			toastsShow({
-				text: $i18n.auth.message.refreshed_authentication,
-				level: 'success'
-			});
-		}
+		await authStore.forceSync();
 
 		// TODO: add a warning banner for the hedge case in which the tab was already logged in and now is refreshed with another identity
 	};
 
 	const openBc = () => {
 		try {
-			const bc = new AuthBroadcastChannel();
+			const bc = AuthBroadcastChannel.getInstance();
 
 			bc.onLoginSuccess(handleBroadcastLoginSuccess);
 
 			return () => {
-				bc?.close();
+				bc?.destroy();
 			};
 		} catch (err: unknown) {
 			// We don't really care if the broadcast channel fails to open or if it fails to set the message handler.
@@ -144,12 +150,38 @@
 	};
 
 	onMount(openBc);
+
+	let scrollY = 0;
+
+	const lockBodyScroll = () => {
+		({ scrollY } = window);
+		document.body.style.position = 'fixed';
+		document.body.style.top = `-${scrollY}px`;
+		document.body.style.width = '100%';
+	};
+
+	const unlockBodyScroll = () => {
+		document.body.style.position = '';
+		document.body.style.top = '';
+		document.body.style.width = '';
+		window.scrollTo(0, scrollY);
+	};
+
+	$effect(() => {
+		if (isIOS()) {
+			if (nonNullish($modalStore?.type)) {
+				lockBodyScroll();
+			} else {
+				unlockBodyScroll();
+			}
+		}
+	});
 </script>
 
 <svelte:window onstorage={syncAuthStore} />
 
 {#await init()}
-	<div in:fade>
+	<div class="text-brand-primary" in:fade>
 		<Spinner />
 	</div>
 {:then _}
@@ -161,3 +193,4 @@
 <Busy />
 <ModalExitHandler />
 <SystemThemeListener />
+<ResponsiveListener />

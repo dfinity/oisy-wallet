@@ -1,16 +1,15 @@
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
-import type { CustomTokenSection } from '$lib/enums/custom-token-section';
-import type { RequiredToken, Token, TokenMetadata, TokenStandard } from '$lib/types/token';
+import type { NonFungibleTokenAppearance } from '$lib/types/nft-ui';
+import type { RequiredToken, Token, TokenMetadata, TokenStandardCode } from '$lib/types/token';
 
-type Erc721Standard = Extract<TokenStandard, 'erc721'>;
+type Erc721Standard = Extract<TokenStandardCode, 'erc721'>;
 
 export type Erc721Token = Erc721Contract &
+	NonFungibleTokenAppearance &
 	Omit<Token, 'network' | 'standard'> & {
 		network: EthereumNetwork;
-		standard: Erc721Standard;
-		section?: CustomTokenSection;
-		allowExternalContentSource?: boolean;
+		standard: { code: Erc721Standard; version?: string };
 	};
 
 export type RequiredErc721Token = RequiredToken<
