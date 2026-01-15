@@ -1,18 +1,29 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { collectionMetadata } from '$icp/api/icpunks.api';
 import { loadAndAssertAddCustomToken } from '$icp/services/icpunks-add-custom-tokens.service';
 import type { IcPunksTokenWithoutId } from '$icp/types/icpunks-token';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockICatsCanisterId2, mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
+vi.mock('$icp/api/icpunks.api', () => ({
+	collectionMetadata: vi.fn()
+}));
+
 describe('icpunks-add-custom-tokens.service', () => {
 	describe('loadAndAssertAddCustomToken', () => {
 		const mockCanisterId = mockIcPunksCanisterId;
+
+		const mockFetchedMetadata = {
+			symbol: 'MOCK',
+			name: 'Mock Collection',
+			description: 'Mock Description',
+			icon: 'https://example.com/icon.png'
+		};
 
 		let spyToastsError: MockInstance;
 
@@ -22,14 +33,12 @@ describe('icpunks-add-custom-tokens.service', () => {
 			canisterId: mockCanisterId
 		};
 
-		const expectedName = shortenWithMiddleEllipsis({ text: mockCanisterId });
-
 		const expectedToken: IcPunksTokenWithoutId = {
 			canisterId: mockCanisterId,
 			standard: { code: 'icpunks' },
 			category: 'custom',
-			name: expectedName,
-			symbol: expectedName,
+			name: mockFetchedMetadata.name,
+			symbol: mockFetchedMetadata.name,
 			decimals: 0,
 			network: ICP_NETWORK
 		};
@@ -38,21 +47,23 @@ describe('icpunks-add-custom-tokens.service', () => {
 			vi.clearAllMocks();
 
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+			vi.mocked(collectionMetadata).mockResolvedValue(mockFetchedMetadata);
 		});
 
-		it('should return error if identity is missing', () => {
-			expect(() =>
+		it('should return error if identity is missing', async () => {
+			await expect(
 				loadAndAssertAddCustomToken({
 					...validParams,
 					identity: undefined
 				})
-			).toThrowError();
+			).rejects.toThrowError();
 		});
 
-		it('should return error if canisterId is missing', () => {
+		it('should return error if canisterId is missing', async () => {
 			const { canisterId: _, ...params } = validParams;
 
-			const result = loadAndAssertAddCustomToken(params);
+			const result = await loadAndAssertAddCustomToken(params);
 
 			expect(result).toEqual({ result: 'error' });
 
@@ -61,8 +72,8 @@ describe('icpunks-add-custom-tokens.service', () => {
 			});
 		});
 
-		it('should return error if token is already available', () => {
-			const result = loadAndAssertAddCustomToken({
+		it('should return error if token is already available', async () => {
+			const result = await loadAndAssertAddCustomToken({
 				...validParams,
 				icPunksTokens: [
 					{
@@ -79,8 +90,8 @@ describe('icpunks-add-custom-tokens.service', () => {
 			});
 		});
 
-		it('should return error if token already exists', () => {
-			const result = loadAndAssertAddCustomToken({
+		it('should return error if token already exists', async () => {
+			const result = await loadAndAssertAddCustomToken({
 				identity: mockIdentity,
 				icPunksTokens: [
 					{
@@ -99,10 +110,22 @@ describe('icpunks-add-custom-tokens.service', () => {
 			});
 		});
 
-		it('should successfully load a new token', () => {
-			const result = loadAndAssertAddCustomToken(validParams);
+		it('should successfully load a new token', async () => {
+			const result = await loadAndAssertAddCustomToken(validParams);
 
 			expect(result).toStrictEqual({ result: 'success', data: { token: expectedToken } });
+		});
+
+		it('should return error if loading metadata fails', async () => {
+			vi.mocked(collectionMetadata).mockRejectedValue(new Error('Failed to fetch'));
+
+			const result = await loadAndAssertAddCustomToken(validParams);
+
+			expect(result).toEqual({ result: 'error' });
+
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: get(i18n).tokens.import.error.loading_metadata }
+			});
 		});
 	});
 });
