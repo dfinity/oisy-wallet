@@ -71,6 +71,10 @@
 			return;
 		}
 
+		if (loading) {
+			return;
+		}
+
 		loading = true;
 
 		await Promise.allSettled(
