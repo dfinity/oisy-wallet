@@ -103,7 +103,15 @@ describe('icpunks.utils', () => {
 				mapIcPunksToken({ ...mockParams, metadata: { ...mockParams.metadata, name: '' } })
 			).toStrictEqual({
 				...expected,
-				name: '',
+				name: ''
+			});
+		});
+
+		it('should handle empty string as symbol', () => {
+			expect(
+				mapIcPunksToken({ ...mockParams, metadata: { ...mockParams.metadata, symbol: '' } })
+			).toStrictEqual({
+				...expected,
 				symbol: ''
 			});
 		});
