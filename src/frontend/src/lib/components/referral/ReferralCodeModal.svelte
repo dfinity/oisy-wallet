@@ -2,7 +2,7 @@
 	import { Modal, QRCode } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
+	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import SkeletonReceiveCopy from '$lib/components/receive/SkeletonReceiveCopy.svelte';
 	import ShareButton from '$lib/components/share/ShareButton.svelte';
@@ -19,7 +19,6 @@
 		REFERRAL_CODE_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getReferrerInfo } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -32,7 +31,6 @@
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -52,9 +50,11 @@
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
 			{#if nonNullish(referralCode)}
 				<QRCode value={referralUrl}>
-					<div slot="logo" class="flex items-center justify-center rounded-lg bg-primary p-2">
-						<IconAstronautHelmet />
-					</div>
+					{#snippet logo()}
+						<div class="flex items-center justify-center rounded-lg bg-primary p-2">
+							<IconAstronautHelmet />
+						</div>
+					{/snippet}
 				</QRCode>
 			{:else}
 				<SkeletonQrCode />

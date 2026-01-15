@@ -2,7 +2,7 @@ import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { basename, dirname, resolve } from 'node:path';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
-import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
+import { defineViteReplacements, readCanisterIds } from './vite.utils';
 
 // npm run dev = local
 // npm run build = local
@@ -19,13 +19,16 @@ const config: UserConfig = {
 			$declarations: resolve('./src/declarations')
 		}
 	},
-	...CSS_CONFIG_OPTIONS,
 	build: {
 		target: 'es2020',
 		rollupOptions: {
 			output: {
 				manualChunks: (id) => {
 					const folder = dirname(id);
+
+					if (folder.includes('src/frontend/src/lib/i18n') && id.endsWith('.json')) {
+						return `i18n-${basename(id, '.json')}`;
+					}
 
 					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'html5-qrcode', 'qr-creator'];
 

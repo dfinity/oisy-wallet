@@ -1,7 +1,6 @@
 import { SOL_DEVNET_EXPLORER_URL, SOL_MAINNET_EXPLORER_URL } from '$env/explorers.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import {
 	TOKEN_MENU_SOL_BUTTON,
 	TOKEN_MENU_SOL_EXPLORER_LINK
@@ -28,11 +27,6 @@ describe('SolTokenMenu', () => {
 
 		solAddressMainnetStore.reset();
 		solAddressDevnetStore.reset();
-
-		// In component TokenMenu there is a dependency to the store erc20UserTokensStore that impedes the correct rendering of the component
-		// So we need to reset the store before each test
-		// TODO: verify if this dependency can be removed
-		erc20UserTokensStore.resetAll();
 	});
 
 	const testCases = [

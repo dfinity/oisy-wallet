@@ -6,8 +6,8 @@ import type {
 import { LlmCanister } from '$lib/canisters/llm.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { ActorSubclass } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import type { ActorSubclass } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 describe('llm.canister', () => {
@@ -64,7 +64,7 @@ describe('llm.canister', () => {
 
 			const res = chat(params);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 });

@@ -11,22 +11,39 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import type { AnyTransactionUi } from '$lib/types/transaction';
+	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
 
 	interface Props {
-		type: 'send' | 'receive';
-		to: string | undefined;
+		type: 'send' | 'receive' | 'approve';
+		to?: string;
 		toExplorerUrl?: string;
-		from: string | undefined;
+		from?: string;
 		fromExplorerUrl?: string;
+		approveSpender?: string;
+		approveSpenderExplorerUrl?: string;
 		onSaveAddressComplete?: (data: OpenTransactionParams<AnyTransactionUi>) => void;
 	}
 
-	const { type, to, from, toExplorerUrl, fromExplorerUrl, onSaveAddressComplete }: Props = $props();
+	const {
+		type,
+		to,
+		from,
+		toExplorerUrl,
+		fromExplorerUrl,
+		approveSpender,
+		approveSpenderExplorerUrl,
+		onSaveAddressComplete
+	}: Props = $props();
 
 	let address: string | undefined = $derived(
-		type === 'send' && nonNullish(to) ? to : type !== 'send' && nonNullish(from) ? from : undefined
+		type === 'send' && nonNullish(to)
+			? to
+			: type === 'receive' && nonNullish(from)
+				? from
+				: type === 'approve' && nonNullish(approveSpender)
+					? approveSpender
+					: undefined
 	);
 
 	let contact: ContactUi | undefined = $derived(
@@ -52,7 +69,11 @@
 		{#snippet content()}
 			<span class="mx-1 flex flex-col items-start text-left">
 				<span class="font-bold"
-					>{type === 'send' ? $i18n.transaction.text.to : $i18n.transaction.text.from}: {contact?.name}</span
+					>{type === 'send'
+						? $i18n.transaction.text.to
+						: type === 'approve'
+							? $i18n.transaction.text.for
+							: $i18n.transaction.text.from}: {contact?.name}</span
 				>
 				<span class="w-full truncate">{address}</span>
 
@@ -82,11 +103,19 @@
 				copyAddress={address}
 				copyAddressText={type === 'send'
 					? $i18n.transaction.text.to_copied
-					: $i18n.transaction.text.from_copied}
-				externalLink={type === 'send' ? toExplorerUrl : fromExplorerUrl}
+					: type === 'approve'
+						? $i18n.transaction.text.for_copied
+						: $i18n.transaction.text.from_copied}
+				externalLink={type === 'send'
+					? toExplorerUrl
+					: type === 'approve'
+						? approveSpenderExplorerUrl
+						: fromExplorerUrl}
 				externalLinkAriaLabel={type === 'send'
 					? $i18n.transaction.alt.open_to_block_explorer
-					: $i18n.transaction.alt.open_from_block_explorer}
+					: type === 'approve'
+						? $i18n.transaction.alt.open_for_block_explorer
+						: $i18n.transaction.alt.open_from_block_explorer}
 			/>
 		{/snippet}
 	</AddressCard>

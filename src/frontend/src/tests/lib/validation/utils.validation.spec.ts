@@ -1,5 +1,5 @@
 import { safeParse } from '$lib/validation/utils.validation';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 describe('safeParse', () => {
 	const stringSchema = z.string();

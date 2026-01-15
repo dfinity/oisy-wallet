@@ -2,15 +2,13 @@
 	import InputAddressAlias from '$lib/components/address/InputAddressAlias.svelte';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
-	let {
-		address = $bindable(),
-		disableAddressField,
-		isValid = $bindable()
-	}: {
+	interface Props {
 		address: Partial<ContactAddressUi>;
 		disableAddressField?: boolean;
 		isValid: boolean;
-	} = $props();
+	}
+
+	let { address = $bindable(), disableAddressField, isValid = $bindable() }: Props = $props();
 
 	// Expose the isValid value for testing
 	export const getIsValid = () => isValid;

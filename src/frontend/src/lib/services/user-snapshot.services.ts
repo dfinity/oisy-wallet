@@ -10,12 +10,15 @@ import type {
 } from '$declarations/rewards/rewards.did';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
+import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
 import {
 	NANO_SECONDS_IN_MILLISECOND,
@@ -33,10 +36,13 @@ import { authIdentity } from '$lib/derived/auth.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import { nftStore } from '$lib/stores/nft.store';
 import type { Address } from '$lib/types/address';
 import type { Balance } from '$lib/types/balance';
+import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
-import type { AnyTransactionUi, TransactionType } from '$lib/types/transaction';
+import type { TransactionType } from '$lib/types/transaction';
+import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 import type { Option } from '$lib/types/utils';
 import {
 	isNetworkIdBTCMainnet,
@@ -50,6 +56,7 @@ import {
 	isNetworkIdSepolia,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import { findNftsByToken } from '$lib/utils/nfts.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -154,6 +161,26 @@ const getLastTransactionsByToken = ({
 				: [];
 };
 
+// Currently we have not way of differentiate more details for the token (for example the standard or the ID for NFTs).
+// So, for now, we simply create a custom string for the NFTs, and use the token ID description for the fungible tokens.
+// TODO: Improve the data passing when the Rewards Canister expand the interface for the type `AnyToken`.
+const toTokenSymbol = (token: Token): string => {
+	if (isTokenErc721(token) || isTokenErc1155(token)) {
+		return `nft#${token.name}#${token.address}#${token.section ?? ''}`;
+	}
+
+	if (isTokenIcNft(token)) {
+		return `nft#${token.name}#${token.canisterId}#${token.section ?? ''}`;
+	}
+
+	const { id: tokenId } = token;
+
+	// This does not happen, but we need it to make it type-safe
+	assertNonNullish(tokenId.description);
+
+	return tokenId.description;
+};
+
 const toAnySnapshot = ({
 	token,
 	balance,
@@ -165,7 +192,6 @@ const toAnySnapshot = ({
 	assertNonNullish(identity);
 
 	const {
-		id: tokenId,
 		network: { id: networkId, env: networkEnv },
 		decimals,
 		groupData
@@ -201,11 +227,8 @@ const toAnySnapshot = ({
 		network_id: networkId.description
 	};
 
-	// This does not happen, but we need it to make it type-safe
-	assertNonNullish(tokenId.description);
-
 	const tokenAddress: AnyToken = {
-		token_symbol: tokenId.description,
+		token_symbol: toTokenSymbol(token),
 		wraps: toNullable(nonNullish(groupData) ? groupData.id.description : undefined)
 	};
 
@@ -227,6 +250,12 @@ const toAnySnapshot = ({
 	return { Any: snapshot };
 };
 
+// For now the Rewards Canister does not accept the NFT ID as input.
+// So we create this workaround to show how many NFT we have per-collection.
+// TODO: Improve the balance calculation when the Rewards Canister accepts a different input for NFTs.
+const getNftBalance = ({ nfts, token }: { nfts: Nft[]; token: NonFungibleToken }): bigint =>
+	BigInt(findNftsByToken({ nfts, token }).length ?? ZERO);
+
 const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 	const balances = get(balancesStore);
 
@@ -238,14 +267,23 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 
 	const allTokens: Token[] = get(tokens);
 
+	const nftStoreTokens = get(nftStore) ?? [];
+
 	return allTokens.reduce<AccountSnapshotFor[]>((acc, token) => {
-		const balance = balances[token.id]?.data;
+		const balance =
+			isTokenErc721(token) || isTokenErc1155(token) || isTokenIcNft(token)
+				? getNftBalance({ nfts: nftStoreTokens, token })
+				: balances[token.id]?.data;
 
 		if (isNullish(balance) || balance === ZERO) {
 			return acc;
 		}
 
-		const exchangeRate = exchangeRates[token.id]?.usd;
+		// We want to send the snapshots even for tokens that do not have an exchange rate.
+		// However, the Rewards Canister does not accept a nullish value as input.
+		// For now, we send them with an exchange rate of 0, even if theoretically wrong.
+		// TODO: Remove the nullish check and the zero-fallback once the Rewards Canister accepts nullish values.
+		const exchangeRate = exchangeRates[token.id]?.usd ?? 0;
 
 		if (isNullish(exchangeRate)) {
 			return acc;

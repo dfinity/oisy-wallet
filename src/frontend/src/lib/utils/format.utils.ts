@@ -97,17 +97,23 @@ const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 export const formatSecondsToDate = ({
 	seconds,
 	language,
-	formatOptions
+	formatOptions,
+	timeOnly = false
 }: {
 	seconds: number;
 	language?: Languages;
 	formatOptions?: Intl.DateTimeFormatOptions;
+	timeOnly?: boolean;
 }): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString(
+	return date[timeOnly ? 'toLocaleTimeString' : 'toLocaleDateString'](
 		language ?? Languages.ENGLISH,
 		nonNullish(formatOptions)
-			? { ...DATE_TIME_FORMAT_OPTIONS, ...formatOptions }
+			? {
+					...DATE_TIME_FORMAT_OPTIONS,
+					...formatOptions,
+					...(timeOnly && { day: undefined, month: undefined, year: undefined })
+				}
 			: DATE_TIME_FORMAT_OPTIONS
 	);
 };
@@ -183,6 +189,31 @@ export const formatSecondsToNormalizedDate = ({
 	});
 };
 
+/** Formats a timestamp to a day difference.
+ *
+ * It uses the current date to compare the date with.
+ *
+ * @param {Object} params - The option object.
+ * @param {number} params.timestamp - The timestamp to format.
+ * @param {number} params.language - Current language.
+ */
+export const formatTimestampToDaysDifference = ({
+	timestamp,
+	language
+}: {
+	timestamp: number;
+	language?: Languages;
+}): string => {
+	const date = new Date(timestamp);
+	const today = new Date();
+
+	const dateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+	const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+	const daysDifference = Math.ceil((dateUTC - todayUTC) / MILLISECONDS_IN_DAY);
+
+	return getRelativeTimeFormatter(language).format(daysDifference, 'day');
+};
+
 export const formatCurrency = ({
 	value,
 	currency,
@@ -253,4 +284,20 @@ export const formatCurrency = ({
 	}
 
 	return formatted;
+};
+
+export const formatStakeApyNumber = (apy: number): string => {
+	if (apy >= 100) {
+		return `${Math.round(apy)}`;
+	}
+
+	if (apy >= 10) {
+		return (Math.round(apy * 10) / 10).toFixed(1);
+	}
+
+	if (apy > 0) {
+		return (Math.round(apy * 100) / 100).toFixed(2);
+	}
+
+	return '0';
 };

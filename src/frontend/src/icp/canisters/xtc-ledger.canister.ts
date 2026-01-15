@@ -5,9 +5,10 @@ import { mapXtcLedgerCanisterError } from '$icp/canisters/xtc-ledger.errors';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { XtcLedgerTransferParams } from '$icp/types/xtc-ledger';
 import { getAgent } from '$lib/actors/agents.ic';
+import { ZERO } from '$lib/constants/app.constants';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import type { Principal } from '@dfinity/principal';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 	static async create({
@@ -62,5 +63,5 @@ export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 	): Promise<{
 		transactions: Dip20TransactionWithId[];
 		oldest_tx_id: [] | [bigint];
-	}> => Promise.resolve({ transactions: [], oldest_tx_id: toNullable(0n) });
+	}> => Promise.resolve({ transactions: [], oldest_tx_id: toNullable(ZERO) });
 }

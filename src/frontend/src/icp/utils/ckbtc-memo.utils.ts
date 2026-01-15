@@ -1,6 +1,5 @@
-import { Cbor } from '@dfinity/agent';
-import { arrayOfNumberToUint8Array } from '@dfinity/utils';
-import * as z from 'zod/v4';
+import { Cbor } from '@icp-sdk/core/agent';
+import * as z from 'zod';
 
 /// Mint
 
@@ -37,14 +36,14 @@ export type MintMemo = z.infer<typeof MintMemoSchema>;
  * @throws LegacyMintMemoError when the memo length is 0 or 32 which identifying a legacy memo which are not supported by this help.
  * @returns {MintMemo} the decoded memo object.
  */
-export const decodeMintMemo = (memo: Uint8Array | number[]): MintMemo => {
+export const decodeMintMemo = (memo: Uint8Array): MintMemo => {
 	// Legacy minting transaction have a memo of length 0 or 32.
 	// We ignore them - those are not supported by this decoder.
 	if (memo.length === 0 || memo.length === 32) {
 		throw new LegacyMintMemoError();
 	}
 
-	return MintMemoSchema.parse(Cbor.decode(new Uint8Array(memo)));
+	return MintMemoSchema.parse(Cbor.decode(memo));
 };
 
 /// Burn
@@ -74,7 +73,5 @@ export type BurnMemo = z.infer<typeof BurnMemoSchema>;
  * @param memo a Cbor encoded memo.
  * @returns {BurnMemo} the decoded memo object.
  */
-export const decodeBurnMemo = (memo: Uint8Array | number[]): BurnMemo =>
-	BurnMemoSchema.parse(
-		Cbor.decode(memo instanceof Uint8Array ? memo : arrayOfNumberToUint8Array(memo))
-	);
+export const decodeBurnMemo = (memo: Uint8Array): BurnMemo =>
+	BurnMemoSchema.parse(Cbor.decode(memo));

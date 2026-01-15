@@ -4,7 +4,7 @@ import TransactionsDateGroup from '$lib/components/transactions/TransactionsDate
 import type {
 	AllTransactionUiWithCmp,
 	AllTransactionUiWithCmpNonEmptyList
-} from '$lib/types/transaction';
+} from '$lib/types/transaction-ui';
 import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { render } from '@testing-library/svelte';
@@ -42,7 +42,7 @@ describe('TransactionsDateGroup', () => {
 		...mockEthTransactionsUi
 	] as AllTransactionUiWithCmpNonEmptyList;
 
-	it('should render the date', () => {
+	it('should render the capitalized date', () => {
 		const { getByText } = render(TransactionsDateGroup, {
 			props: {
 				formattedDate: 'today',
@@ -50,7 +50,7 @@ describe('TransactionsDateGroup', () => {
 			}
 		});
 
-		expect(getByText('today')).toBeInTheDocument();
+		expect(getByText('Today')).toBeInTheDocument();
 	});
 
 	it('should render the transactions list', () => {
@@ -61,9 +61,7 @@ describe('TransactionsDateGroup', () => {
 			}
 		});
 
-		const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
-			(el) => el.parentElement?.parentElement === container
-		);
+		const transactionComponents = Array.from(container.querySelectorAll('button.contents'));
 
 		expect(transactionComponents).toHaveLength(btcTransactionsNumber + ethTransactionsNumber);
 	});

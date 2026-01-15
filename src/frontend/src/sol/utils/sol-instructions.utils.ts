@@ -1,5 +1,4 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import { getAccountInfo } from '$sol/api/solana.api';
 import {
@@ -9,6 +8,7 @@ import {
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type {
 	SolInstruction,
@@ -262,6 +262,9 @@ const mapToken2022ParsedInstruction = async ({
 	}
 };
 
+// This is just a placeholder to "treat" ATA instructions in SOL.
+// For now, we don't map any of them because we don't need to.
+// It is just for completeness in util `mapSolParsedInstruction` to be aware of this kind of instruction.
 const mapAssociatedTokenAccountInstruction = ({
 	type
 }: {
@@ -269,7 +272,7 @@ const mapAssociatedTokenAccountInstruction = ({
 }): SolMappedTransaction | undefined => {
 	if (type === 'create' || type === 'createIdempotent') {
 		// We don't need to map the instruction since it is not relevant for the user
-		return;
+		return undefined;
 	}
 };
 
@@ -334,8 +337,6 @@ export const mapSolParsedInstruction = async ({
 		`Could not map Solana instruction of type ${type} for program ${programAddress}`,
 		instruction
 	);
-
-	return;
 };
 
 /**

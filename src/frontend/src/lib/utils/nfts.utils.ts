@@ -1,16 +1,21 @@
-import { NftCollectionSchema } from '$lib/schema/nft.schema';
+import type { EthAddress } from '$eth/types/address';
+import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { MediaType } from '$lib/enums/media-type';
+import { NftCollectionSchema, NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { extractMediaTypeAndSize } from '$lib/services/url.services';
 import type { NftSortingType } from '$lib/stores/settings.store';
-import type { EthAddress } from '$lib/types/address';
 import type { NftError } from '$lib/types/errors';
-import type { NetworkId } from '$lib/types/network';
+import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
+import { getNftIdentifier } from '$lib/utils/nft.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import { SvelteMap } from 'svelte/reactivity';
 
 export const findNft = ({
 	nfts,
-	token: { address: tokenAddress, network: tokenNetwork },
+	token,
 	tokenId
 }: {
 	nfts: Nft[];
@@ -19,21 +24,15 @@ export const findNft = ({
 }): Nft | undefined =>
 	nfts.find(
 		({ id, collection: { address, network } }) =>
-			address === tokenAddress && network.id === tokenNetwork.id && id === tokenId
+			address === getNftIdentifier(token) && network.id === token.network.id && id === tokenId
 	);
 
-export const findNftsByToken = ({
-	nfts,
-	token: { address: tokenAddress, network: tokenNetwork }
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-}): Nft[] =>
+export const findNftsByToken = ({ nfts, token }: { nfts: Nft[]; token: NonFungibleToken }): Nft[] =>
 	nfts.filter((nft) =>
 		areAddressesEqual({
 			address1: nft.collection.address,
-			address2: tokenAddress,
-			networkId: tokenNetwork.id
+			address2: getNftIdentifier(token),
+			networkId: token.network.id
 		})
 	);
 
@@ -42,8 +41,11 @@ export const findNftsByNetwork = ({
 	networkId
 }: {
 	nfts: Nft[];
-	networkId: NetworkId;
-}): Nft[] => nfts.filter((nft) => nft.collection.network.id === networkId);
+	networkId: OptionNetworkId;
+}): Nft[] =>
+	nonNullish(networkId)
+		? nfts.filter((nft) => nft.collection.network.id === networkId)
+		: nfts.filter((nft) => nft.collection.network.env !== 'testnet');
 
 export const findNewNftIds = ({
 	nfts,
@@ -54,48 +56,6 @@ export const findNewNftIds = ({
 	token: NonFungibleToken;
 	inventory: NftId[];
 }): NftId[] => inventory.filter((tokenId) => isNullish(findNft({ nfts, token, tokenId })));
-
-export const findRemovedNfts = ({
-	nfts,
-	token,
-	inventory
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-	inventory: NftId[];
-}): Nft[] =>
-	nfts.filter(
-		(nft) =>
-			nft.collection.network === token.network &&
-			nft.collection.address === token.address &&
-			isNullish(inventory.find((nftId) => nftId === nft.id))
-	);
-
-export const getUpdatedNfts = ({
-	nfts,
-	token,
-	inventory
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-	inventory: Nft[];
-}): Nft[] =>
-	(nfts ?? []).reduce<Nft[]>((acc, nft) => {
-		if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
-			return acc;
-		}
-
-		const ownedNft = inventory.find((ownedNft) => ownedNft.id === nft.id);
-
-		if (nonNullish(ownedNft) && nft.balance !== ownedNft.balance) {
-			acc.push({
-				...nft,
-				balance: ownedNft.balance
-			});
-		}
-
-		return acc;
-	}, []);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
@@ -134,12 +94,17 @@ export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: N
 
 export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 	NftCollectionSchema.parse({
-		address: token.address,
+		address: getNftIdentifier(token),
 		id: token.id,
 		network: token.network,
 		standard: token.standard,
+		section: token.section,
 		...(notEmptyString(token.symbol) && { symbol: token.symbol }),
-		...(notEmptyString(token.name) && { name: token.name })
+		...(notEmptyString(token.name) && { name: token.name }),
+		...(notEmptyString(token.description) && { description: token.description }),
+		...(nonNullish(token.allowExternalContentSource) && {
+			allowExternalContentSource: token.allowExternalContentSource
+		})
 	});
 
 export const getEnabledNfts = ({
@@ -157,8 +122,9 @@ export const getEnabledNfts = ({
 			}
 		}) =>
 			$enabledNonFungibleNetworkTokens.some(
-				({ address: contractAddress, network: { id: contractNetworkId } }) =>
-					contractAddress === nftContractAddress && contractNetworkId === nftContractNetworkId
+				(token) =>
+					getNftIdentifier(token) === nftContractAddress &&
+					token.network.id === nftContractNetworkId
 			)
 	);
 
@@ -178,14 +144,22 @@ export const getNftCollectionUi = ({
 		if ('collection' in item) {
 			const k = keyOf({ addr: item.collection.address, netId: String(item.collection.network.id) });
 			const entry = index.get(k);
-			if (entry) {
+			if (nonNullish(entry)) {
 				entry.nfts = [...entry.nfts, item];
+				const newTimestamp = item.acquiredAt?.getTime() ?? 0;
+				const currentMax = entry.collection.newestAcquiredAt?.getTime() ?? 0;
+				if (newTimestamp > currentMax) {
+					entry.collection.newestAcquiredAt = new Date(newTimestamp);
+				}
 			} // only attach if the token exists
 			return acc;
 		}
 		const coll = mapTokenToCollection(item);
 		const k = keyOf({ addr: coll.address, netId: String(coll.network.id) });
-		const entry: NftCollectionUi = { collection: coll, nfts: [] };
+		const entry: NftCollectionUi = {
+			collection: { ...coll, newestAcquiredAt: new Date(0) },
+			nfts: []
+		};
 		index.set(k, entry);
 		acc = [...acc, entry];
 		return acc;
@@ -203,6 +177,25 @@ const cmpByCollectionName =
 		const an = a.collection?.name ?? '';
 		const bn = b.collection?.name ?? '';
 		return collator.compare(an, bn) * dir;
+	};
+
+const cmpByAcquiredDate =
+	(dir: number) =>
+	({ a, b }: { a: Nft | NftCollectionUi; b: Nft | NftCollectionUi }): number => {
+		const getNewestAcquiredAt = (item: Nft | NftCollectionUi): number => {
+			if (isNft(item)) {
+				return item.acquiredAt?.getTime() ?? 0;
+			}
+			if (isCollectionUi(item)) {
+				return item.collection.newestAcquiredAt?.getTime() ?? 0;
+			}
+			return 0;
+		};
+
+		const an = getNewestAcquiredAt(a);
+		const bn = getNewestAcquiredAt(b);
+
+		return (an - bn) * dir;
 	};
 
 // Overloads (so TS keeps the exact array element type on return)
@@ -225,6 +218,46 @@ interface FilterSortByCollection {
 	(params: NftCollectionFilterAndSortParams): NftCollectionUi[];
 }
 
+const isCollectionUi = (item: Nft | NftCollectionUi): item is NftCollectionUi =>
+	'nfts' in item && 'collection' in item;
+const isNft = (item: Nft | NftCollectionUi): item is Nft =>
+	'collection' in item && !('nfts' in item);
+
+const matchesFilter = ({
+	item,
+	filter
+}: {
+	item: Nft | NftCollectionUi;
+	filter: string;
+}): boolean => {
+	const lower = filter.toLowerCase();
+
+	if (isCollectionUi(item)) {
+		// search by collection name
+		const collectionName = item.collection?.name?.toLowerCase() ?? '';
+		if (collectionName.includes(lower)) {
+			return true;
+		}
+		// search by collections nfts name or id
+		return (item.nfts ?? []).some(
+			(nft) =>
+				(nft.name?.toLowerCase().includes(lower) ?? false) ||
+				(String(nft.id)?.toLowerCase().includes(lower) ?? false)
+		);
+	}
+
+	// search nfts by id, name or collection name
+	if (isNft(item)) {
+		return (
+			(String(item.id)?.toLowerCase().includes(lower) ?? false) ||
+			(item.name?.toLowerCase().includes(lower) ?? false) ||
+			(item.collection?.name?.toLowerCase().includes(lower) ?? false)
+		);
+	}
+
+	return false;
+};
+
 // Single implementation (T is Nft or NftCollectionUi)
 export const filterSortByCollection: FilterSortByCollection = <T extends Nft | NftCollectionUi>({
 	items,
@@ -234,9 +267,7 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 	let result = items;
 
 	if (nonNullish(filter)) {
-		result = result.filter((it) =>
-			(it.collection?.name?.toLowerCase() ?? '').includes(filter.toLowerCase())
-		);
+		result = result.filter((item) => matchesFilter({ item, filter }));
 	}
 
 	if (nonNullish(sort)) {
@@ -244,6 +275,8 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 
 		if (sort.type === 'collection-name') {
 			result = [...result].sort((a, b) => cmpByCollectionName(dir)({ a, b }));
+		} else if (sort.type === 'date') {
+			result = [...result].sort((a, b) => cmpByAcquiredDate(dir)({ a, b }));
 		} else {
 			// extendable, for now we return a copy of the list
 			result = [...result];
@@ -262,12 +295,67 @@ export const findNonFungibleToken = ({
 	address: EthAddress;
 	networkId: NetworkId;
 }): NonFungibleToken | undefined =>
-	tokens.find((token) => token.address === address && token.network.id === networkId);
+	tokens.find((token) => getNftIdentifier(token) === address && token.network.id === networkId);
 
-// We offer this util so we dont mistakingly take the value from the nfts collection prop,
-// as it is not updated after updating the consent. Going through this function ensures no stale data
-export const getAllowMediaForNft = (params: {
-	tokens: NonFungibleToken[];
-	address: EthAddress;
-	networkId: NetworkId;
-}): boolean | undefined => findNonFungibleToken(params)?.allowExternalContentSource;
+export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+	if (isNullish(mediaUrl)) {
+		return NftMediaStatusEnum.INVALID_DATA;
+	}
+
+	try {
+		const url = adaptMetadataResourceUrl(new URL(mediaUrl));
+
+		if (isNullish(url)) {
+			return NftMediaStatusEnum.INVALID_DATA;
+		}
+
+		const { type, size } = await extractMediaTypeAndSize(url.href);
+
+		if (isNullish(type) || isNullish(size)) {
+			// Not all servers return the Content-Type and Content-Length headers,
+			// so we can't be sure that the media is valid or not.
+			// For now, we assume that it is valid.
+			// TODO: this is not safe for the size limit, we should check the size of the file.
+			return NftMediaStatusEnum.OK;
+		}
+
+		if (!(type === MediaType.Img) && !(type === MediaType.Video)) {
+			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
+		}
+
+		if (Number(size) > NFT_MAX_FILESIZE_LIMIT) {
+			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
+		}
+	} catch (_: unknown) {
+		// The error here is caused by `fetch`, which can fail for various reasons (network error, CORS, DNS, etc).
+		// Empirically, it happens mostly for CORS policy block: we can't be sure that the media is valid or not.
+		// For now, we assume that it is valid to avoid blocking the user.
+		// Ideally, we should load this data in a backend service to avoid CORS issues.
+		// TODO: this is not safe for the size limit, we should check the size of the file in the backend (or similar solutions).
+		return NftMediaStatusEnum.OK;
+	}
+
+	return NftMediaStatusEnum.OK;
+};
+
+// The CORS policy raises an error everytime we try to access the media URL, so we cache the result to avoid making the same request multiple times.
+// Unfortunately, the CORS errors cannot be removed from the browser: https://stackoverflow.com/questions/52807184/how-to-hide-console-status-error-message-while-fetching-in-react-js
+const mediaStatusCache = new SvelteMap<string, NftMediaStatusEnum>();
+
+export const getMediaStatusOrCache = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+	if (isNullish(mediaUrl)) {
+		return NftMediaStatusEnum.INVALID_DATA;
+	}
+
+	const cachedStatus = mediaStatusCache.get(mediaUrl);
+
+	if (nonNullish(cachedStatus)) {
+		return cachedStatus;
+	}
+
+	const status = await getMediaStatus(mediaUrl);
+
+	mediaStatusCache.set(mediaUrl, status);
+
+	return status;
+};

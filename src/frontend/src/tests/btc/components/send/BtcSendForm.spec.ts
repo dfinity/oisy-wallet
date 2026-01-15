@@ -7,6 +7,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 describe('BtcSendForm', () => {
@@ -22,7 +23,11 @@ describe('BtcSendForm', () => {
 		destination: mockBtcAddress,
 		amount: 22_000_000,
 		networkId: BTC_MAINNET_NETWORK_ID,
-		source: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9'
+		source: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
+		onBack: vi.fn(),
+		onNext: vi.fn(),
+		onTokensList: vi.fn(),
+		cancel: mockSnippet
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;

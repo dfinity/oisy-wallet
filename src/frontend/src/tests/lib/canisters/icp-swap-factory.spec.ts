@@ -8,8 +8,8 @@ import { CanisterInternalError } from '$lib/canisters/errors';
 import { ICPSwapFactoryCanister } from '$lib/canisters/icp-swap-factory.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { ActorSubclass } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import type { ActorSubclass } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 describe('icp_swap_factory.canister', () => {
@@ -73,7 +73,7 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrow(
+			await expect(result).rejects.toThrowError(
 				new CanisterInternalError('Internal error: Failed to find pool')
 			);
 		});
@@ -87,7 +87,7 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 
 		it('throws error for unexpected structure', async () => {
@@ -98,7 +98,7 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrow();
+			await expect(result).rejects.toThrowError();
 		});
 	});
 });

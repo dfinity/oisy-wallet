@@ -2,25 +2,12 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { EnvDip20TokenSchema, EnvDip20TokensSchema } from '$env/schema/env-dip20-token.schema';
 import dip20Tokens from '$env/tokens/tokens.dip20.json';
 import type { EnvDip20Token } from '$env/types/env-dip20-token';
-import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
+import type { IcTokenWithoutId } from '$icp/types/ic-token';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { get } from 'svelte/store';
 
-export const buildIndexedDip20Tokens = (): Record<LedgerCanisterIdText, IcTokenWithoutIdExtended> =>
-	buildDip20Tokens().reduce(
-		(acc, { ledgerCanisterId, ...rest }) => ({
-			...acc,
-			[`${ledgerCanisterId}`]: {
-				ledgerCanisterId,
-				...rest
-			}
-		}),
-		{}
-	);
-
-export const buildDip20Tokens = (): IcTokenWithoutIdExtended[] => {
+export const buildDip20Tokens = (): IcTokenWithoutId[] => {
 	try {
 		return EnvDip20TokensSchema.parse(
 			dip20Tokens.map(
@@ -54,7 +41,7 @@ export const buildDip20Tokens = (): IcTokenWithoutIdExtended[] => {
 const mapDip20Token = ({
 	ledgerCanisterId,
 	metadata: { name, decimals, symbol, fee, alternativeName }
-}: EnvDip20Token): IcTokenWithoutIdExtended => ({
+}: EnvDip20Token): IcTokenWithoutId => ({
 	ledgerCanisterId,
 	network: ICP_NETWORK,
 	name,
@@ -62,7 +49,7 @@ const mapDip20Token = ({
 	symbol,
 	exchangeCoinId: undefined,
 	position: Number.MAX_VALUE,
-	standard: 'dip20',
+	standard: { code: 'dip20' },
 	category: 'custom',
 	fee,
 	alternativeName,

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount, setContext, type Snippet } from 'svelte';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { getContext, onMount, setContext, type Snippet } from 'svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
@@ -21,14 +21,21 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { ExchangesData } from '$lib/types/exchange';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
+	import { isTokenToggleable } from '$lib/utils/token.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
-	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
+	interface Props {
+		initialSearch?: string;
+		infoElement?: Snippet;
+		isNftsPage?: boolean;
+		onSave: (tokens: Token[]) => void;
+		onAddToken: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { initialSearch, infoElement, isNftsPage, onSave, onAddToken }: Props = $props();
 
-	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
+	// To avoid strange behaviour when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
 	// the life of the component.
 	let exchangesStaticData: ExchangesData | undefined = $state();
@@ -56,7 +63,8 @@
 			filterZeroBalance: false,
 			filterNetwork: $selectedNetwork,
 			filterQuery: nonNullish(initialSearch) ? initialSearch : '',
-			sortByBalance: false
+			sortByBalance: false,
+			filterNfts: isNftsPage
 		})
 	);
 
@@ -66,45 +74,41 @@
 		setTokens(allTokensSorted);
 	});
 
-	let loading = $derived($erc20UserTokensNotInitialized);
-
 	let showNetworks = $state(false);
 
 	const onSelectNetwork = () => {
 		showNetworks = !showNetworks;
 	};
 
-	let modifiedTokens: Record<string, Token> = $state({});
+	const modifiedTokens = new SvelteMap<TokenId, Token>();
 
-	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
-		const { id: networkId } = network;
-		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
+	const onToggle = ({ id, ...rest }: Token) => {
+		const current = modifiedTokens.get(id);
 
 		// we need to set the tokenlist for the ModalTokenListContext manually when we change the enabled prop,
 		// because the exposed prop from the context is a derived and on update of the data the "enabled" gets reset
 		const tokensList = [...allTokensSorted];
 		const token = tokensList.find((t) => t.id === id);
-		if (nonNullish(token) && 'enabled' in token) {
+		if (nonNullish(token) && isTokenToggleable(token)) {
 			token.enabled = !token.enabled;
 			setTokens(tokensList);
 		}
 
 		if (nonNullish(current)) {
-			modifiedTokens = { ...tokens };
+			modifiedTokens.delete(id);
 			return;
 		}
 
-		modifiedTokens = {
-			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
-			...tokens
-		};
+		modifiedTokens.set(id, { id, ...rest });
 	};
 
-	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
+	let tokensToBeSaved = $derived([...modifiedTokens.values()]);
+
+	let saveDisabled = $derived(tokensToBeSaved.length === 0);
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
 	// We might want to improve this in the future.
-	const save = () => dispatch('icSave', modifiedTokens);
+	const save = () => onSave(tokensToBeSaved);
 </script>
 
 {#if nonNullish(infoElement)}
@@ -112,12 +116,11 @@
 {/if}
 
 {#if showNetworks}
-	<ModalNetworksFilter on:icNetworkFilter={() => (showNetworks = false)} />
+	<ModalNetworksFilter onNetworkFilter={() => (showNetworks = false)} />
 {:else}
 	<ModalTokensList
-		{loading}
 		networkSelectorViewOnly={nonNullish($selectedNetwork)}
-		on:icSelectNetworkFilter={onSelectNetwork}
+		onSelectNetworkFilter={onSelectNetwork}
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
@@ -149,9 +152,13 @@
 		{#snippet toolbar()}
 			<Button
 				colorStyle="secondary-light"
-				disabled={$pseudoNetworkICPTestnet}
-				onclick={() => dispatch('icAddToken')}
-				><IconPlus /> {$i18n.tokens.manage.text.import_token}</Button
+				disabled={$pseudoNetworkICPTestnet ||
+					(isNftsPage && nonNullish($selectedNetwork) && !$selectedNetwork.supportsNft)}
+				onclick={onAddToken}
+				><IconPlus />
+				{isNftsPage
+					? $i18n.tokens.manage.text.import_nft
+					: $i18n.tokens.manage.text.import_token}</Button
 			>
 			<Button disabled={saveDisabled} onclick={save} testId={MANAGE_TOKENS_MODAL_SAVE}>
 				{$i18n.core.text.save}

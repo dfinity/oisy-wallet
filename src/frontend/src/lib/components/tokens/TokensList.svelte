@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { isIOS } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
+	import { SvelteMap } from 'svelte/reactivity';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
@@ -12,14 +14,15 @@
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
-	import { allTokens } from '$lib/derived/all-tokens.derived';
+	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
-	import type { Token } from '$lib/types/token';
-	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
+	import type { Token, TokenId } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token-ui';
+	import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
@@ -32,7 +35,7 @@
 	const handleAnimationStart = () => {
 		animating = true;
 
-		// The following is to guarantee that the function is triggered, even if 'animationend' event is not triggered.
+		// The following is to guarantee that the function is triggered, even if the 'animationend' event is not triggered.
 		// It may happen if the animation aborts before reaching completion.
 		debouncedHandleAnimationEnd();
 	};
@@ -55,26 +58,23 @@
 	// Token list for enabling when filtering
 	let enableMoreTokensList: TokenUiOrGroupUi[] = $state([]);
 
-	const updateFilterList = ({
-		filter,
-		selectedNetwork
-	}: {
-		filter: string;
-		selectedNetwork?: Network;
-	}) => {
+	const updateFilterList = ({ filter }: { filter: string }) => {
 		// Sort alphabetically and apply filter
 		enableMoreTokensList = getFilteredTokenList({
 			filter,
 			list: sortTokenOrGroupUi(
-				getDisabledOrModifiedTokens({ $allTokens, modifiedTokens, selectedNetwork })
+				getDisabledOrModifiedTokens({
+					tokens: $allFungibleNetworkTokens,
+					modifiedTokens
+				})
 			)
 		});
 
 		// We need to reset modified tokens; since the filter has changed, the selected token(s) may not be visible anymore
-		modifiedTokens = {};
+		modifiedTokens.clear();
 	};
 
-	// we debounce the filter input for updating the enable tokens list
+	// we debounce the filter input for updating the enabled tokens list
 	const debouncedFilterList = debounce(
 		(params: { filter: string; selectedNetwork?: Network }) => updateFilterList(params),
 		300
@@ -89,45 +89,58 @@
 
 	const onSave = async () => {
 		saveLoading = true;
-		await saveAllCustomTokens({ tokens: modifiedTokens, $authIdentity, $i18n });
+		await saveAllCustomTokens({ tokens: tokensToBeSaved, $authIdentity, $i18n });
 
 		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
-		updateFilterList({ filter: $tokenListStore.filter, selectedNetwork: $selectedNetwork });
+		updateFilterList({ filter: $tokenListStore.filter });
 		saveLoading = false;
 	};
 
-	let modifiedTokens: Record<string, Token> = $state({});
-	let modifiedTokensLen = $derived(Object.keys(modifiedTokens).length);
+	const modifiedTokens = new SvelteMap<TokenId, Token>();
 
-	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
+	let tokensToBeSaved = $derived([...modifiedTokens.values()]);
 
-	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
-		const { id: networkId } = network;
-		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
+	let tokensToBeSavedLength = $derived(tokensToBeSaved.length);
+
+	let saveDisabled = $derived(tokensToBeSavedLength === 0);
+
+	const onToggle = ({ id, ...rest }: Token) => {
+		const current = modifiedTokens.get(id);
 
 		if (nonNullish(current)) {
-			modifiedTokens = { ...tokens };
+			modifiedTokens.delete(id);
 			return;
 		}
 
-		modifiedTokens = {
-			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
-			...tokens
-		};
+		modifiedTokens.set(id, { id, ...rest });
 	};
+
+	let ios = $derived(isIOS());
+
+	let fadeParams = $derived(ios ? { duration: 0 } : undefined);
+
+	let flipParams = $derived({ duration: ios ? 0 : 250 });
+
+	const tokenKey = ({ id: tokenId, network: { id: networkId } }: TokenUi): string =>
+		`token:${tokenId.description}:${networkId.description}`;
+
+	const groupKey = ({ id }: TokenUiGroup): string => `group:${id.description}`;
+
+	const getUiKey = (tokenOrGroup: TokenUiOrGroupUi): string =>
+		isTokenUiGroup(tokenOrGroup) ? groupKey(tokenOrGroup.group) : tokenKey(tokenOrGroup.token);
 </script>
 
 <TokensDisplayHandler {animating} bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
-			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+			{#each filteredTokens as tokenOrGroup (getUiKey(tokenOrGroup))}
 				<div
 					class="overflow-hidden rounded-xl"
 					class:pointer-events-none={animating}
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
-					transition:fade
-					animate:flip={{ duration: 250 }}
+					transition:fade={fadeParams}
+					animate:flip={flipParams}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
@@ -137,7 +150,7 @@
 						{@const { token } = tokenOrGroup}
 
 						<div class="transition duration-300 hover:bg-primary">
-							<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
+							<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
 						</div>
 					{/if}
 				</div>
@@ -153,42 +166,44 @@
 		{/if}
 
 		{#if $tokenListStore.filter !== '' && enableMoreTokensList.length > 0}
-			<div class="mb-3 mt-6 flex flex-col gap-3">
+			<div class="mt-6 mb-3 flex flex-col gap-3">
 				<StickyHeader>
-					<div class="flex items-center justify-between pb-4">
-						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
-						<div>
-							<Button
-								disabled={saveDisabled || saveLoading}
-								fullWidth={false}
-								loading={saveLoading}
-								onclick={onSave}
-								paddingSmall
-								styleClass="py-2"
-							>
-								{$i18n.core.text.apply}
-								{#if modifiedTokensLen > 0}({modifiedTokensLen}){/if}
-							</Button>
+					{#snippet header()}
+						<div class="flex items-center justify-between pb-4">
+							<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
+							<div>
+								<Button
+									disabled={saveDisabled || saveLoading}
+									fullWidth={false}
+									loading={saveLoading}
+									onclick={onSave}
+									paddingSmall
+									styleClass="py-2"
+								>
+									{$i18n.core.text.apply}
+									{#if tokensToBeSavedLength > 0}({tokensToBeSavedLength}){/if}
+								</Button>
+							</div>
 						</div>
-					</div>
-				</StickyHeader>
+					{/snippet}
 
-				{#each enableMoreTokensList as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
-					<div
-						class="overflow-hidden rounded-xl"
-						class:pointer-events-none={animating}
-						onanimationend={handleAnimationEnd}
-						onanimationstart={handleAnimationStart}
-						transition:fade
-						animate:flip={{ duration: 250 }}
-					>
-						<div class="transition duration-300 hover:bg-primary">
-							{#if !isTokenUiGroup(tokenOrGroup)}
-								<TokenCard data={tokenOrGroup.token} {onToggle} />
-							{/if}
+					{#each enableMoreTokensList as tokenOrGroup (getUiKey(tokenOrGroup))}
+						<div
+							class="overflow-hidden rounded-xl"
+							class:pointer-events-none={animating}
+							onanimationend={handleAnimationEnd}
+							onanimationstart={handleAnimationStart}
+							transition:fade={fadeParams}
+							animate:flip={flipParams}
+						>
+							<div class="transition duration-300 hover:bg-primary">
+								{#if !isTokenUiGroup(tokenOrGroup)}
+									<TokenCard data={tokenOrGroup.token} {onToggle} />
+								{/if}
+							</div>
 						</div>
-					</div>
-				{/each}
+					{/each}
+				</StickyHeader>
 			</div>
 		{/if}
 	</TokensSkeletons>

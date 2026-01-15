@@ -200,6 +200,7 @@ type ExperimentalFeaturesSettings = record {
 		ExperimentalFeatureSettings
 	}
 };
+type ExtV2Token = record { canister_id : principal };
 type GetAllowedCyclesError = variant {
 	Other : text;
 	FailedToContactCyclesLedger
@@ -322,11 +323,14 @@ type SupportedCredential = record {
 type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
 	Erc20 : ErcToken;
+	ExtV2 : ExtV2Token;
 	Icrc : IcrcToken;
 	Erc721 : ErcToken;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken;
-	Erc1155 : ErcToken
+	IcPunks : ExtV2Token;
+	Erc1155 : ErcToken;
+	Dip721 : ExtV2Token
 };
 type TokenAccountId = variant {
 	Btc : BtcAddress;
@@ -371,6 +375,7 @@ type UpdateUserAgreementsRequest = record {
 };
 type UserAgreement = record {
 	last_accepted_at_ns : opt nat64;
+	text_sha256 : opt text;
 	accepted : opt bool;
 	last_updated_at_ms : opt nat64
 };

@@ -19,6 +19,7 @@ import {
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -49,7 +50,9 @@ describe('EthConvertForm', () => {
 	const props = {
 		sendAmount: 0.001,
 		receiveAmount: 0.001,
-		destination: 'address'
+		destination: 'address',
+		onNext: vi.fn(),
+		cancel: mockSnippet
 	};
 	const mockFeeStore = {
 		maxFeePerGas: 1000n,

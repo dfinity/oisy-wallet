@@ -1,20 +1,18 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, onDestroy, onMount } from 'svelte';
+	import { getContext, onDestroy, onMount, type Snippet, untrack } from 'svelte';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
-	import { infuraProviders } from '$eth/providers/infura.providers';
-	import { InfuraGasRest } from '$eth/rest/infura.rest';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import {
 		getCkErc20FeeData,
 		getErc20FeeData,
 		getEthFeeData,
-		type GetFeeData
+		getEthFeeDataWithProvider
 	} from '$eth/services/fee.services';
 	import {
 		encodeErc1155SafeTransfer,
 		encodeErc721SafeTransfer
-	} from '$eth/services/nft-send.services';
+	} from '$eth/services/nft-transfer.services';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -28,7 +26,6 @@
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
-	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
@@ -38,19 +35,36 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
-	import { isNetworkICP } from '$lib/utils/network.utils';
+	import { assertIsNetworkEthereum, isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let observe: boolean;
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let data: string | undefined = undefined;
-	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
-	export let nativeEthereumToken: Token;
-	export let sendToken: Token;
-	export let sendTokenId: TokenId;
-	export let sendNft: Nft | undefined = undefined;
+	interface Props {
+		observe: boolean;
+		destination?: string;
+		amount?: OptionAmount;
+		data?: string;
+		sourceNetwork: EthereumNetwork;
+		targetNetwork?: Network;
+		nativeEthereumToken: Token;
+		sendToken: Token;
+		sendTokenId: TokenId;
+		sendNft?: Nft;
+		children: Snippet;
+	}
+
+	let {
+		observe,
+		destination = '',
+		amount,
+		data,
+		sourceNetwork,
+		targetNetwork,
+		nativeEthereumToken,
+		sendToken,
+		sendTokenId,
+		sendNft,
+		children
+	}: Props = $props();
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
@@ -58,7 +72,7 @@
 	 * Updating and fetching fee
 	 */
 
-	let listener: WebSocketListener | undefined = undefined;
+	let listener = $state<WebSocketListener | undefined>();
 
 	const errorMsgs: symbol[] = [];
 
@@ -68,29 +82,18 @@
 				return;
 			}
 
-			const params: GetFeeData = {
-				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress),
-				from: mapAddressStartsWith0x($ethAddress)
-			};
+			const { network } = sendToken;
 
-			const { getFeeData, safeEstimateGas, estimateGas } = infuraProviders(sendToken.network.id);
+			assertIsNetworkEthereum(network);
 
-			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
+			const { feeData, provider, params } = await getEthFeeDataWithProvider({
+				networkId: network.id,
+				chainId: network.chainId,
+				from: $ethAddress,
+				to: destination !== '' ? destination : $ethAddress
+			});
 
-			const { getSuggestedFeeData } = new InfuraGasRest(
-				(sendToken.network as EthereumNetwork).chainId
-			);
-
-			const {
-				maxFeePerGas: suggestedMaxFeePerGas,
-				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
-			} = await getSuggestedFeeData();
-
-			const feeData = {
-				...feeDataRest,
-				maxFeePerGas: maxBigInt(maxFeePerGas, suggestedMaxFeePerGas) ?? null,
-				maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas) ?? null
-			};
+			const { safeEstimateGas, estimateGas } = provider;
 
 			const feeDataGas = getEthFeeData({
 				...params,
@@ -195,11 +198,11 @@
 
 	const debounceUpdateFeeData = debounce(updateFeeData);
 
-	let listenerCallbackTimer: NodeJS.Timeout | undefined;
+	let listenerCallbackTimer = $state<NodeJS.Timeout | undefined>();
 
-	let isDestroyed = false;
+	let isDestroyed = $state(false);
 
-	const obverseFeeData = async (watch: boolean) => {
+	const obverseFeeData = async () => {
 		const throttledCallback = () => {
 			// to make sure we don't update the UI too often, we listen to the WS updates max. once per 10 secs
 			if (isNullish(listenerCallbackTimer)) {
@@ -219,7 +222,7 @@
 			return;
 		}
 
-		if (!watch) {
+		if (!observe) {
 			return;
 		}
 
@@ -235,6 +238,7 @@
 	onMount(() => {
 		observe && debounceUpdateFeeData();
 	});
+
 	onDestroy(async () => {
 		isDestroyed = true;
 		await listener?.disconnect();
@@ -246,12 +250,19 @@
 	 * Observe input properties for erc20
 	 */
 
-	$: obverseFeeData(observe);
+	$effect(() => {
+		[observe];
 
-	$: ($ckEthMinterInfoStore,
-		(() => {
-			observe && debounceUpdateFeeData();
-		})());
+		untrack(() => obverseFeeData());
+	});
+
+	$effect(() => {
+		[$ckEthMinterInfoStore];
+
+		if (observe) {
+			untrack(() => debounceUpdateFeeData());
+		}
+	});
 
 	/**
 	 * Expose a call to evaluate so that consumers can re-evaluate imperatively, for example, when the user manually updates the amount or destination.
@@ -259,4 +270,4 @@
 	export const triggerUpdateFee = () => debounceUpdateFeeData();
 </script>
 
-<slot />
+{@render children()}

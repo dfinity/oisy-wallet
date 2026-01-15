@@ -81,7 +81,7 @@ describe('sol-instructions-token.utils', () => {
 		it('should raise an error if the instruction is missing the data', () => {
 			const { data: _, ...withoutData } = mockInstruction;
 
-			expect(() => parseSolTokenInstruction(withoutData)).toThrow(
+			expect(() => parseSolTokenInstruction(withoutData)).toThrowError(
 				'The instruction does not have any data'
 			);
 		});
@@ -89,9 +89,9 @@ describe('sol-instructions-token.utils', () => {
 		it('should raise an error if the instruction is missing the accounts', () => {
 			const { accounts: _, ...withoutAccounts } = mockInstruction;
 
-			expect(() => parseSolTokenInstruction(withoutAccounts as unknown as SolInstruction)).toThrow(
-				'The instruction does not have any accounts'
-			);
+			expect(() =>
+				parseSolTokenInstruction(withoutAccounts as unknown as SolInstruction)
+			).toThrowError('The instruction does not have any accounts');
 		});
 
 		it('should parse an InitializeMint instruction', () => {
@@ -348,37 +348,13 @@ describe('sol-instructions-token.utils', () => {
 			expect(parseUiAmountToAmountInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
 		});
 
-		it('should return the original instruction if it is not a recognised Token instruction', () => {
+		it('should raise an error if it is not a recognised Token instruction', () => {
 			// @ts-expect-error intentional for testing unknown discriminant
 			vi.mocked(identifyTokenInstruction).mockReturnValue('unknown-instruction');
 
-			expect(parseSolTokenInstruction(mockInstruction)).toStrictEqual(mockInstruction);
-
-			expect(parseInitializeMintInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeAccountInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeMultisigInstruction).not.toHaveBeenCalled();
-			expect(parseTransferInstruction).not.toHaveBeenCalled();
-			expect(parseApproveInstruction).not.toHaveBeenCalled();
-			expect(parseRevokeInstruction).not.toHaveBeenCalled();
-			expect(parseSetAuthorityInstruction).not.toHaveBeenCalled();
-			expect(parseMintToInstruction).not.toHaveBeenCalled();
-			expect(parseBurnInstruction).not.toHaveBeenCalled();
-			expect(parseCloseAccountInstruction).not.toHaveBeenCalled();
-			expect(parseFreezeAccountInstruction).not.toHaveBeenCalled();
-			expect(parseThawAccountInstruction).not.toHaveBeenCalled();
-			expect(parseTransferCheckedInstruction).not.toHaveBeenCalled();
-			expect(parseApproveCheckedInstruction).not.toHaveBeenCalled();
-			expect(parseMintToCheckedInstruction).not.toHaveBeenCalled();
-			expect(parseBurnCheckedInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeAccount2Instruction).not.toHaveBeenCalled();
-			expect(parseSyncNativeInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeAccount3Instruction).not.toHaveBeenCalled();
-			expect(parseInitializeMultisig2Instruction).not.toHaveBeenCalled();
-			expect(parseInitializeMint2Instruction).not.toHaveBeenCalled();
-			expect(parseGetAccountDataSizeInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeImmutableOwnerInstruction).not.toHaveBeenCalled();
-			expect(parseAmountToUiAmountInstruction).not.toHaveBeenCalled();
-			expect(parseUiAmountToAmountInstruction).not.toHaveBeenCalled();
+			expect(() => parseSolTokenInstruction(mockInstruction)).toThrowError(
+				'Unknown Solana Token instruction: unknown-instruction'
+			);
 		});
 	});
 });

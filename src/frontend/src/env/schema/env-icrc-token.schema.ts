@@ -1,12 +1,12 @@
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 export const EnvIcrcTokenMetadataSchema = z.object({
 	decimals: z.number(),
 	name: z.string(),
 	symbol: z.string(),
 	fee: z.bigint(),
-	alternativeName: z.optional(z.string()),
-	url: z.optional(z.url())
+	alternativeName: z.string().optional(),
+	url: z.url().optional()
 });
 
 export const EnvIcrcTokenIconSchema = z.object({
@@ -20,7 +20,8 @@ export const EnvIcrcTokenMetadataWithIconSchema = z.object({
 
 export const EnvIcTokenSchema = z.object({
 	ledgerCanisterId: z.string(),
-	indexCanisterId: z.string().optional()
+	indexCanisterId: z.string().optional(),
+	mintingAccount: z.string().optional()
 });
 
 const OptionalEnvIcrcTokenMetadataSchema = z.union([

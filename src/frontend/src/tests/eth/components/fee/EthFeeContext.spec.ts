@@ -2,10 +2,10 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 import * as infuraMod from '$eth/providers/infura.providers';
-import * as infuraGasRestMod from '$eth/rest/infura.rest';
+import { InfuraGasRest } from '$eth/rest/infura.rest';
 import * as listenerServices from '$eth/services/eth-listener.services';
 import * as feeServices from '$eth/services/fee.services';
-import * as nftSend from '$eth/services/nft-send.services';
+import * as nftTransfer from '$eth/services/nft-transfer.services';
 import {
 	ETH_FEE_CONTEXT_KEY,
 	type EthFeeStore,
@@ -16,6 +16,7 @@ import * as ethUtils from '$eth/utils/eth.utils';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as evmNativeUtils from '$evm/utils/native-token.utils';
 import * as ckethStoreMod from '$icp-eth/stores/cketh.store';
+import { ZERO } from '$lib/constants/app.constants';
 import * as addressDerived from '$lib/derived/address.derived';
 import type { Network } from '$lib/types/network';
 import type { Nft } from '$lib/types/nft';
@@ -24,8 +25,14 @@ import type { Token, TokenId } from '$lib/types/token';
 import * as networkUtils from '$lib/utils/network.utils';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
+import type { Snippet } from 'svelte';
 import { readable, writable, type Writable } from 'svelte/store';
+
+vi.mock('$eth/rest/infura.rest', () => ({
+	InfuraGasRest: vi.fn()
+}));
 
 describe('EthFeeContext', () => {
 	const feeState: Writable<FeeStoreData | undefined> = writable(undefined);
@@ -55,6 +62,7 @@ describe('EthFeeContext', () => {
 		sendToken: Token;
 		sendTokenId: TokenId;
 		sendNft: Nft | undefined;
+		children: Snippet;
 	} = {
 		observe: true,
 		destination,
@@ -65,12 +73,21 @@ describe('EthFeeContext', () => {
 		nativeEthereumToken,
 		sendToken: ETHEREUM_TOKEN,
 		sendTokenId: ETHEREUM_TOKEN.id,
-		sendNft: undefined
+		sendNft: undefined,
+		children: mockSnippet
 	};
+
+	const renderWith = (props: Partial<typeof baseProps> = {}) =>
+		render(EthFeeContext, { props: { ...baseProps, ...props }, context: mockContext(feeStore) });
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
+
+		InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
+			maxFeePerGas: 12n,
+			maxPriorityFeePerGas: 7n
+		});
 
 		vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(fromAddr));
 		vi.spyOn(networkUtils, 'isNetworkICP').mockReturnValue(false);
@@ -97,39 +114,27 @@ describe('EthFeeContext', () => {
 						maxPriorityFeePerGas: 5n
 					})
 				),
-			safeEstimateGas: async () => await new Promise((resolve) => resolve(0n)),
-			estimateGas: async () => await new Promise((resolve) => resolve(0n))
+			safeEstimateGas: async () => await new Promise((resolve) => resolve(ZERO)),
+			estimateGas: async () => await new Promise((resolve) => resolve(ZERO))
 		} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
 
-		vi.spyOn(infuraGasRestMod, 'InfuraGasRest').mockImplementation(
-			() =>
-				({
-					getSuggestedFeeData: async () =>
-						await new Promise((resolve) =>
-							resolve({
-								maxFeePerGas: 12n,
-								maxPriorityFeePerGas: 7n
-							})
-						)
-				}) as unknown as infuraGasRestMod.InfuraGasRest
-		);
-
 		vi.spyOn(feeServices, 'getEthFeeData').mockReturnValue(21n);
-		vi.spyOn(feeServices, 'getCkErc20FeeData').mockResolvedValue(0n);
-		vi.spyOn(feeServices, 'getErc20FeeData').mockResolvedValue(0n);
+		vi.spyOn(feeServices, 'getCkErc20FeeData').mockResolvedValue(ZERO);
+		vi.spyOn(feeServices, 'getErc20FeeData').mockResolvedValue(ZERO);
 
-		vi.spyOn(nftSend, 'encodeErc721SafeTransfer').mockReturnValue({
+		vi.spyOn(nftTransfer, 'encodeErc721SafeTransfer').mockReturnValue({
 			to: '0x2222222222222222222222222222222222222222',
 			data: '0xdeadbeef'
 		});
-		vi.spyOn(nftSend, 'encodeErc1155SafeTransfer').mockReturnValue({
+		vi.spyOn(nftTransfer, 'encodeErc1155SafeTransfer').mockReturnValue({
 			to: '0x3333333333333333333333333333333333333333',
 			data: '0xfeedbead'
 		});
 	});
 
-	const renderWith = (props: Partial<typeof baseProps> = {}) =>
-		render(EthFeeContext, { props: { ...baseProps, ...props }, context: mockContext(feeStore) });
+	afterEach(() => {
+		vi.useRealTimers();
+	});
 
 	it('sets fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
 		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
@@ -144,9 +149,7 @@ describe('EthFeeContext', () => {
 
 		await vi.runAllTimersAsync();
 
-		expect(feeStore.setFee).toHaveBeenCalledOnce();
-
-		expect(feeStore.setFee).toHaveBeenCalledWith(
+		expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				gas: 25n,
 				maxFeePerGas: 12n,
@@ -163,9 +166,7 @@ describe('EthFeeContext', () => {
 
 		await vi.runAllTimersAsync();
 
-		expect(feeStore.setFee).toHaveBeenCalledOnce();
-
-		expect(feeStore.setFee).toHaveBeenCalledWith(
+		expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				gas: 123n
 			})
@@ -192,26 +193,20 @@ describe('EthFeeContext', () => {
 
 		await vi.runAllTimersAsync();
 
-		expect(nftSend.encodeErc721SafeTransfer).toHaveBeenCalledOnce();
-
-		expect(nftSend.encodeErc721SafeTransfer).toHaveBeenCalledWith({
+		expect(nftTransfer.encodeErc721SafeTransfer).toHaveBeenCalledExactlyOnceWith({
 			contractAddress: nft.collection.address,
 			from: fromAddr,
 			to: destination,
 			tokenId: nft.id
 		});
 
-		expect(provider.estimateGas).toHaveBeenCalledOnce();
-
-		expect(provider.estimateGas).toHaveBeenCalledWith({
+		expect(provider.estimateGas).toHaveBeenCalledExactlyOnceWith({
 			from: fromAddr,
 			to: '0x2222222222222222222222222222222222222222',
 			data: '0xdeadbeef'
 		});
 
-		expect(feeStore.setFee).toHaveBeenCalledOnce();
-
-		expect(feeStore.setFee).toHaveBeenCalledWith(
+		expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				gas: 90n
 			})

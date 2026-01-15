@@ -30,7 +30,11 @@
 		testId={REWARDS_MODAL_IMAGE_BANNER}
 	/>
 
-	<span class="absolute right-4 top-4">
-		<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
+	<span class="absolute top-4 right-4">
+		<RewardDateBadge
+			endDate={reward.endDate}
+			startDate={reward.startDate}
+			testId={REWARDS_MODAL_DATE_BADGE}
+		/>
 	</span>
 </div>

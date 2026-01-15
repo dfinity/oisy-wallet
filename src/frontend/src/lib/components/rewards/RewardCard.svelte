@@ -42,7 +42,7 @@
 
 <button class="flex flex-col" data-tid={testId} {onclick}>
 	<div class="-mb-7">
-		<div class="max-h-66 relative overflow-hidden rounded-2xl">
+		<div class="relative max-h-66 overflow-hidden rounded-2xl">
 			<Img
 				alt={replacePlaceholders($i18n.rewards.alt.reward_banner, {
 					$campaignName: resolveText({ i18n: $i18n, path: reward.cardTitle })
@@ -52,17 +52,18 @@
 				testId={REWARDS_BANNER}
 			/>
 
-			<span class="absolute right-4 top-4">
+			<span class="absolute top-4 right-4">
 				<RewardDateBadge
-					date={reward.endDate}
+					endDate={reward.endDate}
+					startDate={reward.startDate}
 					testId={nonNullish(testId) ? `${testId}-date-badge` : undefined}
 				/>
 			</span>
 		</div>
 	</div>
 
-	<div class="relative rounded-lg bg-primary p-4">
-		<article class="h-full">
+	<div class="relative rounded-lg bg-primary p-5">
+		<article class="flex h-full flex-col gap-3">
 			<section>
 				<div
 					class="flex gap-3 text-start text-lg font-semibold"
@@ -85,9 +86,10 @@
 					<Html text={resolveText({ i18n: $i18n, path: reward.oneLiner })} />
 				</p>
 			</section>
-			<section class="bottom-4 left-4 mt-3 flex">
+
+			<section class="mt-3 flex">
 				<div
-					class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
+					class="rounded-xl bg-brand-primary px-3 py-2 font-semibold text-primary-inverted"
 					data-tid={REWARDS_STATUS_BUTTON}
 					>{hasEnded ? $i18n.rewards.text.view_details : $i18n.rewards.text.check_status}
 				</div>

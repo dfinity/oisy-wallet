@@ -16,13 +16,12 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { USER_MENU_ROUTE } from '$lib/constants/analytics.contants';
+	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
@@ -108,7 +107,7 @@
 	>
 		{#if $authNotSignedIn}
 			<span class="mb-2 text-center">
-				<ButtonAuthenticateWithHelp fullWidth needHelpLink={false} />
+				<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
 			</span>
 			<Hr />
 
@@ -211,13 +210,8 @@
 	{#if $authSignedIn}
 		<Hr />
 
-		<div class="flex max-w-80 flex-col gap-3 pt-3">
+		<div class="flex max-w-80 flex-col pt-3">
 			<LockOrSignOut onHidePopover={hidePopover} />
-			<Hr />
-
-			<span class="text-center text-sm text-tertiary">
-				<LicenseLink noUnderline />
-			</span>
 		</div>
 	{/if}
 </Popover>

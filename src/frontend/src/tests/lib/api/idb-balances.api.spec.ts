@@ -23,10 +23,6 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('idb-balances.api', () => {
 	const mockIdbBalancesStore = createStore('mock-store', 'mock-store');
 
@@ -194,7 +190,7 @@ describe('idb-balances.api', () => {
 					...mockParams,
 					balancesStoreData: get(balancesStore)
 				})
-			).resolves.not.toThrow();
+			).resolves.not.toThrowError();
 
 			expect(idbKeyval.set).toHaveBeenCalledTimes(mockTokens.length);
 		});

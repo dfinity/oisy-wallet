@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
@@ -14,17 +13,20 @@
 		destination: string;
 		invalidDestination?: boolean;
 		selectedContact?: ContactUi;
+		onSendDestinationStep: () => void;
 	}
-	let { destination, invalidDestination = false, selectedContact }: Props = $props();
 
-	const dispatch = createEventDispatcher();
-
-	const onIcSendDestinationStep = () => dispatch('icSendDestinationStep');
+	let {
+		destination,
+		invalidDestination = false,
+		selectedContact,
+		onSendDestinationStep
+	}: Props = $props();
 
 	let addressToDisplay = $derived(shortenWithMiddleEllipsis({ text: destination }));
 </script>
 
-<div class="mb-10 mt-6" data-tid={SEND_DESTINATION_SECTION}>
+<div class="mt-6 mb-10" data-tid={SEND_DESTINATION_SECTION}>
 	<div class="font-bold">{$i18n.core.text.to}</div>
 
 	<AddressCard hasError={invalidDestination} items="center">
@@ -52,7 +54,7 @@
 			<button
 				class="text-brand-primary"
 				aria-label={$i18n.core.text.back}
-				onclick={onIcSendDestinationStep}
+				onclick={onSendDestinationStep}
 			>
 				<IconPenLine />
 			</button>

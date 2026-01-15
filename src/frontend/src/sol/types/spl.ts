@@ -1,5 +1,5 @@
-import type { SolAddress } from '$lib/types/address';
 import type { RequiredToken, Token } from '$lib/types/token';
+import type { SolAddress } from '$sol/types/address';
 
 export type SplTokenAddress = SolAddress;
 

@@ -6,6 +6,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
@@ -15,7 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import type { AnyTransactionUi } from '$lib/types/transaction';
+	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -102,6 +103,16 @@
 		{/if}
 
 		<List styleClass="mt-5">
+			{#if nonNullish(token?.network)}
+				<ListItem>
+					<span>
+						{$i18n.networks.network}
+					</span>
+
+					<NetworkWithLogo network={token.network} />
+				</ListItem>
+			{/if}
+
 			{#if nonNullish(id)}
 				<ListItem>
 					<span>

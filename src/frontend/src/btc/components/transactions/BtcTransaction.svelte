@@ -18,13 +18,15 @@
 
 	let label = $derived(type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive);
 
-	let amount = $derived(nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined);
+	let displayAmount = $derived(
+		nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined
+	);
 
 	const modalId = Symbol();
 </script>
 
 <Transaction
-	{amount}
+	{displayAmount}
 	{from}
 	{iconType}
 	onClick={() => modalStore.openBtcTransaction({ id: modalId, data: { transaction, token } })}

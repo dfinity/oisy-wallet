@@ -1,4 +1,5 @@
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
+import { ZERO } from '$lib/constants/app.constants';
 import { last } from '$lib/utils/array.utils';
 import * as solApi from '$sol/api/solana.api';
 import {
@@ -181,19 +182,19 @@ describe.skip('sol-signatures.services integration', () => {
 					const { fee } = meta ?? {};
 					const { pubkey: feePayer } = extractFeePayer([...(accountKeys ?? [])]) ?? {};
 
-					return accTotalFee + (feePayer === address ? (fee ?? 0n) : 0n);
-				}, Promise.resolve(0n));
+					return accTotalFee + (feePayer === address ? (fee ?? ZERO) : ZERO);
+				}, Promise.resolve(ZERO));
 
 				const { solBalance: transactionSolBalance } = transactions.reduce<{
 					solBalance: bigint;
 					signatures: string[];
 				}>(
 					({ solBalance, signatures }, { value, type, signature }) => ({
-						solBalance: solBalance + (value ?? 0n) * (type === 'send' ? -1n : 1n),
+						solBalance: solBalance + (value ?? ZERO) * (type === 'send' ? -1n : 1n),
 						signatures: [...signatures, signature]
 					}),
 					{
-						solBalance: 0n,
+						solBalance: ZERO,
 						signatures: []
 					}
 				);
@@ -249,10 +250,10 @@ describe.skip('sol-signatures.services integration', () => {
 					signatures: string[];
 				}>(
 					({ balance, signatures }, { value, type, signature }) => ({
-						balance: balance + (value ?? 0n) * (type === 'send' ? -1n : 1n),
+						balance: balance + (value ?? ZERO) * (type === 'send' ? -1n : 1n),
 						signatures: [...signatures, signature]
 					}),
-					{ balance: 0n, signatures: [] }
+					{ balance: ZERO, signatures: [] }
 				);
 
 				const fetchedBalance = await loadTokenBalance({

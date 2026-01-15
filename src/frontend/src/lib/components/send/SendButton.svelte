@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
+	import IconPickaxe from '$lib/components/icons/IconPickaxe.svelte';
 	import IconlySend from '$lib/components/icons/iconly/IconlySend.svelte';
 	import { SEND_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { isBusy } from '$lib/derived/busy.derived';
@@ -23,9 +25,13 @@
 	testId={SEND_TOKENS_MODAL_OPEN_BUTTON}
 >
 	{#snippet icon()}
-		<IconlySend size="24" />
+		{#if $isIcMintingAccount}
+			<IconPickaxe size="24" />
+		{:else}
+			<IconlySend size="24" />
+		{/if}
 	{/snippet}
 	{#snippet label()}
-		{$i18n.send.text.send}
+		{$isIcMintingAccount ? $i18n.mint.text.mint : $i18n.send.text.send}
 	{/snippet}
 </ButtonHero>

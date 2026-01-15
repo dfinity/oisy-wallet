@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -11,7 +11,6 @@
 	import type { Erc1155Metadata } from '$eth/types/erc1155';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc721Metadata } from '$eth/types/erc721';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -24,34 +23,43 @@
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 
-	export let contractAddress: string | undefined;
-	export let metadata: Erc20Metadata | Erc721Metadata | Erc1155Metadata | undefined;
-	export let network: Network;
+	interface Props {
+		contractAddress?: string;
+		metadata?: Erc20Metadata | Erc721Metadata | Erc1155Metadata;
+		network: Network;
+		onBack: () => void;
+		onSave: () => void;
+	}
+
+	let { contractAddress, metadata = $bindable(), network, onBack, onSave }: Props = $props();
 
 	const validateMetadata = () => {
 		if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.incomplete_metadata }
 			});
-			dispatch('icBack');
+			onBack();
 			return;
 		}
+
+		// This does not happen at this point, but it is useful type-wise
+		assertIsNetworkEthereum(network);
 
 		if (
 			[...$erc20Tokens, ...$erc721Tokens]?.find(
 				({ symbol, name, network: tokenNetwork }) =>
 					(symbol.toLowerCase() === (metadata?.symbol?.toLowerCase() ?? '') ||
 						name.toLowerCase() === (metadata?.name?.toLowerCase() ?? '')) &&
-					tokenNetwork.chainId === (network as EthereumNetwork).chainId
+					tokenNetwork.chainId === network.chainId
 			) !== undefined
 		) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.duplicate_metadata }
 			});
 
-			dispatch('icBack');
-			return;
+			onBack();
 		}
 	};
 
@@ -61,7 +69,7 @@
 				msg: { text: $i18n.tokens.import.error.missing_contract_address }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
@@ -70,9 +78,12 @@
 				msg: { text: $i18n.tokens.import.error.no_network }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
+
+		// This does not happen at this point, but it is useful type-wise
+		assertIsNetworkEthereum(network);
 
 		if (
 			[...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens]?.find(
@@ -81,14 +92,14 @@
 						address1: address,
 						address2: contractAddress,
 						networkId: network.id
-					}) && tokenNetwork.chainId === (network as EthereumNetwork).chainId
+					}) && tokenNetwork.chainId === network.chainId
 			) !== undefined
 		) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.already_available }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
@@ -112,14 +123,11 @@
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
-			dispatch('icBack');
+			onBack();
 		}
 	});
 
-	let invalid = true;
-	$: invalid = isNullishOrEmpty(contractAddress) || isNullish(metadata);
-
-	const dispatch = createEventDispatcher();
+	let invalid = $derived(isNullishOrEmpty(contractAddress) || isNullish(metadata));
 </script>
 
 <ContentWithToolbar>
@@ -186,8 +194,8 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonBack onclick={() => dispatch('icBack')} />
-			<Button disabled={invalid} onclick={() => dispatch('icSave')}>
+			<ButtonBack onclick={onBack} />
+			<Button disabled={invalid} onclick={onSave}>
 				{$i18n.tokens.import.text.add_the_token}
 			</Button>
 		</ButtonGroup>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import {
 		BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION,
 		DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
@@ -8,22 +8,25 @@
 	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
-	export let source: string;
-	export let amount: OptionAmount = undefined;
-	export let networkId: NetworkId | undefined = undefined;
-	export let amountError = false;
+	interface Props {
+		source: string;
+		amount?: OptionAmount;
+		networkId?: NetworkId;
+		amountError?: boolean;
+		children: Snippet;
+	}
+
+	let { source, amount, networkId, amountError = false, children }: Props = $props();
 
 	const { store } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 
 	const loadEstimatedFee = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -32,16 +35,16 @@
 			return;
 		}
 
-		// UTXOs API call is very time-consuming operation, even though the fees do not change often (no matter what amount is provided)
+		// UTXOs API call is a very time-consuming operation, even though the fees do not change often (no matter what amount is provided)
 		// Therefore, to improve UX, we start fetching the fee directly on modal open event
-		// Initially, we fetch fees with default value and then re-fetch it in the background on value change
+		// Initially, we fetch fees with the default value and then re-fetch it in the background on value change
 		const parsedAmount =
 			nonNullish(amount) && Number(amount) !== 0
 				? Number(amount)
 				: DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE;
 
 		// WizardModal re-renders content on step change (e.g. when switching between Convert to Review steps)
-		// To avoid re-fetching the fees, we need to check if amount hasn't changed since the last request
+		// To avoid re-fetching the fees, we need to check if the amount hasn't changed since the last request
 		if (
 			amountError ||
 			isNullish(networkId) ||
@@ -82,7 +85,11 @@
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
 
-	$: (amount, networkId, amountError, source, debounceEstimateFee());
+	$effect(() => {
+		[amount, networkId, amountError, source];
+
+		debounceEstimateFee();
+	});
 </script>
 
-<slot />
+{@render children()}

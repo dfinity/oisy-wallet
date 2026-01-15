@@ -22,10 +22,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { toNullable } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('AiAssistantReviewSendBtcToken', () => {
 	const sendAmount = 0.0001;
 	const transactionId = 'txid';
@@ -36,7 +32,8 @@ describe('AiAssistantReviewSendBtcToken', () => {
 		amount: sendAmount,
 		destination: mockBtcAddress,
 		sendCompleted: false,
-		sendEnabled: true
+		sendEnabled: true,
+		onSendCompleted: vi.fn()
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
@@ -78,7 +75,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 			context: mockContext()
 		});
 
-		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
+		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrowError();
 		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE)).toBeInTheDocument();
 	});
 
@@ -101,7 +98,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 			await fireEvent.click(button);
 
-			expect(btcSendApiSpy).toHaveBeenCalledWith({
+			expect(btcSendApiSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				network: mapToSignerBitcoinNetwork({ network: BTC_MAINNET_TOKEN.network.env }),
 				utxosToSpend: mockUtxosFee.utxos,
@@ -113,7 +110,6 @@ describe('AiAssistantReviewSendBtcToken', () => {
 					}
 				]
 			});
-			expect(btcSendApiSpy).toHaveBeenCalledOnce();
 		});
 	});
 

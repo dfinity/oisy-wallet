@@ -1,13 +1,11 @@
 import { NetworkSchema } from '$lib/schema/network.schema';
+import { OnramperIdSchema } from '$lib/schema/onramper.schema';
 import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
-import type { OnramperId } from '$lib/types/onramper';
-import type { TokenBuy } from '$lib/types/token';
-import type { AtLeastOne } from '$lib/types/utils';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 export const TokenIdSchema = z.symbol().brand<'TokenId'>();
 
-export const TokenStandardSchema = z.enum([
+export const TokenStandardCodeSchema = z.enum([
 	'ethereum',
 	'erc20',
 	'erc721',
@@ -15,10 +13,18 @@ export const TokenStandardSchema = z.enum([
 	'icp',
 	'icrc',
 	'dip20',
+	'dip721',
+	'ext',
+	'icpunks', // This standard can be applied to all NFT IC tokens with a similar interface to ICPunks (for example, ICats)
 	'bitcoin',
 	'solana',
 	'spl'
 ]);
+
+export const TokenStandardSchema = z.object({
+	code: TokenStandardCodeSchema,
+	version: z.string().optional()
+});
 
 export const TokenCategorySchema = z.enum(['default', 'custom']);
 
@@ -26,7 +32,8 @@ export const TokenMetadataSchema = z.object({
 	name: z.string(),
 	symbol: z.string(),
 	decimals: z.number(),
-	icon: z.string().optional()
+	icon: z.string().optional(),
+	description: z.string().optional()
 });
 
 const TokenOisySymbolSchema = z.object({
@@ -41,16 +48,15 @@ const TokenOisyNameSchema = z.object({
 export const TokenAppearanceSchema = z.object({
 	oisySymbol: TokenOisySymbolSchema.optional(),
 	oisyName: TokenOisyNameSchema.optional(),
-	alwaysShowInTokenGroup: z.boolean().optional()
+	neverCollapseInTokenGroup: z.boolean().optional()
 });
 
-// TODO: use Zod to validate the OnramperId
-export const TokenBuySchema = z.object({
-	onramperId: z.custom<OnramperId>().optional()
+const TokenBuySchema = z.object({
+	onramperId: OnramperIdSchema
 });
 
 export const TokenBuyableSchema = z.object({
-	buy: z.custom<AtLeastOne<TokenBuy>>().optional()
+	buy: TokenBuySchema.optional()
 });
 
 export const TokenSchema = z.object({

@@ -1,6 +1,7 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
+import type { EthAddress } from '$eth/types/address';
 import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc721Token } from '$eth/types/erc721';
@@ -14,13 +15,13 @@ import type {
 } from '$eth/types/etherscan-transaction';
 import type { EthereumChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
-import type { Address, EthAddress } from '$lib/types/address';
+import type { Address } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { NftId } from '$lib/types/nft';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import {
 	EtherscanProvider as EtherscanProviderLib,
 	Network,
@@ -57,7 +58,7 @@ export class EtherscanProvider {
 			action: 'txlist',
 			address,
 			startblock: startBlock ?? 0,
-			endblock: endBlock ?? 99999999,
+			...(nonNullish(endBlock) ? { endblock: endBlock } : {}),
 			sort: 'asc'
 		};
 
@@ -99,7 +100,7 @@ export class EtherscanProvider {
 			action: 'txlistinternal',
 			address,
 			startblock: startBlock ?? 0,
-			endblock: endBlock ?? 99999999,
+			...(nonNullish(endBlock) ? { endblock: endBlock } : {}),
 			sort: 'asc'
 		};
 
@@ -150,7 +151,6 @@ export class EtherscanProvider {
 			contractAddress,
 			address,
 			startblock: 0,
-			endblock: 99999999,
 			sort: 'desc'
 		};
 
@@ -202,7 +202,6 @@ export class EtherscanProvider {
 			contractAddress,
 			address,
 			startblock: 0,
-			endblock: 99999999,
 			sort: 'desc'
 		};
 
@@ -253,7 +252,6 @@ export class EtherscanProvider {
 			contractAddress,
 			address,
 			startblock: 0,
-			endblock: 99999999,
 			sort: 'desc'
 		};
 
@@ -305,7 +303,6 @@ export class EtherscanProvider {
 			address,
 			contractaddress: contractAddress,
 			startblock: 0,
-			endblock: 99999999,
 			sort: 'desc'
 		};
 
@@ -318,7 +315,7 @@ export class EtherscanProvider {
 			throw new Error(result);
 		}
 
-		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseNftId(parseInt(TokenId)));
+		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseNftId(TokenId));
 	};
 }
 

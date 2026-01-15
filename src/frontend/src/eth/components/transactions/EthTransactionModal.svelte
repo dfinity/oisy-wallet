@@ -13,6 +13,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
@@ -25,7 +26,7 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
-	import type { AnyTransactionUi } from '$lib/types/transaction';
+	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -98,7 +99,7 @@
 			nonNullish(token) &&
 			isTokenNonFungible(token) &&
 			nonNullish(transaction.tokenId)
-			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(transaction.tokenId) })
+			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(String(transaction.tokenId)) })
 			: undefined
 	);
 </script>
@@ -147,6 +148,16 @@
 		{/if}
 
 		<List styleClass="mt-5">
+			{#if nonNullish(token?.network)}
+				<ListItem>
+					<span>
+						{$i18n.networks.network}
+					</span>
+
+					<NetworkWithLogo network={token.network} />
+				</ListItem>
+			{/if}
+
 			{#if nonNullish(hash)}
 				<ListItem>
 					<span>{$i18n.transaction.text.hash}</span>

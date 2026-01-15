@@ -7,6 +7,8 @@ import {
 	formatNanosecondsToDate,
 	formatSecondsToDate,
 	formatSecondsToNormalizedDate,
+	formatStakeApyNumber,
+	formatTimestampToDaysDifference,
 	formatToShortDateString,
 	formatToken,
 	formatTokenBigintToNumber
@@ -284,7 +286,9 @@ describe('format.utils', () => {
 				futureDate.setDate(currentDate.getDate() + 1);
 				const futureTimestamp = Math.floor(futureDate.getTime() / 1000);
 
-				expect(() => formatSecondsToNormalizedDate({ seconds: futureTimestamp })).not.toThrow();
+				expect(() =>
+					formatSecondsToNormalizedDate({ seconds: futureTimestamp })
+				).not.toThrowError();
 			});
 
 			it('should return "yesterday" even if the date was in the past year', () => {
@@ -451,7 +455,45 @@ describe('format.utils', () => {
 		});
 	});
 
+	describe('formatTimestampToDaysDifference', () => {
+		const currentDate = new Date();
+
+		it('should return "today" for the current date', () => {
+			const currentDateTimestamp = currentDate.getTime();
+
+			expect(formatTimestampToDaysDifference({ timestamp: currentDateTimestamp })).toBe('today');
+		});
+
+		it('should return "yesterday" for the previous date', () => {
+			const yesterday = new Date(currentDate);
+			yesterday.setDate(currentDate.getDate() - 1);
+			const yesterdayTimestamp = yesterday.getTime();
+
+			expect(formatTimestampToDaysDifference({ timestamp: yesterdayTimestamp })).toBe('yesterday');
+		});
+
+		it('should return 7 days for the future date', () => {
+			const yesterday = new Date(currentDate);
+			yesterday.setDate(currentDate.getDate() + 7);
+			const yesterdayTimestamp = yesterday.getTime();
+
+			expect(formatTimestampToDaysDifference({ timestamp: yesterdayTimestamp })).toBe('in 7 days');
+		});
+
+		it('should return "tomorrow" for the next date', () => {
+			const yesterday = new Date(currentDate);
+			yesterday.setDate(currentDate.getDate() + 1);
+			const yesterdayTimestamp = yesterday.getTime();
+
+			expect(formatTimestampToDaysDifference({ timestamp: yesterdayTimestamp })).toBe('tomorrow');
+		});
+	});
+
 	describe('formatSecondsToDate', () => {
+		beforeEach(() => {
+			vi.stubEnv('TZ', 'UTC');
+		});
+
 		it('formats seconds correctly in default (en) locale', () => {
 			const result = formatSecondsToDate({ seconds: 1672531200 }); // Jan 1, 2023
 
@@ -486,6 +528,26 @@ describe('format.utils', () => {
 			});
 
 			expect(result).toBe('January 1, 2023');
+		});
+
+		it('should allow to display only the time if timeOnly is passed', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672535700,
+				formatOptions: { month: 'long' },
+				timeOnly: true
+			});
+
+			expect(result).toBe('01:15');
+		});
+
+		it('should allow to format the time if timeOnly is passed', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672535732,
+				formatOptions: { hour: 'numeric', minute: 'numeric', second: '2-digit' },
+				timeOnly: true
+			});
+
+			expect(result).toBe('01:15:32');
 		});
 	});
 
@@ -1147,6 +1209,26 @@ describe('format.utils', () => {
 					notBelowThreshold: true
 				})
 			).toBe('< ¥1');
+		});
+	});
+
+	describe('formatStakeApyNumber', () => {
+		it('parses stake apy number correctly if it has 3 digits', () => {
+			expect(formatStakeApyNumber(101.2131231231)).toEqual('101');
+		});
+
+		it('parses stake apy number correctly if it has 2 digits', () => {
+			expect(formatStakeApyNumber(64.4656)).toEqual('64.5');
+			expect(formatStakeApyNumber(64.000001)).toEqual('64.0');
+		});
+
+		it('parses stake apy number correctly if it has 1 digit', () => {
+			expect(formatStakeApyNumber(6.4656)).toEqual('6.47');
+			expect(formatStakeApyNumber(6.0000032)).toEqual('6.00');
+		});
+
+		it('parses stake apy number correctly if it is zero', () => {
+			expect(formatStakeApyNumber(0)).toEqual('0');
 		});
 	});
 });

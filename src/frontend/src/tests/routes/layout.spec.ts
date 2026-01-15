@@ -1,19 +1,25 @@
+import { OISY_URL } from '$lib/constants/oisy.constants';
+import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import * as analytics from '$lib/services/analytics.services';
-import { authStore } from '$lib/stores/auth.store';
+import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
+import * as toastsStore from '$lib/stores/toasts.store';
+import { toastsShow } from '$lib/stores/toasts.store';
 import App from '$routes/+layout.svelte';
+import { mockAuthSignedIn } from '$tests/mocks/auth.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
-vi.mock(import('$lib/services/worker.auth.services'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		initAuthWorker: vi.fn().mockResolvedValue({
-			syncAuthIdle: vi.fn()
-		})
-	};
-});
+vi.mock('$lib/services/worker.auth.services', () => ({
+	AuthWorker: {
+		init: vi.fn()
+	}
+}));
+
+vi.mock('$lib/providers/auth-broadcast.providers', async (importActual) => ({
+	...(await importActual())
+}));
 
 describe('App Layout', () => {
 	beforeAll(() => {
@@ -28,6 +34,10 @@ describe('App Layout', () => {
 				dispatchEvent: vi.fn()
 			}))
 		});
+	});
+
+	beforeEach(() => {
+		vi.clearAllMocks();
 	});
 
 	it('should render the app layout', () => {
@@ -56,5 +66,182 @@ describe('App Layout', () => {
 		render(App, { children: mockSnippet });
 
 		expect(spy).toHaveBeenCalledOnce();
+	});
+
+	describe('when handling AuthBroadcastChannel', () => {
+		let bc: AuthBroadcastChannel;
+
+		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		const loginSuccessMessage = {
+			msg: AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS,
+			emitterId: window.crypto.randomUUID()
+		};
+
+		const mockChannels = new Map<string, BroadcastChannel>();
+
+		const broadcastChannelCloseSpy = vi.fn();
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.stubGlobal(
+				'BroadcastChannel',
+				// eslint-disable-next-line prefer-arrow/prefer-arrow-functions,prefer-arrow-callback,local-rules/prefer-object-params
+				vi.fn(function (this: BroadcastChannel, name: string) {
+					const postMessage = vi.fn();
+
+					const channel =
+						mockChannels.get(name) ??
+						({
+							name,
+							onmessage: null,
+							postMessage,
+							close: broadcastChannelCloseSpy
+						} as unknown as BroadcastChannel);
+
+					postMessage.mockImplementation((message: unknown) => {
+						const event = new MessageEvent('message', {
+							data: message,
+							origin: OISY_URL
+						});
+
+						channel.onmessage?.(event);
+					});
+
+					mockChannels.set(name, channel);
+
+					return channel;
+				})
+			);
+
+			bc = AuthBroadcastChannel.getInstance();
+
+			authLoggedInAnotherTabStore.set(false);
+		});
+
+		afterEach(() => {
+			bc.destroy();
+			vi.unstubAllGlobals();
+		});
+
+		it('should destroy the channel on unmount', () => {
+			const spy = vi.spyOn(authStore, 'forceSync');
+
+			const { unmount } = render(App, { children: mockSnippet });
+
+			spy.mockClear();
+
+			const newBc = new BroadcastChannel(channelName);
+
+			newBc.postMessage(loginSuccessMessage);
+
+			expect(spy).not.toHaveBeenCalled();
+
+			expect(broadcastChannelCloseSpy).not.toHaveBeenCalled();
+
+			spy.mockClear();
+
+			unmount();
+
+			expect(broadcastChannelCloseSpy).toHaveBeenCalledExactlyOnceWith();
+
+			newBc.postMessage(loginSuccessMessage);
+
+			expect(spy).not.toHaveBeenCalled();
+		});
+
+		it('should initialize a channel for auth synchronization', () => {
+			AuthBroadcastChannel.prototype.onLoginSuccess = vi.fn();
+
+			const service = AuthBroadcastChannel.getInstance();
+			vi.spyOn(service, 'onLoginSuccess').mockImplementation(
+				AuthBroadcastChannel.prototype.onLoginSuccess
+			);
+			vi.spyOn(service, 'destroy').mockImplementation(vi.fn());
+
+			expect(AuthBroadcastChannel.prototype.onLoginSuccess).not.toHaveBeenCalled();
+
+			render(App, { children: mockSnippet });
+
+			expect(AuthBroadcastChannel.prototype.onLoginSuccess).toHaveBeenCalledExactlyOnceWith(
+				expect.any(Function)
+			);
+		});
+
+		describe('on login success message', () => {
+			beforeEach(() => {
+				vi.clearAllMocks();
+
+				vi.spyOn(toastsStore, 'toastsShow');
+			});
+
+			it('should trigger the forced re-synchronization if already logged in', () => {
+				mockAuthSignedIn(true);
+
+				const spy = vi.spyOn(authStore, 'forceSync').mockImplementationOnce(async () => {
+					mockAuthSignedIn();
+
+					await Promise.resolve();
+				});
+
+				render(App, { children: mockSnippet });
+
+				spy.mockClear();
+
+				const newBc = new BroadcastChannel(channelName);
+
+				newBc.postMessage(loginSuccessMessage);
+
+				expect(spy).toHaveBeenCalledExactlyOnceWith();
+			});
+
+			it('should not trigger the forced re-synchronization if not logged in', () => {
+				mockAuthSignedIn(false);
+
+				const spy = vi.spyOn(authStore, 'forceSync').mockImplementationOnce(async () => {
+					mockAuthSignedIn();
+
+					await Promise.resolve();
+				});
+
+				render(App, { children: mockSnippet });
+
+				spy.mockClear();
+
+				const newBc = new BroadcastChannel(channelName);
+
+				newBc.postMessage(loginSuccessMessage);
+
+				expect(spy).not.toHaveBeenCalled();
+			});
+
+			it('should do nothing if after the re-synchronization it is logged out', async () => {
+				mockAuthSignedIn(false);
+
+				render(App, { children: mockSnippet });
+
+				const newBc = new BroadcastChannel(channelName);
+
+				newBc.postMessage(loginSuccessMessage);
+
+				await waitFor(() => {
+					expect(toastsShow).not.toHaveBeenCalled();
+				});
+			});
+
+			it('should set the authLoggedInAnotherTabStore to true', async () => {
+				mockAuthSignedIn(false);
+
+				render(App, { children: mockSnippet });
+
+				const newBc = new BroadcastChannel(channelName);
+
+				newBc.postMessage(loginSuccessMessage);
+
+				await waitFor(() => {
+					expect(get(authLoggedInAnotherTabStore)).toBeTruthy();
+				});
+			});
+		});
 	});
 });

@@ -1,9 +1,10 @@
 import { getStatus } from '$icp/api/icrc-index-ng.api';
 import { getBlocks } from '$icp/api/icrc-ledger.api';
 import { isIndexCanisterAwake } from '$icp/services/index-canister.services';
+import { ZERO } from '$lib/constants/app.constants';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { IcrcGetBlocksResult, IcrcNgStatus } from '@dfinity/ledger-icrc';
+import type { IcrcIndexDid, IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
 
 vi.mock('$icp/api/icrc-index-ng.api', () => ({
 	getStatus: vi.fn()
@@ -23,13 +24,13 @@ describe('index-canister.services', () => {
 
 		const mockTotalBlocks = 123n;
 
-		const mockGetBlocksResponse: IcrcGetBlocksResult = {
+		const mockGetBlocksResponse: IcrcLedgerDid.GetBlocksResult = {
 			log_length: mockTotalBlocks,
 			blocks: [],
 			archived_blocks: []
 		};
 
-		const mockIndexCanisterStatus: IcrcNgStatus = { num_blocks_synced: mockTotalBlocks };
+		const mockIndexCanisterStatus: IcrcIndexDid.Status = { num_blocks_synced: mockTotalBlocks };
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -69,9 +70,9 @@ describe('index-canister.services', () => {
 		it('should return true if Index canister synced blocks equals Ledger canister total blocks and both are zero', async () => {
 			vi.mocked(getStatus).mockResolvedValueOnce({
 				...mockIndexCanisterStatus,
-				num_blocks_synced: 0n
+				num_blocks_synced: ZERO
 			});
-			vi.mocked(getBlocks).mockResolvedValueOnce({ ...mockGetBlocksResponse, log_length: 0n });
+			vi.mocked(getBlocks).mockResolvedValueOnce({ ...mockGetBlocksResponse, log_length: ZERO });
 
 			const result = await isIndexCanisterAwake(mockParams);
 

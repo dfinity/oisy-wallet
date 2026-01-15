@@ -3,21 +3,18 @@ import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterApiFunctionParams, CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Identity } from '@dfinity/agent';
+import { assertNonNullish, fromDefinedNullable, type QueryParams } from '@dfinity/utils';
 import {
 	IcrcLedgerCanister,
+	fromCandidAccount,
+	toCandidAccount,
 	type GetBlocksParams,
 	type IcrcAccount,
-	type IcrcAllowance,
-	type IcrcBlockIndex,
-	type IcrcGetBlocksResult,
-	type IcrcStandardRecord,
-	type IcrcSubaccount,
-	type IcrcTokenMetadataResponse,
-	type IcrcTokens
-} from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
-import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
+	type IcrcLedgerDid,
+	type IcrcTokenMetadataResponse
+} from '@icp-sdk/canisters/ledger/icrc';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 /**
  * Retrieves metadata for the ICRC token.
@@ -89,7 +86,7 @@ export const balance = async ({
 	owner: Principal;
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
-} & QueryParams): Promise<IcrcTokens> => {
+} & QueryParams): Promise<IcrcLedgerDid.Tokens> => {
 	assertNonNullish(identity);
 
 	const { balance } = await ledgerCanister({ identity, ...rest });
@@ -120,13 +117,13 @@ export const transfer = async ({
 	amount: bigint;
 	createdAt?: bigint;
 	ledgerCanisterId: CanisterIdText;
-}): Promise<IcrcBlockIndex> => {
+}): Promise<IcrcLedgerDid.BlockIndex> => {
 	assertNonNullish(identity);
 
 	const { transfer } = await ledgerCanister({ identity, ledgerCanisterId });
 
 	return transfer({
-		to: toAccount(to),
+		to: toCandidAccount(to),
 		amount,
 		created_at_time: createdAt ?? nowInBigIntNanoSeconds()
 	});
@@ -158,14 +155,14 @@ export const approve = async ({
 	spender: IcrcAccount;
 	expiresAt: bigint;
 	createdAt?: bigint;
-}): Promise<IcrcBlockIndex> => {
+}): Promise<IcrcLedgerDid.BlockIndex> => {
 	assertNonNullish(identity);
 
 	const { approve } = await ledgerCanister({ identity, ledgerCanisterId });
 
 	return approve({
 		amount,
-		spender: toAccount(spender),
+		spender: toCandidAccount(spender),
 		expires_at,
 		created_at_time: createdAt ?? nowInBigIntNanoSeconds()
 	});
@@ -194,24 +191,16 @@ export const allowance = async ({
 		owner: IcrcAccount;
 		spender: IcrcAccount;
 	} & QueryParams
->): Promise<IcrcAllowance> => {
+>): Promise<IcrcLedgerDid.Allowance> => {
 	assertNonNullish(identity);
 	const { allowance } = await ledgerCanister({ identity, ledgerCanisterId });
 
 	return allowance({
 		certified,
-		account: toAccount(owner),
-		spender: toAccount(spender)
+		account: toCandidAccount(owner),
+		spender: toCandidAccount(spender)
 	});
 };
-
-const toAccount = ({
-	owner,
-	subaccount
-}: IcrcAccount): { owner: Principal; subaccount: [] | [IcrcSubaccount] } => ({
-	owner,
-	subaccount: toNullable(subaccount)
-});
 
 export const getBlocks = async ({
 	certified = true,
@@ -221,7 +210,7 @@ export const getBlocks = async ({
 }: {
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
-} & GetBlocksParams): Promise<IcrcGetBlocksResult> => {
+} & GetBlocksParams): Promise<IcrcLedgerDid.GetBlocksResult> => {
 	assertNonNullish(identity);
 
 	const { getBlocks } = await ledgerCanister({ identity, ledgerCanisterId });
@@ -245,12 +234,57 @@ export const icrc1SupportedStandards = async ({
 }: {
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
-} & QueryParams): Promise<IcrcStandardRecord[]> => {
+} & QueryParams): Promise<IcrcLedgerDid.StandardRecord[]> => {
 	assertNonNullish(identity);
 
 	const { icrc1SupportedStandards } = await ledgerCanister({ identity, ledgerCanisterId });
 
 	return icrc1SupportedStandards({ certified });
+};
+
+/**
+ * Retrieves the ledger ICRC10 supported standards.
+ *
+ * @param {Object} params - The parameters for fetching supported standards.
+ * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
+ * @returns {Promise<IcrcStandardRecord[]>} The array of all supported standards.
+ */
+export const icrc10SupportedStandards = async ({
+	certified = true,
+	identity,
+	ledgerCanisterId
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & QueryParams): Promise<IcrcLedgerDid.StandardRecord[]> => {
+	assertNonNullish(identity);
+
+	const { icrc10SupportedStandards } = await ledgerCanister({ identity, ledgerCanisterId });
+
+	return icrc10SupportedStandards({ certified });
+};
+
+export const getMintingAccount = async ({
+	certified = true,
+	identity,
+	ledgerCanisterId
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & QueryParams): Promise<IcrcAccount | undefined> => {
+	assertNonNullish(identity);
+
+	const { getMintingAccount } = await ledgerCanister({ identity, ledgerCanisterId });
+
+	try {
+		const account = await getMintingAccount({ certified });
+
+		return fromCandidAccount(fromDefinedNullable(account));
+	} catch (_: unknown) {
+		// In case the method is not implemented, return undefined
+	}
 };
 
 const ledgerCanister = async ({

@@ -3,7 +3,7 @@
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
-	import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
+	import { NANO_SECONDS_IN_SECOND, ZERO } from '$lib/constants/app.constants';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
@@ -23,14 +23,24 @@
 		timestamp: timestampNanoseconds,
 		incoming,
 		to,
-		from
+		from,
+		fee,
+		approveSpender
 	} = $derived(transaction);
 
 	let pending = $derived(transaction?.status === 'pending');
 
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let amount = $derived(nonNullish(value) ? (incoming ? value : value * -1n) : value);
+	let displayAmount = $derived(
+		type === 'approve'
+			? (fee ?? ZERO) * -1n
+			: nonNullish(value)
+				? incoming
+					? value
+					: (value + (fee ?? ZERO)) * -1n
+				: value
+	);
 
 	let timestamp = $derived(
 		nonNullish(timestampNanoseconds)
@@ -42,7 +52,8 @@
 </script>
 
 <Transaction
-	{amount}
+	{approveSpender}
+	{displayAmount}
 	{from}
 	{iconType}
 	onClick={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}
@@ -53,5 +64,5 @@
 	{token}
 	{type}
 >
-	<IcTransactionLabel fallback={type} label={transactionTypeLabel} {token} />
+	<IcTransactionLabel amount={value} label={transactionTypeLabel} {token} {type} />
 </Transaction>

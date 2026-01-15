@@ -15,11 +15,11 @@ import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transaction
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
+import {
+	IntersectionObserverActive,
+	IntersectionObserverPassive
+} from '$tests/mocks/infinite-scroll.mock';
 import { render } from '@testing-library/svelte';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 describe('AllTransactionsList', () => {
 	beforeAll(() => {
@@ -37,7 +37,15 @@ describe('AllTransactionsList', () => {
 		ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
 		icTransactionsStore.reset(ICP_TOKEN_ID);
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
+
+		Object.defineProperty(window, 'IntersectionObserver', {
+			writable: true,
+			configurable: true,
+			value: IntersectionObserverActive
+		});
 	});
+
+	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
 
 	it('should call the function to map the transactions list', () => {
 		const spyMapAllTransactionsUi = vi.spyOn(transactionsUtils, 'mapAllTransactionsUi');
@@ -144,20 +152,18 @@ describe('AllTransactionsList', () => {
 			const todayDateGroup = getByTestId('all-transactions-date-group-0');
 
 			expect(todayDateGroup).toBeInTheDocument();
-			expect(getByText('today')).toBeInTheDocument();
+			expect(getByText('Today')).toBeInTheDocument();
 
 			const yesterdayDateGroup = getByTestId('all-transactions-date-group-1');
 
 			expect(yesterdayDateGroup).toBeInTheDocument();
-			expect(getByText('yesterday')).toBeInTheDocument();
+			expect(getByText('Yesterday')).toBeInTheDocument();
 		});
 
 		it('should render the transactions list with all the transactions', () => {
 			const { container } = render(AllTransactionsList);
 
-			const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
-				(el) => el.parentElement?.parentElement?.parentElement === container
-			);
+			const transactionComponents = Array.from(container.querySelectorAll('button.contents'));
 
 			expect(transactionComponents).toHaveLength(
 				btcTransactionsNumber + ethTransactionsNumber + icTransactionsNumber

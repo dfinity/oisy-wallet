@@ -2,8 +2,10 @@ import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { POW_FEATURE_ENABLED } from '$env/pow.env';
 import { hasRequiredCycles } from '$icp/services/pow-protector.services';
 import { allowSigning } from '$lib/api/backend.api';
+import { POW_MIN_CYCLES_THRESHOLD, POW_ZERO_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
@@ -15,35 +17,31 @@ import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.servic
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { loading } from '$lib/stores/loader.store';
+import { initialLoading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-/**
- * Retrieves and checks if the required number of cycles are available for the user.
- *
- * This asynchronous function verifies whether the user has sufficient cycles to proceed with further operations.
- * It retrieves the user's identity and calculates the number of allowed cycles. If the number of allowed cycles
- * meets or exceeds the defined threshold (`POW_MIN_CYCLES_THRESHOLD`), the function returns `true`. Otherwise,
- * it performs necessary error handling and signs the user out in the event of insufficient cycles or any other
- * encountered error.
- *
- * @returns {Promise<boolean>} A promise resolving to `true` if the required cycles are met or exceeded,
- * otherwise `false` if insufficient cycles are detected or an error occurs during processing.
- */
-export const handleInsufficientCycles = async (): Promise<boolean> => {
+export const isCyclesAllowanceLow = async (): Promise<boolean> => {
 	try {
 		const { identity } = get(authStore);
 		assertNonNullish(identity, 'Cannot continue without an identity.');
-		return await hasRequiredCycles({ identity });
+		return !(await hasRequiredCycles({ identity, requiredCycles: POW_MIN_CYCLES_THRESHOLD }));
 	} catch (_err: unknown) {
-		// In the event of any error, we sign the user out, since do not know whether the user has enough cycles to continue.
-		await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
+		return false;
 	}
-	return false;
+};
+
+export const isCyclesAllowanceSpent = async (): Promise<boolean> => {
+	try {
+		const { identity } = get(authStore);
+		assertNonNullish(identity, 'Cannot continue without an identity.');
+		return !(await hasRequiredCycles({ identity, requiredCycles: POW_ZERO_CYCLES_THRESHOLD }));
+	} catch (_err: unknown) {
+		return false;
+	}
 };
 
 /**
@@ -83,29 +81,24 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  * If the addresses are loaded from the IDB:
  * - The addresses will be validated.
  * - The additional data will be loaded.
- * - The progress modal will not be displayed.
  * If the addresses are loaded from the backend:
  * - The signer allowance will be initialized.
  * - The additional data will be loaded.
- * - The progress modal will be displayed.
  *
  * @param {Object} params The parameters to initialize the loader.
  * @param {OptionIdentity} params.identity The identity to use for the request.
  * @param {Function} params.validateAddresses The function to validate the addresses.
  * @param {Function} params.progressAndLoad The function to set the next step of the Progress modal and load the additional data.
- * @param {Function} params.setProgressModal The function to set the progress modal.
  * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialized (user profile settings and addresses are loaded).
  */
 export const initLoader = async ({
 	identity,
 	validateAddresses,
-	progressAndLoad,
-	setProgressModal
+	progressAndLoad
 }: {
 	identity: OptionIdentity;
 	validateAddresses: () => void;
-	progressAndLoad: () => Promise<void>;
-	setProgressModal: (value: boolean) => void;
+	progressAndLoad: () => void;
 }): Promise<void> => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
@@ -131,30 +124,28 @@ export const initLoader = async ({
 	const { success: addressIdbSuccess, err } = await loadIdbAddresses(enabledNetworkIds);
 
 	if (addressIdbSuccess) {
-		loading.set(false);
+		initialLoading.set(false);
 
-		await progressAndLoad();
+		progressAndLoad();
 
 		validateAddresses();
 
 		return;
 	}
 
-	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
-	setProgressModal(true);
+	if (!POW_FEATURE_ENABLED) {
+		if (FRONTEND_DERIVATION_ENABLED) {
+			// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
+			initSignerAllowance();
+		} else {
+			const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
-	if (FRONTEND_DERIVATION_ENABLED) {
-		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
-		initSignerAllowance();
-	} else {
-		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
-
-		if (!initSignerAllowanceSuccess) {
-			// Sign-out is handled within the service.
-			return;
+			if (!initSignerAllowanceSuccess) {
+				// Sign-out is handled within the service.
+				return;
+			}
 		}
 	}
-
 	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
 
 	// We don't need to load the addresses of the disabled networks.

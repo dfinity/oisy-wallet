@@ -12,7 +12,7 @@
 
 	interface Props {
 		expectedToken: OptionToken;
-		destination: string | undefined;
+		destination?: string;
 		amount: OptionAmount;
 		onDecodeQrCode: ({
 			status,
@@ -23,7 +23,7 @@
 			code?: string;
 			expectedToken: OptionToken;
 		}) => QrResponse;
-		onIcQrCodeBack: () => void;
+		onQRCodeBack: () => void;
 	}
 
 	let {
@@ -31,7 +31,7 @@
 		destination = $bindable(),
 		amount = $bindable(),
 		onDecodeQrCode,
-		onIcQrCodeBack
+		onQRCodeBack
 	}: Props = $props();
 
 	const onScan = ({ status, code }: { status: QrStatus; code?: string }) => {
@@ -39,7 +39,7 @@
 
 		if (qrResponse.status === 'token_incompatible') {
 			toastsError({ msg: { text: $i18n.send.error.incompatible_token } });
-			onIcQrCodeBack();
+			onQRCodeBack();
 			return;
 		}
 
@@ -51,16 +51,16 @@
 			({ amount } = qrResponse);
 		}
 
-		onIcQrCodeBack();
+		onQRCodeBack();
 	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-	<QrCodeScanner onBack={onIcQrCodeBack} {onScan} />
+	<QrCodeScanner onBack={onQRCodeBack} {onScan} />
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonBack onclick={onIcQrCodeBack} />
+			<ButtonBack onclick={onQRCodeBack} />
 		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

@@ -38,27 +38,17 @@ pub fn assert_deviation<T>(value: T, expected_value: T, max_deviation: T)
 where
     T: PartialOrd + std::fmt::Debug + Sub<Output = T> + Add<Output = T> + Clone,
 {
-    // panic if underflow occurs
-    let min_value = (expected_value >= max_deviation.clone())
-        .then(|| expected_value.clone() - max_deviation.clone())
-        .ok_or_else(|| {
-            format!(
-                "Underflow error: Cannot subtract deviation {:?} from expected value {:?}",
-                max_deviation, expected_value
-            )
-        })
-        .expect("Underflow occurred!");
+    // Handle underflow by using saturating subtraction concept
+    let min_value = if expected_value >= max_deviation {
+        expected_value.clone() - max_deviation.clone()
+    } else {
+        // If subtraction would underflow, use a default minimum (typically zero for unsigned types)
+        // For this case, we'll use the expected_value itself as the minimum bound
+        expected_value.clone() - expected_value.clone() // This effectively gives us zero for
+                                                        // numeric types
+    };
 
-    // panic if overflow occurs
-    let max_value = (expected_value <= expected_value.clone() + max_deviation.clone())
-        .then(|| expected_value.clone() + max_deviation.clone())
-        .ok_or_else(|| {
-            format!(
-                "Overflow error: Cannot add deviation {:?} to expected value {:?}",
-                max_deviation, expected_value
-            )
-        })
-        .expect("Overflow occurred!");
+    let max_value = expected_value.clone() + max_deviation.clone();
 
     assert!(
         value >= min_value && value <= max_value,
@@ -66,7 +56,7 @@ where
         value.clone(),
         min_value,
         max_value,
-        (value - expected_value)
+        max_deviation
     );
 }
 

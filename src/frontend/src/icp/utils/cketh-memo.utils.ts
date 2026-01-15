@@ -1,6 +1,5 @@
-import { Cbor } from '@dfinity/agent';
-import { arrayOfNumberToUint8Array } from '@dfinity/utils';
-import * as z from 'zod/v4';
+import { Cbor } from '@icp-sdk/core/agent';
+import * as z from 'zod';
 
 // Mint
 
@@ -39,10 +38,8 @@ export type MintMemo = z.infer<typeof MintMemoSchema>;
  * @param memo a Cbor encoded memo.
  * @returns {MintMemo} the decoded memo object.
  */
-export const decodeMintMemo = (memo: Uint8Array | number[]): MintMemo =>
-	MintMemoSchema.parse(
-		Cbor.decode(memo instanceof Uint8Array ? memo : arrayOfNumberToUint8Array(memo))
-	);
+export const decodeMintMemo = (memo: Uint8Array): MintMemo =>
+	MintMemoSchema.parse(Cbor.decode(memo));
 
 // Burn
 
@@ -81,7 +78,5 @@ export type BurnMemo = z.infer<typeof BurnMemoSchema>;
  * @param memo a Cbor encoded memo.
  * @returns {BurnMemo} the decoded memo object.
  */
-export const decodeBurnMemo = (memo: Uint8Array | number[]): BurnMemo =>
-	BurnMemoSchema.parse(
-		Cbor.decode(memo instanceof Uint8Array ? memo : arrayOfNumberToUint8Array(memo))
-	);
+export const decodeBurnMemo = (memo: Uint8Array): BurnMemo =>
+	BurnMemoSchema.parse(Cbor.decode(memo));

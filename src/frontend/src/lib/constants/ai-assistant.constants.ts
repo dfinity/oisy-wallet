@@ -1,4 +1,5 @@
 import type { tool } from '$declarations/llm/llm.did';
+import { ToolResultType } from '$lib/types/ai-assistant';
 import { toNullable } from '@dfinity/utils';
 
 export const AI_ASSISTANT_LLM_MODEL = 'qwen3:32b';
@@ -47,6 +48,15 @@ export const getAiAssistantSystemPrompt = ({
 		- Call only when filters are given (e.g. "Show me my ETH contacts") or when resolving a contact name together with a known token.
 		- Return only "addressIds" (addresses[].id) from the user's contacts. If no matches, do not call any tools and tell to user that not suitable contacts were found with the given filters.
 
+	- For 'show_balance':
+		- If the user asks for their total balance, call with no arguments (e.g. "Show me my balance").  
+		- If the user asks for balance of a specific token, provide only "tokenSymbol" (e.g. "Show me my balance of USDC token").    
+		- If the user asks for balance of a specific network, provide only "networkId" (e.g. "Show me my balance of Base network").    
+		- If the user asks for balance of a token on a specific network, provide both "tokenSymbol" and "networkId" (e.g. "Show me my balance of USDC token on ETH network").
+		- Token must be one of the AVAILABLE TOKENS.
+		- Network must be one of the AVAILABLE TOKENS.
+		- Never request tokenSymbol or networkId from the user unless they explicitly mentioned them; default to total balance instead.  
+  
 	MEMORY & CHAINING BEHAVIOR:
 	- Always remember values from earlier in the conversation (address, selectedContactAddressId, amountNumber, tokenSymbol, networkId) until the send action is complete.
 	- Token's network id and standard are 2 different things: network id can only be used for the "Network ID → addressType" mapping, standard - for validating if a contact address can be used for sending the token ("acceptedTokenStandards" list).
@@ -189,7 +199,44 @@ export const getAiAssistantToolsDescription = ({
 					required: toNullable(['amountNumber', 'tokenSymbol', 'networkId'])
 				})
 			}
+		},
+		{
+			function: {
+				name: 'show_balance',
+				description: toNullable(
+					`Show user's wallet balance with a possibility to filter by token, network or both at the same time.`
+				),
+				parameters: toNullable({
+					type: 'object',
+					properties: toNullable([
+						{
+							type: 'string',
+							name: 'tokenSymbol',
+							enum: toNullable(enabledTokensSymbols),
+							description: toNullable(
+								"Token symbol or identifier for which the balance should be shown. Example: 'ICP', 'BTC', 'ckUSDC'. Must be one of the AVAILABLE TOKENS."
+							)
+						},
+						{
+							type: 'string',
+							name: 'networkId',
+							enum: toNullable(enabledNetworksSymbols),
+							description: toNullable(
+								'The blockchain network for which the balance should be shown (e.g., ETH, BASE, ARB, ICP, SOL, BTC). Optional argument, no need to ask user to provide it specifically. Must come from AVAILABLE TOKENS.'
+							)
+						}
+					]),
+					required: toNullable()
+				})
+			}
 		}
 	] as tool[];
 
 export const MAX_SUPPORTED_AI_ASSISTANT_CHAT_LENGTH = 100;
+
+export const TOOL_CALLS_LIMITS: Record<ToolResultType, number> = {
+	[ToolResultType.REVIEW_SEND_TOKENS]: 1,
+	[ToolResultType.SHOW_BALANCE]: 10,
+	[ToolResultType.SHOW_ALL_CONTACTS]: 1,
+	[ToolResultType.SHOW_FILTERED_CONTACTS]: 10
+};

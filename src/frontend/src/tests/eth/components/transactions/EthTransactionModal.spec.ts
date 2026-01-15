@@ -1,5 +1,7 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
+import { ZERO } from '$lib/constants/app.constants';
+import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import {
@@ -8,6 +10,7 @@ import {
 } from '$tests/mocks/eth-transactions.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 const [mockEthTransactionUi] = createMockEthTransactionsUi(1);
 const [mockErc721TransactionUi] = createMockNftTransactionsUi(1);
@@ -29,7 +32,7 @@ describe('EthTransactionModal', () => {
 		});
 
 		const formattedAmount = `${formatToken({
-			value: mockEthTransactionUi.value ?? 0n,
+			value: mockEthTransactionUi.value ?? ZERO,
 			unitName: ETHEREUM_TOKEN.decimals,
 			displayDecimals: ETHEREUM_TOKEN.decimals
 		})} ${ETHEREUM_TOKEN.symbol}`;
@@ -44,7 +47,7 @@ describe('EthTransactionModal', () => {
 		});
 
 		const formattedAmount = `${formatToken({
-			value: mockErc721TransactionUi.value ?? 0n,
+			value: mockErc721TransactionUi.value ?? ZERO,
 			unitName: mockValidErc721Token.decimals,
 			displayDecimals: mockValidErc721Token.decimals
 		})} ${mockValidErc721Token.symbol}`;
@@ -90,5 +93,15 @@ describe('EthTransactionModal', () => {
 		assertNonNullish(mockErc721TransactionUi.tokenId);
 
 		expect(getByText(mockErc721TransactionUi.tokenId.toString())).toBeInTheDocument();
+	});
+
+	it('should display the network', () => {
+		const { getByText } = render(EthTransactionModal, {
+			transaction: mockEthTransactionUi,
+			token: ETHEREUM_TOKEN
+		});
+
+		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
+		expect(getByText(ETHEREUM_TOKEN.network.name)).toBeInTheDocument();
 	});
 });

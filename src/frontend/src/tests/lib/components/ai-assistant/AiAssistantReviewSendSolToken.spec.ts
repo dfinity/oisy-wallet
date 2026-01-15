@@ -18,10 +18,6 @@ import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('AiAssistantReviewSendSolToken', () => {
 	const sendAmount = 0.001;
 
@@ -34,7 +30,8 @@ describe('AiAssistantReviewSendSolToken', () => {
 		amount: sendAmount,
 		destination: mockSolAddress,
 		sendCompleted: false,
-		sendEnabled: true
+		sendEnabled: true,
+		onSendCompleted: vi.fn()
 	};
 	let sendSpy: MockInstance;
 
@@ -56,7 +53,7 @@ describe('AiAssistantReviewSendSolToken', () => {
 			context: mockContext()
 		});
 
-		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
+		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrowError();
 		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE)).toBeInTheDocument();
 	});
 
@@ -73,8 +70,7 @@ describe('AiAssistantReviewSendSolToken', () => {
 
 		await fireEvent.click(button);
 
-		expect(sendSpy).toHaveBeenCalledOnce();
-		expect(sendSpy).toHaveBeenCalledWith({
+		expect(sendSpy).toHaveBeenCalledExactlyOnceWith({
 			destination: mockSolAddress,
 			prioritizationFee: ZERO,
 			source: mockSolAddress2,

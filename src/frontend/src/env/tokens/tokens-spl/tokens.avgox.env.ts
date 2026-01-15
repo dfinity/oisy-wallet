@@ -14,7 +14,7 @@ export const AVGOX_TOKEN_ID: TokenId = parseTokenId(AVGOX_SYMBOL);
 export const AVGOX_TOKEN: RequiredSpl2022Token = {
 	id: AVGOX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Broadcom xStock',
 	symbol: AVGOX_SYMBOL,

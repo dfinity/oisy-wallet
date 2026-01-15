@@ -15,10 +15,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('AiAssistantReviewSendIcToken', () => {
 	const sendAmount = 0.001;
 	const ckBtcToken = {
@@ -33,7 +29,8 @@ describe('AiAssistantReviewSendIcToken', () => {
 		amount: sendAmount,
 		destination: mockPrincipalText,
 		sendCompleted: false,
-		sendEnabled: true
+		sendEnabled: true,
+		onSendCompleted: vi.fn()
 	};
 	let sendSpy: MockInstance;
 
@@ -54,7 +51,7 @@ describe('AiAssistantReviewSendIcToken', () => {
 			context: mockContext()
 		});
 
-		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
+		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrowError();
 		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE)).toBeInTheDocument();
 	});
 
@@ -70,8 +67,7 @@ describe('AiAssistantReviewSendIcToken', () => {
 
 		await fireEvent.click(button);
 
-		expect(sendSpy).toHaveBeenCalledOnce();
-		expect(sendSpy).toHaveBeenCalledWith(
+		expect(sendSpy).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				to: mockPrincipalText,
 				amount: parseToken({

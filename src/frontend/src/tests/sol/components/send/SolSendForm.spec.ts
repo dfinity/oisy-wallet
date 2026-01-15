@@ -1,5 +1,6 @@
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	SEND_DESTINATION_SECTION,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -10,6 +11,7 @@ import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
 import * as solAddressUtils from '$sol/utils/sol-address.utils';
 import en from '$tests/mocks/i18n.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
@@ -24,7 +26,11 @@ describe('SolSendForm', () => {
 	const props = {
 		destination: mockAtaAddress,
 		amount: 22_000,
-		source: mockSolAddress
+		source: mockSolAddress,
+		onBack: vi.fn(),
+		onNext: vi.fn(),
+		onTokensList: vi.fn(),
+		cancel: mockSnippet
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
@@ -34,7 +40,7 @@ describe('SolSendForm', () => {
 		vi.clearAllMocks();
 		vi.resetAllMocks();
 
-		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(0n);
+		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(ZERO);
 
 		mockFeeStore.setFee(123n);
 		mockPrioritizationFeeStore.setFee(3n);
@@ -48,7 +54,8 @@ describe('SolSendForm', () => {
 				ataFeeStore: mockAtaFeeStore,
 				feeSymbolStore: writable(SOLANA_TOKEN.symbol),
 				feeDecimalsStore: writable(SOLANA_TOKEN.decimals),
-				feeTokenIdStore: writable(SOLANA_TOKEN.id)
+				feeTokenIdStore: writable(SOLANA_TOKEN.id),
+				feeExchangeRateStore: writable(9.87)
 			})
 		);
 	});
@@ -100,7 +107,7 @@ describe('SolSendForm', () => {
 				context: mockContext
 			});
 
-			expect(() => getByText(en.fee.text.ata_fee)).toThrow();
+			expect(() => getByText(en.fee.text.ata_fee)).toThrowError();
 		});
 
 		it('should render ATA creation fee if it is not nullish', async () => {
@@ -130,7 +137,7 @@ describe('SolSendForm', () => {
 			// Wait for the fee to be loaded
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 
-			expect(() => getByText(en.fee.text.ata_fee)).toThrow();
+			expect(() => getByText(en.fee.text.ata_fee)).toThrowError();
 		}, 60000);
 	});
 });

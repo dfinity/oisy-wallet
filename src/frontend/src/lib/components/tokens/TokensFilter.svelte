@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import SlidingInput from '$lib/components/ui/SlidingInput.svelte';
 	import { TOKEN_LIST_FILTER } from '$lib/constants/test-ids.constants';
@@ -9,7 +8,11 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { isTokensPath, isTransactionsPath } from '$lib/utils/nav.utils';
 
-	let { overflowableContent }: { overflowableContent?: Snippet } = $props();
+	interface Props {
+		overflowableContent?: Snippet;
+	}
+
+	let { overflowableContent }: Props = $props();
 
 	let inputValue = $derived($tokenListStore.filter);
 
@@ -29,7 +32,6 @@
 
 <SlidingInput
 	ariaLabel={$i18n.tokens.alt.filter_button}
-	disabled={$erc20UserTokensNotInitialized}
 	inputPlaceholder={$i18n.tokens.text.filter_placeholder}
 	{overflowableContent}
 	testIdPrefix={TOKEN_LIST_FILTER}

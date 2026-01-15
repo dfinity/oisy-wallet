@@ -19,14 +19,26 @@ import {
 	SOLANA_MAINNET_NETWORK_ID,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
+import type { EthereumNetwork } from '$eth/types/network';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { SolanaNetwork } from '$sol/types/network';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { nonNullish } from '@dfinity/utils';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 
 export type IsNetworkIdUtil = (networkId: NetworkId | undefined) => boolean;
+
+export const isNetworkEthereum = (network: Network | undefined): network is EthereumNetwork =>
+	isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id);
+
+export const assertIsNetworkEthereum: (
+	network: Network | undefined
+) => asserts network is EthereumNetwork = (network: Network | undefined): void => {
+	if (!isNetworkEthereum(network)) {
+		throw new Error(`Network ${network?.name ?? ''} is not an Ethereum or EVM network`);
+	}
+};
 
 export const isNetworkICP = (network: Network | undefined): boolean => isNetworkIdICP(network?.id);
 

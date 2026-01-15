@@ -4,20 +4,19 @@ import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
-import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
-import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
+import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
-import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import type { Address } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
@@ -70,16 +69,6 @@ const loadEthTransactions = async ({
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
-		const {
-			init: {
-				error: { eth_address_unknown }
-			}
-		} = get(i18n);
-
-		toastsError({
-			msg: { text: eth_address_unknown }
-		});
-
 		return { success: false };
 	}
 
@@ -143,16 +132,6 @@ const loadErcTransactions = async ({
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
-		const {
-			init: {
-				error: { eth_address_unknown }
-			}
-		} = get(i18n);
-
-		toastsError({
-			msg: { text: eth_address_unknown }
-		});
-
 		return { success: false };
 	}
 
@@ -167,16 +146,6 @@ const loadErcTransactions = async ({
 	);
 
 	if (isNullish(token)) {
-		const {
-			transactions: {
-				error: { no_token_loading_transaction }
-			}
-		} = get(i18n);
-
-		toastsError({
-			msg: { text: no_token_loading_transaction }
-		});
-
 		return { success: false };
 	}
 
@@ -235,7 +204,7 @@ const loadErc20Transactions = async ({
 	address
 }: {
 	networkId: NetworkId;
-	token: Erc20TokenToggleable;
+	token: Erc20CustomToken;
 	address: Address;
 }): Promise<Transaction[]> => {
 	const { erc20Transactions } = etherscanProviders(networkId);
@@ -250,7 +219,7 @@ const loadErc721Transactions = async ({
 	address
 }: {
 	networkId: NetworkId;
-	token: Erc721TokenToggleable;
+	token: Erc721CustomToken;
 	address: Address;
 }): Promise<Transaction[]> => {
 	const { erc721Transactions } = etherscanProviders(networkId);
@@ -265,7 +234,7 @@ const loadErc1155Transactions = async ({
 	address
 }: {
 	networkId: NetworkId;
-	token: Erc1155TokenToggleable;
+	token: Erc1155CustomToken;
 	address: Address;
 }): Promise<Transaction[]> => {
 	const { erc1155Transactions } = etherscanProviders(networkId);

@@ -10,6 +10,7 @@
 		disabled?: boolean;
 		networkName?: string;
 	}
+
 	let { networkName = $bindable(), availableNetworks, disabled = false }: Props = $props();
 </script>
 

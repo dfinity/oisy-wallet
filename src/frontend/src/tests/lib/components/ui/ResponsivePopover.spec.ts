@@ -1,16 +1,8 @@
+import { screensStore } from '$lib/stores/screens.store';
+import ResponsivePopoverTest from '$tests/lib/components/ui/ResponsivePopoverTest.svelte';
 import { render, waitFor } from '@testing-library/svelte';
-import ResponsivePopoverTest from './ResponsivePopoverTest.svelte';
 
 describe('ResponsivePopover', () => {
-	const setWindowWidth = (width: number) => {
-		Object.defineProperty(window, 'innerWidth', {
-			writable: true,
-			configurable: true,
-			value: width
-		});
-		window.dispatchEvent(new Event('resize'));
-	};
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
@@ -18,7 +10,7 @@ describe('ResponsivePopover', () => {
 	it('displays popover on large screens', async () => {
 		const { queryByTestId } = render(ResponsivePopoverTest);
 
-		setWindowWidth(1000);
+		screensStore.set('lg');
 
 		await waitFor(() => {
 			const popover = queryByTestId('popover-content');
@@ -32,7 +24,7 @@ describe('ResponsivePopover', () => {
 	it('displays bottom sheet on small screens', async () => {
 		const { queryByTestId } = render(ResponsivePopoverTest);
 
-		setWindowWidth(100);
+		screensStore.set('xs');
 
 		await waitFor(() => {
 			const popover = queryByTestId('popover-content');

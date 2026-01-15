@@ -1,5 +1,5 @@
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
-import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import { fromNullishNullable, nonNullish } from '@dfinity/utils';
 
 export const toCkEthHelperContractAddress = (

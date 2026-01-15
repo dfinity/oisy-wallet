@@ -5,7 +5,6 @@ import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { SolAddress } from '$lib/types/address';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
@@ -16,6 +15,7 @@ import { getTokenInfo } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
@@ -102,7 +102,7 @@ const loadCustomTokensWithMetadata = async (
 					return [[...accExisting, { ...existingToken, enabled, version }], accNonExisting];
 				}
 
-				const newToken = {
+				const newToken: SplCustomToken = {
 					id: parseCustomTokenId({
 						identifier: fromNullable(symbol) ?? tokenAddress,
 						chainId: tokenNetwork.chainId
@@ -114,7 +114,7 @@ const loadCustomTokensWithMetadata = async (
 					network: tokenNetwork,
 					symbol: fromNullable(symbol) ?? '',
 					decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
-					standard: 'spl' as const,
+					standard: { code: 'spl' as const },
 					category: 'custom' as const,
 					enabled,
 					version
@@ -127,22 +127,45 @@ const loadCustomTokensWithMetadata = async (
 
 		const customTokens: SplCustomToken[] = await nonExistingTokens.reduce<
 			Promise<SplCustomToken[]>
-		>(async (acc, token) => {
+		>(async (acc, { symbol: oldSymbol, name: oldName, ...token }) => {
 			const { network, address } = token;
 
 			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
-			const { owner, ...rest } = await getTokenInfo({ address, network: solNetwork });
+			const {
+				owner,
+				symbol: infoSymbol,
+				name: infoName,
+				...rest
+			} = await getTokenInfo({ address, network: solNetwork });
 
 			if (isNullish(owner)) {
 				return acc;
 			}
 
-			const metadata = await getSplMetadata({ address, network: solNetwork });
+			const {
+				symbol: metadataSymbol,
+				name: metadataName,
+				...metadata
+			} = (await getSplMetadata({ address, network: solNetwork })) ?? {};
 
-			return nonNullish(metadata)
-				? [...(await acc), { ...token, owner, ...rest, ...hardenMetadata(metadata) }]
-				: acc;
+			const symbol = infoSymbol ?? metadataSymbol ?? oldSymbol;
+			const name = infoName ?? metadataName ?? oldName;
+
+			if (isNullish(symbol) || isNullish(name)) {
+				return acc;
+			}
+
+			const newToken: SplCustomToken = {
+				...token,
+				owner,
+				symbol,
+				name,
+				...rest,
+				...(nonNullish(metadata) ? hardenMetadata(metadata) : {})
+			};
+
+			return [...(await acc), newToken];
 		}, Promise.resolve([]));
 
 		return [...existingTokens, ...customTokens];
@@ -167,7 +190,7 @@ export const getSplMetadata = async ({
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-}): Promise<Omit<TokenMetadata, 'decimals'> | undefined> => {
+}): Promise<Partial<Omit<TokenMetadata, 'decimals'>> | undefined> => {
 	try {
 		const metadataResult = await splMetadata({ tokenAddress: address, network });
 

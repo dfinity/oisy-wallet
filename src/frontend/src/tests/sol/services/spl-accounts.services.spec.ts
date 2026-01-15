@@ -1,4 +1,5 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
+import { ZERO } from '$lib/constants/app.constants';
 import * as solanaApi from '$sol/api/solana.api';
 import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
@@ -45,19 +46,16 @@ describe('spl-account.services', () => {
 
 			expect(balance).toEqual(mockBalance);
 
-			expect(spyIsAtaAddress).toHaveBeenCalledOnce();
-			expect(spyIsAtaAddress).toHaveBeenCalledWith({
+			expect(spyIsAtaAddress).toHaveBeenCalledExactlyOnceWith({
 				address: mockAtaAddress,
 				network: SolanaNetworks.mainnet
 			});
 			expect(spyFindAssociatedTokenPda).not.toHaveBeenCalled();
-			expect(spyCheckIfAccountExists).toHaveBeenCalledOnce();
-			expect(spyCheckIfAccountExists).toHaveBeenCalledWith({
+			expect(spyCheckIfAccountExists).toHaveBeenCalledExactlyOnceWith({
 				address: mockAtaAddress,
 				network: SolanaNetworks.mainnet
 			});
-			expect(spyLoadTokenBalance).toHaveBeenCalledOnce();
-			expect(spyLoadTokenBalance).toHaveBeenCalledWith({
+			expect(spyLoadTokenBalance).toHaveBeenCalledExactlyOnceWith({
 				ataAddress: mockAtaAddress,
 				network: SolanaNetworks.mainnet
 			});
@@ -68,7 +66,7 @@ describe('spl-account.services', () => {
 
 			const balance = await loadSplTokenBalance(mockParams);
 
-			expect(balance).toEqual(0n);
+			expect(balance).toEqual(ZERO);
 
 			expect(spyLoadTokenBalance).not.toHaveBeenCalled();
 		});
@@ -78,7 +76,7 @@ describe('spl-account.services', () => {
 
 			const balance = await loadSplTokenBalance(mockParams);
 
-			expect(balance).toEqual(0n);
+			expect(balance).toEqual(ZERO);
 		});
 
 		it('should calculate the ATA address when the input address is not an ATA', async () => {
@@ -91,24 +89,20 @@ describe('spl-account.services', () => {
 
 			expect(balance).toEqual(mockBalance);
 
-			expect(spyIsAtaAddress).toHaveBeenCalledOnce();
-			expect(spyIsAtaAddress).toHaveBeenCalledWith({
+			expect(spyIsAtaAddress).toHaveBeenCalledExactlyOnceWith({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
-			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();
-			expect(spyFindAssociatedTokenPda).toHaveBeenCalledWith({
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledExactlyOnceWith({
 				owner: mockSolAddress,
 				tokenProgram: DEVNET_EURC_TOKEN.owner,
 				mint: DEVNET_EURC_TOKEN.address
 			});
-			expect(spyCheckIfAccountExists).toHaveBeenCalledOnce();
-			expect(spyCheckIfAccountExists).toHaveBeenCalledWith({
+			expect(spyCheckIfAccountExists).toHaveBeenCalledExactlyOnceWith({
 				address: mockAtaAddress2,
 				network: SolanaNetworks.mainnet
 			});
-			expect(spyLoadTokenBalance).toHaveBeenCalledOnce();
-			expect(spyLoadTokenBalance).toHaveBeenCalledWith({
+			expect(spyLoadTokenBalance).toHaveBeenCalledExactlyOnceWith({
 				ataAddress: mockAtaAddress2,
 				network: SolanaNetworks.mainnet
 			});

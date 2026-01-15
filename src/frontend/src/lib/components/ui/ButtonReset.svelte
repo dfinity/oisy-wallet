@@ -3,7 +3,12 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let { ariaLabel, onclick }: { ariaLabel?: string; onclick: () => void } = $props();
+	interface Props {
+		ariaLabel?: string;
+		onclick: () => void;
+	}
+
+	let { ariaLabel, onclick }: Props = $props();
 </script>
 
 <ButtonIcon

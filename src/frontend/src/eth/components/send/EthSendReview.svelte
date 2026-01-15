@@ -14,29 +14,39 @@
 	import { isEthAddress } from '$lib/utils/account.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let selectedContact: ContactUi | undefined = undefined;
-	export let nft: Nft | undefined = undefined;
+	interface Props {
+		destination?: string;
+		amount?: OptionAmount;
+		selectedContact?: ContactUi;
+		nft?: Nft;
+		onBack: () => void;
+		onSend: () => void;
+	}
+
+	let { destination = '', amount, selectedContact, nft, onBack, onSend }: Props = $props();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeStore: storeFeeData }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
-	let invalid = true;
-	$: invalid =
+	let invalid = $derived(
 		isNullishOrEmpty(destination) ||
-		!isEthAddress(destination) ||
-		(isNullish(nft) && invalidAmount(amount)) ||
-		isNullish($storeFeeData);
+			!isEthAddress(destination) ||
+			(isNullish(nft) && invalidAmount(amount)) ||
+			isNullish($storeFeeData)
+	);
 </script>
 
-<SendReview {amount} {destination} disabled={invalid} {nft} {selectedContact} on:icBack on:icSend>
-	<EthFeeDisplay slot="fee">
-		{#snippet label()}
-			<Html text={$i18n.fee.text.max_fee_eth} />
-		{/snippet}
-	</EthFeeDisplay>
+<SendReview {amount} {destination} disabled={invalid} {nft} {onBack} {onSend} {selectedContact}>
+	{#snippet fee()}
+		<EthFeeDisplay>
+			{#snippet label()}
+				<Html text={$i18n.fee.text.max_fee_eth} />
+			{/snippet}
+		</EthFeeDisplay>
+	{/snippet}
 
-	<ReviewNetwork slot="network" sourceNetwork={$sendToken.network} />
+	{#snippet network()}
+		<ReviewNetwork sourceNetwork={$sendToken.network} />
+	{/snippet}
 </SendReview>

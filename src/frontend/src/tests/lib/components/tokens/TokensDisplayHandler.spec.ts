@@ -1,7 +1,7 @@
 import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 import { showZeroBalances } from '$lib/derived/settings.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import type { TokenUiOrGroupUi } from '$lib/types/token-group';
+import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { randomWait } from '$lib/utils/time.utils';
 import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
 import TokensDisplayHandlerTest from '$tests/lib/components/tokens/TokensDisplayHandlerTest.svelte';

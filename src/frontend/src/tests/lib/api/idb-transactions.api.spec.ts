@@ -30,10 +30,6 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 vi.mock('$lib/utils/idb.utils', () => ({
 	delMultiKeysByPrincipal: vi.fn()
 }));
@@ -202,7 +198,7 @@ describe('idb-transactions.api', () => {
 					...mockParams,
 					transactionsStoreData: get(ethTransactionsStore)
 				})
-			).resolves.not.toThrow();
+			).resolves.not.toThrowError();
 
 			expect(idbKeyval.set).toHaveBeenCalledTimes(2);
 		});

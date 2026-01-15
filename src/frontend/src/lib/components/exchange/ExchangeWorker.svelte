@@ -5,7 +5,7 @@
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
-	import { type ExchangeWorker, initExchangeWorker } from '$lib/services/worker.exchange.services';
+	import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { enabledSplTokenAddresses } from '$sol/derived/spl.derived';
 
 	interface Props {
@@ -14,7 +14,7 @@
 
 	let { children }: Props = $props();
 
-	let worker: ExchangeWorker | undefined = $state();
+	let worker = $state<ExchangeWorker | undefined>();
 
 	onMount(async () => {
 		if (EXCHANGE_DISABLED) {
@@ -22,7 +22,7 @@
 			return;
 		}
 
-		worker = await initExchangeWorker();
+		worker = await ExchangeWorker.init();
 	});
 
 	onDestroy(() => worker?.destroy());

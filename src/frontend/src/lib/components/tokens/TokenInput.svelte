@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -20,33 +20,59 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let token: Token | undefined = undefined;
-	export let amount: OptionAmount;
-	export let name = 'token-input';
-	export let displayUnit: DisplayUnit = 'token';
-	export let exchangeRate: number | undefined = undefined;
-	export let disabled = false;
-	export let placeholder = '0';
-	export let errorType: TokenActionErrorType = undefined;
-	// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
-	export let error: Error | undefined = undefined;
-	export let amountSetToMax = false;
-	export let loading = false;
-	export let isSelectable = true;
-	export let autofocus = false;
-	export let customValidate: (userAmount: bigint) => TokenActionErrorType = () => undefined;
-	export let customErrorValidate: (userAmount: bigint) => Error | undefined = () => undefined;
-	export let showTokenNetwork = false;
+	interface Props {
+		token?: Token;
+		amount: OptionAmount;
+		name?: string;
+		displayUnit?: DisplayUnit;
+		exchangeRate?: number;
+		disabled?: boolean;
+		placeholder?: string;
+		errorType?: TokenActionErrorType;
+		// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
+		error?: Error;
+		amountSetToMax?: boolean;
+		loading?: boolean;
+		isSelectable?: boolean;
+		autofocus?: boolean;
+		onCustomValidate?: (userAmount: bigint) => TokenActionErrorType;
+		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
+		showTokenNetwork?: boolean;
+		onClick?: () => void;
+		title?: Snippet;
+		amountInfo: Snippet;
+		balance: Snippet;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		token,
+		amount = $bindable(),
+		name = 'token-input',
+		displayUnit = 'token',
+		exchangeRate,
+		disabled = false,
+		placeholder = '0',
+		errorType = $bindable(),
+		error = $bindable(),
+		amountSetToMax = $bindable(false),
+		loading = false,
+		isSelectable = true,
+		autofocus = false,
+		onCustomValidate = () => undefined,
+		onCustomErrorValidate = () => undefined,
+		showTokenNetwork = false,
+		onClick,
+		title,
+		amountInfo,
+		balance
+	}: Props = $props();
 
-	let focused: boolean;
+	let focused = $state(false);
 	const onFocus = () => (focused = true);
 	const onBlur = () => (focused = false);
 
 	const onInput = () => {
 		amountSetToMax = false;
-		dispatch('nnsInput');
 	};
 
 	const validate = () => {
@@ -60,12 +86,17 @@
 			unitName: token.decimals
 		});
 
-		errorType = customValidate(parsedValue);
-		error = customErrorValidate(parsedValue);
+		errorType = onCustomValidate(parsedValue);
+		error = onCustomErrorValidate(parsedValue);
 	};
 
 	const debounceValidate = debounce(validate, 300);
-	$: (amount, token, debounceValidate());
+
+	$effect(() => {
+		[amount, token];
+
+		debounceValidate();
+	});
 </script>
 
 <div
@@ -76,7 +107,7 @@
 	class:border-secondary={!focused}
 >
 	<div class="space-between mb-2 flex justify-between text-sm font-bold">
-		<slot name="title" />
+		{@render title?.()}
 		{#if showTokenNetwork && nonNullish(token)}
 			<div class="flex text-xs font-normal text-tertiary">
 				<span class="mr-1 text-sm">On {token.network.name}</span>
@@ -100,11 +131,11 @@
 						{disabled}
 						error={nonNullish(errorType)}
 						{loading}
+						{onBlur}
+						{onFocus}
+						{onInput}
 						{placeholder}
 						bind:value={amount}
-						on:focus={onFocus}
-						on:blur={onBlur}
-						on:nnsInput={onInput}
 					/>
 				{:else if displayUnit === 'usd'}
 					<TokenInputCurrencyFiat
@@ -114,16 +145,16 @@
 						error={nonNullish(errorType)}
 						{exchangeRate}
 						{loading}
+						{onBlur}
+						{onFocus}
+						{onInput}
 						{placeholder}
 						tokenDecimals={token.decimals}
 						bind:tokenAmount={amount}
-						on:focus={onFocus}
-						on:blur={onBlur}
-						on:nnsInput={onInput}
 					/>
 				{/if}
 			{:else}
-				<button class="h-full w-full pl-3 text-base" on:click
+				<button class="h-full w-full pl-3 text-base" onclick={onClick}
 					>{$i18n.tokens.text.select_token}</button
 				>
 			{/if}
@@ -131,7 +162,7 @@
 
 		<div class="h-3/4 w-[1px] bg-disabled"></div>
 
-		<button class="flex h-full gap-1 px-3" disabled={!isSelectable} on:click>
+		<button class="flex h-full gap-1 px-3" disabled={!isSelectable} onclick={onClick}>
 			{#if token}
 				<TokenLogo data={token} logoSize="xs" />
 				<div class="ml-2 text-sm font-semibold">{getTokenDisplaySymbol(token)}</div>
@@ -151,9 +182,9 @@
 	</TokenInputContainer>
 
 	<div class="mt-2 flex min-h-6 items-center justify-between text-sm">
-		<slot name="amount-info" />
+		{@render amountInfo()}
 
-		<slot name="balance" />
+		{@render balance()}
 	</div>
 </div>
 

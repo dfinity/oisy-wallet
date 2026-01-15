@@ -3,8 +3,10 @@
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import SendContactName from '$lib/components/send/SendContactName.svelte';
+	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
 
 	interface Props {
 		destination: string;
@@ -13,6 +15,10 @@
 	}
 
 	const { destination, selectedContact, aiAssistantConsoleView }: Props = $props();
+
+	let contact = $derived(
+		selectedContact ?? getContactForAddress({ addressString: destination, contactList: $contacts })
+	);
 </script>
 
 <AddressCard>
@@ -21,7 +27,7 @@
 			<AvatarWithBadge
 				address={destination}
 				badge={{ type: 'addressType', address: destination }}
-				contact={selectedContact}
+				{contact}
 				variant={aiAssistantConsoleView ? 'sm' : 'md'}
 			/>
 		</div>
@@ -29,16 +35,16 @@
 
 	{#snippet content()}
 		<div class:text-sm={aiAssistantConsoleView}>
-			{#if isNullish(selectedContact)}
+			{#if isNullish(contact)}
 				<span class="font-bold">{$i18n.transaction.text.to}</span>
 			{:else}
-				<SendContactName address={destination} contact={selectedContact}>
+				<SendContactName address={destination} {contact}>
 					{$i18n.transaction.text.to} :
 				</SendContactName>
 			{/if}
 		</div>
 
-		<span class="w-full whitespace-normal break-all" class:text-sm={aiAssistantConsoleView}>
+		<span class="w-full break-all whitespace-normal" class:text-sm={aiAssistantConsoleView}>
 			{destination}
 		</span>
 	{/snippet}

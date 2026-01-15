@@ -9,6 +9,7 @@ import {
 	initRewardEligibilityStore,
 	REWARD_ELIGIBILITY_CONTEXT_KEY
 } from '$lib/stores/reward.store';
+import type { CampaignEligibility } from '$lib/types/reward';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
@@ -137,5 +138,37 @@ describe('RewardModal', () => {
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
 
 		expect(imageBanner).toBeInTheDocument();
+	});
+
+	it('should update the rewards store content', async () => {
+		const campaignEligibilities: CampaignEligibility[] = [
+			{
+				campaignId: 'test',
+				eligible: true,
+				available: true,
+				criteria: [],
+				probabilityMultiplierEnabled: false,
+				probabilityMultiplier: 1
+			}
+		];
+
+		const getCampaignEligibilitiesSpy = vi
+			.spyOn(rewardService, 'getCampaignEligibilities')
+			.mockResolvedValueOnce(campaignEligibilities);
+
+		const mockedReward: RewardCampaignDescription = { ...mockRewardCampaigns[0] };
+
+		render(RewardModal, {
+			props: {
+				reward: mockedReward
+			},
+			context: mockContext
+		});
+
+		expect(getCampaignEligibilitiesSpy).toHaveBeenCalledOnce();
+
+		await vi.waitFor(() => {
+			expect(get(store).campaignEligibilities).toEqual(campaignEligibilities);
+		});
 	});
 });

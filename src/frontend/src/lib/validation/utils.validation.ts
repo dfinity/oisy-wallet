@@ -1,4 +1,4 @@
-import type * as z from 'zod/v4';
+import type * as z from 'zod';
 
 interface SafeParseParams<T, Fallback> {
 	schema: z.ZodType<T>;

@@ -4,16 +4,21 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
+	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
+	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getNftDisplayImageUrl, getNftDisplayName } from '$lib/utils/nft.utils';
+	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -23,39 +28,60 @@
 	const { token, nft }: Props = $props();
 
 	const breadcrumbItems = $derived.by(() => {
-		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts as string }];
+		let breadcrumbs = [
+			{
+				label: $i18n.navigation.text.tokens,
+				url: nftsUrl({
+					originSelectedNetwork: nonNullish($userSelectedNetworkStore)
+						? parseNetworkId($userSelectedNetworkStore)
+						: undefined
+				})
+			}
+		];
 		if (nonNullish(nft) && nonNullish(nft.collection.name)) {
 			breadcrumbs = [
 				...breadcrumbs,
 				{
 					label: nft.collection.name,
-					url: `${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}`
+					url: nftsUrl({ collection: nft?.collection })
 				}
 			];
 		}
 		return breadcrumbs;
 	});
 
-	const normalizedNftName = $derived.by(() => {
-		if (nonNullish(nft?.name)) {
-			// sometimes NFT names include the number itself, in that case we do not display the number
-			return nft.name.includes(`#${nft.id}`) ? nft.name : `${nft.name} #${nft.id}`;
-		}
-	});
+	const normalizedNftName = $derived(nonNullish(nft) ? getNftDisplayName(nft) : undefined);
+
+	let nftDisplayImageUrl = $derived(nonNullish(nft) ? getNftDisplayImageUrl(nft) : undefined);
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:fade>
 	<div class="relative h-64 w-full overflow-hidden">
 		<div class="absolute h-full w-full">
-			<NftImageConsent {nft} showMessage={false} type="hero-banner">
-				<BgImg imageUrl={nft?.imageUrl} size="cover" styleClass=" blur" />
-			</NftImageConsent>
+			<NftDisplayGuard
+				location={{
+					source: PLAUSIBLE_EVENT_SOURCES.NFT_PAGE,
+					subSource: 'hero'
+				}}
+				{nft}
+				showMessage={false}
+				type="hero-banner"
+			>
+				<BgImg imageUrl={nftDisplayImageUrl} size="cover" styleClass=" blur" />
+			</NftDisplayGuard>
 		</div>
 
-		{#if nonNullish(nft?.imageUrl)}
+		{#if nonNullish(nft) && nonNullish(nftDisplayImageUrl)}
 			<div class="absolute flex h-full w-full items-center justify-center text-center">
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
-					<NftImageConsent {nft} type="nft-display">
+					<NftDisplayGuard
+						location={{
+							source: PLAUSIBLE_EVENT_SOURCES.NFT_PAGE,
+							subSource: 'hero'
+						}}
+						{nft}
+						type="nft-display"
+					>
 						<button
 							class="block h-auto w-auto border-0"
 							onclick={() =>
@@ -64,10 +90,10 @@
 									data: nft
 								})}
 						>
-							<Img src={nft.imageUrl} styleClass="max-h-full max-w-full" />
+							<Img src={nftDisplayImageUrl} styleClass="max-h-full max-w-full w-full" />
 						</button>
-					</NftImageConsent>
-					<span class="absolute bottom-0 right-0 m-2.5">
+					</NftDisplayGuard>
+					<span class="absolute right-0 bottom-0 m-2.5">
 						<NetworkLogo color="white" network={nft.collection.network} size="xs" />
 					</span>
 				</div>
@@ -97,6 +123,12 @@
 			</span>
 		{/if}
 
-		<NftMetadataList {nft} />
+		{#if nonNullish(nft?.description)}
+			<div class="mb-5 text-sm">
+				<ExpandText maxWords={20} text={nft.description} />
+			</div>
+		{/if}
+
+		<NftMetadataList {nft} source={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE} />
 	</div>
 </div>

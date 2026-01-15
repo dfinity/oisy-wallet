@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import {
 	decodeErc20AbiDataValue,
@@ -8,7 +9,6 @@ import {
 	mapEthTransactionUi
 } from '$eth/utils/transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction } from '$lib/types/transaction';
@@ -19,7 +19,7 @@ import {
 	mockEthHelperContractAddress
 } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import type { MinterInfo } from '@dfinity/cketh';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 
 const transaction: Transaction = {
 	blockNumber: 123456,
@@ -41,7 +41,7 @@ describe('transactions.utils', () => {
 		const mockAddress: EthAddress = mockEthAddress;
 		const mockNetworkId: NetworkId = ETHEREUM_NETWORK_ID;
 		const mockErc20Tokens: Erc20Token[] = [USDC_TOKEN, SEPOLIA_USDC_TOKEN, PEPE_TOKEN];
-		const mockMinterInfo: CertifiedData<MinterInfo> = {
+		const mockMinterInfo: CertifiedData<CkEthMinterDid.MinterInfo> = {
 			data: mockCkMinterInfo,
 			certified: false
 		};

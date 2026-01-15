@@ -1,24 +1,28 @@
 <script lang="ts">
-	import { Spinner, Toasts, SystemThemeListener } from '@dfinity/gix-components';
+	import { isIOS, Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
+	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
+	import ResponsiveListener from '$lib/components/ui/ResponsiveListener.svelte';
 	import {
 		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
+	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
+	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
-	import { initAuthWorker } from '$lib/services/worker.auth.services';
-	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
+	import { AuthWorker } from '$lib/services/worker.auth.services';
+	import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 
 	interface Props {
@@ -33,9 +37,9 @@
 
 	const init = async () => {
 		/**
-		 * We use `Promise.allSettled` to ensure that all initialization functions run,
+		 * We use `Promise.allSettled` to ensure that all initialisation functions run,
 		 * regardless of whether some of them fail. This avoids blocking the entire app
-		 * if non-critical services like analytics or i18n fail to initialize.
+		 * if non-critical services like analytics or i18n fail to initialise.
 		 *
 		 * Each service handles its own error handling,
 		 * and we avoid surfacing errors to the user here to keep the UX clean.
@@ -75,14 +79,10 @@
 	 * Workers
 	 */
 
-	let worker = $state<
-		| {
-				syncAuthIdle: (args: { auth: AuthStoreData; locked?: boolean }) => void;
-		  }
-		| undefined
-	>();
+	let worker = $state<AuthWorker | undefined>();
 
-	onMount(async () => (worker = await initAuthWorker()));
+	onMount(async () => (worker = await AuthWorker.init()));
+	onDestroy(() => worker?.destroy());
 
 	$effect(() => {
 		[worker, $authStore, $isLocked];
@@ -94,7 +94,7 @@
 	 */
 
 	// To improve the UX while the app is loading on mainnet we display a spinner which is attached statically in the index.html files.
-	// Once the authentication has been initialized we know most JavaScript resources has been loaded and therefore we can hide the spinner, the loading information.
+	// Once the authentication has been initialised, we know most JavaScript resources have been loaded, and therefore we can hide the spinner, the loading information.
 	$effect(() => {
 		if (!browser) {
 			return;
@@ -106,14 +106,82 @@
 		}
 
 		const spinner = document.querySelector('body > #app-spinner');
-		spinner?.remove();
+
+		// Due to an issue in mobile safari we cleanly detach all running animations and request an animation frame to be sure all animations are halted to safely remove the dom element
+		if (nonNullish(spinner) && spinner instanceof HTMLElement) {
+			// stop animation first
+			spinner.style.animation = 'none';
+			spinner.style.transition = 'none';
+
+			// let the browser flush compositing state
+			requestAnimationFrame(() => {
+				spinner.remove();
+			});
+		}
+	});
+
+	const handleBroadcastLoginSuccess = async () => {
+		authLoggedInAnotherTabStore.set(true);
+
+		if ($authNotSignedIn) {
+			return;
+		}
+
+		await authStore.forceSync();
+
+		// TODO: add a warning banner for the hedge case in which the tab was already logged in and now is refreshed with another identity
+	};
+
+	const openBc = () => {
+		try {
+			const bc = AuthBroadcastChannel.getInstance();
+
+			bc.onLoginSuccess(handleBroadcastLoginSuccess);
+
+			return () => {
+				bc?.destroy();
+			};
+		} catch (err: unknown) {
+			// We don't really care if the broadcast channel fails to open or if it fails to set the message handler.
+			// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
+			// We just print a warning in the console for debugging purposes.
+			console.warn('Auth BroadcastChannel initialization failed', err);
+		}
+	};
+
+	onMount(openBc);
+
+	let scrollY = 0;
+
+	const lockBodyScroll = () => {
+		({ scrollY } = window);
+		document.body.style.position = 'fixed';
+		document.body.style.top = `-${scrollY}px`;
+		document.body.style.width = '100%';
+	};
+
+	const unlockBodyScroll = () => {
+		document.body.style.position = '';
+		document.body.style.top = '';
+		document.body.style.width = '';
+		window.scrollTo(0, scrollY);
+	};
+
+	$effect(() => {
+		if (isIOS()) {
+			if (nonNullish($modalStore?.type)) {
+				lockBodyScroll();
+			} else {
+				unlockBodyScroll();
+			}
+		}
 	});
 </script>
 
 <svelte:window onstorage={syncAuthStore} />
 
 {#await init()}
-	<div in:fade>
+	<div class="text-brand-primary" in:fade>
 		<Spinner />
 	</div>
 {:then _}
@@ -125,3 +193,4 @@
 <Busy />
 <ModalExitHandler />
 <SystemThemeListener />
+<ResponsiveListener />

@@ -1,6 +1,7 @@
 import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
+import { getNonce } from '$eth/services/nonce.services';
 import type { SwapParams } from '$eth/types/swap';
 import { signTransaction } from '$lib/api/signer.api';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -95,9 +96,7 @@ export const swap = async ({
 
 	const { id: networkId } = sourceNetwork;
 
-	const { getTransactionCount } = infuraProviders(networkId);
-
-	const nonce = await getTransactionCount(from);
+	const nonce = await getNonce({ from, networkId });
 
 	const transactionSent = await sendTransaction({
 		progress,

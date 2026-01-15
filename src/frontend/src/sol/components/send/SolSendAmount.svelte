@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -15,39 +15,42 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
-	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
 
-	export let amount: OptionAmount = undefined;
-	export let amountError: SolAmountAssertionError | undefined;
+	interface Props {
+		amount: OptionAmount;
+		amountError?: SolAmountAssertionError;
+		onTokensList: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
 
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
+
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	const { sendToken, sendBalance, sendTokenStandard, sendTokenNetworkId, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeStore: fee }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	let solanaNativeToken: Token;
-	$: solanaNativeToken = isNetworkIdSOLDevnet($sendTokenNetworkId)
-		? SOLANA_DEVNET_TOKEN
-		: isNetworkIdSOLLocal($sendTokenNetworkId)
-			? SOLANA_LOCAL_TOKEN
-			: SOLANA_TOKEN;
+	let solanaNativeToken = $derived(
+		isNetworkIdSOLDevnet($sendTokenNetworkId)
+			? SOLANA_DEVNET_TOKEN
+			: isNetworkIdSOLLocal($sendTokenNetworkId)
+				? SOLANA_LOCAL_TOKEN
+				: SOLANA_TOKEN
+	);
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
 			return new SolAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
-		if (nonNullish($sendBalance) && $sendTokenStandard === 'solana') {
+		if (nonNullish($sendBalance) && $sendTokenStandard.code === 'solana') {
 			const total = userAmount + ($fee ?? ZERO);
 
 			if (total > $sendBalance) {
@@ -73,19 +76,17 @@
 <div class="mb-4">
 	<TokenInput
 		autofocus={nonNullish($sendToken)}
-		customErrorValidate={customValidate}
 		displayUnit={inputUnit}
 		exchangeRate={$sendTokenExchangeRate}
+		onClick={onTokensList}
+		onCustomErrorValidate={customValidate}
 		token={$sendToken}
 		bind:amount
 		bind:error={amountError}
-		on:click={() => {
-			dispatch('icTokensList');
-		}}
 	>
-		<span slot="title">{$i18n.core.text.amount}</span>
+		{#snippet title()}{$i18n.core.text.amount}{/snippet}
 
-		<svelte:fragment slot="amount-info">
+		{#snippet amountInfo()}
 			{#if nonNullish($sendToken)}
 				<div class="text-tertiary">
 					<TokenInputAmountExchange
@@ -96,9 +97,9 @@
 					/>
 				</div>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 
-		<svelte:fragment slot="balance">
+		{#snippet balance()}
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
 					balance={$sendBalance}
@@ -108,6 +109,6 @@
 					bind:amount
 				/>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</TokenInput>
 </div>

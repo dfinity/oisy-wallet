@@ -15,10 +15,6 @@ vi.mock('$lib/utils/parse.utils', () => ({
 	parseToken: vi.fn()
 }));
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 const mockToken = { ...mockValidErc20Token, enabled: true };
 const mockDestToken = { ...ETHEREUM_TOKEN, enabled: true };
 
@@ -78,7 +74,9 @@ describe('SwapEthWizard', () => {
 		render(SwapEthWizard, {
 			props: {
 				...BASE_PROPS,
-				currentStep: { name: step, title: 'Swap' }
+				currentStep: { name: step, title: 'Swap' },
+				onStartTriggerAmount: vi.fn(),
+				onStopTriggerAmount: vi.fn()
 			},
 			context: mockContext
 		});

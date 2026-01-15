@@ -37,7 +37,7 @@ describe('sol-instructions-ata.utils', () => {
 		it('should raise an error if the instruction is missing the data', () => {
 			const { data: _, ...withoutData } = mockInstruction;
 
-			expect(() => parseSolAtaInstruction(withoutData)).toThrow(
+			expect(() => parseSolAtaInstruction(withoutData)).toThrowError(
 				'The instruction does not have any data'
 			);
 		});
@@ -45,7 +45,7 @@ describe('sol-instructions-ata.utils', () => {
 		it('should raise an error if the instruction is missing the accounts', () => {
 			const { accounts: _, ...withoutAccounts } = mockInstruction;
 
-			expect(() => parseSolAtaInstruction(withoutAccounts)).toThrow(
+			expect(() => parseSolAtaInstruction(withoutAccounts)).toThrowError(
 				'The instruction does not have any accounts'
 			);
 		});
@@ -96,11 +96,9 @@ describe('sol-instructions-ata.utils', () => {
 			// @ts-expect-error intentional for testing unknown discriminant
 			vi.mocked(identifyAssociatedTokenInstruction).mockReturnValue('unknown-instruction');
 
-			expect(parseSolAtaInstruction(mockInstruction)).toStrictEqual(mockInstruction);
-
-			expect(parseCreateAssociatedTokenInstruction).not.toHaveBeenCalled();
-			expect(parseCreateAssociatedTokenIdempotentInstruction).not.toHaveBeenCalled();
-			expect(parseRecoverNestedAssociatedTokenInstruction).not.toHaveBeenCalled();
+			expect(() => parseSolAtaInstruction(mockInstruction)).toThrowError(
+				'Unknown Solana ATA instruction: unknown-instruction'
+			);
 		});
 	});
 });

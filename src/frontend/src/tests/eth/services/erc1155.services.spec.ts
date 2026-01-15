@@ -2,12 +2,18 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import type { InfuraErc1155Provider } from '$eth/providers/infura-erc1155.providers';
-import * as infuraProvidersModule from '$eth/providers/infura-erc1155.providers';
+import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
+import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import { loadCustomTokens, loadErc1155Tokens } from '$eth/services/erc1155.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import { listCustomTokens } from '$lib/api/backend.api';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_NFT
+} from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -23,8 +29,8 @@ vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
 }));
 
-vi.mock('$eth/providers/infura-erc1155.providers', () => ({
-	infuraErc1155Providers: vi.fn()
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
 }));
 
 describe('erc1155.services', () => {
@@ -44,7 +50,7 @@ describe('erc1155.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc1155',
+				standard: { code: 'erc1155' },
 				category: 'custom',
 				version: 1n,
 				enabled: true,
@@ -58,7 +64,7 @@ describe('erc1155.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc1155',
+				standard: { code: 'erc1155' },
 				category: 'custom',
 				version: 2n,
 				enabled: true,
@@ -72,7 +78,7 @@ describe('erc1155.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc1155',
+				standard: { code: 'erc1155' },
 				category: 'custom',
 				version: undefined,
 				enabled: false,
@@ -86,7 +92,7 @@ describe('erc1155.services', () => {
 	];
 
 	describe('loadErc1155Tokens', () => {
-		let infuraProvidersSpy: MockInstance;
+		let alchemyProvidersSpy: MockInstance;
 
 		const mockMetadata = vi.fn();
 
@@ -102,15 +108,15 @@ describe('erc1155.services', () => {
 
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc1155);
 
-			mockMetadata.mockImplementation(({ address }) =>
+			mockMetadata.mockImplementation((address) =>
 				address === mockEthAddress ? mockMetadata1 : mockMetadata2
 			);
 
-			infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraErc1155Providers');
+			alchemyProvidersSpy = vi.spyOn(alchemyProvidersModule, 'alchemyProviders');
 
-			infuraProvidersSpy.mockReturnValue({
-				metadata: mockMetadata
-			}) as unknown as InfuraErc1155Provider;
+			alchemyProvidersSpy.mockReturnValue({
+				getContractMetadata: mockMetadata
+			} as unknown as AlchemyProvider);
 		});
 
 		it('should save the custom tokens in the store', async () => {
@@ -129,11 +135,57 @@ describe('erc1155.services', () => {
 			expect(tokens).toEqual(expected);
 		});
 
+		it('should not throw error if metadata throws', async () => {
+			const mockError = new Error('Error loading metadata');
+			vi.mocked(mockMetadata).mockRejectedValue(mockError);
+
+			await expect(loadErc1155Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
+
+			expect(get(erc1155CustomTokensStore)).toStrictEqual([]);
+
+			// query + update
+			expect(trackEvent).toHaveBeenCalledTimes(mockCustomTokensErc1155.length * 2);
+
+			mockCustomTokensErc1155.forEach(({ token }, index) => {
+				assert('Erc1155' in token);
+
+				const {
+					Erc1155: { token_address: address }
+				} = token;
+
+				const {
+					network: { id: networkId }
+				} = expectedCustomTokens[index].data;
+
+				expect(trackEvent).toHaveBeenNthCalledWith(index + 1, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_NFT.ERC1155,
+						token_address: address,
+						token_network: `${networkId.description}`
+					},
+					warning: `Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}. ${mockError}`
+				});
+
+				expect(trackEvent).toHaveBeenNthCalledWith(index + 1 + mockCustomTokensErc1155.length, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_NFT.ERC1155,
+						token_address: address,
+						token_network: `${networkId.description}`
+					},
+					warning: `Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}. ${mockError}`
+				});
+			});
+		});
+
 		it('should not throw error if list custom tokens throws', async () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadErc1155Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc1155Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 	});
 
@@ -185,7 +237,10 @@ describe('erc1155.services', () => {
 
 		it('should reset token store on error', async () => {
 			erc1155CustomTokensStore.setAll([
-				{ data: { ...SEPOLIA_PEPE_TOKEN, standard: 'erc1155', enabled: true }, certified: false }
+				{
+					data: { ...SEPOLIA_PEPE_TOKEN, standard: { code: 'erc1155' }, enabled: true },
+					certified: false
+				}
 			]);
 
 			vi.mocked(listCustomTokens).mockRejectedValue(new Error('Error loading custom tokens'));

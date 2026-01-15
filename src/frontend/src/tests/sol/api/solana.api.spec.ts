@@ -1,6 +1,7 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
+import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
 import { PENGU_TOKEN } from '$env/tokens/tokens-spl/tokens.pengu.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
@@ -77,6 +78,92 @@ describe('solana.api', () => {
 			}
 		}
 	};
+	const mockTokenAccountInfoWithExtensions = {
+		value: {
+			data: {
+				parsed: {
+					info: {
+						decimals: 8,
+						extensions: [
+							{
+								extension: 'metadataPointer',
+								state: {
+									authority: '5aMNNLQJwAEeoemTEMkv5NVjqKwvvefRYCQ5Z67HFvEq',
+									metadataAddress: 'XsyZcb97BzETAqi9BoP2C9D196MiMNBisGMVNje2Thz'
+								}
+							},
+							{
+								extension: 'permanentDelegate',
+								state: {
+									delegate: '5aMNNLQJwAEeoemTEMkv5NVjqKwvvefRYCQ5Z67HFvEq'
+								}
+							},
+							{
+								extension: 'defaultAccountState',
+								state: {
+									accountState: 'initialized'
+								}
+							},
+							{
+								extension: 'scaledUiAmountConfig',
+								state: {
+									authority: 'S7vYFFWH6BjJyEsdrPQpqpYTqLTrPRK6KW3VwsJuRaS',
+									multiplier: '1',
+									newMultiplier: '1',
+									newMultiplierEffectiveTimestamp: 0
+								}
+							},
+							{
+								extension: 'pausableConfig',
+								state: {
+									authority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+									paused: false
+								}
+							},
+							{
+								extension: 'confidentialTransferMint',
+								state: {
+									auditorElgamalPubkey: null,
+									authority: '5aMNNLQJwAEeoemTEMkv5NVjqKwvvefRYCQ5Z67HFvEq',
+									autoApproveNewAccounts: false
+								}
+							},
+							{
+								extension: 'transferHook',
+								state: {
+									authority: '5aMNNLQJwAEeoemTEMkv5NVjqKwvvefRYCQ5Z67HFvEq',
+									programId: null
+								}
+							},
+							{
+								extension: 'tokenMetadata',
+								state: {
+									additionalMetadata: [],
+									mint: 'XsyZcb97BzETAqi9BoP2C9D196MiMNBisGMVNje2Thz',
+									name: 'S&P Small Cap xStock',
+									symbol: 'IJRx',
+									updateAuthority: '5aMNNLQJwAEeoemTEMkv5NVjqKwvvefRYCQ5Z67HFvEq',
+									uri: 'https://xstocks-metadata.backed.fi/tokens/Solana/IJRx/metadata.json'
+								}
+							}
+						],
+						freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+						isInitialized: true,
+						mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+						supply: '0'
+					},
+					type: 'mint'
+				},
+				program: 'spl-token-2022',
+				space: 684
+			},
+			executable: false,
+			lamports: 5651520,
+			owner: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',
+			rentEpoch: 18446744073709552000,
+			space: 684
+		}
+	};
 	const mockAtaInfo = {
 		value: {
 			data: {
@@ -151,14 +238,16 @@ describe('solana.api', () => {
 		});
 
 		it('should handle zero balance', async () => {
-			mockGetBalance.mockReturnValueOnce({ send: () => Promise.resolve({ value: lamports(0n) }) });
+			mockGetBalance.mockReturnValueOnce({
+				send: () => Promise.resolve({ value: lamports(ZERO) })
+			});
 
 			const balance = await loadSolLamportsBalance({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(balance).toEqual(0n);
+			expect(balance).toEqual(ZERO);
 		});
 
 		it('should throw error when RPC call fails', async () => {
@@ -169,7 +258,7 @@ describe('solana.api', () => {
 					address: mockSolAddress,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should throw error when address is empty', async () => {
@@ -178,7 +267,7 @@ describe('solana.api', () => {
 					address: '',
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 	});
 
@@ -203,7 +292,7 @@ describe('solana.api', () => {
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(balance).toEqual(0n);
+			expect(balance).toEqual(ZERO);
 		});
 
 		it('should handle undefined balance', async () => {
@@ -240,7 +329,7 @@ describe('solana.api', () => {
 					ataAddress: mockAtaAddress,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should throw error when address is empty', async () => {
@@ -249,7 +338,7 @@ describe('solana.api', () => {
 					ataAddress: '',
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 	});
 
@@ -280,7 +369,7 @@ describe('solana.api', () => {
 
 			expect(transactions).toHaveLength(5);
 			expect(mockGetSignaturesForAddress).toHaveBeenCalledTimes(2);
-			// Verify the second call uses the last signature from first batch for pagination
+			// Verify the second call uses the last signature from the first batch for pagination
 			expect(mockGetSignaturesForAddress).toHaveBeenLastCalledWith(
 				expect.anything(),
 				expect.objectContaining({
@@ -410,7 +499,7 @@ describe('solana.api', () => {
 					network: SolanaNetworks.mainnet,
 					tokenAddress: DEVNET_EURC_TOKEN.address
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should throw an error when address is empty', async () => {
@@ -420,7 +509,7 @@ describe('solana.api', () => {
 					network: SolanaNetworks.mainnet,
 					tokenAddress: DEVNET_EURC_TOKEN.address
 				})
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 
 		it('should throw an error when token address is empty', async () => {
@@ -430,7 +519,7 @@ describe('solana.api', () => {
 					network: SolanaNetworks.mainnet,
 					tokenAddress: ''
 				})
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 	});
 
@@ -447,7 +536,7 @@ describe('solana.api', () => {
 				send: () => Promise.reject(mockError)
 			});
 
-			await expect(getSolCreateAccountFee(SolanaNetworks.mainnet)).rejects.toThrow(mockError);
+			await expect(getSolCreateAccountFee(SolanaNetworks.mainnet)).rejects.toThrowError(mockError);
 		});
 	});
 
@@ -486,7 +575,7 @@ describe('solana.api', () => {
 
 			const fee = await estimatePriorityFee({ network: SolanaNetworks.mainnet });
 
-			expect(fee).toEqual(0n);
+			expect(fee).toEqual(ZERO);
 			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledOnce();
 		});
 
@@ -495,7 +584,7 @@ describe('solana.api', () => {
 				send: () => Promise.reject(mockError)
 			});
 
-			await expect(estimatePriorityFee({ network: SolanaNetworks.mainnet })).rejects.toThrow(
+			await expect(estimatePriorityFee({ network: SolanaNetworks.mainnet })).rejects.toThrowError(
 				mockError
 			);
 		});
@@ -508,6 +597,7 @@ describe('solana.api', () => {
 		const mockAddress2 = TRUMP_TOKEN.address;
 		const mockAddress3 = PENGU_TOKEN.address;
 		const mockAddress4 = GMEX_TOKEN.address;
+		const mockAddress5 = GOOGLX_TOKEN.address;
 
 		beforeEach(() => {
 			mockAccountInfo = mockTokenAccountInfo;
@@ -561,7 +651,7 @@ describe('solana.api', () => {
 					address: mockAddress3,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should not throw error when RPC call fails but the info was already cached', async () => {
@@ -581,6 +671,52 @@ describe('solana.api', () => {
 
 			expect(secondCall).toEqual(firstCall);
 			expect(mockGetAccountInfo).toHaveBeenCalledOnce();
+		});
+
+		it('should re-cache account if the cache is nullish', async () => {
+			vi.clearAllMocks();
+
+			mockAccountInfo = { value: null };
+
+			const firstCall = await getAccountInfo({
+				address: mockAddress5,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(firstCall).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAddress5, {
+				encoding: 'jsonParsed'
+			});
+
+			mockAccountInfo = mockTokenAccountInfo;
+
+			const secondCall = await getAccountInfo({
+				address: mockAddress5,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(secondCall).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
+
+			const thirdCall = await getAccountInfo({
+				address: mockAddress5,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(thirdCall).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
 		});
 	});
 
@@ -614,7 +750,7 @@ describe('solana.api', () => {
 					address: mockSplAddress,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should handle correctly when info are not complete', async () => {
@@ -675,6 +811,65 @@ describe('solana.api', () => {
 				decimals: 8
 			});
 		});
+
+		describe('with extensions', () => {
+			const {
+				value: {
+					owner,
+					data: {
+						parsed: {
+							info: { decimals, mintAuthority, freezeAuthority, extensions }
+						}
+					}
+				}
+			} = mockTokenAccountInfoWithExtensions;
+
+			beforeEach(() => {
+				mockAccountInfo = mockTokenAccountInfoWithExtensions;
+
+				vi.spyOn(Map.prototype, 'get').mockReturnValue(undefined);
+			});
+
+			it('should parse the metadata extensions if present', async () => {
+				const info = await getTokenInfo({
+					address: mockSplAddress,
+					network: SolanaNetworks.mainnet
+				});
+
+				expect(info).toEqual({
+					owner,
+					decimals,
+					mintAuthority,
+					freezeAuthority,
+					symbol: extensions.find((ext) => ext.extension === 'tokenMetadata')?.state.symbol,
+					name: extensions.find((ext) => ext.extension === 'tokenMetadata')?.state.name
+				});
+				expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSplAddress, { encoding: 'jsonParsed' });
+			});
+
+			it('should not raise if the token metadata extension is missing', async () => {
+				const mockAccountInfoModified = { ...mockTokenAccountInfoWithExtensions };
+
+				mockAccountInfoModified.value.data.parsed.info.extensions = [
+					...mockAccountInfoModified.value.data.parsed.info.extensions.filter(
+						(ext) => ext.extension !== 'tokenMetadata'
+					)
+				];
+
+				const info = await getTokenInfo({
+					address: mockSplAddress,
+					network: SolanaNetworks.mainnet
+				});
+
+				expect(info).toEqual({
+					owner,
+					decimals,
+					mintAuthority,
+					freezeAuthority
+				});
+				expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSplAddress, { encoding: 'jsonParsed' });
+			});
+		});
 	});
 
 	describe('getAccountOwner', () => {
@@ -702,7 +897,7 @@ describe('solana.api', () => {
 					address: mockSplAddress,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should return undefined when owner is not found', async () => {
@@ -780,7 +975,7 @@ describe('solana.api', () => {
 					address: mockSplAddress,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 	});
 });

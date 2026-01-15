@@ -4,12 +4,8 @@ import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { QUICKNODE_API_KEY } from '$env/rest/quicknode.env';
 import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
 
-import solDevnetIconDark from '$lib/assets/networks/dark/solana-devnet.svg';
-import solMainnetIconDark from '$lib/assets/networks/dark/solana-mainnet.svg';
-import solDevnetIconLight from '$lib/assets/networks/light/solana-devnet.svg';
-import solMainnetIconLight from '$lib/assets/networks/light/solana-mainnet.svg';
-import solDevnetIconTransparent from '$lib/assets/networks/transparent/solana-devnet.svg';
-import solMainnetIconTransparent from '$lib/assets/networks/transparent/solana-mainnet.svg';
+import solDevnetIcon from '$lib/assets/networks/solana-devnet.svg';
+import solMainnetIcon from '$lib/assets/networks/solana-mainnet.svg';
 import type { Network, NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -47,11 +43,10 @@ export const SOLANA_MAINNET_NETWORK: SolanaNetwork = {
 	env: 'mainnet',
 	name: 'Solana',
 	chainId: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
-	iconLight: solMainnetIconLight,
-	iconDark: solMainnetIconDark,
-	iconTransparent: solMainnetIconTransparent,
+	icon: solMainnetIcon,
 	explorerUrl: SOL_MAINNET_EXPLORER_URL,
-	buy: { onramperId: 'solana' }
+	buy: { onramperId: 'solana' },
+	pay: { openCryptoPay: 'Solana' }
 };
 
 export const SOLANA_DEVNET_NETWORK_SYMBOL = 'SOL (Devnet)';
@@ -63,9 +58,7 @@ export const SOLANA_DEVNET_NETWORK: SolanaNetwork = {
 	env: 'testnet',
 	name: 'Solana Devnet',
 	chainId: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
-	iconLight: solDevnetIconLight,
-	iconDark: solDevnetIconDark,
-	iconTransparent: solDevnetIconTransparent,
+	icon: solDevnetIcon,
 	explorerUrl: SOL_DEVNET_EXPLORER_URL
 };
 
@@ -77,9 +70,8 @@ export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 	id: SOLANA_LOCAL_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Local',
-	iconLight: solDevnetIconLight,
-	iconDark: solDevnetIconDark,
-	iconTransparent: solDevnetIconTransparent
+	icon: solDevnetIcon,
+	explorerUrl: SOL_MAINNET_EXPLORER_URL
 };
 
 export const SUPPORTED_SOLANA_NETWORKS: Network[] = defineSupportedNetworks({

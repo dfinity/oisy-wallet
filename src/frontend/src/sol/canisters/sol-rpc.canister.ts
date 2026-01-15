@@ -11,12 +11,12 @@ import type {
 import { idlFactory as idlCertifiedFactorySolRpc } from '$declarations/sol_rpc/sol_rpc.factory.certified.did';
 import { idlFactory as idlFactorySolRpc } from '$declarations/sol_rpc/sol_rpc.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
-import type { SolAddress } from '$lib/types/address';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { JSON_PARSED, SOL_RPC_CONFIG } from '$sol/canisters/sol-rpc.constants';
 import { SolRpcCanisterError, assertConsistentResponse } from '$sol/canisters/sol-rpc.errors';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
-import { Canister, createServices, fromNullable, toNullable } from '@dfinity/utils';
+import { Canister, assertNever, createServices, fromNullable, toNullable } from '@dfinity/utils';
 
 export const networkToCluster = (network: SolanaNetworkType): SolanaCluster => {
 	if (network === 'devnet') {
@@ -29,10 +29,7 @@ export const networkToCluster = (network: SolanaNetworkType): SolanaCluster => {
 		return { Mainnet: null };
 	}
 
-	// Force compiler error on unhandled cases based on leftover types
-	const _: never = network;
-
-	throw new Error(`Unknown network: ${network}`);
+	assertNever(network, `Unknown network: ${network}`);
 };
 
 const rpcSources = (network: SolanaNetworkType): RpcSources => ({

@@ -4,6 +4,8 @@ import {
 	approve,
 	balance,
 	getBlocks,
+	getMintingAccount,
+	icrc10SupportedStandards,
 	icrc1SupportedStandards,
 	metadata,
 	transactionFee,
@@ -13,16 +15,14 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import {
 	IcrcLedgerCanister,
 	IcrcMetadataResponseEntries,
 	type IcrcAccount,
-	type IcrcAllowance,
-	type IcrcBlockIndex,
-	type IcrcGetBlocksResult,
+	type IcrcLedgerDid,
 	type IcrcTokenMetadataResponse
-} from '@dfinity/ledger-icrc';
-import { toNullable } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('$icp/utils/date.utils', () => ({
@@ -77,7 +77,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(metadata({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(metadata({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -115,7 +115,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transactionFee({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(transactionFee({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -160,7 +160,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(balance({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(balance({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -186,7 +186,7 @@ describe('icrc-ledger.api', () => {
 			createdAt
 		};
 
-		const mockIndex: IcrcBlockIndex = 123n;
+		const mockIndex: IcrcLedgerDid.BlockIndex = 123n;
 
 		beforeEach(() => {
 			ledgerCanisterMock.transfer.mockResolvedValue(mockIndex);
@@ -219,7 +219,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(transfer({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -247,7 +247,7 @@ describe('icrc-ledger.api', () => {
 			createdAt
 		};
 
-		const mockIndex: IcrcBlockIndex = 123n;
+		const mockIndex: IcrcLedgerDid.BlockIndex = 123n;
 
 		beforeEach(() => {
 			ledgerCanisterMock.approve.mockResolvedValue(mockIndex);
@@ -282,7 +282,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(approve({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(approve({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -305,7 +305,7 @@ describe('icrc-ledger.api', () => {
 			identity: mockIdentity
 		};
 
-		const allowanceResponse: IcrcAllowance = {
+		const allowanceResponse: IcrcLedgerDid.Allowance = {
 			allowance: 1_000_000n,
 			expires_at: []
 		};
@@ -471,7 +471,7 @@ describe('icrc-ledger.api', () => {
 					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
 					identity: undefined
 				})
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 	});
 
@@ -484,7 +484,7 @@ describe('icrc-ledger.api', () => {
 		};
 
 		const mockTotalBlocks = 123n;
-		const mockGetBlocksResponse: IcrcGetBlocksResult = {
+		const mockGetBlocksResponse: IcrcLedgerDid.GetBlocksResult = {
 			log_length: mockTotalBlocks,
 			blocks: [],
 			archived_blocks: []
@@ -517,7 +517,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(getBlocks({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(getBlocks({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -558,7 +558,108 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(icrc1SupportedStandards({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(
+				icrc1SupportedStandards({ ...params, identity: undefined })
+			).rejects.toThrowError();
+		});
+	});
+
+	describe('icrc10SupportedStandards', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
+
+		const supportedStandards = [
+			{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
+			{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }
+		];
+
+		beforeEach(() => {
+			ledgerCanisterMock.icrc10SupportedStandards.mockResolvedValue(supportedStandards);
+		});
+
+		it('successfully calls icrc10SupportedStandards endpoint', async () => {
+			const result = await icrc10SupportedStandards(params);
+
+			expect(result).toEqual(supportedStandards);
+
+			expect(ledgerCanisterMock.icrc10SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
+
+		it('successfully calls icrc10SupportedStandards endpoint as query', async () => {
+			const result = await icrc10SupportedStandards({ ...params, certified: false });
+
+			expect(result).toEqual(supportedStandards);
+
+			expect(ledgerCanisterMock.icrc10SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(
+				icrc10SupportedStandards({ ...params, identity: undefined })
+			).rejects.toThrowError();
+		});
+	});
+
+	describe('getMintingAccount', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
+
+		const candidAccount = {
+			owner: mockPrincipal,
+			subaccount: toNullable(Uint8Array.from([1, 2, 3]))
+		};
+		const expectedAccount = { owner: mockPrincipal, subaccount: Uint8Array.from([1, 2, 3]) };
+
+		beforeEach(() => {
+			ledgerCanisterMock.getMintingAccount.mockResolvedValue(toNullable(candidAccount));
+		});
+
+		it('successfully calls getMintingAccount endpoint', async () => {
+			const result = await getMintingAccount(params);
+
+			expect(result).toEqual(expectedAccount);
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
+
+		it('successfully calls getMintingAccount endpoint as query', async () => {
+			const result = await getMintingAccount({ ...params, certified: false });
+
+			expect(result).toEqual(expectedAccount);
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(getMintingAccount({ ...params, identity: undefined })).rejects.toThrowError();
+		});
+
+		it('returns undefined if getMintingAccount throws', async () => {
+			ledgerCanisterMock.getMintingAccount.mockRejectedValue(
+				new Error('Minting account not found')
+			);
+
+			const result = await getMintingAccount(params);
+
+			expect(result).toBeUndefined();
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
 		});
 	});
 });

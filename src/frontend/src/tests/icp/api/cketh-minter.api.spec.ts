@@ -7,14 +7,9 @@ import { eip1559TransactionPrice, withdrawErc20, withdrawEth } from '$icp/api/ck
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import {
-	CkETHMinterCanister,
-	type Eip1559TransactionPrice,
-	type RetrieveErc20Request,
-	type RetrieveEthRequest
-} from '@dfinity/cketh';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import { CkEthMinterCanister, type CkEthMinterDid } from '@icp-sdk/canisters/cketh';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('$icp/utils/date.utils', () => ({
@@ -22,12 +17,12 @@ vi.mock('$icp/utils/date.utils', () => ({
 }));
 
 describe('cketh-minter.api', () => {
-	const canisterMock = mock<CkETHMinterCanister>();
+	const canisterMock = mock<CkEthMinterCanister>();
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(CkETHMinterCanister, 'create').mockImplementation(() => canisterMock);
+		vi.spyOn(CkEthMinterCanister, 'create').mockImplementation(() => canisterMock);
 	});
 
 	describe('withdrawEth', () => {
@@ -40,7 +35,7 @@ describe('cketh-minter.api', () => {
 			address: mockEthAddress
 		};
 
-		const expected: RetrieveEthRequest = { block_index: 123n };
+		const expected: CkEthMinterDid.RetrieveEthRequest = { block_index: 123n };
 
 		beforeEach(() => {
 			canisterMock.withdrawEth.mockResolvedValue(expected);
@@ -51,15 +46,14 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.withdrawEth).toHaveBeenCalledOnce();
-			expect(canisterMock.withdrawEth).toHaveBeenCalledWith({
+			expect(canisterMock.withdrawEth).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				address: mockEthAddress
 			});
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(withdrawEth({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(withdrawEth({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -74,7 +68,10 @@ describe('cketh-minter.api', () => {
 			address: mockEthAddress
 		};
 
-		const expected: RetrieveErc20Request = { ckerc20_block_index: 123n, cketh_block_index: 456n };
+		const expected: CkEthMinterDid.RetrieveErc20Request = {
+			ckerc20_block_index: 123n,
+			cketh_block_index: 456n
+		};
 
 		beforeEach(() => {
 			canisterMock.withdrawErc20.mockResolvedValue(expected);
@@ -85,8 +82,7 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.withdrawErc20).toHaveBeenCalledOnce();
-			expect(canisterMock.withdrawErc20).toHaveBeenCalledWith({
+			expect(canisterMock.withdrawErc20).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				address: mockEthAddress,
 				ledgerCanisterId: Principal.fromText(IC_CKETH_LEDGER_CANISTER_ID)
@@ -94,7 +90,7 @@ describe('cketh-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(withdrawErc20({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(withdrawErc20({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -108,7 +104,7 @@ describe('cketh-minter.api', () => {
 			certified: true
 		};
 
-		const expected: Eip1559TransactionPrice = {
+		const expected: CkEthMinterDid.Eip1559TransactionPrice = {
 			max_priority_fee_per_gas: 123n,
 			max_fee_per_gas: 456n,
 			max_transaction_fee: 789n,
@@ -125,8 +121,7 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledOnce();
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledWith({
+			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledExactlyOnceWith({
 				ckErc20LedgerId,
 				certified: true
 			});
@@ -137,8 +132,9 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledOnce();
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledWith({ certified: true });
+			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
 		});
 
 		it('successfully calls getMinterInfo endpoint as query', async () => {
@@ -146,15 +142,16 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledOnce();
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledWith({
+			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledExactlyOnceWith({
 				ckErc20LedgerId,
 				certified: false
 			});
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(eip1559TransactionPrice({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(
+				eip1559TransactionPrice({ ...params, identity: undefined })
+			).rejects.toThrowError();
 		});
 	});
 });

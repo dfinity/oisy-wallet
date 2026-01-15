@@ -1,7 +1,8 @@
 import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
-import type { AnyTransaction, Transaction } from '$lib/types/transaction';
+import type { Transaction } from '$lib/types/transaction';
+import type { AnyTransaction } from '$lib/types/transaction-ui';
 import { nonNullish } from '@dfinity/utils';
 
 type TransactionTypes = AnyTransaction;
@@ -32,8 +33,9 @@ export type TransactionsData<T extends TransactionTypes> =
 	| CertifiedTransaction<T>[]
 	| NullableCertifiedTransactions;
 
-export interface TransactionsStore<T extends TransactionTypes>
-	extends CertifiedStore<TransactionsData<T>> {
+export interface TransactionsStore<T extends TransactionTypes> extends CertifiedStore<
+	TransactionsData<T>
+> {
 	set: (params: TransactionsStoreParams<T>) => void;
 	add: (params: TransactionsStoreParams<T>) => void;
 	prepend: (params: TransactionsStoreParams<T>) => void;

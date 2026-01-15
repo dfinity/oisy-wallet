@@ -1,6 +1,8 @@
 import type { Address } from '$lib/types/address';
 import type { ContactAddressUiWithId, ExtendedAddressContactUi } from '$lib/types/contact';
-import type { Token, TokenStandard } from '$lib/types/token';
+import type { Network } from '$lib/types/network';
+import type { Token, TokenStandardCode } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
 
 export interface ChatMessageContent {
 	text?: string;
@@ -46,21 +48,33 @@ export interface ReviewSendTokensToolResult {
 	address?: Address;
 }
 
+export interface ShowBalanceToolResult {
+	mainCard: {
+		totalUsdBalance: number;
+		token?: TokenUi;
+		network?: Network;
+	};
+	secondaryCards?: TokenUi[];
+}
+
 export enum ToolResultType {
 	SHOW_ALL_CONTACTS = 'show_all_contacts',
 	SHOW_FILTERED_CONTACTS = 'show_filtered_contacts',
-	REVIEW_SEND_TOKENS = 'review_send_tokens'
+	REVIEW_SEND_TOKENS = 'review_send_tokens',
+	SHOW_BALANCE = 'show_balance'
 }
 
 export interface ToolResult {
 	type: ToolResultType;
-	result?: ShowContactsToolResult | ReviewSendTokensToolResult;
+	result?: ShowContactsToolResult | ReviewSendTokensToolResult | ShowBalanceToolResult;
 }
 
-export interface AiAssistantContactUi
-	extends Omit<ExtendedAddressContactUi, 'addresses' | 'image' | 'updateTimestampNs' | 'id'> {
+export interface AiAssistantContactUi extends Omit<
+	ExtendedAddressContactUi,
+	'addresses' | 'image' | 'updateTimestampNs' | 'id'
+> {
 	addresses: (Omit<ContactAddressUiWithId, 'address'> & {
-		acceptedTokenStandards: TokenStandard[];
+		acceptedTokenStandards: TokenStandardCode[];
 	})[];
 }
 

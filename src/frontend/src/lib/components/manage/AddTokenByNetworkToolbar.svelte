@@ -1,15 +1,17 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 
-	export let invalid: boolean;
+	interface Props {
+		invalid: boolean;
+		onBack: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { invalid, onBack }: Props = $props();
 </script>
 
 <ButtonGroup>
-	<ButtonBack onclick={() => dispatch('icBack')} />
+	<ButtonBack onclick={onBack} />
 	<ButtonNext disabled={invalid} />
 </ButtonGroup>

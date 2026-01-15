@@ -1,11 +1,9 @@
+import { BtcAddressObjectSchema } from '$btc/schema/address.schema';
+import { EthAddressObjectSchema } from '$eth/schema/address.schema';
 import { TOKEN_ACCOUNT_ID_TYPES } from '$lib/constants/token-account-id.constants';
-import {
-	BtcAddressObjectSchema,
-	EthAddressObjectSchema,
-	Icrcv2AccountIdObjectSchema,
-	SolAddressSchema
-} from '$lib/schema/address.schema';
-import { z } from 'zod/v4';
+import { Icrcv2AccountIdObjectSchema } from '$lib/schema/address.schema';
+import { SolAddressSchema } from '$sol/schema/address.schema';
+import { z } from 'zod';
 
 export const TokenAccountIdSchema = z.union([
 	Icrcv2AccountIdObjectSchema.transform((data) => ({ Icrcv2: data })),

@@ -8,6 +8,7 @@
 			"done": "Concluído",
 			"close": "Fechar",
 			"change": "Alterar",
+			"continue": "",
 			"apply": "Aplicar",
 			"retry": "",
 			"refresh": "Atualizar",
@@ -35,11 +36,19 @@
 			"more_items": "+$items mais",
 			"select": "Selecionar",
 			"language": "Linguagem",
-			"currency": "Moeda"
+			"currency": "Moeda",
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": "",
+			"learn_more": ""
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
-			"test_banner_beta": ""
+			"test_banner_beta": "",
+			"internet_identity_banner_first_part": "$oisy_name agora usa",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "Leia mas"
 		},
 		"alt": {
 			"logo": "Logotipo $name",
@@ -48,10 +57,15 @@
 			"open_details": "Abrir detalhes",
 			"close_details": "Fechar detalhes",
 			"switch_language": "Mudar linguagem",
-			"switch_currency": "Mudar moeda"
+			"switch_currency": "Mudar moeda",
+			"more": "",
+			"less": "",
+			"learn_more": ""
 		},
 		"warning": {
-			"do_not_close": "Não feche esta aba até que a transação esteja concluída"
+			"do_not_close": "Não feche esta aba até que a transação esteja concluída",
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -61,7 +75,7 @@
 			"dapp_explorer": "Explorar",
 			"activity": "Atividade",
 			"airdrops": "Recompensas",
-			"earning": "Ganhar recompensas",
+			"earning": "Ganhar",
 			"source_code_on_github": "Código-fonte no GitHub",
 			"view_on_explorer": "Ver no explorador",
 			"source_code": "Código-fonte",
@@ -102,17 +116,22 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Descentralizado",
+			"title_part_1": "Seus Ativos Digitais",
+			"title_part_2": "Privados e Seguros",
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP e mais",
-			"instant_and_private": "Acesso instantâneo e privado em qualquer lugar",
-			"advanced_cryptography": "100% onchain: tranquilidade através de criptografia avançada"
+			"legacy_login": "Login legado",
+			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
+			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
+			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
+			"social_login": "Acesso instantâneo e privado + login social"
 		},
 		"alt": {
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular"
+		},
+		"message": {
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",
@@ -132,36 +151,34 @@
 		},
 		"help": {
 			"text": {
-				"title": "Problemas com a autenticação?",
-				"description": "Percebemos que você cancelou a autenticação com Internet Identity. Gostaríamos de entender o que aconteceu para que possamos melhorar sua experiência.",
-				"subtitle": "Alguma das seguintes causas causou o problema?",
-				"lost_identity": "Perdi meu número de Internet Identity",
-				"security": "Fiquei preocupado com a segurança ou privacidade",
-				"got_confused": "Senti que o processo foi confuso",
-				"other": "Outro...",
-				"feedback_text": "Seu feedback nos ajuda a melhorar a carteira.",
+				"title": "Seu processo de login foi interrompido",
+				"description": "Parece que você cancelou seu login ou cadastro. Gostaríamos de entender o que aconteceu para que possamos melhorar sua experiência.",
+				"login_page_looks_different": "Por que a página de login está diferente?",
+				"use_identity_number": "Quero usar meu número de identificação da Internet.",
+				"lost_identity_number": "Perdi meu número Internet Identity",
+				"feedback_text": "Seu feedback nos ajuda a melhorar o $oisy_short.",
 				"thanks_text": "Obrigado!",
+				"useful_links": "Links úteis",
 				"identity_new_identity": "A carteira $oisy_short muda o domínio da Internet Identity para: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "Como resultado, seu número de Internet Identity pode não aparecer automaticamente, e você pode precisar digitá-lo novamente.",
+				"switch_to_new_internet_identity": "",
+				"identity_legacy_identity_title": "",
+				"identity_legacy_identity_item_1": "",
+				"identity_legacy_identity_item_2": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"identity_new_identity_item_2": "",
+				"identity_new_identity_link": "",
 				"identity_legacy_sign_in": "Entrar com o domínio Internet Identity legacy",
 				"identity_learn_more": "Saiba mais nos Docs do $oisy_short",
-				"other_title": "Obrigado pelo seu feedback!",
-				"other_description": "Aqui estão alguns recursos úteis sobre <span class=\"font-bold\">segurança</span> e <span class=\"font-bold\">privacidade</span> em $oisy_short e Internet Identity. Esperamos que eles o ajudem a tomar uma decisão informada:",
-				"other_introduction": "Introdução ao $oisy_short",
-				"other_docs": "Docs do $oisy_short: Internet Identity",
-				"other_private_key": "Quem controla a chave privada para os ativos nativos?",
-				"other_asset_control": "Controle de Ativos, Recuperação e Governança na Carteira $oisy_short",
+				"oisy_introduction": "",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "Precisa de ajuda para",
 				"sign_in": "fazer login?"
 			},
 			"alt": {
-				"internet_identity": "Imagem da nova Internet Identity",
-				"identity_learn_more": "Saiba mais sobre a Internet Identity",
-				"other_introduction": "Abrir Introdução ao $oisy_short",
-				"other_docs": "Abrir docs do $oisy_short: Internet Identity",
-				"other_private_key": "Obter ajuda sobre quem controla a chave privada para os ativos nativos",
-				"other_asset_control": "Obter informações sobre Controle de Ativos, Recuperação e Governança na Carteira $oisy_short",
-				"sign_in": "Precisa de ajuda para fazer login?"
+				"internet_identity": "Imagem da nova Internet Identity"
 			}
 		}
 	},
@@ -170,6 +187,7 @@
 			"title_part_1": "Desbloqueie para continuar",
 			"title_part_2": "Você bloqueou sua carteira anteriormente para mantê-la segura. Continue de onde parou ou saia.",
 			"unlock": "Desbloquear",
+			"unlock_with_legacy_login": "",
 			"logout": "Sair",
 			"logout_clear_cash_message": "Saída limpa, mensagem de cache",
 			"learn_more": "Saber mais"
@@ -206,7 +224,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Jogo",
 			"tools": "Ferramentas",
-			"ai": ""
+			"ai": "",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -225,7 +244,7 @@
 				"description": "O OpenChat é uma aplicação de chat completa, que funciona de ponta a ponta na blockchain Internet Computer. <br/><br/>O OpenChat é governado pela sua comunidade através de um DAO e tem o seu próprio token CHAT. Os tokens CHAT são dados como recompensa aos utilizadores para impulsionar crescimento e criar uma equipa de milhões de defensores da descentralização, permitindo que o OpenChat se torne um concorrente viável para os grandes concorrentes de tecnologias centralizadas!",
 				"stats": "80,000+ utilizadores",
 				"carousel": {
-					"text": "OpenChat – Onde a web3 comunica",
+					"text": "",
 					"call_to_action": "Mostrar mais"
 				}
 			},
@@ -319,11 +338,7 @@
 				"name": "Taggr",
 				"one_liner": "Redes sociais descentralizadas: publique, ganhe, possua.",
 				"call_to_action": "Viajar até ao Taggr",
-				"description": "Taggr é uma plataforma de mídia social totalmente descentralizada que reside em uma rede pública de computação distribuída alimentada pelo Internet Computer. Ao contrário das plataformas de mídia social tradicionais controladas por corporações, o Taggr é de propriedade e governado inteiramente pelos seus utilizadores.",
-				"carousel": {
-					"text": "Mídias social descentralizada - publique, ganhe, possua.",
-					"call_to_action": "Aprender mais"
-				}
+				"description": "Taggr é uma plataforma de mídia social totalmente descentralizada que reside em uma rede pública de computação distribuída alimentada pelo Internet Computer. Ao contrário das plataformas de mídia social tradicionais controladas por corporações, o Taggr é de propriedade e governado inteiramente pelos seus utilizadores."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -344,6 +359,61 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -354,6 +424,7 @@
 			"upcoming_campaigns": "Próximas campanhas",
 			"active_date": "Termina em",
 			"ended_date": "Terminou em",
+			"upcoming_date": "",
 			"share": "Partilhar no X",
 			"learn_more": "Saiba mais",
 			"check_status": "Verificar Status e Elegibilidade",
@@ -362,18 +433,18 @@
 			"activity_button_text": "Verificar Atividade Recente",
 			"activity_button_text_short": "Verificar atividade",
 			"open_wallet": "Leve-me para a carteira",
-			"carousel_slide_title": "$oisy_short Sprinkles estão agora ativas!",
+			"carousel_slide_title": "$oisy_short Sprinkles episódio 5 agora ativas!",
 			"carousel_slide_cta": "Saiba mais",
 			"sprinkles_earned": "Você ganhou $noOfSprinkles sprinkles, totalizando $amount! ?",
 			"youre_eligible": "Você é elegível!",
-			"not_eligible": "",
+			"not_eligible": "Não elegível",
 			"ongoing": "Em andamento",
 			"ended": "Finalizado ($amount)",
 			"banner_text": "Ganhe recompensas diárias com OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Critérios de elegibilidade",
-			"network_bonus_info": "",
+			"network_bonus_info": "Cada rede na qual você mantém ativos lhe dá um multiplicador de recompensas. Quanto mais redes você usar, mais recompensas você receberá!",
 			"min_logins": "Login $loginsx vezes nos últimos $days dias",
 			"min_transactions": "Terá que ter completo mínimo de $transactions transações nos últimos $days dias",
 			"min_total_assets_usd": "Mantenha $$usd em tokens no momento da emissão",
@@ -381,7 +452,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Fique de olho nos próximos lançamentos de tokens! <a href=\"https://x.com/oisy\" target=\"_blank\">Siga-nos no X</a>, junte-se ao nosso <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, ou entre no nosso <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> para ficar por dentro das últimas novidades.",
-			"coming_soon": "O episódio 4 de $oisy_short está chegando",
+			"coming_soon": "O episódio 6 de $oisy_short está chegando",
 			"reward_banner": "Banner da campanha $campaignName"
 		},
 		"campaigns": {
@@ -417,6 +488,11 @@
 				"participate_title": "Ganhe BTC mantendo-se ativo - e agora também por convidar outras pessoas.",
 				"description": "Cumpra requisitos semanais simples: inicie sessão, faça duas transações e tenha pelo menos 20 dólares em tokens para continuar elegível para ganhar até 50 dólares em BTC por dia. <br>Agora com recompensas por referência: convide um amigo para criar uma carteira e ambos ganharão Sprinkles garantidos. Esteja entre os 4 melhores nomeados e ganhe um jackpot.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Bem vindo ao $oisy_curtas!",
+					"subtitle": "Pronto para ganhar?",
+					"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique 4 amigos e ganhe um bônus garantido."
+				},
 				"win": {
 					"default": {
 						"title": "Você foi recompensado",
@@ -446,31 +522,36 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episódio 5 está no ar 🎉",
+				"one_liner": "Ganhe Sprinkles por ser ativo, indicar outras pessoas e usar o OISY em diferentes redes. Suas ações aumentam suas recompensas, e indicações ativas as impulsionam ainda mais.<br/>Além disso, agora mais redes significam mais chances de ganhar.",
+				"participate_title": "Ganhe tokens por atividades e indicações. Mais cadeias significam mais chances.",
+				"description": "Permaneça ativo por mais de 10 dias para se qualificar: faça login com frequência, conclua ações da carteira e mantenha pelo menos US$ 20.<br/>Cada cadeia ativa aumenta suas chances com um Multiplicador Multicadeia.<br/>Ganhe 10% de amigos que se qualificarem e fique entre os 3 primeiros para ganhar um Super Sprinkle de US$ 200.",
 				"campaign_href": "",
+				"welcome": {
+					"title": "Bem vindo ao $oisy_curtas!",
+					"subtitle": "Pronto para ganhar?",
+					"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique seus amigos e ganhe um bônus toda vez que um deles ganhar granulados."
+				},
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Você foi recompensado",
+						"description": "As suas recompensas acabaram de chegar à sua carteira<br>Não se esqueça de indicar amigos e manter-se ativo para ganhar ainda mais",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Você ganhou o bônus semanal",
+						"description": "Você acabou de ganhar um de nossos bônus semanais.<br>Mantenha-se ativo e continue indicando para ganhar mais.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Você chegou ao topo da tabela de classificação",
+						"description": "Você ficou entre os 4 melhores indicadores desta temporada<br>$200 foram adicionados à sua carteira",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Aqui está um pequeno agradecimento",
+						"description": "Um dos seus utilizadores indicados acabou de ganhar alguns sprinkles.",
 						"share_href": ""
 					}
 				}
@@ -482,7 +563,7 @@
 			"incubated_with": "Incubado com",
 			"by": "por",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "$oisy_short Assistente"
 		},
 		"alt": {
@@ -531,7 +612,6 @@
 			"no_infura_erc1155_provider": "Nenhum provedor Infura ERC1155 para a rede $network",
 			"no_infura_erc20_icp_provider": "Nenhum provedor Infura ERC20 ICP para a rede $network",
 			"no_solana_network": "Nenhuma rede Solana para a rede $network",
-			"eth_address_unknown": "Endereço ETH desconhecido.",
 			"loading_address": "Erro ao carregar o endereço $symbol.",
 			"loading_balance": "Erro ao carregar o saldo $symbol para a rede $network.",
 			"erc20_contracts": "Erro ao carregar os contratos ERC20.",
@@ -553,10 +633,11 @@
 			"erc20_custom_tokens": "Erro ao carregar o token personalizado ERC20.",
 			"erc721_custom_tokens": "Erro ao carregar o token personalizado ERC721.",
 			"erc1155_custom_tokens": "Erro ao carregar o token personalizado ERC1155.",
-			"erc20_user_tokens": "Erro ao carregar os tokens de usuário ERC20.",
 			"spl_custom_tokens": "Erro ao carregar o token personalizado SPL.",
-			"erc20_user_token": "Erro ao habilitar o token gêmeo ERC20.",
+			"erc20_custom_token": "Erro ao habilitar o token gêmeo ERC20.",
 			"icrc_custom_token": "Erro ao carregar o token personalizado ICRC.",
+			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Sua carteira requer alguns dados iniciais que ainda não foram carregados. Por favor, tente novamente.",
 			"allow_signing": "Ocorreu um problema ao configurar sua carteira para assinar. Você foi desconectado. Se o problema persistir, entre em contato com o suporte.",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -580,6 +661,7 @@
 	"settings": {
 		"text": {
 			"title": "Configurações",
+			"general": "",
 			"principal": "Seu Principal",
 			"principal_copied": "Principal copiado para a área de transferência",
 			"principal_description": "Seu ID para $oisy_name. Criado pela sua Internet Identity.",
@@ -649,9 +731,11 @@
 				"display_account_id_qr": "Exibir ID da Conta ICP como um código QR",
 				"account_id_copied": "ID da Conta ICP copiado para a área de transferência.",
 				"principal": "Principal ICP",
+				"principal_title": "Endereço da carteira ICP - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Principal Internet Computer copiado para a área de transferência.",
 				"display_internet_computer_principal_qr": "Exibir Principal Internet Computer como um código QR",
 				"icp_account": "Conta ICP (para exchanges)",
+				"icp_account_title": "Endereço da carteira ICP - Apenas por token ICP",
 				"icp_account_copied": "Conta ICP copiada para a área de transferência.",
 				"display_icp_account_qr": "Exibir Conta ICP como um código QR"
 			}
@@ -664,6 +748,7 @@
 				"learn_how_to_convert": "Saiba como converter $token para $ckToken",
 				"metamask": "Receber do Metamask",
 				"ethereum": "Ethereum",
+				"ethereum_title": "Endereço da carteira Ethereum",
 				"ethereum_address": "Endereço",
 				"ethereum_address_copied": "Endereço Ethereum copiado para a área de transferência.",
 				"display_ethereum_address_qr": "Exibir endereço Ethereum como um código QR"
@@ -681,8 +766,11 @@
 				"checking_incoming": "Verificando BTCs recebidos...",
 				"refreshing_wallet": "Atualizando carteira...",
 				"bitcoin_address": "Bitcoin",
+				"bitcoin_address_title": "Endereço da carteira Bitcoin",
 				"bitcoin_testnet_address": "Bitcoin (Testnet)",
+				"bitcoin_testnet_address_title": "Endereço da carteira Bitcoin (Testnet)",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
+				"bitcoin_regtest_address_title": "Endereço da carteira Bitcoin (Regtest)",
 				"display_bitcoin_address_qr": "Exibir Endereço Bitcoin como um código QR",
 				"bitcoin_address_copied": "Endereço Bitcoin copiado para a área de transferência.",
 				"from_network": "Transfira Bitcoin na rede BTC para este endereço para receber ckBTC.",
@@ -699,8 +787,11 @@
 		"solana": {
 			"text": {
 				"solana_address": "Endereço Solana",
+				"solana_address_title": "Endereço da carteira Solana",
 				"solana_devnet_address": "Endereço Solana da Devnet",
+				"solana_devnet_address_title": "Endereço da carteira Solana Devnet",
 				"solana_local_address": "Endereço Solana Local",
+				"solana_local_address_title": "Endereço da carteira Solana Local",
 				"solana_address_copied": "Endereço Solana copiado para a área de transferência",
 				"display_solana_address_qr": "Exibir endereço Solana como QR code"
 			}
@@ -814,6 +905,57 @@
 			"solana_transaction_expired": "Sua transação de envio não foi processada pela rede Solana e expirou, provavelmente porque a taxa de prioridade fornecida não foi suficiente. Nós a atualizamos para o valor recomendado mais recente, então tente enviá-la novamente.",
 			"solana_confirmation_failed": "Não recebemos uma confirmação da transação que você acabou de criar. Aguarde alguns segundos e verifique a lista de transações do seu token para confirmar se a transação foi criada corretamente.",
 			"fee_calc_unsupported_standard": ""
+		}
+	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"recipient": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": "",
+			"pay_amount": "",
+			"go_to_assets": "",
+			"supported_tokens": "",
+			"no_supported_tokens": "",
+			"pay_with": "",
+			"select_token": "",
+			"select_different_token": "",
+			"tokens_available": "",
+			"select_token_to_pay": "",
+			"pay_at_successful": "",
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
+		},
+		"error": {
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -933,6 +1075,29 @@
 			"title": "Comprar via Onramper"
 		}
 	},
+	"pay": {
+		"text": {
+			"pay": "",
+			"dialog_title": "",
+			"dialog_description": "",
+			"dialog_button": "",
+			"where_you_can_pay": "",
+			"request_payment_details": "",
+			"creating_transaction": "",
+			"signing_transaction": "",
+			"paying": ""
+		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
+		},
+		"alt": {
+			"pay": "",
+			"where_you_can_pay": ""
+		}
+	},
 	"tokens": {
 		"text": {
 			"title": "Tokens",
@@ -984,9 +1149,11 @@
 		"import": {
 			"text": {
 				"title": "Importar token",
+				"title_nft": "",
 				"review": "Rever",
 				"saving": "Salvando...",
 				"updating": "Atualizando lista de tokens",
+				"canister_id": "",
 				"ledger_canister_id": "ID do Canister Ledger",
 				"index_canister_id": "ID do Canister Index",
 				"minter_canister_id": "ID do Canister Minter",
@@ -996,6 +1163,7 @@
 				"verifying": "Verificando detalhes do token...",
 				"add_the_token": "Adicionar o token",
 				"info": "Os IDs dos canisters Ledger e Index geralmente estão disponíveis no site do projeto.",
+				"info_ext": "",
 				"info_index": "O ID do canister Index é opcional, mas sem ele, $oisy_short não pode exibir o histórico de transações.",
 				"custom_tokens_not_supported": "A rede selecionada não suporta tokens personalizados."
 			},
@@ -1005,8 +1173,10 @@
 				"unexpected_ledger": "Algo deu errado ao validar o canister Ledger.",
 				"unexpected_index": "Algo deu errado ao validar o canister Index.",
 				"unexpected_index_ledger": "Algo deu errado ao carregar o ID do Ledger relacionado ao canister Index.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "O ID do Ledger não está relacionado ao canister Index.",
 				"missing_ledger_id": "O ID do Ledger está faltando. Você forneceu um valor?",
+				"missing_canister_id": "",
 				"missing_contract_address": "O endereço do contrato está faltando. Você forneceu um valor?",
 				"missing_token_address": "O endereço do token está faltando. Você forneceu um valor?",
 				"no_network": "Nenhuma rede selecionada. Isso é inesperado."
@@ -1018,9 +1188,12 @@
 		"manage": {
 			"text": {
 				"title": "Gerir tokens",
+				"title_nft": "",
 				"manage_list": "Gerir tokens",
+				"manage_list_nft": "",
 				"list_settings": "Configurações da lista",
 				"import_token": "Importar token",
+				"import_nft": "",
 				"network": "Rede",
 				"all_tokens_zero_balance": "Todos os tokens têm saldo zero.",
 				"enable_more_assets": "Habilitar mais tokens"
@@ -1083,6 +1256,8 @@
 			"title": "NFT",
 			"title_empty": "Seus NFT aparecerão aqui",
 			"description_empty": "Parece que você ainda não recebeu NFT",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "",
 			"as_plain_list": "",
 			"by_collection": "",
@@ -1103,28 +1278,41 @@
 			"collections": "",
 			"all_assets": "",
 			"address_copied": "",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "",
 			"not_spam": "",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "",
 			"unhide": "",
 			"hidden": "",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "",
 			"img_consent_disabled": "",
 			"img_consent_none": "",
 			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "",
 			"review_preference": "",
 			"media_enabled": "",
 			"media_disabled": "",
 			"enable_media": "",
 			"disable_media": "",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
 			"learn_more": "",
-			"token_id": ""
+			"token_id": "",
+			"go_to_collection": "",
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "Nenhum NFT por enquanto",
@@ -1132,7 +1320,8 @@
 				"image": "Imagem do NFT com token ID: $tokenId"
 			},
 			"copy_address": "",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
@@ -1147,7 +1336,10 @@
 			"convert_btc_network_fee": "Taxa de rede Bitcoin",
 			"zero_fee": "Taxa grátis",
 			"total_fee": "Taxa total",
-			"ata_fee": "Taxa ATA"
+			"ata_fee": "Taxa ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Saldo insuficiente para cobrir as taxas."
@@ -1181,11 +1373,17 @@
 			"scan_qr": "Fazer scan de QR code",
 			"or_use_link": "ou usar link WalletConnect",
 			"proposer": "Proponente",
+			"spender": "",
+			"application": "",
 			"review": "Rever permissões necessárias de $chain_name ($key)",
 			"method": "Método",
 			"methods": "Métodos",
 			"events": "Eventos",
 			"message": "Mensagem",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "Dados HEX",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem"
@@ -1254,7 +1452,11 @@
 			"block": "Bloco",
 			"interacted_with": "Interagido com (Para)",
 			"status": "Status",
-			"confirmations": "Confirmações"
+			"confirmations": "Confirmações",
+			"for": "",
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "Confirmado",
@@ -1292,7 +1494,8 @@
 		"alt": {
 			"open_block_explorer": "Abrir esta transação no explorador de blocos",
 			"open_from_block_explorer": "Abrir o endereço 'De' no explorador de blocos",
-			"open_to_block_explorer": "Abrir o endereço 'Para' no explorador de blocos"
+			"open_to_block_explorer": "Abrir o endereço 'Para' no explorador de blocos",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "Não é possível obter o número do bloco.",
@@ -1304,6 +1507,8 @@
 			"title": "Transações",
 			"buy_or_receive": "Faça sua primeira transação, e compre ou receba tokens agora!",
 			"transaction_history": "O seu histórico de transações aparecerá aqui",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "As informações de transação BTC são obtidas a partir de terceiras partes centralizadas e devem ser verificadas independentemente.",
 			"transaction_history_unavailable": "Histórico de transações indisponível",
 			"missing_index_canister_explanation": "Atualmente, $oisy_short não pode exibir seu histórico de transações de tokens porque o emissor ainda não forneceu a função de rastreamento. Ela deve ser adicionada em breve. Enquanto isso, não se preocupe — você ainda pode enviar e receber seus tokens como de costume.",
@@ -1311,9 +1516,7 @@
 			"token_needs_enabling": "O token precisa de ser habilitado para visualizar o histórico de transações."
 		},
 		"error": {
-			"loading_transactions": "Erro ao carregar as transações.",
 			"loading_transactions_symbol": "Erro ao carregar as transações $symbol.",
-			"no_token_loading_transaction": "Token não encontrado. Transações não podem ser carregadas.",
 			"uncertified_transactions_removed": "Várias transações não certificadas foram identificadas e subsequentemente removidas das listas exibidas.",
 			"loading_pending_ck_ethereum_transactions": "Algo deu errado ao buscar as transações pendentes de $network.",
 			"get_transaction_for_hash": "Falha ao obter a transação a partir do hash fornecido ($hash).",
@@ -1495,6 +1698,15 @@
 			"title": "Scan do QR code"
 		}
 	},
+	"pow_protector": {
+		"text": {
+			"title": "Preparing Signer",
+			"description": "Verifying that you are not a robot",
+			"request_challenge": "Waiting for new challenge",
+			"solve_challenge": "Solving challenge",
+			"grant_cycles": "Enabling signing"
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1566,14 +1778,7 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Revise os Termos e Condições",
-			"review_updated_title": "Revise os Termos e Condições atualizados",
-			"review_description": "Antes de usar a Carteira OISY, você deve revisar e concordar com nossos Termos de Serviço e Política de Privacidade. Esses documentos explicam as regras do nosso serviço e como protegemos seus dados.",
-			"review_updated_description": "Para continuar usando a Carteira OISY, revise e concorde com nossos Termos de Serviço e Política de Privacidade atualizados. Essas alterações são importantes para manter nosso serviço seguro e em conformidade.",
-			"reject_warning": "Você deve aceitar os Termos e Condições para prosseguir. Sinta-se à vontade para tentar novamente quando quiser.",
-			"i_have_accepted": "Li e concordo com os",
-			"i_have_accepted_updated": "Li e concordo com os atualizados",
-			"accept_and_continue": "Aceite e continue"
+			"updated_agreements_warning": "Atualizamos $agreements. Ao usar $oisy_short, você confirma que leu e concorda com as atualizações."
 		},
 		"error": {
 			"cannot_update_user_agreements": "Algo deu errado ao atualizar seus acordos."
@@ -1582,23 +1787,11 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Contrato de Licença",
-			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",
-			"paragraph_1": "Obrigado pelo seu interesse em $oisy_name, um aplicativo descentralizado de carteira multi-cadeia e auto-custódia baseado em navegador, hospedado na rede pública de blockchain Internet Computer (“$oisy_short”). Para obter mais informações sobre $oisy_short, seu código-fonte aberto e licenças relacionadas, consulte o repositório GitHub de $oisy_short aqui: $oisy_repo_url.",
-			"paragraph_2": "Este Contrato de Licença rege o uso de $oisy_short por você (“Você”). AO USAR $oisy_short, VOCÊ CONCORDA QUE LEU, COMPREENDEU E CONCORDA EM ESTAR VINCULADO POR ESTE CONTRATO DE LICENÇA. SE VOCÊ NÃO CONCORDA, VOCÊ NÃO PODE USAR $oisy_short.",
-			"paragraph_3": "Se você optar por usar $oisy_short, você e a DFINITY Foundation, incluindo suas afiliadas e subsidiárias (coletivamente “DFINITY”), reconhecem e concordam com o seguinte:",
-			"limited_license": "<strong>1. LICENÇA LIMITADA.</strong> Sujeito aos termos e condições contidos neste Contrato de Licença, a DFINITY concede a você uma licença limitada, não exclusiva, não transferível, não sublicenciável e revogável para usar $oisy_short apenas para os fins de receber, manter e enviar tokens como ICP nativos, ICRC-1, ETH e tokens ERC20, bem como outros tokens que podem ser disponibilizados de tempos em tempos. Você pode criar obras derivadas na medida permitida pelos termos de licenciamento que regem o uso de quaisquer componentes de código aberto incluídos em $oisy_short.",
-			"restrictions": "<strong>2. RESTRIÇÕES.</strong> Você é responsável por todas as atividades relacionadas ao seu uso de $oisy_short, independentemente de as atividades serem autorizadas por você ou realizadas por você, seus funcionários ou um terceiro em seu nome. VOCÊ COMPREENDE QUE A DFINITY NÃO É RESPONSÁVEL POR QUAISQUER ATIVIDADES OU TRANSAÇÕES (SEJAM ELAS CONCLUÍDAS OU NÃO) ASSOCIADAS À SUA $oisy_name. Você não deturpará ou embelezará a relação entre você e a DFINITY, incluindo expressar ou implicar que a DFINITY o apoia, patrocina, endossa ou contribui para você ou seus empreendimentos comerciais através do seu uso de $oisy_short. Você não implicará nenhuma relação ou afiliação com a DFINITY, exceto conforme expressamente permitido por este Contrato de Licença. Você está proibido de usar o nome $oisy_short, o logotipo ou quaisquer outras marcas comerciais relacionadas a $oisy_short de qualquer maneira que possa implicar um endosso ou afiliação, deturpar sua relação com $oisy_short ou criar confusão em relação à origem de $oisy_short.",
-			"applicable_laws": "<strong>3. LEIS APLICÁVEIS.</strong> Você cumprirá todas as leis e regulamentos aplicáveis (incluindo, sem limitação, leis e regulamentos relacionados a controles de exportação, lavagem de dinheiro ou sanções econômicas) em conexão com o seu uso de $oisy_short e quaisquer transações associadas à sua $oisy_name.",
-			"reservation_rights": "<strong>4. RESERVA DE DIREITOS DA DFINITY.</strong> $oisy_short é propriedade da DFINITY e licenciado, não vendido, a você. O conteúdo de $oisy_short, suas interfaces visuais, recursos interativos, informações, gráficos, design, compilação, código de computador, produtos, serviços e todos os outros elementos de $oisy_short e documentação relacionada, são protegidos pelas leis de propriedade intelectual aplicáveis. Entre você e a DFINITY, todos os materiais da DFINITY e $oisy_short, incluindo os direitos de propriedade intelectual neles, são propriedade exclusiva e única da DFINITY ou de suas subsidiárias ou empresas afiliadas e/ou de seus licenciadores terceirizados, sujeitos a quaisquer licenças de software de código aberto. A DFINITY reserva-se todos os direitos não expressamente concedidos neste Contrato de Licença. Você não adquire nenhum direito, título ou interesse nos materiais da DFINITY ou $oisy_short, seja por implicação, impedimento legal ou de outra forma, exceto pelos direitos limitados estabelecidos neste Contrato de Licença e pelos direitos conferidos pelos termos de licenciamento que regem o uso de quaisquer componentes de código aberto incluídos em $oisy_short. Este Contrato de Licença não concede a você nenhum direito de usar o nome $oisy_short, o logotipo ou outras marcas comerciais relacionadas a $oisy_short ou DFINITY.",
-			"feedback": "<strong>5. FEEDBACK.</strong> Se você fornecer à DFINITY quaisquer comentários, ideias, relatórios de bugs, feedback, melhorias, recomendações ou modificações em relação a $oisy_short (“Feedback”), tal Feedback é fornecido de forma não confidencial, e a DFINITY terá o direito de usar tal Feedback a seu critério, incluindo, mas não se limitando à incorporação de tais mudanças sugeridas nos materiais da DFINITY, $oisy_short ou outros serviços. Você concede à DFINITY uma licença perpétua, irrevogável, transferível, sublicenciável, não exclusiva, livre de royalties, sob todos os direitos necessários para incorporar e usar seu Feedback para qualquer finalidade, incluindo a fabricação e venda de produtos e serviços, e concorda em fornecer à DFINITY toda a assistência necessária para documentar, aperfeiçoar e manter os direitos da DFINITY sobre o Feedback. Você concorda em permitir que a DFINITY entre em contato com você para obter Feedback de tempos em tempos, mas pode optar por não participar enviando uma notificação por escrito para legalnotice@dfinity.org.",
-			"termination": "<strong>6. TERMOS E RESCISÃO.</strong> Este Contrato de Licença permanecerá em vigor até que seja rescindido. O Contrato de Licença, e seus direitos e licenças aqui contidos, terminarão imediatamente após sua violação do Contrato de Licença. Você pode rescindir o Contrato de Licença a qualquer momento, esvaziando seu $oisy_name de tokens e cessando todo o uso de $oisy_short. A DFINITY pode rescindir este Contrato de Licença a qualquer momento por qualquer motivo, incluindo, sem limitação, qualquer uso indevido ou abuso real ou suspeito de $oisy_short por você ou qualquer violação deste Contrato de Licença. As Seções 3 a 13 sobreviverão a qualquer rescisão deste Contrato de Licença.",
-			"warranty_liability": "<strong>7. ISENÇÃO DE GARANTIA E LIMITAÇÃO DE RESPONSABILIDADE.</strong> NA EXTENSÃO MÁXIMA PERMITIDA PELA LEI APLICÁVEL, $oisy_short É FORNECIDO “COMO ESTÁ”, SEM GARANTIA DE QUALQUER TIPO. NA EXTENSÃO MÁXIMA PERMITIDA PELA LEI APLICÁVEL, A DFINITY SE ISENTA DE TODAS AS GARANTIAS E CONDIÇÕES, EXPRESSAS, IMPLÍCITAS, LEGAIS OU DE OUTRA FORMA, INCLUINDO, MAS NÃO SE LIMITANDO A, GARANTIAS OU CONDIÇÕES IMPLÍCITAS DE ADEQUAÇÃO A UM FIM ESPECÍFICO, COMERCIALIZAÇÃO, TÍTULO, QUALIDADE, RESULTADOS E NÃO INFRAÇÃO. A DFINITY NÃO GARANTE QUE $oisy_short ESTARÁ SEMPRE DISPONÍVEL, SEGURO OU PROTEGIDO (AGORA E NO FUTURO). A DFINITY SE ISENTA EXPRESSAMENTE DE QUAISQUER GARANTIAS DE QUALQUER TIPO EM RELAÇÃO À PRECISÃO OU FUNCIONALIDADE DE $oisy_short, E EM RELAÇÃO À PRECISÃO, VALIDADE OU INTEGRALIDADE DE QUALQUER INFORMAÇÃO OU RECURSOS (AGORA E NO FUTURO) DISPONIBILIZADOS ATRAVÉS DO SEU USO DE $oisy_short, OU À QUALIDADE OU CONSISTÊNCIA DE $oisy_short OU AOS RESULTADOS OBTIDOS ATRAVÉS DO SEU USO. NA EXTENSÃO MÁXIMA PERMITIDA PELA LEI APLICÁVEL, EM NENHUM CASO A DFINITY SERÁ RESPONSÁVEL POR QUAISQUER DANOS CONSEQUENCIAIS, ESPECIAIS, INDIRETOS, INCIDENTAIS OU PUNITIVOS, SEJA QUAL FOR A ORIGEM, DECORRENTES DO USO OU DA INCAPACIDADE DE USAR E ACESSAR $oisy_short OU MATERIAIS DA DFINITY, MESMO QUE A DFINITY TENHA SIDO AVISADA DA POSSIBILIDADE DE TAIS DANOS, E NÃO OBSTANTE QUALQUER FALHA DE PROPÓSITO ESSENCIAL DE QUALQUER RECURSO LIMITADO. NA EXTENSÃO MÁXIMA PERMITIDA PELA LEI APLICÁVEL, EM NENHUM CASO A RESPONSABILIDADE AGREGADA DA DFINITY POR DANOS DECORRENTES DESTE CONTRATO DE LICENÇA OU DO SEU USO OU INCAPACIDADE DE USAR $oisy_short EXCEDERÁ 100 CHF.",
-			"indemnity": "<strong>8. INDENIZAÇÃO.</strong> Você concorda em indenizar, defender e isentar a DFINITY e suas afiliadas, diretores, fornecedores, licenciadores e outros clientes de qualquer responsabilidade e custos, incluindo honorários advocatícios razoáveis incorridos por tais partes, em conexão com o seu uso ou uso indevido de $oisy_short ou sua violação deste Contrato de Licença ou de qualquer lei ou regulamento aplicável.",
-			"governing_law": "<strong>9. LEI APLICÁVEL; FORO.</strong> Qualquer reivindicação relacionada a $oisy_short será regida pelas leis da Suíça, com exclusão das regras de conflito de leis. Qualquer reivindicação ou disputa relacionada a este Contrato de Licença ou a ele (incluindo para disputas ou reivindicações não contratuais e sua interpretação) estará sujeita à jurisdição exclusiva dos Tribunais de Zurique, Suíça, sujeita a um recurso no Tribunal Federal Suíço.",
-			"entire_agreement": "<strong>10. ACORDO INTEGRAL E SEPARABILIDADE.</strong> Este Contrato de Licença é o acordo integral entre Você e a DFINITY e substitui quaisquer e todos os acordos, negociações ou outras comunicações anteriores entre Você e a DFINITY, sejam orais ou escritas, com relação ao assunto aqui tratado. A DFINITY pode fazer alterações neste Contrato de Licença quando novas versões de $oisy_short forem disponibilizadas. No caso de qualquer disposição deste Contrato de Licença ser considerada inválida ou inexequível, então: (a) tal disposição será considerada reformada na medida estritamente necessária para tornar tal disposição válida e exequível, ou se não for passível de tal reforma, será considerada separada deste Contrato de Licença; e (b) a validade e a exequibilidade de todas as outras disposições aqui contidas não serão de forma alguma afetadas ou prejudicadas.",
-			"assignment": "<strong>11. CESSÃO.</strong> Você não pode ceder este Contrato de Licença sem o consentimento prévio por escrito da DFINITY, seja expressamente ou por força da lei, inclusive em conexão com uma fusão ou mudança de controle, e qualquer tentativa de cessão será nula e sem efeito. A DFINITY pode ceder este Contrato de Licença sem restrições e sem qualquer aviso a você. Sujeito ao exposto, este Contrato de Licença será vinculativo para as partes e seus respectivos sucessores e cessionários permitidos.",
-			"no_waiver": "<strong>12. NÃO RENÚNCIA.</strong> A falha em exercer, ou o atraso em exercer, um direito, poder ou recurso previsto neste Contrato de Licença ou por lei não constituirá uma renúncia a esse direito, poder ou recurso. A renúncia da DFINITY a qualquer obrigação ou violação deste Contrato de Licença não operará como uma renúncia a qualquer outra obrigação ou violação subsequente do Contrato de Licença.",
-			"english_version": "<strong>13. VERSÃO EM INGLÊS.</strong> A versão em inglês deste Contrato de Licença será a versão oficial e controladora do contrato se surgir algum conflito. Todas as comunicações e avisos feitos de acordo com este Contrato de Licença devem ser em inglês.",
+			"det": {
+				"article": "o ",
+				"possessive": "nosso "
+			},
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1608,7 +1801,13 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Termos de Uso",
+			"det": {
+				"article": "os ",
+				"possessive": "nossos "
+			},
 			"title": "",
+			"instruction": "Ao clicar neste botão, você concorda com os $link",
+			"instruction_two_buttons": "Ao clicar em um desses botões, você concorda com os $link",
 			"body": ""
 		},
 		"alt": {
@@ -1618,6 +1817,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Política de Privacidade",
+			"det": {
+				"article": "a ",
+				"possessive": "nossa "
+			},
 			"title": "",
 			"body": ""
 		},
@@ -1639,21 +1842,154 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Ganhe"
+			"title": "Ganhe",
+			"tab_title": "",
+			"earning_opportunities": "",
+			"header_title": "",
+			"header_description": "",
+			"go_to_earn": ""
 		},
 		"cards": {
-			"gold_title": "Ouro",
-			"gold_description": "GLDT Staking",
-			"stablecoins_title": "Moedas estáveis (stablecoins)",
-			"stablecoins_description": "Em breve",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Recompensas OISY"
+			"gldt": {
+				"title1": "",
+				"title2": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
+		},
+		"providers": {
+			"goldDaoStaking": {
+				"cardTitle": ""
+			}
 		}
 	},
-	"welcome": {
-		"title": "Bem vindo ao $oisy_curtas!",
-		"subtitle": "Pronto para ganhar?",
-		"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique seus amigos e ganhe um bônus toda vez que um deles ganhar granulados."
+	"stake": {
+		"text": {
+			"gldt_stake_page_description": "",
+			"stake": "",
+			"stake_now": "",
+			"stake_amount": "",
+			"not_enough_to_stake": "",
+			"unstake": "",
+			"unstake_now": "",
+			"unstaking": "",
+			"unstake_token": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"earning_potential": "",
+			"earning_potential_hint": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
+			"unproductive_assets": "",
+			"invested_assets": "",
+			"visit_provider": "",
+			"current_apy_label": "",
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"unlock_requests": "",
+			"unlocking_in": "",
+			"unlocked": "",
+			"withdraw": "",
+			"withdraw_successful": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_reward_short": "",
+			"claim_now": "",
+			"claiming": "",
+			"get_tokens_with_amount": "",
+			"get_tokens": "",
+			"reward_claimed": "",
+			"staked": "",
+			"unstaked": "",
+			"title_empty_1": "",
+			"title_empty_2_usd": "",
+			"title_empty_2_apy": "",
+			"title_empty_3": "",
+			"description_empty": "",
+			"full_history": "",
+			"recent_history": "",
+			"gldt_stake_carousel_slide_title": "",
+			"gldt_stake_carousel_slide_cta": ""
+		},
+		"error": {
+			"unexpected_error_on_withdraw": "",
+			"unexpected_error_on_unstake": "",
+			"dissolvement_limit_reached": ""
+		},
+		"terms": {
+			"gldt": {
+				"item1_title": "",
+				"item1_description": "",
+				"item2_title_1": "",
+				"item2_title_2": "",
+				"item3_title": "",
+				"item3_description": "",
+				"item4_title": "",
+				"item4_description": "",
+				"item5_title": ""
+			}
+		},
+		"info": {
+			"gldt": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": "",
+				"fact_3_description_fallback": ""
+			}
+		},
+		"alt": {
+			"placeholder_image": ""
+		}
+	},
+	"get_token": {
+		"text": {
+			"title": "",
+			"swap_to_token": "",
+			"ready_to_swap": "",
+			"convert_assets": "",
+			"convertible_assets": "",
+			"how_to_convert": "",
+			"get_more_token": "",
+			"receive_token": "",
+			"receive_token_title": "",
+			"receive_token_text": "",
+			"buy_assets": "",
+			"buy_assets_title": "",
+			"buy_assets_text": ""
+		}
 	},
 	"temporal": {
 		"seconds_to_duration": {
@@ -1681,11 +2017,18 @@
 			"action_button_send_tokens_title": "",
 			"action_button_send_tokens_subtitle": "",
 			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "",
 			"send_to_message": "",
 			"send_message": "Enviar mensagem",
 			"send_message_input_placeholder": "O que você quer fazer?",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "Desculpe, não consegui encontrar nenhum contato adequado na sua lista de contatos.",
 			"loading": "A pensar...",
 			"reset_chat_history": "",

@@ -11,7 +11,6 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
-import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import type { CanisterIdText } from '$lib/types/canister';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
@@ -117,11 +116,6 @@ export const icrcTokens: Readable<IcrcCustomToken[]> = derived(
 	]
 );
 
-export const sortedIcrcTokens: Readable<IcrcCustomToken[]> = derived(
-	[icrcTokens],
-	([$icrcTokens]) => $icrcTokens.sort(sortIcTokens)
-);
-
 /**
  * The list of ICRC tokens that are either enabled by default (static config) or enabled by the users regardless if they are custom or default.
  */
@@ -168,4 +162,14 @@ export const allKnownIcrcTokensLedgerCanisterIds: Readable<LedgerCanisterIdText[
 			...icrcEnvTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
 		];
 	}
+);
+
+export const icrcCustomTokensInitialized: Readable<boolean> = derived(
+	[icrcCustomTokensStore],
+	([$icrcCustomTokensStore]) => $icrcCustomTokensStore !== undefined
+);
+
+export const icrcCustomTokensNotInitialized: Readable<boolean> = derived(
+	[icrcCustomTokensInitialized],
+	([$icrcCustomTokensInitialized]) => !$icrcCustomTokensInitialized
 );

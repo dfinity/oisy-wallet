@@ -2,7 +2,7 @@ import { EnvIcrcTokenMetadataSchema, EnvIcTokenSchema } from '$env/schema/env-ic
 import { EnvTokenSymbolSchema } from '$env/schema/env-token-common.schema';
 import { isEthAddress } from '$lib/utils/account.utils';
 import { isNullish } from '@dfinity/utils';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 const EnvErc20ContractAddressSchema = z.custom<string>((data: unknown) => {
 	if (isNullish(data) || typeof data !== 'string') {

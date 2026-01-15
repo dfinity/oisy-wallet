@@ -1,15 +1,15 @@
 import { ICP_LEDGER_CANISTER_ID, ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { loadAndAssertAddCustomToken } from '$icp/services/ic-add-custom-tokens.service';
 import type { IcCanisters, IcToken } from '$icp/types/ic-token';
-import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { IcrcIndexNgCanister, IcrcLedgerCanister } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
+import { mockIcrcAccount, mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
+import { IcrcIndexCanister, IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -17,7 +17,7 @@ import { mock } from 'vitest-mock-extended';
 describe('ic-add-custom-tokens.service', () => {
 	describe('loadAndAssertAddCustomToken', () => {
 		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
-		const indexCanisterMock = mock<IcrcIndexNgCanister>();
+		const indexCanisterMock = mock<IcrcIndexCanister>();
 
 		const mockLedgerCanisterId = 'zfcdd-tqaaa-aaaaq-aaaga-cai';
 		const mockIndexCanisterId = 'zlaol-iaaaa-aaaaq-aaaha-cai';
@@ -30,6 +30,7 @@ describe('ic-add-custom-tokens.service', () => {
 		let spyLedgerId: MockInstance;
 		let spyGetTransactions: MockInstance;
 		let spyMetadata: MockInstance;
+		let spyMintingAccount: MockInstance;
 		let spyBalance: MockInstance;
 
 		const validParams = {
@@ -47,7 +48,7 @@ describe('ic-add-custom-tokens.service', () => {
 			id: parseTokenId('test'),
 			ledgerCanisterId: '2ouva-viaaa-aaaaq-aaamq-cai',
 			indexCanisterId: '2awyi-oyaaa-aaaaq-aaanq-cai',
-			standard: 'icp',
+			standard: { code: 'icp' },
 			category: 'custom',
 			position: Number.MAX_VALUE,
 			name: tokenName,
@@ -66,11 +67,17 @@ describe('ic-add-custom-tokens.service', () => {
 				.spyOn(IcrcLedgerCanister, 'create')
 				.mockImplementation(() => ledgerCanisterMock);
 			spyIndexCreate = vi
-				.spyOn(IcrcIndexNgCanister, 'create')
+				.spyOn(IcrcIndexCanister, 'create')
 				.mockImplementation(() => indexCanisterMock);
 		});
 
 		describe('error', () => {
+			beforeEach(() => {
+				spyMintingAccount = ledgerCanisterMock.getMintingAccount.mockResolvedValue(
+					toNullable({ owner: mockPrincipal, subaccount: toNullable() })
+				);
+			});
+
 			it('should return error if identity is missing', async () => {
 				await expect(() =>
 					loadAndAssertAddCustomToken({
@@ -79,7 +86,7 @@ describe('ic-add-custom-tokens.service', () => {
 						ledgerCanisterId: mockLedgerCanisterId,
 						indexCanisterId: mockIndexCanisterId
 					})
-				).rejects.toThrow();
+				).rejects.toThrowError();
 			});
 
 			it('should return error if ledgerCanisterId is missing', async () => {
@@ -118,7 +125,7 @@ describe('ic-add-custom-tokens.service', () => {
 							id: parseTokenId('test'),
 							ledgerCanisterId: mockLedgerCanisterId,
 							indexCanisterId: mockIndexCanisterId,
-							standard: 'icp',
+							standard: { code: 'icp' },
 							category: 'custom',
 							position: 0,
 							name: 'Test',
@@ -199,7 +206,7 @@ describe('ic-add-custom-tokens.service', () => {
 					spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
 						balance: 100n,
 						transactions: [],
-						oldest_tx_id: [0n]
+						oldest_tx_id: [ZERO]
 					});
 
 					spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([]);
@@ -224,7 +231,7 @@ describe('ic-add-custom-tokens.service', () => {
 					spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
 						balance: 100n,
 						transactions: [],
-						oldest_tx_id: [0n]
+						oldest_tx_id: [ZERO]
 					});
 
 					spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
@@ -270,6 +277,14 @@ describe('ic-add-custom-tokens.service', () => {
 				await loadAndAssertAddCustomToken(params);
 
 				expect(spyMetadata).toHaveBeenNthCalledWith(1, {
+					certified: true
+				});
+			};
+
+			const assertUpdateCallMintingAccount = async (params: LoadAndAssertAddCustomTokenParams) => {
+				await loadAndAssertAddCustomToken(params);
+
+				expect(spyMintingAccount).toHaveBeenNthCalledWith(1, {
 					certified: true
 				});
 			};
@@ -339,6 +354,10 @@ describe('ic-add-custom-tokens.service', () => {
 					await assertUpdateCallMetadata(validParams);
 				});
 
+				it('should call with an update getMintingAccount to retrieve the minting account of the token', async () => {
+					await assertUpdateCallMintingAccount(validParams);
+				});
+
 				it('should successfully load a new token', async () => {
 					await assertLoadToken(validParams);
 				});
@@ -362,7 +381,7 @@ describe('ic-add-custom-tokens.service', () => {
 					spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
 						balance: expectedBalance,
 						transactions: [],
-						oldest_tx_id: [0n]
+						oldest_tx_id: [ZERO]
 					});
 				});
 
@@ -387,7 +406,7 @@ describe('ic-add-custom-tokens.service', () => {
 					await loadAndAssertAddCustomToken(validParamsWithIndex);
 
 					expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
-						account: getIcrcAccount(mockIdentity.getPrincipal()),
+						account: mockIcrcAccount,
 						certified: true,
 						max_results: ZERO,
 						start: undefined
@@ -396,6 +415,10 @@ describe('ic-add-custom-tokens.service', () => {
 
 				it('should call with an update metadata to retrieve the details of the token', async () => {
 					await assertUpdateCallMetadata(validParamsWithIndex);
+				});
+
+				it('should call with an update getMintingAccount to retrieve the minting account of the token', async () => {
+					await assertUpdateCallMintingAccount(validParamsWithIndex);
 				});
 
 				it('should successfully load a new token', async () => {

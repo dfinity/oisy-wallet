@@ -2,8 +2,8 @@ import { balance, transactions, transfer } from '$icp/api/xtc-ledger.api';
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
-import type { IcrcAccount } from '@dfinity/ledger-icrc';
 import { toNullable } from '@dfinity/utils';
+import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
 
 describe('xtc-ledger.api', () => {
@@ -33,13 +33,12 @@ describe('xtc-ledger.api', () => {
 			ledgerCanisterMock.transfer.mockResolvedValue(transactionId);
 		});
 
-		it('successfully calls balance endpoint', async () => {
+		it('successfully calls transfer endpoint', async () => {
 			const result = await transfer(params);
 
 			expect(result).toEqual(transactionId);
 
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
 				to: params.to,
 				amount: params.amount,
 				...account
@@ -47,7 +46,7 @@ describe('xtc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(transfer({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -68,12 +67,11 @@ describe('xtc-ledger.api', () => {
 
 			expect(result).toEqual(balanceE8s);
 
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledWith(mockPrincipal);
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledExactlyOnceWith(mockPrincipal);
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(balance({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(balance({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 
@@ -121,8 +119,7 @@ describe('xtc-ledger.api', () => {
 
 			expect(result).toEqual(transactionsResponse);
 
-			expect(ledgerCanisterMock.transactions).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transactions).toHaveBeenCalledWith({ certified: true });
+			expect(ledgerCanisterMock.transactions).toHaveBeenCalledExactlyOnceWith({ certified: true });
 		});
 
 		it('successfully calls transactions endpoint as query', async () => {
@@ -133,12 +130,11 @@ describe('xtc-ledger.api', () => {
 
 			expect(result).toEqual(transactionsResponse);
 
-			expect(ledgerCanisterMock.transactions).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transactions).toHaveBeenCalledWith({ certified: false });
+			expect(ledgerCanisterMock.transactions).toHaveBeenCalledExactlyOnceWith({ certified: false });
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transactions({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(transactions({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 });

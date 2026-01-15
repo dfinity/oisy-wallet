@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconHide from '$lib/components/icons/IconHide.svelte';
@@ -32,7 +31,6 @@
 <ButtonIcon
 	ariaLabel={$i18n.navigation.alt.menu}
 	colorStyle="muted"
-	disabled={$erc20UserTokensNotInitialized}
 	link={false}
 	onclick={() => (visible = true)}
 	styleClass={visible ? 'active' : ''}

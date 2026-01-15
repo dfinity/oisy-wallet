@@ -35,7 +35,7 @@ import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { isNullish } from '@dfinity/utils';
+import { assertNever, isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const userNetworks: Readable<UserNetworks> = derived(
@@ -113,10 +113,7 @@ export const userNetworks: Readable<UserNetworks> = derived(
 				return ARBITRUM_SEPOLIA_NETWORK_ID;
 			}
 
-			// Force compiler error on unhandled cases based on leftover types
-			const _: never = key;
-
-			throw new Error(`Unknown network key: ${key}`);
+			assertNever(key, `Unknown network key: ${key}`);
 		};
 
 		return {

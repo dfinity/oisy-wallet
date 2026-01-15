@@ -204,7 +204,7 @@ describe('sol-instructions-token-2022.utils', () => {
 		it('should raise an error if the instruction is missing the data', () => {
 			const { data: _, ...withoutData } = mockInstruction;
 
-			expect(() => parseSolToken2022Instruction(withoutData)).toThrow(
+			expect(() => parseSolToken2022Instruction(withoutData)).toThrowError(
 				'The instruction does not have any data'
 			);
 		});
@@ -214,7 +214,7 @@ describe('sol-instructions-token-2022.utils', () => {
 
 			expect(() =>
 				parseSolToken2022Instruction(withoutAccounts as unknown as SolInstruction)
-			).toThrow('The instruction does not have any accounts');
+			).toThrowError('The instruction does not have any accounts');
 		});
 
 		it('should parse an InitializeMint instruction', () => {
@@ -1309,104 +1309,13 @@ describe('sol-instructions-token-2022.utils', () => {
 			);
 		});
 
-		it('should return the original instruction if it is not a recognised Token-2022 instruction', () => {
+		it('should raise an error if it is not a recognised Token-2022 instruction', () => {
 			// @ts-expect-error intentional for testing unknown discriminant
 			vi.mocked(identifyToken2022Instruction).mockReturnValue('unknown-instruction');
 
-			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual(mockInstruction);
-
-			expect(parseInitializeMintInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeAccountInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeMultisigInstruction).not.toHaveBeenCalled();
-			expect(parseTransferInstruction).not.toHaveBeenCalled();
-			expect(parseApproveInstruction).not.toHaveBeenCalled();
-			expect(parseRevokeInstruction).not.toHaveBeenCalled();
-			expect(parseSetAuthorityInstruction).not.toHaveBeenCalled();
-			expect(parseMintToInstruction).not.toHaveBeenCalled();
-			expect(parseBurnInstruction).not.toHaveBeenCalled();
-			expect(parseCloseAccountInstruction).not.toHaveBeenCalled();
-			expect(parseFreezeAccountInstruction).not.toHaveBeenCalled();
-			expect(parseThawAccountInstruction).not.toHaveBeenCalled();
-			expect(parseTransferCheckedInstruction).not.toHaveBeenCalled();
-			expect(parseApproveCheckedInstruction).not.toHaveBeenCalled();
-			expect(parseMintToCheckedInstruction).not.toHaveBeenCalled();
-			expect(parseBurnCheckedInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeAccount2Instruction).not.toHaveBeenCalled();
-			expect(parseSyncNativeInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeAccount3Instruction).not.toHaveBeenCalled();
-			expect(parseInitializeMultisig2Instruction).not.toHaveBeenCalled();
-			expect(parseInitializeMint2Instruction).not.toHaveBeenCalled();
-			expect(parseGetAccountDataSizeInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeImmutableOwnerInstruction).not.toHaveBeenCalled();
-			expect(parseAmountToUiAmountInstruction).not.toHaveBeenCalled();
-			expect(parseUiAmountToAmountInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeMintCloseAuthorityInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeTransferFeeConfigInstruction).not.toHaveBeenCalled();
-			expect(parseTransferCheckedWithFeeInstruction).not.toHaveBeenCalled();
-			expect(parseWithdrawWithheldTokensFromMintInstruction).not.toHaveBeenCalled();
-			expect(parseWithdrawWithheldTokensFromAccountsInstruction).not.toHaveBeenCalled();
-			expect(parseHarvestWithheldTokensToMintInstruction).not.toHaveBeenCalled();
-			expect(parseSetTransferFeeInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeConfidentialTransferMintInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateConfidentialTransferMintInstruction).not.toHaveBeenCalled();
-			expect(parseConfigureConfidentialTransferAccountInstruction).not.toHaveBeenCalled();
-			expect(parseApproveConfidentialTransferAccountInstruction).not.toHaveBeenCalled();
-			expect(parseEmptyConfidentialTransferAccountInstruction).not.toHaveBeenCalled();
-			expect(parseConfidentialDepositInstruction).not.toHaveBeenCalled();
-			expect(parseConfidentialWithdrawInstruction).not.toHaveBeenCalled();
-			expect(parseConfidentialTransferInstruction).not.toHaveBeenCalled();
-			expect(parseApplyConfidentialPendingBalanceInstruction).not.toHaveBeenCalled();
-			expect(parseEnableConfidentialCreditsInstruction).not.toHaveBeenCalled();
-			expect(parseDisableConfidentialCreditsInstruction).not.toHaveBeenCalled();
-			expect(parseEnableNonConfidentialCreditsInstruction).not.toHaveBeenCalled();
-			expect(parseDisableNonConfidentialCreditsInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeDefaultAccountStateInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateDefaultAccountStateInstruction).not.toHaveBeenCalled();
-			expect(parseReallocateInstruction).not.toHaveBeenCalled();
-			expect(parseEnableMemoTransfersInstruction).not.toHaveBeenCalled();
-			expect(parseDisableMemoTransfersInstruction).not.toHaveBeenCalled();
-			expect(parseCreateNativeMintInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeNonTransferableMintInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeInterestBearingMintInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateRateInterestBearingMintInstruction).not.toHaveBeenCalled();
-			expect(parseEnableCpiGuardInstruction).not.toHaveBeenCalled();
-			expect(parseDisableCpiGuardInstruction).not.toHaveBeenCalled();
-			expect(parseInitializePermanentDelegateInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeTransferHookInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateTransferHookInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeConfidentialTransferFeeInstruction).not.toHaveBeenCalled();
-			expect(
-				parseWithdrawWithheldTokensFromMintForConfidentialTransferFeeInstruction
-			).not.toHaveBeenCalled();
-			expect(
-				parseWithdrawWithheldTokensFromAccountsForConfidentialTransferFeeInstruction
-			).not.toHaveBeenCalled();
-			expect(
-				parseHarvestWithheldTokensToMintForConfidentialTransferFeeInstruction
-			).not.toHaveBeenCalled();
-			expect(parseEnableHarvestToMintInstruction).not.toHaveBeenCalled();
-			expect(parseDisableHarvestToMintInstruction).not.toHaveBeenCalled();
-			expect(parseWithdrawExcessLamportsInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeMetadataPointerInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateMetadataPointerInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeGroupPointerInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateGroupPointerInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeGroupMemberPointerInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateGroupMemberPointerInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeScaledUiAmountMintInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateMultiplierScaledUiMintInstruction).not.toHaveBeenCalled();
-			expect(parseInitializePausableConfigInstruction).not.toHaveBeenCalled();
-			expect(parsePauseInstruction).not.toHaveBeenCalled();
-			expect(parseResumeInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeTokenMetadataInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateTokenMetadataFieldInstruction).not.toHaveBeenCalled();
-			expect(parseRemoveTokenMetadataKeyInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateTokenMetadataUpdateAuthorityInstruction).not.toHaveBeenCalled();
-			expect(parseEmitTokenMetadataInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeTokenGroupInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateTokenGroupMaxSizeInstruction).not.toHaveBeenCalled();
-			expect(parseUpdateTokenGroupUpdateAuthorityInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeTokenGroupMemberInstruction).not.toHaveBeenCalled();
+			expect(() => parseSolToken2022Instruction(mockInstruction)).toThrowError(
+				'Unknown Solana Token 2022 instruction: unknown-instruction'
+			);
 		});
 	});
 });

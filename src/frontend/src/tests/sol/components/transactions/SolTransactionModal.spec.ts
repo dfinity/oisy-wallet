@@ -1,5 +1,6 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
@@ -29,7 +30,7 @@ describe('SolTransactionModal', () => {
 		});
 
 		const formattedAmount = `${formatToken({
-			value: mockSolTransactionUi.value ?? 0n,
+			value: mockSolTransactionUi.value ?? ZERO,
 			unitName: SOLANA_TOKEN.decimals,
 			displayDecimals: SOLANA_TOKEN.decimals
 		})} ${SOLANA_TOKEN.symbol}`;
@@ -116,5 +117,15 @@ describe('SolTransactionModal', () => {
 				getByText(shortenWithMiddleEllipsis({ text: mockSolTransactionUi.to as string }))
 			).toBeInTheDocument();
 		});
+	});
+
+	it('should display the network', () => {
+		const { getByText } = render(SolTransactionModal, {
+			transaction: mockSolTransactionUi,
+			token: BONK_TOKEN
+		});
+
+		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
+		expect(getByText(BONK_TOKEN.network.name)).toBeInTheDocument();
 	});
 });

@@ -5,7 +5,6 @@ import type { EnvIcrcTokenIcon, EnvIcrcTokenMetadataWithIcon } from '$env/types/
 import type { EnvSnsTokenWithIcon } from '$env/types/env-sns-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { PartialSpecific } from '$lib/types/utils';
-import { IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
 import {
 	candidNumberArrayToBigInt,
 	fromNullable,
@@ -14,9 +13,10 @@ import {
 	nonNullish
 } from '@dfinity/utils';
 import type { UrlSchema } from '@dfinity/zod-schemas';
+import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { z } from 'zod/v4';
+import type { z } from 'zod';
 import { SNS_JSON_FILE } from './constants.mjs';
 
 const AGGREGATOR_PAGE_SIZE = 10;
@@ -33,6 +33,7 @@ interface ResponseData {
 		ledger_canister_id: CanisterIdText;
 		index_canister_id: CanisterIdText;
 		root_canister_id: CanisterIdText;
+		governance_canister_id: CanisterIdText;
 	};
 	icrc1_metadata: [[string, { Text: string } | { Nat: [number] }]];
 	meta: { name: string; url: z.infer<typeof UrlSchema> };
@@ -156,7 +157,7 @@ const filterCommittedSns = ({
 }: ResponseData) => lifecycle === 3;
 
 const mapSnsMetadata = ({
-	canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
+	canister_ids: { ledger_canister_id, index_canister_id, root_canister_id, governance_canister_id },
 	icrc1_metadata,
 	meta: { name: alternativeName, url }
 }: ResponseData): SnsTokenWithOptionalMetadata => {
@@ -166,6 +167,7 @@ const mapSnsMetadata = ({
 		ledgerCanisterId: ledger_canister_id,
 		indexCanisterId: index_canister_id,
 		rootCanisterId: root_canister_id,
+		governanceCanisterId: governance_canister_id,
 		...(nonNullish(tokenMetadata) && {
 			metadata: {
 				...tokenMetadata,

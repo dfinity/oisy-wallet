@@ -1,8 +1,8 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
 import { randomWait } from '$lib/utils/time.utils';
 import { fetchSignatures, loadSolLamportsBalance, loadTokenBalance } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
+import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';

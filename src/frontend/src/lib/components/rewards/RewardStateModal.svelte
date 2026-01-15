@@ -12,7 +12,7 @@
 	import {
 		TRACK_REWARD_CAMPAIGN_WIN_LEARN_MORE,
 		TRACK_REWARD_CAMPAIGN_WIN_SHARE
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
 	import {
 		REWARDS_STATE_MODAL_IMAGE_BANNER,
@@ -31,25 +31,33 @@
 
 	let { reward, rewardType = RewardType.AIRDROP }: Props = $props();
 
-	let imgSrc = $state('');
-	let title = $state('');
-	let description = $state('');
-	let shareHref = $state('');
-
-	$effect(() => {
+	let {
+		banner: imgSrc,
+		title,
+		description,
+		shareHref
+	} = $derived.by(() => {
 		if (rewardType === RewardType.LEADERBOARD && nonNullish(reward.win.leaderboard)) {
-			({ banner: imgSrc, title, description, shareHref } = reward.win.leaderboard);
-		} else if (rewardType === RewardType.JACKPOT) {
-			({ banner: imgSrc, title, description, shareHref } = reward.win.jackpot);
-		} else if (rewardType === RewardType.REFERRER && nonNullish(reward.win.referrer)) {
-			({ banner: imgSrc, title, description, shareHref } = reward.win.referrer);
-		} else if (rewardType === RewardType.REFEREE && nonNullish(reward.win.referee)) {
-			({ banner: imgSrc, title, description, shareHref } = reward.win.referee);
-		} else if (rewardType === RewardType.REFERRAL && nonNullish(reward.win.referral)) {
-			({ banner: imgSrc, title, description, shareHref } = reward.win.referral);
-		} else {
-			({ banner: imgSrc, title, description, shareHref } = reward.win.default);
+			return reward.win.leaderboard;
 		}
+
+		if (rewardType === RewardType.JACKPOT) {
+			return reward.win.jackpot;
+		}
+
+		if (rewardType === RewardType.REFERRER && nonNullish(reward.win.referrer)) {
+			return reward.win.referrer;
+		}
+
+		if (rewardType === RewardType.REFEREE && nonNullish(reward.win.referee)) {
+			return reward.win.referee;
+		}
+
+		if (rewardType === RewardType.REFERRAL && nonNullish(reward.win.referral)) {
+			return reward.win.referral;
+		}
+
+		return reward.win.default;
 	});
 </script>
 

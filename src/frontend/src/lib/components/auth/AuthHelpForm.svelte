@@ -1,105 +1,215 @@
 <script lang="ts">
-	import helpAuthBanner from '$lib/assets/help-auth-banner.svg';
-	import IconAnnoyed from '$lib/components/icons/lucide/IconAnnoyed.svelte';
-	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
-	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import { PRIMARY_INTERNET_IDENTITY_VERSION } from '$env/auth.env';
+	import helpAuthIdentityBanner from '$lib/assets/help-auth-identity-banner.webp';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import {
-		TRACK_HELP_CONCERNED_ABOUT_SECURITY,
-		TRACK_HELP_GOT_CONFUSED,
-		TRACK_HELP_LOST_INTERNET_IDENTITY,
-		TRACK_HELP_OTHER
-	} from '$lib/constants/analytics.contants';
+		OISY_ACCESS_CONTROL_URL,
+		OISY_DOCS_URL,
+		OISY_FAQ_URL_WHO_CONTROLS_THE_PRIVATE_KEY,
+		OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL,
+		OISY_INTERNET_IDENTITY_HELP_CENTER_URL
+	} from '$lib/constants/oisy.constants';
 	import {
-		HELP_AUTH_GOT_CONFUSED_BUTTON,
+		HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON,
 		HELP_AUTH_IMAGE_BANNER,
 		HELP_AUTH_LOST_IDENTITY_BUTTON,
-		HELP_AUTH_OTHER_BUTTON,
-		HELP_AUTH_SECURITY_BUTTON
+		HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,
+		HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK,
+		HELP_AUTH_INTRODUCTION_LINK,
+		HELP_AUTH_PRIVATE_KEY_LINK,
+		HELP_AUTH_ASSET_CONTROL_LINK,
+		HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK
 	} from '$lib/constants/test-ids.constants';
+	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		onLostIdentity: () => void;
-		onOther: () => void;
+		onOpenNewIdentityHelp: () => void;
+		onOpenLegacyIdentityHelp: () => void;
 	}
 
-	let { onLostIdentity, onOther }: Props = $props();
+	let { onOpenLegacyIdentityHelp, onOpenNewIdentityHelp }: Props = $props();
+
+	const trackingEventKey = 'main_page_button';
+
+	let isPrimaryIdentityVersion2 = $derived(PRIMARY_INTERNET_IDENTITY_VERSION === '2.0');
 </script>
 
 <div class="grid gap-6">
-	<Img src={helpAuthBanner} styleClass="w-full" testId={HELP_AUTH_IMAGE_BANNER} />
+	<Img
+		src={helpAuthIdentityBanner}
+		styleClass="w-full rounded-xl"
+		testId={HELP_AUTH_IMAGE_BANNER}
+	/>
 
 	<span>{$i18n.auth.help.text.description}</span>
 
 	<div>
-		<p class="text-md font-bold">{$i18n.auth.help.text.subtitle}</p>
 		<div class="grid gap-2">
+			{#if isPrimaryIdentityVersion2}
+				<Button
+					ariaLabel={$i18n.auth.help.text.login_page_looks_different}
+					colorStyle="secondary-light"
+					fullWidth
+					onclick={() => {
+						trackEvent({
+							name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+							metadata: { event_key: trackingEventKey, event_value: 'login_page_looks_different' }
+						});
+						onOpenNewIdentityHelp();
+					}}
+					testId={HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON}
+					type="button"
+				>
+					{$i18n.auth.help.text.login_page_looks_different}
+				</Button>
+
+				<Button
+					ariaLabel={$i18n.auth.help.text.use_identity_number}
+					colorStyle="secondary-light"
+					fullWidth
+					onclick={() => {
+						trackEvent({
+							name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+							metadata: {
+								event_key: trackingEventKey,
+								event_value: 'use_identity_number'
+							}
+						});
+						onOpenNewIdentityHelp();
+					}}
+					testId={HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON}
+					type="button"
+				>
+					{$i18n.auth.help.text.use_identity_number}
+				</Button>
+			{/if}
+
 			<Button
-				colorStyle="secondary"
+				ariaLabel={$i18n.auth.help.text.lost_identity_number}
+				colorStyle="secondary-light"
 				fullWidth
 				onclick={() => {
 					trackEvent({
-						name: TRACK_HELP_LOST_INTERNET_IDENTITY
+						name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+						metadata: {
+							event_key: trackingEventKey,
+							event_value: 'lost_identity_number'
+						}
 					});
-					onLostIdentity();
+					onOpenLegacyIdentityHelp();
 				}}
 				testId={HELP_AUTH_LOST_IDENTITY_BUTTON}
 				type="button"
 			>
-				<span class="text-error-primary"><IconClose size="24" /></span>{$i18n.auth.help.text
-					.lost_identity}
+				{$i18n.auth.help.text.lost_identity_number}
 			</Button>
 
-			<Button
-				colorStyle="secondary"
-				fullWidth
-				onclick={() => {
-					trackEvent({
-						name: TRACK_HELP_CONCERNED_ABOUT_SECURITY
-					});
-					onOther();
-				}}
-				testId={HELP_AUTH_SECURITY_BUTTON}
-				type="button"
-			>
-				<span class="text-error-primary"><IconShieldCheck /></span>{$i18n.auth.help.text.security}
-			</Button>
+			<div class="mt-6 mb-2 font-bold">{$i18n.auth.help.text.useful_links}</div>
 
-			<Button
-				colorStyle="secondary"
-				fullWidth
-				onclick={() => {
-					trackEvent({
-						name: TRACK_HELP_GOT_CONFUSED
-					});
-					onOther();
-				}}
-				testId={HELP_AUTH_GOT_CONFUSED_BUTTON}
-				type="button"
-			>
-				<span class="text-error-primary"><IconAnnoyed /></span>{$i18n.auth.help.text.got_confused}
-			</Button>
+			<div>
+				<ExternalLink
+					ariaLabel={$i18n.auth.help.text.switch_to_new_internet_identity}
+					href={OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL}
+					iconAsLast
+					styleClass="font-semibold"
+					testId={HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK}
+					trackEvent={{
+						name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+						metadata: {
+							event_key: trackingEventKey,
+							event_value: 'switch_to_new_internet_identity'
+						}
+					}}
+				>
+					{replaceOisyPlaceholders($i18n.auth.help.text.switch_to_new_internet_identity)}
+				</ExternalLink>
+			</div>
 
-			<Button
-				colorStyle="secondary"
-				fullWidth
-				onclick={() => {
-					trackEvent({
-						name: TRACK_HELP_OTHER
-					});
-					onOther();
-				}}
-				testId={HELP_AUTH_OTHER_BUTTON}
-				type="button">{$i18n.auth.help.text.other}</Button
-			>
+			<div>
+				<ExternalLink
+					ariaLabel={replaceOisyPlaceholders($i18n.auth.help.text.internet_identity_help_center)}
+					href={OISY_INTERNET_IDENTITY_HELP_CENTER_URL}
+					iconAsLast
+					styleClass="font-semibold"
+					testId={HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK}
+					trackEvent={{
+						name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+						metadata: {
+							event_key: trackingEventKey,
+							event_value: 'internet_identity_help_center'
+						}
+					}}
+				>
+					{replaceOisyPlaceholders($i18n.auth.help.text.internet_identity_help_center)}
+				</ExternalLink>
+			</div>
+
+			<div>
+				<ExternalLink
+					ariaLabel={$i18n.auth.help.text.oisy_introduction}
+					href={OISY_DOCS_URL}
+					iconAsLast
+					styleClass="font-semibold"
+					testId={HELP_AUTH_INTRODUCTION_LINK}
+					trackEvent={{
+						name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+						metadata: {
+							event_key: trackingEventKey,
+							event_value: 'oisy_introduction'
+						}
+					}}
+				>
+					{replaceOisyPlaceholders($i18n.auth.help.text.oisy_introduction)}
+				</ExternalLink>
+			</div>
+
+			<div>
+				<ExternalLink
+					ariaLabel={$i18n.auth.help.text.private_key}
+					href={OISY_FAQ_URL_WHO_CONTROLS_THE_PRIVATE_KEY}
+					iconAsLast
+					styleClass="font-semibold"
+					testId={HELP_AUTH_PRIVATE_KEY_LINK}
+					trackEvent={{
+						name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+						metadata: {
+							event_key: trackingEventKey,
+							event_value: 'private_key'
+						}
+					}}
+				>
+					{$i18n.auth.help.text.private_key}
+				</ExternalLink>
+			</div>
+
+			<div>
+				<ExternalLink
+					ariaLabel={replaceOisyPlaceholders($i18n.auth.help.text.asset_control)}
+					href={OISY_ACCESS_CONTROL_URL}
+					iconAsLast
+					styleClass="font-semibold"
+					testId={HELP_AUTH_ASSET_CONTROL_LINK}
+					trackEvent={{
+						name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+						metadata: {
+							event_key: trackingEventKey,
+							event_value: 'asset_control'
+						}
+					}}
+				>
+					{replaceOisyPlaceholders($i18n.auth.help.text.asset_control)}
+				</ExternalLink>
+			</div>
 		</div>
 	</div>
 
-	<div>
-		<i class="block">{$i18n.auth.help.text.feedback_text}</i>
+	<div class="mb-6">
+		<i class="block">{replaceOisyPlaceholders($i18n.auth.help.text.feedback_text)}</i>
 		<i class="block">{$i18n.auth.help.text.thanks_text}</i>
 	</div>
 </div>

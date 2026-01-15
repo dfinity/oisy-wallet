@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -18,21 +17,23 @@
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
+	interface Props {
+		data: CardData;
+		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
+		asNetwork?: boolean;
+		hover?: boolean;
+		onClick?: () => void;
+		onToggle?: (t: Token) => void;
+	}
+
 	let {
 		data,
 		testIdPrefix = TOKEN_CARD,
 		asNetwork = false,
 		hover = false,
+		onClick,
 		onToggle
-	}: {
-		data: CardData;
-		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
-		asNetwork?: boolean;
-		hover?: boolean;
-		onToggle?: (t: CustomEvent<Token>) => void;
-	} = $props();
-
-	const dispatch = createEventDispatcher();
+	}: Props = $props();
 
 	let testId = $derived(
 		`${testIdPrefix}-${data.symbol}${nonNullish(data.network) ? `-${data.network.id.description}` : ''}`
@@ -44,14 +45,7 @@
 </script>
 
 <div class="flex w-full flex-col">
-	<LogoButton
-		condensed={asNetwork}
-		dividers={false}
-		{hover}
-		onClick={() => dispatch('click')}
-		rounded={false}
-		{testId}
-	>
+	<LogoButton condensed={asNetwork} dividers={false} {hover} {onClick} rounded={false} {testId}>
 		{#snippet logo()}
 			<span class="flex" class:mr-2={!asNetwork}>
 				<TokenLogo

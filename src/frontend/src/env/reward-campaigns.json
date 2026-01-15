@@ -46,6 +46,11 @@
 		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
 		"startDate": "2025-06-26T12:00:00.000Z",
 		"endDate": "2025-09-24T12:00:00.000Z",
+		"welcome": {
+			"title": "rewards.campaigns.sprinkles_s1e4.welcome.title",
+			"subtitle": "rewards.campaigns.sprinkles_s1e4.welcome.subtitle",
+			"description": "rewards.campaigns.sprinkles_s1e4.welcome.description"
+		},
 		"win": {
 			"default": {
 				"title": "rewards.campaigns.sprinkles_s1e4.win.default.title",
@@ -87,11 +92,16 @@
 		"participateTitle": "rewards.campaigns.sprinkles_s1e5.participate_title",
 		"description": "rewards.campaigns.sprinkles_s1e5.description",
 		"logo": "/images/rewards/oisy-reward-logo.svg",
-		"cardBanner": "/images/rewards/oisy-episode-three-campaign.svg",
+		"cardBanner": "/images/rewards/oisy-episode-five-campaign.webp",
 		"campaignHref": "rewards.campaigns.sprinkles_s1e5.campaign_href",
 		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
 		"startDate": "2025-09-24T12:00:00.000Z",
-		"endDate": "2025-11-12T12:00:00.000Z",
+		"endDate": "2026-01-31T12:00:00.000Z",
+		"welcome": {
+			"title": "rewards.campaigns.sprinkles_s1e5.welcome.title",
+			"subtitle": "rewards.campaigns.sprinkles_s1e5.welcome.subtitle",
+			"description": "rewards.campaigns.sprinkles_s1e5.welcome.description"
+		},
 		"win": {
 			"default": {
 				"title": "rewards.campaigns.sprinkles_s1e5.win.default.title",

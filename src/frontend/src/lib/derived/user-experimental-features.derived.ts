@@ -4,7 +4,7 @@ import type {
 	ExperimentalFeatureId,
 	UserExperimentalFeatures
 } from '$lib/types/user-experimental-features';
-import { isNullish } from '@dfinity/utils';
+import { assertNever, isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const userExperimentalFeatures: Readable<UserExperimentalFeatures | null> = derived(
@@ -22,10 +22,7 @@ export const userExperimentalFeatures: Readable<UserExperimentalFeatures | null>
 				return 'AiAssistantBeta';
 			}
 
-			// Force compiler error on unhandled cases based on leftover types
-			const _: never = key;
-
-			throw new Error(`Unknown feature key: ${key}`);
+			assertNever(key, `Unknown feature key: ${key}`);
 		};
 
 		return {

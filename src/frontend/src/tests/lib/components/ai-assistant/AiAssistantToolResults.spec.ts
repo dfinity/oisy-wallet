@@ -24,7 +24,7 @@ describe('AiAssistantToolResults', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
 				isLastItem: false,
-				false: false,
+				loading: false,
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
@@ -42,7 +42,7 @@ describe('AiAssistantToolResults', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
 				isLastItem: false,
-				false: false,
+				loading: false,
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
@@ -65,7 +65,13 @@ describe('AiAssistantToolResults', () => {
 				results: [
 					{
 						type: ToolResultType.REVIEW_SEND_TOKENS,
-						result: { amount: 1, token: ICP_TOKEN, address: mockPrincipalText }
+						result: {
+							amount: 1,
+							token: ICP_TOKEN,
+							address: mockPrincipalText,
+							sendCompleted: false,
+							id: 'test'
+						}
 					}
 				]
 			}
@@ -73,6 +79,29 @@ describe('AiAssistantToolResults', () => {
 
 		expect(getByText(en.transaction.text.to)).toBeInTheDocument();
 		expect(getByText(mockPrincipalText)).toBeInTheDocument();
+	});
+
+	it('renders show_balance tool correctly', () => {
+		const { getByText } = render(AiAssistantToolResults, {
+			props: {
+				isLastItem: false,
+				loading: false,
+				onSendMessage: () => Promise.resolve(),
+				results: [
+					{
+						type: ToolResultType.SHOW_BALANCE,
+						result: {
+							mainCard: {
+								token: { ...ICP_TOKEN, usdBalance: 1000, balance: 500n },
+								totalUsdBalance: 1000
+							}
+						}
+					}
+				]
+			}
+		});
+
+		expect(getByText('$1,000.00')).toBeInTheDocument();
 	});
 
 	it('does not render unknown tool', () => {
@@ -86,6 +115,6 @@ describe('AiAssistantToolResults', () => {
 			}
 		});
 
-		expect(() => getByText(contacts[0].name)).toThrow();
+		expect(() => getByText(contacts[0].name)).toThrowError();
 	});
 });

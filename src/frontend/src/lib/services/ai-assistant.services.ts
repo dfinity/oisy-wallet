@@ -2,13 +2,16 @@ import type { chat_message_v1 } from '$declarations/llm/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import {
 	AI_ASSISTANT_LLM_MODEL,
-	getAiAssistantToolsDescription
+	getAiAssistantToolsDescription,
+	TOOL_CALLS_LIMITS
 } from '$lib/constants/ai-assistant.constants';
 import {
 	AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
 	AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
+import { networks } from '$lib/derived/networks.derived';
+import { enabledMainnetFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
@@ -20,10 +23,11 @@ import {
 import {
 	generateAiAssistantResponseEventMetadata,
 	parseReviewSendTokensToolArguments,
+	parseShowBalanceToolArguments,
 	parseShowFilteredContactsToolArguments
 } from '$lib/utils/ai-assistant.utils';
-import type { Identity } from '@dfinity/agent';
-import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 /**
@@ -60,12 +64,22 @@ export const askLlm = async ({
 		identity
 	});
 	const toolResults: ToolResult[] = [];
+	const toolCallsCounters: Record<ToolResultType, number> = {
+		[ToolResultType.REVIEW_SEND_TOKENS]: 0,
+		[ToolResultType.SHOW_BALANCE]: 0,
+		[ToolResultType.SHOW_ALL_CONTACTS]: 0,
+		[ToolResultType.SHOW_FILTERED_CONTACTS]: 0
+	};
 
 	if (nonNullish(tool_calls) && tool_calls.length > 0) {
 		for (const toolCall of tool_calls) {
-			const result = executeTool({ toolCall, requestStartTimestamp });
+			const toolType = toolCall.function.name as ToolResultType;
 
-			nonNullish(result) && toolResults.push(result);
+			if (toolCallsCounters[toolType] < TOOL_CALLS_LIMITS[toolType]) {
+				const result = executeTool({ toolCall, requestStartTimestamp });
+				nonNullish(result) && toolResults.push(result);
+				toolCallsCounters[toolType] += 1;
+			}
 		}
 	} else {
 		trackEvent({
@@ -103,6 +117,7 @@ export const executeTool = ({
 	} = toolCall;
 
 	let result: ToolResult['result'] | undefined;
+	let additionalTrackingMetadata: Record<string, string> = {};
 
 	if (name === ToolResultType.SHOW_ALL_CONTACTS) {
 		result = { contacts: Object.values(get(extendedAddressContactsStore)) };
@@ -111,17 +126,47 @@ export const executeTool = ({
 			filterParams,
 			extendedAddressContacts: get(extendedAddressContactsStore)
 		});
+	} else if (name === ToolResultType.SHOW_BALANCE) {
+		result = parseShowBalanceToolArguments({
+			filterParams,
+			tokensUi: get(enabledMainnetFungibleTokensUi),
+			networks: get(networks)
+		});
+
+		additionalTrackingMetadata = {
+			...(nonNullish(result.mainCard.token) && { requestedToken: result.mainCard.token.symbol }),
+			...(nonNullish(result.mainCard.network) && { requestedNetwork: result.mainCard.network.name })
+		};
 	} else if (name === ToolResultType.REVIEW_SEND_TOKENS) {
 		result = parseReviewSendTokensToolArguments({
 			filterParams,
 			extendedAddressContacts: get(extendedAddressContactsStore),
 			tokens: get(enabledTokens)
 		});
+
+		// Note: both cases should not happen, still we prefer to handle them.
+		// 1. If all 3 addresses params are present, we consider it as an invalid parsing result; therefore, it's safer to reset it
+		// 2. If the token was not identified, we consider it as an invalid parsing result; therefore, it's safer to reset it
+		if (
+			isNullish(result) ||
+			(result.contactAddress && result.contact && result.address) ||
+			isNullish(result.token)
+		) {
+			result = undefined;
+		} else {
+			additionalTrackingMetadata = {
+				requestedToken: result.token.symbol
+			};
+		}
 	}
 
 	trackEvent({
 		name: AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED,
-		metadata: generateAiAssistantResponseEventMetadata({ toolName: name, requestStartTimestamp })
+		metadata: generateAiAssistantResponseEventMetadata({
+			toolName: name,
+			requestStartTimestamp,
+			additionalMetadata: additionalTrackingMetadata
+		})
 	});
 
 	return { type: name as ToolResult['type'], result };

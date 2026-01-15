@@ -1,15 +1,14 @@
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
+import type { OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
-import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR } from '$lib/constants/analytics.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -36,15 +35,11 @@ const loadEthBalance = async ({
 
 	const {
 		init: {
-			error: { eth_address_unknown, loading_balance }
+			error: { loading_balance }
 		}
 	} = get(i18n);
 
 	if (isNullish(address)) {
-		toastsError({
-			msg: { text: eth_address_unknown }
-		});
-
 		return { success: false };
 	}
 
@@ -86,15 +81,11 @@ const loadErc20Balance = async ({
 
 	const {
 		init: {
-			error: { eth_address_unknown, loading_balance }
+			error: { loading_balance }
 		}
 	} = get(i18n);
 
 	if (isNullish(address)) {
-		toastsError({
-			msg: { text: eth_address_unknown }
-		});
-
 		return { success: false };
 	}
 

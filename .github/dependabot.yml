@@ -12,17 +12,33 @@ updates:
     directory: '/'
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 30
 
   - package-ecosystem: npm
     directory: '/'
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 30
     allow:
       - dependency-type: all
     ignore:
       - dependency-name: '@dfinity/*'
+      - dependency-name: '@icp-sdk/*'
       - dependency-name: '@types/*'
-      - dependency-name: '@typescript-eslint/*'
-      - dependency-name: 'eslint'
-      - dependency-name: 'eslint-*'
       - dependency-name: 'typescript'
+    open-pull-requests-limit: 10
+    groups:
+      solana-kit:
+        patterns:
+          - '@solana-program/compute-budget'
+          - '@solana-program/system'
+          - '@solana-program/token'
+          - '@solana-program/token-2022'
+          - '@solana/kit'
+      vitest-group:
+        patterns:
+          - 'vitest'
+          - 'vitest-mock-extended'
+          - '@vitest/coverage-v8'

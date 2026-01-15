@@ -1,4 +1,4 @@
-import { TRACK_CHANGE_CURRENCY } from '$lib/constants/analytics.contants';
+import { TRACK_CHANGE_CURRENCY } from '$lib/constants/analytics.constants';
 import { Currency } from '$lib/enums/currency';
 import * as analytics from '$lib/services/analytics.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';

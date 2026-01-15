@@ -9,7 +9,12 @@ a.no-underline {
 }
 
 a.blue-link {
-	color: var(--color-foreground-brand-primary-alt);
+	@apply text-brand-primary-alt;
+
+	&:hover,
+	&.selected {
+		@apply text-brand-secondary;
+	}
 }
 
 // NAV ITEMS

@@ -11,7 +11,6 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
-	import { ethAddressNotCertified } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Option } from '$lib/types/utils';
@@ -73,7 +72,7 @@
 					})}:
 				</p>
 
-				<article class="rounded-xs mt-4 bg-disabled p-4">
+				<article class="mt-4 rounded-xs bg-disabled p-4">
 					<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
 
 					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
@@ -106,7 +105,7 @@
 			{#if displayCancel}
 				<div in:fade>
 					<ButtonGroup>
-						<ButtonCancel disabled={$isBusy || $ethAddressNotCertified} onclick={onCancel} />
+						<ButtonCancel disabled={$isBusy} onclick={onCancel} />
 					</ButtonGroup>
 				</div>
 			{/if}

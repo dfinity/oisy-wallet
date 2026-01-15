@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
@@ -15,20 +16,55 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let disabled: boolean | undefined = false;
-	export let selectedContact: ContactUi | undefined = undefined;
-	export let nft: Nft | undefined = undefined;
+	interface BaseProps {
+		destination?: string;
+		amount?: OptionAmount;
+		disabled?: boolean;
+		selectedContact?: ContactUi;
+		nft?: Nft;
+		network?: Snippet;
+		fee?: Snippet;
+		info?: Snippet;
+	}
 
-	const dispatch = createEventDispatcher();
+	type Props = BaseProps &
+		(
+			| {
+					onBack: () => void;
+					onSend: () => void;
+			  }
+			| {
+					replaceToolbar: Snippet;
+			  }
+		);
 
-	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	let {
+		destination = '',
+		amount,
+		disabled = false,
+		selectedContact,
+		nft,
+		network,
+		fee,
+		info,
+		...rest
+	}: Props = $props();
+
+	const { sendToken, sendTokenExchangeRate, isIcBurning } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
 	{#if isNullish(nft)}
-		<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken} />
+		<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken}>
+			{#snippet subtitle()}
+				{$isIcMintingAccount
+					? $i18n.mint.text.mint_review_subtitle
+					: $isIcBurning
+						? $i18n.burn.text.burn_review_subtitle
+						: $i18n.send.text.send_review_subtitle}
+			{/snippet}
+		</SendTokenReview>
 	{:else}
 		<SendNftReview {nft} />
 	{/if}
@@ -37,18 +73,28 @@
 		<SendReviewDestination {destination} {selectedContact} />
 	</div>
 
-	<slot name="network" />
+	{@render network?.()}
 
-	<slot name="fee" />
+	{@render fee?.()}
 
-	<slot name="info" />
+	{@render info?.()}
 
 	{#snippet toolbar()}
-		<ButtonGroup testId="toolbar">
-			<ButtonBack onclick={() => dispatch('icBack')} />
-			<Button {disabled} onclick={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
-				{$i18n.send.text.send}
-			</Button>
-		</ButtonGroup>
+		{#if 'replaceToolbar' in rest}
+			{@render rest.replaceToolbar()}
+		{:else}
+			{@const { onBack, onSend } = rest}
+
+			<ButtonGroup testId="toolbar">
+				<ButtonBack onclick={onBack} />
+				<Button {disabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
+					{$isIcMintingAccount
+						? $i18n.mint.text.mint
+						: $isIcBurning
+							? $i18n.burn.text.burn
+							: $i18n.send.text.send}
+				</Button>
+			</ButtonGroup>
+		{/if}
 	{/snippet}
 </ContentWithToolbar>

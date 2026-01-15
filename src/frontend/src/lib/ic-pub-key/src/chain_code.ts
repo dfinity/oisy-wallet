@@ -1,3 +1,4 @@
+/* eslint-disable */
 /* istanbul ignore file */
 /* v8 ignore start */
 

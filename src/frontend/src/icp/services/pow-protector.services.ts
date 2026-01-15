@@ -1,13 +1,18 @@
 import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { allowance } from '$icp/api/icrc-ledger.api';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
-import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
-import { POW_MIN_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID, ZERO } from '$lib/constants/app.constants';
 import { hashText } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
-export const hasRequiredCycles = async ({ identity }: { identity: Identity }): Promise<boolean> => {
+export const hasRequiredCycles = async ({
+	identity,
+	requiredCycles
+}: {
+	identity: Identity;
+	requiredCycles: bigint;
+}): Promise<boolean> => {
 	const allowanceResult = await allowance({
 		identity,
 		certified: false,
@@ -21,8 +26,7 @@ export const hasRequiredCycles = async ({ identity }: { identity: Identity }): P
 			subaccount: getIcrcSubaccount(identity.getPrincipal())
 		}
 	});
-
-	return allowanceResult.allowance >= POW_MIN_CYCLES_THRESHOLD;
+	return allowanceResult.allowance >= requiredCycles;
 };
 
 /**
@@ -45,7 +49,7 @@ export const solvePowChallenge = async ({
 	}
 
 	// This is the value we need to find to solve the challenge (changed to bigint)
-	let nonce = 0n;
+	let nonce = ZERO;
 
 	// Target is proportional to 1/difficulty (converted target to bigint)
 	const target = BigInt(Math.floor(0xffffffff / difficulty));

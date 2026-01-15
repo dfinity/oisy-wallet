@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import NewSwapForm from '$lib/components/swap/NewSwapForm.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
+	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -18,6 +18,7 @@
 		sourceTokenFee?: bigint;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 	}
@@ -29,6 +30,7 @@
 		sourceTokenFee,
 		isSwapAmountsLoading,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext
 	}: Props = $props();
@@ -38,7 +40,11 @@
 
 	let errorType = $state<TokenActionErrorType | undefined>();
 
-	let totalFee = $derived((sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n));
+	let totalFee = $derived(
+		nonNullish($isSourceTokenIcrc2)
+			? (sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n)
+			: undefined
+	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		nonNullish($sourceToken)
@@ -52,7 +58,7 @@
 			: undefined;
 </script>
 
-<NewSwapForm
+<SwapForm
 	{errorType}
 	fee={totalFee}
 	{isSwapAmountsLoading}
@@ -69,9 +75,9 @@
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider showSelectButton {slippageValue} on:icShowProviderList />
+				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
 				<SwapFees />
 			</div>
 		{/if}
 	{/snippet}
-</NewSwapForm>
+</SwapForm>

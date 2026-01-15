@@ -23,13 +23,13 @@
 
 	let transactionStatus: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let amount = $derived(nonNullish(value) ? (type === 'send' ? value * -1n : value) : value);
+	let displayAmount = $derived(nonNullish(value) ? (type === 'send' ? value * -1n : value) : value);
 
 	const modalId = Symbol();
 </script>
 
 <Transaction
-	{amount}
+	{displayAmount}
 	from={fromOwner ?? from}
 	{iconType}
 	onClick={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}

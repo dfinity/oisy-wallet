@@ -10,6 +10,16 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
 
+	interface Props {
+		inputValue: string;
+		inputPlaceholder: string;
+		ariaLabel: string;
+		testIdPrefix?: string;
+		disabled?: boolean;
+		icon: Snippet;
+		overflowableContent?: Snippet;
+	}
+
 	let {
 		inputValue = $bindable(''),
 		inputPlaceholder,
@@ -18,15 +28,7 @@
 		disabled = false,
 		icon: slidingIcon,
 		overflowableContent
-	}: {
-		inputValue: string;
-		inputPlaceholder: string;
-		ariaLabel: string;
-		testIdPrefix?: string;
-		disabled?: boolean;
-		icon: Snippet;
-		overflowableContent?: Snippet;
-	} = $props();
+	}: Props = $props();
 
 	let visible = $state(false);
 
@@ -75,7 +77,7 @@
 
 <div class="relative flex w-full">
 	{#if visible && inputValue === ''}
-		<div class="z-2 fixed bottom-0 left-0 right-0 top-0">
+		<div class="fixed top-0 right-0 bottom-0 left-0 z-2">
 			<Backdrop invisible on:nnsClose={handleClose} />
 		</div>
 	{/if}
@@ -85,7 +87,7 @@
 			{@render overflowableContent()}
 		</div>
 	{/if}
-	<div class="z-2 absolute right-0 w-full">
+	<div class="absolute right-0 z-2 w-full">
 		{#if visible}
 			<div
 				class="input-field condensed absolute right-0 -mt-[11px] mr-px flex overflow-hidden"
@@ -107,7 +109,7 @@
 					bind:value={inputValue}
 				/>
 				{#if inputValue !== ''}
-					<div class="absolute right-12 top-[11px] bg-primary" transition:fade>
+					<div class="absolute top-[11px] right-12 bg-primary" transition:fade>
 						<ButtonIcon
 							ariaLabel={$i18n.core.text.clear_filter}
 							colorStyle="muted"

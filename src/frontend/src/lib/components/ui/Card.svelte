@@ -29,15 +29,15 @@
 	}: Props = $props();
 </script>
 
-<div class="flex items-center gap-4" class:mb-6={!noMargin} data-tid={testId}>
+<div class="flex min-w-0 items-center gap-4" class:mb-6={!noMargin} data-tid={testId}>
 	{@render icon()}
 
-	<div class="flex flex-1 flex-col justify-center" class:gap-1={withGap}>
-		<div class="flex gap-1 font-bold leading-5" class:items-center={isNullish(description)}>
-			<span
-				style={nonNullish(amount) ? 'max-width: 60%' : undefined}
-				class="clamp-4 inline-flex items-center text-left">{@render children?.()}</span
-			>
+	<div class="flex min-w-0 flex-1 flex-col justify-center" class:gap-1={withGap}>
+		<div
+			class="flex min-w-0 items-center gap-2 text-left leading-5 font-bold"
+			class:items-center={isNullish(description)}
+		>
+			{@render children?.()}
 
 			{#if nonNullish(amount)}
 				<CardAmount>{@render amount()}</CardAmount>

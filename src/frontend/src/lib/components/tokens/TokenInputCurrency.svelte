@@ -4,7 +4,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 
 	interface Props {
-		innerEnd: Snippet;
+		innerEnd?: Snippet;
 		prefix?: Snippet;
 		value: OptionAmount;
 		decimals: number;
@@ -16,6 +16,9 @@
 		testId?: string;
 		styleClass?: string;
 		autofocus?: boolean;
+		onInput: () => void;
+		onBlur: () => void;
+		onFocus: () => void;
 	}
 
 	let {
@@ -30,7 +33,10 @@
 		loading = false,
 		testId,
 		styleClass = '',
-		autofocus = false
+		autofocus = false,
+		onInput,
+		onBlur,
+		onFocus
 	}: Props = $props();
 </script>
 
@@ -46,12 +52,12 @@
 		{decimals}
 		{disabled}
 		{innerEnd}
+		{onBlur}
+		{onFocus}
+		{onInput}
 		{placeholder}
 		{testId}
 		bind:value
-		on:focus
-		on:blur
-		on:nnsInput
 	/>
 </div>
 

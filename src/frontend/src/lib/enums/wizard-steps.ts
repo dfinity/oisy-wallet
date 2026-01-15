@@ -33,8 +33,8 @@ export enum WizardStepsSwap {
 
 export enum WizardStepsAuthHelp {
 	OVERVIEW = 'Overview',
-	HELP_IDENTITY = 'Help Identity',
-	HELP_OTHER = 'Help Other'
+	HELP_LEGACY_IDENTITY = 'Help Legacy Identity',
+	HELP_NEW_IDENTITY = 'Help New Identity'
 }
 
 export enum WizardStepsHowToConvert {
@@ -74,4 +74,38 @@ export enum WizardStepsManageTokens {
 	IMPORT = 'Import',
 	REVIEW = 'Review',
 	SAVING = 'Saving'
+}
+
+export enum WizardStepsStake {
+	STAKE = 'Stake',
+	REVIEW = 'Review',
+	STAKING = 'Staking'
+}
+
+export enum WizardStepsUnstake {
+	UNSTAKE = 'Unstake',
+	REVIEW = 'Review',
+	UNSTAKING = 'Unstaking'
+}
+
+export enum WizardStepsClaimStakingReward {
+	REVIEW = 'Review',
+	CLAIMING = 'Claiming'
+}
+
+export const WizardStepsGetToken = {
+	GET_TOKEN: 'Get Token',
+	RECEIVE: 'Receive',
+	BUY_TOKEN: 'Buy Token',
+	...WizardStepsSwap,
+	...WizardStepsHowToConvert
+} as const;
+
+export enum WizardStepsScanner {
+	SCAN = 'Scan',
+	PAY = 'Pay',
+	TOKENS_LIST = 'Tokens List',
+	PAYING = 'Paying',
+	PAYMENT_CONFIRMED = 'Payment Confirmed',
+	PAYMENT_FAILED = 'Payment Failed'
 }

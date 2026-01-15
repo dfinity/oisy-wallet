@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -17,19 +17,29 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let amount: OptionAmount = undefined;
-	export let insufficientFunds: boolean;
-	export let nativeEthereumToken: Token;
+	interface Props {
+		amount: OptionAmount;
+		insufficientFunds: boolean;
+		nativeEthereumToken: Token;
+		onTokensList: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		amount = $bindable(),
+		insufficientFunds = $bindable(),
+		nativeEthereumToken,
+		onTokensList
+	}: Props = $props();
 
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
-	let insufficientFundsError: InsufficientFundsError | undefined = undefined;
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
-	$: insufficientFunds = nonNullish(insufficientFundsError);
+	let insufficientFundsError = $state<InsufficientFundsError | undefined>();
+
+	$effect(() => {
+		insufficientFunds = nonNullish(insufficientFundsError);
+	});
 
 	const {
 		feeStore: storeFeeData,
@@ -56,7 +66,7 @@
 				})
 			: ZERO;
 
-		// If ETH, the balance should cover the user entered amount plus the min gas fee
+		// If ETH, the balance should cover the user-entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)) {
 			const total = userAmount + ($minGasFee ?? ZERO);
 
@@ -82,28 +92,26 @@
 	};
 
 	/**
-	 * Reevaluate max amount if user has used the "Max" button and the fees are changing.
+	 * Reevaluate max amount if the user has used the "Max" button and the fees are changing.
 	 */
-	let amountSetToMax = false;
+	let amountSetToMax = $state(false);
 </script>
 
 <div class="mb-4">
 	<TokenInput
 		autofocus={nonNullish($sendToken)}
-		customErrorValidate={customValidate}
 		displayUnit={inputUnit}
 		exchangeRate={$sendTokenExchangeRate}
+		onClick={onTokensList}
+		onCustomErrorValidate={customValidate}
 		token={$sendToken}
 		bind:amount
 		bind:amountSetToMax
 		bind:error={insufficientFundsError}
-		on:click={() => {
-			dispatch('icTokensList');
-		}}
 	>
-		<span slot="title">{$i18n.core.text.amount}</span>
+		{#snippet title()}{$i18n.core.text.amount}{/snippet}
 
-		<svelte:fragment slot="amount-info">
+		{#snippet amountInfo()}
 			{#if nonNullish($sendToken)}
 				<div class="text-tertiary">
 					<TokenInputAmountExchange
@@ -114,9 +122,9 @@
 					/>
 				</div>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 
-		<svelte:fragment slot="balance">
+		{#snippet balance()}
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
 					balance={$sendBalance}
@@ -127,6 +135,6 @@
 					bind:amountSetToMax
 				/>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</TokenInput>
 </div>

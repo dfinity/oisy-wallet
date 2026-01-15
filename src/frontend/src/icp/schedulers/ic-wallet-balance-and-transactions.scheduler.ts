@@ -4,11 +4,16 @@ import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import type { GetTransactions } from '$icp/types/ic.post-message';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
-import type { PostMessageDataResponseWalletCleanUp } from '$lib/types/post-message';
+import type {
+	PostMessageDataRequestDip20,
+	PostMessageDataRequestIcp,
+	PostMessageDataRequestIcrcStrict,
+	PostMessageDataResponseWalletCleanUp
+} from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
-import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { isNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
+import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
@@ -21,13 +26,22 @@ interface IcWalletStore<T> {
 }
 
 export type GetBalanceAndTransactions<
-	TWithId extends IcrcTransactionWithId | TransactionWithId | Dip20TransactionWithId
+	TWithId extends
+		| IcrcIndexDid.TransactionWithId
+		| IcpIndexDid.TransactionWithId
+		| Dip20TransactionWithId
 > = GetTransactions & { transactions: TWithId[] };
 
 export class IcWalletBalanceAndTransactionsScheduler<
-	T extends IcrcTransaction | Transaction | Event,
-	TWithId extends IcrcTransactionWithId | TransactionWithId | Dip20TransactionWithId,
-	PostMessageDataRequest
+	T extends IcrcIndexDid.Transaction | IcpIndexDid.Transaction | Event,
+	TWithId extends
+		| IcrcIndexDid.TransactionWithId
+		| IcpIndexDid.TransactionWithId
+		| Dip20TransactionWithId,
+	PostMessageDataRequest extends
+		| PostMessageDataRequestIcrcStrict
+		| PostMessageDataRequestIcp
+		| PostMessageDataRequestDip20
 > extends IcWalletScheduler<PostMessageDataRequest> {
 	private store: IcWalletStore<T> = {
 		balance: undefined,
@@ -217,7 +231,12 @@ export class IcWalletBalanceAndTransactionsScheduler<
 	}
 
 	private postMessageWalletCleanUp(transactions: IndexedTransactions<T>) {
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageDataResponseWalletCleanUp>({
+			ref: this.ref,
 			msg: `${this.msg}CleanUp`,
 			data: {
 				transactionIds: Object.keys(transactions)

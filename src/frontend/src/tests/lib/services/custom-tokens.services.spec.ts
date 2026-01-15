@@ -1,17 +1,15 @@
 import { listCustomTokens } from '$lib/api/backend.api';
 import * as idbTokensApi from '$lib/api/idb-tokens.api';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
+import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
+import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
+import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
+import { Principal } from '@icp-sdk/core/principal';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
@@ -116,25 +114,13 @@ describe('custom-tokens.services', () => {
 		it('should throw if listCustomTokens fails', async () => {
 			vi.mocked(listCustomTokens).mockRejectedValue(new Error('Backend error'));
 
-			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrow('Backend error');
+			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrowError('Backend error');
 		});
 
 		it('should throw if setIdbTokens fails', async () => {
 			mockSetIdbTokens.mockRejectedValue(new Error('IDB error'));
 
-			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrow('IDB error');
-		});
-
-		it('should sign out if the identity is nullish', async () => {
-			await expect(loadNetworkCustomTokens({ ...mockParams, identity: null })).resolves.toEqual([]);
-
-			expect(nullishSignOut).toHaveBeenCalledOnce();
-
-			await expect(
-				loadNetworkCustomTokens({ ...mockParams, identity: undefined })
-			).resolves.toEqual([]);
-
-			expect(nullishSignOut).toHaveBeenCalledTimes(2);
+			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrowError('IDB error');
 		});
 
 		it('should fetch the cached tokens if useCache is true and certified is false', async () => {
@@ -173,7 +159,7 @@ describe('custom-tokens.services', () => {
 			});
 		});
 
-		it('should parse correctly the cached ledger and index canister IDs from the custom tokens', async () => {
+		it('should parse correctly the cached ledger and index canister IDs from the ICRC custom tokens', async () => {
 			mockGetIdbTokens.mockResolvedValue([
 				{
 					token: {
@@ -196,6 +182,90 @@ describe('custom-tokens.services', () => {
 			});
 
 			expect(result).toStrictEqual(mockCustomTokens.slice(0, 1));
+
+			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should parse correctly the cached canister ID from the EXT custom tokens', async () => {
+			mockGetIdbTokens.mockResolvedValue([
+				{
+					token: {
+						ExtV2: {
+							canister_id: Principal.fromText(mockExtV2TokenCanisterId).toUint8Array()
+						}
+					},
+					version: toNullable(10n),
+					enabled: false,
+					section: toNullable(),
+					allow_external_content_source: toNullable()
+				}
+			]);
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(mockCustomTokens.slice(2, 3));
+
+			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should parse correctly the cached canister ID from the DIP721 custom tokens', async () => {
+			mockGetIdbTokens.mockResolvedValue([
+				{
+					token: {
+						Dip721: {
+							canister_id: Principal.fromText(mockDip721TokenCanisterId).toUint8Array()
+						}
+					},
+					version: toNullable(123n),
+					enabled: false,
+					section: toNullable(),
+					allow_external_content_source: toNullable()
+				}
+			]);
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(mockCustomTokens.slice(3, 4));
+
+			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should parse correctly the cached canister ID from the ICPunks custom tokens', async () => {
+			mockGetIdbTokens.mockResolvedValue([
+				{
+					token: {
+						IcPunks: {
+							canister_id: Principal.fromText(mockIcPunksCanisterId).toUint8Array()
+						}
+					},
+					version: toNullable(999n),
+					enabled: false,
+					section: toNullable(),
+					allow_external_content_source: toNullable()
+				}
+			]);
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(mockCustomTokens.slice(4, 5));
 
 			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 

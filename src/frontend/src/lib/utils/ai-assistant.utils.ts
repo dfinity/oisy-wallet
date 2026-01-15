@@ -1,16 +1,19 @@
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type {
 	AiAssistantContactUiMap,
 	AiAssistantToken,
 	ReviewSendTokensToolResult,
+	ShowBalanceToolResult,
 	ShowContactsToolResult,
 	ToolCallArgument
 } from '$lib/types/ai-assistant';
 import type { ExtendedAddressContactUiMap } from '$lib/types/contact';
-import type { Token } from '$lib/types/token';
+import type { Network } from '$lib/types/network';
+import type { RequiredTokenWithLinkedData, Token } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
-import { jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
+import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
+import { isNullish, jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const parseToAiAssistantContacts = (
 	extendedAddressContacts: ExtendedAddressContactUiMap
@@ -63,7 +66,7 @@ export const parseToAiAssistantTokens = (tokens: Token[]): AiAssistantToken[] =>
 				name,
 				symbol,
 				standard,
-				networkId: networkId.description ?? ''
+				networkId: `${networkId.description}`
 			}
 		];
 	}, []);
@@ -116,7 +119,7 @@ export const parseReviewSendTokensToolArguments = ({
 	filterParams: ToolCallArgument[];
 	tokens: Token[];
 	extendedAddressContacts: ExtendedAddressContactUiMap;
-}): ReviewSendTokensToolResult => {
+}): ReviewSendTokensToolResult | undefined => {
 	const {
 		selectedContactAddressIdFilter,
 		amountNumberFilter,
@@ -167,11 +170,14 @@ export const parseReviewSendTokensToolArguments = ({
 		{ contact: undefined, contactAddress: undefined }
 	);
 
-	const tokenWithFallback =
-		tokens.find(
-			({ id, network: { id: networkId } }) =>
-				id.description === tokenSymbolFilter && networkId.description === networkIdFilter
-		) ?? ICP_TOKEN;
+	const token = tokens.find(
+		({ id, network: { id: networkId } }) =>
+			id.description === tokenSymbolFilter && networkId.description === networkIdFilter
+	);
+
+	if (isNullish(token)) {
+		return;
+	}
 
 	const parsedAmount = Number(amountNumberFilter);
 
@@ -180,23 +186,119 @@ export const parseReviewSendTokensToolArguments = ({
 		contactAddress,
 		address: addressFilter,
 		amount: parsedAmount,
-		token: tokenWithFallback,
+		token,
 		sendCompleted: false,
 		id: crypto.randomUUID().toString()
 	};
 };
 
+export const parseShowBalanceToolArguments = ({
+	filterParams,
+	tokensUi,
+	networks
+}: {
+	filterParams: ToolCallArgument[];
+	tokensUi: TokenUi[];
+	networks: Network[];
+}): ShowBalanceToolResult => {
+	const { tokenSymbolFilter, networkIdFilter } = filterParams.reduce<{
+		tokenSymbolFilter?: string;
+		networkIdFilter?: string;
+	}>(
+		(acc, { value, name }) => ({
+			tokenSymbolFilter: name === 'tokenSymbol' ? value : acc.tokenSymbolFilter,
+			networkIdFilter: name === 'networkId' ? value : acc.networkIdFilter
+		}),
+		{
+			tokenSymbolFilter: undefined,
+			networkIdFilter: undefined
+		}
+	);
+
+	// both token symbol and network id filters provided -> search for a single token
+	if (nonNullish(tokenSymbolFilter) && nonNullish(networkIdFilter)) {
+		const filteredToken = tokensUi.find(
+			({ symbol, network: { id: networkId } }) =>
+				symbol === tokenSymbolFilter && networkId.description === networkIdFilter
+		);
+		return {
+			mainCard: {
+				totalUsdBalance: filteredToken?.usdBalance ?? 0,
+				token: filteredToken
+			}
+		};
+	}
+
+	// only the token symbol filter provided -> search for matching tokens on different networks
+	if (nonNullish(tokenSymbolFilter)) {
+		const filteredBySymbolTokens = tokensUi.filter(({ symbol }) => symbol === tokenSymbolFilter);
+
+		const ckTwinTokenSymbols = filteredBySymbolTokens.reduce<Set<string>>(
+			(acc, token) =>
+				'twinTokenSymbol' in token && nonNullish(token.twinTokenSymbol)
+					? acc.add((token as RequiredTokenWithLinkedData).twinTokenSymbol)
+					: acc,
+			new Set()
+		);
+		const ckTwinTokens = tokensUi.filter(({ symbol }) => ckTwinTokenSymbols.has(symbol));
+
+		const filteredBySymbolAndBalanceTokens = [...filteredBySymbolTokens, ...ckTwinTokens].filter(
+			({ usdBalance }) => (usdBalance ?? 0) > 0
+		);
+
+		return {
+			mainCard: {
+				totalUsdBalance: sumTokensUiUsdBalance(filteredBySymbolAndBalanceTokens),
+				token: filteredBySymbolAndBalanceTokens[0] ?? filteredBySymbolTokens[0]
+			},
+			...(filteredBySymbolAndBalanceTokens.length > 1 && {
+				secondaryCards: filteredBySymbolAndBalanceTokens
+			})
+		};
+	}
+
+	// only the network id filter provided -> search for all tokens on this network
+	if (nonNullish(networkIdFilter)) {
+		const filteredNetwork = networks.find(({ id }) => id.description === networkIdFilter);
+
+		const secondaryCards = tokensUi.filter(
+			(token) =>
+				token.network.id.description === filteredNetwork?.id.description &&
+				nonNullish(token.usdBalance) &&
+				token.usdBalance > 0
+		);
+
+		// no filters provided -> calculate total balance
+		return {
+			mainCard: {
+				totalUsdBalance: sumTokensUiUsdBalance(secondaryCards),
+				network: filteredNetwork
+			},
+			secondaryCards
+		};
+	}
+
+	return {
+		mainCard: {
+			totalUsdBalance: sumTokensUiUsdBalance(tokensUi)
+		}
+	};
+};
+
 export const generateAiAssistantResponseEventMetadata = ({
 	requestStartTimestamp,
-	toolName
+	toolName,
+	additionalMetadata
 }: {
 	requestStartTimestamp: number;
 	toolName?: string;
+	additionalMetadata?: Record<string, string>;
 }) => {
 	const responseTimeMs = Date.now() - requestStartTimestamp;
 
 	return {
 		...(notEmptyString(toolName) && { toolName }),
+		...(nonNullish(additionalMetadata) && additionalMetadata),
 		responseTime: `${responseTimeMs / 1000}s`,
 		responseTimeCategory:
 			responseTimeMs <= 100

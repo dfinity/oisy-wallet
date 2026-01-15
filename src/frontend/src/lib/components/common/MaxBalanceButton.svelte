@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { preventDefault } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -8,25 +10,36 @@
 	import type { Token } from '$lib/types/token';
 	import { getMaxTransactionAmount, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let amount: OptionAmount;
-	export let amountSetToMax = false;
-	export let error = false;
-	export let balance: OptionBalance;
-	export let token: Token | undefined = undefined;
-	export let fee: bigint | undefined = undefined;
+	interface Props {
+		amount: OptionAmount;
+		amountSetToMax?: boolean;
+		error?: boolean;
+		balance: OptionBalance;
+		token?: Token;
+		fee?: bigint;
+	}
 
-	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish(balance) || balance === ZERO;
+	let {
+		amount = $bindable(),
+		amountSetToMax = $bindable(false),
+		error = false,
+		balance,
+		token,
+		fee
+	}: Props = $props();
 
-	let maxAmount: string | undefined;
-	$: maxAmount = nonNullish(token)
-		? getMaxTransactionAmount({
-				balance,
-				fee,
-				tokenDecimals: token.decimals,
-				tokenStandard: token.standard
-			})
-		: undefined;
+	let isZeroBalance = $derived(!$isIcMintingAccount && (isNullish(balance) || balance === ZERO));
+
+	let maxAmount = $derived(
+		nonNullish(token)
+			? getMaxTransactionAmount({
+					balance,
+					fee,
+					tokenDecimals: token.decimals,
+					tokenStandard: token.standard
+				})
+			: undefined
+	);
 
 	const setMax = () => {
 		if (!isZeroBalance && nonNullish(maxAmount)) {
@@ -36,7 +49,7 @@
 	};
 
 	/**
-	 * Reevaluate max amount if user has used the "Max" button and fee is changing.
+	 * Reevaluate max amount if the user has used the "Max" button and the fee is changing.
 	 */
 	const debounceSetMax = () => {
 		if (!amountSetToMax) {
@@ -45,7 +58,11 @@
 		debounce(() => setMax(), 500)();
 	};
 
-	$: (fee, debounceSetMax());
+	$effect(() => {
+		[fee];
+
+		debounceSetMax();
+	});
 </script>
 
 <button
@@ -53,7 +70,7 @@
 	class:text-brand-primary-alt={!isZeroBalance && !error}
 	class:text-error-primary={isZeroBalance || error}
 	data-tid={MAX_BUTTON}
-	on:click|preventDefault={setMax}
+	onclick={preventDefault(setMax)}
 >
 	{$i18n.core.text.max}:
 	{nonNullish(maxAmount) && nonNullish(token)

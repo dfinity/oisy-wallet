@@ -18,7 +18,7 @@ export const ETHEREUM_TOKEN_ID: TokenId = parseTokenId(ETHEREUM_SYMBOL);
 export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 	id: ETHEREUM_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
 	name: 'Ethereum',
 	symbol: ETHEREUM_SYMBOL,
@@ -26,7 +26,7 @@ export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 	icon: eth,
 	twinTokenSymbol: 'ckETH',
 	groupData: ETH_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true,
+	neverCollapseInTokenGroup: true,
 	buy: {
 		onramperId: 'eth'
 	}
@@ -39,7 +39,7 @@ export const SEPOLIA_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_SYMBOL);
 export const SEPOLIA_TOKEN: RequiredTokenWithLinkedData = {
 	id: SEPOLIA_TOKEN_ID,
 	network: SEPOLIA_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
 	name: 'SepoliaETH',
 	symbol: SEPOLIA_SYMBOL,

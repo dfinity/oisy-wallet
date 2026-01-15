@@ -1,12 +1,11 @@
+import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import type {
 	IcTransactionType,
 	IcTransactionUi,
 	IcrcTransaction
 } from '$icp/types/ic-transaction';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
-import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
-import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import {
 	fromNullable,
 	fromNullishNullable,
@@ -14,8 +13,13 @@ import {
 	jsonReplacer,
 	nonNullish
 } from '@dfinity/utils';
+import {
+	encodeIcrcAccount,
+	fromCandidAccount,
+	type IcrcIndexDid
+} from '@icp-sdk/canisters/ledger/icrc';
 
-export const mapTransactionIcrcToSelf = (tx: IcrcTransactionWithId): IcrcTransaction[] => {
+export const mapTransactionIcrcToSelf = (tx: IcrcIndexDid.TransactionWithId): IcrcTransaction[] => {
 	const { transaction, id } = tx;
 	const { transfer: t } = transaction;
 
@@ -33,14 +37,8 @@ export const mapTransactionIcrcToSelf = (tx: IcrcTransactionWithId): IcrcTransac
 	const { from, to } = transfer;
 
 	const isSelfTransaction =
-		encodeIcrcAccount({
-			owner: from.owner,
-			subaccount: fromNullable(from.subaccount)
-		}).toLowerCase() ===
-		encodeIcrcAccount({
-			owner: to.owner,
-			subaccount: fromNullable(to.subaccount)
-		}).toLowerCase();
+		encodeIcrcAccount(fromCandidAccount(from)).toLowerCase() ===
+		encodeIcrcAccount(fromCandidAccount(to)).toLowerCase();
 
 	return [
 		{
@@ -91,17 +89,11 @@ export const mapIcrcTransaction = ({
 	});
 
 	const isApprove = nonNullish(fromNullable(approve));
-	const isTransfer = nonNullish(fromNullable(transfer));
 	const isMint = nonNullish(fromNullable(mint));
 
 	const source: Pick<IcTransactionUi, 'from' | 'incoming'> = {
 		...('from' in data
-			? mapFrom(
-					encodeIcrcAccount({
-						owner: data.from.owner,
-						subaccount: fromNullable(data.from.subaccount)
-					})
-				)
+			? mapFrom(encodeIcrcAccount(fromCandidAccount(data.from)))
 			: isMint
 				? { incoming: true }
 				: {})
@@ -117,28 +109,32 @@ export const mapIcrcTransaction = ({
 					? 'send'
 					: 'receive';
 
-	const value = isApprove
-		? ZERO
-		: nonNullish(data?.amount)
-			? data.amount +
-				(isTransfer && source.incoming === false
-					? (fromNullishNullable(fromNullable(transfer)?.fee) ?? ZERO)
-					: ZERO)
-			: undefined;
+	const approveFee = fromNullishNullable(fromNullable(approve)?.fee);
+	const transferFee = fromNullishNullable(fromNullable(transfer)?.fee);
+
+	const value = data?.amount;
+	const fee = isApprove ? approveFee : transferFee;
+
+	const approveData = fromNullable(approve);
+	const approveSpender = nonNullish(approveData)
+		? encodeIcrcAccount(fromCandidAccount(approveData.spender))
+		: undefined;
+
+	const approveExpiresAt = fromNullishNullable(approveData?.expires_at);
 
 	return {
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
 		type,
 		...source,
-		to:
-			'to' in data
-				? encodeIcrcAccount({
-						owner: data.to.owner,
-						subaccount: fromNullable(data.to.subaccount)
-					})
-				: undefined,
+		to: 'to' in data ? encodeIcrcAccount(fromCandidAccount(data.to)) : undefined,
 		...(nonNullish(value) && { value }),
+		...(nonNullish(fee) && { fee }),
 		timestamp,
-		status: 'executed'
+		status: 'executed',
+		...(nonNullish(approveSpender) && { approveSpender }),
+		...(nonNullish(approveSpender) && {
+			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approveSpender}`
+		}),
+		...(nonNullish(approveExpiresAt) && { approveExpiresAt })
 	};
 };

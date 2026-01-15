@@ -1,15 +1,15 @@
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 import {
 	MANAGE_TOKENS_MODAL_ROUTE,
 	TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
-import { nullishSignOut } from '$lib/services/auth.services';
+import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
@@ -19,11 +19,11 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
-import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
-export interface ManageTokensSaveParams {
+interface ManageTokensSaveParams {
 	progress?: (step: ProgressStepsAddToken) => void;
 	modalNext?: () => void;
 	onSuccess?: () => void;
@@ -39,8 +39,8 @@ export interface SaveTokensParams<T> {
 
 export const saveTokens = async <
 	T extends
-		| SaveUserToken
 		| SaveCustomTokenWithKey
+		| SaveErc20CustomToken
 		| SaveSplCustomToken
 		| SaveErc721CustomToken
 		| SaveErc1155CustomToken
@@ -60,7 +60,6 @@ export const saveTokens = async <
 	const $i18n = get(i18n);
 
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 
@@ -123,4 +122,17 @@ export const saveTokens = async <
 			metadata: mapIcErrorMetadata(err)
 		});
 	}
+};
+
+export const saveCustomTokensWithKey = async ({
+	tokens,
+	...rest
+}: {
+	tokens: SaveCustomTokenWithKey[];
+} & ManageTokensSaveParams) => {
+	await saveTokens({
+		...rest,
+		tokens,
+		save: saveCustomTokens
+	});
 };

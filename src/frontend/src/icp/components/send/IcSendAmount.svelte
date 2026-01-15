@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
-	import type { OptionIcToken } from '$icp/types/ic-token';
+	import { getTokenFee } from '$icp/utils/token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -12,23 +13,32 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 
-	export let amount: OptionAmount = undefined;
-	export let amountError: IcAmountAssertionError | undefined;
+	interface Props {
+		amount: OptionAmount;
+		amountError?: IcAmountAssertionError;
+		onTokensList: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
 
-	const { sendToken, sendTokenExchangeRate, sendBalance } =
+	const { sendToken, sendTokenExchangeRate, sendBalance, isIcBurning } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let fee: bigint | undefined;
-	$: fee = ($sendToken as OptionIcToken)?.fee;
+	// An IC Burn transaction does not require a fee
+	let fee = $derived($isIcBurning ? ZERO : getTokenFee($sendToken));
 
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
+
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (isNullish(fee) || isNullish($sendToken)) {
+			return;
+		}
+
+		// If the user is the minting account, it does not require any balance to send tokens.
+		// Any token sent from a minting account is considered a Mint transaction.
+		if ($isIcMintingAccount) {
 			return;
 		}
 
@@ -38,8 +48,6 @@
 			if (total > ($sendBalance ?? ZERO)) {
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
-
-			return undefined;
 		};
 
 		return assertBalance();
@@ -49,19 +57,17 @@
 <div class="mb-4">
 	<TokenInput
 		autofocus={nonNullish($sendToken)}
-		customErrorValidate={customValidate}
 		displayUnit={inputUnit}
 		exchangeRate={$sendTokenExchangeRate}
+		onClick={onTokensList}
+		onCustomErrorValidate={customValidate}
 		token={$sendToken}
 		bind:amount
 		bind:error={amountError}
-		on:click={() => {
-			dispatch('icTokensList');
-		}}
 	>
-		<span slot="title">{$i18n.core.text.amount}</span>
+		{#snippet title()}{$i18n.core.text.amount}{/snippet}
 
-		<svelte:fragment slot="amount-info">
+		{#snippet amountInfo()}
 			{#if nonNullish($sendToken)}
 				<div class="text-tertiary">
 					<TokenInputAmountExchange
@@ -72,9 +78,9 @@
 					/>
 				</div>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 
-		<svelte:fragment slot="balance">
+		{#snippet balance()}
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
 					balance={$sendBalance}
@@ -84,6 +90,6 @@
 					bind:amount
 				/>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</TokenInput>
 </div>

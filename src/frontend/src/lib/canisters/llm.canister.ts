@@ -4,6 +4,7 @@ import type {
 	chat_response_v1
 } from '$declarations/llm/llm.did';
 import { idlFactory as idlCertifiedFactoryLlm } from '$declarations/llm/llm.factory.certified.did';
+import { idlFactory as idlFactoryLlm } from '$declarations/llm/llm.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices } from '@dfinity/utils';
@@ -20,7 +21,7 @@ export class LlmCanister extends Canister<LlmService> {
 				...options,
 				agent
 			},
-			idlFactory: idlCertifiedFactoryLlm,
+			idlFactory: idlFactoryLlm,
 			certifiedIdlFactory: idlCertifiedFactoryLlm
 		});
 

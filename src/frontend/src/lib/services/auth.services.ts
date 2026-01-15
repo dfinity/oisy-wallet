@@ -1,18 +1,20 @@
+import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import {
 	clearIdbBtcAddressMainnet,
+	clearIdbBtcAddressTestnet,
 	clearIdbEthAddress,
+	clearIdbSolAddressDevnet,
+	clearIdbSolAddressLocal,
 	clearIdbSolAddressMainnet,
 	deleteIdbBtcAddressMainnet,
+	deleteIdbBtcAddressTestnet,
 	deleteIdbEthAddress,
+	deleteIdbSolAddressDevnet,
+	deleteIdbSolAddressLocal,
 	deleteIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
 import { clearIdbBalances, deleteIdbBalances } from '$lib/api/idb-balances.api';
-import {
-	clearIdbAllCustomTokens,
-	clearIdbEthTokensDeprecated,
-	deleteIdbAllCustomTokens,
-	deleteIdbEthTokensDeprecated
-} from '$lib/api/idb-tokens.api';
+import { clearIdbAllCustomTokens, deleteIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import {
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,
@@ -31,20 +33,28 @@ import {
 	TRACK_SIGN_OUT_ERROR,
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
-import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
+import {
+	authLoggedInAnotherTabStore,
+	authStore,
+	type AuthSignInParams
+} from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
+import { AUTH_LOCK_KEY } from '$lib/stores/locked.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
+import { InternetIdentityDomain } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { ToastMsg } from '$lib/types/toast';
 import { emit } from '$lib/utils/events.utils';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
+import { get as getStorage } from '$lib/utils/storage.utils';
+import { randomWait } from '$lib/utils/time.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
-import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 export const signIn = async (
@@ -52,21 +62,33 @@ export const signIn = async (
 ): Promise<{ success: 'ok' | 'cancelled' | 'error'; err?: unknown }> => {
 	busy.show();
 
+	const trackingMetadata = {
+		domain: params.domain ?? InternetIdentityDomain.VERSION_1_0
+	};
+
 	try {
-		await authStore.signIn(params);
+		const fn = get(authLoggedInAnotherTabStore)
+			? () => authStore.forceSync()
+			: () => authStore.signIn(params);
+
+		await fn();
 
 		trackEvent({
-			name: TRACK_COUNT_SIGN_IN_SUCCESS
+			name: TRACK_COUNT_SIGN_IN_SUCCESS,
+			metadata: trackingMetadata
 		});
 
-		// We clean previous messages in case user was signed out automatically before sign-in again.
+		// We clean previous messages in case the user was signed out automatically before signing-in again.
 		toastsClean();
+
+		authLoggedInAnotherTabStore.set(false);
 
 		return { success: 'ok' };
 	} catch (err: unknown) {
 		if (err === 'UserInterrupt') {
 			trackEvent({
-				name: TRACK_SIGN_IN_CANCELLED_COUNT
+				name: TRACK_SIGN_IN_CANCELLED_COUNT,
+				metadata: trackingMetadata
 			});
 
 			// We do not display an error if the user explicitly cancelled the process of sign-in
@@ -75,7 +97,8 @@ export const signIn = async (
 
 		if (err instanceof AuthClientNotInitializedError) {
 			trackEvent({
-				name: TRACK_SIGN_IN_UNDEFINED_AUTH_CLIENT_ERROR
+				name: TRACK_SIGN_IN_UNDEFINED_AUTH_CLIENT_ERROR,
+				metadata: trackingMetadata
 			});
 
 			toastsError({
@@ -86,7 +109,8 @@ export const signIn = async (
 		}
 
 		trackEvent({
-			name: TRACK_SIGN_IN_ERROR_COUNT
+			name: TRACK_SIGN_IN_ERROR_COUNT,
+			metadata: trackingMetadata
 		});
 
 		toastsError({
@@ -96,6 +120,8 @@ export const signIn = async (
 
 		return { success: 'error', err };
 	} finally {
+		await disconnectWalletConnect();
+
 		busy.stop();
 	}
 };
@@ -146,15 +172,25 @@ export const nullishSignOut = (): Promise<void> =>
 	warnSignOut(get(i18n).auth.warning.not_signed_in);
 
 export const idleSignOut = (): Promise<void> => {
-	const text = get(i18n).auth.warning.session_expired;
+	const locked = getStorage({ key: AUTH_LOCK_KEY });
+
+	const level: ToastLevel = locked ? 'info' : 'warn';
+
+	const text = locked
+		? get(i18n).auth.message.session_locked
+		: get(i18n).auth.warning.session_expired;
+
+	const reason = locked ? 'session_locked' : 'session_expired';
+
 	trackEvent({
 		name: TRACK_SIGN_OUT_WITH_WARNING,
-		metadata: { level: 'warn', text, reason: 'session_expired', clearStorages: 'false' }
+		metadata: { level, text, reason, clearStorages: 'false' }
 	});
+
 	return logout({
 		msg: {
-			text: get(i18n).auth.warning.session_expired,
-			level: 'warn'
+			text,
+			level
 		},
 		clearCurrentPrincipalStorages: false
 	});
@@ -195,12 +231,13 @@ const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 const deleteIdbStoreList = [
 	// Addresses
 	deleteIdbBtcAddressMainnet,
+	deleteIdbBtcAddressTestnet,
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet,
+	deleteIdbSolAddressDevnet,
+	deleteIdbSolAddressLocal,
 	// Tokens
 	deleteIdbAllCustomTokens,
-	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-	deleteIdbEthTokensDeprecated,
 	// Transactions
 	deleteIdbBtcTransactions,
 	deleteIdbEthTransactions,
@@ -213,12 +250,13 @@ const deleteIdbStoreList = [
 const clearIdbStoreList = [
 	// Addresses
 	clearIdbBtcAddressMainnet,
+	clearIdbBtcAddressTestnet,
 	clearIdbEthAddress,
 	clearIdbSolAddressMainnet,
+	clearIdbSolAddressDevnet,
+	clearIdbSolAddressLocal,
 	// Tokens
 	clearIdbAllCustomTokens,
-	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-	clearIdbEthTokensDeprecated,
 	// Transactions
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,
@@ -231,6 +269,17 @@ const clearIdbStoreList = [
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
 	sessionStorage.clear();
+};
+
+const disconnectWalletConnect = async () => {
+	emit({ message: 'oisyDisconnectWalletConnect' });
+
+	// Wait until WalletConnect is not connected or until a certain max number of attempts is made.
+	let count = 0;
+	while (get(walletConnectPaired) && count < 10) {
+		await randomWait({ min: 1000, max: 1000 });
+		count++;
+	}
 };
 
 const logout = async ({
@@ -247,7 +296,7 @@ const logout = async ({
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
 
-	emit({ message: 'oisyDisconnectWalletConnect' });
+	await disconnectWalletConnect();
 
 	if (clearCurrentPrincipalStorages) {
 		await Promise.all(deleteIdbStoreList.map(emptyPrincipalIdbStore));
@@ -299,7 +348,7 @@ const appendMsgToUrl = (msg: ToastMsg) => {
 };
 
 /**
- * If the url contains a msg that has been provided on logout, display it as a toast message. Cleanup url afterwards - we don't want the user to see the message again if reloads the browser
+ * If the url contains a msg that has been provided on logout, display it as a toast message. Clean up the url afterwards - we don't want the user to see the message again if reloads the browser
  */
 export const displayAndCleanLogoutMsg = () => {
 	const urlParams: URLSearchParams = new URLSearchParams(window.location.search);

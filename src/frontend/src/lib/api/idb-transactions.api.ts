@@ -8,7 +8,6 @@ import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
 import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { nullishSignOut } from '$lib/services/auth.services';
 import type {
 	GetIdbTransactionsParams,
 	IdbTransactionsStoreData,
@@ -18,8 +17,8 @@ import type { Transaction } from '$lib/types/transaction';
 import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 import { clear, createStore, get, set as idbSet, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.
@@ -46,14 +45,17 @@ export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData
 	idbTransactionsStore
 }: SetIdbTransactionsParams<T> & { idbTransactionsStore: UseStore }) => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
+		return;
+	}
+
+	if (isNullish(transactionsStoreData)) {
 		return;
 	}
 
 	// We don't necessarily need this function to work, it is just a cache-saving service. Useful but not critical. We can ignore errors.
 	await Promise.allSettled(
 		tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
-			const transactions = transactionsStoreData?.[tokenId];
+			const transactions = transactionsStoreData[tokenId];
 
 			if (isNullish(transactions)) {
 				return;

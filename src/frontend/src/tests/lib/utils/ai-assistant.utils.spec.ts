@@ -1,12 +1,23 @@
+import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK, ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import {
+	USDC_SYMBOL,
+	USDC_TOKEN as USDC_TOKEN_ERC20
+} from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDC_TOKEN as USDC_TOKEN_BEP20 } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdc.env';
+import { USDC_TOKEN as USDC_TOKEN_SPL } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import { contactsStore } from '$lib/stores/contacts.store';
 import {
 	generateAiAssistantResponseEventMetadata,
 	parseReviewSendTokensToolArguments,
+	parseShowBalanceToolArguments,
 	parseShowFilteredContactsToolArguments,
 	parseToAiAssistantContacts,
 	parseToAiAssistantTokens
@@ -77,6 +88,10 @@ describe('ai-assistant.utils', () => {
 						{
 							value: 'ICP',
 							name: 'tokenSymbol'
+						},
+						{
+							value: 'ICP',
+							name: 'networkId'
 						}
 					],
 					tokens: [ICP_TOKEN, ETHEREUM_TOKEN, BTC_MAINNET_TOKEN],
@@ -91,6 +106,33 @@ describe('ai-assistant.utils', () => {
 				id: mockRandomUUID,
 				sendCompleted: false
 			});
+		});
+
+		it('returns undefined when the token could not be identified', () => {
+			expect(
+				parseReviewSendTokensToolArguments({
+					filterParams: [
+						{
+							value: extendedAddressContactUi.addresses[0].id,
+							name: 'selectedContactAddressId'
+						},
+						{
+							value: `${sendValue}`,
+							name: 'amountNumber'
+						},
+						{
+							value: 'RandomToken',
+							name: 'tokenSymbol'
+						},
+						{
+							value: 'RandomNetwork',
+							name: 'networkId'
+						}
+					],
+					tokens: [ICP_TOKEN, ETHEREUM_TOKEN, BTC_MAINNET_TOKEN],
+					extendedAddressContacts: storeData
+				})
+			).toBeUndefined();
 		});
 
 		it('returns correct result when address is provided', () => {
@@ -202,18 +244,21 @@ describe('ai-assistant.utils', () => {
 		});
 
 		it('returns correct result with a tool name', () => {
+			const additionalMetadata = { testParam: 'test' };
 			const requestStartTimestamp = 1000000;
 			vi.spyOn(Date, 'now').mockReturnValue(requestStartTimestamp + 4000000);
 
 			expect(
 				generateAiAssistantResponseEventMetadata({
 					toolName: 'test',
-					requestStartTimestamp
+					requestStartTimestamp,
+					additionalMetadata
 				})
 			).toEqual({
 				toolName: 'test',
 				responseTime: '4000s',
-				responseTimeCategory: '100000+'
+				responseTimeCategory: '100000+',
+				...additionalMetadata
 			});
 		});
 
@@ -228,6 +273,109 @@ describe('ai-assistant.utils', () => {
 			).toEqual({
 				responseTime: '65.579s',
 				responseTimeCategory: '20001-100000'
+			});
+		});
+	});
+
+	describe('parseShowBalanceToolArguments', () => {
+		const icpTokenUi = { ...ICP_TOKEN, usdBalance: 1000, balance: 1000n };
+		const usdcErc20TokenUi = { ...USDC_TOKEN_ERC20, usdBalance: 1000, balance: 1000n };
+		const ckUsdcTokenUi = {
+			...USDC_TOKEN_ERC20,
+			symbol: 'ckUSDC',
+			network: ICP_NETWORK,
+			usdBalance: 1000,
+			balance: 1000n
+		};
+		const usdcBep20TokenUi = { ...USDC_TOKEN_BEP20, usdBalance: 1000, balance: 1000n };
+		const usdcSplTokenUi = { ...USDC_TOKEN_SPL, usdBalance: 1000, balance: 1000n };
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('returns correct result when both token symbol and network id provided', () => {
+			expect(
+				parseShowBalanceToolArguments({
+					filterParams: [
+						{
+							value: ICP_SYMBOL,
+							name: 'tokenSymbol'
+						},
+						{
+							value: ICP_NETWORK_SYMBOL,
+							name: 'networkId'
+						}
+					],
+					tokensUi: [icpTokenUi, { ...ETHEREUM_TOKEN, usdBalance: 1000, balance: 1000n }],
+					networks: [ICP_NETWORK, ETHEREUM_NETWORK]
+				})
+			).toEqual({
+				mainCard: {
+					token: icpTokenUi,
+					totalUsdBalance: 1000
+				}
+			});
+		});
+
+		it('returns correct result when only token symbol provided', () => {
+			expect(
+				parseShowBalanceToolArguments({
+					filterParams: [
+						{
+							value: USDC_SYMBOL,
+							name: 'tokenSymbol'
+						}
+					],
+					tokensUi: [usdcErc20TokenUi, usdcBep20TokenUi, usdcSplTokenUi, ckUsdcTokenUi],
+					networks: [ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK, BSC_MAINNET_NETWORK]
+				})
+			).toEqual({
+				mainCard: {
+					token: usdcErc20TokenUi,
+					totalUsdBalance:
+						usdcErc20TokenUi.usdBalance +
+						usdcBep20TokenUi.usdBalance +
+						usdcSplTokenUi.usdBalance +
+						ckUsdcTokenUi.usdBalance
+				},
+				secondaryCards: [usdcErc20TokenUi, usdcBep20TokenUi, usdcSplTokenUi, ckUsdcTokenUi]
+			});
+		});
+
+		it('returns correct result when only network id provided', () => {
+			expect(
+				parseShowBalanceToolArguments({
+					filterParams: [
+						{
+							value: ETHEREUM_NETWORK_SYMBOL,
+							name: 'networkId'
+						}
+					],
+					tokensUi: [usdcErc20TokenUi, usdcBep20TokenUi, usdcSplTokenUi],
+					networks: [ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK, BSC_MAINNET_NETWORK]
+				})
+			).toEqual({
+				mainCard: {
+					network: ETHEREUM_NETWORK,
+					totalUsdBalance: usdcErc20TokenUi.usdBalance
+				},
+				secondaryCards: [usdcErc20TokenUi]
+			});
+		});
+
+		it('returns correct result when no filters provided', () => {
+			expect(
+				parseShowBalanceToolArguments({
+					filterParams: [],
+					tokensUi: [usdcErc20TokenUi, usdcBep20TokenUi, usdcSplTokenUi],
+					networks: [ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK, BSC_MAINNET_NETWORK]
+				})
+			).toEqual({
+				mainCard: {
+					totalUsdBalance:
+						usdcErc20TokenUi.usdBalance + usdcBep20TokenUi.usdBalance + usdcSplTokenUi.usdBalance
+				}
 			});
 		});
 	});

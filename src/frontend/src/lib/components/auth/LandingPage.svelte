@@ -16,14 +16,14 @@
 		<HeroSignIn />
 	</div>
 
-	<div class="min-h-[85dvh] md:mt-10 md:min-h-[75dvh]">
+	<div class="min-h-[85dvh] md:mt-8 md:min-h-[65dvh] 2.5xl:min-h-[75dvh]">
 		{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
 			<BgImg
 				{ariaLabel}
 				imageUrl={src}
 				shadow="none"
 				size="contain"
-				styleClass="min-h-[85dvh] min-w-[1400px] bg-left absolute"
+				styleClass="min-h-[75dvh] 2.5xl:min-h-[85dvh] min-w-[1400px] bg-left absolute"
 			/>
 		{/await}
 	</div>

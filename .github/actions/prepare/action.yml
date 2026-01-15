@@ -15,3 +15,7 @@ runs:
     - name: Install dependencies
       shell: bash
       run: npm ci
+
+    - name: Prepare
+      shell: bash
+      run: npm run prepare

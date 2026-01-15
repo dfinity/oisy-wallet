@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import IcReceiveWalletAddress from '$icp/components/receive/IcReceiveWalletAddress.svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
@@ -11,16 +11,22 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ReceiveQRCode } from '$lib/types/receive';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+
+	interface Props {
+		onQRCode: (details: ReceiveQRCode) => void;
+		onHowToConvert: () => void;
+	}
+
+	let { onQRCode, onHowToConvert }: Props = $props();
 
 	const { token, ckEthereumTwinToken, ckEthereumTwinTokenNetwork, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
-
-	const dispatch = createEventDispatcher();
 </script>
 
 <ContentWithToolbar>
-	<IcReceiveWalletAddress on:icQRCode />
+	<IcReceiveWalletAddress {onQRCode} />
 
 	<Hr spacing="lg" />
 
@@ -32,7 +38,7 @@
 		{/snippet}
 
 		{#snippet content()}
-			<p class="break-normal py-2 text-tertiary">
+			<p class="py-2 break-normal text-tertiary">
 				{replacePlaceholders(
 					replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
 					{
@@ -47,7 +53,7 @@
 
 	{#snippet toolbar()}
 		<div class="flex w-full flex-col gap-3">
-			<Button colorStyle="secondary" onclick={() => dispatch('icHowToConvert')} paddingSmall>
+			<Button colorStyle="secondary" onclick={onHowToConvert} paddingSmall>
 				<span class="text-dark-slate-blue font-bold"
 					>{replacePlaceholders(
 						replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),

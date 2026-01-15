@@ -57,7 +57,7 @@
 					: $i18n.receive.text.receive
 	);
 
-	let amount = $derived(value * (type === 'send' || type === 'deposit' ? -1n : 1n));
+	let displayAmount = $derived(value * (type === 'send' || type === 'deposit' ? -1n : 1n));
 
 	let transactionDate = $derived(timestamp ?? displayTimestamp);
 
@@ -65,7 +65,7 @@
 </script>
 
 <Transaction
-	{amount}
+	{displayAmount}
 	{from}
 	{iconType}
 	onClick={() => modalStore.openEthTransaction({ id: modalId, data: { transaction, token } })}

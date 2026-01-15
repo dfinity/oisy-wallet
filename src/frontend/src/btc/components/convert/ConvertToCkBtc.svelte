@@ -11,7 +11,6 @@
 	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
 	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import type { IcCkToken } from '$icp/types/ic-token';
 	import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
@@ -27,17 +26,18 @@
 
 	const modalId = Symbol();
 
-	let ckBtcToken: IcCkToken | undefined;
-	$: ckBtcToken = findTwinToken({
-		tokenToPair: BTC_MAINNET_TOKEN,
-		tokens: $tokens
-	});
+	let ckBtcToken = $derived(
+		findTwinToken({
+			tokenToPair: BTC_MAINNET_TOKEN,
+			tokens: $tokens
+		})
+	);
 
 	setContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY, {
 		store: initUtxosFeeStore()
 	});
 
-	let minterInfoLoaded = false;
+	let minterInfoLoaded = $state(false);
 
 	const openConvert = async () => {
 		// ckBtcToken is already available at this point, so the check is needed for TS-purposes only

@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import * as sendServices from '$eth/services/send.services';
 import * as ethFeeStore from '$eth/stores/eth-fee.store';
+import type { OptionEthAddress } from '$eth/types/address';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import AiAssistantReviewSendEthToken from '$lib/components/ai-assistant/AiAssistantReviewSendEthToken.svelte';
 import {
@@ -11,7 +12,6 @@ import {
 import { ethAddressStore } from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
@@ -21,10 +21,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { isNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 describe('AiAssistantReviewSendEthToken', () => {
 	const sendAmount = 0.001;
@@ -76,7 +72,8 @@ describe('AiAssistantReviewSendEthToken', () => {
 		nativeEthereumToken: ETHEREUM_TOKEN,
 		sendCompleted: false,
 		sourceNetwork: ETHEREUM_NETWORK,
-		sendEnabled: true
+		sendEnabled: true,
+		onSendCompleted: vi.fn()
 	};
 	let sendSpy: MockInstance;
 
@@ -97,7 +94,7 @@ describe('AiAssistantReviewSendEthToken', () => {
 			context: mockContext()
 		});
 
-		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
+		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrowError();
 		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE)).toBeInTheDocument();
 	});
 
@@ -117,8 +114,7 @@ describe('AiAssistantReviewSendEthToken', () => {
 
 		await fireEvent.click(button);
 
-		expect(sendSpy).toHaveBeenCalledOnce();
-		expect(sendSpy).toHaveBeenCalledWith({
+		expect(sendSpy).toHaveBeenCalledExactlyOnceWith({
 			from: mockEthAddress,
 			to: mockEthAddress3,
 			token: SEPOLIA_TOKEN,

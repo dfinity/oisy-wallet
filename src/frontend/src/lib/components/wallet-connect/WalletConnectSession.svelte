@@ -17,7 +17,7 @@
 	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
-	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
+	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.constants';
 	import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
@@ -26,7 +26,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { loading } from '$lib/stores/loader.store';
+	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { Option } from '$lib/types/utils';
@@ -107,7 +107,6 @@
 
 	const resetListener = () => {
 		listener = undefined;
-		proposal = null;
 	};
 
 	const initListener = async () => {
@@ -146,7 +145,7 @@
 	const goToFirstStep = () => modal?.set?.(0);
 
 	// One try to manually sign in by entering the URL manually or scanning a QR code
-	const userConnect = async ({ detail: uri }: CustomEvent<string>) => {
+	const userConnect = async (uri: string) => {
 		if (isNullish(modal)) {
 			return;
 		}
@@ -167,16 +166,16 @@
 		}
 
 		// We are still loading ETH address and other data. Boot screen load.
-		if ($loading) {
+		if ($initialLoading) {
 			return;
 		}
 
-		// Address is not defined. We need it at least one between the Ethereum address and the Solana address.
+		// Address is not defined. We need at least one between the Ethereum address and the Solana address.
 		if (isNullish($ethAddress) && isNullish($solAddressMainnet)) {
 			return;
 		}
 
-		// For simplicity reason we just display an error for now if the user has already opened the WalletConnect modal.
+		// For simplicity reason, we just display an error for now if the user has already opened the WalletConnect modal.
 		// Technically, we could potentially check which steps are in progress and eventually jump or not, but let's keep it simple for now.
 		if ($modalWalletConnectAuth) {
 			toastsError({
@@ -197,17 +196,12 @@
 	};
 
 	$effect(() => {
-		[$ethAddress, $solAddressMainnet, $walletConnectUri, $loading];
+		[$ethAddress, $solAddressMainnet, $walletConnectUri, $initialLoading];
 
 		untrack(() => uriConnect());
 	});
 
 	const onSessionProposal = (sessionProposal: WalletKitTypes.SessionProposal) => {
-		// Prevent race condition
-		if (isNullish(listener)) {
-			return;
-		}
-
 		proposal = sessionProposal;
 	};
 
@@ -336,11 +330,6 @@
 			}
 		});
 
-	const cancel = () => {
-		resetListener();
-		modal?.back();
-	};
-
 	const approve = async () =>
 		await answer({
 			callback: listener?.approveSession,
@@ -413,7 +402,7 @@
 			return;
 		}
 
-		if ($loading || (isNullish($ethAddress) && isNullish($solAddressMainnet))) {
+		if ($initialLoading || (isNullish($ethAddress) && isNullish($solAddressMainnet))) {
 			reconnecting = false;
 
 			return;
@@ -451,7 +440,7 @@
 	};
 
 	$effect(() => {
-		[$ethAddress, $solAddressMainnet, $loading];
+		[$ethAddress, $solAddressMainnet, $initialLoading];
 
 		untrack(() => reconnect());
 	});
@@ -467,7 +456,7 @@
 	};
 </script>
 
-<svelte:window onoisyDisconnectWalletConnect={disconnect} />
+<svelte:window onoisyDisconnectWalletConnect={disconnectListener} />
 
 {#if nonNullish(listener)}
 	<WalletConnectButton onclick={disconnect}>
@@ -493,10 +482,12 @@
 			</WalletConnectModalTitle>
 		{/snippet}
 
-		{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
-			<WalletConnectReview onApprove={approve} onCancel={cancel} onReject={reject} {proposal} />
-		{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
-			<WalletConnectForm on:icConnect={userConnect} />
-		{/if}
+		{#key currentStep?.name}
+			{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
+				<WalletConnectReview onApprove={approve} onCancel={reject} onReject={reject} {proposal} />
+			{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
+				<WalletConnectForm onConnect={userConnect} />
+			{/if}
+		{/key}
 	</WizardModal>
 {/if}

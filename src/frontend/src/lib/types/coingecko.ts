@@ -1,26 +1,17 @@
 // https://www.coingecko.com/api/documentation
 
-// We are only interested in specific coin <> USD for now, therefore not an exhaustive list.
-// *refers to curl -l https://api.coingecko.com/api/v3/coins/list
-import type { Erc20ContractAddress } from '$eth/types/erc20';
+import type { EthAddress } from '$eth/types/address';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { Currency } from '$lib/enums/currency';
-import type { EthAddress } from '$lib/types/address';
-import type { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
-import type * as z from 'zod/v4';
+import type {
+	CoingeckoCoinsIdSchema,
+	CoingeckoPlatformIdSchema
+} from '$lib/schema/coingecko.schema';
+import type * as z from 'zod';
 
 export type CoingeckoCoinsId = z.infer<typeof CoingeckoCoinsIdSchema>;
 
-// We are interested only in the ERC20 <> USD on Ethereum and in the ICRC <> USD on Internet Computer, therefore not an exhaustive list.
-// *refers to curl -l https://api.coingecko.com/api/v3/asset_platforms
-export type CoingeckoPlatformId =
-	| 'ethereum'
-	| 'internet-computer'
-	| 'solana'
-	| 'base'
-	| 'binance-smart-chain'
-	| 'polygon-pos'
-	| 'arbitrum-one';
+export type CoingeckoPlatformId = z.infer<typeof CoingeckoPlatformIdSchema>;
 
 // Please, cross-reference the OISY supported currencies with the Coingecko API for supported currencies.
 // *refers to curl -l https://api.coingecko.com/api/v3/simple/supported_vs_currencies
@@ -80,8 +71,3 @@ export type CoingeckoSimpleTokenPriceResponse = CoingeckoResponse<CoingeckoSimpl
 export type CoingeckoPriceResponse =
 	| CoingeckoSimplePriceResponse
 	| CoingeckoSimpleTokenPriceResponse;
-
-export interface CoingeckoErc20PriceParams {
-	coingeckoPlatformId: CoingeckoPlatformId;
-	contractAddresses: Erc20ContractAddress[];
-}

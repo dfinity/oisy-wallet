@@ -1,6 +1,6 @@
 import * as env from '$env/dapp-descriptions.env';
 import DappsExplorerSignedIn from '$lib/components/dapps/DappsExplorerSignedIn.svelte';
-import { TRACK_COUNT_DAPP_OPEN_INFO_MODAL } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_DAPP_OPEN_INFO_MODAL } from '$lib/constants/analytics.constants';
 import * as analytics from '$lib/services/analytics.services';
 import { mockDappsDescriptions } from '$tests/mocks/dapps.mock';
 import { nonNullish } from '@dfinity/utils';

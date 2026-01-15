@@ -1,7 +1,7 @@
 import {
 	TRACK_COUNT_WC_SOL_SEND_ERROR,
 	TRACK_COUNT_WC_SOL_SEND_SUCCESS
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -12,33 +12,38 @@ import {
 } from '$lib/services/wallet-connect.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
+import {
+	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+	SESSION_REQUEST_SOL_SIGN_TRANSACTION
+} from '$sol/constants/wallet-connect.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import {
 	sendSignedTransaction,
 	setLifetimeAndFeePayerToTransaction
 } from '$sol/services/sol-send.services';
-import { signTransaction } from '$sol/services/sol-sign.services';
+import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
+import type { SolanaNetworkType } from '$sol/types/network';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
-import { createSigner } from '$sol/utils/sol-sign.utils';
+import { createSigner, signTransaction, type CreateSignerParams } from '$sol/utils/sol-sign.utils';
 import {
 	decodeTransactionMessage,
 	mapSolTransactionMessage,
-	parseSolBase64TransactionMessage,
-	transactionMessageHasBlockhashLifetime
+	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import {
-	addSignersToTransactionMessage,
+	getBase58Decoder,
 	getBase64Decoder,
 	getTransactionEncoder,
+	isTransactionMessageWithBlockhashLifetime,
+	address as solAddress,
 	type Base64EncodedWireTransaction
 } from '@solana/kit';
 import { get } from 'svelte/store';
@@ -69,6 +74,111 @@ export const decode = async ({
 	});
 
 	return mapSolTransactionMessage(parsedTransactionMessage);
+};
+
+const getSignatureWithoutSending = async ({
+	identity,
+	base64EncodedTransactionMessage,
+	address,
+	network
+}: CreateSignerParams & { base64EncodedTransactionMessage: string }): Promise<string> => {
+	const decodedTransactionMessage = decodeTransactionMessage(base64EncodedTransactionMessage);
+
+	const signaturesMap = await signTransaction({
+		identity,
+		transaction: decodedTransactionMessage,
+		address,
+		network
+	});
+
+	const customSign = signaturesMap[solAddress(address)];
+
+	return getBase58Decoder().decode(customSign);
+};
+
+const getSignatureWithSending = async ({
+	identity,
+	base64EncodedTransactionMessage,
+	address,
+	network,
+	progress
+}: {
+	identity: OptionIdentity;
+	base64EncodedTransactionMessage: string;
+	address: SolAddress;
+	network: SolanaNetworkType;
+	progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => void;
+}): Promise<string | undefined> => {
+	const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
+
+	const additionalSigners = Object.entries(signatures).reduce<string[]>(
+		(acc, [a, signature]) => [...acc, ...(a !== address && isNullish(signature) ? [a] : [])],
+		[]
+	);
+
+	// We cannot send transaction with additional signers that have not signed yet
+	if (additionalSigners.length > 0) {
+		console.warn(
+			`WalletConnect Solana transaction has additional signers that have not signed yet: ${additionalSigners}`
+		);
+
+		return;
+	}
+
+	const rpc = solanaHttpRpc(network);
+
+	const transactionMessageRaw = await parseSolBase64TransactionMessage({
+		transactionMessage: base64EncodedTransactionMessage,
+		rpc
+	});
+
+	// It should not happen, since we receive transaction with blockhash lifetime,
+	// but just to guarantee the correct type casting
+	if (!isTransactionMessageWithBlockhashLifetime(transactionMessageRaw)) {
+		console.warn(
+			'WalletConnect Solana transaction does not have blockhash lifetime, cannot be sent'
+		);
+
+		return;
+	}
+
+	const signer = createSigner({
+		identity,
+		address,
+		network
+	});
+
+	const transactionMessage = await setLifetimeAndFeePayerToTransaction({
+		transactionMessage: transactionMessageRaw,
+		rpc,
+		feePayer: signer
+	});
+
+	const { signedTransaction, signature } = await executeSign(transactionMessage);
+
+	const transactionBytes = getBase64Decoder().decode(
+		getTransactionEncoder().encode(signedTransaction)
+	);
+
+	const { simulateTransaction } = rpc;
+
+	const simulationResult = await simulateTransaction(
+		transactionBytes as Base64EncodedWireTransaction,
+		{
+			encoding: 'base64'
+		}
+	).send();
+
+	if (nonNullish(simulationResult.value.err)) {
+		// In case of simulation error, it is useful to log the error to the console for development purposes
+		console.warn('WalletConnect Solana transaction simulation error', simulationResult);
+	}
+
+	progress(ProgressStepsSendSol.SEND);
+
+	await sendSignedTransaction({ rpc, signedTransaction });
+
+	return signature;
 };
 
 export const sign = ({
@@ -128,81 +238,26 @@ export const sign = ({
 			try {
 				progress(ProgressStepsSign.SIGN);
 
-				assertNonNullish(address);
+				const signature =
+					method === SESSION_REQUEST_SOL_SIGN_TRANSACTION
+						? await getSignatureWithoutSending({
+								identity,
+								base64EncodedTransactionMessage,
+								address,
+								network: solNetwork
+							})
+						: method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION
+							? await getSignatureWithSending({
+									identity,
+									base64EncodedTransactionMessage,
+									address,
+									network: solNetwork,
+									progress
+								})
+							: undefined;
 
-				const rpc = solanaHttpRpc(solNetwork);
-
-				const signer = createSigner({
-					identity,
-					address,
-					network: solNetwork
-				});
-
-				const transactionMessageRaw = await parseSolBase64TransactionMessage({
-					transactionMessage: base64EncodedTransactionMessage,
-					rpc
-				});
-
-				// It should not happen, since we receive transaction with blockhash lifetime, but just to guarantee the correct type casting
-				if (!transactionMessageHasBlockhashLifetime(transactionMessageRaw)) {
+				if (isNullish(signature)) {
 					return { success: false };
-				}
-
-				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
-				const additionalSigners = Object.keys(signatures)
-					.filter((a) => a !== address)
-					.map((signer) =>
-						createSigner({
-							identity,
-							address: signer,
-							network: solNetwork
-						})
-					);
-				const transactionMessageWithAllSigners = addSignersToTransactionMessage(
-					additionalSigners,
-					transactionMessageRaw
-				);
-
-				const transactionMessage = await setLifetimeAndFeePayerToTransaction({
-					transactionMessage: transactionMessageWithAllSigners,
-					rpc,
-					feePayer: signer
-				});
-
-				const { signedTransaction, signature } = await signTransaction(transactionMessage);
-
-				const transactionBytes = getBase64Decoder().decode(
-					getTransactionEncoder().encode(signedTransaction)
-				);
-
-				const { simulateTransaction } = rpc;
-
-				const simulationResult = await simulateTransaction(
-					transactionBytes as Base64EncodedWireTransaction,
-					{
-						encoding: 'base64'
-					}
-				).send();
-
-				if (nonNullish(simulationResult.value.err)) {
-					// In case of simulation error, it is useful to log the error to the console for development purposes
-					console.warn('WalletConnect Solana transaction simulation error', simulationResult);
-				}
-
-				if (method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION) {
-					progress(ProgressStepsSendSol.SEND);
-				}
-
-				try {
-					// Even if some DEXs send an only-sign transaction, they do not send it when we return it.
-					// So, for good measure, we will send it anyway. It is not an issue if it is sent twice, since only one will pass.
-					// Plus, if it requires more signatures on the DEX's side, it will be sent again by them and it will fail with us.
-					sendSignedTransaction({ rpc, signedTransaction });
-				} catch (err: unknown) {
-					// If the transaction requires that we send it, and it fails, we reject the request, otherwise we just log the error
-					if (method !== SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION) {
-						console.warn('WalletConnect Solana transaction send error', err);
-					}
 				}
 
 				progress(ProgressStepsSign.APPROVE_WALLET_CONNECT);

@@ -11,6 +11,7 @@ import {
 	type EthFeeContext,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import type { OptionEthAddress } from '$eth/types/address';
 import * as ckEthDerived from '$icp-eth/derived/cketh.derived';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import * as ckEthStores from '$icp-eth/stores/cketh.store';
@@ -29,7 +30,6 @@ import {
 	initTokenActionValidationErrorsContext,
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -38,16 +38,12 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import type { MinterInfo } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 import { fireEvent, render } from '@testing-library/svelte';
 import { InfuraProvider } from 'ethers/providers';
 import { get, readable, writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 vi.mock('$eth/services/fee.services', () => ({
 	getErc20FeeData: vi.fn()
@@ -105,7 +101,7 @@ describe('EthConvertTokenWizard', () => {
 
 	let sendSpy: MockInstance;
 
-	const mockCkEthMinterInfoStore = (minterInfo?: MinterInfo) => {
+	const mockCkEthMinterInfoStore = (minterInfo?: CkEthMinterDid.MinterInfo) => {
 		const store = initCertifiedSetterStore<CkEthMinterInfoData>();
 
 		if (nonNullish(minterInfo)) {

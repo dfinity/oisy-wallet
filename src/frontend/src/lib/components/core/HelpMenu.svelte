@@ -3,7 +3,7 @@
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
+	import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
@@ -11,7 +11,7 @@
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { USER_MENU_ROUTE } from '$lib/constants/analytics.contants';
+	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
@@ -87,9 +87,9 @@
 
 	<Hr />
 
-	<div class="mt-2 flex gap-2 text-nowrap text-xs text-tertiary">
+	<div class="mt-2 flex gap-2 text-xs text-nowrap text-tertiary">
 		<TermsOfUseLink />
 		<PrivacyPolicyLink />
-		<LicenseLink />
+		<LicenseAgreementLink />
 	</div>
 </Popover>

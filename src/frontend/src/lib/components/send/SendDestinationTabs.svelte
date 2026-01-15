@@ -14,6 +14,7 @@
 		knownDestinations?: KnownDestinations;
 		networkContacts?: NetworkContacts;
 		selectedContact?: ContactUi;
+		onNext: () => void;
 	}
 
 	let {
@@ -21,7 +22,8 @@
 		destination = $bindable(),
 		activeSendDestinationTab = $bindable(),
 		selectedContact = $bindable(),
-		networkContacts
+		networkContacts,
+		onNext
 	}: Props = $props();
 </script>
 
@@ -37,12 +39,12 @@
 			<KnownDestinationsComponent
 				{knownDestinations}
 				{networkContacts}
+				{onNext}
 				bind:selectedContact
 				bind:destination
-				on:icNext
 			/>
 		{:else if activeSendDestinationTab === 'contacts'}
-			<SendContacts {networkContacts} bind:destination bind:selectedContact on:icNext />
+			<SendContacts {networkContacts} {onNext} bind:destination bind:selectedContact />
 		{/if}
 	</Tabs>
 </div>

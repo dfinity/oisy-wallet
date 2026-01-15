@@ -20,15 +20,15 @@
 	let loading = $state(false);
 
 	const onLoad = async () => {
+		if (isNullish($ethAddress)) {
+			return;
+		}
+
 		if (loading) {
 			return;
 		}
 
 		loading = true;
-
-		if (isNullish($ethAddress)) {
-			return;
-		}
 
 		await Promise.allSettled([
 			// We might require Ethereum balance on IC network as well given that one can convert ckETH to ETH.
@@ -77,6 +77,6 @@
 	});
 </script>
 
-<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad}>
-	{@render children?.()}
-</IntervalLoader>
+{@render children?.()}
+
+<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad} />

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/Button.svelte';
-	import { TRACK_REWARD_FILTER_CHANGE } from '$lib/constants/analytics.contants';
+	import { TRACK_REWARD_FILTER_CHANGE } from '$lib/constants/analytics.constants';
 	import { REWARDS_FILTER } from '$lib/constants/test-ids.constants';
 	import { RewardStates } from '$lib/enums/reward-states';
 	import { trackEvent } from '$lib/services/analytics.services';

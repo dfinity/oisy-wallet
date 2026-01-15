@@ -9,7 +9,7 @@ import { nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
-import { loading } from '$lib/stores/loader.store';
+import { initialLoading } from '$lib/stores/loader.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { LoadIdbAddressError } from '$lib/types/errors';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -69,27 +69,15 @@ describe('loader.services', () => {
 				throw new CanisterInternalError('Test');
 			});
 
-			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
-			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
-			vi.spyOn(console, 'warn').mockImplementation(() => {});
-
 			const result = await initSignerAllowance();
 
 			expect(result.success).toBeFalsy();
-
-			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
-				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
-			);
 		});
 
 		it('should sign out and ultimately reload the window', async () => {
 			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
-
-			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
-			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
-			vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 			const spySignOut = vi.spyOn(authServices, 'errorSignOut');
 
@@ -99,23 +87,17 @@ describe('loader.services', () => {
 
 			expect(spySignOut).toHaveBeenCalledOnce();
 			expect(spy).toHaveBeenCalledOnce();
-
-			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
-				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
-			);
 		});
 	});
 
 	describe('initLoader', () => {
 		const mockValidateAddresses = vi.fn();
 		const mockProgressAndLoad = vi.fn();
-		const mockSetProgressModal = vi.fn();
 
 		const mockParams = {
 			identity: mockIdentity,
 			validateAddresses: mockValidateAddresses,
-			progressAndLoad: mockProgressAndLoad,
-			setProgressModal: mockSetProgressModal
+			progressAndLoad: mockProgressAndLoad
 		};
 
 		beforeEach(() => {
@@ -158,7 +140,7 @@ describe('loader.services', () => {
 			expect(mockProgressAndLoad).toHaveBeenCalledOnce();
 			expect(mockValidateAddresses).toHaveBeenCalledOnce();
 
-			expect(get(loading)).toBeFalsy();
+			expect(get(initialLoading)).toBeFalsy();
 		});
 
 		it('should not load addresses from the backend if the IDB addresses are loaded', async () => {

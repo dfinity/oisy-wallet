@@ -1,15 +1,21 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
+import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
+import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
+import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
-import { balance, metadata } from '$icp/api/icrc-ledger.api';
-import { buildIndexedDip20Tokens } from '$icp/services/dip20-tokens.services';
-import { buildIndexedIcpTokens } from '$icp/services/icp-tokens.services';
-import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
+import {
+	balance,
+	getMintingAccount,
+	allowance as icrcAllowance,
+	metadata
+} from '$icp/api/icrc-ledger.api';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkToken, IcInterface, IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	mapIcrcToken,
@@ -17,7 +23,7 @@ import {
 	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
@@ -25,11 +31,11 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { AnonymousIdentity, type Identity } from '@dfinity/agent';
 import {
 	fromNullable,
 	isNullish,
@@ -38,6 +44,8 @@ import {
 	type QueryAndUpdateRequestParams,
 	type QueryAndUpdateStrategy
 } from '@dfinity/utils';
+import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
+import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -97,13 +105,6 @@ const loadDefaultIcrc = ({
 			trackEvent({
 				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
 				metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
-			});
-
-			toastsShow({
-				text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
-					$ledgerCanisterId: ledgerCanisterId
-				}),
-				level: 'warn'
 			});
 		},
 		strategy,
@@ -167,9 +168,9 @@ const loadCustomIcrcTokensData = async ({
 	identity: OptionIdentity;
 }): Promise<IcrcCustomToken[]> => {
 	const indexedIcrcCustomTokens = {
-		...buildIndexedIcpTokens(),
-		...buildIndexedIcrcCustomTokens(),
-		...buildIndexedDip20Tokens()
+		...SUPPORTED_ICP_TOKENS_INDEXED,
+		...SNS_BUILTIN_TOKENS_INDEXED,
+		...DIP20_BUILTIN_TOKENS_INDEXED
 	};
 
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
@@ -197,10 +198,11 @@ const loadCustomIcrcTokensData = async ({
 			ledgerCanisterId: ledgerCanisterIdText
 		});
 
+		const serviceParams = { ledgerCanisterId: ledgerCanisterIdText, identity, certified };
+
 		const data: IcrcLoadData = {
-			metadata: nonNullish(meta)
-				? meta
-				: await metadata({ ledgerCanisterId: ledgerCanisterIdText, identity, certified }),
+			metadata: nonNullish(meta) ? meta : await metadata(serviceParams),
+			mintingAccount: await getMintingAccount(serviceParams),
 			ledgerCanisterId: ledgerCanisterIdText,
 			...(nonNullish(indexCanisterId) && { indexCanisterId: indexCanisterId.toText() }),
 			position: ICRC_TOKENS.length + 1 + index,
@@ -228,14 +230,26 @@ const loadCustomIcrcTokensData = async ({
 			// For development purposes, we want to see the error in the console.
 			console.error(result.reason);
 
-			const { token } = tokens[index];
+			const { enabled, token } = tokens[index];
 
 			if ('Icrc' in token) {
 				const {
 					Icrc: { ledger_id }
 				} = token;
 
-				icrcCustomTokensStore.reset(ledger_id.toString());
+				const ledgerCanisterId = ledger_id.toText();
+
+				icrcCustomTokensStore.resetByIdentifier(ledgerCanisterId);
+
+				// To avoid polluting the screen, we show the toast error only after the update call.
+				if (enabled && certified) {
+					toastsShow({
+						text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
+							$ledgerCanisterId: ledgerCanisterId
+						}),
+						level: 'warn'
+					});
+				}
 			}
 
 			return acc;
@@ -261,14 +275,15 @@ const loadIcrcCustomData = ({
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
-export const loadDisabledIcrcTokensBalances = ({
+// TODO: Refactor to use queryAndUpdate
+export const loadDisabledIcrcTokensBalances = async ({
 	identity,
 	disabledIcrcTokens
 }: {
 	identity: Identity;
 	disabledIcrcTokens: IcToken[];
-}): Promise<void[]> =>
-	Promise.all(
+}): Promise<void> => {
+	const results = await Promise.allSettled(
 		disabledIcrcTokens.map(async ({ ledgerCanisterId, id }) => {
 			const icrcTokenBalance = await balance({
 				identity,
@@ -276,6 +291,14 @@ export const loadDisabledIcrcTokensBalances = ({
 				ledgerCanisterId
 			});
 
+			return { id, icrcTokenBalance };
+		})
+	);
+
+	// TODO: Reduce the number of loops
+	results.forEach((result) => {
+		if (result.status === 'fulfilled') {
+			const { id, icrcTokenBalance } = result.value;
 			balancesStore.set({
 				id,
 				data: {
@@ -283,15 +306,16 @@ export const loadDisabledIcrcTokensBalances = ({
 					certified: true
 				}
 			});
-		})
-	);
+		}
+	});
+};
 
 export const loadDisabledIcrcTokensExchanges = async ({
 	disabledIcrcTokens
 }: {
 	disabledIcrcTokens: IcToken[];
 }): Promise<void> => {
-	const [currentErc20Prices, currentIcrcPrices] = await Promise.all([
+	const results = await Promise.allSettled([
 		exchangeRateERC20ToUsd({
 			coingeckoPlatformId: 'ethereum',
 			contractAddresses: disabledIcrcTokens.reduce<Erc20ContractAddress[]>((acc, token) => {
@@ -319,8 +343,58 @@ export const loadDisabledIcrcTokensExchanges = async ({
 		)
 	]);
 
+	const [erc20Result, icrcResult] = results;
+
 	exchangeStore.set([
-		...(nonNullish(currentErc20Prices) ? [currentErc20Prices] : []),
-		...(nonNullish(currentIcrcPrices) ? [currentIcrcPrices] : [])
+		...(erc20Result.status === 'fulfilled' && nonNullish(erc20Result.value)
+			? [erc20Result.value]
+			: []),
+		...(icrcResult.status === 'fulfilled' && nonNullish(icrcResult.value) ? [icrcResult.value] : [])
 	]);
+};
+
+/**
+ * Checks if the owner has sufficient allowance for the spender to execute a transaction.
+ *
+ * The allowanceBuffer ensures the allowance won't expire while the transaction is being processed.
+ * For example, if the allowance expires in 10 seconds but the swap takes 20 seconds to complete,
+ * we should request a new approval instead of starting a transaction that will fail.
+ *
+ * @returns `true` if allowance is sufficient and won't expire within the buffer period, `false` otherwise
+ *
+ */
+export const hasSufficientIcrcAllowance = async ({
+	identity,
+	ledgerCanisterId,
+	owner,
+	spender,
+	amount,
+	allowanceBuffer
+}: {
+	identity: Identity;
+	ledgerCanisterId: CanisterIdText;
+	owner: Principal;
+	spender: Principal;
+	amount: bigint;
+	allowanceBuffer?: bigint;
+}): Promise<boolean> => {
+	const { allowance, expires_at } = await icrcAllowance({
+		identity,
+		ledgerCanisterId,
+		owner: { owner },
+		spender: { owner: spender },
+		certified: false
+	});
+
+	const hasSufficientAllowance = allowance >= amount;
+
+	if (isNullish(allowanceBuffer)) {
+		return hasSufficientAllowance;
+	}
+
+	const expiredBuffer = nowInBigIntNanoSeconds() + allowanceBuffer;
+	const expiredAt = fromNullable(expires_at);
+	const isNotExpired = nonNullish(expiredAt) && expiredAt > expiredBuffer;
+
+	return hasSufficientAllowance && isNotExpired;
 };

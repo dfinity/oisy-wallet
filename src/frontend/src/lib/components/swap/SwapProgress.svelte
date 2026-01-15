@@ -12,7 +12,7 @@
 	}
 
 	let {
-		swapProgressStep = $bindable(ProgressStepsSwap.INITIALIZATION),
+		swapProgressStep = ProgressStepsSwap.INITIALIZATION,
 		failedSteps = $bindable([]),
 		sendWithApproval = false,
 		swapWithWithdrawing = false

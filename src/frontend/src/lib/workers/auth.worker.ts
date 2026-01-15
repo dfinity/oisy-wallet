@@ -1,8 +1,9 @@
-import { authClientStorage, createAuthClient } from '$lib/api/auth-client.api';
 import { AUTH_TIMER_INTERVAL, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
-import { KEY_STORAGE_DELEGATION, type AuthClient } from '@dfinity/auth-client';
-import { DelegationChain, isDelegationValid } from '@dfinity/identity';
+import { nonNullish } from '@dfinity/utils';
+import { KEY_STORAGE_DELEGATION } from '@icp-sdk/auth/client';
+import { DelegationChain, isDelegationValid } from '@icp-sdk/core/identity';
 
 export const onAuthMessage = async ({
 	data
@@ -16,24 +17,38 @@ export const onAuthMessage = async ({
 			return;
 		case 'stopIdleTimer':
 			stopIdleTimer();
-			return;
 	}
 };
 
 let timer: NodeJS.Timeout | undefined = undefined;
 
+const scheduleNext = (): void => {
+	timer = setTimeout(async () => {
+		await onIdleSignOut();
+
+		if (nonNullish(timer)) {
+			scheduleNext();
+		}
+	}, AUTH_TIMER_INTERVAL);
+};
+
 /**
- * The timer is executed only if user has signed in
+ * The timer is executed only if the user has signed in
  */
-const startIdleTimer = () =>
-	(timer = setInterval(async () => await onIdleSignOut(), AUTH_TIMER_INTERVAL));
+const startIdleTimer = () => {
+	if (nonNullish(timer)) {
+		return;
+	}
+
+	scheduleNext();
+};
 
 const stopIdleTimer = () => {
 	if (!timer) {
 		return;
 	}
 
-	clearInterval(timer);
+	clearTimeout(timer);
 	timer = undefined;
 };
 
@@ -55,12 +70,12 @@ const onIdleSignOut = async () => {
  * @returns true if authenticated
  */
 const checkAuthentication = async (): Promise<boolean> => {
-	const authClient: AuthClient = await createAuthClient();
+	const authClient = await AuthClientProvider.getInstance().createAuthClient();
 	return authClient.isAuthenticated();
 };
 
 /**
- * If there is no delegation or if not valid, then delegation is not valid
+ * If there is no delegation or if not valid, then the delegation is not valid
  *
  * @returns true if delegation is valid
  */
@@ -68,7 +83,8 @@ const checkDelegationChain = async (): Promise<{
 	valid: boolean;
 	delegation: DelegationChain | null;
 }> => {
-	const delegationChain: string | null = await authClientStorage.get(KEY_STORAGE_DELEGATION);
+	const delegationChain =
+		await AuthClientProvider.getInstance().storage.get(KEY_STORAGE_DELEGATION);
 
 	const delegation = delegationChain !== null ? DelegationChain.fromJSON(delegationChain) : null;
 
@@ -80,7 +96,7 @@ const checkDelegationChain = async (): Promise<{
 
 // We do the logout on the client side because we reload the window to reload stores afterwards
 const logout = () => {
-	// Clear timer to not emit sign-out multiple times
+	// Clear timer to avoid emitting sign-out multiple times
 	stopIdleTimer();
 
 	postMessage({ msg: 'signOutIdleTimer' });

@@ -9,7 +9,7 @@ import { MILLISECONDS_IN_SECOND, NANO_SECONDS_IN_MILLISECOND } from '$lib/consta
 import { TransactionStatusSchema, TransactionTypeSchema } from '$lib/schema/transaction.schema';
 import { i18n } from '$lib/stores/i18n.store';
 import type { ModalData } from '$lib/stores/modal.store';
-import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
+import type { AnyTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import {
 	groupTransactionsByDate,
 	mapTransactionIcon,

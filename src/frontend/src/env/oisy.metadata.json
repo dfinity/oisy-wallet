@@ -14,5 +14,10 @@
 	"OISY_INTERNET_IDENTITY_URL": "https://docs.oisy.com/introduction/internet-identity",
 	"OISY_FIND_INTERNET_IDENTITY_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/find-your-internet-identity",
 	"OISY_FAQ_URL": "https://docs.oisy.com/using-oisy-wallet/faq",
-	"OISY_ACCESS_CONTROL_URL": "https://docs.oisy.com/security/asset-control-recovery-and-governance-in-oisy-wallet"
+	"OISY_FAQ_URL_WHO_CONTROLS_THE_PRIVATE_KEY": "https://docs.oisy.com/using-oisy-wallet/faq#who-controls-the-private-key-for-the-native-assets",
+	"OISY_INTERNET_IDENTITY_HELP_CENTER_URL": "https://identitysupport.dfinity.org/hc/en-us/articles/39593373981588-Internet-Identity-2-0",
+	"OISY_ACCESS_CONTROL_URL": "https://docs.oisy.com/security/asset-control-recovery-and-governance-in-oisy-wallet",
+	"OISY_NFT_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/nfts",
+	"OISY_HOW_TO_CONVERT_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/how-tos/",
+	"OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL": "https://docs.oisy.com/using-oisy-wallet/support/oisy-wallet-switches-to-internet-identity-2.0"
 }

@@ -1,9 +1,15 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
+	import {
+		SESSION_REQUEST_ETH_SIGN_LEGACY,
+		SESSION_REQUEST_ETH_SIGN_V4
+	} from '$eth/constants/wallet-connect.constants';
 	import { signMessage } from '$eth/services/wallet-connect.services';
+	import { getSignParamsMessageTypedDataV4 } from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
@@ -13,8 +19,24 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
-	export let listener: OptionWalletConnectListener;
-	export let request: WalletKitTypes.SessionRequest;
+	interface Props {
+		listener: OptionWalletConnectListener;
+		request: WalletKitTypes.SessionRequest;
+	}
+
+	let { listener = $bindable(), request }: Props = $props();
+
+	let method = $derived(request.params.request.method);
+
+	let domainName = $derived.by(() => {
+		if (method === SESSION_REQUEST_ETH_SIGN_V4 || method === SESSION_REQUEST_ETH_SIGN_LEGACY) {
+			const {
+				domain: { name }
+			} = getSignParamsMessageTypedDataV4(request.params.request.params);
+
+			return name;
+		}
+	});
 
 	/**
 	 * Modal
@@ -31,8 +53,8 @@
 		}
 	];
 
-	let currentStep: WizardStep<WizardStepsSign> | undefined;
-	let modal: WizardModal<WizardStepsSign>;
+	let currentStep = $state<WizardStep<WizardStepsSign> | undefined>();
+	let modal = $state<WizardModal<WizardStepsSign>>();
 
 	const close = () => modalStore.close();
 
@@ -40,7 +62,7 @@
 	 * WalletConnect
 	 */
 
-	let signProgressStep: string = ProgressStepsSign.INITIALIZATION;
+	let signProgressStep = $state<ProgressStepsSign>(ProgressStepsSign.INITIALIZATION);
 
 	/**
 	 * Reject a message
@@ -53,6 +75,10 @@
 	};
 
 	const approve = async () => {
+		if (isNullish(modal)) {
+			return;
+		}
+
 		const { success } = await signMessage({
 			request,
 			listener,
@@ -66,12 +92,16 @@
 
 <WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{#snippet title()}
-		<WalletConnectModalTitle>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle>
+		<WalletConnectModalTitle
+			>{domainName ?? $i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
+		>
 	{/snippet}
 
-	{#if currentStep?.name === WizardStepsSign.SIGNING}
-		<InProgressWizard progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
-	{:else if currentStep?.name === WizardStepsSign.REVIEW}
-		<WalletConnectSignReview onApprove={approve} onReject={reject} {request} />
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSign.SIGNING}
+			<InProgressWizard progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
+		{:else if currentStep?.name === WizardStepsSign.REVIEW}
+			<WalletConnectSignReview onApprove={approve} onReject={reject} {request} />
+		{/if}
+	{/key}
 </WizardModal>

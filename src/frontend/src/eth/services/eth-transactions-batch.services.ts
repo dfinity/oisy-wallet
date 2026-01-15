@@ -9,18 +9,12 @@ export type ResultByToken = ResultSuccess & { tokenId: TokenId };
 type PromiseResult = Promise<ResultByToken>;
 
 export const batchLoadTransactions = ({
-	tokens,
-	tokensAlreadyLoaded
+	tokens
 }: {
 	tokens: Token[];
-	tokensAlreadyLoaded: TokenId[];
 }): AsyncGenerator<PromiseSettledResult<ResultByToken>[]> => {
 	const promises = tokens.reduce<(() => Promise<ResultByToken>)[]>(
 		(acc, { network: { id: networkId }, id: tokenId, standard }) => {
-			if (tokensAlreadyLoaded.includes(tokenId)) {
-				return acc;
-			}
-
 			const promise = async (): PromiseResult => {
 				const result = await loadEthereumTransactions({ tokenId, networkId, standard });
 				return { ...result, tokenId };

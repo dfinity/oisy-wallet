@@ -1,4 +1,4 @@
-import { TRACK_CHANGE_CURRENCY } from '$lib/constants/analytics.contants';
+import { TRACK_CHANGE_CURRENCY } from '$lib/constants/analytics.constants';
 import { authSignedIn } from '$lib/derived/auth.derived';
 import { Currency } from '$lib/enums/currency';
 import { trackEvent } from '$lib/services/analytics.services';

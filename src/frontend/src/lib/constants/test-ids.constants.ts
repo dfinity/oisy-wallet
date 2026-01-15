@@ -22,6 +22,7 @@ export const LOCK_BUTTON = 'lock-button';
 export const MAX_BUTTON = 'max-button';
 
 export const LOADER_MODAL = 'loader-modal';
+export const POW_PROTECTOR_MODAL = 'pow-protector-modal';
 export const BUTTON_MODAL_CLOSE = 'close-modal';
 
 export const MODAL_TITLE = 'modal-title';
@@ -45,9 +46,16 @@ export const NFT_LIST_COMMON = 'nft-list-common';
 export const NFT_LIST_HIDDEN = 'nft-list-hidden';
 export const NFT_LIST_SPAM = 'nft-list-spam';
 export const NFT_ACTION_SEND = 'nft-action-send';
+export const NFT_PLACEHOLDER_INVALID = 'nft-placeholder-invalid';
+export const NFT_PLACEHOLDER_FILESIZE = 'nft-placeholder-filesize';
+export const NFT_PLACEHOLDER_UNSUPPORTED = 'nft-placeholder-unsupported';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
+
+export const PAY_DIALOG = 'pay-dialog';
+export const PAY_DIALOG_PAY_BUTTON = 'pay-dialog-pay-button';
+export const PAY_DIALOG_BANNER = 'pay-dialog-banner';
 
 export const RECEIVE_TOKENS_MODAL_OPEN_BUTTON = 'receive-tokens-modal-open-button';
 export const RECEIVE_TOKENS_MODAL_DONE_BUTTON = 'receive-tokens-modal-done-button';
@@ -79,6 +87,8 @@ export const SEND_TOKENS_MODAL = 'send-tokens-modal';
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
+
+export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
 
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
 export const SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON = 'settings-active-networks-edit-button';
@@ -145,11 +155,15 @@ export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-una
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
 export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
 export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
+export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step';
+
+export const MODAL_FILTER_NETWORKS = 'MODAL_FILTER_NETWORKS';
 
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
 export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
 export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
+export const MANAGE_TOKENS_IC_ADD_NFT_INPUT = 'manage-tokens-ic-add-nft-input';
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
@@ -173,6 +187,10 @@ export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
 export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
 export const REWARDS_NETWORK_MULTIPLIER_IMAGE = 'reward-network-multiplier-image';
 
+export const EARNING_CARD = 'earning-card';
+export const EARNING_NO_POSITION_PLACEHOLDER = 'earning-no-position-placeholder';
+export const EARNING_GOTO_BUTTON = 'earning-goto-button';
+
 export const WELCOME_MODAL_IMAGE_BANNER = 'welcome-modal-image-banner';
 export const WELCOME_MODAL_LEARN_MORE_ANCHOR = 'welcome-modal-learn-more-anchor';
 export const WELCOME_MODAL_SHARE_ANCHOR = 'welcome-modal-share-anchor';
@@ -183,6 +201,7 @@ export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anc
 export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
 
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
+export const TRANSACTIONS_DATE_GROUP_PREFIX = 'transactions-date-group-';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
@@ -190,18 +209,20 @@ export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_LOST_IDENTITY_BUTTON = 'help-auth-lost-identity-button';
-export const HELP_AUTH_SECURITY_BUTTON = 'help-auth-security-button';
-export const HELP_AUTH_GOT_CONFUSED_BUTTON = 'help-auth-got-confused-button';
-export const HELP_AUTH_OTHER_BUTTON = 'help-auth-other-button';
+export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';
+export const HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON = 'help-auth-user-identity-number-button';
 export const HELP_AUTH_IDENTITY_IMAGE_BANNER = 'help-auth-identity-image-banner';
 export const HELP_AUTH_LEGACY_SIGN_IN_BUTTON = 'help-auth-legacy-sign-in-button';
 export const HELP_AUTH_BACK_BUTTON = 'help-auth-back-button';
 export const HELP_AUTH_DONE_BUTTON = 'help-auth-done-button';
 export const HELP_AUTH_LEARN_MORE_LINK = 'help-auth-learn-more-link';
+export const HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK =
+	'help-auth-switch-to-new-internet-identity-link';
 export const HELP_AUTH_INTRODUCTION_LINK = 'help-auth-introduction-link';
-export const HELP_AUTH_DOCS_LINK = 'help-auth-docs-link';
 export const HELP_AUTH_PRIVATE_KEY_LINK = 'help-auth-private-key-link';
 export const HELP_AUTH_ASSET_CONTROL_LINK = 'help-auth-asset-control-link';
+export const HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK =
+	'help-auth-internet-identity-help-center-link';
 
 export const AUTH_SIGNING_IN_HELP_LINK = 'auth-signing-in-help-link';
 
@@ -211,6 +232,7 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+export const MODAL_TOKENS_LIST = 'modal-tokens-list';
 
 export const ADDRESS_BOOK_MODAL = 'address-book-modal';
 export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
@@ -288,12 +310,32 @@ export const AI_ASSISTANT_SEND_TOKENS_BUTTON = 'ai-assistant-send-tokens-button'
 export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-tokens-success-message';
 
 // Agreements
-export const AGREEMENTS_MODAL = 'agreements-modal';
-export const AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE = 'agreements-modal-checkbox-terms-of-use';
-export const AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY = 'agreements-modal-checkbox-privacy-policy';
-export const AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT =
-	'agreements-modal-checkbox-license-agreement';
-export const AGREEMENTS_MODAL_ACCEPT_BUTTON = 'agreements-modal-accept-button';
+export const AGREEMENTS_WARNING_BANNER = 'agreements-warning-banner';
+export const AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON = 'agreements-warning-banner-close-button';
 
 // UI components
 export const DATE_BADGE_ICON = 'date-badge-icon';
+
+// Confirmation modal
+export const CONFIRMATION_MODAL = 'confirmation-modal';
+
+// Stake
+export const STAKE_REVIEW_FORM_BUTTON = 'stake-review-form-button';
+export const STAKE_FORM_REVIEW_BUTTON = 'stake-form-next-button';
+export const STAKE_PROVIDER_LOGO = 'stake-provider-logo';
+export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';
+export const STAKE_DISSOLVE_EVENTS_WITHDRAW_BUTTON = 'stake-dissolve-events-withdraw-button';
+
+// PWA
+export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';
+export const PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-info-banner-close-button';
+
+// OpenCryptoPay
+export const OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON = 'open-crypto-pay-enter-manually-button';
+
+// Get Token Modal
+export const GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE = 'get-token-modal-potential-usd-balance';
+export const GET_TOKEN_MODAL_OPEN_SWAP_BUTTON = 'get-token-modal-open-swap-button';
+
+// BUY MODAL
+export const BUY_MODAL_ONRAMPER_IFRAME = 'buy-modal-onramper-iframe';

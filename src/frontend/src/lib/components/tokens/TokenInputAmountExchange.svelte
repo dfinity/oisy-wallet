@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { preventDefault } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import {
@@ -16,28 +17,38 @@
 	import type { Token } from '$lib/types/token';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
-	export let amount: OptionAmount;
-	export let exchangeRate: number | undefined;
-	export let token: Token | undefined = undefined;
-	export let displayUnit: DisplayUnit = 'usd';
-	export let disabled = false;
+	interface Props {
+		amount: OptionAmount;
+		exchangeRate?: number;
+		token?: Token;
+		displayUnit?: DisplayUnit;
+		disabled?: boolean;
+	}
+
+	let {
+		amount,
+		exchangeRate,
+		token,
+		displayUnit = $bindable('usd'),
+		disabled = false
+	}: Props = $props();
 
 	const handleUnitSwitch = () => {
 		displayUnit = displayUnit === 'usd' ? 'token' : 'usd';
 	};
 
-	let formattedUSDAmount: string | undefined;
-	$: formattedUSDAmount = formatCurrency({
-		value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
-		currency: $currentCurrency,
-		exchangeRate: $currencyExchangeStore,
-		language: $currentLanguage
-	});
+	let formattedUSDAmount = $derived(
+		formatCurrency({
+			value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
+		})
+	);
 
-	let formattedTokenAmount: string | undefined;
-	$: formattedTokenAmount = nonNullish(token)
-		? `${nonNullish(amount) ? amount : 0} ${token.symbol}`
-		: '0';
+	let formattedTokenAmount = $derived(
+		nonNullish(token) ? `${nonNullish(amount) ? amount : 0} ${token.symbol}` : '0'
+	);
 </script>
 
 <div class="flex items-center gap-1" data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE}>
@@ -46,7 +57,7 @@
 			class:hover:cursor-default={disabled}
 			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON}
 			{disabled}
-			on:click|preventDefault={handleUnitSwitch}
+			onclick={preventDefault(handleUnitSwitch)}
 		>
 			<IconArrowUpDown size="14" />
 		</button>

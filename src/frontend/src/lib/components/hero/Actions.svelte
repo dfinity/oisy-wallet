@@ -6,7 +6,7 @@
 	import ConvertToCkEth from '$eth/components/convert/ConvertToCkEth.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkErc20 from '$eth/components/send/ConvertToCkErc20.svelte';
-	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
+	import { erc20CustomTokensInitialized } from '$eth/derived/erc20.derived';
 	import ConvertToBtc from '$icp/components/convert/ConvertToBtc.svelte';
 	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
@@ -33,12 +33,12 @@
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
 
-	let convertEth = $derived($ethToCkETHEnabled && $erc20UserTokensInitialized);
+	let convertEth = $derived($ethToCkETHEnabled && $erc20CustomTokensInitialized);
 
-	let convertErc20 = $derived($erc20ToCkErc20Enabled && $erc20UserTokensInitialized);
+	let convertErc20 = $derived($erc20ToCkErc20Enabled && $erc20CustomTokensInitialized);
 
 	let convertCkBtc = $derived(
-		$networkBitcoinMainnetEnabled && $tokenCkBtcLedger && $erc20UserTokensInitialized
+		$networkBitcoinMainnetEnabled && $tokenCkBtcLedger && $erc20CustomTokensInitialized
 	);
 
 	let convertBtc = $derived($networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId));
@@ -46,11 +46,23 @@
 	let isTransactionsPage = $derived(isRouteTransactions(page));
 	let isNftsPage = $derived(isRouteNfts(page));
 
-	let swapAction = $derived(!isTransactionsPage || (isTransactionsPage && $networkICP));
+	let swapAction = $derived(
+		(!isTransactionsPage || (isTransactionsPage && !$networkSolana && !$networkBitcoin)) &&
+			!isNftsPage
+	);
 
 	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 
-	let buyAction = $derived(!$networkICP || nonNullish($pageToken?.buy));
+	let buyAction = $derived((!$networkICP || nonNullish($pageToken?.buy)) && !isNftsPage);
+
+	// Temporary workaround: disable the Buy button for tokens that support both Swap and Convert.
+	// TODO: Remove once Swap/Convert are refactored and merged.
+	let tooManyButtons = $derived(
+		sendAction &&
+			swapAction &&
+			isTransactionsPage &&
+			(convertErc20 || convertEth || convertCkBtc || convertBtc)
+	);
 </script>
 
 <div class="flex w-full justify-center pt-8" role="toolbar">
@@ -101,7 +113,7 @@
 			{/if}
 		{/if}
 
-		{#if buyAction}
+		{#if buyAction && !tooManyButtons}
 			<Buy />
 		{/if}
 	</HeroButtonGroup>

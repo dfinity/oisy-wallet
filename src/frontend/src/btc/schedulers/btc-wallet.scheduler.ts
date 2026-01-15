@@ -1,4 +1,5 @@
 import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import type { BtcAddress } from '$btc/types/address';
 import {
 	btcWalletBalanceEquals,
 	type BtcTransactionUi,
@@ -17,7 +18,6 @@ import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/
 import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
-import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type {
@@ -29,8 +29,6 @@ import {
 	mapCkBtcBitcoinNetworkToBackendBitcoinNetwork,
 	mapToSignerBitcoinNetwork
 } from '$lib/utils/network.utils';
-import type { Identity } from '@dfinity/agent';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import {
 	assertNonNullish,
 	isNullish,
@@ -39,6 +37,8 @@ import {
 	queryAndUpdate,
 	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
+import type { Identity } from '@icp-sdk/core/agent';
 
 interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 	bitcoinNetwork: BitcoinNetwork;

@@ -1,6 +1,6 @@
 import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import type { BtcAddress } from '$btc/types/address';
 import type { BtcTransactionUi } from '$btc/types/btc';
-import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import { isNullish, nonNullish } from '@dfinity/utils';
 

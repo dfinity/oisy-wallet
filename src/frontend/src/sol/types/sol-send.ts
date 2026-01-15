@@ -1,4 +1,4 @@
-import type { SolAddress } from '$lib/types/address';
+import type { SolAddress } from '$sol/types/address';
 import type {
 	TransactionMessage,
 	TransactionMessageWithBlockhashLifetime,

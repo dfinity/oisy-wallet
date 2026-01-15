@@ -12,6 +12,7 @@
 </script>
 
 <label class="font-bold" for={ref}>{@render label()}</label>
-<svelte:element this={element} id={ref} class="mb-4 break-all font-normal"
-	>{@render content?.()}</svelte:element
->
+
+<svelte:element this={element} id={ref} class="mb-4 font-normal break-all">
+	{@render content?.()}
+</svelte:element>

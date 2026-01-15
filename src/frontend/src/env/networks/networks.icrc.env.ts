@@ -437,6 +437,12 @@ const ADDITIONAL_ICRC_PRODUCTION_DATA = mapIcrcData(additionalIcrcTokens);
 export const GLDT_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA.GLDT?.ledgerCanisterId ?? '6c7su-kiaaa-aaaar-qaira-cai';
 
+export const VCHF_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA.VCHF?.ledgerCanisterId ?? 'ly36x-wiaaa-aaaai-aqj7q-cai';
+
+export const VEUR_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA.VEUR?.ledgerCanisterId ?? 'wu6g4-6qaaa-aaaan-qmrza-cai';
+
 export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA.GHOSTNODE?.ledgerCanisterId ?? 'sx3gz-hqaaa-aaaar-qaoca-cai';
 
@@ -448,9 +454,6 @@ export const BITCAT_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 
 export const FORSETISCN_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA?.FORSETISCN?.ledgerCanisterId ?? 'tta5j-yqaaa-aaaar-qarbq-cai';
-
-export const ODINDOG_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.ODINDOG?.ledgerCanisterId ?? 'eazb6-tqaaa-aaaar-qan2a-cai';
 
 const TICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA?.TICRC1?.ledgerCanisterId ?? '3jkp5-oyaaa-aaaaj-azwqa-cai';

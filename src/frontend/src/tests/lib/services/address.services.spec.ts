@@ -11,7 +11,7 @@ import { LoadIdbAddressError } from '$lib/types/errors';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
+import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import type { MockInstance } from 'vitest';
 
 describe('address.services', () => {
@@ -57,8 +57,7 @@ describe('address.services', () => {
 			const result = await loadTokenAddress(mockParams);
 
 			expect(result).toEqual({ success: true });
-			expect(mockGetAddress).toHaveBeenCalledOnce();
-			expect(mockGetAddress).toHaveBeenCalledWith(mockIdentity);
+			expect(mockGetAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity);
 			expect(mockAddressStore.set).toHaveBeenCalledWith({ data: 'mock-address', certified: true });
 		});
 
@@ -68,8 +67,7 @@ describe('address.services', () => {
 			const result = await loadTokenAddress(mockParams);
 
 			expect(result).toEqual({ success: true });
-			expect(mockSetIdbAddress).toHaveBeenCalledOnce();
-			expect(mockSetIdbAddress).toHaveBeenCalledWith({
+			expect(mockSetIdbAddress).toHaveBeenCalledExactlyOnceWith({
 				address: {
 					address: 'mock-address',
 					createdAtTimestamp: expect.any(Number),
@@ -90,7 +88,7 @@ describe('address.services', () => {
 			expect(spyToastsError).toHaveBeenCalledWith({
 				msg: {
 					text: replacePlaceholders(en.init.error.loading_address, {
-						$symbol: mockNetworkId.description ?? ''
+						$symbol: `${mockNetworkId.description}`
 					})
 				},
 				err: expect.any(Error)
@@ -112,8 +110,7 @@ describe('address.services', () => {
 			const result = await loadIdbTokenAddress(mockParams);
 
 			expect(result).toEqual({ success: false, err: new LoadIdbAddressError(mockNetworkId) });
-			expect(mockGetIdbAddress).toHaveBeenCalledOnce();
-			expect(mockGetIdbAddress).toHaveBeenCalledWith(mockIdentity.getPrincipal());
+			expect(mockGetIdbAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 			expect(mockAddressStore.set).not.toHaveBeenCalled();
 			expect(mockUpdateIdbAddressLastUsage).not.toHaveBeenCalled();
 		});
@@ -125,11 +122,11 @@ describe('address.services', () => {
 			const result = await loadIdbTokenAddress(mockParams);
 
 			expect(result).toEqual({ success: true });
-			expect(mockGetIdbAddress).toHaveBeenCalledOnce();
-			expect(mockGetIdbAddress).toHaveBeenCalledWith(mockIdentity.getPrincipal());
+			expect(mockGetIdbAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 			expect(mockAddressStore.set).toHaveBeenCalledWith({ data: mockAddress, certified: false });
-			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledOnce();
-			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledWith(mockIdentity.getPrincipal());
+			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(
+				mockIdentity.getPrincipal()
+			);
 		});
 
 		it('should handle errors gracefully and return a failure result', async () => {
@@ -138,13 +135,11 @@ describe('address.services', () => {
 			const result = await loadIdbTokenAddress(mockParams);
 
 			expect(result).toEqual({ success: false, err: new LoadIdbAddressError(mockNetworkId) });
-			expect(mockGetIdbAddress).toHaveBeenCalledOnce();
-			expect(mockGetIdbAddress).toHaveBeenCalledWith(mockIdentity.getPrincipal());
+			expect(mockGetIdbAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 			expect(mockUpdateIdbAddressLastUsage).not.toHaveBeenCalled();
 			expect(mockAddressStore.set).not.toHaveBeenCalled();
 
-			expect(console.error).toHaveBeenCalledOnce();
-			expect(console.error).toHaveBeenCalledWith(
+			expect(console.error).toHaveBeenCalledExactlyOnceWith(
 				`Error encountered while searching for locally stored ${mockNetworkId.description} public address in the browser.`
 			);
 		});
@@ -167,14 +162,14 @@ describe('address.services', () => {
 			const result = await certifyAddress(mockParams);
 
 			expect(result).toEqual({ success: true });
-			expect(mockGetAddress).toHaveBeenCalledOnce();
-			expect(mockGetAddress).toHaveBeenCalledWith(mockIdentity);
+			expect(mockGetAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity);
 			expect(mockAddressStore.set).toHaveBeenCalledWith({
 				data: mockAddress,
 				certified: true
 			});
-			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledOnce();
-			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledWith(mockIdentity.getPrincipal());
+			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(
+				mockIdentity.getPrincipal()
+			);
 		});
 
 		it('should return error when address does not match certified address', async () => {
@@ -186,8 +181,7 @@ describe('address.services', () => {
 				success: false,
 				err: `The address used to load the data did not match your actual ${mockNetworkId.description} wallet address, which is why your session was ended. Please sign in again to reload your own data.`
 			});
-			expect(mockGetAddress).toHaveBeenCalledOnce();
-			expect(mockGetAddress).toHaveBeenCalledWith(mockIdentity);
+			expect(mockGetAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity);
 		});
 
 		it('should reset address store and return error when exception occurs', async () => {
@@ -199,8 +193,7 @@ describe('address.services', () => {
 				success: false,
 				err: `Error while loading the ${mockNetworkId.description} address.`
 			});
-			expect(mockGetAddress).toHaveBeenCalledOnce();
-			expect(mockGetAddress).toHaveBeenCalledWith(mockIdentity);
+			expect(mockGetAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity);
 			expect(mockAddressStore.reset).toHaveBeenCalled();
 		});
 	});

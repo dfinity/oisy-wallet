@@ -1,3 +1,4 @@
+import type { BtcAddress } from '$btc/types/address';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import {
 	IcCanistersSchema,
@@ -9,23 +10,21 @@ import type { JsonText } from '$icp/types/btc.post-message';
 import { CurrencyExchangeDataSchema, CurrencySchema } from '$lib/schema/currency.schema';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { SyncStateSchema } from '$lib/schema/sync.schema';
-import type { BtcAddress, SolAddress } from '$lib/types/address';
 import { CanisterIdTextSchema, type OptionCanisterIdText } from '$lib/types/canister';
 import type {
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import type { CertifiedData } from '$lib/types/store';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import * as z from 'zod/v4';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
+import * as z from 'zod';
 
 export const POST_MESSAGE_REQUESTS = [
 	'startIdleTimer',
 	'stopIdleTimer',
-	'startCodeTimer',
-	'stopCodeTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
 	'startPowProtectionTimer',
@@ -233,11 +232,34 @@ export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
 		nextAllowanceMs: z.custom<bigint>().optional()
 	});
 
-export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+export const PostMessageCommonSchema = z.object({
+	ref: z.string().optional()
+});
+
+const buildPostMessageSchema = <T extends z.ZodTypeAny, MsgSchema extends z.ZodTypeAny>({
+	dataSchema,
+	msgSchema
+}: {
+	dataSchema: T;
+	msgSchema: MsgSchema;
+}) =>
 	z.union([
 		z.object({
-			msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
+			...PostMessageCommonSchema.shape,
+			msg: msgSchema,
 			data: z.strictObject(dataSchema).shape.optional()
 		}),
-		PostMessageDataErrorSchema
+		z.object({
+			...PostMessageCommonSchema.shape,
+			...PostMessageDataErrorSchema.shape
+		})
 	]);
+
+export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+	buildPostMessageSchema({
+		dataSchema,
+		msgSchema: z.union([PostMessageRequestSchema, PostMessageResponseSchema])
+	});
+
+export const inferPostMessageSchedulerSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+	buildPostMessageSchema({ dataSchema, msgSchema: PostMessageResponseSchema });

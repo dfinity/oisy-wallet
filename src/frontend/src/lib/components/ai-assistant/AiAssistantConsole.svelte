@@ -9,10 +9,11 @@
 	import IconRepeat from '$lib/components/icons/IconRepeat.svelte';
 	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
+	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import {
 		AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED,
 		AI_ASSISTANT_MESSAGE_SENT
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import {
 		aiAssistantLlmMessages,
 		aiAssistantChatMessages
@@ -20,7 +21,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { askLlm } from '$lib/services/ai-assistant.services';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ChatMessage } from '$lib/types/ai-assistant';
@@ -73,7 +73,6 @@
 		context?: string;
 	}) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -148,10 +147,10 @@
 </script>
 
 <div
-	class="pointer-events-auto fixed bottom-0 right-0 flex h-full min-h-full w-full flex-col justify-between rounded-2xl bg-primary md:bottom-6 md:right-8 md:h-[calc(100vh-7.25rem)] md:min-h-[25rem] md:w-[22.5rem]"
+	class="pointer-events-auto fixed right-0 bottom-0 flex h-full min-h-full w-full flex-col justify-between rounded-2xl bg-primary md:right-8 md:bottom-6 md:h-[calc(100vh-7.25rem)] md:min-h-[25rem] md:w-[22.5rem]"
 	transition:fade
 >
-	<div class="border-b-1 flex items-center justify-between border-brand-subtle-10 px-4 py-2">
+	<div class="flex items-center justify-between border-b-1 border-brand-subtle-10 px-4 py-2">
 		<IconAiAssistant />
 
 		<h5 class="mx-2 w-full">{replaceOisyPlaceholders($i18n.ai_assistant.text.title)}</h5>
@@ -179,7 +178,7 @@
 
 	<div
 		bind:this={messagesContainer}
-		class="h-full overflow-y-auto overflow-x-hidden px-4 py-6"
+		class="h-full overflow-x-hidden overflow-y-auto px-4 py-6"
 		onscroll={handleMessagesContainerScroll}
 	>
 		{#if !loading && messagesToDisplay.length <= 0}
@@ -210,6 +209,19 @@
 					>
 						{#snippet icon()}
 							<IconSend size="24" />
+						{/snippet}
+					</AiAssistantActionButton>
+					<AiAssistantActionButton
+						onClick={() => {
+							sendMessage({
+								messageText: $i18n.ai_assistant.text.action_button_show_balance_prompt
+							});
+						}}
+						subtitle={$i18n.ai_assistant.text.action_button_show_balance_subtitle}
+						title={$i18n.ai_assistant.text.action_button_show_balance_title}
+					>
+						{#snippet icon()}
+							<IconWallet size="24" />
 						{/snippet}
 					</AiAssistantActionButton>
 				</div>

@@ -4,7 +4,6 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import {
@@ -82,7 +81,6 @@
 	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
 	aria-label={$i18n.tokens.alt.context_menu}
 	data-tid={`${testId}-button`}
-	disabled={$erc20UserTokensNotInitialized}
 	onclick={() => (visible = true)}
 >
 	<IconMoreVertical />

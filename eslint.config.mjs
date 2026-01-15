@@ -14,6 +14,35 @@ export default [
 	},
 
 	{
+		files: ['src/frontend/src/**/*'],
+		rules: {
+			'local-rules/no-relative-imports': 'error'
+		}
+	},
+
+	{
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				{
+					selector: "Literal[raw='0n']",
+					message: 'Use the shared constant `ZERO` instead of `0n`.'
+				}
+			]
+		}
+	},
+
+	// TODO: re-enable this rule when we fix all the warnings that it causes.
+	{
+		rules: {
+			'svelte/no-navigation-without-resolve': 'off',
+			'vitest/no-conditional-expect': 'off',
+			'vitest/no-disabled-tests': 'off',
+			'vitest/no-standalone-expect': 'off'
+		}
+	},
+
+	{
 		ignores: [
 			'**/.DS_Store',
 			'**/node_modules',

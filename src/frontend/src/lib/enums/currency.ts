@@ -14,6 +14,7 @@ export enum Currency {
 	KRW = 'krw',
 	NGN = 'ngn',
 	PLN = 'pln',
+	RUB = 'rub',
 	SAR = 'sar',
 	SGD = 'sgd',
 	USD = 'usd',

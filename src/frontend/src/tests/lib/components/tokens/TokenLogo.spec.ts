@@ -69,8 +69,7 @@ describe('TokenLogo', () => {
 				props: { data: mockToken, badge: { type: 'network' }, badgeTestId: 'badge' }
 			});
 
-			expect(getByTestId('network-badge-light')).toBeInTheDocument();
-			expect(getByTestId('network-badge-dark')).toBeInTheDocument();
+			expect(getByTestId('network-badge-default')).toBeInTheDocument();
 		});
 	});
 

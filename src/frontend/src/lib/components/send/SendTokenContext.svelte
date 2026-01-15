@@ -1,19 +1,26 @@
 <script lang="ts">
-	import { setContext } from 'svelte';
+	import { setContext, type Snippet } from 'svelte';
 	import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { OptionBalance } from '$lib/types/balance';
+	import type { OptionToken } from '$lib/types/token';
 
-	export let token: OptionToken;
+	interface Props {
+		token: OptionToken;
+		children: Snippet;
+		customSendBalance?: OptionBalance;
+	}
 
-	let selectedToken: Token;
-	$: selectedToken = token ?? DEFAULT_ETHEREUM_TOKEN;
+	let { token, children, customSendBalance }: Props = $props();
+
+	let selectedToken = $derived(token ?? DEFAULT_ETHEREUM_TOKEN);
 
 	/**
 	 * Send modal context store
 	 */
 	const { sendToken, ...rest } = initSendContext({
-		token: selectedToken
+		token: token ?? DEFAULT_ETHEREUM_TOKEN,
+		customSendBalance
 	});
 
 	setContext<SendContext>(SEND_CONTEXT_KEY, {
@@ -21,7 +28,9 @@
 		...rest
 	});
 
-	$: sendToken.set(selectedToken);
+	$effect(() => {
+		sendToken.set(selectedToken);
+	});
 </script>
 
-<slot />
+{@render children()}

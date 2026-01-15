@@ -1,4 +1,4 @@
-import { TRACK_PRIVACY_MODE_CHANGE } from '$lib/constants/analytics.contants';
+import { TRACK_PRIVACY_MODE_CHANGE } from '$lib/constants/analytics.constants';
 import * as analytics from '$lib/services/analytics.services';
 import { privacyModeStore } from '$lib/stores/settings.store';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -63,8 +63,7 @@ describe('setPrivacyMode', () => {
 
 		setPrivacyMode({ enabled: true, source: 'User menu click' });
 
-		expect(spyTrackEvent).toHaveBeenCalledOnce();
-		expect(spyTrackEvent).toHaveBeenCalledWith({
+		expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: TRACK_PRIVACY_MODE_CHANGE,
 			metadata: {
 				enabled: 'true',
@@ -79,8 +78,7 @@ describe('setPrivacyMode', () => {
 
 		setPrivacyMode({ enabled: false, withToast: true, source: 'keypress P' });
 
-		expect(spyTrackEvent).toHaveBeenCalledOnce();
-		expect(spyTrackEvent).toHaveBeenCalledWith({
+		expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: TRACK_PRIVACY_MODE_CHANGE,
 			metadata: {
 				enabled: 'false',

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import ConvertReview from '$lib/components/convert/ConvertReview.svelte';
@@ -10,28 +10,36 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		onConvert: () => void;
+		cancel: Snippet;
+	}
+
+	let { sendAmount, receiveAmount, onConvert, cancel }: Props = $props();
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
 
-<ConvertReview {receiveAmount} {sendAmount} on:icConvert on:icBack>
-	<EthFeeDisplay slot="fee">
-		{#snippet label()}
-			<Html text={$i18n.fee.text.convert_fee} />
-		{/snippet}
-	</EthFeeDisplay>
+<ConvertReview {cancel} {onConvert} {receiveAmount} {sendAmount}>
+	{#snippet fee()}
+		<EthFeeDisplay>
+			{#snippet label()}
+				<Html text={$i18n.fee.text.convert_fee} />
+			{/snippet}
+		</EthFeeDisplay>
+	{/snippet}
 
-	<div slot="info-message" class="mt-4">
-		<MessageBox>
-			{isTokenErc20($sourceToken)
-				? replacePlaceholders($i18n.convert.text.ckerc20_conversions_may_take, {
-						$ckErc20: $destinationToken.symbol
-					})
-				: $i18n.convert.text.cketh_conversions_may_take}
-		</MessageBox>
-	</div>
-
-	<slot name="cancel" slot="cancel" />
+	{#snippet infoMessage()}
+		<div class="mt-4">
+			<MessageBox>
+				{isTokenErc20($sourceToken)
+					? replacePlaceholders($i18n.convert.text.ckerc20_conversions_may_take, {
+							$ckErc20: $destinationToken.symbol
+						})
+					: $i18n.convert.text.cketh_conversions_may_take}
+			</MessageBox>
+		</div>
+	{/snippet}
 </ConvertReview>

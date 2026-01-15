@@ -1,10 +1,12 @@
+import { EnvIcrcTokenMetadataSchema } from '$env/schema/env-icrc-token.schema';
 import { IcTokenDeprecatedSchema } from '$icp/schema/ic-token-deprecated.schema';
+import { CoingeckoCoinsIdSchema } from '$lib/schema/coingecko.schema';
 import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
 import { TokenSchema } from '$lib/schema/token.schema';
 import { CanisterIdTextSchema } from '$lib/types/canister';
-import { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
-import * as z from 'zod/v4';
+import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+import * as z from 'zod';
 
 export const IcFeeSchema = z.object({
 	fee: z.bigint()
@@ -34,19 +36,29 @@ export const IcCkMetadataSchema = IcCkLinkedAssetsSchema.partial().extend({
 	minterCanisterId: CanisterIdTextSchema
 });
 
+export const IcMetadataSchema = z.object({
+	mintingAccount: z.custom<IcrcAccount>().optional()
+});
+
 export const IcInterfaceSchema = z.object({
 	...IcCanistersSchema.shape,
-	...IcAppMetadataSchema.shape
+	...IcAppMetadataSchema.shape,
+	...IcMetadataSchema.shape
 });
 
 export const IcTokenSchema = z.object({
 	...TokenSchema.shape,
 	...IcFeeSchema.shape,
 	...IcInterfaceSchema.shape,
-	...IcTokenDeprecatedSchema.shape
+	...IcTokenDeprecatedSchema.shape,
+	...EnvIcrcTokenMetadataSchema.pick({ alternativeName: true }).shape
 });
 
 export const IcTokenWithoutIdSchema = IcTokenSchema.omit({ id: true }).strict();
+
+export const IcTokenWithIcrc2SupportedSchema = IcTokenSchema.extend({
+	isIcrc2: z.boolean()
+}).strict();
 
 export const IcCkTokenSchema = z.object({
 	...IcTokenSchema.shape,

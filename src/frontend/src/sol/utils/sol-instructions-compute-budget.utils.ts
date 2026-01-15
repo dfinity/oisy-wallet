@@ -2,6 +2,7 @@ import type {
 	SolInstruction,
 	SolParsedComputeBudgetInstruction
 } from '$sol/types/sol-instructions';
+import { assertNever } from '@dfinity/utils';
 import {
 	ComputeBudgetInstruction,
 	identifyComputeBudgetInstruction,
@@ -15,7 +16,7 @@ import { assertIsInstructionWithData } from '@solana/kit';
 
 export const parseSolComputeBudgetInstruction = (
 	instruction: SolInstruction
-): SolInstruction | SolParsedComputeBudgetInstruction => {
+): SolParsedComputeBudgetInstruction => {
 	assertIsInstructionWithData<Uint8Array>(instruction);
 
 	const decodedInstruction = identifyComputeBudgetInstruction(instruction);
@@ -46,10 +47,10 @@ export const parseSolComputeBudgetInstruction = (
 				instructionType: ComputeBudgetInstruction.SetLoadedAccountsDataSizeLimit
 			};
 		default: {
-			// Force compiler error on unhandled cases based on leftover types
-			const _: never = decodedInstruction;
-
-			return instruction;
+			assertNever(
+				decodedInstruction,
+				`Unknown Solana Compute Budget instruction: ${decodedInstruction}`
+			);
 		}
 	}
 };

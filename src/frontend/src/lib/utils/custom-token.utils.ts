@@ -1,6 +1,11 @@
 import type {
 	CustomToken,
+	// The backend declarations are not exporting Dip721Token because it is structurally identical to ExtV2Token
+	ExtV2Token as Dip721Token,
 	ErcToken,
+	ExtV2Token,
+	// The backend declarations are not exporting IcPunksToken because it is structurally identical to ExtV2Token
+	ExtV2Token as IcPunksToken,
 	IcrcToken,
 	SplToken,
 	Token
@@ -8,7 +13,10 @@ import type {
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumChainId } from '$eth/types/network';
 import type {
+	Dip721SaveCustomToken,
 	ErcSaveCustomToken,
+	ExtSaveCustomToken,
+	IcPunksSaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
@@ -18,8 +26,8 @@ import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolanaChainId } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { Principal } from '@dfinity/principal';
-import { nonNullish, toNullable } from '@dfinity/utils';
+import { assertNever, nonNullish, toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 const toIcrcCustomToken = ({
 	ledgerCanisterId,
@@ -29,6 +37,18 @@ const toIcrcCustomToken = ({
 	index_id: toNullable(
 		nonNullish(indexCanisterId) ? Principal.fromText(indexCanisterId) : undefined
 	)
+});
+
+const toExtV2CustomToken = ({ canisterId }: ExtSaveCustomToken): ExtV2Token => ({
+	canister_id: Principal.fromText(canisterId)
+});
+
+const toDip721CustomToken = ({ canisterId }: Dip721SaveCustomToken): Dip721Token => ({
+	canister_id: Principal.fromText(canisterId)
+});
+
+const toIcPunksCustomToken = ({ canisterId }: IcPunksSaveCustomToken): IcPunksToken => ({
+	canister_id: Principal.fromText(canisterId)
 });
 
 const toErcCustomToken = ({
@@ -63,6 +83,18 @@ export const toCustomToken = ({
 			return { Icrc: toIcrcCustomToken(rest) };
 		}
 
+		if (networkKey === 'ExtV2') {
+			return { ExtV2: toExtV2CustomToken(rest) };
+		}
+
+		if (networkKey === 'Dip721') {
+			return { Dip721: toDip721CustomToken(rest) };
+		}
+
+		if (networkKey === 'IcPunks') {
+			return { IcPunks: toIcPunksCustomToken(rest) };
+		}
+
 		if (networkKey === 'Erc20') {
 			return { Erc20: toErcCustomToken(rest) };
 		}
@@ -83,10 +115,7 @@ export const toCustomToken = ({
 			return { SplDevnet: toSplCustomToken(rest) };
 		}
 
-		// Force compiler error on unhandled cases based on leftover types
-		const _: never = networkKey;
-
-		throw new Error(`Unsupported network key: ${networkKey}`);
+		assertNever(networkKey, `Unsupported network key: ${networkKey}`);
 	};
 
 	return {

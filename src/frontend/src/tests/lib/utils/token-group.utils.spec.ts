@@ -11,8 +11,9 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import type { Token, TokenUi } from '$lib/types/token';
-import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
+import type { Token } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
+import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { last } from '$lib/utils/array.utils';
 import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
 import {
@@ -39,7 +40,7 @@ const tokens: TokenUi[] = [
 		network: ICP_NETWORK,
 		balance: bn2Bi,
 		usdBalance: 100000,
-		standard: 'icrc',
+		standard: { code: 'icrc' },
 		category: 'default',
 		decimals: BTC_MAINNET_TOKEN.decimals,
 		name: 'Chain key Bitcoin',
@@ -56,7 +57,7 @@ const tokens: TokenUi[] = [
 		network: ICP_NETWORK,
 		balance: 5n,
 		usdBalance: 15000,
-		standard: 'icrc',
+		standard: { code: 'icrc' },
 		category: 'default',
 		decimals: ETHEREUM_TOKEN.decimals,
 		name: 'Chain key Ethereum',

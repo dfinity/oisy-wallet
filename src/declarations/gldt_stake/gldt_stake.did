@@ -1,0 +1,492 @@
+type Account = record { owner : opt principal; subaccount : opt Subaccount };
+type Action = variant {
+	ManageNervousSystemParameters : NervousSystemParameters;
+	AddGenericNervousSystemFunction : NervousSystemFunction;
+	RemoveGenericNervousSystemFunction : nat64;
+	UpgradeSnsToNextVersion : record {};
+	RegisterDappCanisters : RegisterDappCanisters;
+	TransferSnsTreasuryFunds : TransferSnsTreasuryFunds;
+	UpgradeSnsControlledCanister : UpgradeSnsControlledCanister;
+	DeregisterDappCanisters : DeregisterDappCanisters;
+	Unspecified : record {};
+	ManageSnsMetadata : ManageSnsMetadata;
+	ExecuteGenericNervousSystemFunction : ExecuteGenericNervousSystemFunction;
+	Motion : Motion
+};
+type AddNeuronPermissions = record {
+	permissions_to_add : opt NeuronPermissionList;
+	principal_id : opt principal
+};
+type AddStakePositionErrors = variant {
+	TransferError : text;
+	CapacityExceeded : text;
+	StakePositionAlreadyExists : text;
+	AlreadyProcessing : text;
+	InvalidStakeAmount : text;
+	InvalidPrincipal : text;
+	CallError : text;
+	MaxAllowedStakePositions : text
+};
+type Amount = record { e8s : nat64 };
+type ArchivedBlocks = record {
+	args : vec GetBlocksRequest;
+	callback : func(vec GetBlocksRequest) -> (GetBlocksResult) query
+};
+type Args = record { amount : nat64 };
+type Args_1 = record { starting_day : nat64; limit : opt nat64 };
+type Args_2 = record { starting_day : nat64; limit : opt nat64 };
+type Args_3 = record { skip : nat64; limit : nat64; neuron_id : text };
+type Args_4 = record {
+	of_principal : opt principal;
+	skip : nat64;
+	limit : nat64
+};
+type Args_5 = record { command : Command; neuron_id : blob };
+type Args_6 = variant { Upgrade : UpgradeArgs; Init : InitArgs };
+type BlockWithId = record { id : nat; block : ICRC3Value };
+type BuildVersion = record { major : nat32; minor : nat32; patch : nat32 };
+type By = variant {
+	MemoAndController : MemoAndController;
+	NeuronId : record {}
+};
+type ChangeAutoStakeMaturity = record {
+	requested_setting_for_auto_stake_maturity : bool
+};
+type ClaimOrRefresh = record { by : opt By };
+type ClaimRewardErrors = variant {
+	NoTokensProvided : text;
+	TransferError : text;
+	InvalidRewardToken : text;
+	AlreadyProcessing : text;
+	InvalidPrincipal : text;
+	NotFound : text;
+	NotAuthorized : text;
+	CallError : text;
+	TokenImbalance : text
+};
+type ClaimRewardStatus = variant { Failed : text; None; InProgress };
+type Command = variant {
+	Split : Split;
+	Follow : Follow;
+	DisburseMaturity : DisburseMaturity;
+	ClaimOrRefresh : ClaimOrRefresh;
+	Configure : Configure;
+	RegisterVote : RegisterVote;
+	MakeProposal : Proposal;
+	StakeMaturity : StakeMaturity;
+	RemoveNeuronPermissions : RemoveNeuronPermissions;
+	AddNeuronPermissions : AddNeuronPermissions;
+	MergeMaturity : MergeMaturity;
+	Disburse : Disburse
+};
+type Configure = record { operation : opt Operation };
+type ConsentInfo = record {
+	metadata : ConsentMessageMetadata;
+	consent_message : ConsentMessage
+};
+type ConsentMessage = variant {
+	LineDisplayMessage : record { pages : vec LineDisplayPage };
+	GenericDisplayMessage : text
+};
+type ConsentMessageMetadata = record {
+	utc_offset_minutes : opt int16;
+	language : text
+};
+type ConsentMessageRequest = record {
+	arg : blob;
+	method : text;
+	user_preferences : ConsentMessageSpec
+};
+type ConsentMessageSpec = record {
+	metadata : ConsentMessageMetadata;
+	device_spec : opt DisplayMessageType
+};
+type CreateNeuronError = variant { TransferError : text; InternalError : text };
+type DailyAnalytics = record {
+	apy : float64;
+	staked_gldt : nat;
+	rewards : vec record { TokenSymbol; nat };
+	weighted_stake : nat
+};
+type DefaultFollowees = record { followees : vec record { nat64; Followees } };
+type DeregisterDappCanisters = record {
+	canister_ids : vec principal;
+	new_controllers : vec principal
+};
+type Disburse = record { to_account : opt Account; amount : opt Amount };
+type DisburseMaturity = record {
+	to_account : opt Account;
+	percentage_to_disburse : nat32
+};
+type DisburseMaturityInProgress = record {
+	timestamp_of_disbursement_seconds : nat64;
+	amount_e8s : nat64;
+	account_to_disburse_to : opt Account
+};
+type DisplayMessageType = variant {
+	GenericDisplay;
+	LineDisplay : record { characters_per_line : nat16; lines_per_page : nat16 }
+};
+type DissolveInstantlyRequestErrors = variant {
+	AlreadyWithdrawnEarly : text;
+	TransferError : text;
+	AlreadyProcessing : text;
+	InvalidPrincipal : text;
+	NotFound : text;
+	WithdrawErrors : WithdrawErrors;
+	NotAuthorized : text;
+	CallError : text
+};
+type DissolveInstantlyStatus = variant {
+	DissolvedInstantly;
+	Failed : text;
+	None;
+	InProgress
+};
+type DissolveStakeEvent = record {
+	dissolved_date : nat64;
+	completed : bool;
+	amount : nat;
+	percentage : nat8
+};
+type DissolveState = variant {
+	DissolveDelaySeconds : nat64;
+	WhenDissolvedTimestampSeconds : nat64
+};
+type Duration = record { secs : nat64; nanos : nat32 };
+type ErrorInfo = record { description : text };
+type ExecuteGenericNervousSystemFunction = record {
+	function_id : nat64;
+	payload : blob
+};
+type Follow = record { function_id : nat64; followees : vec NeuronId };
+type Followees = record { followees : vec NeuronId };
+type FunctionType = variant {
+	NativeNervousSystemFunction : record {};
+	GenericNervousSystemFunction : GenericNervousSystemFunction
+};
+type GeneralError = variant {
+	TransactionAddError : text;
+	TransferError : text;
+	AlreadyProcessing : text;
+	TransactionPreparationError : text;
+	CannotAddReward : text;
+	InvalidPrincipal : text;
+	BalanceIsLowerThanFee : text;
+	NotAuthorized : text;
+	BalanceIsLowerThanThreshold : text;
+	CallError : text;
+	ModifyStakeError : text;
+	StakePositionNotFound : text;
+	BalanceIsZero : text;
+	ZeroAPY : text;
+	InvalidPercentage : text
+};
+type GenericNervousSystemFunction = record {
+	validator_canister_id : opt principal;
+	target_canister_id : opt principal;
+	validator_method_name : opt text;
+	target_method_name : opt text
+};
+type GetBlocksRequest = record { start : nat; length : nat };
+type GetBlocksResult = record {
+	log_length : nat;
+	blocks : vec BlockWithId;
+	archived_blocks : vec ArchivedBlocks
+};
+type ICRC3ArchiveInfo = record {
+	end : nat;
+	canister_id : principal;
+	start : nat
+};
+type ICRC3Config = record {
+	constants : ICRC3Properties;
+	supported_blocks : vec SupportedBlockType
+};
+type ICRC3DataCertificate = record { certificate : blob; hash_tree : blob };
+type ICRC3Properties = record {
+	max_blocks_per_response : nat;
+	initial_cycles : nat;
+	tx_window : Duration;
+	max_transactions_to_purge : nat;
+	max_memory_size_bytes : nat;
+	ttl_for_non_archived_transactions : Duration;
+	max_transactions_in_window : nat;
+	max_unarchived_transactions : nat;
+	reserved_cycles : nat
+};
+type ICRC3Value = variant {
+	Int : int;
+	Map : vec record { text; ICRC3Value };
+	Nat : nat;
+	Blob : blob;
+	Text : text;
+	Array : vec ICRC3Value
+};
+type Icrc21Error = variant {
+	GenericError : record { description : text; error_code : nat };
+	InsufficientPayment : ErrorInfo;
+	UnsupportedCanisterCall : ErrorInfo;
+	ConsentMessageUnavailable : ErrorInfo
+};
+type IncreaseDissolveDelay = record {
+	additional_dissolve_delay_seconds : nat32
+};
+type InitArgs = record {
+	apy_limit : opt nat8;
+	allowed_reward_tokens : vec text;
+	test_mode : bool;
+	authorized_principals : vec principal;
+	version : BuildVersion;
+	gld_sns_governance_canister_id : principal;
+	icrc3_config : ICRC3Config;
+	gldt_ledger_id : principal;
+	goldao_ledger_id : principal;
+	commit_hash : text;
+	gld_sns_rewards_canister_id : principal
+};
+type LineDisplayPage = record { lines : vec text };
+type ManageSnsMetadata = record {
+	url : opt text;
+	logo : opt text;
+	name : opt text;
+	description : opt text
+};
+type ManageStakePositionArgs = variant {
+	Withdraw : record {};
+	DissolveInstantly : record { fraction : nat8 };
+	StartDissolving : record { fraction : nat8 };
+	ClaimRewards : record { tokens : vec TokenSymbol };
+	AddStake : record { amount : nat }
+};
+type ManageStakePositionError = variant {
+	StartDissolvingError : StartDissolvingErrors;
+	AddStakeError : AddStakePositionErrors;
+	GeneralError : GeneralError;
+	DissolveInstantlyError : DissolveInstantlyRequestErrors;
+	WithdrawError : WithdrawRequestErrors;
+	ClaimRewardError : vec ClaimRewardErrors
+};
+type MemoAndController = record { controller : opt principal; memo : nat64 };
+type MergeMaturity = record { percentage_to_merge : nat32 };
+type Motion = record { motion_text : text };
+type NervousSystemFunction = record {
+	id : nat64;
+	name : text;
+	description : opt text;
+	function_type : opt FunctionType
+};
+type NervousSystemParameters = record {
+	default_followees : opt DefaultFollowees;
+	max_dissolve_delay_seconds : opt nat64;
+	max_dissolve_delay_bonus_percentage : opt nat64;
+	max_followees_per_function : opt nat64;
+	neuron_claimer_permissions : opt NeuronPermissionList;
+	neuron_minimum_stake_e8s : opt nat64;
+	max_neuron_age_for_age_bonus : opt nat64;
+	initial_voting_period_seconds : opt nat64;
+	neuron_minimum_dissolve_delay_to_vote_seconds : opt nat64;
+	reject_cost_e8s : opt nat64;
+	max_proposals_to_keep_per_action : opt nat32;
+	wait_for_quiet_deadline_increase_seconds : opt nat64;
+	max_number_of_neurons : opt nat64;
+	transaction_fee_e8s : opt nat64;
+	max_number_of_proposals_with_ballots : opt nat64;
+	max_age_bonus_percentage : opt nat64;
+	neuron_grantable_permissions : opt NeuronPermissionList;
+	voting_rewards_parameters : opt VotingRewardsParameters;
+	maturity_modulation_disabled : opt bool;
+	max_number_of_principals_per_neuron : opt nat64
+};
+type Neuron = record {
+	id : opt NeuronId;
+	staked_maturity_e8s_equivalent : opt nat64;
+	permissions : vec NeuronPermission;
+	maturity_e8s_equivalent : nat64;
+	cached_neuron_stake_e8s : nat64;
+	created_timestamp_seconds : nat64;
+	source_nns_neuron_id : opt nat64;
+	auto_stake_maturity : opt bool;
+	aging_since_timestamp_seconds : nat64;
+	dissolve_state : opt DissolveState;
+	voting_power_percentage_multiplier : nat64;
+	vesting_period_seconds : opt nat64;
+	disburse_maturity_in_progress : vec DisburseMaturityInProgress;
+	followees : vec record { nat64; Followees };
+	neuron_fees_e8s : nat64
+};
+type NeuronId = record { id : blob };
+type NeuronPermission = record {
+	"principal" : opt principal;
+	permission_type : vec int32
+};
+type NeuronPermissionList = record { permissions : vec int32 };
+type NormalWithdrawStatus = variant {
+	Failed : text;
+	None;
+	Withdrawn;
+	InProgress
+};
+type Operation = variant {
+	ChangeAutoStakeMaturity : ChangeAutoStakeMaturity;
+	StopDissolving : record {};
+	StartDissolving : record {};
+	IncreaseDissolveDelay : IncreaseDissolveDelay;
+	SetDissolveTimestamp : SetDissolveTimestamp
+};
+type Proposal = record {
+	url : text;
+	title : text;
+	action : opt Action;
+	summary : text
+};
+type ProposalId = record { id : nat64 };
+type RegisterDappCanisters = record { canister_ids : vec principal };
+type RegisterVote = record { vote : int32; proposal : opt ProposalId };
+type RemoveNeuronPermissions = record {
+	permissions_to_remove : opt NeuronPermissionList;
+	principal_id : opt principal
+};
+type Response = record {
+	reward_tokens : vec text;
+	max_dissolve_events : nat64;
+	early_unlock_fee : float64;
+	unlock_delay : nat64;
+	stake_limit_max : nat64;
+	stake_limit_min : nat64
+};
+type Response_1 = variant { Success : text; InternalError : text };
+type Result = variant { Ok : nat; Err : text };
+type Result_1 = variant { Ok : blob; Err : CreateNeuronError };
+type Result_2 = variant { Ok : ConsentInfo; Err : Icrc21Error };
+type Result_3 = variant {
+	Ok : StakePositionResponse;
+	Err : ManageStakePositionError
+};
+type Result_4 = variant { Ok; Err : text };
+type Result_5 = variant { Ok : nat; Err : GeneralError };
+type SetDissolveTimestamp = record { dissolve_timestamp_seconds : nat64 };
+type Split = record { memo : nat64; amount_e8s : nat64 };
+type StakeMaturity = record { percentage_to_stake : opt nat32 };
+type StakePosition = record {
+	staked : nat;
+	dissolve_delay : Duration;
+	claimable_rewards : vec record { TokenSymbol; nat };
+	claim_reward_status : ClaimRewardStatus;
+	age_bonus_timestamp : nat64;
+	created_at : nat64;
+	owned_by : principal;
+	dissolve_events : vec DissolveStakeEvent;
+	withdraw_state : WithdrawState
+};
+type StakePositionResponse = record {
+	staked : nat;
+	dissolve_delay : Duration;
+	claimable_rewards : vec record { TokenSymbol; nat };
+	created_at : nat64;
+	age_bonus_multiplier : float64;
+	owned_by : principal;
+	dissolve_events : vec DissolveStakeEvent;
+	weighted_stake : nat;
+	instant_dissolve_fee : nat
+};
+type StartDissolvingErrors = variant {
+	DissolvementsLimitReached : text;
+	AlreadyProcessing : text;
+	InvalidPrincipal : text;
+	NotFound : text;
+	NotAuthorized : text;
+	InvalidDissolveAmount : text
+};
+type Subaccount = record { subaccount : blob };
+type SupportedBlockType = record { url : text; block_type : text };
+type SupportedStandard = record { url : text; name : text };
+type TokenSymbol = variant { ICP; OGY; WTN; GOLDAO; GLDT };
+type TransferSnsTreasuryFunds = record {
+	from_treasury : int32;
+	to_principal : opt principal;
+	to_subaccount : opt Subaccount;
+	memo : opt nat64;
+	amount_e8s : nat64
+};
+type UpgradeArgs = record { version : BuildVersion; commit_hash : text };
+type UpgradeSnsControlledCanister = record {
+	new_canister_wasm : blob;
+	mode : opt int32;
+	canister_id : opt principal;
+	canister_upgrade_arg : opt blob
+};
+type VoteType = variant { SelfVote; FolloweeVote };
+type VotingRewardsParameters = record {
+	final_reward_rate_basis_points : opt nat64;
+	initial_reward_rate_basis_points : opt nat64;
+	reward_rate_transition_duration_seconds : opt nat64;
+	round_duration_seconds : opt nat64
+};
+type WithdrawErrors = variant {
+	NoValidDissolveEvents : text;
+	AlreadyProcessing : text;
+	InvalidDissolveInstantlyAmount : text;
+	InvalidWithdrawAmount : text;
+	InvalidDissolveState : text;
+	CantWithdrawWithRewardsBalance : text
+};
+type WithdrawRequestErrors = variant {
+	TransferError : text;
+	AlreadyWithdrawn : text;
+	InvalidPrincipal : text;
+	NotFound : text;
+	WithdrawErrors : WithdrawErrors;
+	NotAuthorized : text;
+	CallError : text;
+	InvalidState : text
+};
+type WithdrawState = variant {
+	None;
+	NormalWithdraw : NormalWithdrawStatus;
+	EarlyWithdraw : DissolveInstantlyStatus
+};
+service : (Args_6) -> {
+	allocated_rewards_balance : (null) -> (vec record { TokenSymbol; Result });
+	commit : () -> ();
+	create_neuron : (Args) -> (Result_1);
+	get_all_gldt_staked_history : (Args_1) -> (vec record { nat64; nat }) query;
+	get_all_rewards_history : (Args_1) -> (
+		vec record { nat64; vec record { TokenSymbol; nat } }
+	) query;
+	get_all_stake_positions : () -> (
+		vec record { principal; StakePosition }
+	) query;
+	get_apy_overall : (null) -> (float64) query;
+	get_apy_timeseries : (Args_2) -> (vec record { nat64; float64 }) query;
+	get_config : (null) -> (Response) query;
+	get_daily_analytics : (Args_2) -> (
+		vec record { nat64; DailyAnalytics }
+	) query;
+	get_neurons : (null) -> (vec Neuron) query;
+	get_position : (principal) -> (opt StakePositionResponse) query;
+	get_proposal_votes_of_neuron : (Args_3) -> (
+		vec record { ProposalId; int32; VoteType }
+	) query;
+	get_total_allocated_rewards : (null) -> (
+		vec record { TokenSymbol; nat }
+	) query;
+	get_total_staked : (null) -> (nat) query;
+	icrc10_supported_standards : () -> (vec SupportedStandard) query;
+	icrc21_canister_call_consent_message : (ConsentMessageRequest) -> (
+		Result_2
+	) query;
+	icrc3_get_archives : (null) -> (vec ICRC3ArchiveInfo) query;
+	icrc3_get_blocks : (vec GetBlocksRequest) -> (GetBlocksResult) query;
+	icrc3_get_properties : (null) -> (ICRC3Properties) query;
+	icrc3_get_tip_certificate : (null) -> (ICRC3DataCertificate) query;
+	icrc3_supported_block_types : (null) -> (vec SupportedBlockType) query;
+	list_all_positions : (Args_4) -> (vec StakePositionResponse) query;
+	manage_sns_neuron : (Args_5) -> (Response_1);
+	manage_stake_position : (ManageStakePositionArgs) -> (Result_3);
+	processing_rewards_balance : (null) -> (vec record { TokenSymbol; Result });
+	set_apy_limit : (opt nat8) -> (Result_4);
+	unallocated_rewards_balance : (null) -> (
+		vec record { TokenSymbol; Result_5 }
+	)
+}

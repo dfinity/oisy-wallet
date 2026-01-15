@@ -38,12 +38,11 @@ describe('rest.services', () => {
 			const maxRetries = 3;
 
 			await expect(
-				async () =>
-					await retry({
-						request: mockFailedRequest,
-						maxRetries
-					})
-			).rejects.toThrow(mockError);
+				retry({
+					request: mockFailedRequest,
+					maxRetries
+				})
+			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
 
@@ -66,12 +65,13 @@ describe('rest.services', () => {
 			expect(result).toEqual(mockResult);
 
 			expect(mockRequest).toHaveBeenCalledTimes(3);
+
 			expect(mockOnRetry).toHaveBeenCalledTimes(2);
-			expect(mockOnRetry).toHaveBeenCalledWith({
+			expect(mockOnRetry).toHaveBeenNthCalledWith(1, {
 				error: new Error('First attempt failed'),
 				retryCount: 0
 			});
-			expect(mockOnRetry).toHaveBeenCalledWith({
+			expect(mockOnRetry).toHaveBeenNthCalledWith(2, {
 				error: new Error('Second attempt failed'),
 				retryCount: 1
 			});
@@ -81,13 +81,12 @@ describe('rest.services', () => {
 			const maxRetries = 2;
 
 			await expect(
-				async () =>
-					await retry({
-						request: mockFailedRequest,
-						onRetry: mockOnRetry,
-						maxRetries
-					})
-			).rejects.toThrow(mockError);
+				retry({
+					request: mockFailedRequest,
+					onRetry: mockOnRetry,
+					maxRetries
+				})
+			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
 			expect(mockOnRetry).toHaveBeenCalledTimes(maxRetries);
@@ -95,13 +94,12 @@ describe('rest.services', () => {
 
 		it('should not retry if maxRetries is set to 0', async () => {
 			await expect(
-				async () =>
-					await retry({
-						request: mockFailedRequest,
-						onRetry: mockOnRetry,
-						maxRetries: 0
-					})
-			).rejects.toThrow(mockError);
+				retry({
+					request: mockFailedRequest,
+					onRetry: mockOnRetry,
+					maxRetries: 0
+				})
+			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledOnce();
 			expect(mockOnRetry).not.toHaveBeenCalled();
@@ -126,8 +124,7 @@ describe('rest.services', () => {
 			expect(result).toEqual(mockResult);
 
 			expect(mockRequest).toHaveBeenCalledTimes(2);
-			expect(mockOnRetry).toHaveBeenCalledOnce();
-			expect(mockOnRetry).toHaveBeenCalledWith({
+			expect(mockOnRetry).toHaveBeenCalledExactlyOnceWith({
 				error: new Error('First attempt failed'),
 				retryCount: 0
 			});
@@ -180,12 +177,11 @@ describe('rest.services', () => {
 			const maxRetries = 3;
 
 			await expect(
-				async () =>
-					await retryWithDelay({
-						request: mockFailedRequest,
-						maxRetries
-					})
-			).rejects.toThrow(mockError);
+				retryWithDelay({
+					request: mockFailedRequest,
+					maxRetries
+				})
+			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
 
@@ -195,12 +191,11 @@ describe('rest.services', () => {
 
 		it('should call randomWait after each failed attempt', async () => {
 			await expect(
-				async () =>
-					await retryWithDelay({
-						request: mockFailedRequest,
-						maxRetries: 2
-					})
-			).rejects.toThrow(mockError);
+				retryWithDelay({
+					request: mockFailedRequest,
+					maxRetries: 2
+				})
+			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(3);
 			expect(randomWait).toHaveBeenCalledTimes(2);
@@ -208,12 +203,11 @@ describe('rest.services', () => {
 
 		it('should not retry if maxRetries is set to 0', async () => {
 			await expect(
-				async () =>
-					await retryWithDelay({
-						request: mockFailedRequest,
-						maxRetries: 0
-					})
-			).rejects.toThrow(mockError);
+				retryWithDelay({
+					request: mockFailedRequest,
+					maxRetries: 0
+				})
+			).rejects.toThrowError(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledOnce();
 			expect(randomWait).not.toHaveBeenCalled();

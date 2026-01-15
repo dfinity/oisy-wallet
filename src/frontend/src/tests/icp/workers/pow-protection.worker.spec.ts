@@ -5,7 +5,6 @@ import type {
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import { PowProtectionScheduler } from '$icp/schedulers/pow-protection.scheduler';
 import * as powProtectorServices from '$icp/services/pow-protector.services';
-import * as authClientApi from '$lib/api/auth-client.api';
 import * as backendApi from '$lib/api/backend.api';
 import {
 	ChallengeCompletionErrorEnum,
@@ -13,11 +12,26 @@ import {
 	PowChallengeError,
 	PowCreateChallengeError
 } from '$lib/canisters/backend.errors';
+import { ZERO } from '$lib/constants/app.constants';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import type { MockInstance } from 'vitest';
+
+vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
+	const authClientProvider = vi.fn().mockReturnValue({
+		loadIdentity: vi.fn()
+	});
+
+	return {
+		...(await importActual()),
+		AuthClientProvider: Object.assign(authClientProvider, {
+			getInstance: authClientProvider
+		})
+	};
+});
 
 describe('pow-protector.worker', () => {
 	let spyCreatePowChallenge: MockInstance;
@@ -69,6 +83,27 @@ describe('pow-protector.worker', () => {
 		}
 	};
 
+	const mockPostMessageProgressRequestChallenge = {
+		msg: 'syncPowProgress',
+		data: {
+			progress: 'REQUEST_CHALLENGE'
+		}
+	};
+
+	const mockPostMessageProgressSolveChallenge = {
+		msg: 'syncPowProgress',
+		data: {
+			progress: 'SOLVE_CHALLENGE'
+		}
+	};
+
+	const mockPostMessageProgressGrantCycles = {
+		msg: 'syncPowProgress',
+		data: {
+			progress: 'GRANT_CYCLES'
+		}
+	};
+
 	const postMessageMock = vi.fn();
 
 	// We don't await the job execution promise in the scheduler's function, so we need to advance the timers to verify the correct execution of the job
@@ -83,11 +118,12 @@ describe('pow-protector.worker', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
+		const provider = AuthClientProvider.getInstance();
+		vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
 
 		// Mock the allowance API call that hasRequiredCycles depends on
 		_spyAllowance = vi.spyOn(icrcLedgerApi, 'allowance').mockResolvedValue({
-			allowance: 0n,
+			allowance: ZERO,
 			expires_at: []
 		}); // Return insufficient allowance by default
 
@@ -148,17 +184,14 @@ describe('pow-protector.worker', () => {
 					await scheduler.trigger(startData);
 
 					expect(spyHasRequiredCycles).toHaveBeenCalledOnce();
-					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
-					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
+					expect(spyCreatePowChallenge).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 
-					expect(spySolvePowChallenge).toHaveBeenCalledOnce();
-					expect(spySolvePowChallenge).toHaveBeenCalledWith({
+					expect(spySolvePowChallenge).toHaveBeenCalledExactlyOnceWith({
 						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
 						difficulty: mockCreateChallengeResponse.difficulty
 					});
 
-					expect(spyAllowSigning).toHaveBeenCalledOnce();
-					expect(spyAllowSigning).toHaveBeenCalledWith({
+					expect(spyAllowSigning).toHaveBeenCalledExactlyOnceWith({
 						identity: mockIdentity,
 						request: { nonce: 42n }
 					});
@@ -177,17 +210,14 @@ describe('pow-protector.worker', () => {
 					await vi.advanceTimersByTimeAsync(100);
 
 					// After start() - should have run once immediately
-					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
-					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
+					expect(spyCreatePowChallenge).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 
-					expect(spySolvePowChallenge).toHaveBeenCalledOnce();
-					expect(spySolvePowChallenge).toHaveBeenCalledWith({
+					expect(spySolvePowChallenge).toHaveBeenCalledExactlyOnceWith({
 						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
 						difficulty: mockCreateChallengeResponse.difficulty
 					});
 
-					expect(spyAllowSigning).toHaveBeenCalledOnce();
-					expect(spyAllowSigning).toHaveBeenCalledWith({
+					expect(spyAllowSigning).toHaveBeenCalledExactlyOnceWith({
 						identity: mockIdentity,
 						request: { nonce: 42n }
 					});
@@ -195,7 +225,7 @@ describe('pow-protector.worker', () => {
 					// Advance timer to trigger the first interval execution
 					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
 
-					// After first interval - should have run twice total
+					// After the first interval - should have run twice total
 					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(2);
 					expect(spySolvePowChallenge).toHaveBeenCalledTimes(2);
 					expect(spyAllowSigning).toHaveBeenCalledTimes(2);
@@ -203,7 +233,7 @@ describe('pow-protector.worker', () => {
 					// Advance timer to trigger the second interval execution
 					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
 
-					// After second interval - should have run three times total
+					// After the second interval - should have run three times total
 					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(3);
 					expect(spySolvePowChallenge).toHaveBeenCalledTimes(3);
 					expect(spyAllowSigning).toHaveBeenCalledTimes(3);
@@ -225,27 +255,27 @@ describe('pow-protector.worker', () => {
 					// Verify the first round of messages
 					expect(postMessageMock).toHaveBeenCalledTimes(6);
 
-					// First two calls should be status updates
+					// The first two calls should be status updates
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
 
 					// Reset mock to simplify subsequent tests
 					postMessageMock.mockClear();
 
-					// Advance timer to trigger next cycle
+					// Advance timer to trigger the next cycle
 					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
 
-					// Second round of messages should have same pattern
+					// The second round of messages should have the same pattern
 					expect(postMessageMock).toHaveBeenCalledTimes(6);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
 
 					postMessageMock.mockClear();
 
-					// Advance timer to trigger third cycle
+					// Advance timer to trigger the third cycle
 					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
 
-					// Third round of messages should have same pattern
+					// The third round of messages should have the same pattern
 					expect(postMessageMock).toHaveBeenCalledTimes(6);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
@@ -286,10 +316,15 @@ describe('pow-protector.worker', () => {
 
 					// For ChallengeInProgressError, we just start and end normally
 					// because the error is handled internally without propagating
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(3);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(
+						2,
+						mockPostMessageProgressRequestChallenge
+					);
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 
-					// Make sure error status was not set
+					// Make sure the error status was not set
 					const errorCalls = postMessageMock.mock.calls.filter(
 						(call) => call[0].data?.state === 'error'
 					);
@@ -332,10 +367,18 @@ describe('pow-protector.worker', () => {
 					await awaitJobExecution();
 
 					// With ExpiredChallengeError, we should see the error status
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusError);
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(
+						2,
+						mockPostMessageProgressRequestChallenge
+					);
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageProgressSolveChallenge);
+					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageProgressGrantCycles);
+					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusError);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
 
-					// Make sure error status was set
+					// Make sure the error status was set
 					const errorCalls = postMessageMock.mock.calls.filter(
 						(call) => call[0].data?.state === 'error'
 					);
@@ -374,8 +417,14 @@ describe('pow-protector.worker', () => {
 					await awaitJobExecution();
 
 					// For unhandled errors, we should see the error status
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusError);
+					expect(postMessageMock).toHaveBeenCalledTimes(4);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(
+						2,
+						mockPostMessageProgressRequestChallenge
+					);
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusError);
+					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
 				});
 			}
 		};
@@ -406,8 +455,9 @@ describe('pow-protector.worker', () => {
 					await awaitJobExecution();
 
 					// Should only see status messages, no progress messages
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(2);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageStatusIdle);
 
 					// Should not call PoW-related functions
 					expect(spyCreatePowChallenge).not.toHaveBeenCalled();

@@ -1,15 +1,18 @@
 import type { solTransactionTypes } from '$lib/schema/transaction.schema';
-import type { SolAddress } from '$lib/types/address';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
-import type { getRpcTransaction } from '$sol/api/solana.api';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
+import type { SolAddress } from '$sol/types/address';
 import type { SplTokenAddress } from '$sol/types/spl';
-import type {
-	Commitment,
-	FullySignedTransaction,
-	GetSignaturesForAddressApi,
-	Signature,
-	Transaction,
-	TransactionWithBlockhashLifetime
+import {
+	getBase58Decoder,
+	signature,
+	type Commitment,
+	type FullySignedTransaction,
+	type GetSignaturesForAddressApi,
+	type Signature,
+	type Transaction,
+	type TransactionWithBlockhashLifetime,
+	type TransactionWithinSizeLimit
 } from '@solana/kit';
 
 export type SolTransactionType = Extract<
@@ -29,7 +32,23 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	toOwner?: SolAddress;
 }
 
-export type SolRpcTransactionRaw = NonNullable<Awaited<ReturnType<typeof getRpcTransaction>>>;
+const mockSolSignature = () => {
+	const randomBytes = new Uint8Array(64);
+	crypto.getRandomValues(randomBytes);
+	const base58 = getBase58Decoder().decode(randomBytes);
+	return signature(base58);
+};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const aux = async () => {
+	const { getTransaction } = solanaHttpRpc('mainnet');
+
+	return await getTransaction(mockSolSignature(), {
+		maxSupportedTransactionVersion: 0,
+		encoding: 'jsonParsed'
+	}).send();
+};
+// TODO: Import type directly from @solana/kit when they will expose it
+export type SolRpcTransactionRaw = NonNullable<Awaited<ReturnType<typeof aux>>>;
 
 export type ParsedAccount = SolRpcTransactionRaw['transaction']['message']['accountKeys'][number];
 
@@ -45,6 +64,7 @@ export type SolSignature = ReturnType<
 
 export type SolSignedTransaction = Transaction &
 	FullySignedTransaction &
+	TransactionWithinSizeLimit &
 	TransactionWithBlockhashLifetime;
 
 export interface MappedSolTransaction {

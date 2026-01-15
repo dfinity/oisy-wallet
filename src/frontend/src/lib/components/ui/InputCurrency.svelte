@@ -4,7 +4,7 @@
 	import { onMount, type Snippet } from 'svelte';
 
 	interface Props {
-		innerEnd: Snippet;
+		innerEnd?: Snippet;
 		value?: string | number;
 		disabled?: boolean;
 		name: string;
@@ -13,6 +13,9 @@
 		decimals?: number;
 		testId?: string;
 		autofocus?: boolean;
+		onInput: () => void;
+		onBlur: () => void;
+		onFocus: () => void;
 	}
 
 	let {
@@ -24,7 +27,10 @@
 		required = true,
 		decimals,
 		testId,
-		autofocus = false
+		autofocus = false,
+		onInput,
+		onBlur,
+		onFocus
 	}: Props = $props();
 
 	let inputElement = $state<HTMLInputElement | undefined>();
@@ -42,19 +48,16 @@
 		autocomplete="off"
 		{decimals}
 		{disabled}
+		{innerEnd}
 		inputType="currency"
+		{onBlur}
+		{onFocus}
+		{onInput}
 		{placeholder}
 		{required}
 		spellcheck={false}
 		{testId}
 		bind:value
-		on:nnsInput
-		on:blur
-		on:focus
 		bind:inputElement
-	>
-		<svelte:fragment slot="inner-end">
-			{@render innerEnd()}
-		</svelte:fragment>
-	</Input>
+	/>
 </div>

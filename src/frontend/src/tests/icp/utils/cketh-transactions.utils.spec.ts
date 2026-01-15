@@ -16,8 +16,8 @@ import {
 	cleanupCkEthPendingStore,
 	setupCkEthPendingStore
 } from '$tests/mocks/ic-transactions.mock';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 describe('mapCkEthereumTransaction', () => {
@@ -49,6 +49,7 @@ describe('mapCkEthereumTransaction', () => {
 					spender: []
 				}
 			],
+			fee_collector: [],
 			timestamp: BigInt('1730723519954194000')
 		}
 	};

@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
+import * as nftSendServices from '$eth/services/nft-send.services';
 import * as sendServices from '$eth/services/send.services';
 import * as feeStoreMod from '$eth/stores/eth-fee.store';
 import {
@@ -17,7 +18,6 @@ import * as exchDerived from '$lib/derived/exchange.derived';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
-import * as nftServices from '$lib/services/nft.services';
 import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import * as toasts from '$lib/stores/toasts.store';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
@@ -91,7 +91,7 @@ describe('EthSendTokenWizard.spec', () => {
 		}));
 
 		vi.spyOn(sendServices, 'send').mockResolvedValue({} as TransactionResponse);
-		vi.spyOn(nftServices, 'sendNft').mockResolvedValue(undefined);
+		vi.spyOn(nftSendServices, 'sendNft').mockResolvedValue(undefined);
 	});
 
 	const renderHost = ({
@@ -125,7 +125,12 @@ describe('EthSendTokenWizard.spec', () => {
 				destination,
 				sourceNetwork,
 				amount: amount ?? 1,
-				nativeEthereumToken
+				nativeEthereumToken,
+				onBack: vi.fn(),
+				onClose: vi.fn(),
+				onNext: vi.fn(),
+				onSendBack: vi.fn(),
+				onTokensList: vi.fn()
 			},
 			context: mockContext({ sendToken, sendTokenId, sendTokenDecimals })
 		});
@@ -146,9 +151,7 @@ describe('EthSendTokenWizard.spec', () => {
 		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
 		await vi.runOnlyPendingTimersAsync();
 
-		expect(sendServices.send).toHaveBeenCalledOnce();
-
-		expect(sendServices.send).toHaveBeenCalledWith(
+		expect(sendServices.send).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				from: fromAddr,
 				to: destination,
@@ -160,7 +163,7 @@ describe('EthSendTokenWizard.spec', () => {
 			})
 		);
 
-		expect(nftServices.sendNft).not.toHaveBeenCalled();
+		expect(nftSendServices.sendNft).not.toHaveBeenCalled();
 	});
 
 	it('sends NFT via sendNft on icSend', async () => {
@@ -182,14 +185,12 @@ describe('EthSendTokenWizard.spec', () => {
 		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
 		await vi.runOnlyPendingTimersAsync();
 
-		expect(nftServices.sendNft).toHaveBeenCalledOnce();
-
-		expect(nftServices.sendNft).toHaveBeenCalledWith(
+		expect(nftSendServices.sendNft).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				token: collectionToken,
 				tokenId: nft.id,
-				toAddress: destination,
-				fromAddress: fromAddr,
+				to: destination,
+				from: fromAddr,
 				gas: 100n,
 				maxFeePerGas: 2_000_000n,
 				maxPriorityFeePerGas: 1_000_000n
@@ -219,6 +220,6 @@ describe('EthSendTokenWizard.spec', () => {
 
 		expect(sendServices.send).not.toHaveBeenCalled();
 
-		expect(nftServices.sendNft).not.toHaveBeenCalled();
+		expect(nftSendServices.sendNft).not.toHaveBeenCalled();
 	});
 });

@@ -14,9 +14,9 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { ActorSubclass } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
 import { jsonReplacer } from '@dfinity/utils';
+import type { ActorSubclass } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
@@ -68,7 +68,7 @@ describe('signer.canister', () => {
 				height: 1000,
 				value: 1n,
 				outpoint: {
-					txid: [1, 2, 3],
+					txid: Uint8Array.from([1, 2, 3]),
 					vout: 1
 				}
 			}
@@ -119,7 +119,7 @@ describe('signer.canister', () => {
 
 			const res = getBtcAddress(btcParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(internalErrorResponse.Err.InternalError.msg)
 			);
 		});
@@ -133,7 +133,7 @@ describe('signer.canister', () => {
 
 			const res = getBtcAddress(btcParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
 			);
 		});
@@ -148,7 +148,7 @@ describe('signer.canister', () => {
 
 			const res = getBtcAddress(btcParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError('Unknown SignerCanisterBtcError')
 			);
 		});
@@ -164,7 +164,7 @@ describe('signer.canister', () => {
 
 			const res = getBtcAddress(btcParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if btc_caller_address returns an unexpected response', async () => {
@@ -177,7 +177,7 @@ describe('signer.canister', () => {
 
 			const res = getBtcAddress(btcParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -232,7 +232,7 @@ describe('signer.canister', () => {
 
 			const res = getBtcBalance(btcParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(internalErrorResponse.Err.InternalError.msg)
 			);
 		});
@@ -246,7 +246,7 @@ describe('signer.canister', () => {
 
 			const res = getBtcBalance(btcParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
 			);
 		});
@@ -261,7 +261,7 @@ describe('signer.canister', () => {
 
 			const res = getBtcBalance(btcParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError('Unknown SignerCanisterBtcError')
 			);
 		});
@@ -277,7 +277,7 @@ describe('signer.canister', () => {
 
 			const res = getBtcBalance(btcParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if btc_caller_balance returns an unexpected response', async () => {
@@ -290,7 +290,7 @@ describe('signer.canister', () => {
 
 			const res = getBtcBalance(btcParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -330,7 +330,7 @@ describe('signer.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getEthAddress()).rejects.toThrow(mockResponseError);
+			await expect(getEthAddress()).rejects.toThrowError(mockResponseError);
 		});
 
 		const signingErrors = [
@@ -361,7 +361,7 @@ describe('signer.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getEthAddress()).rejects.toThrow(
+				await expect(getEthAddress()).rejects.toThrowError(
 					new CanisterInternalError(`Signing error: ${JSON.stringify(rejectionCode)} ${addOns}`)
 				);
 			}
@@ -374,7 +374,7 @@ describe('signer.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getEthAddress()).rejects.toThrow(
+			await expect(getEthAddress()).rejects.toThrowError(
 				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
 			);
 		});
@@ -389,7 +389,7 @@ describe('signer.canister', () => {
 
 			const res = getEthAddress();
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -421,7 +421,7 @@ describe('signer.canister', () => {
 
 			const res = signTransaction(signTransactionParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if eth_sign_transaction returns an unexpected response', async () => {
@@ -434,7 +434,7 @@ describe('signer.canister', () => {
 
 			const res = signTransaction(signTransactionParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -466,7 +466,7 @@ describe('signer.canister', () => {
 
 			const res = personalSign(personalSignParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if eth_personal_sign returns an unexpected response', async () => {
@@ -479,7 +479,7 @@ describe('signer.canister', () => {
 
 			const res = personalSign(personalSignParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -511,7 +511,7 @@ describe('signer.canister', () => {
 
 			const res = signPrehash(signPrehashParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if eth_sign_prehash returns an unexpected response', async () => {
@@ -524,7 +524,7 @@ describe('signer.canister', () => {
 
 			const res = signPrehash(signPrehashParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -561,7 +561,7 @@ describe('signer.canister', () => {
 
 			const res = sendBtc(sendBtcParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(internalErrorResponse.Err.InternalError.msg)
 			);
 		});
@@ -575,7 +575,7 @@ describe('signer.canister', () => {
 
 			const res = sendBtc(sendBtcParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
 			);
 		});
@@ -598,7 +598,7 @@ describe('signer.canister', () => {
 
 			const res = sendBtc(sendBtcParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(JSON.stringify(error, jsonReplacer))
 			);
 		});
@@ -613,7 +613,7 @@ describe('signer.canister', () => {
 
 			const res = sendBtc(sendBtcParams);
 
-			await expect(res).rejects.toThrow(
+			await expect(res).rejects.toThrowError(
 				new CanisterInternalError('Unknown SignerCanisterSendBtcError')
 			);
 		});
@@ -629,7 +629,7 @@ describe('signer.canister', () => {
 
 			const res = sendBtc(sendBtcParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if btc_caller_send returns an unexpected response', async () => {
@@ -642,14 +642,14 @@ describe('signer.canister', () => {
 
 			const res = sendBtc(sendBtcParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
 	describe('getSchnorrPublicKey', () => {
 		it('returns correct Schnorr public key', async () => {
-			const publicKey = [1, 2, 3];
-			const response = { public_key: publicKey, chain_code: [4, 5, 6] };
+			const publicKey = Uint8Array.from([1, 2, 3]);
+			const response = { public_key: publicKey, chain_code: Uint8Array.from([4, 5, 6]) };
 			service.schnorr_public_key.mockResolvedValue({ Ok: [response] });
 
 			const { getSchnorrPublicKey } = await createSignerCanister({
@@ -680,13 +680,13 @@ describe('signer.canister', () => {
 
 			const res = getSchnorrPublicKey({ derivationPath: ['test'], keyId: SOLANA_KEY_ID });
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 
 	describe('signWithSchnorr', () => {
-		const message = [1, 2, 3];
-		const signature = [4, 5, 6];
+		const message = Uint8Array.from([1, 2, 3]);
+		const signature = Uint8Array.from([4, 5, 6]);
 
 		it('signs with Schnorr', async () => {
 			service.schnorr_sign.mockResolvedValue({ Ok: [{ signature }] });
@@ -727,7 +727,7 @@ describe('signer.canister', () => {
 				keyId: SOLANA_KEY_ID
 			});
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 });

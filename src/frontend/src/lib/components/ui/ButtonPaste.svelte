@@ -4,7 +4,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { readClipboard } from '$lib/utils/share.utils';
 
-	let { onpaste }: { onpaste: (text: string) => void } = $props();
+	interface Props {
+		onpaste: (text: string) => void;
+	}
+
+	let { onpaste }: Props = $props();
 
 	const handlePaste = async () => {
 		const text = await readClipboard();
