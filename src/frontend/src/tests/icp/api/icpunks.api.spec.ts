@@ -1,7 +1,10 @@
 import { collectionMetadata, getTokensByOwner, metadata, transfer } from '$icp/api/icpunks.api';
 import { IcPunksCanister } from '$icp/canisters/icpunks.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import { mockIcPunksMetadata } from '$tests/mocks/icpunks-token.mock';
+import {
+	mockIcPunksCollectionMetadata,
+	mockIcPunksMetadata
+} from '$tests/mocks/icpunks-token.mock';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { mock } from 'vitest-mock-extended';
@@ -134,13 +137,6 @@ describe('icpunks.api', () => {
 	});
 
 	describe('collectionMetadata', () => {
-		const mockMetadata = {
-			symbol: 'ICPUNKS',
-			name: 'ICPUNKS Collection',
-			description: 'A collection of ICPUNKS NFTs',
-			icon: 'https://example.com/icon.png'
-		};
-
 		const params = {
 			identity: mockIdentity,
 			owner: mockPrincipal,
@@ -148,13 +144,13 @@ describe('icpunks.api', () => {
 		};
 
 		beforeEach(() => {
-			tokenCanisterMock.collectionMetadata.mockResolvedValue(mockMetadata);
+			tokenCanisterMock.collectionMetadata.mockResolvedValue(mockIcPunksCollectionMetadata);
 		});
 
 		it('should call successfully collectionMetadata endpoint', async () => {
 			const result = await collectionMetadata(params);
 
-			expect(result).toStrictEqual(mockMetadata);
+			expect(result).toStrictEqual(mockIcPunksCollectionMetadata);
 
 			expect(tokenCanisterMock.collectionMetadata).toHaveBeenCalledExactlyOnceWith({});
 		});

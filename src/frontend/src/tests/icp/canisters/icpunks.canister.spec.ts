@@ -1,7 +1,10 @@
 import type { _SERVICE as IcPunksService } from '$declarations/icpunks/icpunks.did';
 import { IcPunksCanister } from '$icp/canisters/icpunks.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { mockIcPunksMetadata } from '$tests/mocks/icpunks-token.mock';
+import {
+	mockIcPunksCollectionMetadata,
+	mockIcPunksMetadata
+} from '$tests/mocks/icpunks-token.mock';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
@@ -131,27 +134,15 @@ describe('icpunks.canister', () => {
 	});
 
 	describe('collectionMetadata', () => {
-		const mockSymbol = 'ICPU';
-		const mockName = 'ICPunks';
-		const mockDescription = 'ICPunks NFT Collection';
-		const mockIconUrl = 'https://example.com/icon.png';
-
 		const mockParams = { certified };
-
-		const expected = {
-			symbol: mockSymbol,
-			name: mockName,
-			description: mockDescription,
-			icon: mockIconUrl
-		};
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			service.symbol.mockResolvedValue(mockSymbol);
-			service.name.mockResolvedValue(mockName);
-			service.description.mockResolvedValue(mockDescription);
-			service.icon_url.mockResolvedValue(mockIconUrl);
+			service.symbol.mockResolvedValue(mockIcPunksCollectionMetadata.symbol);
+			service.name.mockResolvedValue(mockIcPunksCollectionMetadata.name);
+			service.description.mockResolvedValue(mockIcPunksCollectionMetadata.description);
+			service.icon_url.mockResolvedValue(mockIcPunksCollectionMetadata.icon);
 		});
 
 		it('should correctly call the metadata methods', async () => {
@@ -159,7 +150,7 @@ describe('icpunks.canister', () => {
 
 			const res = await collectionMetadata(mockParams);
 
-			expect(res).toStrictEqual(expected);
+			expect(res).toStrictEqual(mockIcPunksCollectionMetadata);
 			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
 			expect(service.name).toHaveBeenCalledExactlyOnceWith();
 			expect(service.description).toHaveBeenCalledExactlyOnceWith();
@@ -173,7 +164,7 @@ describe('icpunks.canister', () => {
 
 			const res = await collectionMetadata(mockParams);
 
-			const { icon: _, ...expectedWithoutIcon } = expected;
+			const { icon: _, ...expectedWithoutIcon } = mockIcPunksCollectionMetadata;
 
 			expect(res).toStrictEqual(expectedWithoutIcon);
 			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
