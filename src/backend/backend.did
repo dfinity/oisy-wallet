@@ -397,15 +397,6 @@ type UserProfile = record {
 	created_timestamp : nat64;
 	updated_timestamp : nat64
 };
-type UserToken = record {
-	decimals : opt nat8;
-	version : opt nat64;
-	enabled : opt bool;
-	chain_id : nat64;
-	contract_address : text;
-	symbol : opt text
-};
-type UserTokenId = record { chain_id : nat64; contract_address : text };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
 	// Adds a verifiable credential to the user profile.
@@ -559,14 +550,11 @@ service : (Arg) -> {
 	// Processes external HTTP requests.
 	http_request : (HttpRequest) -> (HttpResponse) query;
 	list_custom_tokens : () -> (vec CustomToken) query;
-	list_user_tokens : () -> (vec UserToken) query;
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
-	remove_user_token : (UserTokenId) -> ();
 	// Add or update custom token for the user.
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
-	set_many_user_tokens : (vec UserToken) -> ();
 	// Sets the user's preference to show (or hide) testnets in the interface.
 	//
 	// # Returns
@@ -578,7 +566,6 @@ service : (Arg) -> {
 	set_user_show_testnets : (SetShowTestnetsRequest) -> (
 		SetUserShowTestnetsResult
 	);
-	set_user_token : (UserToken) -> ();
 	// Gets statistics about the canister.
 	//
 	// Note: This is a private method, restricted to authorized users, as some stats may not be
