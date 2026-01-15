@@ -68,12 +68,13 @@ const mapStandardVersion = (version: EnvExtTokenStandardVersion): string | undef
 export const mapExtToken = ({
 	canisterId,
 	standardVersion,
-	metadata: { name, symbol }
+	metadata: { name }
 }: EnvExtToken): ExtTokenWithoutId => ({
 	canisterId,
 	network: ICP_NETWORK,
 	name,
-	symbol,
+	// Currently, we have no way to get a correct symbol metadata from the canister, so we use the name as a fallback.
+	symbol: name,
 	// For our current scopes, there is no need to have the correct decimals, since we are using this standard as NFT collections.
 	decimals: 0,
 	standard: {
