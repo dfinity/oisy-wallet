@@ -72,7 +72,7 @@
 			tokenData = isNftsPage
 				? nonNullish(extCanisterId)
 					? { extCanisterId }
-					: nonNullish(extCanisterId)
+					: nonNullish(dip721CanisterId)
 						? { dip721CanisterId }
 						: { icPunksCanisterId }
 				: {
