@@ -862,7 +862,7 @@ describe('post-message.schema', () => {
 				data: validData
 			};
 
-			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrowError();
 		});
 
 		it('should throw an error if data does not match dataSchema', () => {
@@ -881,7 +881,7 @@ describe('post-message.schema', () => {
 				data: validData
 			};
 
-			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrowError();
 		});
 	});
 
@@ -964,7 +964,7 @@ describe('post-message.schema', () => {
 		it('should throw an error if msg is missing', () => {
 			const invalidPayload = { ref: validRef, data: validData };
 
-			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrowError();
 		});
 
 		it('should throw an error if ref is missing', () => {
@@ -990,7 +990,7 @@ describe('post-message.schema', () => {
 				data: validData
 			};
 
-			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrowError();
 		});
 
 		it('should throw an error if data does not match dataSchema', () => {
