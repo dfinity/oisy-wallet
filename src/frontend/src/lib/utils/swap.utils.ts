@@ -1,7 +1,7 @@
 import type {
 	SwapAmountsReply,
 	SwapAmountsTxReply
-} from '$declarations/kong_backend/declarations/kong_backend.did';
+} from '$declarations/kong_backend/kong_backend.did';
 import { dAppDescriptions } from '$env/dapp-descriptions.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';

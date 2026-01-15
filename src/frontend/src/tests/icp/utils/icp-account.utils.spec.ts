@@ -1,4 +1,4 @@
-import type { Icrcv2AccountId } from '$declarations/backend/declarations/backend.did';
+import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
 import {
 	getIcrcv2AccountIdString,
 	parseIcrcv2AccountId,
@@ -152,9 +152,9 @@ describe('icp-account.utils', () => {
 
 		it('should return undefined for invalid Icrcv2AccountId objects', () => {
 			// @ts-expect-error Testing invalid input
-			expect(() => getIcrcv2AccountIdString({})).toThrow();
+			expect(() => getIcrcv2AccountIdString({})).toThrowError();
 			// @ts-expect-error Testing invalid input
-			expect(() => getIcrcv2AccountIdString({ InvalidType: 'address' })).toThrow();
+			expect(() => getIcrcv2AccountIdString({ InvalidType: 'address' })).toThrowError();
 		});
 	});
 

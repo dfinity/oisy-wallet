@@ -19,7 +19,7 @@ import {
 	mockEthHelperContractAddress
 } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import type { MinterInfo } from '@icp-sdk/canisters/cketh';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 
 const transaction: Transaction = {
 	blockNumber: 123456,
@@ -41,7 +41,7 @@ describe('transactions.utils', () => {
 		const mockAddress: EthAddress = mockEthAddress;
 		const mockNetworkId: NetworkId = ETHEREUM_NETWORK_ID;
 		const mockErc20Tokens: Erc20Token[] = [USDC_TOKEN, SEPOLIA_USDC_TOKEN, PEPE_TOKEN];
-		const mockMinterInfo: CertifiedData<MinterInfo> = {
+		const mockMinterInfo: CertifiedData<CkEthMinterDid.MinterInfo> = {
 			data: mockCkMinterInfo,
 			certified: false
 		};

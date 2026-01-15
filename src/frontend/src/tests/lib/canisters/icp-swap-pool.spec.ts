@@ -4,7 +4,7 @@ import type {
 	SwapArgs,
 	_SERVICE as SwapPoolService,
 	WithdrawArgs
-} from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
+} from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ICPSwapPoolCanister } from '$lib/canisters/icp-swap-pool.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -67,7 +67,7 @@ describe('icp_swap_pool.canister', () => {
 			service.quote.mockResolvedValue(errResult);
 			const { quote } = await createPool({ serviceOverride: service });
 
-			await expect(quote(args)).rejects.toThrow(
+			await expect(quote(args)).rejects.toThrowError(
 				new CanisterInternalError('Internal error: Internal failure')
 			);
 		});
@@ -79,7 +79,7 @@ describe('icp_swap_pool.canister', () => {
 			const { quote } = await createPool({ serviceOverride: service });
 			const result = quote(args);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -97,7 +97,7 @@ describe('icp_swap_pool.canister', () => {
 			const { swap } = await createPool({ serviceOverride: service });
 			const result = swap(args);
 
-			await expect(result).rejects.toThrow(
+			await expect(result).rejects.toThrowError(
 				new CanisterInternalError('Internal error: Internal failure')
 			);
 		});
@@ -109,7 +109,7 @@ describe('icp_swap_pool.canister', () => {
 			const { swap } = await createPool({ serviceOverride: service });
 			const result = swap(args);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -127,7 +127,7 @@ describe('icp_swap_pool.canister', () => {
 			const { deposit } = await createPool({ serviceOverride: service });
 			const result = deposit(depositArgs);
 
-			await expect(result).rejects.toThrow(
+			await expect(result).rejects.toThrowError(
 				new CanisterInternalError('Internal error: Internal failure')
 			);
 		});
@@ -139,7 +139,7 @@ describe('icp_swap_pool.canister', () => {
 			const { deposit } = await createPool({ serviceOverride: service });
 			const result = deposit(depositArgs);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -157,7 +157,7 @@ describe('icp_swap_pool.canister', () => {
 			const { depositFrom } = await createPool({ serviceOverride: service });
 			const result = depositFrom(depositArgs);
 
-			await expect(result).rejects.toThrow(
+			await expect(result).rejects.toThrowError(
 				new CanisterInternalError('Internal error: Internal failure')
 			);
 		});
@@ -169,7 +169,7 @@ describe('icp_swap_pool.canister', () => {
 			const { depositFrom } = await createPool({ serviceOverride: service });
 			const result = depositFrom(depositArgs);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -187,7 +187,7 @@ describe('icp_swap_pool.canister', () => {
 			const { withdraw } = await createPool({ serviceOverride: service });
 			const result = withdraw(withdrawArgs);
 
-			await expect(result).rejects.toThrow(
+			await expect(result).rejects.toThrowError(
 				new CanisterInternalError('Internal error: Internal failure')
 			);
 		});
@@ -199,7 +199,7 @@ describe('icp_swap_pool.canister', () => {
 			const { withdraw } = await createPool({ serviceOverride: service });
 			const result = withdraw(withdrawArgs);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -220,7 +220,7 @@ describe('icp_swap_pool.canister', () => {
 			const { getUserUnusedBalance } = await createPool({ serviceOverride: service });
 			const result = getUserUnusedBalance(principal);
 
-			await expect(result).rejects.toThrow(
+			await expect(result).rejects.toThrowError(
 				new CanisterInternalError('Internal error: Failed to get balance')
 			);
 		});
@@ -232,7 +232,7 @@ describe('icp_swap_pool.canister', () => {
 			const { getUserUnusedBalance } = await createPool({ serviceOverride: service });
 			const result = getUserUnusedBalance(principal);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -269,7 +269,7 @@ describe('icp_swap_pool.canister', () => {
 			const { getPoolMetadata } = await createPool({ serviceOverride: service });
 			const result = getPoolMetadata();
 
-			await expect(result).rejects.toThrow(
+			await expect(result).rejects.toThrowError(
 				new CanisterInternalError('Internal error: Failed to get pool metadata')
 			);
 		});
@@ -281,7 +281,7 @@ describe('icp_swap_pool.canister', () => {
 			const { getPoolMetadata } = await createPool({ serviceOverride: service });
 			const result = getPoolMetadata();
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 });

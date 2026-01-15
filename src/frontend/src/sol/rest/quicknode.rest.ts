@@ -19,9 +19,9 @@ interface QuicknodeApiError {
 interface SplMetadataResponse {
 	result: {
 		content: {
-			metadata: TokenMetadata;
+			metadata: Partial<TokenMetadata>;
 			links: {
-				image: z.infer<typeof UrlSchema>;
+				image?: z.infer<typeof UrlSchema>;
 			};
 		};
 	};

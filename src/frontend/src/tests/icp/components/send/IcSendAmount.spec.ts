@@ -1,28 +1,38 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
+import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import type { Token } from '$lib/types/token';
 import en from '$tests/mocks/i18n.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 describe('IcSendAmount', () => {
+	const ctx = initSendContext({
+		token: ICP_TOKEN
+	});
+
 	const mockContext = new Map([]);
-	mockContext.set(
-		SEND_CONTEXT_KEY,
-		initSendContext({
-			token: ICP_TOKEN
-		})
-	);
+	mockContext.set(SEND_CONTEXT_KEY, ctx);
 
 	const props = {
 		amount: 1,
-		amountError: undefined
+		amountError: undefined,
+		onTokensList: vi.fn()
 	};
 	const newAmount = 10;
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		isIcMintingAccount.set(false);
+	});
 
 	it('should render input with the proper value', () => {
 		const { container } = render(IcSendAmount, {
@@ -78,7 +88,58 @@ describe('IcSendAmount', () => {
 
 		await waitFor(() => {
 			expect(input?.value).toBe(`${newAmount}`);
-			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrow();
+			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrowError();
+		});
+	});
+
+	it('should not show balance error on input if there is not enough funds but the user is the minting account', async () => {
+		isIcMintingAccount.set(true);
+
+		const { container, getByText } = render(IcSendAmount, {
+			props: {
+				...props,
+				amount: undefined
+			},
+			context: mockContext
+		});
+
+		const input: HTMLInputElement | null = container.querySelector(amountSelector);
+
+		assertNonNullish(input);
+
+		await fireEvent.input(input, { target: { value: `${newAmount}` } });
+
+		await waitFor(() => {
+			expect(input?.value).toBe(`${newAmount}`);
+			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrowError();
+		});
+	});
+
+	it('should not show balance error on input if there is not enough funds but the destination is the minting account', async () => {
+		const { sendToken, sendDestination, ...rest } = ctx;
+
+		mockContext.set(SEND_CONTEXT_KEY, { sendToken, sendDestination, ...rest });
+
+		sendToken.set({ ...ICP_TOKEN, mintingAccount: getIcrcAccount(mockPrincipal) } as Token);
+		sendDestination.set(mockPrincipal.toText());
+
+		const { container, getByText } = render(IcSendAmount, {
+			props: {
+				...props,
+				amount: undefined
+			},
+			context: mockContext
+		});
+
+		const input: HTMLInputElement | null = container.querySelector(amountSelector);
+
+		assertNonNullish(input);
+
+		await fireEvent.input(input, { target: { value: `${newAmount}` } });
+
+		await waitFor(() => {
+			expect(input?.value).toBe(`${newAmount}`);
+			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrowError();
 		});
 	});
 });

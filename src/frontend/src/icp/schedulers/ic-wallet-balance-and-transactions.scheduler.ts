@@ -1,4 +1,4 @@
-import type { Event } from '$declarations/xtc_ledger/declarations/xtc_ledger.did';
+import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
 import { IcWalletScheduler, type IcWalletMsg } from '$icp/schedulers/ic-wallet.scheduler';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
@@ -12,11 +12,8 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { isNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
-import type { Transaction, TransactionWithId } from '@icp-sdk/canisters/ledger/icp';
-import type {
-	IcrcIndexNgTransaction,
-	IcrcIndexNgTransactionWithId
-} from '@icp-sdk/canisters/ledger/icrc';
+import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
@@ -29,12 +26,18 @@ interface IcWalletStore<T> {
 }
 
 export type GetBalanceAndTransactions<
-	TWithId extends IcrcIndexNgTransactionWithId | TransactionWithId | Dip20TransactionWithId
+	TWithId extends
+		| IcrcIndexDid.TransactionWithId
+		| IcpIndexDid.TransactionWithId
+		| Dip20TransactionWithId
 > = GetTransactions & { transactions: TWithId[] };
 
 export class IcWalletBalanceAndTransactionsScheduler<
-	T extends IcrcIndexNgTransaction | Transaction | Event,
-	TWithId extends IcrcIndexNgTransactionWithId | TransactionWithId | Dip20TransactionWithId,
+	T extends IcrcIndexDid.Transaction | IcpIndexDid.Transaction | Event,
+	TWithId extends
+		| IcrcIndexDid.TransactionWithId
+		| IcpIndexDid.TransactionWithId
+		| Dip20TransactionWithId,
 	PostMessageDataRequest extends
 		| PostMessageDataRequestIcrcStrict
 		| PostMessageDataRequestIcp

@@ -25,7 +25,8 @@ describe('auth-broadcast.providers', () => {
 
 			vi.stubGlobal(
 				'BroadcastChannel',
-				vi.fn((name: string) => {
+				// eslint-disable-next-line prefer-arrow/prefer-arrow-functions,prefer-arrow-callback,local-rules/prefer-object-params
+				vi.fn(function (this: BroadcastChannel, name: string) {
 					const channel =
 						mockChannels.get(name) ??
 						({

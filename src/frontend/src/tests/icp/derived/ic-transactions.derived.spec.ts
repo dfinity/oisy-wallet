@@ -13,6 +13,7 @@ import { token } from '$lib/stores/token.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { setupCkBTCStores } from '$tests/utils/ckbtc-stores.test-utils';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import { get } from 'svelte/store';
@@ -110,12 +111,13 @@ describe('ic-transactions.derived', () => {
 
 		beforeEach(() => {
 			const mockToken: IcCkToken = {
+				...mockValidIcCkToken,
 				id: tokenId,
-				standard: 'icrc',
+				standard: { code: 'icrc' },
 				ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
 				indexCanisterId: IC_CKETH_INDEX_CANISTER_ID,
 				minterCanisterId: IC_CKETH_MINTER_CANISTER_ID
-			} as unknown as IcCkToken;
+			};
 
 			token.set(mockToken);
 

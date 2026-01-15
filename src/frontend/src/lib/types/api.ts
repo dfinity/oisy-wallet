@@ -7,14 +7,14 @@ import type {
 	GetUserProfileError,
 	UserProfile,
 	Utxo
-} from '$declarations/backend/declarations/backend.did';
-import type { TxId } from '$declarations/kong_backend/declarations/kong_backend.did';
+} from '$declarations/backend/backend.did';
+import type { TxId } from '$declarations/kong_backend/kong_backend.did';
 import type {
 	BtcTxOutput,
 	SchnorrKeyId,
 	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
-} from '$declarations/signer/declarations/signer.did';
+} from '$declarations/signer/signer.did';
 import type { IcToken } from '$icp/types/ic-token';
 import type { Address } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
@@ -49,7 +49,7 @@ export interface BtcGetPendingTransactionParams {
 }
 
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
-	txId: Uint8Array | number[];
+	txId: Uint8Array;
 	utxos: Utxo[];
 }
 
@@ -66,7 +66,7 @@ export interface GetSchnorrPublicKeyParams {
 }
 
 export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
-	message: number[];
+	message: Uint8Array;
 }
 
 export interface AddUserHiddenDappIdParams {

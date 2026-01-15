@@ -12,7 +12,7 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
-import type { Utxo } from '@icp-sdk/canisters/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 // Mock environment variables (same as btc-utxos.service.spec.ts)
 vi.mock('$env/networks/networks.icrc.env', () => ({
@@ -86,7 +86,7 @@ describe('btc-send.services', () => {
 
 			const res = sendBtc(defaultParams);
 
-			await expect(res).rejects.toThrow(error);
+			await expect(res).rejects.toThrowError(error);
 		});
 
 		it('should throw if backend addPendingBtcTransaction throws', async () => {
@@ -97,16 +97,16 @@ describe('btc-send.services', () => {
 
 			const res = sendBtc(defaultParams);
 
-			await expect(res).rejects.toThrow(error);
+			await expect(res).rejects.toThrowError(error);
 		});
 	});
 
 	describe('validateUtxosForSend', () => {
-		const validUtxo: Utxo = {
+		const validUtxo: CkBtcMinterDid.Utxo = {
 			height: 100,
 			value: 100000n,
 			outpoint: {
-				txid: [1, 2, 3, 4, 5],
+				txid: Uint8Array.from([1, 2, 3, 4, 5]),
 				vout: 0
 			}
 		};
@@ -140,7 +140,7 @@ describe('btc-send.services', () => {
 		});
 
 		it('should pass validation for valid UTXOs and parameters', async () => {
-			await expect(validateBtcSend(defaultValidateParams)).resolves.not.toThrow();
+			await expect(validateBtcSend(defaultValidateParams)).resolves.not.toThrowError();
 		});
 
 		it('should throw InvalidAmount error when amount is invalid', async () => {
@@ -149,7 +149,7 @@ describe('btc-send.services', () => {
 				amount: -1 // Invalid negative amount
 			};
 
-			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
+			await expect(validateBtcSend(params)).rejects.toThrowError(BtcValidationError);
 
 			try {
 				await validateBtcSend(params);
@@ -165,7 +165,7 @@ describe('btc-send.services', () => {
 				utxosFee: { ...validUtxosFee, utxos: [] }
 			};
 
-			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
+			await expect(validateBtcSend(params)).rejects.toThrowError(BtcValidationError);
 
 			try {
 				await validateBtcSend(params);
@@ -179,14 +179,14 @@ describe('btc-send.services', () => {
 			it('should throw InvalidUtxoData error when UTXO has no txid', async () => {
 				const invalidUtxo = {
 					...validUtxo,
-					outpoint: { ...validUtxo.outpoint, txid: [] as number[] }
+					outpoint: { ...validUtxo.outpoint, txid: Uint8Array.from([]) }
 				};
 				const params = {
 					...defaultValidateParams,
 					utxosFee: { ...validUtxosFee, utxos: [invalidUtxo] }
 				};
 
-				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrowError(BtcValidationError);
 
 				try {
 					await validateBtcSend(params);
@@ -206,7 +206,7 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, utxos: [invalidUtxo] }
 				};
 
-				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrowError(BtcValidationError);
 
 				try {
 					await validateBtcSend(params);
@@ -222,7 +222,7 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, utxos: [invalidUtxo] }
 				};
 
-				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrowError(BtcValidationError);
 
 				try {
 					await validateBtcSend(params);
@@ -239,7 +239,7 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, utxos: [invalidUtxo] }
 				};
 
-				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrowError(BtcValidationError);
 
 				try {
 					await validateBtcSend(params);
@@ -259,7 +259,7 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, utxos: [invalidUtxo] }
 				};
 
-				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrowError(BtcValidationError);
 
 				try {
 					await validateBtcSend(params);
@@ -274,7 +274,7 @@ describe('btc-send.services', () => {
 			vi.spyOn(btcUtils, 'getPendingTransactionUtxoTxIds').mockReturnValue(['txid1']);
 			vi.spyOn(btcUtxosUtils, 'extractUtxoTxIds').mockReturnValue(['txid1']);
 
-			await expect(validateBtcSend(defaultValidateParams)).rejects.toThrow(BtcValidationError);
+			await expect(validateBtcSend(defaultValidateParams)).rejects.toThrowError(BtcValidationError);
 
 			try {
 				await validateBtcSend(defaultValidateParams);
@@ -294,7 +294,7 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, feeSatoshis: 100n } // Very low fee
 				};
 
-				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrowError(BtcValidationError);
 
 				try {
 					await validateBtcSend(params);
@@ -315,7 +315,7 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, feeSatoshis: 50000n } // Very high fee
 				};
 
-				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrowError(BtcValidationError);
 
 				try {
 					await validateBtcSend(params);
@@ -338,7 +338,7 @@ describe('btc-send.services', () => {
 				utxosFee: { ...validUtxosFee, feeSatoshis: 250n } // 250 * 1 = 250, within tolerance
 			};
 
-			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
+			await expect(validateBtcSend(params)).rejects.toThrowError(BtcValidationError);
 
 			try {
 				await validateBtcSend(params);
@@ -363,7 +363,7 @@ describe('btc-send.services', () => {
 				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange } // 1100
 			};
 
-			await expect(validateBtcSend(paramsUpperBound)).resolves.not.toThrow();
+			await expect(validateBtcSend(paramsUpperBound)).resolves.not.toThrowError();
 
 			// Test fee at lower tolerance boundary
 			const paramsLowerBound = {
@@ -371,15 +371,15 @@ describe('btc-send.services', () => {
 				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee - toleranceRange } // 900
 			};
 
-			await expect(validateBtcSend(paramsLowerBound)).resolves.not.toThrow();
+			await expect(validateBtcSend(paramsLowerBound)).resolves.not.toThrowError();
 		});
 
 		it('should handle multiple UTXOs correctly', async () => {
-			const utxo2: Utxo = {
+			const utxo2: CkBtcMinterDid.Utxo = {
 				height: 200,
 				value: 50000n,
 				outpoint: {
-					txid: [6, 7, 8, 9, 10],
+					txid: Uint8Array.from([6, 7, 8, 9, 10]),
 					vout: 1
 				}
 			};
@@ -397,7 +397,7 @@ describe('btc-send.services', () => {
 				}
 			};
 
-			await expect(validateBtcSend(params)).resolves.not.toThrow();
+			await expect(validateBtcSend(params)).resolves.not.toThrowError();
 		});
 
 		it('should call getFeeRateFromPercentiles with correct parameters', async () => {
@@ -424,14 +424,14 @@ describe('btc-send.services', () => {
 				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange + 1n } // 1101
 			};
 
-			await expect(validateBtcSend(paramsOutsideUpper)).rejects.toThrow(BtcValidationError);
+			await expect(validateBtcSend(paramsOutsideUpper)).rejects.toThrowError(BtcValidationError);
 
 			const paramsOutsideLower = {
 				...defaultValidateParams,
 				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee - toleranceRange - 1n } // 899
 			};
 
-			await expect(validateBtcSend(paramsOutsideLower)).rejects.toThrow(BtcValidationError);
+			await expect(validateBtcSend(paramsOutsideLower)).rejects.toThrowError(BtcValidationError);
 
 			// Test fee exactly at tolerance boundary (should pass)
 			const paramsExactUpper = {
@@ -439,7 +439,7 @@ describe('btc-send.services', () => {
 				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange } // 1100
 			};
 
-			await expect(validateBtcSend(paramsExactUpper)).resolves.not.toThrow();
+			await expect(validateBtcSend(paramsExactUpper)).resolves.not.toThrowError();
 		});
 	});
 });

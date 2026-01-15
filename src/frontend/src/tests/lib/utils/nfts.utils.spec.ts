@@ -7,7 +7,8 @@ import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.et
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
+import { NetworkSchema } from '$lib/schema/network.schema';
+import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId } from '$lib/types/nft';
 import {
@@ -28,6 +29,7 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('nfts.utils', () => {
@@ -272,7 +274,7 @@ describe('nfts.utils', () => {
 		it('should raise an error if URL is not a parseable URL', () => {
 			const url = 'invalid-url';
 
-			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrowError(mockError);
 		});
 
 		it('should return the same URL if not IPFS protocol', () => {
@@ -322,12 +324,12 @@ describe('nfts.utils', () => {
 		it('should not allow URL with localhost', () => {
 			const url = 'http://localhost:3000/some-data';
 
-			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrowError(mockError);
 		});
 	});
 
 	describe('mapTokenToCollection', () => {
-		it('should map token correctly', () => {
+		it('should map ERC721 token correctly', () => {
 			const result = mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN);
 
 			expect(result).toEqual({
@@ -335,9 +337,23 @@ describe('nfts.utils', () => {
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
 				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description
+			});
+		});
+
+		it('should map EXT token correctly', () => {
+			const result = mapTokenToCollection(mockValidExtV2Token);
+
+			expect(result).toEqual({
+				address: mockValidExtV2Token.canisterId,
+				name: mockValidExtV2Token.name,
+				symbol: mockValidExtV2Token.symbol,
+				id: mockValidExtV2Token.id,
+				network: NetworkSchema.parse(mockValidExtV2Token.network),
+				standard: mockValidExtV2Token.standard,
+				description: mockValidExtV2Token.description
 			});
 		});
 
@@ -352,7 +368,7 @@ describe('nfts.utils', () => {
 			expect(result).toEqual({
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
 			});
 		});
@@ -368,7 +384,7 @@ describe('nfts.utils', () => {
 				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
 				section: CustomTokenSection.HIDDEN,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol
@@ -385,7 +401,7 @@ describe('nfts.utils', () => {
 				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
-				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
 				section: undefined,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol
@@ -795,6 +811,40 @@ describe('nfts.utils', () => {
 			expect(result).toBe(NftMediaStatusEnum.OK);
 		});
 
+		it('returns OK for valid gif under the size limit', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? '.gif;charset=utf-8'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/image.gif');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
+		it('returns OK for valid video under the size limit', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'video/mp4'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/video.mp4');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
 		it('returns INVALID_DATA for invalid URL', async () => {
 			const result = await getMediaStatus('not-a-url');
 
@@ -819,15 +869,15 @@ describe('nfts.utils', () => {
 			expect(result).toBe(NftMediaStatusEnum.OK);
 		});
 
-		it('returns NON_SUPPORTED_MEDIA_TYPE for non-image type', async () => {
+		it('returns NON_SUPPORTED_MEDIA_TYPE for non-image and non-video type', async () => {
 			global.fetch = vi.fn().mockResolvedValueOnce({
 				headers: {
 					get: (h: string) =>
-						h === 'Content-Type' ? 'video/mp4' : h === 'Content-Length' ? '100' : null
+						h === 'Content-Type' ? 'text/html' : h === 'Content-Length' ? '100' : null
 				}
 			});
 
-			const result = await getMediaStatus('https://example.com/video.mp4');
+			const result = await getMediaStatus('https://example.com/page.html');
 
 			expect(result).toBe(NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
 		});

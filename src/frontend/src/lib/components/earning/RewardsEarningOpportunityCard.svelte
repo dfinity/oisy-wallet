@@ -40,7 +40,7 @@
 </script>
 
 {#if nonNullish(cardData)}
-	<EarningOpportunityCard>
+	<EarningOpportunityCard titles={cardData.titles}>
 		{#snippet logo()}
 			<Logo size="lg" src={cardData.logo} />
 		{/snippet}
@@ -48,9 +48,6 @@
 			<span class="mr-2"><IconCalendarDays size="14" /></span>
 			{$i18n.rewards.text.active_date}
 			{`${formatToShortDateString({ date: currentReward.endDate, i18n: $i18n })} ${currentReward.endDate.getDate()}`}
-		{/snippet}
-		{#snippet title()}
-			{resolveText({ i18n: $i18n, path: cardData.title })}
 		{/snippet}
 		{#snippet description()}
 			<p>{resolveText({ i18n: $i18n, path: cardData.description })}</p>
@@ -65,12 +62,9 @@
 			/>
 		{/snippet}
 		{#snippet button()}
-			<Button
-				colorStyle="primary"
-				fullWidth
-				onclick={() => goto(AppPath.EarningRewards)}
-				paddingSmall>{resolveText({ i18n: $i18n, path: cardData.actionText })}</Button
-			>
+			<Button colorStyle="primary" fullWidth onclick={() => goto(AppPath.EarnRewards)} paddingSmall>
+				{resolveText({ i18n: $i18n, path: cardData.actionText })}
+			</Button>
 		{/snippet}
 	</EarningOpportunityCard>
 {/if}

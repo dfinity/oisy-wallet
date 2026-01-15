@@ -25,9 +25,16 @@ describe('HowToConvertEthereumWizardSteps', () => {
 			]
 		]);
 
+	const props = {
+		onBack: vi.fn(),
+		onConvert: vi.fn(),
+		onQrCode: vi.fn()
+	};
+
 	it('should render HowToConvertEthereumInfo if current step is info', () => {
 		const { getByTestId } = render(HowToConvertEthereumWizardSteps, {
 			props: {
+				...props,
 				currentStep: {
 					name: WizardStepsHowToConvert.INFO,
 					title: 'INFO'
@@ -42,6 +49,7 @@ describe('HowToConvertEthereumWizardSteps', () => {
 	it('should render ReceiveAddressQrCode if current step is info', () => {
 		const { getByTestId } = render(HowToConvertEthereumWizardSteps, {
 			props: {
+				...props,
 				currentStep: {
 					name: WizardStepsHowToConvert.ETH_QR_CODE,
 					title: 'ETH QR CODE'

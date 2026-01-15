@@ -14,7 +14,7 @@ export const COINX_TOKEN_ID: TokenId = parseTokenId(COINX_SYMBOL);
 export const COINX_TOKEN: RequiredSpl2022Token = {
 	id: COINX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Coinbase xStock',
 	symbol: COINX_SYMBOL,

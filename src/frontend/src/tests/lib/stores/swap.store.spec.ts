@@ -77,6 +77,43 @@ describe('swapStore', () => {
 		expect(get(destinationTokenExchangeRate)).toStrictEqual(ckBtcExchangeValue);
 	});
 
+	it('should reset all values', () => {
+		const {
+			sourceToken,
+			sourceTokenBalance,
+			sourceTokenExchangeRate,
+			destinationTokenExchangeRate,
+			destinationTokenBalance,
+			destinationToken,
+			reset
+		} = initSwapContext({
+			destinationToken: mockToken1,
+			sourceToken: mockToken2
+		});
+		const ckBtcBalance = bn1Bi;
+		const icpBalance = bn2Bi;
+
+		balancesStore.set({
+			id: mockToken1.id,
+			data: { data: ckBtcBalance, certified: true }
+		});
+		balancesStore.set({
+			id: mockToken2.id,
+			data: { data: icpBalance, certified: true }
+		});
+
+		reset();
+
+		expect(get(sourceToken)).toBe(undefined);
+		expect(get(destinationToken)).toBe(undefined);
+
+		expect(get(sourceTokenBalance)).toBe(undefined);
+		expect(get(destinationTokenBalance)).toBe(undefined);
+
+		expect(get(sourceTokenExchangeRate)).toBe(undefined);
+		expect(get(destinationTokenExchangeRate)).toBe(undefined);
+	});
+
 	it('should set tokens correctly', () => {
 		const { sourceToken, destinationToken, setSourceToken, setDestinationToken } = initSwapContext({
 			destinationToken: mockToken1,

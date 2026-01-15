@@ -2,14 +2,14 @@ import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
 import { mockPendingUtxo } from '$tests/mocks/ckbtc.mock';
-import type { PendingUtxo } from '@icp-sdk/canisters/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 vi.mock('@dfinity/utils', async () => {
 	const mod = await vi.importActual<object>('@dfinity/utils');
 	return {
 		...mod,
-		uint8ArrayToHexString: (v: Uint8Array | number[]) => v
+		uint8ArrayToHexString: (v: Uint8Array) => v
 	};
 });
 
@@ -22,7 +22,7 @@ describe('ckbtc-utxos.store', () => {
 
 			const utxosIds: UtxoTxidText[] = ['utxo1', 'utxo2', 'utxo3', 'utxo4', 'utxo5'];
 
-			const pendingUtxos: PendingUtxo[] = utxosIds.map((txid) => ({
+			const pendingUtxos: CkBtcMinterDid.PendingUtxo[] = utxosIds.map((txid) => ({
 				...mockPendingUtxo,
 				outpoint: { ...mockPendingUtxo.outpoint, txid: txid as unknown as Uint8Array }
 			}));
@@ -31,7 +31,7 @@ describe('ckbtc-utxos.store', () => {
 
 			const expectedIds = utxosIds.filter((id) => !filterIds.includes(id));
 
-			const expectedPendingUtxos: PendingUtxo[] = expectedIds.map((txid) => ({
+			const expectedPendingUtxos: CkBtcMinterDid.PendingUtxo[] = expectedIds.map((txid) => ({
 				...mockPendingUtxo,
 				outpoint: { ...mockPendingUtxo.outpoint, txid: txid as unknown as Uint8Array }
 			}));

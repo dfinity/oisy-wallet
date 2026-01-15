@@ -1,5 +1,5 @@
-import type { BitcoinNetwork as BackendBitcoinNetwork } from '$declarations/backend/declarations/backend.did';
-import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/declarations/signer.did';
+import type { BitcoinNetwork as BackendBitcoinNetwork } from '$declarations/backend/backend.did';
+import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
@@ -19,6 +19,7 @@ import {
 	SOLANA_MAINNET_NETWORK_ID,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
+import type { EthereumNetwork } from '$eth/types/network';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
@@ -27,6 +28,17 @@ import { nonNullish } from '@dfinity/utils';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 
 export type IsNetworkIdUtil = (networkId: NetworkId | undefined) => boolean;
+
+export const isNetworkEthereum = (network: Network | undefined): network is EthereumNetwork =>
+	isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id);
+
+export const assertIsNetworkEthereum: (
+	network: Network | undefined
+) => asserts network is EthereumNetwork = (network: Network | undefined): void => {
+	if (!isNetworkEthereum(network)) {
+		throw new Error(`Network ${network?.name ?? ''} is not an Ethereum or EVM network`);
+	}
+};
 
 export const isNetworkICP = (network: Network | undefined): boolean => isNetworkIdICP(network?.id);
 

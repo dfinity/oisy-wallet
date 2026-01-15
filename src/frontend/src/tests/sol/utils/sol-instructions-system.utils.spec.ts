@@ -57,7 +57,7 @@ describe('sol-instructions-system.utils', () => {
 		it('should raise an error if the instruction is missing the data', () => {
 			const { data: _, ...withoutData } = mockInstruction;
 
-			expect(() => parseSolSystemInstruction(withoutData)).toThrow(
+			expect(() => parseSolSystemInstruction(withoutData)).toThrowError(
 				'The instruction does not have any data'
 			);
 		});
@@ -65,9 +65,9 @@ describe('sol-instructions-system.utils', () => {
 		it('should raise an error if the instruction is missing the accounts', () => {
 			const { accounts: _, ...withoutAccounts } = mockInstruction;
 
-			expect(() => parseSolSystemInstruction(withoutAccounts as unknown as SolInstruction)).toThrow(
-				'The instruction does not have any accounts'
-			);
+			expect(() =>
+				parseSolSystemInstruction(withoutAccounts as unknown as SolInstruction)
+			).toThrowError('The instruction does not have any accounts');
 		});
 
 		it('should parse a CreateAccount instruction', () => {
@@ -212,7 +212,7 @@ describe('sol-instructions-system.utils', () => {
 			// @ts-expect-error intentional for testing unknown discriminant
 			vi.mocked(identifySystemInstruction).mockReturnValue('unknown-instruction');
 
-			expect(() => parseSolSystemInstruction(mockInstruction)).toThrow(
+			expect(() => parseSolSystemInstruction(mockInstruction)).toThrowError(
 				'Unknown Solana System instruction: unknown-instruction'
 			);
 		});

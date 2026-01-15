@@ -1,4 +1,4 @@
-import type { EthSignTransactionRequest } from '$declarations/signer/declarations/signer.did';
+import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraCkErc20Providers } from '$eth/providers/infura-ckerc20.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
@@ -36,7 +36,7 @@ import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
-const ethPrepareTransaction = ({
+export const ethPrepareTransaction = ({
 	to,
 	amount,
 	maxPriorityFeePerGas: max_priority_fee_per_gas,
@@ -57,7 +57,7 @@ const ethPrepareTransaction = ({
 	data: toNullable(data)
 });
 
-const erc20PrepareTransaction = async ({
+export const erc20PrepareTransaction = async ({
 	to,
 	amount,
 	token,

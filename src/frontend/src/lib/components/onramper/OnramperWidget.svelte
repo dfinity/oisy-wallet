@@ -10,6 +10,7 @@
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
+	import { BUY_MODAL_ONRAMPER_IFRAME } from '$lib/constants/test-ids.constants';
 	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { networkBitcoin, networkEthereum, networkSolana } from '$lib/derived/network.derived';
@@ -116,6 +117,7 @@
 
 <iframe
 	allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
+	data-tid={BUY_MODAL_ONRAMPER_IFRAME}
 	height="680px"
 	onload={changeThemeOnIframeLoad}
 	sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"

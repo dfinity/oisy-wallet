@@ -1,24 +1,37 @@
 <script lang="ts">
-	import IconAstronautArrow from '$lib/components/icons/icon-astronaut/IconAstronautArrow.svelte';
-	import { LOGIN_BUTTON } from '$lib/constants/test-ids.constants';
-	import { i18n } from '$lib/stores/i18n.store';
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		onclick: () => void;
 		fullWidth?: boolean;
+		testId?: string;
+		styleClass?: string;
+		isPrimaryIdentityVersion2?: boolean;
+		children: Snippet;
 	}
 
-	let { onclick, fullWidth = false }: Props = $props();
+	let {
+		onclick,
+		fullWidth = false,
+		isPrimaryIdentityVersion2,
+		styleClass,
+		testId,
+		children
+	}: Props = $props();
 </script>
 
 <button
-	class="login-button flex w-full items-center justify-center gap-4 rounded-2xl bg-brand-primary py-3 text-lg leading-6 font-bold text-primary-inverted sm:px-12"
-	class:sm:w-80={!fullWidth}
-	data-tid={LOGIN_BUTTON}
+	class={`login-button flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-lg leading-6 font-bold whitespace-nowrap sm:max-w-none ${styleClass ?? ''}`}
+	class:lg:px-6={!fullWidth}
+	class:max-w-[24rem]={!fullWidth}
+	class:px-12={fullWidth || !isPrimaryIdentityVersion2}
+	class:px-4={!fullWidth}
+	class:sm:w-80={!isPrimaryIdentityVersion2}
+	class:sm:w-auto={!fullWidth && isPrimaryIdentityVersion2}
+	data-tid={testId}
 	{onclick}
 >
-	{$i18n.auth.text.authenticate}
-	<IconAstronautArrow />
+	{@render children()}
 </button>
 
 <style lang="scss">
