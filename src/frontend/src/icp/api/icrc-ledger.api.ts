@@ -27,7 +27,7 @@ import { Principal } from '@icp-sdk/core/principal';
  * @returns {Promise<IcrcTokenMetadataResponse>} The metadata response for the ICRC token.
  */
 export const metadata = async ({
-	certified = true,
+	certified,
 	identity,
 	...rest
 }: {
@@ -203,7 +203,7 @@ export const allowance = async ({
 };
 
 export const getBlocks = async ({
-	certified = true,
+	certified,
 	identity,
 	ledgerCanisterId,
 	...rest
@@ -267,7 +267,7 @@ export const icrc10SupportedStandards = async ({
 };
 
 export const getMintingAccount = async ({
-	certified = true,
+	certified,
 	identity,
 	ledgerCanisterId
 }: {

@@ -18,8 +18,7 @@ export const mockValidIcToken: IcToken = {
 	...mockValidToken,
 	...mockValidIcCanisters,
 	mintingAccount: mockIcrcAccount,
-	fee: 123n,
-	position: 1
+	fee: 123n
 };
 
 export const mockValidIcrcToken: IcToken = {

@@ -60,7 +60,7 @@ export class BackendCanister extends Canister<BackendService> {
 		return new BackendCanister(canisterId, service, certifiedService);
 	}
 
-	listCustomTokens = ({ certified = true }: QueryParams): Promise<CustomToken[]> => {
+	listCustomTokens = ({ certified }: QueryParams): Promise<CustomToken[]> => {
 		const { list_custom_tokens } = this.caller({ certified });
 
 		return list_custom_tokens();
@@ -90,7 +90,7 @@ export class BackendCanister extends Canister<BackendService> {
 		return create_user_profile();
 	};
 
-	getUserProfile = ({ certified = true }: QueryParams): Promise<GetUserProfileResponse> => {
+	getUserProfile = ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
 		const { get_user_profile } = this.caller({ certified });
 
 		return get_user_profile();

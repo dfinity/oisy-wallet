@@ -187,7 +187,6 @@ describe('custom-token.services', () => {
 								...mockValidIcToken,
 								id: expect.any(Symbol),
 								category: 'custom',
-								position: 4,
 								enabled: true,
 								standard: { code: 'icrc' },
 								version: 1n

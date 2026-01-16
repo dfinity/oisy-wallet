@@ -48,7 +48,6 @@ const mapDip20Token = ({
 	decimals,
 	symbol,
 	exchangeCoinId: undefined,
-	position: Number.MAX_VALUE,
 	standard: { code: 'dip20' },
 	category: 'custom',
 	fee,
