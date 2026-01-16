@@ -41,7 +41,7 @@ export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 
 export const allSortedIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 	[allIcrcTokens],
-	([$allIcrcTokens]) => $allIcrcTokens.sort(sortIcTokens)
+	([$allIcrcTokens]) => [...$allIcrcTokens].sort(sortIcTokens)
 );
 
 export const allKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = derived(
