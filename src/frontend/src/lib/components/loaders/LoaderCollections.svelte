@@ -113,7 +113,8 @@
 		}
 
 		await queryAndUpdate({
-			request: async (params) => await listCustomTokens({
+			request: async (params) =>
+				await listCustomTokens({
 					...params,
 					nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 				}),
