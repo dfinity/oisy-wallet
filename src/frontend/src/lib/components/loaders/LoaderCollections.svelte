@@ -113,7 +113,6 @@
 
 		const customTokens = await listCustomTokens({
 			identity: $authIdentity,
-			// TODO: use queryAndUpdate
 			certified: true,
 			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 		});
