@@ -41,8 +41,7 @@ import {
 	isNullish,
 	nonNullish,
 	queryAndUpdate,
-	type QueryAndUpdateRequestParams,
-	type QueryAndUpdateStrategy
+	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -89,11 +88,9 @@ export const loadCustomTokens = ({
 	});
 
 const loadDefaultIcrc = ({
-	data: { ledgerCanisterId, ...data },
-	strategy
+	data: { ledgerCanisterId, ...data }
 }: {
 	data: IcInterface;
-	strategy?: QueryAndUpdateStrategy;
 }): Promise<void> =>
 	queryAndUpdate<IcrcLoadData>({
 		request: (params) =>
@@ -107,7 +104,6 @@ const loadDefaultIcrc = ({
 				metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
 			});
 		},
-		strategy,
 		identity: new AnonymousIdentity()
 	});
 
