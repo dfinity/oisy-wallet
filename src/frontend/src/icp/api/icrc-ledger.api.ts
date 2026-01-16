@@ -203,7 +203,7 @@ export const allowance = async ({
 };
 
 export const getBlocks = async ({
-	certified = true,
+	certified,
 	identity,
 	ledgerCanisterId,
 	...rest
@@ -267,7 +267,7 @@ export const icrc10SupportedStandards = async ({
 };
 
 export const getMintingAccount = async ({
-	certified = true,
+	certified,
 	identity,
 	ledgerCanisterId
 }: {
