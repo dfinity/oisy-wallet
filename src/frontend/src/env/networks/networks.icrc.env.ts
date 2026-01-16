@@ -507,7 +507,7 @@ const ADDITIONAL_ICRC_TOKENS: IcInterface[] = Object.entries(
 		return acc;
 	}
 
-	return [...acc, { ...data }];
+	return [...acc, data];
 }, []);
 
 export const ICRC_TOKENS: IcInterface[] = [
