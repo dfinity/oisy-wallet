@@ -173,10 +173,8 @@ const loadCustomIcrcTokensData = async ({
 		...DIP20_BUILTIN_TOKENS_INDEXED
 	};
 
-	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
-		custom_token: CustomToken,
-		index: number
+		custom_token: CustomToken
 	): Promise<IcrcCustomToken | undefined> => {
 		const { enabled, version: v, token } = custom_token;
 
