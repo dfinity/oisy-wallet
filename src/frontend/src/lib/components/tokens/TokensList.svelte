@@ -158,7 +158,7 @@
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#key firstListRerenderTick}
-				{#each filteredTokens as tokenOrGroup (getUiKey(tokenOrGroup)}
+				{#each filteredTokens as tokenOrGroup (getUiKey(tokenOrGroup))}
 					<div
 						class="overflow-hidden rounded-xl"
 						class:pointer-events-none={animating}
