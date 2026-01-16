@@ -34,7 +34,7 @@
 		try {
 			await loadKongSwapTokensService({
 				identity: $authIdentity,
-				allIcrcTokens: [ICP_TOKEN, ...$allIcrcTokens]
+				allIcrcTokens: [ICP_TOKEN, ...$allSortedIcrcTokens]
 			});
 
 			return 'ready';
