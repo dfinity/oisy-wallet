@@ -5,7 +5,7 @@ import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { ExtToken, ExtTokenWithoutId } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
 import type { Token } from '$lib/types/token';
-import { isTokenToggleable } from '$lib/utils/token.utils';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 export const isTokenExt = (token: Partial<IcToken>): token is ExtToken =>
