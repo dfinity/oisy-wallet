@@ -20,7 +20,7 @@ import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
-import { isTokenToggleable } from '$lib/utils/token.utils';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
