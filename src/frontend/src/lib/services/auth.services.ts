@@ -128,18 +128,18 @@ export const signIn = async (
 
 export const signOut = ({
 	resetUrl = false,
-	clearAllPrincipalsStorages = false,
+	clearPrincipalStorages = 'current',
 	source = ''
 }: {
 	resetUrl?: boolean;
-	clearAllPrincipalsStorages?: boolean;
+	clearPrincipalStorages?: 'current' | 'all' | 'none';
 	source?: string;
 }): Promise<void> => {
 	trackSignOut({
 		name: TRACK_SIGN_OUT_SUCCESS,
 		meta: { reason: 'user', resetUrl, source }
 	});
-	return logout({ resetUrl, clearAllPrincipalsStorages });
+	return logout({ resetUrl, clearPrincipalStorages });
 };
 
 export const errorSignOut = (text: string): Promise<void> => {
@@ -192,14 +192,14 @@ export const idleSignOut = (): Promise<void> => {
 			text,
 			level
 		},
-		clearCurrentPrincipalStorages: false
+		clearPrincipalStorages: 'none'
 	});
 };
 
 export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
 	logout({
 		resetUrl,
-		clearCurrentPrincipalStorages: false
+		clearPrincipalStorages: 'none'
 	});
 
 const emptyPrincipalIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<void>) => {
@@ -284,13 +284,11 @@ const disconnectWalletConnect = async () => {
 
 const logout = async ({
 	msg = undefined,
-	clearCurrentPrincipalStorages = true,
-	clearAllPrincipalsStorages = false,
+	clearPrincipalStorages = 'current',
 	resetUrl = false
 }: {
 	msg?: ToastMsg;
-	clearCurrentPrincipalStorages?: boolean;
-	clearAllPrincipalsStorages?: boolean;
+	clearPrincipalStorages?: 'current' | 'all' | 'none';
 	resetUrl?: boolean;
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
@@ -298,10 +296,9 @@ const logout = async ({
 
 	await disconnectWalletConnect();
 
-	if (clearCurrentPrincipalStorages) {
+	if (clearPrincipalStorages === 'current') {
 		await Promise.all(deleteIdbStoreList.map(emptyPrincipalIdbStore));
-	}
-	if (clearAllPrincipalsStorages) {
+	} else if (clearPrincipalStorages === 'all') {
 		await Promise.all(clearIdbStoreList.map(clearIdbStore));
 	}
 

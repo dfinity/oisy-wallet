@@ -127,7 +127,7 @@ describe('auth.services', () => {
 		});
 
 		it('should clean the IDB storage for all principals', async () => {
-			await signOut({ clearAllPrincipalsStorages: true });
+			await signOut({ clearPrincipalStorages: 'all' });
 
 			// 6 addresses (mainnet and testnet) + 1 tokens + 4 txs + 1 balance
 			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
