@@ -65,7 +65,8 @@ describe('LoaderCollections', () => {
 		render(LoaderCollections);
 
 		await waitFor(() => {
-			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length);
+			// query + update
+			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length * 2);
 
 			for (const network of networks) {
 				expect(saveCustomTokensSpy).toHaveBeenCalledWith({
@@ -108,7 +109,8 @@ describe('LoaderCollections', () => {
 		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
 
 		await waitFor(() => {
-			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length);
+			// query + update
+			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length * 2);
 
 			EXT_BUILTIN_TOKENS.forEach(({ canisterId }, index) => {
 				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
@@ -117,6 +119,15 @@ describe('LoaderCollections', () => {
 					canisterId,
 					certified: false
 				});
+				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(
+					EXT_BUILTIN_TOKENS.length + index + 1,
+					{
+						identity: mockIdentity,
+						owner: mockPrincipal,
+						canisterId,
+						certified: false
+					}
+				);
 			});
 
 			expect(saveCustomTokensSpy).toHaveBeenCalledExactlyOnceWith({
@@ -142,7 +153,8 @@ describe('LoaderCollections', () => {
 		render(LoaderCollections);
 
 		await waitFor(() => {
-			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length);
+			// query + update
+			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length * 2);
 
 			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 		});
@@ -156,7 +168,8 @@ describe('LoaderCollections', () => {
 		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
 
 		await waitFor(() => {
-			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length);
+			// query + update
+			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length * 2);
 
 			EXT_BUILTIN_TOKENS.forEach(({ canisterId }, index) => {
 				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
@@ -165,6 +178,15 @@ describe('LoaderCollections', () => {
 					canisterId,
 					certified: false
 				});
+				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(
+					EXT_BUILTIN_TOKENS.length + index + 1,
+					{
+						identity: mockIdentity,
+						owner: mockPrincipal,
+						canisterId,
+						certified: false
+					}
+				);
 			});
 
 			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
@@ -214,7 +236,8 @@ describe('LoaderCollections', () => {
 		render(LoaderCollections);
 
 		await waitFor(() => {
-			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length);
+			// query + update
+			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length * 2);
 
 			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 		});
@@ -240,7 +263,8 @@ describe('LoaderCollections', () => {
 		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
 
 		await waitFor(() => {
-			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length - 1);
+			// query + update
+			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes((EXT_BUILTIN_TOKENS.length - 1) * 2);
 
 			EXT_BUILTIN_TOKENS.slice(1).forEach(({ canisterId }, index) => {
 				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
@@ -249,6 +273,15 @@ describe('LoaderCollections', () => {
 					canisterId,
 					certified: false
 				});
+				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(
+					EXT_BUILTIN_TOKENS.length - 1 + index + 1,
+					{
+						identity: mockIdentity,
+						owner: mockPrincipal,
+						canisterId,
+						certified: false
+					}
+				);
 			});
 
 			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
@@ -266,7 +299,8 @@ describe('LoaderCollections', () => {
 		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
 
 		await waitFor(() => {
-			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length);
+			// query + update
+			expect(extGetTokensByOwnerSpy).toHaveBeenCalledTimes(EXT_BUILTIN_TOKENS.length * 2);
 
 			EXT_BUILTIN_TOKENS.forEach(({ canisterId }, index) => {
 				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
@@ -275,6 +309,15 @@ describe('LoaderCollections', () => {
 					canisterId,
 					certified: false
 				});
+				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(
+					EXT_BUILTIN_TOKENS.length + index + 1,
+					{
+						identity: mockIdentity,
+						owner: mockPrincipal,
+						canisterId,
+						certified: false
+					}
+				);
 			});
 
 			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
