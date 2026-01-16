@@ -41,7 +41,7 @@ import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 
 export const IC_CYCLES_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
@@ -500,15 +500,9 @@ const ICRC_CK_TOKENS: IcInterface[] = [
 	...(nonNullish(CKXAUT_IC_DATA) ? [CKXAUT_IC_DATA] : [])
 ];
 
-const ADDITIONAL_ICRC_TOKENS: IcInterface[] = Object.entries(
+const ADDITIONAL_ICRC_TOKENS: IcInterface[] = Object.values(
 	ADDITIONAL_ICRC_PRODUCTION_DATA ?? {}
-).reduce<IcInterface[]>((acc, [_, data]) => {
-	if (isNullish(data)) {
-		return acc;
-	}
-
-	return [...acc, data];
-}, []);
+).filter(nonNullish);
 
 export const ICRC_TOKENS: IcInterface[] = [
 	...PUBLIC_ICRC_TOKENS,
@@ -516,9 +510,10 @@ export const ICRC_TOKENS: IcInterface[] = [
 	...ICRC_CK_TOKENS
 ];
 
-export const ICRC_CK_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_CK_TOKENS.concat(
-	PUBLIC_ICRC_TOKENS
-).map(({ ledgerCanisterId }) => ledgerCanisterId);
+export const ICRC_CK_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = [
+	...ICRC_CK_TOKENS,
+	...PUBLIC_ICRC_TOKENS
+].map(({ ledgerCanisterId }) => ledgerCanisterId);
 
 export const ICRC_LEDGER_CANISTER_TESTNET_IDS = [
 	...CKBTC_LEDGER_CANISTER_TESTNET_IDS,
