@@ -60,7 +60,6 @@ const mapIcrcCustomToken = ({
 	decimals,
 	symbol,
 	exchangeCoinId: undefined,
-	position: Number.MAX_VALUE,
 	standard: { code: 'icrc' },
 	category: 'custom',
 	fee,

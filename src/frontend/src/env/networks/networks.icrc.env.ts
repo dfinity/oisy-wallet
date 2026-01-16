@@ -41,7 +41,6 @@ import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
-import { last } from '$lib/utils/array.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const IC_CYCLES_LEDGER_CANISTER_ID =
@@ -99,7 +98,6 @@ const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 				indexCanisterId: LOCAL_CKBTC_INDEX_CANISTER_ID,
 				minterCanisterId: LOCAL_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
-				position: 3,
 				twinToken: BTC_TESTNET_TOKEN
 			}
 		: undefined;
@@ -114,7 +112,6 @@ const CKBTC_STAGING_DATA: IcCkInterface | undefined =
 				indexCanisterId: STAGING_CKBTC_INDEX_CANISTER_ID,
 				minterCanisterId: STAGING_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
-				position: 2,
 				twinToken: BTC_TESTNET_TOKEN,
 				explorerUrl: CKBTC_TESTNET_EXPLORER_URL
 			}
@@ -127,7 +124,6 @@ const CKBTC_IC_DATA: IcCkInterface | undefined =
 				indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID,
 				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
-				position: 1,
 				twinToken: BTC_MAINNET_TOKEN,
 				groupData: BTC_TOKEN_GROUP,
 				explorerUrl: CKBTC_EXPLORER_URL
@@ -186,7 +182,6 @@ const CKETH_LOCAL_DATA: IcCkInterface | undefined =
 				indexCanisterId: LOCAL_CKETH_INDEX_CANISTER_ID,
 				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
-				position: 3,
 				twinToken: SEPOLIA_TOKEN
 			}
 		: undefined;
@@ -201,7 +196,6 @@ const CKETH_STAGING_DATA: IcCkInterface | undefined =
 				indexCanisterId: STAGING_CKETH_INDEX_CANISTER_ID,
 				minterCanisterId: STAGING_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
-				position: 2,
 				twinToken: SEPOLIA_TOKEN,
 				explorerUrl: CKETH_SEPOLIA_EXPLORER_URL
 			}
@@ -214,7 +208,6 @@ const CKETH_IC_DATA: IcCkInterface | undefined =
 				indexCanisterId: IC_CKETH_INDEX_CANISTER_ID,
 				minterCanisterId: IC_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
-				position: 1,
 				twinToken: ETHEREUM_TOKEN,
 				groupData: ETH_TOKEN_GROUP,
 				explorerUrl: CKETH_EXPLORER_URL
@@ -250,7 +243,6 @@ const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
 				indexCanisterId: LOCAL_CKUSDC_INDEX_CANISTER_ID,
 				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
-				position: 3,
 				twinToken: SEPOLIA_USDC_TOKEN,
 				...(nonNullish(LOCAL_CKETH_LEDGER_CANISTER_ID) && {
 					feeLedgerCanisterId: LOCAL_CKETH_LEDGER_CANISTER_ID
@@ -308,7 +300,6 @@ const CKUSDC_STAGING_DATA: IcCkInterface | undefined = nonNullish(
 )
 	? {
 			...CKERC20_STAGING_DATA.ckSepoliaUSDC,
-			position: 2,
 			twinToken: SEPOLIA_USDC_TOKEN
 		}
 	: undefined;
@@ -318,7 +309,6 @@ const CKLINK_STAGING_DATA: IcCkInterface | undefined = nonNullish(
 )
 	? {
 			...CKERC20_STAGING_DATA.ckSepoliaLINK,
-			position: 3,
 			twinToken: SEPOLIA_LINK_TOKEN
 		}
 	: undefined;
@@ -328,7 +318,6 @@ const CKPEPE_STAGING_DATA: IcCkInterface | undefined = nonNullish(
 )
 	? {
 			...CKERC20_STAGING_DATA.ckSepoliaPEPE,
-			position: 4,
 			twinToken: SEPOLIA_PEPE_TOKEN
 		}
 	: undefined;
@@ -336,7 +325,6 @@ const CKPEPE_STAGING_DATA: IcCkInterface | undefined = nonNullish(
 const CKUSDC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDC)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUSDC,
-			position: 1,
 			twinToken: USDC_TOKEN,
 			groupData: USDC_TOKEN_GROUP
 		}
@@ -345,7 +333,6 @@ const CKUSDC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 const CKLINK_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckLINK)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckLINK,
-			position: 2,
 			twinToken: LINK_TOKEN,
 			groupData: LINK_TOKEN_GROUP
 		}
@@ -354,7 +341,6 @@ const CKLINK_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 const CKPEPE_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckPEPE)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckPEPE,
-			position: 3,
 			twinToken: PEPE_TOKEN,
 			groupData: PEPE_TOKEN_GROUP
 		}
@@ -363,7 +349,6 @@ const CKPEPE_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 const CKOCT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckOCT)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckOCT,
-			position: 4,
 			twinToken: OCT_TOKEN,
 			groupData: OCT_TOKEN_GROUP
 		}
@@ -372,7 +357,6 @@ const CKOCT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_D
 const CKSHIB_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckSHIB)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckSHIB,
-			position: 5,
 			twinToken: SHIB_TOKEN,
 			groupData: SHIB_TOKEN_GROUP
 		}
@@ -381,7 +365,6 @@ const CKSHIB_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 const CKWBTC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckWBTC)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckWBTC,
-			position: 6,
 			twinToken: WBTC_TOKEN,
 			groupData: WBTC_TOKEN_GROUP
 		}
@@ -390,7 +373,6 @@ const CKWBTC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 const CKUSDT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDT)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUSDT,
-			position: 7,
 			twinToken: USDT_TOKEN,
 			groupData: USDT_TOKEN_GROUP
 		}
@@ -399,7 +381,6 @@ const CKUSDT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 const CKWSTETH_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckWSTETH)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckWSTETH,
-			position: 8,
 			twinToken: WSTETH_TOKEN,
 			groupData: WSTETH_TOKEN_GROUP
 		}
@@ -408,7 +389,6 @@ const CKWSTETH_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTIO
 const CKUNI_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUNI)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUNI,
-			position: 9,
 			twinToken: UNI_TOKEN,
 			groupData: UNI_TOKEN_GROUP
 		}
@@ -417,7 +397,6 @@ const CKUNI_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_D
 const CKEURC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckEURC)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckEURC,
-			position: 10,
 			twinToken: EURC_TOKEN,
 			groupData: EURC_TOKEN_GROUP
 		}
@@ -426,7 +405,6 @@ const CKEURC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 const CKXAUT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckXAUT)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckXAUT,
-			position: 11,
 			twinToken: XAUT_TOKEN,
 			groupData: XAUT_TOKEN_GROUP
 		}
@@ -522,8 +500,6 @@ const ICRC_CK_TOKENS: IcInterface[] = [
 	...(nonNullish(CKXAUT_IC_DATA) ? [CKXAUT_IC_DATA] : [])
 ];
 
-const POSITION_OFFSET = (last(ICRC_CK_TOKENS) ?? { position: 0 }).position;
-
 const ADDITIONAL_ICRC_TOKENS: IcInterface[] = Object.entries(
 	ADDITIONAL_ICRC_PRODUCTION_DATA ?? {}
 ).reduce<IcInterface[]>((acc, [_, data]) => {
@@ -531,7 +507,7 @@ const ADDITIONAL_ICRC_TOKENS: IcInterface[] = Object.entries(
 		return acc;
 	}
 
-	return [...acc, { ...data, position: POSITION_OFFSET + acc.length + 1 }];
+	return [...acc, data];
 }, []);
 
 export const ICRC_TOKENS: IcInterface[] = [

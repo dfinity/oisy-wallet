@@ -173,10 +173,8 @@ const loadCustomIcrcTokensData = async ({
 		...DIP20_BUILTIN_TOKENS_INDEXED
 	};
 
-	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
-		custom_token: CustomToken,
-		index: number
+		custom_token: CustomToken
 	): Promise<IcrcCustomToken | undefined> => {
 		const { enabled, version: v, token } = custom_token;
 
@@ -205,7 +203,6 @@ const loadCustomIcrcTokensData = async ({
 			mintingAccount: await getMintingAccount(serviceParams),
 			ledgerCanisterId: ledgerCanisterIdText,
 			...(nonNullish(indexCanisterId) && { indexCanisterId: indexCanisterId.toText() }),
-			position: ICRC_TOKENS.length + 1 + index,
 			category: 'custom',
 			icrcCustomTokens: indexedIcrcCustomTokens
 		};

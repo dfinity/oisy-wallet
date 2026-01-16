@@ -118,16 +118,12 @@ const mapOptionalToken = (response: IcrcTokenMetadataResponse): IcrcTokenMetadat
 
 // eslint-disable-next-line local-rules/prefer-object-params -- This is a sorting function, so the parameters will be provided not as an object but as separate arguments.
 export const sortIcTokens = (
-	{ name: nameA, position: positionA, exchangeCoinId: exchangeCoinIdA }: IcToken,
-	{ name: nameB, position: positionB, exchangeCoinId: exchangeCoinIdB }: IcToken
+	{ name: nameA, exchangeCoinId: exchangeCoinIdA }: IcToken,
+	{ name: nameB, exchangeCoinId: exchangeCoinIdB }: IcToken
 ) =>
-	positionA === positionB
-		? exchangeCoinIdA === exchangeCoinIdB ||
-			isNullish(exchangeCoinIdA) ||
-			isNullish(exchangeCoinIdB)
-			? nameA.localeCompare(nameB)
-			: exchangeCoinIdA.localeCompare(exchangeCoinIdB)
-		: positionA - positionB;
+	exchangeCoinIdA === exchangeCoinIdB || isNullish(exchangeCoinIdA) || isNullish(exchangeCoinIdB)
+		? nameA.localeCompare(nameB)
+		: exchangeCoinIdA.localeCompare(exchangeCoinIdB);
 
 export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	icrcCustomTokens,

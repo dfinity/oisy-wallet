@@ -14,7 +14,6 @@ const mockGldtToken: IcToken = {
 	network: ICP_NETWORK,
 	standard: { code: 'icrc' },
 	ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
-	position: 1,
 	fee: 100n,
 	category: 'custom'
 };
