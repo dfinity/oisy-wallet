@@ -27,7 +27,7 @@ import { Principal } from '@icp-sdk/core/principal';
  * @returns {Promise<IcrcTokenMetadataResponse>} The metadata response for the ICRC token.
  */
 export const metadata = async ({
-	certified = true,
+	certified,
 	identity,
 	...rest
 }: {
