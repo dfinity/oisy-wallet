@@ -43,7 +43,6 @@ describe('ic-token.schema', () => {
 	};
 
 	const mockApp = {
-		position: 1,
 		exchangeCoinId: 'bitcoin',
 		explorerUrl: 'https://explorer.example.com'
 	};
@@ -67,15 +66,6 @@ describe('ic-token.schema', () => {
 
 		it('should validate with correct data', () => {
 			expect(IcAppMetadataSchema.parse(validData)).toEqual(validData);
-		});
-
-		it('should fail with invalid position', () => {
-			const invalidData = {
-				...validData,
-				position: 'first'
-			};
-
-			expect(() => IcAppMetadataSchema.parse(invalidData)).toThrowError();
 		});
 
 		it('should fail with invalid explorerUrl', () => {
@@ -246,15 +236,6 @@ describe('ic-token.schema', () => {
 
 			expect(() => IcInterfaceSchema.parse(invalidData)).toThrowError();
 		});
-
-		it('should fail with incorrect IcAppMetadataSchema data', () => {
-			const invalidData = {
-				...validData,
-				position: 'first'
-			};
-
-			expect(() => IcInterfaceSchema.parse(invalidData)).toThrowError();
-		});
 	});
 
 	describe('IcTokenSchema', () => {
@@ -291,15 +272,6 @@ describe('ic-token.schema', () => {
 			const invalidData = {
 				...validData,
 				ledgerCanisterId: 123
-			};
-
-			expect(() => IcTokenSchema.parse(invalidData)).toThrowError();
-		});
-
-		it('should fail with invalid app data', () => {
-			const invalidData = {
-				...validData,
-				position: 'first'
 			};
 
 			expect(() => IcTokenSchema.parse(invalidData)).toThrowError();

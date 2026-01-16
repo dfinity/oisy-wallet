@@ -139,7 +139,6 @@ describe('icrc.services', () => {
 						ledgerCanisterId: mockLedgerCanisterId,
 						name: mockName,
 						network: ICP_NETWORK,
-						position: 4,
 						standard: { code: 'icrc' },
 						symbol: mockSymbol,
 						version: fromNullable(mockCustomToken.version)
