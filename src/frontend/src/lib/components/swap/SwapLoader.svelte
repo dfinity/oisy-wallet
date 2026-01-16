@@ -6,7 +6,7 @@
 		loadDisabledIcrcTokensBalances,
 		loadDisabledIcrcTokensExchanges
 	} from '$icp/services/icrc.services';
-	import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
+	import { allSortedIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { loadKongSwapTokens as loadKongSwapTokensService } from '$lib/services/swap.services';
 	import { busy } from '$lib/stores/busy.store';
@@ -63,10 +63,10 @@
 
 		await loadDisabledIcrcTokensBalances({
 			identity: $authIdentity,
-			disabledIcrcTokens: $allIcrcTokens
+			disabledIcrcTokens: $allSortedIcrcTokens
 		});
 		await loadDisabledIcrcTokensExchanges({
-			disabledIcrcTokens: $allIcrcTokens
+			disabledIcrcTokens: $allSortedIcrcTokens
 		});
 	};
 </script>
