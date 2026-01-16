@@ -1,9 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 
-
-
-
 describe('token-toggleable.utils', () => {
 	describe('isTokenToggleable', () => {
 		it('should return true if token has property `enabled`', () => {
