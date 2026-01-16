@@ -2,13 +2,11 @@ import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
-import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
-import type { IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
+import { icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
-import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { Token } from '$lib/types/token';
 import { isTokenFungible } from '$lib/utils/nft.utils';
@@ -43,20 +41,6 @@ export const allKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = de
 	[allIcrcTokens, kongSwapTokensStore],
 	([$allIcrcTokens, $kongSwapTokensStore]) =>
 		$allIcrcTokens.filter(({ symbol }) => nonNullish($kongSwapTokensStore?.[symbol]))
-);
-
-export const allDisabledKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = derived(
-	[allKongSwapCompatibleIcrcTokens, enabledIcrcTokens],
-	([allKongSwapCompatibleIcrcTokens, $enabledIcrcTokens]) => {
-		const enabledIcrcTokenIds = $enabledIcrcTokens.map(({ id }) => id);
-
-		return allKongSwapCompatibleIcrcTokens.filter(({ id }) => !enabledIcrcTokenIds.includes(id));
-	}
-);
-
-export const allSwappableTokensDerived: Readable<IcTokenWithIcrc2Supported[]> = derived(
-	[swappableIcrcTokensStore],
-	([$swappableTokensStore]) => $swappableTokensStore ?? []
 );
 
 export const allTokens: Readable<CustomToken<Token>[]> = derived(
