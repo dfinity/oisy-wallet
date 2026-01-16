@@ -1,6 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { isIcrcTokenToggleDisabled } from '$lib/utils/token-toggle.utils';
+import { isIcrcTokenToggleDisabled } from '$icp/utils/token-toggle.utils';
 
 describe('isIcrcCustomTokenDisabled', () => {
 	it('should check if icp default token is disabled for token toggle', () => {
