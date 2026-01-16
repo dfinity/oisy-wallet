@@ -1,9 +1,8 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 
-vi.mock('$lib/utils/exchange.utils', () => ({
-	usdValue: vi.fn()
-}));
+
+
 
 describe('token-toggleable.utils', () => {
 	describe('isTokenToggleable', () => {
