@@ -33,8 +33,13 @@ export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 			...icrcEnvTokens.filter(
 				({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
 			)
-		].sort(sortIcTokens);
+		];
 	}
+);
+
+export const allSortedIcrcTokens: Readable<IcTokenToggleable[]> = derived(
+	[allIcrcTokens],
+	([$allIcrcTokens]) => [...$allIcrcTokens].sort(sortIcTokens)
 );
 
 export const allKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = derived(

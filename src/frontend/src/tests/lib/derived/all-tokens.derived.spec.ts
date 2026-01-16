@@ -169,9 +169,9 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
-				mockDip20Token.id.description,
-				mockIcrcToken2.id.description,
 				mockIcrcToken.id.description,
+				mockIcrcToken2.id.description,
+				mockDip20Token.id.description,
 				mockSplToken.id.description,
 				mockErc721Token.id.description
 			]);
@@ -333,9 +333,9 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
-				mockDip20Token.id.description,
-				mockIcrcToken2.id.description,
 				mockIcrcToken.id.description,
+				mockIcrcToken2.id.description,
+				mockDip20Token.id.description,
 				mockSplToken.id.description
 			]);
 		});
