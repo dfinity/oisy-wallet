@@ -281,7 +281,8 @@ export const loadDisabledIcrcTokensBalances = async ({
 			const icrcTokenBalance = await balance({
 				identity,
 				owner: identity.getPrincipal(),
-				ledgerCanisterId
+				ledgerCanisterId,
+				certified: true
 			});
 
 			return { id, icrcTokenBalance };
