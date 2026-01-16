@@ -16,7 +16,6 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
-	import { acceptAgreements } from '$lib/services/user-agreements.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { OisyReloadCollectionsEvent } from '$lib/types/custom-events';
