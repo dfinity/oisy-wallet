@@ -59,7 +59,7 @@
 	// on the initial load. The underlying data eventually becomes consistent, but the
 	// first render can break due to a timing issue in the tokens list pipeline.
 	// Re-rendering the list after a few seconds seems to fix the issue. To mitigate this,
-	// re-apply the token list periodically for the first 15 seconds after mount
+	// re-apply the token list periodically for the first 10 seconds after mount
 	// as a defensive workaround until the data stabilises.
 	// TODO: Remove this interval logic once we find out the issue with initial tokens loading
 	let firstListRerenderTick = $state(0);
