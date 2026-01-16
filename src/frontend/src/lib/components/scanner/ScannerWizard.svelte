@@ -5,7 +5,7 @@
 	import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import OpenCryptoPayProgress from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayProgress.svelte';
-	import TokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
+	import OpenCryptoPayTokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 	import PaymentFailed from '$lib/components/scanner/open-crypto-pay/PaymentFailed.svelte';
 	import PaymentSucceeded from '$lib/components/scanner/open-crypto-pay/PaymentSucceeded.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
@@ -71,7 +71,7 @@
 				bind:payProgressStep
 			/>
 		{:else if currentStep?.name === WizardStepsScanner.TOKENS_LIST && !isTokenSelecting}
-			<TokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
+			<OpenCryptoPayTokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
 		{:else if currentStep?.name === WizardStepsScanner.PAYING}
 			<OpenCryptoPayProgress {payProgressStep} />
 		{:else if currentStep?.name === WizardStepsScanner.PAYMENT_FAILED}
