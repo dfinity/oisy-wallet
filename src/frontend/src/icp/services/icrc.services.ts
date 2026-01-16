@@ -276,13 +276,15 @@ export const loadDisabledIcrcTokensBalances = async ({
 	identity: Identity;
 	disabledIcrcTokens: IcToken[];
 }): Promise<void> => {
+	const certified = true;
+
 	const results = await Promise.allSettled(
 		disabledIcrcTokens.map(async ({ ledgerCanisterId, id }) => {
 			const icrcTokenBalance = await balance({
 				identity,
 				owner: identity.getPrincipal(),
 				ledgerCanisterId,
-				certified: true
+				certified
 			});
 
 			return { id, icrcTokenBalance };
@@ -297,7 +299,7 @@ export const loadDisabledIcrcTokensBalances = async ({
 				id,
 				data: {
 					data: icrcTokenBalance,
-					certified: true
+					certified
 				}
 			});
 		}
