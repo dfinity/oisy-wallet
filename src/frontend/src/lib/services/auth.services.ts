@@ -57,6 +57,12 @@ import { isNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
+export enum PrincipalsStorage {
+	CURRENT = 'current',
+	ALL = 'all',
+	NONE = 'none'
+}
+
 export const signIn = async (
 	params: AuthSignInParams
 ): Promise<{ success: 'ok' | 'cancelled' | 'error'; err?: unknown }> => {
@@ -128,11 +134,11 @@ export const signIn = async (
 
 export const signOut = ({
 	resetUrl = false,
-	clearPrincipalStorages = 'current',
+	clearPrincipalStorages = PrincipalsStorage.CURRENT,
 	source = ''
 }: {
 	resetUrl?: boolean;
-	clearPrincipalStorages?: 'current' | 'all' | 'none';
+	clearPrincipalStorages?: PrincipalsStorage;
 	source?: string;
 }): Promise<void> => {
 	trackSignOut({
@@ -192,14 +198,14 @@ export const idleSignOut = (): Promise<void> => {
 			text,
 			level
 		},
-		clearPrincipalStorages: 'none'
+		clearPrincipalStorages: PrincipalsStorage.NONE
 	});
 };
 
 export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
 	logout({
 		resetUrl,
-		clearPrincipalStorages: 'none'
+		clearPrincipalStorages: PrincipalsStorage.NONE
 	});
 
 const emptyPrincipalIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<void>) => {
@@ -284,11 +290,11 @@ const disconnectWalletConnect = async () => {
 
 const logout = async ({
 	msg = undefined,
-	clearPrincipalStorages = 'current',
+	clearPrincipalStorages = PrincipalsStorage.CURRENT,
 	resetUrl = false
 }: {
 	msg?: ToastMsg;
-	clearPrincipalStorages?: 'current' | 'all' | 'none';
+	clearPrincipalStorages?: PrincipalsStorage;
 	resetUrl?: boolean;
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
@@ -296,9 +302,9 @@ const logout = async ({
 
 	await disconnectWalletConnect();
 
-	if (clearPrincipalStorages === 'current') {
+	if (clearPrincipalStorages === PrincipalsStorage.CURRENT) {
 		await Promise.all(deleteIdbStoreList.map(emptyPrincipalIdbStore));
-	} else if (clearPrincipalStorages === 'all') {
+	} else if (clearPrincipalStorages === PrincipalsStorage.ALL) {
 		await Promise.all(clearIdbStoreList.map(clearIdbStore));
 	}
 

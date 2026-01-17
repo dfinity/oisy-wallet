@@ -4,7 +4,7 @@
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { LOCK_BUTTON, LOGOUT_BUTTON } from '$lib/constants/test-ids.constants';
-	import { lockSession, signOut } from '$lib/services/auth.services';
+	import { lockSession, PrincipalsStorage, signOut } from '$lib/services/auth.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
@@ -28,7 +28,11 @@
 
 	const handleLogoutTriggered = async () => {
 		onHidePopover?.();
-		await signOut({ resetUrl: true, clearPrincipalStorages: 'all', source: 'menu-button' });
+		await signOut({
+			resetUrl: true,
+			clearPrincipalStorages: PrincipalsStorage.ALL,
+			source: 'menu-button'
+		});
 	};
 
 	const handleLock = async () => {
