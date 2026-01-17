@@ -57,6 +57,12 @@ import { isNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
+export enum PrincipalsStorage {
+	CURRENT = 'current',
+	ALL = 'all',
+	NONE = 'none'
+}
+
 export const signIn = async (
 	params: AuthSignInParams
 ): Promise<{ success: 'ok' | 'cancelled' | 'error'; err?: unknown }> => {
@@ -128,18 +134,18 @@ export const signIn = async (
 
 export const signOut = ({
 	resetUrl = false,
-	clearAllPrincipalsStorages = false,
+	clearPrincipalStorages = PrincipalsStorage.CURRENT,
 	source = ''
 }: {
 	resetUrl?: boolean;
-	clearAllPrincipalsStorages?: boolean;
+	clearPrincipalStorages?: PrincipalsStorage;
 	source?: string;
 }): Promise<void> => {
 	trackSignOut({
 		name: TRACK_SIGN_OUT_SUCCESS,
 		meta: { reason: 'user', resetUrl, source }
 	});
-	return logout({ resetUrl, clearAllPrincipalsStorages });
+	return logout({ resetUrl, clearPrincipalStorages });
 };
 
 export const errorSignOut = (text: string): Promise<void> => {
@@ -192,14 +198,14 @@ export const idleSignOut = (): Promise<void> => {
 			text,
 			level
 		},
-		clearCurrentPrincipalStorages: false
+		clearPrincipalStorages: PrincipalsStorage.NONE
 	});
 };
 
 export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
 	logout({
 		resetUrl,
-		clearCurrentPrincipalStorages: false
+		clearPrincipalStorages: PrincipalsStorage.NONE
 	});
 
 const emptyPrincipalIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<void>) => {
@@ -284,13 +290,11 @@ const disconnectWalletConnect = async () => {
 
 const logout = async ({
 	msg = undefined,
-	clearCurrentPrincipalStorages = true,
-	clearAllPrincipalsStorages = false,
+	clearPrincipalStorages = PrincipalsStorage.CURRENT,
 	resetUrl = false
 }: {
 	msg?: ToastMsg;
-	clearCurrentPrincipalStorages?: boolean;
-	clearAllPrincipalsStorages?: boolean;
+	clearPrincipalStorages?: PrincipalsStorage;
 	resetUrl?: boolean;
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
@@ -298,10 +302,9 @@ const logout = async ({
 
 	await disconnectWalletConnect();
 
-	if (clearCurrentPrincipalStorages) {
+	if (clearPrincipalStorages === PrincipalsStorage.CURRENT) {
 		await Promise.all(deleteIdbStoreList.map(emptyPrincipalIdbStore));
-	}
-	if (clearAllPrincipalsStorages) {
+	} else if (clearPrincipalStorages === PrincipalsStorage.ALL) {
 		await Promise.all(clearIdbStoreList.map(clearIdbStore));
 	}
 

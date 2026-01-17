@@ -8,7 +8,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import { signOut, signIn } from '$lib/services/auth.services';
+	import { signOut, signIn, PrincipalsStorage } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -34,7 +34,11 @@
 
 	const handleLogout = async () => {
 		authLocked.unlock({ source: 'logout from lock page' });
-		await signOut({ resetUrl: true, clearAllPrincipalsStorages: true, source: 'lock-page' });
+		await signOut({
+			resetUrl: true,
+			clearPrincipalStorages: PrincipalsStorage.ALL,
+			source: 'lock-page'
+		});
 	};
 </script>
 
