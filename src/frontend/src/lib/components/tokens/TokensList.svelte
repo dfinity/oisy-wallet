@@ -151,13 +151,21 @@
 
 	const getUiKey = (tokenOrGroup: TokenUiOrGroupUi): string =>
 		isTokenUiGroup(tokenOrGroup) ? groupKey(tokenOrGroup.group) : tokenKey(tokenOrGroup.token);
+
+	let tokensWithKey = $derived(
+		filteredTokens.map((tokenOrGroup) => ({ tokenOrGroup, key: getUiKey(tokenOrGroup) }))
+	);
+
+	let enableMoreTokensWithKey = $derived(
+		enableMoreTokensList.map((tokenOrGroup) => ({ tokenOrGroup, key: getUiKey(tokenOrGroup) }))
+	);
 </script>
 
 <TokensDisplayHandler {animating} bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
-			{#key firstListRerenderTick}
-				{#each filteredTokens as tokenOrGroup (getUiKey(tokenOrGroup))}
+						{#key firstListRerenderTick}
+				{#each tokensWithKey as { tokenOrGroup, key } (key)}
 					<div
 						class="overflow-hidden rounded-xl"
 						class:pointer-events-none={animating}
@@ -211,7 +219,7 @@
 						</div>
 					{/snippet}
 
-					{#each enableMoreTokensList as tokenOrGroup (getUiKey(tokenOrGroup))}
+					{#each enableMoreTokensWithKey as { tokenOrGroup, key } (key)}
 						<div
 							class="overflow-hidden rounded-xl"
 							class:pointer-events-none={animating}
