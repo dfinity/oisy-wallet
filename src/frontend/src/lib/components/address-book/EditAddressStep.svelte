@@ -39,7 +39,7 @@
 		disabled = false
 	}: Props = $props();
 
-	let editingAddress = $state(address ? { ...address } : {});
+	let editingAddress = $derived(address ? { ...address } : {});
 
 	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
 	let modalDataAddress: string | undefined = $derived(
