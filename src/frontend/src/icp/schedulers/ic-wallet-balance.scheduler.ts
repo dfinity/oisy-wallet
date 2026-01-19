@@ -41,8 +41,7 @@ export class IcWalletBalanceScheduler<
 			request: ({ identity: _, certified }) => this.getBalance({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncBalance({ certified, ...rest }),
 			onUpdateError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
-			identity,
-			resolution: 'all_settled'
+			identity
 		});
 	};
 
