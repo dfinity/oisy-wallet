@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext, onMount, setContext, type Snippet } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
+	import { writable } from 'svelte/store';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
@@ -24,7 +25,6 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-	import {writable} from "svelte/store";
 
 	interface Props {
 		initialSearch?: string;
@@ -57,17 +57,17 @@
 			: []
 	);
 
-	const filterQuery = writable<string>()
+	const filterQuery = writable<string>();
 
 	$effect(() => {
-		filterQuery.set(nonNullish(initialSearch) ? initialSearch : '')
-	})
+		filterQuery.set(nonNullish(initialSearch) ? initialSearch : '');
+	});
 
-	const filterNfts = writable<boolean>()
+	const filterNfts = writable<boolean>();
 
 	$effect(() => {
-		filterNfts.set(!!isNftsPage)
-	})
+		filterNfts.set(!!isNftsPage);
+	});
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
