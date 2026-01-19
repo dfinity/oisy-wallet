@@ -17,7 +17,7 @@
 
 	let Cmp = $derived(type === 'static' ? StaticSteps : ProgressStepsCmp);
 
-	let dynamicSteps = $state<ProgressSteps>([
+	let dynamicSteps = $derived<ProgressSteps>([
 		// TODO: have a look if there is a better solution than casting
 		...(steps as ProgressSteps)
 	]);
