@@ -45,6 +45,7 @@
 	 * Context for the IC receives modals: We initialise with a token, ensuring that the information is never undefined.
 	 */
 	// TODO: This statement is not reactive. Check if it is intentional or not.
+	// eslint-disable-next-line svelte/no-unused-svelte-ignore
 	// svelte-ignore state_referenced_locally
 	const context = initReceiveTokenContext({ token, open, close });
 	setContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY, context);
