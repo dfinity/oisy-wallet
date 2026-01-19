@@ -62,7 +62,7 @@
 
 	$effect(() => {
 		if (nftCacheLoaded && nonNullish($nftStore)) {
-            // TODO: Needs to parse symbols properly before storing
+			// TODO: Needs to parse symbols properly before storing
 			setIdbAllNfts({
 				identity: $authIdentity,
 				nfts: $nftStore
