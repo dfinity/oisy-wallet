@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { setContext, type Snippet } from 'svelte';
+	import { getContext, setContext, type Snippet } from 'svelte';
+	import { initListStore, LIST_CONTEXT_KEY, type ListContext } from '$lib/stores/list-store.store';
 	import type { ListVariant } from '$lib/types/style';
 
 	interface Props {
@@ -26,20 +27,22 @@
 		testId
 	}: Props = $props();
 
-	export interface ListContext {
-		variant: ListVariant;
-		condensed?: boolean;
-		noPadding?: boolean;
-		noBorder?: boolean;
-		itemStyleClass?: string;
-	}
 
-	setContext<ListContext>('list-context', {
-		variant,
-		condensed,
-		noPadding,
-		noBorder,
-		itemStyleClass
+
+	setContext<ListContext>(LIST_CONTEXT_KEY, {
+		store: initListStore()
+	});
+
+	const { store } = getContext<ListContext>(LIST_CONTEXT_KEY);
+
+	$effect(() => {
+		store.setList({
+			variant,
+			condensed,
+			noPadding,
+			noBorder,
+			itemStyleClass
+		});
 	});
 </script>
 
