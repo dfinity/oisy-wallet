@@ -17,10 +17,7 @@
 
 	let Cmp = $derived(type === 'static' ? StaticSteps : ProgressStepsCmp);
 
-	let dynamicSteps = $derived<ProgressSteps>([
-		// TODO: have a look if there is a better solution than casting
-		...(steps as ProgressSteps)
-	]);
+	let dynamicSteps = $derived(steps as ProgressSteps);
 
 	const updateSteps = () => {
 		const progressIndex = dynamicSteps.findIndex(({ step }) => step === progressStep);
