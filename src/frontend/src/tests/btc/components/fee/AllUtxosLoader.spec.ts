@@ -1,4 +1,4 @@
-import AllUtxosContext from '$btc/components/fee/AllUtxosContext.svelte';
+import AllUtxosLoader from '$btc/components/fee/AllUtxosLoader.svelte';
 import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import {
 	ALL_UTXOS_CONTEXT_KEY,
@@ -16,7 +16,7 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-describe('AllUtxosContext', () => {
+describe('AllUtxosLoader', () => {
 	const networkId = BTC_MAINNET_NETWORK_ID;
 	const source = mockBtcAddress;
 	const mockAllUtxos = [mockUtxo];
@@ -52,7 +52,7 @@ describe('AllUtxosContext', () => {
 
 		mockAuthStore();
 
-		render(AllUtxosContext, {
+		render(AllUtxosLoader, {
 			props,
 			context: mockContext(store)
 		});
@@ -77,7 +77,7 @@ describe('AllUtxosContext', () => {
 
 		mockAuthStore();
 
-		render(AllUtxosContext, {
+		render(AllUtxosLoader, {
 			props: newProps,
 			context: mockContext(store)
 		});
@@ -92,7 +92,7 @@ describe('AllUtxosContext', () => {
 
 		mockAuthStore();
 
-		render(AllUtxosContext, {
+		render(AllUtxosLoader, {
 			props: { ...props, networkId: ICP_NETWORK_ID },
 			context: mockContext(store)
 		});
