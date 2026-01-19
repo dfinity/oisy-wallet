@@ -79,7 +79,7 @@
 
 	let isFormValid = $state(false);
 
-	const focusField = isNewAddress ? 'address' : 'label';
+	let focusField = $derived(isNewAddress ? ('address' as const) : ('label' as const));
 
 	let originalLabel = $derived(!isNewAddress && nonNullish(address?.label) ? address.label : '');
 	let labelChanged = $derived(isNewAddress ? true : editingAddress.label !== originalLabel);
