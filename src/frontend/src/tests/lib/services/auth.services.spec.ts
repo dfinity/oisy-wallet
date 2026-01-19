@@ -6,6 +6,7 @@ import {
 } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
+	PrincipalsStorage,
 	errorSignOut,
 	idleSignOut,
 	lockSession,
@@ -127,7 +128,7 @@ describe('auth.services', () => {
 		});
 
 		it('should clean the IDB storage for all principals', async () => {
-			await signOut({ clearAllPrincipalsStorages: true });
+			await signOut({ clearPrincipalStorages: PrincipalsStorage.ALL });
 
 			// 6 addresses (mainnet and testnet) + 1 tokens + 4 txs + 1 balance
 			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
