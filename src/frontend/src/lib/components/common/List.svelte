@@ -34,7 +34,7 @@
 		itemStyleClass?: string;
 	}
 
-	$effect(() => {
+
 		setContext<ListContext>('list-context', {
 			variant,
 			condensed,
@@ -42,7 +42,6 @@
 			noBorder,
 			itemStyleClass
 		});
-	});
 </script>
 
 {#if element === 'ul'}
