@@ -288,8 +288,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				if (FAILURE_THRESHOLD <= this.failedSyncCounter) {
 					this.postMessageWalletError({ error });
 				}
-			},
-			resolution: 'all_settled'
+			}
 		});
 	};
 
