@@ -62,8 +62,12 @@
 			tokens: [],
 			filterZeroBalance: false,
 			filterNetwork: $selectedNetwork,
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// svelte-ignore state_referenced_locally
 			filterQuery: nonNullish(initialSearch) ? initialSearch : '',
 			sortByBalance: false,
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// svelte-ignore state_referenced_locally
 			filterNfts: isNftsPage
 		})
 	);

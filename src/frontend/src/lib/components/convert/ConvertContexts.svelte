@@ -23,7 +23,11 @@
 	setContext<ConvertContext>(
 		CONVERT_CONTEXT_KEY,
 		initConvertContext({
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// svelte-ignore state_referenced_locally
 			sourceToken,
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// svelte-ignore state_referenced_locally
 			destinationToken
 		})
 	);

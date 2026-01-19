@@ -19,7 +19,11 @@
 	 * Send modal context store
 	 */
 	const { sendToken, ...rest } = initSendContext({
+		// TODO: This statement is not reactive. Check if it is intentional or not.
+		// svelte-ignore state_referenced_locally
 		token: token ?? DEFAULT_ETHEREUM_TOKEN,
+		// TODO: This statement is not reactive. Check if it is intentional or not.
+		// svelte-ignore state_referenced_locally
 		customSendBalance
 	});
 
