@@ -164,7 +164,7 @@
 <TokensDisplayHandler {animating} bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
-						{#key firstListRerenderTick}
+			{#key firstListRerenderTick}
 				{#each tokensWithKey as { tokenOrGroup, key } (key)}
 					<div
 						class="overflow-hidden rounded-xl"
