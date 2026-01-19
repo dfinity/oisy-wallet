@@ -1,3 +1,4 @@
+import { browser } from '$app/environment';
 import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import {
 	clearIdbBtcAddressMainnet,
@@ -268,7 +269,9 @@ const clearIdbStoreList = [
 
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
-	sessionStorage.clear();
+	if (browser) {
+		sessionStorage.clear();
+	}
 };
 
 const disconnectWalletConnect = async () => {
@@ -305,7 +308,11 @@ const logout = async ({
 		await Promise.all(clearIdbStoreList.map(clearIdbStore));
 	}
 
-	await clearSessionStorage();
+	try {
+		await clearSessionStorage();
+	} catch (err: unknown) {
+		console.warn('Error clearing session storage on logout', err);
+	}
 
 	await authStore.signOut();
 
