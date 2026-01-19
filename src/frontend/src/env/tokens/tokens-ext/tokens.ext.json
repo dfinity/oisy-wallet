@@ -1211,6 +1211,13 @@
 		}
 	},
 	{
+		"canisterId": "ah2fs-fqaaa-aaaak-aalya-cai",
+		"standardVersion": "ext",
+		"metadata": {
+			"name": "Distrikt PODs"
+		}
+	},	
+	{
 		"canisterId": "ahl3d-xqaaa-aaaaj-qacca-cai",
 		"standardVersion": "legacy1.5",
 		"metadata": {
@@ -2792,6 +2799,13 @@
 			"name": "BetBase Aliens"
 		}
 	},
+	{
+		"canisterId": "kafas-uaaaa-aaaao-aaofq-cai",
+		"standardVersion": "ext",
+		"metadata": {
+			"name": "8YearGang Genesis"
+		}
+	},	
 	{
 		"canisterId": "kbk6s-tyaaa-aaaag-qb4fq-cai",
 		"standardVersion": "ext",
