@@ -1,0 +1,54 @@
+<script lang="ts">
+	import { isNullish } from '@dfinity/utils';
+	import { getContext, type Snippet, untrack } from 'svelte';
+	import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+	import { ALL_UTXOS_CONTEXT_KEY, type AllUtxosContext } from '$btc/stores/all-utxos.store';
+	import {
+		BITCOIN_CANISTER_IDS,
+		IC_CKBTC_MINTER_CANISTER_ID
+	} from '$env/networks/networks.icrc.env';
+	import { getUtxosQuery } from '$icp/api/bitcoin.api';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import type { NetworkId } from '$lib/types/network';
+	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
+
+	interface Props {
+		source: string;
+		networkId?: NetworkId;
+		children: Snippet;
+	}
+
+	let { source, networkId, children }: Props = $props();
+
+	const { store } = getContext<AllUtxosContext>(ALL_UTXOS_CONTEXT_KEY);
+
+	const loadAllUtxos = async () => {
+		if (isNullish(networkId)) {
+			return;
+		}
+
+		const network = mapNetworkIdToBitcoinNetwork(networkId);
+
+		if (isNullish(network)) {
+			return;
+		}
+
+		const { utxos: allUtxos } = await getUtxosQuery({
+			identity: $authIdentity,
+			address: source,
+			network,
+			bitcoinCanisterId: BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID],
+			minConfirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+		});
+
+		store.setAllUtxos({ allUtxos });
+	};
+
+	$effect(() => {
+		[source, networkId];
+
+		untrack(() => loadAllUtxos());
+	});
+</script>
+
+{@render children()}
