@@ -1,11 +1,8 @@
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import type { InfuraProvider } from '$eth/providers/infura.providers';
-import {
-	getErc20FeeData,
-	getEthFeeDataWithProvider,
-	type GetFeeData
-} from '$eth/services/fee.services';
+import { getErc20FeeData, getEthFeeDataWithProvider } from '$eth/services/fee.services';
 import type { OptionEthAddress } from '$eth/types/address';
+import type { GetFeeData } from '$eth/types/infura';
 import type { EthFeeResult } from '$eth/types/pay';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';

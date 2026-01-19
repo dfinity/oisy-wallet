@@ -1,10 +1,10 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import * as tokenToggleUtils from '$icp/utils/token-toggle.utils';
 import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.constants';
 import type { Token } from '$lib/types/token';
-import * as tokenToggleUtils from '$lib/utils/token-toggle.utils';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';

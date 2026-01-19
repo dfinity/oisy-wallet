@@ -11,10 +11,10 @@
 	let { children }: Props = $props();
 </script>
 
-<IcLoaderWallets>
-	<BtcLoaderWallets>
-		<SolLoaderWallets>
-			{@render children()}
-		</SolLoaderWallets>
-	</BtcLoaderWallets>
-</IcLoaderWallets>
+<IcLoaderWallets />
+
+<BtcLoaderWallets />
+
+<SolLoaderWallets />
+
+{@render children()}

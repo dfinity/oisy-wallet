@@ -109,7 +109,7 @@ interface UpdateTokenGroupParams extends GroupTokenParams {
 export const updateTokenGroup = ({ token, tokenGroup }: UpdateTokenGroupParams): TokenUiGroup => {
 	const newTokens: TokenUiGroup['tokens'] = [...tokenGroup.tokens, token];
 
-	const newDecimals = Math.max(...newTokens.map(({ decimals }) => decimals));
+	const newDecimals = Math.max(tokenGroup.decimals, token.decimals);
 
 	return {
 		...tokenGroup,

@@ -22,7 +22,7 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token, TokenId } from '$lib/types/token';
-	import { isTokenToggleable } from '$lib/utils/token.utils';
+	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
 	interface Props {
@@ -62,8 +62,14 @@
 			tokens: [],
 			filterZeroBalance: false,
 			filterNetwork: $selectedNetwork,
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally
 			filterQuery: nonNullish(initialSearch) ? initialSearch : '',
 			sortByBalance: false,
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally
 			filterNfts: isNftsPage
 		})
 	);
