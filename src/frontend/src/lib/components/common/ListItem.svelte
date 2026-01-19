@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
-	import type { ListContext } from '$lib/components/common/List.svelte';
+	import { LIST_CONTEXT_KEY, type ListContext } from '$lib/stores/list-store.store';
 	import type { ListVariant } from '$lib/types/style';
 
 	interface Props {
@@ -11,8 +11,9 @@
 
 	const { children, styleClass }: Props = $props();
 
-	const { variant, condensed, noPadding, noBorder, itemStyleClass } =
-		getContext<ListContext>('list-context');
+	const { store } = getContext<ListContext>(LIST_CONTEXT_KEY);
+
+	const { variant, condensed, noPadding, noBorder, itemStyleClass } = $derived($store);
 
 	const classes: { [key in ListVariant]: string } = $derived({
 		none: `ml-3 ${condensed || noPadding ? 'py-0' : 'py-1'} ${styleClass ?? ''}`,

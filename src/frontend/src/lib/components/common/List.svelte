@@ -27,8 +27,6 @@
 		testId
 	}: Props = $props();
 
-
-
 	setContext<ListContext>(LIST_CONTEXT_KEY, {
 		store: initListStore()
 	});

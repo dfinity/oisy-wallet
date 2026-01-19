@@ -1,21 +1,20 @@
 import type { ListVariant } from '$lib/types/style';
-import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
-export type ListStoreData = Option<{
+export interface ListStoreData {
 	variant: ListVariant;
 	condensed?: boolean;
 	noPadding?: boolean;
 	noBorder?: boolean;
 	itemStyleClass?: string;
-}>;
+}
 
 export interface ListStore extends Readable<ListStoreData> {
 	setList: (data: ListStoreData) => void;
 }
 
 export const initListStore = (): ListStore => {
-	const { subscribe, set } = writable<ListStoreData>(undefined);
+	const { subscribe, set } = writable<ListStoreData>({ variant: 'styled' });
 
 	return {
 		subscribe,
