@@ -34,12 +34,14 @@
 		itemStyleClass?: string;
 	}
 
-	setContext<ListContext>('list-context', {
-		variant,
-		condensed,
-		noPadding,
-		noBorder,
-		itemStyleClass
+	$effect(() => {
+		setContext<ListContext>('list-context', {
+			variant,
+			condensed,
+			noPadding,
+			noBorder,
+			itemStyleClass
+		});
 	});
 </script>
 
