@@ -6,7 +6,7 @@ import {
 	SEND_DESTINATION_SECTION,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
-import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
