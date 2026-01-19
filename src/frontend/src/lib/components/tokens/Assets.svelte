@@ -33,6 +33,8 @@
 
 	let { tab }: Props = $props();
 
+	// TODO: check if there is a better way to handle this svelte-ignore
+	// svelte-ignore state_referenced_locally -- we want to get only the initial value
 	let activeTab = $state(tab);
 
 	let { initialSearch, message } = $derived(

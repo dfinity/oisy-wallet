@@ -19,6 +19,8 @@
 	let { children, level = 'info', closableKey, styleClass, testId }: Props = $props();
 
 	const closable = $derived(nonNullish(closableKey));
+	// TODO: check if there is a better way to handle this svelte-ignore
+	// svelte-ignore state_referenced_locally -- we want to get only the initial value
 	let visible = $state(isNullish(closableKey) || !shouldHideInfo(closableKey));
 
 	const close = () => {
