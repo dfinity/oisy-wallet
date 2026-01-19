@@ -1,4 +1,4 @@
-import FeeRatePercentilesContext from '$btc/components/fee/FeeRatePercentilesContext.svelte';
+import FeeRatePercentilesLoader from '$btc/components/fee/FeeRatePercentilesLoader.svelte';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import {
 	FEE_RATE_PERCENTILES_CONTEXT_KEY,
@@ -13,7 +13,7 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-describe('FeeRatePercentilesContext', () => {
+describe('FeeRatePercentilesLoader', () => {
 	const networkId = BTC_MAINNET_NETWORK_ID;
 	const mockFeeRateFromPercentiles = 5000n;
 
@@ -45,7 +45,7 @@ describe('FeeRatePercentilesContext', () => {
 
 		mockAuthStore();
 
-		render(FeeRatePercentilesContext, {
+		render(FeeRatePercentilesLoader, {
 			props,
 			context: mockContext(store)
 		});
@@ -67,7 +67,7 @@ describe('FeeRatePercentilesContext', () => {
 
 		mockAuthStore();
 
-		render(FeeRatePercentilesContext, {
+		render(FeeRatePercentilesLoader, {
 			props: newProps,
 			context: mockContext(store)
 		});
@@ -82,7 +82,7 @@ describe('FeeRatePercentilesContext', () => {
 
 		mockAuthStore();
 
-		render(FeeRatePercentilesContext, {
+		render(FeeRatePercentilesLoader, {
 			props: { ...props, networkId: ICP_NETWORK_ID },
 			context: mockContext(store)
 		});
@@ -97,7 +97,7 @@ describe('FeeRatePercentilesContext', () => {
 
 		mockAuthStore(null);
 
-		render(FeeRatePercentilesContext, {
+		render(FeeRatePercentilesLoader, {
 			props,
 			context: mockContext(store)
 		});
