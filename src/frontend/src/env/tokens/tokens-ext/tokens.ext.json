@@ -1216,7 +1216,7 @@
 		"metadata": {
 			"name": "Distrikt PODs"
 		}
-	},	
+	},
 	{
 		"canisterId": "ahl3d-xqaaa-aaaaj-qacca-cai",
 		"standardVersion": "legacy1.5",
@@ -2805,7 +2805,7 @@
 		"metadata": {
 			"name": "8YearGang Genesis"
 		}
-	},	
+	},
 	{
 		"canisterId": "kbk6s-tyaaa-aaaag-qb4fq-cai",
 		"standardVersion": "ext",
