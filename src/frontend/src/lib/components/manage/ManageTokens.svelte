@@ -24,6 +24,7 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import {writable} from "svelte/store";
 
 	interface Props {
 		initialSearch?: string;
@@ -56,15 +57,27 @@
 			: []
 	);
 
+	const filterQuery = writable<string>()
+
+	$effect(() => {
+		filterQuery.set(nonNullish(initialSearch) ? initialSearch : '')
+	})
+
+	const filterNfts = writable<boolean>()
+
+	$effect(() => {
+		filterNfts.set(!!isNftsPage)
+	})
+
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
 			tokens: [],
 			filterZeroBalance: false,
 			filterNetwork: $selectedNetwork,
-			filterQuery: nonNullish(initialSearch) ? initialSearch : '',
+			filterQuery: $filterQuery,
 			sortByBalance: false,
-			filterNfts: isNftsPage
+			filterNfts: $filterNfts
 		})
 	);
 
