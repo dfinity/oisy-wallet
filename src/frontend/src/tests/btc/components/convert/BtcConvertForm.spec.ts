@@ -1,8 +1,13 @@
 import BtcConvertForm from '$btc/components/convert/BtcConvertForm.svelte';
 import * as btcPendingSendTransactionsStatusStore from '$btc/derived/btc-pending-sent-transactions-status.derived';
+import { ALL_UTXOS_CONTEXT_KEY, initAllUtxosStore } from '$btc/stores/all-utxos.store';
 import {
-	initUtxosFeeStore,
+	FEE_RATE_PERCENTILES_CONTEXT_KEY,
+	initFeeRatePercentilesStore
+} from '$btc/stores/fee-rate-percentiles.store';
+import {
 	UTXOS_FEE_CONTEXT_KEY,
+	initUtxosFeeStore,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -27,6 +32,8 @@ describe('BtcConvertForm', () => {
 	}) =>
 		new Map([
 			[UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore }],
+			[ALL_UTXOS_CONTEXT_KEY, { store: initAllUtxosStore() }],
+			[FEE_RATE_PERCENTILES_CONTEXT_KEY, { store: initFeeRatePercentilesStore() }],
 			[
 				CONVERT_CONTEXT_KEY,
 				{

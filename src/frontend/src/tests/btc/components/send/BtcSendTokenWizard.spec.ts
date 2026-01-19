@@ -1,4 +1,4 @@
-import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
+import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
 import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import {
@@ -21,24 +21,13 @@ import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
-import { btcAddressStore } from '$icp/stores/btc.store';
 import * as backendApi from '$lib/api/backend.api';
 import * as signerApi from '$lib/api/signer.api';
 import * as addressesStore from '$lib/derived/address.derived';
-import { ProgressStepsConvert } from '$lib/enums/progress-steps';
-import { WizardStepsConvert } from '$lib/enums/wizard-steps';
-import {
-	CONVERT_CONTEXT_KEY,
-	initConvertContext,
-	type ConvertContext
-} from '$lib/stores/convert.store';
-import {
-	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
-	initTokenActionValidationErrorsContext,
-	type TokenActionValidationErrorsContext
-} from '$lib/stores/token-action-validation-errors.store';
+import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
+import { WizardStepsSend } from '$lib/enums/wizard-steps';
+import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -50,77 +39,73 @@ import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-describe('BtcConvertTokenWizard', () => {
+describe('BtcSendTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
 	const pendingBtcTransactionResponse = true;
+
 	const mockContext = ({
-		sourceToken = BTC_MAINNET_TOKEN,
+		token = BTC_MAINNET_TOKEN,
 		mockUtxosFeeStore
 	}: {
-		sourceToken?: Token;
+		token?: Token;
 		mockUtxosFeeStore: UtxosFeeStore;
 	}) =>
-		new Map<
-			symbol,
-			| ConvertContext
-			| TokenActionValidationErrorsContext
-			| UtxosFeeContext
-			| AllUtxosContext
-			| FeeRatePercentilesContext
-		>([
+		new Map<symbol, SendContext | UtxosFeeContext | AllUtxosContext | FeeRatePercentilesContext>([
 			[UTXOS_FEE_CONTEXT_KEY, { store: mockUtxosFeeStore }],
 			[ALL_UTXOS_CONTEXT_KEY, { store: initAllUtxosStore() }],
 			[FEE_RATE_PERCENTILES_CONTEXT_KEY, { store: initFeeRatePercentilesStore() }],
-			[CONVERT_CONTEXT_KEY, initConvertContext({ sourceToken, destinationToken: ICP_TOKEN })],
-			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
+			[SEND_CONTEXT_KEY, initSendContext({ token })]
 		]);
+
 	const onBack = vi.fn();
 	const onClose = vi.fn();
 	const onNext = vi.fn();
+	const onSendBack = vi.fn();
+	const onTokensList = vi.fn();
+
 	const props = {
 		currentStep: {
-			name: WizardStepsConvert.REVIEW,
+			name: WizardStepsSend.REVIEW,
 			title: 'title'
 		},
-		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
-		sendAmount,
-		receiveAmount: sendAmount,
+		sendProgressStep: ProgressStepsSendBtc.INITIALIZATION,
+		amount: sendAmount,
+		destination: mockBtcAddress,
 		onBack,
 		onClose,
-		onNext
+		onNext,
+		onSendBack,
+		onTokensList
 	};
+
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
+
 	const mockBackendApi = () =>
 		vi
 			.spyOn(backendApi, 'addPendingBtcTransaction')
 			.mockResolvedValue(pendingBtcTransactionResponse);
-	const mockBtcAddressStore = (address: string | undefined = mockBtcAddress) => {
-		btcAddressStore.set({
-			id: ICP_TOKEN.id,
-			data: {
-				certified: true,
-				data: address
-			}
-		});
-	};
+
 	const mockAddressesStore = () =>
 		vi
 			.spyOn(addressesStore, 'btcAddressMainnet', 'get')
 			.mockImplementation(() => readable(mockBtcAddress));
+
 	const mockBtcPendingSentTransactionsStore = () =>
 		vi
 			.spyOn(btcPendingSentTransactionsStore, 'loadBtcPendingSentTransactions')
 			.mockResolvedValue({ success: true });
-	const mockUtxosFeeStore = (utxosFee?: UtxosFee) => {
+
+	const mockUtxosFeeStoreWithValue = (utxosFee?: UtxosFee) => {
 		const store = utxosFeeStore.initUtxosFeeStore();
 		store.setUtxosFee({ utxosFee });
 		return store;
 	};
-	const clickConvertButton = async (container: HTMLElement) => {
-		const convertButtonSelector = '[data-tid="convert-review-button-next"]';
-		const button: HTMLButtonElement | null = container.querySelector(convertButtonSelector);
+
+	const clickSendButton = async (container: HTMLElement) => {
+		const sendButtonSelector = '[data-tid="review-form-send-button"]';
+		const button: HTMLButtonElement | null = container.querySelector(sendButtonSelector);
 		assertNonNullish(button, 'Button not found');
 		await fireEvent.click(button);
 	};
@@ -131,7 +116,7 @@ describe('BtcConvertTokenWizard', () => {
 		mockPage.reset();
 		mockBtcPendingSentTransactionsStore();
 
-		vi.spyOn(btcUtxosService, 'prepareBtcSend').mockResolvedValue({
+		vi.spyOn(btcUtxosService, 'prepareBtcSend').mockReturnValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
 			utxos: mockUtxosFee.utxos
 		});
@@ -148,15 +133,14 @@ describe('BtcConvertTokenWizard', () => {
 		const btcSendApiSpy = mockSignerApi();
 		const addPendingTransactionApiSpy = mockBackendApi();
 		mockAuthStore();
-		mockBtcAddressStore();
 		mockAddressesStore();
 
-		const { container } = render(BtcConvertTokenWizard, {
+		const { container } = render(BtcSendTokenWizard, {
 			props,
-			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStore(mockUtxosFee) })
+			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStoreWithValue(mockUtxosFee) })
 		});
 
-		await clickConvertButton(container);
+		await clickSendButton(container);
 
 		expect(btcSendApiSpy).toHaveBeenCalledExactlyOnceWith({
 			identity: mockIdentity,
@@ -177,15 +161,14 @@ describe('BtcConvertTokenWizard', () => {
 		const btcSendApiSpy = mockSignerApi();
 		const addPendingTransactionApiSpy = mockBackendApi();
 		mockAuthStore(null);
-		mockBtcAddressStore();
 		mockAddressesStore();
 
-		const { container } = render(BtcConvertTokenWizard, {
+		const { container } = render(BtcSendTokenWizard, {
 			props,
-			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStore(mockUtxosFee) })
+			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStoreWithValue(mockUtxosFee) })
 		});
 
-		await clickConvertButton(container);
+		await clickSendButton(container);
 
 		expect(btcSendApiSpy).not.toHaveBeenCalled();
 		expect(addPendingTransactionApiSpy).not.toHaveBeenCalled();
@@ -196,17 +179,16 @@ describe('BtcConvertTokenWizard', () => {
 		const addPendingTransactionApiSpy = mockBackendApi();
 		mockAuthStore();
 		mockAddressesStore();
-		mockBtcAddressStore();
 
-		const { container } = render(BtcConvertTokenWizard, {
+		const { container } = render(BtcSendTokenWizard, {
 			props,
 			context: mockContext({
-				sourceToken: ETHEREUM_TOKEN,
-				mockUtxosFeeStore: mockUtxosFeeStore(mockUtxosFee)
+				token: ETHEREUM_TOKEN,
+				mockUtxosFeeStore: mockUtxosFeeStoreWithValue(mockUtxosFee)
 			})
 		});
 
-		await clickConvertButton(container);
+		await clickSendButton(container);
 
 		expect(btcSendApiSpy).not.toHaveBeenCalled();
 		expect(addPendingTransactionApiSpy).not.toHaveBeenCalled();
@@ -217,35 +199,36 @@ describe('BtcConvertTokenWizard', () => {
 		const addPendingTransactionApiSpy = mockBackendApi();
 		mockAuthStore();
 		mockAddressesStore();
-		mockBtcAddressStore('');
 
-		const { container } = render(BtcConvertTokenWizard, {
-			props,
-			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStore(mockUtxosFee) })
+		const { container } = render(BtcSendTokenWizard, {
+			props: {
+				...props,
+				destination: ''
+			},
+			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStoreWithValue(mockUtxosFee) })
 		});
 
-		await clickConvertButton(container);
+		await clickSendButton(container);
 
 		expect(btcSendApiSpy).not.toHaveBeenCalled();
 		expect(addPendingTransactionApiSpy).not.toHaveBeenCalled();
 	});
 
-	it('should not call sendBtc if sendAmount is not defined', async () => {
+	it('should not call sendBtc if amount is not defined', async () => {
 		const btcSendApiSpy = mockSignerApi();
 		const addPendingTransactionApiSpy = mockBackendApi();
 		mockAuthStore();
 		mockAddressesStore();
-		mockBtcAddressStore();
 
-		const { container } = render(BtcConvertTokenWizard, {
+		const { container } = render(BtcSendTokenWizard, {
 			props: {
 				...props,
-				sendAmount: undefined
+				amount: undefined
 			},
-			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStore(mockUtxosFee) })
+			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStoreWithValue(mockUtxosFee) })
 		});
 
-		await clickConvertButton(container);
+		await clickSendButton(container);
 
 		expect(btcSendApiSpy).not.toHaveBeenCalled();
 		expect(addPendingTransactionApiSpy).not.toHaveBeenCalled();
@@ -256,46 +239,54 @@ describe('BtcConvertTokenWizard', () => {
 		const addPendingTransactionApiSpy = mockBackendApi();
 		mockAuthStore();
 		mockAddressesStore();
-		mockBtcAddressStore();
 
-		const { container } = render(BtcConvertTokenWizard, {
+		const { container } = render(BtcSendTokenWizard, {
 			props,
-			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStore(undefined) })
+			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStoreWithValue(undefined) })
 		});
 
-		await clickConvertButton(container);
+		await clickSendButton(container);
 
 		expect(btcSendApiSpy).not.toHaveBeenCalled();
 		expect(addPendingTransactionApiSpy).not.toHaveBeenCalled();
 	});
 
-	it('should render convert form if currentStep is CONVERT', () => {
-		const { getByTestId } = render(BtcConvertTokenWizard, {
+	it('should render send form if currentStep is SEND', () => {
+		const { getByTestId } = render(BtcSendTokenWizard, {
 			props: {
 				...props,
 				currentStep: {
-					name: WizardStepsConvert.CONVERT,
+					name: WizardStepsSend.SEND,
 					title: 'test'
 				}
 			},
-			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStore(mockUtxosFee) })
+			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStoreWithValue(mockUtxosFee) })
 		});
 
-		expect(getByTestId('convert-form-button-next')).toBeInTheDocument();
+		expect(getByTestId('send-form-next-button')).toBeInTheDocument();
 	});
 
-	it('should render convert progress if currentStep is CONVERTING', () => {
-		const { container } = render(BtcConvertTokenWizard, {
+	it('should render send progress if currentStep is SENDING', () => {
+		const { container } = render(BtcSendTokenWizard, {
 			props: {
 				...props,
 				currentStep: {
-					name: WizardStepsConvert.CONVERTING,
+					name: WizardStepsSend.SENDING,
 					title: 'test'
 				}
 			},
-			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStore(mockUtxosFee) })
+			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStoreWithValue(mockUtxosFee) })
 		});
 
 		expect(container).toHaveTextContent(en.core.warning.do_not_close);
+	});
+
+	it('should render review form if currentStep is REVIEW', () => {
+		const { container } = render(BtcSendTokenWizard, {
+			props,
+			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStoreWithValue(mockUtxosFee) })
+		});
+
+		expect(container).toHaveTextContent(en.send.text.send);
 	});
 });
