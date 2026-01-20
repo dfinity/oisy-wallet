@@ -132,13 +132,13 @@
 		}
 	};
 
-	// const debounceReload = debounce(reload, 1000);
-	//
-	// $effect(() => {
-	// 	[$backendCustomTokens];
-	//
-	// 	untrack(() => debounceReload());
-	// });
+	const debounceReload = debounce(reload, 1000);
+
+	$effect(() => {
+		[$backendCustomTokens];
+
+		untrack(() => debounceReload());
+	});
 </script>
 
 <svelte:window onoisyReloadCollections={reload} />
