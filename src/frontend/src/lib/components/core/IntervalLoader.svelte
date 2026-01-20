@@ -36,6 +36,12 @@
 		timer = undefined;
 	};
 
+	const resetTimer = () => {
+		stopTimer();
+
+		timer = startTimer();
+	};
+
 	// Lifecycle: on component mount
 	// 1. If `skipInitialLoad` is false, call `onLoad` once immediately.
 	// 2. After the initial call completes, set `scheduledLoad` so it can run repeatedly.
@@ -62,5 +68,11 @@
 		timer = startTimer();
 
 		return () => stopTimer();
+	});
+
+	$effect(() => {
+		[interval];
+
+		resetTimer();
 	});
 </script>
