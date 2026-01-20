@@ -26,12 +26,14 @@ describe('custom-tokens.services', () => {
 			nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 		};
 
-		const waitForDebounce = () => new Promise((r) => setTimeout(r, 301));
+		const waitForDebounce = () => new Promise((r) => setTimeout(r, 350));
 
 		beforeEach(async () => {
 			vi.clearAllMocks();
 
 			await waitForDebounce();
+
+			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
 		});
 
 		afterEach(async () => {
@@ -42,8 +44,6 @@ describe('custom-tokens.services', () => {
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
 
 			const promises = Array.from({ length: 30 }).map(() => debounceListCustomTokens(mockParams));
-
-			await waitForDebounce();
 
 			const results = await Promise.all(promises);
 
@@ -65,8 +65,6 @@ describe('custom-tokens.services', () => {
 			const firstPromise = debounceListCustomTokens(mockParams);
 			const secondPromise = debounceListCustomTokens(mockParams);
 
-			await waitForDebounce();
-
 			const results = await Promise.all([firstPromise, secondPromise]);
 
 			expect(results[0]).toStrictEqual(firstResult);
@@ -76,15 +74,23 @@ describe('custom-tokens.services', () => {
 		});
 
 		it('should throw if listCustomTokens fails', async () => {
-			const mockError = new Error('Backend error');
-
-			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
-
-			const promises = Array.from({ length: 10 }).map(() => debounceListCustomTokens(mockParams));
+			await debounceListCustomTokens(mockParams);
 
 			await waitForDebounce();
 
-			await expect(Promise.all(promises)).rejects.toThrowError(mockError);
+			vi.mocked(listCustomTokens).mockReset();
+
+			const mockError = new Error('Backend error');
+
+			vi.mocked(listCustomTokens).mockRejectedValueOnce(mockError);
+
+			const promises = Array.from({ length: 10 }).map(() => debounceListCustomTokens(mockParams));
+
+			const checks = promises.map(async (promise) => {
+				await expect(promise).rejects.toThrowError(mockError);
+			});
+
+			await Promise.all(checks);
 
 			expect(listCustomTokens).toHaveBeenCalledExactlyOnceWith(mockParams);
 		});

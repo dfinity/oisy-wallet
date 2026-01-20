@@ -38,9 +38,14 @@ const debouncedListCustomTokens = debounce(async () => {
 
 	const params = latestParams;
 
+	// start a new window state regardless of outcome
+	latestParams = undefined;
+
+	// nothing to do: flush waiters with empty to avoid hanging
 	if (isNullish(params)) {
 		// should not happen, but avoid hanging tests
 		toFlush.forEach(({ resolve }) => resolve([]));
+
 		return;
 	}
 
