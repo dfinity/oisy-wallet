@@ -58,7 +58,7 @@ describe('query.services', () => {
 		});
 
 		it('should use provided params.strategy after warmup period', async () => {
-			const qau = createQueryAndUpdateWithWarmup();
+			const qau = createQueryAndUpdateWithWarmup(warmupMs);
 
 			// Move time past warmup
 			vi.advanceTimersByTime(warmupMs + 1);
