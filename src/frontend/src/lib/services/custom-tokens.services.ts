@@ -108,15 +108,7 @@ export const debounceListCustomTokens = (
 	new Promise<CustomToken[]>((resolve, reject) => {
 		const key: DebounceWindowKey = params.certified ? 'update' : 'query';
 
-		const window =
-			windows[key] ??
-			(() => {
-				const newWindow: DebounceWindow = { pending: [] };
-
-				windows[key] = newWindow;
-
-				return newWindow;
-			})();
+		const window = windows[key];
 
 		window.pending.push({ resolve, reject });
 		window.latestParams = params;
