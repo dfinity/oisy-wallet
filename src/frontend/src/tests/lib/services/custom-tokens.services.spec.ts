@@ -1,6 +1,9 @@
 import { listCustomTokens } from '$lib/api/backend.api';
 import * as idbTokensApi from '$lib/api/idb-tokens.api';
-import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+import {
+	debounceListCustomTokens,
+	loadNetworkCustomTokens
+} from '$lib/services/custom-tokens.services';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
@@ -16,6 +19,103 @@ vi.mock('$lib/api/backend.api', () => ({
 }));
 
 describe('custom-tokens.services', () => {
+	describe('debounceListCustomTokens', () => {
+		const mockParams = {
+			identity: mockIdentity,
+			certified: true,
+			nullishIdentityErrorMessage: en.auth.error.no_internet_identity
+		};
+
+		const waitForDebounce = () => new Promise((r) => setTimeout(r, 301));
+
+		beforeEach(async () => {
+			vi.clearAllMocks();
+
+			await waitForDebounce();
+		});
+
+		afterEach(async () => {
+			await waitForDebounce();
+		});
+
+		it('should debounce multiple calls to listCustomTokens', async () => {
+			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
+
+			const promises = Array.from({ length: 30 }).map(() => debounceListCustomTokens(mockParams));
+
+			await waitForDebounce();
+
+			const results = await Promise.all(promises);
+
+			results.forEach((result) => {
+				expect(result).toStrictEqual(mockCustomTokens);
+			});
+
+			expect(listCustomTokens).toHaveBeenCalledExactlyOnceWith(mockParams);
+		});
+
+		it('should resolve with the first call result', async () => {
+			const firstResult = mockCustomTokens.slice(0, 2);
+			const secondResult = mockCustomTokens.slice(2, 4);
+
+			vi.mocked(listCustomTokens)
+				.mockResolvedValueOnce(firstResult)
+				.mockResolvedValueOnce(secondResult);
+
+			const firstPromise = debounceListCustomTokens(mockParams);
+			const secondPromise = debounceListCustomTokens(mockParams);
+
+			await waitForDebounce();
+
+			const results = await Promise.all([firstPromise, secondPromise]);
+
+			expect(results[0]).toStrictEqual(firstResult);
+			expect(results[1]).toStrictEqual(firstResult);
+
+			expect(listCustomTokens).toHaveBeenCalledExactlyOnceWith(mockParams);
+		});
+
+		it('should throw if listCustomTokens fails', async () => {
+			const mockError = new Error('Backend error');
+
+			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
+
+			const promises = Array.from({ length: 10 }).map(() => debounceListCustomTokens(mockParams));
+
+			await waitForDebounce();
+
+			await expect(Promise.all(promises)).rejects.toThrowError(mockError);
+
+			expect(listCustomTokens).toHaveBeenCalledExactlyOnceWith(mockParams);
+		});
+
+		it('should call the function again after the debounce period', async () => {
+			const firstTokens = mockCustomTokens.slice(0, 2);
+			const secondTokens = mockCustomTokens.slice(2, 4);
+
+			vi.mocked(listCustomTokens)
+				.mockResolvedValueOnce(firstTokens)
+				.mockResolvedValueOnce(secondTokens);
+
+			const firstPromise = debounceListCustomTokens(mockParams);
+
+			// Fast-forward time to exceed the debounce period
+			await waitForDebounce();
+
+			const secondPromise = debounceListCustomTokens(mockParams);
+
+			const firstResult = await firstPromise;
+			const secondResult = await secondPromise;
+
+			expect(firstResult).toStrictEqual(firstTokens);
+			expect(secondResult).toStrictEqual(secondTokens);
+
+			expect(listCustomTokens).toHaveBeenCalledTimes(2);
+			expect(listCustomTokens).toHaveBeenNthCalledWith(1, mockParams);
+			expect(listCustomTokens).toHaveBeenNthCalledWith(2, mockParams);
+		});
+	});
+
 	describe('loadNetworkCustomTokens', () => {
 		const mockSetIdbTokens = vi.fn();
 		const mockGetIdbTokens = vi.fn();

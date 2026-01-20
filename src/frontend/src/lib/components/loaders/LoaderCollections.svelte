@@ -15,6 +15,7 @@
 	import { COLLECTION_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { debounceListCustomTokens } from '$lib/services/custom-tokens.services';
 	import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CanisterIdText } from '$lib/types/canister';
@@ -113,7 +114,7 @@
 
 		await queryAndUpdate({
 			request: async (params) =>
-				await listCustomTokens({
+				await debounceListCustomTokens({
 					...params,
 					nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 				}),

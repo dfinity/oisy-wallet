@@ -2,8 +2,17 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { listCustomTokens } from '$lib/api/backend.api';
 import { getIdbAllCustomTokens, setIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import { i18n } from '$lib/stores/i18n.store';
+import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import { assertNever, fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import {
+	assertNever,
+	debounce,
+	fromNullable,
+	isNullish,
+	nonNullish,
+	toNullable,
+	type QueryParams
+} from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
@@ -17,12 +26,50 @@ type LoadCustomTokensParams = LoadCustomTokensFromBackendParams & {
 	useCache?: boolean;
 };
 
+const pending: Array<{
+	resolve: (value: CustomToken[]) => void;
+	reject: (reason?: unknown) => void;
+}> = [];
+
+let latestParams: CanisterApiFunctionParams<QueryParams> | undefined;
+
+const debouncedListCustomTokens = debounce(async () => {
+	const toFlush = pending.splice(0, pending.length);
+
+	const params = latestParams;
+
+	if (isNullish(params)) {
+		// should not happen, but avoid hanging tests
+		toFlush.forEach(({ resolve }) => resolve([]));
+		return;
+	}
+
+	try {
+		const tokens = await listCustomTokens(params);
+
+		toFlush.forEach(({ resolve }) => resolve(tokens));
+	} catch (error: unknown) {
+		toFlush.forEach(({ reject }) => reject(error));
+	}
+});
+
+export const debounceListCustomTokens = (
+	params: CanisterApiFunctionParams<QueryParams>
+): Promise<CustomToken[]> =>
+	new Promise<CustomToken[]>((resolve, reject) => {
+		pending.push({ resolve, reject });
+
+		latestParams = params;
+
+		debouncedListCustomTokens();
+	});
+
 const loadCustomTokensFromBackend = async ({
 	identity,
 	certified,
 	filterTokens
 }: LoadCustomTokensFromBackendParams): Promise<CustomToken[]> => {
-	const tokens = await listCustomTokens({
+	const tokens = await debounceListCustomTokens({
 		identity,
 		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
