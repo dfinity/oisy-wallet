@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {  isNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
@@ -139,8 +139,6 @@
 
 		event?.detail.callback?.();
 	};
-
-
 </script>
 
 <svelte:window onoisyReloadCollections={reload} />
