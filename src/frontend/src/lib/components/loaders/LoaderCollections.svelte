@@ -10,7 +10,6 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
-	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { COLLECTION_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
