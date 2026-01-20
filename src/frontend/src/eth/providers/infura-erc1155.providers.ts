@@ -19,7 +19,7 @@ import { get } from 'svelte/store';
 
 const cachedNftMetadata = new SvelteMap<
 	Networkish,
-	SvelteMap<string, SvelteMap<NftId, SvelteMap<NftId, NftMetadata>>>
+	SvelteMap<Erc1155ContractAddress['address'], SvelteMap<NftId, NftMetadata>>
 >();
 
 const getCachedNftMetadata = ({
@@ -30,8 +30,7 @@ const getCachedNftMetadata = ({
 	network: Networkish;
 	contractAddress: Erc1155ContractAddress['address'];
 	tokenId: NftId;
-}): NftMetadata | undefined =>
-	cachedNftMetadata.get(network)?.get(contractAddress)?.get(tokenId)?.get(tokenId);
+}): NftMetadata | undefined => cachedNftMetadata.get(network)?.get(contractAddress)?.get(tokenId);
 
 const updateCachedNftMetadata = ({
 	network,
@@ -47,28 +46,18 @@ const updateCachedNftMetadata = ({
 	let networkMap = cachedNftMetadata.get(network);
 
 	if (isNullish(networkMap)) {
-		networkMap = new SvelteMap<
-			Erc1155ContractAddress['address'],
-			SvelteMap<NftId, SvelteMap<NftId, NftMetadata>>
-		>();
+		networkMap = new SvelteMap<Erc1155ContractAddress['address'], SvelteMap<NftId, NftMetadata>>();
 		cachedNftMetadata.set(network, networkMap);
 	}
 
 	let contractMap = networkMap.get(contractAddress);
 
 	if (isNullish(contractMap)) {
-		contractMap = new SvelteMap<NftId, SvelteMap<NftId, NftMetadata>>();
+		contractMap = new SvelteMap<NftId, NftMetadata>();
 		networkMap.set(contractAddress, contractMap);
 	}
 
-	let tokenMap = contractMap.get(tokenId);
-
-	if (isNullish(tokenMap)) {
-		tokenMap = new SvelteMap<NftId, NftMetadata>();
-		contractMap.set(tokenId, tokenMap);
-	}
-
-	tokenMap.set(tokenId, metadata);
+	contractMap.set(tokenId, metadata);
 };
 
 export class InfuraErc1155Provider extends InfuraErc165Provider {
