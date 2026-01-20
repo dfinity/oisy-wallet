@@ -20,7 +20,6 @@
 	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
 	import { authNotSignedIn, authSignedIn, authIdentity } from '$lib/derived/auth.derived';
@@ -121,9 +120,7 @@
 					{#snippet menu()}
 						<NavigationMenu>
 							{#if assetsRoute}
-								<Responsive up="1.5xl">
-									<DappsCarousel />
-								</Responsive>
+								<DappsCarousel wrapperStyleClass="hidden xl:flex" />
 							{/if}
 						</NavigationMenu>
 					{/snippet}
@@ -134,9 +131,7 @@
 
 					<Loaders>
 						{#if assetsRoute}
-							<Responsive down="xl">
-								<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
-							</Responsive>
+							<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
 						{/if}
 
 						{@render children()}
