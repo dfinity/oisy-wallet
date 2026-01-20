@@ -42,7 +42,7 @@ const updateCachedNftMetadata = ({
 	contractAddress: Erc1155ContractAddress['address'];
 	tokenId: NftId;
 	metadata: NftMetadata;
-}): void => {
+}) => {
 	let networkMap = cachedNftMetadata.get(network);
 
 	if (isNullish(networkMap)) {
