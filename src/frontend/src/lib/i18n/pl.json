@@ -46,9 +46,9 @@
 		"info": {
 			"test_banner": "Tylko do celów testowych!",
 			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"internet_identity_banner_first_part": "$oisy_name teraz używa",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "Przeczytaj więcej"
 		},
 		"alt": {
 			"logo": "logo $name",
@@ -121,11 +121,11 @@
 			"logout": "Wyloguj",
 			"lock": "Zablokuj",
 			"authenticate": "Otwórz lub Utwórz",
-			"legacy_login": "",
+			"legacy_login": "Starsze logowanie",
 			"asset_types": "Zarządzaj aktywami w BTC, SOL, ETH, ICP i innych kryptowalutach",
 			"instant_and_private": "Wbudowany asystent AI z ochroną prywatności w standardzie",
 			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
-			"social_login": ""
+			"social_login": "Natychmiastowy i prywatny dostęp + logowanie społecznościowe"
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie"
@@ -1807,7 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "Klikając ten przycisk, zgadzasz się na $link",
-			"instruction_two_buttons": "",
+			"instruction_two_buttons": "Klikając jeden z tych przycisków, zgadzasz się na $link",
 			"body": ""
 		},
 		"alt": {

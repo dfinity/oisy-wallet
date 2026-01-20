@@ -46,9 +46,9 @@
 		"info": {
 			"test_banner": "仅用于测试目的！",
 			"test_banner_beta": "这是一个测试版发布。你可能会遇到一些错误。真实资产正在使用中——请谨慎操作。",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"internet_identity_banner_first_part": "$oisy_name 现在使用",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "阅读更多"
 		},
 		"alt": {
 			"logo": "$name 标志",
@@ -121,11 +121,11 @@
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
-			"legacy_login": "",
+			"legacy_login": "旧版登录",
 			"asset_types": "跨 Bitcoin、Solana、Ethereum、ICP 等管理资产",
 			"instant_and_private": "内置 AI 助手，隐私保护为默认标准",
 			"advanced_cryptography": "由先进的密码学保障安全 —— 100% 链上",
-			"social_login": ""
+			"social_login": "即时私密访问 + 社交登录"
 		},
 		"alt": {
 			"preview": "登录后 $oisy_name 的预览效果，适用于桌面端和移动端"
@@ -153,21 +153,21 @@
 			"text": {
 				"title": "你的登录流程被中断了",
 				"description": "看起来你取消了登录或注册。我们希望了解发生了什么，以便改进你的使用体验。",
-				"login_page_looks_different": "",
-				"use_identity_number": "",
-				"lost_identity_number": "",
+				"login_page_looks_different": "为什么登录页面看起来不一样？",
+				"use_identity_number": "我想使用我的 Internet Identity I号码",
+				"lost_identity_number": "我的互联网身份号码丢失了",
 				"feedback_text": "你的反馈将帮助我们让 $oisy_short 变得更好。",
 				"thanks_text": "谢谢您！",
-				"useful_links": "",
+				"useful_links": "有用的链接",
 				"identity_new_identity": "$oisy_short 钱包已切换 Internet Identity 域名为：<span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"switch_to_new_internet_identity": "",
-				"identity_legacy_identity_title": "",
-				"identity_legacy_identity_item_1": "",
-				"identity_legacy_identity_item_2": "",
-				"identity_new_identity_title": "",
-				"identity_new_identity_item_1": "",
-				"identity_new_identity_item_2": "",
-				"identity_new_identity_link": "",
+				"switch_to_new_internet_identity": "$oisy_name 切换到 Internet Identity 2.0（英文版）",
+				"identity_legacy_identity_title": "登录界面上看不到您的互联网身份号码了吗？您可以通过以下任一方法查找您的身份号码：",
+				"identity_legacy_identity_item_1": "查看您之前在 <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> 或 <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a> 使用过的 Internet IdentityI 号码列表",
+				"identity_legacy_identity_item_2": "查看您之前可能保存的恢复短语开头的数字。",
+				"identity_new_identity_title": "$oisy_name 现在使用 Internet Identity 2.0，它提供了多项改进，并允许您将您的身份与您在 Google、Apple 或 Microsoft 上的登录信息关联起来。",
+				"identity_new_identity_item_1": "要迁移您现有的身份，请点击新登录页面顶部的“Upgrade your identity”链接，然后按照步骤操作。",
+				"identity_new_identity_item_2": "您仍然可以使用旧版登录页面和您的互联网身份号码。只需点击下方链接即可访问旧版登录页面。",
+				"identity_new_identity_link": "在 OISY Docs 上了解更多关于互联网身份 2.0 的信息（英文版）",
 				"identity_legacy_sign_in": "使用旧 Internet Identity 域名登录",
 				"identity_learn_more": "在 $oisy_short 文档中了解更多",
 				"oisy_introduction": "",

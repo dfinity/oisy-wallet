@@ -5,7 +5,7 @@
 	import BtcConvertForm from '$btc/components/convert/BtcConvertForm.svelte';
 	import BtcConvertProgress from '$btc/components/convert/BtcConvertProgress.svelte';
 	import BtcConvertReview from '$btc/components/convert/BtcConvertReview.svelte';
-	import UtxosFeeContext from '$btc/components/fee/UtxosFeeContext.svelte';
+	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
 	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 	import { sendBtc } from '$btc/services/btc-send.services';
 	import {
@@ -156,7 +156,7 @@
 	const back = () => onBack();
 </script>
 
-<UtxosFeeContext amount={sendAmount} {amountError} {networkId} source={sourceAddress}>
+<UtxosFeeLoader amount={sendAmount} {amountError} {networkId} source={sourceAddress}>
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsConvert.CONVERT}
 			<BtcConvertForm
@@ -184,4 +184,4 @@
 			<BtcConvertProgress {convertProgressStep} />
 		{/if}
 	{/key}
-</UtxosFeeContext>
+</UtxosFeeLoader>

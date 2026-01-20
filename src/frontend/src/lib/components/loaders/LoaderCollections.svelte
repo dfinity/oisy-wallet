@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, queryAndUpdate } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/backend.did';
@@ -111,21 +111,25 @@
 			return;
 		}
 
-		const customTokens = await listCustomTokens({
-			identity: $authIdentity,
-			certified: true,
-			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		await queryAndUpdate({
+			request: async (params) =>
+				await listCustomTokens({
+					...params,
+					nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+				}),
+			onLoad: async ({ response: customTokens }) => {
+				const params: LoadTokensParams = {
+					identity: $authIdentity,
+					customTokens
+				};
+
+				await Promise.all([
+					loadErcTokens(params),
+					extTokens ? loadExtTokens(params) : Promise.resolve()
+				]);
+			},
+			identity: $authIdentity
 		});
-
-		const params: LoadTokensParams = {
-			identity: $authIdentity,
-			customTokens
-		};
-
-		await Promise.all([
-			loadErcTokens(params),
-			extTokens ? loadExtTokens(params) : Promise.resolve()
-		]);
 	};
 
 	const onLoad = async () => {

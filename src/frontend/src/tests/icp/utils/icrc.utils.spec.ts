@@ -50,7 +50,6 @@ describe('icrc.utils', () => {
 			category: 'default',
 			ledgerCanisterId: mockValidIcToken.ledgerCanisterId,
 			mintingAccount: mockIcrcAccount,
-			position: 1,
 			icrcCustomTokens: {
 				[mockToken.ledgerCanisterId]: mockToken
 			}
@@ -490,8 +489,7 @@ describe('icrc.utils', () => {
 
 	describe('mapTokenOisyName', () => {
 		const mockToken: IcInterface = {
-			ledgerCanisterId: mockLedgerCanisterId,
-			position: 1
+			ledgerCanisterId: mockLedgerCanisterId
 		};
 
 		it('should return the token as it is if it is not an IcCkInterface', () => {
@@ -533,8 +531,7 @@ describe('icrc.utils', () => {
 
 	describe('mapTokenOisySymbol', () => {
 		const mockToken: IcInterface = {
-			ledgerCanisterId: mockLedgerCanisterId,
-			position: 1
+			ledgerCanisterId: mockLedgerCanisterId
 		};
 
 		it('should return the token as it is if there is no custom symbol', () => {

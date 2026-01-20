@@ -81,8 +81,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 				this.cleanTransactions({ certified });
 			},
 			onUpdateError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
-			identity,
-			resolution: 'all_settled'
+			identity
 		});
 	};
 

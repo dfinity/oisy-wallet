@@ -46,9 +46,9 @@
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
 			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado.",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"internet_identity_banner_first_part": "$oisy_name ahora utiliza",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "Leer mas"
 		},
 		"alt": {
 			"logo": "Logotipo",
@@ -121,11 +121,11 @@
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
-			"legacy_login": "",
+			"legacy_login": "Acceso de legado",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
 			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena",
-			"social_login": ""
+			"social_login": "Acceso instantáneo y privado + inicio de sesión social"
 		},
 		"alt": {
 			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil"
@@ -151,29 +151,29 @@
 		},
 		"help": {
 			"text": {
-				"title": "",
-				"description": "",
-				"login_page_looks_different": "",
-				"use_identity_number": "",
-				"lost_identity_number": "",
-				"feedback_text": "",
+				"title": "Su proceso de inicio de sesión se interrumpió",
+				"description": "Parece que cancelaste tu inicio de sesión o registro. Nos gustaría saber qué sucedió para mejorar tu experiencia.",
+				"login_page_looks_different": "¿Por qué la página de inicio de sesión se ve diferente?",
+				"use_identity_number": "Quiero utilizar mi número de Internet Identity",
+				"lost_identity_number": "Perdí mi número de Internet Identity",
+				"feedback_text": "Sus comentarios nos ayudan a mejorar $oisy_short.",
 				"thanks_text": "¡Gracias!",
-				"useful_links": "",
+				"useful_links": "Enlaces útiles",
 				"identity_new_identity": "$oisy_short Wallet cambia el dominio de Internet Identity a: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"switch_to_new_internet_identity": "",
-				"identity_legacy_identity_title": "",
-				"identity_legacy_identity_item_1": "",
-				"identity_legacy_identity_item_2": "",
-				"identity_new_identity_title": "",
-				"identity_new_identity_item_1": "",
-				"identity_new_identity_item_2": "",
-				"identity_new_identity_link": "",
+				"switch_to_new_internet_identity": "$oisy_name cambia a Internet Identity 2.0",
+				"identity_legacy_identity_title": "¿Ya no ves tu número de Internet Identity en la pantalla de inicio de sesión? Puedes encontrarlo mediante cualquiera de los siguientes métodos:",
+				"identity_legacy_identity_item_1": "Revise la lista de números de identidad que ha utilizado anteriormente en <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> o <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
+				"identity_legacy_identity_item_2": "Mira el número al comienzo de una frase de recuperación que hayas guardado anteriormente.",
+				"identity_new_identity_title": "$oisy_name ahora usa Internet Identity 2.0, que ofrece varias mejoras y le permite conectar su identidad con sus inicios de sesión en Google, Apple o Microsoft.",
+				"identity_new_identity_item_1": "Para migrar su identidad existente, haga clic en el enlace “Upgrade your Identity” en la parte superior de la nueva página de inicio de sesión y siga los pasos.",
+				"identity_new_identity_item_2": "Aún puedes usar la página de inicio de sesión legacy con tu número de Internet Identity. Simplemente haz clic en el enlace de abajo para acceder a la pantalla de inicio de sesión antigua.",
+				"identity_new_identity_link": "Obtenga más información sobre Internet Identity 2.0 en OISY Docs",
 				"identity_legacy_sign_in": "Iniciar sesión con el dominio antiguo de Internet Identity",
 				"identity_learn_more": "Más información en los Docs de $oisy_short",
-				"oisy_introduction": "",
+				"oisy_introduction": "$oisy_short Introducción",
 				"private_key": "",
 				"asset_control": "",
-				"internet_identity_help_center": "",
+				"internet_identity_help_center": "Centro de ayuda de Internet Identity 2.0",
 				"need_help": "Necesito ayuda",
 				"sign_in": "¿ iniciar sesión?"
 			},
@@ -1807,7 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "Al hacer clic en este botón, aceptas los $link",
-			"instruction_two_buttons": "",
+			"instruction_two_buttons": "Al hacer clic en uno de los botones, aceptas los $link",
 			"body": ""
 		},
 		"alt": {

@@ -46,9 +46,9 @@
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
 			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können.",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"internet_identity_banner_first_part": "$oisy_name benutzt jetzt",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "Mehr erfahren"
 		},
 		"alt": {
 			"logo": "$name-Logo",
@@ -121,22 +121,22 @@
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
-			"legacy_login": "",
+			"legacy_login": "Legacy Login",
 			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
 			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
-			"social_login": ""
+			"social_login": "Einfacher und sicherer Zugriff via Social Login"
 		},
 		"alt": {
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil"
 		},
 		"message": {
-			"session_locked": ""
+			"session_locked": "Deine Session wurde in einem anderem Browsertab gesperrt."
 		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",
 			"session_expired": "Deine Sitzung ist abgelaufen, du wurdest abgemeldet.",
-			"reload_and_retry": ""
+			"reload_and_retry": "Etwas ist schiefgelaufen als du dich angemeldet hast. Bitte lade die Seite neu und versuche es erneut. Falls es weiterhin passiert, kontaktiere bitte Support."
 		},
 		"error": {
 			"no_internet_identity": "Keine Internet Identity.",
@@ -151,29 +151,29 @@
 		},
 		"help": {
 			"text": {
-				"title": "",
-				"description": "",
-				"login_page_looks_different": "",
-				"use_identity_number": "",
-				"lost_identity_number": "",
-				"feedback_text": "",
+				"title": "Das Einloggen wurde unterbrochen",
+				"description": "Es scheint du hast das Anmelden abgebrochen. Wir würden gerne verstehen was passiert ist, damit wir den Prozess verbessern können.",
+				"login_page_looks_different": "Wieso schaut die Login Seite so anders aus?",
+				"use_identity_number": "Ich möchte meine Internet Identity Nummer verwenden",
+				"lost_identity_number": "Ich habe meine Internet Identity Nummer vergessen",
+				"feedback_text": "Deine Rückmeldung hilft uns, $oisy_short zu verbessern.",
 				"thanks_text": "Danke!",
-				"useful_links": "",
+				"useful_links": "Hilfreiche Links",
 				"identity_new_identity": "$oisy_short Wallet wechselt die Internet Identity-Domain zu: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"switch_to_new_internet_identity": "",
-				"identity_legacy_identity_title": "",
-				"identity_legacy_identity_item_1": "",
-				"identity_legacy_identity_item_2": "",
-				"identity_new_identity_title": "",
-				"identity_new_identity_item_1": "",
-				"identity_new_identity_item_2": "",
-				"identity_new_identity_link": "",
-				"identity_legacy_sign_in": "Mit der Legacy-Internet-Identity-Domain anmelden",
+				"switch_to_new_internet_identity": "$oisy_name switches to Internet Identity 2.0",
+				"identity_legacy_identity_title": "Du siehst deine Internet Identity Number auf dem Einloggen Schirm nicht mehr? Du kannst sie mit einer der folgenden Methoden wiederfinden:",
+				"identity_legacy_identity_item_1": "Überprüfe die angezeigten Nummern auf einer der Seiten auf denen du dich früher mal angemeldet hast: <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> oder <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
+				"identity_legacy_identity_item_2": "Du findest die Nummer auch an erster Stelle der Recovery Phrase die du eventuell füher mal niedergeschrieben hast.",
+				"identity_new_identity_title": "$oisy_name benutzt jetzt Internet Identity 2.0, das zahlreiche Verbesserungen enthält und es dir erlaubt, dich auch via deinem Konto bei Google, Apple oder Microsoft anzumelden.",
+				"identity_new_identity_item_1": "Um deine bestehende Identity zu aktualisieren, klicke auf den “Upgrade your identity“ Button im oberen Bereich des neuen Login Schirmes, und folge den weiteren Schritten.",
+				"identity_new_identity_item_2": "Du kannst noch den alten Login Schirm mit deiner Identity Nummer verwenden. Klicke dazu den unten stehenden Link.",
+				"identity_new_identity_link": "Erfahre mehr zu Internet Identity 2.0 in unserer Dokumentation",
+				"identity_legacy_sign_in": "Mit Internet Identity 1.0 anmelden (legacy)",
 				"identity_learn_more": "Mehr erfahren in den $oisy_short Docs",
-				"oisy_introduction": "",
-				"private_key": "",
-				"asset_control": "",
-				"internet_identity_help_center": "",
+				"oisy_introduction": "$oisy_short Introduction",
+				"private_key": "Who controls the private key for the native assets?",
+				"asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet",
+				"internet_identity_help_center": "Internet Identity 2.0 Help Center",
 				"need_help": "Brauchst du Hilfe bei",
 				"sign_in": "Anmeldung?"
 			},
@@ -187,7 +187,7 @@
 			"title_part_1": "Deine Wallet ist gesichert",
 			"title_part_2": "Du hast deine Wallet gesperrt. Entsperre sie um fortzufahren, oder logge dich aus.",
 			"unlock": "Entsperren",
-			"unlock_with_legacy_login": "",
+			"unlock_with_legacy_login": "Entsperren via Legacy Login",
 			"logout": "Ausloggen",
 			"logout_clear_cash_message": "Ausloggen wird alle lokal gecachten Daten löschen",
 			"learn_more": "Erfahre mehr"
@@ -224,8 +224,8 @@
 			"walletconnect": "Wallet Connect",
 			"game": "Spiele",
 			"tools": "Tools",
-			"ai": "",
-			"nft": ""
+			"ai": "KI",
+			"nft": "NFT"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -1807,7 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
-			"instruction_two_buttons": "",
+			"instruction_two_buttons": "Durch Klicken einer dieser Schaltflächen stimmst du den $link zu",
 			"body": ""
 		},
 		"alt": {

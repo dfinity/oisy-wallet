@@ -49,8 +49,7 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcC
 				withdrawalStatuses({ minterCanisterId, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncStatusesResults({ certified, ...rest }),
 			onUpdateError: ({ error }) => this.postMessageWalletError(error),
-			identity,
-			resolution: 'all_settled'
+			identity
 		});
 	};
 

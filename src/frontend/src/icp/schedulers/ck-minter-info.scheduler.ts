@@ -55,8 +55,7 @@ export class CkMinterInfoScheduler<
 				this.minterInfo({ minterCanisterId, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncMinterInfo({ certified, ...rest }),
 			onUpdateError: ({ error }) => this.postMessageWalletError(error),
-			identity,
-			resolution: 'all_settled'
+			identity
 		});
 	};
 
