@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import {debounce, isNullish} from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
@@ -20,6 +20,7 @@
 	import type { SaveCustomExtVariant } from '$lib/types/custom-token';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
+	import {untrack} from "svelte";
 
 	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
 		if (isNullish($ethAddress)) {
