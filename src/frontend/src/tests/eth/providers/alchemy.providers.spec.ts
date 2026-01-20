@@ -430,6 +430,64 @@ describe('alchemy.providers', () => {
 
 			expect(Alchemy.prototype.nft.getNftMetadata).toHaveBeenCalledOnce();
 		});
+
+		it('should use cached values when available', async () => {
+			// Svelte map already has cached value from previous test runs
+			vi.spyOn(SvelteMap.prototype, 'get').mockRestore();
+
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getNftMetadata: vi.fn().mockResolvedValue(mockApiResponse)
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			await provider.getNftMetadata({ token: mockValidErc1155Token, tokenId: mockTokenId });
+
+			// give different values to the endpoint to ensure the cache is used
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getNftMetadata: vi.fn().mockResolvedValue({
+						tokenId: '1',
+						name: 'AnotherName',
+						image: { originalUrl: 'https://anotherdownload.com' },
+						description: 'another description',
+						raw: { metadata: {} },
+						contract: {
+							address: mockValidErc1155Token.address,
+							tokenType: NftTokenType.ERC1155,
+							openSeaMetadata: {
+								bannerImageUrl: 'https://anotherdownload.com',
+								lastIngestedAt: '123_456'
+							},
+							spamClassifications: [NftSpamClassification.Unknown]
+						},
+						tokenType: NftTokenType.ERC1155,
+						timeLastUpdated: '456_123'
+					})
+				},
+				configurable: true
+			});
+
+			const nft = await provider.getNftMetadata({
+				token: mockValidErc1155Token,
+				tokenId: mockTokenId
+			});
+
+			expect(nft).toStrictEqual({
+				id: parseNftId('1'),
+				collection: {
+					...mapTokenToCollection(mockValidErc1155Token)
+				},
+				mediaStatus: {
+					image: NftMediaStatusEnum.INVALID_DATA,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
+			});
+			expect(Alchemy.prototype.nft?.getNftMetadata).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('getTokensForOwner', () => {
