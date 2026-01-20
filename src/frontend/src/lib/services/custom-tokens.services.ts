@@ -1,6 +1,7 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { listCustomTokens } from '$lib/api/backend.api';
 import { getIdbAllCustomTokens, setIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
+import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { assertNever, fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
@@ -27,6 +28,8 @@ const loadCustomTokensFromBackend = async ({
 		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
+
+	backendCustomTokens.set(tokens);
 
 	// Caching the custom tokens in the IDB if update call
 	if (certified && tokens.length > 0) {
