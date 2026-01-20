@@ -12,7 +12,63 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
+import type { Networkish } from 'ethers/providers';
+import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
+
+const cachedNftMetadata = new SvelteMap<
+	Networkish,
+	SvelteMap<string, SvelteMap<NftId, SvelteMap<NftId, NftMetadata>>>
+>();
+
+const getCachedNftMetadata = ({
+	network,
+	contractAddress,
+	tokenId
+}: {
+	network: Networkish;
+	contractAddress: Erc721ContractAddress['address'];
+	tokenId: NftId;
+}): NftMetadata | undefined =>
+	cachedNftMetadata.get(network)?.get(contractAddress)?.get(tokenId)?.get(tokenId);
+
+const updateCachedNftMetadata = ({
+	network,
+	contractAddress,
+	tokenId,
+	metadata
+}: {
+	network: Networkish;
+	contractAddress: Erc721ContractAddress['address'];
+	tokenId: NftId;
+	metadata: NftMetadata;
+}): void => {
+	let networkMap = cachedNftMetadata.get(network);
+
+	if (isNullish(networkMap)) {
+		networkMap = new SvelteMap<
+			Erc721ContractAddress['address'],
+			SvelteMap<NftId, SvelteMap<NftId, NftMetadata>>
+		>();
+		cachedNftMetadata.set(network, networkMap);
+	}
+
+	let contractMap = networkMap.get(contractAddress);
+
+	if (isNullish(contractMap)) {
+		contractMap = new SvelteMap<NftId, SvelteMap<NftId, NftMetadata>>();
+		networkMap.set(contractAddress, contractMap);
+	}
+
+	let tokenMap = contractMap.get(tokenId);
+
+	if (isNullish(tokenMap)) {
+		tokenMap = new SvelteMap<NftId, NftMetadata>();
+		contractMap.set(tokenId, tokenMap);
+	}
+
+	tokenMap.set(tokenId, metadata);
+};
 
 export class InfuraErc721Provider extends InfuraErc165Provider {
 	isInterfaceErc721 = (contract: Erc721ContractAddress): Promise<boolean> =>
@@ -39,6 +95,16 @@ export class InfuraErc721Provider extends InfuraErc165Provider {
 		contractAddress: Erc721ContractAddress['address'];
 		tokenId: NftId;
 	}): Promise<NftMetadata> => {
+		const cachedMetadata = getCachedNftMetadata({
+			network: this.network,
+			contractAddress,
+			tokenId
+		});
+
+		if (nonNullish(cachedMetadata)) {
+			return cachedMetadata;
+		}
+
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
 		const tokenUri = await erc721Contract.tokenURI(tokenId);
@@ -55,7 +121,7 @@ export class InfuraErc721Provider extends InfuraErc165Provider {
 
 		const mappedAttributes = 'attributes' in metadata ? mapNftAttributes(metadata.attributes) : [];
 
-		return {
+		const nftMetadata: NftMetadata = {
 			id: tokenId,
 			...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }),
 			...(nonNullish(metadata.name) && { name: metadata.name }),
@@ -63,6 +129,15 @@ export class InfuraErc721Provider extends InfuraErc165Provider {
 				notEmptyString(metadata.description) && { description: metadata.description }),
 			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })
 		};
+
+		updateCachedNftMetadata({
+			network: this.network,
+			contractAddress,
+			tokenId,
+			metadata: nftMetadata
+		});
+
+		return nftMetadata;
 	};
 }
 
