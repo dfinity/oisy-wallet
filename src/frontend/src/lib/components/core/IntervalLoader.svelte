@@ -70,8 +70,16 @@
 		return () => stopTimer();
 	});
 
+	let intervalEffectInitialRun = true;
+
 	$effect(() => {
 		[interval];
+
+		if (intervalEffectInitialRun) {
+			intervalEffectInitialRun = false;
+
+			return;
+		}
 
 		untrack(() => resetTimer());
 	});
