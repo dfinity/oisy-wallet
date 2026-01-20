@@ -32,6 +32,14 @@ import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
+vi.mock('@dfinity/utils', async () => {
+	const actual = await vi.importActual('@dfinity/utils');
+	return {
+		...actual,
+		debounce: (fn: () => void) => fn // Execute immediately instead of debouncing
+	};
+});
+
 vi.mock('$app/environment', () => ({
 	browser: true
 }));
