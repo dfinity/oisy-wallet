@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext, onMount, setContext, type Snippet } from 'svelte';
+	import {getContext, onMount, setContext, type Snippet, untrack} from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
@@ -42,6 +42,12 @@
 
 	onMount(() => {
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
+
+		return () => {
+			modifiedTokens.clear();
+			userHasEdited = false;
+			tokensInContext = [];
+		};
 	});
 
 	let allTokensSorted: Token[] = $derived(
@@ -55,6 +61,8 @@
 				)
 			: []
 	);
+
+	let tokensInContext: Token[] = $state([]);
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -76,8 +84,19 @@
 
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
+	const updateContextTokens = () => {
+		// Keep the context list in sync only until the user starts editing.
+		// This prevents overwriting the locally toggled enabled state.
+		if (!userHasEdited) {
+			tokensInContext = allTokensSorted;
+			setTokens(tokensInContext);
+		}
+	};
+
 	$effect(() => {
-		setTokens(allTokensSorted);
+		[userHasEdited, allTokensSorted];
+
+		untrack(() => updateContextTokens());
 	});
 
 	let showNetworks = $state(false);
@@ -88,17 +107,19 @@
 
 	const modifiedTokens = new SvelteMap<TokenId, Token>();
 
+	let userHasEdited = $state(false);
+
 	const onToggle = ({ id, ...rest }: Token) => {
 		const current = modifiedTokens.get(id);
 
 		// we need to set the tokenlist for the ModalTokenListContext manually when we change the enabled prop,
 		// because the exposed prop from the context is a derived and on update of the data the "enabled" gets reset
-		const tokensList = [...allTokensSorted];
-		const token = tokensList.find((t) => t.id === id);
-		if (nonNullish(token) && isTokenToggleable(token)) {
-			token.enabled = !token.enabled;
-			setTokens(tokensList);
-		}
+		userHasEdited = true;
+		const tokensList = tokensInContext.map((t) =>
+			t.id === id && isTokenToggleable(t) ? { ...t, enabled: !t.enabled } : t
+		);
+		tokensInContext = tokensList;
+		setTokens(tokensList);
 
 		if (nonNullish(current)) {
 			modifiedTokens.delete(id);
