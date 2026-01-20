@@ -25,6 +25,14 @@ import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
+vi.mock('@dfinity/utils', async () => {
+	const actual = await vi.importActual('@dfinity/utils');
+	return {
+		...actual,
+		debounce: (fn: () => void) => fn // Execute immediately instead of debouncing
+	};
+});
+
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
 }));
