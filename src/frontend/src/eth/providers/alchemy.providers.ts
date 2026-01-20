@@ -127,6 +127,55 @@ export const initPendingTransactionsListener = ({
 	};
 };
 
+const cachedNftMetadata = new SvelteMap<
+	Network,
+	SvelteMap<EthNonFungibleToken['address'], SvelteMap<NftId, Nft>>
+>();
+
+const getCachedNftMetadata = ({
+	network,
+	address,
+	tokenId
+}: {
+	network: Network;
+	address: EthNonFungibleToken['address'];
+	tokenId: NftId;
+}): Nft | undefined => cachedNftMetadata.get(network)?.get(address)?.get(tokenId);
+
+const updateCachedNftMetadata = ({
+	network,
+	address,
+	tokenId,
+	metadata
+}: {
+	network: Network;
+	address: EthNonFungibleToken['address'];
+	tokenId: NftId;
+	metadata: Nft;
+}) => {
+	const networkMap =
+		cachedNftMetadata.get(network) ??
+		(() => {
+			const map = new SvelteMap<EthNonFungibleToken['address'], SvelteMap<NftId, Nft>>();
+
+			cachedNftMetadata.set(network, map);
+
+			return map;
+		})();
+
+	const addressMap =
+		networkMap.get(address) ??
+		(() => {
+			const map = new SvelteMap<NftId, Nft>();
+
+			networkMap.set(address, map);
+
+			return map;
+		})();
+
+	addressMap.set(tokenId, metadata);
+};
+
 const cachedContractMetadata = new SvelteMap<
 	Network,
 	SvelteMap<EthAddress, Erc1155Metadata | Erc721Metadata>
@@ -290,6 +339,16 @@ export class AlchemyProvider {
 		token: EthNonFungibleToken;
 		tokenId: NftId;
 	}): Promise<Nft> => {
+		const cachedMetadata = getCachedNftMetadata({
+			network: this.network,
+			address: token.address,
+			tokenId
+		});
+
+		if (nonNullish(cachedMetadata)) {
+			return cachedMetadata;
+		}
+
 		const { address: contractAddress } = token;
 
 		const nft: AlchemyNft = await this.deprecatedProvider.nft.getNftMetadata(
@@ -297,7 +356,16 @@ export class AlchemyProvider {
 			tokenId
 		);
 
-		return await this.mapNftFromRpc({ nft, token });
+		const metadata: Nft = await this.mapNftFromRpc({ nft, token });
+
+		updateCachedNftMetadata({
+			network: this.network,
+			address: contractAddress,
+			tokenId,
+			metadata
+		});
+
+		return metadata;
 	};
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
