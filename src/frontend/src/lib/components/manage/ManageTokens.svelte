@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import {getContext, onMount, setContext, type Snippet, untrack} from 'svelte';
+	import { getContext, onMount, setContext, type Snippet, untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
