@@ -43,19 +43,25 @@ const updateCachedNftMetadata = ({
 	tokenId: NftId;
 	metadata: NftMetadata;
 }) => {
-	let networkMap = cachedNftMetadata.get(network);
+	const networkMap =
+		cachedNftMetadata.get(network) ??
+		(() => {
+			const map = new SvelteMap<Erc1155ContractAddress['address'], SvelteMap<NftId, NftMetadata>>();
 
-	if (isNullish(networkMap)) {
-		networkMap = new SvelteMap<Erc1155ContractAddress['address'], SvelteMap<NftId, NftMetadata>>();
-		cachedNftMetadata.set(network, networkMap);
-	}
+			cachedNftMetadata.set(network, map);
 
-	let contractMap = networkMap.get(contractAddress);
+			return map;
+		})();
 
-	if (isNullish(contractMap)) {
-		contractMap = new SvelteMap<NftId, NftMetadata>();
-		networkMap.set(contractAddress, contractMap);
-	}
+	const contractMap =
+		networkMap.get(contractAddress) ??
+		(() => {
+			const map = new SvelteMap<NftId, NftMetadata>();
+
+			networkMap.set(contractAddress, map);
+
+			return map;
+		})();
 
 	contractMap.set(tokenId, metadata);
 };
