@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import {onMount, untrack} from 'svelte';
+	import { onMount, untrack } from 'svelte';
 
 	interface Props {
 		onLoad: () => Promise<void>;
@@ -73,6 +73,6 @@
 	$effect(() => {
 		[interval];
 
-		untrack(()=>resetTimer());
+		untrack(() => resetTimer());
 	});
 </script>
