@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
-	import { untrack } from 'svelte';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
@@ -140,14 +139,6 @@
 
 		event?.detail.callback?.();
 	};
-
-	const debounceReload = debounce(reload, 1000);
-
-	$effect(() => {
-		[$backendCustomTokens];
-
-		untrack(() => debounceReload());
-	});
 </script>
 
 <svelte:window onoisyReloadCollections={reload} />
