@@ -26,20 +26,30 @@ type LoadCustomTokensParams = LoadCustomTokensFromBackendParams & {
 	useCache?: boolean;
 };
 
-const pending: Array<{
-	resolve: (value: CustomToken[]) => void;
-	reject: (reason?: unknown) => void;
-}> = [];
+type DebounceWindowKey = 'update' | 'query';
 
-let latestParams: CanisterApiFunctionParams<QueryParams> | undefined;
+interface DebounceWindow {
+	pending: Array<{
+		resolve: (value: CustomToken[]) => void;
+		reject: (reason?: unknown) => void;
+	}>;
+	latestParams?: CanisterApiFunctionParams<QueryParams>;
+}
 
-const debouncedListCustomTokens = debounce(async () => {
+const windows: Record<DebounceWindowKey, DebounceWindow> = {
+	update: { pending: [] },
+	query: { pending: [] }
+};
+
+const debouncedQueryListCustomTokens = debounce(async () => {
+	const window = windows.query;
+
+	const { pending, latestParams } = window;
+
 	const toFlush = pending.splice(0, pending.length);
-
 	const params = latestParams;
 
-	// start a new window state regardless of outcome
-	latestParams = undefined;
+	window.latestParams = undefined;
 
 	// nothing to do: flush waiters with empty to avoid hanging
 	if (isNullish(params)) {
@@ -58,15 +68,60 @@ const debouncedListCustomTokens = debounce(async () => {
 	}
 });
 
+const debouncedUpdateListCustomTokens = debounce(async () => {
+	const window = windows.update;
+
+	const { pending, latestParams } = window;
+
+	const toFlush = pending.splice(0, pending.length);
+
+	const params = latestParams;
+
+	// start a new window state regardless of outcome
+	window.latestParams = undefined;
+
+	// nothing to do: flush waiters with empty to avoid hanging
+	if (isNullish(params)) {
+		// should not happen, but avoid hanging tests
+		toFlush.forEach(({ resolve }) => resolve([]));
+
+		return;
+	}
+
+	try {
+		const tokens = await listCustomTokens(params);
+
+		toFlush.forEach(({ resolve }) => resolve(tokens));
+	} catch (error: unknown) {
+		toFlush.forEach(({ reject }) => reject(error));
+	}
+});
+
+const debouncedByWindow: Record<DebounceWindowKey, () => void> = {
+	query: debouncedQueryListCustomTokens,
+	update: debouncedUpdateListCustomTokens
+};
+
 export const debounceListCustomTokens = (
 	params: CanisterApiFunctionParams<QueryParams>
 ): Promise<CustomToken[]> =>
 	new Promise<CustomToken[]>((resolve, reject) => {
-		pending.push({ resolve, reject });
+		const key: DebounceWindowKey = params.certified ? 'update' : 'query';
 
-		latestParams = params;
+		const window =
+			windows[key] ??
+			(() => {
+				const newWindow: DebounceWindow = { pending: [] };
 
-		debouncedListCustomTokens();
+				windows[key] = newWindow;
+
+				return newWindow;
+			})();
+
+		window.pending.push({ resolve, reject });
+		window.latestParams = params;
+
+		debouncedByWindow[key]();
 	});
 
 const loadCustomTokensFromBackend = async ({

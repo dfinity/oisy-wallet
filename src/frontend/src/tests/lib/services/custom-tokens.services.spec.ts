@@ -120,6 +120,37 @@ describe('custom-tokens.services', () => {
 			expect(listCustomTokens).toHaveBeenNthCalledWith(1, mockParams);
 			expect(listCustomTokens).toHaveBeenNthCalledWith(2, mockParams);
 		});
+
+		it('should not debounce if the calls have differente certified param', async () => {
+			const updateParams = {
+				...mockParams,
+				certified: true
+			};
+
+			const queryParams = {
+				...mockParams,
+				certified: false
+			};
+
+			const firstTokens = mockCustomTokens.slice(0, 2);
+			const secondTokens = mockCustomTokens.slice(2, 4);
+
+			vi.mocked(listCustomTokens)
+				.mockResolvedValueOnce(firstTokens)
+				.mockResolvedValueOnce(secondTokens);
+
+			const certifiedPromise = debounceListCustomTokens(updateParams);
+			const queryPromise = debounceListCustomTokens(queryParams);
+
+			const [certifiedResult, queryResult] = await Promise.all([certifiedPromise, queryPromise]);
+
+			expect(certifiedResult).toStrictEqual(firstTokens);
+			expect(queryResult).toStrictEqual(secondTokens);
+
+			expect(listCustomTokens).toHaveBeenCalledTimes(2);
+			expect(listCustomTokens).toHaveBeenNthCalledWith(1, updateParams);
+			expect(listCustomTokens).toHaveBeenNthCalledWith(2, queryParams);
+		});
 	});
 
 	describe('loadNetworkCustomTokens', () => {
