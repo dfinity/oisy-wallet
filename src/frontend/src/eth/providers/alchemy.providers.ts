@@ -33,6 +33,7 @@ import {
 	type OwnedNftsResponse
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
+import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
@@ -124,6 +125,42 @@ export const initPendingTransactionsListener = ({
 			provider = null;
 		}
 	};
+};
+
+const cachedContractMetadata = new SvelteMap<
+	Network,
+	SvelteMap<EthAddress, Erc1155Metadata | Erc721Metadata>
+>();
+
+const getCachedContractMetadata = ({
+	network,
+	address
+}: {
+	network: Network;
+	address: EthAddress;
+}): Erc1155Metadata | Erc721Metadata | undefined =>
+	cachedContractMetadata.get(network)?.get(address);
+
+const updateCachedContractMetadata = ({
+	network,
+	address,
+	metadata
+}: {
+	network: Network;
+	address: EthAddress;
+	metadata: Erc1155Metadata | Erc721Metadata;
+}) => {
+	const networkMap =
+		cachedContractMetadata.get(network) ??
+		(() => {
+			const map = new SvelteMap<EthAddress, Erc1155Metadata | Erc721Metadata>();
+
+			cachedContractMetadata.set(network, map);
+
+			return map;
+		})();
+
+	networkMap.set(address, metadata);
 };
 
 export class AlchemyProvider {
@@ -275,6 +312,7 @@ export class AlchemyProvider {
 					: ownedContract.tokenType === 'ERC1155'
 						? ('erc1155' as const)
 						: undefined;
+
 			if (isNullish(tokenStandard)) {
 				return acc;
 			}
@@ -292,6 +330,15 @@ export class AlchemyProvider {
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-metadata-endpoints/get-contract-metadata-v-3
 	getContractMetadata = async (address: EthAddress): Promise<Erc1155Metadata | Erc721Metadata> => {
+		const cachedMetadata = getCachedContractMetadata({
+			network: this.network,
+			address
+		});
+
+		if (nonNullish(cachedMetadata)) {
+			return cachedMetadata;
+		}
+
 		const result: AlchemyProviderContract =
 			await this.deprecatedProvider.nft.getContractMetadata(address);
 
@@ -314,7 +361,7 @@ export class AlchemyProvider {
 					? result.name
 					: undefined;
 
-		return {
+		const metadata: Erc1155Metadata | Erc721Metadata = {
 			...(nonNullish(maybeName) && { name: maybeName }),
 			...(nonNullish(result.symbol) && { symbol: result.symbol }),
 			...(nonNullish(result.openSeaMetadata?.description) && {
@@ -322,6 +369,14 @@ export class AlchemyProvider {
 			}),
 			decimals: 0
 		};
+
+		updateCachedContractMetadata({
+			network: this.network,
+			address,
+			metadata
+		});
+
+		return metadata;
 	};
 }
 
