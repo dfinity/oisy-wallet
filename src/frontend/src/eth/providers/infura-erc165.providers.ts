@@ -9,7 +9,7 @@ import { InfuraProvider, type Networkish } from 'ethers/providers';
 export class InfuraErc165Provider implements Erc165Provider {
 	protected readonly provider: InfuraProvider;
 
-	constructor(private readonly network: Networkish) {
+	constructor(protected readonly network: Networkish) {
 		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
 	}
 
