@@ -21,6 +21,14 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
+vi.mock('@dfinity/utils', async () => {
+	const actual = await vi.importActual('@dfinity/utils');
+	return {
+		...actual,
+		debounce: (fn: () => void) => fn // Execute immediately instead of debouncing
+	};
+});
+
 describe('custom-token.services', () => {
 	const backendCanisterMock = mock<BackendCanister>();
 	const ledgerCanisterMock = mock<IcrcLedgerCanister>();
