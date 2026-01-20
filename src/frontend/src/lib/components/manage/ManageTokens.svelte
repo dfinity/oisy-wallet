@@ -89,7 +89,7 @@
 		// This prevents overwriting the locally toggled enabled state.
 		if (!userHasEdited) {
 			tokensInContext = allTokensSorted;
-			setTokens(tokensInContext);
+			setTokens(allTokensSorted);
 		}
 	};
 

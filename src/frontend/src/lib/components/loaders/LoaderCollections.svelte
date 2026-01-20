@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { isNullish, queryAndUpdate } from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
-	import { get } from 'svelte/store';
+	import { untrack } from 'svelte';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
@@ -10,13 +10,13 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
-	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { COLLECTION_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 	import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { OisyReloadCollectionsEvent } from '$lib/types/custom-events';
 	import type { SaveCustomExtVariant } from '$lib/types/custom-token';
@@ -106,43 +106,48 @@
 		});
 	};
 
-	const load = async ({ extTokens = false }: { extTokens?: boolean }) => {
+	const load = async ({ extTokens }: { extTokens: boolean }) => {
 		if (isNullish($authIdentity)) {
 			return;
 		}
 
-		await queryAndUpdate({
-			request: async (params) =>
-				await listCustomTokens({
-					...params,
-					nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-				}),
-			onLoad: async ({ response: customTokens }) => {
-				const params: LoadTokensParams = {
-					identity: $authIdentity,
-					customTokens
-				};
+		const params: LoadTokensParams = {
+			identity: $authIdentity,
+			customTokens: $backendCustomTokens
+		};
 
-				await Promise.all([
-					loadErcTokens(params),
-					extTokens ? loadExtTokens(params) : Promise.resolve()
-				]);
-			},
-			identity: $authIdentity
-		});
+		try {
+			await Promise.all([
+				loadErcTokens(params),
+				extTokens ? loadExtTokens(params) : Promise.resolve()
+			]);
+		} catch (_: unknown) {
+			// no need to raise the error, but we should reload the custom tokens, just to avoid that it is caused by outdated tokens
+			await loadNetworkCustomTokens({
+				identity: $authIdentity,
+				filterTokens: () => true,
+				certified: true
+			});
+		}
 	};
 
 	const onLoad = async () => {
-		await load({});
+		await load({ extTokens: false });
 	};
 
 	const reload = async (event?: CustomEvent<OisyReloadCollectionsEvent>) => {
-		try {
-			await load({ extTokens: true });
-		} finally {
-			event?.detail.callback?.();
-		}
+		await load({ extTokens: true });
+
+		event?.detail.callback?.();
 	};
+
+	const debounceReload = debounce(reload, 1000);
+
+	$effect(() => {
+		[$backendCustomTokens];
+
+		untrack(() => debounceReload());
+	});
 </script>
 
 <svelte:window onoisyReloadCollections={reload} />
