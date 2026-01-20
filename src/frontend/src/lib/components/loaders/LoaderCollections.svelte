@@ -1,6 +1,7 @@
 <script lang="ts">
-	import {debounce, isNullish} from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
+	import { untrack } from 'svelte';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
@@ -13,6 +14,7 @@
 	import { COLLECTION_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 	import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 	import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 	import type { CanisterIdText } from '$lib/types/canister';
@@ -20,7 +22,6 @@
 	import type { SaveCustomExtVariant } from '$lib/types/custom-token';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
-	import {untrack} from "svelte";
 
 	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
 		if (isNullish($ethAddress)) {
@@ -115,10 +116,19 @@
 			customTokens: $backendCustomTokens
 		};
 
-		await Promise.all([
-			loadErcTokens(params),
-			extTokens ? loadExtTokens(params) : Promise.resolve()
-		]);
+		try {
+			await Promise.all([
+				loadErcTokens(params),
+				extTokens ? loadExtTokens(params) : Promise.resolve()
+			]);
+		} catch (_: unknown) {
+			// no need to catch the error, but we should reload the custom tokens, just to avoid that it is caused by outdated tokens
+			await loadNetworkCustomTokens({
+				identity: $authIdentity,
+				filterTokens: () => true,
+				certified: true
+			});
+		}
 	};
 
 	const onLoad = async () => {
@@ -126,11 +136,9 @@
 	};
 
 	const reload = async (event?: CustomEvent<OisyReloadCollectionsEvent>) => {
-		try {
-			await load({ extTokens: true });
-		} finally {
-			event?.detail.callback?.();
-		}
+		await load({ extTokens: true });
+
+		event?.detail.callback?.();
 	};
 
 	const debounceReload = debounce(reload, 1000);
