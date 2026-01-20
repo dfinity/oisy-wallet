@@ -78,6 +78,7 @@
 		(params: { filter: string; selectedNetwork?: Network }) => updateFilterList(params),
 		300
 	);
+
 	$effect(() => {
 		const { filter } = $tokenListStore;
 		const network = $selectedNetwork;
