@@ -6,25 +6,15 @@ import {
 	clearIdbEthAddress,
 	clearIdbSolAddressDevnet,
 	clearIdbSolAddressLocal,
-	clearIdbSolAddressMainnet,
-	deleteIdbBtcAddressMainnet,
-	deleteIdbBtcAddressTestnet,
-	deleteIdbEthAddress,
-	deleteIdbSolAddressDevnet,
-	deleteIdbSolAddressLocal,
-	deleteIdbSolAddressMainnet
+	clearIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
-import { clearIdbBalances, deleteIdbBalances } from '$lib/api/idb-balances.api';
-import { clearIdbAllCustomTokens, deleteIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
+import { clearIdbBalances } from '$lib/api/idb-balances.api';
+import { clearIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import {
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,
 	clearIdbIcTransactions,
-	clearIdbSolTransactions,
-	deleteIdbBtcTransactions,
-	deleteIdbEthTransactions,
-	deleteIdbIcTransactions,
-	deleteIdbSolTransactions
+	clearIdbSolTransactions
 } from '$lib/api/idb-transactions.api';
 import { deleteIdbAllOisyRelated } from '$lib/api/idb.api';
 import {
@@ -56,14 +46,7 @@ import { get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
 import { isNullish } from '@dfinity/utils';
-import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
-
-export enum PrincipalsStorage {
-	CURRENT = 'current',
-	ALL = 'all',
-	NONE = 'none'
-}
 
 export const signIn = async (
 	params: AuthSignInParams
@@ -136,18 +119,16 @@ export const signIn = async (
 
 export const signOut = ({
 	resetUrl = false,
-	clearPrincipalStorages = PrincipalsStorage.CURRENT,
 	source = ''
 }: {
 	resetUrl?: boolean;
-	clearPrincipalStorages?: PrincipalsStorage;
 	source?: string;
 }): Promise<void> => {
 	trackSignOut({
 		name: TRACK_SIGN_OUT_SUCCESS,
 		meta: { reason: 'user', resetUrl, source }
 	});
-	return logout({ resetUrl, clearPrincipalStorages });
+	return logout({ resetUrl });
 };
 
 export const errorSignOut = (text: string): Promise<void> => {
@@ -200,31 +181,15 @@ export const idleSignOut = (): Promise<void> => {
 			text,
 			level
 		},
-		clearPrincipalStorages: PrincipalsStorage.NONE
+		clearIdbStorages: false
 	});
 };
 
 export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
 	logout({
 		resetUrl,
-		clearPrincipalStorages: PrincipalsStorage.NONE
+		clearIdbStorages: false
 	});
-
-const emptyPrincipalIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<void>) => {
-	const { identity } = get(authStore);
-
-	if (isNullish(identity)) {
-		return;
-	}
-
-	try {
-		await deleteIdbStore(identity.getPrincipal());
-	} catch (err: unknown) {
-		// We silence the error.
-		// Effective logout is more important here.
-		console.error(err);
-	}
-};
 
 const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 	try {
@@ -235,25 +200,6 @@ const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 		console.error(err);
 	}
 };
-
-const deleteIdbStoreList = [
-	// Addresses
-	deleteIdbBtcAddressMainnet,
-	deleteIdbBtcAddressTestnet,
-	deleteIdbEthAddress,
-	deleteIdbSolAddressMainnet,
-	deleteIdbSolAddressDevnet,
-	deleteIdbSolAddressLocal,
-	// Tokens
-	deleteIdbAllCustomTokens,
-	// Transactions
-	deleteIdbBtcTransactions,
-	deleteIdbEthTransactions,
-	deleteIdbIcTransactions,
-	deleteIdbSolTransactions,
-	// Balances
-	deleteIdbBalances
-];
 
 const clearIdbStoreList = [
 	// Addresses
@@ -297,11 +243,11 @@ const disconnectWalletConnect = async () => {
 
 const logout = async ({
 	msg = undefined,
-	clearPrincipalStorages = PrincipalsStorage.CURRENT,
+	clearIdbStorages = true,
 	resetUrl = false
 }: {
 	msg?: ToastMsg;
-	clearPrincipalStorages?: PrincipalsStorage;
+	clearIdbStorages?: boolean;
 	resetUrl?: boolean;
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
@@ -309,9 +255,7 @@ const logout = async ({
 
 	await disconnectWalletConnect();
 
-	if (clearPrincipalStorages === PrincipalsStorage.CURRENT) {
-		await Promise.all(deleteIdbStoreList.map(emptyPrincipalIdbStore));
-	} else if (clearPrincipalStorages === PrincipalsStorage.ALL) {
+	if (clearIdbStorages) {
 		await Promise.all(clearIdbStoreList.map(clearIdbStore));
 	}
 
