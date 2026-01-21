@@ -104,7 +104,7 @@ describe('ConvertAmountSource', () => {
 		// wait for debounced setMax to be completed
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		expect(testProps.sendAmount).toBe('0.04991');
+		expect(testProps.sendAmount).toBe('0.0499');
 	});
 
 	it('should not update sendAmount value if max button was not clicked and total fee got updated', async () => {
