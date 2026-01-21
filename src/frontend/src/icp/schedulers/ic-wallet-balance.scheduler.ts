@@ -1,12 +1,13 @@
 import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
+import { createQueryAndUpdateWithWarmup } from '$lib/services/query.services';
 import type {
 	PostMessageDataRequestDip20,
 	PostMessageDataRequestIcp,
 	PostMessageDataRequestIcrc
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { isNullish, queryAndUpdate } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 
 // Not reactive, only used to hold values imperatively.
 interface IcrcBalanceStore {
@@ -19,6 +20,16 @@ export class IcWalletBalanceScheduler<
 		| PostMessageDataRequestIcp
 		| PostMessageDataRequestDip20
 > extends IcWalletScheduler<PostMessageDataRequest> {
+	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
+
+	private get queryAndUpdateWithWarmup() {
+		if (isNullish(this._queryAndUpdateWithWarmup)) {
+			this._queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+		}
+
+		return this._queryAndUpdateWithWarmup;
+	}
+
 	private store: IcrcBalanceStore = {
 		balance: undefined
 	};
@@ -37,7 +48,7 @@ export class IcWalletBalanceScheduler<
 		identity,
 		...data
 	}: SchedulerJobData<PostMessageDataRequest>) => {
-		await queryAndUpdate<bigint>({
+		await this.queryAndUpdateWithWarmup<bigint>({
 			request: ({ identity: _, certified }) => this.getBalance({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncBalance({ certified, ...rest }),
 			onUpdateError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
