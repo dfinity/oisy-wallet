@@ -61,7 +61,7 @@ export const sortTokens = <T extends Token>({
 		if (nonNullish(token)) {
 			acc.push(token);
 
-			tokenById.delete(pinnedId); // remove so it can't appear in otherTokens
+			tokenById.delete(pinnedId);
 		}
 
 		return acc;
