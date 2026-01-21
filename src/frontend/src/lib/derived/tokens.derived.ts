@@ -82,15 +82,15 @@ export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tok
 );
 
 export const tokensToPin: Readable<TokenToPin[]> = derived(
-	[icrcChainFusionDefaultTokens, defaultEthereumTokens],
-	([$icrcChainFusionDefaultTokens, $defaultEthereumTokens]) => [
+	[icrcChainFusionDefaultTokens, enabledEvmTokens],
+	([$icrcChainFusionDefaultTokens, $enabledEvmTokens]) => [
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
 		TESTICP_TOKEN,
 		SOLANA_TOKEN,
 		...$icrcChainFusionDefaultTokens,
-		...$defaultEthereumTokens.filter((token) => token !== ETHEREUM_TOKEN)
+		...$enabledEvmTokens
 	]
 );
 
