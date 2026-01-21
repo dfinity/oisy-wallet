@@ -59,7 +59,15 @@ interface BtcWalletData {
 }
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
-	private queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
+
+	private get queryAndUpdateWithWarmup() {
+		if (isNullish(this._queryAndUpdateWithWarmup)) {
+			this._queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+		}
+
+		return this._queryAndUpdateWithWarmup;
+	}
 
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
 
