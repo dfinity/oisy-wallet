@@ -40,7 +40,7 @@ export const enabledNonFungibleNetworkTokensWithoutSpam: Readable<NonFungibleTok
 /**
  * Fungible network tokens sorted by market cap, with the ones to pin at the top of the list.
  */
-export const combinedDerivedSortedFungibleNetworkTokens: Readable<Token[]> = derived(
+const combinedDerivedSortedFungibleNetworkTokens: Readable<Token[]> = derived(
 	[enabledFungibleNetworkTokens, tokensToPin, exchanges],
 	([$tokens, $tokensToPin, $exchanges]) => sortTokens({ $tokens, $exchanges, $tokensToPin })
 );
