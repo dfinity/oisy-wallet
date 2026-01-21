@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {  nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { type Snippet, untrack } from 'svelte';
 	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
