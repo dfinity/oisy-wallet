@@ -31,11 +31,17 @@ export const ManageTokensCases: ManageTokensConfig[] = [
 		tokenSymbol: 'EURC',
 		networkSymbol: 'SOL'
 	},
-	{
+		{
 		type: 'DevnetSPL',
 		tokenSymbol: 'DevnetUSDC',
 		networkSymbol: 'SOL (Devnet)'
+	},
+	{
+		type: 'Bitcoin',
+		tokenSymbol: 'BTC',
+		networkSymbol: 'Bitcoin'
 	}
+];
 ];
 
 export class ManageTokensPage extends HomepageLoggedIn {
