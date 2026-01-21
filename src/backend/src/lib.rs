@@ -68,7 +68,7 @@ use crate::{
     bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
-    types::{ContactMap, PowChallengeMap},
+    types::{AgreementsHistoryMap, ContactMap, PowChallengeMap},
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
         update_experimental_feature_settings, update_network_settings,
@@ -101,6 +101,7 @@ const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
+const USER_AGREEMENTS_HISTORY_MEMORY_ID: MemoryId = MemoryId::new(7);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -117,6 +118,7 @@ thread_local! {
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
+            agreements_history: AgreementsHistoryMap::init(mm.borrow().get(USER_AGREEMENTS_HISTORY_MEMORY_ID)),
         })
     );
 }
@@ -155,6 +157,7 @@ pub struct State {
     user_profile_updated: UserProfileUpdatedMap,
     pow_challenge: PowChallengeMap,
     contact: ContactMap,
+    agreements_history: AgreementsHistoryMap,
 }
 
 fn set_config(arg: InitArg) {
