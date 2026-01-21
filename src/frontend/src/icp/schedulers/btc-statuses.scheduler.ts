@@ -13,7 +13,15 @@ import { assertNonNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { RetrieveBtcStatusV2WithId } from '@icp-sdk/canisters/ckbtc';
 
 export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcCk> {
-	private queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
+
+	private get queryAndUpdateWithWarmup() {
+		if (isNullish(this._queryAndUpdateWithWarmup)) {
+			this._queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+		}
+
+		return this._queryAndUpdateWithWarmup;
+	}
 
 	private timer = new SchedulerTimer('syncBtcStatusesStatus');
 
