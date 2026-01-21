@@ -10,7 +10,7 @@ import type { Nft, NftCollection } from '$lib/types/nft';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { getMediaStatusOrCache } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { notEmptyString } from '@dfinity/utils';
+import { notEmptyString, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -22,12 +22,13 @@ const mapExtCollection = ({ canisterId, ...rest }: ExtToken): NftCollection => (
 export const mapExtNft = async ({
 	index,
 	token,
-	identity
+	identity,
+	certified
 }: {
 	index: TokenIndex;
 	token: ExtToken;
 	identity: Identity;
-}): Promise<Nft> => {
+} & QueryParams): Promise<Nft> => {
 	const { canisterId } = token;
 
 	const identifier = extIndexToIdentifier({ collectionId: Principal.fromText(canisterId), index });
@@ -41,7 +42,8 @@ export const mapExtNft = async ({
 	} = (await getExtMetadata({
 		canisterId,
 		tokenIdentifier: identifier,
-		identity
+		identity,
+		certified
 	})) ?? {};
 
 	const imageUrl = fetchedImageUrl ?? defaultImageUrl;
@@ -69,7 +71,10 @@ const mapDip721Collection = ({ canisterId, ...rest }: Dip721Token): NftCollectio
 });
 
 // TODO: Fetch metadata of the NFT
-export const mapDip721Nft = ({ index, token }: { index: bigint; token: Dip721Token }): Nft => {
+export const mapDip721Nft = ({
+	index,
+	token
+}: { index: bigint; token: Dip721Token } & QueryParams): Nft => {
 	const mediaStatus = {
 		image: NftMediaStatusEnum.INVALID_DATA,
 		thumbnail: NftMediaStatusEnum.INVALID_DATA
@@ -90,12 +95,13 @@ const mapIcPunksCollection = ({ canisterId, ...rest }: IcPunksToken): NftCollect
 export const mapIcPunksNft = async ({
 	index: tokenIdentifier,
 	token,
-	identity
+	identity,
+	certified
 }: {
 	index: bigint;
 	token: IcPunksToken;
 	identity: Identity;
-}): Promise<Nft> => {
+} & QueryParams): Promise<Nft> => {
 	const { canisterId } = token;
 
 	const {
@@ -106,7 +112,8 @@ export const mapIcPunksNft = async ({
 	} = await getIcPunksMetadata({
 		canisterId,
 		tokenIdentifier,
-		identity
+		identity,
+		certified
 	});
 
 	const imageUrl = `https://${canisterId}.raw.icp0.io${rawUrl}`;
