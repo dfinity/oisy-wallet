@@ -53,7 +53,7 @@ export const sortTokens = <T extends Token>({
 	$exchanges: ExchangesData;
 	$tokensToPin: TokenToPin[];
 }): T[] => {
-	const tokenById = new Map<TokenId, T[][number]>($tokens.map((token) => [token.id, token]));
+	const tokenById = new Map<TokenId, T>($tokens.map((token) => [token.id, token]));
 
 	const pinnedTokens = $tokensToPin.reduce<T[]>((acc, { id: pinnedId }) => {
 		const token = tokenById.get(pinnedId);
