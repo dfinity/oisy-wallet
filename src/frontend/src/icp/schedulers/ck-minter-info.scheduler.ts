@@ -7,7 +7,7 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
+import { assertNonNullish, isNullish, jsonReplacer } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 
