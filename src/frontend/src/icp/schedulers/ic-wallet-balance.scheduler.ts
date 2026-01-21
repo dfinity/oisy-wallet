@@ -20,7 +20,15 @@ export class IcWalletBalanceScheduler<
 		| PostMessageDataRequestIcp
 		| PostMessageDataRequestDip20
 > extends IcWalletScheduler<PostMessageDataRequest> {
-	private queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
+
+	private get queryAndUpdateWithWarmup() {
+		if (isNullish(this._queryAndUpdateWithWarmup)) {
+			this._queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+		}
+
+		return this._queryAndUpdateWithWarmup;
+	}
 
 	private store: IcrcBalanceStore = {
 		balance: undefined
