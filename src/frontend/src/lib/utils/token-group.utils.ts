@@ -32,8 +32,10 @@ export const isTokenUiGroup = (
  *          and tokens without twins remain in their original place.
  *          A group replaces its first token in the list.
  */
-export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] =>
-	groupTokens(tokens).sort((aa, bb) => {
+export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
+	const tokenOrGroups = groupTokens(tokens);
+
+	return tokenOrGroups.sort((aa, bb) => {
 		const a = isTokenUiGroup(aa) ? aa.group : aa.token;
 		const b = isTokenUiGroup(bb) ? bb.group : bb.token;
 
@@ -42,6 +44,7 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] =>
 			+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO))
 		);
 	});
+};
 
 const hasBalance = ({ token, showZeroBalances }: { token: TokenUi; showZeroBalances: boolean }) =>
 	Number(token.balance ?? ZERO) || Number(token.usdBalance ?? ZERO) || showZeroBalances;
