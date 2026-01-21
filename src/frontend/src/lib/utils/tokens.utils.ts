@@ -129,9 +129,13 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 				$exchanges
 			});
 
-			return (tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO) > 0
-				? [[...acc[0], tokenUI], acc[1]]
-				: [acc[0], [...acc[1], tokenUI]];
+			if ((tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO) > 0) {
+				acc[0].push(tokenUI);
+			} else {
+				acc[1].push(tokenUI);
+			}
+
+			return acc;
 		},
 		[[], []]
 	);
