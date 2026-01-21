@@ -22,7 +22,7 @@ import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { StakeBalances } from '$lib/types/stake-balance';
-import type { Token, TokenToPin } from '$lib/types/token';
+import type { Token, TokenId, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -53,20 +53,21 @@ export const sortTokens = <T extends Token>({
 	$exchanges: ExchangesData;
 	$tokensToPin: TokenToPin[];
 }): T[] => {
-	const pinnedTokens = $tokensToPin
-		.map(({ id: pinnedId, network: { id: pinnedNetworkId } }) =>
-			$tokens.find(
-				({ id, network: { id: networkId } }) => id === pinnedId && networkId === pinnedNetworkId
-			)
-		)
-		.filter(nonNullish);
+	const tokenById = new Map<TokenId, T[][number]>($tokens.map((token) => [token.id, token]));
 
-	const otherTokens = $tokens.filter(
-		(token) =>
-			!pinnedTokens.some(
-				({ id, network: { id: networkId } }) => id === token.id && networkId === token.network.id
-			)
-	);
+	const pinnedTokens = $tokensToPin.reduce<T[]>((acc, { id: pinnedId }) => {
+		const token = tokenById.get(pinnedId);
+
+		if (nonNullish(token)) {
+			acc.push(token);
+
+			tokenById.delete(pinnedId); // remove so it can't appear in otherTokens
+		}
+
+		return acc;
+	}, []);
+
+	const otherTokens = Array.from(tokenById.values());
 
 	return [
 		...pinnedTokens,
