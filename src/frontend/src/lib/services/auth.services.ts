@@ -26,6 +26,7 @@ import {
 	deleteIdbIcTransactions,
 	deleteIdbSolTransactions
 } from '$lib/api/idb-transactions.api';
+import { clearIdbAllOisyRelated } from '$lib/api/idb.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -270,7 +271,9 @@ const clearIdbStoreList = [
 	clearIdbIcTransactions,
 	clearIdbSolTransactions,
 	// Balances
-	clearIdbBalances
+	clearIdbBalances,
+	// Any other possible OISY-related indexedDB
+	clearIdbAllOisyRelated
 ];
 
 // eslint-disable-next-line require-await
