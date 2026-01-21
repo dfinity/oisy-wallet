@@ -29,24 +29,6 @@
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
-	let animating = $state(false);
-
-	const handleAnimationStart = () => {
-		animating = true;
-
-		// The following is to guarantee that the function is triggered, even if the 'animationend' event is not triggered.
-		// It may happen if the animation aborts before reaching completion.
-		debouncedHandleAnimationEnd();
-	};
-
-	const handleAnimationEnd = () => (animating = false);
-
-	const debouncedHandleAnimationEnd = debounce(() => {
-		if (animating) {
-			handleAnimationEnd();
-		}
-	}, 250);
-
 	let loading: boolean = $derived(isNullish(tokens));
 
 	// Default token / tokenGroup list
@@ -136,17 +118,11 @@
 	);
 </script>
 
-<TokensDisplayHandler {animating} bind:tokens>
+<TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each tokensWithKey as { tokenOrGroup, key } (key)}
-				<div
-					class="overflow-hidden rounded-xl"
-					class:pointer-events-none={animating}
-					onanimationend={handleAnimationEnd}
-					onanimationstart={handleAnimationStart}
-					animate:flip={flipParams}
-				>
+				<div class="overflow-hidden rounded-xl" animate:flip={flipParams}>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
 
@@ -193,13 +169,7 @@
 					{/snippet}
 
 					{#each enableMoreTokensWithKey as { tokenOrGroup, key } (key)}
-						<div
-							class="overflow-hidden rounded-xl"
-							class:pointer-events-none={animating}
-							onanimationend={handleAnimationEnd}
-							onanimationstart={handleAnimationStart}
-							animate:flip={flipParams}
-						>
+						<div class="overflow-hidden rounded-xl">
 							<div class="transition duration-300 hover:bg-primary">
 								{#if !isTokenUiGroup(tokenOrGroup)}
 									<TokenCard data={tokenOrGroup.token} {onToggle} />
