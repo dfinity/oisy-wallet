@@ -13,7 +13,7 @@ const deleteDatabase = (name: string): Promise<void> =>
 		);
 	});
 
-export const clearIdbAllOisyRelated = async () => {
+export const deleteIdbAllOisyRelated = async () => {
 	try {
 		const dbInfo = await indexedDB.databases();
 
