@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+print_help() {
+  cat <<-EOF
+
+	Measures unit test coverage of Rust code.
+
+	Note: Integration tests use code compiled to Wasm running on pocket-ic,
+	so integration test coverage cannot be measured with tarpaulin.
+
+	EOF
+}
+
+[[ "${1:-}" != "--help" ]] || {
+  print_help
+  exit 0
+}
+
+cargo tarpaulin --lib --out Html
