@@ -25,10 +25,6 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
-vi.mock('$lib/utils/idb.utils', () => ({
-	delMultiKeysByPrincipal: vi.fn()
-}));
-
 describe('idb-transactions.api', () => {
 	const mockIdbTransactionsStore = createStore('mock-store', 'mock-store');
 
