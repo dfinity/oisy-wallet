@@ -72,7 +72,7 @@
 			});
 		}
 
-		displayAndCleanLogoutMsg();
+		await displayAndCleanLogoutMsg();
 	};
 
 	/**
