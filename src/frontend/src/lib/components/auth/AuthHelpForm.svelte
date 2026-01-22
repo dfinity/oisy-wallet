@@ -25,10 +25,9 @@
 
 	interface Props {
 		onOpenNewIdentityHelp: () => void;
-		onOpenLegacyIdentityHelp: () => void;
 	}
 
-	let { onOpenLegacyIdentityHelp, onOpenNewIdentityHelp }: Props = $props();
+	let { onOpenNewIdentityHelp }: Props = $props();
 
 	const trackingEventKey = 'main_page_button';
 </script>
