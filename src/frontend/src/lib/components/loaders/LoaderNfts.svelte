@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
 	import { untrack } from 'svelte';
+	import { page } from '$app/state';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { MILLISECONDS_IN_DAY, NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -8,9 +9,8 @@
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftsByNetwork } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
-	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
-	import { page } from '$app/state';
+	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
 	const onLoad = async () => {
 		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
