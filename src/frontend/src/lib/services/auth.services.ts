@@ -319,8 +319,18 @@ const appendMsgToUrl = ({ msg, deleteIdbCache }: { msg?: ToastMsg; deleteIdbCach
 /**
  * If the url contains a msg that has been provided on logout, display it as a toast message. Clean up the url afterwards - we don't want the user to see the message again if reloads the browser
  */
-export const displayAndCleanLogoutMsg = () => {
+export const displayAndCleanLogoutMsg = async () => {
 	const urlParams: URLSearchParams = new URLSearchParams(window.location.search);
+
+	const deleteIdbCache: string | null = urlParams.get(PARAM_DELETE_IDB_CACHE);
+
+	if (deleteIdbCache === 'true') {
+		try {
+			await deleteIdbAllOisyRelated();
+		} catch (err: unknown) {
+			console.error('Error deleting cache after logout', err);
+		}
+	}
 
 	const msg: string | null = urlParams.get(PARAM_MSG);
 
@@ -341,6 +351,7 @@ const cleanUpMsgUrl = () => {
 
 	url.searchParams.delete(PARAM_MSG);
 	url.searchParams.delete(PARAM_LEVEL);
+	url.searchParams.delete(PARAM_DELETE_IDB_CACHE);
 
 	replaceHistory(url);
 };
