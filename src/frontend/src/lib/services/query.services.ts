@@ -7,7 +7,7 @@ import { queryAndUpdate, type QueryAndUpdateParams } from '@dfinity/utils';
  * wrapper is created), all calls are forced to use the `'query'` strategy to
  * avoid triggering updates while the application or canister is starting up.
  * After the warmup period elapses, the wrapper uses the strategy provided in
- * {@link QueryAndUpdateParams.strategy}, defaulting to `'update'`when none
+ * {@link QueryAndUpdateParams.strategy}, defaulting to `'update'` when none
  * is specified.
  *
  * @param warmupMs - Length of the warmup period in milliseconds. Calls made
