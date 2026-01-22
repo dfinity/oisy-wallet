@@ -4,6 +4,7 @@ import {
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
 } from '$lib/constants/analytics.constants';
+import { PARAM_DELETE_IDB_CACHE } from '$lib/constants/routes.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
 	errorSignOut,
@@ -180,7 +181,11 @@ describe('auth.services', () => {
 		it('should not append a message to the reload URL', async () => {
 			await signOut({});
 
-			expect(window.history.replaceState).not.toHaveBeenCalled();
+			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
+				{},
+				'',
+				new URL(`${rootLocation}?${PARAM_DELETE_IDB_CACHE}=true`)
+			);
 		});
 	});
 
@@ -291,7 +296,9 @@ describe('auth.services', () => {
 			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
 				{},
 				'',
-				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=error`)
+				new URL(
+					`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=error&${PARAM_DELETE_IDB_CACHE}=true`
+				)
 			);
 		});
 	});
@@ -403,7 +410,9 @@ describe('auth.services', () => {
 			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
 				{},
 				'',
-				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=warn`)
+				new URL(
+					`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=warn&${PARAM_DELETE_IDB_CACHE}=true`
+				)
 			);
 		});
 	});
@@ -515,7 +524,9 @@ describe('auth.services', () => {
 			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
 				{},
 				'',
-				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(expectedText))}&level=warn`)
+				new URL(
+					`${rootLocation}?msg=${encodeURI(encodeURI(expectedText))}&level=warn&${PARAM_DELETE_IDB_CACHE}=true`
+				)
 			);
 		});
 	});

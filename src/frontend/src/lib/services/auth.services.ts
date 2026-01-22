@@ -276,9 +276,10 @@ const logout = async ({
 		await gotoReplaceRoot(clearIdbStorages);
 	}
 
-	if (nonNullish(msg)) {
-		appendMsgToUrl(msg);
-	}
+	appendMsgToUrl({
+		...(nonNullish(msg) ? { msg } : {}),
+		deleteIdbCache: clearIdbStorages
+	});
 
 	// Auth: Delegation and identity are cleared from indexedDB by agent-js so, we do not need to clear these
 
@@ -292,19 +293,27 @@ const logout = async ({
 /**
  * If a message was provided to the logout process - e.g. a message informing the logout happened because the session timed-out - append the information to the url as query params
  */
-const appendMsgToUrl = (msg: ToastMsg) => {
+const appendMsgToUrl = ({ msg, deleteIdbCache }: { msg?: ToastMsg; deleteIdbCache?: boolean }) => {
 	if (typeof window === 'undefined') {
 		return;
 	}
 
-	const { text, level } = msg;
-
 	const url: URL = new URL(window.location.href);
 
-	url.searchParams.append(PARAM_MSG, encodeURI(text));
-	url.searchParams.append(PARAM_LEVEL, level);
+	if (nonNullish(msg)) {
+		const { text, level } = msg;
 
-	replaceHistory(url);
+		url.searchParams.append(PARAM_MSG, encodeURI(text));
+		url.searchParams.append(PARAM_LEVEL, level);
+	}
+
+	if (deleteIdbCache) {
+		url.searchParams.append(PARAM_DELETE_IDB_CACHE, 'true');
+	}
+
+	if (nonNullish(msg) || deleteIdbCache) {
+		replaceHistory(url);
+	}
 };
 
 /**
