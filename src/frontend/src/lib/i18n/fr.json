@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "À des fins de test uniquement !",
-			"test_banner_beta": "Il s'agit d'une version bêta. Vous pourriez rencontrer des bugs. De vrais actifs sont en jeu - veuillez utiliser avec précaution."
+			"test_banner_beta": "Il s'agit d'une version bêta. Vous pourriez rencontrer des bugs. De vrais actifs sont en jeu - veuillez utiliser avec précaution.",
+			"internet_identity_banner_first_part": "$oisy_name utilise maintenant",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "En savoir plus"
 		},
 		"alt": {
 			"logo": "Logo de $name",
@@ -118,10 +121,11 @@
 			"logout": "Se déconnecter",
 			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
-			"sign_in_with_identity_number": "Se connecter avec votre numéro d'identité",
+			"legacy_login": "Connexion legacy",
 			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
 			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
-			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain"
+			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain",
+			"social_login": "Accès instantané et privé + connexion via les réseaux sociaux"
 		},
 		"alt": {
 			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile"
@@ -149,36 +153,32 @@
 			"text": {
 				"title": "Votre processus de connexion a été interrompu",
 				"description": "Il semble que vous ayez annulé votre connexion ou votre inscription. Nous aimerions comprendre ce qu'il s'est passé afin d'améliorer votre expérience.",
-				"new_auth_version": "La page de connexion est complètement différente",
-				"could_not_enter_identity_number": "Je n'ai pas pu saisir mon numéro Internet Identity",
-				"lost_identity": "J'ai perdu mon numéro Internet Identity",
-				"security": "J'étais préoccupé par la sécurité ou la confidentialité",
-				"got_confused": "Je n'ai pas compris les options d'inscription proposées",
-				"no_signup_needed": "Je ne voulais pas vraiment m'inscrire",
-				"other": "Autre...",
+				"login_page_looks_different": "Pourquoi la page de connexion est-elle différente ?",
+				"use_identity_number": "Je souhaite utiliser mon numéro d'Internet Identity",
+				"lost_identity_number": "J'ai perdu mon numéro d'Internet Identity",
 				"feedback_text": "Vos commentaires nous aident à améliorer $oisy_short.",
 				"thanks_text": "Merci !",
+				"useful_links": "Liens utiles",
 				"identity_new_identity": "Le portefeuille $oisy_short change le domaine Internet Identity en : <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "Par conséquent, votre numéro Internet Identity peut ne pas apparaître automatiquement, et vous devrez peut-être le saisir à nouveau.",
+				"switch_to_new_internet_identity": "$oisy_name passe à Internet Identity 2.0 (en anglais)",
+				"identity_legacy_identity_title": "Vous ne voyez plus votre numéro d'Internet Identity sur l'écran de connexion ? Vous pouvez le retrouver en utilisant l'une des méthodes suivantes :",
+				"identity_legacy_identity_item_1": "Consultez la liste des numéros d'Internet Identity que vous avez précédemment utilisés chez <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> ou <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
+				"identity_legacy_identity_item_2": "Look at the number at the beginning of a recovery phrase you may have saved earlier.",
+				"identity_new_identity_title": "$oisy_name utilise désormais Internet Identity 2.0, qui offre plusieurs améliorations et vous permet de connecter votre identité à vos identifiants sur Google, Apple ou Microsoft.",
+				"identity_new_identity_item_1": "Pour migrer votre identité existante, cliquez sur le lien « Upgrade your identity » en haut de la nouvelle page de connexion et suivez les étapes.",
+				"identity_new_identity_item_2": "Vous pouvez toujours utiliser l'ancienne page de connexion avec votre Internet Identity. Cliquez simplement sur le lien ci-dessous pour y accéder.",
+				"identity_new_identity_link": "En savoir plus sur Internet Identity 2.0 (en anglais)",
 				"identity_legacy_sign_in": "Se connecter avec le domaine Internet Identity hérité",
 				"identity_learn_more": "En savoir plus sur les Docs de $oisy_short",
-				"other_title": "Merci pour vos commentaires !",
-				"other_description": "Voici quelques ressources utiles sur la <span class=\"font-bold\">sécurité</span> et la <span class=\"font-bold\">confidentialité</span> dans $oisy_short et Internet Identity. Nous espérons qu'elles vous aideront à prendre une décision éclairée :",
-				"other_introduction": "Introduction à $oisy_short",
-				"other_docs": "Docs $oisy_short : Internet Identity",
-				"other_private_key": "Qui contrôle la clé privée des actifs natifs ?",
-				"other_asset_control": "Contrôle des actifs, récupération et gouvernance dans le portefeuille $oisy_short",
+				"oisy_introduction": "Introduction à $oisy_short (en anglais)",
+				"private_key": "Who controls the private key for the native assets?",
+				"asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet",
+				"internet_identity_help_center": "Centre d'aide Internet Identity 2.0 (en anglais)",
 				"need_help": "Besoin d'aide pour",
 				"sign_in": "vous connecter ?"
 			},
 			"alt": {
-				"internet_identity": "Image de la nouvelle Internet Identity",
-				"identity_learn_more": "En savoir plus sur l'ancienne Internet Identity",
-				"other_introduction": "Ouvrir l'introduction à $oisy_short",
-				"other_docs": "Ouvrir les docs $oisy_short : Internet Identity",
-				"other_private_key": "Obtenir de l'aide sur qui contrôle la clé privée des actifs natifs",
-				"other_asset_control": "Obtenir des informations sur le contrôle des actifs, la récupération et la gouvernance dans le portefeuille $oisy_short",
-				"sign_in": "Besoin d'aide pour vous connecter ?"
+				"internet_identity": "Image de la nouvelle Internet Identity"
 			}
 		}
 	},
@@ -187,6 +187,7 @@
 			"title_part_1": "Déverrouillez pour continuer",
 			"title_part_2": "Vous avez précédemment verrouillé votre portefeuille pour le protéger. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
 			"unlock": "Ouvrir",
+			"unlock_with_legacy_login": "",
 			"logout": "Se déconnecter",
 			"logout_clear_cash_message": "La déconnexion effacera toutes les données mises en cache",
 			"learn_more": "En savoir plus"
@@ -632,11 +633,11 @@
 			"erc20_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC20.",
 			"erc721_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC721.",
 			"erc1155_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC1155.",
-			"erc20_user_tokens": "Erreur lors du chargement des tokens utilisateur ERC20.",
 			"spl_custom_tokens": "Erreur lors du chargement des tokens personnalisés SPL.",
-			"erc20_user_token": "Erreur lors de l'activation du token jumeau ERC20.",
+			"erc20_custom_token": "Erreur lors de l'activation du token jumeau ERC20.",
 			"icrc_custom_token": "Erreur lors du chargement du token personnalisé ICRC.",
 			"ext_custom_tokens": "Erreur lors du chargement des tokens personnalisés EXT.",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Votre portefeuille nécessite des données initiales qui n'ont pas encore été chargées. Veuillez réessayer.",
 			"allow_signing": "Un problème est survenu lors de la configuration de votre portefeuille pour la signature. Vous avez été déconnecté. Si le problème persiste, contactez le support.",
 			"waiting_for_allowed_cycles_aborted": "Préparation du ledger de cycles abandonnée. Veuillez essayer de vous connecter plus tard",
@@ -1172,6 +1173,7 @@
 				"unexpected_ledger": "Quelque chose s'est mal passé lors de la validation du canister Ledger.",
 				"unexpected_index": "Quelque chose s'est mal passé lors de la validation du canister Index.",
 				"unexpected_index_ledger": "Quelque chose s'est mal passé lors du chargement de l'ID Ledger lié au canister Index.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "L'ID Ledger n'est pas lié au canister Index.",
 				"missing_ledger_id": "L'ID Ledger est manquant. Avez-vous fourni une valeur ?",
 				"missing_canister_id": "L'ID du Canister est manquant. Avez-vous fourni une valeur ?",
@@ -1784,46 +1786,46 @@
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "License Agreement",
+			"license_agreement": "Contrat de licence",
 			"det": {
-				"article": "the ",
-				"possessive": "our "
+				"article": "le ",
+				"possessive": "notre "
 			},
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"license_agreement": "The $oisy_name License Agreement"
+			"license_agreement": ""
 		}
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "Terms of Use",
+			"terms_of_use": "Conditions d'utilisation",
 			"det": {
-				"article": "the ",
-				"possessive": "our "
+				"article": "les ",
+				"possessive": "nos "
 			},
 			"title": "",
-			"instruction": "By clicking this button, you agree to the $link",
-			"instruction_two_buttons": "By clicking on one of these buttons, you agree to the $link",
+			"instruction": "En cliquant sur ce bouton, vous acceptez les $link",
+			"instruction_two_buttons": "En cliquant sur l'un des boutons, vous acceptez les $link",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": "Terms of Use Link"
+			"terms_of_use": ""
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "Privacy Policy",
+			"privacy_policy": "Politique de confidentialité",
 			"det": {
-				"article": "the ",
-				"possessive": "our "
+				"article": "la ",
+				"possessive": "notre "
 			},
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": "Privacy Policy Link"
+			"privacy_policy": ""
 		}
 	},
 	"activity": {

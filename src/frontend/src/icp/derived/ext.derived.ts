@@ -16,9 +16,6 @@ const extDefaultTokensCanisterIds: Readable<CanisterIdText[]> = derived(
 	([$extDefaultTokens]) => $extDefaultTokens.map(({ canisterId }) => canisterId)
 );
 
-/**
- * The list of EXT custom tokens the user has added, enabled, or disabled.
- */
 export const extCustomTokens: Readable<ExtCustomToken[]> = derived(
 	[extCustomTokensStore],
 	([$extCustomTokensStore]) => $extCustomTokensStore?.map(({ data: token }) => token) ?? []
@@ -45,9 +42,6 @@ const extCustomTokensToggleable: Readable<ExtCustomToken[]> = derived(
 		$extCustomTokens.filter(({ canisterId }) => !$extDefaultTokensCanisterIds.includes(canisterId))
 );
 
-/**
- * The list of all EXT tokens.
- */
 export const extTokens: Readable<ExtCustomToken[]> = derived(
 	[extDefaultTokensToggleable, extCustomTokensToggleable],
 	([$extDefaultTokensToggleable, $extCustomTokensToggleable]) => [
@@ -56,14 +50,7 @@ export const extTokens: Readable<ExtCustomToken[]> = derived(
 	]
 );
 
-/**
- * The list of all enabled EXT tokens.
- */
-export const enabledExtTokens: Readable<ExtCustomToken[]> = derived([extTokens], ([$extTokens]) =>
-	$extTokens.filter(({ enabled }) => enabled)
-);
-
-export const extCustomTokensInitialized: Readable<boolean> = derived(
+const extCustomTokensInitialized: Readable<boolean> = derived(
 	[extCustomTokensStore],
 	([$extCustomTokensStore]) => $extCustomTokensStore !== undefined
 );

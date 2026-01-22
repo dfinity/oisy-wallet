@@ -17,8 +17,8 @@ import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
-import { isTokenExt } from '$icp/utils/ext.utils';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
+import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
 import {
 	NANO_SECONDS_IN_MILLISECOND,
@@ -169,7 +169,7 @@ const toTokenSymbol = (token: Token): string => {
 		return `nft#${token.name}#${token.address}#${token.section ?? ''}`;
 	}
 
-	if (isTokenExt(token)) {
+	if (isTokenIcNft(token)) {
 		return `nft#${token.name}#${token.canisterId}#${token.section ?? ''}`;
 	}
 
@@ -271,7 +271,7 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 
 	return allTokens.reduce<AccountSnapshotFor[]>((acc, token) => {
 		const balance =
-			isTokenErc721(token) || isTokenErc1155(token) || isTokenExt(token)
+			isTokenErc721(token) || isTokenErc1155(token) || isTokenIcNft(token)
 				? getNftBalance({ nfts: nftStoreTokens, token })
 				: balances[token.id]?.data;
 

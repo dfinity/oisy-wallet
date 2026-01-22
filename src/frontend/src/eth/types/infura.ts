@@ -1,3 +1,5 @@
+import type { EthAddress } from '$eth/types/address';
+
 interface FeeEstimateLevel {
 	suggestedMaxPriorityFeePerGas: string;
 	suggestedMaxFeePerGas: string;
@@ -17,4 +19,11 @@ export interface GasFeeEstimate {
 	priorityFeeTrend: 'up' | 'down' | 'stable';
 	baseFeeTrend: 'up' | 'down' | 'stable';
 	version: string;
+}
+
+export interface GetFeeData {
+	from: EthAddress;
+	to: EthAddress;
+	value?: bigint;
+	data?: string;
 }

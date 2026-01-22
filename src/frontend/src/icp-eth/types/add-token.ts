@@ -14,10 +14,25 @@ interface ExtAddTokenData {
 	extCanisterId: string;
 }
 
+interface Dip721AddTokenData {
+	dip721CanisterId: string;
+}
+
+interface IcPunksAddTokenData {
+	icPunksCanisterId: string;
+}
+
 interface SplAddTokenData {
 	splTokenAddress: SolAddress;
 }
 
 export type AddTokenData = OneOf<
-	[EthAddTokenData, IcAddTokenData, ExtAddTokenData, SplAddTokenData]
+	[
+		EthAddTokenData,
+		IcAddTokenData,
+		ExtAddTokenData,
+		Dip721AddTokenData,
+		IcPunksAddTokenData,
+		SplAddTokenData
+	]
 >;

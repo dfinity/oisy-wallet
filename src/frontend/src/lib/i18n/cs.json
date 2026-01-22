@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
-			"test_banner_beta": "Toto je beta verze. Může se vyskytnout chyba. V sázce jsou skutečné prostředky – používejte prosím s opatrností."
+			"test_banner_beta": "Toto je beta verze. Může se vyskytnout chyba. V sázce jsou skutečné prostředky – používejte prosím s opatrností.",
+			"internet_identity_banner_first_part": "$oisy_name nyní používá",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "Přečtěte více"
 		},
 		"alt": {
 			"logo": "logo $name",
@@ -118,10 +121,11 @@
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
-			"sign_in_with_identity_number": "Přihlásit se pomocí identifikačního čísla",
+			"legacy_login": "Starší přihlášení",
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
-			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain"
+			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
+			"social_login": "Okamžitý a soukromý přístup + přihlášení přes sociální sítě"
 		},
 		"alt": {
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"
@@ -149,36 +153,32 @@
 			"text": {
 				"title": "Proces přihlášení byl přerušen",
 				"description": "Zdá se, že jste zrušili přihlášení nebo registraci. Rádi bychom pochopili, co se stalo, abychom mohli zlepšit vaše uživatelské prostředí.",
-				"new_auth_version": "Přihlašovací stránka vypadá zcela jinak",
-				"could_not_enter_identity_number": "Nepodařilo se zadat číslo Internet Identity",
-				"lost_identity": "Ztratil jsem své číslo Internet Identity",
-				"security": "Měl jsem obavy o bezpečnost nebo soukromí",
-				"got_confused": "Nerozuměl/a jsem nabízeným možnostem registrace",
-				"no_signup_needed": "Ve skutečnosti jsem se nechtěl/a registrovat",
-				"other": "Jiné...",
+				"login_page_looks_different": "Proč přihlašovací stránka vypadá jinak?",
+				"use_identity_number": "Chci použít své číslo Internet Identity",
+				"lost_identity_number": "Ztratil jsem své číslo Internet Identity.",
 				"feedback_text": "Vaše zpětná vazba nám pomáhá zlepšovat $oisy_short.",
 				"thanks_text": "Děkuji!",
+				"useful_links": "Užitečné odkazy",
 				"identity_new_identity": "Peněženka $oisy_short přepíná doménu Internet Identity na: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "V důsledku toho se vaše číslo Internet Identity nemusí objevit automaticky a možná jej budete muset zadat znovu.",
-				"identity_legacy_sign_in": "Přihlásit se pomocí staré domény Internet Identity",
+				"switch_to_new_internet_identity": "$oisy_name přepíná na Internet Identity 2.0",
+				"identity_legacy_identity_title": "Už nevidíte své číslo Internet Identity na přihlašovací obrazovce? Své číslo Internet Identity můžete zjistit některým z následujících způsobů:",
+				"identity_legacy_identity_item_1": "Projděte si seznam čísel, která jste dříve používali na <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> nebo <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
+				"identity_legacy_identity_item_2": "Podívejte se na číslo na začátku fráze pro obnovení, kterou jste si možná dříve uložili.",
+				"identity_new_identity_title": "$oisy_name nyní používá Internet Identity 2.0, která nabízí několik vylepšení a umožňuje propojit vaši identitu s vašimi přihlašovacími údaji na Google, Apple nebo Microsoft.",
+				"identity_new_identity_item_1": "Chcete-li migrovat svou stávající identitu, klikněte na odkaz “Upgrade your identity“ v horní části nové přihlašovací stránky a postupujte podle pokynů.",
+				"identity_new_identity_item_2": "Stále můžete používat starší přihlašovací stránku se svým číslem Internet Identity. Stačí kliknout na odkaz níže a zobrazit starší přihlašovací obrazovku.",
+				"identity_new_identity_link": "Více informací o Internet Identity 2.0 naleznete v dokumentech OISY.",
+				"identity_legacy_sign_in": "Přihlásit se pomocí staré domény Internet Identity (legacy)",
 				"identity_learn_more": "Více se dozvíte v dokumentaci $oisy_short",
-				"other_title": "Děkujeme za vaši zpětnou vazbu!",
-				"other_description": "Zde jsou některé užitečné zdroje o <span class=\"font-bold\">bezpečnosti</span> a <span class=\"font-bold\">soukromí</span> v $oisy_short a Internet Identity. Doufáme, že vám pomohou učinit informované rozhodnutí:",
-				"other_introduction": "Úvod do $oisy_short",
-				"other_docs": "Dokumentace $oisy_short: Internet Identity",
-				"other_private_key": "Kdo ovládá soukromý klíč k nativním aktivům?",
-				"other_asset_control": "Kontrola aktiv, obnova a správa v peněžence $oisy_short",
+				"oisy_introduction": "$oisy_short Úvod",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "Centrum nápovědy k Internet Identity 2.0",
 				"need_help": "Potřebujete pomoc",
 				"sign_in": "s přihlášením?"
 			},
 			"alt": {
-				"internet_identity": "Obrázek nové internetové identity",
-				"identity_learn_more": "Více se dozvíte o staré internetové identitě",
-				"other_introduction": "Otevřít úvod do $oisy_short",
-				"other_docs": "Otevřít dokumentaci $oisy_short: Internet Identity",
-				"other_private_key": "Získejte informace ohledně toho, kdo ovládá soukromý klíč k nativním aktivům",
-				"other_asset_control": "Získejte informace o kontrole aktiv, obnově a správě v peněžence $oisy_short",
-				"sign_in": "Potřebujete pomoc s přihlášením?"
+				"internet_identity": "Obrázek nové internetové identity"
 			}
 		}
 	},
@@ -187,6 +187,7 @@
 			"title_part_1": "Chcete-li pokračovat, odemkněte",
 			"title_part_2": "Předtím jste si pro bezpečnost zamkli peněženku. Pokračujte tam, kde jste skončili, nebo se odhlaste.",
 			"unlock": "Odemknout",
+			"unlock_with_legacy_login": "",
 			"logout": "Odhlásit se",
 			"logout_clear_cash_message": "Odhlášením se vymažou všechna data v mezipaměti",
 			"learn_more": "Zjistěte více"
@@ -632,11 +633,11 @@
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
 			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
 			"erc1155_custom_tokens": "Chyba při načítání vlastních tokenů ERC1155.",
-			"erc20_user_tokens": "Chyba při načítání uživatelských tokenů ERC20.",
 			"spl_custom_tokens": "Chyba při načítání vlastních tokenů SPL.",
-			"erc20_user_token": "Chyba při povolování dvojitého tokenu ERC20.",
+			"erc20_custom_token": "Chyba při povolování dvojitého tokenu ERC20.",
 			"icrc_custom_token": "Chyba při načítání vlastního tokenu ICRC.",
 			"ext_custom_tokens": "Chyba při načítání vlastních EXT tokenů.",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Vaše peněženka vyžaduje některá počáteční data, která ještě nebyla načtena. Zkuste to prosím znovu.",
 			"allow_signing": "Při nastavování vaší peněženky pro podepisování došlo k problému. Byli jste odhlášeni. Pokud problém přetrvává, obraťte se na podporu.",
 			"waiting_for_allowed_cycles_aborted": "Příprava cyklů účetní knihy byla přerušena. Zkuste se prosím přihlásit později.",
@@ -1172,6 +1173,7 @@
 				"unexpected_ledger": "Při ověřování kanystru účetní knihy se něco pokazilo.",
 				"unexpected_index": "Při ověřování kanystru indexu se něco pokazilo.",
 				"unexpected_index_ledger": "Při načítání ID účetní knihy souvisejícího s kanystrem indexu se něco pokazilo.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "ID účetní knihy nesouvisí s kanystrem indexu.",
 				"missing_ledger_id": "Chybí ID účetní knihy. Zadali jste hodnotu?",
 				"missing_canister_id": "Chybí ID kanistru. Zadali jste hodnotu?",

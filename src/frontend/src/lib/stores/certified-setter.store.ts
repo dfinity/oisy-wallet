@@ -7,8 +7,10 @@ import {
 import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
-export interface CertifiedSetterStoreStore<T, Id extends symbol = TokenId>
-	extends CertifiedStore<T, Id> {
+export interface CertifiedSetterStoreStore<T, Id extends symbol = TokenId> extends CertifiedStore<
+	T,
+	Id
+> {
 	set: (params: { id: Id; data: T }) => void;
 }
 

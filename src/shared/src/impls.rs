@@ -12,8 +12,8 @@ use crate::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{
-            CustomToken, CustomTokenId, Dip721Token, ErcToken, ErcTokenId, ExtV2Token, IcrcToken,
-            SplToken, SplTokenId, Token,
+            CustomToken, CustomTokenId, Dip721Token, ErcToken, ErcTokenId, ExtV2Token,
+            IcPunksToken, IcrcToken, SplToken, SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         experimental_feature::{
@@ -108,6 +108,7 @@ impl From<&Token> for CustomTokenId {
             }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
             Token::ExtV2(token) => CustomTokenId::ExtV2(token.canister_id),
             Token::Dip721(token) => CustomTokenId::Dip721(token.canister_id),
+            Token::IcPunks(token) => CustomTokenId::IcPunks(token.canister_id),
         }
     }
 }
@@ -553,7 +554,10 @@ impl Validate for ErcTokenId {
 impl Validate for CustomTokenId {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
-            CustomTokenId::Icrc(_) | CustomTokenId::ExtV2(_) | CustomTokenId::Dip721(_) => Ok(()), /* This is a principal. */
+            CustomTokenId::Icrc(_)
+            | CustomTokenId::ExtV2(_)
+            | CustomTokenId::Dip721(_)
+            | CustomTokenId::IcPunks(_) => Ok(()), /* This is a principal. */
             // In principle, we
             // could check the exact
             // type of principal.
@@ -579,6 +583,7 @@ impl Validate for Token {
             Token::Erc20(token) | Token::Erc721(token) | Token::Erc1155(token) => token.validate(),
             Token::ExtV2(token) => token.validate(),
             Token::Dip721(token) => token.validate(),
+            Token::IcPunks(token) => token.validate(),
         }
     }
 }
@@ -653,6 +658,21 @@ impl Validate for Dip721Token {
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
     fn validate(&self) -> Result<(), candid::Error> {
         let Dip721Token { canister_id } = self;
+        // The canister_id should be appropriate for a canister.
+        if canister_id.as_slice().last() != Some(&1) {
+            return Err(candid::Error::msg("Canister ID is not a canister"));
+        }
+        Ok(())
+    }
+}
+
+impl Validate for IcPunksToken {
+    /// Verifies that an `ICPunks` token is valid.
+    ///
+    /// - Checks that the canister principal is the type of principal used for a canister.
+    ///   - <https://wiki.internetcomputer.org/wiki/Principal>
+    fn validate(&self) -> Result<(), candid::Error> {
+        let IcPunksToken { canister_id } = self;
         // The canister_id should be appropriate for a canister.
         if canister_id.as_slice().last() != Some(&1) {
             return Err(candid::Error::msg("Canister ID is not a canister"));
@@ -770,6 +790,7 @@ validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(ExtV2Token);
 validate_on_deserialize!(Dip721Token);
+validate_on_deserialize!(IcPunksToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(ErcToken);

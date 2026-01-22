@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
-			"test_banner_beta": "これはベータ版リリースです。不具合が発生する可能性があります。実際の資産が使用されますので、十分ご注意のうえご利用ください。"
+			"test_banner_beta": "これはベータ版リリースです。不具合が発生する可能性があります。実際の資産が使用されますので、十分ご注意のうえご利用ください。",
+			"internet_identity_banner_first_part": "$oisy_nameは現在",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>を利用しています",
+			"internet_identity_banner_button": "続きを読む"
 		},
 		"alt": {
 			"logo": "$name ロゴ",
@@ -118,10 +121,11 @@
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "ログイン/新規作成",
-			"sign_in_with_identity_number": "",
+			"legacy_login": "従来のログイン",
 			"asset_types": "BTC / SOL / ETH / ICP など幅広い資産を一元管理",
 			"instant_and_private": "AIアシスタント搭載 ― プライバシーを標準装備",
-			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで"
+			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで",
+			"social_login": "即時かつプライベートなアクセス + ソーシャルログイン"
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
@@ -149,36 +153,32 @@
 			"text": {
 				"title": "あなたのログインプロセスが中断されました。",
 				"description": "あなたはログインまたは新規作成をキャンセルされたようです。どうしてそうなったのかを理解するため、改善に役立てたいと思っています。",
-				"new_auth_version": "ログインページが全く異なっています。",
-				"could_not_enter_identity_number": "Internet Identity番号を入力できませんでした。",
-				"lost_identity": "Internet Identity 番号を紛失しました。",
-				"security": "セキュリティまたはプライバシーについて懸念がありました。",
-				"got_confused": "提供された選択肢を理解できませんでした。",
-				"no_signup_needed": "新規作成は必要ありませんでした。",
-				"other": "その他...",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"lost_identity_number": "",
 				"feedback_text": "あなたのフィードバックは、$oisy_shortを改善するために役立ちます。",
 				"thanks_text": "ご協力ありがとうございました！",
+				"useful_links": "",
 				"identity_new_identity": "$oisy_shortウォレットはInternet Identityドメインを<span class=\"font-bold\">identity.internetcomputer.org</span>に切り替えます。",
-				"identity_legacy_description": "このため、Internet Identity番号が自動的に表示されない場合があり、再入力が必要になる場合があります。",
+				"switch_to_new_internet_identity": "",
+				"identity_legacy_identity_title": "",
+				"identity_legacy_identity_item_1": "",
+				"identity_legacy_identity_item_2": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"identity_new_identity_item_2": "",
+				"identity_new_identity_link": "",
 				"identity_legacy_sign_in": "旧Internet Identityドメインでサインイン",
 				"identity_learn_more": "$oisy_short Docsで詳細を確認",
-				"other_title": "フィードバックありがとうございました！",
-				"other_description": "以下は$oisy_shortとInternet Identityにおける<span class=\"font-bold\">セキュリティ</span>と<span class=\"font-bold\">プライバシー</span>に関する役立つリソースです。情報に基づいた意思決定に役立つことを願っています。",
-				"other_introduction": "$oisy_short紹介",
-				"other_docs": "$oisy_short Docs: Internet Identity",
-				"other_private_key": "誰がネイティブアセットの秘密鍵を管理していますか？",
-				"other_asset_control": "$oisy_shortウォレットにおけるアセット管理、復旧、ガバナンス",
+				"oisy_introduction": "",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "サインイン",
 				"sign_in": "に関してサポートが必要ですか？"
 			},
 			"alt": {
-				"internet_identity": "新しいInternet Identityの画像",
-				"identity_learn_more": "旧Internet Identityについて詳しく知る",
-				"other_introduction": "$oisy_shortの紹介を開く",
-				"other_docs": "$oisy_shortのドキュメント（Internet Identity）を開く",
-				"other_private_key": "ネイティブアセットの秘密鍵の管理者についてヘルプを確認する",
-				"other_asset_control": "$oisy_shortウォレットにおけるアセット管理、復旧、ガバナンスに関する情報を見る",
-				"sign_in": "サインインに関するサポートが必要ですか？"
+				"internet_identity": "新しいInternet Identityの画像"
 			}
 		}
 	},
@@ -187,6 +187,7 @@
 			"title_part_1": "ロックを解除して続行",
 			"title_part_2": "ウォレットは安全のためロックされています。中断したところから再開するか、ログアウトしてください。",
 			"unlock": "ロック解除",
+			"unlock_with_legacy_login": "",
 			"logout": "ログアウト",
 			"logout_clear_cash_message": "ログアウトすると、キャッシュされたデータがすべて消去されます。",
 			"learn_more": "詳細を見る"
@@ -632,11 +633,11 @@
 			"erc20_custom_tokens": "ERC20カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc721_custom_tokens": "ERC721カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc1155_custom_tokens": "ERC1155カスタムトークンの読み込み中にエラーが発生しました。",
-			"erc20_user_tokens": "ERC20ユーザーがトークンを読み込み中にエラーが発生しました。",
 			"spl_custom_tokens": "SPLカスタムトークンの読み込み中にエラーが発生しました。",
-			"erc20_user_token": "ERC20ツインの有効化中にエラーが発生しました。",
+			"erc20_custom_token": "",
 			"icrc_custom_token": "ICRCカスタムトークンの読み込み中にエラーが発生しました。",
 			"ext_custom_tokens": "EXTカスタムトークンの読み込み中にエラーが発生しました。",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "ウォレットにはまだロードされていない初期データが必要です。もう一度お試しください。",
 			"allow_signing": "署名の準備中にエラーが発生しました。サインアウトされました。問題が解決しない場合は、サポートにお問い合わせください。",
 			"waiting_for_allowed_cycles_aborted": "Cyclesレジャーの準備を中止しました。後でログインしてください。",
@@ -1172,6 +1173,7 @@
 				"unexpected_ledger": "台帳キャニスターの検証中に予期しないエラーが発生しました。",
 				"unexpected_index": "インデックスキャニスターの検証中に予期しないエラーが発生しました。",
 				"unexpected_index_ledger": "インデックスキャニスターに関連する台帳IDの読み込み中に予期しないエラーが発生しました。",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "台帳IDがインデックスキャニスターに関連付けられていません。",
 				"missing_ledger_id": "台帳IDがありません。値を入力しましたか？",
 				"missing_canister_id": "キャニスターIDがありません。値を入力しましたか？",

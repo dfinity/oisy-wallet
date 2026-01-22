@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
-			"test_banner_beta": "This is a beta release. You may encounter bugs. Real assets are in play - please use with care."
+			"test_banner_beta": "This is a beta release. You may encounter bugs. Real assets are in play - please use with care.",
+			"internet_identity_banner_first_part": "$oisy_name now uses",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "Read more"
 		},
 		"alt": {
 			"logo": "$name logo",
@@ -118,10 +121,11 @@
 			"logout": "Log out",
 			"lock": "Lock",
 			"authenticate": "Open or Create",
-			"sign_in_with_identity_number": "Sign in with your identity number",
+			"legacy_login": "Legacy login",
 			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Built-in AI Assistant with privacy as standard",
-			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain"
+			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain",
+			"social_login": "Instant and private access + social login"
 		},
 		"alt": {
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
@@ -149,36 +153,32 @@
 			"text": {
 				"title": "Your log-in process got interrupted",
 				"description": "It seems that you cancelled your log-in or sign-up. We'd love to understand what happened, so we can improve your experience.",
-				"new_auth_version": "The login page looks all different",
-				"could_not_enter_identity_number": "I could not enter my Internet Identity number",
-				"lost_identity": "I lost my Internet Identity number",
-				"security": "I was concerned about security or privacy",
-				"got_confused": "I didn't understand the offered sign-up options",
-				"no_signup_needed": "I didn't really want to sign up",
-				"other": "Other...",
+				"login_page_looks_different": "Why does the login page look different?",
+				"use_identity_number": "I want to use my Internet Identity number",
+				"lost_identity_number": "I lost my Internet Identity number",
 				"feedback_text": "Your feedback helps us to make $oisy_short better.",
 				"thanks_text": "Thank you!",
+				"useful_links": "Useful links",
 				"identity_new_identity": "$oisy_short Wallet switches the Internet Identity domain to: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "As a result, your Internet Identity number might not appear automatically, and you may need to re-enter it.",
-				"identity_legacy_sign_in": "Sign in with legacy Internet Identity domain",
+				"switch_to_new_internet_identity": "$oisy_name switches to Internet Identity 2.0",
+				"identity_legacy_identity_title": "You don’t see your Internet Identity number on the login screen anymore? You can find your identity number using any of the following methods:",
+				"identity_legacy_identity_item_1": "Review the list of identity numbers you’ve previously used at <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> and <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
+				"identity_legacy_identity_item_2": "Look at the number at the beginning of a recovery phrase you may have saved earlier.",
+				"identity_new_identity_title": "$oisy_name now uses Internet Identity 2.0, which offers several improvements and allows you to connect your identity with your logins on Apple, Google, or Microsoft.",
+				"identity_new_identity_item_1": "To migrate your existing identity, click the “Upgrade your identity“ link on top of the new login page and follow the steps.",
+				"identity_new_identity_item_2": "You can still use the legacy login page with your Internet Identity number. Just click the link below to access the legacy login screen.",
+				"identity_new_identity_link": "Learn more about Internet Identity 2.0 on OISY Docs",
+				"identity_legacy_sign_in": "Sign in with Internet Identity 1.0 (legacy)",
 				"identity_learn_more": "Learn more on $oisy_short Docs",
-				"other_title": "Thanks for your feedback!",
-				"other_description": "Here are some helpful resources about <span class=\"font-bold\">security</span> and <span class=\"font-bold\">privacy</span> in $oisy_short and Internet Identity. We hope they help you make an informed decision:",
-				"other_introduction": "$oisy_short Introduction",
-				"other_docs": "$oisy_short docs: Internet Identity",
-				"other_private_key": "Who controls the private key for the native assets?",
-				"other_asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet",
+				"oisy_introduction": "$oisy_short Introduction",
+				"private_key": "Who controls the private key for the native assets?",
+				"asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet",
+				"internet_identity_help_center": "Internet Identity 2.0 Help Center",
 				"need_help": "Need help",
 				"sign_in": "signing in?"
 			},
 			"alt": {
-				"internet_identity": "Image of new Internet Identity",
-				"identity_learn_more": "Learn more about legacy Internet Identity",
-				"other_introduction": "Open $oisy_short Introduction",
-				"other_docs": "Open $oisy_short docs: Internet Identity",
-				"other_private_key": "Get help about who controls the private key for the native assets",
-				"other_asset_control": "Get information about Asset Control, Recovery, and Governance in $oisy_short Wallet",
-				"sign_in": "Need some help for signing in?"
+				"internet_identity": "Image of new Internet Identity"
 			}
 		}
 	},
@@ -187,6 +187,7 @@
 			"title_part_1": "Unlock to continue",
 			"title_part_2": "You previously locked your wallet to keep it safe. Resume where you left off or log out.",
 			"unlock": "Unlock",
+			"unlock_with_legacy_login": "Unlock with legacy login",
 			"logout": "Log out",
 			"logout_clear_cash_message": "Logging out will clear all cached data",
 			"learn_more": "Learn more"
@@ -632,11 +633,11 @@
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
 			"erc1155_custom_tokens": "Error while loading the ERC1155 custom tokens.",
-			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
 			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
-			"erc20_user_token": "Error while enabling the ERC20 twin token.",
+			"erc20_custom_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"ext_custom_tokens": "Error while loading the EXT custom tokens.",
+			"icpunks_custom_tokens": "Error while loading the ICPunks custom tokens.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
 			"waiting_for_allowed_cycles_aborted": "Aborted cycles ledger preperation. Please try to login later",
@@ -1172,6 +1173,7 @@
 				"unexpected_ledger": "Something went wrong while validating the Ledger canister.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
+				"unrecognized_nft_canister_id_standard": "We couldn't detect the NFT collection canister ID standard. Please check the provided canister ID and try again. Or contact support if the issue persists.",
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
 				"missing_canister_id": "The Canister ID is missing. Did you provide a value?",

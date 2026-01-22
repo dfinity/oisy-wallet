@@ -5,9 +5,11 @@ import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.stor
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { loadCustomTokens as loadCustomExtTokens } from '$icp/services/ext.services';
+import { loadCustomTokens as loadCustomIcPunksTokens } from '$icp/services/icpunks.services';
 import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
 import { dip721CustomTokensStore } from '$icp/stores/dip721-custom-tokens.store';
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
+import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -37,6 +39,12 @@ const hideTokenByKey = (token: SaveCustomTokenWithKey) => {
 
 	if (token.networkKey === 'Dip721') {
 		dip721CustomTokensStore.resetByIdentifier(token.canisterId);
+
+		return;
+	}
+
+	if (token.networkKey === 'IcPunks') {
+		icPunksCustomTokensStore.resetByIdentifier(token.canisterId);
 
 		return;
 	}
@@ -95,6 +103,7 @@ export const saveCustomTokens = async ({
 		loadCustomIcrcTokens({ identity }),
 		loadCustomExtTokens({ identity }),
 		// TODO: add loadCustomDip721Tokens here (and in the tests)
+		loadCustomIcPunksTokens({ identity }),
 		loadCustomSplTokens({ identity })
 	]);
 };

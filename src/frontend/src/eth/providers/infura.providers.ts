@@ -1,8 +1,8 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
-import type { GetFeeData } from '$eth/services/fee.services';
 import type { EthAddress } from '$eth/types/address';
+import type { GetFeeData } from '$eth/types/infura';
 import { TRACK_ETH_ESTIMATE_GAS_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';

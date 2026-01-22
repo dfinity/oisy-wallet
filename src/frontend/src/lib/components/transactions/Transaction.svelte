@@ -4,7 +4,7 @@
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import type { EthNonFungibleToken } from '$eth/types/nft';
 	import { isTokenErc } from '$eth/utils/erc.utils';
-	import { isTokenExt } from '$icp/utils/ext.utils';
+	import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -96,7 +96,7 @@
 							? t.ledgerCanisterId
 							: isTokenErc(t) || isTokenSpl(t)
 								? t.address
-								: isTokenExt(t)
+								: isTokenIcNft(t)
 									? t.canisterId
 									: undefined,
 						networkId: t.network.id

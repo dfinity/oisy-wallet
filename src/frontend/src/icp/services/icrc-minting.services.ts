@@ -19,6 +19,7 @@ export const isUserMintingAccount = async ({
 
 	const mintingAccount =
 		tokenMintingAccount ??
+		// TODO: use queryAndUpdate
 		(await getMintingAccount({
 			identity,
 			ledgerCanisterId

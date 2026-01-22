@@ -47,9 +47,8 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
@@ -94,7 +93,6 @@ describe('network-tokens.derived', () => {
 
 		erc721CustomTokensStore.resetAll();
 		erc20DefaultTokensStore.reset();
-		erc20UserTokensStore.resetAll();
 		erc20CustomTokensStore.resetAll();
 		icrcDefaultTokensStore.resetAll();
 		icrcCustomTokensStore.resetAll();
@@ -117,12 +115,12 @@ describe('network-tokens.derived', () => {
 		});
 
 		describe('when testnets are enabled', () => {
-			const mockErc20UserToken: Erc20UserToken = {
+			const mockErc20CustomToken: Erc20CustomToken = {
 				...PEPE_TOKEN,
 				...toggleProps
 			};
 
-			const mockErc20SepoliaUserToken: Erc20UserToken = {
+			const mockErc20SepoliaCustomToken: Erc20CustomToken = {
 				...SEPOLIA_LINK_TOKEN,
 				...toggleProps
 			};
@@ -148,11 +146,11 @@ describe('network-tokens.derived', () => {
 				},
 				{
 					network: ETHEREUM_NETWORK,
-					tokens: [ETHEREUM_TOKEN, mockErc20UserToken]
+					tokens: [ETHEREUM_TOKEN, mockErc20CustomToken]
 				},
 				{
 					network: SEPOLIA_NETWORK,
-					tokens: [SEPOLIA_TOKEN, mockErc20SepoliaUserToken]
+					tokens: [SEPOLIA_TOKEN, mockErc20SepoliaCustomToken]
 				},
 				{
 					network: SOLANA_MAINNET_NETWORK,
@@ -199,13 +197,9 @@ describe('network-tokens.derived', () => {
 			beforeEach(() => {
 				setupTestnetsStore('enabled');
 
-				erc20UserTokensStore.setAll([
-					{ data: mockErc20UserToken, certified: false },
-					{ data: mockErc20SepoliaUserToken, certified: false }
-				]);
 				erc20CustomTokensStore.setAll([
-					{ data: mockErc20UserToken, certified: false },
-					{ data: mockErc20SepoliaUserToken, certified: false }
+					{ data: mockErc20CustomToken, certified: false },
+					{ data: mockErc20SepoliaCustomToken, certified: false }
 				]);
 				splCustomTokensStore.setAll([
 					{ data: mockSplCustomToken, certified: false },
@@ -223,7 +217,7 @@ describe('network-tokens.derived', () => {
 					BNB_MAINNET_TOKEN,
 					POL_MAINNET_TOKEN,
 					ARBITRUM_ETH_TOKEN,
-					mockErc20UserToken,
+					mockErc20CustomToken,
 					mockSplCustomToken
 				]);
 			});

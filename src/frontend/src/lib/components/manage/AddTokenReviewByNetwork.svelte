@@ -4,14 +4,14 @@
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
 	import { isInterfaceErc721 } from '$eth/services/erc721.services';
-	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
-	import type { SaveUserToken } from '$eth/types/erc20-user-token';
 	import type { Erc721Metadata } from '$eth/types/erc721';
 	import IcAddExtTokenReview from '$icp/components/tokens/IcAddExtTokenReview.svelte';
+	import IcAddIcPunksTokenReview from '$icp/components/tokens/IcAddIcPunksTokenReview.svelte';
 	import IcAddIcrcTokenReview from '$icp/components/tokens/IcAddIcrcTokenReview.svelte';
 	import type { ValidateTokenData as ValidateExtTokenData } from '$icp/services/ext-add-custom-tokens.service';
 	import type { ValidateTokenData as ValidateIcrcTokenData } from '$icp/services/ic-add-custom-tokens.service';
+	import type { ValidateTokenData as ValidateIcPunksTokenData } from '$icp/services/icpunks-add-custom-tokens.service';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import { TRACK_UNRECOGNISED_ERC_INTERFACE } from '$lib/constants/analytics.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -93,6 +93,23 @@
 		]);
 	};
 
+	const addIcPunksToken = async () => {
+		if (isNullish(icPunksCanisterId)) {
+			toastsError({
+				msg: { text: get(i18n).tokens.import.error.missing_canister_id }
+			});
+			return;
+		}
+
+		await saveTokens([
+			{
+				enabled: true,
+				networkKey: 'IcPunks',
+				canisterId: icPunksCanisterId
+			}
+		]);
+	};
+
 	const saveEthToken = async () => {
 		if (isNullishOrEmpty(ethContractAddress)) {
 			toastsError({
@@ -140,8 +157,6 @@
 		}
 
 		if (ethMetadata.decimals >= 0) {
-			await saveErc20Deprecated([{ ...ethMetadata, ...newToken, network }]);
-
 			await saveTokens([{ ...newToken, networkKey: 'Erc20' }]);
 
 			return;
@@ -199,37 +214,43 @@
 			identity: $authIdentity
 		});
 
-	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-	const saveErc20Deprecated = (tokens: SaveUserToken[]): Promise<void> =>
-		saveErc20UserTokens({
-			tokens,
-			progress,
-			modalNext,
-			onSuccess,
-			onError,
-			identity: $authIdentity
-		});
-
 	let icrcMetadata: ValidateIcrcTokenData | undefined = $state();
 
 	let extMetadata: ValidateExtTokenData | undefined = $state();
+
+	let icPunksMetadata: ValidateIcPunksTokenData | undefined = $state();
 
 	let ethMetadata: Erc20Metadata | Erc721Metadata | undefined = $state();
 
 	let splMetadata: TokenMetadata | undefined = $state();
 
-	let { ledgerCanisterId, indexCanisterId, extCanisterId, ethContractAddress, splTokenAddress } =
-		$derived(tokenData);
+	let {
+		ledgerCanisterId,
+		indexCanisterId,
+		extCanisterId,
+		icPunksCanisterId,
+		ethContractAddress,
+		splTokenAddress
+	} = $derived(tokenData);
 </script>
 
 {#if isNetworkIdICP(network?.id)}
 	{#if isNftsPage}
-		<IcAddExtTokenReview
-			{extCanisterId}
-			{onBack}
-			onSave={addExtToken}
-			bind:metadata={extMetadata}
-		/>
+		{#if nonNullish(extCanisterId)}
+			<IcAddExtTokenReview
+				{extCanisterId}
+				{onBack}
+				onSave={addExtToken}
+				bind:metadata={extMetadata}
+			/>
+		{:else if nonNullish(icPunksCanisterId)}
+			<IcAddIcPunksTokenReview
+				{icPunksCanisterId}
+				{onBack}
+				onSave={addIcPunksToken}
+				bind:metadata={icPunksMetadata}
+			/>
+		{/if}
 	{:else}
 		<IcAddIcrcTokenReview
 			{indexCanisterId}

@@ -602,6 +602,12 @@
 			"build": "scripts/build.dip721.sh",
 			"candid": "target/dip721.did",
 			"wasm": "target/dip721.wasm.gz"
+		},
+		"icpunks": {
+			"type": "custom",
+			"build": "scripts/build.icpunks.sh",
+			"candid": "target/icpunks.did",
+			"wasm": "target/icpunks.wasm.gz"
 		}
 	},
 	"defaults": {

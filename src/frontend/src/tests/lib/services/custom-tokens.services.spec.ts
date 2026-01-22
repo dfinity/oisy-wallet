@@ -1,14 +1,17 @@
 import { listCustomTokens } from '$lib/api/backend.api';
 import * as idbTokensApi from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
+import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
+import { get } from 'svelte/store';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
@@ -44,6 +47,14 @@ describe('custom-tokens.services', () => {
 				identity: mockIdentity,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
+		});
+
+		it('should set the backend custom tokens store', async () => {
+			backendCustomTokens.set([]);
+
+			await loadNetworkCustomTokens(mockParams);
+
+			expect(get(backendCustomTokens)).toStrictEqual(mockCustomTokens);
 		});
 
 		it('should filter the custom tokens based on the provided filter function', async () => {
@@ -237,6 +248,34 @@ describe('custom-tokens.services', () => {
 			});
 
 			expect(result).toStrictEqual(mockCustomTokens.slice(3, 4));
+
+			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should parse correctly the cached canister ID from the ICPunks custom tokens', async () => {
+			mockGetIdbTokens.mockResolvedValue([
+				{
+					token: {
+						IcPunks: {
+							canister_id: Principal.fromText(mockIcPunksCanisterId).toUint8Array()
+						}
+					},
+					version: toNullable(999n),
+					enabled: false,
+					section: toNullable(),
+					allow_external_content_source: toNullable()
+				}
+			]);
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(mockCustomTokens.slice(4, 5));
 
 			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 

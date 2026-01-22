@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
-			"test_banner_beta": "Это бета-версия. Пожалуйста, используйте с осторожностью."
+			"test_banner_beta": "Это бета-версия. Пожалуйста, используйте с осторожностью.",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "Логотип $name",
@@ -118,10 +121,11 @@
 			"logout": "Выйти",
 			"lock": "Закрыть",
 			"authenticate": "Открыть или создать",
-			"sign_in_with_identity_number": "",
+			"legacy_login": "",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP и другие",
 			"instant_and_private": "Приватный доступ в любой момент",
-			"advanced_cryptography": "Защищено передовой криптографией - 100% onchain"
+			"advanced_cryptography": "Защищено передовой криптографией - 100% onchain",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве"
@@ -149,36 +153,32 @@
 			"text": {
 				"title": "Процесс входа в систему был прерван.",
 				"description": "Похоже вы отменили свой вход в систему или регистрацию. Мы хотели бы понять что произошло чтобы улучшить ваш пользовательский опыт.",
-				"new_auth_version": "Страница входа выглядит совсем по-другому.",
-				"could_not_enter_identity_number": "Я не смог ввести свой Internet Identity.",
-				"lost_identity": "Я потерял свой номер Internet Identity",
-				"security": "Меня беспокоила безопасность или конфиденциальность",
-				"got_confused": "Я не понял предложенных вариантов регистрации.",
-				"no_signup_needed": "Я не хотел регистрироваться.",
-				"other": "Другое...",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"lost_identity_number": "",
 				"feedback_text": "Ваши отзывы помогают нам улучшать $oisy_short.",
 				"thanks_text": "Спасибо!",
+				"useful_links": "",
 				"identity_new_identity": "Кошелек $oisy_short переключает домен Internet Identity на: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "В результате ваш номер Internet Identity может не появиться автоматически, и вам может потребоваться ввести его заново.",
+				"switch_to_new_internet_identity": "",
+				"identity_legacy_identity_title": "",
+				"identity_legacy_identity_item_1": "",
+				"identity_legacy_identity_item_2": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"identity_new_identity_item_2": "",
+				"identity_new_identity_link": "",
 				"identity_legacy_sign_in": "Войти с устаревшим доменом Internet Identity",
 				"identity_learn_more": "Узнайте больше в документации $oisy_short",
-				"other_title": "Спасибо за ваш отзыв!",
-				"other_description": "Вот несколько полезных ресурсов о <span class=\"font-bold\">безопасности</span> и <span class=\"font-bold\">конфиденциальности</span> в $oisy_short и Internet Identity. Мы надеемся что они помогут вам принять информированное решение:",
-				"other_introduction": "Введение в $oisy_short",
-				"other_docs": "Документация $oisy_short: Internet Identity",
-				"other_private_key": "Кто контролирует закрытый ключ для нативных активов?",
-				"other_asset_control": "Управление активами, восстановление и управление в кошельке $oisy_short",
+				"oisy_introduction": "",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "Нужна помощь",
 				"sign_in": "Вход"
 			},
 			"alt": {
-				"internet_identity": "Изображение новой Internet Identity",
-				"identity_learn_more": "Узнайте больше об устаревшей Internet Identity",
-				"other_introduction": "Открыть введение в $oisy_short",
-				"other_docs": "Открыть документацию $oisy_short: Internet Identity",
-				"other_private_key": "Получить помощь в том, что бы узнать кто контролирует закрытый ключ для нативных активов",
-				"other_asset_control": "Получить информацию об управлении активами, восстановлении и управлении в кошельке $oisy_short",
-				"sign_in": "Нужна помощь для входа?"
+				"internet_identity": "Изображение новой Internet Identity"
 			}
 		}
 	},
@@ -187,6 +187,7 @@
 			"title_part_1": "Разблокируйте, чтобы продолжить",
 			"title_part_2": "Вы ранее заблокировали свой кошелёк для безопасности. Продолжите работу с того места, где остановились или выйдите из него.",
 			"unlock": "Разблокировать",
+			"unlock_with_legacy_login": "",
 			"logout": "Выйти из системы",
 			"logout_clear_cash_message": "Выйти и очистить сообщение об активах",
 			"learn_more": "Узнать больше"
@@ -632,11 +633,11 @@
 			"erc20_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-20.",
 			"erc721_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-721.",
 			"erc1155_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-1155.",
-			"erc20_user_tokens": "Ошибка при загрузке пользовательских токенов ERC-20.",
 			"spl_custom_tokens": "Ошибка при загрузке пользовательских токенов SPL.",
-			"erc20_user_token": "Ошибка при включении токена ERC-20.",
+			"erc20_custom_token": "Ошибка при включении токена ERC-20.",
 			"icrc_custom_token": "Ошибка при загрузке пользовательского токена ICRC.",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Вашему кошельку требуются некоторые начальные данные, которые еще не загружены. Пожалуйста, попробуйте еще раз.",
 			"allow_signing": "Проблема с настройкой вашего кошелька для подписи. Вы были выведены из системы. Если проблема не исчезнет, обратитесь в службу поддержки.",
 			"waiting_for_allowed_cycles_aborted": "Пожалуйста, попробуйте войти позже",
@@ -1172,6 +1173,7 @@
 				"unexpected_ledger": "Что-то пошло не так при проверке контейнера реестра.",
 				"unexpected_index": "Что-то пошло не так при проверке контейнера индекса.",
 				"unexpected_index_ledger": "Что-то пошло не так при загрузке ID реестра, связанного с контейнером индекса.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "ID реестра не связан с контейнером индекса.",
 				"missing_ledger_id": "Отсутствует ID реестра. Вы указали значение?",
 				"missing_canister_id": "Отсутствует ID контейнера. Вы указали значение?",

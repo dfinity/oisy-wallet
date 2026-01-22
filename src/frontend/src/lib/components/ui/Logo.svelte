@@ -26,7 +26,7 @@
 		testId
 	}: Props = $props();
 
-	let sizePx = $state(logoSizes[size]);
+	let sizePx = $derived(logoSizes[size]);
 
 	let loadingError: boolean | undefined = $state();
 	let isReady = $derived((nonNullish(src) && nonNullish(loadingError)) || isNullish(src));

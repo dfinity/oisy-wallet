@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
-			"test_banner_beta": ""
+			"test_banner_beta": "",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "شعار $name",
@@ -118,10 +121,11 @@
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
-			"sign_in_with_identity_number": "",
+			"legacy_login": "",
 			"asset_types": "",
 			"instant_and_private": "",
-			"advanced_cryptography": ""
+			"advanced_cryptography": "",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
@@ -149,36 +153,32 @@
 			"text": {
 				"title": "",
 				"description": "",
-				"new_auth_version": "",
-				"could_not_enter_identity_number": "",
-				"lost_identity": "لقد فقدت رقم هويتي على الإنترنت",
-				"security": "كنت قلقًا بشأن الأمان أو الخصوصية",
-				"got_confused": "",
-				"no_signup_needed": "",
-				"other": "أخرى...",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"lost_identity_number": "",
 				"feedback_text": "",
 				"thanks_text": "شكرًا لك!",
+				"useful_links": "",
 				"identity_new_identity": "محفظة $oisy_short تحوّل نطاق هوية الإنترنت إلى: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "نتيجة لذلك، قد لا يظهر رقم هوية الإنترنت الخاص بك تلقائيًا، وقد تحتاج إلى إعادة إدخاله.",
+				"switch_to_new_internet_identity": "",
+				"identity_legacy_identity_title": "",
+				"identity_legacy_identity_item_1": "",
+				"identity_legacy_identity_item_2": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"identity_new_identity_item_2": "",
+				"identity_new_identity_link": "",
 				"identity_legacy_sign_in": "تسجيل الدخول باستخدام نطاق هوية الإنترنت القديم",
 				"identity_learn_more": "تعرف على المزيد في وثائق $oisy_short",
-				"other_title": "شكرًا لك على ملاحظاتك!",
-				"other_description": "إليك بعض الموارد المفيدة حول <span class=\"font-bold\">الأمان</span> و<span class=\"font-bold\">الخصوصية</span> في $oisy_short وهوية الإنترنت. نأمل أن تساعدك في اتخاذ قرار مستنير:",
-				"other_introduction": "مقدمة $oisy_short",
-				"other_docs": "وثائق $oisy_short: هوية الإنترنت",
-				"other_private_key": "من يتحكم في المفتاح الخاص للأصول الأصلية؟",
-				"other_asset_control": "التحكم في الأصول، الاسترداد، والحوكمة في محفظة $oisy_short",
+				"oisy_introduction": "",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "هل تحتاج مساعدة في",
 				"sign_in": "تسجيل الدخول؟"
 			},
 			"alt": {
-				"internet_identity": "صورة لهوية الإنترنت الجديدة",
-				"identity_learn_more": "تعرف على المزيد حول هوية الإنترنت القديمة",
-				"other_introduction": "افتح مقدمة $oisy_short",
-				"other_docs": "افتح وثائق $oisy_short: هوية الإنترنت",
-				"other_private_key": "احصل على مساعدة حول من يتحكم في المفتاح الخاص للأصول الأصلية",
-				"other_asset_control": "احصل على معلومات حول التحكم في الأصول، الاسترداد، والحوكمة في محفظة $oisy_short",
-				"sign_in": "هل تحتاج بعض المساعدة لتسجيل الدخول؟"
+				"internet_identity": "صورة لهوية الإنترنت الجديدة"
 			}
 		}
 	},
@@ -187,6 +187,7 @@
 			"title_part_1": "",
 			"title_part_2": "",
 			"unlock": "",
+			"unlock_with_legacy_login": "",
 			"logout": "",
 			"logout_clear_cash_message": "",
 			"learn_more": ""
@@ -632,11 +633,11 @@
 			"erc20_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20 المخصصة.",
 			"erc721_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC721 المخصصة.",
 			"erc1155_custom_tokens": "",
-			"erc20_user_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20.",
 			"spl_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم SPL المخصصة.",
-			"erc20_user_token": "خطأ أثناء تفعيل التوكن التوأم ERC20.",
+			"erc20_custom_token": "خطأ أثناء تفعيل التوكن التوأم ERC20.",
 			"icrc_custom_token": "خطأ أثناء تحميل التوكن المخصص ICRC.",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "تتطلب محفظتك بعض البيانات الأولية التي لم يتم تحميلها بعد. يرجى المحاولة مرة أخرى.",
 			"allow_signing": "حدثت مشكلة أثناء إعداد محفظتك للتوقيع. تم تسجيل خروجك. إذا استمرت المشكلة، يرجى الاتصال بالدعم.",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -1172,6 +1173,7 @@
 				"unexpected_ledger": "حدث خطأ ما أثناء التحقق من صحة حاوية السجل.",
 				"unexpected_index": "حدث خطأ ما أثناء التحقق من صحة حاوية الفهرس.",
 				"unexpected_index_ledger": "حدث خطأ ما أثناء تحميل معرف السجل المرتبط بحاوية الفهرس.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "معرف السجل غير مرتبط بحاوية الفهرس.",
 				"missing_ledger_id": "معرف السجل مفقود. هل قدمت قيمة؟",
 				"missing_canister_id": "",

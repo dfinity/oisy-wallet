@@ -10,17 +10,15 @@ await copyFile(
 	'./node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_ledger.idl.js',
 	'./node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_ledger.idl.mjs'
 );
-const { init: initLedger } = await import(
-	'../node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_ledger.idl.mjs'
-);
+const { init: initLedger } =
+	await import('../node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_ledger.idl.mjs');
 
 await copyFile(
 	'./node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_index-ng.idl.js',
 	'./node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_index-ng.idl.mjs'
 );
-const { init: initIndex } = await import(
-	'../node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_index-ng.idl.mjs'
-);
+const { init: initIndex } =
+	await import('../node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_index-ng.idl.mjs');
 
 /**
  * Init arguments and other properties

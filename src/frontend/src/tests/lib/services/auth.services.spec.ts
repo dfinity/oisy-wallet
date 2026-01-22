@@ -6,6 +6,7 @@ import {
 } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
+	PrincipalsStorage,
 	errorSignOut,
 	idleSignOut,
 	lockSession,
@@ -119,18 +120,18 @@ describe('auth.services', () => {
 
 			await signOut({});
 
-			// 6 addresses (mainnet and testnet) + 1(+1) tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(8);
+			// 6 addresses (mainnet and testnet) + 1 tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
 
 			// 4 transactions + 1 balances
 			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
 		});
 
 		it('should clean the IDB storage for all principals', async () => {
-			await signOut({ clearAllPrincipalsStorages: true });
+			await signOut({ clearPrincipalStorages: PrincipalsStorage.ALL });
 
-			// 6 addresses (mainnet and testnet) + 1(+1) tokens + 4 txs + 1 balance
-			expect(idbKeyval.clear).toHaveBeenCalledTimes(13);
+			// 6 addresses (mainnet and testnet) + 1 tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
@@ -242,8 +243,8 @@ describe('auth.services', () => {
 
 			await errorSignOut(mockText);
 
-			// 6 addresses (mainnet and testnet) + 1(+1) tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(8);
+			// 6 addresses (mainnet and testnet) + 1 tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
 
 			// 4 transactions + 1 balances
 			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
@@ -368,8 +369,8 @@ describe('auth.services', () => {
 
 			await warnSignOut(mockText);
 
-			// 6 addresses (mainnet and testnet) + 1(+1) tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(8);
+			// 6 addresses (mainnet and testnet) + 1 tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
 
 			// 4 transactions + 1 balances
 			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
@@ -494,8 +495,8 @@ describe('auth.services', () => {
 
 			await nullishSignOut();
 
-			// 6 addresses (mainnet and testnet) + 1(+1) tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(8);
+			// 6 addresses (mainnet and testnet) + 1 tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
 
 			// 4 transactions + 1 balances
 			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);

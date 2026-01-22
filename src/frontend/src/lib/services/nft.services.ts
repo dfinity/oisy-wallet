@@ -5,7 +5,9 @@ import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { loadNfts as loadIcNfts } from '$icp/services/nft.services';
 import type { IcNonFungibleToken } from '$icp/types/nft';
+import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
 import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
+import { isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import { nftStore } from '$lib/stores/nft.store';
@@ -15,19 +17,20 @@ import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { isNetworkIdEthereum, isNetworkIdEvm, isNetworkIdICP } from '$lib/utils/network.utils';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, type QueryParams } from '@dfinity/utils';
 
 export const loadNftsByNetwork = async ({
 	networkId,
 	tokens,
 	identity,
-	ethAddress
+	ethAddress,
+	certified
 }: {
 	networkId: NetworkId;
 	tokens: NonFungibleToken[];
 	identity: OptionIdentity;
 	ethAddress: OptionEthAddress;
-}): Promise<Nft[]> => {
+} & QueryParams): Promise<Nft[]> => {
 	if (tokens.length === 0) {
 		return [];
 	}
@@ -45,7 +48,8 @@ export const loadNftsByNetwork = async ({
 		return await loadIcNfts({
 			// For now, it is acceptable to cast it since we checked before if the network is ICP.
 			tokens: tokens as IcNonFungibleToken[],
-			identity
+			identity,
+			certified
 		});
 	}
 
@@ -55,12 +59,13 @@ export const loadNftsByNetwork = async ({
 export const loadNfts = async ({
 	tokens,
 	identity,
+	certified,
 	ethAddress
 }: {
 	tokens: NonFungibleToken[];
 	identity: OptionIdentity;
 	ethAddress: OptionEthAddress;
-}) => {
+} & QueryParams) => {
 	const tokensByNetwork = getTokensByNetwork(tokens);
 
 	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
@@ -72,6 +77,7 @@ export const loadNfts = async ({
 			networkId,
 			tokens,
 			identity,
+			certified,
 			ethAddress
 		});
 
@@ -94,20 +100,34 @@ export const saveNftCustomToken = async ({
 		return;
 	}
 
-	if (isTokenErc721CustomToken(token)) {
+	if (isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token)) {
 		await saveCustomTokens({
 			identity,
-			tokens: [{ ...token, chainId: token.network.chainId, networkKey: 'Erc721' }]
+			tokens: [
+				{
+					...token,
+					chainId: token.network.chainId,
+					networkKey: isTokenErc721CustomToken(token) ? 'Erc721' : 'Erc1155'
+				}
+			]
 		});
-	} else if (isTokenErc1155CustomToken(token)) {
+	} else if (
+		isTokenExtCustomToken(token) ||
+		isTokenDip721CustomToken(token) ||
+		isTokenIcPunksCustomToken(token)
+	) {
 		await saveCustomTokens({
 			identity,
-			tokens: [{ ...token, chainId: token.network.chainId, networkKey: 'Erc1155' }]
-		});
-	} else if (isTokenExtCustomToken(token)) {
-		await saveCustomTokens({
-			identity,
-			tokens: [{ ...token, networkKey: 'ExtV2' }]
+			tokens: [
+				{
+					...token,
+					networkKey: isTokenExtCustomToken(token)
+						? 'ExtV2'
+						: isTokenDip721CustomToken(token)
+							? 'Dip721'
+							: 'IcPunks'
+				}
+			]
 		});
 	}
 

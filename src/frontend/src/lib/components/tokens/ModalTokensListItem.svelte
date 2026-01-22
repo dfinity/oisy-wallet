@@ -17,7 +17,7 @@
 
 	let { token, logoSize = 'lg', onClick, showDividers = true }: Props = $props();
 
-	const { oisyName, oisySymbol, symbol, name, network } = token;
+	const { oisyName, oisySymbol, symbol, name, network } = $derived(token);
 </script>
 
 <LogoButton dividers={showDividers} fullWidth {onClick}>

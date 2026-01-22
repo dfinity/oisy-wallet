@@ -3,7 +3,6 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
@@ -30,7 +29,6 @@ describe('tokens-ui.derived', () => {
 		vi.resetAllMocks();
 
 		erc20DefaultTokensStore.reset();
-		erc20UserTokensStore.resetAll();
 		erc721CustomTokensStore.resetAll();
 		erc1155CustomTokensStore.resetAll();
 		icrcDefaultTokensStore.resetAll();

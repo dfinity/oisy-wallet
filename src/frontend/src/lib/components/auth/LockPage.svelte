@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { themeStore } from '@dfinity/gix-components';
-	import { PRIMARY_INTERNET_IDENTITY_VERSION } from '$env/auth.env';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import IconKey from '$lib/components/icons/IconKey.svelte';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
@@ -8,7 +7,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import { signOut, signIn } from '$lib/services/auth.services';
+	import { signOut, signIn, PrincipalsStorage } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -19,11 +18,9 @@
 	const modalId = Symbol();
 	const imgStyleClass = 'h-full object-contain mx-auto object-top';
 
-	const handleUnlock = async () => {
+	const handleUnlock = async (domain: InternetIdentityDomain) => {
 		const { success } = await signIn({
-			...(PRIMARY_INTERNET_IDENTITY_VERSION === '2.0' && {
-				domain: InternetIdentityDomain.VERSION_2_0
-			})
+			domain
 		});
 
 		if (success === 'ok') {
@@ -35,7 +32,11 @@
 
 	const handleLogout = async () => {
 		authLocked.unlock({ source: 'logout from lock page' });
-		await signOut({ resetUrl: true, clearAllPrincipalsStorages: true, source: 'lock-page' });
+		await signOut({
+			resetUrl: true,
+			clearPrincipalStorages: PrincipalsStorage.ALL,
+			source: 'lock-page'
+		});
 	};
 </script>
 
@@ -75,17 +76,30 @@
 				<Button
 					fullWidth
 					innerStyleClass="items-center justify-center"
-					onclick={handleUnlock}
+					onclick={() => handleUnlock(InternetIdentityDomain.VERSION_2_0)}
 					styleClass="mb-3 w-full"
 				>
 					{$i18n.lock.text.unlock}
 					<IconKey />
 				</Button>
+
+				<Button
+					colorStyle="secondary-light"
+					fullWidth
+					innerStyleClass="items-center justify-center"
+					onclick={() => handleUnlock(InternetIdentityDomain.VERSION_1_0)}
+					styleClass="mb-3 w-full"
+				>
+					{$i18n.lock.text.unlock_with_legacy_login}
+					<IconKey />
+				</Button>
+
 				<Button
 					colorStyle="secondary-light"
 					fullWidth
 					innerStyleClass="items-center justify-center"
 					onclick={handleLogout}
+					transparent
 				>
 					{$i18n.lock.text.logout}
 					<IconLogout />

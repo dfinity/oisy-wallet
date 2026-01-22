@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
-	import { erc20UserTokens } from '$eth/derived/erc20.derived';
+	import { erc20CustomTokens } from '$eth/derived/erc20.derived';
 	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
 	import {
@@ -27,7 +27,7 @@
 
 	const openReceive = async (modalId: symbol) => {
 		const { result } = await autoLoadErc20Token({
-			erc20UserTokens: $erc20UserTokens,
+			erc20CustomTokens: $erc20CustomTokens,
 			sendToken: $tokenWithFallback,
 			identity: $authIdentity
 		});

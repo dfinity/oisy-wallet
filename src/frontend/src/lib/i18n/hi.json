@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
-			"test_banner_beta": ""
+			"test_banner_beta": "",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "$name लोगो",
@@ -118,10 +121,11 @@
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
-			"sign_in_with_identity_number": "",
+			"legacy_login": "",
 			"asset_types": "",
 			"instant_and_private": "",
-			"advanced_cryptography": ""
+			"advanced_cryptography": "",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
@@ -149,36 +153,32 @@
 			"text": {
 				"title": "",
 				"description": "",
-				"new_auth_version": "",
-				"could_not_enter_identity_number": "",
-				"lost_identity": "मैंने अपना इंटरनेट आइडेंटिटी नंबर खो दिया",
-				"security": "मुझे सुरक्षा या गोपनीयता के बारे में चिंता थी",
-				"got_confused": "",
-				"no_signup_needed": "",
-				"other": "अन्य...",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"lost_identity_number": "",
 				"feedback_text": "",
 				"thanks_text": "धन्यवाद!",
+				"useful_links": "",
 				"identity_new_identity": "$oisy_short वॉलेट इंटरनेट आइडेंटिटी डोमेन को: <span class=\"font-bold\">identity.internetcomputer.org</span> पर स्विच करता है",
-				"identity_legacy_description": "परिणामस्वरूप, आपका इंटरनेट आइडेंटिटी नंबर स्वचालित रूप से दिखाई नहीं दे सकता है, और आपको इसे फिर से दर्ज करना पड़ सकता है।",
+				"switch_to_new_internet_identity": "",
+				"identity_legacy_identity_title": "",
+				"identity_legacy_identity_item_1": "",
+				"identity_legacy_identity_item_2": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"identity_new_identity_item_2": "",
+				"identity_new_identity_link": "",
 				"identity_legacy_sign_in": "विरासत इंटरनेट आइडेंटिटी डोमेन के साथ साइन इन करें",
 				"identity_learn_more": "$oisy_short डॉक्स पर अधिक जानें",
-				"other_title": "आपकी प्रतिक्रिया के लिए धन्यवाद!",
-				"other_description": "यहां $oisy_short और इंटरनेट आइडेंटिटी में <span class=\"font-bold\">सुरक्षा</span> और <span class=\"font-bold\">गोपनीयता</span> के बारे में कुछ उपयोगी संसाधन दिए गए हैं। हमें उम्मीद है कि वे आपको एक सूचित निर्णय लेने में मदद करेंगे:",
-				"other_introduction": "$oisy_short परिचय",
-				"other_docs": "$oisy_short डॉक्स: इंटरनेट आइडेंटिटी",
-				"other_private_key": "नेटिव एसेट्स के लिए निजी कुंजी को कौन नियंत्रित करता है?",
-				"other_asset_control": "$oisy_short वॉलेट में एसेट कंट्रोल, रिकवरी और गवर्नेंस",
+				"oisy_introduction": "",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "मदद चाहिए",
 				"sign_in": "साइन इन करने में?"
 			},
 			"alt": {
-				"internet_identity": "नई इंटरनेट आइडेंटिटी की छवि",
-				"identity_learn_more": "विरासत इंटरनेट आइडेंटिटी के बारे में अधिक जानें",
-				"other_introduction": "$oisy_short परिचय खोलें",
-				"other_docs": "$oisy_short डॉक्स खोलें: इंटरनेट आइडेंटिटी",
-				"other_private_key": "नेटिव एसेट्स के लिए निजी कुंजी को कौन नियंत्रित करता है, इसके बारे में मदद प्राप्त करें",
-				"other_asset_control": "$oisy_short वॉलेट में एसेट कंट्रोल, रिकवरी और गवर्नेंस के बारे में जानकारी प्राप्त करें",
-				"sign_in": "साइन इन करने के लिए कुछ मदद चाहिए?"
+				"internet_identity": "नई इंटरनेट आइडेंटिटी की छवि"
 			}
 		}
 	},
@@ -187,6 +187,7 @@
 			"title_part_1": "जारी रखने के लिए अनलॉक करें",
 			"title_part_2": "आपने पहले अपने वॉलेट को सुरक्षित रखने के लिए लॉक किया था। जहाँ से छोड़ा था वहीं से शुरू करें या लॉग आउट करें।",
 			"unlock": "अनलॉक करें",
+			"unlock_with_legacy_login": "",
 			"logout": "लॉगआउट करें",
 			"logout_clear_cash_message": "लॉग आउट करने से सभी कैश्ड डेटा साफ़ हो जाएगा",
 			"learn_more": "और जानें"
@@ -632,11 +633,11 @@
 			"erc20_custom_tokens": "ERC20 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc721_custom_tokens": "ERC721 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc1155_custom_tokens": "ERC1155 कस्टम टोकन लोड करते समय त्रुटि।",
-			"erc20_user_tokens": "ERC20 उपयोगकर्ता टोकन लोड करते समय त्रुटि।",
 			"spl_custom_tokens": "SPL कस्टम टोकन लोड करते समय त्रुटि।",
-			"erc20_user_token": "ERC20 ट्विन टोकन सक्षम करते समय त्रुटि।",
+			"erc20_custom_token": "ERC20 ट्विन टोकन सक्षम करते समय त्रुटि।",
 			"icrc_custom_token": "ICRC कस्टम टोकन लोड करते समय त्रुटि।",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "आपके वॉलेट को कुछ प्रारंभिक डेटा की आवश्यकता है जो अभी तक लोड नहीं हुआ है। कृपया पुनः प्रयास करें।",
 			"allow_signing": "आपके वॉलेट को साइन करने के लिए सेट करते समय एक समस्या हुई। आपको साइन आउट कर दिया गया है। यदि समस्या बनी रहती है, तो सहायता से संपर्क करें।",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -1172,6 +1173,7 @@
 				"unexpected_ledger": "लेज़र कैनिस्टर को सत्यापित करते समय कुछ गलत हो गया।",
 				"unexpected_index": "इंडेक्स कैनिस्टर को सत्यापित करते समय कुछ गलत हो गया।",
 				"unexpected_index_ledger": "इंडेक्स कैनिस्टर से संबंधित लेज़र आईडी लोड करते समय कुछ गलत हो गया।",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "लेज़र आईडी इंडेक्स कैनिस्टर से संबंधित नहीं है।",
 				"missing_ledger_id": "लेज़र आईडी गायब है। क्या आपने कोई मान प्रदान किया है?",
 				"missing_canister_id": "",
