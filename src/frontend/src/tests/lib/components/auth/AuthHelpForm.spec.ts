@@ -35,8 +35,7 @@ describe('AuthHelpForm', () => {
 	it('should render auth help form content', () => {
 		const { container, getByText } = render(AuthHelpForm, {
 			props: {
-				onOpenNewIdentityHelp: vi.fn(),
-				onOpenLegacyIdentityHelp: vi.fn()
+				onOpenNewIdentityHelp: vi.fn()
 			}
 		});
 
@@ -110,18 +109,15 @@ describe('AuthHelpForm', () => {
 	it('should call correct function on button click', async () => {
 		const trackingEventKey = 'main_page_button';
 		const onOpenNewIdentityHelpMock = vi.fn();
-		const onOpenLegacyIdentityHelpMock = vi.fn();
 		const analyticSpy = vi.spyOn(analytics, 'trackEvent');
 
 		const { container } = render(AuthHelpForm, {
 			props: {
-				onOpenNewIdentityHelp: onOpenNewIdentityHelpMock,
-				onOpenLegacyIdentityHelp: onOpenLegacyIdentityHelpMock
+				onOpenNewIdentityHelp: onOpenNewIdentityHelpMock
 			}
 		});
 
 		expect(onOpenNewIdentityHelpMock).not.toHaveBeenCalled();
-		expect(onOpenLegacyIdentityHelpMock).not.toHaveBeenCalled();
 		expect(analyticSpy).not.toHaveBeenCalled();
 
 		const newIdentityVersionButton: HTMLButtonElement | null = container.querySelector(
