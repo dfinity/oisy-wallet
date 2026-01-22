@@ -90,7 +90,7 @@ describe('AuthHelpForm', () => {
 			createingAWalletLinkSelector
 		);
 
-		expect(createingAWalletLinkSelector).toBeInTheDocument();
+		expect(createingAWalletLink).toBeInTheDocument();
 
 		const privateKeyLink: HTMLAnchorElement | null =
 			container.querySelector(privateKeyLinkSelector);
