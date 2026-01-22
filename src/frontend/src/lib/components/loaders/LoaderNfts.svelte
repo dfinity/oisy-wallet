@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { debounce } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
+	import { getIdbAllNfts, setIdbAllNfts } from '$lib/api/idb-nfts.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -10,7 +11,31 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
+	let nftCacheLoaded = $state(false);
+
+	const loadCachedNfts = async () => {
+		if (isNullish($authIdentity)) {
+			return;
+		}
+
+		const cachedNfts = await getIdbAllNfts($authIdentity.getPrincipal());
+
+		if (isNullish(cachedNfts) || cachedNfts.length === 0) {
+			nftCacheLoaded = true;
+
+			return;
+		}
+
+		nftStore.addAll(cachedNfts);
+
+		nftCacheLoaded = true;
+	};
+
 	const onLoad = async () => {
+		if (!nftCacheLoaded) {
+			await loadCachedNfts();
+		}
+
 		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
 
 		const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
@@ -33,6 +58,16 @@
 		[$enabledNonFungibleTokens, $authIdentity, $ethAddress];
 
 		untrack(() => debounceLoad());
+	});
+
+	$effect(() => {
+		if (nftCacheLoaded && nonNullish($nftStore)) {
+			// TODO: Needs to parse symbols properly before storing
+			setIdbAllNfts({
+				identity: $authIdentity,
+				nfts: $nftStore
+			});
+		}
 	});
 </script>
 
