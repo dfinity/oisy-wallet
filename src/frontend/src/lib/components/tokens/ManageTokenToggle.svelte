@@ -1,20 +1,24 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
 	import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
-	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
+	import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 	import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+	import type { Dip721CustomToken } from '$icp/types/dip721-custom-token';
 	import type { ExtCustomToken } from '$icp/types/ext-custom-token';
+	import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
 	import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
 
 	type TokenToggleable =
-		| EthereumUserToken
+		| Erc20CustomToken
 		| SplCustomToken
 		| Erc721CustomToken
 		| Erc1155CustomToken
-		| ExtCustomToken;
+		| ExtCustomToken
+		| Dip721CustomToken
+		| IcPunksCustomToken;
 
 	interface Props {
 		token: TokenToggleable;

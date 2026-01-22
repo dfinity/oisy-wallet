@@ -14,7 +14,7 @@ export const VTIX_TOKEN_ID: TokenId = parseTokenId(VTIX_SYMBOL);
 export const VTIX_TOKEN: RequiredSpl2022Token = {
 	id: VTIX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Vanguard xStock',
 	symbol: VTIX_SYMBOL,

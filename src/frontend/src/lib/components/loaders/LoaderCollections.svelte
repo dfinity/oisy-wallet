@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
-	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/backend.did';
-	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
@@ -11,16 +9,16 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
-	import { saveCustomTokens as saveExtCustomTokens } from '$icp/services/ext-custom-tokens.services';
-	import type { SaveExtCustomToken } from '$icp/types/ext-custom-token';
-	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { COLLECTION_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+	import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
+	import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { OisyReloadCollectionsEvent } from '$lib/types/custom-events';
+	import type { SaveCustomExtVariant } from '$lib/types/custom-token';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
@@ -95,50 +93,51 @@
 			return;
 		}
 
-		const extTokens: SaveExtCustomToken[] = canisterIds.map((canisterId) => ({
+		const extTokens: SaveCustomExtVariant[] = canisterIds.map((canisterId) => ({
 			canisterId,
-			network: ICP_NETWORK,
+			networkKey: 'ExtV2',
 			enabled: true
 		}));
 
-		await saveExtCustomTokens({
-			tokens: extTokens as NonEmptyArray<SaveExtCustomToken>,
+		await saveCustomTokens({
+			tokens: extTokens as NonEmptyArray<SaveCustomExtVariant>,
 			identity
 		});
 	};
 
-	const load = async ({ extTokens = false }: { extTokens?: boolean }) => {
+	const load = async ({ extTokens }: { extTokens: boolean }) => {
 		if (isNullish($authIdentity)) {
 			return;
 		}
 
-		const customTokens = await listCustomTokens({
-			identity: $authIdentity,
-			certified: true,
-			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-		});
-
 		const params: LoadTokensParams = {
 			identity: $authIdentity,
-			customTokens
+			customTokens: $backendCustomTokens
 		};
 
-		await Promise.all([
-			loadErcTokens(params),
-			extTokens ? loadExtTokens(params) : Promise.resolve()
-		]);
+		try {
+			await Promise.all([
+				loadErcTokens(params),
+				extTokens ? loadExtTokens(params) : Promise.resolve()
+			]);
+		} catch (_: unknown) {
+			// no need to raise the error, but we should reload the custom tokens, just to avoid that it is caused by outdated tokens
+			await loadNetworkCustomTokens({
+				identity: $authIdentity,
+				filterTokens: () => true,
+				certified: true
+			});
+		}
 	};
 
 	const onLoad = async () => {
-		await load({});
+		await load({ extTokens: false });
 	};
 
 	const reload = async (event?: CustomEvent<OisyReloadCollectionsEvent>) => {
-		try {
-			await load({ extTokens: true });
-		} finally {
-			event?.detail.callback?.();
-		}
+		await load({ extTokens: true });
+
+		event?.detail.callback?.();
 	};
 </script>
 

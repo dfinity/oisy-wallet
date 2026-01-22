@@ -14,7 +14,7 @@ export const CRCLX_TOKEN_ID: TokenId = parseTokenId(CRCLX_SYMBOL);
 export const CRCLX_TOKEN: RequiredSpl2022Token = {
 	id: CRCLX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Circle xStock',
 	symbol: CRCLX_SYMBOL,

@@ -1,5 +1,6 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
+import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 import { i18n } from '$lib/stores/i18n.store';
 import * as modalStoreMod from '$lib/stores/modal.store';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -25,13 +26,17 @@ describe('NftImageConsentPreference', () => {
 		.spyOn(modalStoreMod.modalStore, 'openNftImageConsent')
 		.mockImplementation(() => {});
 
+	const props = {
+		source: PLAUSIBLE_EVENT_SOURCES.NFT_PAGE as const
+	};
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
 	it('renders media_enabled text when hasConsent=true', () => {
 		const { getByText } = render(NftImageConsentPreference, {
-			props: { collection: { ...nftAzuki.collection, allowExternalContentSource: true } }
+			props: { ...props, collection: { ...nftAzuki.collection, allowExternalContentSource: true } }
 		});
 
 		expect(getByText(get(i18n).nfts.text.media_enabled)).toBeInTheDocument();
@@ -39,7 +44,7 @@ describe('NftImageConsentPreference', () => {
 
 	it('renders media_disabled text when hasConsent=false', () => {
 		const { getByText } = render(NftImageConsentPreference, {
-			props: { collection: { ...nftAzuki.collection, allowExternalContentSource: false } }
+			props: { ...props, collection: { ...nftAzuki.collection, allowExternalContentSource: false } }
 		});
 
 		expect(getByText(get(i18n).nfts.text.media_disabled)).toBeInTheDocument();
@@ -47,7 +52,7 @@ describe('NftImageConsentPreference', () => {
 
 	it('opens the consent modal with the collection when clicking the button', async () => {
 		const { getByRole } = render(NftImageConsentPreference, {
-			props: { collection: { ...nftAzuki.collection, allowExternalContentSource: true } }
+			props: { ...props, collection: { ...nftAzuki.collection, allowExternalContentSource: true } }
 		});
 
 		const btn = getByRole('button', { name: get(i18n).nfts.alt.review_preference });

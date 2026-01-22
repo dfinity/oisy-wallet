@@ -46,7 +46,13 @@ interface I18nCore {
 		ellipsis: string;
 		learn_more: string;
 	};
-	info: { test_banner: string; test_banner_beta: string };
+	info: {
+		test_banner: string;
+		test_banner_beta: string;
+		internet_identity_banner_first_part: string;
+		internet_identity_banner_second_part: string;
+		internet_identity_banner_button: string;
+	};
 	alt: {
 		logo: string;
 		go_to_home: string;
@@ -59,7 +65,7 @@ interface I18nCore {
 		less: string;
 		learn_more: string;
 	};
-	warning: { do_not_close: string; standalone_mode: string };
+	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 }
 
 interface I18nNavigation {
@@ -114,9 +120,11 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
+		legacy_login: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
+		social_login: string;
 	};
 	alt: { preview: string };
 	message: { session_locked: string };
@@ -136,35 +144,31 @@ interface I18nAuth {
 		text: {
 			title: string;
 			description: string;
-			subtitle: string;
-			lost_identity: string;
-			security: string;
-			got_confused: string;
-			other: string;
+			login_page_looks_different: string;
+			use_identity_number: string;
+			lost_identity_number: string;
 			feedback_text: string;
 			thanks_text: string;
+			useful_links: string;
 			identity_new_identity: string;
-			identity_legacy_description: string;
+			switch_to_new_internet_identity: string;
+			identity_legacy_identity_title: string;
+			identity_legacy_identity_item_1: string;
+			identity_legacy_identity_item_2: string;
+			identity_new_identity_title: string;
+			identity_new_identity_item_1: string;
+			identity_new_identity_item_2: string;
+			identity_new_identity_link: string;
 			identity_legacy_sign_in: string;
 			identity_learn_more: string;
-			other_title: string;
-			other_description: string;
-			other_introduction: string;
-			other_docs: string;
-			other_private_key: string;
-			other_asset_control: string;
+			oisy_introduction: string;
+			private_key: string;
+			asset_control: string;
+			internet_identity_help_center: string;
 			need_help: string;
 			sign_in: string;
 		};
-		alt: {
-			internet_identity: string;
-			identity_learn_more: string;
-			other_introduction: string;
-			other_docs: string;
-			other_private_key: string;
-			other_asset_control: string;
-			sign_in: string;
-		};
+		alt: { internet_identity: string };
 	};
 }
 
@@ -173,6 +177,7 @@ interface I18nLock {
 		title_part_1: string;
 		title_part_2: string;
 		unlock: string;
+		unlock_with_legacy_login: string;
 		logout: string;
 		logout_clear_cash_message: string;
 		learn_more: string;
@@ -430,11 +435,11 @@ interface I18nInit {
 		erc20_custom_tokens: string;
 		erc721_custom_tokens: string;
 		erc1155_custom_tokens: string;
-		erc20_user_tokens: string;
 		spl_custom_tokens: string;
-		erc20_user_token: string;
+		erc20_custom_token: string;
 		icrc_custom_token: string;
 		ext_custom_tokens: string;
+		icpunks_custom_tokens: string;
 		loading_wallet_timeout: string;
 		allow_signing: string;
 		waiting_for_allowed_cycles_aborted: string;
@@ -696,6 +701,14 @@ interface I18nSend {
 	};
 }
 
+interface I18nMint {
+	text: { mint: string; minting: string; mint_review_subtitle: string };
+}
+
+interface I18nBurn {
+	text: { burn: string; burning: string; burn_review_subtitle: string };
+}
+
 interface I18nScanner {
 	text: {
 		scan_qr_code: string;
@@ -724,8 +737,11 @@ interface I18nScanner {
 		select_token_to_pay: string;
 		pay_at_successful: string;
 		pay_at_failure: string;
+		try_again: string;
+		payment_confirmed: string;
+		payment_failed: string;
 	};
-	error: { code_link_is_not_valid: string };
+	error: { code_link_is_not_valid: string; data_is_incompleted: string };
 }
 
 interface I18nConvert {
@@ -849,6 +865,12 @@ interface I18nPay {
 		signing_transaction: string;
 		paying: string;
 	};
+	error: {
+		data_is_incompleted: string;
+		amount_does_not_match: string;
+		recipient_address_is_not_valid: string;
+		token_address_mismatch: string;
+	};
 	alt: { pay: string; where_you_can_pay: string };
 }
 
@@ -923,6 +945,7 @@ interface I18nTokens {
 			unexpected_ledger: string;
 			unexpected_index: string;
 			unexpected_index_ledger: string;
+			unrecognized_nft_canister_id_standard: string;
 			invalid_ledger_id: string;
 			missing_ledger_id: string;
 			missing_canister_id: string;
@@ -1045,6 +1068,7 @@ interface I18nNfts {
 		token_id: string;
 		go_to_collection: string;
 		could_not_update_section: string;
+		media_stored_at_different_location: string;
 	};
 	alt: {
 		placeholder_image: string;
@@ -1228,6 +1252,8 @@ interface I18nTransactions {
 		title: string;
 		buy_or_receive: string;
 		transaction_history: string;
+		minter_transaction_history: string;
+		mint_burn_transactions_unavailable: string;
 		mainnet_btc_transactions_info: string;
 		transaction_history_unavailable: string;
 		missing_index_canister_explanation: string;
@@ -1418,6 +1444,7 @@ interface I18nTerms_of_use {
 		det: { article: string; possessive: string };
 		title: string;
 		instruction: string;
+		instruction_two_buttons: string;
 		body: string;
 	};
 	alt: { terms_of_use: string };
@@ -1640,6 +1667,8 @@ interface I18n {
 	networks: I18nNetworks;
 	receive: I18nReceive;
 	send: I18nSend;
+	mint: I18nMint;
+	burn: I18nBurn;
 	scanner: I18nScanner;
 	convert: I18nConvert;
 	swap: I18nSwap;

@@ -8,11 +8,13 @@ import {
 	infuraErc721Providers
 } from '$eth/providers/infura-erc721.providers';
 import type { EthereumNetwork } from '$eth/types/network';
+import type { NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import en from '$tests/mocks/i18n.mock';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
+import { SvelteMap } from 'svelte/reactivity';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'
@@ -105,16 +107,18 @@ describe('infura-erc721.providers', () => {
 
 				const provider = new InfuraErc721Provider(infura);
 
-				await expect(provider.metadata(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.metadata(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
 		describe('getNftMetadata', () => {
 			const mockTokenUri = vi.fn();
 
+			const tokenId = parseNftId('12345');
+
 			const mockParams = {
 				contractAddress,
-				tokenId: parseNftId('123456')
+				tokenId
 			};
 
 			const mockMetadata = {
@@ -124,12 +128,22 @@ describe('infura-erc721.providers', () => {
 				attributes: [{ trait_type: 'Color', value: 'Blue' }]
 			};
 
+			const expected: NftMetadata = {
+				name: mockMetadata.name,
+				id: tokenId,
+				attributes: [{ traitType: 'Color', value: 'Blue' }],
+				imageUrl: mockMetadata.image,
+				description: mockMetadata.description
+			};
+
 			beforeEach(() => {
 				vi.clearAllMocks();
 
 				mockTokenUri.mockResolvedValue(
 					'ipfs://bafybeig4s66nv3qbczmjxekn4tjk7pjdhcqbbshjj4kxwgdruvzym3rsbm/27'
 				);
+
+				vi.spyOn(SvelteMap.prototype, 'get').mockReturnValue(undefined); // invalidate cache
 
 				global.fetch = vi.fn().mockResolvedValue({
 					json: () => Promise.resolve(mockMetadata)
@@ -144,13 +158,9 @@ describe('infura-erc721.providers', () => {
 
 				const metadata = await provider.getNftMetadata(mockParams);
 
-				expect(metadata).toStrictEqual({
-					name: mockMetadata.name,
-					id: '123456',
-					attributes: [{ traitType: 'Color', value: 'Blue' }],
-					imageUrl: mockMetadata.image,
-					description: mockMetadata.description
-				});
+				expect(global.fetch).toHaveBeenCalledOnce();
+
+				expect(metadata).toStrictEqual(expected);
 			});
 
 			it('should handle errors gracefully', async () => {
@@ -159,13 +169,17 @@ describe('infura-erc721.providers', () => {
 
 				const provider = new InfuraErc721Provider(infura);
 
-				await expect(provider.getNftMetadata(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.getNftMetadata(mockParams)).rejects.toThrowError(errorMessage);
+
+				expect(global.fetch).not.toHaveBeenCalled();
 			});
 
 			it('should call the tokenURI method of the contract', async () => {
 				const provider = new InfuraErc721Provider(infura);
 
 				await provider.getNftMetadata(mockParams);
+
+				expect(global.fetch).toHaveBeenCalledOnce();
 
 				expect(provider).toBeDefined();
 
@@ -178,6 +192,19 @@ describe('infura-erc721.providers', () => {
 				);
 
 				expect(mockTokenUri).toHaveBeenCalledOnce();
+			});
+
+			it('should return the cached metadata if available', async () => {
+				// Svelte map already has cached value from previous test runs
+				vi.spyOn(SvelteMap.prototype, 'get').mockRestore();
+
+				const provider = new InfuraErc721Provider(infura);
+
+				const result = await provider.getNftMetadata(mockParams);
+
+				expect(global.fetch).not.toHaveBeenCalled();
+
+				expect(result).toEqual(expected);
 			});
 		});
 
@@ -193,7 +220,7 @@ describe('infura-erc721.providers', () => {
 			});
 
 			it('should throw an error for an unsupported network ID', () => {
-				expect(() => infuraErc721Providers(ICP_NETWORK_ID)).toThrow(
+				expect(() => infuraErc721Providers(ICP_NETWORK_ID)).toThrowError(
 					replacePlaceholders(en.init.error.no_infura_erc721_provider, {
 						$network: ICP_NETWORK_ID.toString()
 					})

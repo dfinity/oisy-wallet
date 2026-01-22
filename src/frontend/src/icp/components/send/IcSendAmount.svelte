@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
@@ -20,10 +21,11 @@
 
 	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
 
-	const { sendToken, sendTokenExchangeRate, sendBalance } =
+	const { sendToken, sendTokenExchangeRate, sendBalance, isIcBurning } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let fee = $derived(getTokenFee($sendToken));
+	// An IC Burn transaction does not require a fee
+	let fee = $derived($isIcBurning ? ZERO : getTokenFee($sendToken));
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
@@ -34,14 +36,18 @@
 			return;
 		}
 
+		// If the user is the minting account, it does not require any balance to send tokens.
+		// Any token sent from a minting account is considered a Mint transaction.
+		if ($isIcMintingAccount) {
+			return;
+		}
+
 		const assertBalance = (): IcAmountAssertionError | undefined => {
 			const total = userAmount + (fee ?? ZERO);
 
 			if (total > ($sendBalance ?? ZERO)) {
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
-
-			return undefined;
 		};
 
 		return assertBalance();

@@ -116,7 +116,7 @@ describe('infura-erc20.providers', () => {
 
 				const provider = new InfuraErc20Provider(infura);
 
-				await expect(provider.metadata(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.metadata(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -168,7 +168,7 @@ describe('infura-erc20.providers', () => {
 
 				const provider = new InfuraErc20Provider(infura);
 
-				await expect(provider.balance(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.balance(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -350,7 +350,7 @@ describe('infura-erc20.providers', () => {
 
 				const provider = new InfuraErc20Provider(infura);
 
-				await expect(provider.populateTransaction(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.populateTransaction(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -418,7 +418,7 @@ describe('infura-erc20.providers', () => {
 
 				const provider = new InfuraErc20Provider(infura);
 
-				await expect(provider.populateApprove(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.populateApprove(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -472,7 +472,7 @@ describe('infura-erc20.providers', () => {
 
 				const provider = new InfuraErc20Provider(infura);
 
-				await expect(provider.allowance(mockParams)).rejects.toThrow(errorMessage);
+				await expect(provider.allowance(mockParams)).rejects.toThrowError(errorMessage);
 			});
 		});
 
@@ -663,7 +663,7 @@ describe('infura-erc20.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => infuraErc20Providers(ICP_NETWORK_ID)).toThrow(
+			expect(() => infuraErc20Providers(ICP_NETWORK_ID)).toThrowError(
 				replacePlaceholders(en.init.error.no_infura_erc20_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})

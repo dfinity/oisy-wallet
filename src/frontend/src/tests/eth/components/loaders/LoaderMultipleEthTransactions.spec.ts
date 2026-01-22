@@ -9,7 +9,6 @@ import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipl
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
@@ -19,7 +18,7 @@ import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { syncTransactionsFromCache } from '$lib/services/listener.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockErc1155CustomTokens } from '$tests/mocks/erc1155-tokens.mock';
-import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
+import { createMockErc20CustomTokens } from '$tests/mocks/erc20-tokens.mock';
 import { createMockErc721CustomTokens } from '$tests/mocks/erc721-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
@@ -51,12 +50,12 @@ vi.mock('$lib/utils/time.utils', () => ({
 describe('LoaderMultipleEthTransactions', () => {
 	const timeout = WALLET_TIMER_INTERVAL_MILLIS;
 
-	const mockMainnetErc20CertifiedCustomTokens = createMockErc20UserTokens({
+	const mockMainnetErc20CertifiedCustomTokens = createMockErc20CustomTokens({
 		n: 2,
 		networkEnv: 'mainnet'
 	});
 
-	const mockSepoliaErc20CertifiedCustomTokens = createMockErc20UserTokens({
+	const mockSepoliaErc20CertifiedCustomTokens = createMockErc20CustomTokens({
 		n: 3,
 		networkEnv: 'testnet'
 	});
@@ -96,7 +95,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		...mockTestnetErc1155CustomTokens
 	];
 
-	const mockAdditionalCertifiedTokens = createMockErc20UserTokens({
+	const mockAdditionalCertifiedTokens = createMockErc20CustomTokens({
 		n: 8,
 		networkEnv: 'mainnet',
 		start: 2
@@ -136,8 +135,6 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 
-		erc20UserTokensStore.resetAll();
-		erc20UserTokensStore.setAll(mockErc20CertifiedCustomTokens);
 		erc20CustomTokensStore.resetAll();
 		erc20CustomTokensStore.setAll(mockErc20CertifiedCustomTokens);
 
@@ -308,7 +305,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		const mockLoadEthereumTransactions = vi.mocked(loadEthereumTransactions);
 		mockLoadEthereumTransactions.mockResolvedValue({ success: true });
 
-		const mockAdditionalTokens = createMockErc20UserTokens({
+		const mockAdditionalTokens = createMockErc20CustomTokens({
 			n: 13,
 			networkEnv: 'mainnet',
 			start: 100
@@ -328,8 +325,6 @@ describe('LoaderMultipleEthTransactions', () => {
 			});
 		});
 
-		erc20UserTokensStore.resetAll();
-		erc20UserTokensStore.setAll([...mockErc20CertifiedCustomTokens, ...mockAdditionalTokens]);
 		erc20CustomTokensStore.resetAll();
 		erc20CustomTokensStore.setAll([...mockErc20CertifiedCustomTokens, ...mockAdditionalTokens]);
 
@@ -373,11 +368,6 @@ describe('LoaderMultipleEthTransactions', () => {
 			});
 		});
 
-		erc20UserTokensStore.resetAll();
-		erc20UserTokensStore.setAll([
-			...mockErc20CertifiedCustomTokens,
-			...mockAdditionalCertifiedTokens
-		]);
 		erc20CustomTokensStore.resetAll();
 		erc20CustomTokensStore.setAll([
 			...mockErc20CertifiedCustomTokens,
@@ -405,18 +395,12 @@ describe('LoaderMultipleEthTransactions', () => {
 			});
 		});
 
-		const mockNewAdditionalTokens = createMockErc20UserTokens({
+		const mockNewAdditionalTokens = createMockErc20CustomTokens({
 			n: 17,
 			networkEnv: 'mainnet',
 			start: 100
 		});
 
-		erc20UserTokensStore.resetAll();
-		erc20UserTokensStore.setAll([
-			...mockErc20CertifiedCustomTokens,
-			...mockAdditionalCertifiedTokens,
-			...mockNewAdditionalTokens
-		]);
 		erc20CustomTokensStore.resetAll();
 		erc20CustomTokensStore.setAll([
 			...mockErc20CertifiedCustomTokens,
@@ -468,11 +452,6 @@ describe('LoaderMultipleEthTransactions', () => {
 			});
 		});
 
-		erc20UserTokensStore.resetAll();
-		erc20UserTokensStore.setAll([
-			...mockErc20CertifiedCustomTokens,
-			...mockAdditionalCertifiedTokens
-		]);
 		erc20CustomTokensStore.resetAll();
 		erc20CustomTokensStore.setAll([
 			...mockErc20CertifiedCustomTokens,

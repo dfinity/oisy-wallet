@@ -22,7 +22,7 @@ describe('GldtStakeDissolveEvents', () => {
 	const gldtToken = {
 		...mockIcrcCustomToken,
 		id: Symbol('GLDT') as TokenId,
-		standard: 'icrc',
+		standard: { code: 'icrc' },
 		ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
 		symbol: 'GLDT'
 	} as IcToken;
@@ -46,7 +46,7 @@ describe('GldtStakeDissolveEvents', () => {
 			context: mockContext(getEvents([]))
 		});
 
-		expect(() => getByText(en.stake.text.unlock_requests)).toThrow();
+		expect(() => getByText(en.stake.text.unlock_requests)).toThrowError();
 	});
 
 	it('does display the section if events are available', () => {

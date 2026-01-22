@@ -1,5 +1,5 @@
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { TokenSchema } from '$lib/schema/token.schema';
+import { TokenSchema, TokenStandardCodeSchema } from '$lib/schema/token.schema';
 import * as z from 'zod';
 
 export const NftIdSchema = z.string().brand<'NftId'>();
@@ -57,7 +57,7 @@ export const NftSchema = z.object({
 });
 
 export const OwnedContractSchema = z.object({
-	...TokenSchema.pick({ standard: true }).shape,
+	standard: TokenStandardCodeSchema,
 	address: z.string(),
 	isSpam: z.boolean()
 });

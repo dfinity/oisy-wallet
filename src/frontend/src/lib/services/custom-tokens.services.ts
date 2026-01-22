@@ -1,6 +1,7 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { listCustomTokens } from '$lib/api/backend.api';
 import { getIdbAllCustomTokens, setIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
+import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { assertNever, fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
@@ -27,6 +28,8 @@ const loadCustomTokensFromBackend = async ({
 		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
+
+	backendCustomTokens.set(tokens);
 
 	// Caching the custom tokens in the IDB if update call
 	if (certified && tokens.length > 0) {
@@ -87,6 +90,36 @@ export const loadNetworkCustomTokens = async ({
 					};
 				}
 
+				if ('Dip721' in token.token) {
+					const { canister_id: rawCanisterId } = token.token.Dip721;
+
+					const canisterId = Principal.from(rawCanisterId);
+
+					return {
+						...token,
+						token: {
+							Dip721: {
+								canister_id: canisterId
+							}
+						}
+					};
+				}
+
+				if ('IcPunks' in token.token) {
+					const { canister_id: rawCanisterId } = token.token.IcPunks;
+
+					const canisterId = Principal.from(rawCanisterId);
+
+					return {
+						...token,
+						token: {
+							IcPunks: {
+								canister_id: canisterId
+							}
+						}
+					};
+				}
+
 				if (
 					'Erc20' in token.token ||
 					'Erc721' in token.token ||
@@ -100,7 +133,11 @@ export const loadNetworkCustomTokens = async ({
 				assertNever(token.token, `Unexpected token type: ${token.token}`);
 			};
 
-			return cachedTokens.map(parsePrincipal).filter(filterTokens);
+			return cachedTokens.reduce<CustomToken[]>((acc, token) => {
+				const parsed = parsePrincipal(token);
+
+				return filterTokens(parsed) ? [...acc, parsed] : acc;
+			}, []);
 		}
 	}
 

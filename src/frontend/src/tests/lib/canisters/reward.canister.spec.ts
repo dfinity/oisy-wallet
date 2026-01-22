@@ -59,7 +59,7 @@ describe('reward.canister', () => {
 
 			const result = isEligible(queryParams);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -189,7 +189,7 @@ describe('reward.canister', () => {
 
 			const result = getUserInfo(queryParams);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -225,7 +225,7 @@ describe('reward.canister', () => {
 
 			const result = getNewVipReward({ campaign_id: 'vip' });
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -263,7 +263,7 @@ describe('reward.canister', () => {
 
 			const result = claimVipReward({ code: '1234567890' });
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -298,7 +298,7 @@ describe('reward.canister', () => {
 
 			const result = getReferrerInfo(queryParams);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -327,7 +327,7 @@ describe('reward.canister', () => {
 
 			const result = setReferrer(mockedReferrerCode);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 
@@ -359,7 +359,7 @@ describe('reward.canister', () => {
 
 			const result = registerAirdropRecipient(mockUserSnapshot);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 	});
 });

@@ -62,6 +62,19 @@ describe('ext.services', () => {
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensExt);
 		});
 
+		it('should save the default tokens in the store', async () => {
+			await loadExtTokens({ identity: mockIdentity });
+
+			const tokens = get(extDefaultTokensStore);
+
+			EXT_BUILTIN_TOKENS.forEach((token, index) => {
+				expect(tokens).toContainEqual({
+					...token,
+					id: (tokens ?? [])[index].id
+				});
+			});
+		});
+
 		it('should save the custom tokens in the store', async () => {
 			await loadExtTokens({ identity: mockIdentity });
 
@@ -82,7 +95,7 @@ describe('ext.services', () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadExtTokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadExtTokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 	});
 
@@ -162,7 +175,7 @@ describe('ext.services', () => {
 						id: (tokens ?? [])[0].data.id,
 						version: 1n,
 						enabled: true,
-						standard: 'extV2',
+						standard: { code: 'ext', version: 'v2' },
 						category: 'custom',
 						canisterId: mockCanisterId,
 						symbol: mockCanisterId,
@@ -180,7 +193,7 @@ describe('ext.services', () => {
 					data: {
 						...EXT_BUILTIN_TOKENS[0],
 						id: parseTokenId('mockToken'),
-						standard: 'extV2',
+						standard: { code: 'ext' },
 						enabled: true
 					},
 					certified: false

@@ -3,6 +3,7 @@
 	import { getContext } from 'svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -37,7 +38,9 @@
 
 <SendReview {amount} {destination} disabled={invalid} {nft} {onBack} {onSend} {selectedContact}>
 	{#snippet fee()}
-		<IcTokenFee />
+		{#if !$isIcMintingAccount}
+			<IcTokenFee />
+		{/if}
 	{/snippet}
 
 	{#snippet network()}

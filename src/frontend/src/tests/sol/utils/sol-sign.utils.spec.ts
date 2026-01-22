@@ -91,7 +91,7 @@ describe('sol-sign.utils', () => {
 				network: mockNetwork
 			});
 
-			await expect(signer.signTransactions([mockTransaction])).rejects.toThrow('Mock Error');
+			await expect(signer.signTransactions([mockTransaction])).rejects.toThrowError('Mock Error');
 		});
 	});
 });

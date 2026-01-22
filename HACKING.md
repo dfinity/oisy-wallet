@@ -378,7 +378,7 @@ Location: `src/frontend/src/env/tokens/tokens-evm/`
   export const POL_MAINNET_TOKEN: RequiredToken = {
   	id: POL_MAINNET_TOKEN_ID,
   	network: POLYGON_MAINNET_NETWORK,
-  	standard: 'ethereum',
+  	standard: { code: 'ethereum' },
   	category: 'default',
   	name: 'POL (prev. MATIC)',
   	symbol: POL_MAINNET_SYMBOL,

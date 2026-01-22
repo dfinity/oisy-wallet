@@ -1,5 +1,5 @@
 import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import type { SaveUserToken } from '$eth/types/erc20-user-token';
+import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 import {
 	MANAGE_TOKENS_MODAL_ROUTE,
@@ -23,7 +23,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
-export interface ManageTokensSaveParams {
+interface ManageTokensSaveParams {
 	progress?: (step: ProgressStepsAddToken) => void;
 	modalNext?: () => void;
 	onSuccess?: () => void;
@@ -39,8 +39,8 @@ export interface SaveTokensParams<T> {
 
 export const saveTokens = async <
 	T extends
-		| SaveUserToken
 		| SaveCustomTokenWithKey
+		| SaveErc20CustomToken
 		| SaveSplCustomToken
 		| SaveErc721CustomToken
 		| SaveErc1155CustomToken

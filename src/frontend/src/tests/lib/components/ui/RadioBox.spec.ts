@@ -68,6 +68,6 @@ describe('RadioBox', () => {
 		label = getByTestId(labelTestId);
 
 		expect(label).toBeInTheDocument();
-		expect(() => getByTestId(descriptionTestId)).toThrow();
+		expect(() => getByTestId(descriptionTestId)).toThrowError();
 	});
 });

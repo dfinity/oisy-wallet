@@ -18,7 +18,7 @@ export const BASE_ETH_TOKEN_ID: TokenId = parseTokenId(BASE_ETH_SYMBOL);
 export const BASE_ETH_TOKEN: RequiredToken = {
 	id: BASE_ETH_TOKEN_ID,
 	network: BASE_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
 	name: 'Ethereum',
 	symbol: BASE_ETH_SYMBOL,
@@ -37,7 +37,7 @@ export const BASE_SEPOLIA_ETH_TOKEN_ID: TokenId = parseTokenId(BASE_SEPOLIA_ETH_
 export const BASE_SEPOLIA_ETH_TOKEN: RequiredToken = {
 	id: BASE_SEPOLIA_ETH_TOKEN_ID,
 	network: BASE_SEPOLIA_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
 	name: 'SepoliaETH',
 	symbol: BASE_SEPOLIA_ETH_SYMBOL,

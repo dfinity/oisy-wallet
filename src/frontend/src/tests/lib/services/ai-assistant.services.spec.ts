@@ -2,7 +2,7 @@ import type { chat_response_v1 } from '$declarations/llm/llm.did';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { llmChat } from '$lib/api/llm.api';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
-import { askLlm, executeTool } from '$lib/services/ai-assistant.services';
+import * as aiAssistantServices from '$lib/services/ai-assistant.services';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 import { getMockContactsUi, mockContactBtcAddressUi } from '$tests/mocks/contacts.mock';
@@ -52,7 +52,7 @@ describe('ai-assistant.services', () => {
 
 			vi.mocked(llmChat).mockResolvedValue(response);
 
-			const result = await askLlm({
+			const result = await aiAssistantServices.askLlm({
 				identity: mockIdentity,
 				messages: [{ user: { content: 'test' } }]
 			});
@@ -77,7 +77,7 @@ describe('ai-assistant.services', () => {
 
 			vi.mocked(llmChat).mockResolvedValue(response);
 
-			const result = await askLlm({
+			const result = await aiAssistantServices.askLlm({
 				identity: mockIdentity,
 				messages: [{ user: { content: 'test' } }]
 			});
@@ -87,6 +87,35 @@ describe('ai-assistant.services', () => {
 				text: fromNullable(response.message.content),
 				tool: {
 					calls: [showAllContactsToolCall],
+					results: [
+						{
+							result: { contacts: [] },
+							type: 'show_all_contacts'
+						}
+					]
+				}
+			});
+		});
+
+		it('parses only one tool call if the limit for a tool has been reached', async () => {
+			const response = {
+				message: {
+					content: toNullable(),
+					tool_calls: [showAllContactsToolCall, showAllContactsToolCall, showAllContactsToolCall]
+				}
+			} as chat_response_v1;
+
+			vi.mocked(llmChat).mockResolvedValue(response);
+
+			const result = await aiAssistantServices.askLlm({
+				identity: mockIdentity,
+				messages: [{ user: { content: 'test' } }]
+			});
+
+			expect(result).toStrictEqual({
+				text: fromNullable(response.message.content),
+				tool: {
+					calls: [showAllContactsToolCall, showAllContactsToolCall, showAllContactsToolCall],
 					results: [
 						{
 							result: { contacts: [] },
@@ -114,7 +143,7 @@ describe('ai-assistant.services', () => {
 		});
 
 		it('parses show_all_contacts tool and returns all contacts', () => {
-			const result = executeTool({
+			const result = aiAssistantServices.executeTool({
 				toolCall: showAllContactsToolCall,
 				requestStartTimestamp: 1000
 			});
@@ -128,7 +157,7 @@ describe('ai-assistant.services', () => {
 		});
 
 		it('parses show_filtered_contacts tool and returns contacts', () => {
-			const result = executeTool({
+			const result = aiAssistantServices.executeTool({
 				toolCall: showFilteredContactsToolCall,
 				requestStartTimestamp: 1000
 			});
@@ -142,7 +171,7 @@ describe('ai-assistant.services', () => {
 		});
 
 		it('parses show_balance tool and returns the expected data', () => {
-			const result = executeTool({
+			const result = aiAssistantServices.executeTool({
 				toolCall: showBalanceToolCall,
 				requestStartTimestamp: 1000
 			});

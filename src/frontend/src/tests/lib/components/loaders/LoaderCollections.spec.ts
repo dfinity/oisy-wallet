@@ -1,17 +1,14 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
-import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
-import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import * as extTokenApi from '$icp/api/ext-v2-token.api';
-import * as extCustomTokens from '$icp/services/ext-custom-tokens.services';
-import { listCustomTokens } from '$lib/api/backend.api';
 import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
+import * as saveCustomTokens from '$lib/services/save-custom-tokens.services';
 import { ethAddressStore } from '$lib/stores/address.store';
+import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { emit } from '$lib/utils/events.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -21,16 +18,10 @@ import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
-vi.mock('$lib/api/backend.api', () => ({
-	listCustomTokens: vi.fn()
-}));
-
 describe('LoaderCollections', () => {
 	let alchemyProvidersSpy: MockInstance;
 	let extGetTokensByOwnerSpy: MockInstance;
-	let erc721CustomTokensSpy: MockInstance;
-	let erc1155CustomTokensSpy: MockInstance;
-	let extCustomTokensSpy: MockInstance;
+	let saveCustomTokensSpy: MockInstance;
 
 	const mockGetTokensForOwner = vi.fn();
 
@@ -44,17 +35,11 @@ describe('LoaderCollections', () => {
 			getTokensForOwner: mockGetTokensForOwner
 		} as unknown as AlchemyProvider);
 
-		erc721CustomTokensSpy = vi.spyOn(erc721CustomTokens, 'saveCustomTokens');
-		erc721CustomTokensSpy.mockResolvedValue(undefined);
-
-		erc1155CustomTokensSpy = vi.spyOn(erc1155CustomTokens, 'saveCustomTokens');
-		erc1155CustomTokensSpy.mockResolvedValue(undefined);
-
 		extGetTokensByOwnerSpy = vi.spyOn(extTokenApi, 'getTokensByOwner');
 		extGetTokensByOwnerSpy.mockResolvedValue([]);
 
-		extCustomTokensSpy = vi.spyOn(extCustomTokens, 'saveCustomTokens');
-		extCustomTokensSpy.mockResolvedValue(undefined);
+		saveCustomTokensSpy = vi.spyOn(saveCustomTokens, 'saveCustomTokens');
+		saveCustomTokensSpy.mockResolvedValue(undefined);
 
 		mockAuthStore();
 
@@ -62,7 +47,7 @@ describe('LoaderCollections', () => {
 
 		mockGetTokensForOwner.mockResolvedValue([]);
 
-		vi.mocked(listCustomTokens).mockResolvedValue([]);
+		backendCustomTokens.set([]);
 	});
 
 	it('should add new ERC collections', async () => {
@@ -79,22 +64,18 @@ describe('LoaderCollections', () => {
 			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length);
 
 			for (const network of networks) {
-				expect(erc721CustomTokensSpy).toHaveBeenCalledWith({
+				expect(saveCustomTokensSpy).toHaveBeenCalledWith({
 					tokens: [
 						{
 							address: mockEthAddress,
-							network,
+							chainId: network.chainId,
+							networkKey: 'Erc721',
 							enabled: true
-						}
-					],
-					identity: mockIdentity
-				});
-
-				expect(erc1155CustomTokensSpy).toHaveBeenCalledWith({
-					tokens: [
+						},
 						{
 							address: mockEthAddress,
-							network,
+							chainId: network.chainId,
+							networkKey: 'Erc1155',
 							enabled: true
 						}
 					],
@@ -111,7 +92,7 @@ describe('LoaderCollections', () => {
 
 		await waitFor(() => {
 			expect(extGetTokensByOwnerSpy).not.toHaveBeenCalled();
-			expect(extCustomTokensSpy).not.toHaveBeenCalled();
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 		});
 	});
 
@@ -134,12 +115,12 @@ describe('LoaderCollections', () => {
 				});
 			});
 
-			expect(extCustomTokensSpy).toHaveBeenCalledExactlyOnceWith({
+			expect(saveCustomTokensSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokens: [
 					{
 						canisterId: EXT_BUILTIN_TOKENS[0].canisterId,
-						network: ICP_NETWORK,
+						networkKey: 'ExtV2',
 						enabled: true
 					}
 				]
@@ -159,8 +140,7 @@ describe('LoaderCollections', () => {
 		await waitFor(() => {
 			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length);
 
-			expect(erc721CustomTokensSpy).not.toHaveBeenCalled();
-			expect(erc1155CustomTokensSpy).not.toHaveBeenCalled();
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 		});
 	});
 
@@ -183,7 +163,7 @@ describe('LoaderCollections', () => {
 				});
 			});
 
-			expect(extCustomTokensSpy).not.toHaveBeenCalled();
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 
 			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
 		});
@@ -217,10 +197,7 @@ describe('LoaderCollections', () => {
 			allow_external_content_source: toNullable(true)
 		}));
 
-		vi.mocked(listCustomTokens).mockResolvedValue([
-			...existingErc721CustomTokens,
-			...existingErc1155CustomTokens
-		]);
+		backendCustomTokens.set([...existingErc721CustomTokens, ...existingErc1155CustomTokens]);
 
 		mockGetTokensForOwner.mockResolvedValue([
 			{ address: mockEthAddress, isSpam: false, standard: 'erc721' },
@@ -232,8 +209,7 @@ describe('LoaderCollections', () => {
 		await waitFor(() => {
 			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length);
 
-			expect(erc721CustomTokensSpy).not.toHaveBeenCalled();
-			expect(erc1155CustomTokensSpy).not.toHaveBeenCalled();
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 		});
 	});
 
@@ -250,7 +226,7 @@ describe('LoaderCollections', () => {
 			allow_external_content_source: toNullable(false)
 		};
 
-		vi.mocked(listCustomTokens).mockResolvedValue([existingExtCustomToken]);
+		backendCustomTokens.set([existingExtCustomToken]);
 
 		render(LoaderCollections);
 
@@ -268,7 +244,7 @@ describe('LoaderCollections', () => {
 				});
 			});
 
-			expect(extCustomTokensSpy).not.toHaveBeenCalled();
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 
 			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
 		});
@@ -294,7 +270,7 @@ describe('LoaderCollections', () => {
 				});
 			});
 
-			expect(extCustomTokensSpy).not.toHaveBeenCalled();
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
 
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
 				`Error fetching EXT tokens from canister ${EXT_BUILTIN_TOKENS[0].canisterId}:`,

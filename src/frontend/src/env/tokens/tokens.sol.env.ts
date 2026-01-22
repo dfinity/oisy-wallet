@@ -18,7 +18,7 @@ export const SOLANA_TOKEN_ID: TokenId = parseTokenId(SOLANA_SYMBOL);
 export const SOLANA_TOKEN: RequiredToken = {
 	id: SOLANA_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'solana',
+	standard: { code: 'solana' },
 	category: 'default',
 	name: 'Solana',
 	symbol: SOLANA_SYMBOL,
@@ -36,7 +36,7 @@ export const SOLANA_DEVNET_TOKEN_ID: TokenId = parseTokenId(SOLANA_DEVNET_SYMBOL
 export const SOLANA_DEVNET_TOKEN: RequiredToken = {
 	id: SOLANA_DEVNET_TOKEN_ID,
 	network: SOLANA_DEVNET_NETWORK,
-	standard: 'solana',
+	standard: { code: 'solana' },
 	category: 'default',
 	name: 'Solana (Devnet)',
 	symbol: SOLANA_DEVNET_SYMBOL,
@@ -51,7 +51,7 @@ export const SOLANA_LOCAL_TOKEN_ID: TokenId = parseTokenId(SOLANA_LOCAL_SYMBOL);
 export const SOLANA_LOCAL_TOKEN: RequiredToken = {
 	id: SOLANA_LOCAL_TOKEN_ID,
 	network: SOLANA_LOCAL_NETWORK,
-	standard: 'solana',
+	standard: { code: 'solana' },
 	category: 'default',
 	name: 'Solana (Local)',
 	symbol: SOLANA_LOCAL_SYMBOL,

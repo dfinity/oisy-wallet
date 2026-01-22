@@ -359,7 +359,9 @@ export type Token =
 	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }
 	| { SplMainnet: SplToken }
-	| { Erc1155: ErcToken };
+	| { IcPunks: ExtV2Token }
+	| { Erc1155: ErcToken }
+	| { Dip721: ExtV2Token };
 export type TokenAccountId =
 	| { Btc: BtcAddress }
 	| { Eth: EthAddress }
@@ -425,18 +427,6 @@ export interface UserProfile {
 	settings: [] | [Settings];
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
-}
-export interface UserToken {
-	decimals: [] | [number];
-	version: [] | [bigint];
-	enabled: [] | [boolean];
-	chain_id: bigint;
-	contract_address: string;
-	symbol: [] | [string];
-}
-export interface UserTokenId {
-	chain_id: bigint;
-	contract_address: string;
 }
 export interface Utxo {
 	height: number;
@@ -632,18 +622,15 @@ export interface _SERVICE {
 	 */
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
-	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	/**
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
-	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	/**
 	 * Add or update custom token for the user.
 	 */
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
-	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	/**
 	 * Sets the user's preference to show (or hide) testnets in the interface.
 	 *
@@ -655,7 +642,6 @@ export interface _SERVICE {
 	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	 */
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], SetUserShowTestnetsResult>;
-	set_user_token: ActorMethod<[UserToken], undefined>;
 	/**
 	 * Gets statistics about the canister.
 	 *

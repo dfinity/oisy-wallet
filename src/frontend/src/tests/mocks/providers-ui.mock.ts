@@ -12,9 +12,8 @@ const mockGldtToken: IcToken = {
 	name: 'Gold DAO Token',
 	decimals: 8,
 	network: ICP_NETWORK,
-	standard: 'icrc',
+	standard: { code: 'icrc' },
 	ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
-	position: 1,
 	fee: 100n,
 	category: 'custom'
 };

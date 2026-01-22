@@ -4,7 +4,12 @@ import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
 import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
-import { balance, allowance as icrcAllowance, metadata } from '$icp/api/icrc-ledger.api';
+import {
+	balance,
+	getMintingAccount,
+	allowance as icrcAllowance,
+	metadata
+} from '$icp/api/icrc-ledger.api';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -36,8 +41,7 @@ import {
 	isNullish,
 	nonNullish,
 	queryAndUpdate,
-	type QueryAndUpdateRequestParams,
-	type QueryAndUpdateStrategy
+	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -84,11 +88,9 @@ export const loadCustomTokens = ({
 	});
 
 const loadDefaultIcrc = ({
-	data: { ledgerCanisterId, ...data },
-	strategy
+	data: { ledgerCanisterId, ...data }
 }: {
 	data: IcInterface;
-	strategy?: QueryAndUpdateStrategy;
 }): Promise<void> =>
 	queryAndUpdate<IcrcLoadData>({
 		request: (params) =>
@@ -102,7 +104,6 @@ const loadDefaultIcrc = ({
 				metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
 			});
 		},
-		strategy,
 		identity: new AnonymousIdentity()
 	});
 
@@ -168,10 +169,8 @@ const loadCustomIcrcTokensData = async ({
 		...DIP20_BUILTIN_TOKENS_INDEXED
 	};
 
-	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
-		custom_token: CustomToken,
-		index: number
+		custom_token: CustomToken
 	): Promise<IcrcCustomToken | undefined> => {
 		const { enabled, version: v, token } = custom_token;
 
@@ -193,13 +192,13 @@ const loadCustomIcrcTokensData = async ({
 			ledgerCanisterId: ledgerCanisterIdText
 		});
 
+		const serviceParams = { ledgerCanisterId: ledgerCanisterIdText, identity, certified };
+
 		const data: IcrcLoadData = {
-			metadata: nonNullish(meta)
-				? meta
-				: await metadata({ ledgerCanisterId: ledgerCanisterIdText, identity, certified }),
+			metadata: nonNullish(meta) ? meta : await metadata(serviceParams),
+			mintingAccount: await getMintingAccount(serviceParams),
 			ledgerCanisterId: ledgerCanisterIdText,
 			...(nonNullish(indexCanisterId) && { indexCanisterId: indexCanisterId.toText() }),
-			position: ICRC_TOKENS.length + 1 + index,
 			category: 'custom',
 			icrcCustomTokens: indexedIcrcCustomTokens
 		};
@@ -277,12 +276,15 @@ export const loadDisabledIcrcTokensBalances = async ({
 	identity: Identity;
 	disabledIcrcTokens: IcToken[];
 }): Promise<void> => {
+	const certified = true;
+
 	const results = await Promise.allSettled(
 		disabledIcrcTokens.map(async ({ ledgerCanisterId, id }) => {
 			const icrcTokenBalance = await balance({
 				identity,
 				owner: identity.getPrincipal(),
-				ledgerCanisterId
+				ledgerCanisterId,
+				certified
 			});
 
 			return { id, icrcTokenBalance };
@@ -297,7 +299,7 @@ export const loadDisabledIcrcTokensBalances = async ({
 				id,
 				data: {
 					data: icrcTokenBalance,
-					certified: true
+					certified
 				}
 			});
 		}

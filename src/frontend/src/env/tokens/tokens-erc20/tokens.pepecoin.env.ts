@@ -13,7 +13,7 @@ export const PEPECOIN_TOKEN_ID: TokenId = parseTokenId(PEPECOIN_SYMBOL);
 export const PEPECOIN_TOKEN: RequiredAdditionalErc20Token = {
 	id: PEPECOIN_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'pepeCoin',
 	symbol: PEPECOIN_SYMBOL,

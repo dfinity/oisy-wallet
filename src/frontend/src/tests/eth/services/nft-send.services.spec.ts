@@ -37,7 +37,7 @@ describe('nft-send.services', () => {
 			id: parseTokenId('721'),
 			name: 'My721',
 			network: ETHEREUM_NETWORK,
-			standard: 'erc721',
+			standard: { code: 'erc721' },
 			symbol: 'MY721'
 		};
 
@@ -48,7 +48,7 @@ describe('nft-send.services', () => {
 			id: parseTokenId('1155'),
 			name: 'My1155',
 			network: ETHEREUM_NETWORK,
-			standard: 'erc1155',
+			standard: { code: 'erc1155' },
 			symbol: 'MY1155'
 		};
 

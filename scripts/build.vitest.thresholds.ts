@@ -23,6 +23,24 @@ const extractThresholds = (text: string): ThresholdMap => {
 	return map;
 };
 
+const roundToDecimals = ({ text, decimals }: { text: string; decimals: number }): string => {
+	const currentThresholds = extractThresholds(text);
+
+	return text.replace(COVERAGE_REGEX, (_: string, key: string, value: string) => {
+		const typedKey = key as ThresholdKey;
+		const oldValue = currentThresholds[typedKey];
+
+		if (isNullish(oldValue)) {
+			// If something is missing, do not change this occurrence
+			return `${key}: ${value}`;
+		}
+
+		const newValue = oldValue.toFixed(decimals);
+
+		return `${key}: ${newValue}`;
+	});
+};
+
 const applyMargin = ({ text, margin }: { text: string; margin: number }): string => {
 	const currentThresholds = extractThresholds(text);
 
@@ -73,8 +91,11 @@ const main = () => {
 	const current = readFileSync(CONFIG_FILE, 'utf8');
 	const original = readFileSync(ORIGINAL_FILE, 'utf8');
 
+	// We don't want a high-frequency update, so we round to increments of 10bps (0.10%)
+	const rounded = roundToDecimals({ text: current, decimals: 1 });
+
 	// The coverage calculation is a bit flaky, so to avoid being stuck, we reduce it to have an acceptable margin
-	const withMargin = applyMargin({ text: current, margin: 0.3 });
+	const withMargin = applyMargin({ text: rounded, margin: 0.3 });
 
 	// Ensure thresholds never decrease
 	const finalText = enforceNonDecreasingThresholds({

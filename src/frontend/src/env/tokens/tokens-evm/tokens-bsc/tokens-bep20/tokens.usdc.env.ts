@@ -14,7 +14,7 @@ export const USDC_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
 export const USDC_TOKEN: RequiredEvmBep20Token = {
 	id: USDC_TOKEN_ID,
 	network: BSC_MAINNET_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'USD Coin',
 	symbol: USDC_SYMBOL,

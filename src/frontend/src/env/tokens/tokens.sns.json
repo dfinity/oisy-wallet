@@ -3,6 +3,7 @@
 		"ledgerCanisterId": "zfcdd-tqaaa-aaaaq-aaaga-cai",
 		"rootCanisterId": "zxeu2-7aaaa-aaaaq-aaafa-cai",
 		"indexCanisterId": "zlaol-iaaaa-aaaaq-aaaha-cai",
+		"governanceCanisterId": "zqfso-syaaa-aaaaq-aaafq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Draggin Karma Points",
@@ -18,6 +19,7 @@
 		"ledgerCanisterId": "2ouva-viaaa-aaaaq-aaamq-cai",
 		"rootCanisterId": "3e3x2-xyaaa-aaaaq-aaalq-cai",
 		"indexCanisterId": "2awyi-oyaaa-aaaaq-aaanq-cai",
+		"governanceCanisterId": "2jvtu-yqaaa-aaaaq-aaama-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "CHAT",
@@ -33,6 +35,7 @@
 		"ledgerCanisterId": "73mez-iiaaa-aaaaq-aaasq-cai",
 		"rootCanisterId": "7jkta-eyaaa-aaaaq-aaarq-cai",
 		"indexCanisterId": "7vojr-tyaaa-aaaaq-aaatq-cai",
+		"governanceCanisterId": "74ncn-fqaaa-aaaaq-aaasa-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "KINIC",
@@ -48,6 +51,7 @@
 		"ledgerCanisterId": "6rdgd-kyaaa-aaaaq-aaavq-cai",
 		"rootCanisterId": "67bll-riaaa-aaaaq-aaauq-cai",
 		"indexCanisterId": "6dfr2-giaaa-aaaaq-aaawq-cai",
+		"governanceCanisterId": "6wcax-haaaa-aaaaq-aaava-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "DOLR AI",
@@ -63,6 +67,7 @@
 		"ledgerCanisterId": "4c4fd-caaaa-aaaaq-aaa3a-cai",
 		"rootCanisterId": "4m6il-zqaaa-aaaaq-aaa2a-cai",
 		"indexCanisterId": "5ithz-aqaaa-aaaaq-aaa4a-cai",
+		"governanceCanisterId": "4l7o7-uiaaa-aaaaq-aaa2q-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Mimic Clay",
@@ -78,6 +83,7 @@
 		"ledgerCanisterId": "xsi2v-cyaaa-aaaaq-aabfq-cai",
 		"rootCanisterId": "x4kx5-ziaaa-aaaaq-aabeq-cai",
 		"indexCanisterId": "xaonm-oiaaa-aaaaq-aabgq-cai",
+		"governanceCanisterId": "xvj4b-paaaa-aaaaq-aabfa-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "DecideAI",
@@ -93,6 +99,7 @@
 		"ledgerCanisterId": "vtrom-gqaaa-aaaaq-aabia-cai",
 		"rootCanisterId": "xjngq-yaaaa-aaaaq-aabha-cai",
 		"indexCanisterId": "v5tde-5aaaa-aaaaq-aabja-cai",
+		"governanceCanisterId": "xomae-vyaaa-aaaaq-aabhq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "BOOM",
@@ -108,6 +115,7 @@
 		"ledgerCanisterId": "uf2wh-taaaa-aaaaq-aabna-cai",
 		"rootCanisterId": "uly3p-iqaaa-aaaaq-aabma-cai",
 		"indexCanisterId": "ux4b6-7qaaa-aaaaq-aaboa-cai",
+		"governanceCanisterId": "umz53-fiaaa-aaaaq-aabmq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "CatalyzeDAO",
@@ -124,6 +132,7 @@
 		"rootCanisterId": "u67kc-jyaaa-aaaaq-aabpq-cai",
 		"deprecated": true,
 		"indexCanisterId": "rlh33-uyaaa-aaaaq-aabrq-cai",
+		"governanceCanisterId": "rceqh-cqaaa-aaaaq-aabqa-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "---- (formerly Seers)",
@@ -137,6 +146,7 @@
 		"ledgerCanisterId": "rxdbk-dyaaa-aaaaq-aabtq-cai",
 		"rootCanisterId": "rzbmc-yiaaa-aaaaq-aabsq-cai",
 		"indexCanisterId": "q5mdq-biaaa-aaaaq-aabuq-cai",
+		"governanceCanisterId": "rqch6-oaaaa-aaaaq-aabta-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Nuance",
@@ -152,6 +162,7 @@
 		"ledgerCanisterId": "qbizb-wiaaa-aaaaq-aabwq-cai",
 		"rootCanisterId": "qtooy-2yaaa-aaaaq-aabvq-cai",
 		"indexCanisterId": "qpkuj-nyaaa-aaaaq-aabxq-cai",
+		"governanceCanisterId": "qgj7v-3qaaa-aaaaq-aabwa-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Sonic",
@@ -167,6 +178,7 @@
 		"ledgerCanisterId": "tyyy3-4aaaa-aaaaq-aab7a-cai",
 		"rootCanisterId": "tw2vt-hqaaa-aaaaq-aab6a-cai",
 		"indexCanisterId": "efv5g-kqaaa-aaaaq-aacaa-cai",
+		"governanceCanisterId": "tr3th-kiaaa-aaaaq-aab6q-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "GOLDAO",
@@ -182,6 +194,7 @@
 		"ledgerCanisterId": "emww2-4yaaa-aaaaq-aacbq-cai",
 		"rootCanisterId": "ecu3s-hiaaa-aaaaq-aacaq-cai",
 		"indexCanisterId": "e6qbd-qiaaa-aaaaq-aaccq-cai",
+		"governanceCanisterId": "elxqo-raaaa-aaaaq-aacba-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "TRAX",
@@ -197,6 +210,7 @@
 		"ledgerCanisterId": "f54if-eqaaa-aaaaq-aacea-cai",
 		"rootCanisterId": "extk7-gaaaa-aaaaq-aacda-cai",
 		"indexCanisterId": "ft6fn-7aaaa-aaaaq-aacfa-cai",
+		"governanceCanisterId": "eqsml-lyaaa-aaaaq-aacdq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Neutrinite",
@@ -212,6 +226,7 @@
 		"ledgerCanisterId": "hvgxa-wqaaa-aaaaq-aacia-cai",
 		"rootCanisterId": "fp274-iaaaa-aaaaq-aacha-cai",
 		"indexCanisterId": "h3e2i-naaaa-aaaaq-aacja-cai",
+		"governanceCanisterId": "fi3zi-fyaaa-aaaaq-aachq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Sneed DAO",
@@ -227,6 +242,7 @@
 		"ledgerCanisterId": "hhaaz-2aaaa-aaaaq-aacla-cai",
 		"rootCanisterId": "hjcnr-bqaaa-aaaaq-aacka-cai",
 		"indexCanisterId": "gnpcd-yqaaa-aaaaq-aacma-cai",
+		"governanceCanisterId": "hodlf-miaaa-aaaaq-aackq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "ICLighthouse DAO",
@@ -242,6 +258,7 @@
 		"ledgerCanisterId": "gemj7-oyaaa-aaaaq-aacnq-cai",
 		"rootCanisterId": "gkoex-viaaa-aaaaq-aacmq-cai",
 		"indexCanisterId": "gwk6g-ciaaa-aaaaq-aacoq-cai",
+		"governanceCanisterId": "gdnpl-daaaa-aaaaq-aacna-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "ELNA",
@@ -257,6 +274,7 @@
 		"ledgerCanisterId": "ddsp7-7iaaa-aaaaq-aacqq-cai",
 		"rootCanisterId": "gyito-zyaaa-aaaaq-aacpq-cai",
 		"indexCanisterId": "dnqcx-eyaaa-aaaaq-aacrq-cai",
+		"governanceCanisterId": "detjl-sqaaa-aaaaq-aacqa-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "ICFC",
@@ -272,6 +290,7 @@
 		"ledgerCanisterId": "druyg-tyaaa-aaaaq-aactq-cai",
 		"rootCanisterId": "d7wvo-iiaaa-aaaaq-aacsq-cai",
 		"indexCanisterId": "c3324-riaaa-aaaaq-aacuq-cai",
+		"governanceCanisterId": "dwv6s-6aaaa-aaaaq-aacta-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "ICPanda",
@@ -287,6 +306,7 @@
 		"ledgerCanisterId": "ca6gz-lqaaa-aaaaq-aacwa-cai",
 		"rootCanisterId": "csyra-haaaa-aaaaq-aacva-cai",
 		"indexCanisterId": "co4lr-qaaaa-aaaaq-aacxa-cai",
+		"governanceCanisterId": "cvzxu-kyaaa-aaaaq-aacvq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "ICPSwap Token",
@@ -302,6 +322,7 @@
 		"ledgerCanisterId": "atbfz-diaaa-aaaaq-aacyq-cai",
 		"rootCanisterId": "cj5nf-5yaaa-aaaaq-aacxq-cai",
 		"indexCanisterId": "a5dir-yyaaa-aaaaq-aaczq-cai",
+		"governanceCanisterId": "auadn-oqaaa-aaaaq-aacya-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Yuku AI",
@@ -317,6 +338,7 @@
 		"ledgerCanisterId": "bliq2-niaaa-aaaaq-aac4q-cai",
 		"rootCanisterId": "abhsa-pyaaa-aaaaq-aac3q-cai",
 		"indexCanisterId": "bfk5s-wyaaa-aaaaq-aac5q-cai",
+		"governanceCanisterId": "bmjwo-aqaaa-aaaaq-aac4a-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "ESTATE",
@@ -332,6 +354,7 @@
 		"ledgerCanisterId": "k45jy-aiaaa-aaaaq-aadcq-cai",
 		"rootCanisterId": "ko36b-myaaa-aaaaq-aadbq-cai",
 		"indexCanisterId": "ks7eq-3yaaa-aaaaq-aaddq-cai",
+		"governanceCanisterId": "k34pm-nqaaa-aaaaq-aadca-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Motoko",
@@ -347,6 +370,7 @@
 		"ledgerCanisterId": "lrtnw-paaaa-aaaaq-aadfa-cai",
 		"rootCanisterId": "l7ra6-uqaaa-aaaaq-aadea-cai",
 		"indexCanisterId": "ldv2p-dqaaa-aaaaq-aadga-cai",
+		"governanceCanisterId": "lyqgk-ziaaa-aaaaq-aadeq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Swampies",
@@ -362,6 +386,7 @@
 		"ledgerCanisterId": "lkwrt-vyaaa-aaaaq-aadhq-cai",
 		"rootCanisterId": "leu43-oiaaa-aaaaq-aadgq-cai",
 		"indexCanisterId": "jqkzp-liaaa-aaaaq-aadiq-cai",
+		"governanceCanisterId": "lnxxh-yaaaa-aaaaq-aadha-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "ORIGYN",
@@ -377,6 +402,7 @@
 		"ledgerCanisterId": "jcmow-hyaaa-aaaaq-aadlq-cai",
 		"rootCanisterId": "jmod6-4iaaa-aaaaq-aadkq-cai",
 		"indexCanisterId": "iidmm-fiaaa-aaaaq-aadmq-cai",
+		"governanceCanisterId": "jfnic-kaaaa-aaaaq-aadla-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "WaterNeuron",
@@ -393,6 +419,7 @@
 		"rootCanisterId": "ibahq-taaaa-aaaaq-aadna-cai",
 		"deprecated": true,
 		"indexCanisterId": "i5e5b-eaaaa-aaaaq-aadpa-cai",
+		"governanceCanisterId": "igbbe-6yaaa-aaaaq-aadnq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "---- (formerly CYCLES-TRANSFER-STATION)",
@@ -406,12 +433,13 @@
 		"ledgerCanisterId": "np5km-uyaaa-aaaaq-aadrq-cai",
 		"rootCanisterId": "nb7he-piaaa-aaaaq-aadqq-cai",
 		"indexCanisterId": "n535v-yiaaa-aaaaq-aadsq-cai",
+		"governanceCanisterId": "ni4my-zaaaa-aaaaq-aadra-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "PHASMA",
 			"symbol": "PHASMA",
 			"fee": {
-				"__bigint__": "500000000000000000"
+				"__bigint__": "5000000000"
 			},
 			"alternativeName": "PHASMA",
 			"url": "https://phasma-lm0.caffeine.xyz"
@@ -421,6 +449,7 @@
 		"ledgerCanisterId": "m6xut-mqaaa-aaaaq-aadua-cai",
 		"rootCanisterId": "nuywj-oaaaa-aaaaq-aadta-cai",
 		"indexCanisterId": "mqvz3-xaaaa-aaaaq-aadva-cai",
+		"governanceCanisterId": "ntzq5-dyaaa-aaaaq-aadtq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "ICVC",
@@ -436,6 +465,7 @@
 		"ledgerCanisterId": "o7oak-iyaaa-aaaaq-aadzq-cai",
 		"rootCanisterId": "ormnc-tiaaa-aaaaq-aadyq-cai",
 		"indexCanisterId": "onixt-eiaaa-aaaaq-aad2q-cai",
+		"governanceCanisterId": "oypg6-faaaa-aaaaq-aadza-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "KongSwap",
@@ -451,6 +481,7 @@
 		"ledgerCanisterId": "o4zzi-qaaaa-aaaaq-aaeeq-cai",
 		"rootCanisterId": "pww3s-sqaaa-aaaaq-aaedq-cai",
 		"indexCanisterId": "os3ua-lqaaa-aaaaq-aaefq-cai",
+		"governanceCanisterId": "o3y74-5yaaa-aaaaq-aaeea-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "FomoWell",
@@ -466,6 +497,7 @@
 		"ledgerCanisterId": "oj6if-riaaa-aaaaq-aaeha-cai",
 		"rootCanisterId": "oh4fn-kyaaa-aaaaq-aaega-cai",
 		"indexCanisterId": "mtcaz-pyaaa-aaaaq-aaeia-cai",
+		"governanceCanisterId": "oa5dz-haaaa-aaaaq-aaegq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "ALICE",
@@ -481,6 +513,7 @@
 		"ledgerCanisterId": "mih44-vaaaa-aaaaq-aaekq-cai",
 		"rootCanisterId": "m2blf-zqaaa-aaaaq-aaejq-cai",
 		"indexCanisterId": "mgfru-oqaaa-aaaaq-aaelq-cai",
+		"governanceCanisterId": "mpg2i-yyaaa-aaaaq-aaeka-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "NFID Wallet",
@@ -496,6 +529,7 @@
 		"ledgerCanisterId": "nfjys-2iaaa-aaaaq-aaena-cai",
 		"rootCanisterId": "nllv2-byaaa-aaaaq-aaema-cai",
 		"indexCanisterId": "nxppl-wyaaa-aaaaq-aaeoa-cai",
+		"governanceCanisterId": "nmkto-maaaa-aaaaq-aaemq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "FUEL",
@@ -511,6 +545,7 @@
 		"ledgerCanisterId": "ifwyg-gaaaa-aaaaq-aaeqq-cai",
 		"rootCanisterId": "n6mex-aqaaa-aaaaq-aaepq-cai",
 		"indexCanisterId": "iluvo-5qaaa-aaaaq-aaerq-cai",
+		"governanceCanisterId": "icx6s-lyaaa-aaaaq-aaeqa-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "ICExplorer",
@@ -526,6 +561,7 @@
 		"ledgerCanisterId": "ixqp7-kqaaa-aaaaq-aaetq-cai",
 		"rootCanisterId": "izscx-raaaa-aaaaq-aaesq-cai",
 		"indexCanisterId": "j57nf-iaaaa-aaaaq-aaeuq-cai",
+		"governanceCanisterId": "iqrjl-hiaaa-aaaaq-aaeta-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Personal DAO",
@@ -541,6 +577,7 @@
 		"ledgerCanisterId": "jg2ra-syaaa-aaaaq-aaewa-cai",
 		"rootCanisterId": "ju4gz-6iaaa-aaaaq-aaeva-cai",
 		"indexCanisterId": "jiy4i-jiaaa-aaaaq-aaexa-cai",
+		"governanceCanisterId": "jt5an-tqaaa-aaaaq-aaevq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Cecil The Lion DAO",
@@ -556,6 +593,7 @@
 		"ledgerCanisterId": "lvfsa-2aaaa-aaaaq-aaeyq-cai",
 		"rootCanisterId": "jpz24-eqaaa-aaaaq-aaexq-cai",
 		"indexCanisterId": "l3h7i-bqaaa-aaaaq-aaezq-cai",
+		"governanceCanisterId": "lseuu-xyaaa-aaaaq-aaeya-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "ICPEx",
@@ -571,6 +609,7 @@
 		"ledgerCanisterId": "kknbx-zyaaa-aaaaq-aae4a-cai",
 		"rootCanisterId": "lacdn-3iaaa-aaaaq-aae3a-cai",
 		"indexCanisterId": "kepm7-ciaaa-aaaaq-aae5a-cai",
+		"governanceCanisterId": "lhdfz-wqaaa-aaaaq-aae3q-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "TACO",
@@ -586,6 +625,7 @@
 		"ledgerCanisterId": "kylwo-viaaa-aaaaq-aae7a-cai",
 		"rootCanisterId": "kwj3g-oyaaa-aaaaq-aae6a-cai",
 		"indexCanisterId": "bb4ce-dyaaa-aaaaq-aafaa-cai",
+		"governanceCanisterId": "kri5s-daaaa-aaaaq-aae6q-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Tendies",

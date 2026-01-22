@@ -18,7 +18,7 @@ describe('GldtStakeEarnCard', () => {
 		new Map<symbol, GldtStakeContext>([[GLDT_STAKE_CONTEXT_KEY, { store: initGldtStakeStore() }]]);
 	const gldtToken = {
 		...mockIcrcCustomToken,
-		standard: 'icrc',
+		standard: { code: 'icrc' },
 		ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
 		symbol: 'GLDT'
 	} as IcToken;

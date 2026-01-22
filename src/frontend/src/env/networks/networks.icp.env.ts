@@ -1,9 +1,11 @@
 import { ICP_EXPLORER_URL } from '$env/explorers.env';
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import icpIcon from '$lib/assets/networks/icp.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { Network, NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const ICP_LEDGER_CANISTER_ID =
 	(LOCAL
@@ -16,6 +18,15 @@ export const ICP_INDEX_CANISTER_ID =
 		? (import.meta.env.VITE_LOCAL_ICP_INDEX_CANISTER_ID as OptionCanisterIdText)
 		: (import.meta.env.VITE_IC_ICP_INDEX_CANISTER_ID as OptionCanisterIdText)) ??
 	'qhbym-qaaaa-aaaaa-aaafq-cai';
+
+export const ICP_MINTING_ACCOUNT = getIcrcAccount(
+	Principal.fromText(
+		(LOCAL
+			? (import.meta.env.VITE_LOCAL_ICP_MINTING_ACCOUNT_PRINCIPAL_TEXT as OptionCanisterIdText)
+			: (import.meta.env.VITE_IC_ICP_MINTING_ACCOUNT_PRINCIPAL_TEXT as OptionCanisterIdText)) ??
+			'rrkah-fqaaa-aaaaa-aaaaq-cai'
+	)
+);
 
 /**
  * ICP

@@ -22,6 +22,20 @@ pub struct ExtV2Token {
     pub canister_id: CanisterId,
 }
 
+/// A DIP721 compliant token on the Internet Computer.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct Dip721Token {
+    pub canister_id: CanisterId,
+}
+
+/// A token on the Internet Computer with an interface similar to the one of `ICPunks`.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct IcPunksToken {
+    pub canister_id: CanisterId,
+}
+
 /// A network-specific unique Solana token identifier.
 #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
 #[serde(remote = "Self")]
@@ -66,6 +80,8 @@ pub enum Token {
     Erc721(ErcToken) = 4,
     Erc1155(ErcToken) = 5,
     ExtV2(ExtV2Token) = 6,
+    Dip721(Dip721Token) = 7,
+    IcPunks(IcPunksToken) = 8,
 }
 
 /// User preferences for any token
@@ -99,5 +115,9 @@ pub enum CustomTokenId {
     /// An Ethereum/EVM token on an EVM-compatible network.
     Ethereum(ErcTokenId, ChainId) = 3,
     /// An EXT v2 Token on the Internet Computer mainnet.
-    ExtV2(LedgerId) = 4,
+    ExtV2(CanisterId) = 4,
+    /// A DIP721 compliant token on the Internet Computer mainnet.
+    Dip721(CanisterId) = 5,
+    /// A token on the Internet Computer with an interface similar to the one of `ICPunks`.
+    IcPunks(CanisterId) = 6,
 }

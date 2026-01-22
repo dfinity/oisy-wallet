@@ -13,7 +13,7 @@ export const DMAIL_TOKEN_ID: TokenId = parseTokenId(DMAIL_SYMBOL);
 export const DMAIL_TOKEN: RequiredAdditionalErc20Token = {
 	id: DMAIL_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Dmail Network',
 	symbol: DMAIL_SYMBOL,

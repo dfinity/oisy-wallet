@@ -3,20 +3,15 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
-	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
-	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
+	import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import IcAddIcrcTokenForm from '$icp/components/tokens/IcAddIcrcTokenForm.svelte';
 	import { assertIndexLedgerId } from '$icp/services/ic-add-custom-tokens.service';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
-	import { toUserToken } from '$icp-eth/services/user-token.services';
-	import { removeCustomToken, removeUserToken, setCustomToken } from '$lib/api/backend.api';
-	import {
-		deleteIdbEthTokenDeprecated,
-		deleteIdbIcToken,
-		deleteIdbSolToken
-	} from '$lib/api/idb-tokens.api';
+	import { isTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
+	import { removeCustomToken, setCustomToken } from '$lib/api/backend.api';
+	import { deleteIdbIcToken, deleteIdbSolToken, deleteIdbEthToken } from '$lib/api/idb-tokens.api';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
@@ -154,20 +149,23 @@
 		}
 
 		try {
-			// TODO: update this function to handle ICRC/SPL when BE supports removing custom tokens
-			if (isTokenErc20UserToken(tokenToDelete)) {
+			if (isTokenErc20(tokenToDelete)) {
 				loading = true;
 
-				const userToken = toUserToken(tokenToDelete);
-
-				await removeUserToken({
-					chain_id: userToken.chain_id,
-					contract_address: userToken.contract_address,
-					identity: $authIdentity
+				const customToken = toCustomToken({
+					...tokenToDelete,
+					chainId: tokenToDelete.network.chainId,
+					enabled: true,
+					networkKey: 'Erc20'
 				});
 
-				erc20UserTokensStore.reset(tokenToDelete.id);
-				await deleteIdbEthTokenDeprecated({ identity: $authIdentity, token: userToken });
+				await removeCustomToken({
+					identity: $authIdentity,
+					token: customToken
+				});
+
+				erc20CustomTokensStore.reset(tokenToDelete.id);
+				await deleteIdbEthToken({ identity: $authIdentity, token: customToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
 			} else if (isTokenIcrc(tokenToDelete)) {
@@ -229,7 +227,7 @@
 		}
 
 		try {
-			if (icTokenIcrcCustomToken(tokenToEdit)) {
+			if (isTokenIcrcCustomToken(tokenToEdit)) {
 				loading = true;
 				gotoStep(TokenModalSteps.EDIT_PROGRESS);
 				progress(ProgressStepsAddToken.SAVE);

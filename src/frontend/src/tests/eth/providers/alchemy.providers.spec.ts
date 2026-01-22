@@ -309,7 +309,7 @@ describe('alchemy.providers', () => {
 
 			await expect(
 				provider.getNftsByOwner({ address: mockEthAddress, tokens: [mockValidErc1155Token] })
-			).rejects.toThrow('Nfts Error');
+			).rejects.toThrowError('Nfts Error');
 
 			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
 		});
@@ -426,9 +426,67 @@ describe('alchemy.providers', () => {
 
 			await expect(
 				provider.getNftMetadata({ token: mockValidErc1155Token, tokenId: mockTokenId })
-			).rejects.toThrow('Nfts Error');
+			).rejects.toThrowError('Nfts Error');
 
 			expect(Alchemy.prototype.nft.getNftMetadata).toHaveBeenCalledOnce();
+		});
+
+		it('should use cached values when available', async () => {
+			// Svelte map already has cached value from previous test runs
+			vi.spyOn(SvelteMap.prototype, 'get').mockRestore();
+
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getNftMetadata: vi.fn().mockResolvedValue(mockApiResponse)
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			await provider.getNftMetadata({ token: mockValidErc1155Token, tokenId: mockTokenId });
+
+			// give different values to the endpoint to ensure the cache is used
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getNftMetadata: vi.fn().mockResolvedValue({
+						tokenId: '1',
+						name: 'AnotherName',
+						image: { originalUrl: 'https://anotherdownload.com' },
+						description: 'another description',
+						raw: { metadata: {} },
+						contract: {
+							address: mockValidErc1155Token.address,
+							tokenType: NftTokenType.ERC1155,
+							openSeaMetadata: {
+								bannerImageUrl: 'https://anotherdownload.com',
+								lastIngestedAt: '123_456'
+							},
+							spamClassifications: [NftSpamClassification.Unknown]
+						},
+						tokenType: NftTokenType.ERC1155,
+						timeLastUpdated: '456_123'
+					})
+				},
+				configurable: true
+			});
+
+			const nft = await provider.getNftMetadata({
+				token: mockValidErc1155Token,
+				tokenId: mockTokenId
+			});
+
+			expect(nft).toStrictEqual({
+				id: parseNftId('1'),
+				collection: {
+					...mapTokenToCollection(mockValidErc1155Token)
+				},
+				mediaStatus: {
+					image: NftMediaStatusEnum.INVALID_DATA,
+					thumbnail: NftMediaStatusEnum.INVALID_DATA
+				}
+			});
+			expect(Alchemy.prototype.nft?.getNftMetadata).not.toHaveBeenCalled();
 		});
 	});
 
@@ -523,6 +581,8 @@ describe('alchemy.providers', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+
+			vi.spyOn(SvelteMap.prototype, 'get').mockReturnValue(undefined); // invalidate cache
 		});
 
 		it('should fetch and map contract metadata correctly', async () => {
@@ -557,11 +617,48 @@ describe('alchemy.providers', () => {
 
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 
-			await expect(provider.getContractMetadata(mockEthAddress)).rejects.toThrow(
+			await expect(provider.getContractMetadata(mockEthAddress)).rejects.toThrowError(
 				'Invalid token standard'
 			);
 
 			expect(Alchemy.prototype.nft.getContractMetadata).toHaveBeenCalledOnce();
+		});
+
+		it('should use cached values when available', async () => {
+			// Svelte map already has cached value from previous test runs
+			vi.spyOn(SvelteMap.prototype, 'get').mockRestore();
+
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getContractMetadata: vi.fn().mockResolvedValue(mockApiResponse)
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			await provider.getContractMetadata(mockEthAddress);
+
+			// give different values to the endpoint to ensure the cache is used
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getContractMetadata: vi.fn().mockResolvedValue({
+						name: 'AnotherContract',
+						symbol: 'AC',
+						tokenType: 'ERC721',
+						openSeaMetadata: {
+							description: 'Another description',
+							collectionName: 'Another mega contract'
+						}
+					})
+				},
+				configurable: true
+			});
+
+			const metadata = await provider.getContractMetadata(mockEthAddress);
+
+			expect(metadata).toStrictEqual(expectedMetadata);
+			expect(Alchemy.prototype.nft?.getContractMetadata).not.toHaveBeenCalled();
 		});
 	});
 
@@ -578,7 +675,7 @@ describe('alchemy.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrow(
+			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrowError(
 				replacePlaceholders(en.init.error.no_alchemy_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})

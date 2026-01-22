@@ -34,7 +34,7 @@ describe('KongSwap REST client', () => {
 				ok: false
 			} as Response);
 
-			await expect(getKongSwapTokenById(MOCK_CANISTER_ID_1)).rejects.toThrow(
+			await expect(getKongSwapTokenById(MOCK_CANISTER_ID_1)).rejects.toThrowError(
 				'Fetching KongSwap failed.'
 			);
 		});

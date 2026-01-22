@@ -42,9 +42,8 @@ describe('EarningsList', () => {
 			decimals: 8,
 			network: ICP_NETWORK,
 			enabled: true,
-			standard: 'icrc',
+			standard: { code: 'icrc' },
 			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
-			position: 1,
 			fee: 100n,
 			category: 'custom'
 		};

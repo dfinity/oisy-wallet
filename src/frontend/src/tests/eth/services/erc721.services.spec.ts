@@ -51,7 +51,7 @@ describe('erc721.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc721',
+				standard: { code: 'erc721' },
 				category: 'custom',
 				version: 1n,
 				enabled: true,
@@ -66,7 +66,7 @@ describe('erc721.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc721',
+				standard: { code: 'erc721' },
 				category: 'custom',
 				version: 2n,
 				enabled: true,
@@ -80,7 +80,7 @@ describe('erc721.services', () => {
 		{
 			certified: true,
 			data: {
-				standard: 'erc721',
+				standard: { code: 'erc721' },
 				category: 'custom',
 				version: undefined,
 				enabled: false,
@@ -141,7 +141,7 @@ describe('erc721.services', () => {
 			const mockError = new Error('Error loading metadata');
 			vi.mocked(mockMetadata).mockRejectedValue(mockError);
 
-			await expect(loadErc721Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc721Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 
 			expect(get(erc721CustomTokensStore)).toStrictEqual([]);
 
@@ -187,7 +187,7 @@ describe('erc721.services', () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadErc721Tokens({ identity: mockIdentity })).resolves.not.toThrow();
+			await expect(loadErc721Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
 		});
 	});
 
@@ -295,7 +295,10 @@ describe('erc721.services', () => {
 
 		it('should reset token store on error', async () => {
 			erc721CustomTokensStore.setAll([
-				{ data: { ...SEPOLIA_PEPE_TOKEN, standard: 'erc721', enabled: true }, certified: false }
+				{
+					data: { ...SEPOLIA_PEPE_TOKEN, standard: { code: 'erc721' }, enabled: true },
+					certified: false
+				}
 			]);
 
 			vi.mocked(listCustomTokens).mockRejectedValue(new Error('Error loading custom tokens'));

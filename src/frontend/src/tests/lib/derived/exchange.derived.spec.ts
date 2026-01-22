@@ -36,9 +36,8 @@ import {
 } from '$env/tokens/tokens.sol.env';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcCkToken } from '$icp/types/ic-token';
@@ -125,9 +124,9 @@ describe('exchange.derived', () => {
 			address: `${mockValidErc20Token.address}1`
 		};
 
-		const mockEr20UserToken: Erc20UserToken = {
+		const mockEr20CustomToken: Erc20CustomToken = {
 			...mockValidErc20Token,
-			id: parseTokenId('Erc20UserTokenId'),
+			id: parseTokenId('Erc20CustomTokenId'),
 			symbol: 'EUTK',
 			address: `${mockValidErc20Token.address}2`,
 			version: undefined,
@@ -232,7 +231,6 @@ describe('exchange.derived', () => {
 			exchangeStore.reset();
 
 			erc20DefaultTokensStore.reset();
-			erc20UserTokensStore.resetAll();
 			erc20CustomTokensStore.resetAll();
 
 			icrcDefaultTokensStore.resetAll();
@@ -242,13 +240,9 @@ describe('exchange.derived', () => {
 			splCustomTokensStore.resetAll();
 
 			erc20DefaultTokensStore.add(mockErc20DefaultToken);
-			erc20UserTokensStore.setAll([
-				{ data: { ...mockErc20DefaultToken, enabled: true }, certified: false },
-				{ data: mockEr20UserToken, certified: false }
-			]);
 			erc20CustomTokensStore.setAll([
 				{ data: { ...mockErc20DefaultToken, enabled: true }, certified: false },
-				{ data: mockEr20UserToken, certified: false }
+				{ data: mockEr20CustomToken, certified: false }
 			]);
 
 			icrcDefaultTokensStore.set({ data: mockCkBtcToken, certified: false });
@@ -351,13 +345,13 @@ describe('exchange.derived', () => {
 		it('should return values for ERC20 tokens', () => {
 			exchangeStore.set([
 				{ [mockErc20DefaultToken.address.toUpperCase()]: mockErc20TokenPrice1 },
-				{ [mockEr20UserToken.address.toLowerCase()]: mockErc20TokenPrice2 }
+				{ [mockEr20CustomToken.address.toLowerCase()]: mockErc20TokenPrice2 }
 			]);
 
 			const result = get(exchanges);
 
 			expect(result?.[mockErc20DefaultToken.id]).toEqual(mockErc20TokenPrice1);
-			expect(result?.[mockEr20UserToken.id]).toEqual(mockErc20TokenPrice2);
+			expect(result?.[mockEr20CustomToken.id]).toEqual(mockErc20TokenPrice2);
 		});
 
 		it('should return values for SPL tokens', () => {
@@ -376,7 +370,7 @@ describe('exchange.derived', () => {
 		it('should return values for ERC20 and SPL tokens', () => {
 			exchangeStore.set([
 				{ [mockErc20DefaultToken.address.toLowerCase()]: mockErc20TokenPrice1 },
-				{ [mockEr20UserToken.address.toLowerCase()]: mockErc20TokenPrice2 },
+				{ [mockEr20CustomToken.address.toLowerCase()]: mockErc20TokenPrice2 },
 				{ [mockSplDefaultToken.address.toLowerCase()]: mockSplTokenPrice1 },
 				{ [mockSplCustomToken.address.toLowerCase()]: mockSplTokenPrice2 }
 			]);
@@ -384,19 +378,13 @@ describe('exchange.derived', () => {
 			expect(get(exchanges)).toStrictEqual({
 				...expectedNullishExchanges,
 				[mockErc20DefaultToken.id]: mockErc20TokenPrice1,
-				[mockEr20UserToken.id]: mockErc20TokenPrice2,
+				[mockEr20CustomToken.id]: mockErc20TokenPrice2,
 				[mockSplDefaultToken.id]: mockSplTokenPrice1,
 				[mockSplCustomToken.id]: mockSplTokenPrice2
 			});
 		});
 
 		it('should return values for ERC20 token ICP', () => {
-			erc20UserTokensStore.setAll([
-				{
-					data: { ...mockErc20DefaultToken, exchange: 'icp', enabled: true },
-					certified: false
-				}
-			]);
 			erc20CustomTokensStore.setAll([
 				{
 					data: { ...mockErc20DefaultToken, exchange: 'icp', enabled: true },

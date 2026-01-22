@@ -20,6 +20,7 @@ import type { TokenUi } from '$lib/types/token-ui';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -44,7 +45,8 @@ export const getMaxTransactionAmount = ({
 	tokenStandard: TokenStandard;
 }): string => {
 	const value =
-		(balance ?? ZERO) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO);
+		(balance ?? ZERO) -
+		(tokenStandard.code !== 'erc20' && tokenStandard.code !== 'spl' ? fee : ZERO);
 
 	return value <= ZERO
 		? ZERO.toString()
@@ -260,9 +262,6 @@ export const findTwinToken = ({
  */
 export const getTokenDisplaySymbol = (token: Token | CardData): string =>
 	token.oisySymbol?.oisySymbol ?? token.symbol;
-
-export const isTokenToggleable = <T extends Token>(token: T): token is TokenToggleable<T> =>
-	'enabled' in token;
 
 /**
  * Checks if a token is specifically defined as enabled/disabled, otherwise it defaults to true.

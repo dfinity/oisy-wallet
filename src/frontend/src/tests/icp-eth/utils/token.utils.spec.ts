@@ -22,7 +22,7 @@ describe('token.utils', () => {
 			expect(
 				isGLDTToken({
 					...mockValidIcToken,
-					standard: 'icrc',
+					standard: { code: 'icrc' },
 					symbol: 'GLDT',
 					ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
 				} as Token)
@@ -32,12 +32,14 @@ describe('token.utils', () => {
 		it('should return false for token GLDT that is not ICRC token', () => {
 			expect(isGLDTToken({ ...mockValidIcToken, symbol: 'GLDT' })).toBeFalsy();
 
-			expect(isGLDTToken({ ...mockValidIcToken, standard: 'erc20', symbol: 'GLDT' })).toBeFalsy();
+			expect(
+				isGLDTToken({ ...mockValidIcToken, standard: { code: 'erc20' }, symbol: 'GLDT' })
+			).toBeFalsy();
 		});
 
 		it('should return false for ICRC tokens that is not token GLDT', () => {
 			expect(
-				isGLDTToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'not-GLDT' })
+				isGLDTToken({ ...mockValidIcToken, standard: { code: 'icrc' }, symbol: 'not-GLDT' })
 			).toBeFalsy();
 		});
 
@@ -60,7 +62,7 @@ describe('token.utils', () => {
 			expect(
 				isGoldaoToken({
 					...mockValidIcToken,
-					standard: 'icrc',
+					standard: { code: 'icrc' },
 					symbol: 'GOLDAO',
 					network: ICP_TOKEN.network,
 					ledgerCanisterId: GOLDAO_LEDGER_CANISTER_ID
@@ -71,13 +73,13 @@ describe('token.utils', () => {
 		it('should return false for GOLDAO symbol that is not an ICRC token', () => {
 			expect(isGoldaoToken({ ...mockValidIcToken, symbol: 'GOLDAO' })).toBeFalsy();
 			expect(
-				isGoldaoToken({ ...mockValidIcToken, standard: 'erc20', symbol: 'GOLDAO' })
+				isGoldaoToken({ ...mockValidIcToken, standard: { code: 'erc20' }, symbol: 'GOLDAO' })
 			).toBeFalsy();
 		});
 
 		it('should return false for ICRC tokens that are not GOLDAO', () => {
 			expect(
-				isGoldaoToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'not-GOLDAO' })
+				isGoldaoToken({ ...mockValidIcToken, standard: { code: 'icrc' }, symbol: 'not-GOLDAO' })
 			).toBeFalsy();
 		});
 
@@ -100,7 +102,7 @@ describe('token.utils', () => {
 			expect(
 				isVCHFToken({
 					...mockValidIcToken,
-					standard: 'icrc',
+					standard: { code: 'icrc' },
 					symbol: 'VCHF',
 					ledgerCanisterId: VCHF_LEDGER_CANISTER_ID
 				} as Token)
@@ -110,12 +112,14 @@ describe('token.utils', () => {
 		it('should return false for token VCHF that is not ICRC token', () => {
 			expect(isVCHFToken({ ...mockValidIcToken, symbol: 'VCHF' })).toBeFalsy();
 
-			expect(isVCHFToken({ ...mockValidIcToken, standard: 'erc20', symbol: 'VCHF' })).toBeFalsy();
+			expect(
+				isVCHFToken({ ...mockValidIcToken, standard: { code: 'erc20' }, symbol: 'VCHF' })
+			).toBeFalsy();
 		});
 
 		it('should return false for ICRC tokens that is not token VCHF', () => {
 			expect(
-				isVCHFToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'not-VCHF' })
+				isVCHFToken({ ...mockValidIcToken, standard: { code: 'icrc' }, symbol: 'not-VCHF' })
 			).toBeFalsy();
 		});
 
@@ -138,7 +142,7 @@ describe('token.utils', () => {
 			expect(
 				isVEURToken({
 					...mockValidIcToken,
-					standard: 'icrc',
+					standard: { code: 'icrc' },
 					symbol: 'VEUR',
 					ledgerCanisterId: VEUR_LEDGER_CANISTER_ID
 				} as Token)
@@ -148,12 +152,14 @@ describe('token.utils', () => {
 		it('should return false for token VEUR that is not ICRC token', () => {
 			expect(isVEURToken({ ...mockValidIcToken, symbol: 'VEUR' })).toBeFalsy();
 
-			expect(isVEURToken({ ...mockValidIcToken, standard: 'erc20', symbol: 'VEUR' })).toBeFalsy();
+			expect(
+				isVEURToken({ ...mockValidIcToken, standard: { code: 'erc20' }, symbol: 'VEUR' })
+			).toBeFalsy();
 		});
 
 		it('should return false for ICRC tokens that is not token VEUR', () => {
 			expect(
-				isVEURToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'not-VEUR' })
+				isVEURToken({ ...mockValidIcToken, standard: { code: 'icrc' }, symbol: 'not-VEUR' })
 			).toBeFalsy();
 		});
 

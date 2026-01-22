@@ -20,6 +20,8 @@ export type NftAttribute = z.infer<typeof NftAttributeSchema>;
 
 export type NftMetadata = z.infer<typeof NftMetadataSchema>;
 
+export type NftMetadataWithoutId = Omit<NftMetadata, 'id'>;
+
 export type NftCollection = z.infer<typeof NftCollectionSchema>;
 
 export interface NftCollectionUi {

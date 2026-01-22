@@ -14,7 +14,7 @@ export const HONX_TOKEN_ID: TokenId = parseTokenId(HONX_SYMBOL);
 export const HONX_TOKEN: RequiredSpl2022Token = {
 	id: HONX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Honeywell xStock',
 	symbol: HONX_SYMBOL,

@@ -43,7 +43,7 @@
 					<span class="font-bold">
 						{#if cardField === EarningCardFields.EARNING_POTENTIAL}
 							<EarningYearlyAmount
-								showAsError
+								showAsNeutral
 								showPlusSign
 								value={nonNullish(cardFields[cardField])
 									? Number(cardFields[cardField])

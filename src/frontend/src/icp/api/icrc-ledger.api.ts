@@ -20,14 +20,14 @@ import { Principal } from '@icp-sdk/core/principal';
  * Retrieves metadata for the ICRC token.
  *
  * @param {Object} params - The parameters for fetching metadata.
- * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {boolean} [params.certified] - Whether the data should be certified.
  * @param {OptionIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
  * @param {QueryParams} params.rest - Additional query parameters.
  * @returns {Promise<IcrcTokenMetadataResponse>} The metadata response for the ICRC token.
  */
 export const metadata = async ({
-	certified = true,
+	certified,
 	identity,
 	...rest
 }: {
@@ -70,7 +70,7 @@ export const transactionFee = async ({
  * Retrieves the balance of ICRC tokens for a specified owner.
  *
  * @param {Object} params - The parameters for fetching the balance.
- * @param {boolean} [params.certified=true] - Whether the balance data should be certified.
+ * @param {boolean} [params.certified] - Whether the balance data should be certified.
  * @param {Principal} params.owner - The principal of the account owner.
  * @param {OptionIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
@@ -78,7 +78,7 @@ export const transactionFee = async ({
  * @returns {Promise<IcrcTokens>} The balance of ICRC tokens.
  */
 export const balance = async ({
-	certified = true,
+	certified,
 	owner,
 	identity,
 	...rest
@@ -203,7 +203,7 @@ export const allowance = async ({
 };
 
 export const getBlocks = async ({
-	certified = true,
+	certified,
 	identity,
 	ledgerCanisterId,
 	...rest
@@ -267,7 +267,7 @@ export const icrc10SupportedStandards = async ({
 };
 
 export const getMintingAccount = async ({
-	certified = true,
+	certified,
 	identity,
 	ledgerCanisterId
 }: {
@@ -278,9 +278,13 @@ export const getMintingAccount = async ({
 
 	const { getMintingAccount } = await ledgerCanister({ identity, ledgerCanisterId });
 
-	const account = await getMintingAccount({ certified });
+	try {
+		const account = await getMintingAccount({ certified });
 
-	return fromCandidAccount(fromDefinedNullable(account));
+		return fromCandidAccount(fromDefinedNullable(account));
+	} catch (_: unknown) {
+		// In case the method is not implemented, return undefined
+	}
 };
 
 const ledgerCanister = async ({

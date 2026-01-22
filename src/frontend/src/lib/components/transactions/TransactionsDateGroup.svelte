@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
+	import { capitalizeFirstLetter } from '../../../tests/utils/string-utils';
 	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
@@ -15,15 +16,15 @@
 	}
 
 	let { formattedDate, transactions, testId }: Props = $props();
+
+	let capitalizedFormattedDate = $derived(capitalizeFirstLetter(formattedDate));
 </script>
 
 {#if transactions.length > 0}
 	<div class="mb-5 flex flex-col gap-3" data-tid={testId}>
 		<StickyHeader>
 			{#snippet header()}
-				<span class="mb-3 flex text-lg font-medium text-tertiary first-letter:capitalize"
-					>{formattedDate}</span
-				>
+				<span class="mb-3 flex text-lg font-medium text-tertiary">{capitalizedFormattedDate}</span>
 			{/snippet}
 
 			{#each transactions as transactionUi, index (`${transactionUi.transaction.id}-${transactionUi.token.id.description}-${index}`)}

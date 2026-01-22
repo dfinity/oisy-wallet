@@ -5,6 +5,7 @@ import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
 import { TokenSchema } from '$lib/schema/token.schema';
 import { CanisterIdTextSchema } from '$lib/types/canister';
 import { UrlSchema } from '$lib/validation/url.validation';
+import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import * as z from 'zod';
 
 export const IcFeeSchema = z.object({
@@ -13,7 +14,6 @@ export const IcFeeSchema = z.object({
 
 export const IcAppMetadataSchema = z.object({
 	exchangeCoinId: CoingeckoCoinsIdSchema.optional(),
-	position: z.number(),
 	explorerUrl: UrlSchema.optional()
 });
 
@@ -35,9 +35,14 @@ export const IcCkMetadataSchema = IcCkLinkedAssetsSchema.partial().extend({
 	minterCanisterId: CanisterIdTextSchema
 });
 
+export const IcMetadataSchema = z.object({
+	mintingAccount: z.custom<IcrcAccount>().optional()
+});
+
 export const IcInterfaceSchema = z.object({
 	...IcCanistersSchema.shape,
-	...IcAppMetadataSchema.shape
+	...IcAppMetadataSchema.shape,
+	...IcMetadataSchema.shape
 });
 
 export const IcTokenSchema = z.object({

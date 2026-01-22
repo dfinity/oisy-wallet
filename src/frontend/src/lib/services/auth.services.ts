@@ -1,3 +1,4 @@
+import { browser } from '$app/environment';
 import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import {
 	clearIdbBtcAddressMainnet,
@@ -14,12 +15,7 @@ import {
 	deleteIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
 import { clearIdbBalances, deleteIdbBalances } from '$lib/api/idb-balances.api';
-import {
-	clearIdbAllCustomTokens,
-	clearIdbEthTokensDeprecated,
-	deleteIdbAllCustomTokens,
-	deleteIdbEthTokensDeprecated
-} from '$lib/api/idb-tokens.api';
+import { clearIdbAllCustomTokens, deleteIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import {
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,
@@ -30,6 +26,7 @@ import {
 	deleteIdbIcTransactions,
 	deleteIdbSolTransactions
 } from '$lib/api/idb-transactions.api';
+import { deleteIdbAllOisyRelated } from '$lib/api/idb.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -49,6 +46,7 @@ import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { AUTH_LOCK_KEY } from '$lib/stores/locked.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
+import { InternetIdentityDomain } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { ToastMsg } from '$lib/types/toast';
 import { emit } from '$lib/utils/events.utils';
@@ -61,10 +59,20 @@ import { isNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
+export enum PrincipalsStorage {
+	CURRENT = 'current',
+	ALL = 'all',
+	NONE = 'none'
+}
+
 export const signIn = async (
 	params: AuthSignInParams
 ): Promise<{ success: 'ok' | 'cancelled' | 'error'; err?: unknown }> => {
 	busy.show();
+
+	const trackingMetadata = {
+		domain: params.domain ?? InternetIdentityDomain.VERSION_1_0
+	};
 
 	try {
 		const fn = get(authLoggedInAnotherTabStore)
@@ -74,7 +82,8 @@ export const signIn = async (
 		await fn();
 
 		trackEvent({
-			name: TRACK_COUNT_SIGN_IN_SUCCESS
+			name: TRACK_COUNT_SIGN_IN_SUCCESS,
+			metadata: trackingMetadata
 		});
 
 		// We clean previous messages in case the user was signed out automatically before signing-in again.
@@ -86,7 +95,8 @@ export const signIn = async (
 	} catch (err: unknown) {
 		if (err === 'UserInterrupt') {
 			trackEvent({
-				name: TRACK_SIGN_IN_CANCELLED_COUNT
+				name: TRACK_SIGN_IN_CANCELLED_COUNT,
+				metadata: trackingMetadata
 			});
 
 			// We do not display an error if the user explicitly cancelled the process of sign-in
@@ -95,7 +105,8 @@ export const signIn = async (
 
 		if (err instanceof AuthClientNotInitializedError) {
 			trackEvent({
-				name: TRACK_SIGN_IN_UNDEFINED_AUTH_CLIENT_ERROR
+				name: TRACK_SIGN_IN_UNDEFINED_AUTH_CLIENT_ERROR,
+				metadata: trackingMetadata
 			});
 
 			toastsError({
@@ -106,7 +117,8 @@ export const signIn = async (
 		}
 
 		trackEvent({
-			name: TRACK_SIGN_IN_ERROR_COUNT
+			name: TRACK_SIGN_IN_ERROR_COUNT,
+			metadata: trackingMetadata
 		});
 
 		toastsError({
@@ -124,18 +136,18 @@ export const signIn = async (
 
 export const signOut = ({
 	resetUrl = false,
-	clearAllPrincipalsStorages = false,
+	clearPrincipalStorages = PrincipalsStorage.CURRENT,
 	source = ''
 }: {
 	resetUrl?: boolean;
-	clearAllPrincipalsStorages?: boolean;
+	clearPrincipalStorages?: PrincipalsStorage;
 	source?: string;
 }): Promise<void> => {
 	trackSignOut({
 		name: TRACK_SIGN_OUT_SUCCESS,
 		meta: { reason: 'user', resetUrl, source }
 	});
-	return logout({ resetUrl, clearAllPrincipalsStorages });
+	return logout({ resetUrl, clearPrincipalStorages });
 };
 
 export const errorSignOut = (text: string): Promise<void> => {
@@ -188,14 +200,14 @@ export const idleSignOut = (): Promise<void> => {
 			text,
 			level
 		},
-		clearCurrentPrincipalStorages: false
+		clearPrincipalStorages: PrincipalsStorage.NONE
 	});
 };
 
 export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
 	logout({
 		resetUrl,
-		clearCurrentPrincipalStorages: false
+		clearPrincipalStorages: PrincipalsStorage.NONE
 	});
 
 const emptyPrincipalIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<void>) => {
@@ -234,8 +246,6 @@ const deleteIdbStoreList = [
 	deleteIdbSolAddressLocal,
 	// Tokens
 	deleteIdbAllCustomTokens,
-	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-	deleteIdbEthTokensDeprecated,
 	// Transactions
 	deleteIdbBtcTransactions,
 	deleteIdbEthTransactions,
@@ -255,20 +265,23 @@ const clearIdbStoreList = [
 	clearIdbSolAddressLocal,
 	// Tokens
 	clearIdbAllCustomTokens,
-	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-	clearIdbEthTokensDeprecated,
 	// Transactions
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,
 	clearIdbIcTransactions,
 	clearIdbSolTransactions,
 	// Balances
-	clearIdbBalances
+	clearIdbBalances,
+	// Delete all possible OISY-related indexedDB
+	// We should clear them first, since the deletion may not be supported in the current browser
+	deleteIdbAllOisyRelated
 ];
 
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
-	sessionStorage.clear();
+	if (browser) {
+		sessionStorage.clear();
+	}
 };
 
 const disconnectWalletConnect = async () => {
@@ -284,13 +297,11 @@ const disconnectWalletConnect = async () => {
 
 const logout = async ({
 	msg = undefined,
-	clearCurrentPrincipalStorages = true,
-	clearAllPrincipalsStorages = false,
+	clearPrincipalStorages = PrincipalsStorage.CURRENT,
 	resetUrl = false
 }: {
 	msg?: ToastMsg;
-	clearCurrentPrincipalStorages?: boolean;
-	clearAllPrincipalsStorages?: boolean;
+	clearPrincipalStorages?: PrincipalsStorage;
 	resetUrl?: boolean;
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
@@ -298,14 +309,17 @@ const logout = async ({
 
 	await disconnectWalletConnect();
 
-	if (clearCurrentPrincipalStorages) {
+	if (clearPrincipalStorages === PrincipalsStorage.CURRENT) {
 		await Promise.all(deleteIdbStoreList.map(emptyPrincipalIdbStore));
-	}
-	if (clearAllPrincipalsStorages) {
+	} else if (clearPrincipalStorages === PrincipalsStorage.ALL) {
 		await Promise.all(clearIdbStoreList.map(clearIdbStore));
 	}
 
-	await clearSessionStorage();
+	try {
+		await clearSessionStorage();
+	} catch (err: unknown) {
+		console.warn('Error clearing session storage on logout', err);
+	}
 
 	await authStore.signOut();
 

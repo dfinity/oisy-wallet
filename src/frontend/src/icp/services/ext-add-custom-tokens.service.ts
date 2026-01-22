@@ -112,6 +112,7 @@ const loadMetadata = ({ canisterId }: ExtCanisters): ExtTokenWithoutId | undefin
 	try {
 		return mapExtToken({
 			canisterId,
+			standardVersion: 'ext',
 			// We still don't have a way to get the token name from the canisterId, so we use the canisterId as the token name
 			metadata: { name: shortenWithMiddleEllipsis({ text: canisterId }) }
 		});

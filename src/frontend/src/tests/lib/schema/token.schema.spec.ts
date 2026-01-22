@@ -6,6 +6,7 @@ import {
 	TokenIdSchema,
 	TokenMetadataSchema,
 	TokenSchema,
+	TokenStandardCodeSchema,
 	TokenStandardSchema
 } from '$lib/schema/token.schema';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -21,7 +22,75 @@ describe('token.schema', () => {
 		it('should fail validation with a string instead of a symbol', () => {
 			const invalidTokenId = 'TokenId';
 
-			expect(() => TokenIdSchema.parse(invalidTokenId)).toThrow();
+			expect(() => TokenIdSchema.parse(invalidTokenId)).toThrowError();
+		});
+	});
+
+	describe('TokenStandardCodeSchema', () => {
+		it('should validate "ethereum" as a supported token standard', () => {
+			const validStandard = 'ethereum';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "erc20" as a supported token standard', () => {
+			const validStandard = 'erc20';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "icp" as a supported token standard', () => {
+			const validStandard = 'icp';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "icrc" as a supported token standard', () => {
+			const validStandard = 'icrc';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "dip20" as a supported token standard', () => {
+			const validStandard = 'dip20';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "dip721" as a supported token standard', () => {
+			const validStandard = 'dip721';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "ext" as a supported token standard', () => {
+			const validStandard = 'ext';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "icpunks" as a supported token standard', () => {
+			const validStandard = 'icpunks';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "bitcoin" as a supported token standard', () => {
+			const validStandard = 'bitcoin';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "solana" as a supported token standard', () => {
+			const validStandard = 'solana';
+
+			expect(TokenStandardCodeSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should fail validation with an unsupported token standard', () => {
+			const invalidStandard = 'unsupported-standard';
+
+			expect(() => TokenStandardCodeSchema.parse(invalidStandard)).toThrowError();
 		});
 	});
 
@@ -29,55 +98,88 @@ describe('token.schema', () => {
 		it('should validate "ethereum" as a supported token standard', () => {
 			const validStandard = 'ethereum';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
 		});
 
 		it('should validate "erc20" as a supported token standard', () => {
 			const validStandard = 'erc20';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
 		});
 
 		it('should validate "icp" as a supported token standard', () => {
 			const validStandard = 'icp';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
 		});
 
 		it('should validate "icrc" as a supported token standard', () => {
 			const validStandard = 'icrc';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
 		});
 
 		it('should validate "dip20" as a supported token standard', () => {
 			const validStandard = 'dip20';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
 		});
 
-		it('should validate "extV2" as a supported token standard', () => {
-			const validStandard = 'extV2';
+		it('should validate "dip721" as a supported token standard', () => {
+			const validStandard = 'dip721';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "ext" as a supported token standard', () => {
+			const validStandard = 'ext';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should validate "icpunks" as a supported token standard', () => {
+			const validStandard = 'icpunks';
+
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({
+				code: validStandard
+			});
 		});
 
 		it('should validate "bitcoin" as a supported token standard', () => {
 			const validStandard = 'bitcoin';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
 		});
 
 		it('should validate "solana" as a supported token standard', () => {
 			const validStandard = 'solana';
 
-			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+			expect(TokenStandardSchema.parse({ code: validStandard })).toEqual({ code: validStandard });
+		});
+
+		it('should accept a version for the standard', () => {
+			const validStandard = 'ext';
+			const validVersion = 'legacy';
+
+			expect(TokenStandardSchema.parse({ code: validStandard, version: validVersion })).toEqual({
+				code: validStandard,
+				version: validVersion
+			});
 		});
 
 		it('should fail validation with an unsupported token standard', () => {
 			const invalidStandard = 'unsupported-standard';
 
-			expect(() => TokenStandardSchema.parse(invalidStandard)).toThrow();
+			expect(() => TokenStandardSchema.parse({ code: invalidStandard })).toThrowError();
+		});
+
+		it('should fail validation with an unsupported standard version', () => {
+			const validStandard = 'ext';
+			const invalidVersion = 123;
+
+			expect(() =>
+				TokenStandardSchema.parse({ code: validStandard, version: invalidVersion })
+			).toThrowError();
 		});
 	});
 
@@ -97,7 +199,7 @@ describe('token.schema', () => {
 		it('should fail validation with an unsupported token category', () => {
 			const invalidCategory = 'unsupported-category';
 
-			expect(() => TokenCategorySchema.parse(invalidCategory)).toThrow();
+			expect(() => TokenCategorySchema.parse(invalidCategory)).toThrowError();
 		});
 	});
 
@@ -142,7 +244,7 @@ describe('token.schema', () => {
 				icon: 'https://example.com/icon.png'
 			};
 
-			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrow();
+			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrowError();
 		});
 
 		it('should fail validation with missing name', () => {
@@ -152,7 +254,7 @@ describe('token.schema', () => {
 				icon: 'https://example.com/icon.png'
 			};
 
-			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrow();
+			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrowError();
 		});
 
 		it('should fail validation with missing symbol', () => {
@@ -162,7 +264,7 @@ describe('token.schema', () => {
 				icon: 'https://example.com/icon.png'
 			};
 
-			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrow();
+			expect(() => TokenMetadataSchema.parse(invalidMetadata)).toThrowError();
 		});
 	});
 
@@ -189,7 +291,7 @@ describe('token.schema', () => {
 				oisySymbol: { oisySymbol: 123 }
 			};
 
-			expect(() => TokenAppearanceSchema.parse(invalidAppearance)).toThrow();
+			expect(() => TokenAppearanceSchema.parse(invalidAppearance)).toThrowError();
 		});
 	});
 
@@ -215,7 +317,7 @@ describe('token.schema', () => {
 		const validTokenWithRequiredFields = {
 			id: parseTokenId('TokenId'),
 			network: mockNetwork,
-			standard: 'ethereum',
+			standard: { code: 'ethereum' },
 			category: 'default',
 			name: 'SampleToken',
 			symbol: 'STK',
@@ -241,43 +343,43 @@ describe('token.schema', () => {
 		it('should fail validation when id is missing', () => {
 			const { id: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when network is missing', () => {
 			const { network: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when standard is missing', () => {
 			const { standard: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when category is missing', () => {
 			const { category: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when name is missing', () => {
 			const { name: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when symbol is missing', () => {
 			const { symbol: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 
 		it('should fail validation when decimals is missing', () => {
 			const { decimals: _, ...invalidToken } = validToken;
 
-			expect(() => TokenSchema.parse(invalidToken)).toThrow();
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});
 	});
 });

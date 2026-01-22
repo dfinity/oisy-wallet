@@ -1,21 +1,15 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { saveErcCustomTokens } from '$eth/services/erc-custom-tokens.services';
-import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
-import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
-import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
+import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
+import type { SaveCustomErc1155Variant, SaveCustomErc721Variant } from '$lib/types/custom-token';
 import type { OwnedContract } from '$lib/types/nft';
-import type { TokenStandard } from '$lib/types/token';
+import type { TokenStandardCode } from '$lib/types/token';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCustomTokensErc1155, mockCustomTokensErc721 } from '$tests/mocks/custom-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
-vi.mock('$eth/services/erc721-custom-tokens.services', () => ({
-	saveCustomTokens: vi.fn()
-}));
-
-vi.mock('$eth/services/erc1155-custom-tokens.services', () => ({
+vi.mock('$lib/services/save-custom-tokens.services', () => ({
 	saveCustomTokens: vi.fn()
 }));
 
@@ -45,13 +39,25 @@ describe('erc-custom-tokens.services', () => {
 			identity: mockIdentity
 		};
 
-		const expectedErc721Tokens: SaveErc721CustomToken[] = mockOwnedContractsErc721.map(
-			({ address }) => ({ address, network: mockNetwork, enabled: true })
+		const expectedErc721Tokens: SaveCustomErc721Variant[] = mockOwnedContractsErc721.map(
+			({ address }) => ({
+				address,
+				chainId: mockNetwork.chainId,
+				networkKey: 'Erc721',
+				enabled: true
+			})
 		);
 
-		const expectedErc1155Tokens: SaveErc1155CustomToken[] = mockOwnedContractsErc1155.map(
-			({ address }) => ({ address, network: mockNetwork, enabled: true })
+		const expectedErc1155Tokens: SaveCustomErc1155Variant[] = mockOwnedContractsErc1155.map(
+			({ address }) => ({
+				address,
+				chainId: mockNetwork.chainId,
+				networkKey: 'Erc1155',
+				enabled: true
+			})
 		);
+
+		const expectedErcTokens = [...expectedErc721Tokens, ...expectedErc1155Tokens];
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -59,34 +65,11 @@ describe('erc-custom-tokens.services', () => {
 			mockAuthStore();
 		});
 
-		it('should save ERC721 tokens for the specified network', async () => {
-			await saveErcCustomTokens(mockParams);
-
-			expect(saveErc721CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc721Tokens,
-				identity: mockIdentity
-			});
-		});
-
-		it('should save ERC1155 tokens for the specified network', async () => {
-			await saveErcCustomTokens(mockParams);
-
-			expect(saveErc1155CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc1155Tokens,
-				identity: mockIdentity
-			});
-		});
-
 		it('should save all ERC tokens for the specified network', async () => {
 			await saveErcCustomTokens(mockParams);
 
-			expect(saveErc721CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc721Tokens,
-				identity: mockIdentity
-			});
-
-			expect(saveErc1155CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc1155Tokens,
+			expect(saveCustomTokens).toHaveBeenCalledExactlyOnceWith({
+				tokens: expectedErcTokens,
 				identity: mockIdentity
 			});
 		});
@@ -94,9 +77,7 @@ describe('erc-custom-tokens.services', () => {
 		it('should not save ERC721 tokens if there are none', async () => {
 			await saveErcCustomTokens({ ...mockParams, contracts: mockOwnedContractsErc1155 });
 
-			expect(saveErc721CustomTokens).not.toHaveBeenCalled();
-
-			expect(saveErc1155CustomTokens).toHaveBeenCalledExactlyOnceWith({
+			expect(saveCustomTokens).toHaveBeenCalledExactlyOnceWith({
 				tokens: expectedErc1155Tokens,
 				identity: mockIdentity
 			});
@@ -105,9 +86,7 @@ describe('erc-custom-tokens.services', () => {
 		it('should not save ERC1155 tokens if there are none', async () => {
 			await saveErcCustomTokens({ ...mockParams, contracts: mockOwnedContractsErc721 });
 
-			expect(saveErc1155CustomTokens).not.toHaveBeenCalled();
-
-			expect(saveErc721CustomTokens).toHaveBeenCalledExactlyOnceWith({
+			expect(saveCustomTokens).toHaveBeenCalledExactlyOnceWith({
 				tokens: expectedErc721Tokens,
 				identity: mockIdentity
 			});
@@ -116,9 +95,7 @@ describe('erc-custom-tokens.services', () => {
 		it('should not save any tokens if there are none', async () => {
 			await saveErcCustomTokens({ ...mockParams, contracts: [] });
 
-			expect(saveErc721CustomTokens).not.toHaveBeenCalled();
-
-			expect(saveErc1155CustomTokens).not.toHaveBeenCalled();
+			expect(saveCustomTokens).not.toHaveBeenCalled();
 		});
 
 		it('should not save tokens that are already saved', async () => {
@@ -136,47 +113,20 @@ describe('erc-custom-tokens.services', () => {
 				]
 			});
 
-			expect(saveErc721CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc721Tokens,
-				identity: mockIdentity
-			});
-
-			expect(saveErc1155CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc1155Tokens,
+			expect(saveCustomTokens).toHaveBeenCalledExactlyOnceWith({
+				tokens: expectedErcTokens,
 				identity: mockIdentity
 			});
 		});
 
-		it('should fail if saving ERC721 tokens fails', async () => {
-			const mockError = new Error('Failed to save ERC721 tokens');
-			vi.mocked(saveErc721CustomTokens).mockRejectedValueOnce(mockError);
+		it('should fail if saving tokens fails', async () => {
+			const mockError = new Error('Failed to save tokens');
+			vi.mocked(saveCustomTokens).mockRejectedValueOnce(mockError);
 
-			await expect(saveErcCustomTokens(mockParams)).rejects.toThrow(mockError);
+			await expect(saveErcCustomTokens(mockParams)).rejects.toThrowError(mockError);
 
-			expect(saveErc721CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc721Tokens,
-				identity: mockIdentity
-			});
-
-			expect(saveErc1155CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc1155Tokens,
-				identity: mockIdentity
-			});
-		});
-
-		it('should fail if saving ERC1155 tokens fails', async () => {
-			const mockError = new Error('Failed to save ERC1155 tokens');
-			vi.mocked(saveErc1155CustomTokens).mockRejectedValueOnce(mockError);
-
-			await expect(saveErcCustomTokens(mockParams)).rejects.toThrow(mockError);
-
-			expect(saveErc721CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc721Tokens,
-				identity: mockIdentity
-			});
-
-			expect(saveErc1155CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc1155Tokens,
+			expect(saveCustomTokens).toHaveBeenCalledExactlyOnceWith({
+				tokens: expectedErcTokens,
 				identity: mockIdentity
 			});
 		});
@@ -187,27 +137,20 @@ describe('erc-custom-tokens.services', () => {
 				contracts: [{ address: mockEthAddress, isSpam: false, standard: 'erc20' }]
 			});
 
-			expect(saveErc721CustomTokens).not.toHaveBeenCalled();
-
-			expect(saveErc1155CustomTokens).not.toHaveBeenCalled();
+			expect(saveCustomTokens).not.toHaveBeenCalled();
 		});
 
 		it('should handle mixed-case standards', async () => {
 			const mixedCaseContracts: OwnedContract[] = [
-				{ ...mockOwnedContracts[0], standard: 'eRc721' as TokenStandard },
-				{ ...mockOwnedContracts[1], standard: 'ERC721' as TokenStandard },
-				{ ...mockOwnedContracts[2], standard: 'eRC1155' as TokenStandard }
+				{ ...mockOwnedContracts[0], standard: 'eRc721' as TokenStandardCode },
+				{ ...mockOwnedContracts[1], standard: 'ERC721' as TokenStandardCode },
+				{ ...mockOwnedContracts[2], standard: 'eRC1155' as TokenStandardCode }
 			];
 
 			await saveErcCustomTokens({ ...mockParams, contracts: mixedCaseContracts });
 
-			expect(saveErc721CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc721Tokens,
-				identity: mockIdentity
-			});
-
-			expect(saveErc1155CustomTokens).toHaveBeenCalledExactlyOnceWith({
-				tokens: expectedErc1155Tokens,
+			expect(saveCustomTokens).toHaveBeenCalledExactlyOnceWith({
+				tokens: expectedErcTokens,
 				identity: mockIdentity
 			});
 		});

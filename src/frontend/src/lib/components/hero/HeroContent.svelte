@@ -4,6 +4,7 @@
 	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { isErc20Icp } from '$eth/utils/token.utils';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import {
 		isGLDTToken as isGLDTTokenUtil,
 		isVCHFToken as isVCHFTokenUtil,
@@ -76,8 +77,10 @@
 
 	let isNftsPage = $derived(isRouteNfts(page));
 
+	let hasNoUsableBalance = $derived(!$isIcMintingAccount && ($balanceZero || isNullish($balance)));
+
 	$effect(() => {
-		outflowActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
+		outflowActionsDisabled.set(isTransactionsPage && hasNoUsableBalance);
 	});
 
 	$effect(() => {

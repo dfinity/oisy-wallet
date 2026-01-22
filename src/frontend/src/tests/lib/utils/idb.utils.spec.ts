@@ -53,7 +53,7 @@ describe('idb.utils', () => {
 		it('should handle errors gracefully', async () => {
 			vi.mocked(delMany).mockRejectedValueOnce(new Error('Mocked error'));
 
-			await expect(delMultiKeysByPrincipal(mockParams)).rejects.toThrow();
+			await expect(delMultiKeysByPrincipal(mockParams)).rejects.toThrowError();
 
 			expect(delMany).toHaveBeenCalledExactlyOnceWith(expectedKeys, mockStore);
 		});

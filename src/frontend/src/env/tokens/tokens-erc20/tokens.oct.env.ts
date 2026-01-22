@@ -14,7 +14,7 @@ export const OCT_TOKEN_ID: TokenId = parseTokenId(OCT_SYMBOL);
 export const OCT_TOKEN: RequiredErc20Token = {
 	id: OCT_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Octopus Network Token',
 	symbol: OCT_SYMBOL,

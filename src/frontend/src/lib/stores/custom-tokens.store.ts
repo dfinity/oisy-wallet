@@ -2,7 +2,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import { isTokenErc } from '$eth/utils/erc.utils';
 import type { ExtToken } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
-import { isTokenExtV2 } from '$icp/utils/ext.utils';
+import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { CertifiedData } from '$lib/types/store';
@@ -14,8 +14,9 @@ import { writable, type Readable } from 'svelte/store';
 
 type CertifiedCustomTokensData<T extends Token> = Option<CertifiedData<CustomToken<T>>[]>;
 
-export interface CertifiedCustomTokensStore<T extends Token>
-	extends Readable<CertifiedCustomTokensData<T>> {
+export interface CertifiedCustomTokensStore<T extends Token> extends Readable<
+	CertifiedCustomTokensData<T>
+> {
 	setAll: (tokens: CertifiedData<CustomToken<T>>[]) => void;
 	reset: (tokenId: TokenId) => void;
 	resetByIdentifier: (identifier: Identifier) => void;
@@ -38,7 +39,7 @@ export const initCertifiedCustomTokensStore = <
 			? token.address
 			: isTokenErc(token)
 				? `${token.address}#${token.network.chainId}`
-				: isTokenExtV2(token)
+				: isTokenIcNft(token)
 					? token.canisterId
 					: isTokenIc(token)
 						? token.ledgerCanisterId

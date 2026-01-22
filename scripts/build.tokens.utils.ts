@@ -1,9 +1,11 @@
 import type { EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { createAgent } from '@dfinity/utils';
+import { createAgent, fromDefinedNullable } from '@dfinity/utils';
 import {
 	IcrcLedgerCanister,
+	fromCandidAccount,
 	mapTokenMetadata,
+	type IcrcAccount,
 	type IcrcTokenMetadataResponse
 } from '@icp-sdk/canisters/ledger/icrc';
 import { AnonymousIdentity, type HttpAgent } from '@icp-sdk/core/agent';
@@ -45,6 +47,24 @@ export const getIndexPrincipal = async (
 	} catch (_: unknown) {
 		// This method is just to get the index principal if the token supports the method `icrc106_get_index_principal`.
 		// So if it fails, we do not really care and consider it as not supported.
+	}
+};
+
+export const getMintingAccount = async (
+	ledgerCanisterId: LedgerCanisterIdText
+): Promise<IcrcAccount | undefined> => {
+	const { getMintingAccount } = IcrcLedgerCanister.create({
+		agent,
+		canisterId: Principal.from(ledgerCanisterId)
+	});
+
+	try {
+		const account = await getMintingAccount({ certified: true });
+
+		return fromCandidAccount(fromDefinedNullable(account));
+	} catch (_: unknown) {
+		// This method is just to get the minting account.
+		// So if it fails, we do not really care and consider it as non-existent.
 	}
 };
 

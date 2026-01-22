@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
@@ -11,10 +11,6 @@
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
 	const onLoad = async () => {
-		if (isNullish($ethAddress)) {
-			return;
-		}
-
 		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
 
 		const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
@@ -34,7 +30,7 @@
 	const debounceLoad = debounce(onLoad);
 
 	$effect(() => {
-		[$enabledNonFungibleTokens, $ethAddress];
+		[$enabledNonFungibleTokens, $authIdentity, $ethAddress];
 
 		untrack(() => debounceLoad());
 	});

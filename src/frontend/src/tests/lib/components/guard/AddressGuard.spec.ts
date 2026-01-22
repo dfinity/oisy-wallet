@@ -17,7 +17,6 @@ import * as solAddressServices from '$sol/services/sol-address.services';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
 	mockNetworksSettings,
@@ -62,7 +61,7 @@ describe('AddressGuard', () => {
 
 			const spy = vi.spyOn(loaderServices, 'initSignerAllowance');
 
-			render(AddressGuard, { children: mockSnippet });
+			render(AddressGuard);
 
 			emit({ message: 'oisyValidateAddresses' });
 
@@ -78,7 +77,7 @@ describe('AddressGuard', () => {
 
 			const spy = vi.spyOn(window.location, 'reload');
 
-			render(AddressGuard, { children: mockSnippet });
+			render(AddressGuard);
 
 			emit({ message: 'oisyValidateAddresses' });
 
@@ -118,7 +117,7 @@ describe('AddressGuard', () => {
 			it.each(cases)(
 				'should not call validate $name address if signer allowance is not loaded',
 				({ store, mockAddress, validateFn }) => {
-					render(AddressGuard, { children: mockSnippet });
+					render(AddressGuard);
 
 					const spy = vi.spyOn({ validateFn }, 'validateFn');
 
@@ -161,7 +160,7 @@ describe('AddressGuard', () => {
 			it('should not validate addresses if all networks are disabled', () => {
 				setupUserNetworksStore('allDisabled');
 
-				render(AddressGuard, { children: mockSnippet });
+				render(AddressGuard);
 
 				emit({ message: 'oisyValidateAddresses' });
 
@@ -196,7 +195,7 @@ describe('AddressGuard', () => {
 					}
 				});
 
-				render(AddressGuard, { children: mockSnippet });
+				render(AddressGuard);
 
 				const validateBitcoinSpy = vi.spyOn(btcAddressServices, 'validateBtcAddressMainnet');
 				const validateEthereumSpy = vi.spyOn(ethAddressServices, 'validateEthAddress');
@@ -231,7 +230,7 @@ describe('AddressGuard', () => {
 					}
 				});
 
-				render(AddressGuard, { children: mockSnippet });
+				render(AddressGuard);
 
 				const validateEthereumSpy = vi.spyOn(ethAddressServices, 'validateEthAddress');
 
@@ -245,7 +244,7 @@ describe('AddressGuard', () => {
 			it.each(cases)(
 				'should call validate $name address if signer allowance is loaded after address store',
 				async ({ store, mockAddress, spy }) => {
-					render(AddressGuard, { children: mockSnippet });
+					render(AddressGuard);
 
 					const validateSpy = spy();
 
@@ -265,7 +264,7 @@ describe('AddressGuard', () => {
 			it.each(cases)(
 				'should call validate $name address if signer allowance is loaded before address store',
 				async ({ store, mockAddress, spy }) => {
-					render(AddressGuard, { children: mockSnippet });
+					render(AddressGuard);
 
 					const validateSpy = spy();
 
@@ -285,7 +284,7 @@ describe('AddressGuard', () => {
 			it.each(cases)(
 				'should call validate $name address twice',
 				async ({ store, mockAddress, spy }) => {
-					render(AddressGuard, { children: mockSnippet });
+					render(AddressGuard);
 
 					const validateSpy = spy();
 

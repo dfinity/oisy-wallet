@@ -5,7 +5,9 @@
 	import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import OpenCryptoPayProgress from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayProgress.svelte';
-	import TokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
+	import OpenCryptoPayTokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
+	import PaymentFailed from '$lib/components/scanner/open-crypto-pay/PaymentFailed.svelte';
+	import PaymentSucceeded from '$lib/components/scanner/open-crypto-pay/PaymentSucceeded.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
@@ -28,7 +30,7 @@
 
 	const onClose = () => modalStore.close();
 
-	setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
+	const { reset } = setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
 
 	const goToStep = (stepName: WizardStepsScanner) => {
 		if (isNullish(modal)) {
@@ -62,14 +64,25 @@
 		{:else if currentStep?.name === WizardStepsScanner.PAY}
 			<OpenCryptoPay
 				onPay={() => goToStep(WizardStepsScanner.PAYING)}
+				onPayFailed={() => goToStep(WizardStepsScanner.PAYMENT_FAILED)}
+				onPaySucceeded={() => goToStep(WizardStepsScanner.PAYMENT_CONFIRMED)}
 				onSelectToken={() => goToStep(WizardStepsScanner.TOKENS_LIST)}
 				bind:isTokenSelecting
 				bind:payProgressStep
 			/>
 		{:else if currentStep?.name === WizardStepsScanner.TOKENS_LIST && !isTokenSelecting}
-			<TokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
+			<OpenCryptoPayTokensList onClose={() => goToStep(WizardStepsScanner.PAY)} />
 		{:else if currentStep?.name === WizardStepsScanner.PAYING}
 			<OpenCryptoPayProgress {payProgressStep} />
+		{:else if currentStep?.name === WizardStepsScanner.PAYMENT_FAILED}
+			<PaymentFailed
+				onClose={() => {
+					reset();
+					goToStep(WizardStepsScanner.SCAN);
+				}}
+			/>
+		{:else if currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
+			<PaymentSucceeded {onClose} />
 		{/if}
 	{/key}
 </WizardModal>

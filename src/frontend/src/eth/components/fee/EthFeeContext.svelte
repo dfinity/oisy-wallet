@@ -35,7 +35,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
-	import { isNetworkICP } from '$lib/utils/network.utils';
+	import { assertIsNetworkEthereum, isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
@@ -82,9 +82,13 @@
 				return;
 			}
 
+			const { network } = sendToken;
+
+			assertIsNetworkEthereum(network);
+
 			const { feeData, provider, params } = await getEthFeeDataWithProvider({
-				networkId: sendToken.network.id,
-				chainId: (sendToken.network as EthereumNetwork).chainId,
+				networkId: network.id,
+				chainId: network.chainId,
 				from: $ethAddress,
 				to: destination !== '' ? destination : $ethAddress
 			});

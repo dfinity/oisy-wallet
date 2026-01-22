@@ -45,7 +45,10 @@
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
-			"test_banner_beta": ""
+			"test_banner_beta": "",
+			"internet_identity_banner_first_part": "",
+			"internet_identity_banner_second_part": "",
+			"internet_identity_banner_button": ""
 		},
 		"alt": {
 			"logo": "$name लोगो",
@@ -61,7 +64,8 @@
 		},
 		"warning": {
 			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
-			"standalone_mode": ""
+			"standalone_mode": "",
+			"video_not_supported": ""
 		}
 	},
 	"navigation": {
@@ -117,9 +121,11 @@
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
+			"legacy_login": "",
 			"asset_types": "",
 			"instant_and_private": "",
-			"advanced_cryptography": ""
+			"advanced_cryptography": "",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
@@ -145,36 +151,34 @@
 		},
 		"help": {
 			"text": {
-				"title": "प्रमाणीकरण में समस्या आ रही है?",
-				"description": "हमने देखा कि आपने इंटरनेट आइडेंटिटी के साथ प्रमाणीकरण रद्द कर दिया है। हम यह समझना चाहेंगे कि क्या हुआ ताकि हम आपके अनुभव को बेहतर बना सकें।",
-				"subtitle": "क्या निम्न में से कोई समस्या का कारण था?",
-				"lost_identity": "मैंने अपना इंटरनेट आइडेंटिटी नंबर खो दिया",
-				"security": "मुझे सुरक्षा या गोपनीयता के बारे में चिंता थी",
-				"got_confused": "प्रक्रिया के दौरान मैं भ्रमित हो गया",
-				"other": "अन्य...",
-				"feedback_text": "आपकी प्रतिक्रिया हमें वॉलेट को बेहतर बनाने में मदद करती है।",
+				"title": "",
+				"description": "",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
+				"lost_identity_number": "",
+				"feedback_text": "",
 				"thanks_text": "धन्यवाद!",
+				"useful_links": "",
 				"identity_new_identity": "$oisy_short वॉलेट इंटरनेट आइडेंटिटी डोमेन को: <span class=\"font-bold\">identity.internetcomputer.org</span> पर स्विच करता है",
-				"identity_legacy_description": "परिणामस्वरूप, आपका इंटरनेट आइडेंटिटी नंबर स्वचालित रूप से दिखाई नहीं दे सकता है, और आपको इसे फिर से दर्ज करना पड़ सकता है।",
+				"switch_to_new_internet_identity": "",
+				"identity_legacy_identity_title": "",
+				"identity_legacy_identity_item_1": "",
+				"identity_legacy_identity_item_2": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"identity_new_identity_item_2": "",
+				"identity_new_identity_link": "",
 				"identity_legacy_sign_in": "विरासत इंटरनेट आइडेंटिटी डोमेन के साथ साइन इन करें",
 				"identity_learn_more": "$oisy_short डॉक्स पर अधिक जानें",
-				"other_title": "आपकी प्रतिक्रिया के लिए धन्यवाद!",
-				"other_description": "यहां $oisy_short और इंटरनेट आइडेंटिटी में <span class=\"font-bold\">सुरक्षा</span> और <span class=\"font-bold\">गोपनीयता</span> के बारे में कुछ उपयोगी संसाधन दिए गए हैं। हमें उम्मीद है कि वे आपको एक सूचित निर्णय लेने में मदद करेंगे:",
-				"other_introduction": "$oisy_short परिचय",
-				"other_docs": "$oisy_short डॉक्स: इंटरनेट आइडेंटिटी",
-				"other_private_key": "नेटिव एसेट्स के लिए निजी कुंजी को कौन नियंत्रित करता है?",
-				"other_asset_control": "$oisy_short वॉलेट में एसेट कंट्रोल, रिकवरी और गवर्नेंस",
+				"oisy_introduction": "",
+				"private_key": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "मदद चाहिए",
 				"sign_in": "साइन इन करने में?"
 			},
 			"alt": {
-				"internet_identity": "नई इंटरनेट आइडेंटिटी की छवि",
-				"identity_learn_more": "विरासत इंटरनेट आइडेंटिटी के बारे में अधिक जानें",
-				"other_introduction": "$oisy_short परिचय खोलें",
-				"other_docs": "$oisy_short डॉक्स खोलें: इंटरनेट आइडेंटिटी",
-				"other_private_key": "नेटिव एसेट्स के लिए निजी कुंजी को कौन नियंत्रित करता है, इसके बारे में मदद प्राप्त करें",
-				"other_asset_control": "$oisy_short वॉलेट में एसेट कंट्रोल, रिकवरी और गवर्नेंस के बारे में जानकारी प्राप्त करें",
-				"sign_in": "साइन इन करने के लिए कुछ मदद चाहिए?"
+				"internet_identity": "नई इंटरनेट आइडेंटिटी की छवि"
 			}
 		}
 	},
@@ -183,6 +187,7 @@
 			"title_part_1": "जारी रखने के लिए अनलॉक करें",
 			"title_part_2": "आपने पहले अपने वॉलेट को सुरक्षित रखने के लिए लॉक किया था। जहाँ से छोड़ा था वहीं से शुरू करें या लॉग आउट करें।",
 			"unlock": "अनलॉक करें",
+			"unlock_with_legacy_login": "",
 			"logout": "लॉगआउट करें",
 			"logout_clear_cash_message": "लॉग आउट करने से सभी कैश्ड डेटा साफ़ हो जाएगा",
 			"learn_more": "और जानें"
@@ -558,7 +563,7 @@
 			"incubated_with": "प्यार के साथ विकसित",
 			"by": "द्वारा",
 			"dfinity_foundation": "DFINITY फ़ाउंडेशन",
-			"copyright": "© 2025",
+			"copyright": "© 2026",
 			"ai_assistant_console_button": "$oisy_short सहायक"
 		},
 		"alt": {
@@ -628,11 +633,11 @@
 			"erc20_custom_tokens": "ERC20 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc721_custom_tokens": "ERC721 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc1155_custom_tokens": "ERC1155 कस्टम टोकन लोड करते समय त्रुटि।",
-			"erc20_user_tokens": "ERC20 उपयोगकर्ता टोकन लोड करते समय त्रुटि।",
 			"spl_custom_tokens": "SPL कस्टम टोकन लोड करते समय त्रुटि।",
-			"erc20_user_token": "ERC20 ट्विन टोकन सक्षम करते समय त्रुटि।",
+			"erc20_custom_token": "ERC20 ट्विन टोकन सक्षम करते समय त्रुटि।",
 			"icrc_custom_token": "ICRC कस्टम टोकन लोड करते समय त्रुटि।",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "आपके वॉलेट को कुछ प्रारंभिक डेटा की आवश्यकता है जो अभी तक लोड नहीं हुआ है। कृपया पुनः प्रयास करें।",
 			"allow_signing": "आपके वॉलेट को साइन करने के लिए सेट करते समय एक समस्या हुई। आपको साइन आउट कर दिया गया है। यदि समस्या बनी रहती है, तो सहायता से संपर्क करें।",
 			"waiting_for_allowed_cycles_aborted": "",
@@ -902,6 +907,20 @@
 			"fee_calc_unsupported_standard": ""
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "",
@@ -929,10 +948,14 @@
 			"tokens_available": "",
 			"select_token_to_pay": "",
 			"pay_at_successful": "",
-			"pay_at_failure": ""
+			"pay_at_failure": "",
+			"try_again": "",
+			"payment_confirmed": "",
+			"payment_failed": ""
 		},
 		"error": {
-			"code_link_is_not_valid": ""
+			"code_link_is_not_valid": "",
+			"data_is_incompleted": ""
 		}
 	},
 	"convert": {
@@ -1064,6 +1087,12 @@
 			"signing_transaction": "",
 			"paying": ""
 		},
+		"error": {
+			"data_is_incompleted": "",
+			"amount_does_not_match": "",
+			"recipient_address_is_not_valid": "",
+			"token_address_mismatch": ""
+		},
 		"alt": {
 			"pay": "",
 			"where_you_can_pay": ""
@@ -1144,6 +1173,7 @@
 				"unexpected_ledger": "लेज़र कैनिस्टर को सत्यापित करते समय कुछ गलत हो गया।",
 				"unexpected_index": "इंडेक्स कैनिस्टर को सत्यापित करते समय कुछ गलत हो गया।",
 				"unexpected_index_ledger": "इंडेक्स कैनिस्टर से संबंधित लेज़र आईडी लोड करते समय कुछ गलत हो गया।",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "लेज़र आईडी इंडेक्स कैनिस्टर से संबंधित नहीं है।",
 				"missing_ledger_id": "लेज़र आईडी गायब है। क्या आपने कोई मान प्रदान किया है?",
 				"missing_canister_id": "",
@@ -1281,7 +1311,8 @@
 			"learn_more": "",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"media_stored_at_different_location": ""
 		},
 		"alt": {
 			"placeholder_image": "अभी तक कोई NFTs नहीं",
@@ -1476,6 +1507,8 @@
 			"title": "लेनदेन",
 			"buy_or_receive": "अपना पहला लेनदेन करें, और अब टोकन खरीदें या प्राप्त करें!",
 			"transaction_history": "आपका लेनदेन इतिहास यहाँ दिखाई देगा",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।",
 			"transaction_history_unavailable": "लेनदेन इतिहास अनुपलब्ध",
 			"missing_index_canister_explanation": "अभी, $oisy_short आपके पिछले टोकन लेनदेन को नहीं दिखा सकता है क्योंकि जारीकर्ता ने अभी तक ट्रैकिंग सुविधा प्रदान नहीं की है। इसे जल्द ही जोड़ा जाना चाहिए। इस बीच, चिंता न करें - आप अभी भी अपने टोकन सामान्य रूप से भेज और प्राप्त कर सकते हैं।",
@@ -1774,6 +1807,7 @@
 			},
 			"title": "",
 			"instruction": "",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

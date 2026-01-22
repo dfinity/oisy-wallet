@@ -43,10 +43,11 @@ import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
-import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft, mockValidExtNft } from '$tests/mocks/nfts.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
@@ -460,13 +461,20 @@ describe('user-snapshot.services', () => {
 				collection: mockValidErc1155Token
 			};
 
-			const mockNfts = [mockNft1, mockNft2, mockNft3];
+			const mockNft4: Nft = {
+				...mockValidExtNft,
+				id: parseNftId('some-canister-id::12345'),
+				collection: { ...mockValidExtV2Token, address: mockValidExtV2Token.canisterId }
+			};
+
+			const mockNfts = [mockNft1, mockNft2, mockNft3, mockNft4];
 
 			nftStore.addAll(mockNfts);
 
 			const mockTokens = [
 				mockValidErc721Token,
-				{ ...mockValidErc1155Token, section: CustomTokenSection.HIDDEN }
+				{ ...mockValidErc1155Token, section: CustomTokenSection.HIDDEN },
+				{ ...mockValidExtV2Token, section: CustomTokenSection.SPAM }
 			];
 
 			const expectedAccounts: { Any: AccountSnapshot_Any }[] = [
@@ -501,6 +509,24 @@ describe('user-snapshot.services', () => {
 						account: mockEthAddress,
 						token_address: {
 							token_symbol: `nft#${mockValidErc1155Token.name}#${mockValidErc1155Token.address}#${CustomTokenSection.HIDDEN}`,
+							wraps: toNullable()
+						},
+						last_transactions: []
+					}
+				},
+				{
+					Any: {
+						decimals: mockValidExtV2Token.decimals,
+						approx_usd_per_token: 0,
+						amount: 1n,
+						timestamp: nowNanoseconds,
+						network: {
+							testnet_for: toNullable(),
+							network_id: `${mockValidExtV2Token.network.id.description}`
+						},
+						account: mockPrincipalText,
+						token_address: {
+							token_symbol: `nft#${mockValidExtV2Token.name}#${mockValidExtV2Token.canisterId}#${CustomTokenSection.SPAM}`,
 							wraps: toNullable()
 						},
 						last_transactions: []

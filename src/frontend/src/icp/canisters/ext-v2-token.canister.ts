@@ -1,6 +1,8 @@
 import type {
 	Balance,
 	_SERVICE as ExtV2TokenService,
+	Metadata,
+	MetadataLegacy,
 	TokenIdentifier,
 	TokenIndex,
 	Transaction,
@@ -16,7 +18,14 @@ import { mapExtTokensListing, toUser } from '$icp/utils/ext-v2-token.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import {
+	Canister,
+	createServices,
+	isNullish,
+	nonNullish,
+	toNullable,
+	type QueryParams
+} from '@dfinity/utils';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { Principal } from '@icp-sdk/core/principal';
 
@@ -114,6 +123,38 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	};
 
 	/**
+	 * Get the list of collection's tokens owned by a specific user (legacy method).
+	 *
+	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#tokens
+	 *
+	 * @param {Object} params - The parameters for fetching the tokens.
+	 * @param {Principal} params.owner - The ICRC principal of the user.
+	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
+	 * @returns {Promise<TokenIndex[]>} The list of token indices owned by the user.
+	 * @throws CanisterInternalError if the token identifier is invalid.
+	 */
+	getTokensByOwnerLegacy = async ({
+		certified,
+		owner
+	}: IcrcAccount & QueryParams): Promise<TokenIndex[]> => {
+		const { tokens } = this.caller({ certified });
+
+		const response = await tokens(getAccountIdentifier(owner).toHex());
+
+		if ('ok' in response) {
+			return Array.from(response.ok);
+		}
+
+		// If the owner has no tokens in the collection, apparently it is returned as a generic `Other` error.
+		// Since we don't have a resilient way of distinguishing this from other errors, we manually compare the error message (case-insensitive).
+		if ('Other' in response.err && response.err.Other.toLowerCase() === 'no tokens') {
+			return [];
+		}
+
+		throw mapExtV2TokenCommonError(response.err);
+	};
+
+	/**
 	 * Transfer NFT of a collection from one user to another.
 	 *
 	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
@@ -128,6 +169,53 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 	 * @throws CanisterInternalError if the token identifier is invalid or if the transfer fails.
 	 */
 	transfer = async ({
+		certified,
+		from,
+		to,
+		tokenIdentifier: token,
+		amount
+	}: {
+		from: Principal;
+		to: Principal;
+		tokenIdentifier: TokenIdentifier;
+		amount: bigint;
+	} & QueryParams): Promise<Balance> => {
+		const { transfer } = this.caller({ certified });
+
+		const args: TransferRequest = {
+			from: toUser(from),
+			to: toUser(to),
+			token,
+			amount,
+			notify: false,
+			memo: new Uint8Array(),
+			subaccount: toNullable()
+		};
+
+		const response = await transfer(args);
+
+		if ('ok' in response) {
+			return response.ok;
+		}
+
+		throw mapExtV2TokenTransferError(response);
+	};
+
+	/**
+	 * Transfer NFT of a collection from one user to another (alias method).
+	 *
+	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#transfer--ext_transfer
+	 *
+	 * @param {Object} params - The parameters for the transfer.
+	 * @param {Principal} params.from - The ICRC principal of the sender.
+	 * @param {Principal} params.to - The ICRC principal of the receiver.
+	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
+	 * @param {bigint} params.amount - The amount to transfer.
+	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
+	 * @returns {Promise<Balance>} The new balance of the sender after the transfer.
+	 * @throws CanisterInternalError if the token identifier is invalid or if the transfer fails.
+	 */
+	transferAlias = async ({
 		certified,
 		from,
 		to,
@@ -158,5 +246,65 @@ export class ExtV2TokenCanister extends Canister<ExtV2TokenService> {
 		}
 
 		throw mapExtV2TokenTransferError(response);
+	};
+
+	/**
+	 * Returns the metadata of a specific token of the collection.
+	 *
+	 * It first tries to use the new `ext_metadata` endpoint, and if it fails,
+	 * it falls back to the legacy `metadata` endpoint for compatibility with older EXT canisters.
+	 * When both methods are not supported, it returns `undefined`.
+	 *
+	 * @link https://github.com/Toniq-Labs/ext-v2-token/blob/main/API-REFERENCE.md#metadata
+	 *
+	 * @param {Object} params - The parameters for fetching the metadata.
+	 * @param {TokenIdentifier} params.tokenIdentifier - The token identifier of the NFT as string.
+	 * @param {boolean} [params.certified=true] - Whether the data should be certified.
+	 * @returns {Promise<MetadataLegacy | Metadata | undefined>} The metadata of the specified token or `undefined` if it does not exist.
+	 * @throws CanisterInternalError if the token identifier is invalid.
+	 */
+	metadata = async ({
+		tokenIdentifier: token,
+		certified
+	}: { tokenIdentifier: TokenIdentifier } & QueryParams): Promise<
+		MetadataLegacy | Metadata | undefined
+	> => {
+		const { metadata, ext_metadata } = this.caller({ certified });
+
+		const getMetadata = async () => {
+			try {
+				return await ext_metadata(token);
+			} catch (_: unknown) {
+				// Some legacy EXT canisters still do not support the new metadata endpoint.
+			}
+		};
+
+		const getLegacyMetadata = async () => {
+			try {
+				return await metadata(token);
+			} catch (_: unknown) {
+				// Some new EXT canisters still do not support the legacy metadata endpoint.
+			}
+		};
+
+		const response = await getMetadata();
+
+		if (nonNullish(response) && 'ok' in response) {
+			return response.ok;
+		}
+
+		const legacyResponse = await getLegacyMetadata();
+
+		if (nonNullish(legacyResponse) && 'ok' in legacyResponse) {
+			return legacyResponse.ok;
+		}
+
+		const error = response?.err ?? legacyResponse?.err;
+
+		if (isNullish(error)) {
+			return;
+		}
+
+		throw mapExtV2TokenCommonError(error);
 	};
 }

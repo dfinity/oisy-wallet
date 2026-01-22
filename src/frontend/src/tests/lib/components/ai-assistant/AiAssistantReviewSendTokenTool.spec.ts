@@ -1,12 +1,29 @@
+import * as btcUtxosService from '$btc/services/btc-utxos.service';
+import {
+	ALL_UTXOS_CONTEXT_KEY,
+	initAllUtxosStore,
+	type AllUtxosContext
+} from '$btc/stores/all-utxos.store';
+import {
+	FEE_RATE_PERCENTILES_CONTEXT_KEY,
+	initFeeRatePercentilesStore,
+	type FeeRatePercentilesContext
+} from '$btc/stores/fee-rate-percentiles.store';
+import {
+	UTXOS_FEE_CONTEXT_KEY,
+	initUtxosFeeStore,
+	type UtxosFeeContext
+} from '$btc/stores/utxos-fee.store';
 import { ARBITRUM_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import * as bitcoinApi from '$icp/api/bitcoin.api';
 import AiAssistantReviewSendTokenTool from '$lib/components/ai-assistant/AiAssistantReviewSendTokenTool.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { AI_ASSISTANT_SEND_TOKENS_BUTTON } from '$lib/constants/test-ids.constants';
-import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
 import * as solanaApi from '$sol/api/solana.api';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -14,18 +31,32 @@ import { render } from '@testing-library/svelte';
 
 describe('AiAssistantReviewSendTokenTool', () => {
 	const mockContext = (token: Token) =>
-		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token })]]);
+		new Map<symbol, SendContext | UtxosFeeContext | AllUtxosContext | FeeRatePercentilesContext>([
+			[SEND_CONTEXT_KEY, initSendContext({ token })],
+			[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }],
+			[ALL_UTXOS_CONTEXT_KEY, { store: initAllUtxosStore() }],
+			[FEE_RATE_PERCENTILES_CONTEXT_KEY, { store: initFeeRatePercentilesStore() }]
+		]);
 
 	const props = {
 		amount: 1,
 		address: mockEthAddress,
-		sendEnabled: true
+		sendEnabled: true,
+		sendCompleted: false,
+		id: 'mock-id'
 	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(ZERO);
+		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
+			utxos: [],
+			tip_block_hash: new Uint8Array(),
+			tip_height: 100,
+			next_page: []
+		});
+		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
 	});
 
 	it('renders correctly for a BTC token', () => {

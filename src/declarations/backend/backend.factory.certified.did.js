@@ -413,7 +413,9 @@ export const idlFactory = ({ IDL }) => {
 		Erc721: ErcToken,
 		SplDevnet: SplToken,
 		SplMainnet: SplToken,
-		Erc1155: ErcToken
+		IcPunks: ExtV2Token,
+		Erc1155: ErcToken,
+		Dip721: ExtV2Token
 	});
 	const TokenSection = IDL.Variant({ Spam: IDL.Null, Hidden: IDL.Null });
 	const CustomToken = IDL.Record({
@@ -422,18 +424,6 @@ export const idlFactory = ({ IDL }) => {
 		section: IDL.Opt(TokenSection),
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
-	});
-	const UserToken = IDL.Record({
-		decimals: IDL.Opt(IDL.Nat8),
-		version: IDL.Opt(IDL.Nat64),
-		enabled: IDL.Opt(IDL.Bool),
-		chain_id: IDL.Nat64,
-		contract_address: IDL.Text,
-		symbol: IDL.Opt(IDL.Text)
-	});
-	const UserTokenId = IDL.Record({
-		chain_id: IDL.Nat64,
-		contract_address: IDL.Text
 	});
 	const SetShowTestnetsRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
@@ -530,14 +520,10 @@ export const idlFactory = ({ IDL }) => {
 		has_user_profile: IDL.Func([], [HasUserProfileResponse]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)]),
-		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)]),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
-		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
-		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
-		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats]),
 		top_up_cycles_ledger: IDL.Func(
 			[IDL.Opt(TopUpCyclesLedgerRequest)],

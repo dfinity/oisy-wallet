@@ -4,7 +4,7 @@ import { isIndexCanisterAwake } from '$icp/services/index-canister.services';
 import { ZERO } from '$lib/constants/app.constants';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { IcrcIndexNgDid, IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
+import type { IcrcIndexDid, IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
 
 vi.mock('$icp/api/icrc-index-ng.api', () => ({
 	getStatus: vi.fn()
@@ -30,7 +30,7 @@ describe('index-canister.services', () => {
 			archived_blocks: []
 		};
 
-		const mockIndexCanisterStatus: IcrcIndexNgDid.Status = { num_blocks_synced: mockTotalBlocks };
+		const mockIndexCanisterStatus: IcrcIndexDid.Status = { num_blocks_synced: mockTotalBlocks };
 
 		beforeEach(() => {
 			vi.clearAllMocks();

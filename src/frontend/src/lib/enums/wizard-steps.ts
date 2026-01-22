@@ -33,8 +33,8 @@ export enum WizardStepsSwap {
 
 export enum WizardStepsAuthHelp {
 	OVERVIEW = 'Overview',
-	HELP_IDENTITY = 'Help Identity',
-	HELP_OTHER = 'Help Other'
+	HELP_LEGACY_IDENTITY = 'Help Legacy Identity',
+	HELP_NEW_IDENTITY = 'Help New Identity'
 }
 
 export enum WizardStepsHowToConvert {
@@ -105,5 +105,7 @@ export enum WizardStepsScanner {
 	SCAN = 'Scan',
 	PAY = 'Pay',
 	TOKENS_LIST = 'Tokens List',
-	PAYING = 'Paying'
+	PAYING = 'Paying',
+	PAYMENT_CONFIRMED = 'Payment Confirmed',
+	PAYMENT_FAILED = 'Payment Failed'
 }
