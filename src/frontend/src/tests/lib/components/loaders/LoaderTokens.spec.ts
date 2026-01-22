@@ -11,6 +11,7 @@ import { loadIcPunksTokens } from '$icp/services/icpunks.services';
 import { loadIcrcTokens } from '$icp/services/icrc.services';
 import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 import * as appConstants from '$lib/constants/app.constants';
+import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	ethAddressStore,
 	solAddressDevnetStore,
@@ -23,6 +24,7 @@ import { loadSplTokens } from '$sol/services/spl.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
@@ -90,6 +92,9 @@ describe('LoaderTokens', () => {
 		vi.clearAllMocks();
 
 		mockAuthStore();
+
+		// Set the route to the NFTs page to trigger the NFTs interval loaders
+		mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Nfts}` });
 
 		setupTestnetsStore('disabled');
 		setupUserNetworksStore('allDisabled');

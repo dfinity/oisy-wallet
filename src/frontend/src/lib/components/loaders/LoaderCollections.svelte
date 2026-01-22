@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
+	import { page } from '$app/state';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
@@ -10,7 +11,10 @@
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { getTokensByOwner } from '$icp/api/ext-v2-token.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
-	import { COLLECTION_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+	import {
+		COLLECTION_TIMER_INTERVAL_MILLIS,
+		MILLISECONDS_IN_DAY
+	} from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
@@ -21,6 +25,7 @@
 	import type { SaveCustomExtVariant } from '$lib/types/custom-token';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
+	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
 
 	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
 		if (isNullish($ethAddress)) {
@@ -139,8 +144,16 @@
 
 		event?.detail.callback?.();
 	};
+
+	// If we are not in NFTs page or Activity page, there is no need to reload collections frequently.
+	// In fact, we can disable it, giving it a very high interval.
+	let isNftsPage = $derived(isRouteNfts(page));
+	let isActivityPage = $derived(isRouteActivity(page));
+	let interval = $derived(
+		isNftsPage || isActivityPage ? COLLECTION_TIMER_INTERVAL_MILLIS : MILLISECONDS_IN_DAY
+	);
 </script>
 
 <svelte:window onoisyReloadCollections={reload} />
 
-<IntervalLoader interval={COLLECTION_TIMER_INTERVAL_MILLIS} {onLoad} />
+<IntervalLoader {interval} {onLoad} />
