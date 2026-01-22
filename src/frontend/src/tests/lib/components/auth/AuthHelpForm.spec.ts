@@ -1,9 +1,11 @@
 import AuthHelpForm from '$lib/components/auth/AuthHelpForm.svelte';
 import {
 	HELP_AUTH_ASSET_CONTROL_LINK,
+	HELP_AUTH_CREATING_A_WALLET_LINK,
 	HELP_AUTH_IMAGE_BANNER,
 	HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK,
 	HELP_AUTH_INTRODUCTION_LINK,
+	HELP_AUTH_LOGGING_INTO_OISY_LINK,
 	HELP_AUTH_LOST_IDENTITY_BUTTON,
 	HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,
 	HELP_AUTH_PRIVATE_KEY_LINK,
@@ -27,6 +29,8 @@ describe('AuthHelpForm', () => {
 	const privateKeyLinkSelector = `a[data-tid="${HELP_AUTH_PRIVATE_KEY_LINK}"]`;
 	const assetControlLinkSelector = `a[data-tid="${HELP_AUTH_ASSET_CONTROL_LINK}"]`;
 	const internetIdentityHelpCenterLinkSelector = `a[data-tid="${HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK}"]`;
+	const loggingIntoOisyLinkSelector = `a[data-tid="${HELP_AUTH_LOGGING_INTO_OISY_LINK}"]`;
+	const createingAWalletLinkSelector = `a[data-tid="${HELP_AUTH_CREATING_A_WALLET_LINK}"]`;
 
 	it('should render auth help form content', () => {
 		const { container, getByText } = render(AuthHelpForm, {
@@ -75,6 +79,16 @@ describe('AuthHelpForm', () => {
 			container.querySelector(introductionLinkSelector);
 
 		expect(introductionLink).toBeInTheDocument();
+
+		const loggingIntoOisyLink: HTMLAnchorElement | null =
+			container.querySelector(loggingIntoOisyLinkSelector);
+
+		expect(loggingIntoOisyLink).toBeInTheDocument();
+
+		const createingAWalletLink: HTMLAnchorElement | null =
+			container.querySelector(createingAWalletLinkSelector);
+
+		expect(createingAWalletLinkSelector).toBeInTheDocument();
 
 		const privateKeyLink: HTMLAnchorElement | null =
 			container.querySelector(privateKeyLinkSelector);
