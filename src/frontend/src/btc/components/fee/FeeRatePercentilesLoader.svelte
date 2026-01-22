@@ -1,11 +1,8 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { getContext, type Snippet, untrack } from 'svelte';
+	import { type Snippet, untrack } from 'svelte';
 	import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
-	import {
-		FEE_RATE_PERCENTILES_CONTEXT_KEY,
-		type FeeRatePercentilesContext
-	} from '$btc/stores/fee-rate-percentiles.store';
+	import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { NetworkId } from '$lib/types/network';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
@@ -16,8 +13,6 @@
 	}
 
 	let { networkId, children }: Props = $props();
-
-	const { store } = getContext<FeeRatePercentilesContext>(FEE_RATE_PERCENTILES_CONTEXT_KEY);
 
 	const loadFeeRateFromPercentiles = async () => {
 		if (isNullish(networkId)) {
@@ -35,13 +30,16 @@
 			network
 		});
 
-		store.setFeeRateFromPercentiles({ feeRateFromPercentiles });
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles });
 	};
 
 	$effect(() => {
 		[networkId];
 
-		untrack(() => loadFeeRateFromPercentiles());
+		untrack(
+			() =>
+				isNullish($feeRatePercentilesStore?.feeRateFromPercentiles) && loadFeeRateFromPercentiles()
+		);
 	});
 </script>
 

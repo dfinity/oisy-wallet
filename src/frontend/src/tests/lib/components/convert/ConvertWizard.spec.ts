@@ -1,14 +1,8 @@
+import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
-import {
-	ALL_UTXOS_CONTEXT_KEY,
-	initAllUtxosStore,
-	type AllUtxosContext
-} from '$btc/stores/all-utxos.store';
-import {
-	FEE_RATE_PERCENTILES_CONTEXT_KEY,
-	initFeeRatePercentilesStore,
-	type FeeRatePercentilesContext
-} from '$btc/stores/fee-rate-percentiles.store';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
 	UTXOS_FEE_CONTEXT_KEY,
 	initUtxosFeeStore,
@@ -82,16 +76,9 @@ describe('ConvertWizard', () => {
 	const mockContext = (sourceToken: Token) =>
 		new Map<
 			symbol,
-			| UtxosFeeContext
-			| AllUtxosContext
-			| FeeRatePercentilesContext
-			| EthFeeContext
-			| ConvertContext
-			| TokenActionValidationErrorsContext
+			UtxosFeeContext | EthFeeContext | ConvertContext | TokenActionValidationErrorsContext
 		>([
 			[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }],
-			[ALL_UTXOS_CONTEXT_KEY, { store: initAllUtxosStore() }],
-			[FEE_RATE_PERCENTILES_CONTEXT_KEY, { store: initFeeRatePercentilesStore() }],
 			[
 				ETH_FEE_CONTEXT_KEY,
 				initEthFeeContext({
@@ -109,6 +96,10 @@ describe('ConvertWizard', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		allUtxosStore.reset();
+		feeRatePercentilesStore.reset();
+		btcPendingSentTransactionsStore.reset();
+
 		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
 			utxos: [],
 			tip_block_hash: new Uint8Array(),
@@ -116,6 +107,10 @@ describe('ConvertWizard', () => {
 			next_page: []
 		});
 		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
+		vi.spyOn(
+			btcPendingSentTransactionsServices,
+			'loadBtcPendingSentTransactions'
+		).mockResolvedValue({ success: true });
 
 		mockPage.reset();
 	});
