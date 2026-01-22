@@ -5,6 +5,7 @@ import {
 	HELP_AUTH_IMAGE_BANNER,
 	HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK,
 	HELP_AUTH_INTRODUCTION_LINK,
+	HELP_AUTH_ISSUE_WITH_LOGIN_PAGE_BUTTON,
 	HELP_AUTH_LOGGING_INTO_OISY_LINK,
 	HELP_AUTH_LOST_IDENTITY_BUTTON,
 	HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,
@@ -23,6 +24,7 @@ describe('AuthHelpForm', () => {
 	const imageBannerSelector = `img[data-tid="${HELP_AUTH_IMAGE_BANNER}"]`;
 	const lostIdentityButtonSelector = `button[data-tid="${HELP_AUTH_LOST_IDENTITY_BUTTON}"]`;
 	const newIdentityVersionButtonSelector = `button[data-tid="${HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON}"]`;
+	const issueWithLoginPageButtonSelector = `button[data-tid="${HELP_AUTH_ISSUE_WITH_LOGIN_PAGE_BUTTON}"]`;
 	const useIdentityNumberButtonSelector = `button[data-tid="${HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON}"]`;
 	const switchToNewInternetIdentityLinkSelector = `a[data-tid="${HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK}"]`;
 	const introductionLinkSelector = `a[data-tid="${HELP_AUTH_INTRODUCTION_LINK}"]`;
@@ -46,12 +48,12 @@ describe('AuthHelpForm', () => {
 
 		expect(getByText(get(i18n).auth.help.text.description)).toBeInTheDocument();
 
-		const newIdentityVersionButton: HTMLButtonElement | null = container.querySelector(
-			newIdentityVersionButtonSelector
+		const issueWithLoginPageButton: HTMLButtonElement | null = container.querySelector(
+			issueWithLoginPageButtonSelector
 		);
 
-		expect(newIdentityVersionButton).toBeInTheDocument();
-		expect(getByText(get(i18n).auth.help.text.login_page_looks_different)).toBeInTheDocument();
+		expect(issueWithLoginPageButton).toBeInTheDocument();
+		expect(getByText(get(i18n).auth.help.text.issue_with_logon_page)).toBeInTheDocument();
 
 		const useIdentityNumberButton: HTMLButtonElement | null = container.querySelector(
 			useIdentityNumberButtonSelector
