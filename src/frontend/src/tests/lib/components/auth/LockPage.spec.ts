@@ -1,4 +1,3 @@
-import * as authEnv from '$env/auth.env';
 import LockPage from '$lib/components/auth/LockPage.svelte';
 import * as authServices from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -38,24 +37,7 @@ describe('LockPage', () => {
 		expect(getByText(get(i18n).lock.text.learn_more)).toBeInTheDocument();
 	});
 
-	it('should call signIn and unlock on unlock button click', async () => {
-		const signInMock = vi.spyOn(authServices, 'signIn').mockResolvedValue({ success: 'ok' });
-
-		const { getByText } = render(LockPage);
-		const unlockButton = getByText(get(i18n).lock.text.unlock);
-
-		await fireEvent.click(unlockButton);
-
-		expect(signInMock).toHaveBeenCalledWith({
-			domain: InternetIdentityDomain.VERSION_1_0
-		});
-		expect(authLocked.unlock).toHaveBeenCalledWith({
-			source: 'login from lock page'
-		});
-	});
-
-	it('should call signIn with domain param if env var is set to 2.0', async () => {
-		vi.spyOn(authEnv, 'PRIMARY_INTERNET_IDENTITY_VERSION', 'get').mockImplementation(() => '2.0');
+	it('should call signIn with domain param', async () => {
 		const signInMock = vi.spyOn(authServices, 'signIn').mockResolvedValue({ success: 'ok' });
 
 		const { getByText } = render(LockPage);

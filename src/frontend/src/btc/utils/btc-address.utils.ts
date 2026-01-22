@@ -1,9 +1,10 @@
 import type { BtcAddress } from '$declarations/backend/backend.did';
-import { assertNever } from '@dfinity/utils';
+import { assertNever, isNullish } from '@dfinity/utils';
 import {
 	BtcAddressType,
 	parseBtcAddress as parseBtcAddressCkbtc,
-	type BtcAddressInfo
+	type BtcAddressInfo,
+	type BtcAddress as BtcAddressTypeObjType
 } from '@icp-sdk/canisters/ckbtc';
 
 const createBtcAddressFromAddressInfo = ({ info }: { info: BtcAddressInfo }): BtcAddress => {
@@ -52,3 +53,19 @@ export const getBtcAddressString = (address: BtcAddress): string => {
 
 	assertNever(address, `Unexpected BtcAddress: ${address}`);
 };
+
+export const isBtcAddress = (address: BtcAddressTypeObjType | undefined): boolean => {
+	if (isNullish(address)) {
+		return false;
+	}
+
+	try {
+		parseBtcAddressCkbtc(address);
+		return true;
+	} catch (_: unknown) {
+		return false;
+	}
+};
+
+export const invalidBtcAddress = (address: BtcAddressTypeObjType | undefined): boolean =>
+	!isBtcAddress(address);

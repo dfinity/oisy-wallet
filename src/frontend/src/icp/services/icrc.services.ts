@@ -41,8 +41,7 @@ import {
 	isNullish,
 	nonNullish,
 	queryAndUpdate,
-	type QueryAndUpdateRequestParams,
-	type QueryAndUpdateStrategy
+	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -89,11 +88,9 @@ export const loadCustomTokens = ({
 	});
 
 const loadDefaultIcrc = ({
-	data: { ledgerCanisterId, ...data },
-	strategy
+	data: { ledgerCanisterId, ...data }
 }: {
 	data: IcInterface;
-	strategy?: QueryAndUpdateStrategy;
 }): Promise<void> =>
 	queryAndUpdate<IcrcLoadData>({
 		request: (params) =>
@@ -107,7 +104,6 @@ const loadDefaultIcrc = ({
 				metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
 			});
 		},
-		strategy,
 		identity: new AnonymousIdentity()
 	});
 
@@ -173,10 +169,8 @@ const loadCustomIcrcTokensData = async ({
 		...DIP20_BUILTIN_TOKENS_INDEXED
 	};
 
-	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
-		custom_token: CustomToken,
-		index: number
+		custom_token: CustomToken
 	): Promise<IcrcCustomToken | undefined> => {
 		const { enabled, version: v, token } = custom_token;
 
@@ -205,7 +199,6 @@ const loadCustomIcrcTokensData = async ({
 			mintingAccount: await getMintingAccount(serviceParams),
 			ledgerCanisterId: ledgerCanisterIdText,
 			...(nonNullish(indexCanisterId) && { indexCanisterId: indexCanisterId.toText() }),
-			position: ICRC_TOKENS.length + 1 + index,
 			category: 'custom',
 			icrcCustomTokens: indexedIcrcCustomTokens
 		};
@@ -283,12 +276,15 @@ export const loadDisabledIcrcTokensBalances = async ({
 	identity: Identity;
 	disabledIcrcTokens: IcToken[];
 }): Promise<void> => {
+	const certified = true;
+
 	const results = await Promise.allSettled(
 		disabledIcrcTokens.map(async ({ ledgerCanisterId, id }) => {
 			const icrcTokenBalance = await balance({
 				identity,
 				owner: identity.getPrincipal(),
-				ledgerCanisterId
+				ledgerCanisterId,
+				certified
 			});
 
 			return { id, icrcTokenBalance };
@@ -303,7 +299,7 @@ export const loadDisabledIcrcTokensBalances = async ({
 				id,
 				data: {
 					data: icrcTokenBalance,
-					certified: true
+					certified
 				}
 			});
 		}

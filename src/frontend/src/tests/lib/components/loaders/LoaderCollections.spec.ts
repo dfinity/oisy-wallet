@@ -5,10 +5,10 @@ import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import * as extTokenApi from '$icp/api/ext-v2-token.api';
-import { listCustomTokens } from '$lib/api/backend.api';
 import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 import * as saveCustomTokens from '$lib/services/save-custom-tokens.services';
 import { ethAddressStore } from '$lib/stores/address.store';
+import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { emit } from '$lib/utils/events.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -17,10 +17,6 @@ import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
-
-vi.mock('$lib/api/backend.api', () => ({
-	listCustomTokens: vi.fn()
-}));
 
 describe('LoaderCollections', () => {
 	let alchemyProvidersSpy: MockInstance;
@@ -51,7 +47,7 @@ describe('LoaderCollections', () => {
 
 		mockGetTokensForOwner.mockResolvedValue([]);
 
-		vi.mocked(listCustomTokens).mockResolvedValue([]);
+		backendCustomTokens.set([]);
 	});
 
 	it('should add new ERC collections', async () => {
@@ -201,10 +197,7 @@ describe('LoaderCollections', () => {
 			allow_external_content_source: toNullable(true)
 		}));
 
-		vi.mocked(listCustomTokens).mockResolvedValue([
-			...existingErc721CustomTokens,
-			...existingErc1155CustomTokens
-		]);
+		backendCustomTokens.set([...existingErc721CustomTokens, ...existingErc1155CustomTokens]);
 
 		mockGetTokensForOwner.mockResolvedValue([
 			{ address: mockEthAddress, isSpam: false, standard: 'erc721' },
@@ -233,7 +226,7 @@ describe('LoaderCollections', () => {
 			allow_external_content_source: toNullable(false)
 		};
 
-		vi.mocked(listCustomTokens).mockResolvedValue([existingExtCustomToken]);
+		backendCustomTokens.set([existingExtCustomToken]);
 
 		render(LoaderCollections);
 

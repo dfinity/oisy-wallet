@@ -18,7 +18,7 @@
 		swapWithWithdrawing = false
 	}: Props = $props();
 
-	let steps = $state<ProgressSteps>([
+	let steps = $derived<ProgressSteps>([
 		{
 			step: ProgressStepsSwap.INITIALIZATION,
 			text: $i18n.swap.text.initializing,

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { PRIMARY_INTERNET_IDENTITY_VERSION } from '$env/auth.env';
 	import helpAuthIdentityBanner from '$lib/assets/help-auth-identity-banner.webp';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -35,8 +34,6 @@
 	let { onOpenLegacyIdentityHelp, onOpenNewIdentityHelp }: Props = $props();
 
 	const trackingEventKey = 'main_page_button';
-
-	let isPrimaryIdentityVersion2 = $derived(PRIMARY_INTERNET_IDENTITY_VERSION === '2.0');
 </script>
 
 <div class="grid gap-6">
@@ -50,44 +47,42 @@
 
 	<div>
 		<div class="grid gap-2">
-			{#if isPrimaryIdentityVersion2}
-				<Button
-					ariaLabel={$i18n.auth.help.text.login_page_looks_different}
-					colorStyle="secondary-light"
-					fullWidth
-					onclick={() => {
-						trackEvent({
-							name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-							metadata: { event_key: trackingEventKey, event_value: 'login_page_looks_different' }
-						});
-						onOpenNewIdentityHelp();
-					}}
-					testId={HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON}
-					type="button"
-				>
-					{$i18n.auth.help.text.login_page_looks_different}
-				</Button>
+			<Button
+				ariaLabel={$i18n.auth.help.text.login_page_looks_different}
+				colorStyle="secondary-light"
+				fullWidth
+				onclick={() => {
+					trackEvent({
+						name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+						metadata: { event_key: trackingEventKey, event_value: 'login_page_looks_different' }
+					});
+					onOpenNewIdentityHelp();
+				}}
+				testId={HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON}
+				type="button"
+			>
+				{$i18n.auth.help.text.login_page_looks_different}
+			</Button>
 
-				<Button
-					ariaLabel={$i18n.auth.help.text.use_identity_number}
-					colorStyle="secondary-light"
-					fullWidth
-					onclick={() => {
-						trackEvent({
-							name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-							metadata: {
-								event_key: trackingEventKey,
-								event_value: 'use_identity_number'
-							}
-						});
-						onOpenNewIdentityHelp();
-					}}
-					testId={HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON}
-					type="button"
-				>
-					{$i18n.auth.help.text.use_identity_number}
-				</Button>
-			{/if}
+			<Button
+				ariaLabel={$i18n.auth.help.text.use_identity_number}
+				colorStyle="secondary-light"
+				fullWidth
+				onclick={() => {
+					trackEvent({
+						name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+						metadata: {
+							event_key: trackingEventKey,
+							event_value: 'use_identity_number'
+						}
+					});
+					onOpenNewIdentityHelp();
+				}}
+				testId={HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON}
+				type="button"
+			>
+				{$i18n.auth.help.text.use_identity_number}
+			</Button>
 
 			<Button
 				ariaLabel={$i18n.auth.help.text.lost_identity_number}
