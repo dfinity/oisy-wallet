@@ -217,10 +217,7 @@ const clearIdbStoreList = [
 	clearIdbIcTransactions,
 	clearIdbSolTransactions,
 	// Balances
-	clearIdbBalances,
-	// Delete all possible OISY-related indexedDB
-	// We should clear them first, since the deletion may not be supported in the current browser
-	deleteIdbAllOisyRelated
+	clearIdbBalances
 ];
 
 // eslint-disable-next-line require-await
@@ -257,6 +254,10 @@ const logout = async ({
 
 	if (clearIdbStorages) {
 		await Promise.all(clearIdbStoreList.map(clearIdbStore));
+
+		// Delete all possible OISY-related indexedDB
+		// We should clear them first, since the deletion may not be supported in the current browser
+		await clearIdbStore(deleteIdbAllOisyRelated);
 	}
 
 	try {
