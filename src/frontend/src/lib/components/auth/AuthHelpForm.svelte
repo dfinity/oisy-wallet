@@ -54,7 +54,7 @@
 					});
 					onOpenNewIdentityHelp();
 				}}
-				testId={HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON}
+				testId={HELP_AUTH_ISSUE_WITH_LOGIN_PAGE_BUTTON}
 				type="button"
 			>
 				{$i18n.auth.help.text.issue_with_login_page}
