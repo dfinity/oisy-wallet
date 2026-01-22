@@ -136,7 +136,6 @@
 	};
 
 	const onLoad = async () => {
-		console.log('load collections')
 		await load({ extTokens: false });
 	};
 
