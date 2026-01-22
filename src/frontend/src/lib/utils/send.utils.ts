@@ -1,5 +1,5 @@
+import { invalidBtcAddress } from '$btc/utils/btc-address.utils';
 import type { NetworkId } from '$lib/types/network';
-import { invalidBtcAddress } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 import { BtcNetwork } from '@icp-sdk/canisters/ckbtc';

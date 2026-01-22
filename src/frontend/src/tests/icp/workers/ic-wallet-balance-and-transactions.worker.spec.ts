@@ -44,6 +44,15 @@ vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
 	};
 });
 
+vi.mock(import('$lib/services/query.services'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...actual,
+		createQueryAndUpdateWithWarmup: () => actual.createQueryAndUpdateWithWarmup(0)
+	};
+});
+
 describe('ic-wallet-balance-and-transactions.worker', () => {
 	let spyGetBalance: MockInstance;
 	let spyGetTransactions: MockInstance;

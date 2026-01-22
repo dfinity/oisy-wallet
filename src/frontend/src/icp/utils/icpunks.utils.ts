@@ -4,7 +4,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
 import type { IcPunksToken, IcPunksTokenWithoutId } from '$icp/types/icpunks-token';
 import type { Token } from '$lib/types/token';
-import { isTokenToggleable } from '$lib/utils/token.utils';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 
 export const isTokenIcPunks = (token: Partial<IcToken>): token is IcPunksToken =>
 	token.standard?.code === 'icpunks';

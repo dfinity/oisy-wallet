@@ -2,7 +2,6 @@ import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/netwo
 import { showZeroBalances } from '$lib/derived/settings.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
-import { randomWait } from '$lib/utils/time.utils';
 import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
 import TokensDisplayHandlerTest from '$tests/lib/components/tokens/TokensDisplayHandlerTest.svelte';
 import {
@@ -12,7 +11,7 @@ import {
 } from '$tests/mocks/user-profile.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
-import { fireEvent, render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
@@ -32,54 +31,28 @@ vi.mock(import('$lib/utils/token-group.utils'), async (importOriginal) => {
 describe('TokensDisplayHandler', () => {
 	const childTestId = 'child-test-id';
 	const tokenCountTestId = 'token-count-test-id';
-	const buttonTestId = 'button-test-id';
 
 	const props = {
 		childTestId,
-		tokenCountTestId,
-		buttonTestId
+		tokenCountTestId
 	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it('should apply tokens immediately when animating is false', () => {
+	it('should apply tokens immediately', async () => {
 		const initial = get(combinedDerivedSortedFungibleNetworkTokensUi);
 
 		const { getByTestId } = render(TokensDisplayHandlerTest, {
-			props: { ...props, animating: false }
+			props
 		});
 
 		const count = getByTestId(tokenCountTestId);
 
-		expect(count.textContent).toBe(initial.length.toString());
-	});
-
-	it('should defer applying while animating is true, then apply after animation stops', async () => {
-		const initial = get(combinedDerivedSortedFungibleNetworkTokensUi);
-
-		const { getByTestId } = render(TokensDisplayHandlerTest, {
-			props: { ...props, animating: true }
+		await waitFor(() => {
+			expect(count.textContent).toBe(initial.length.toString());
 		});
-
-		// While animating, tokens should NOT be applied yet
-		const count = getByTestId(tokenCountTestId);
-
-		expect(count.textContent).toBe('0');
-
-		await randomWait({});
-
-		expect(count.textContent).toBe('0');
-
-		const stopBtn = getByTestId(buttonTestId);
-
-		await fireEvent.click(stopBtn);
-
-		// The component scheduled a retry previously; advance time to let it run
-		await randomWait({});
-
-		expect(count.textContent).toBe(initial.length.toString());
 	});
 
 	it('should call the utils functions with the correct arguments', async () => {
@@ -87,7 +60,7 @@ describe('TokensDisplayHandler', () => {
 		const expected: TokenUiOrGroupUi[] = initial.map((token) => ({ token }));
 
 		render(TokensDisplayHandlerTest, {
-			props: { ...props, animating: false }
+			props
 		});
 
 		expect(groupTokensByTwin).toHaveBeenCalledExactlyOnceWith(initial);
