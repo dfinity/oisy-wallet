@@ -4,7 +4,6 @@ import {
 	HELP_AUTH_IMAGE_BANNER,
 	HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK,
 	HELP_AUTH_INTRODUCTION_LINK,
-	HELP_AUTH_LOST_IDENTITY_BUTTON,
 	HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,
 	HELP_AUTH_PRIVATE_KEY_LINK,
 	HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK,
@@ -19,7 +18,6 @@ import { get } from 'svelte/store';
 
 describe('AuthHelpForm', () => {
 	const imageBannerSelector = `img[data-tid="${HELP_AUTH_IMAGE_BANNER}"]`;
-	const lostIdentityButtonSelector = `button[data-tid="${HELP_AUTH_LOST_IDENTITY_BUTTON}"]`;
 	const newIdentityVersionButtonSelector = `button[data-tid="${HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON}"]`;
 	const useIdentityNumberButtonSelector = `button[data-tid="${HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON}"]`;
 	const switchToNewInternetIdentityLinkSelector = `a[data-tid="${HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK}"]`;
@@ -31,8 +29,7 @@ describe('AuthHelpForm', () => {
 	it('should render auth help form content', () => {
 		const { container, getByText } = render(AuthHelpForm, {
 			props: {
-				onOpenNewIdentityHelp: vi.fn(),
-				onOpenLegacyIdentityHelp: vi.fn()
+				onOpenNewIdentityHelp: vi.fn()
 			}
 		});
 
@@ -55,13 +52,6 @@ describe('AuthHelpForm', () => {
 
 		expect(useIdentityNumberButton).toBeInTheDocument();
 		expect(getByText(get(i18n).auth.help.text.use_identity_number)).toBeInTheDocument();
-
-		const lostIdentityButton: HTMLButtonElement | null = container.querySelector(
-			lostIdentityButtonSelector
-		);
-
-		expect(lostIdentityButton).toBeInTheDocument();
-		expect(getByText(get(i18n).auth.help.text.lost_identity_number)).toBeInTheDocument();
 
 		expect(getByText(get(i18n).auth.help.text.useful_links)).toBeInTheDocument();
 
@@ -101,18 +91,15 @@ describe('AuthHelpForm', () => {
 	it('should call correct function on button click', async () => {
 		const trackingEventKey = 'main_page_button';
 		const onOpenNewIdentityHelpMock = vi.fn();
-		const onOpenLegacyIdentityHelpMock = vi.fn();
 		const analyticSpy = vi.spyOn(analytics, 'trackEvent');
 
 		const { container } = render(AuthHelpForm, {
 			props: {
-				onOpenNewIdentityHelp: onOpenNewIdentityHelpMock,
-				onOpenLegacyIdentityHelp: onOpenLegacyIdentityHelpMock
+				onOpenNewIdentityHelp: onOpenNewIdentityHelpMock
 			}
 		});
 
 		expect(onOpenNewIdentityHelpMock).not.toHaveBeenCalled();
-		expect(onOpenLegacyIdentityHelpMock).not.toHaveBeenCalled();
 		expect(analyticSpy).not.toHaveBeenCalled();
 
 		const newIdentityVersionButton: HTMLButtonElement | null = container.querySelector(
@@ -147,23 +134,6 @@ describe('AuthHelpForm', () => {
 		expect(analyticSpy).toHaveBeenCalledWith({
 			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
 			metadata: { event_key: trackingEventKey, event_value: 'use_identity_number' }
-		});
-
-		const lostIdentityButton: HTMLButtonElement | null = container.querySelector(
-			lostIdentityButtonSelector
-		);
-
-		expect(lostIdentityButton).toBeInTheDocument();
-
-		await waitFor(() => {
-			lostIdentityButton?.click();
-
-			expect(onOpenLegacyIdentityHelpMock).toHaveBeenCalledOnce();
-		});
-
-		expect(analyticSpy).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-			metadata: { event_key: trackingEventKey, event_value: 'lost_identity_number' }
 		});
 	});
 });
