@@ -174,7 +174,7 @@ describe('nav.utils', () => {
 			expect(mockGoTo).toHaveBeenCalledExactlyOnceWith('/', { replaceState: true });
 		});
 
-		it('should navigate to "/?deleteIdbCache=true" with replaceState when deleteIdbCache is true', async () => {
+		it('should navigate with param to delete cache with replaceState when deleteIdbCache is true', async () => {
 			await gotoReplaceRoot(true);
 
 			expect(mockGoTo).toHaveBeenCalledExactlyOnceWith(`/?${PARAM_DELETE_IDB_CACHE}=true`, {
