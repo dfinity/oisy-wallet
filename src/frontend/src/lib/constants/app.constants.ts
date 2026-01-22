@@ -201,7 +201,7 @@ export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1_000; // 5 minutes in milliseconds
 
 // Fallback
-export const FALLBACK_TIMEOUT = 1_0000;
+export const FALLBACK_TIMEOUT = 10_000;
 
 // Git
 export const GIT_COMMIT_HASH = VITE_GIT_COMMIT_HASH;
