@@ -7,8 +7,6 @@ import {
 	HELP_AUTH_INTRODUCTION_LINK,
 	HELP_AUTH_ISSUE_WITH_LOGIN_PAGE_BUTTON,
 	HELP_AUTH_LOGGING_INTO_OISY_LINK,
-	HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,
-	HELP_AUTH_PRIVATE_KEY_LINK,
 	HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
@@ -20,11 +18,9 @@ import { get } from 'svelte/store';
 
 describe('AuthHelpForm', () => {
 	const imageBannerSelector = `img[data-tid="${HELP_AUTH_IMAGE_BANNER}"]`;
-	const newIdentityVersionButtonSelector = `button[data-tid="${HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON}"]`;
 	const issueWithLoginPageButtonSelector = `button[data-tid="${HELP_AUTH_ISSUE_WITH_LOGIN_PAGE_BUTTON}"]`;
 	const useIdentityNumberButtonSelector = `button[data-tid="${HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON}"]`;
 	const introductionLinkSelector = `a[data-tid="${HELP_AUTH_INTRODUCTION_LINK}"]`;
-	const privateKeyLinkSelector = `a[data-tid="${HELP_AUTH_PRIVATE_KEY_LINK}"]`;
 	const assetControlLinkSelector = `a[data-tid="${HELP_AUTH_ASSET_CONTROL_LINK}"]`;
 	const internetIdentityHelpCenterLinkSelector = `a[data-tid="${HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK}"]`;
 	const loggingIntoOisyLinkSelector = `a[data-tid="${HELP_AUTH_LOGGING_INTO_OISY_LINK}"]`;
@@ -76,11 +72,6 @@ describe('AuthHelpForm', () => {
 
 		expect(createingAWalletLink).toBeInTheDocument();
 
-		const privateKeyLink: HTMLAnchorElement | null =
-			container.querySelector(privateKeyLinkSelector);
-
-		expect(privateKeyLink).toBeInTheDocument();
-
 		const assetControlLink: HTMLAnchorElement | null =
 			container.querySelector(assetControlLinkSelector);
 
@@ -112,14 +103,14 @@ describe('AuthHelpForm', () => {
 		expect(onOpenNewIdentityHelpMock).not.toHaveBeenCalled();
 		expect(analyticSpy).not.toHaveBeenCalled();
 
-		const newIdentityVersionButton: HTMLButtonElement | null = container.querySelector(
-			newIdentityVersionButtonSelector
+		const issueWithLoginPageButton: HTMLButtonElement | null = container.querySelector(
+			issueWithLoginPageButtonSelector
 		);
 
-		expect(newIdentityVersionButton).toBeInTheDocument();
+		expect(issueWithLoginPageButton).toBeInTheDocument();
 
 		await waitFor(() => {
-			newIdentityVersionButton?.click();
+			issueWithLoginPageButton?.click();
 
 			expect(onOpenNewIdentityHelpMock).toHaveBeenCalledOnce();
 		});
