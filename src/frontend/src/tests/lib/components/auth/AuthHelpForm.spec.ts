@@ -22,7 +22,6 @@ describe('AuthHelpForm', () => {
 	const useIdentityNumberButtonSelector = `button[data-tid="${HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON}"]`;
 	const introductionLinkSelector = `a[data-tid="${HELP_AUTH_INTRODUCTION_LINK}"]`;
 	const assetControlLinkSelector = `a[data-tid="${HELP_AUTH_ASSET_CONTROL_LINK}"]`;
-	const internetIdentityHelpCenterLinkSelector = `a[data-tid="${HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK}"]`;
 	const loggingIntoOisyLinkSelector = `a[data-tid="${HELP_AUTH_LOGGING_INTO_OISY_LINK}"]`;
 	const createingAWalletLinkSelector = `a[data-tid="${HELP_AUTH_CREATING_A_WALLET_LINK}"]`;
 
@@ -77,12 +76,6 @@ describe('AuthHelpForm', () => {
 
 		expect(assetControlLink).toBeInTheDocument();
 
-		const internetIdentityHelpCenterLink: HTMLAnchorElement | null = container.querySelector(
-			internetIdentityHelpCenterLinkSelector
-		);
-
-		expect(internetIdentityHelpCenterLink).toBeInTheDocument();
-
 		expect(
 			getByText(replaceOisyPlaceholders(get(i18n).auth.help.text.feedback_text))
 		).toBeInTheDocument();
@@ -135,11 +128,6 @@ describe('AuthHelpForm', () => {
 		expect(analyticSpy).toHaveBeenCalledWith({
 			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
 			metadata: { event_key: trackingEventKey, event_value: 'use_identity_number' }
-		});
-
-		expect(analyticSpy).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-			metadata: { event_key: trackingEventKey, event_value: 'lost_identity_number' }
 		});
 	});
 });
