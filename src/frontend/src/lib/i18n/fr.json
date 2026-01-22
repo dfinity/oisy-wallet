@@ -155,7 +155,6 @@
 				"description": "Il semble que vous ayez annulé votre connexion ou votre inscription. Nous aimerions comprendre ce qu'il s'est passé afin d'améliorer votre expérience.",
 				"login_page_looks_different": "Pourquoi la page de connexion est-elle différente ?",
 				"use_identity_number": "Je souhaite utiliser mon numéro d'Internet Identity",
-				"lost_identity_number": "J'ai perdu mon numéro d'Internet Identity",
 				"feedback_text": "Vos commentaires nous aident à améliorer $oisy_short.",
 				"thanks_text": "Merci !",
 				"useful_links": "Liens utiles",

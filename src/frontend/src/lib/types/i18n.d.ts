@@ -146,7 +146,6 @@ interface I18nAuth {
 			description: string;
 			login_page_looks_different: string;
 			use_identity_number: string;
-			lost_identity_number: string;
 			feedback_text: string;
 			thanks_text: string;
 			useful_links: string;

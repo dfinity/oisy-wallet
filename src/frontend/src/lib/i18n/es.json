@@ -155,7 +155,6 @@
 				"description": "Parece que cancelaste tu inicio de sesión o registro. Nos gustaría saber qué sucedió para mejorar tu experiencia.",
 				"login_page_looks_different": "¿Por qué la página de inicio de sesión se ve diferente?",
 				"use_identity_number": "Quiero utilizar mi número de Internet Identity",
-				"lost_identity_number": "Perdí mi número de Internet Identity",
 				"feedback_text": "Sus comentarios nos ayudan a mejorar $oisy_short.",
 				"thanks_text": "¡Gracias!",
 				"useful_links": "Enlaces útiles",
