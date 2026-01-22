@@ -1,9 +1,8 @@
+import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
-import { ALL_UTXOS_CONTEXT_KEY, initAllUtxosStore } from '$btc/stores/all-utxos.store';
-import {
-	FEE_RATE_PERCENTILES_CONTEXT_KEY,
-	initFeeRatePercentilesStore
-} from '$btc/stores/fee-rate-percentiles.store';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import { UTXOS_FEE_CONTEXT_KEY, initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -21,6 +20,10 @@ describe('ConvertModal', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		allUtxosStore.reset();
+		feeRatePercentilesStore.reset();
+		btcPendingSentTransactionsStore.reset();
+
 		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
 			utxos: [],
 			tip_block_hash: new Uint8Array(),
@@ -28,16 +31,16 @@ describe('ConvertModal', () => {
 			next_page: []
 		});
 		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
+		vi.spyOn(
+			btcPendingSentTransactionsServices,
+			'loadBtcPendingSentTransactions'
+		).mockResolvedValue({ success: true });
 	});
 
 	it('should display correct modal title after navigating between steps', async () => {
 		const { container, getByText, getByTestId } = render(ConvertModal, {
 			props,
-			context: new Map([
-				[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }],
-				[ALL_UTXOS_CONTEXT_KEY, { store: initAllUtxosStore() }],
-				[FEE_RATE_PERCENTILES_CONTEXT_KEY, { store: initFeeRatePercentilesStore() }]
-			])
+			context: new Map([[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }]])
 		});
 
 		const firstStepTitle = 'Convert BTC → ICP';
