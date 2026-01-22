@@ -45,7 +45,7 @@ import { replaceHistory } from '$lib/utils/route.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const signIn = async (
@@ -239,14 +239,15 @@ const disconnectWalletConnect = async () => {
 };
 
 const logout = async ({
-	msg = undefined,
 	clearIdbStorages = true,
-	resetUrl = false
-}: {
-	msg?: ToastMsg;
-	clearIdbStorages?: boolean;
-	resetUrl?: boolean;
-}) => {
+	...params
+}: { clearIdbStorages?: boolean } & ({ msg?: ToastMsg } | { resetUrl?: boolean })) => {
+	const { msg, resetUrl } = {
+		msg: undefined,
+		resetUrl: false,
+		...params
+	};
+
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
 
@@ -268,12 +269,14 @@ const logout = async ({
 
 	await authStore.signOut();
 
-	if (msg) {
-		appendMsgToUrl(msg);
-	}
-
+	// No need to append the message if we are resetting the url.
+	// The reset will redirect the user to the root, so any appended message would be lost.
 	if (resetUrl) {
 		await gotoReplaceRoot();
+	}
+
+	if (nonNullish(msg)) {
+		appendMsgToUrl(msg);
 	}
 
 	// Auth: Delegation and identity are cleared from indexedDB by agent-js so, we do not need to clear these
