@@ -10,10 +10,6 @@ export const authHelpWizardSteps = ({
 		title: i18n.auth.help.text.title
 	},
 	{
-		name: WizardStepsAuthHelp.HELP_LEGACY_IDENTITY,
-		title: i18n.auth.help.text.title
-	},
-	{
 		name: WizardStepsAuthHelp.HELP_NEW_IDENTITY,
 		title: i18n.auth.help.text.title
 	}
