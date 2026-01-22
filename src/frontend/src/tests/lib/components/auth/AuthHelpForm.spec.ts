@@ -9,7 +9,6 @@ import {
 	HELP_AUTH_LOGGING_INTO_OISY_LINK,
 	HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,
 	HELP_AUTH_PRIVATE_KEY_LINK,
-	HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK,
 	HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
@@ -24,7 +23,6 @@ describe('AuthHelpForm', () => {
 	const newIdentityVersionButtonSelector = `button[data-tid="${HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON}"]`;
 	const issueWithLoginPageButtonSelector = `button[data-tid="${HELP_AUTH_ISSUE_WITH_LOGIN_PAGE_BUTTON}"]`;
 	const useIdentityNumberButtonSelector = `button[data-tid="${HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON}"]`;
-	const switchToNewInternetIdentityLinkSelector = `a[data-tid="${HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK}"]`;
 	const introductionLinkSelector = `a[data-tid="${HELP_AUTH_INTRODUCTION_LINK}"]`;
 	const privateKeyLinkSelector = `a[data-tid="${HELP_AUTH_PRIVATE_KEY_LINK}"]`;
 	const assetControlLinkSelector = `a[data-tid="${HELP_AUTH_ASSET_CONTROL_LINK}"]`;
@@ -60,12 +58,6 @@ describe('AuthHelpForm', () => {
 		expect(getByText(get(i18n).auth.help.text.use_identity_number)).toBeInTheDocument();
 
 		expect(getByText(get(i18n).auth.help.text.useful_links)).toBeInTheDocument();
-
-		const switchToNewInternetIdentityLink: HTMLAnchorElement | null = container.querySelector(
-			switchToNewInternetIdentityLinkSelector
-		);
-
-		expect(switchToNewInternetIdentityLink).toBeInTheDocument();
 
 		const introductionLink: HTMLAnchorElement | null =
 			container.querySelector(introductionLinkSelector);
