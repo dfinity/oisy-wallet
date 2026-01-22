@@ -71,7 +71,7 @@ describe('query.services', () => {
 			});
 		});
 
-		it('should default to "query_and_update" after warmup when params.strategy is undefined', async () => {
+		it('should default to "update" after warmup when params.strategy is undefined', async () => {
 			const qau = createQueryAndUpdateWithWarmup(warmupMs);
 
 			vi.advanceTimersByTime(warmupMs + 10);
@@ -80,7 +80,7 @@ describe('query.services', () => {
 
 			expect(queryAndUpdate).toHaveBeenCalledExactlyOnceWith({
 				...params,
-				strategy: 'query_and_update'
+				strategy: 'update'
 			});
 		});
 
@@ -107,7 +107,7 @@ describe('query.services', () => {
 
 			expect(queryAndUpdate).toHaveBeenCalledExactlyOnceWith({
 				...params,
-				strategy: 'query_and_update'
+				strategy: 'update'
 			});
 		});
 	});

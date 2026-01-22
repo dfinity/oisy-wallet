@@ -7,8 +7,8 @@ import { queryAndUpdate, type QueryAndUpdateParams } from '@dfinity/utils';
  * wrapper is created), all calls are forced to use the `'query'` strategy to
  * avoid triggering updates while the application or canister is starting up.
  * After the warmup period elapses, the wrapper uses the strategy provided in
- * {@link QueryAndUpdateParams.strategy}, defaulting to `'query_and_update'`
- * when none is specified.
+ * {@link QueryAndUpdateParams.strategy}, defaulting to `'update'`when none
+ * is specified.
  *
  * @param warmupMs - Length of the warmup period in milliseconds. Calls made
  *   before this duration has passed since the wrapper's creation are executed
@@ -23,7 +23,6 @@ export const createQueryAndUpdateWithWarmup = (warmupMs = 10_000) => {
 	return async <R, E = unknown>(params: QueryAndUpdateParams<R, E>): Promise<void> =>
 		await queryAndUpdate<R, E>({
 			...params,
-			strategy:
-				Date.now() - startTimeMs < warmupMs ? 'query' : (params.strategy ?? 'query_and_update')
+			strategy: Date.now() - startTimeMs < warmupMs ? 'query' : (params.strategy ?? 'update')
 		});
 };
