@@ -53,7 +53,7 @@ describe('AuthHelpForm', () => {
 		);
 
 		expect(issueWithLoginPageButton).toBeInTheDocument();
-		expect(getByText(get(i18n).auth.help.text.issue_with_logon_page)).toBeInTheDocument();
+		expect(getByText(get(i18n).auth.help.text.issue_with_login_page)).toBeInTheDocument();
 
 		const useIdentityNumberButton: HTMLButtonElement | null = container.querySelector(
 			useIdentityNumberButtonSelector
