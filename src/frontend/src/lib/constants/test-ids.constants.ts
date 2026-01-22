@@ -223,6 +223,8 @@ export const HELP_AUTH_PRIVATE_KEY_LINK = 'help-auth-private-key-link';
 export const HELP_AUTH_ASSET_CONTROL_LINK = 'help-auth-asset-control-link';
 export const HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK =
 	'help-auth-internet-identity-help-center-link';
+export const HELP_AUTH_LOGGING_INTO_OISY_LINK = 'help-auth-logging-into-oisy-link';
+export const HELP_AUTH_CREATING_A_WALLET_LINK =	'help-auth-creating-a-wallet-link';
 
 export const AUTH_SIGNING_IN_HELP_LINK = 'auth-signing-in-help-link';
 
