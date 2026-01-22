@@ -155,7 +155,7 @@ export const fetchTransactionDetailForSignature = async ({
 		signature: signature.signature
 	};
 
-	if (nonNullish(transaction) && confirmationStatus === 'finalized') {
+	if (confirmationStatus === 'finalized' && nonNullish(transaction)) {
 		networkCache.set(signature, transaction);
 	}
 
