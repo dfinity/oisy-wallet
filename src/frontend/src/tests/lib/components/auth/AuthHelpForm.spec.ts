@@ -117,7 +117,7 @@ describe('AuthHelpForm', () => {
 
 		expect(analyticSpy).toHaveBeenCalledWith({
 			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-			metadata: { event_key: trackingEventKey, event_value: 'login_page_looks_different' }
+			metadata: { event_key: trackingEventKey, event_value: 'issue_with_login_page' }
 		});
 
 		const useIdentityNumberButton: HTMLButtonElement | null = container.querySelector(
