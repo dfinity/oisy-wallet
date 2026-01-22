@@ -3,7 +3,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import AuthHelpForm from '$lib/components/auth/AuthHelpForm.svelte';
-	import AuthHelpLegacyIdentityForm from '$lib/components/auth/AuthHelpLegacyIdentityForm.svelte';
 	import AuthHelpNewIdentityForm from '$lib/components/auth/AuthHelpNewIdentityForm.svelte';
 	import { authHelpWizardSteps } from '$lib/config/auth-help.config';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
@@ -48,8 +47,6 @@
 		nonNullish(modal) ? goToWizardStep({ modal, steps, stepName }) : undefined;
 
 	const onBack = () => onWizardStepChange(WizardStepsAuthHelp.OVERVIEW);
-	const onOpenLegacyIdentityHelp = () =>
-		onWizardStepChange(WizardStepsAuthHelp.HELP_LEGACY_IDENTITY);
 	const onOpenNewIdentityHelp = () => onWizardStepChange(WizardStepsAuthHelp.HELP_NEW_IDENTITY);
 </script>
 
@@ -60,9 +57,7 @@
 
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsAuthHelp.OVERVIEW}
-			<AuthHelpForm {onOpenLegacyIdentityHelp} {onOpenNewIdentityHelp} />
-		{:else if currentStep?.name === WizardStepsAuthHelp.HELP_LEGACY_IDENTITY}
-			<AuthHelpLegacyIdentityForm hideBack={usesIdentityHelp} {onBack} onDone={close} />
+			<AuthHelpForm {onOpenNewIdentityHelp} />
 		{:else if currentStep?.name === WizardStepsAuthHelp.HELP_NEW_IDENTITY}
 			<AuthHelpNewIdentityForm hideBack={usesIdentityHelp} {onBack} onDone={close} />
 		{/if}
