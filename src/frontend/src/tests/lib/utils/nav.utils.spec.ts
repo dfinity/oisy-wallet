@@ -8,6 +8,7 @@ import {
 	COLLECTION_PARAM,
 	NETWORK_PARAM,
 	NFT_PARAM,
+	PARAM_DELETE_IDB_CACHE,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
 	URI_PARAM
@@ -163,10 +164,22 @@ describe('nav.utils', () => {
 	});
 
 	describe('gotoReplaceRoot', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
 		it('should navigate to "/" with replaceState', async () => {
 			await gotoReplaceRoot();
 
-			expect(mockGoTo).toHaveBeenCalledWith('/', { replaceState: true });
+			expect(mockGoTo).toHaveBeenCalledExactlyOnceWith('/', { replaceState: true });
+		});
+
+		it('should navigate with param to delete cache with replaceState when deleteIdbCache is true', async () => {
+			await gotoReplaceRoot(true);
+
+			expect(mockGoTo).toHaveBeenCalledExactlyOnceWith(`/?${PARAM_DELETE_IDB_CACHE}=true`, {
+				replaceState: true
+			});
 		});
 	});
 

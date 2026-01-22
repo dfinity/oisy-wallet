@@ -273,7 +273,7 @@ const logout = async ({
 	// No need to append the message if we are resetting the url.
 	// The reset will redirect the user to the root, so any appended message would be lost.
 	if (resetUrl) {
-		await gotoReplaceRoot();
+		await gotoReplaceRoot(clearIdbStorages);
 	}
 
 	if (nonNullish(msg)) {
