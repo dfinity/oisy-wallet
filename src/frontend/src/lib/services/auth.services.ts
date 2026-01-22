@@ -26,6 +26,7 @@ import {
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
 } from '$lib/constants/analytics.constants';
+import { PARAM_LEVEL, PARAM_MSG } from '$lib/constants/routes.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
 	authLoggedInAnotherTabStore,
@@ -272,7 +273,7 @@ const logout = async ({
 	// No need to append the message if we are resetting the url.
 	// The reset will redirect the user to the root, so any appended message would be lost.
 	if (resetUrl) {
-		await gotoReplaceRoot();
+		await gotoReplaceRoot(clearIdbStorages);
 	}
 
 	if (nonNullish(msg)) {
@@ -287,9 +288,6 @@ const logout = async ({
 	// We reload the page to make sure all the states are cleared
 	window.location.reload();
 };
-
-const PARAM_MSG = 'msg';
-const PARAM_LEVEL = 'level';
 
 /**
  * If a message was provided to the logout process - e.g. a message informing the logout happened because the session timed-out - append the information to the url as query params
