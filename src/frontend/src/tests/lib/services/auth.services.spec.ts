@@ -180,7 +180,11 @@ describe('auth.services', () => {
 		it('should not append a message to the reload URL', async () => {
 			await signOut({});
 
-			expect(window.history.replaceState).not.toHaveBeenCalled();
+			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
+				{},
+				'',
+				new URL(`${rootLocation}?cleanCache=true`)
+			);
 		});
 	});
 
@@ -291,7 +295,7 @@ describe('auth.services', () => {
 			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
 				{},
 				'',
-				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=error`)
+				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=error&cleanCache=true`)
 			);
 		});
 	});
@@ -403,7 +407,7 @@ describe('auth.services', () => {
 			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
 				{},
 				'',
-				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=warn`)
+				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=warn&cleanCache=true`)
 			);
 		});
 	});
@@ -515,7 +519,9 @@ describe('auth.services', () => {
 			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
 				{},
 				'',
-				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(expectedText))}&level=warn`)
+				new URL(
+					`${rootLocation}?msg=${encodeURI(encodeURI(expectedText))}&level=warn&cleanCache=true`
+				)
 			);
 		});
 	});
