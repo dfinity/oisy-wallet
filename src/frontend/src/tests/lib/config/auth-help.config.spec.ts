@@ -17,10 +17,6 @@ describe('auth-help.config', () => {
 					title: en.auth.help.text.title
 				},
 				{
-					name: WizardStepsAuthHelp.HELP_LEGACY_IDENTITY,
-					title: en.auth.help.text.title
-				},
-				{
 					name: WizardStepsAuthHelp.HELP_NEW_IDENTITY,
 					title: en.auth.help.text.title
 				}
