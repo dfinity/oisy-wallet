@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isIOS } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { goto } from '$app/navigation';
@@ -29,56 +29,12 @@
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
-	let animating = $state(false);
-
-	const handleAnimationStart = () => {
-		animating = true;
-
-		// The following is to guarantee that the function is triggered, even if the 'animationend' event is not triggered.
-		// It may happen if the animation aborts before reaching completion.
-		debouncedHandleAnimationEnd();
-	};
-
-	const handleAnimationEnd = () => (animating = false);
-
-	const debouncedHandleAnimationEnd = debounce(() => {
-		if (animating) {
-			handleAnimationEnd();
-		}
-	}, 250);
-
 	let loading: boolean = $derived(isNullish(tokens));
 
 	// Default token / tokenGroup list
 	let filteredTokens: TokenUiOrGroupUi[] | undefined = $derived(
 		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] })
 	);
-
-	// For newly logged-in users, the token list occasionally fails to render correctly
-	// on the initial load. The underlying data eventually becomes consistent, but the
-	// first render can break due to a timing issue in the tokens list pipeline.
-	// Re-rendering the list after a few seconds seems to fix the issue. To mitigate this,
-	// re-apply the token list periodically for the first 10 seconds after mount
-	// as a defensive workaround until the data stabilises.
-	// TODO: Remove this interval logic once we find out the issue with initial tokens loading
-	let firstListRerenderTick = $state(0);
-	let rerendering = $state(false);
-	onMount(() => {
-		const interval = setInterval(() => {
-			firstListRerenderTick++;
-			rerendering = true;
-		}, 3_000);
-
-		const stop = setTimeout(() => {
-			rerendering = false;
-			clearInterval(interval);
-		}, 10_000);
-
-		return () => {
-			clearInterval(interval);
-			clearTimeout(stop);
-		};
-	});
 
 	// Token list for enabling when filtering
 	let enableMoreTokensList: TokenUiOrGroupUi[] = $state([]);
@@ -104,6 +60,7 @@
 		(params: { filter: string; selectedNetwork?: Network }) => updateFilterList(params),
 		300
 	);
+
 	$effect(() => {
 		const { filter } = $tokenListStore;
 		const network = $selectedNetwork;
@@ -142,7 +99,7 @@
 
 	let ios = $derived(isIOS());
 
-	let flipParams = $derived({ duration: ios || rerendering ? 0 : 250 });
+	let flipParams = $derived({ duration: ios ? 0 : 250 });
 
 	const tokenKey = ({ id: tokenId, network: { id: networkId } }: TokenUi): string =>
 		`token:${tokenId.description}:${networkId.description}`;
@@ -161,32 +118,24 @@
 	);
 </script>
 
-<TokensDisplayHandler {animating} bind:tokens>
+<TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
-			{#key firstListRerenderTick}
-				{#each tokensWithKey as { tokenOrGroup, key } (key)}
-					<div
-						class="overflow-hidden rounded-xl"
-						class:pointer-events-none={animating}
-						onanimationend={handleAnimationEnd}
-						onanimationstart={handleAnimationStart}
-						animate:flip={flipParams}
-					>
-						{#if isTokenUiGroup(tokenOrGroup)}
-							{@const { group: tokenGroup } = tokenOrGroup}
+			{#each tokensWithKey as { tokenOrGroup, key } (key)}
+				<div class="overflow-hidden rounded-xl" animate:flip={flipParams}>
+					{#if isTokenUiGroup(tokenOrGroup)}
+						{@const { group: tokenGroup } = tokenOrGroup}
 
-							<TokenGroupCard {tokenGroup} />
-						{:else}
-							{@const { token } = tokenOrGroup}
+						<TokenGroupCard {tokenGroup} />
+					{:else}
+						{@const { token } = tokenOrGroup}
 
-							<div class="transition duration-300 hover:bg-primary">
-								<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
-							</div>
-						{/if}
-					</div>
-				{/each}
-			{/key}
+						<div class="transition-colors duration-300 hover:bg-primary">
+							<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
+						</div>
+					{/if}
+				</div>
+			{/each}
 		</div>
 
 		{#if filteredTokens?.length === 0}
@@ -220,14 +169,8 @@
 					{/snippet}
 
 					{#each enableMoreTokensWithKey as { tokenOrGroup, key } (key)}
-						<div
-							class="overflow-hidden rounded-xl"
-							class:pointer-events-none={animating}
-							onanimationend={handleAnimationEnd}
-							onanimationstart={handleAnimationStart}
-							animate:flip={flipParams}
-						>
-							<div class="transition duration-300 hover:bg-primary">
+						<div class="overflow-hidden rounded-xl" animate:flip={flipParams}>
+							<div class="transition-colors duration-300 hover:bg-primary">
 								{#if !isTokenUiGroup(tokenOrGroup)}
 									<TokenCard data={tokenOrGroup.token} {onToggle} />
 								{/if}

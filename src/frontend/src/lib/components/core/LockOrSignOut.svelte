@@ -30,7 +30,7 @@
 		onHidePopover?.();
 		await signOut({
 			resetUrl: true,
-			clearPrincipalStorages: PrincipalsStorage.ALL,
+			clearPrincipalStorages: PrincipalsStorage.CURRENT,
 			source: 'menu-button'
 		});
 	};

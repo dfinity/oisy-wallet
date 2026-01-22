@@ -18,6 +18,7 @@ import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/
 import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import { createQueryAndUpdateWithWarmup } from '$lib/services/query.services';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type {
@@ -34,7 +35,6 @@ import {
 	isNullish,
 	jsonReplacer,
 	nonNullish,
-	queryAndUpdate,
 	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
@@ -59,6 +59,16 @@ interface BtcWalletData {
 }
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
+	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
+
+	private get queryAndUpdateWithWarmup() {
+		if (isNullish(this._queryAndUpdateWithWarmup)) {
+			this._queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+		}
+
+		return this._queryAndUpdateWithWarmup;
+	}
+
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
 
 	private failedSyncCounter = 0;
@@ -120,6 +130,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			};
 		}
 	}
+
 	private async loadBtcTransactionsData({ btcAddress }: { btcAddress: BtcAddress }): Promise<{
 		transactions: CertifiedData<BtcTransactionUi>[];
 		latestBitcoinBlockHeight: number;
@@ -268,7 +279,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		const btcAddress = data?.btcAddress.data;
 		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
 
-		await queryAndUpdate<BtcWalletData>({
+		await this.queryAndUpdateWithWarmup<BtcWalletData>({
 			request: ({ identity: _, certified }) =>
 				this.loadWalletData({
 					certified,

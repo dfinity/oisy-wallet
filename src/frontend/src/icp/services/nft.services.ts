@@ -15,10 +15,14 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Nft } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
-import { assertNever, isNullish } from '@dfinity/utils';
+import { assertNever, isNullish, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
-const loadExtNfts = async ({ token, identity }: { token: ExtToken; identity: Identity }) => {
+const loadExtNfts = async ({
+	token,
+	identity,
+	certified
+}: { token: ExtToken; identity: Identity } & QueryParams) => {
 	const {
 		canisterId,
 		standard: { code: standard }
@@ -30,10 +34,13 @@ const loadExtNfts = async ({ token, identity }: { token: ExtToken; identity: Ide
 		const tokenIndices = await getExtTokensByOwner({
 			identity,
 			owner,
-			canisterId
+			canisterId,
+			certified
 		});
 
-		const promises = tokenIndices.map(async (index) => await mapExtNft({ index, token, identity }));
+		const promises = tokenIndices.map(
+			async (index) => await mapExtNft({ index, token, identity, certified })
+		);
 
 		return await Promise.all(promises);
 	} catch (err: unknown) {
@@ -46,7 +53,11 @@ const loadExtNfts = async ({ token, identity }: { token: ExtToken; identity: Ide
 	}
 };
 
-const loadDip721Nfts = async ({ token, identity }: { token: Dip721Token; identity: Identity }) => {
+const loadDip721Nfts = async ({
+	token,
+	identity,
+	certified
+}: { token: Dip721Token; identity: Identity } & QueryParams) => {
 	const {
 		canisterId,
 		standard: { code: standard }
@@ -58,10 +69,13 @@ const loadDip721Nfts = async ({ token, identity }: { token: Dip721Token; identit
 		const tokenIndices = await getDip721TokensByOwner({
 			identity,
 			owner,
-			canisterId
+			canisterId,
+			certified
 		});
 
-		const promises = tokenIndices.map(async (index) => await mapDip721Nft({ index, token }));
+		const promises = tokenIndices.map(
+			async (index) => await mapDip721Nft({ index, token, certified })
+		);
 
 		return await Promise.all(promises);
 	} catch (err: unknown) {
@@ -76,11 +90,12 @@ const loadDip721Nfts = async ({ token, identity }: { token: Dip721Token; identit
 
 const loadIcPunksNfts = async ({
 	token,
-	identity
+	identity,
+	certified
 }: {
 	token: IcPunksToken;
 	identity: Identity;
-}) => {
+} & QueryParams) => {
 	const {
 		canisterId,
 		standard: { code: standard }
@@ -92,11 +107,12 @@ const loadIcPunksNfts = async ({
 		const tokenIndices = await getIcPunksTokensByOwner({
 			identity,
 			owner,
-			canisterId
+			canisterId,
+			certified
 		});
 
 		const promises = tokenIndices.map(
-			async (index) => await mapIcPunksNft({ index, token, identity })
+			async (index) => await mapIcPunksNft({ index, token, identity, certified })
 		);
 
 		return await Promise.all(promises);
@@ -112,26 +128,27 @@ const loadIcPunksNfts = async ({
 
 export const loadNfts = async ({
 	tokens,
-	identity
+	identity,
+	certified
 }: {
 	tokens: IcNonFungibleToken[];
 	identity: OptionIdentity;
-}): Promise<Nft[]> => {
+} & QueryParams): Promise<Nft[]> => {
 	if (isNullish(identity)) {
 		return [];
 	}
 
 	const nftPromises = tokens.map(async (token) => {
 		if (isTokenExt(token)) {
-			return await loadExtNfts({ token, identity });
+			return await loadExtNfts({ token, identity, certified });
 		}
 
 		if (isTokenDip721(token)) {
-			return await loadDip721Nfts({ token, identity });
+			return await loadDip721Nfts({ token, identity, certified });
 		}
 
 		if (isTokenIcPunks(token)) {
-			return await loadIcPunksNfts({ token, identity });
+			return await loadIcPunksNfts({ token, identity, certified });
 		}
 
 		assertNever(token, `Unsupported NFT IC token ${(token as Token).standard.code}`);

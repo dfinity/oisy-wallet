@@ -17,19 +17,20 @@ import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { isNetworkIdEthereum, isNetworkIdEvm, isNetworkIdICP } from '$lib/utils/network.utils';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, type QueryParams } from '@dfinity/utils';
 
 export const loadNftsByNetwork = async ({
 	networkId,
 	tokens,
 	identity,
-	ethAddress
+	ethAddress,
+	certified
 }: {
 	networkId: NetworkId;
 	tokens: NonFungibleToken[];
 	identity: OptionIdentity;
 	ethAddress: OptionEthAddress;
-}): Promise<Nft[]> => {
+} & QueryParams): Promise<Nft[]> => {
 	if (tokens.length === 0) {
 		return [];
 	}
@@ -47,7 +48,8 @@ export const loadNftsByNetwork = async ({
 		return await loadIcNfts({
 			// For now, it is acceptable to cast it since we checked before if the network is ICP.
 			tokens: tokens as IcNonFungibleToken[],
-			identity
+			identity,
+			certified
 		});
 	}
 
@@ -57,12 +59,13 @@ export const loadNftsByNetwork = async ({
 export const loadNfts = async ({
 	tokens,
 	identity,
+	certified,
 	ethAddress
 }: {
 	tokens: NonFungibleToken[];
 	identity: OptionIdentity;
 	ethAddress: OptionEthAddress;
-}) => {
+} & QueryParams) => {
 	const tokensByNetwork = getTokensByNetwork(tokens);
 
 	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
@@ -74,6 +77,7 @@ export const loadNfts = async ({
 			networkId,
 			tokens,
 			identity,
+			certified,
 			ethAddress
 		});
 

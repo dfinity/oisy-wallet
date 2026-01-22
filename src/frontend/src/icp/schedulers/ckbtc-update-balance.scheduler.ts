@@ -14,7 +14,7 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { assertNonNullish, isNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
+import { isEmptyString, isNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 import {
 	MinterNoNewUtxosError,
 	type BitcoinNetwork,
@@ -49,23 +49,28 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 		identity,
 		data
 	}: SchedulerJobData<PostMessageDataRequestIcCkBTCUpdateBalance>) => {
-		const minterCanisterId = data?.minterCanisterId;
+		const { minterCanisterId, bitcoinNetwork, btcAddress } = data ?? {};
 
-		assertNonNullish(
-			minterCanisterId,
-			'No data - minterCanisterId - provided to update the BTC balance.'
-		);
+		if (isNullish(minterCanisterId)) {
+			console.error('No data - minterCanisterId - provided to update the BTC balance. Skipping.');
 
-		const bitcoinNetwork = data?.bitcoinNetwork;
+			return;
+		}
 
-		assertNonNullish(bitcoinNetwork, 'No BTC network provided to check for update balance.');
+		if (isNullish(bitcoinNetwork)) {
+			console.error('No data - bitcoinNetwork - provided to update the BTC balance. Skipping.');
+
+			return;
+		}
 
 		const address =
-			data?.btcAddress ??
-			this.btcAddress ??
-			(await this.loadBtcAddress({ minterCanisterId, identity }));
+			btcAddress ?? this.btcAddress ?? (await this.loadBtcAddress({ minterCanisterId, identity }));
 
-		assertNonNullish(address, 'No BTC address could be derived from the ckBTC minter.');
+		if (isEmptyString(address)) {
+			console.error('No BTC address could be derived from the ckBTC minter. Skipping.');
+
+			return;
+		}
 
 		const pendingUtxos = await this.hasPendingUtxos({
 			minterCanisterId,

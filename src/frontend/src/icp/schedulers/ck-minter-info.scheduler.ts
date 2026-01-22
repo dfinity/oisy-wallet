@@ -1,18 +1,29 @@
 import type { MinterInfoParams } from '$icp/types/ck';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import { createQueryAndUpdateWithWarmup } from '$lib/services/query.services';
 import type {
 	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { assertNonNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
+import { assertNonNullish, isNullish, jsonReplacer } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 
 export class CkMinterInfoScheduler<
 	T extends CkBtcMinterDid.MinterInfo | CkEthMinterDid.MinterInfo
 > implements Scheduler<PostMessageDataRequestIcCk> {
+	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
+
+	private get queryAndUpdateWithWarmup() {
+		if (isNullish(this._queryAndUpdateWithWarmup)) {
+			this._queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+		}
+
+		return this._queryAndUpdateWithWarmup;
+	}
+
 	private timer = new SchedulerTimer('syncCkMinterInfoStatus');
 
 	constructor(
@@ -50,7 +61,7 @@ export class CkMinterInfoScheduler<
 			'No data - minterCanisterId - provided to fetch the minter information.'
 		);
 
-		await queryAndUpdate<T>({
+		await this.queryAndUpdateWithWarmup<T>({
 			request: ({ identity: _, certified }) =>
 				this.minterInfo({ minterCanisterId, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncMinterInfo({ certified, ...rest }),
