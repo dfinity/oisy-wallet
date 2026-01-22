@@ -21,7 +21,9 @@
 		HELP_AUTH_INTRODUCTION_LINK,
 		HELP_AUTH_PRIVATE_KEY_LINK,
 		HELP_AUTH_ASSET_CONTROL_LINK,
-		HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK
+		HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK,
+		HELP_AUTH_LOGGING_INTO_OISY_LINK,
+		HELP_AUTH_CREATING_A_WALLET_LINK
 	} from '$lib/constants/test-ids.constants';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
