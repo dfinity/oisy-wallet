@@ -20,7 +20,7 @@ import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
-import { isTokenToggleable } from '$lib/utils/token.utils';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
@@ -118,16 +118,12 @@ const mapOptionalToken = (response: IcrcTokenMetadataResponse): IcrcTokenMetadat
 
 // eslint-disable-next-line local-rules/prefer-object-params -- This is a sorting function, so the parameters will be provided not as an object but as separate arguments.
 export const sortIcTokens = (
-	{ name: nameA, position: positionA, exchangeCoinId: exchangeCoinIdA }: IcToken,
-	{ name: nameB, position: positionB, exchangeCoinId: exchangeCoinIdB }: IcToken
+	{ name: nameA, exchangeCoinId: exchangeCoinIdA }: IcToken,
+	{ name: nameB, exchangeCoinId: exchangeCoinIdB }: IcToken
 ) =>
-	positionA === positionB
-		? exchangeCoinIdA === exchangeCoinIdB ||
-			isNullish(exchangeCoinIdA) ||
-			isNullish(exchangeCoinIdB)
-			? nameA.localeCompare(nameB)
-			: exchangeCoinIdA.localeCompare(exchangeCoinIdB)
-		: positionA - positionB;
+	exchangeCoinIdA === exchangeCoinIdB || isNullish(exchangeCoinIdA) || isNullish(exchangeCoinIdB)
+		? nameA.localeCompare(nameB)
+		: exchangeCoinIdA.localeCompare(exchangeCoinIdB);
 
 export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	icrcCustomTokens,

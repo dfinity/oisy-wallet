@@ -84,7 +84,7 @@
 </script>
 
 <div class="flex flex-col" class:bg-primary={isExpanded}>
-	<div class="transition duration-300 hover:bg-primary">
+	<div class="transition-colors duration-300 hover:bg-primary">
 		<TokenCard
 			data={{
 				...headerData,
@@ -100,7 +100,7 @@
 		<div class="ml-0 flex flex-col gap-1.5 p-2 md:ml-16" transition:slide={SLIDE_PARAMS}>
 			{#each tokensToShow as token (`token:${token.id.description}:${token.network.id.description}`)}
 				<div
-					class="flex overflow-hidden rounded-lg bg-secondary transition duration-250 hover:bg-brand-subtle-10"
+					class="flex overflow-hidden rounded-lg bg-secondary transition-colors duration-250 hover:bg-brand-subtle-10"
 					transition:slide={SLIDE_PARAMS}
 				>
 					<TokenCard asNetwork data={token} onClick={() => goto(transactionsUrl({ token }))} />

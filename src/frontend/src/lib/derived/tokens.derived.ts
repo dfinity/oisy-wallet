@@ -9,7 +9,6 @@ import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
-import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { extTokens } from '$icp/derived/ext.derived';
 import { icPunksTokens } from '$icp/derived/icpunks.derived';
@@ -77,20 +76,16 @@ export const tokens: Readable<Token[]> = derived(
 	([$fungibleTokens, $nonFungibleTokens]) => [...$fungibleTokens, ...$nonFungibleTokens]
 );
 
-export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
-	$tokens.filter((token) => isDefaultEthereumToken(token))
-);
-
 export const tokensToPin: Readable<TokenToPin[]> = derived(
-	[icrcChainFusionDefaultTokens, defaultEthereumTokens],
-	([$icrcChainFusionDefaultTokens, $defaultEthereumTokens]) => [
+	[icrcChainFusionDefaultTokens, enabledEvmTokens],
+	([$icrcChainFusionDefaultTokens, $enabledEvmTokens]) => [
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
 		TESTICP_TOKEN,
 		SOLANA_TOKEN,
 		...$icrcChainFusionDefaultTokens,
-		...$defaultEthereumTokens.filter((token) => token !== ETHEREUM_TOKEN)
+		...$enabledEvmTokens
 	]
 );
 

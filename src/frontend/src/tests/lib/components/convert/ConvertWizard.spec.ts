@@ -1,6 +1,17 @@
+import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import {
-	initUtxosFeeStore,
+	ALL_UTXOS_CONTEXT_KEY,
+	initAllUtxosStore,
+	type AllUtxosContext
+} from '$btc/stores/all-utxos.store';
+import {
+	FEE_RATE_PERCENTILES_CONTEXT_KEY,
+	initFeeRatePercentilesStore,
+	type FeeRatePercentilesContext
+} from '$btc/stores/fee-rate-percentiles.store';
+import {
 	UTXOS_FEE_CONTEXT_KEY,
+	initUtxosFeeStore,
 	type UtxosFeeContext
 } from '$btc/stores/utxos-fee.store';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
@@ -14,6 +25,7 @@ import {
 	initEthFeeStore,
 	type EthFeeContext
 } from '$eth/stores/eth-fee.store';
+import * as bitcoinApi from '$icp/api/bitcoin.api';
 import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 import {
 	BTC_CONVERT_FORM_TEST_ID,
@@ -28,8 +40,8 @@ import {
 	type ConvertContext
 } from '$lib/stores/convert.store';
 import {
-	initTokenActionValidationErrorsContext,
 	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
 import type { Token } from '$lib/types/token';
@@ -70,9 +82,16 @@ describe('ConvertWizard', () => {
 	const mockContext = (sourceToken: Token) =>
 		new Map<
 			symbol,
-			ConvertContext | TokenActionValidationErrorsContext | UtxosFeeContext | EthFeeContext
+			| UtxosFeeContext
+			| AllUtxosContext
+			| FeeRatePercentilesContext
+			| EthFeeContext
+			| ConvertContext
+			| TokenActionValidationErrorsContext
 		>([
 			[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }],
+			[ALL_UTXOS_CONTEXT_KEY, { store: initAllUtxosStore() }],
+			[FEE_RATE_PERCENTILES_CONTEXT_KEY, { store: initFeeRatePercentilesStore() }],
 			[
 				ETH_FEE_CONTEXT_KEY,
 				initEthFeeContext({
@@ -89,6 +108,14 @@ describe('ConvertWizard', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
+			utxos: [],
+			tip_block_hash: new Uint8Array(),
+			tip_height: 100,
+			next_page: []
+		});
+		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
 
 		mockPage.reset();
 	});
