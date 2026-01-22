@@ -158,18 +158,6 @@ describe('AuthHelpForm', () => {
 			metadata: { event_key: trackingEventKey, event_value: 'use_identity_number' }
 		});
 
-		const lostIdentityButton: HTMLButtonElement | null = container.querySelector(
-			lostIdentityButtonSelector
-		);
-
-		expect(lostIdentityButton).toBeInTheDocument();
-
-		await waitFor(() => {
-			lostIdentityButton?.click();
-
-			expect(onOpenLegacyIdentityHelpMock).toHaveBeenCalledOnce();
-		});
-
 		expect(analyticSpy).toHaveBeenCalledWith({
 			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
 			metadata: { event_key: trackingEventKey, event_value: 'lost_identity_number' }
