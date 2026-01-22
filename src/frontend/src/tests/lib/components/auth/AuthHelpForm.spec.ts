@@ -80,13 +80,15 @@ describe('AuthHelpForm', () => {
 
 		expect(introductionLink).toBeInTheDocument();
 
-		const loggingIntoOisyLink: HTMLAnchorElement | null =
-			container.querySelector(loggingIntoOisyLinkSelector);
+		const loggingIntoOisyLink: HTMLAnchorElement | null = container.querySelector(
+			loggingIntoOisyLinkSelector
+		);
 
 		expect(loggingIntoOisyLink).toBeInTheDocument();
 
-		const createingAWalletLink: HTMLAnchorElement | null =
-			container.querySelector(createingAWalletLinkSelector);
+		const createingAWalletLink: HTMLAnchorElement | null = container.querySelector(
+			createingAWalletLinkSelector
+		);
 
 		expect(createingAWalletLinkSelector).toBeInTheDocument();
 
