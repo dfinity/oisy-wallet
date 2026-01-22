@@ -110,7 +110,7 @@ export const getRpcTransaction = async ({
 
 const cachedTransactions = new SvelteMap<
 	SolanaNetworkType,
-	SvelteMap<SolSignature, SolRpcTransaction>
+	SvelteMap<SolSignature['signature'], SolRpcTransaction>
 >();
 
 export const fetchTransactionDetailForSignature = async ({
@@ -123,14 +123,14 @@ export const fetchTransactionDetailForSignature = async ({
 	const networkCache =
 		cachedTransactions.get(network) ??
 		(() => {
-			const map = new SvelteMap<SolSignature, SolRpcTransaction>();
+			const map = new SvelteMap<SolSignature['signature'], SolRpcTransaction>();
 
 			cachedTransactions.set(network, map);
 
 			return map;
 		})();
 
-	const cachedTransaction = networkCache.get(signature);
+	const cachedTransaction = networkCache.get(signature.signature);
 
 	if (nonNullish(cachedTransaction)) {
 		return cachedTransaction;
@@ -156,7 +156,7 @@ export const fetchTransactionDetailForSignature = async ({
 	};
 
 	if (confirmationStatus === 'finalized' && nonNullish(transaction)) {
-		networkCache.set(signature, transaction);
+		networkCache.set(signature.signature, transaction);
 	}
 
 	return transaction;
