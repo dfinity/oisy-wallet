@@ -6,6 +6,7 @@ import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers'
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import type { EthereumChainId } from '$eth/types/network';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -42,19 +43,22 @@ export const isInterfaceErc1155 = async ({
 };
 
 export const loadErc1155Tokens = async ({
-	identity
+	identity,
+	networkChainIds
 }: {
 	identity: OptionIdentity;
+	networkChainIds: EthereumChainId[];
 }): Promise<void> => {
-	await Promise.all([loadCustomTokens({ identity, useCache: true })]);
+	await Promise.all([loadCustomTokens({ identity, networkChainIds, useCache: true })]);
 };
 
 export const loadCustomTokens = ({
 	identity,
+	networkChainIds,
 	useCache = false
 }: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
 	queryAndUpdate<Erc1155CustomToken[]>({
-		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
+		request: (params) => loadCustomTokensWithMetadata({ ...params, networkChainIds, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
 			erc1155CustomTokensStore.resetAll();
@@ -67,10 +71,14 @@ export const loadCustomTokens = ({
 		identity
 	});
 
-const loadErc1155CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
+const loadErc1155CustomTokens = async ({
+	networkChainIds,
+	...params
+}: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
 		...params,
-		filterTokens: ({ token }) => 'Erc1155' in token
+		filterTokens: ({ token }) =>
+			'Erc1155' in token && networkChainIds.includes(token.Erc1155.chain_id)
 	});
 
 const safeLoadMetadata = async ({

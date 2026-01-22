@@ -1,5 +1,6 @@
 import type { Token as BackendToken } from '$declarations/backend/backend.did';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { EthereumChainId } from '$eth/types/network';
 import type { Dip721Token } from '$icp/types/dip721-token';
 import type { ExtToken } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
@@ -59,4 +60,7 @@ export type SaveCustomExtVariant = CustomTokenState & TokenVariant<'ExtV2', ExtS
 
 export type CustomToken<T extends Token> = TokenToggleable<T>;
 
-export type LoadCustomTokenParams = QueryAndUpdateRequestParams & { useCache?: boolean };
+export type LoadCustomTokenParams = QueryAndUpdateRequestParams & {
+	networkChainIds: EthereumChainId[];
+	useCache?: boolean;
+};
