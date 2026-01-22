@@ -37,6 +37,7 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
+import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -67,6 +68,8 @@ describe('sol-transactions.services', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		vi.spyOn(SvelteMap.prototype, 'get').mockReturnValue(undefined); // invalidate cache
 
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
 		spyGetTransactions = vi.spyOn(solSignaturesServices, 'getSolTransactions');

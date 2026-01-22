@@ -31,6 +31,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { lamports, address as solAddress } from '@solana/kit';
 import type { Lamports } from '@solana/rpc-types';
+import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
 
 // The fee payer is always the first signer
@@ -65,6 +66,11 @@ const extractBalances = ({
 	};
 };
 
+const cachedParsedTransactions = new SvelteMap<
+	SolanaNetworkType,
+	SvelteMap<SolSignature['signature'], SolTransactionUi[]>
+>();
+
 export const fetchSolTransactionsForSignature = async ({
 	identity,
 	signature,
@@ -80,6 +86,22 @@ export const fetchSolTransactionsForSignature = async ({
 	tokenAddress?: SplTokenAddress;
 	tokenOwnerAddress?: SolAddress;
 }): Promise<SolTransactionUi[]> => {
+	const networkCache =
+		cachedParsedTransactions.get(network) ??
+		(() => {
+			const map = new SvelteMap<SolSignature['signature'], SolTransactionUi[]>();
+
+			cachedParsedTransactions.set(network, map);
+
+			return map;
+		})();
+
+	const cachedTransactions = networkCache.get(signature.signature);
+
+	if (nonNullish(cachedTransactions)) {
+		return cachedTransactions;
+	}
+
 	const transactionDetail: SolRpcTransaction | null = await fetchTransactionDetailForSignature({
 		signature,
 		network
@@ -257,7 +279,13 @@ export const fetchSolTransactionsForSignature = async ({
 	// order—from the last executed instruction to the first. This ensures that when shown,
 	// the most recently executed instruction appears first, maintaining a more intuitive,
 	// backward-looking view of execution history.
-	return parsedTransactions.reverse();
+	const transactions = parsedTransactions.reverse();
+
+	if (signature.confirmationStatus === 'finalized') {
+		networkCache.set(signature.signature, transactions);
+	}
+
+	return transactions;
 };
 
 export const loadNextSolTransactions = async ({
