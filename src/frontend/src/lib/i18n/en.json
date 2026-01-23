@@ -170,6 +170,8 @@
 				"identity_legacy_sign_in": "Sign in with Internet Identity 1.0 (legacy)",
 				"identity_learn_more": "Learn more on $oisy_short Docs",
 				"oisy_introduction": "$oisy_short Introduction",
+				"logging_into_oisy": "Logging into $oisy_short",
+				"creating_a_wallet": "Creating a wallet",
 				"private_key": "Who controls the private key for the native assets?",
 				"asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet",
 				"internet_identity_help_center": "Internet Identity 2.0 Help Center",
