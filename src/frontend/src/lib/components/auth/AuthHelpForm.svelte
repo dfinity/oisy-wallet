@@ -3,10 +3,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import {
-		OISY_ACCESS_CONTROL_URL,
-		OISY_DOCS_URL
-	} from '$lib/constants/oisy.constants';
+	import { OISY_ACCESS_CONTROL_URL, OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON,
 		HELP_AUTH_IMAGE_BANNER,
