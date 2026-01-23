@@ -161,7 +161,6 @@ interface I18nAuth {
 			identity_legacy_sign_in: string;
 			identity_learn_more: string;
 			oisy_introduction: string;
-			private_key: string;
 			asset_control: string;
 			internet_identity_help_center: string;
 			need_help: string;
