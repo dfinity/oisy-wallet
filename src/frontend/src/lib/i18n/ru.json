@@ -155,7 +155,6 @@
 				"description": "Похоже вы отменили свой вход в систему или регистрацию. Мы хотели бы понять что произошло чтобы улучшить ваш пользовательский опыт.",
 				"login_page_looks_different": "",
 				"use_identity_number": "",
-				"lost_identity_number": "",
 				"feedback_text": "Ваши отзывы помогают нам улучшать $oisy_short.",
 				"thanks_text": "Спасибо!",
 				"useful_links": "",

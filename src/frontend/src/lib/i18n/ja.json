@@ -155,7 +155,6 @@
 				"description": "あなたはログインまたは新規作成をキャンセルされたようです。どうしてそうなったのかを理解するため、改善に役立てたいと思っています。",
 				"login_page_looks_different": "",
 				"use_identity_number": "",
-				"lost_identity_number": "",
 				"feedback_text": "あなたのフィードバックは、$oisy_shortを改善するために役立ちます。",
 				"thanks_text": "ご協力ありがとうございました！",
 				"useful_links": "",

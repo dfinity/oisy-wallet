@@ -155,7 +155,6 @@
 				"description": "看起来你取消了登录或注册。我们希望了解发生了什么，以便改进你的使用体验。",
 				"login_page_looks_different": "为什么登录页面看起来不一样？",
 				"use_identity_number": "我想使用我的 Internet Identity I号码",
-				"lost_identity_number": "我的互联网身份号码丢失了",
 				"feedback_text": "你的反馈将帮助我们让 $oisy_short 变得更好。",
 				"thanks_text": "谢谢您！",
 				"useful_links": "有用的链接",

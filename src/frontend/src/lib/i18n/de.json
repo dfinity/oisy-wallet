@@ -155,7 +155,6 @@
 				"description": "Es scheint du hast das Anmelden abgebrochen. Wir würden gerne verstehen was passiert ist, damit wir den Prozess verbessern können.",
 				"login_page_looks_different": "Wieso schaut die Login Seite so anders aus?",
 				"use_identity_number": "Ich möchte meine Internet Identity Nummer verwenden",
-				"lost_identity_number": "Ich habe meine Internet Identity Nummer vergessen",
 				"feedback_text": "Deine Rückmeldung hilft uns, $oisy_short zu verbessern.",
 				"thanks_text": "Danke!",
 				"useful_links": "Hilfreiche Links",
