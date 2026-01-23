@@ -2,7 +2,9 @@ import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { KASPA_MAINNET_TOKEN } from '$env/tokens/tokens.kaspa.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { enabledKaspaTokens } from '$kaspa/derived/tokens.derived';
 import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
@@ -34,20 +36,23 @@ export const nativeTokens: Readable<Token[]> = derived(
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		enabledEvmTokens,
-		enabledSolanaTokens
+		enabledSolanaTokens,
+		enabledKaspaTokens
 	],
 	([
 		$defaultIcpTokens,
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$enabledEvmTokens,
-		$enabledSolanaTokens
+		$enabledSolanaTokens,
+		$enabledKaspaTokens
 	]) => [
 		...$defaultIcpTokens,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
-		...$enabledEvmTokens
+		...$enabledEvmTokens,
+		...$enabledKaspaTokens
 	]
 );
 
@@ -84,6 +89,7 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		ICP_TOKEN,
 		TESTICP_TOKEN,
 		SOLANA_TOKEN,
+		KASPA_MAINNET_TOKEN,
 		...$icrcChainFusionDefaultTokens,
 		...$enabledEvmTokens
 	]

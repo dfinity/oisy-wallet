@@ -4,6 +4,7 @@ import { SUPPORTED_BSC_TOKENS } from '$env/tokens/tokens-evm/tokens-bsc/tokens.b
 import { SUPPORTED_POLYGON_TOKENS } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
 import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
+import { SUPPORTED_KASPA_TOKENS } from '$env/tokens/tokens.kaspa.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 
 export const [DEFAULT_ETHEREUM_TOKEN] = SUPPORTED_ETHEREUM_TOKENS;
@@ -11,6 +12,8 @@ export const [DEFAULT_ETHEREUM_TOKEN] = SUPPORTED_ETHEREUM_TOKENS;
 export const [DEFAULT_BITCOIN_TOKEN] = SUPPORTED_BITCOIN_TOKENS;
 
 export const [DEFAULT_SOLANA_TOKEN] = SUPPORTED_SOLANA_TOKENS;
+
+export const [DEFAULT_KASPA_TOKEN] = SUPPORTED_KASPA_TOKENS;
 
 export const [DEFAULT_BSC_TOKEN] = SUPPORTED_BSC_TOKENS;
 
