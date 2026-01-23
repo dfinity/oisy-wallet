@@ -121,7 +121,7 @@ const loadCustomTokensWithMetadata = async ({
 }: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<Erc20CustomToken[]> => {
 	const loadCustomContracts = async (): Promise<Erc20CustomToken[]> => {
 		const erc20CustomTokens = nonNullish(fetchedTokens)
-			? fetchedTokens.filter(({ token }) => 'Erc20' in token)
+			? fetchedTokens
 			: await loadErc20CustomTokens(params);
 
 		const [existingTokens, nonExistingTokens] = erc20CustomTokens.reduce<

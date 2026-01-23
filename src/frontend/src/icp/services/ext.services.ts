@@ -74,7 +74,7 @@ const loadCustomTokensWithMetadata = async ({
 	...params
 }: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<ExtCustomToken[]> => {
 	const extCustomTokens: CustomToken[] = nonNullish(fetchedTokens)
-		? fetchedTokens.filter(({ token }) => 'ExtV2' in token)
+		? fetchedTokens
 		: await loadExtCustomTokens(params);
 
 	const customTokenPromises = extCustomTokens

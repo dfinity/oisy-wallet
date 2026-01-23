@@ -79,7 +79,7 @@ const loadCustomTokensWithMetadata = async ({
 	...params
 }: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<IcPunksCustomToken[]> => {
 	const icPunksCustomTokens: CustomToken[] = nonNullish(fetchedTokens)
-		? fetchedTokens.filter(({ token }) => 'IcPunks' in token)
+		? fetchedTokens
 		: await loadIcPunksCustomTokens(params);
 
 	const customTokenPromises = icPunksCustomTokens

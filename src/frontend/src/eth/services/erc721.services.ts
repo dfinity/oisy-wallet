@@ -114,7 +114,7 @@ const loadCustomTokensWithMetadata = async ({
 	...params
 }: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<Erc721CustomToken[]> => {
 	const erc721CustomTokens: CustomToken[] = nonNullish(fetchedTokens)
-		? fetchedTokens.filter(({ token }) => 'Erc721' in token)
+		? fetchedTokens
 		: await loadErc721CustomTokens(params);
 
 	const customTokenPromises = erc721CustomTokens

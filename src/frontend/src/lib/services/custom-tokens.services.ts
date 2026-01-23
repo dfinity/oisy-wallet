@@ -192,14 +192,40 @@ export const loadCustomTokens = async ({
 				'../../icp/services/icpunks.services'
 			);
 
+			const icrcTokens: CustomToken[] = [];
+			const erc20Tokens: CustomToken[] = [];
+			const erc721Tokens: CustomToken[] = [];
+			const erc1155Tokens: CustomToken[] = [];
+			const splTokens: CustomToken[] = [];
+			const extTokens: CustomToken[] = [];
+			const icPunksTokens: CustomToken[] = [];
+
+			tokens.forEach((token) => {
+				if ('Icrc' in token.token) {
+					icrcTokens.push(token);
+				} else if ('Erc20' in token.token) {
+					erc20Tokens.push(token);
+				} else if ('Erc721' in token.token) {
+					erc721Tokens.push(token);
+				} else if ('Erc1155' in token.token) {
+					erc1155Tokens.push(token);
+				} else if ('SplMainnet' in token.token || 'SplDevnet' in token.token) {
+					splTokens.push(token);
+				} else if ('ExtV2' in token.token) {
+					extTokens.push(token);
+				} else if ('IcPunks' in token.token) {
+					icPunksTokens.push(token);
+				}
+			});
+
 			await Promise.all([
-				loadIcrcCustomTokens({ identity, certified, tokens }),
-				loadErc20CustomTokens({ identity, certified, tokens }),
-				loadErc721CustomTokens({ identity, certified, tokens }),
-				loadErc1155CustomTokens({ identity, certified, tokens }),
-				loadSplCustomTokens({ identity, certified, tokens }),
-				loadExtCustomTokens({ identity, certified, tokens }),
-				loadIcPunksCustomTokens({ identity, certified, tokens })
+				loadIcrcCustomTokens({ identity, certified, tokens: icrcTokens }),
+				loadErc20CustomTokens({ identity, certified, tokens: erc20Tokens }),
+				loadErc721CustomTokens({ identity, certified, tokens: erc721Tokens }),
+				loadErc1155CustomTokens({ identity, certified, tokens: erc1155Tokens }),
+				loadSplCustomTokens({ identity, certified, tokens: splTokens }),
+				loadExtCustomTokens({ identity, certified, tokens: extTokens }),
+				loadIcPunksCustomTokens({ identity, certified, tokens: icPunksTokens })
 			]);
 		},
 		onUpdateError: () => {

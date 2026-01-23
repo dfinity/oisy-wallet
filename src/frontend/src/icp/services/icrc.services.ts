@@ -159,7 +159,7 @@ const loadIcrcCustomTokens = async ({
 	tokens?: CustomToken[];
 }): Promise<IcrcCustomToken[]> => {
 	const tokens = nonNullish(fetchedTokens)
-		? fetchedTokens.filter(({ token }) => 'Icrc' in token)
+		? fetchedTokens
 		: await loadNetworkCustomTokens({
 			identity,
 			certified,

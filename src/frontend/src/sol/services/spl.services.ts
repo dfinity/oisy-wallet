@@ -89,7 +89,7 @@ const loadCustomTokensWithMetadata = async ({
 }: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<SplCustomToken[]> => {
 	const loadCustomContracts = async (): Promise<SplCustomToken[]> => {
 		const splCustomTokens = nonNullish(fetchedTokens)
-			? fetchedTokens.filter(({ token }) => 'SplMainnet' in token || 'SplDevnet' in token)
+			? fetchedTokens
 			: await loadSplCustomTokens(params);
 
 		const [existingTokens, nonExistingTokens] = splCustomTokens.reduce<
