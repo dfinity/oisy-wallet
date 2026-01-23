@@ -48,68 +48,71 @@ export const loadCustomTokens = ({
 		identity
 	});
 
-const loadExtCustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
-	await loadNetworkCustomTokens({
-		...params,
-		filterTokens: ({ token }) => 'ExtV2' in token
-	});
+type CustomTokenExtVariant = Omit<CustomToken, 'token'> & { token: { ExtV2: ExtV2Token } };
+
+const filterExtCustomToken = (customToken: CustomToken): customToken is CustomTokenExtVariant =>
+	'ExtV2' in customToken.token;
+
+const mapExtCustomToken = async ({
+	token,
+	enabled,
+	version: versionNullable,
+	section: sectionNullable,
+	allow_external_content_source: allowExternalContentSourceNullable
+	// eslint-disable-next-line require-await -- We are going to add an async function to fetch the metadata
+}: CustomTokenExtVariant): Promise<ExtCustomToken | undefined> => {
+	const version = fromNullable(versionNullable);
+	const section = fromNullable(sectionNullable);
+	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
+	const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+
+	const {
+		ExtV2: { canister_id: canisterId }
+	} = token;
+
+	const canisterIdText = canisterId.toString();
+
+	// TODO: add the canister method to fetch metadata from the canister.
+	const metadata = EXT_BUILTIN_TOKENS_INDEXED.get(canisterIdText);
+
+	const { symbol, ...rest } = metadata ?? {
+		symbol: canisterIdText,
+		name: canisterIdText,
+		decimals: 0,
+		network: ICP_NETWORK
+	};
+
+	return {
+		...rest,
+		id: parseTokenId(symbol),
+		canisterId: canisterIdText,
+		symbol,
+		standard: { code: 'ext' as const, version: 'v2' },
+		category: 'custom' as const,
+		enabled,
+		version,
+		...(nonNullish(mappedSection) && {
+			section: mappedSection
+		}),
+		allowExternalContentSource
+	};
+};
 
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
 ): Promise<ExtCustomToken[]> => {
-	const extCustomTokens: CustomToken[] = await loadExtCustomTokens(params);
+	const backendCustomTokens: CustomToken[] = await loadNetworkCustomTokens(params);
 
-	const customTokenPromises = extCustomTokens
-		.filter(
-			(customToken): customToken is CustomToken & { token: { ExtV2: ExtV2Token } } =>
-				'ExtV2' in customToken.token
-		)
-		.map(
-			async ({
-				token,
-				enabled,
-				version: versionNullable,
-				section: sectionNullable,
-				allow_external_content_source: allowExternalContentSourceNullable
-				// eslint-disable-next-line require-await -- We are going to add an async function to fetch the metadata
-			}) => {
-				const version = fromNullable(versionNullable);
-				const section = fromNullable(sectionNullable);
-				const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
-				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
-
-				const {
-					ExtV2: { canister_id: canisterId }
-				} = token;
-
-				const canisterIdText = canisterId.toString();
-
-				// TODO: add the canister method to fetch metadata from the canister.
-				const metadata = EXT_BUILTIN_TOKENS_INDEXED.get(canisterIdText);
-
-				const { symbol, ...rest } = metadata ?? {
-					symbol: canisterIdText,
-					name: canisterIdText,
-					decimals: 0,
-					network: ICP_NETWORK
-				};
-
-				return {
-					...rest,
-					id: parseTokenId(symbol),
-					canisterId: canisterIdText,
-					symbol,
-					standard: { code: 'ext' as const, version: 'v2' },
-					category: 'custom' as const,
-					enabled,
-					version,
-					...(nonNullish(mappedSection) && {
-						section: mappedSection
-					}),
-					allowExternalContentSource
-				};
+	const customTokenPromises = backendCustomTokens.reduce<Promise<ExtCustomToken | undefined>[]>(
+		(acc, token) => {
+			if (filterExtCustomToken(token)) {
+				acc.push(mapExtCustomToken(token));
 			}
-		);
+
+			return acc;
+		},
+		[]
+	);
 
 	const customTokens = await Promise.allSettled(customTokenPromises);
 
