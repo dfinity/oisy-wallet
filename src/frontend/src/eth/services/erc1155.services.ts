@@ -16,7 +16,6 @@ import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
@@ -41,19 +40,30 @@ export const isInterfaceErc1155 = async ({
 	return await isInterfaceErc1155({ address });
 };
 
-export const loadErc1155Tokens = async ({
-	identity
-}: {
-	identity: OptionIdentity;
-}): Promise<void> => {
-	await Promise.all([loadCustomTokens({ identity, useCache: true })]);
+export const loadErc1155Tokens = async (): Promise<void> => {
+	// No default ERC1155 tokens to load specifically for now, but we keep the function for consistency
 };
 
-export const loadCustomTokens = ({
+export const loadCustomTokens = async ({
 	identity,
-	useCache = false
-}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
-	queryAndUpdate<Erc1155CustomToken[]>({
+	useCache = false,
+	tokens,
+	certified
+}: LoadCustomTokenParams): Promise<void> => {
+	if (nonNullish(tokens)) {
+		const response = await loadCustomTokensWithMetadata({
+			identity,
+			certified,
+			useCache,
+			tokens
+		});
+
+		loadCustomTokenData({ response, certified });
+
+		return;
+	}
+
+	return queryAndUpdate<Erc1155CustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
@@ -66,6 +76,7 @@ export const loadCustomTokens = ({
 		},
 		identity
 	});
+};
 
 const loadErc1155CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
@@ -98,10 +109,13 @@ const safeLoadMetadata = async ({
 	}
 };
 
-const loadCustomTokensWithMetadata = async (
-	params: LoadCustomTokenParams
-): Promise<Erc1155CustomToken[]> => {
-	const erc1155CustomTokens: CustomToken[] = await loadErc1155CustomTokens(params);
+const loadCustomTokensWithMetadata = async ({
+	tokens: fetchedTokens,
+	...params
+}: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<Erc1155CustomToken[]> => {
+	const erc1155CustomTokens: CustomToken[] = nonNullish(fetchedTokens)
+		? fetchedTokens
+		: await loadErc1155CustomTokens(params);
 
 	const customTokenPromises = erc1155CustomTokens
 		.filter(

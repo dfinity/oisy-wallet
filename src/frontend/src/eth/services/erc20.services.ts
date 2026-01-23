@@ -26,19 +26,14 @@ import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadErc20Tokens = async ({
-	identity
-}: {
-	identity: OptionIdentity;
-}): Promise<void> => {
-	await Promise.all([loadDefaultErc20Tokens(), loadCustomTokens({ identity, useCache: true })]);
+export const loadErc20Tokens = async (): Promise<void> => {
+	await loadDefaultErc20Tokens();
 };
 
 const ALL_DEFAULT_ERC20_TOKENS = [
@@ -80,11 +75,26 @@ const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 	return { success: true };
 };
 
-export const loadCustomTokens = ({
+export const loadCustomTokens = async ({
 	identity,
-	useCache = false
-}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
-	queryAndUpdate<Erc20CustomToken[]>({
+	useCache = false,
+	tokens,
+	certified
+}: LoadCustomTokenParams): Promise<void> => {
+	if (nonNullish(tokens)) {
+		const response = await loadCustomTokensWithMetadata({
+			identity,
+			certified,
+			useCache,
+			tokens
+		});
+
+		loadCustomTokenData({ response, certified });
+
+		return;
+	}
+
+	return queryAndUpdate<Erc20CustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
@@ -97,6 +107,7 @@ export const loadCustomTokens = ({
 		},
 		identity
 	});
+};
 
 const loadErc20CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
@@ -104,11 +115,14 @@ const loadErc20CustomTokens = async (params: LoadCustomTokenParams): Promise<Cus
 		filterTokens: ({ token }) => 'Erc20' in token
 	});
 
-const loadCustomTokensWithMetadata = async (
-	params: LoadCustomTokenParams
-): Promise<Erc20CustomToken[]> => {
+const loadCustomTokensWithMetadata = async ({
+	tokens: fetchedTokens,
+	...params
+}: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<Erc20CustomToken[]> => {
 	const loadCustomContracts = async (): Promise<Erc20CustomToken[]> => {
-		const erc20CustomTokens = await loadErc20CustomTokens(params);
+		const erc20CustomTokens = nonNullish(fetchedTokens)
+			? fetchedTokens
+			: await loadErc20CustomTokens(params);
 
 		const [existingTokens, nonExistingTokens] = erc20CustomTokens.reduce<
 			[Erc20CustomToken[], Erc20CustomToken[]]

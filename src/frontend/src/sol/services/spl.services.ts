@@ -6,7 +6,6 @@ import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
@@ -23,8 +22,8 @@ import { fromNullable, isNullish, nonNullish, queryAndUpdate } from '@dfinity/ut
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 
-export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
-	await Promise.all([loadDefaultSplTokens(), loadCustomTokens({ identity, useCache: true })]);
+export const loadSplTokens = async (): Promise<void> => {
+	loadDefaultSplTokens();
 };
 
 const loadDefaultSplTokens = (): ResultSuccess => {
@@ -44,11 +43,26 @@ const loadDefaultSplTokens = (): ResultSuccess => {
 	return { success: true };
 };
 
-export const loadCustomTokens = ({
+export const loadCustomTokens = async ({
 	identity,
-	useCache = false
-}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
-	queryAndUpdate<SplCustomToken[]>({
+	useCache = false,
+	tokens,
+	certified
+}: LoadCustomTokenParams): Promise<void> => {
+	if (nonNullish(tokens)) {
+		const response = await loadCustomTokensWithMetadata({
+			identity,
+			certified,
+			useCache,
+			tokens
+		});
+
+		loadCustomTokenData({ response, certified });
+
+		return;
+	}
+
+	return queryAndUpdate<SplCustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
@@ -61,6 +75,7 @@ export const loadCustomTokens = ({
 		},
 		identity
 	});
+};
 
 const loadSplCustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
@@ -68,11 +83,14 @@ const loadSplCustomTokens = async (params: LoadCustomTokenParams): Promise<Custo
 		filterTokens: ({ token }) => 'SplMainnet' in token || 'SplDevnet' in token
 	});
 
-const loadCustomTokensWithMetadata = async (
-	params: LoadCustomTokenParams
-): Promise<SplCustomToken[]> => {
+const loadCustomTokensWithMetadata = async ({
+	tokens: fetchedTokens,
+	...params
+}: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<SplCustomToken[]> => {
 	const loadCustomContracts = async (): Promise<SplCustomToken[]> => {
-		const splCustomTokens = await loadSplCustomTokens(params);
+		const splCustomTokens = nonNullish(fetchedTokens)
+			? fetchedTokens
+			: await loadSplCustomTokens(params);
 
 		const [existingTokens, nonExistingTokens] = splCustomTokens.reduce<
 			[SplCustomToken[], SplCustomToken[]]

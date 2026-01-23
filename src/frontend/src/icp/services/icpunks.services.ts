@@ -23,12 +23,8 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadIcPunksTokens = async ({
-	identity
-}: {
-	identity: OptionIdentity;
-}): Promise<void> => {
-	await Promise.all([loadDefaultIcPunksTokens(), loadCustomTokens({ identity, useCache: true })]);
+export const loadIcPunksTokens = async (): Promise<void> => {
+	loadDefaultIcPunksTokens();
 };
 
 const loadDefaultIcPunksTokens = (): ResultSuccess => {
@@ -39,11 +35,25 @@ const loadDefaultIcPunksTokens = (): ResultSuccess => {
 	return { success: true };
 };
 
-export const loadCustomTokens = ({
+export const loadCustomTokens = async ({
 	identity,
-	useCache = false
-}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
-	queryAndUpdate<IcPunksCustomToken[]>({
+	useCache = false,
+	tokens,
+	certified
+}: LoadCustomTokenParams): Promise<void> => {
+	if (nonNullish(tokens)) {
+		const response = await loadCustomTokensWithMetadata({
+			identity,
+			certified,
+			useCache,
+			tokens
+		});
+
+		loadCustomTokenData({ response, certified });
+		return;
+	}
+
+	return queryAndUpdate<IcPunksCustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
@@ -56,6 +66,7 @@ export const loadCustomTokens = ({
 		},
 		identity
 	});
+};
 
 const loadIcPunksCustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
@@ -63,10 +74,13 @@ const loadIcPunksCustomTokens = async (params: LoadCustomTokenParams): Promise<C
 		filterTokens: ({ token }) => 'IcPunks' in token
 	});
 
-const loadCustomTokensWithMetadata = async (
-	params: LoadCustomTokenParams
-): Promise<IcPunksCustomToken[]> => {
-	const icPunksCustomTokens: CustomToken[] = await loadIcPunksCustomTokens(params);
+const loadCustomTokensWithMetadata = async ({
+	tokens: fetchedTokens,
+	...params
+}: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<IcPunksCustomToken[]> => {
+	const icPunksCustomTokens: CustomToken[] = nonNullish(fetchedTokens)
+		? fetchedTokens
+		: await loadIcPunksCustomTokens(params);
 
 	const customTokenPromises = icPunksCustomTokens
 		.filter(

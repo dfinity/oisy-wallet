@@ -32,6 +32,7 @@
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import { loadCustomTokens } from '$lib/services/all-tokens.services';
 	import { splCustomTokensNotInitialized } from '$sol/derived/spl.derived';
 	import { loadSplTokens } from '$sol/services/spl.services';
 
@@ -42,7 +43,7 @@
 	let { children }: Props = $props();
 
 	$effect(() => {
-		loadIcrcTokens({ identity: $authIdentity });
+		loadIcrcTokens();
 	});
 
 	let loadErc = $derived(
@@ -72,37 +73,46 @@
 
 	$effect(() => {
 		if (loadErc20) {
-			loadErc20Tokens({ identity: $authIdentity });
+			loadErc20Tokens();
 		}
 	});
 
 	$effect(() => {
 		if (loadErc721) {
-			loadErc721Tokens({ identity: $authIdentity });
+			loadErc721Tokens();
 		}
 	});
 
 	$effect(() => {
 		if (loadErc1155) {
-			loadErc1155Tokens({ identity: $authIdentity });
+			loadErc1155Tokens();
 		}
 	});
 
 	$effect(() => {
 		if (loadSpl) {
-			loadSplTokens({ identity: $authIdentity });
+			loadSplTokens();
 		}
 	});
 
 	$effect(() => {
 		if (loadExt) {
-			loadExtTokens({ identity: $authIdentity });
+			loadExtTokens();
 		}
 	});
 
 	$effect(() => {
 		if (loadIcPunks) {
-			loadIcPunksTokens({ identity: $authIdentity });
+			loadIcPunksTokens();
+		}
+	});
+
+	$effect(() => {
+		const loadAnyCustomTokens =
+			loadErc20 || loadErc721 || loadErc1155 || loadSpl || loadExt || loadIcPunks;
+
+		if (loadAnyCustomTokens) {
+			loadCustomTokens({ identity: $authIdentity, useCache: true });
 		}
 	});
 </script>

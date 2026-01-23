@@ -11,15 +11,14 @@ import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadExtTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
-	await Promise.all([loadDefaultExtTokens(), loadCustomTokens({ identity, useCache: true })]);
+export const loadExtTokens = async (): Promise<void> => {
+	loadDefaultExtTokens();
 };
 
 const loadDefaultExtTokens = (): ResultSuccess => {
@@ -30,11 +29,26 @@ const loadDefaultExtTokens = (): ResultSuccess => {
 	return { success: true };
 };
 
-export const loadCustomTokens = ({
+export const loadCustomTokens = async ({
 	identity,
-	useCache = false
-}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
-	queryAndUpdate<ExtCustomToken[]>({
+	useCache = false,
+	tokens,
+	certified
+}: LoadCustomTokenParams): Promise<void> => {
+	if (nonNullish(tokens)) {
+		const response = await loadCustomTokensWithMetadata({
+			identity,
+			certified,
+			useCache,
+			tokens
+		});
+
+		loadCustomTokenData({ response, certified });
+
+		return;
+	}
+
+	return queryAndUpdate<ExtCustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
@@ -47,6 +61,7 @@ export const loadCustomTokens = ({
 		},
 		identity
 	});
+};
 
 const loadExtCustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
@@ -54,10 +69,13 @@ const loadExtCustomTokens = async (params: LoadCustomTokenParams): Promise<Custo
 		filterTokens: ({ token }) => 'ExtV2' in token
 	});
 
-const loadCustomTokensWithMetadata = async (
-	params: LoadCustomTokenParams
-): Promise<ExtCustomToken[]> => {
-	const extCustomTokens: CustomToken[] = await loadExtCustomTokens(params);
+const loadCustomTokensWithMetadata = async ({
+	tokens: fetchedTokens,
+	...params
+}: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<ExtCustomToken[]> => {
+	const extCustomTokens: CustomToken[] = nonNullish(fetchedTokens)
+		? fetchedTokens
+		: await loadExtCustomTokens(params);
 
 	const customTokenPromises = extCustomTokens
 		.filter(

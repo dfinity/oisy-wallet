@@ -4,7 +4,7 @@ import { getIdbAllCustomTokens, setIdbAllCustomTokens } from '$lib/api/idb-token
 import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import { assertNever, fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { assertNever, fromNullable, isNullish, nonNullish, queryAndUpdate, toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 

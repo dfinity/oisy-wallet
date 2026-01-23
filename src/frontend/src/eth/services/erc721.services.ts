@@ -41,19 +41,29 @@ export const isInterfaceErc721 = async ({
 	return await isInterfaceErc721({ address });
 };
 
-export const loadErc721Tokens = async ({
-	identity
-}: {
-	identity: OptionIdentity;
-}): Promise<void> => {
-	await Promise.all([loadCustomTokens({ identity, useCache: true })]);
+export const loadErc721Tokens = async (): Promise<void> => {
+	// No default ERC721 tokens to load specifically for now, but we keep the function for consistency
 };
 
-export const loadCustomTokens = ({
+export const loadCustomTokens = async ({
 	identity,
-	useCache = false
-}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
-	queryAndUpdate<Erc721CustomToken[]>({
+	useCache = false,
+	tokens,
+	certified
+}: LoadCustomTokenParams): Promise<void> => {
+	if (nonNullish(tokens)) {
+		const response = await loadCustomTokensWithMetadata({
+			identity,
+			certified,
+			useCache,
+			tokens
+		});
+
+		loadCustomTokenData({ response, certified });
+		return;
+	}
+
+	return queryAndUpdate<Erc721CustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
@@ -66,6 +76,7 @@ export const loadCustomTokens = ({
 		},
 		identity
 	});
+};
 
 const loadErc721CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
@@ -98,10 +109,13 @@ const safeLoadMetadata = async ({
 	}
 };
 
-const loadCustomTokensWithMetadata = async (
-	params: LoadCustomTokenParams
-): Promise<Erc721CustomToken[]> => {
-	const erc721CustomTokens: CustomToken[] = await loadErc721CustomTokens(params);
+const loadCustomTokensWithMetadata = async ({
+	tokens: fetchedTokens,
+	...params
+}: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<Erc721CustomToken[]> => {
+	const erc721CustomTokens: CustomToken[] = nonNullish(fetchedTokens)
+		? fetchedTokens
+		: await loadErc721CustomTokens(params);
 
 	const customTokenPromises = erc721CustomTokens
 		.filter(
