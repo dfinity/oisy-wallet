@@ -12,7 +12,7 @@ import {
 	PLAUSIBLE_EVENT_SUBCONTEXT_NFT
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
-import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
@@ -153,37 +153,13 @@ const mapErc721CustomToken = async ({
 
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
-): Promise<Erc721CustomToken[]> => {
-	const backendCustomTokens: CustomToken[] = await loadNetworkCustomTokens(params);
-
-	const customTokenPromises = backendCustomTokens.reduce<Promise<Erc721CustomToken | undefined>[]>(
-		(acc, token) => {
-			if (filterErc721CustomToken(token)) {
-				acc.push(mapErc721CustomToken(token));
-			}
-
-			return acc;
-		},
-		[]
-	);
-
-	const customTokens = await Promise.allSettled(customTokenPromises);
-
-	return customTokens.reduce<Erc721CustomToken[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		if (result.status === 'rejected' && params.certified) {
-			toastsError({
-				msg: { text: get(i18n).init.error.erc721_custom_tokens },
-				err: result.reason
-			});
-		}
-
-		return acc;
-	}, []);
-};
+): Promise<Erc721CustomToken[]> =>
+	await mapBackendTokens<CustomTokenErc721Variant, Erc721CustomToken>({
+		...params,
+		filterCustomToken: filterErc721CustomToken,
+		mapCustomToken: mapErc721CustomToken,
+		errorMsg: get(i18n).init.error.erc721_custom_tokens
+	});
 
 const loadCustomTokenData = ({
 	response: tokens,

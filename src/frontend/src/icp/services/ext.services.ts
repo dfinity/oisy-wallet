@@ -7,7 +7,7 @@ import {
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { extDefaultTokensStore } from '$icp/stores/ext-default-tokens.store';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
-import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
@@ -100,37 +100,13 @@ const mapExtCustomToken = async ({
 
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
-): Promise<ExtCustomToken[]> => {
-	const backendCustomTokens: CustomToken[] = await loadNetworkCustomTokens(params);
-
-	const customTokenPromises = backendCustomTokens.reduce<Promise<ExtCustomToken | undefined>[]>(
-		(acc, token) => {
-			if (filterExtCustomToken(token)) {
-				acc.push(mapExtCustomToken(token));
-			}
-
-			return acc;
-		},
-		[]
-	);
-
-	const customTokens = await Promise.allSettled(customTokenPromises);
-
-	return customTokens.reduce<ExtCustomToken[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		if (result.status === 'rejected' && params.certified) {
-			toastsError({
-				msg: { text: get(i18n).init.error.ext_custom_tokens },
-				err: result.reason
-			});
-		}
-
-		return acc;
-	}, []);
-};
+): Promise<ExtCustomToken[]> =>
+	await mapBackendTokens<CustomTokenExtVariant, ExtCustomToken>({
+		...params,
+		filterCustomToken: filterExtCustomToken,
+		mapCustomToken: mapExtCustomToken,
+		errorMsg: get(i18n).init.error.ext_custom_tokens
+	});
 
 const loadCustomTokenData = ({
 	response: tokens,

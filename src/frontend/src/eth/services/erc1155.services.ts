@@ -12,7 +12,7 @@ import {
 	PLAUSIBLE_EVENT_SUBCONTEXT_NFT
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
-import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
@@ -153,37 +153,13 @@ const mapErc1155CustomToken = async ({
 
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
-): Promise<Erc1155CustomToken[]> => {
-	const backendCustomTokens: CustomToken[] = await loadNetworkCustomTokens(params);
-
-	const customTokenPromises = backendCustomTokens.reduce<Promise<Erc1155CustomToken | undefined>[]>(
-		(acc, token) => {
-			if (filterErc1155CustomToken(token)) {
-				acc.push(mapErc1155CustomToken(token));
-			}
-
-			return acc;
-		},
-		[]
-	);
-
-	const customTokens = await Promise.allSettled(customTokenPromises);
-
-	return customTokens.reduce<Erc1155CustomToken[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		if (result.status === 'rejected') {
-			toastsError({
-				msg: { text: get(i18n).init.error.erc1155_custom_tokens },
-				err: result.reason
-			});
-		}
-
-		return acc;
-	}, []);
-};
+): Promise<Erc1155CustomToken[]> =>
+	await mapBackendTokens<CustomTokenErc1155Variant, Erc1155CustomToken>({
+		...params,
+		filterCustomToken: filterErc1155CustomToken,
+		mapCustomToken: mapErc1155CustomToken,
+		errorMsg: get(i18n).init.error.erc1155_custom_tokens
+	});
 
 const loadCustomTokenData = ({
 	response: tokens,
