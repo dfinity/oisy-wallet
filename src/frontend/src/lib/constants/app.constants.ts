@@ -193,6 +193,8 @@ export const WALLET_PAGINATION = 10n;
 // Until we find a way to reduce the number of calls (that we pay proportionally) done to the Solana RPC, we delay them more than the other wallets.
 // TODO: Use the normal one when we have a better way to handle the Solana wallets, for example when we have the internal Solana RPC canister, or when we don't load again the transactions that are already loaded.
 export const SOL_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute in milliseconds
+// Kaspa wallets - Kaspa has fast ~1 second blocks, so we can poll more frequently
+export const KASPA_WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1_000; // 30 seconds in milliseconds
 
 // Code generation
 export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;

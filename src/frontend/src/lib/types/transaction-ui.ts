@@ -1,12 +1,18 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import type { KaspaTransactionUi } from '$kaspa/types/kaspa-transaction';
 import type { Token } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import type { NonEmptyArray } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
-export type AnyTransaction = BtcTransactionUi | Transaction | IcTransactionUi | SolTransactionUi;
+export type AnyTransaction =
+	| BtcTransactionUi
+	| Transaction
+	| IcTransactionUi
+	| SolTransactionUi
+	| KaspaTransactionUi;
 
 export type AnyTransactionUi =
 	| BtcTransactionUi

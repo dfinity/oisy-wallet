@@ -7,6 +7,7 @@ import { onDip20WalletMessage } from '$icp/workers/dip20-wallet.worker';
 import { onIcpWalletMessage } from '$icp/workers/icp-wallet.worker';
 import { onIcrcWalletMessage } from '$icp/workers/icrc-wallet.worker';
 import { onPowProtectionMessage } from '$icp/workers/pow-protection.worker';
+import { onKaspaWalletMessage } from '$kaspa/workers/kaspa-wallet.worker';
 import type {
 	PostMessage,
 	PostMessageDataRequest,
@@ -48,6 +49,10 @@ export const messageToHandler: PostMessageRequestMap = {
 	startSolWalletTimer: onSolWalletMessage,
 	stopSolWalletTimer: onSolWalletMessage,
 	triggerSolWalletTimer: onSolWalletMessage,
+
+	startKaspaWalletTimer: onKaspaWalletMessage,
+	stopKaspaWalletTimer: onKaspaWalletMessage,
+	triggerKaspaWalletTimer: onKaspaWalletMessage,
 
 	startBtcStatusesTimer: onBtcStatusesMessage,
 	stopBtcStatusesTimer: onBtcStatusesMessage,
