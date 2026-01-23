@@ -46,11 +46,10 @@ const loadDefaultIcPunksTokens = (): ResultSuccess => {
 
 export const loadCustomTokens = ({
 	identity,
-	tokens,
 	useCache = false
 }: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
 	queryAndUpdate<IcPunksCustomToken[]>({
-		request: (params) => loadCustomTokensWithMetadata({ ...params, tokens, useCache }),
+		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
 			icPunksCustomTokensStore.resetAll();
