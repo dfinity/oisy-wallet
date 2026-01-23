@@ -27,6 +27,7 @@ export interface Modal<T> {
 		| 'cketh-receive'
 		| 'btc-receive'
 		| 'sol-receive'
+		| 'kaspa-receive'
 		| 'receive'
 		| 'send'
 		| 'swap'
@@ -100,6 +101,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openCkETHReceive: (id: symbol) => void;
 	openBtcReceive: (id: symbol) => void;
 	openSolReceive: (id: symbol) => void;
+	openKaspaReceive: (id: symbol) => void;
 	openReceive: (id: symbol) => void;
 	openSend: (id: symbol) => void;
 	openBuy: (id: symbol) => void;
@@ -165,6 +167,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openCkETHReceive: setType('cketh-receive'),
 		openBtcReceive: setType('btc-receive'),
 		openSolReceive: setType('sol-receive'),
+		openKaspaReceive: setType('kaspa-receive'),
 		openReceive: setType('receive'),
 		openSend: setType('send'),
 		openBuy: setType('buy'),

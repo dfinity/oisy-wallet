@@ -4,6 +4,7 @@ import {
 	DEFAULT_BITCOIN_TOKEN,
 	DEFAULT_BSC_TOKEN,
 	DEFAULT_ETHEREUM_TOKEN,
+	DEFAULT_KASPA_TOKEN,
 	DEFAULT_POLYGON_TOKEN,
 	DEFAULT_SOLANA_TOKEN
 } from '$lib/constants/tokens.constants';
@@ -13,6 +14,7 @@ import {
 	networkBitcoin,
 	networkBsc,
 	networkEthereum,
+	networkKaspa,
 	networkPolygon,
 	networkSolana
 } from '$lib/derived/network.derived';
@@ -28,7 +30,8 @@ export const defaultFallbackToken: Readable<RequiredToken> = derived(
 		networkBsc,
 		networkPolygon,
 		networkSolana,
-		networkArbitrum
+		networkArbitrum,
+		networkKaspa
 	],
 	([
 		$networkBitcoin,
@@ -37,13 +40,17 @@ export const defaultFallbackToken: Readable<RequiredToken> = derived(
 		$networkBsc,
 		$networkPolygon,
 		$networkSolana,
-		$networkArbitrum
+		$networkArbitrum,
+		$networkKaspa
 	]) => {
 		if ($networkBitcoin) {
 			return DEFAULT_BITCOIN_TOKEN;
 		}
 		if ($networkSolana) {
 			return DEFAULT_SOLANA_TOKEN;
+		}
+		if ($networkKaspa) {
+			return DEFAULT_KASPA_TOKEN;
 		}
 		if ($networkEthereum) {
 			return DEFAULT_ETHEREUM_TOKEN;

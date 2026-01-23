@@ -25,12 +25,14 @@
 		pseudoNetworkChainFusion,
 		networkId,
 		networkSolana,
+		networkKaspa,
 		networkEvm
 	} from '$lib/derived/network.derived';
 	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken, pageTokenWithFallback } from '$lib/derived/page-token.derived';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
+	import KaspaReceive from '$kaspa/components/receive/KaspaReceive.svelte';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
 
 	let convertEth = $derived($ethToCkETHEnabled && $erc20CustomTokensInitialized);
@@ -75,6 +77,8 @@
 			<BtcReceive />
 		{:else if $networkSolana}
 			<SolReceive token={$pageTokenWithFallback} />
+		{:else if $networkKaspa}
+			<KaspaReceive token={$pageTokenWithFallback} />
 		{:else if $pseudoNetworkChainFusion}
 			<Receive />
 		{/if}

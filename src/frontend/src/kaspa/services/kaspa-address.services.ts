@@ -22,27 +22,8 @@ import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkIdKASTestnet } from '$lib/utils/network.utils';
 import { assertNonNullish } from '@dfinity/utils';
+import { encodeKaspaAddress, toWords } from '$kaspa/utils/kaspa-bech32.utils';
 import { get } from 'svelte/store';
-
-// @kaspa/core-lib doesn't have TypeScript types, so we declare the minimal interface we need
-interface KaspaCorePublicKey {
-	toBuffer(): Buffer;
-}
-
-interface KaspaCoreAddress {
-	toString(): string;
-}
-
-interface KaspaCoreLib {
-	initRuntime(): Promise<boolean>;
-	PublicKey: new (data: Buffer | Uint8Array | string) => KaspaCorePublicKey;
-	Address: {
-		fromPublicKey(pubkey: KaspaCorePublicKey, network: string): KaspaCoreAddress;
-	};
-}
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const kaspacore: KaspaCoreLib = require('@kaspa/core-lib');
 
 // Kaspa uses secp256k1, same as Bitcoin
 const KASPA_ECDSA_KEY_ID = {
@@ -70,59 +51,57 @@ const kaspaMapper: Record<
 	}
 };
 
-// Track if kaspa-core-lib runtime is initialized
-let kaspaRuntimeReady = false;
-let kaspaRuntimePromise: Promise<boolean> | null = null;
-
-/**
- * Initialize kaspa-core-lib WASM runtime.
- * Must be called before using PublicKey or Address classes.
- */
-const ensureKaspaRuntime = async (): Promise<void> => {
-	if (kaspaRuntimeReady) {
-		return;
-	}
-
-	if (!kaspaRuntimePromise) {
-		kaspaRuntimePromise = kaspacore.initRuntime();
-	}
-
-	await kaspaRuntimePromise;
-	kaspaRuntimeReady = true;
-};
+// Kaspa address type constants (matching kaspa Motoko library)
+// SCHNORR = 0 (32-byte public key)
+// ECDSA = 1 (33-byte compressed public key)
+// P2SH = 8
+const KASPA_ADDRESS_TYPE_ECDSA = 1;
 
 /**
  * Convert a secp256k1 public key to a Kaspa address.
- * Uses @kaspa/core-lib for proper Bech32 address derivation.
+ * Uses pure JavaScript implementation with bech32.
+ *
+ * Kaspa address format (for ECDSA pubkey addresses):
+ * - HRP: "kaspa" (mainnet) or "kaspatest" (testnet)
+ * - Data: [address_type (1 byte)] + [compressed public key (33 bytes)]
+ * - Encoding: bech32
+ *
+ * Note: Kaspa P2PK addresses encode the full compressed public key,
+ * not a hash of it. This is different from Bitcoin.
  *
  * @param publicKey - Compressed secp256k1 public key (33 bytes with 0x02 or 0x03 prefix)
  * @param network - 'mainnet' or 'testnet'
  * @returns Kaspa address string (e.g., kaspa:qr...)
  */
-const publicKeyToKaspaAddress = async (
+const publicKeyToKaspaAddress = (
 	publicKey: Uint8Array,
 	network: KaspaNetworkType
-): Promise<KaspaAddress> => {
-	// Ensure WASM runtime is initialized
-	await ensureKaspaRuntime();
+): KaspaAddress => {
+	// Validate public key length (compressed = 33 bytes)
+	if (publicKey.length !== 33) {
+		throw new Error(`Invalid public key length: expected 33, got ${publicKey.length}`);
+	}
 
-	// Map network type to kaspa-core-lib network name
-	const kaspaNetwork = network === 'mainnet' ? 'kaspa' : 'kaspatest';
+	// Build the address payload: [type (1 byte)] + [public key (33 bytes)]
+	const payload = new Uint8Array(34);
+	payload[0] = KASPA_ADDRESS_TYPE_ECDSA;
+	payload.set(publicKey, 1);
 
-	// Create PublicKey from the compressed public key buffer (DER format)
-	// The public key from tECDSA is in compressed format (33 bytes)
-	const pubKey = new kaspacore.PublicKey(publicKey);
+	// Convert payload to 5-bit words for Kaspa bech32 encoding
+	const words = toWords(payload);
 
-	// Create Address from PublicKey with the specified network
-	const address = kaspacore.Address.fromPublicKey(pubKey, kaspaNetwork);
+	// Select HRP based on network
+	const hrp = network === 'mainnet' ? 'kaspa' : 'kaspatest';
 
-	// Return the Bech32 encoded address string
-	return address.toString() as KaspaAddress;
+	// Encode using Kaspa-specific bech32 (with ':' separator and custom checksum)
+	const address = encodeKaspaAddress(hrp, words);
+
+	return address as KaspaAddress;
 };
 
 /**
  * Get Kaspa address from the signer canister using generic ECDSA.
- * Uses threshold ECDSA for secure key derivation and @kaspa/core-lib for address generation.
+ * Uses threshold ECDSA for secure key derivation and pure JS for address generation.
  */
 export const getKaspaAddress = async ({
 	identity,
@@ -142,8 +121,8 @@ export const getKaspaAddress = async ({
 		keyId: KASPA_ECDSA_KEY_ID
 	});
 
-	// Convert the public key to a Kaspa address using kaspa-core-lib
-	return await publicKeyToKaspaAddress(new Uint8Array(publicKey), network);
+	// Convert the public key to a Kaspa address using pure JS
+	return publicKeyToKaspaAddress(new Uint8Array(publicKey), network);
 };
 
 const loadKaspaAddress = ({

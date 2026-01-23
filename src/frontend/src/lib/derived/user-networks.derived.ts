@@ -27,6 +27,10 @@ import {
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID, ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
+	KASPA_MAINNET_NETWORK_ID,
+	KASPA_TESTNET_NETWORK_ID
+} from '$env/networks/networks.kaspa.env';
+import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
@@ -124,7 +128,10 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			}, {}),
 			// We always enable ICP network.
 			[ICP_NETWORK_ID]: { enabled: true, isTestnet: false },
-			[ICP_PSEUDO_TESTNET_NETWORK_ID]: { enabled: true, isTestnet: true }
+			[ICP_PSEUDO_TESTNET_NETWORK_ID]: { enabled: true, isTestnet: true },
+			// Kaspa networks are always enabled (backend support not yet added)
+			[KASPA_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
+			[KASPA_TESTNET_NETWORK_ID]: { enabled: $testnetsEnabled, isTestnet: true }
 		};
 	}
 );

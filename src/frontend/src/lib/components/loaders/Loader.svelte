@@ -7,12 +7,18 @@
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
+	import {
+		loadKaspaAddressMainnet,
+		loadKaspaAddressTestnet
+	} from '$kaspa/services/kaspa-address.services';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
 		btcAddressTestnet,
 		ethAddress,
+		kaspaAddressMainnet,
+		kaspaAddressTestnet,
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet
@@ -25,6 +31,8 @@
 		networkEthereumEnabled,
 		networkEvmMainnetEnabled,
 		networkEvmTestnetEnabled,
+		networkKaspaMainnetEnabled,
+		networkKaspaTestnetEnabled,
 		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
@@ -74,6 +82,9 @@
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
+	const debounceLoadKaspaAddressMainnet = debounce(loadKaspaAddressMainnet);
+	const debounceLoadKaspaAddressTestnet = debounce(loadKaspaAddressTestnet);
+
 	$effect(() => {
 		if (progressDone) {
 			if (($networkEthereumEnabled || $networkEvmMainnetEnabled) && isNullish($ethAddress)) {
@@ -88,6 +99,10 @@
 				debounceLoadSolAddressMainnet();
 			}
 
+			if ($networkKaspaMainnetEnabled && isNullish($kaspaAddressMainnet)) {
+				debounceLoadKaspaAddressMainnet();
+			}
+
 			if ($testnetsEnabled) {
 				if (($networkSepoliaEnabled || $networkEvmTestnetEnabled) && isNullish($ethAddress)) {
 					debounceLoadEthAddress();
@@ -99,6 +114,10 @@
 
 				if ($networkSolanaDevnetEnabled && isNullish($solAddressDevnet)) {
 					debounceLoadSolAddressDevnet();
+				}
+
+				if ($networkKaspaTestnetEnabled && isNullish($kaspaAddressTestnet)) {
+					debounceLoadKaspaAddressTestnet();
 				}
 
 				if (LOCAL) {

@@ -9,6 +9,7 @@ import {
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdICP,
+	isNetworkIdKaspa,
 	isNetworkIdPolygon,
 	isNetworkIdSolana,
 	isPseudoNetworkIdIcpTestnet
@@ -67,6 +68,10 @@ export const networkArbitrum: Readable<boolean> = derived([networkId], ([$networ
 
 export const networkSolana: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdSolana($networkId)
+);
+
+export const networkKaspa: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdKaspa($networkId)
 );
 
 export const pseudoNetworkChainFusion: Readable<boolean> = derived(

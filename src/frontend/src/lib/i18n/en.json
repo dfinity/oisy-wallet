@@ -784,6 +784,16 @@
 				"solana_address_copied": "Solana address copied to clipboard",
 				"display_solana_address_qr": "Display Solana address as QR code"
 			}
+		},
+		"kaspa": {
+			"text": {
+				"kaspa_address": "Kaspa Address",
+				"kaspa_address_title": "Kaspa wallet address",
+				"kaspa_testnet_address": "Kaspa Testnet Address",
+				"kaspa_testnet_address_title": "Kaspa Testnet wallet address",
+				"kaspa_address_copied": "Kaspa address copied to clipboard",
+				"display_kaspa_address_qr": "Display Kaspa address as QR code"
+			}
 		}
 	},
 	"send": {

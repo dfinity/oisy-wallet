@@ -67,7 +67,18 @@ const config: UserConfig = {
 	// proxy /api to port 4943 during development
 	server: {
 		proxy: {
-			'/api': 'http://localhost:4943'
+			'/api': 'http://localhost:4943',
+			// Kaspa API proxies to bypass CORS in development
+			'/kaspa-api': {
+				target: 'https://api.kaspa.org',
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/kaspa-api/, '')
+			},
+			'/kaspa-testnet-api': {
+				target: 'https://api-tn10.kaspa.org',
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/kaspa-testnet-api/, '')
+			}
 		}
 	},
 	optimizeDeps: {
