@@ -67,12 +67,6 @@ export const loadCustomTokens = ({
 		identity
 	});
 
-const loadErc1155CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
-	await loadNetworkCustomTokens({
-		...params,
-		filterTokens: ({ token }) => 'Erc1155' in token
-	});
-
 const safeLoadMetadata = async ({
 	networkId,
 	address
@@ -98,70 +92,80 @@ const safeLoadMetadata = async ({
 	}
 };
 
+type CustomTokenErc1155Variant = Omit<CustomToken, 'token'> & { token: { Erc1155: ErcToken } };
+
+const filterErc1155CustomToken = (
+	customToken: CustomToken
+): customToken is CustomTokenErc1155Variant => 'Erc1155' in customToken.token;
+
+const mapErc1155CustomToken = async ({
+	token,
+	enabled,
+	version: versionNullable,
+	section: sectionNullable,
+	allow_external_content_source: allowExternalContentSourceNullable
+}: CustomTokenErc1155Variant): Promise<Erc1155CustomToken | undefined> => {
+	const version = fromNullable(versionNullable);
+	const section = fromNullable(sectionNullable);
+	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
+	const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+
+	const {
+		Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
+	} = token;
+
+	const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
+		({ chainId }) => tokenChainId === chainId
+	);
+
+	// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
+	assertNonNullish(
+		network,
+		`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
+	);
+
+	const metadata = await safeLoadMetadata({ networkId: network.id, address: tokenAddress });
+
+	if (isNullish(metadata)) {
+		return;
+	}
+
+	return {
+		...{
+			id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
+			name: tokenAddress,
+			address: tokenAddress,
+			network,
+			symbol: metadata.symbol ?? '', // The symbol is used with the amount, no issue with having it empty for NFTs
+			decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
+			standard: { code: 'erc1155' as const },
+			category: 'custom' as const,
+			enabled,
+			version,
+			...(nonNullish(mappedSection) && {
+				section: mappedSection
+			}),
+			allowExternalContentSource
+		},
+		...metadata
+	};
+};
+
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
 ): Promise<Erc1155CustomToken[]> => {
-	const erc1155CustomTokens: CustomToken[] = await loadErc1155CustomTokens(params);
+	const backendCustomTokens: CustomToken[] = await loadNetworkCustomTokens(params);
 
-	const customTokenPromises = erc1155CustomTokens
-		.filter(
-			(customToken): customToken is CustomToken & { token: { Erc1155: ErcToken } } =>
-				'Erc1155' in customToken.token
-		)
-		.map(
-			async ({
-				token,
-				enabled,
-				version: versionNullable,
-				section: sectionNullable,
-				allow_external_content_source: allowExternalContentSourceNullable
-			}) => {
-				const version = fromNullable(versionNullable);
-				const section = fromNullable(sectionNullable);
-				const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
-				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
-
-				const {
-					Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
-				} = token;
-
-				const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
-					({ chainId }) => tokenChainId === chainId
-				);
-
-				// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
-				assertNonNullish(
-					network,
-					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
-				);
-
-				const metadata = await safeLoadMetadata({ networkId: network.id, address: tokenAddress });
-
-				if (isNullish(metadata)) {
-					return;
-				}
-
-				return {
-					...{
-						id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
-						name: tokenAddress,
-						address: tokenAddress,
-						network,
-						symbol: metadata.symbol ?? '', // The symbol is used with the amount, no issue with having it empty for NFTs
-						decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
-						standard: { code: 'erc1155' as const },
-						category: 'custom' as const,
-						enabled,
-						version,
-						...(nonNullish(mappedSection) && {
-							section: mappedSection
-						}),
-						allowExternalContentSource
-					},
-					...metadata
-				};
+	const customTokenPromises = backendCustomTokens.reduce<Promise<Erc1155CustomToken | undefined>[]>(
+		(acc, token) => {
+			if (filterErc1155CustomToken(token)) {
+				acc.push(mapErc1155CustomToken(token));
 			}
-		);
+
+			return acc;
+		},
+		[]
+	);
 
 	const customTokens = await Promise.allSettled(customTokenPromises);
 
