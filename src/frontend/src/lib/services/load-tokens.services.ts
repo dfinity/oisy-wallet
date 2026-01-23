@@ -15,7 +15,6 @@ export const mapBackendTokens = async <
 	errorMsg,
 	...params
 }: LoadCustomTokenParams & {
-	tokens?: BackendCustomToken[];
 	filterCustomToken: (token: BackendCustomToken) => token is Variant;
 	mapCustomToken: (params: Variant & QueryAndUpdateRequestParams) => Promise<T | undefined>;
 	errorMsg: string;

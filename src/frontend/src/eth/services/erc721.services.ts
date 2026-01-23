@@ -51,10 +51,11 @@ export const loadErc721Tokens = async ({
 
 export const loadCustomTokens = ({
 	identity,
+	tokens,
 	useCache = false
 }: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
 	queryAndUpdate<Erc721CustomToken[]>({
-		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
+		request: (params) => loadCustomTokensWithMetadata({ ...params, tokens, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
 			erc721CustomTokensStore.resetAll();
