@@ -218,7 +218,6 @@ export const HELP_AUTH_LEARN_MORE_LINK = 'help-auth-learn-more-link';
 export const HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK =
 	'help-auth-switch-to-new-internet-identity-link';
 export const HELP_AUTH_INTRODUCTION_LINK = 'help-auth-introduction-link';
-export const HELP_AUTH_PRIVATE_KEY_LINK = 'help-auth-private-key-link';
 export const HELP_AUTH_ASSET_CONTROL_LINK = 'help-auth-asset-control-link';
 export const HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK =
 	'help-auth-internet-identity-help-center-link';
