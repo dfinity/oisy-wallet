@@ -12,7 +12,7 @@ import { collectionMetadata } from '$icp/api/icpunks.api';
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icPunksDefaultTokensStore } from '$icp/stores/icpunks-default-tokens.store';
 import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
-import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
@@ -118,43 +118,13 @@ const mapIcPunksCustomToken = async ({
 
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
-): Promise<IcPunksCustomToken[]> => {
-	const backendCustomTokens: CustomToken[] = await loadNetworkCustomTokens(params);
-
-	const customTokenPromises = backendCustomTokens.reduce<Promise<IcPunksCustomToken | undefined>[]>(
-		(acc, token) => {
-			if (filterIcPunksCustomToken(token)) {
-				acc.push(
-					mapIcPunksCustomToken({
-						...token,
-						identity: params.identity,
-						certified: params.certified
-					})
-				);
-			}
-
-			return acc;
-		},
-		[]
-	);
-
-	const customTokens = await Promise.allSettled(customTokenPromises);
-
-	return customTokens.reduce<IcPunksCustomToken[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		if (result.status === 'rejected' && params.certified) {
-			toastsError({
-				msg: { text: get(i18n).init.error.icpunks_custom_tokens },
-				err: result.reason
-			});
-		}
-
-		return acc;
-	}, []);
-};
+): Promise<IcPunksCustomToken[]> =>
+	await mapBackendTokens<CustomTokenIcPunksVariant, IcPunksCustomToken>({
+		...params,
+		filterCustomToken: filterIcPunksCustomToken,
+		mapCustomToken: mapIcPunksCustomToken,
+		errorMsg: get(i18n).init.error.icpunks_custom_tokens
+	});
 
 const loadCustomTokenData = ({
 	response: tokens,
