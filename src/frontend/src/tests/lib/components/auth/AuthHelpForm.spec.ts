@@ -2,11 +2,8 @@ import AuthHelpForm from '$lib/components/auth/AuthHelpForm.svelte';
 import {
 	HELP_AUTH_ASSET_CONTROL_LINK,
 	HELP_AUTH_IMAGE_BANNER,
-	HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK,
 	HELP_AUTH_INTRODUCTION_LINK,
 	HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,
-	HELP_AUTH_PRIVATE_KEY_LINK,
-	HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK,
 	HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
@@ -20,11 +17,8 @@ describe('AuthHelpForm', () => {
 	const imageBannerSelector = `img[data-tid="${HELP_AUTH_IMAGE_BANNER}"]`;
 	const newIdentityVersionButtonSelector = `button[data-tid="${HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON}"]`;
 	const useIdentityNumberButtonSelector = `button[data-tid="${HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON}"]`;
-	const switchToNewInternetIdentityLinkSelector = `a[data-tid="${HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK}"]`;
 	const introductionLinkSelector = `a[data-tid="${HELP_AUTH_INTRODUCTION_LINK}"]`;
-	const privateKeyLinkSelector = `a[data-tid="${HELP_AUTH_PRIVATE_KEY_LINK}"]`;
 	const assetControlLinkSelector = `a[data-tid="${HELP_AUTH_ASSET_CONTROL_LINK}"]`;
-	const internetIdentityHelpCenterLinkSelector = `a[data-tid="${HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK}"]`;
 
 	it('should render auth help form content', () => {
 		const { container, getByText } = render(AuthHelpForm, {
@@ -55,32 +49,15 @@ describe('AuthHelpForm', () => {
 
 		expect(getByText(get(i18n).auth.help.text.useful_links)).toBeInTheDocument();
 
-		const switchToNewInternetIdentityLink: HTMLAnchorElement | null = container.querySelector(
-			switchToNewInternetIdentityLinkSelector
-		);
-
-		expect(switchToNewInternetIdentityLink).toBeInTheDocument();
-
 		const introductionLink: HTMLAnchorElement | null =
 			container.querySelector(introductionLinkSelector);
 
 		expect(introductionLink).toBeInTheDocument();
 
-		const privateKeyLink: HTMLAnchorElement | null =
-			container.querySelector(privateKeyLinkSelector);
-
-		expect(privateKeyLink).toBeInTheDocument();
-
 		const assetControlLink: HTMLAnchorElement | null =
 			container.querySelector(assetControlLinkSelector);
 
 		expect(assetControlLink).toBeInTheDocument();
-
-		const internetIdentityHelpCenterLink: HTMLAnchorElement | null = container.querySelector(
-			internetIdentityHelpCenterLinkSelector
-		);
-
-		expect(internetIdentityHelpCenterLink).toBeInTheDocument();
 
 		expect(
 			getByText(replaceOisyPlaceholders(get(i18n).auth.help.text.feedback_text))
