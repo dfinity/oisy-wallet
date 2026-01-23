@@ -3,16 +3,16 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { 
+	import {
 		OISY_DOCS_URL,
 		OISY_LOGGING_INTO_OISY_URL,
 		OISY_CREATING_A_WALLET_URL,
 		OISY_ACCESS_CONTROL_URL
 	} from '$lib/constants/oisy.constants';
 	import {
-		HELP_AUTH_IMAGE_BANNER,		
-		HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,		
-		HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON,		
+		HELP_AUTH_IMAGE_BANNER,
+		HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,
+		HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON,
 		HELP_AUTH_INTRODUCTION_LINK,
 		HELP_AUTH_LOGGING_INTO_OISY_LINK,
 		HELP_AUTH_CREATING_A_WALLET_LINK,
