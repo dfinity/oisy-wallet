@@ -7,7 +7,6 @@
 	import {
 		HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON,
 		HELP_AUTH_IMAGE_BANNER,
-		HELP_AUTH_LOST_IDENTITY_BUTTON,
 		HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON,
 		HELP_AUTH_INTRODUCTION_LINK,
 		HELP_AUTH_ASSET_CONTROL_LINK
@@ -19,10 +18,9 @@
 
 	interface Props {
 		onOpenNewIdentityHelp: () => void;
-		onOpenLegacyIdentityHelp: () => void;
 	}
 
-	let { onOpenLegacyIdentityHelp, onOpenNewIdentityHelp }: Props = $props();
+	let { onOpenNewIdentityHelp }: Props = $props();
 
 	const trackingEventKey = 'main_page_button';
 </script>
@@ -73,26 +71,6 @@
 				type="button"
 			>
 				{$i18n.auth.help.text.use_identity_number}
-			</Button>
-
-			<Button
-				ariaLabel={$i18n.auth.help.text.lost_identity_number}
-				colorStyle="secondary-light"
-				fullWidth
-				onclick={() => {
-					trackEvent({
-						name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-						metadata: {
-							event_key: trackingEventKey,
-							event_value: 'lost_identity_number'
-						}
-					});
-					onOpenLegacyIdentityHelp();
-				}}
-				testId={HELP_AUTH_LOST_IDENTITY_BUTTON}
-				type="button"
-			>
-				{$i18n.auth.help.text.lost_identity_number}
 			</Button>
 
 			<div class="mt-6 mb-2 font-bold">{$i18n.auth.help.text.useful_links}</div>
