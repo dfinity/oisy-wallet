@@ -20,7 +20,12 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
+import {
+	fromNullable,
+	nonNullish,
+	queryAndUpdate,
+	type QueryAndUpdateRequestParams
+} from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadIcPunksTokens = async ({
@@ -57,67 +62,81 @@ export const loadCustomTokens = ({
 		identity
 	});
 
-const loadIcPunksCustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
-	await loadNetworkCustomTokens({
-		...params,
-		filterTokens: ({ token }) => 'IcPunks' in token
-	});
+type CustomTokenIcPunksVariant = Omit<CustomToken, 'token'> & { token: { IcPunks: IcPunksToken } };
+
+const filterIcPunksCustomToken = (
+	customToken: CustomToken
+): customToken is CustomTokenIcPunksVariant => 'IcPunks' in customToken.token;
+
+const mapIcPunksCustomToken = async ({
+	token,
+	enabled,
+	version: versionNullable,
+	section: sectionNullable,
+	allow_external_content_source: allowExternalContentSourceNullable,
+	identity,
+	certified
+}: CustomTokenIcPunksVariant & QueryAndUpdateRequestParams): Promise<
+	IcPunksCustomToken | undefined
+> => {
+	const version = fromNullable(versionNullable);
+	const section = fromNullable(sectionNullable);
+	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
+	const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+
+	const {
+		IcPunks: { canister_id: rawCanisterId }
+	} = token;
+
+	const canisterId = rawCanisterId.toString();
+
+	const { symbol, ...rest } =
+		IC_PUNKS_BUILTIN_TOKENS_INDEXED.get(canisterId) ??
+		(await collectionMetadata({
+			canisterId,
+			certified,
+			identity
+		}));
+
+	return {
+		decimals: 0,
+		network: ICP_NETWORK,
+		...rest,
+		id: parseTokenId(symbol),
+		canisterId,
+		symbol,
+		standard: { code: 'icpunks' as const },
+		category: 'custom' as const,
+		enabled,
+		version,
+		...(nonNullish(mappedSection) && {
+			section: mappedSection
+		}),
+		allowExternalContentSource
+	};
+};
 
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
 ): Promise<IcPunksCustomToken[]> => {
-	const icPunksCustomTokens: CustomToken[] = await loadIcPunksCustomTokens(params);
+	const backendCustomTokens: CustomToken[] = await loadNetworkCustomTokens(params);
 
-	const customTokenPromises = icPunksCustomTokens
-		.filter(
-			(customToken): customToken is CustomToken & { token: { IcPunks: IcPunksToken } } =>
-				'IcPunks' in customToken.token
-		)
-		.map(
-			async ({
-				token,
-				enabled,
-				version: versionNullable,
-				section: sectionNullable,
-				allow_external_content_source: allowExternalContentSourceNullable
-			}) => {
-				const version = fromNullable(versionNullable);
-				const section = fromNullable(sectionNullable);
-				const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
-				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
-
-				const {
-					IcPunks: { canister_id: rawCanisterId }
-				} = token;
-
-				const canisterId = rawCanisterId.toString();
-
-				const { symbol, ...rest } =
-					IC_PUNKS_BUILTIN_TOKENS_INDEXED.get(canisterId) ??
-					(await collectionMetadata({
-						canisterId,
-						certified: params.certified,
-						identity: params.identity
-					}));
-
-				return {
-					decimals: 0,
-					network: ICP_NETWORK,
-					...rest,
-					id: parseTokenId(symbol),
-					canisterId,
-					symbol,
-					standard: { code: 'icpunks' as const },
-					category: 'custom' as const,
-					enabled,
-					version,
-					...(nonNullish(mappedSection) && {
-						section: mappedSection
-					}),
-					allowExternalContentSource
-				};
+	const customTokenPromises = backendCustomTokens.reduce<Promise<IcPunksCustomToken | undefined>[]>(
+		(acc, token) => {
+			if (filterIcPunksCustomToken(token)) {
+				acc.push(
+					mapIcPunksCustomToken({
+						...token,
+						identity: params.identity,
+						certified: params.certified
+					})
+				);
 			}
-		);
+
+			return acc;
+		},
+		[]
+	);
 
 	const customTokens = await Promise.allSettled(customTokenPromises);
 
