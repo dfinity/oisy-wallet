@@ -23,12 +23,8 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadIcPunksTokens = async ({
-	identity
-}: {
-	identity: OptionIdentity;
-}): Promise<void> => {
-	await Promise.all([loadDefaultIcPunksTokens(), loadCustomTokens({ identity, useCache: true })]);
+export const loadIcPunksTokens = async (): Promise<void> => {
+	loadDefaultIcPunksTokens();
 };
 
 const loadDefaultIcPunksTokens = (): ResultSuccess => {
@@ -41,9 +37,23 @@ const loadDefaultIcPunksTokens = (): ResultSuccess => {
 
 export const loadCustomTokens = ({
 	identity,
-	useCache = false
-}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
-	queryAndUpdate<IcPunksCustomToken[]>({
+	useCache = false,
+	tokens,
+	certified: restCertified
+}: Omit<LoadCustomTokenParams, 'certified'> & {
+	certified?: boolean;
+	tokens?: CustomToken[];
+}): Promise<void> => {
+	if (nonNullish(tokens)) {
+		return loadCustomTokensWithMetadata({
+			identity,
+			certified: restCertified ?? true,
+			useCache,
+			tokens
+		}).then((response) => loadCustomTokenData({ response, certified: restCertified ?? true }));
+	}
+
+	return queryAndUpdate<IcPunksCustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
@@ -56,6 +66,7 @@ export const loadCustomTokens = ({
 		},
 		identity
 	});
+};
 
 const loadIcPunksCustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
@@ -63,10 +74,13 @@ const loadIcPunksCustomTokens = async (params: LoadCustomTokenParams): Promise<C
 		filterTokens: ({ token }) => 'IcPunks' in token
 	});
 
-const loadCustomTokensWithMetadata = async (
-	params: LoadCustomTokenParams
-): Promise<IcPunksCustomToken[]> => {
-	const icPunksCustomTokens: CustomToken[] = await loadIcPunksCustomTokens(params);
+const loadCustomTokensWithMetadata = async ({
+	tokens: fetchedTokens,
+	...params
+}: LoadCustomTokenParams & { tokens?: CustomToken[] }): Promise<IcPunksCustomToken[]> => {
+	const icPunksCustomTokens: CustomToken[] = nonNullish(fetchedTokens)
+		? fetchedTokens.filter(({ token }) => 'IcPunks' in token)
+		: await loadIcPunksCustomTokens(params);
 
 	const customTokenPromises = icPunksCustomTokens
 		.filter(

@@ -4,7 +4,7 @@ import { getIdbAllCustomTokens, setIdbAllCustomTokens } from '$lib/api/idb-token
 import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import { assertNever, fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { assertNever, fromNullable, isNullish, nonNullish, queryAndUpdate, toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
@@ -149,5 +149,62 @@ export const loadNetworkCustomTokens = async ({
 		identity,
 		certified,
 		filterTokens
+	});
+};
+
+export const loadCustomTokens = async ({
+	identity,
+	...rest
+}: {
+	identity: OptionIdentity;
+} & Omit<LoadCustomTokensParams, 'identity' | 'filterTokens' | 'certified'>): Promise<void> => {
+	if (isNullish(identity)) {
+		return;
+	}
+
+	await queryAndUpdate<CustomToken[]>({
+		request: ({ certified }) =>
+			loadNetworkCustomTokens({
+				identity,
+				certified,
+				...rest
+			}),
+		onLoad: async ({ response: tokens, certified }) => {
+			const { loadCustomTokens: loadIcrcCustomTokens } = await import(
+				'../../icp/services/icrc.services'
+			);
+			const { loadCustomTokens: loadErc20CustomTokens } = await import(
+				'../../eth/services/erc20.services'
+			);
+			const { loadCustomTokens: loadErc721CustomTokens } = await import(
+				'../../eth/services/erc721.services'
+			);
+			const { loadCustomTokens: loadErc1155CustomTokens } = await import(
+				'../../eth/services/erc1155.services'
+			);
+			const { loadCustomTokens: loadSplCustomTokens } = await import(
+				'../../sol/services/spl.services'
+			);
+			const { loadCustomTokens: loadExtCustomTokens } = await import(
+				'../../icp/services/ext.services'
+			);
+			const { loadCustomTokens: loadIcPunksCustomTokens } = await import(
+				'../../icp/services/icpunks.services'
+			);
+
+			await Promise.all([
+				loadIcrcCustomTokens({ identity, certified, tokens }),
+				loadErc20CustomTokens({ identity, certified, tokens }),
+				loadErc721CustomTokens({ identity, certified, tokens }),
+				loadErc1155CustomTokens({ identity, certified, tokens }),
+				loadSplCustomTokens({ identity, certified, tokens }),
+				loadExtCustomTokens({ identity, certified, tokens }),
+				loadIcPunksCustomTokens({ identity, certified, tokens })
+			]);
+		},
+		onUpdateError: () => {
+			// Errors are handled standard by standard
+		},
+		identity
 	});
 };

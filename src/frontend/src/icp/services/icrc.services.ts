@@ -47,8 +47,8 @@ import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
-export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
-	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity, useCache: true })]);
+export const loadIcrcTokens = async (): Promise<void> => {
+	await loadDefaultIcrcTokens();
 };
 
 const loadDefaultIcrcTokens = async () => {
@@ -62,13 +62,28 @@ const loadDefaultIcrcTokens = async () => {
 export const loadCustomTokens = ({
 	identity,
 	useCache = false,
-	onSuccess
+	onSuccess,
+	tokens,
+	certified: restCertified
 }: {
 	identity: OptionIdentity;
 	useCache?: boolean;
 	onSuccess?: () => void;
-}): Promise<void> =>
-	queryAndUpdate<IcrcCustomToken[]>({
+	tokens?: CustomToken[];
+	certified?: boolean;
+}): Promise<void> => {
+	if (nonNullish(tokens)) {
+		return loadIcrcCustomTokens({
+			identity,
+			certified: restCertified ?? true,
+			useCache,
+			tokens
+		}).then((response) =>
+			loadIcrcCustomData({ response, certified: restCertified ?? true, onSuccess })
+		);
+	}
+
+	return queryAndUpdate<IcrcCustomToken[]>({
 		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
 		onLoad: (params) => loadIcrcCustomData({ ...params, onSuccess }),
 		onUpdateError: ({ error: err }) => {
@@ -86,6 +101,7 @@ export const loadCustomTokens = ({
 		},
 		identity
 	});
+};
 
 const loadDefaultIcrc = ({
 	data: { ledgerCanisterId, ...data }
@@ -114,10 +130,10 @@ const requestIcrcMetadata = async ({
 	...rest
 }: IcInterface &
 	QueryAndUpdateRequestParams & { category: TokenCategory }): Promise<IcrcLoadData> => ({
-	...rest,
-	ledgerCanisterId,
-	metadata: await metadata({ ledgerCanisterId, identity, certified })
-});
+		...rest,
+		ledgerCanisterId,
+		metadata: await metadata({ ledgerCanisterId, identity, certified })
+	});
 
 const loadIcrcData = ({
 	response: token,
@@ -134,18 +150,22 @@ const loadIcrcData = ({
 const loadIcrcCustomTokens = async ({
 	identity,
 	certified,
-	useCache = false
+	useCache = false,
+	tokens: fetchedTokens
 }: {
 	identity: OptionIdentity;
 	certified: boolean;
 	useCache?: boolean;
+	tokens?: CustomToken[];
 }): Promise<IcrcCustomToken[]> => {
-	const tokens = await loadNetworkCustomTokens({
-		identity,
-		certified,
-		filterTokens: ({ token }) => 'Icrc' in token,
-		useCache
-	});
+	const tokens = nonNullish(fetchedTokens)
+		? fetchedTokens.filter(({ token }) => 'Icrc' in token)
+		: await loadNetworkCustomTokens({
+			identity,
+			certified,
+			filterTokens: ({ token }) => 'Icrc' in token,
+			useCache
+		});
 
 	return await loadCustomIcrcTokensData({
 		tokens,
@@ -210,10 +230,10 @@ const loadCustomIcrcTokensData = async ({
 		return isNullish(t)
 			? undefined
 			: {
-					...t,
-					enabled,
-					...(nonNullish(version) && { version })
-				};
+				...t,
+				enabled,
+				...(nonNullish(version) && { version })
+			};
 	};
 
 	const results = await Promise.allSettled(tokens.map(requestIcrcCustomTokenMetadata));
@@ -320,11 +340,11 @@ export const loadDisabledIcrcTokensExchanges = async ({
 
 				return nonNullish(twinTokenAddress)
 					? [
-							...acc,
-							{
-								address: twinTokenAddress
-							}
-						]
+						...acc,
+						{
+							address: twinTokenAddress
+						}
+					]
 					: acc;
 			}, [])
 		}),
