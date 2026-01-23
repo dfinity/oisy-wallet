@@ -32,6 +32,7 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
+import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
@@ -63,9 +64,7 @@ export const loadCustomTokens = ({
 	identity,
 	useCache = false,
 	onSuccess
-}: {
-	identity: OptionIdentity;
-	useCache?: boolean;
+}: Omit<LoadCustomTokenParams, 'certified'> & {
 	onSuccess?: () => void;
 }): Promise<void> =>
 	queryAndUpdate<IcrcCustomToken[]>({
@@ -134,21 +133,19 @@ const loadIcrcData = ({
 const loadIcrcCustomTokens = async ({
 	identity,
 	certified,
+	tokens,
 	useCache = false
-}: {
-	identity: OptionIdentity;
-	certified: boolean;
-	useCache?: boolean;
-}): Promise<IcrcCustomToken[]> => {
-	const tokens = await loadNetworkCustomTokens({
-		identity,
-		certified,
-		filterTokens: ({ token }) => 'Icrc' in token,
-		useCache
-	});
+}: LoadCustomTokenParams): Promise<IcrcCustomToken[]> => {
+	const customTokens =
+		tokens ??
+		(await loadNetworkCustomTokens({
+			identity,
+			certified,
+			useCache
+		}));
 
 	return await loadCustomIcrcTokensData({
-		tokens,
+		tokens: customTokens,
 		identity,
 		certified
 	});
