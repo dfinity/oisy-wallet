@@ -140,7 +140,7 @@ export const loadNetworkCustomTokens = async ({
 			return cachedTokens.reduce<CustomToken[]>((acc, token) => {
 				const parsed = parsePrincipal(token);
 
-				return nonNullish(filterTokens) && filterTokens(parsed) ? [...acc, parsed] : acc;
+				return isNullish(filterTokens) || filterTokens(parsed) ? [...acc, parsed] : acc;
 			}, []);
 		}
 	}
