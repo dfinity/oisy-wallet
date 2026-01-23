@@ -574,6 +574,16 @@ interface I18nReceive {
 			display_solana_address_qr: string;
 		};
 	};
+	kaspa: {
+		text: {
+			kaspa_address: string;
+			kaspa_address_title: string;
+			kaspa_testnet_address: string;
+			kaspa_testnet_address_title: string;
+			kaspa_address_copied: string;
+			display_kaspa_address_qr: string;
+		};
+	};
 }
 
 interface I18nSend {
