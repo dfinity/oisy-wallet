@@ -9,6 +9,8 @@ import type { EthAddress } from '$eth/types/address';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
+	GenericEcdsaPublicKeyParams,
+	GenericSignWithEcdsaParams,
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
 	SignWithSchnorrParams
@@ -117,6 +119,27 @@ export const signWithSchnorr = async ({
 	const { signWithSchnorr } = await signerCanister({ identity });
 
 	return await signWithSchnorr(rest);
+};
+
+export const getGenericEcdsaPublicKey = async ({
+	identity,
+	...rest
+}: CanisterApiFunctionParams<GenericEcdsaPublicKeyParams>): Promise<{
+	publicKey: Uint8Array;
+	chainCode: Uint8Array;
+}> => {
+	const { getGenericEcdsaPublicKey } = await signerCanister({ identity });
+
+	return await getGenericEcdsaPublicKey(rest);
+};
+
+export const signWithGenericEcdsa = async ({
+	identity,
+	...rest
+}: CanisterApiFunctionParams<GenericSignWithEcdsaParams>): Promise<Uint8Array> => {
+	const { signWithGenericEcdsa } = await signerCanister({ identity });
+
+	return await signWithGenericEcdsa(rest);
 };
 
 const signerCanister = async ({

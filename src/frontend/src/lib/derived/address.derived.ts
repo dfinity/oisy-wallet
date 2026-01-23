@@ -1,10 +1,13 @@
 import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
+import type { KaspaAddress, OptionKaspaAddress } from '$kaspa/types/address';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
 	btcAddressTestnetStore,
 	ethAddressStore,
+	kaspaAddressMainnetStore,
+	kaspaAddressTestnetStore,
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
 	solAddressMainnetStore
@@ -82,4 +85,24 @@ export const solAddressDevnet: Readable<OptionSolAddress> = derived(
 export const solAddressLocal: Readable<OptionSolAddress> = derived(
 	[solAddressLocalnetStore],
 	([$solAddressLocalnetStore]) => mapAddress<SolAddress>($solAddressLocalnetStore)
+);
+
+export const kaspaAddressMainnetNotLoaded: Readable<boolean> = derived(
+	[kaspaAddressMainnetStore],
+	([$kaspaAddressMainnetStore]) => isNullish($kaspaAddressMainnetStore)
+);
+
+export const kaspaAddressTestnetNotLoaded: Readable<boolean> = derived(
+	[kaspaAddressTestnetStore],
+	([$kaspaAddressTestnetStore]) => isNullish($kaspaAddressTestnetStore)
+);
+
+export const kaspaAddressMainnet: Readable<OptionKaspaAddress> = derived(
+	[kaspaAddressMainnetStore],
+	([$kaspaAddressMainnetStore]) => mapAddress<KaspaAddress>($kaspaAddressMainnetStore)
+);
+
+export const kaspaAddressTestnet: Readable<OptionKaspaAddress> = derived(
+	[kaspaAddressTestnetStore],
+	([$kaspaAddressTestnetStore]) => mapAddress<KaspaAddress>($kaspaAddressTestnetStore)
 );

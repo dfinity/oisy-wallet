@@ -14,6 +14,11 @@ import {
 import { SEPOLIA_NETWORK_ID, SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID, ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
+	KASPA_MAINNET_NETWORK_ID,
+	KASPA_TESTNET_NETWORK_ID,
+	SUPPORTED_KASPA_NETWORK_IDS
+} from '$env/networks/networks.kaspa.env';
+import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID,
@@ -94,6 +99,15 @@ export const isNetworkIdSOLDevnet: IsNetworkIdUtil = (networkId) =>
 
 export const isNetworkIdSOLLocal: IsNetworkIdUtil = (networkId) =>
 	SOLANA_LOCAL_NETWORK_ID === networkId;
+
+export const isNetworkIdKaspa: IsNetworkIdUtil = (networkId) =>
+	nonNullish(networkId) && SUPPORTED_KASPA_NETWORK_IDS.includes(networkId);
+
+export const isNetworkIdKASMainnet: IsNetworkIdUtil = (networkId) =>
+	KASPA_MAINNET_NETWORK_ID === networkId;
+
+export const isNetworkIdKASTestnet: IsNetworkIdUtil = (networkId) =>
+	KASPA_TESTNET_NETWORK_ID === networkId;
 
 const mapper: Record<symbol, BitcoinNetwork> = {
 	[BTC_MAINNET_NETWORK_ID]: 'mainnet',

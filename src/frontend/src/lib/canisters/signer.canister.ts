@@ -21,6 +21,8 @@ import {
 	mapSignerCanisterSendBtcError
 } from '$lib/canisters/signer.errors';
 import type {
+	GenericEcdsaPublicKeyParams,
+	GenericSignWithEcdsaParams,
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
 	SignWithSchnorrParams
@@ -281,5 +283,61 @@ export class SignerCanister extends Canister<SignerService> {
 
 		// TODO: map error like the other methods when SchnorrSignError is exposed in the Signer repo
 		throw response.Err;
+	};
+
+	/**
+	 * Get a generic ECDSA public key with custom derivation path.
+	 * Used for Kaspa and other chains that use secp256k1.
+	 */
+	getGenericEcdsaPublicKey = async ({
+		derivationPath,
+		keyId
+	}: GenericEcdsaPublicKeyParams): Promise<{ publicKey: Uint8Array; chainCode: Uint8Array }> => {
+		const { generic_caller_ecdsa_public_key } = this.caller({
+			certified: true
+		});
+
+		const response = await generic_caller_ecdsa_public_key(
+			{
+				key_id: keyId,
+				canister_id: [],
+				derivation_path: mapDerivationPath(derivationPath)
+			},
+			[SIGNER_PAYMENT_TYPE]
+		);
+
+		if ('Ok' in response) {
+			const { public_key, chain_code } = fromDefinedNullable(response.Ok);
+			return { publicKey: public_key, chainCode: chain_code };
+		}
+
+		throw mapSignerCanisterGetEthAddressError(response.Err);
+	};
+
+	/**
+	 * Sign a message hash with generic ECDSA.
+	 * Used for Kaspa and other chains that use secp256k1.
+	 */
+	signWithGenericEcdsa = async ({
+		messageHash,
+		derivationPath,
+		keyId
+	}: GenericSignWithEcdsaParams): Promise<Uint8Array> => {
+		const { generic_sign_with_ecdsa } = this.caller({
+			certified: true
+		});
+
+		const response = await generic_sign_with_ecdsa([SIGNER_PAYMENT_TYPE], {
+			key_id: keyId,
+			derivation_path: mapDerivationPath(derivationPath),
+			message_hash: messageHash
+		});
+
+		if ('Ok' in response) {
+			const { signature } = fromDefinedNullable(response.Ok);
+			return signature;
+		}
+
+		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 }

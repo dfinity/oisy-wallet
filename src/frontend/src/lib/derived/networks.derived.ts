@@ -11,22 +11,34 @@ import {
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK, ICP_PSEUDO_TESTNET_NETWORK } from '$env/networks/networks.icp.env';
 import {
+	KASPA_MAINNET_NETWORK_ID,
+	KASPA_TESTNET_NETWORK_ID
+} from '$env/networks/networks.kaspa.env';
+import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { enabledEvmNetworks } from '$evm/derived/networks.derived';
+import { enabledKaspaNetworks } from '$kaspa/derived/networks.derived';
 import type { Network } from '$lib/types/network';
 import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 import { derived, type Readable } from 'svelte/store';
 
 export const networks: Readable<Network[]> = derived(
-	[enabledBitcoinNetworks, enabledEthereumNetworks, enabledSolanaNetworks, enabledEvmNetworks],
+	[
+		enabledBitcoinNetworks,
+		enabledEthereumNetworks,
+		enabledSolanaNetworks,
+		enabledKaspaNetworks,
+		enabledEvmNetworks
+	],
 	([
 		$enabledBitcoinNetworks,
 		$enabledEthereumNetworks,
 		$enabledSolanaNetworks,
+		$enabledKaspaNetworks,
 		$enabledEvmNetworks
 	]) => [
 		...$enabledBitcoinNetworks,
@@ -34,6 +46,7 @@ export const networks: Readable<Network[]> = derived(
 		ICP_NETWORK,
 		ICP_PSEUDO_TESTNET_NETWORK,
 		...$enabledSolanaNetworks,
+		...$enabledKaspaNetworks,
 		...$enabledEvmNetworks
 	]
 );
@@ -123,4 +136,12 @@ export const networkSolanaDevnetEnabled: Readable<boolean> = derived([networks],
 
 export const networkSolanaLocalEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
 	$networks.some(({ id }) => id === SOLANA_LOCAL_NETWORK_ID)
+);
+
+export const networkKaspaMainnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === KASPA_MAINNET_NETWORK_ID)
+);
+
+export const networkKaspaTestnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === KASPA_TESTNET_NETWORK_ID)
 );

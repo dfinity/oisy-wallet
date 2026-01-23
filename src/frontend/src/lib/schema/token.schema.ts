@@ -18,7 +18,8 @@ export const TokenStandardCodeSchema = z.enum([
 	'icpunks', // This standard can be applied to all NFT IC tokens with a similar interface to ICPunks (for example, ICats)
 	'bitcoin',
 	'solana',
-	'spl'
+	'spl',
+	'kaspa'
 ]);
 
 export const TokenStandardSchema = z.object({

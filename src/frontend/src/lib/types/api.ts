@@ -11,6 +11,7 @@ import type {
 import type { TxId } from '$declarations/kong_backend/kong_backend.did';
 import type {
 	BtcTxOutput,
+	EcdsaKeyId,
 	SchnorrKeyId,
 	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
@@ -67,6 +68,15 @@ export interface GetSchnorrPublicKeyParams {
 
 export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
 	message: Uint8Array;
+}
+
+export interface GenericEcdsaPublicKeyParams {
+	derivationPath: string[];
+	keyId: EcdsaKeyId;
+}
+
+export interface GenericSignWithEcdsaParams extends GenericEcdsaPublicKeyParams {
+	messageHash: Uint8Array;
 }
 
 export interface AddUserHiddenDappIdParams {
