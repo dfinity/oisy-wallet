@@ -236,7 +236,7 @@ describe('load-tokens.services', () => {
 			expect(toastsError).not.toHaveBeenCalled();
 		});
 
-		it('should return and empty array if no tokens are filtered successfully', async () => {
+		it('should return an empty array if no tokens are filtered successfully', async () => {
 			filterCustomToken.mockReturnValue(false);
 
 			const result = await mapBackendTokensTyped({ ...params, certified: false });
