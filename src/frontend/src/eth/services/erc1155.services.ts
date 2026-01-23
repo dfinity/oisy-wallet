@@ -16,7 +16,6 @@ import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
@@ -45,22 +44,23 @@ export const loadErc1155Tokens = async (): Promise<void> => {
 	// No default ERC1155 tokens to load specifically for now, but we keep the function for consistency
 };
 
-export const loadCustomTokens = ({
+export const loadCustomTokens = async ({
 	identity,
 	useCache = false,
 	tokens,
-	certified: restCertified
-}: Omit<LoadCustomTokenParams, 'certified'> & {
-	certified?: boolean;
-	tokens?: CustomToken[];
-}): Promise<void> => {
+	certified
+}: LoadCustomTokenParams): Promise<void> => {
 	if (nonNullish(tokens)) {
-		return loadCustomTokensWithMetadata({
+		const response = await loadCustomTokensWithMetadata({
 			identity,
-			certified: restCertified ?? true,
+			certified,
 			useCache,
 			tokens
-		}).then((response) => loadCustomTokenData({ response, certified: restCertified ?? true }));
+		});
+
+		loadCustomTokenData({ response, certified });
+
+		return;
 	}
 
 	return queryAndUpdate<Erc1155CustomToken[]>({

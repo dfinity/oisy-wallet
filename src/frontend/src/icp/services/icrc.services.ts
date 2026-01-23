@@ -32,6 +32,7 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
+import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
@@ -59,28 +60,26 @@ const loadDefaultIcrcTokens = async () => {
 	);
 };
 
-export const loadCustomTokens = ({
+export const loadCustomTokens = async ({
 	identity,
 	useCache = false,
 	onSuccess,
 	tokens,
-	certified: restCertified
-}: {
-	identity: OptionIdentity;
-	useCache?: boolean;
+	certified
+}: LoadCustomTokenParams & {
 	onSuccess?: () => void;
-	tokens?: CustomToken[];
-	certified?: boolean;
 }): Promise<void> => {
 	if (nonNullish(tokens)) {
-		return loadIcrcCustomTokens({
+		const response = await loadIcrcCustomTokens({
 			identity,
-			certified: restCertified ?? true,
+			certified,
 			useCache,
 			tokens
-		}).then((response) =>
-			loadIcrcCustomData({ response, certified: restCertified ?? true, onSuccess })
-		);
+		});
+
+		loadIcrcCustomData({ response, certified, onSuccess });
+
+		return;
 	}
 
 	return queryAndUpdate<IcrcCustomToken[]>({

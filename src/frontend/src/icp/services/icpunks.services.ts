@@ -35,22 +35,22 @@ const loadDefaultIcPunksTokens = (): ResultSuccess => {
 	return { success: true };
 };
 
-export const loadCustomTokens = ({
+export const loadCustomTokens = async ({
 	identity,
 	useCache = false,
 	tokens,
-	certified: restCertified
-}: Omit<LoadCustomTokenParams, 'certified'> & {
-	certified?: boolean;
-	tokens?: CustomToken[];
-}): Promise<void> => {
+	certified
+}: LoadCustomTokenParams): Promise<void> => {
 	if (nonNullish(tokens)) {
-		return loadCustomTokensWithMetadata({
+		const response = await loadCustomTokensWithMetadata({
 			identity,
-			certified: restCertified ?? true,
+			certified,
 			useCache,
 			tokens
-		}).then((response) => loadCustomTokenData({ response, certified: restCertified ?? true }));
+		});
+
+		loadCustomTokenData({ response, certified });
+		return;
 	}
 
 	return queryAndUpdate<IcPunksCustomToken[]>({

@@ -6,7 +6,6 @@ import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
@@ -44,22 +43,23 @@ const loadDefaultSplTokens = (): ResultSuccess => {
 	return { success: true };
 };
 
-export const loadCustomTokens = ({
+export const loadCustomTokens = async ({
 	identity,
 	useCache = false,
 	tokens,
-	certified: restCertified
-}: Omit<LoadCustomTokenParams, 'certified'> & {
-	certified?: boolean;
-	tokens?: CustomToken[];
-}): Promise<void> => {
+	certified
+}: LoadCustomTokenParams): Promise<void> => {
 	if (nonNullish(tokens)) {
-		return loadCustomTokensWithMetadata({
+		const response = await loadCustomTokensWithMetadata({
 			identity,
-			certified: restCertified ?? true,
+			certified,
 			useCache,
 			tokens
-		}).then((response) => loadCustomTokenData({ response, certified: restCertified ?? true }));
+		});
+
+		loadCustomTokenData({ response, certified });
+
+		return;
 	}
 
 	return queryAndUpdate<SplCustomToken[]>({
@@ -108,8 +108,8 @@ const loadCustomTokensWithMetadata = async ({
 					decimals,
 					token_address: tokenAddress
 				} = 'SplDevnet' in token
-						? { ...token.SplDevnet, network: SOLANA_DEVNET_NETWORK }
-						: { ...token.SplMainnet, network: SOLANA_MAINNET_NETWORK };
+					? { ...token.SplDevnet, network: SOLANA_DEVNET_NETWORK }
+					: { ...token.SplMainnet, network: SOLANA_MAINNET_NETWORK };
 
 				const existingToken = SPL_TOKENS.find(
 					({ address, network: { id: networkId } }) =>

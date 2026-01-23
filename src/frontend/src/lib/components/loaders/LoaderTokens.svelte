@@ -32,7 +32,7 @@
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
-	import { loadCustomTokens } from '$lib/services/custom-tokens.services';
+	import { loadCustomTokens } from '$lib/services/all-tokens.services';
 	import { splCustomTokensNotInitialized } from '$sol/derived/spl.derived';
 	import { loadSplTokens } from '$sol/services/spl.services';
 
