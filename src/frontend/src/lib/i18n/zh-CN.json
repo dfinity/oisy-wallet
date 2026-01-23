@@ -170,6 +170,8 @@
 				"identity_legacy_sign_in": "使用旧 Internet Identity 域名登录",
 				"identity_learn_more": "在 $oisy_short 文档中了解更多",
 				"oisy_introduction": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"private_key": "",
 				"asset_control": "",
 				"internet_identity_help_center": "",
