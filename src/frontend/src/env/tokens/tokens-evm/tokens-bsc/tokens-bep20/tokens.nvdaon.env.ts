@@ -1,6 +1,6 @@
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { NVDAON_TOKEN_GROUP } from '$env/tokens/groups/groups.nvdaon.env';
-import nvdaon from '$eth/assets/nvdaon.svg';
+import nvdaon from '$eth/assets/nvdaon.webp';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
