@@ -53,6 +53,10 @@ export const TRACK_COUNT_SOL_SEND_ERROR = 'sol_send_error';
 export const TRACK_COUNT_WC_SOL_SEND_SUCCESS = 'wc_sol_send_success';
 export const TRACK_COUNT_WC_SOL_SEND_ERROR = 'wc_sol_send_error';
 
+// Kaspa
+export const TRACK_COUNT_KASPA_SEND_SUCCESS = 'kaspa_send_success';
+export const TRACK_COUNT_KASPA_SEND_ERROR = 'kaspa_send_error';
+
 // WalletConnect
 export const TRACK_COUNT_WALLET_CONNECT_MENU_OPEN = 'wallet_connect_menu_open';
 export const TRACK_COUNT_WALLET_CONNECT_QR_CODE = 'wallet_connect_qr_code';

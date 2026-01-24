@@ -34,11 +34,13 @@
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
+		isNetworkIdKaspa,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
+	import KaspaSendDestination from '$kaspa/components/send/KaspaSendDestination.svelte';
 
 	interface Props {
 		destination: string;
@@ -169,6 +171,20 @@
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				onNext={next}
+				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
+			/>
+		</div>
+	{:else if isNetworkIdKaspa($sendTokenNetworkId)}
+		<div data-tid={testId}>
+			<KaspaSendDestination
+				{onQRCodeScan}
+				bind:destination
+				bind:invalidDestination
+			/>
+			<SendDestinationTabs
 				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab

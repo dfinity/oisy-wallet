@@ -12,11 +12,19 @@ export interface KaspaBalanceResponse {
 }
 
 /**
+ * Script public key object from Kaspa API
+ */
+export interface KaspaScriptPublicKey {
+	scriptPublicKey: string;
+	version?: number;
+}
+
+/**
  * UTXO entry from the Kaspa API
  */
 export interface KaspaUtxoEntry {
 	amount: string; // Amount in sompi as string
-	scriptPublicKey: string;
+	scriptPublicKey: KaspaScriptPublicKey;
 	blockDaaScore: string;
 	isCoinbase: boolean;
 }

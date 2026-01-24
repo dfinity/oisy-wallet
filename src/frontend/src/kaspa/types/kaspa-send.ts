@@ -100,3 +100,8 @@ export type KaspaNetworkType = 'mainnet' | 'testnet';
 export const KASPA_DUST_THRESHOLD = 546n; // Minimum output amount in sompi
 export const KASPA_SOMPI_PER_KAS = 100_000_000n; // 1 KAS = 100,000,000 sompi
 export const KASPA_DEFAULT_FEE_RATE = 1; // Default fee rate in sompi per gram (mass unit)
+
+/**
+ * Error class for amount validation in send flow
+ */
+export class KaspaAmountAssertionError extends Error {}

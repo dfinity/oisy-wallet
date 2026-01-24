@@ -155,3 +155,28 @@ export const loadKaspaAddressMainnet = (): Promise<ResultSuccess> =>
  */
 export const getKaspaSourceAddress = (networkId: NetworkId | undefined): string =>
 	(isNetworkIdKASTestnet(networkId) ? get(kaspaAddressTestnet) : get(kaspaAddressMainnet)) ?? '';
+
+/**
+ * Get the Kaspa public key for signing transactions.
+ * Returns the raw secp256k1 compressed public key (33 bytes).
+ */
+export const getKaspaPublicKey = async ({
+	identity,
+	network
+}: {
+	identity: OptionIdentity;
+	network: KaspaNetworkType;
+}): Promise<Uint8Array> => {
+	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+
+	const derivationPath =
+		network === 'mainnet' ? KASPA_DERIVATION_PATH_MAINNET : KASPA_DERIVATION_PATH_TESTNET;
+
+	const { publicKey } = await getGenericEcdsaPublicKey({
+		identity,
+		derivationPath,
+		keyId: KASPA_ECDSA_KEY_ID
+	});
+
+	return new Uint8Array(publicKey);
+};

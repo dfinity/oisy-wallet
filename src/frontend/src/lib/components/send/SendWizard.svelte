@@ -19,11 +19,13 @@
 		isNetworkIdEthereum,
 		isNetworkIdICP,
 		isNetworkIdBitcoin,
+		isNetworkIdKaspa,
 		isNetworkIdSolana,
 		isNetworkIdEvm,
 		isNetworkEthereum
 	} from '$lib/utils/network.utils';
 	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
+	import KaspaSendTokenWizard from '$kaspa/components/send/KaspaSendTokenWizard.svelte';
 
 	interface Props {
 		destination: string;
@@ -125,6 +127,19 @@
 	</UtxosFeeContexts>
 {:else if isNetworkIdSolana($sendToken.network.id)}
 	<SolSendTokenWizard
+		{currentStep}
+		{destination}
+		{onBack}
+		{onClose}
+		{onNext}
+		{onSendBack}
+		{onTokensList}
+		{selectedContact}
+		bind:amount
+		bind:sendProgressStep
+	/>
+{:else if isNetworkIdKaspa($sendToken.network.id)}
+	<KaspaSendTokenWizard
 		{currentStep}
 		{destination}
 		{onBack}

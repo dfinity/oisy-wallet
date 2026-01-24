@@ -2,18 +2,16 @@
  * Kaspa Send Services
  *
  * Handles building, signing, and broadcasting Kaspa transactions using:
- * - @kaspa/core-lib for transaction construction
+ * - Pure JavaScript transaction building (no WASM dependencies)
  * - ICP threshold ECDSA for secure signing
  * - Kaspa public API for broadcasting
  */
 
 import type { KaspaAddress } from '$kaspa/types/address';
-import type { KaspaUtxo, KaspaSubmitTransactionRequest } from '$kaspa/types/kaspa-api';
+import type { KaspaUtxo } from '$kaspa/types/kaspa-api';
 import {
 	type KaspaNetworkType,
-	type KaspaPreparedTransaction,
 	type KaspaSignedTransaction,
-	type KaspaUnspentOutput,
 	type KaspaUtxosFee,
 	KaspaSendError,
 	KaspaSendValidationError,
@@ -24,127 +22,18 @@ import {
 	getKaspaUtxos,
 	submitKaspaTransaction
 } from '$kaspa/providers/kaspa-api.providers';
+import {
+	buildUnsignedTransaction,
+	calculateAllSighashes,
+	applySignatures,
+	transactionToApiFormat
+} from '$kaspa/utils/kaspa-transaction.utils';
+import { isKaspaAddress } from '$kaspa/utils/kaspa-address.utils';
 import { signWithGenericEcdsa } from '$lib/api/signer.api';
 import type { OptionIdentity } from '$lib/types/identity';
 import { assertNonNullish } from '@dfinity/utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { get } from 'svelte/store';
-
-/**
- * Convert Uint8Array to hex string
- */
-const uint8ArrayToHex = (arr: Uint8Array): string =>
-	Array.from(arr)
-		.map((b) => b.toString(16).padStart(2, '0'))
-		.join('');
-
-// @kaspa/core-lib type definitions
-// Note: These types use Uint8Array but the actual library returns Buffer-like objects
-// that have toString('hex') method. We'll handle conversion in transactionToApiFormat.
-interface KaspaCoreInput {
-	prevTxId: Uint8Array | { toString(encoding: string): string };
-	outputIndex: number;
-	output: {
-		script: { toBuffer(): Uint8Array; toHex?(): string };
-		satoshis: number;
-		satoshisBN: unknown;
-	};
-	sequenceNumber: number;
-	addSignature(
-		transaction: KaspaCoreTransaction,
-		signature: KaspaCoreTransactionSignature,
-		signingMethod: string
-	): void;
-}
-
-interface KaspaCoreTransaction {
-	from(utxos: KaspaUnspentOutput[]): KaspaCoreTransaction;
-	to(address: string, amount: number): KaspaCoreTransaction;
-	change(address: string): KaspaCoreTransaction;
-	fee(amount: number): KaspaCoreTransaction;
-	sign(privateKey: unknown): KaspaCoreTransaction;
-	serialize(unsafe?: boolean): string;
-	toString(): string;
-	inputs: KaspaCoreInput[];
-	outputs: Array<{
-		satoshis: number;
-		script: { toBuffer(): Uint8Array; toHex(): string };
-	}>;
-	id: string;
-	hash: string;
-	version: number;
-	nLockTime: number;
-}
-
-interface KaspaCoreSignature {
-	r: unknown;
-	s: unknown;
-	nhashtype: number;
-}
-
-interface KaspaCoreTransactionSignature {
-	publicKey: unknown;
-	prevTxId: Uint8Array | { toString(encoding: string): string };
-	outputIndex: number;
-	inputIndex: number;
-	signature: KaspaCoreSignature;
-	sigtype: number;
-}
-
-interface KaspaCoreSighash {
-	sighash(
-		transaction: KaspaCoreTransaction,
-		sighashType: number,
-		inputIndex: number,
-		subscript: unknown,
-		satoshisBN: unknown,
-		flags?: number
-	): Uint8Array;
-}
-
-interface KaspaCoreTransactionModule {
-	new (): KaspaCoreTransaction;
-	Sighash: KaspaCoreSighash;
-	Signature: new (params: {
-		publicKey: unknown;
-		prevTxId: Uint8Array | { toString(encoding: string): string };
-		outputIndex: number;
-		inputIndex: number;
-		signature: KaspaCoreSignature;
-		sigtype: number;
-	}) => KaspaCoreTransactionSignature;
-}
-
-interface KaspaCoreLib {
-	initRuntime(): Promise<boolean>;
-	Transaction: KaspaCoreTransactionModule;
-	Address: new (address: string) => unknown;
-	PublicKey: new (data: Uint8Array) => unknown;
-	Script: {
-		fromAddress(address: unknown): unknown;
-	};
-	crypto: {
-		Signature: new (r?: unknown, s?: unknown) => KaspaCoreSignature;
-		BN: new (data: Uint8Array | string) => unknown;
-	};
-}
-
-// Lazy-loaded kaspa-core-lib module
-let kaspacore: KaspaCoreLib | null = null;
-
-/**
- * Dynamically import @kaspa/core-lib to avoid CommonJS/ESM issues
- */
-const loadKaspaCoreLib = async (): Promise<KaspaCoreLib> => {
-	if (kaspacore !== null) {
-		return kaspacore;
-	}
-
-	// Cast to unknown first since the library's types don't exactly match our interface
-	const module = await import('@kaspa/core-lib');
-	kaspacore = (module.default ?? module) as unknown as KaspaCoreLib;
-	return kaspacore;
-};
 
 // Kaspa ECDSA key configuration
 const KASPA_ECDSA_KEY_ID = {
@@ -154,40 +43,6 @@ const KASPA_ECDSA_KEY_ID = {
 
 const KASPA_DERIVATION_PATH_MAINNET = ['kaspa', 'mainnet'];
 const KASPA_DERIVATION_PATH_TESTNET = ['kaspa', 'testnet'];
-
-// Sighash type for Kaspa (ALL | FORKID)
-const SIGHASH_ALL_FORKID = 0x41;
-
-// Track runtime initialization
-let kaspaRuntimeReady = false;
-let kaspaRuntimePromise: Promise<boolean> | null = null;
-
-const ensureKaspaRuntime = async (): Promise<KaspaCoreLib> => {
-	const lib = await loadKaspaCoreLib();
-
-	if (kaspaRuntimeReady) {
-		return lib;
-	}
-
-	if (!kaspaRuntimePromise) {
-		kaspaRuntimePromise = lib.initRuntime();
-	}
-
-	await kaspaRuntimePromise;
-	kaspaRuntimeReady = true;
-	return lib;
-};
-
-/**
- * Convert API UTXO format to kaspa-core-lib UnspentOutput format
- */
-const convertUtxoToUnspentOutput = (utxo: KaspaUtxo): KaspaUnspentOutput => ({
-	txId: utxo.outpoint.transactionId,
-	outputIndex: utxo.outpoint.index,
-	address: utxo.address,
-	script: utxo.utxoEntry.scriptPublicKey,
-	satoshis: parseInt(utxo.utxoEntry.amount, 10)
-});
 
 /**
  * Select UTXOs for a transaction and calculate fees
@@ -274,102 +129,26 @@ export const selectUtxosForSend = async ({
 };
 
 /**
- * Build an unsigned Kaspa transaction
- */
-export const buildUnsignedTransaction = async ({
-	source,
-	destination,
-	amount,
-	utxos,
-	fee,
-	change
-}: {
-	source: KaspaAddress;
-	destination: KaspaAddress;
-	amount: bigint;
-	utxos: KaspaUtxo[];
-	fee: bigint;
-	change: bigint;
-}): Promise<{ transaction: KaspaCoreTransaction; unspentOutputs: KaspaUnspentOutput[] }> => {
-	const lib = await ensureKaspaRuntime();
-
-	// Convert UTXOs to the format expected by kaspa-core-lib
-	const unspentOutputs = utxos.map(convertUtxoToUnspentOutput);
-
-	// Create transaction
-	const transaction = new lib.Transaction()
-		.from(unspentOutputs)
-		.to(destination, Number(amount))
-		.fee(Number(fee));
-
-	// Add change output if needed
-	if (change > 0n) {
-		transaction.change(source);
-	}
-
-	return { transaction, unspentOutputs };
-};
-
-/**
- * Get sighashes for all inputs of a transaction
- */
-export const getTransactionSighashes = async (
-	transaction: KaspaCoreTransaction
-): Promise<{ sighashes: Uint8Array[]; inputIndices: number[] }> => {
-	const lib = await ensureKaspaRuntime();
-	const sighashes: Uint8Array[] = [];
-	const inputIndices: number[] = [];
-
-	for (let i = 0; i < transaction.inputs.length; i++) {
-		const input = transaction.inputs[i];
-		const sighash = lib.Transaction.Sighash.sighash(
-			transaction,
-			SIGHASH_ALL_FORKID,
-			i,
-			input.output.script,
-			input.output.satoshisBN
-		);
-
-		sighashes.push(new Uint8Array(sighash));
-		inputIndices.push(i);
-	}
-
-	return { sighashes, inputIndices };
-};
-
-/**
  * Sign all transaction inputs using threshold ECDSA
  */
-export const signTransactionInputs = async ({
-	transaction,
+const signTransactionInputs = async ({
 	sighashes,
-	inputIndices,
 	identity,
-	network,
-	publicKey
+	network
 }: {
-	transaction: KaspaCoreTransaction;
 	sighashes: Uint8Array[];
-	inputIndices: number[];
 	identity: OptionIdentity;
 	network: KaspaNetworkType;
-	publicKey: Uint8Array;
-}): Promise<KaspaCoreTransaction> => {
+}): Promise<Uint8Array[]> => {
 	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
-
-	const lib = await ensureKaspaRuntime();
 
 	const derivationPath =
 		network === 'mainnet' ? KASPA_DERIVATION_PATH_MAINNET : KASPA_DERIVATION_PATH_TESTNET;
 
-	// Create PublicKey object from raw public key
-	const pubKey = new lib.PublicKey(publicKey);
+	const signatures: Uint8Array[] = [];
 
 	// Sign each input
-	for (let i = 0; i < sighashes.length; i++) {
-		const sighash = sighashes[i];
-		const inputIndex = inputIndices[i];
-
+	for (const sighash of sighashes) {
 		// Sign the sighash using threshold ECDSA
 		const signatureBytes = await signWithGenericEcdsa({
 			identity,
@@ -378,80 +157,10 @@ export const signTransactionInputs = async ({
 			keyId: KASPA_ECDSA_KEY_ID
 		});
 
-		// Parse the signature (64 bytes: 32 bytes r + 32 bytes s)
-		const r = new lib.crypto.BN(new Uint8Array(signatureBytes.slice(0, 32)));
-		const s = new lib.crypto.BN(new Uint8Array(signatureBytes.slice(32, 64)));
-
-		// Create signature object
-		const signature = new lib.crypto.Signature(r, s);
-		signature.nhashtype = SIGHASH_ALL_FORKID;
-
-		// Create transaction signature
-		const input = transaction.inputs[inputIndex];
-		const txSignature = new lib.Transaction.Signature({
-			publicKey: pubKey,
-			prevTxId: input.prevTxId,
-			outputIndex: input.outputIndex,
-			inputIndex,
-			signature,
-			sigtype: SIGHASH_ALL_FORKID
-		});
-
-		// Apply signature to transaction
-		// Note: This modifies the transaction in place
-		input.addSignature(transaction, txSignature, 'ecdsa');
+		signatures.push(new Uint8Array(signatureBytes));
 	}
 
-	return transaction;
-};
-
-/**
- * Convert a buffer-like object or Uint8Array to hex string
- */
-const toHexString = (data: Uint8Array | { toString(encoding: string): string }): string => {
-	if (typeof (data as { toString(encoding: string): string }).toString === 'function') {
-		try {
-			// Try Buffer-style toString first (kaspa-core-lib uses Buffer internally)
-			const result = (data as { toString(encoding: string): string }).toString('hex');
-			if (typeof result === 'string' && result.length > 0) {
-				return result;
-			}
-		} catch {
-			// Fall through to Uint8Array conversion
-		}
-	}
-	return uint8ArrayToHex(data as Uint8Array);
-};
-
-/**
- * Convert a signed transaction to the format expected by the Kaspa API
- */
-const transactionToApiFormat = (
-	transaction: KaspaCoreTransaction
-): KaspaSubmitTransactionRequest => {
-	return {
-		transaction: {
-			version: transaction.version,
-			inputs: transaction.inputs.map((input) => ({
-				previousOutpoint: {
-					transactionId: toHexString(input.prevTxId),
-					index: input.outputIndex
-				},
-				signatureScript: input.output.script.toHex?.() ?? uint8ArrayToHex(input.output.script.toBuffer()),
-				sequence: input.sequenceNumber.toString(),
-				sigOpCount: 1
-			})),
-			outputs: transaction.outputs.map((output) => ({
-				amount: output.satoshis.toString(),
-				scriptPublicKey: {
-					scriptPublicKey: output.script.toHex(),
-					version: 0
-				}
-			})),
-			lockTime: transaction.nLockTime.toString(),
-			subnetworkId: '0000000000000000000000000000000000000000'
-		}
-	};
+	return signatures;
 };
 
 /**
@@ -494,38 +203,38 @@ export const sendKaspa = async ({
 		throw new KaspaSendValidationError(utxoError);
 	}
 
-	// Build unsigned transaction
-	const { transaction } = await buildUnsignedTransaction({
-		source,
-		destination,
-		amount,
+	// Build unsigned transaction using pure JS
+	const unsignedTx = buildUnsignedTransaction({
 		utxos: selectedUtxos,
-		fee,
-		change
+		destinationAddress: destination,
+		destinationAmount: amount,
+		changeAddress: source,
+		changeAmount: change,
+		fee
 	});
 
-	// Get sighashes for signing
-	const { sighashes, inputIndices } = await getTransactionSighashes(transaction);
+	// Calculate sighashes for all inputs
+	const { sighashes } = calculateAllSighashes(unsignedTx);
 
-	// Sign the transaction
-	const signedTransaction = await signTransactionInputs({
-		transaction,
+	// Sign all inputs using threshold ECDSA
+	const signatures = await signTransactionInputs({
 		sighashes,
-		inputIndices,
 		identity,
-		network,
-		publicKey
+		network
 	});
 
-	// Broadcast the transaction
-	const apiTransaction = transactionToApiFormat(signedTransaction);
+	// Apply signatures to the transaction
+	const signedTx = applySignatures(unsignedTx, signatures, publicKey);
+
+	// Convert to API format and broadcast
+	const apiTransaction = transactionToApiFormat(signedTx);
 	const { transactionId } = await submitKaspaTransaction({
 		transaction: apiTransaction,
 		network
 	});
 
 	return {
-		signedTxHex: signedTransaction.serialize(true),
+		signedTxHex: JSON.stringify(apiTransaction),
 		txId: transactionId
 	};
 };
@@ -564,10 +273,7 @@ export const validateKaspaSend = async ({
 	}
 
 	// Validate destination address format
-	const lib = await ensureKaspaRuntime();
-	try {
-		new lib.Address(destination);
-	} catch {
+	if (!isKaspaAddress({ address: destination })) {
 		return {
 			selectedUtxos: [],
 			fee: 0n,

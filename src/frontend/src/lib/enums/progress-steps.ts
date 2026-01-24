@@ -88,6 +88,14 @@ export enum ProgressStepsSendSol {
 	DONE = 'done'
 }
 
+export enum ProgressStepsSendKaspa {
+	INITIALIZATION = 'initialization',
+	SIGN = 'sign',
+	SEND = 'send',
+	RELOAD = 'reload',
+	DONE = 'done'
+}
+
 export enum ProgressStepsUpdateBalanceCkBtc {
 	INITIALIZATION = 'initialization',
 	RETRIEVE = 'retrieve',
