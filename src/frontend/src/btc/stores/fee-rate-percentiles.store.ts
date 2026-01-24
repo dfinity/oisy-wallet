@@ -26,8 +26,4 @@ export const initFeeRatePercentilesStore = (): FeeRatePercentilesStore => {
 	};
 };
 
-export interface FeeRatePercentilesContext {
-	store: FeeRatePercentilesStore;
-}
-
-export const FEE_RATE_PERCENTILES_CONTEXT_KEY = Symbol('fee-rate-percentiles');
+export const feeRatePercentilesStore = initFeeRatePercentilesStore();
