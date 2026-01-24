@@ -39,6 +39,7 @@ import { PGX_TOKEN } from '$env/tokens/tokens-spl/tokens.pgx.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { QQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.qqqx.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
+import { SLVON_TOKEN } from '$env/tokens/tokens-spl/tokens.slvon.env';
 import { SPX_TOKEN } from '$env/tokens/tokens-spl/tokens.spx.env';
 import { SPYX_TOKEN } from '$env/tokens/tokens-spl/tokens.spyx.env';
 import { TQQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.tqqqx.env';
@@ -93,6 +94,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	POPCAT_TOKEN,
 	QQQX_TOKEN,
 	RAY_TOKEN,
+	SLVON_TOKEN,
 	SPX_TOKEN,
 	SPYX_TOKEN,
 	TQQQX_TOKEN,
