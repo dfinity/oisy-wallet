@@ -11,7 +11,6 @@ import { get } from 'svelte/store';
 interface LoadCustomTokensFromBackendParams {
 	identity: OptionIdentity;
 	certified: boolean;
-	filterTokens?: (token: CustomToken) => boolean;
 }
 
 type LoadCustomTokensParams = LoadCustomTokensFromBackendParams & {
