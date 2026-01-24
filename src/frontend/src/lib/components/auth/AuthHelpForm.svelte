@@ -1,5 +1,5 @@
 <script lang="ts">
-	import helpAuthIdentityBanner from '$lib/assets/help-auth-identity-banner.webp';
+	import helpAuthInterruptedLoginBanner from '$lib/assets/help-auth-interrupted-login-banner.webp';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -34,7 +34,7 @@
 
 <div class="grid gap-6">
 	<Img
-		src={helpAuthIdentityBanner}
+		src={helpAuthInterruptedLoginBanner}
 		styleClass="w-full rounded-xl"
 		testId={HELP_AUTH_IMAGE_BANNER}
 	/>
