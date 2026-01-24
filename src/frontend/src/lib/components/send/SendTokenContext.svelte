@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { setContext, type Snippet } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import { onDestroy, setContext, type Snippet } from 'svelte';
+	import { resetUtxosDataStores } from '$btc/utils/btc-utxos.utils';
+	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionBalance } from '$lib/types/balance';
@@ -36,6 +39,12 @@
 
 	$effect(() => {
 		sendToken.set(selectedToken);
+	});
+
+	onDestroy(() => {
+		if (nonNullish(token) && isBitcoinToken(token)) {
+			resetUtxosDataStores();
+		}
 	});
 </script>
 

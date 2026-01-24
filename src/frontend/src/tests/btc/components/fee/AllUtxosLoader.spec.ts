@@ -1,10 +1,6 @@
 import AllUtxosLoader from '$btc/components/fee/AllUtxosLoader.svelte';
 import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
-import {
-	ALL_UTXOS_CONTEXT_KEY,
-	initAllUtxosStore,
-	type AllUtxosStore
-} from '$btc/stores/all-utxos.store';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
@@ -15,13 +11,12 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('AllUtxosLoader', () => {
 	const networkId = BTC_MAINNET_NETWORK_ID;
 	const source = mockBtcAddress;
 	const mockAllUtxos = [mockUtxo];
-
-	const mockContext = (store: AllUtxosStore) => new Map([[ALL_UTXOS_CONTEXT_KEY, { store }]]);
 
 	const mockGetUtxosQuery = () =>
 		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
@@ -30,8 +25,6 @@ describe('AllUtxosLoader', () => {
 			tip_height: 100,
 			next_page: []
 		});
-
-	let store: AllUtxosStore;
 
 	const props = {
 		source,
@@ -43,19 +36,16 @@ describe('AllUtxosLoader', () => {
 		vi.clearAllMocks();
 
 		mockPage.reset();
-		store = initAllUtxosStore();
+
+		allUtxosStore.reset();
 	});
 
 	it('should call getUtxosQuery and set store with proper params', async () => {
-		const setAllUtxosSpy = vi.spyOn(store, 'setAllUtxos');
 		const getUtxosQuerySpy = mockGetUtxosQuery();
 
 		mockAuthStore();
 
-		render(AllUtxosLoader, {
-			props,
-			context: mockContext(store)
-		});
+		render(AllUtxosLoader, { props });
 
 		await waitFor(() => {
 			expect(getUtxosQuerySpy).toHaveBeenCalledExactlyOnceWith({
@@ -65,9 +55,7 @@ describe('AllUtxosLoader', () => {
 				bitcoinCanisterId: BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID],
 				minConfirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 			});
-			expect(setAllUtxosSpy).toHaveBeenCalledExactlyOnceWith({
-				allUtxos: mockAllUtxos
-			});
+			expect(get(allUtxosStore)?.allUtxos).toEqual(mockAllUtxos);
 		});
 	});
 
@@ -77,10 +65,7 @@ describe('AllUtxosLoader', () => {
 
 		mockAuthStore();
 
-		render(AllUtxosLoader, {
-			props: newProps,
-			context: mockContext(store)
-		});
+		render(AllUtxosLoader, { props: newProps });
 
 		await waitFor(() => {
 			expect(getUtxosQuerySpy).not.toHaveBeenCalled();
@@ -93,9 +78,22 @@ describe('AllUtxosLoader', () => {
 		mockAuthStore();
 
 		render(AllUtxosLoader, {
-			props: { ...props, networkId: ICP_NETWORK_ID },
-			context: mockContext(store)
+			props: { ...props, networkId: ICP_NETWORK_ID }
 		});
+
+		await waitFor(() => {
+			expect(getUtxosQuerySpy).not.toHaveBeenCalled();
+		});
+	});
+
+	it('should not call getUtxosQuery if store already has data', async () => {
+		allUtxosStore.setAllUtxos({ allUtxos: mockAllUtxos });
+
+		const getUtxosQuerySpy = mockGetUtxosQuery();
+
+		mockAuthStore();
+
+		render(AllUtxosLoader, { props });
 
 		await waitFor(() => {
 			expect(getUtxosQuerySpy).not.toHaveBeenCalled();

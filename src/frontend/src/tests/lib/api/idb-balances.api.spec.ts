@@ -1,23 +1,13 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import {
-	clearIdbBalances,
-	deleteIdbBalances,
-	getIdbBalances,
-	setIdbBalancesStore
-} from '$lib/api/idb-balances.api';
+import { clearIdbBalances, getIdbBalances, setIdbBalancesStore } from '$lib/api/idb-balances.api';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Balance } from '$lib/types/balance';
-import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 import { get } from 'svelte/store';
-
-vi.mock('$lib/utils/idb.utils', () => ({
-	delMultiKeysByPrincipal: vi.fn()
-}));
 
 vi.mock('$app/environment', () => ({
 	browser: true
@@ -211,17 +201,6 @@ describe('idb-balances.api', () => {
 				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
 				expect.any(Object)
 			);
-		});
-	});
-
-	describe('deleteIdbBalances', () => {
-		it('should delete balances', async () => {
-			await deleteIdbBalances(mockPrincipal);
-
-			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
-				principal: mockPrincipal,
-				store: expect.any(Object)
-			});
 		});
 	});
 

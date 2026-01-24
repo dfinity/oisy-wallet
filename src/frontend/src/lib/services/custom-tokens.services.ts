@@ -11,7 +11,7 @@ import { get } from 'svelte/store';
 interface LoadCustomTokensFromBackendParams {
 	identity: OptionIdentity;
 	certified: boolean;
-	filterTokens: (token: CustomToken) => boolean;
+	filterTokens?: (token: CustomToken) => boolean;
 }
 
 type LoadCustomTokensParams = LoadCustomTokensFromBackendParams & {
@@ -34,6 +34,10 @@ const loadCustomTokensFromBackend = async ({
 	// Caching the custom tokens in the IDB if update call
 	if (certified && tokens.length > 0) {
 		await setIdbAllCustomTokens({ identity, tokens });
+	}
+
+	if (isNullish(filterTokens)) {
+		return tokens;
 	}
 
 	// We filter the custom tokens, since the backend "Custom Token" potentially supports other types
@@ -136,7 +140,7 @@ export const loadNetworkCustomTokens = async ({
 			return cachedTokens.reduce<CustomToken[]>((acc, token) => {
 				const parsed = parsePrincipal(token);
 
-				return filterTokens(parsed) ? [...acc, parsed] : acc;
+				return isNullish(filterTokens) || filterTokens(parsed) ? [...acc, parsed] : acc;
 			}, []);
 		}
 	}
