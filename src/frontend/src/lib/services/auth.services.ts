@@ -6,25 +6,15 @@ import {
 	clearIdbEthAddress,
 	clearIdbSolAddressDevnet,
 	clearIdbSolAddressLocal,
-	clearIdbSolAddressMainnet,
-	deleteIdbBtcAddressMainnet,
-	deleteIdbBtcAddressTestnet,
-	deleteIdbEthAddress,
-	deleteIdbSolAddressDevnet,
-	deleteIdbSolAddressLocal,
-	deleteIdbSolAddressMainnet
+	clearIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
-import { clearIdbBalances, deleteIdbBalances } from '$lib/api/idb-balances.api';
-import { clearIdbAllCustomTokens, deleteIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
+import { clearIdbBalances } from '$lib/api/idb-balances.api';
+import { clearIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import {
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,
 	clearIdbIcTransactions,
-	clearIdbSolTransactions,
-	deleteIdbBtcTransactions,
-	deleteIdbEthTransactions,
-	deleteIdbIcTransactions,
-	deleteIdbSolTransactions
+	clearIdbSolTransactions
 } from '$lib/api/idb-transactions.api';
 import { deleteIdbAllOisyRelated } from '$lib/api/idb.api';
 import {
@@ -36,6 +26,7 @@ import {
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
 } from '$lib/constants/analytics.constants';
+import { PARAM_DELETE_IDB_CACHE, PARAM_LEVEL, PARAM_MSG } from '$lib/constants/routes.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
 	authLoggedInAnotherTabStore,
@@ -55,15 +46,8 @@ import { replaceHistory } from '$lib/utils/route.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
-import { isNullish } from '@dfinity/utils';
-import type { Principal } from '@icp-sdk/core/principal';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-
-export enum PrincipalsStorage {
-	CURRENT = 'current',
-	ALL = 'all',
-	NONE = 'none'
-}
 
 export const signIn = async (
 	params: AuthSignInParams
@@ -136,18 +120,16 @@ export const signIn = async (
 
 export const signOut = ({
 	resetUrl = false,
-	clearPrincipalStorages = PrincipalsStorage.CURRENT,
 	source = ''
 }: {
 	resetUrl?: boolean;
-	clearPrincipalStorages?: PrincipalsStorage;
 	source?: string;
 }): Promise<void> => {
 	trackSignOut({
 		name: TRACK_SIGN_OUT_SUCCESS,
 		meta: { reason: 'user', resetUrl, source }
 	});
-	return logout({ resetUrl, clearPrincipalStorages });
+	return logout({ resetUrl });
 };
 
 export const errorSignOut = (text: string): Promise<void> => {
@@ -200,31 +182,15 @@ export const idleSignOut = (): Promise<void> => {
 			text,
 			level
 		},
-		clearPrincipalStorages: PrincipalsStorage.NONE
+		clearIdbStorages: false
 	});
 };
 
 export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
 	logout({
 		resetUrl,
-		clearPrincipalStorages: PrincipalsStorage.NONE
+		clearIdbStorages: false
 	});
-
-const emptyPrincipalIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<void>) => {
-	const { identity } = get(authStore);
-
-	if (isNullish(identity)) {
-		return;
-	}
-
-	try {
-		await deleteIdbStore(identity.getPrincipal());
-	} catch (err: unknown) {
-		// We silence the error.
-		// Effective logout is more important here.
-		console.error(err);
-	}
-};
 
 const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 	try {
@@ -235,25 +201,6 @@ const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 		console.error(err);
 	}
 };
-
-const deleteIdbStoreList = [
-	// Addresses
-	deleteIdbBtcAddressMainnet,
-	deleteIdbBtcAddressTestnet,
-	deleteIdbEthAddress,
-	deleteIdbSolAddressMainnet,
-	deleteIdbSolAddressDevnet,
-	deleteIdbSolAddressLocal,
-	// Tokens
-	deleteIdbAllCustomTokens,
-	// Transactions
-	deleteIdbBtcTransactions,
-	deleteIdbEthTransactions,
-	deleteIdbIcTransactions,
-	deleteIdbSolTransactions,
-	// Balances
-	deleteIdbBalances
-];
 
 const clearIdbStoreList = [
 	// Addresses
@@ -271,10 +218,7 @@ const clearIdbStoreList = [
 	clearIdbIcTransactions,
 	clearIdbSolTransactions,
 	// Balances
-	clearIdbBalances,
-	// Delete all possible OISY-related indexedDB
-	// We should clear them first, since the deletion may not be supported in the current browser
-	deleteIdbAllOisyRelated
+	clearIdbBalances
 ];
 
 // eslint-disable-next-line require-await
@@ -296,23 +240,26 @@ const disconnectWalletConnect = async () => {
 };
 
 const logout = async ({
-	msg = undefined,
-	clearPrincipalStorages = PrincipalsStorage.CURRENT,
-	resetUrl = false
-}: {
-	msg?: ToastMsg;
-	clearPrincipalStorages?: PrincipalsStorage;
-	resetUrl?: boolean;
-}) => {
+	clearIdbStorages = true,
+	...params
+}: { clearIdbStorages?: boolean } & ({ msg?: ToastMsg } | { resetUrl?: boolean })) => {
+	const { msg, resetUrl } = {
+		msg: undefined,
+		resetUrl: false,
+		...params
+	};
+
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
 
 	await disconnectWalletConnect();
 
-	if (clearPrincipalStorages === PrincipalsStorage.CURRENT) {
-		await Promise.all(deleteIdbStoreList.map(emptyPrincipalIdbStore));
-	} else if (clearPrincipalStorages === PrincipalsStorage.ALL) {
+	if (clearIdbStorages) {
 		await Promise.all(clearIdbStoreList.map(clearIdbStore));
+
+		// Delete all possible OISY-related indexedDB
+		// We should clear them first, since the deletion may not be supported in the current browser
+		await clearIdbStore(deleteIdbAllOisyRelated);
 	}
 
 	try {
@@ -323,13 +270,16 @@ const logout = async ({
 
 	await authStore.signOut();
 
-	if (msg) {
-		appendMsgToUrl(msg);
+	// No need to append the message if we are resetting the url.
+	// The reset will redirect the user to the root, so any appended message would be lost.
+	if (resetUrl) {
+		await gotoReplaceRoot(clearIdbStorages);
 	}
 
-	if (resetUrl) {
-		await gotoReplaceRoot();
-	}
+	appendMsgToUrl({
+		...(nonNullish(msg) ? { msg } : {}),
+		deleteIdbCache: clearIdbStorages
+	});
 
 	// Auth: Delegation and identity are cleared from indexedDB by agent-js so, we do not need to clear these
 
@@ -340,32 +290,47 @@ const logout = async ({
 	window.location.reload();
 };
 
-const PARAM_MSG = 'msg';
-const PARAM_LEVEL = 'level';
-
 /**
  * If a message was provided to the logout process - e.g. a message informing the logout happened because the session timed-out - append the information to the url as query params
  */
-const appendMsgToUrl = (msg: ToastMsg) => {
+const appendMsgToUrl = ({ msg, deleteIdbCache }: { msg?: ToastMsg; deleteIdbCache?: boolean }) => {
 	if (typeof window === 'undefined') {
 		return;
 	}
 
-	const { text, level } = msg;
-
 	const url: URL = new URL(window.location.href);
 
-	url.searchParams.append(PARAM_MSG, encodeURI(text));
-	url.searchParams.append(PARAM_LEVEL, level);
+	if (nonNullish(msg)) {
+		const { text, level } = msg;
 
-	replaceHistory(url);
+		url.searchParams.append(PARAM_MSG, encodeURI(text));
+		url.searchParams.append(PARAM_LEVEL, level);
+	}
+
+	if (deleteIdbCache) {
+		url.searchParams.append(PARAM_DELETE_IDB_CACHE, 'true');
+	}
+
+	if (nonNullish(msg) || deleteIdbCache) {
+		replaceHistory(url);
+	}
 };
 
 /**
  * If the url contains a msg that has been provided on logout, display it as a toast message. Clean up the url afterwards - we don't want the user to see the message again if reloads the browser
  */
-export const displayAndCleanLogoutMsg = () => {
+export const displayAndCleanLogoutMsg = async () => {
 	const urlParams: URLSearchParams = new URLSearchParams(window.location.search);
+
+	const deleteIdbCache: string | null = urlParams.get(PARAM_DELETE_IDB_CACHE);
+
+	if (deleteIdbCache === 'true') {
+		try {
+			await deleteIdbAllOisyRelated();
+		} catch (err: unknown) {
+			console.error('Error deleting cache after logout', err);
+		}
+	}
 
 	const msg: string | null = urlParams.get(PARAM_MSG);
 
@@ -386,6 +351,7 @@ const cleanUpMsgUrl = () => {
 
 	url.searchParams.delete(PARAM_MSG);
 	url.searchParams.delete(PARAM_LEVEL);
+	url.searchParams.delete(PARAM_DELETE_IDB_CACHE);
 
 	replaceHistory(url);
 };

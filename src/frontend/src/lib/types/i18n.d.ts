@@ -146,7 +146,6 @@ interface I18nAuth {
 			description: string;
 			login_page_looks_different: string;
 			use_identity_number: string;
-			lost_identity_number: string;
 			feedback_text: string;
 			thanks_text: string;
 			useful_links: string;
@@ -162,7 +161,8 @@ interface I18nAuth {
 			identity_legacy_sign_in: string;
 			identity_learn_more: string;
 			oisy_introduction: string;
-			private_key: string;
+			logging_into_oisy: string;
+			creating_a_wallet: string;
 			asset_control: string;
 			internet_identity_help_center: string;
 			need_help: string;

@@ -5,12 +5,6 @@ import {
 	clearIdbSolAddressDevnet,
 	clearIdbSolAddressLocal,
 	clearIdbSolAddressMainnet,
-	deleteIdbBtcAddressMainnet,
-	deleteIdbBtcAddressTestnet,
-	deleteIdbEthAddress,
-	deleteIdbSolAddressDevnet,
-	deleteIdbSolAddressLocal,
-	deleteIdbSolAddressMainnet,
 	getIdbBtcAddressMainnet,
 	getIdbEthAddress,
 	getIdbSolAddressMainnet,
@@ -62,18 +56,6 @@ describe('idb-addresses.api', () => {
 			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
 		});
 
-		it('should delete BTC mainnet address', async () => {
-			await deleteIdbBtcAddressMainnet(mockPrincipal);
-
-			expect(idbKeyval.del).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
-		});
-
-		it('should delete BTC Testnet address', async () => {
-			await deleteIdbBtcAddressTestnet(mockPrincipal);
-
-			expect(idbKeyval.del).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
-		});
-
 		it('should update BTC address last usage', async () => {
 			// eslint-disable-next-line local-rules/prefer-object-params
 			vi.mocked(idbKeyval.update).mockImplementation((_, updater) => {
@@ -113,12 +95,6 @@ describe('idb-addresses.api', () => {
 			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
 		});
 
-		it('should delete ETH address', async () => {
-			await deleteIdbEthAddress(mockPrincipal);
-
-			expect(idbKeyval.del).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
-		});
-
 		it('should update ETH address last usage', async () => {
 			// eslint-disable-next-line local-rules/prefer-object-params
 			vi.mocked(idbKeyval.update).mockImplementation((_, updater) => {
@@ -156,24 +132,6 @@ describe('idb-addresses.api', () => {
 
 			expect(result).toEqual(mockAddress);
 			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
-		});
-
-		it('should delete SOL mainnet address', async () => {
-			await deleteIdbSolAddressMainnet(mockPrincipal);
-
-			expect(idbKeyval.del).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
-		});
-
-		it('should delete SOL devnet address', async () => {
-			await deleteIdbSolAddressDevnet(mockPrincipal);
-
-			expect(idbKeyval.del).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
-		});
-
-		it('should delete SOL local address', async () => {
-			await deleteIdbSolAddressLocal(mockPrincipal);
-
-			expect(idbKeyval.del).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
 		});
 
 		it('should update SOL address last usage', async () => {
