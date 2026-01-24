@@ -33,7 +33,6 @@ export enum WizardStepsSwap {
 
 export enum WizardStepsAuthHelp {
 	OVERVIEW = 'Overview',
-	HELP_LEGACY_IDENTITY = 'Help Legacy Identity',
 	HELP_NEW_IDENTITY = 'Help New Identity'
 }
 

@@ -1,16 +1,9 @@
 import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
-import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
+import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
-import {
-	ALL_UTXOS_CONTEXT_KEY,
-	initAllUtxosStore,
-	type AllUtxosContext
-} from '$btc/stores/all-utxos.store';
-import {
-	FEE_RATE_PERCENTILES_CONTEXT_KEY,
-	initFeeRatePercentilesStore,
-	type FeeRatePercentilesContext
-} from '$btc/stores/fee-rate-percentiles.store';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
 import {
 	UTXOS_FEE_CONTEXT_KEY,
@@ -61,17 +54,8 @@ describe('BtcConvertTokenWizard', () => {
 		sourceToken?: Token;
 		mockUtxosFeeStore: UtxosFeeStore;
 	}) =>
-		new Map<
-			symbol,
-			| ConvertContext
-			| TokenActionValidationErrorsContext
-			| UtxosFeeContext
-			| AllUtxosContext
-			| FeeRatePercentilesContext
-		>([
+		new Map<symbol, ConvertContext | TokenActionValidationErrorsContext | UtxosFeeContext>([
 			[UTXOS_FEE_CONTEXT_KEY, { store: mockUtxosFeeStore }],
-			[ALL_UTXOS_CONTEXT_KEY, { store: initAllUtxosStore() }],
-			[FEE_RATE_PERCENTILES_CONTEXT_KEY, { store: initFeeRatePercentilesStore() }],
 			[CONVERT_CONTEXT_KEY, initConvertContext({ sourceToken, destinationToken: ICP_TOKEN })],
 			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
@@ -109,9 +93,9 @@ describe('BtcConvertTokenWizard', () => {
 		vi
 			.spyOn(addressesStore, 'btcAddressMainnet', 'get')
 			.mockImplementation(() => readable(mockBtcAddress));
-	const mockBtcPendingSentTransactionsStore = () =>
+	const mockLoadBtcPendingSentTransactions = () =>
 		vi
-			.spyOn(btcPendingSentTransactionsStore, 'loadBtcPendingSentTransactions')
+			.spyOn(btcPendingSentTransactionsServices, 'loadBtcPendingSentTransactions')
 			.mockResolvedValue({ success: true });
 	const mockUtxosFeeStore = (utxosFee?: UtxosFee) => {
 		const store = utxosFeeStore.initUtxosFeeStore();
@@ -129,7 +113,11 @@ describe('BtcConvertTokenWizard', () => {
 		vi.clearAllMocks();
 
 		mockPage.reset();
-		mockBtcPendingSentTransactionsStore();
+		mockLoadBtcPendingSentTransactions();
+
+		allUtxosStore.reset();
+		feeRatePercentilesStore.reset();
+		btcPendingSentTransactionsStore.reset();
 
 		vi.spyOn(btcUtxosService, 'prepareBtcSend').mockResolvedValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
