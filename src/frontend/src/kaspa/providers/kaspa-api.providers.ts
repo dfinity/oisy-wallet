@@ -22,10 +22,7 @@ import type {
 	KaspaUtxosResponse,
 	KaspaVirtualChainBlueScore
 } from '$kaspa/types/kaspa-api';
-import { i18n } from '$lib/stores/i18n.store';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
 
 export type KaspaNetworkType = 'mainnet' | 'testnet';
 
@@ -35,12 +32,7 @@ export type KaspaNetworkType = 'mainnet' | 'testnet';
 const getApiBaseUrl = (network: KaspaNetworkType): string => {
 	const url = network === 'mainnet' ? KASPA_API_URL_MAINNET : KASPA_API_URL_TESTNET;
 
-	assertNonNullish(
-		url,
-		replacePlaceholders(get(i18n).init.error.no_alchemy_config, {
-			$network: `Kaspa ${network}`
-		})
-	);
+	assertNonNullish(url, `Kaspa ${network} API URL is not configured`);
 
 	return url;
 };
