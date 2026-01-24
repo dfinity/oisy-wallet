@@ -35,7 +35,8 @@ vi.mock(import('$lib/services/query.services'), async (importOriginal) => {
 
 	return {
 		...actual,
-		createQueryAndUpdateWithWarmup: () => actual.createQueryAndUpdateWithWarmup(0)
+		createQueryAndUpdateWithWarmup: () =>
+			actual.createQueryAndUpdateWithWarmup({ warmupMs: 0, defaultStrategy: 'query_and_update' })
 	};
 });
 

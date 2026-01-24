@@ -21,3 +21,7 @@ export const NETWORK_PARAM = 'network';
 export const COLLECTION_PARAM = 'collection';
 export const NFT_PARAM = 'nft';
 export const URI_PARAM = 'uri';
+
+export const PARAM_MSG = 'msg';
+export const PARAM_LEVEL = 'level';
+export const PARAM_DELETE_IDB_CACHE = 'delete-idb-cache';

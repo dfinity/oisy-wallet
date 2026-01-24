@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { getContext, type Snippet, untrack } from 'svelte';
+	import { type Snippet, untrack } from 'svelte';
 	import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
-	import { ALL_UTXOS_CONTEXT_KEY, type AllUtxosContext } from '$btc/stores/all-utxos.store';
+	import { allUtxosStore } from '$btc/stores/all-utxos.store';
 	import {
 		BITCOIN_CANISTER_IDS,
 		IC_CKBTC_MINTER_CANISTER_ID
@@ -19,8 +19,6 @@
 	}
 
 	let { source, networkId, children }: Props = $props();
-
-	const { store } = getContext<AllUtxosContext>(ALL_UTXOS_CONTEXT_KEY);
 
 	const loadAllUtxos = async () => {
 		if (isNullish(networkId)) {
@@ -41,13 +39,13 @@
 			minConfirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 		});
 
-		store.setAllUtxos({ allUtxos });
+		allUtxosStore.setAllUtxos({ allUtxos });
 	};
 
 	$effect(() => {
 		[source, networkId];
 
-		untrack(() => loadAllUtxos());
+		untrack(() => isNullish($allUtxosStore?.allUtxos) && loadAllUtxos());
 	});
 </script>
 

@@ -34,7 +34,7 @@ describe('query.services', () => {
 		});
 
 		it('should use "query" strategy during warmup period', async () => {
-			const qau = createQueryAndUpdateWithWarmup(warmupMs);
+			const qau = createQueryAndUpdateWithWarmup({ warmupMs });
 
 			// Within warmup
 			await qau(params);
@@ -58,7 +58,7 @@ describe('query.services', () => {
 		});
 
 		it('should use provided params.strategy after warmup period', async () => {
-			const qau = createQueryAndUpdateWithWarmup(warmupMs);
+			const qau = createQueryAndUpdateWithWarmup({ warmupMs });
 
 			// Move time past warmup
 			vi.advanceTimersByTime(warmupMs + 1);
@@ -71,8 +71,8 @@ describe('query.services', () => {
 			});
 		});
 
-		it('should default to "query_and_update" after warmup when params.strategy is undefined', async () => {
-			const qau = createQueryAndUpdateWithWarmup(warmupMs);
+		it('should default to "update" after warmup when params.strategy is undefined', async () => {
+			const qau = createQueryAndUpdateWithWarmup({ warmupMs });
 
 			vi.advanceTimersByTime(warmupMs + 10);
 
@@ -80,13 +80,13 @@ describe('query.services', () => {
 
 			expect(queryAndUpdate).toHaveBeenCalledExactlyOnceWith({
 				...params,
-				strategy: 'query_and_update'
+				strategy: 'update'
 			});
 		});
 
 		it('should respect a custom warmupMs value', async () => {
 			const warmupMs = 250;
-			const qau = createQueryAndUpdateWithWarmup(warmupMs);
+			const qau = createQueryAndUpdateWithWarmup({ warmupMs });
 
 			// Still inside warmup
 			vi.advanceTimersByTime(warmupMs - 5);
@@ -107,7 +107,7 @@ describe('query.services', () => {
 
 			expect(queryAndUpdate).toHaveBeenCalledExactlyOnceWith({
 				...params,
-				strategy: 'query_and_update'
+				strategy: 'update'
 			});
 		});
 	});
