@@ -4,6 +4,7 @@
 	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
+	import KaspaTransaction from '$kaspa/components/transactions/KaspaTransaction.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction-ui';
@@ -37,6 +38,8 @@
 						<EthTransaction iconType="token" {token} {transaction} />
 					{:else if component === 'solana'}
 						<SolTransaction iconType="token" {token} {transaction} />
+					{:else if component === 'kaspa'}
+						<KaspaTransaction iconType="token" {token} {transaction} />
 					{:else}
 						<IcTransaction iconType="token" {token} {transaction} />
 					{/if}

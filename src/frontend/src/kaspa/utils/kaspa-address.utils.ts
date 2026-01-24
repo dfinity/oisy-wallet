@@ -24,20 +24,25 @@ export const isKaspaAddress = ({ address }: { address: string | undefined }): bo
 		return false;
 	}
 
+	// Trim whitespace that might be included when copying/pasting
+	const trimmedAddress = address.trim();
+
 	// Check if address starts with a valid Kaspa prefix
-	const hasValidPrefix = KASPA_PREFIXES.some((prefix) => address.toLowerCase().startsWith(prefix));
+	const hasValidPrefix = KASPA_PREFIXES.some((prefix) =>
+		trimmedAddress.toLowerCase().startsWith(prefix)
+	);
 
 	if (!hasValidPrefix) {
 		return false;
 	}
 
 	// Extract the part after the prefix
-	const prefix = KASPA_PREFIXES.find((p) => address.toLowerCase().startsWith(p));
+	const prefix = KASPA_PREFIXES.find((p) => trimmedAddress.toLowerCase().startsWith(p));
 	if (!prefix) {
 		return false;
 	}
 
-	const addressBody = address.slice(prefix.length);
+	const addressBody = trimmedAddress.slice(prefix.length);
 
 	// Kaspa addresses (after prefix) should be:
 	// - At least 61 characters for P2PK addresses (q prefix + 60 chars)
@@ -65,7 +70,7 @@ export const isKaspaAddress = ({ address }: { address: string | undefined }): bo
  */
 export const parseKaspaAddress = (address: string): string | undefined => {
 	if (isKaspaAddress({ address })) {
-		return address;
+		return address.trim();
 	}
 	return undefined;
 };
@@ -76,7 +81,7 @@ export const parseKaspaAddress = (address: string): string | undefined => {
 export const getKaspaNetworkFromAddress = (
 	address: string
 ): 'mainnet' | 'testnet' | 'devnet' | 'simnet' | undefined => {
-	const lowerAddress = address.toLowerCase();
+	const lowerAddress = address.trim().toLowerCase();
 
 	if (lowerAddress.startsWith(KASPA_MAINNET_PREFIX)) {
 		return 'mainnet';

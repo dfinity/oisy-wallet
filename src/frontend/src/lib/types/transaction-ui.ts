@@ -18,7 +18,8 @@ export type AnyTransactionUi =
 	| BtcTransactionUi
 	| EthTransactionUi
 	| IcTransactionUi
-	| SolTransactionUi;
+	| SolTransactionUi
+	| KaspaTransactionUi;
 
 export type AnyTransactionUiWithToken = AnyTransactionUi & {
 	token: Token;
@@ -28,7 +29,8 @@ export type AnyTransactionUiWithCmp =
 	| { component: 'bitcoin'; transaction: BtcTransactionUi }
 	| { component: 'ethereum'; transaction: EthTransactionUi }
 	| { component: 'ic'; transaction: IcTransactionUi }
-	| { component: 'solana'; transaction: SolTransactionUi };
+	| { component: 'solana'; transaction: SolTransactionUi }
+	| { component: 'kaspa'; transaction: KaspaTransactionUi };
 
 export type AllTransactionUiWithCmp = AnyTransactionUiWithCmp & {
 	token: Token;

@@ -35,9 +35,11 @@ import {
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdICP,
+	isNetworkIdKaspa,
 	isNetworkIdSepolia,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import type { KaspaCertifiedTransactionsData } from '$kaspa/stores/kaspa-transactions.store';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -53,6 +55,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * @param $icTransactions - The ICP transactions store data.
  * @param $solTransactions - The SOL transactions store data.
  * @param $btcStatuses - The BTC statuses store data.
+ * @param $kaspaTransactions - The Kaspa transactions store data.
  * @returns The unified list of transactions with their respective token and components.
  */
 export const mapAllTransactionsUi = ({
@@ -63,6 +66,7 @@ export const mapAllTransactionsUi = ({
 	$ckBtcMinterInfoStore,
 	$ethAddress,
 	$solTransactions,
+	$kaspaTransactions,
 	$btcStatuses,
 	$icTransactionsStore,
 	$ckBtcPendingUtxosStore,
@@ -75,6 +79,7 @@ export const mapAllTransactionsUi = ({
 	$ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	$ethAddress: OptionEthAddress;
 	$solTransactions: SolCertifiedTransactionsData;
+	$kaspaTransactions: KaspaCertifiedTransactionsData;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
 	$icTransactionsStore: IcCertifiedTransactionsData;
 	$ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
@@ -181,6 +186,21 @@ export const mapAllTransactionsUi = ({
 					transaction,
 					token,
 					component: 'solana' as const
+				}))
+			];
+		}
+
+		if (isNetworkIdKaspa(networkId)) {
+			if (isNullish($kaspaTransactions)) {
+				return acc;
+			}
+
+			return [
+				...acc,
+				...($kaspaTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
+					transaction,
+					token,
+					component: 'kaspa' as const
 				}))
 			];
 		}

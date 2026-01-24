@@ -112,7 +112,27 @@ export class KaspaApiProvider {
 			offset: offset.toString()
 		});
 		const url = `${this.baseUrl}/addresses/${address}/full-transactions?${params}`;
-		return fetchKaspaApi<KaspaTransaction[]>(url);
+
+		try {
+			const response = await fetchKaspaApi<KaspaTransaction[] | { transactions: KaspaTransaction[] }>(
+				url
+			);
+
+			// Handle both array response and wrapped response formats
+			if (Array.isArray(response)) {
+				return response;
+			}
+
+			// Some API versions return { transactions: [...] }
+			if (response && 'transactions' in response) {
+				return response.transactions;
+			}
+
+			return [];
+		} catch (error) {
+			console.warn('[Kaspa] Failed to fetch transactions:', error);
+			return [];
+		}
 	};
 
 	/**

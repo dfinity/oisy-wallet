@@ -14,6 +14,9 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import KaspaTransactionModal from '$kaspa/components/transactions/KaspaTransactionModal.svelte';
+	import { kaspaTransactionsStore } from '$kaspa/stores/kaspa-transactions.store';
+	import type { KaspaTransactionUi } from '$kaspa/types/kaspa-transaction';
 	import AllTransactionsLoader from '$lib/components/transactions/AllTransactionsLoader.svelte';
 	import AllTransactionsScroll from '$lib/components/transactions/AllTransactionsScroll.svelte';
 	import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
@@ -25,6 +28,7 @@
 		modalBtcTransaction,
 		modalEthTransaction,
 		modalIcTransaction,
+		modalKaspaTransaction,
 		modalSolTransaction
 	} from '$lib/derived/modal.derived';
 	import {
@@ -48,6 +52,7 @@
 			$ethAddress,
 			$btcStatuses: $btcStatusesStore,
 			$solTransactions: $solTransactionsStore,
+			$kaspaTransactions: $kaspaTransactionsStore,
 			$icTransactionsStore,
 			$ckBtcMinterInfoStore,
 			$icPendingTransactionsStore,
@@ -92,6 +97,13 @@
 			$modalStore
 		})
 	);
+
+	let { transaction: selectedKaspaTransaction, token: selectedKaspaToken } = $derived(
+		mapTransactionModalData<KaspaTransactionUi>({
+			$modalOpen: $modalKaspaTransaction,
+			$modalStore
+		})
+	);
 </script>
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
@@ -122,4 +134,6 @@
 	<IcTransactionModal token={selectedIcToken} transaction={selectedIcTransaction} />
 {:else if $modalSolTransaction && nonNullish(selectedSolTransaction)}
 	<SolTransactionModal token={selectedSolToken} transaction={selectedSolTransaction} />
+{:else if $modalKaspaTransaction && nonNullish(selectedKaspaTransaction)}
+	<KaspaTransactionModal token={selectedKaspaToken} transaction={selectedKaspaTransaction} />
 {/if}

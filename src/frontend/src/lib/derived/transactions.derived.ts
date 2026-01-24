@@ -3,6 +3,8 @@ import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+import { enabledKaspaTokens } from '$kaspa/derived/tokens.derived';
+import { kaspaTransactionsStore } from '$kaspa/stores/kaspa-transactions.store';
 import { LOCAL } from '$lib/constants/app.constants';
 import { enabledErc20Tokens, enabledIcTokens } from '$lib/derived/tokens.derived';
 import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
@@ -17,38 +19,44 @@ export const transactionsStoreWithTokens: Readable<TransactionsStoreCheckParams[
 		ethTransactionsStore,
 		icTransactionsStore,
 		solTransactionsStore,
+		kaspaTransactionsStore,
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		enabledErc20Tokens,
 		enabledIcTokens,
 		enabledSolanaTokens,
-		enabledSplTokens
+		enabledSplTokens,
+		enabledKaspaTokens
 	],
 	([
 		$btcTransactionsStore,
 		$ethTransactionsStore,
 		$icTransactionsStore,
 		$solTransactionsStore,
+		$kaspaTransactionsStore,
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$enabledErc20Tokens,
 		$enabledIcTokens,
 		$enabledSolanaTokens,
-		$enabledSplTokens
-	]) => [
-		// We explicitly do not include the Bitcoin transactions store locally, as it may cause lags in the UI.
-		// It could take longer time to be initialized and in case of no transactions (for example, a new user), it would be stuck to show the skeletons.
-		...(LOCAL
+		$enabledSplTokens,
+		$enabledKaspaTokens
+	]) =>
+		// In LOCAL mode, we return an empty array to prevent the Activity page from being
+		// stuck on loading skeletons due to unavailable canisters or slow external APIs.
+		LOCAL
 			? []
-			: [{ transactionsStoreData: $btcTransactionsStore, tokens: $enabledBitcoinTokens }]),
-		{
-			transactionsStoreData: $ethTransactionsStore,
-			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens]
-		},
-		{ transactionsStoreData: $icTransactionsStore, tokens: $enabledIcTokens },
-		{
-			transactionsStoreData: $solTransactionsStore,
-			tokens: [...$enabledSolanaTokens, ...$enabledSplTokens]
-		}
-	]
+			: [
+					{ transactionsStoreData: $btcTransactionsStore, tokens: $enabledBitcoinTokens },
+					{ transactionsStoreData: $kaspaTransactionsStore, tokens: $enabledKaspaTokens },
+					{ transactionsStoreData: $icTransactionsStore, tokens: $enabledIcTokens },
+					{
+						transactionsStoreData: $ethTransactionsStore,
+						tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens]
+					},
+					{
+						transactionsStoreData: $solTransactionsStore,
+						tokens: [...$enabledSolanaTokens, ...$enabledSplTokens]
+					}
+				]
 );

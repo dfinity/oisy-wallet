@@ -16,8 +16,14 @@ const TX_VERSION = 0;
 const SIGHASH_ALL = 0x01;
 
 // Kaspa-specific opcodes
-const OP_DATA_33 = 0x21; // Push 33 bytes
-const OP_CHECKSIGECDSA = 0xab;
+const OP_DATA_32 = 0x20; // Push 32 bytes (Schnorr pubkey)
+const OP_DATA_33 = 0x21; // Push 33 bytes (ECDSA pubkey)
+const OP_CHECKSIG = 0xac; // Schnorr signature check
+const OP_CHECKSIGECDSA = 0xab; // ECDSA signature check
+
+// Kaspa address types
+const ADDRESS_TYPE_SCHNORR = 0; // P2PK Schnorr (32-byte pubkey)
+const ADDRESS_TYPE_ECDSA = 1; // P2PK ECDSA (33-byte pubkey)
 
 // Sequence number (max value = no RBF)
 const SEQUENCE_FINAL = 0xffffffffffffffffn;
@@ -101,10 +107,20 @@ const fromWords = (words: number[]): Uint8Array => {
 };
 
 /**
- * Extract public key from a Kaspa address.
- * Kaspa P2PK ECDSA addresses encode: [type (1 byte)] + [public key (33 bytes)]
+ * Address payload with type information
  */
-export const extractPublicKeyFromAddress = (address: string): Uint8Array | null => {
+interface AddressPayload {
+	type: number;
+	publicKey: Uint8Array;
+}
+
+/**
+ * Extract public key and type from a Kaspa address.
+ * Kaspa P2PK addresses encode: [type (1 byte)] + [public key (32 or 33 bytes)]
+ * - Type 0: Schnorr (32-byte pubkey)
+ * - Type 1: ECDSA (33-byte compressed pubkey)
+ */
+export const extractPublicKeyFromAddress = (address: string): AddressPayload | null => {
 	const decoded = decodeKaspaAddress(address);
 	if (!decoded) {
 		return null;
@@ -113,13 +129,23 @@ export const extractPublicKeyFromAddress = (address: string): Uint8Array | null 
 	// Convert 5-bit words to bytes
 	const payload = fromWords(decoded.data);
 
-	// First byte is address type (1 = ECDSA P2PK)
-	// Remaining 33 bytes are the compressed public key
-	if (payload.length !== 34 || payload[0] !== 1) {
+	if (payload.length < 2) {
 		return null;
 	}
 
-	return payload.slice(1);
+	const addressType = payload[0];
+	const publicKey = payload.slice(1);
+
+	// Validate based on address type
+	if (addressType === ADDRESS_TYPE_SCHNORR && publicKey.length === 32) {
+		return { type: addressType, publicKey };
+	}
+
+	if (addressType === ADDRESS_TYPE_ECDSA && publicKey.length === 33) {
+		return { type: addressType, publicKey };
+	}
+
+	return null;
 };
 
 /**
@@ -140,14 +166,37 @@ export const buildScriptPublicKey = (publicKey: Uint8Array): string => {
 };
 
 /**
- * Build scriptPublicKey from a Kaspa address
+ * Build a P2PK Schnorr scriptPublicKey from a public key.
+ * Format: OP_DATA_32 <pubkey> OP_CHECKSIG
+ */
+export const buildSchnorrScriptPublicKey = (publicKey: Uint8Array): string => {
+	if (publicKey.length !== 32) {
+		throw new Error('Invalid public key length, expected 32 bytes for Schnorr');
+	}
+
+	const script = new Uint8Array(34);
+	script[0] = OP_DATA_32;
+	script.set(publicKey, 1);
+	script[33] = OP_CHECKSIG;
+
+	return bytesToHex(script);
+};
+
+/**
+ * Build scriptPublicKey from a Kaspa address.
+ * Supports both Schnorr (type 0) and ECDSA (type 1) addresses.
  */
 export const addressToScriptPublicKey = (address: string): string => {
-	const publicKey = extractPublicKeyFromAddress(address);
-	if (!publicKey) {
+	const payload = extractPublicKeyFromAddress(address);
+	if (!payload) {
 		throw new Error(`Invalid Kaspa address: ${address}`);
 	}
-	return buildScriptPublicKey(publicKey);
+
+	if (payload.type === ADDRESS_TYPE_SCHNORR) {
+		return buildSchnorrScriptPublicKey(payload.publicKey);
+	}
+
+	return buildScriptPublicKey(payload.publicKey);
 };
 
 /**

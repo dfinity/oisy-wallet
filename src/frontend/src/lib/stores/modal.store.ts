@@ -13,6 +13,7 @@ import type { ClaimStakingRewardParams } from '$lib/types/stake';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 import type { Option } from '$lib/types/utils';
+import type { KaspaTransactionUi } from '$kaspa/types/kaspa-transaction';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { NavigationTarget } from '@sveltejs/kit';
@@ -44,6 +45,7 @@ export interface Modal<T> {
 		| 'ic-transaction'
 		| 'btc-transaction'
 		| 'sol-transaction'
+		| 'kaspa-transaction'
 		| 'manage-tokens'
 		| 'hide-token'
 		| 'ic-hide-token'
@@ -118,6 +120,9 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openIcTransaction: (params: SetWithDataParams<OpenTransactionParams<IcTransactionUi>>) => void;
 	openBtcTransaction: (params: SetWithDataParams<OpenTransactionParams<BtcTransactionUi>>) => void;
 	openSolTransaction: (params: SetWithDataParams<OpenTransactionParams<SolTransactionUi>>) => void;
+	openKaspaTransaction: (
+		params: SetWithDataParams<OpenTransactionParams<KaspaTransactionUi>>
+	) => void;
 	openManageTokens: (params: SetWithOptionalDataParams<ManageTokensData>) => void;
 	openHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openIcHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
@@ -196,6 +201,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openSolTransaction: <
 			(params: SetWithDataParams<OpenTransactionParams<SolTransactionUi>>) => void
 		>setTypeWithData('sol-transaction'),
+		openKaspaTransaction: <
+			(params: SetWithDataParams<OpenTransactionParams<KaspaTransactionUi>>) => void
+		>setTypeWithData('kaspa-transaction'),
 		openManageTokens: <(params: SetWithOptionalDataParams<ManageTokensData>) => void>(
 			setTypeWithData('manage-tokens')
 		),
