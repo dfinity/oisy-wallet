@@ -1,4 +1,4 @@
-import ishares from '$eth/assets/ishares.webp';
+import isharesRed from '$eth/assets/ishares_red.webp';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 
@@ -8,7 +8,7 @@ export const IAUON_TOKEN_GROUP_ID: TokenGroupId = parseTokenGroupId(IAUON_TOKEN_
 
 export const IAUON_TOKEN_GROUP: TokenGroupData = {
 	id: IAUON_TOKEN_GROUP_ID,
-	icon: ishares,
+	icon: isharesRed,
 	name: 'iShares Gold Trust (Ondo Tokenized)',
 	symbol: IAUON_TOKEN_GROUP_SYMBOL
 };
