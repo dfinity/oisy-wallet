@@ -4,6 +4,7 @@ import {
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
 import { ONEINCH_TOKEN } from '$env/tokens/tokens-erc20/tokens.1inch.env';
+import { AMDON_TOKEN } from '$env/tokens/tokens-erc20/tokens.amdon.env';
 import { ARB_TOKEN } from '$env/tokens/tokens-erc20/tokens.arb.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.babaon.env';
 import { COPXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.copxon.env';
@@ -66,6 +67,7 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 
 export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	ONEINCH_TOKEN,
+	AMDON_TOKEN,
 	ARB_TOKEN,
 	BABAON_TOKEN,
 	COPXON_TOKEN,
