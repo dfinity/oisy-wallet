@@ -70,6 +70,10 @@ export const RECEIVE_TOKENS_MODAL_ETH_SECTION = 'receive-tokens-modal-eth-sectio
 export const RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION = 'receive-tokens-modal-sol-mainnet-section';
 export const RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION = 'receive-tokens-modal-sol-devnet-section';
 export const RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION = 'receive-tokens-modal-sol-local-section';
+export const RECEIVE_TOKENS_MODAL_KASPA_MAINNET_SECTION =
+	'receive-tokens-modal-kaspa-mainnet-section';
+export const RECEIVE_TOKENS_MODAL_KASPA_TESTNET_SECTION =
+	'receive-tokens-modal-kaspa-testnet-section';
 
 export const RECEIVE_TOKENS_MODAL_ADDRESS_LABEL = 'receive-tokens-modal-address-label';
 

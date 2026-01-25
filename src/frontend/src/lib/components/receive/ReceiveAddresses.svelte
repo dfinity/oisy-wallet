@@ -9,6 +9,10 @@
 	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import {
+		KASPA_MAINNET_NETWORK,
+		KASPA_TESTNET_NETWORK
+	} from '$env/networks/networks.kaspa.env';
+	import {
 		SOLANA_DEVNET_NETWORK,
 		SOLANA_LOCAL_NETWORK,
 		SOLANA_MAINNET_NETWORK
@@ -20,6 +24,7 @@
 	} from '$env/tokens/tokens.btc.env';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import { KASPA_MAINNET_TOKEN, KASPA_TESTNET_TOKEN } from '$env/tokens/tokens.kaspa.env';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -27,6 +32,7 @@
 	} from '$env/tokens/tokens.sol.env';
 	import type { OptionEthAddress } from '$eth/types/address';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import type { OptionKaspaAddress } from '$kaspa/types/address';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -39,6 +45,8 @@
 		RECEIVE_TOKENS_MODAL_ETH_SECTION,
 		RECEIVE_TOKENS_MODAL_ICP_SECTION,
 		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
+		RECEIVE_TOKENS_MODAL_KASPA_MAINNET_SECTION,
+		RECEIVE_TOKENS_MODAL_KASPA_TESTNET_SECTION,
 		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
 		RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION,
 		RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION,
@@ -49,6 +57,8 @@
 		btcAddressRegtest,
 		btcAddressTestnet,
 		ethAddress,
+		kaspaAddressMainnet,
+		kaspaAddressTestnet,
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet
@@ -60,6 +70,8 @@
 		networkEthereumEnabled,
 		networkEvmMainnetEnabled,
 		networkEvmTestnetEnabled,
+		networkKaspaMainnetEnabled,
+		networkKaspaTestnetEnabled,
 		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
@@ -85,7 +97,7 @@
 
 	interface ReceiveAddressProps {
 		labelRef: string;
-		address: OptionBtcAddress | OptionEthAddress;
+		address: OptionBtcAddress | OptionEthAddress | OptionKaspaAddress;
 		network: Network;
 		token: Token;
 		testId: string;
@@ -215,6 +227,30 @@
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
 			condition: $networkSolanaLocalEnabled && $testnetsEnabled && LOCAL
+		},
+		{
+			labelRef: 'kaspaAddressMainnet',
+			address: $kaspaAddressMainnet,
+			network: KASPA_MAINNET_NETWORK,
+			token: KASPA_MAINNET_TOKEN,
+			testId: RECEIVE_TOKENS_MODAL_KASPA_MAINNET_SECTION,
+			title: $i18n.receive.kaspa.text.kaspa_address_title,
+			label: $i18n.receive.kaspa.text.kaspa_address,
+			copyAriaLabel: $i18n.receive.kaspa.text.kaspa_address_copied,
+			qrCodeAriaLabel: $i18n.receive.kaspa.text.display_kaspa_address_qr,
+			condition: $networkKaspaMainnetEnabled
+		},
+		{
+			labelRef: 'kaspaAddressTestnet',
+			address: $kaspaAddressTestnet,
+			network: KASPA_TESTNET_NETWORK,
+			token: KASPA_TESTNET_TOKEN,
+			testId: RECEIVE_TOKENS_MODAL_KASPA_TESTNET_SECTION,
+			title: $i18n.receive.kaspa.text.kaspa_testnet_address_title,
+			label: $i18n.receive.kaspa.text.kaspa_testnet_address,
+			copyAriaLabel: $i18n.receive.kaspa.text.kaspa_address_copied,
+			qrCodeAriaLabel: $i18n.receive.kaspa.text.display_kaspa_address_qr,
+			condition: $networkKaspaTestnetEnabled && $testnetsEnabled
 		}
 	]);
 
