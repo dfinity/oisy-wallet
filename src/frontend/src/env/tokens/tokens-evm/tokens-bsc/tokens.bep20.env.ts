@@ -6,7 +6,12 @@ import { USDT_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/token
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 
-const BSC_BEP20_TOKENS_MAINNET: RequiredEvmBep20Token[] = [NVDAON_TOKEN, PBRON_TOKEN, USDC_TOKEN, USDT_TOKEN];
+const BSC_BEP20_TOKENS_MAINNET: RequiredEvmBep20Token[] = [
+	NVDAON_TOKEN,
+	PBRON_TOKEN,
+	USDC_TOKEN,
+	USDT_TOKEN
+];
 
 export const BSC_BEP20_TOKENS: RequiredEvmBep20Token[] = defineSupportedTokens({
 	mainnetFlag: BSC_MAINNET_ENABLED,
