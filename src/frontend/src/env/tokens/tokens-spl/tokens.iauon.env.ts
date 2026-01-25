@@ -1,6 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { IAUON_TOKEN_GROUP } from '$env/tokens/groups/groups.iauon.env';
-import ishares from '$eth/assets/ishares.webp';
+import isharesRed from '$eth/assets/ishares_red.webp';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -20,7 +20,7 @@ export const IAUON_TOKEN: RequiredSpl2022Token = {
 	name: 'iShares Gold Trust (Ondo Tokenized)',
 	symbol: IAUON_SYMBOL,
 	decimals: IAUON_DECIMALS,
-	icon: ishares,
+	icon: isharesRed,
 	address: 'M77ZvkZ8zW5udRbuJCbuwSwavRa7bGAZYMTwru8ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
