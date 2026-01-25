@@ -11,7 +11,7 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 
 const BSC_BEP20_TOKENS_MAINNET: RequiredEvmBep20Token[] = [
 	BABAON_TOKEN,
-  COPXON_TOKEN,
+	COPXON_TOKEN,
 	NVDAON_TOKEN,
 	PBRON_TOKEN,
 	SLVON_TOKEN,
