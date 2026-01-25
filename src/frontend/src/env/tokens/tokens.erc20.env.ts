@@ -6,6 +6,7 @@ import {
 import { ONEINCH_TOKEN } from '$env/tokens/tokens-erc20/tokens.1inch.env';
 import { ARB_TOKEN } from '$env/tokens/tokens-erc20/tokens.arb.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.babaon.env';
+import { COPXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.copxon.env';
 import { DAI_TOKEN } from '$env/tokens/tokens-erc20/tokens.dai.env';
 import { DMAIL_TOKEN } from '$env/tokens/tokens-erc20/tokens.dmail.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
@@ -67,6 +68,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	ONEINCH_TOKEN,
 	ARB_TOKEN,
 	BABAON_TOKEN,
+	COPXON_TOKEN,
 	DAI_TOKEN,
 	DMAIL_TOKEN,
 	FLOKI_TOKEN,
