@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { IAUON_TOKEN_GROUP } from '$env/tokens/groups/groups.iauon.env';
-import ishares from '$eth/assets/ishares.webp';
+import isharesRed from '$eth/assets/ishares_red.webp';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -19,7 +19,7 @@ export const IAUON_TOKEN: RequiredAdditionalErc20Token = {
 	name: 'iShares Gold Trust (Ondo Tokenized)',
 	symbol: IAUON_SYMBOL,
 	decimals: IAUON_DECIMALS,
-	icon: ishares,
+	icon: isharesRed,
 	address: '0x4f0CA3df1c2e6b943cf82E649d576ffe7B2fABCF',
 	exchange: 'erc20',
 	groupData: IAUON_TOKEN_GROUP

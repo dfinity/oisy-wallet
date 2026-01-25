@@ -1,6 +1,6 @@
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { IAUON_TOKEN_GROUP } from '$env/tokens/groups/groups.iauon.env';
-import ishares from '$eth/assets/ishares.webp';
+import isharesRed from '$eth/assets/ishares_red.webp';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -19,7 +19,7 @@ export const IAUON_TOKEN: RequiredEvmBep20Token = {
 	name: 'iShares Gold Trust (Ondo Tokenized)',
 	symbol: IAUON_SYMBOL,
 	decimals: IAUON_DECIMALS,
-	icon: ishares,
+	icon: isharesRed,
 	address: '0xcB2a0F46f67dC4c58a316F1c008EDef5c2311795',
 	exchange: 'erc20',
 	groupData: IAUON_TOKEN_GROUP
