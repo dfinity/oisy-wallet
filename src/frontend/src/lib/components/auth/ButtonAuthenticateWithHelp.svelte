@@ -40,21 +40,17 @@
 	class="flex w-full flex-col items-center md:items-start"
 	class:md:items-center={helpAlignment === 'center'}
 >
-	<div
-		class="flex w-full flex-col items-center justify-center md:justify-start"
-		class:sm:flex-row={!fullWidth}
+
+	<ButtonAuthenticate
+		{fullWidth}
+		isLandingPage
+		onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
+		styleClass="bg-brand-primary text-primary-inverted"
+		testId={LOGIN_BUTTON}
 	>
-		<ButtonAuthenticate
-			{fullWidth}
-			isLandingPage
-			onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
-			styleClass="bg-brand-primary text-primary-inverted"
-			testId={LOGIN_BUTTON}
-		>
-			{$i18n.auth.text.authenticate}
-			<IconAstronautArrow />
-		</ButtonAuthenticate>
-	</div>
+		{$i18n.auth.text.authenticate}
+		<IconAstronautArrow />
+	</ButtonAuthenticate>
 
 	<span
 		class="mt-4 flex flex-col text-sm text-tertiary"
