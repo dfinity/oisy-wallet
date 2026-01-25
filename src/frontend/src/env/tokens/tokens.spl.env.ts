@@ -26,6 +26,7 @@ import { HDX_TOKEN } from '$env/tokens/tokens-spl/tokens.hdx.env';
 import { HONX_TOKEN } from '$env/tokens/tokens-spl/tokens.honx.env';
 import { HOODX_TOKEN } from '$env/tokens/tokens-spl/tokens.hoodx.env';
 import { IAUON_TOKEN } from '$env/tokens/tokens-spl/tokens.iauon.env';
+import { IVVON_TOKEN } from '$env/tokens/tokens-spl/tokens.ivvon.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { KOX_TOKEN } from '$env/tokens/tokens-spl/tokens.kox.env';
 import { LLYX_TOKEN } from '$env/tokens/tokens-spl/tokens.llyx.env';
@@ -86,6 +87,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	HONX_TOKEN,
 	HOODX_TOKEN,
 	IAUON_TOKEN,
+	IVVON_TOKEN,
 	JUP_TOKEN,
 	KOX_TOKEN,
 	LLYX_TOKEN,
