@@ -7,6 +7,7 @@ import { AMBRX_TOKEN } from '$env/tokens/tokens-spl/tokens.ambrx.env';
 import { AMZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.amznx.env';
 import { AVGOX_TOKEN } from '$env/tokens/tokens-spl/tokens.avgox.env';
 import { AZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.aznx.env';
+import { BABAON_TOKEN } from '$env/tokens/tokens-spl/tokens.babaon.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { CMCSAX_TOKEN } from '$env/tokens/tokens-spl/tokens.cmcsax.env';
 import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
@@ -62,6 +63,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	AMZNX_TOKEN,
 	AVGOX_TOKEN,
 	AZNX_TOKEN,
+	BABAON_TOKEN,
 	BONK_TOKEN,
 	CMCSAX_TOKEN,
 	COINX_TOKEN,
