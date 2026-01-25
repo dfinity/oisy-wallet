@@ -1,6 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SLVON_TOKEN_GROUP } from '$env/tokens/groups/groups.slvon.env';
-import slvon from '$eth/assets/slvon.webp';
+import isharesRed from '$eth/assets/ishares_red.webp';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -20,7 +20,7 @@ export const SLVON_TOKEN: RequiredSpl2022Token = {
 	name: 'iShares Silver Trust (Ondo Tokenized Stock)',
 	symbol: SLVON_SYMBOL,
 	decimals: SLVON_DECIMALS,
-	icon: slvon,
+	icon: isharesRed,
 	address: 'iy11ytbSGcUnrjE6Lfv78TFqxKyUESfku1FugS9ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
