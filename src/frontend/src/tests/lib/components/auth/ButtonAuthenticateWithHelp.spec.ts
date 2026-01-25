@@ -4,7 +4,6 @@ import * as auth from '$lib/services/auth.services';
 import { authLocked } from '$lib/stores/locked.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { InternetIdentityDomain } from '$lib/types/auth';
-import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
