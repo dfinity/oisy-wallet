@@ -1,6 +1,7 @@
 import { BSC_MAINNET_ENABLED } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.babaon.env';
 import { COPXON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.copxon.env';
+import { IAUON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.iauon.env';
 import { NVDAON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.nvdaon.env';
 import { PBRON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.pbron.env';
 import { SLVON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.slvon.env';
@@ -12,6 +13,7 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 const BSC_BEP20_TOKENS_MAINNET: RequiredEvmBep20Token[] = [
 	BABAON_TOKEN,
 	COPXON_TOKEN,
+	IAUON_TOKEN,
 	NVDAON_TOKEN,
 	PBRON_TOKEN,
 	SLVON_TOKEN,
