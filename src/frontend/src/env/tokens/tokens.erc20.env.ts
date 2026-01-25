@@ -14,6 +14,7 @@ import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.
 import { MATIC_TOKEN } from '$env/tokens/tokens-erc20/tokens.matic.env';
 import { NVDAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.nvdaon.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
+import { PBRON_TOKEN } from '$env/tokens/tokens-erc20/tokens.pbron.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { PEPECOIN_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepecoin.env';
 import { RNDR_TOKEN } from '$env/tokens/tokens-erc20/tokens.rndr.env';
@@ -69,6 +70,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	JASMY_TOKEN,
 	MATIC_TOKEN,
 	NVDAON_TOKEN,
+	PBRON_TOKEN,
 	PEPECOIN_TOKEN,
 	RNDR_TOKEN,
 	SPX_TOKEN,
