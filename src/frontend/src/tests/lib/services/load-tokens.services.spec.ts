@@ -80,6 +80,7 @@ describe('load-tokens.services', () => {
 
 		const params: Params = {
 			...loadParams,
+			tokens: mockCustomTokens,
 			filterCustomToken: filterCustomToken as unknown as Params['filterCustomToken'],
 			mapCustomToken: mapCustomToken as unknown as Params['mapCustomToken'],
 			errorMsg
@@ -95,8 +96,16 @@ describe('load-tokens.services', () => {
 			mapCustomToken.mockImplementation((token) => Promise.resolve(mapBackendTokensImpl(token)));
 		});
 
-		it('should fetch the custom tokens from the backend', async () => {
+		it('should not fetch the custom tokens from the backend if they are provided', async () => {
 			await mapBackendTokensTyped(params);
+
+			expect(loadNetworkCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should fetch the custom tokens from the backend if none are provided', async () => {
+			const { tokens: _, ...paramsWithoutTokens } = params;
+
+			await mapBackendTokensTyped(paramsWithoutTokens);
 
 			expect(loadNetworkCustomTokens).toHaveBeenCalledExactlyOnceWith(loadParams);
 		});
@@ -105,7 +114,9 @@ describe('load-tokens.services', () => {
 			const mockError = new Error('Backend error');
 			vi.mocked(loadNetworkCustomTokens).mockRejectedValueOnce(mockError);
 
-			await expect(mapBackendTokensTyped(params)).rejects.toThrowError(mockError);
+			const { tokens: _, ...paramsWithoutTokens } = params;
+
+			await expect(mapBackendTokensTyped(paramsWithoutTokens)).rejects.toThrowError(mockError);
 
 			expect(loadNetworkCustomTokens).toHaveBeenCalledExactlyOnceWith(loadParams);
 
@@ -114,13 +125,11 @@ describe('load-tokens.services', () => {
 		});
 
 		it('should handle empty custom tokens', async () => {
-			vi.mocked(loadNetworkCustomTokens).mockResolvedValueOnce([]);
-
-			const result = await mapBackendTokensTyped(params);
+			const result = await mapBackendTokensTyped({ ...params, tokens: [] });
 
 			expect(result).toStrictEqual([]);
 
-			expect(loadNetworkCustomTokens).toHaveBeenCalledExactlyOnceWith(loadParams);
+			expect(loadNetworkCustomTokens).not.toHaveBeenCalled();
 
 			expect(filterCustomToken).not.toHaveBeenCalled();
 			expect(mapCustomToken).not.toHaveBeenCalled();
@@ -136,7 +145,7 @@ describe('load-tokens.services', () => {
 				}))
 			);
 
-			expect(loadNetworkCustomTokens).toHaveBeenCalledExactlyOnceWith(loadParams);
+			expect(loadNetworkCustomTokens).not.toHaveBeenCalled();
 
 			expect(filterCustomToken).toHaveBeenCalledTimes(mockCustomTokens.length);
 
@@ -170,10 +179,7 @@ describe('load-tokens.services', () => {
 				}))
 			);
 
-			expect(loadNetworkCustomTokens).toHaveBeenCalledExactlyOnceWith({
-				...loadParams,
-				certified: true
-			});
+			expect(loadNetworkCustomTokens).not.toHaveBeenCalled();
 
 			expect(filterCustomToken).toHaveBeenCalledTimes(mockCustomTokens.length);
 
@@ -212,10 +218,7 @@ describe('load-tokens.services', () => {
 				}))
 			);
 
-			expect(loadNetworkCustomTokens).toHaveBeenCalledExactlyOnceWith({
-				...loadParams,
-				certified: false
-			});
+			expect(loadNetworkCustomTokens).not.toHaveBeenCalled();
 
 			expect(filterCustomToken).toHaveBeenCalledTimes(mockCustomTokens.length);
 
@@ -243,7 +246,7 @@ describe('load-tokens.services', () => {
 
 			expect(result).toEqual([]);
 
-			expect(loadNetworkCustomTokens).toHaveBeenCalledExactlyOnceWith(loadParams);
+			expect(loadNetworkCustomTokens).not.toHaveBeenCalled();
 
 			expect(filterCustomToken).toHaveBeenCalledTimes(mockCustomTokens.length);
 
@@ -263,7 +266,7 @@ describe('load-tokens.services', () => {
 
 			expect(result).toEqual([]);
 
-			expect(loadNetworkCustomTokens).toHaveBeenCalledExactlyOnceWith(loadParams);
+			expect(loadNetworkCustomTokens).not.toHaveBeenCalled();
 
 			expect(filterCustomToken).toHaveBeenCalledTimes(mockCustomTokens.length);
 
