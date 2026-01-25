@@ -33,6 +33,7 @@ import { NFLXX_TOKEN } from '$env/tokens/tokens-spl/tokens.nflxx.env';
 import { NVDAON_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdaon.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
+import { PBRON_TOKEN } from '$env/tokens/tokens-spl/tokens.pbron.env';
 import { PENGU_TOKEN } from '$env/tokens/tokens-spl/tokens.pengu.env';
 import { PEPX_TOKEN } from '$env/tokens/tokens-spl/tokens.pepx.env';
 import { PGX_TOKEN } from '$env/tokens/tokens-spl/tokens.pgx.env';
@@ -88,6 +89,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	NVDAON_TOKEN,
 	NVDAX_TOKEN,
 	ORCA_TOKEN,
+	PBRON_TOKEN,
 	PENGU_TOKEN,
 	PEPX_TOKEN,
 	PGX_TOKEN,
