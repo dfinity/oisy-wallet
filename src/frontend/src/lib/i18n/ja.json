@@ -121,7 +121,6 @@
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "ログイン/新規作成",
-			"legacy_login": "従来のログイン",
 			"asset_types": "BTC / SOL / ETH / ICP など幅広い資産を一元管理",
 			"instant_and_private": "AIアシスタント搭載 ― プライバシーを標準装備",
 			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで",
@@ -1807,7 +1806,6 @@
 			},
 			"title": "",
 			"instruction": "このボタンをクリックすると、以下に同意したことになります。$link",
-			"instruction_two_buttons": "これらのボタンのいずれかをクリックすることで、以下に同意したものとみなされます。$link",
 			"body": ""
 		},
 		"alt": {
