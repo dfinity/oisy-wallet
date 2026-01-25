@@ -13,6 +13,7 @@ import { DMAIL_TOKEN } from '$env/tokens/tokens-erc20/tokens.dmail.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { FLOKI_TOKEN } from '$env/tokens/tokens-erc20/tokens.floki.env';
 import { IAUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.iauon.env';
+import { IVVON_TOKEN } from '$env/tokens/tokens-erc20/tokens.ivvon.env';
 import { JASMY_TOKEN } from '$env/tokens/tokens-erc20/tokens.jasmy.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { MATIC_TOKEN } from '$env/tokens/tokens-erc20/tokens.matic.env';
@@ -76,6 +77,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	DMAIL_TOKEN,
 	FLOKI_TOKEN,
 	IAUON_TOKEN,
+	IVVON_TOKEN,
 	JASMY_TOKEN,
 	MATIC_TOKEN,
 	NVDAON_TOKEN,
