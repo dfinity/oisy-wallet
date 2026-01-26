@@ -7,7 +7,6 @@
 	import OpenCryptoPayTokensList from '$lib/components/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 	import PaymentFailed from '$lib/components/open-crypto-pay/PaymentFailed.svelte';
 	import PaymentSucceeded from '$lib/components/open-crypto-pay/PaymentSucceeded.svelte';
-	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -48,9 +47,7 @@
 </script>
 
 {#key currentStep?.name}
-	{#if currentStep?.name === WizardStepsScanner.SCAN}
-		<ScannerCode onNext={() => modal?.next()} />
-	{:else if currentStep?.name === WizardStepsScanner.PAY}
+	{#if currentStep?.name === WizardStepsScanner.PAY}
 		<OpenCryptoPay
 			onPay={() => goToStep(WizardStepsScanner.PAYING)}
 			onPayFailed={() => goToStep(WizardStepsScanner.PAYMENT_FAILED)}
