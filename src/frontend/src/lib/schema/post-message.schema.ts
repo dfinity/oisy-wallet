@@ -244,15 +244,19 @@ const buildPostMessageSchema = <T extends z.ZodTypeAny, MsgSchema extends z.ZodT
 	msgSchema: MsgSchema;
 }) =>
 	z.union([
-		z.object({
-			...PostMessageCommonSchema.shape,
-			msg: msgSchema,
-			data: z.strictObject(dataSchema).shape.optional()
-		}),
-		z.object({
-			...PostMessageCommonSchema.shape,
-			...PostMessageDataErrorSchema.shape
-		})
+		z
+			.object({
+				...PostMessageCommonSchema.shape,
+				msg: msgSchema,
+				data: z.strictObject(dataSchema).shape.optional()
+			})
+			.strict(),
+		z
+			.object({
+				...PostMessageCommonSchema.shape,
+				...PostMessageDataErrorSchema.shape
+			})
+			.strict()
 	]);
 
 export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
