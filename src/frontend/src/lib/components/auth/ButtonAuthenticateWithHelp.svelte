@@ -41,16 +41,23 @@
 	class:sm:w-80={!fullWidth}
 	class:md:items-center={helpAlignment === 'center'}
 >
-	<ButtonAuthenticate
-		{fullWidth}
-		isLandingPage
-		onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
-		styleClass="bg-brand-primary text-primary-inverted"
-		testId={LOGIN_BUTTON}
+
+	<div
+		class="flex w-full flex-col items-center justify-center md:justify-start"
+		class:sm:w-80={!fullWidth}
 	>
-		{$i18n.auth.text.authenticate}
-		<IconAstronautArrow />
-	</ButtonAuthenticate>
+
+		<ButtonAuthenticate
+			{fullWidth}
+			isLandingPage
+			onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
+			styleClass="bg-brand-primary text-primary-inverted"
+			testId={LOGIN_BUTTON}
+		>
+			{$i18n.auth.text.authenticate}
+			<IconAstronautArrow />
+		</ButtonAuthenticate>
+	</div>
 
 	<span
 		class="mt-4 flex flex-col text-sm text-tertiary"
