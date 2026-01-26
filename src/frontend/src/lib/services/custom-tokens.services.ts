@@ -19,8 +19,7 @@ type LoadCustomTokensParams = LoadCustomTokensFromBackendParams & {
 
 const loadCustomTokensFromBackend = async ({
 	identity,
-	certified,
-	filterTokens
+	certified
 }: LoadCustomTokensFromBackendParams): Promise<CustomToken[]> => {
 	const tokens = await listCustomTokens({
 		identity,
@@ -35,18 +34,12 @@ const loadCustomTokensFromBackend = async ({
 		await setIdbAllCustomTokens({ identity, tokens });
 	}
 
-	if (isNullish(filterTokens)) {
-		return tokens;
-	}
-
-	// We filter the custom tokens, since the backend "Custom Token" potentially supports other types
-	return tokens.filter(filterTokens);
+	return tokens;
 };
 
 export const loadNetworkCustomTokens = async ({
 	identity,
 	certified,
-	filterTokens,
 	useCache = false
 }: LoadCustomTokensParams): Promise<CustomToken[]> => {
 	if (isNullish(identity)) {
@@ -136,17 +129,12 @@ export const loadNetworkCustomTokens = async ({
 				assertNever(token.token, `Unexpected token type: ${token.token}`);
 			};
 
-			return cachedTokens.reduce<CustomToken[]>((acc, token) => {
-				const parsed = parsePrincipal(token);
-
-				return isNullish(filterTokens) || filterTokens(parsed) ? [...acc, parsed] : acc;
-			}, []);
+			return cachedTokens.map(parsePrincipal);
 		}
 	}
 
 	return await loadCustomTokensFromBackend({
 		identity,
-		certified,
-		filterTokens
+		certified
 	});
 };
