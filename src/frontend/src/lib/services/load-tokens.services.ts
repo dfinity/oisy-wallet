@@ -16,7 +16,9 @@ export const mapBackendTokens = async <
 	...params
 }: LoadCustomTokenParams & {
 	filterCustomToken: (token: BackendCustomToken) => token is Variant;
-	mapCustomToken: (params: Variant & QueryAndUpdateRequestParams) => Promise<T | undefined>;
+	mapCustomToken: (
+		params: { token: Variant } & QueryAndUpdateRequestParams
+	) => Promise<T | undefined>;
 	errorMsg: string;
 }): Promise<T[]> => {
 	const backendCustomTokens: BackendCustomToken[] =
@@ -26,7 +28,7 @@ export const mapBackendTokens = async <
 		if (filterCustomToken(token)) {
 			acc.push(
 				mapCustomToken({
-					...token,
+					token,
 					identity: params.identity,
 					certified: params.certified
 				})
