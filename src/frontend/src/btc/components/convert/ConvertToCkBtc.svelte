@@ -1,11 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
-	import {
-		initUtxosFeeStore,
-		UTXOS_FEE_CONTEXT_KEY,
-		type UtxosFeeContext as UtxosFeeContextType
-	} from '$btc/stores/utxos-fee.store';
+	import { getContext } from 'svelte';
+	import UtxosFeeContexts from '$btc/components/fee/UtxosFeeContexts.svelte';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
@@ -32,10 +28,6 @@
 			tokens: $tokens
 		})
 	);
-
-	setContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY, {
-		store: initUtxosFeeStore()
-	});
 
 	let minterInfoLoaded = $state(false);
 
@@ -76,7 +68,9 @@
 </ButtonHero>
 
 {#if $modalConvertBTCToCkBTC && nonNullish(ckBtcToken)}
-	<ConvertModal destinationToken={ckBtcToken} sourceToken={BTC_MAINNET_TOKEN} />
+	<UtxosFeeContexts>
+		<ConvertModal destinationToken={ckBtcToken} sourceToken={BTC_MAINNET_TOKEN} />
+	</UtxosFeeContexts>
 {/if}
 
 {#if !minterInfoLoaded && nonNullish(ckBtcToken)}

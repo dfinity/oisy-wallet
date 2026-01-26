@@ -224,6 +224,7 @@ impl BackendBuilder {
     }
 
     /// Configures the deployment to use a custom Wasm file.
+    #[allow(dead_code)]
     pub fn with_wasm(mut self, wasm_path: &str) -> Self {
         self.wasm_path = wasm_path.to_string();
         self
@@ -382,6 +383,7 @@ pub fn setup() -> PicBackend {
 }
 
 impl PicBackend {
+    #[allow(dead_code)]
     pub fn upgrade_latest_wasm(&self, encoded_arg: Option<Vec<u8>>) -> Result<(), String> {
         let backend_wasm_path =
             env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());

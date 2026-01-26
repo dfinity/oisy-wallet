@@ -46,9 +46,9 @@
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
 			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"internet_identity_banner_first_part": "$oisy_name agora usa",
+			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
+			"internet_identity_banner_button": "Leia mas"
 		},
 		"alt": {
 			"logo": "Logotipo $name",
@@ -121,11 +121,10 @@
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
-			"legacy_login": "",
 			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
 			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
 			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
-			"social_login": ""
+			"social_login": "Acesso instantâneo e privado + login social"
 		},
 		"alt": {
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular"
@@ -151,14 +150,13 @@
 		},
 		"help": {
 			"text": {
-				"title": "",
-				"description": "",
-				"login_page_looks_different": "",
-				"use_identity_number": "",
-				"lost_identity_number": "",
-				"feedback_text": "",
+				"title": "Seu processo de login foi interrompido",
+				"description": "Parece que você cancelou seu login ou cadastro. Gostaríamos de entender o que aconteceu para que possamos melhorar sua experiência.",
+				"login_page_looks_different": "Por que a página de login está diferente?",
+				"use_identity_number": "Quero usar meu número de identificação da Internet.",
+				"feedback_text": "Seu feedback nos ajuda a melhorar o $oisy_short.",
 				"thanks_text": "Obrigado!",
-				"useful_links": "",
+				"useful_links": "Links úteis",
 				"identity_new_identity": "A carteira $oisy_short muda o domínio da Internet Identity para: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "",
 				"identity_legacy_identity_title": "",
@@ -171,7 +169,8 @@
 				"identity_legacy_sign_in": "Entrar com o domínio Internet Identity legacy",
 				"identity_learn_more": "Saiba mais nos Docs do $oisy_short",
 				"oisy_introduction": "",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "",
 				"need_help": "Precisa de ajuda para",
@@ -1807,7 +1806,6 @@
 			},
 			"title": "",
 			"instruction": "Ao clicar neste botão, você concorda com os $link",
-			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
