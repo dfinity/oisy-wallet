@@ -51,14 +51,7 @@ export const loadCustomTokens = ({
 	queryAndUpdate<SplCustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
-		onUpdateError: ({ error: err }) => {
-			splCustomTokensStore.resetAll();
-
-			toastsError({
-				msg: { text: get(i18n).init.error.spl_custom_tokens },
-				err
-			});
-		},
+		onUpdateError,
 		identity
 	});
 
@@ -182,6 +175,15 @@ const loadCustomTokenData = ({
 	response: SplCustomToken[];
 }) => {
 	splCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	splCustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.spl_custom_tokens },
+		err
+	});
 };
 
 export const getSplMetadata = async ({

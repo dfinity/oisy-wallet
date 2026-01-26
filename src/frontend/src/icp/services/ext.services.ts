@@ -37,14 +37,7 @@ export const loadCustomTokens = ({
 	queryAndUpdate<ExtCustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
-		onUpdateError: ({ error: err }) => {
-			extCustomTokensStore.resetAll();
-
-			toastsError({
-				msg: { text: get(i18n).init.error.ext_custom_tokens },
-				err
-			});
-		},
+		onUpdateError,
 		identity
 	});
 
@@ -116,4 +109,13 @@ const loadCustomTokenData = ({
 	response: ExtCustomToken[];
 }) => {
 	extCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	extCustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.ext_custom_tokens },
+		err
+	});
 };
