@@ -39,13 +39,13 @@
 <div
 	class="flex w-full flex-col items-center md:items-start"
 	class:md:items-center={helpAlignment === 'center'}
-	class:sm:w-80={!fullWidth}
 >
 	<ButtonAuthenticate
 		{fullWidth}
 		isLandingPage
 		onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
 		styleClass="bg-brand-primary text-primary-inverted"
+		class:sm:w-80={!fullWidth}
 		testId={LOGIN_BUTTON}
 	>
 		{$i18n.auth.text.authenticate}
