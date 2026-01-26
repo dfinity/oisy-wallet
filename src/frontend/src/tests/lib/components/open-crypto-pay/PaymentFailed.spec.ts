@@ -1,4 +1,4 @@
-import PaymentFailed from '$lib/components/scanner/open-crypto-pay/PaymentFailed.svelte';
+import PaymentFailed from '$lib/components/open-crypto-pay/PaymentFailed.svelte';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';

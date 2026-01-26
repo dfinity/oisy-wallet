@@ -1,6 +1,6 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import PayTokensList from '$lib/components/scanner/open-crypto-pay/PayTokensList.svelte';
+import PayTokensList from '$lib/components/open-crypto-pay/PayTokensList.svelte';
 import en from '$lib/i18n/en.json';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import type { PayableTokenWithConvertedAmount } from '$lib/types/open-crypto-pay';
