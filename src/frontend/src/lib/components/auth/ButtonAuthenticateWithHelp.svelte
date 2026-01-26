@@ -41,7 +41,6 @@
 	class:md:items-center={helpAlignment === 'center'}
 >
 	<ButtonAuthenticate
-		{fullWidth}
 		isLandingPage
 		onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
 		styleClass="bg-brand-primary text-primary-inverted sm:w-80"
