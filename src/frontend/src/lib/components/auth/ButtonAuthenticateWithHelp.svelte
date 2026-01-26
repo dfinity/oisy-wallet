@@ -42,7 +42,6 @@
 >
 	<ButtonAuthenticate
 		{fullWidth}
-		isLandingPage
 		onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
 		styleClass="bg-brand-primary text-primary-inverted"
 		testId={LOGIN_BUTTON}
