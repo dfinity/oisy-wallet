@@ -3,11 +3,11 @@
 	import { isNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import OpenCryptoPay from '$lib/components/open-crypto-pay/OpenCryptoPay.svelte';
-	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import OpenCryptoPayProgress from '$lib/components/open-crypto-pay/OpenCryptoPayProgress.svelte';
 	import OpenCryptoPayTokensList from '$lib/components/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 	import PaymentFailed from '$lib/components/open-crypto-pay/PaymentFailed.svelte';
 	import PaymentSucceeded from '$lib/components/open-crypto-pay/PaymentSucceeded.svelte';
+	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
