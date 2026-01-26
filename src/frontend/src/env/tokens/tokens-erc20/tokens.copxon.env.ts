@@ -20,7 +20,7 @@ export const COPXON_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: COPXON_SYMBOL,
 	decimals: COPXON_DECIMALS,
 	icon: copxon,
-	address: '0x423a63dfe8d82cd9c6568c92210aa537d8ef6885',
+	address: '0x423A63dfE8d82CD9C6568C92210AA537d8Ef6885',
 	exchange: 'erc20',
 	groupData: COPXON_TOKEN_GROUP
 };

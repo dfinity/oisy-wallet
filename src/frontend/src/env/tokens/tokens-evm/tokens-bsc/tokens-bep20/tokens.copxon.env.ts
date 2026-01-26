@@ -20,7 +20,7 @@ export const COPXON_TOKEN: RequiredEvmBep20Token = {
 	symbol: COPXON_SYMBOL,
 	decimals: COPXON_DECIMALS,
 	icon: copxon,
-	address: '0xec93fe7ff4b09ca3ccafbc4cc9615e62be412780',
+	address: '0xEC93fE7Ff4B09CA3CCAFBc4CC9615E62BE412780',
 	exchange: 'erc20',
 	groupData: COPXON_TOKEN_GROUP
 };

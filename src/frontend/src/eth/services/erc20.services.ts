@@ -1,4 +1,3 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
 import {
 	SUPPORTED_EVM_NETWORKS,
 	SUPPORTED_EVM_NETWORKS_CHAIN_IDS
@@ -87,28 +86,16 @@ export const loadCustomTokens = ({
 	queryAndUpdate<Erc20CustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
-		onUpdateError: ({ error: err }) => {
-			erc20CustomTokensStore.resetAll();
-
-			toastsError({
-				msg: { text: get(i18n).init.error.erc20_custom_tokens },
-				err
-			});
-		},
+		onUpdateError,
 		identity
 	});
 
-const loadErc20CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
-	await loadNetworkCustomTokens({
-		...params,
-		filterTokens: ({ token }) => 'Erc20' in token
-	});
-
-const loadCustomTokensWithMetadata = async (
-	params: LoadCustomTokenParams
-): Promise<Erc20CustomToken[]> => {
+const loadCustomTokensWithMetadata = async ({
+	tokens,
+	...params
+}: LoadCustomTokenParams): Promise<Erc20CustomToken[]> => {
 	const loadCustomContracts = async (): Promise<Erc20CustomToken[]> => {
-		const erc20CustomTokens = await loadErc20CustomTokens(params);
+		const erc20CustomTokens = tokens ?? (await loadNetworkCustomTokens(params));
 
 		const [existingTokens, nonExistingTokens] = erc20CustomTokens.reduce<
 			[Erc20CustomToken[], Erc20CustomToken[]]
@@ -221,4 +208,13 @@ const loadCustomTokenData = ({
 	response: Erc20CustomToken[];
 }) => {
 	erc20CustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	erc20CustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.erc20_custom_tokens },
+		err
+	});
 };

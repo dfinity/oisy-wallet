@@ -56,14 +56,7 @@ export const loadCustomTokens = ({
 	queryAndUpdate<Erc1155CustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
-		onUpdateError: ({ error: err }) => {
-			erc1155CustomTokensStore.resetAll();
-
-			toastsError({
-				msg: { text: get(i18n).init.error.erc1155_custom_tokens },
-				err
-			});
-		},
+		onUpdateError,
 		identity
 	});
 
@@ -169,4 +162,13 @@ const loadCustomTokenData = ({
 	response: Erc1155CustomToken[];
 }) => {
 	erc1155CustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	erc1155CustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.erc1155_custom_tokens },
+		err
+	});
 };
