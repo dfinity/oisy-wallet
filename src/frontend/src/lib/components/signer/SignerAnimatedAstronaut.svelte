@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconAstronautWithEyes from '$lib/components/icons/IconAstronautWithEyes.svelte';
+	import IconAstronautWithEyes from '$lib/components/icons/icon-astronaut/IconAstronautWithEyes.svelte';
 </script>
 
 <span class="relative flex aspect-square w-20">

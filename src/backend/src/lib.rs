@@ -3,12 +3,10 @@ use std::{cell::RefCell, time::Duration};
 use bitcoin_utils::estimate_fee;
 use candid::{candid_method, Principal};
 use config::find_credential_config;
-use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
     btc_user_pending_tx_state::StoredPendingTransaction, state::with_btc_pending_transactions,
 };
-use ic_cdk::{api::time, eprintln};
-use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
+use ic_cdk::{api::time, eprintln, export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
@@ -52,7 +50,6 @@ use shared::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
         },
-        token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
         },
@@ -68,7 +65,6 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 use crate::{
-    assertions::assert_token_enabled_is_some,
     bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
@@ -79,7 +75,6 @@ use crate::{
     },
 };
 
-mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
@@ -114,7 +109,7 @@ thread_local! {
 
     static STATE: RefCell<State> = RefCell::new(
         MEMORY_MANAGER.with(|mm| State {
-            config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
+            config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
             // Use `UserProfileModel` to access and manage access to these states
@@ -165,10 +160,7 @@ pub struct State {
 fn set_config(arg: InitArg) {
     let config = Config::from(arg);
     mutate_state(|state| {
-        state
-            .config
-            .set(Some(Candid(config)))
-            .expect("setting config should succeed");
+        state.config.set(Some(Candid(config)));
     });
 }
 
@@ -270,69 +262,6 @@ pub fn http_request(request: HttpRequest) -> HttpResponse {
             body: ByteBuf::from(String::from("Not found.")),
         },
     }
-}
-
-fn parse_eth_address(address: &str) -> [u8; 20] {
-    match address.parse() {
-        Ok(H160(addr)) => addr,
-        Err(err) => ic_cdk::trap(&format!(
-            "failed to parse contract address {address}: {err}",
-        )),
-    }
-}
-
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-pub fn set_user_token(token: UserToken) {
-    assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
-
-    let addr = parse_eth_address(&token.contract_address);
-
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    let find = |t: &UserToken| {
-        t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
-    };
-
-    mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_token, &token, &find));
-}
-
-#[update(guard = "caller_is_not_anonymous")]
-pub fn set_many_user_tokens(tokens: Vec<UserToken>) {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    mutate_state(|s| {
-        for token in tokens {
-            assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
-            parse_eth_address(&token.contract_address);
-
-            let find = |t: &UserToken| {
-                t.chain_id == token.chain_id && (t.contract_address == token.contract_address)
-            };
-
-            add_to_user_token(stored_principal, &mut s.user_token, &token, &find);
-        }
-    });
-}
-
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-pub fn remove_user_token(token_id: UserTokenId) {
-    let addr = parse_eth_address(&token_id.contract_address);
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    let find = |t: &UserToken| {
-        t.chain_id == token_id.chain_id && parse_eth_address(&t.contract_address) == addr
-    };
-
-    mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_token, &find));
-}
-
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn list_user_tokens() -> Vec<UserToken> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
 /// Add or update custom token for the user.
@@ -970,7 +899,9 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
     read_state(|s| {
         s.user_profile
             .iter()
-            .map(|((_updated, StoredPrincipal(principal)), user)| {
+            .map(|entry| {
+                let (_updated, StoredPrincipal(principal)) = *entry.key();
+                let user = entry.value();
                 (principal, user.created_timestamp)
             })
             .collect()

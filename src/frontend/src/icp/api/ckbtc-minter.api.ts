@@ -2,19 +2,17 @@ import type { MinterInfoParams } from '$icp/types/ck';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Identity } from '@dfinity/agent';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import {
-	CkBTCMinterCanister,
+	CkBtcMinterCanister,
+	type CkBtcMinterDid,
 	type EstimateWithdrawalFee,
 	type EstimateWithdrawalFeeParams,
-	type MinterInfo,
-	type RetrieveBtcOk,
 	type RetrieveBtcStatusV2WithId,
-	type UpdateBalanceOk,
-	type Utxo
-} from '@dfinity/ckbtc';
-import { Principal } from '@dfinity/principal';
-import { assertNonNullish, type QueryParams } from '@dfinity/utils';
+	type UpdateBalanceOk
+} from '@icp-sdk/canisters/ckbtc';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const retrieveBtc = async ({
 	identity,
@@ -25,7 +23,7 @@ export const retrieveBtc = async ({
 	minterCanisterId: CanisterIdText;
 	amount: bigint;
 	address: string;
-}): Promise<RetrieveBtcOk> => {
+}): Promise<CkBtcMinterDid.RetrieveBtcOk> => {
 	assertNonNullish(identity);
 
 	const { retrieveBtcWithApproval } = await minterCanister({ identity, minterCanisterId });
@@ -51,7 +49,7 @@ export const minterInfo = async ({
 	identity,
 	minterCanisterId,
 	...rest
-}: MinterInfoParams): Promise<MinterInfo> => {
+}: MinterInfoParams): Promise<CkBtcMinterDid.MinterInfo> => {
 	assertNonNullish(identity);
 
 	const { getMinterInfo } = await minterCanister({ identity, minterCanisterId });
@@ -109,7 +107,7 @@ export const getKnownUtxos = async ({
 }: {
 	identity: OptionIdentity;
 	minterCanisterId: CanisterIdText;
-}): Promise<Utxo[]> => {
+}): Promise<CkBtcMinterDid.Utxo[]> => {
 	assertNonNullish(identity);
 
 	const { getKnownUtxos } = await minterCanister({ identity, minterCanisterId });
@@ -123,10 +121,10 @@ const minterCanister = async ({
 }: {
 	identity: Identity;
 	minterCanisterId: CanisterIdText;
-}): Promise<CkBTCMinterCanister> => {
+}): Promise<CkBtcMinterCanister> => {
 	const agent = await getAgent({ identity });
 
-	return CkBTCMinterCanister.create({
+	return CkBtcMinterCanister.create({
 		agent,
 		canisterId: Principal.fromText(minterCanisterId)
 	});

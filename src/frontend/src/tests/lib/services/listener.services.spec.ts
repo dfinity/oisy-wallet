@@ -164,7 +164,7 @@ describe('listener.services', () => {
 			const mockError = new Error('Database error');
 			mockGetIdbTransactions.mockRejectedValueOnce(mockError);
 
-			await expect(syncWalletFromIdbCache(mockParams)).rejects.toThrow(mockError);
+			await expect(syncWalletFromIdbCache(mockParams)).rejects.toThrowError(mockError);
 
 			expect(mockGetIdbTransactions).toHaveBeenCalledWith({
 				tokenId: mockTokenId,
@@ -181,7 +181,7 @@ describe('listener.services', () => {
 			const mockError = new Error('Database error');
 			vi.mocked(getIdbBalances).mockRejectedValueOnce(mockError);
 
-			await expect(syncWalletFromIdbCache(mockParams)).rejects.toThrow(mockError);
+			await expect(syncWalletFromIdbCache(mockParams)).rejects.toThrowError(mockError);
 
 			expect(mockGetIdbTransactions).toHaveBeenCalledWith({
 				tokenId: mockTokenId,

@@ -1,4 +1,4 @@
-import type { Icrcv2AccountId } from '$declarations/backend/declarations/backend.did';
+import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
 import { parseIcrcv2AccountId } from '$icp/utils/icp-account.utils';
 import { nonNullish } from '@dfinity/utils';
 import { z } from 'zod';

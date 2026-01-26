@@ -9,18 +9,18 @@ describe('i18n.derived', () => {
 			i18n.init();
 		});
 
-		it('should initialize with the default language', () => {
+		it('should initialize with English', () => {
 			expect(get(currentLanguage)).toEqual(Languages.ENGLISH);
 		});
 
-		it('should return the current language from the i18n store', () => {
+		it('should return the current language from the i18n store', async () => {
 			expect(get(currentLanguage)).toEqual(Languages.ENGLISH);
 
-			i18n.switchLang(Languages.GERMAN);
+			await i18n.switchLang(Languages.GERMAN);
 
 			expect(get(currentLanguage)).toEqual(Languages.GERMAN);
 
-			i18n.switchLang(Languages.ITALIAN);
+			await i18n.switchLang(Languages.ITALIAN);
 
 			expect(get(currentLanguage)).toEqual(Languages.ITALIAN);
 		});

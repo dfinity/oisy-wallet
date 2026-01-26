@@ -77,11 +77,11 @@
 
 <Popover anchor={button} invisibleBackdrop bind:visible>
 	<div
-		class="avatar-edit-popover min-w-60 max-w-[60%] text-left"
+		class="avatar-edit-popover max-w-[60%] min-w-60 text-left"
 		data-tid={CONTACT_POPOVER_MENU}
 		role="menu"
 	>
-		<h3 class="popover-title pb-2 pt-1 text-base">{$i18n.address_book.edit_avatar.menu_title}</h3>
+		<h3 class="popover-title pt-1 pb-2 text-base">{$i18n.address_book.edit_avatar.menu_title}</h3>
 		<ul class="flex flex-col">
 			{#each items as { title: itemTitle, logo: ItemLogo, action, testId } (itemTitle)}
 				<li class="logo-button-list-item">

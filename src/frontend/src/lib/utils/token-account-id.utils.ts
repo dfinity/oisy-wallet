@@ -1,5 +1,5 @@
 import { getBtcAddressString } from '$btc/utils/btc-address.utils';
-import type { TokenAccountId } from '$declarations/backend/declarations/backend.did';
+import type { TokenAccountId } from '$declarations/backend/backend.did';
 import { getIcrcv2AccountIdString } from '$icp/utils/icp-account.utils';
 import {
 	TOKEN_ACCOUNT_ID_TO_NETWORKS,

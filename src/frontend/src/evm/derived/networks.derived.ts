@@ -1,4 +1,4 @@
-import type { EthereumNetwork } from '$eth/types/network';
+import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import { enabledArbitrumNetworks } from '$evm/arbitrum/derived/networks.derived';
 import { enabledBaseNetworks } from '$evm/base/derived/networks.derived';
 import { enabledBscNetworks } from '$evm/bsc/derived/networks.derived';
@@ -24,4 +24,9 @@ export const enabledEvmNetworks: Readable<EthereumNetwork[]> = derived(
 export const enabledEvmNetworksIds: Readable<NetworkId[]> = derived(
 	[enabledEvmNetworks],
 	([$enabledEvmNetworks]) => $enabledEvmNetworks.map(({ id }) => id)
+);
+
+export const enabledEvmNetworksChainIds: Readable<EthereumChainId[]> = derived(
+	[enabledEvmNetworks],
+	([$enabledEvmNetworks]) => $enabledEvmNetworks.map(({ chainId }) => chainId)
 );

@@ -5,7 +5,11 @@
 	import type { ProviderFee } from '$lib/types/swap';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let liquidityFees: ProviderFee[];
+	interface Props {
+		liquidityFees: ProviderFee[];
+	}
+
+	let { liquidityFees }: Props = $props();
 </script>
 
 <ModalValue labelStyleClass="self-start">

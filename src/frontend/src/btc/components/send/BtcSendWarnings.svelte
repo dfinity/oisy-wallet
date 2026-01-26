@@ -5,8 +5,12 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
-	export let utxosFee: UtxosFee | undefined = undefined;
+	interface Props {
+		pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
+		utxosFee?: UtxosFee;
+	}
+
+	let { pendingTransactionsStatus, utxosFee }: Props = $props();
 </script>
 
 <!-- TODO remove this as soon as parallel BTC transactions are also enabled for BTC convert -->
@@ -22,9 +26,7 @@
 			<span>{$i18n.send.error.no_pending_bitcoin_transaction}</span>
 		</MessageBox>
 	</div>
-{/if}
-
-{#if utxosFee?.error === BtcPrepareSendError.InsufficientBalance}
+{:else if utxosFee?.error === BtcPrepareSendError.InsufficientBalance}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
 			<span>{$i18n.send.assertion.insufficient_funds}</span>
@@ -47,9 +49,7 @@
 {:else if utxosFee?.error === BtcPrepareSendError.PendingTransactionsNotAvailable}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
-			<span data-tid="btc-send-form-pending-transactions-not-available"
-				>{$i18n.send.assertion.pending_transactions_not_available}</span
-			>
+			<span>{$i18n.send.assertion.pending_transactions_not_available}</span>
 		</MessageBox>
 	</div>
 {:else if utxosFee?.error === BtcPrepareSendError.MinimumBalance}

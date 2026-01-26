@@ -1,4 +1,4 @@
-import type { RpcError, RpcSource } from '$declarations/sol_rpc/declarations/sol_rpc.did';
+import type { RpcError, RpcSource } from '$declarations/sol_rpc/sol_rpc.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { assertNever, fromNullable, jsonReplacer } from '@dfinity/utils';
 

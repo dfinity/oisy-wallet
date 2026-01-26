@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { setContext, type Snippet } from 'svelte';
+	import { onDestroy, setContext, type Snippet } from 'svelte';
+	import { resetUtxosDataStores } from '$btc/utils/btc-utxos.utils';
+	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import {
 		CONVERT_CONTEXT_KEY,
 		type ConvertContext,
@@ -23,7 +25,13 @@
 	setContext<ConvertContext>(
 		CONVERT_CONTEXT_KEY,
 		initConvertContext({
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally
 			sourceToken,
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally
 			destinationToken
 		})
 	);
@@ -32,6 +40,12 @@
 		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
 		initTokenActionValidationErrorsContext()
 	);
+
+	onDestroy(() => {
+		if (isBitcoinToken(sourceToken)) {
+			resetUtxosDataStores();
+		}
+	});
 </script>
 
 {@render children?.()}

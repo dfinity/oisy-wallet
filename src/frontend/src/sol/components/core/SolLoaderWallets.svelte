@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
 	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
 	import {
 		solAddressDevnet,
@@ -14,13 +13,7 @@
 		isNetworkIdSOLMainnet
 	} from '$lib/utils/network.utils';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
-	import { initSolWalletWorker as initWalletWorker } from '$sol/services/worker.sol-wallet.services';
-
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
+	import { SolWalletWorker } from '$sol/services/worker.sol-wallet.services';
 
 	let walletWorkerTokens = $derived(
 		[...$enabledSolanaTokens, ...$enabledSplTokens].filter(
@@ -32,6 +25,4 @@
 	);
 </script>
 
-<WalletWorkers {initWalletWorker} tokens={walletWorkerTokens}>
-	{@render children()}
-</WalletWorkers>
+<WalletWorkers initWalletWorker={SolWalletWorker.init} tokens={walletWorkerTokens} />

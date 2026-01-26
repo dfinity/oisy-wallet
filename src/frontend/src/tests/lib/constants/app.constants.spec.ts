@@ -1,4 +1,4 @@
-vi.mock('@dfinity/principal', () => ({
+vi.mock('@icp-sdk/core/principal', () => ({
 	Principal: {
 		fromText: vi.fn()
 	}

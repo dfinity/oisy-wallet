@@ -14,7 +14,7 @@ export const WSTETH_TOKEN_ID: TokenId = parseTokenId(WSTETH_SYMBOL);
 export const WSTETH_TOKEN: RequiredErc20Token = {
 	id: WSTETH_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Wrapped liquid staked Ether 2.0',
 	symbol: WSTETH_SYMBOL,
@@ -24,5 +24,5 @@ export const WSTETH_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckWSTETH',
 	groupData: WSTETH_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true
+	neverCollapseInTokenGroup: true
 };

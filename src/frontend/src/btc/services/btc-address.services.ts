@@ -13,6 +13,11 @@ import {
 } from '$lib/api/idb-addresses.api';
 import { getBtcAddress as getSignerBtcAddress } from '$lib/api/signer.api';
 import { SIGNER_MASTER_PUB_KEY } from '$lib/constants/signer.constants';
+import {
+	btcAddressMainnet,
+	btcAddressRegtest,
+	btcAddressTestnet
+} from '$lib/derived/address.derived';
 import { deriveBtcAddress } from '$lib/ic-pub-key/src/cli';
 import {
 	certifyAddress,
@@ -32,9 +37,13 @@ import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import {
+	isNetworkIdBTCRegtest,
+	isNetworkIdBTCTestnet,
+	mapToSignerBitcoinNetwork
+} from '$lib/utils/network.utils';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 const bitcoinMapper: Record<
@@ -135,3 +144,15 @@ export const validateBtcAddressMainnet = async ($addressStore: AddressStoreData<
 		$addressStore,
 		certifyAddress: certifyBtcAddressMainnet
 	});
+
+/**
+ * Get the BTC source address for a given network ID
+ * @param networkId - The network ID
+ * @returns The source address string
+ */
+export const getBtcSourceAddress = (networkId: NetworkId | undefined): string =>
+	(isNetworkIdBTCTestnet(networkId)
+		? get(btcAddressTestnet)
+		: isNetworkIdBTCRegtest(networkId)
+			? get(btcAddressRegtest)
+			: get(btcAddressMainnet)) ?? '';

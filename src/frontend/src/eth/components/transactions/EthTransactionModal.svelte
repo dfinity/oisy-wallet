@@ -99,7 +99,7 @@
 			nonNullish(token) &&
 			isTokenNonFungible(token) &&
 			nonNullish(transaction.tokenId)
-			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(transaction.tokenId) })
+			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(String(transaction.tokenId)) })
 			: undefined
 	);
 </script>

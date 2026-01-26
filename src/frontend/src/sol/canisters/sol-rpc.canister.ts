@@ -7,7 +7,7 @@ import type {
 	Slot,
 	_SERVICE as SolRpcService,
 	SolanaCluster
-} from '$declarations/sol_rpc/declarations/sol_rpc.did';
+} from '$declarations/sol_rpc/sol_rpc.did';
 import { idlFactory as idlCertifiedFactorySolRpc } from '$declarations/sol_rpc/sol_rpc.factory.certified.did';
 import { idlFactory as idlFactorySolRpc } from '$declarations/sol_rpc/sol_rpc.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';

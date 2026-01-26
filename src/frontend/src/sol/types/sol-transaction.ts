@@ -11,7 +11,8 @@ import {
 	type GetSignaturesForAddressApi,
 	type Signature,
 	type Transaction,
-	type TransactionWithBlockhashLifetime
+	type TransactionWithBlockhashLifetime,
+	type TransactionWithinSizeLimit
 } from '@solana/kit';
 
 export type SolTransactionType = Extract<
@@ -63,6 +64,7 @@ export type SolSignature = ReturnType<
 
 export type SolSignedTransaction = Transaction &
 	FullySignedTransaction &
+	TransactionWithinSizeLimit &
 	TransactionWithBlockhashLifetime;
 
 export interface MappedSolTransaction {

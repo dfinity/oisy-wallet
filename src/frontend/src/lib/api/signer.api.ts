@@ -3,7 +3,7 @@ import type {
 	BitcoinNetwork,
 	EthSignTransactionRequest,
 	SendBtcResponse
-} from '$declarations/signer/declarations/signer.did';
+} from '$declarations/signer/signer.did';
 import type { EthAddress } from '$eth/types/address';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
@@ -13,8 +13,8 @@ import type {
 	SignWithSchnorrParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 let canister: SignerCanister | undefined = undefined;
 
@@ -94,7 +94,7 @@ export const sendBtc = async ({
 export const getSchnorrPublicKey = async ({
 	identity,
 	...rest
-}: CanisterApiFunctionParams<GetSchnorrPublicKeyParams>): Promise<Uint8Array | number[]> => {
+}: CanisterApiFunctionParams<GetSchnorrPublicKeyParams>): Promise<Uint8Array> => {
 	const { getSchnorrPublicKey } = await signerCanister({ identity });
 
 	return await getSchnorrPublicKey(rest);
@@ -103,7 +103,7 @@ export const getSchnorrPublicKey = async ({
 export const signWithSchnorr = async ({
 	identity,
 	...rest
-}: CanisterApiFunctionParams<SignWithSchnorrParams>): Promise<Uint8Array | number[]> => {
+}: CanisterApiFunctionParams<SignWithSchnorrParams>): Promise<Uint8Array> => {
 	const { signWithSchnorr } = await signerCanister({ identity });
 
 	return await signWithSchnorr(rest);

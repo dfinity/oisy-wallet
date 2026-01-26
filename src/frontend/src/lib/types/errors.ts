@@ -12,6 +12,8 @@ export class AlreadyClaimedError extends Error {}
 
 export class InvalidCampaignError extends Error {}
 
+export class GldtUnstakeDissolvementsLimitReached extends Error {}
+
 export class LoadIdbAddressError extends Error {
 	constructor(private readonly _networkId: NetworkId) {
 		super();
@@ -24,13 +26,13 @@ export class LoadIdbAddressError extends Error {
 
 export class NftError extends Error {
 	constructor(
-		private readonly _tokenUri: number,
+		private readonly _tokenUri: string,
 		private readonly _contractAddress: string
 	) {
 		super();
 	}
 
-	get tokenUri(): number {
+	get tokenUri(): string {
 		return this._tokenUri;
 	}
 

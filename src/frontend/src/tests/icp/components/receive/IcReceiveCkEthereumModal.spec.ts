@@ -19,7 +19,8 @@ import { writable } from 'svelte/store';
 describe('IcReceiveCkEthereumModal', () => {
 	const props = {
 		sourceToken: ETHEREUM_TOKEN,
-		destinationToken: ICP_TOKEN
+		destinationToken: ICP_TOKEN,
+		onClose: vi.fn()
 	};
 
 	const mockContext = () =>

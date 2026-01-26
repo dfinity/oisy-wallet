@@ -25,6 +25,6 @@ describe('EmptyState', () => {
 		});
 
 		expect(getByText(props.title)).toBeInTheDocument();
-		expect(() => getByText(props.description)).toThrow();
+		expect(() => getByText(props.description)).toThrowError();
 	});
 });

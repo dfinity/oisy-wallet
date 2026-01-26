@@ -2,15 +2,16 @@
 	import { blur } from 'svelte/transition';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OisySyncStatusEvent } from '$lib/types/custom-events';
 	import type { SyncState } from '$lib/types/sync';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let ckEthPendingTransactionsSyncState: SyncState | undefined = undefined;
-	const onSyncPendingState = ({ detail: state }: CustomEvent<SyncState>) =>
+	let ckEthPendingTransactionsSyncState = $state<SyncState | undefined>();
+	const onSyncPendingState = ({ detail: state }: CustomEvent<OisySyncStatusEvent>) =>
 		(ckEthPendingTransactionsSyncState = state);
 
-	let ckEthMinterInfoSyncState: SyncState | undefined = undefined;
-	const onSyncMinterInfoState = ({ detail: state }: CustomEvent<SyncState>) =>
+	let ckEthMinterInfoSyncState = $state<SyncState | undefined>();
+	const onSyncMinterInfoState = ({ detail: state }: CustomEvent<OisySyncStatusEvent>) =>
 		(ckEthMinterInfoSyncState = state);
 </script>
 

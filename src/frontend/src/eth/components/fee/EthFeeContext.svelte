@@ -2,19 +2,17 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount, type Snippet, untrack } from 'svelte';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
-	import { infuraProviders } from '$eth/providers/infura.providers';
-	import { InfuraGasRest } from '$eth/rest/infura.rest';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import {
 		getCkErc20FeeData,
 		getErc20FeeData,
 		getEthFeeData,
-		type GetFeeData
+		getEthFeeDataWithProvider
 	} from '$eth/services/fee.services';
 	import {
 		encodeErc1155SafeTransfer,
 		encodeErc721SafeTransfer
-	} from '$eth/services/nft-send.services';
+	} from '$eth/services/nft-transfer.services';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -28,7 +26,6 @@
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
-	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
@@ -38,7 +35,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
-	import { isNetworkICP } from '$lib/utils/network.utils';
+	import { assertIsNetworkEthereum, isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
@@ -85,29 +82,18 @@
 				return;
 			}
 
-			const params: GetFeeData = {
-				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress),
-				from: mapAddressStartsWith0x($ethAddress)
-			};
+			const { network } = sendToken;
 
-			const { getFeeData, safeEstimateGas, estimateGas } = infuraProviders(sendToken.network.id);
+			assertIsNetworkEthereum(network);
 
-			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
+			const { feeData, provider, params } = await getEthFeeDataWithProvider({
+				networkId: network.id,
+				chainId: network.chainId,
+				from: $ethAddress,
+				to: destination !== '' ? destination : $ethAddress
+			});
 
-			const { getSuggestedFeeData } = new InfuraGasRest(
-				(sendToken.network as EthereumNetwork).chainId
-			);
-
-			const {
-				maxFeePerGas: suggestedMaxFeePerGas,
-				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
-			} = await getSuggestedFeeData();
-
-			const feeData = {
-				...feeDataRest,
-				maxFeePerGas: maxBigInt(maxFeePerGas, suggestedMaxFeePerGas) ?? null,
-				maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas) ?? null
-			};
+			const { safeEstimateGas, estimateGas } = provider;
 
 			const feeDataGas = getEthFeeData({
 				...params,

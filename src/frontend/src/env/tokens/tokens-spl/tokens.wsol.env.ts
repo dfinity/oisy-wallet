@@ -14,7 +14,7 @@ export const WSOL_TOKEN_ID: TokenId = parseTokenId(WSOL_SYMBOL);
 export const WSOL_TOKEN: RequiredSplToken = {
 	id: WSOL_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Wrapped SOL',
 	symbol: WSOL_SYMBOL,

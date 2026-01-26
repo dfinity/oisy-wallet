@@ -1,14 +1,16 @@
-import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
-import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
+import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
+import { createPermit } from '$eth/services/eip2612-permit.services';
 import { swap } from '$eth/services/swap.services';
 import type { EthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
-import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
+import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
-import { loadCustomTokens } from '$icp/services/icrc.services';
+import { hasSufficientIcrcAllowance, loadCustomTokens } from '$icp/services/icrc.services';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken, IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isIcrcTokenSupportIcrc2, isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -26,6 +28,7 @@ import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
 import {
 	KONG_BACKEND_CANISTER_ID,
+	NANO_SECONDS_IN_HALF_MINUTE,
 	NANO_SECONDS_IN_MINUTE,
 	ZERO
 } from '$lib/constants/app.constants';
@@ -37,6 +40,8 @@ import {
 	SWAP_MODE,
 	SWAP_SIDE
 } from '$lib/constants/swap.constants';
+import { exchanges } from '$lib/derived/exchange.derived';
+import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -65,6 +70,7 @@ import {
 	type VeloraQuoteParams
 } from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
@@ -75,9 +81,9 @@ import {
 	mapVeloraSwapResult
 } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import {
 	constructSimpleSDK,
 	type DeltaAuction,
@@ -85,6 +91,33 @@ import {
 	type OptimalRate
 } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
+
+const checkNeedsApproval = async ({
+	identity,
+	ledgerCanisterId,
+	amount,
+	spender
+}: {
+	identity: Identity;
+	ledgerCanisterId: LedgerCanisterIdText;
+	amount: bigint;
+	spender: Principal;
+}): Promise<boolean> => {
+	try {
+		const isAllowanceSufficient = await hasSufficientIcrcAllowance({
+			identity,
+			ledgerCanisterId,
+			owner: identity.getPrincipal(),
+			spender,
+			amount,
+			allowanceBuffer: NANO_SECONDS_IN_HALF_MINUTE
+		});
+
+		return !isAllowanceSufficient;
+	} catch (_: unknown) {
+		return true;
+	}
+};
 
 export const fetchKongSwap = async ({
 	identity,
@@ -110,6 +143,7 @@ export const fetchKongSwap = async ({
 		amount: parsedSwapAmount,
 		to: Principal.fromText(KONG_BACKEND_CANISTER_ID).toString()
 	};
+	const parsedSlippageValue = Number(slippageValue);
 
 	const txBlockIndex = !isSourceTokenIcrc2
 		? isTokenIcrc(sourceToken)
@@ -123,25 +157,41 @@ export const fetchKongSwap = async ({
 				})
 		: undefined;
 
-	isSourceTokenIcrc2 &&
-		(await approve({
+	if (isSourceTokenIcrc2) {
+		// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+		const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
+
+		const isApprovalNeeded = await checkNeedsApproval({
 			identity,
 			ledgerCanisterId,
-			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-			amount: parsedSwapAmount + sourceTokenFee * 2n,
-			expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
-			spender: {
-				owner: Principal.from(KONG_BACKEND_CANISTER_ID)
-			}
-		}));
+			amount: amountWithFees,
+			spender: Principal.from(KONG_BACKEND_CANISTER_ID)
+		});
+
+		if (isApprovalNeeded) {
+			await approve({
+				identity,
+				ledgerCanisterId,
+				amount: amountWithFees,
+				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
+				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+				spender: {
+					owner: Principal.from(KONG_BACKEND_CANISTER_ID)
+				}
+			});
+		}
+	}
 
 	await kongSwap({
 		identity,
 		sourceToken,
 		destinationToken,
 		sendAmount: parsedSwapAmount,
-		receiveAmount,
-		maxSlippage: Number(slippageValue),
+		maxSlippage: parsedSlippageValue,
+		receiveAmount: calculateSlippage({
+			quoteAmount: receiveAmount,
+			slippagePercentage: parsedSlippageValue
+		}),
 		...(nonNullish(txBlockIndex) ? { payTransactionId: { BlockIndex: txBlockIndex } } : {})
 	});
 
@@ -260,9 +310,9 @@ const fetchSwapAmountsICP = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2
-}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & { amount: bigint }): Promise<
-	SwapMappedResult[]
-> => {
+}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & {
+	amount: bigint;
+}): Promise<SwapMappedResult[]> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
 	const settledResults = await Promise.allSettled(
@@ -276,10 +326,46 @@ const fetchSwapAmountsICP = async ({
 		)
 	);
 
+	const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
+	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
+	const sourceTokenToDecimals = formatToken({
+		value: amount,
+		unitName: sourceToken.decimals
+	});
+
+	const trackEventBaseParams = {
+		event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+		token_symbol: sourceToken.symbol,
+		token_network: sourceToken.network.name,
+		token_address: (sourceToken as IcToken).ledgerCanisterId,
+		token_name: sourceToken.name,
+		token_standard: sourceToken.standard.code,
+		token_id: String(sourceToken.id),
+		token2_symbol: destinationToken.symbol,
+		token2_network: destinationToken.network.name,
+		token2_address: (destinationToken as IcToken).ledgerCanisterId,
+		token2_name: destinationToken.name,
+		token2_standard: destinationToken.standard.code,
+		token2_id: String(destinationToken.id),
+		...(nonNullish(sourceTokenUsdValue) && {
+			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
+		})
+	};
+
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
 		(acc, provider, index) => {
 			const result = settledResults[index];
 			if (result.status !== 'fulfilled') {
+				trackEvent({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: {
+						...trackEventBaseParams,
+						event_subcontext: provider.key,
+						result_status: 'error',
+						result_error: result.reason.message
+					}
+				});
+
 				return acc;
 			}
 
@@ -290,7 +376,30 @@ const fetchSwapAmountsICP = async ({
 				mapped = provider.mapQuoteResult({ swap, tokens });
 			} else if (provider.key === SwapProvider.ICP_SWAP && isSourceTokenIcrc2) {
 				const swap = result.value as ICPSwapResult;
-				mapped = provider.mapQuoteResult({ swap, slippage });
+				mapped = provider.mapQuoteResult({
+					swap,
+					slippage,
+					destToken: destinationToken as IcToken
+				});
+			}
+
+			if (nonNullish(mapped)) {
+				const destinationTokenToDecimals = formatToken({
+					value: mapped.receiveAmount,
+					unitName: destinationToken.decimals
+				});
+
+				trackEvent({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: {
+						...trackEventBaseParams,
+						event_subcontext: provider.key,
+						result_status: 'success',
+						...(nonNullish(destinationUsdValue) && {
+							token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+						})
+					}
+				});
 			}
 
 			if (mapped && Number(mapped.receiveAmount) > 0) {
@@ -335,8 +444,8 @@ export const fetchIcpSwap = async ({
 
 	const pool = await getPoolCanister({
 		identity,
-		token0: { address: sourceLedgerCanisterId, standard: sourceStandard },
-		token1: { address: destinationLedgerCanisterId, standard: destinationStandard },
+		token0: { address: sourceLedgerCanisterId, standard: sourceStandard.code },
+		token1: { address: destinationLedgerCanisterId, standard: destinationStandard.code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity,
 		fee: ICP_SWAP_POOL_FEE
 	});
@@ -348,7 +457,7 @@ export const fetchIcpSwap = async ({
 	const poolCanisterId = pool.canisterId.toString();
 
 	const slippageMinimum = calculateSlippage({
-		quoteAmount: receiveAmount,
+		quoteAmount: receiveAmount + destinationTokenFee,
 		slippagePercentage: Number(slippageValue)
 	});
 
@@ -397,15 +506,27 @@ export const fetchIcpSwap = async ({
 				fee: sourceTokenFee
 			});
 		} else {
-			await approve({
+			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer"
+			const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
+
+			const isApprovalNeeded = await checkNeedsApproval({
 				identity,
 				ledgerCanisterId: sourceLedgerCanisterId,
-				// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-				amount: parsedSwapAmount + sourceTokenFee * 2n,
-				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
-				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
-				spender: { owner: pool.canisterId }
+				amount: amountWithFees,
+				spender: pool.canisterId
 			});
+
+			if (isApprovalNeeded) {
+				await approve({
+					identity,
+					ledgerCanisterId: sourceLedgerCanisterId,
+					// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+					amount: parsedSwapAmount + sourceTokenFee * 2n,
+					// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
+					expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+					spender: { owner: pool.canisterId }
+				});
+			}
 
 			await depositFrom({
 				identity,
@@ -467,7 +588,7 @@ export const fetchIcpSwap = async ({
 			identity,
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
-			amount: receiveAmount,
+			amount: receiveAmount + destinationTokenFee,
 			fee: destinationTokenFee
 		});
 	} catch (_: unknown) {
@@ -664,19 +785,94 @@ const fetchVeloraSwapAmount = async ({
 		partner: OISY_URL_HOSTNAME
 	};
 
-	const data = await sdk.quote.getQuote(
-		srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
-	);
+	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
+	const sourceTokenToDecimals = formatToken({
+		value: amount,
+		unitName: sourceToken.decimals
+	});
 
-	if ('delta' in data) {
-		return mapVeloraSwapResult(data.delta);
+	const trackEventBaseParams = {
+		event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+		event_subcontext: SwapProvider.VELORA,
+		token_symbol: sourceToken.symbol,
+		token_network: sourceToken.network.name,
+		token_address: sourceToken.address,
+		token_name: sourceToken.name,
+		token_standard: sourceToken.standard.code,
+		token_id: String(sourceToken.id),
+		token2_symbol: destinationToken.symbol,
+		token2_network: destinationToken.network.name,
+		token2_address: destinationToken.address,
+		token2_name: destinationToken.name,
+		token2_standard: destinationToken.standard.code,
+		token2_id: String(destinationToken.id),
+		...(nonNullish(sourceTokenUsdValue) && {
+			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
+		})
+	};
+
+	try {
+		const data = await sdk.quote.getQuote(
+			srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
+		);
+
+		const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
+
+		if ('delta' in data) {
+			const destinationTokenToDecimals = formatToken({
+				value: BigInt(data.delta.destAmount),
+				unitName: destinationToken.decimals
+			});
+
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: {
+					...trackEventBaseParams,
+					result_status: 'success',
+					event_type: 'delta',
+					...(nonNullish(destinationUsdValue) && {
+						token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+					})
+				}
+			});
+			return mapVeloraSwapResult(data);
+		}
+
+		if ('market' in data) {
+			const destinationTokenToDecimals = formatToken({
+				value: BigInt(data.market.destAmount),
+				unitName: destinationToken.decimals
+			});
+
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: {
+					...trackEventBaseParams,
+					result_status: 'success',
+					event_type: 'market',
+					...(nonNullish(destinationUsdValue) && {
+						token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+					})
+				}
+			});
+			return mapVeloraMarketSwapResult(data.market);
+		}
+
+		return null;
+	} catch (error: unknown) {
+		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+			metadata: {
+				...trackEventBaseParams,
+				result_status: 'error',
+				result_error: errorMessage
+			}
+		});
+
+		return null;
 	}
-
-	if ('market' in data) {
-		return mapVeloraMarketSwapResult(data.market);
-	}
-
-	return null;
 };
 
 export const withdrawUserUnusedBalance = async ({
@@ -737,11 +933,11 @@ export const fetchVeloraDeltaSwap = async ({
 	destinationToken,
 	swapAmount,
 	sourceNetwork,
-	receiveAmount,
 	slippageValue,
 	destinationNetwork,
 	userAddress,
 	gas,
+	isGasless,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	swapDetails
@@ -759,7 +955,11 @@ export const fetchVeloraDeltaSwap = async ({
 	const deltaContract = await sdk.delta.getDeltaContract();
 
 	const slippageMinimum = calculateSlippage({
-		quoteAmount: receiveAmount,
+		// According to Velora's documentation, we must provide `destAmount` as the value after slippage.
+		// Additionally, as confirmed with Velora, we cannot use a formatted token value with decimals when creating a Delta order.
+		// Instead, we should use the raw `destAmount` value returned in the quote response (`swapDetails.destAmount`).
+		// Therefore, when creating a Delta order, always use the `destAmount` from `swapDetails`.
+		quoteAmount: BigInt(swapDetails.destAmount),
 		slippagePercentage: Number(slippageValue)
 	});
 
@@ -767,33 +967,58 @@ export const fetchVeloraDeltaSwap = async ({
 		return;
 	}
 
-	await approveToken({
-		token: sourceToken,
-		from: userAddress,
-		to: deltaContract,
-		amount: parsedSwapAmount,
-		sourceNetwork,
-		identity,
-		gas,
-		maxFeePerGas,
-		shouldSwapWithApproval: true,
-		maxPriorityFeePerGas,
-		progress,
-		progressSteps: ProgressStepsSwap
-	});
+	let signableOrderData;
 
-	progress(ProgressStepsSwap.SWAP);
-
-	const signableOrderData = await sdk.delta.buildDeltaOrder({
+	const deltaOrderBaseParams = {
 		deltaPrice: swapDetails as DeltaPrice,
 		owner: userAddress,
 		srcToken: sourceToken.address,
 		destToken: destinationToken.address,
-		srcAmount: `${parsedSwapAmount}`,
+		srcAmount: parsedSwapAmount.toString(),
 		destAmount: `${slippageMinimum}`,
 		destChainId: Number(destinationNetwork.chainId),
 		partner: OISY_URL_HOSTNAME
-	});
+	};
+
+	if (isGasless) {
+		progress(ProgressStepsSwap.APPROVE);
+
+		const { nonce, deadline, encodedPermit } = await createPermit({
+			token: sourceToken,
+			userAddress,
+			spender: deltaContract,
+			value: parsedSwapAmount.toString(),
+			identity
+		});
+
+		progress(ProgressStepsSwap.SWAP);
+
+		signableOrderData = await sdk.delta.buildDeltaOrder({
+			...deltaOrderBaseParams,
+			deadline,
+			nonce,
+			permit: encodedPermit
+		});
+	} else {
+		await approveToken({
+			token: sourceToken,
+			from: userAddress,
+			to: deltaContract,
+			amount: parsedSwapAmount,
+			sourceNetwork,
+			identity,
+			gas,
+			maxFeePerGas,
+			shouldSwapWithApproval: true,
+			maxPriorityFeePerGas,
+			progress,
+			progressSteps: ProgressStepsSwap
+		});
+
+		progress(ProgressStepsSwap.SWAP);
+
+		signableOrderData = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
+	}
 
 	const hash = getSignParamsEIP712(signableOrderData);
 

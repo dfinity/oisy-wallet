@@ -14,7 +14,7 @@ export const USDT_TOKEN_ID: TokenId = parseTokenId(USDT_SYMBOL);
 export const USDT_TOKEN: RequiredEvmBep20Token = {
 	id: USDT_TOKEN_ID,
 	network: BSC_MAINNET_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Tether USD',
 	symbol: USDT_SYMBOL,

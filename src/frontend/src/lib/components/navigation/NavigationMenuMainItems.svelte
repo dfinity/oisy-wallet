@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { assertNever, nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
+	import IconPlant from '$lib/components/icons/IconPlant.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -13,24 +14,27 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_ITEM_ACTIVITY,
-		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_EXPLORER,
+		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
 	} from '$lib/constants/test-ids.constants';
-	import { networkId } from '$lib/derived/network.derived';
+	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { activeAssetsTabStore, userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import {
 		isRouteActivity,
-		isRouteRewards,
 		isRouteDappExplorer,
-		isRouteSettings,
-		isRouteTransactions,
-		networkUrl,
+		isRouteEarn,
 		isRouteEarning,
+		isRouteNfts,
+		isRouteRewards,
+		isRouteSettings,
 		isRouteTokens,
-		isRouteNfts
+		isRouteTransactions,
+		networkUrl
 	} from '$lib/utils/nav.utils';
+	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
 		testIdPrefix?: string;
@@ -43,22 +47,46 @@
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
 
+	const networkId = $derived(
+		nonNullish($userSelectedNetworkStore) ? parseNetworkId($userSelectedNetworkStore) : undefined
+	);
+
 	let fromRoute = $state<NavigationTarget | null>(null);
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
 	});
+
+	let assetsPath = $derived.by(() => {
+		if ($activeAssetsTabStore === TokenTypes.NFTS) {
+			return AppPath.Nfts;
+		}
+
+		if ($activeAssetsTabStore === TokenTypes.EARNING) {
+			return AppPath.Earning;
+		}
+
+		if ($activeAssetsTabStore === TokenTypes.TOKENS) {
+			return AppPath.Tokens;
+		}
+
+		assertNever($activeAssetsTabStore, `Unexpected TokenTypes value: ${$activeAssetsTabStore}`);
+	});
+
+	let assetsSelected = $derived(
+		isRouteTokens(page) || isRouteNfts(page) || isRouteEarning(page) || isRouteTransactions(page)
+	);
 </script>
 
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
-		path: AppPath.Tokens,
-		networkId: $networkId,
+		path: assetsPath,
+		networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
-	selected={isRouteTokens(page) || isRouteNfts(page) || isRouteTransactions(page)}
+	selected={assetsSelected}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
 	{#snippet icon()}
@@ -73,7 +101,7 @@
 	ariaLabel={$i18n.navigation.alt.activity}
 	href={networkUrl({
 		path: AppPath.Activity,
-		networkId: $networkId,
+		networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
@@ -89,11 +117,35 @@
 	{/snippet}
 </NavigationItem>
 
+<!-- Todo: remove condition once the feature is completed -->
+{#if EARNING_ENABLED}
+	<NavigationItem
+		ariaLabel={$i18n.navigation.alt.airdrops}
+		href={networkUrl({
+			path: AppPath.Earn,
+			networkId,
+			usePreviousRoute: isTransactionsRoute,
+			fromRoute
+		})}
+		selected={isRouteEarn(page)}
+		tag={$i18n.core.text.new}
+		tagVariant="emphasis"
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+	>
+		{#snippet icon()}
+			<IconPlant />
+		{/snippet}
+		{#snippet label()}
+			{$i18n.navigation.text.earning}
+		{/snippet}
+	</NavigationItem>
+{/if}
+
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	href={networkUrl({
 		path: AppPath.Explore,
-		networkId: $networkId,
+		networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
@@ -109,33 +161,12 @@
 </NavigationItem>
 
 <!-- Todo: remove condition once the feature is completed -->
-{#if EARNING_ENABLED}
-	<NavigationItem
-		ariaLabel={$i18n.navigation.alt.airdrops}
-		href={networkUrl({
-			path: AppPath.Earning,
-			networkId: $networkId,
-			usePreviousRoute: isTransactionsRoute,
-			fromRoute
-		})}
-		selected={isRouteEarning(page)}
-		tag={$i18n.core.text.new}
-		tagVariant="emphasis"
-		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
-	>
-		{#snippet icon()}
-			<IconGift />
-		{/snippet}
-		{#snippet label()}
-			{$i18n.navigation.text.earning}
-		{/snippet}
-	</NavigationItem>
-{:else}
+{#if !EARNING_ENABLED}
 	<NavigationItem
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
 			path: AppPath.Rewards,
-			networkId: $networkId,
+			networkId,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
@@ -157,7 +188,7 @@
 	ariaLabel={$i18n.navigation.alt.settings}
 	href={networkUrl({
 		path: AppPath.Settings,
-		networkId: $networkId,
+		networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}

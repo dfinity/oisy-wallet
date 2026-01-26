@@ -11,8 +11,9 @@ describe('StakeReview', () => {
 	const props = {
 		amount: 0.01,
 		disabled: false,
-		onClose: () => {},
-		onNext: () => {}
+		onConfirm: () => {},
+		onBack: () => {},
+		actionButtonLabel: 'Stake'
 	};
 
 	it('should keep the next button clickable if all requirements are met', () => {

@@ -1,11 +1,11 @@
 import * as navUtils from '$app/navigation';
 import NftCollectionDescription from '$lib/components/nfts/NftCollectionDescription.svelte';
-import { AppPath } from '$lib/constants/routes.constants';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
 	NFT_COLLECTION_ACTION_SPAM
 } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
+import { nftsUrl } from '$lib/utils/nav.utils';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
@@ -83,8 +83,6 @@ describe('NftCollectionDescription', () => {
 
 		await fireEvent.click(link);
 
-		expect(gotoSpy).toHaveBeenCalledWith(
-			`${AppPath.Nfts}${collection.network.name}-${collection.address}`
-		);
+		expect(gotoSpy).toHaveBeenCalledWith(nftsUrl({ collection }));
 	});
 });

@@ -9,17 +9,17 @@ import { render } from '@testing-library/svelte';
 
 describe('NftCollection', () => {
 	const mockNfts = [
-		{ ...mockValidErc1155Nft, name: 'Null', id: parseNftId(0) },
-		{ ...mockValidErc1155Nft, name: 'Eins', id: parseNftId(1) },
-		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId(2) }
+		{ ...mockValidErc1155Nft, name: 'Null', id: parseNftId('0') },
+		{ ...mockValidErc1155Nft, name: 'Eins', id: parseNftId('1') },
+		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId('2') }
 	];
 
 	beforeAll(() => {
 		nftStore.addAll(mockNfts);
 
-		mockPage.mockDynamicRoutes({
-			networkId: String(mockValidErc1155Nft.collection.network.id),
-			collectionId: mockValidErc1155Nft.collection.address
+		mockPage.mock({
+			network: mockValidErc1155Nft.collection.network.id.description,
+			collection: mockValidErc1155Nft.collection.address
 		});
 	});
 

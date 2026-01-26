@@ -38,8 +38,8 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import type { MinterInfo } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 import { fireEvent, render } from '@testing-library/svelte';
 import { InfuraProvider } from 'ethers/providers';
 import { get, readable, writable } from 'svelte/store';
@@ -101,7 +101,7 @@ describe('EthConvertTokenWizard', () => {
 
 	let sendSpy: MockInstance;
 
-	const mockCkEthMinterInfoStore = (minterInfo?: MinterInfo) => {
+	const mockCkEthMinterInfoStore = (minterInfo?: CkEthMinterDid.MinterInfo) => {
 		const store = initCertifiedSetterStore<CkEthMinterInfoData>();
 
 		if (nonNullish(minterInfo)) {

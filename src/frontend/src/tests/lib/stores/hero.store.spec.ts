@@ -69,5 +69,19 @@ describe('hero.store', () => {
 				expect(get(outflowActionsDisabled)).toBeTruthy();
 			});
 		});
+
+		describe('inflowActionsDisabled', () => {
+			const { inflowActionsDisabled } = initHeroContext();
+
+			it('should be a writable store', () => {
+				expect(inflowActionsDisabled).toHaveProperty('set');
+				expect(inflowActionsDisabled).toHaveProperty('update');
+				expect(inflowActionsDisabled).toHaveProperty('subscribe');
+			});
+
+			it('should be initialized to true', () => {
+				expect(get(inflowActionsDisabled)).toBeTruthy();
+			});
+		});
 	});
 });

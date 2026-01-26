@@ -1,9 +1,9 @@
 import type { EthAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { ProgressStepsSend } from '$lib/enums/progress-steps';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 
-interface CommonNftTransferParams {
+export interface CommonNftTransferParams {
 	sourceNetwork: EthereumNetwork;
 	identity: Identity;
 	from: EthAddress;
@@ -15,13 +15,13 @@ interface CommonNftTransferParams {
 
 export interface TransferErc721Params extends CommonNftTransferParams {
 	contractAddress: string;
-	tokenId: number;
+	tokenId: string;
 	to: EthAddress;
 }
 
 export interface TransferErc1155Params extends CommonNftTransferParams {
 	contractAddress: string;
-	id: number;
+	id: string;
 	amount: bigint;
 	to: EthAddress;
 	data?: `0x${string}` | string;

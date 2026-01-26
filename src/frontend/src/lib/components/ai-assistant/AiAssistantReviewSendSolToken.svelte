@@ -132,7 +132,7 @@
 		if (invalidAmount(amount) || parsedAmount === ZERO) {
 			return $i18n.send.assertion.amount_invalid;
 		}
-		if (nonNullish($sendBalance) && $sendTokenStandard === 'solana') {
+		if (nonNullish($sendBalance) && $sendTokenStandard.code === 'solana') {
 			const total = parsedAmount + ($feeStore ?? ZERO);
 			if (total > $sendBalance) {
 				return $i18n.send.assertion.insufficient_funds_for_gas;
@@ -158,18 +158,14 @@
 
 	const send = async () => {
 		const sharedTrackingEventMetadata = {
-			token: $sendTokenSymbol
+			token: $sendTokenSymbol,
+			network: `${$sendTokenNetworkId.description}`
 		};
 
 		trackEvent({
 			name: AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
 			metadata: sharedTrackingEventMetadata
 		});
-
-		const sendTrackingEventMetadata = {
-			...sharedTrackingEventMetadata,
-			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
-		};
 
 		if (isNullish($authIdentity)) {
 			return;
@@ -205,6 +201,16 @@
 			});
 			return;
 		}
+
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
+			source: AI_ASSISTANT_SEND_TOKEN_SOURCE,
+			...(nonNullish($prioritizationFeeStore)
+				? { prioritizationFee: $prioritizationFeeStore.toString() }
+				: {}),
+			...(nonNullish($ataFeeStore) ? { ataFee: $ataFeeStore.toString() } : {}),
+			...(nonNullish($feeStore) ? { fee: $feeStore.toString() } : {})
+		};
 
 		try {
 			loading = true;
@@ -245,7 +251,7 @@
 	};
 </script>
 
-<div class="mb-8 mt-2">
+<div class="mt-2 mb-8">
 	<SolFeeContext {destination} observe={!loading}>
 		<SolFeeDisplay />
 

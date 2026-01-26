@@ -13,7 +13,7 @@ export const WEETH_TOKEN_ID: TokenId = parseTokenId(WEETH_SYMBOL);
 export const WEETH_TOKEN: RequiredAdditionalErc20Token = {
 	id: WEETH_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Wrapped eETH',
 	symbol: WEETH_SYMBOL,

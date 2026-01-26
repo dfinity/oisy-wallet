@@ -5,6 +5,10 @@ describe('ShareButton', () => {
 	const testId = 'shareButtonId';
 	const shareButtonSelector = `button[data-tid=${testId}]`;
 
+	const props = {
+		shareAriaLabel: 'Share this content'
+	};
+
 	describe('Unavailable share option', () => {
 		beforeEach(() => {
 			Object.defineProperty(window, 'navigator', {
@@ -18,7 +22,7 @@ describe('ShareButton', () => {
 		});
 
 		it('should not render element if share is unavailable', () => {
-			const { container } = render(ShareButton, { testId });
+			const { container } = render(ShareButton, { ...props, testId });
 
 			const shareButton: HTMLButtonElement | null = container.querySelector(shareButtonSelector);
 

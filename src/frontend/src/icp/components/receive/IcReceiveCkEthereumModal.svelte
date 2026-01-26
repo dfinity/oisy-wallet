@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
@@ -27,9 +26,10 @@
 	interface Props {
 		sourceToken: Token;
 		destinationToken: Token;
+		onClose: () => void;
 	}
 
-	let { sourceToken, destinationToken }: Props = $props();
+	let { sourceToken, destinationToken, onClose }: Props = $props();
 
 	let sendAmount: OptionAmount = $state();
 	let receiveAmount: number | undefined = $state();
@@ -45,8 +45,6 @@
 		})
 	);
 
-	const dispatch = createEventDispatcher();
-
 	const close = () =>
 		closeModal(() => {
 			sendAmount = undefined;
@@ -56,7 +54,7 @@
 
 			currentStep = undefined;
 
-			dispatch('nnsClose');
+			onClose();
 		});
 
 	const goToStep = (stepName: WizardStepsReceiveComplete) => {
@@ -98,14 +96,14 @@
 					<HowToConvertEthereumWizardSteps
 						{currentStep}
 						formCancelAction="back"
-						on:icBack={() =>
+						onBack={() =>
 							goToStep(
 								currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE
 									? WizardStepsHowToConvert.INFO
 									: WizardStepsReceive.RECEIVE
 							)}
-						on:icQRCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
-						on:icConvert={() => goToStep(WizardStepsConvert.CONVERT)}
+						onConvert={() => goToStep(WizardStepsConvert.CONVERT)}
+						onQrCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
 					/>
 				{:else if currentStep?.name === WizardStepsReceive.QR_CODE}
 					<ReceiveAddressQrCode
@@ -113,12 +111,12 @@
 						addressToken={ICP_TOKEN}
 						copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
 						network={ICP_NETWORK}
-						on:icBack={modal?.back}
+						onBack={modal?.back}
 					/>
 				{:else if currentStep?.name === WizardStepsReceive.RECEIVE || currentStep?.name === WizardStepsConvert.CONVERT || currentStep?.name === WizardStepsConvert.REVIEW || currentStep?.name === WizardStepsConvert.CONVERTING || currentStep?.name === WizardStepsConvert.DESTINATION || currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 					<IcReceiveInfoCkEthereum
-						on:icQRCode={() => goToStep(WizardStepsReceive.QR_CODE)}
-						on:icHowToConvert={() => goToStep(WizardStepsHowToConvert.INFO)}
+						onHowToConvert={() => goToStep(WizardStepsHowToConvert.INFO)}
+						onQRCode={() => goToStep(WizardStepsReceive.QR_CODE)}
 					/>
 				{/if}
 			{/key}

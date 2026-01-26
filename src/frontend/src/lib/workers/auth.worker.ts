@@ -1,9 +1,9 @@
-import { authClientStorage, createAuthClient } from '$lib/api/auth-client.api';
 import { AUTH_TIMER_INTERVAL, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
-import { KEY_STORAGE_DELEGATION, type AuthClient } from '@dfinity/auth-client';
-import { DelegationChain, isDelegationValid } from '@dfinity/identity';
 import { nonNullish } from '@dfinity/utils';
+import { KEY_STORAGE_DELEGATION } from '@icp-sdk/auth/client';
+import { DelegationChain, isDelegationValid } from '@icp-sdk/core/identity';
 
 export const onAuthMessage = async ({
 	data
@@ -17,11 +17,20 @@ export const onAuthMessage = async ({
 			return;
 		case 'stopIdleTimer':
 			stopIdleTimer();
-			return;
 	}
 };
 
 let timer: NodeJS.Timeout | undefined = undefined;
+
+const scheduleNext = (): void => {
+	timer = setTimeout(async () => {
+		await onIdleSignOut();
+
+		if (nonNullish(timer)) {
+			scheduleNext();
+		}
+	}, AUTH_TIMER_INTERVAL);
+};
 
 /**
  * The timer is executed only if the user has signed in
@@ -31,7 +40,7 @@ const startIdleTimer = () => {
 		return;
 	}
 
-	timer = setInterval(async () => await onIdleSignOut(), AUTH_TIMER_INTERVAL);
+	scheduleNext();
 };
 
 const stopIdleTimer = () => {
@@ -39,7 +48,7 @@ const stopIdleTimer = () => {
 		return;
 	}
 
-	clearInterval(timer);
+	clearTimeout(timer);
 	timer = undefined;
 };
 
@@ -61,7 +70,7 @@ const onIdleSignOut = async () => {
  * @returns true if authenticated
  */
 const checkAuthentication = async (): Promise<boolean> => {
-	const authClient: AuthClient = await createAuthClient();
+	const authClient = await AuthClientProvider.getInstance().createAuthClient();
 	return authClient.isAuthenticated();
 };
 
@@ -74,7 +83,8 @@ const checkDelegationChain = async (): Promise<{
 	valid: boolean;
 	delegation: DelegationChain | null;
 }> => {
-	const delegationChain: string | null = await authClientStorage.get(KEY_STORAGE_DELEGATION);
+	const delegationChain =
+		await AuthClientProvider.getInstance().storage.get(KEY_STORAGE_DELEGATION);
 
 	const delegation = delegationChain !== null ? DelegationChain.fromJSON(delegationChain) : null;
 

@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapProviderListItem from '$lib/components/swap/SwapProviderListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { SWAP_MODAL_SELECT_PROVIDER_STEP } from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -18,10 +19,12 @@
 	import type { SwapMappedResult } from '$lib/types/swap';
 	import { formatTokenBigintToNumber, formatCurrency } from '$lib/utils/format.utils';
 
-	const dispatch = createEventDispatcher<{
-		icSelectProvider: SwapMappedResult;
-		icCloseProviderList: void;
-	}>();
+	interface Props {
+		onSelectProvider: (swap: SwapMappedResult) => void;
+		onCloseProviderList: () => void;
+	}
+
+	let { onSelectProvider, onCloseProviderList }: Props = $props();
 
 	const { destinationToken, destinationTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -56,7 +59,7 @@
 	};
 </script>
 
-<div class=" mb-4 overflow-y-auto overscroll-contain">
+<div class=" mb-4 overflow-y-auto overscroll-contain" data-tid={SWAP_MODAL_SELECT_PROVIDER_STEP}>
 	<div class="flex w-full flex-row justify-between border-b border-solid border-primary pb-2">
 		<span class="text-sm text-tertiary">{$i18n.swap.text.swap_provider}</span>
 		<span class="text-sm text-tertiary">{$i18n.swap.text.you_receive}</span>
@@ -70,12 +73,12 @@
 						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
 						destinationToken={$destinationToken as IcTokenToggleable}
 						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
+						onClick={() => onSelectProvider(swap)}
 						usdBalance={getUsdBalance({
 							amount: swap.receiveAmount,
 							token: $destinationToken as IcTokenToggleable,
 							exchangeRate: $destinationTokenExchangeRate
 						})}
-						on:click={() => dispatch('icSelectProvider', swap)}
 					/>
 				</li>
 			{/if}
@@ -84,5 +87,5 @@
 </div>
 
 <ButtonGroup>
-	<ButtonCancel fullWidth={true} onclick={() => dispatch('icCloseProviderList')} />
+	<ButtonCancel fullWidth={true} onclick={onCloseProviderList} />
 </ButtonGroup>

@@ -25,7 +25,7 @@ describe('AddressBookQrCodeStep', () => {
 		const { container } = render(AddressBookQrCodeStep, {
 			props: {
 				onCancel: vi.fn(),
-				address: undefined
+				onScan: vi.fn()
 			}
 		});
 
@@ -39,7 +39,7 @@ describe('AddressBookQrCodeStep', () => {
 		const { container } = render(AddressBookQrCodeStep, {
 			props: {
 				onCancel,
-				address: undefined
+				onScan: vi.fn()
 			}
 		});
 

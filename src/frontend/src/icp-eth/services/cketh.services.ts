@@ -7,9 +7,9 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { Network } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import { isNetworkICP } from '$lib/utils/network.utils';
-import { AnonymousIdentity } from '@dfinity/agent';
-import type { MinterInfo } from '@dfinity/cketh';
 import { isNullish, queryAndUpdate } from '@dfinity/utils';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
+import { AnonymousIdentity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 export const loadCkEthMinterInfo = async ({
@@ -26,7 +26,7 @@ export const loadCkEthMinterInfo = async ({
 		return;
 	}
 
-	await queryAndUpdate<MinterInfo>({
+	await queryAndUpdate<CkEthMinterDid.MinterInfo>({
 		request: ({ identity: _, certified }) =>
 			minterInfo({
 				minterCanisterId,

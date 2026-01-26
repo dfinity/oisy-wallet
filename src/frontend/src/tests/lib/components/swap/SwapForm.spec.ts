@@ -14,7 +14,7 @@ import {
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('SwapForm', () => {
@@ -91,7 +91,15 @@ describe('SwapForm', () => {
 			setupIcTokenFeeStore();
 
 			const { getByTestId } = render(SwapForm, {
-				props: { ...props, slippageValue: undefined, isSwapAmountsLoading: false },
+				props: {
+					...props,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
 				context: mockContext
 			});
 
@@ -101,6 +109,32 @@ describe('SwapForm', () => {
 			} else {
 				expect(button).not.toHaveAttribute('disabled');
 			}
+		});
+
+		it('should call switchTokens when button is clicked', async () => {
+			const swapAmountsStore = setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+
+			const resetSpy = vi.spyOn(swapAmountsStore, 'reset');
+
+			const { getByTestId } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: 2,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+			const button = getByTestId(SWAP_SWITCH_TOKENS_BUTTON);
+			await fireEvent.click(button);
+
+			expect(resetSpy).toHaveBeenCalled();
 		});
 	});
 
@@ -116,7 +150,11 @@ describe('SwapForm', () => {
 					swapAmount: '1',
 					receiveAmount: 2,
 					slippageValue: undefined,
-					isSwapAmountsLoading: false
+					isSwapAmountsLoading: false,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
 				},
 				context: mockContext
 			});
@@ -164,5 +202,167 @@ describe('SwapForm', () => {
 				expect(destinationInput).toHaveValue('10');
 			}
 		);
+	});
+
+	describe('swap not offered error', () => {
+		it('should show error when swap is not offered', () => {
+			setupSwapAmountsStore({
+				amountForSwap: 1,
+				swaps: [],
+				selectedProvider: undefined
+			});
+			setupIcTokenFeeStore();
+
+			const { container } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: undefined,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+			expect(container.querySelector('.text-error-primary')).toBeInTheDocument();
+		});
+
+		it('should not show error when swap amount is 0', () => {
+			setupSwapAmountsStore({
+				amountForSwap: 0,
+				swaps: [],
+				selectedProvider: undefined
+			});
+			setupIcTokenFeeStore();
+
+			const { container } = render(SwapForm, {
+				props: {
+					swapAmount: '0',
+					receiveAmount: undefined,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+			expect(container.querySelector('.text-error')).not.toBeInTheDocument();
+		});
+
+		it('should not show error when loading', () => {
+			setupSwapAmountsStore({
+				amountForSwap: 1,
+				swaps: [],
+				selectedProvider: undefined
+			});
+			setupIcTokenFeeStore();
+
+			const { container } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: undefined,
+					slippageValue: undefined,
+					isSwapAmountsLoading: true,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+			expect(container.querySelector('.text-error')).not.toBeInTheDocument();
+		});
+	});
+
+	describe('receiveAmount effect', () => {
+		it('should update receiveAmount when selectedProvider changes', async () => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+
+			let receiveAmount: number | undefined;
+
+			render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					get receiveAmount() {
+						return receiveAmount;
+					},
+					set receiveAmount(value) {
+						receiveAmount = value;
+					},
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+			await waitFor(() => {
+				expect(receiveAmount).toBeDefined();
+			});
+		});
+	});
+
+	describe('loading states', () => {
+		it('should show skeleton when fee is not loaded', () => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+
+			const { container } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: 2,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					fee: undefined,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+			expect(container.querySelector('.w-14, .w-16')).toBeInTheDocument();
+		});
+
+		it('should show loading state for destination amount when swapAmountsLoading is true', () => {
+			setupSwapAmountsStore({
+				amountForSwap: 2,
+				swaps: mockSwapProviders,
+				selectedProvider: mockSwapProviders[0]
+			});
+			setupIcTokenFeeStore();
+
+			const { getAllByTestId } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: 2,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+			const inputs = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+
+			expect(inputs[1]).toHaveValue('0');
+		});
 	});
 });

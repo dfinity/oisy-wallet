@@ -28,7 +28,8 @@ export const BTC_MAINNET_NETWORK: BitcoinNetwork = {
 	name: 'Bitcoin',
 	icon: bitcoinMainnetIcon,
 	explorerUrl: BTC_MAINNET_EXPLORER_URL,
-	buy: { onramperId: 'bitcoin' }
+	buy: { onramperId: 'bitcoin' },
+	pay: { openCryptoPay: 'Bitcoin' }
 };
 
 export const BTC_TESTNET_NETWORK_SYMBOL = 'BTC (Testnet)';

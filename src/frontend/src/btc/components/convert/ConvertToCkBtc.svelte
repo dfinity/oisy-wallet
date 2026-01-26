@@ -1,17 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
-	import {
-		initUtxosFeeStore,
-		UTXOS_FEE_CONTEXT_KEY,
-		type UtxosFeeContext as UtxosFeeContextType
-	} from '$btc/stores/utxos-fee.store';
+	import { getContext } from 'svelte';
+	import UtxosFeeContexts from '$btc/components/fee/UtxosFeeContexts.svelte';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
 	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import type { IcCkToken } from '$icp/types/ic-token';
 	import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
@@ -27,17 +22,14 @@
 
 	const modalId = Symbol();
 
-	let ckBtcToken: IcCkToken | undefined;
-	$: ckBtcToken = findTwinToken({
-		tokenToPair: BTC_MAINNET_TOKEN,
-		tokens: $tokens
-	});
+	let ckBtcToken = $derived(
+		findTwinToken({
+			tokenToPair: BTC_MAINNET_TOKEN,
+			tokens: $tokens
+		})
+	);
 
-	setContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY, {
-		store: initUtxosFeeStore()
-	});
-
-	let minterInfoLoaded = false;
+	let minterInfoLoaded = $state(false);
 
 	const openConvert = async () => {
 		// ckBtcToken is already available at this point, so the check is needed for TS-purposes only
@@ -76,7 +68,9 @@
 </ButtonHero>
 
 {#if $modalConvertBTCToCkBTC && nonNullish(ckBtcToken)}
-	<ConvertModal destinationToken={ckBtcToken} sourceToken={BTC_MAINNET_TOKEN} />
+	<UtxosFeeContexts>
+		<ConvertModal destinationToken={ckBtcToken} sourceToken={BTC_MAINNET_TOKEN} />
+	</UtxosFeeContexts>
 {/if}
 
 {#if !minterInfoLoaded && nonNullish(ckBtcToken)}

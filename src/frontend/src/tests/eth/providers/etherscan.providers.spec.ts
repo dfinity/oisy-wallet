@@ -157,7 +157,6 @@ describe('etherscan.providers', () => {
 					action: 'txlist',
 					address,
 					startblock: 0,
-					endblock: 99999999,
 					sort: 'asc'
 				});
 			});
@@ -174,7 +173,6 @@ describe('etherscan.providers', () => {
 					action: 'txlistinternal',
 					address,
 					startblock: 0,
-					endblock: 99999999,
 					sort: 'asc'
 				});
 			});
@@ -183,7 +181,7 @@ describe('etherscan.providers', () => {
 				const provider = new EtherscanProvider(network, chainId);
 				mockFetch.mockRejectedValue(new Error('Network error'));
 
-				await expect(provider.transactions({ address })).rejects.toThrow('Network error');
+				await expect(provider.transactions({ address })).rejects.toThrowError('Network error');
 			});
 
 			describe('erc20Transactions', () => {
@@ -251,7 +249,7 @@ describe('etherscan.providers', () => {
 
 					await expect(
 						provider.erc20Transactions({ address: mockEthAddress, contract: mockValidErc20Token })
-					).rejects.toThrow('Network error');
+					).rejects.toThrowError('Network error');
 				});
 			});
 
@@ -321,7 +319,7 @@ describe('etherscan.providers', () => {
 
 					await expect(
 						provider.erc721Transactions({ address: mockEthAddress, contract: mockValidErc721Token })
-					).rejects.toThrow('Network error');
+					).rejects.toThrowError('Network error');
 				});
 			});
 
@@ -394,7 +392,7 @@ describe('etherscan.providers', () => {
 							address: mockEthAddress,
 							contract: mockValidErc1155Token
 						})
-					).rejects.toThrow('Network error');
+					).rejects.toThrowError('Network error');
 				});
 			});
 		});
@@ -415,7 +413,7 @@ describe('etherscan.providers', () => {
 				}
 			];
 
-			const expectedTokenIds = [1, 2, 3];
+			const expectedTokenIds = ['1', '2', '3'];
 
 			beforeEach(() => {
 				vi.clearAllMocks();
@@ -445,7 +443,7 @@ describe('etherscan.providers', () => {
 						address: mockEthAddress,
 						contractAddress: mockValidErc721Token.address
 					})
-				).rejects.toThrow('Network error');
+				).rejects.toThrowError('Network error');
 			});
 		});
 	});
@@ -463,7 +461,7 @@ describe('etherscan.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
+			expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrowError(
 				replacePlaceholders(en.init.error.no_etherscan_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})

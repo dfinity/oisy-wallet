@@ -1,4 +1,4 @@
-import type { UserProfile } from '$declarations/backend/declarations/backend.did';
+import type { UserProfile } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import { hasPouhCredential } from '$lib/utils/credentials.utils';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';

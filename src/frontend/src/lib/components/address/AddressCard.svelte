@@ -32,7 +32,7 @@
 		{@render logo?.()}
 	</div>
 
-	<div class="flex w-full flex-col truncate pl-2 pr-4 text-sm sm:text-base">
+	<div class="flex w-full flex-col truncate pr-4 pl-2 text-sm sm:text-base">
 		{@render content()}
 	</div>
 

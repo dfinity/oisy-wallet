@@ -1,14 +1,19 @@
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
 	calculateUtxoSelection,
 	estimateTransactionSize,
 	extractUtxoTxIds,
 	filterAvailableUtxos,
 	filterLockedUtxos,
+	resetUtxosDataStores,
 	type UtxoSelectionResult
 } from '$btc/utils/btc-utxos.utils';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import type { Utxo } from '@dfinity/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
+import { get } from 'svelte/store';
 
 describe('btc-utxos.utils', () => {
 	const createMockUtxo = ({
@@ -21,7 +26,7 @@ describe('btc-utxos.utils', () => {
 		height?: number;
 		txid?: Uint8Array;
 		vout?: number;
-	}): Utxo => ({
+	}): CkBtcMinterDid.Utxo => ({
 		value: BigInt(value),
 		height,
 		outpoint: {
@@ -39,7 +44,7 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should convert number array to hex string with byte reversal', () => {
-			const txid = [1, 2, 3, 4];
+			const txid = Uint8Array.from([1, 2, 3, 4]);
 			const result = utxoTxIdToString(txid);
 
 			expect(result).toBe('04030201');
@@ -407,6 +412,37 @@ describe('btc-utxos.utils', () => {
 
 			expect(calculatedFee).toBe(ZERO);
 			expect(selection.feeSatoshis).toBe(ZERO);
+		});
+	});
+
+	describe('resetUtxosDataStores', () => {
+		beforeEach(() => {
+			allUtxosStore.reset();
+			feeRatePercentilesStore.reset();
+			btcPendingSentTransactionsStore.reset();
+		});
+
+		it('should reset all UTXO-related stores', () => {
+			allUtxosStore.setAllUtxos({
+				allUtxos: [createMockUtxo({ value: 100_000 })]
+			});
+			feeRatePercentilesStore.setFeeRateFromPercentiles({
+				feeRateFromPercentiles: 5000n
+			});
+			btcPendingSentTransactionsStore.setPendingTransactions({
+				address: 'test-address',
+				pendingTransactions: []
+			});
+
+			expect(get(allUtxosStore)?.allUtxos).toBeDefined();
+			expect(get(feeRatePercentilesStore)?.feeRateFromPercentiles).toBeDefined();
+			expect(get(btcPendingSentTransactionsStore)['test-address']).toBeDefined();
+
+			resetUtxosDataStores();
+
+			expect(get(allUtxosStore)).toBeNull();
+			expect(get(feeRatePercentilesStore)).toBeNull();
+			expect(get(btcPendingSentTransactionsStore)).toEqual({});
 		});
 	});
 });

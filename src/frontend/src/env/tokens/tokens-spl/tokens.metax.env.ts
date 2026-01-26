@@ -14,7 +14,7 @@ export const METAX_TOKEN_ID: TokenId = parseTokenId(METAX_SYMBOL);
 export const METAX_TOKEN: RequiredSpl2022Token = {
 	id: METAX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Meta xStock',
 	symbol: METAX_SYMBOL,

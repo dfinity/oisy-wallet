@@ -15,7 +15,7 @@ vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
 	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue(undefined)
 }));
 
-vi.mock('$btc/utils/btc-address.utils', () => ({
+vi.mock('$btc/utils/btc-address.services', () => ({
 	getBtcSourceAddress: vi.fn().mockReturnValue('test-btc-address')
 }));
 

@@ -138,7 +138,7 @@
 {#if amountOfRewards > 0}
 	<div transition:fade={SLIDE_DURATION}>
 		<div
-			class="mb-5 mt-2 w-full text-center text-xl font-bold text-success-primary"
+			class="mt-2 mb-5 w-full text-center text-xl font-bold text-success-primary"
 			class:animate-pulse={loading}
 			class:duration-500={loading}
 			class:ease-in-out={loading}

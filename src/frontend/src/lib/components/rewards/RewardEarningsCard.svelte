@@ -13,7 +13,7 @@
 	interface Props {
 		amount: bigint;
 		usdAmount: number;
-		token: IcToken | undefined;
+		token?: IcToken;
 		loading?: boolean;
 		testId?: string;
 	}

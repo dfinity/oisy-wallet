@@ -91,6 +91,22 @@ describe('modalTokensListStore', () => {
 		expect(get(filteredTokens)).toStrictEqual([mockTokenUi2, mockTokenUi1]);
 	});
 
+	it('should reset all filters', () => {
+		const { filterNetwork, filteredTokens, filterQuery, resetFilters } = initModalTokensListContext(
+			{
+				filterNetwork: ICP_NETWORK,
+				filterQuery: 'test',
+				tokens: [mockToken1, mockToken2]
+			}
+		);
+
+		resetFilters();
+
+		expect(get(filterNetwork)).toBe(undefined);
+		expect(get(filterQuery)).toBe(undefined);
+		expect(get(filteredTokens)).toStrictEqual([mockTokenUi2, mockTokenUi1]);
+	});
+
 	it('should filter tokens by network', () => {
 		const { filterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
 			filterNetwork: ETHEREUM_NETWORK,

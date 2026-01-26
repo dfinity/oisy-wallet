@@ -4,7 +4,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
-	let cmp = $state<Collapsible | undefined>(undefined);
+	let cmp = $state<Collapsible | undefined>();
 
 	const onInfoButtonClick = () => {
 		cmp?.toggleContent();

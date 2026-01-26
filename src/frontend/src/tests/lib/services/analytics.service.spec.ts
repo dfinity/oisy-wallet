@@ -1,134 +1,234 @@
-import type { TrackEventParams } from '$lib/types/analytics';
-import Plausible from 'plausible-tracker';
+const trackMock = vi.fn();
+const initMock = vi.fn();
 
-const trackEventMock = vi.fn();
-const enableAutoPageviews = vi.fn();
-
-vi.mock('plausible-tracker', () => ({
-	default: vi.fn(() => ({
-		enableAutoPageviews,
-		trackEvent: trackEventMock
+vi.mock('$lib/services/analytics-wrapper', () => ({
+	loadPlausibleTracker: vi.fn(() => ({
+		init: initMock,
+		track: trackMock
 	}))
 }));
 
-vi.doMock('$lib/constants/app.constants', () => ({
-	PROD: true
+vi.mock('$app/environment', () => ({
+	browser: true
 }));
 
-vi.doMock('$env/plausible.env', () => ({
+vi.mock('$env/plausible.env', () => ({
 	PLAUSIBLE_ENABLED: true,
 	PLAUSIBLE_DOMAIN: 'test.com'
 }));
 
 describe('plausible analytics service', () => {
 	beforeEach(() => {
-		vi.resetModules();
 		vi.clearAllMocks();
 	});
 
 	it('should initialize Plausible with correct config', async () => {
-		const { PLAUSIBLE_DOMAIN } = await import('$env/plausible.env');
 		const { initPlausibleAnalytics } = await import('$lib/services/analytics.services');
 
-		initPlausibleAnalytics();
+		await initPlausibleAnalytics();
 
-		expect(Plausible).toHaveBeenCalledWith({
-			domain: PLAUSIBLE_DOMAIN,
-			hashMode: false,
-			trackLocalhost: false
+		expect(initMock).toHaveBeenCalledWith({
+			domain: 'test.com'
 		});
-
-		expect(console.warn).not.toHaveBeenCalledWith('Warning message');
 	});
 
-	it('should call console.warn if value is provided', async () => {
+	it('should call track with metadata', async () => {
 		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
 
-		initPlausibleAnalytics();
+		await initPlausibleAnalytics();
 
-		const params: TrackEventParams = {
-			name: 'test_event_name',
-			metadata: { eventName: 'eventValue' },
-			warning: 'Warning message'
-		};
-
-		trackEvent(params);
-
-		expect(trackEventMock).toHaveBeenCalledWith('test_event_name', {
-			props: { eventName: 'eventValue' }
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' }
 		});
 
-		expect(console.warn).toHaveBeenCalledWith('Warning message');
+		expect(trackMock).toHaveBeenCalledWith('test_event', {
+			props: { key: 'value' }
+		});
 	});
 
-	it('should enable auto pageviews', async () => {
-		const { initPlausibleAnalytics } = await import('$lib/services/analytics.services');
-
-		expect(enableAutoPageviews).toHaveBeenCalledTimes(0);
-
-		initPlausibleAnalytics();
-
-		expect(enableAutoPageviews).toHaveBeenCalledOnce();
-	});
-
-	it('should call trackEvent if tracker is initialized', async () => {
+	it('should call track without metadata', async () => {
 		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
 
-		initPlausibleAnalytics();
+		await initPlausibleAnalytics();
 
-		const params: TrackEventParams = {
-			name: 'test_event_name',
-			metadata: { eventName: 'eventValue' }
-		};
+		trackEvent({
+			name: 'test_event'
+		});
 
-		trackEvent(params);
-
-		expect(trackEventMock).toHaveBeenCalledWith('test_event_name', {
-			props: { eventName: 'eventValue' }
+		expect(trackMock).toHaveBeenCalledWith('test_event', {
+			props: undefined
 		});
 	});
 
-	it('should NOT call trackEvent or init anything if PLAUSIBLE_ENABLED is false', async () => {
-		vi.doMock('$env/plausible.env', () => ({
-			PLAUSIBLE_ENABLED: false
+	it('should log warning when provided', async () => {
+		const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' },
+			warning: 'Test warning message'
+		});
+
+		expect(trackMock).toHaveBeenCalled();
+		expect(consoleWarnSpy).toHaveBeenCalledWith('Test warning message');
+
+		consoleWarnSpy.mockRestore();
+	});
+
+	it('should NOT log warning when not provided', async () => {
+		const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' }
+		});
+
+		expect(trackMock).toHaveBeenCalled();
+		expect(consoleWarnSpy).not.toHaveBeenCalled();
+
+		consoleWarnSpy.mockRestore();
+	});
+
+	it('should NOT initialize if browser is false', async () => {
+		vi.doMock('$app/environment', () => ({
+			browser: false
 		}));
+
+		vi.resetModules();
+
+		const { initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		expect(initMock).not.toHaveBeenCalled();
+	});
+
+	it('should NOT track if not initialized', async () => {
+		vi.doMock('$env/plausible.env', () => ({
+			PLAUSIBLE_ENABLED: true,
+			PLAUSIBLE_DOMAIN: null
+		}));
+
+		vi.resetModules();
+
+		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' }
+		});
+
+		expect(trackMock).not.toHaveBeenCalled();
+	});
+
+	it('should NOT initialize if PLAUSIBLE_ENABLED is false', async () => {
+		vi.doMock('$env/plausible.env', () => ({
+			PLAUSIBLE_ENABLED: false,
+			PLAUSIBLE_DOMAIN: 'test.com'
+		}));
+
+		vi.resetModules();
+
+		const { initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		expect(initMock).not.toHaveBeenCalled();
+	});
+
+	it('should NOT track if PLAUSIBLE_ENABLED is false', async () => {
+		vi.doMock('$env/plausible.env', () => ({
+			PLAUSIBLE_ENABLED: false,
+			PLAUSIBLE_DOMAIN: 'test.com'
+		}));
+
+		vi.resetModules();
+
+		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' }
+		});
+
+		expect(trackMock).not.toHaveBeenCalled();
+	});
+
+	it('should NOT track if tracker is not initialized', async () => {
+		const { trackEvent } = await import('$lib/services/analytics.services');
+
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' }
+		});
+
+		expect(trackMock).not.toHaveBeenCalled();
+	});
+
+	it('should handle initialization errors gracefully', async () => {
+		const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+		vi.doMock('$lib/services/analytics-wrapper', () => ({
+			loadPlausibleTracker: vi.fn(() => {
+				throw new Error('Load failed');
+			})
+		}));
+
+		vi.resetModules();
 
 		const { initPlausibleAnalytics, trackEvent } = await import('$lib/services/analytics.services');
 
-		initPlausibleAnalytics();
+		await initPlausibleAnalytics();
 
-		expect(Plausible).not.toHaveBeenCalled();
-		expect(enableAutoPageviews).not.toHaveBeenCalled();
-
-		const params: TrackEventParams = {
-			name: 'test_event_name',
-			metadata: { eventName: 'eventValue' }
-		};
-
-		trackEvent(params);
-
-		expect(trackEventMock).not.toHaveBeenCalled();
-	});
-
-	it('should catch and log errors if Plausible initialization fails', async () => {
-		vi.doMock('$env/plausible.env', () => ({
-			PLAUSIBLE_ENABLED: true,
-			PLAUSIBLE_DOMAIN: 'oisy.com'
-		}));
-
-		vi.mocked(Plausible).mockImplementation(() => {
-			throw new Error();
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' }
 		});
 
+		expect(trackMock).not.toHaveBeenCalled();
+
+		consoleWarnSpy.mockRestore();
+	});
+
+	it('should handle init() throwing error', async () => {
 		const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-		const { initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+		const failingInitMock = vi.fn(() => {
+			throw new Error('Init failed');
+		});
 
-		initPlausibleAnalytics();
+		vi.doMock('$lib/services/analytics-wrapper', () => ({
+			loadPlausibleTracker: vi.fn(() => ({
+				init: failingInitMock,
+				track: trackMock
+			}))
+		}));
 
-		expect(consoleWarnSpy).toHaveBeenCalledWith(
-			'An unexpected error occurred during initialization.'
-		);
+		vi.resetModules();
+
+		const { initPlausibleAnalytics, trackEvent } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' }
+		});
+
+		expect(trackMock).not.toHaveBeenCalled();
 
 		consoleWarnSpy.mockRestore();
 	});

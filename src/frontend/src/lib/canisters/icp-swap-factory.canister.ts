@@ -2,7 +2,7 @@ import type {
 	GetPoolArgs,
 	PoolData,
 	_SERVICE as SwapFactoryService
-} from '$declarations/icp_swap_factory/declarations/icp_swap_factory.did';
+} from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import { idlFactory as certifiedFactoryIdlFactory } from '$declarations/icp_swap_factory/icp_swap_factory.factory.certified.did';
 import { idlFactory as factoryIdlFactory } from '$declarations/icp_swap_factory/icp_swap_factory.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';

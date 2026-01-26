@@ -56,15 +56,15 @@
 </script>
 
 <SettingsCard>
-	<svelte:fragment slot="title">{$i18n.settings.text.beta_features}</svelte:fragment>
+	{#snippet title()}{$i18n.settings.text.beta_features}{/snippet}
 
 	{#each features as feature (feature)}
 		<SettingsCardItem>
-			<svelte:fragment slot="key">
+			{#snippet key()}
 				{labelsByFeatureId[feature].title}
-			</svelte:fragment>
+			{/snippet}
 
-			<svelte:fragment slot="value">
+			{#snippet value()}
 				<Toggle
 					ariaLabel={$userExperimentalFeatures?.[feature].enabled
 						? $i18n.settings.text.disable_beta_feature
@@ -80,8 +80,9 @@
 						});
 					}}
 				/>
-			</svelte:fragment>
-			<svelte:fragment slot="info">
+			{/snippet}
+
+			{#snippet info()}
 				<span>
 					{labelsByFeatureId[feature].description}
 
@@ -93,7 +94,7 @@
 						>
 					{/if}
 				</span>
-			</svelte:fragment>
+			{/snippet}
 		</SettingsCardItem>
 	{/each}
 </SettingsCard>

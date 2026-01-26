@@ -1,5 +1,6 @@
 import AboutFeatureItem from '$lib/components/about/AboutFeatureItem.svelte';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 describe('AboutFeatureItem', () => {
@@ -11,7 +12,7 @@ describe('AboutFeatureItem', () => {
 			props: {
 				title: mockTitle,
 				description: mockDescription,
-				icon: () => ''
+				icon: mockSnippet
 			}
 		});
 
@@ -27,7 +28,7 @@ describe('AboutFeatureItem', () => {
 			props: {
 				title: titleWithPlaceholder,
 				description: descriptionWithPlaceholder,
-				icon: () => ''
+				icon: mockSnippet
 			}
 		});
 

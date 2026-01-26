@@ -26,7 +26,9 @@ describe('EthSendReview', () => {
 
 	const props = {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
-		amount: '22000000'
+		amount: '22000000',
+		onBack: vi.fn(),
+		onSend: vi.fn()
 	};
 
 	const toolbarSelector = 'div[data-tid="toolbar"]';

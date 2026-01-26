@@ -13,7 +13,7 @@ export const RNDR_TOKEN_ID: TokenId = parseTokenId(RNDR_SYMBOL);
 export const RNDR_TOKEN: RequiredAdditionalErc20Token = {
 	id: RNDR_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Render Token',
 	symbol: RNDR_SYMBOL,

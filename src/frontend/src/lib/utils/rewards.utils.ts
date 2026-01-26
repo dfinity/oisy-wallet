@@ -1,7 +1,4 @@
-import type {
-	CriterionEligibility,
-	EligibilityReport
-} from '$declarations/rewards/declarations/rewards.did';
+import type { CriterionEligibility, EligibilityReport } from '$declarations/rewards/rewards.did';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import type {

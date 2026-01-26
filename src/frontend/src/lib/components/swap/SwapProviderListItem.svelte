@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { UrlSchema } from '@dfinity/zod-schemas';
-	import { createEventDispatcher } from 'svelte';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
-	import SwapBestRateBadge from '$lib/components/swap/SwapBestRateBadge.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
+	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -21,6 +20,7 @@
 		usdBalance: OptionAmount;
 		dapp?: OisyDappDescription;
 		isBestRate: boolean;
+		onClick: () => void;
 	}
 
 	const {
@@ -29,7 +29,8 @@
 		logoSize = 'md',
 		usdBalance,
 		dapp,
-		isBestRate
+		isBestRate,
+		onClick
 	}: Props = $props();
 
 	let displayURL: string | null = $state(null);
@@ -47,12 +48,10 @@
 			displayURL = null;
 		}
 	});
-
-	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish(dapp)}
-	<LogoButton dividers onClick={() => dispatch('click')}>
+	<LogoButton dividers {onClick}>
 		{#snippet title()}
 			{resolveText({ i18n: $i18n, path: dapp.name })}
 		{/snippet}
@@ -80,7 +79,7 @@
 		{#snippet descriptionEnd()}
 			<div class="flex items-center justify-end gap-2">
 				{#if isBestRate}
-					<SwapBestRateBadge />
+					<BestRateBadge />
 				{/if}
 				<span class="mt-1">
 					{usdBalance ?? $i18n.tokens.text.exchange_is_not_available_short}

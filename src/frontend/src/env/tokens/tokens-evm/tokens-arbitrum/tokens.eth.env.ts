@@ -18,7 +18,7 @@ export const ARBITRUM_ETH_TOKEN_ID: TokenId = parseTokenId(ARBITRUM_ETH_SYMBOL);
 export const ARBITRUM_ETH_TOKEN: RequiredToken = {
 	id: ARBITRUM_ETH_TOKEN_ID,
 	network: ARBITRUM_MAINNET_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
 	name: 'Ethereum',
 	symbol: ARBITRUM_ETH_SYMBOL,
@@ -37,7 +37,7 @@ export const ARBITRUM_SEPOLIA_ETH_TOKEN_ID: TokenId = parseTokenId(ARBITRUM_SEPO
 export const ARBITRUM_SEPOLIA_ETH_TOKEN: RequiredToken = {
 	id: ARBITRUM_SEPOLIA_ETH_TOKEN_ID,
 	network: ARBITRUM_SEPOLIA_NETWORK,
-	standard: 'ethereum',
+	standard: { code: 'ethereum' },
 	category: 'default',
 	name: 'SepoliaETH',
 	symbol: ARBITRUM_SEPOLIA_ETH_SYMBOL,

@@ -6,8 +6,9 @@ import { writable, type Readable } from 'svelte/store';
 
 export type CertifiedIcrcTokensData<T extends IcToken> = Option<CertifiedData<T>[]>;
 
-export interface CertifiedIcrcTokensStore<T extends IcToken>
-	extends Readable<CertifiedIcrcTokensData<T>> {
+export interface CertifiedIcrcTokensStore<T extends IcToken> extends Readable<
+	CertifiedIcrcTokensData<T>
+> {
 	set: (token: CertifiedData<T>) => void;
 	setAll: (tokens: CertifiedData<T>[]) => void;
 	reset: (ledgerCanisterId: CanisterIdText) => void;

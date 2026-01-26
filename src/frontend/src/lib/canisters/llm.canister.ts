@@ -2,7 +2,7 @@ import type {
 	_SERVICE as LlmService,
 	chat_request_v1,
 	chat_response_v1
-} from '$declarations/llm/declarations/llm.did';
+} from '$declarations/llm/llm.did';
 import { idlFactory as idlCertifiedFactoryLlm } from '$declarations/llm/llm.factory.certified.did';
 import { idlFactory as idlFactoryLlm } from '$declarations/llm/llm.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';

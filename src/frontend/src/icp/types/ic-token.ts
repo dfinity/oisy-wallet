@@ -41,5 +41,6 @@ export type OptionIcCkToken = Option<IcCkToken>;
 
 export enum IcTokenStandards {
 	icrc1 = 'ICRC-1',
-	icrc2 = 'ICRC-2'
+	icrc2 = 'ICRC-2',
+	icrc7 = 'ICRC-7'
 }

@@ -1,4 +1,4 @@
-import type { NewVipRewardResponse } from '$declarations/rewards/declarations/rewards.did';
+import type { NewVipRewardResponse } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 import {

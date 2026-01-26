@@ -1,12 +1,12 @@
-import { loadIdentity } from '$lib/api/auth-client.api';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type {
-	PostMessageDataError,
-	PostMessageResponse,
-	PostMessageResponseStatus
+	PostMessageDataResponseLoose,
+	PostMessageResponseStatus,
+	PostMessageScheduler
 } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
-import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish, type QueryParams } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 
 export interface SchedulerParams<T> {
 	job: (params: SchedulerJobData<T>) => Promise<void>;
@@ -44,7 +44,7 @@ export class SchedulerTimer {
 			return;
 		}
 
-		const identity: Identity | undefined = await loadIdentity();
+		const identity = await AuthClientProvider.getInstance().loadIdentity();
 
 		if (isNullish(identity)) {
 			// We do nothing if no identity
@@ -66,11 +66,23 @@ export class SchedulerTimer {
 			return;
 		}
 
-		this.timer = setInterval(execute, interval);
+		const scheduleNext = (): void => {
+			this.timer = setTimeout(async () => {
+				const isTimer = nonNullish(this.timer);
+
+				await execute();
+
+				if (isTimer) {
+					scheduleNext();
+				}
+			}, interval);
+		};
+
+		scheduleNext();
 	}
 
 	async trigger<T>(params: SchedulerParams<T>) {
-		const identity: Identity | undefined = await loadIdentity();
+		const identity = await AuthClientProvider.getInstance().loadIdentity();
 
 		if (isNullish(identity)) {
 			// We cannot execute without an identity
@@ -112,7 +124,7 @@ export class SchedulerTimer {
 		this.setStatus('idle');
 	}
 
-	postMsg<T>(data: { msg: PostMessageResponse; data?: T } | PostMessageDataError) {
+	postMsg<T extends PostMessageDataResponseLoose>(data: PostMessageScheduler<T>) {
 		if (this.isIdle()) {
 			// The worker scheduler was stopped between the start of the execution and the actual completion of the job it runs.
 			return;
@@ -126,7 +138,7 @@ export class SchedulerTimer {
 			return;
 		}
 
-		clearInterval(this.timer);
+		clearTimeout(this.timer);
 		this.timer = undefined;
 	}
 

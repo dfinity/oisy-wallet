@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import {
 		IC_CKETH_MINTER_CANISTER_ID,
 		LOCAL_CKETH_MINTER_CANISTER_ID,
@@ -16,8 +17,13 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { TokenId } from '$lib/types/token';
 
-	export let nativeTokenId: TokenId;
-	export let isSendFlow = false;
+	interface Props {
+		nativeTokenId: TokenId;
+		isSendFlow?: boolean;
+		children: Snippet;
+	}
+
+	let { nativeTokenId, isSendFlow = false, children }: Props = $props();
 
 	const load = async () => {
 		if (
@@ -59,14 +65,19 @@
 		});
 	};
 
-	$: ($networkEthereumDisabled,
-		$networkSepoliaDisabled,
-		$ethToCkETHEnabled,
-		$erc20ToCkErc20Enabled,
-		$icrcDefaultTokensStore,
-		nativeTokenId,
-		isSendFlow,
-		(async () => await load())());
+	$effect(() => {
+		[
+			$networkEthereumDisabled,
+			$networkSepoliaDisabled,
+			$ethToCkETHEnabled,
+			$erc20ToCkErc20Enabled,
+			$icrcDefaultTokensStore,
+			nativeTokenId,
+			isSendFlow
+		];
+
+		(async () => await load())();
+	});
 </script>
 
-<slot />
+{@render children()}

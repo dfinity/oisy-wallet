@@ -11,8 +11,13 @@ import {
 	getDefaultLang,
 	mergeWithFallback,
 	replaceOisyPlaceholders,
-	replacePlaceholders
+	replacePlaceholders,
+	resolveText
 } from '$lib/utils/i18n.utils';
+
+interface MockI18n {
+	[key: string]: string | MockI18n;
+}
 
 describe('i18n-utils', () => {
 	describe('replacePlaceholders', () => {
@@ -69,10 +74,6 @@ describe('i18n-utils', () => {
 	});
 
 	describe('mergeWithFallback', () => {
-		interface MockI18n {
-			[key: string]: string | MockI18n;
-		}
-
 		const mockEnglishTranslations = {
 			key1: 'Key 1 English',
 			key2: 'Key 2 English',
@@ -212,6 +213,24 @@ describe('i18n-utils', () => {
 			expect(getDefaultLang()).toBe(Languages.GERMAN);
 		});
 
+		it('returns GERMAN when browser language is de-CH', () => {
+			mockNavigatorLanguage('de-CH');
+
+			expect(getDefaultLang()).toBe(Languages.GERMAN);
+		});
+
+		it('returns FRENCH when browser language is fr-CH', () => {
+			mockNavigatorLanguage('fr-CH');
+
+			expect(getDefaultLang()).toBe(Languages.FRENCH);
+		});
+
+		it('returns ITALIAN when browser language is it-CH', () => {
+			mockNavigatorLanguage('it-CH');
+
+			expect(getDefaultLang()).toBe(Languages.ITALIAN);
+		});
+
 		it('returns ENGLISH when browser language is en-US', () => {
 			mockNavigatorLanguage('en-US');
 
@@ -228,6 +247,32 @@ describe('i18n-utils', () => {
 
 				expect(supported).toContain(result);
 			}
+		});
+	});
+
+	describe('resolveText', () => {
+		const mockTranslations = {
+			key1: 'Key 1',
+			key2: 'Key 2',
+			key3: 'Key 3'
+		} as MockI18n;
+
+		it('should return a translation string if the provided path is available in the i18n store', () => {
+			const result = resolveText({
+				i18n: mockTranslations as unknown as I18n,
+				path: 'key1'
+			});
+
+			expect(result).toEqual(mockTranslations.key1);
+		});
+
+		it('should return the path back if it is not available in the i18n store', () => {
+			const result = resolveText({
+				i18n: mockTranslations as unknown as I18n,
+				path: 'key4'
+			});
+
+			expect(result).toEqual('key4');
 		});
 	});
 });

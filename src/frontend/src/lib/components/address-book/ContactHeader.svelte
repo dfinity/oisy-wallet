@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ContactImage } from '$declarations/backend/declarations/backend.did';
+	import type { ContactImage } from '$declarations/backend/backend.did';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconContactHeader from '$lib/components/icons/IconContactHeader.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';

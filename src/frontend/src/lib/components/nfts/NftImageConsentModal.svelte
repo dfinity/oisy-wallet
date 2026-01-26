@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
-	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
-	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
-	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
@@ -16,9 +12,17 @@
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_SOURCES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { updateNftMediaConsent } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -26,11 +30,8 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import {
-		findNonFungibleToken,
-		getAllowMediaForNft,
-		getNftCollectionUi
-	} from '$lib/utils/nfts.utils';
+	import { getNftDisplayId } from '$lib/utils/nft.utils';
+	import { findNonFungibleToken, getNftCollectionUi } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection: NftCollection;
@@ -39,13 +40,7 @@
 
 	const { collection, testId }: Props = $props();
 
-	const allowMedia = $derived(
-		getAllowMediaForNft({
-			tokens: $nonFungibleTokens,
-			networkId: collection.network.id,
-			address: collection.address
-		})
-	);
+	const allowMedia = $derived(collection.allowExternalContentSource);
 
 	const shortCollectionName = $derived(
 		nonNullish(collection.name)
@@ -68,32 +63,18 @@
 
 	const save = async (allowMedia: boolean) => {
 		saveLoading = true;
-		if (nonNullish(token) && nonNullish($authIdentity)) {
-			if (isTokenErc721(token)) {
-				await saveErc721CustomTokens({
-					tokens: [
-						{
-							...token,
-							allowExternalContentSource: allowMedia,
-							enabled: true // must be true otherwise we couldnt see it at this point
-						}
-					],
-					identity: $authIdentity
-				});
-			} else if (isTokenErc1155(token)) {
-				await saveErc1155CustomTokens({
-					tokens: [
-						{
-							...token,
-							allowExternalContentSource: allowMedia,
-							enabled: true // must be true otherwise we couldnt see it at this point
-						}
-					],
-					identity: $authIdentity
-				});
-			}
+
+		if (nonNullish(token)) {
+			await updateNftMediaConsent({
+				token,
+				$authIdentity,
+				allowMedia,
+				$ethAddress
+			});
 		}
+
 		saveLoading = false;
+
 		modalStore.close();
 	};
 
@@ -108,6 +89,20 @@
 		if (!saveLoading) {
 			modalStore.close();
 		}
+	};
+
+	const trackEventOnClick = (clickedButton: string) => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.MEDIA_CONSENT,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_value: clickedButton,
+				token_name: collection.name ?? '',
+				token_address: collection.address,
+				token_network: collection.network.name,
+				token_standard: collection.standard.code
+			}
+		});
 	};
 </script>
 
@@ -156,8 +151,8 @@
 
 				{#if nonNullish(token)}
 					<div class="mb-6 flex w-full gap-2">
-						<span><NftSpamButton {token} /></span>
-						<span><NftHideButton {token} /></span>
+						<span><NftSpamButton source={PLAUSIBLE_EVENT_SOURCES.NFT_MEDIA_REVIEW} {token} /></span>
+						<span><NftHideButton source={PLAUSIBLE_EVENT_SOURCES.NFT_MEDIA_REVIEW} {token} /></span>
 					</div>
 				{/if}
 
@@ -222,7 +217,7 @@
 						{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 							{#if nonNullish(nft?.imageUrl)}
 								<span class="flex w-full items-start justify-end md:items-center">
-									#{nft.id} &nbsp;
+									#{getNftDisplayId(nft)} &nbsp;
 									<output class="truncate text-tertiary"
 										>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
 									>
@@ -249,7 +244,10 @@
 						<Button
 							colorStyle="secondary-light"
 							loading={saveLoading}
-							onclick={() => modalStore.close()}
+							onclick={() => {
+								trackEventOnClick('false');
+								modalStore.close();
+							}}
 							testId={`${testId}-keepDisabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_disabled}
@@ -258,7 +256,10 @@
 							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
-							onclick={() => save(true)}
+							onclick={() => {
+								trackEventOnClick('true');
+								save(true);
+							}}
 							testId={`${testId}-enableButton`}
 						>
 							{$i18n.nfts.text.enable_media}
@@ -267,7 +268,10 @@
 						<Button
 							colorStyle="secondary-light"
 							loading={saveLoading}
-							onclick={() => save(false)}
+							onclick={() => {
+								trackEventOnClick('false');
+								save(false);
+							}}
 							testId={`${testId}-disableButton`}
 						>
 							{$i18n.nfts.text.disable_media}
@@ -276,7 +280,10 @@
 							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
-							onclick={() => modalStore.close()}
+							onclick={() => {
+								trackEventOnClick('true');
+								modalStore.close();
+							}}
 							testId={`${testId}-keepEnabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_enabled}
@@ -285,7 +292,10 @@
 						<Button
 							colorStyle="secondary-light"
 							loading={saveLoading}
-							onclick={() => save(false)}
+							onclick={() => {
+								trackEventOnClick('false');
+								save(false);
+							}}
 							testId={`${testId}-keepDisabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_disabled}
@@ -294,7 +304,10 @@
 							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
-							onclick={() => save(true)}
+							onclick={() => {
+								trackEventOnClick('true');
+								save(true);
+							}}
 							testId={`${testId}-enableButton`}
 						>
 							{$i18n.nfts.text.enable_media}

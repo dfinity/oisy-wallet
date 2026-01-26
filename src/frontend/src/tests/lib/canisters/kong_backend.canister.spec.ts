@@ -1,4 +1,4 @@
-import type { _SERVICE as KongBackendService } from '$declarations/kong_backend/declarations/kong_backend.did';
+import type { _SERVICE as KongBackendService } from '$declarations/kong_backend/kong_backend.did';
 import {
 	IC_CKETH_INDEX_CANISTER_ID,
 	IC_CKETH_LEDGER_CANISTER_ID,
@@ -12,9 +12,9 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { getKongIcTokenIdentifier } from '$lib/utils/swap.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
-import type { ActorSubclass } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import type { ActorSubclass } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
@@ -45,7 +45,7 @@ describe('kong_backend.canister', () => {
 	const sourceToken = ICP_TOKEN;
 	const destinationToken = {
 		...ICP_TOKEN,
-		standard: 'icrc',
+		standard: { code: 'icrc' },
 		ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
 		indexCanisterId: IC_CKETH_INDEX_CANISTER_ID,
 		minterCanisterId: IC_CKETH_MINTER_CANISTER_ID
@@ -129,7 +129,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swapAmounts(swapAmountsParams);
 
-			await expect(res).rejects.toThrow(new CanisterInternalError(errorResponse.Err));
+			await expect(res).rejects.toThrowError(new CanisterInternalError(errorResponse.Err));
 		});
 
 		it('should throw an error if swap_amounts throws', async () => {
@@ -143,7 +143,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swapAmounts(swapAmountsParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if swap_amounts returns an unexpected response', async () => {
@@ -156,7 +156,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swapAmounts(swapAmountsParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -195,7 +195,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swap(swapParams);
 
-			await expect(res).rejects.toThrow(new CanisterInternalError(errorResponse.Err));
+			await expect(res).rejects.toThrowError(new CanisterInternalError(errorResponse.Err));
 		});
 
 		it('should throw an error if swap_async throws', async () => {
@@ -209,7 +209,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swap(swapParams);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if swap_async returns an unexpected response', async () => {
@@ -222,7 +222,7 @@ describe('kong_backend.canister', () => {
 
 			const res = swap(swapParams);
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -251,7 +251,7 @@ describe('kong_backend.canister', () => {
 
 			const res = tokens();
 
-			await expect(res).rejects.toThrow(new CanisterInternalError(errorResponse.Err));
+			await expect(res).rejects.toThrowError(new CanisterInternalError(errorResponse.Err));
 		});
 
 		it('should throw an error if tokems throws', async () => {
@@ -265,7 +265,7 @@ describe('kong_backend.canister', () => {
 
 			const res = tokens();
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
 		it('should throw an error if tokens returns an unexpected response', async () => {
@@ -278,7 +278,7 @@ describe('kong_backend.canister', () => {
 
 			const res = tokens();
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 });

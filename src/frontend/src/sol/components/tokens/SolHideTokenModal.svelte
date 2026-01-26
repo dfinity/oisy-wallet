@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Identity } from '@dfinity/agent';
 	import { assertNonNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
@@ -9,11 +9,12 @@
 		TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { saveCustomTokens } from '$sol/services/spl-custom-tokens.services';
+	import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
 
 	interface Props {
@@ -54,7 +55,16 @@
 			}
 		});
 
-		await saveCustomTokens({ ...params, tokens: [{ ...selectedToken, enabled: false }] });
+		await saveCustomTokens({
+			...params,
+			tokens: [
+				{
+					...selectedToken,
+					networkKey: isNetworkIdSOLDevnet(selectedToken.network.id) ? 'SplDevnet' : 'SplMainnet',
+					enabled: false
+				}
+			]
+		});
 	};
 
 	// UI gets updated automatically, resolve promise immediately

@@ -15,7 +15,7 @@ export const SPX_TOKEN_ID: TokenId = parseTokenId(SPX_SYMBOL);
 export const SPX_TOKEN: RequiredSplToken = {
 	id: SPX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'SPX6900 (Wormhole)',
 	symbol: SPX_SYMBOL,

@@ -5,9 +5,9 @@
 import { SIGNER_CANISTER_DERIVATION_PATH } from '$env/signer.env';
 import { schnorr_ed25519_derive } from '$lib/ic-pub-key/src/schnorr/ed25519';
 import { mapDerivationPath } from '$lib/utils/signer.utils.js';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
+import { Principal } from '@icp-sdk/core/principal';
 import { networks, payments, type Network } from 'bitcoinjs-lib';
 import { computeAddress } from 'ethers/transaction';
 import {

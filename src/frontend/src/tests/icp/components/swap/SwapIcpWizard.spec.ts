@@ -27,7 +27,13 @@ const BASE_PROPS = {
 	receiveAmount: 2,
 	slippageValue: '0.5',
 	swapProgressStep: ProgressStepsSwap.INITIALIZATION,
-	swapFailedProgressSteps: []
+	swapFailedProgressSteps: [],
+	isSwapAmountsLoading: false,
+	onShowTokensList: vi.fn(),
+	onShowProviderList: vi.fn(),
+	onClose: vi.fn(),
+	onNext: vi.fn(),
+	onBack: vi.fn()
 };
 
 describe('SwapIcpWizard', () => {

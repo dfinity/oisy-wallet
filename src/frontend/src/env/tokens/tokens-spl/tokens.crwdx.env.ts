@@ -14,7 +14,7 @@ export const CRWDX_TOKEN_ID: TokenId = parseTokenId(CRWDX_SYMBOL);
 export const CRWDX_TOKEN: RequiredSpl2022Token = {
 	id: CRWDX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'CrowdStrike xStock',
 	symbol: CRWDX_SYMBOL,

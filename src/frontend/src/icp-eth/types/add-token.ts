@@ -10,8 +10,29 @@ interface IcAddTokenData {
 	indexCanisterId: string | undefined;
 }
 
+interface ExtAddTokenData {
+	extCanisterId: string;
+}
+
+interface Dip721AddTokenData {
+	dip721CanisterId: string;
+}
+
+interface IcPunksAddTokenData {
+	icPunksCanisterId: string;
+}
+
 interface SplAddTokenData {
 	splTokenAddress: SolAddress;
 }
 
-export type AddTokenData = OneOf<[EthAddTokenData, IcAddTokenData, SplAddTokenData]>;
+export type AddTokenData = OneOf<
+	[
+		EthAddTokenData,
+		IcAddTokenData,
+		ExtAddTokenData,
+		Dip721AddTokenData,
+		IcPunksAddTokenData,
+		SplAddTokenData
+	]
+>;

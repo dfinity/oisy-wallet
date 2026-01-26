@@ -1,26 +1,18 @@
 <script lang="ts">
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
-	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
-		amount: OptionAmount;
+		amount?: bigint;
 		token: Token;
 		exchangeRate?: number;
 		showNullishLabel?: boolean;
 	}
 
-	let { amount, token, exchangeRate, showNullishLabel = false }: Props = $props();
-
-	let bigNumberAmount = $derived(
-		parseToken({
-			value: `${amount ?? 0}`,
-			unitName: token.decimals
-		})
-	);
+	let { amount = ZERO, token, exchangeRate, showNullishLabel = false }: Props = $props();
 </script>
 
 <Value element="div" ref="amount">
@@ -33,7 +25,7 @@
 			{$i18n.send.error.unable_to_retrieve_amount}
 		{:else}
 			<ExchangeAmountDisplay
-				amount={bigNumberAmount}
+				{amount}
 				decimals={token.decimals}
 				{exchangeRate}
 				symbol={token.symbol}

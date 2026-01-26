@@ -46,6 +46,7 @@
 		currentStep?: WizardStep;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -59,6 +60,7 @@
 		currentStep,
 		isSwapAmountsLoading,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext,
 		onBack
@@ -246,9 +248,9 @@
 				{isSwapAmountsLoading}
 				{onClose}
 				{onNext}
+				{onShowProviderList}
 				{onShowTokensList}
 				{sourceTokenFee}
-				on:icShowProviderList
 				bind:swapAmount
 				bind:receiveAmount
 				bind:slippageValue

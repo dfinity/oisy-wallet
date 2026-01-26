@@ -9,6 +9,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { initDefaultTokensStore, type DefaultTokensStore } from '$lib/stores/default-tokens.store';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
 import { get } from 'svelte/store';
 
 describe('default-tokens.store', () => {
@@ -76,6 +77,17 @@ describe('default-tokens.store', () => {
 				mockStore.add(mockSplToken);
 
 				expect(get(mockStore)).toEqual([mockSplToken]);
+			});
+
+			it('should use the canister ID as identifier for EXT tokens', () => {
+				mockStore.add(mockValidExtV2Token);
+				const mockExtToken = {
+					...mockValidExtV2Token2,
+					canisterId: mockValidExtV2Token.canisterId
+				};
+				mockStore.add(mockExtToken);
+
+				expect(get(mockStore)).toEqual([mockExtToken]);
 			});
 		});
 

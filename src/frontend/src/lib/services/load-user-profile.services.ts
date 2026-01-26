@@ -1,4 +1,4 @@
-import type { UserProfile } from '$declarations/backend/declarations/backend.did';
+import type { UserProfile } from '$declarations/backend/backend.did';
 import { createUserProfile, getUserProfile } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';

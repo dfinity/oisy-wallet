@@ -8,7 +8,7 @@ import type {
 	GetBalanceRequest,
 	SendBtcResponse,
 	_SERVICE as SignerService
-} from '$declarations/signer/declarations/signer.did';
+} from '$declarations/signer/signer.did';
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import type { EthAddress } from '$eth/types/address';
@@ -205,7 +205,7 @@ export class SignerCanister extends Canister<SignerService> {
 	getSchnorrPublicKey = async ({
 		derivationPath,
 		keyId
-	}: GetSchnorrPublicKeyParams): Promise<Uint8Array | number[]> => {
+	}: GetSchnorrPublicKeyParams): Promise<Uint8Array> => {
 		const { schnorr_public_key } = this.caller({
 			certified: true
 		});
@@ -232,7 +232,7 @@ export class SignerCanister extends Canister<SignerService> {
 		message,
 		derivationPath,
 		keyId
-	}: SignWithSchnorrParams): Promise<Uint8Array | number[]> => {
+	}: SignWithSchnorrParams): Promise<Uint8Array> => {
 		const { schnorr_sign } = this.caller({
 			certified: true
 		});

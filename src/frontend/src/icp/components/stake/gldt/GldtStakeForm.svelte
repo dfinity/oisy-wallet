@@ -1,23 +1,24 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import GldtStakeFees from '$icp/components/stake/gldt/GldtStakeFees.svelte';
+	import GldtStakeProvider from '$icp/components/stake/gldt/GldtStakeProvider.svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import StakeForm from '$lib/components/stake/StakeForm.svelte';
-	import StakeProvider from '$lib/components/stake/StakeProvider.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { Address } from '$lib/types/address';
 	import type { OptionAmount } from '$lib/types/send';
-	import { StakeProvider as StakeProviderType } from '$lib/types/stake';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
 	interface Props {
 		amount: OptionAmount;
+		destination: Address;
 		onClose: () => void;
 		onNext: () => void;
 	}
 
-	let { amount = $bindable(), onNext, onClose }: Props = $props();
+	let { amount = $bindable(), destination, onNext, onClose }: Props = $props();
 
 	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -32,9 +33,9 @@
 		});
 </script>
 
-<StakeForm {onClose} {onCustomValidate} {onNext} {totalFee} bind:amount>
+<StakeForm {destination} {onClose} {onCustomValidate} {onNext} {totalFee} bind:amount>
 	{#snippet provider()}
-		<StakeProvider provider={StakeProviderType.GLDT} />
+		<GldtStakeProvider />
 	{/snippet}
 
 	{#snippet fee()}

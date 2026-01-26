@@ -1,4 +1,4 @@
-import type { Error as FactoryError } from '$declarations/icp_swap_factory/declarations/icp_swap_factory.did';
+import type { Error as FactoryError } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 
 export const mapIcpSwapFactoryError = (err: FactoryError): CanisterInternalError => {

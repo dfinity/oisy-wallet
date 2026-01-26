@@ -21,6 +21,6 @@
 
 <ReceiveButtonWithModal isOpen={$modalIcrcReceive} open={openModal}>
 	{#snippet modal()}
-		<ReceiveAddressModal infoCmp={IcReceiveInfoIcrc} on:nnsClose={close} />
+		<ReceiveAddressModal infoCmp={IcReceiveInfoIcrc} onClose={close} />
 	{/snippet}
 </ReceiveButtonWithModal>

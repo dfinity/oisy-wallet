@@ -14,7 +14,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
-	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		amount: bigint;
@@ -51,7 +50,7 @@
 
 <ContentWithToolbar>
 	<SendData
-		amount={formatToken({ value: amountDisplay })}
+		amount={amountDisplay}
 		{application}
 		{balance}
 		{destination}
