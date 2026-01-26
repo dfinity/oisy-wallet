@@ -54,16 +54,6 @@
 			{$i18n.auth.text.authenticate}
 			<IconAstronautArrow />
 		</ButtonAuthenticate>
-
-		<ButtonAuthenticate
-			{fullWidth}
-			isLandingPage
-			onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_1_0)}
-			styleClass={`${!fullWidth ? 'sm:ml-3 sm:mt-0' : ''} mt-3 text-brand-primary bg-brand-subtle-10`}
-			testId={LOGIN_BUTTON}
-		>
-			{$i18n.auth.text.legacy_login}
-		</ButtonAuthenticate>
 	</div>
 
 	<span
