@@ -1,4 +1,4 @@
-import OpenCryptoPayTokenAmount from '$lib/components/scanner/OpenCryptoPayTokenAmount.svelte';
+import OpenCryptoPayTokenAmount from '$lib/components/open-crypto-pay/OpenCryptoPayTokenAmount.svelte';
 import * as formatUtils from '$lib/utils/format.utils';
 import { render, screen } from '@testing-library/svelte';
 

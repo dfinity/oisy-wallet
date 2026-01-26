@@ -1,4 +1,4 @@
-import BottomSheetTokensList from '$lib/components/scanner/open-crypto-pay/BottomSheetTokensList.svelte';
+import BottomSheetTokensList from '$lib/components/open-crypto-pay/BottomSheetTokensList.svelte';
 import en from '$lib/i18n/en.json';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import { render, screen } from '@testing-library/svelte';

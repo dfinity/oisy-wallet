@@ -1,4 +1,4 @@
-import OpenCryptoPayTokensList from '$lib/components/scanner/open-crypto-pay/OpenCryptoPayTokensList.svelte';
+import OpenCryptoPayTokensList from '$lib/components/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';

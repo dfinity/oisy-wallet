@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import PaymentStatusHero from '$lib/components/scanner/open-crypto-pay/PaymentStatusHero.svelte';
+	import PaymentStatusHero from '$lib/components/open-crypto-pay/PaymentStatusHero.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';

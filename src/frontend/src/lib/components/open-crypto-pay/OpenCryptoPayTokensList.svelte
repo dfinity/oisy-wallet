@@ -1,5 +1,5 @@
 <script lang="ts">
-	import PayTokenList from '$lib/components/scanner/open-crypto-pay/PayTokensList.svelte';
+	import PayTokenList from '$lib/components/open-crypto-pay/PayTokensList.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 

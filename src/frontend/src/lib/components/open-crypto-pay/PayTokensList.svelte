@@ -4,7 +4,7 @@
 	import Divider from '$lib/components/common/Divider.svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import OpenCryptoPayTokenAmount from '$lib/components/scanner/OpenCryptoPayTokenAmount.svelte';
+	import OpenCryptoPayTokenAmount from '$lib/components/open-crypto-pay/OpenCryptoPayTokenAmount.svelte';
 	import EmptyTokenList from '$lib/components/tokens/EmptyTokenList.svelte';
 	import TokenFeeValue from '$lib/components/tokens/TokenFeeValue.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
