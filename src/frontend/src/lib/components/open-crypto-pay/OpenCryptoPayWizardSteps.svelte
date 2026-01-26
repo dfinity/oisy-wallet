@@ -10,10 +10,7 @@
 	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {
-		PAY_CONTEXT_KEY,
-		type PayContext
-	} from '$lib/stores/open-crypto-pay.store';
+	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
