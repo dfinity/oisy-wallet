@@ -121,7 +121,6 @@
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
-			"legacy_login": "旧版登录",
 			"asset_types": "跨 Bitcoin、Solana、Ethereum、ICP 等管理资产",
 			"instant_and_private": "内置 AI 助手，隐私保护为默认标准",
 			"advanced_cryptography": "由先进的密码学保障安全 —— 100% 链上",
@@ -1807,7 +1806,6 @@
 			},
 			"title": "",
 			"instruction": "点击此按钮即表示你同意 $link",
-			"instruction_two_buttons": "点击其中一个按钮即表示你同意 $link",
 			"body": ""
 		},
 		"alt": {
