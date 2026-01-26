@@ -38,6 +38,7 @@
 
 <div
 	class="flex w-full flex-col items-center md:items-start"
+	class:sm:w-80={!fullWidth}
 	class:md:items-center={helpAlignment === 'center'}
 >
 	<ButtonAuthenticate
