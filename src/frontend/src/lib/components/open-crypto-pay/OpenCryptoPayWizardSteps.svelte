@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { setContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
 	import OpenCryptoPay from '$lib/components/open-crypto-pay/OpenCryptoPay.svelte';
 	import OpenCryptoPayProgress from '$lib/components/open-crypto-pay/OpenCryptoPayProgress.svelte';
 	import OpenCryptoPayTokensList from '$lib/components/open-crypto-pay/OpenCryptoPayTokensList.svelte';
@@ -29,7 +29,7 @@
 
 	const onClose = () => modalStore.close();
 
-	const { reset } = setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
+	const { reset } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
 	const goToStep = (stepName: WizardStepsScanner) => {
 		if (isNullish(modal)) {
