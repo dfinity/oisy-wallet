@@ -1,5 +1,5 @@
 import type { Token } from '$lib/types/token';
-import { isTokenToggleable } from '$lib/utils/token.utils';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import type { SplToken } from '$sol/types/spl';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 

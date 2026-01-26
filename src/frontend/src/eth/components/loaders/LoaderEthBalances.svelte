@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
@@ -18,6 +18,14 @@
 	let { children }: Props = $props();
 
 	let loading = $state(false);
+	let timer = $state<NodeJS.Timeout | undefined>();
+
+	const resetTimer = () => {
+		if (nonNullish(timer)) {
+			clearTimeout(timer);
+			timer = undefined;
+		}
+	};
 
 	const onLoad = async () => {
 		if (isNullish($ethAddress)) {
@@ -25,6 +33,14 @@
 		}
 
 		if (loading) {
+			resetTimer();
+
+			timer = setTimeout(() => {
+				resetTimer();
+
+				onLoad();
+			}, 500);
+
 			return;
 		}
 
@@ -47,6 +63,7 @@
 	$effect(() => {
 		// To trigger the load function when any of the dependencies change.
 		[$ethAddress, $enabledEthereumTokens, $enabledEvmTokens, $enabledErc20Tokens];
+
 		debounceLoad();
 	});
 
@@ -56,6 +73,8 @@
 		if (isNullish(principal)) {
 			return;
 		}
+
+		loading = true;
 
 		await Promise.allSettled(
 			[...$enabledEthereumTokens, ...$enabledEvmTokens, ...$enabledErc20Tokens].map(
@@ -68,6 +87,8 @@
 				}
 			)
 		);
+
+		loading = false;
 	});
 </script>
 

@@ -1,6 +1,7 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { IC_PUNKS_BUILTIN_TOKENS } from '$env/tokens/tokens-icpunks/tokens.icpunks.env';
+import { collectionMetadata } from '$icp/api/icpunks.api';
 import { loadCustomTokens, loadIcPunksTokens } from '$icp/services/icpunks.services';
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icPunksDefaultTokensStore } from '$icp/stores/icpunks-default-tokens.store';
@@ -19,6 +20,10 @@ import { get } from 'svelte/store';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
+}));
+
+vi.mock('$icp/api/icpunks.api', () => ({
+	collectionMetadata: vi.fn()
 }));
 
 describe('icpunks.services', () => {
@@ -85,6 +90,13 @@ describe('icpunks.services', () => {
 	});
 
 	describe('loadCustomTokens', () => {
+		const mockFetchedMetadata = {
+			symbol: 'MOCK',
+			name: 'Mock Collection',
+			description: 'Mock Description',
+			icon: 'https://example.com/icon.png'
+		};
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -95,6 +107,8 @@ describe('icpunks.services', () => {
 			icPunksCustomTokensStore.resetAll();
 
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensIcPunks);
+
+			vi.mocked(collectionMetadata).mockResolvedValue(mockFetchedMetadata);
 		});
 
 		it('should load custom ICPunks tokens', async () => {
@@ -130,7 +144,7 @@ describe('icpunks.services', () => {
 			);
 		});
 
-		it('should use fallback metadata when the token is not mapped already', async () => {
+		it('should use the collection metadata method when the token is not mapped already', async () => {
 			const mockCanisterId = 'mock-canister-id-that-is-not-built-in';
 
 			const customTokens: CustomToken[] = [
@@ -163,13 +177,27 @@ describe('icpunks.services', () => {
 						standard: { code: 'icpunks' },
 						category: 'custom',
 						canisterId: mockCanisterId,
-						symbol: mockCanisterId,
-						name: mockCanisterId,
+						symbol: mockFetchedMetadata.symbol,
+						name: mockFetchedMetadata.name,
+						description: mockFetchedMetadata.description,
+						icon: mockFetchedMetadata.icon,
 						decimals: 0,
 						network: ICP_NETWORK
 					}
 				}
 			]);
+
+			expect(collectionMetadata).toHaveBeenCalledTimes(2);
+			expect(collectionMetadata).toHaveBeenNthCalledWith(1, {
+				canisterId: mockCanisterId,
+				identity: mockIdentity,
+				certified: false
+			});
+			expect(collectionMetadata).toHaveBeenNthCalledWith(2, {
+				canisterId: mockCanisterId,
+				identity: mockIdentity,
+				certified: true
+			});
 		});
 
 		it('should reset token store on error', async () => {

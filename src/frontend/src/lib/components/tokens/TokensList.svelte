@@ -4,7 +4,6 @@
 	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { SvelteMap } from 'svelte/reactivity';
-	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
@@ -29,24 +28,6 @@
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
-
-	let animating = $state(false);
-
-	const handleAnimationStart = () => {
-		animating = true;
-
-		// The following is to guarantee that the function is triggered, even if the 'animationend' event is not triggered.
-		// It may happen if the animation aborts before reaching completion.
-		debouncedHandleAnimationEnd();
-	};
-
-	const handleAnimationEnd = () => (animating = false);
-
-	const debouncedHandleAnimationEnd = debounce(() => {
-		if (animating) {
-			handleAnimationEnd();
-		}
-	}, 250);
 
 	let loading: boolean = $derived(isNullish(tokens));
 
@@ -79,6 +60,7 @@
 		(params: { filter: string; selectedNetwork?: Network }) => updateFilterList(params),
 		300
 	);
+
 	$effect(() => {
 		const { filter } = $tokenListStore;
 		const network = $selectedNetwork;
@@ -117,8 +99,6 @@
 
 	let ios = $derived(isIOS());
 
-	let fadeParams = $derived(ios ? { duration: 0 } : undefined);
-
 	let flipParams = $derived({ duration: ios ? 0 : 250 });
 
 	const tokenKey = ({ id: tokenId, network: { id: networkId } }: TokenUi): string =>
@@ -128,20 +108,21 @@
 
 	const getUiKey = (tokenOrGroup: TokenUiOrGroupUi): string =>
 		isTokenUiGroup(tokenOrGroup) ? groupKey(tokenOrGroup.group) : tokenKey(tokenOrGroup.token);
+
+	let tokensWithKey = $derived(
+		filteredTokens.map((tokenOrGroup) => ({ tokenOrGroup, key: getUiKey(tokenOrGroup) }))
+	);
+
+	let enableMoreTokensWithKey = $derived(
+		enableMoreTokensList.map((tokenOrGroup) => ({ tokenOrGroup, key: getUiKey(tokenOrGroup) }))
+	);
 </script>
 
-<TokensDisplayHandler {animating} bind:tokens>
+<TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
-			{#each filteredTokens as tokenOrGroup (getUiKey(tokenOrGroup))}
-				<div
-					class="overflow-hidden rounded-xl"
-					class:pointer-events-none={animating}
-					onanimationend={handleAnimationEnd}
-					onanimationstart={handleAnimationStart}
-					transition:fade={fadeParams}
-					animate:flip={flipParams}
-				>
+			{#each tokensWithKey as { tokenOrGroup, key } (key)}
+				<div class="overflow-hidden rounded-xl" animate:flip={flipParams}>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
 
@@ -149,7 +130,7 @@
 					{:else}
 						{@const { token } = tokenOrGroup}
 
-						<div class="transition duration-300 hover:bg-primary">
+						<div class="transition-colors duration-300 hover:bg-primary">
 							<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
 						</div>
 					{/if}
@@ -187,16 +168,9 @@
 						</div>
 					{/snippet}
 
-					{#each enableMoreTokensList as tokenOrGroup (getUiKey(tokenOrGroup))}
-						<div
-							class="overflow-hidden rounded-xl"
-							class:pointer-events-none={animating}
-							onanimationend={handleAnimationEnd}
-							onanimationstart={handleAnimationStart}
-							transition:fade={fadeParams}
-							animate:flip={flipParams}
-						>
-							<div class="transition duration-300 hover:bg-primary">
+					{#each enableMoreTokensWithKey as { tokenOrGroup, key } (key)}
+						<div class="overflow-hidden rounded-xl" animate:flip={flipParams}>
+							<div class="transition-colors duration-300 hover:bg-primary">
 								{#if !isTokenUiGroup(tokenOrGroup)}
 									<TokenCard data={tokenOrGroup.token} {onToggle} />
 								{/if}

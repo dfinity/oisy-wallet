@@ -34,8 +34,8 @@
 
 	const back = () => onBack();
 
-	onMount(() => {
-		const { result, data } = loadAndAssertAddCustomToken({
+	onMount(async () => {
+		const { result, data } = await loadAndAssertAddCustomToken({
 			canisterId: icPunksCanisterId,
 			identity: $authIdentity,
 			icPunksTokens: $icPunksTokens

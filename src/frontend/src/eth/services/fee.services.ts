@@ -8,6 +8,7 @@ import { infuraProviders, type InfuraProvider } from '$eth/providers/infura.prov
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { GetFeeData } from '$eth/types/infura';
 import type { EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
@@ -15,13 +16,6 @@ import type { Network, NetworkId } from '$lib/types/network';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
-
-export interface GetFeeData {
-	from: EthAddress;
-	to: EthAddress;
-	value?: bigint;
-	data?: string;
-}
 
 export const getEthFeeData = ({
 	to,
