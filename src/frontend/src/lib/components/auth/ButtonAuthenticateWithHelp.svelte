@@ -40,12 +40,10 @@
 	class="flex w-full flex-col items-center md:items-start"
 	class:md:items-center={helpAlignment === 'center'}
 >
-
 	<div
 		class="flex w-full flex-col items-center justify-center md:justify-start"
 		class:sm:w-80={!fullWidth}
 	>
-
 		<ButtonAuthenticate
 			{fullWidth}
 			isLandingPage
