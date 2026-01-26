@@ -41,11 +41,11 @@
 	class:md:items-center={helpAlignment === 'center'}
 >
 	<ButtonAuthenticate
+		class:sm:w-80={!fullWidth}
 		{fullWidth}
 		isLandingPage
 		onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
 		styleClass="bg-brand-primary text-primary-inverted"
-		class:sm:w-80={!fullWidth}
 		testId={LOGIN_BUTTON}
 	>
 		{$i18n.auth.text.authenticate}
