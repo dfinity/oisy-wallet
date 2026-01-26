@@ -1,5 +1,5 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
+import OpenCryptoPay from '$lib/components/open-crypto-pay/OpenCryptoPay.svelte';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import en from '$lib/i18n/en.json';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';

@@ -1,5 +1,5 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
-import PaymentStatusHero from '$lib/components/scanner/open-crypto-pay/PaymentStatusHero.svelte';
+import PaymentStatusHero from '$lib/components/open-crypto-pay/PaymentStatusHero.svelte';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import type {
 	OpenCryptoPayResponse,
