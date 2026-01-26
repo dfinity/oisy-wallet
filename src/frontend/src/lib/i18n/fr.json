@@ -121,7 +121,6 @@
 			"logout": "Se déconnecter",
 			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
-			"legacy_login": "Connexion legacy",
 			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
 			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
 			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain",
@@ -1807,7 +1806,6 @@
 			},
 			"title": "",
 			"instruction": "En cliquant sur ce bouton, vous acceptez les $link",
-			"instruction_two_buttons": "En cliquant sur l'un des boutons, vous acceptez les $link",
 			"body": ""
 		},
 		"alt": {

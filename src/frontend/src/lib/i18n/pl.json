@@ -121,7 +121,6 @@
 			"logout": "Wyloguj",
 			"lock": "Zablokuj",
 			"authenticate": "Otwórz lub Utwórz",
-			"legacy_login": "Starsze logowanie",
 			"asset_types": "Zarządzaj aktywami w BTC, SOL, ETH, ICP i innych kryptowalutach",
 			"instant_and_private": "Wbudowany asystent AI z ochroną prywatności w standardzie",
 			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
@@ -1807,7 +1806,6 @@
 			},
 			"title": "",
 			"instruction": "Klikając ten przycisk, zgadzasz się na $link",
-			"instruction_two_buttons": "Klikając jeden z tych przycisków, zgadzasz się na $link",
 			"body": ""
 		},
 		"alt": {
