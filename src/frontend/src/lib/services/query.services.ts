@@ -65,7 +65,7 @@ export const queryAndUpdateOrHydrate = async <R, P, E = unknown>({
 	await queryAndUpdate<R, E>({
 		...queryAndUpdateParams,
 		identity,
-		request: (params) => request({ ...params, provided: undefined }),
+		request,
 		onLoad,
 		onUpdateError
 	});
