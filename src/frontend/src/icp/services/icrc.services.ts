@@ -96,14 +96,7 @@ const loadDefaultIcrc = ({
 		request: (params) =>
 			requestIcrcMetadata({ ...params, ...data, ledgerCanisterId, category: 'default' }),
 		onLoad: loadIcrcData,
-		onUpdateError: ({ error: err }) => {
-			icrcDefaultTokensStore.reset(ledgerCanisterId);
-
-			trackEvent({
-				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
-				metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
-			});
-		},
+		onUpdateError: (params) => onUpdateError({ ...params, ledgerCanisterId }),
 		identity: new AnonymousIdentity()
 	});
 
@@ -266,6 +259,21 @@ const loadIcrcCustomData = ({
 	onSuccess?.();
 
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({
+	error: err,
+	ledgerCanisterId
+}: {
+	error: unknown;
+	ledgerCanisterId: LedgerCanisterIdText;
+}) => {
+	icrcDefaultTokensStore.reset(ledgerCanisterId);
+
+	trackEvent({
+		name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+		metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
+	});
 };
 
 // TODO: Refactor to use queryAndUpdate
