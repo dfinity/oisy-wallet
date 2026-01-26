@@ -53,12 +53,11 @@ export const loadCustomTokens = ({
 	queryAndUpdateOrHydrate<Erc721CustomToken[], CustomToken>({
 		certified,
 		provided: tokens,
-		request: ({ identity, certified, provided }) =>
+		request: ({ provided, ...params }) =>
 			loadCustomTokensWithMetadata({
-				identity,
-				certified,
-				useCache,
-				tokens: provided
+				...params,
+				tokens: provided,
+				useCache
 			}),
 		onLoad: loadCustomTokenData,
 		onUpdateError,
