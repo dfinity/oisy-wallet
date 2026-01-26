@@ -166,3 +166,12 @@ const loadCustomTokenData = ({
 }) => {
 	erc721CustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	erc721CustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.erc721_custom_tokens },
+		err
+	});
+};
