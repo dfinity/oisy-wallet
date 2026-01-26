@@ -40,41 +40,25 @@
 	class="flex w-full flex-col items-center md:items-start"
 	class:md:items-center={helpAlignment === 'center'}
 >
-	<div
-		class="flex w-full flex-col items-center justify-center md:justify-start"
-		class:sm:flex-row={!fullWidth}
+	<ButtonAuthenticate
+		{fullWidth}
+		onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
+		styleClass="bg-brand-primary text-primary-inverted"
+		testId={LOGIN_BUTTON}
 	>
-		<ButtonAuthenticate
-			{fullWidth}
-			isLandingPage
-			onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_2_0)}
-			styleClass="bg-brand-primary text-primary-inverted"
-			testId={LOGIN_BUTTON}
-		>
-			{$i18n.auth.text.authenticate}
-			<IconAstronautArrow />
-		</ButtonAuthenticate>
-
-		<ButtonAuthenticate
-			{fullWidth}
-			isLandingPage
-			onclick={() => onAuthenticate(InternetIdentityDomain.VERSION_1_0)}
-			styleClass={`${!fullWidth ? 'sm:ml-3 sm:mt-0' : ''} mt-3 text-brand-primary bg-brand-subtle-10`}
-			testId={LOGIN_BUTTON}
-		>
-			{$i18n.auth.text.legacy_login}
-		</ButtonAuthenticate>
-	</div>
+		{$i18n.auth.text.authenticate}
+		<IconAstronautArrow />
+	</ButtonAuthenticate>
 
 	<span
 		class="mt-4 flex flex-col text-sm text-tertiary"
-		class:sm:w-80={!fullWidth}
+		class:sm:w-85={!fullWidth}
 		class:text-center={helpAlignment === 'center'}
 		class:w-full={fullWidth}
 	>
 		<span class="inline-block">
 			<Html
-				text={replacePlaceholders($i18n.terms_of_use.text.instruction_two_buttons, {
+				text={replacePlaceholders($i18n.terms_of_use.text.instruction, {
 					$link: componentToHtml({ Component: TermsOfUseLink })
 				})}
 			/>
