@@ -1,4 +1,6 @@
+import type { QueryAndUpdateOrHydrateParams } from '$lib/types/query';
 import {
+	nonNullish,
 	queryAndUpdate,
 	type QueryAndUpdateParams,
 	type QueryAndUpdateStrategy
@@ -35,4 +37,39 @@ export const createQueryAndUpdateWithWarmup = ({
 			...params,
 			strategy: Date.now() - startTimeMs < warmupMs ? 'query' : (params.strategy ?? defaultStrategy)
 		});
+};
+
+export const queryAndUpdateOrHydrate = async <R, E = unknown>({
+	tokens,
+	useCache,
+	request,
+	onLoad,
+	onUpdateError,
+	identity,
+	certified,
+	...queryAndUpdateParams
+}: QueryAndUpdateOrHydrateParams<R, E>): Promise<void> => {
+	if (nonNullish(tokens)) {
+		try {
+			const response = await request({ certified, identity, tokens, useCache });
+
+			onLoad({ response, certified });
+
+			return;
+		} catch (err: unknown) {
+			if (certified) {
+				onUpdateError({ error: err as E, identity });
+			}
+		}
+
+		return;
+	}
+
+	await queryAndUpdate<R, E>({
+		request: (params) => request({ ...params, tokens, useCache }),
+		onLoad,
+		onUpdateError,
+		identity,
+		...queryAndUpdateParams
+	});
 };
