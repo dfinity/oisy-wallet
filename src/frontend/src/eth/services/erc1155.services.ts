@@ -99,12 +99,16 @@ const filterErc1155CustomToken = (
 ): customToken is CustomTokenErc1155Variant => 'Erc1155' in customToken.token;
 
 const mapErc1155CustomToken = async ({
-	token,
-	enabled,
-	version: versionNullable,
-	section: sectionNullable,
-	allow_external_content_source: allowExternalContentSourceNullable
-}: CustomTokenErc1155Variant): Promise<Erc1155CustomToken | undefined> => {
+	token: {
+		token,
+		enabled,
+		version: versionNullable,
+		section: sectionNullable,
+		allow_external_content_source: allowExternalContentSourceNullable
+	}
+}: {
+	token: CustomTokenErc1155Variant;
+}): Promise<Erc1155CustomToken | undefined> => {
 	const version = fromNullable(versionNullable);
 	const section = fromNullable(sectionNullable);
 	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;

@@ -54,13 +54,17 @@ const filterExtCustomToken = (customToken: CustomToken): customToken is CustomTo
 	'ExtV2' in customToken.token;
 
 const mapExtCustomToken = async ({
-	token,
-	enabled,
-	version: versionNullable,
-	section: sectionNullable,
-	allow_external_content_source: allowExternalContentSourceNullable
+	token: {
+		token,
+		enabled,
+		version: versionNullable,
+		section: sectionNullable,
+		allow_external_content_source: allowExternalContentSourceNullable
+	}
+}: {
+	token: CustomTokenExtVariant;
 	// eslint-disable-next-line require-await -- We are going to add an async function to fetch the metadata
-}: CustomTokenExtVariant): Promise<ExtCustomToken | undefined> => {
+}): Promise<ExtCustomToken | undefined> => {
 	const version = fromNullable(versionNullable);
 	const section = fromNullable(sectionNullable);
 	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;

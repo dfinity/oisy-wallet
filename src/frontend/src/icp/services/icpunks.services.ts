@@ -69,14 +69,16 @@ const filterIcPunksCustomToken = (
 ): customToken is CustomTokenIcPunksVariant => 'IcPunks' in customToken.token;
 
 const mapIcPunksCustomToken = async ({
-	token,
-	enabled,
-	version: versionNullable,
-	section: sectionNullable,
-	allow_external_content_source: allowExternalContentSourceNullable,
+	token: {
+		token,
+		enabled,
+		version: versionNullable,
+		section: sectionNullable,
+		allow_external_content_source: allowExternalContentSourceNullable
+	},
 	identity,
 	certified
-}: CustomTokenIcPunksVariant & QueryAndUpdateRequestParams): Promise<
+}: { token: CustomTokenIcPunksVariant } & QueryAndUpdateRequestParams): Promise<
 	IcPunksCustomToken | undefined
 > => {
 	const version = fromNullable(versionNullable);
