@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
-			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado.",
-			"internet_identity_banner_first_part": "$oisy_name ahora utiliza",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Leer mas"
+			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado."
 		},
 		"alt": {
 			"logo": "Logotipo",

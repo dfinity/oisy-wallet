@@ -46,13 +46,7 @@ interface I18nCore {
 		ellipsis: string;
 		learn_more: string;
 	};
-	info: {
-		test_banner: string;
-		test_banner_beta: string;
-		internet_identity_banner_first_part: string;
-		internet_identity_banner_second_part: string;
-		internet_identity_banner_button: string;
-	};
+	info: { test_banner: string; test_banner_beta: string };
 	alt: {
 		logo: string;
 		go_to_home: string;
