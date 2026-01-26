@@ -64,7 +64,7 @@
 	>
 		<span class="inline-block">
 			<Html
-				text={replacePlaceholders($i18n.terms_of_use.text.instruction_two_buttons, {
+				text={replacePlaceholders($i18n.terms_of_use.text.instruction, {
 					$link: componentToHtml({ Component: TermsOfUseLink })
 				})}
 			/>
