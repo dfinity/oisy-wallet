@@ -49,7 +49,6 @@ export const loadCustomTokens = ({
 	useCache = false
 }: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
 	queryAndUpdateOrHydrate<Erc721CustomToken[], CustomToken>({
-		identity,
 		certified: true,
 		provided: tokens,
 		request: ({ identity, certified, provided }) =>
@@ -60,7 +59,8 @@ export const loadCustomTokens = ({
 				tokens: provided
 			}),
 		onLoad: loadCustomTokenData,
-		onUpdateError
+		onUpdateError,
+		identity
 	});
 
 const safeLoadMetadata = async ({
