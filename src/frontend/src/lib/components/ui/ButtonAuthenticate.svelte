@@ -14,7 +14,7 @@
 </script>
 
 <button
-	class={`login-button flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-lg leading-6 font-bold whitespace-nowrap sm:max-w-none ${styleClass ?? ''}`}
+	class={`login-button flex w-full items-center justify-center gap-4 rounded-2xl py-3 text-lg leading-6 font-bold whitespace-nowrap sm:max-w-none ${styleClass ?? ''}`}
 	class:lg:px-6={!fullWidth}
 	class:max-w-[24rem]={!fullWidth}
 	class:px-12={fullWidth || !isLandingPage}
