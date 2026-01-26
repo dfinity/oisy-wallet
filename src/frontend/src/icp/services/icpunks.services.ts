@@ -51,14 +51,7 @@ export const loadCustomTokens = ({
 	queryAndUpdate<IcPunksCustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
-		onUpdateError: ({ error: err }) => {
-			icPunksCustomTokensStore.resetAll();
-
-			toastsError({
-				msg: { text: get(i18n).init.error.icpunks_custom_tokens },
-				err
-			});
-		},
+		onUpdateError,
 		identity
 	});
 
@@ -136,4 +129,13 @@ const loadCustomTokenData = ({
 	response: IcPunksCustomToken[];
 }) => {
 	icPunksCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	icPunksCustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.icpunks_custom_tokens },
+		err
+	});
 };
