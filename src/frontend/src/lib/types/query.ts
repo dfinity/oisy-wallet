@@ -1,10 +1,10 @@
-import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-import type { QueryAndUpdateParams } from '@dfinity/utils';
+import type { QueryAndUpdateParams, QueryAndUpdateRequestParams } from '@dfinity/utils';
 
-export type QueryAndUpdateOrHydrateParams<R, E = unknown> = Omit<
+export type QueryAndUpdateOrHydrateParams<R, P, E = unknown> = Omit<
 	QueryAndUpdateParams<R, E>,
-	'request' | 'onUpdateError'
-> &
-	Required<Pick<QueryAndUpdateParams<R, E>, 'onUpdateError'>> & {
-		request: (params: LoadCustomTokenParams) => Promise<R>;
-	} & LoadCustomTokenParams;
+	'request'
+> & {
+	certified: boolean;
+	provided?: P[];
+	request: (params: QueryAndUpdateRequestParams & { provided?: P[] }) => Promise<R>;
+};

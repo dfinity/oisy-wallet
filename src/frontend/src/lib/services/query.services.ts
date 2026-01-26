@@ -39,26 +39,23 @@ export const createQueryAndUpdateWithWarmup = ({
 		});
 };
 
-export const queryAndUpdateOrHydrate = async <R, E = unknown>({
-	tokens,
-	useCache,
+export const queryAndUpdateOrHydrate = async <R, P, E = unknown>({
 	request,
 	onLoad,
 	onUpdateError,
 	identity,
 	certified,
+	provided,
 	...queryAndUpdateParams
-}: QueryAndUpdateOrHydrateParams<R, E>): Promise<void> => {
-	if (nonNullish(tokens)) {
+}: QueryAndUpdateOrHydrateParams<R, P, E>): Promise<void> => {
+	if (nonNullish(provided)) {
 		try {
-			const response = await request({ certified, identity, tokens, useCache });
+			const response = await request({ certified, identity, provided });
 
 			onLoad({ response, certified });
-
-			return;
 		} catch (err: unknown) {
 			if (certified) {
-				onUpdateError({ error: err as E, identity });
+				onUpdateError?.({ error: err as E, identity });
 			}
 		}
 
@@ -66,10 +63,10 @@ export const queryAndUpdateOrHydrate = async <R, E = unknown>({
 	}
 
 	await queryAndUpdate<R, E>({
-		request: (params) => request({ ...params, tokens, useCache }),
-		onLoad,
-		onUpdateError,
+		...queryAndUpdateParams,
 		identity,
-		...queryAndUpdateParams
+		request: (params) => request({ ...params, provided: undefined }),
+		onLoad,
+		onUpdateError
 	});
 };
