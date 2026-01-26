@@ -4,6 +4,7 @@ import {
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
 } from '$lib/constants/analytics.constants';
+import { PARAM_DELETE_IDB_CACHE } from '$lib/constants/routes.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
 	errorSignOut,
@@ -17,17 +18,11 @@ import { authStore } from '$lib/stores/auth.store';
 import { AUTH_LOCK_KEY } from '$lib/stores/locked.store';
 import * as eventsUtils from '$lib/utils/events.utils';
 import { emit } from '$lib/utils/events.utils';
-import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import * as timeUtils from '$lib/utils/time.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import en from '$tests/mocks/i18n.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 import type { MockInstance } from 'vitest';
-
-vi.mock('$lib/utils/idb.utils', () => ({
-	delMultiKeysByPrincipal: vi.fn()
-}));
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -111,23 +106,8 @@ describe('auth.services', () => {
 			expect(sessionStorage.getItem('key')).toBeNull();
 		});
 
-		it('should clean the IDB storage for the current principal', async () => {
-			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
-				fn({ identity: mockIdentity });
-				return () => {};
-			});
-
-			await signOut({});
-
-			// 6 addresses (mainnet and testnet) + 1 tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
-
-			// 4 transactions + 1 balances
-			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
-		});
-
 		it('should clean the IDB storage for all principals', async () => {
-			await signOut({ clearAllPrincipalsStorages: true });
+			await signOut({});
 
 			// 6 addresses (mainnet and testnet) + 1 tokens + 4 txs + 1 balance
 			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
@@ -201,7 +181,11 @@ describe('auth.services', () => {
 		it('should not append a message to the reload URL', async () => {
 			await signOut({});
 
-			expect(window.history.replaceState).not.toHaveBeenCalled();
+			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
+				{},
+				'',
+				new URL(`${rootLocation}?${PARAM_DELETE_IDB_CACHE}=true`)
+			);
 		});
 	});
 
@@ -234,25 +218,11 @@ describe('auth.services', () => {
 			expect(sessionStorage.getItem('key')).toBeNull();
 		});
 
-		it('should clean the IDB storage for the current principal', async () => {
-			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
-				fn({ identity: mockIdentity });
-				return () => {};
-			});
-
+		it('should clean the IDB storage for all principals', async () => {
 			await errorSignOut(mockText);
 
-			// 6 addresses (mainnet and testnet) + 1 tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
-
-			// 4 transactions + 1 balances
-			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
-		});
-
-		it('should not clean the IDB storage for all principals', async () => {
-			await errorSignOut(mockText);
-
-			expect(idbKeyval.clear).not.toHaveBeenCalled();
+			// 6 addresses (mainnet and testnet) + 1 tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
@@ -326,7 +296,9 @@ describe('auth.services', () => {
 			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
 				{},
 				'',
-				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=error`)
+				new URL(
+					`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=error&${PARAM_DELETE_IDB_CACHE}=true`
+				)
 			);
 		});
 	});
@@ -360,25 +332,11 @@ describe('auth.services', () => {
 			expect(sessionStorage.getItem('key')).toBeNull();
 		});
 
-		it('should clean the IDB storage for the current principal', async () => {
-			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
-				fn({ identity: mockIdentity });
-				return () => {};
-			});
-
+		it('should clean the IDB storage for all principals', async () => {
 			await warnSignOut(mockText);
 
-			// 6 addresses (mainnet and testnet) + 1 tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
-
-			// 4 transactions + 1 balances
-			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
-		});
-
-		it('should not clean the IDB storage for all principals', async () => {
-			await warnSignOut(mockText);
-
-			expect(idbKeyval.clear).not.toHaveBeenCalled();
+			// 6 addresses (mainnet and testnet) + 1 tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
@@ -452,7 +410,9 @@ describe('auth.services', () => {
 			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
 				{},
 				'',
-				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=warn`)
+				new URL(
+					`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=warn&${PARAM_DELETE_IDB_CACHE}=true`
+				)
 			);
 		});
 	});
@@ -486,25 +446,11 @@ describe('auth.services', () => {
 			expect(sessionStorage.getItem('key')).toBeNull();
 		});
 
-		it('should clean the IDB storage for the current principal', async () => {
-			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
-				fn({ identity: mockIdentity });
-				return () => {};
-			});
-
+		it('should clean the IDB storage for all principals', async () => {
 			await nullishSignOut();
 
-			// 6 addresses (mainnet and testnet) + 1 tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
-
-			// 4 transactions + 1 balances
-			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
-		});
-
-		it('should not clean the IDB storage for all principals', async () => {
-			await nullishSignOut();
-
-			expect(idbKeyval.clear).not.toHaveBeenCalled();
+			// 6 addresses (mainnet and testnet) + 1 tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
@@ -578,7 +524,9 @@ describe('auth.services', () => {
 			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
 				{},
 				'',
-				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(expectedText))}&level=warn`)
+				new URL(
+					`${rootLocation}?msg=${encodeURI(encodeURI(expectedText))}&level=warn&${PARAM_DELETE_IDB_CACHE}=true`
+				)
 			);
 		});
 	});
@@ -615,19 +563,6 @@ describe('auth.services', () => {
 
 				expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(sessionStorage.getItem('key')).toBeNull();
-			});
-
-			it('should not clean the IDB storage for the current principal', async () => {
-				vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
-					fn({ identity: mockIdentity });
-					return () => {};
-				});
-
-				await idleSignOut();
-
-				expect(idbKeyval.del).not.toHaveBeenCalled();
-
-				expect(delMultiKeysByPrincipal).not.toHaveBeenCalled();
 			});
 
 			it('should not clean the IDB storage for all principals', async () => {
@@ -737,19 +672,6 @@ describe('auth.services', () => {
 
 				expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(sessionStorage.getItem('key')).toBeNull();
-			});
-
-			it('should clean the IDB storage for the current principal', async () => {
-				vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
-					fn({ identity: mockIdentity });
-					return () => {};
-				});
-
-				await idleSignOut();
-
-				expect(idbKeyval.del).not.toHaveBeenCalled();
-
-				expect(delMultiKeysByPrincipal).not.toHaveBeenCalled();
 			});
 
 			it('should not clean the IDB storage for all principals', async () => {
@@ -871,19 +793,6 @@ describe('auth.services', () => {
 
 			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 			expect(sessionStorage.getItem('key')).toBeNull();
-		});
-
-		it('should not clean the IDB storage for the current principal', async () => {
-			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
-				fn({ identity: mockIdentity });
-				return () => {};
-			});
-
-			await lockSession({});
-
-			expect(idbKeyval.del).not.toHaveBeenCalled();
-
-			expect(delMultiKeysByPrincipal).not.toHaveBeenCalled();
 		});
 
 		it('should not clean the IDB storage for all principals', async () => {

@@ -2,7 +2,7 @@ import type { Token, TokenId } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
-import { isTokenToggleable } from '$lib/utils/token.utils';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { SvelteMap } from 'svelte/reactivity';
 

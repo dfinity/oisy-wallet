@@ -121,7 +121,6 @@
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
-			"legacy_login": "Login legado",
 			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
 			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
 			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
@@ -155,7 +154,6 @@
 				"description": "Parece que você cancelou seu login ou cadastro. Gostaríamos de entender o que aconteceu para que possamos melhorar sua experiência.",
 				"login_page_looks_different": "Por que a página de login está diferente?",
 				"use_identity_number": "Quero usar meu número de identificação da Internet.",
-				"lost_identity_number": "Perdi meu número Internet Identity",
 				"feedback_text": "Seu feedback nos ajuda a melhorar o $oisy_short.",
 				"thanks_text": "Obrigado!",
 				"useful_links": "Links úteis",
@@ -171,7 +169,8 @@
 				"identity_legacy_sign_in": "Entrar com o domínio Internet Identity legacy",
 				"identity_learn_more": "Saiba mais nos Docs do $oisy_short",
 				"oisy_introduction": "",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "",
 				"need_help": "Precisa de ajuda para",
@@ -1807,7 +1806,6 @@
 			},
 			"title": "",
 			"instruction": "Ao clicar neste botão, você concorda com os $link",
-			"instruction_two_buttons": "Ao clicar em um desses botões, você concorda com os $link",
 			"body": ""
 		},
 		"alt": {

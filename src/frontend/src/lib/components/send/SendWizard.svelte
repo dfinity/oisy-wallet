@@ -2,6 +2,7 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import UtxosFeeContexts from '$btc/components/fee/UtxosFeeContexts.svelte';
 	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
@@ -108,18 +109,20 @@
 		bind:sendProgressStep
 	/>
 {:else if isNetworkIdBitcoin($sendToken.network.id)}
-	<BtcSendTokenWizard
-		{currentStep}
-		{destination}
-		{onBack}
-		{onClose}
-		{onNext}
-		{onSendBack}
-		{onTokensList}
-		{selectedContact}
-		bind:amount
-		bind:sendProgressStep
-	/>
+	<UtxosFeeContexts>
+		<BtcSendTokenWizard
+			{currentStep}
+			{destination}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
+			{selectedContact}
+			bind:amount
+			bind:sendProgressStep
+		/>
+	</UtxosFeeContexts>
 {:else if isNetworkIdSolana($sendToken.network.id)}
 	<SolSendTokenWizard
 		{currentStep}

@@ -121,7 +121,6 @@
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
-			"legacy_login": "Legacy Login",
 			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
 			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
@@ -155,7 +154,6 @@
 				"description": "Es scheint du hast das Anmelden abgebrochen. Wir würden gerne verstehen was passiert ist, damit wir den Prozess verbessern können.",
 				"login_page_looks_different": "Wieso schaut die Login Seite so anders aus?",
 				"use_identity_number": "Ich möchte meine Internet Identity Nummer verwenden",
-				"lost_identity_number": "Ich habe meine Internet Identity Nummer vergessen",
 				"feedback_text": "Deine Rückmeldung hilft uns, $oisy_short zu verbessern.",
 				"thanks_text": "Danke!",
 				"useful_links": "Hilfreiche Links",
@@ -171,7 +169,8 @@
 				"identity_legacy_sign_in": "Mit Internet Identity 1.0 anmelden (legacy)",
 				"identity_learn_more": "Mehr erfahren in den $oisy_short Docs",
 				"oisy_introduction": "$oisy_short Introduction",
-				"private_key": "Who controls the private key for the native assets?",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet",
 				"internet_identity_help_center": "Internet Identity 2.0 Help Center",
 				"need_help": "Brauchst du Hilfe bei",
@@ -1807,7 +1806,6 @@
 			},
 			"title": "",
 			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
-			"instruction_two_buttons": "Durch Klicken einer dieser Schaltflächen stimmst du den $link zu",
 			"body": ""
 		},
 		"alt": {

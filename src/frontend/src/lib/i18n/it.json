@@ -121,7 +121,6 @@
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
-			"legacy_login": "Accesso legacy",
 			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Assistente AI integrato con privacy come standard",
 			"advanced_cryptography": "Protetto da crittografia avanzata – 100% on-chain",
@@ -155,7 +154,6 @@
 				"description": "Sembra che tu abbia annullato l'accesso o la registrazione. Ci piacerebbe capire cosa è successo, così da poter migliorare la tua esperienza.",
 				"login_page_looks_different": "Perché la pagina di accesso ha un aspetto diverso?",
 				"use_identity_number": "Voglio usare il mio numero di Internet Identity",
-				"lost_identity_number": "Ho perso il mio numero di Internet Identity",
 				"feedback_text": "Il tuo feedback ci aiuta a migliorare $oisy_short.",
 				"thanks_text": "Grazie!",
 				"useful_links": "Collegamenti utili",
@@ -171,7 +169,8 @@
 				"identity_legacy_sign_in": "Accedi con il vecchio dominio Internet Identity (legacy)",
 				"identity_learn_more": "Scopri di più sui Docs di $oisy_short",
 				"oisy_introduction": "Introduzione all'$oisy_short",
-				"private_key": "Who controls the private key for the native assets?",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet",
 				"internet_identity_help_center": "Centro assistenza Internet Identity 2.0",
 				"need_help": "Hai bisogno di aiuto per",
@@ -1807,7 +1806,6 @@
 			},
 			"title": "",
 			"instruction": "Cliccando su questo pulsante, accetti i $link",
-			"instruction_two_buttons": "Cliccando su uno di questi pulsante, accetti i $link",
 			"body": ""
 		},
 		"alt": {

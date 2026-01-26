@@ -121,7 +121,6 @@
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
-			"legacy_login": "Đăng nhập kế thừa",
 			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
 			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
 			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
@@ -155,7 +154,6 @@
 				"description": "",
 				"login_page_looks_different": "",
 				"use_identity_number": "",
-				"lost_identity_number": "",
 				"feedback_text": "",
 				"thanks_text": "Cảm ơn bạn!",
 				"useful_links": "",
@@ -171,7 +169,8 @@
 				"identity_legacy_sign_in": "Đăng nhập bằng tên miền Internet Identity cũ",
 				"identity_learn_more": "Tìm hiểu thêm trên Tài liệu $oisy_short",
 				"oisy_introduction": "",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "",
 				"need_help": "Cần giúp đỡ",
@@ -1807,7 +1806,6 @@
 			},
 			"title": "",
 			"instruction": "Bằng cách nhấp vào nút này, bạn đồng ý với $link",
-			"instruction_two_buttons": "Bằng cách nhấp vào một trong những nút này, bạn đồng ý với $link",
 			"body": ""
 		},
 		"alt": {

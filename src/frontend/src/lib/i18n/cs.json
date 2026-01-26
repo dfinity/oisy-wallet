@@ -121,7 +121,6 @@
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
-			"legacy_login": "Starší přihlášení",
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
 			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
@@ -155,7 +154,6 @@
 				"description": "Zdá se, že jste zrušili přihlášení nebo registraci. Rádi bychom pochopili, co se stalo, abychom mohli zlepšit vaše uživatelské prostředí.",
 				"login_page_looks_different": "Proč přihlašovací stránka vypadá jinak?",
 				"use_identity_number": "Chci použít své číslo Internet Identity",
-				"lost_identity_number": "Ztratil jsem své číslo Internet Identity.",
 				"feedback_text": "Vaše zpětná vazba nám pomáhá zlepšovat $oisy_short.",
 				"thanks_text": "Děkuji!",
 				"useful_links": "Užitečné odkazy",
@@ -171,7 +169,8 @@
 				"identity_legacy_sign_in": "Přihlásit se pomocí staré domény Internet Identity (legacy)",
 				"identity_learn_more": "Více se dozvíte v dokumentaci $oisy_short",
 				"oisy_introduction": "$oisy_short Úvod",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "Centrum nápovědy k Internet Identity 2.0",
 				"need_help": "Potřebujete pomoc",
@@ -1807,7 +1806,6 @@
 			},
 			"title": "",
 			"instruction": "Kliknutím na toto tlačítko souhlasíte s $link",
-			"instruction_two_buttons": "Kliknutím na jedno z těchto tlačítek souhlasíte s $link",
 			"body": ""
 		},
 		"alt": {
