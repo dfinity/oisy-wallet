@@ -6,18 +6,17 @@
 		fullWidth?: boolean;
 		testId?: string;
 		styleClass?: string;
-		isLandingPage?: boolean;
 		children: Snippet;
 	}
 
-	let { onclick, fullWidth = false, isLandingPage, styleClass, testId, children }: Props = $props();
+	let { onclick, fullWidth = false, styleClass, testId, children }: Props = $props();
 </script>
 
 <button
 	class={`login-button flex w-full items-center justify-center gap-4 rounded-2xl py-3 text-lg leading-6 font-bold whitespace-nowrap sm:max-w-none ${styleClass ?? ''}`}
 	class:lg:px-6={!fullWidth}
 	class:max-w-[24rem]={!fullWidth}
-	class:px-12={fullWidth || !isLandingPage}
+	class:px-12={fullWidth}
 	class:px-4={!fullWidth}
 	class:sm:w-80={!fullWidth}
 	data-tid={testId}
