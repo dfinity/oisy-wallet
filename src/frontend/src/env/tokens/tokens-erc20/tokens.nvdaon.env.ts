@@ -20,7 +20,7 @@ export const NVDAON_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: NVDAON_SYMBOL,
 	decimals: NVDAON_DECIMALS,
 	icon: ndvaon,
-	address: '0x2d1f7226bd1f780af6b9a49dcc0ae00e8df4bdee',
+	address: '0x2D1F7226Bd1F780AF6B9A49DCC0aE00E8Df4bDEE',
 	exchange: 'erc20',
 	groupData: NVDAON_TOKEN_GROUP
 };
