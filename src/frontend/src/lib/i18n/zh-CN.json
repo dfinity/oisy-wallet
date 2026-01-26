@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
-			"test_banner_beta": "这是一个测试版发布。你可能会遇到一些错误。真实资产正在使用中——请谨慎操作。",
-			"internet_identity_banner_first_part": "$oisy_name 现在使用",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "阅读更多"
+			"test_banner_beta": "这是一个测试版发布。你可能会遇到一些错误。真实资产正在使用中——请谨慎操作。"
 		},
 		"alt": {
 			"logo": "$name 标志",
