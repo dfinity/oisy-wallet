@@ -64,5 +64,5 @@
 		{/each}
 	</div>
 
-	<ButtonAuthenticateWithHelp needHelpLink={false} />
+	<ButtonAuthenticateWithHelp needHelpLink={true} />
 </div>
