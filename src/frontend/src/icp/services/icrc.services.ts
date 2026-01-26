@@ -70,19 +70,7 @@ export const loadCustomTokens = ({
 	queryAndUpdate<IcrcCustomToken[]>({
 		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
 		onLoad: (params) => loadIcrcCustomData({ ...params, onSuccess }),
-		onUpdateError: ({ error: err }) => {
-			icrcCustomTokensStore.resetAll();
-
-			trackEvent({
-				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
-				metadata: mapIcErrorMetadata(err)
-			});
-
-			toastsError({
-				msg: { text: get(i18n).init.error.icrc_canisters },
-				err
-			});
-		},
+		onUpdateError: onCustomTokensUpdateError,
 		identity
 	});
 
@@ -95,7 +83,7 @@ const loadDefaultIcrc = ({
 		request: (params) =>
 			requestIcrcMetadata({ ...params, ...data, ledgerCanisterId, category: 'default' }),
 		onLoad: loadIcrcData,
-		onUpdateError: (params) => onUpdateError({ ...params, ledgerCanisterId }),
+		onUpdateError: (params) => onDefaultTokensUpdateError({ ...params, ledgerCanisterId }),
 		identity: new AnonymousIdentity()
 	});
 
@@ -258,7 +246,21 @@ const loadIcrcCustomData = ({
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
-const onUpdateError = ({
+const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {
+	icrcCustomTokensStore.resetAll();
+
+	trackEvent({
+		name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+		metadata: mapIcErrorMetadata(err)
+	});
+
+	toastsError({
+		msg: { text: get(i18n).init.error.icrc_canisters },
+		err
+	});
+};
+
+const onDefaultTokensUpdateError = ({
 	error: err,
 	ledgerCanisterId
 }: {
