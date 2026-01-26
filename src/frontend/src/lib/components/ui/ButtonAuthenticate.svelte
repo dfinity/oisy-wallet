@@ -19,8 +19,7 @@
 	class:max-w-[24rem]={!fullWidth}
 	class:px-12={fullWidth || !isLandingPage}
 	class:px-4={!fullWidth}
-	class:sm:w-80={!isLandingPage}
-	class:sm:w-auto={!fullWidth && isLandingPage}
+	class:sm:w-80={!fullWidth}
 	data-tid={testId}
 	{onclick}
 >
