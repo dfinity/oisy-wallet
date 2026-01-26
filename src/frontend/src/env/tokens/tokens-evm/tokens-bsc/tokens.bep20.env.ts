@@ -1,10 +1,31 @@
 import { BSC_MAINNET_ENABLED } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { AMDON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.amdon.env';
+import { BABAON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.babaon.env';
+import { BIDUON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.biduon.env';
+import { COPXON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.copxon.env';
+import { IAUON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.iauon.env';
+import { IVVON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.ivvon.env';
+import { NVDAON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.nvdaon.env';
+import { PBRON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.pbron.env';
+import { SLVON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.slvon.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdt.env';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 
-const BSC_BEP20_TOKENS_MAINNET: RequiredEvmBep20Token[] = [USDC_TOKEN, USDT_TOKEN];
+const BSC_BEP20_TOKENS_MAINNET: RequiredEvmBep20Token[] = [
+	AMDON_TOKEN,
+	BABAON_TOKEN,
+	BIDUON_TOKEN,
+	COPXON_TOKEN,
+	IAUON_TOKEN,
+	IVVON_TOKEN,
+	NVDAON_TOKEN,
+	PBRON_TOKEN,
+	SLVON_TOKEN,
+	USDC_TOKEN,
+	USDT_TOKEN
+];
 
 export const BSC_BEP20_TOKENS: RequiredEvmBep20Token[] = defineSupportedTokens({
 	mainnetFlag: BSC_MAINNET_ENABLED,

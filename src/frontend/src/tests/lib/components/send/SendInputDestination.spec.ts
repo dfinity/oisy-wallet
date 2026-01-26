@@ -14,7 +14,7 @@ describe('SendInputDestination', () => {
 		destination: mockEthAddress,
 		networkContacts: {},
 		inputPlaceholder: 'test',
-		isInvalidDestination: undefined
+		invalidDestination: false
 	};
 
 	const mockContext = (sendToken: Token) =>

@@ -132,7 +132,7 @@
 		if (invalidAmount(amount) || parsedAmount === ZERO) {
 			return $i18n.send.assertion.amount_invalid;
 		}
-		if (nonNullish($sendBalance) && $sendTokenStandard === 'solana') {
+		if (nonNullish($sendBalance) && $sendTokenStandard.code === 'solana') {
 			const total = parsedAmount + ($feeStore ?? ZERO);
 			if (total > $sendBalance) {
 				return $i18n.send.assertion.insufficient_funds_for_gas;

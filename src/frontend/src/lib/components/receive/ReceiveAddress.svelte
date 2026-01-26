@@ -53,17 +53,15 @@
 
 			<div
 				class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
-				class:mt-3={isNullish(text)}
+				class:mt-1.5={isNullish(text)}
 				data-tid={testId}
 			>
-				<div class="h-8 w-8">
-					<NetworkLogo color="white" {network} size="sm" />
-				</div>
+				<NetworkLogo color="white" {network} size="sm" />
 
 				{#if nonNullish(address)}
 					<output
 						id="ic-wallet-address"
-						class="text-sm break-all"
+						class="flex-1 text-sm break-all"
 						data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
 						in:fade>{address}</output
 					>

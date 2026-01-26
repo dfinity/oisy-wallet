@@ -5,7 +5,8 @@ import { render } from '@testing-library/svelte';
 describe('StakeContentSection', () => {
 	const props = {
 		content: createMockSnippet('content'),
-		title: createMockSnippet('title')
+		title: createMockSnippet('title'),
+		action: createMockSnippet('action')
 	};
 
 	it('renders provided snippets correctly', () => {
@@ -15,5 +16,6 @@ describe('StakeContentSection', () => {
 
 		expect(getByTestId('content')).toBeInTheDocument();
 		expect(getByTestId('title')).toBeInTheDocument();
+		expect(getByTestId('action')).toBeInTheDocument();
 	});
 });

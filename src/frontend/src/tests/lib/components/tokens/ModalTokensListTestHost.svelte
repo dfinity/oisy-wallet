@@ -32,21 +32,22 @@
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally
 			tokens,
 			filterZeroBalance: false,
 			filterNetwork: undefined,
 			filterQuery: '',
+			// TODO: This statement is not reactive. Check if it is intentional or not.
+			// eslint-disable-next-line svelte/no-unused-svelte-ignore
+			// svelte-ignore state_referenced_locally
 			filterNfts
 		})
 	);
 </script>
 
-<ModalTokensList
-	loading={false}
-	networkSelectorViewOnly={false}
-	{onSelectNetworkFilter}
-	{onTokenButtonClick}
->
+<ModalTokensList networkSelectorViewOnly={false} {onSelectNetworkFilter} {onTokenButtonClick}>
 	{#snippet noResults()}
 		{#if renderNoResults}
 			<div data-tid={MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS}>No results custom message</div>

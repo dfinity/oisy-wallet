@@ -152,12 +152,12 @@ describe('AllTransactionsList', () => {
 			const todayDateGroup = getByTestId('all-transactions-date-group-0');
 
 			expect(todayDateGroup).toBeInTheDocument();
-			expect(getByText('today')).toBeInTheDocument();
+			expect(getByText('Today')).toBeInTheDocument();
 
 			const yesterdayDateGroup = getByTestId('all-transactions-date-group-1');
 
 			expect(yesterdayDateGroup).toBeInTheDocument();
-			expect(getByText('yesterday')).toBeInTheDocument();
+			expect(getByText('Yesterday')).toBeInTheDocument();
 		});
 
 		it('should render the transactions list with all the transactions', () => {

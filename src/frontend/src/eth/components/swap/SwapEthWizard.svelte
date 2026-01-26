@@ -15,7 +15,6 @@
 		type EthFeeContext as FeeContextType
 	} from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -46,6 +45,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { isNetworkEthereum } from '$lib/utils/network.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -212,7 +212,9 @@
 			isNullish($ethAddress) ||
 			isNullish(maxFeePerGas) ||
 			isNullish(maxPriorityFeePerGas) ||
-			isNullish(gas)
+			isNullish(gas) ||
+			!isNetworkEthereum($sourceToken.network) ||
+			!isNetworkEthereum($destinationToken.network)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -232,10 +234,10 @@
 				sourceToken: $sourceToken as Erc20Token,
 				destinationToken: $destinationToken as Erc20Token,
 				swapAmount,
-				sourceNetwork: $sourceToken.network as EthereumNetwork,
+				sourceNetwork: $sourceToken.network,
 				receiveAmount: $swapAmountsStore?.selectedProvider?.receiveAmount,
 				slippageValue,
-				destinationNetwork: $destinationToken.network as EthereumNetwork,
+				destinationNetwork: $destinationToken.network,
 				userAddress: $ethAddress,
 				gas,
 				maxFeePerGas,
@@ -293,7 +295,7 @@
 	};
 </script>
 
-{#if nonNullish($sourceToken) && nonNullish(nativeEthereumToken)}
+{#if nonNullish($sourceToken) && nonNullish(nativeEthereumToken) && isNetworkEthereum($sourceToken.network)}
 	<EthFeeContext
 		bind:this={feeContext}
 		amount={swapAmount}
@@ -301,7 +303,7 @@
 		observe={currentStep?.name !== WizardStepsSwap.SWAPPING}
 		sendToken={$sourceToken}
 		sendTokenId={$sourceToken.id}
-		sourceNetwork={$sourceToken.network as EthereumNetwork}
+		sourceNetwork={$sourceToken.network}
 	>
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSwap.SWAP}

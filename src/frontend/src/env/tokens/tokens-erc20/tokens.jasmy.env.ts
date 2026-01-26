@@ -13,7 +13,7 @@ export const JASMY_TOKEN_ID: TokenId = parseTokenId(JASMY_SYMBOL);
 export const JASMY_TOKEN: RequiredAdditionalErc20Token = {
 	id: JASMY_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'JasmyCoin',
 	symbol: JASMY_SYMBOL,

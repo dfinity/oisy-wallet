@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import GldtUnstakeDissolveTypeSelector from '$icp/components/stake/gldt/GldtUnstakeDissolveTypeSelector.svelte';
 	import StakeForm from '$lib/components/stake/StakeForm.svelte';
@@ -32,9 +33,11 @@
 			token: $sendToken,
 			balance: $sendBalance ?? ZERO
 		});
+
+	let disabled = $derived(isNullish(amountToReceive) || amountToReceive <= 0);
 </script>
 
-<StakeForm {onClose} {onCustomValidate} {onNext} totalFee={ZERO} bind:amount>
+<StakeForm {disabled} {onClose} {onCustomValidate} {onNext} totalFee={ZERO} bind:amount>
 	{#snippet fee()}
 		<GldtUnstakeDissolveTypeSelector {amount} bind:dissolveInstantly bind:amountToReceive />
 	{/snippet}

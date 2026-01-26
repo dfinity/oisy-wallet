@@ -1,18 +1,21 @@
 import type { EthAddress } from '$eth/types/address';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { MediaType } from '$lib/enums/media-type';
 import { NftCollectionSchema, NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { extractMediaTypeAndSize } from '$lib/services/url.services';
 import type { NftSortingType } from '$lib/stores/settings.store';
 import type { NftError } from '$lib/types/errors';
 import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
+import { getNftIdentifier } from '$lib/utils/nft.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { SvelteMap } from 'svelte/reactivity';
 
 export const findNft = ({
 	nfts,
-	token: { address: tokenAddress, network: tokenNetwork },
+	token,
 	tokenId
 }: {
 	nfts: Nft[];
@@ -21,21 +24,15 @@ export const findNft = ({
 }): Nft | undefined =>
 	nfts.find(
 		({ id, collection: { address, network } }) =>
-			address === tokenAddress && network.id === tokenNetwork.id && id === tokenId
+			address === getNftIdentifier(token) && network.id === token.network.id && id === tokenId
 	);
 
-export const findNftsByToken = ({
-	nfts,
-	token: { address: tokenAddress, network: tokenNetwork }
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-}): Nft[] =>
+export const findNftsByToken = ({ nfts, token }: { nfts: Nft[]; token: NonFungibleToken }): Nft[] =>
 	nfts.filter((nft) =>
 		areAddressesEqual({
 			address1: nft.collection.address,
-			address2: tokenAddress,
-			networkId: tokenNetwork.id
+			address2: getNftIdentifier(token),
+			networkId: token.network.id
 		})
 	);
 
@@ -97,7 +94,7 @@ export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: N
 
 export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 	NftCollectionSchema.parse({
-		address: token.address,
+		address: getNftIdentifier(token),
 		id: token.id,
 		network: token.network,
 		standard: token.standard,
@@ -125,8 +122,9 @@ export const getEnabledNfts = ({
 			}
 		}) =>
 			$enabledNonFungibleNetworkTokens.some(
-				({ address: contractAddress, network: { id: contractNetworkId } }) =>
-					contractAddress === nftContractAddress && contractNetworkId === nftContractNetworkId
+				(token) =>
+					getNftIdentifier(token) === nftContractAddress &&
+					token.network.id === nftContractNetworkId
 			)
 	);
 
@@ -297,7 +295,7 @@ export const findNonFungibleToken = ({
 	address: EthAddress;
 	networkId: NetworkId;
 }): NonFungibleToken | undefined =>
-	tokens.find((token) => token.address === address && token.network.id === networkId);
+	tokens.find((token) => getNftIdentifier(token) === address && token.network.id === networkId);
 
 export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
 	if (isNullish(mediaUrl)) {
@@ -311,10 +309,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			return NftMediaStatusEnum.INVALID_DATA;
 		}
 
-		const response = await fetch(url.href, { method: 'HEAD' });
-
-		const type = response.headers.get('Content-Type');
-		const size = response.headers.get('Content-Length');
+		const { type, size } = await extractMediaTypeAndSize(url.href);
 
 		if (isNullish(type) || isNullish(size)) {
 			// Not all servers return the Content-Type and Content-Length headers,
@@ -324,7 +319,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			return NftMediaStatusEnum.OK;
 		}
 
-		if (!type.startsWith('image/')) {
+		if (!(type === MediaType.Img) && !(type === MediaType.Video)) {
 			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
 		}
 

@@ -3,7 +3,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
-	import { setCustomToken } from '$icp-eth/services/custom-token.services';
+	import { setCustomToken } from '$icp-eth/services/icrc-token.services';
 	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 	import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';

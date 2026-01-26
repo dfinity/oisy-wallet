@@ -1,4 +1,4 @@
-import type { Utxo } from '@icp-sdk/canisters/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 export class BtcAmountAssertionError extends Error {}
 
@@ -35,6 +35,6 @@ export enum BtcSendValidationError {
 
 export interface UtxosFee {
 	feeSatoshis: bigint;
-	utxos: Utxo[];
+	utxos: CkBtcMinterDid.Utxo[];
 	error?: BtcPrepareSendError | BtcSendValidationError;
 }

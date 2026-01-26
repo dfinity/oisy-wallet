@@ -3,6 +3,7 @@ import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 import * as auth from '$lib/services/auth.services';
 import { authLocked } from '$lib/stores/locked.store';
 import { modalStore } from '$lib/stores/modal.store';
+import { InternetIdentityDomain } from '$lib/types/auth';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -43,6 +44,20 @@ describe('ButtonAuthenticateWithHelp', () => {
 		expect(authSpy).toHaveBeenCalledOnce();
 
 		expect(get(modalStore)?.type).toBe('auth-help');
+	});
+
+	it('should call sign in with the correct domain', async () => {
+		const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
+
+		const { container } = render(ButtonAuthenticateWithHelp);
+
+		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
+		expect(signInButton).toBeInTheDocument();
+
+		await waitFor(() => signInButton?.click());
+
+		expect(authSpy).toHaveBeenCalledExactlyOnceWith({ domain: InternetIdentityDomain.VERSION_2_0 });
 	});
 
 	it('should set the lock store to false on successful sign in', async () => {

@@ -5,6 +5,7 @@ import {
 	COLLECTION_PARAM,
 	NETWORK_PARAM,
 	NFT_PARAM,
+	PARAM_DELETE_IDB_CACHE,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
 	URI_PARAM
@@ -34,12 +35,14 @@ export const isTokensPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`;
 export const isNftsPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`) ?? false;
-export const isRewardsPath = (path: string | null) =>
-	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 export const isEarningPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}`) ?? false;
-export const isEarningGoldPath = (path: string | null) =>
-	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.EarningGold}`;
+export const isRewardsPath = (path: string | null) =>
+	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
+export const isEarnPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}`) ?? false;
+export const isEarnGoldPath = (path: string | null) =>
+	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}`;
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
@@ -57,11 +60,13 @@ export const isRouteTokens = ({ route: { id } }: Page): boolean => isTokensPath(
 
 export const isRouteNfts = ({ route: { id } }: Page): boolean => isNftsPath(id);
 
-export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
-
 export const isRouteEarning = ({ route: { id } }: Page): boolean => isEarningPath(id);
 
-export const isRouteEarningGold = ({ route: { id } }: Page): boolean => isEarningGoldPath(id);
+export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
+
+export const isRouteEarn = ({ route: { id } }: Page): boolean => isEarnPath(id);
+
+export const isRouteEarnGold = ({ route: { id } }: Page): boolean => isEarnGoldPath(id);
 
 const tokenUrl = ({
 	token: {
@@ -108,8 +113,8 @@ export const back = async ({ pop }: { pop: boolean }) => {
 	await goto('/');
 };
 
-export const gotoReplaceRoot = async () => {
-	await goto('/', { replaceState: true });
+export const gotoReplaceRoot = async (deleteIdbCache = false) => {
+	await goto(deleteIdbCache ? `/?${PARAM_DELETE_IDB_CACHE}=true` : '/', { replaceState: true });
 };
 
 export const removeSearchParam = ({ url, searchParam }: { url: URL; searchParam: string }) => {

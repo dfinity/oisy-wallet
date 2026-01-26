@@ -6,6 +6,7 @@
 	import SwapProviderListItem from '$lib/components/swap/SwapProviderListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { SWAP_MODAL_SELECT_PROVIDER_STEP } from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -58,7 +59,7 @@
 	};
 </script>
 
-<div class=" mb-4 overflow-y-auto overscroll-contain">
+<div class=" mb-4 overflow-y-auto overscroll-contain" data-tid={SWAP_MODAL_SELECT_PROVIDER_STEP}>
 	<div class="flex w-full flex-row justify-between border-b border-solid border-primary pb-2">
 		<span class="text-sm text-tertiary">{$i18n.swap.text.swap_provider}</span>
 		<span class="text-sm text-tertiary">{$i18n.swap.text.you_receive}</span>

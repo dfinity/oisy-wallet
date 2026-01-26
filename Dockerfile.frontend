@@ -36,6 +36,7 @@ RUN echo $ENV
 RUN echo $DFX_NETWORK
 
 RUN npm ci
+RUN npm run prepare
 RUN npm run build
 RUN scripts/build.frontend-report.sh > build/build-report.txt
 

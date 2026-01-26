@@ -20,7 +20,6 @@ import {
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK
 } from '$env/networks/networks.sol.env';
-import type { EthereumNetwork } from '$eth/types/network';
 import * as appConstants from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
@@ -221,7 +220,7 @@ describe('networks.utils', () => {
 		];
 
 		it.each(evmCases)('$label uses /address/', ({ network }) => {
-			const base = (network as EthereumNetwork).explorerUrl;
+			const base = network.explorerUrl;
 			const url = getContractExplorerUrl({ network, contractAddress: ADDR });
 
 			expect(url).toBe(`${base}/address/${ADDR}`);

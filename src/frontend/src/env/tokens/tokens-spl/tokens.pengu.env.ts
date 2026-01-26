@@ -14,7 +14,7 @@ export const PENGU_TOKEN_ID: TokenId = parseTokenId(PENGU_SYMBOL);
 export const PENGU_TOKEN: RequiredSplToken = {
 	id: PENGU_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Pudgy Penguins',
 	symbol: PENGU_SYMBOL,

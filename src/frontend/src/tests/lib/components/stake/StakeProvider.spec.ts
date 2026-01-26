@@ -15,7 +15,7 @@ describe('StakeProvider', () => {
 		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: ICP_TOKEN })]]);
 	const props = {
 		provider: StakeProviderType.GLDT,
-		content: mockSnippet
+		terms: [mockSnippet]
 	};
 
 	it('renders provided provider data correctly', () => {

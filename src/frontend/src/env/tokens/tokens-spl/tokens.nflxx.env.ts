@@ -14,7 +14,7 @@ export const NFLXX_TOKEN_ID: TokenId = parseTokenId(NFLXX_SYMBOL);
 export const NFLXX_TOKEN: RequiredSpl2022Token = {
 	id: NFLXX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Netflix xStock',
 	symbol: NFLXX_SYMBOL,

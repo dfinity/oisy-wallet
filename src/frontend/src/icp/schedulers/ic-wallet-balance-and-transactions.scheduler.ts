@@ -4,6 +4,7 @@ import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import type { GetTransactions } from '$icp/types/ic.post-message';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
+import { createQueryAndUpdateWithWarmup } from '$lib/services/query.services';
 import type {
 	PostMessageDataRequestDip20,
 	PostMessageDataRequestIcp,
@@ -11,12 +12,9 @@ import type {
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { isNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
-import type { Transaction, TransactionWithId } from '@icp-sdk/canisters/ledger/icp';
-import type {
-	IcrcIndexNgTransaction,
-	IcrcIndexNgTransactionWithId
-} from '@icp-sdk/canisters/ledger/icrc';
+import { isNullish, jsonReplacer } from '@dfinity/utils';
+import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
@@ -29,17 +27,33 @@ interface IcWalletStore<T> {
 }
 
 export type GetBalanceAndTransactions<
-	TWithId extends IcrcIndexNgTransactionWithId | TransactionWithId | Dip20TransactionWithId
+	TWithId extends
+		| IcrcIndexDid.TransactionWithId
+		| IcpIndexDid.TransactionWithId
+		| Dip20TransactionWithId
 > = GetTransactions & { transactions: TWithId[] };
 
 export class IcWalletBalanceAndTransactionsScheduler<
-	T extends IcrcIndexNgTransaction | Transaction | Event,
-	TWithId extends IcrcIndexNgTransactionWithId | TransactionWithId | Dip20TransactionWithId,
+	T extends IcrcIndexDid.Transaction | IcpIndexDid.Transaction | Event,
+	TWithId extends
+		| IcrcIndexDid.TransactionWithId
+		| IcpIndexDid.TransactionWithId
+		| Dip20TransactionWithId,
 	PostMessageDataRequest extends
 		| PostMessageDataRequestIcrcStrict
 		| PostMessageDataRequestIcp
 		| PostMessageDataRequestDip20
 > extends IcWalletScheduler<PostMessageDataRequest> {
+	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
+
+	private get queryAndUpdateWithWarmup() {
+		if (isNullish(this._queryAndUpdateWithWarmup)) {
+			this._queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+		}
+
+		return this._queryAndUpdateWithWarmup;
+	}
+
 	private store: IcWalletStore<T> = {
 		balance: undefined,
 		transactions: {}
@@ -70,7 +84,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 		identity,
 		...data
 	}: SchedulerJobData<PostMessageDataRequest>) => {
-		await queryAndUpdate<GetBalanceAndTransactions<TWithId>>({
+		await this.queryAndUpdateWithWarmup<GetBalanceAndTransactions<TWithId>>({
 			request: ({ identity: _, certified }) =>
 				this.getBalanceAndTransactions({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => {
@@ -78,8 +92,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 				this.cleanTransactions({ certified });
 			},
 			onUpdateError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
-			identity,
-			resolution: 'all_settled'
+			identity
 		});
 	};
 

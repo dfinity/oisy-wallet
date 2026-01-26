@@ -73,7 +73,7 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrow(
+			await expect(result).rejects.toThrowError(
 				new CanisterInternalError('Internal error: Failed to find pool')
 			);
 		});
@@ -87,7 +87,7 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrow(mockResponseError);
+			await expect(result).rejects.toThrowError(mockResponseError);
 		});
 
 		it('throws error for unexpected structure', async () => {
@@ -98,7 +98,7 @@ describe('icp_swap_factory.canister', () => {
 
 			const result = getPool(args);
 
-			await expect(result).rejects.toThrow();
+			await expect(result).rejects.toThrowError();
 		});
 	});
 });

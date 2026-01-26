@@ -20,7 +20,9 @@ pub fn add_to_user_token<T>(
         if token.get_version() == existing_token.get_version() {
             *existing_token = token.with_incremented_version();
         } else {
-            ic_cdk::trap("Version mismatch, token update not allowed");
+            ic_cdk::trap(&format!(
+                "Version mismatch, token update not allowed. Existing token: {existing_token:?}, New token: {token:?}"
+            ));
         }
     } else {
         if tokens.len() == MAX_TOKEN_LIST_LENGTH {

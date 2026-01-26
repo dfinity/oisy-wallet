@@ -5,6 +5,7 @@
 	import CkBtcUpdateBalanceListener from '$icp/components/core/CkBtcUpdateBalanceListener.svelte';
 	import BalancesIdbSetter from '$lib/components/balances/BalancesIdbSetter.svelte';
 	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
+	import StakeContext from '$lib/components/earning/StakeContext.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import Guards from '$lib/components/guard/Guards.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
@@ -39,7 +40,9 @@
 											<LoaderContacts>
 												<TransactionsIdbSetter>
 													<BalancesIdbSetter>
-														{@render children()}
+														<StakeContext>
+															{@render children()}
+														</StakeContext>
 													</BalancesIdbSetter>
 												</TransactionsIdbSetter>
 											</LoaderContacts>

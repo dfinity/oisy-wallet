@@ -32,7 +32,13 @@
 	);
 </script>
 
-<StakeReview {amount} disabled={invalid} {onBack} onConfirm={onStake}>
+<StakeReview
+	actionButtonLabel={$i18n.stake.text.stake_now}
+	{amount}
+	disabled={invalid}
+	{onBack}
+	onConfirm={onStake}
+>
 	{#snippet subtitle()}
 		{$i18n.stake.text.stake_review_subtitle}
 	{/snippet}
@@ -44,7 +50,7 @@
 	{/snippet}
 
 	{#snippet provider()}
-		<GldtStakeProvider />
+		<GldtStakeProvider showAllTerms />
 	{/snippet}
 
 	{#snippet network()}

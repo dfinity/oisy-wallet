@@ -16,7 +16,7 @@ describe('pow-protector.services', () => {
 			const timestamp = 1234567890n;
 			const difficulty = 0;
 
-			await expect(solvePowChallenge({ timestamp, difficulty })).rejects.toThrow(
+			await expect(solvePowChallenge({ timestamp, difficulty })).rejects.toThrowError(
 				'Difficulty must be greater than zero'
 			);
 		});
@@ -25,7 +25,7 @@ describe('pow-protector.services', () => {
 			const timestamp = 1234567890n;
 			const difficulty = -1;
 
-			await expect(solvePowChallenge({ timestamp, difficulty })).rejects.toThrow(
+			await expect(solvePowChallenge({ timestamp, difficulty })).rejects.toThrowError(
 				'Difficulty must be greater than zero'
 			);
 		});

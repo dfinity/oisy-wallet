@@ -11,7 +11,7 @@ describe('token-group.validation', () => {
 		it('should fail to parse non-string input', () => {
 			const invalidInput = 123;
 
-			expect(() => parseTokenGroupId(invalidInput as unknown as string)).toThrow();
+			expect(() => parseTokenGroupId(invalidInput as unknown as string)).toThrowError();
 		});
 	});
 });

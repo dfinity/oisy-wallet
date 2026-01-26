@@ -1,13 +1,13 @@
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
-import NftHero from '$lib/components/nfts/NftHero.svelte';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
 	NFT_COLLECTION_ACTION_SPAM,
 	NFT_HIDDEN_BADGE
 } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { extractMediaUrls } from '$lib/services/url.services';
 import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
@@ -18,6 +18,10 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 
+vi.mock('$lib/services/url.services', () => ({
+	extractMediaUrls: vi.fn()
+}));
+
 describe('NftCollectionHero', () => {
 	const spamButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_SPAM}"]`;
 	const hideButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_HIDE}"]`;
@@ -25,11 +29,19 @@ describe('NftCollectionHero', () => {
 
 	const mockToken: NonFungibleToken = {
 		...AZUKI_ELEMENTAL_BEANS_TOKEN,
+		standard: {
+			...AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
+			version: 'standard-version'
+		},
 		network: POLYGON_MAINNET_NETWORK,
 		description: 'Some descriptive text'
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
+		vi.mocked(extractMediaUrls).mockResolvedValue([]);
+
 		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
 	});
 
@@ -53,9 +65,15 @@ describe('NftCollectionHero', () => {
 
 		expect(description).toBeInTheDocument();
 
-		const standard: HTMLElement | null = getByText(mockToken.standard);
+		const standard: HTMLElement | null = getByText(mockToken.standard.code);
 
 		expect(standard).toBeInTheDocument();
+
+		assertNonNullish(mockToken.standard.version);
+
+		const standardVersion: HTMLElement | null = getByText(mockToken.standard.version);
+
+		expect(standardVersion).toBeInTheDocument();
 
 		const address: HTMLElement | null = getByText(
 			shortenWithMiddleEllipsis({ text: mockToken.address })
@@ -124,10 +142,10 @@ describe('NftCollectionHero', () => {
 			value: ETHEREUM_NETWORK_ID.description
 		});
 
-		const { container } = render(NftHero, {
+		const { container } = render(NftCollectionHero, {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
-				nft: mockValidErc1155Nft
+				nfts: mockNftCollectionUi.nfts
 			}
 		});
 
@@ -148,10 +166,10 @@ describe('NftCollectionHero', () => {
 			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
 		});
 
-		const { container } = render(NftHero, {
+		const { container } = render(NftCollectionHero, {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
-				nft: mockValidErc1155Nft
+				nfts: mockNftCollectionUi.nfts
 			}
 		});
 

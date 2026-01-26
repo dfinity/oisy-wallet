@@ -31,7 +31,8 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'binance-smart-chain' },
-	buy: { onramperId: 'bsc' }
+	buy: { onramperId: 'bsc' },
+	pay: { openCryptoPay: 'BinanceSmartChain' }
 };
 
 export const BSC_TESTNET_NETWORK_SYMBOL = 'BSC (Testnet)';

@@ -1,5 +1,5 @@
 import { nonNullish } from '@dfinity/utils';
-import { ICManagementCanister, InstallMode } from '@icp-sdk/canisters/ic-management';
+import { IcManagementCanister } from '@icp-sdk/canisters/ic-management';
 import { IDL } from '@icp-sdk/core/candid';
 import { Principal } from '@icp-sdk/core/principal';
 import { copyFile, readFile } from 'node:fs/promises';
@@ -10,17 +10,15 @@ await copyFile(
 	'./node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_ledger.idl.js',
 	'./node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_ledger.idl.mjs'
 );
-const { init: initLedger } = await import(
-	'../node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_ledger.idl.mjs'
-);
+const { init: initLedger } =
+	await import('../node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_ledger.idl.mjs');
 
 await copyFile(
 	'./node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_index-ng.idl.js',
 	'./node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_index-ng.idl.mjs'
 );
-const { init: initIndex } = await import(
-	'../node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_index-ng.idl.mjs'
-);
+const { init: initIndex } =
+	await import('../node_modules/@icp-sdk/canisters/ledger/icrc/candid/icrc_index-ng.idl.mjs');
 
 /**
  * Init arguments and other properties
@@ -49,7 +47,7 @@ const INDEX_WASM_PATH = join(process.cwd(), 'target', 'ic', 'ckbtc_index.wasm.gz
  */
 
 const createCanister = async ({ identity, agent, canisterId: canisterIdParam }) => {
-	const { provisionalCreateCanisterWithCycles } = ICManagementCanister.create({
+	const { provisionalCreateCanisterWithCycles } = IcManagementCanister.create({
 		agent
 	});
 
@@ -62,12 +60,12 @@ const createCanister = async ({ identity, agent, canisterId: canisterIdParam }) 
 };
 
 const installCode = async ({ agent, wasmPath, canisterId, arg }) => {
-	const { installCode } = ICManagementCanister.create({
+	const { installCode } = IcManagementCanister.create({
 		agent
 	});
 
 	await installCode({
-		mode: InstallMode.Install,
+		mode: { install: null },
 		canisterId: Principal.from(canisterId),
 		wasmModule: await readFile(wasmPath),
 		arg: new Uint8Array(arg)

@@ -4,6 +4,7 @@
 	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { isErc20Icp } from '$eth/utils/token.utils';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import {
 		isGLDTToken as isGLDTTokenUtil,
 		isVCHFToken as isVCHFTokenUtil,
@@ -38,6 +39,7 @@
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
@@ -49,6 +51,7 @@
 			? mapTokenUi({
 					token: $pageToken,
 					$balances: $balancesStore,
+					$stakeBalances,
 					$exchanges
 				})
 			: undefined
@@ -74,8 +77,10 @@
 
 	let isNftsPage = $derived(isRouteNfts(page));
 
+	let hasNoUsableBalance = $derived(!$isIcMintingAccount && ($balanceZero || isNullish($balance)));
+
 	$effect(() => {
-		outflowActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
+		outflowActionsDisabled.set(isTransactionsPage && hasNoUsableBalance);
 	});
 
 	$effect(() => {

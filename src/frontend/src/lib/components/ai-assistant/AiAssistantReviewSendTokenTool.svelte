@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import UtxosFeeContexts from '$btc/components/fee/UtxosFeeContexts.svelte';
+	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import { selectedEvmNetwork } from '$evm/derived/network.derived';
 	import { evmNativeToken } from '$evm/derived/token.derived';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
@@ -21,6 +22,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ReviewSendTokensToolResult } from '$lib/types/ai-assistant';
 	import {
+		isNetworkEthereum,
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
@@ -80,7 +82,7 @@
 				{sendEnabled}
 				sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			/>
-		{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken)}
+		{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken) && isNetworkEthereum($sendToken.network)}
 			<AiAssistantReviewSendEthToken
 				{amount}
 				{destination}
@@ -88,16 +90,20 @@
 				{onSendCompleted}
 				{sendCompleted}
 				{sendEnabled}
-				sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
+				sourceNetwork={$selectedEvmNetwork ?? $sendToken.network}
 			/>
 		{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
-			<AiAssistantReviewSendBtcToken
-				{amount}
-				{destination}
-				{onSendCompleted}
-				{sendCompleted}
-				{sendEnabled}
-			/>
+			<UtxosFeeContexts>
+				<UtxosFeeLoader {amount} networkId={$sendTokenNetworkId} source={destination}>
+					<AiAssistantReviewSendBtcToken
+						{amount}
+						{destination}
+						{onSendCompleted}
+						{sendCompleted}
+						{sendEnabled}
+					/>
+				</UtxosFeeLoader>
+			</UtxosFeeContexts>
 		{:else if isNetworkIdSolana($sendToken.network.id)}
 			<AiAssistantReviewSendSolToken
 				{amount}

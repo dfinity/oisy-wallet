@@ -9,16 +9,17 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { StakeProvider } from '$lib/types/stake';
 	import { formatStakeApyNumber } from '$lib/utils/format.utils';
-	import { resolveText, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { resolveText } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		provider: StakeProvider;
 		content: Snippet;
+		pageTitle: string;
 		backButton?: Snippet;
 		currentApy?: number;
 	}
 
-	let { provider, content, backButton, currentApy }: Props = $props();
+	let { provider, content, backButton, pageTitle, currentApy }: Props = $props();
 </script>
 
 <StakeContentSection {content}>
@@ -38,9 +39,7 @@
 			/>
 
 			<h2 class="my-2 text-xl font-bold sm:text-2xl">
-				{replacePlaceholders($i18n.stake.text.stake_page_title, {
-					$provider: stakeProvidersConfig[provider].name
-				})}
+				{pageTitle}
 			</h2>
 
 			<div class="text-sm sm:text-base">

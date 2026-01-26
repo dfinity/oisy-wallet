@@ -7,19 +7,20 @@ describe('EarningOpportunityCard', () => {
 	const props = {
 		logo: createMockSnippet('logo'),
 		badge: createMockSnippet('badge'),
-		title: createMockSnippet('title'),
+		titles: ['title1', 'title2'],
 		description: createMockSnippet('description'),
 		button: createMockSnippet('button')
 	};
 
 	it('renders all snippet sections (logo, badge, title, description, button)', () => {
-		render(EarningOpportunityCard, props);
+		const { getByTestId, getByText } = render(EarningOpportunityCard, props);
 
-		expect(screen.getByTestId('logo')).toBeInTheDocument();
-		expect(screen.getByTestId('badge')).toBeInTheDocument();
-		expect(screen.getByTestId('title')).toBeInTheDocument();
-		expect(screen.getByTestId('description')).toBeInTheDocument();
-		expect(screen.getByTestId('button')).toBeInTheDocument();
+		expect(getByTestId('logo')).toBeInTheDocument();
+		expect(getByTestId('badge')).toBeInTheDocument();
+		expect(getByText('title1')).toBeInTheDocument();
+		expect(getByText('title2')).toBeInTheDocument();
+		expect(getByTestId('description')).toBeInTheDocument();
+		expect(getByTestId('button')).toBeInTheDocument();
 	});
 
 	it('applies the expected container classes', () => {

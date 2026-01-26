@@ -53,7 +53,7 @@
 	});
 </script>
 
-{#if nonNullish($gldtStakeStore?.position)}
+{#if nonNullish($gldtStakeStore?.position) && rewardTokens.length > 0}
 	<StakeContentSection>
 		{#snippet title()}
 			<h4>{$i18n.stake.text.unclaimed_rewards}</h4>

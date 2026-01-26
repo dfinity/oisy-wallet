@@ -258,7 +258,7 @@ describe('solana.api', () => {
 					address: mockSolAddress,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should throw error when address is empty', async () => {
@@ -267,7 +267,7 @@ describe('solana.api', () => {
 					address: '',
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 	});
 
@@ -329,7 +329,7 @@ describe('solana.api', () => {
 					ataAddress: mockAtaAddress,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should throw error when address is empty', async () => {
@@ -338,7 +338,7 @@ describe('solana.api', () => {
 					ataAddress: '',
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 	});
 
@@ -499,7 +499,7 @@ describe('solana.api', () => {
 					network: SolanaNetworks.mainnet,
 					tokenAddress: DEVNET_EURC_TOKEN.address
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should throw an error when address is empty', async () => {
@@ -509,7 +509,7 @@ describe('solana.api', () => {
 					network: SolanaNetworks.mainnet,
 					tokenAddress: DEVNET_EURC_TOKEN.address
 				})
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 
 		it('should throw an error when token address is empty', async () => {
@@ -519,7 +519,7 @@ describe('solana.api', () => {
 					network: SolanaNetworks.mainnet,
 					tokenAddress: ''
 				})
-			).rejects.toThrow();
+			).rejects.toThrowError();
 		});
 	});
 
@@ -536,7 +536,7 @@ describe('solana.api', () => {
 				send: () => Promise.reject(mockError)
 			});
 
-			await expect(getSolCreateAccountFee(SolanaNetworks.mainnet)).rejects.toThrow(mockError);
+			await expect(getSolCreateAccountFee(SolanaNetworks.mainnet)).rejects.toThrowError(mockError);
 		});
 	});
 
@@ -584,7 +584,7 @@ describe('solana.api', () => {
 				send: () => Promise.reject(mockError)
 			});
 
-			await expect(estimatePriorityFee({ network: SolanaNetworks.mainnet })).rejects.toThrow(
+			await expect(estimatePriorityFee({ network: SolanaNetworks.mainnet })).rejects.toThrowError(
 				mockError
 			);
 		});
@@ -651,7 +651,7 @@ describe('solana.api', () => {
 					address: mockAddress3,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should not throw error when RPC call fails but the info was already cached', async () => {
@@ -750,7 +750,7 @@ describe('solana.api', () => {
 					address: mockSplAddress,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should handle correctly when info are not complete', async () => {
@@ -897,7 +897,7 @@ describe('solana.api', () => {
 					address: mockSplAddress,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 
 		it('should return undefined when owner is not found', async () => {
@@ -975,7 +975,7 @@ describe('solana.api', () => {
 					address: mockSplAddress,
 					network: SolanaNetworks.mainnet
 				})
-			).rejects.toThrow(mockError);
+			).rejects.toThrowError(mockError);
 		});
 	});
 });

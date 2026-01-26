@@ -12,9 +12,24 @@
 		content: Snippet;
 		footer?: Snippet;
 		contentClass?: string;
+		testId?: string;
+		onClose?: () => void;
 	}
 
-	let { visible = $bindable(), content, footer, contentClass = 'min-h-[30vh]' }: Props = $props();
+	let {
+		visible = $bindable(),
+		content,
+		footer,
+		contentClass = 'min-h-[30vh]',
+		testId,
+		onClose
+	}: Props = $props();
+
+	const handleClose = () => {
+		visible = false;
+
+		onClose?.();
+	};
 
 	$effect(() => {
 		bottomSheetOpenStore.set(visible);
@@ -22,13 +37,13 @@
 </script>
 
 {#if visible}
-	<div class="fixed inset-0 z-14">
+	<div class="fixed inset-0 z-14" data-tid={testId}>
 		<BottomSheet transition>
 			{#snippet header()}
 				<div class="w-full p-4">
 					<ButtonIcon
 						ariaLabel={$i18n.core.alt.close_details}
-						onclick={() => (visible = false)}
+						onclick={handleClose}
 						styleClass="text-disabled float-right"
 					>
 						{#snippet icon()}
@@ -47,6 +62,6 @@
 				</div>
 			{/if}
 		</BottomSheet>
-		<Backdrop on:nnsClose={() => (visible = false)} />
+		<Backdrop on:nnsClose={handleClose} />
 	</div>
 {/if}

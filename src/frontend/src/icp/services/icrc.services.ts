@@ -1,10 +1,15 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
+import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
+import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
+import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
-import { balance, allowance as icrcAllowance, metadata } from '$icp/api/icrc-ledger.api';
-import { buildIndexedDip20Tokens } from '$icp/services/dip20-tokens.services';
-import { buildIndexedIcpTokens } from '$icp/services/icp-tokens.services';
-import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
+import {
+	balance,
+	getMintingAccount,
+	allowance as icrcAllowance,
+	metadata
+} from '$icp/api/icrc-ledger.api';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -27,6 +32,7 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
+import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
@@ -36,8 +42,7 @@ import {
 	isNullish,
 	nonNullish,
 	queryAndUpdate,
-	type QueryAndUpdateRequestParams,
-	type QueryAndUpdateStrategy
+	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -59,50 +64,26 @@ export const loadCustomTokens = ({
 	identity,
 	useCache = false,
 	onSuccess
-}: {
-	identity: OptionIdentity;
-	useCache?: boolean;
+}: Omit<LoadCustomTokenParams, 'certified'> & {
 	onSuccess?: () => void;
 }): Promise<void> =>
 	queryAndUpdate<IcrcCustomToken[]>({
 		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
 		onLoad: (params) => loadIcrcCustomData({ ...params, onSuccess }),
-		onUpdateError: ({ error: err }) => {
-			icrcCustomTokensStore.resetAll();
-
-			trackEvent({
-				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
-				metadata: mapIcErrorMetadata(err)
-			});
-
-			toastsError({
-				msg: { text: get(i18n).init.error.icrc_canisters },
-				err
-			});
-		},
+		onUpdateError: onCustomTokensUpdateError,
 		identity
 	});
 
 const loadDefaultIcrc = ({
-	data: { ledgerCanisterId, ...data },
-	strategy
+	data: { ledgerCanisterId, ...data }
 }: {
 	data: IcInterface;
-	strategy?: QueryAndUpdateStrategy;
 }): Promise<void> =>
 	queryAndUpdate<IcrcLoadData>({
 		request: (params) =>
 			requestIcrcMetadata({ ...params, ...data, ledgerCanisterId, category: 'default' }),
 		onLoad: loadIcrcData,
-		onUpdateError: ({ error: err }) => {
-			icrcDefaultTokensStore.reset(ledgerCanisterId);
-
-			trackEvent({
-				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
-				metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
-			});
-		},
-		strategy,
+		onUpdateError: (params) => onDefaultTokensUpdateError({ ...params, ledgerCanisterId }),
 		identity: new AnonymousIdentity()
 	});
 
@@ -133,21 +114,19 @@ const loadIcrcData = ({
 const loadIcrcCustomTokens = async ({
 	identity,
 	certified,
+	tokens,
 	useCache = false
-}: {
-	identity: OptionIdentity;
-	certified: boolean;
-	useCache?: boolean;
-}): Promise<IcrcCustomToken[]> => {
-	const tokens = await loadNetworkCustomTokens({
-		identity,
-		certified,
-		filterTokens: ({ token }) => 'Icrc' in token,
-		useCache
-	});
+}: LoadCustomTokenParams): Promise<IcrcCustomToken[]> => {
+	const customTokens =
+		tokens ??
+		(await loadNetworkCustomTokens({
+			identity,
+			certified,
+			useCache
+		}));
 
 	return await loadCustomIcrcTokensData({
-		tokens,
+		tokens: customTokens,
 		identity,
 		certified
 	});
@@ -163,15 +142,13 @@ const loadCustomIcrcTokensData = async ({
 	identity: OptionIdentity;
 }): Promise<IcrcCustomToken[]> => {
 	const indexedIcrcCustomTokens = {
-		...buildIndexedIcpTokens(),
-		...buildIndexedIcrcCustomTokens(),
-		...buildIndexedDip20Tokens()
+		...SUPPORTED_ICP_TOKENS_INDEXED,
+		...SNS_BUILTIN_TOKENS_INDEXED,
+		...DIP20_BUILTIN_TOKENS_INDEXED
 	};
 
-	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
-		custom_token: CustomToken,
-		index: number
+		custom_token: CustomToken
 	): Promise<IcrcCustomToken | undefined> => {
 		const { enabled, version: v, token } = custom_token;
 
@@ -193,13 +170,13 @@ const loadCustomIcrcTokensData = async ({
 			ledgerCanisterId: ledgerCanisterIdText
 		});
 
+		const serviceParams = { ledgerCanisterId: ledgerCanisterIdText, identity, certified };
+
 		const data: IcrcLoadData = {
-			metadata: nonNullish(meta)
-				? meta
-				: await metadata({ ledgerCanisterId: ledgerCanisterIdText, identity, certified }),
+			metadata: nonNullish(meta) ? meta : await metadata(serviceParams),
+			mintingAccount: await getMintingAccount(serviceParams),
 			ledgerCanisterId: ledgerCanisterIdText,
 			...(nonNullish(indexCanisterId) && { indexCanisterId: indexCanisterId.toText() }),
-			position: ICRC_TOKENS.length + 1 + index,
 			category: 'custom',
 			icrcCustomTokens: indexedIcrcCustomTokens
 		};
@@ -233,7 +210,7 @@ const loadCustomIcrcTokensData = async ({
 
 				const ledgerCanisterId = ledger_id.toText();
 
-				icrcCustomTokensStore.reset(ledgerCanisterId);
+				icrcCustomTokensStore.resetByIdentifier(ledgerCanisterId);
 
 				// To avoid polluting the screen, we show the toast error only after the update call.
 				if (enabled && certified) {
@@ -269,6 +246,35 @@ const loadIcrcCustomData = ({
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
+const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {
+	icrcCustomTokensStore.resetAll();
+
+	trackEvent({
+		name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+		metadata: mapIcErrorMetadata(err)
+	});
+
+	toastsError({
+		msg: { text: get(i18n).init.error.icrc_canisters },
+		err
+	});
+};
+
+const onDefaultTokensUpdateError = ({
+	error: err,
+	ledgerCanisterId
+}: {
+	error: unknown;
+	ledgerCanisterId: LedgerCanisterIdText;
+}) => {
+	icrcDefaultTokensStore.reset(ledgerCanisterId);
+
+	trackEvent({
+		name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+		metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
+	});
+};
+
 // TODO: Refactor to use queryAndUpdate
 export const loadDisabledIcrcTokensBalances = async ({
 	identity,
@@ -277,12 +283,15 @@ export const loadDisabledIcrcTokensBalances = async ({
 	identity: Identity;
 	disabledIcrcTokens: IcToken[];
 }): Promise<void> => {
+	const certified = true;
+
 	const results = await Promise.allSettled(
 		disabledIcrcTokens.map(async ({ ledgerCanisterId, id }) => {
 			const icrcTokenBalance = await balance({
 				identity,
 				owner: identity.getPrincipal(),
-				ledgerCanisterId
+				ledgerCanisterId,
+				certified
 			});
 
 			return { id, icrcTokenBalance };
@@ -297,7 +306,7 @@ export const loadDisabledIcrcTokensBalances = async ({
 				id,
 				data: {
 					data: icrcTokenBalance,
-					certified: true
+					certified
 				}
 			});
 		}

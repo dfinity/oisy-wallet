@@ -17,6 +17,7 @@
 	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getNftDisplayImageUrl, getNftDisplayName } from '$lib/utils/nft.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
@@ -49,12 +50,9 @@
 		return breadcrumbs;
 	});
 
-	const normalizedNftName = $derived.by(() => {
-		if (nonNullish(nft?.name)) {
-			// sometimes NFT names include the number itself, in that case we do not display the number
-			return nft.name.includes(`#${nft.id}`) ? nft.name : `${nft.name} #${nft.id}`;
-		}
-	});
+	const normalizedNftName = $derived(nonNullish(nft) ? getNftDisplayName(nft) : undefined);
+
+	let nftDisplayImageUrl = $derived(nonNullish(nft) ? getNftDisplayImageUrl(nft) : undefined);
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:fade>
@@ -69,11 +67,11 @@
 				showMessage={false}
 				type="hero-banner"
 			>
-				<BgImg imageUrl={nft?.imageUrl} size="cover" styleClass=" blur" />
+				<BgImg imageUrl={nftDisplayImageUrl} size="cover" styleClass=" blur" />
 			</NftDisplayGuard>
 		</div>
 
-		{#if nonNullish(nft?.imageUrl)}
+		{#if nonNullish(nft) && nonNullish(nftDisplayImageUrl)}
 			<div class="absolute flex h-full w-full items-center justify-center text-center">
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
 					<NftDisplayGuard
@@ -92,7 +90,7 @@
 									data: nft
 								})}
 						>
-							<Img src={nft.imageUrl} styleClass="max-h-full max-w-full" />
+							<Img src={nftDisplayImageUrl} styleClass="max-h-full max-w-full w-full" />
 						</button>
 					</NftDisplayGuard>
 					<span class="absolute right-0 bottom-0 m-2.5">

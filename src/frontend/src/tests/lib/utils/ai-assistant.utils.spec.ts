@@ -88,6 +88,10 @@ describe('ai-assistant.utils', () => {
 						{
 							value: 'ICP',
 							name: 'tokenSymbol'
+						},
+						{
+							value: 'ICP',
+							name: 'networkId'
 						}
 					],
 					tokens: [ICP_TOKEN, ETHEREUM_TOKEN, BTC_MAINNET_TOKEN],
@@ -102,6 +106,33 @@ describe('ai-assistant.utils', () => {
 				id: mockRandomUUID,
 				sendCompleted: false
 			});
+		});
+
+		it('returns undefined when the token could not be identified', () => {
+			expect(
+				parseReviewSendTokensToolArguments({
+					filterParams: [
+						{
+							value: extendedAddressContactUi.addresses[0].id,
+							name: 'selectedContactAddressId'
+						},
+						{
+							value: `${sendValue}`,
+							name: 'amountNumber'
+						},
+						{
+							value: 'RandomToken',
+							name: 'tokenSymbol'
+						},
+						{
+							value: 'RandomNetwork',
+							name: 'networkId'
+						}
+					],
+					tokens: [ICP_TOKEN, ETHEREUM_TOKEN, BTC_MAINNET_TOKEN],
+					extendedAddressContacts: storeData
+				})
+			).toBeUndefined();
 		});
 
 		it('returns correct result when address is provided', () => {

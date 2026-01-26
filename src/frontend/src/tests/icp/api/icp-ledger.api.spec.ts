@@ -8,8 +8,12 @@ import {
 	mockPrincipalText2
 } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
-import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@icp-sdk/canisters/ledger/icp';
-import type { IcrcAccount, IcrcBlockIndex } from '@icp-sdk/canisters/ledger/icrc';
+import {
+	AccountIdentifier,
+	IcpLedgerCanister,
+	type BlockHeight
+} from '@icp-sdk/canisters/ledger/icp';
+import type { IcrcAccount, IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('$icp/utils/date.utils', () => ({
@@ -17,12 +21,12 @@ vi.mock('$icp/utils/date.utils', () => ({
 }));
 
 describe('icp-ledger.api', () => {
-	const ledgerCanisterMock = mock<LedgerCanister>();
+	const ledgerCanisterMock = mock<IcpLedgerCanister>();
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(LedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
+		vi.spyOn(IcpLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 	});
 
 	describe('transfer', () => {
@@ -53,11 +57,11 @@ describe('icp-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(transfer({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 
 		it('throws an error if provided "to" string is not a valid AccountIdentifier', async () => {
-			await expect(transfer({ ...params, to: mockPrincipalText2 })).rejects.toThrow();
+			await expect(transfer({ ...params, to: mockPrincipalText2 })).rejects.toThrowError();
 		});
 	});
 
@@ -83,7 +87,7 @@ describe('icp-ledger.api', () => {
 			ledgerCanisterId: mockLedgerCanisterId
 		};
 
-		const mockIndex: IcrcBlockIndex = 123n;
+		const mockIndex: IcrcIndexDid.BlockIndex = 123n;
 
 		beforeEach(() => {
 			ledgerCanisterMock.icrc1Transfer.mockResolvedValue(mockIndex);
@@ -116,7 +120,7 @@ describe('icp-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(icrc1Transfer({ ...params, identity: undefined })).rejects.toThrow();
+			await expect(icrc1Transfer({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 	});
 });

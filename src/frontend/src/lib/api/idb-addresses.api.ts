@@ -17,7 +17,7 @@ import type {
 import type { SolAddress } from '$sol/types/address';
 import { isNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
-import { clear, createStore, del, get, set, update, type UseStore } from 'idb-keyval';
+import { clear, createStore, get, set, update, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.
 const idbAddressesStore = (key: string): UseStore =>
@@ -108,17 +108,14 @@ export const getIdbEthAddress = (principal: Principal): Promise<IdbEthAddress | 
 export const getIdbSolAddressMainnet = (principal: Principal): Promise<IdbSolAddress | undefined> =>
 	get(principal.toText(), idbSolAddressesStoreMainnet);
 
-export const deleteIdbBtcAddressMainnet = (principal: Principal): Promise<void> =>
-	del(principal.toText(), idbBtcAddressesStoreMainnet);
-
-export const deleteIdbEthAddress = (principal: Principal): Promise<void> =>
-	del(principal.toText(), idbEthAddressesStore);
-
-export const deleteIdbSolAddressMainnet = (principal: Principal): Promise<void> =>
-	del(principal.toText(), idbSolAddressesStoreMainnet);
-
 export const clearIdbBtcAddressMainnet = (): Promise<void> => clear(idbBtcAddressesStoreMainnet);
+
+export const clearIdbBtcAddressTestnet = (): Promise<void> => clear(idbBtcAddressesStoreTestnet);
 
 export const clearIdbEthAddress = (): Promise<void> => clear(idbEthAddressesStore);
 
 export const clearIdbSolAddressMainnet = (): Promise<void> => clear(idbSolAddressesStoreMainnet);
+
+export const clearIdbSolAddressDevnet = (): Promise<void> => clear(idbSolAddressesStoreDevnet);
+
+export const clearIdbSolAddressLocal = (): Promise<void> => clear(idbSolAddressesStoreLocal);

@@ -12,7 +12,8 @@ describe('StakeReview', () => {
 		amount: 0.01,
 		disabled: false,
 		onConfirm: () => {},
-		onBack: () => {}
+		onBack: () => {},
+		actionButtonLabel: 'Stake'
 	};
 
 	it('should keep the next button clickable if all requirements are met', () => {

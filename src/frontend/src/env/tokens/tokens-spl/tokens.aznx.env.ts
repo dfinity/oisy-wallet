@@ -14,7 +14,7 @@ export const AZNX_TOKEN_ID: TokenId = parseTokenId(AZNX_SYMBOL);
 export const AZNX_TOKEN: RequiredSpl2022Token = {
 	id: AZNX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'AstraZeneca xStock',
 	symbol: AZNX_SYMBOL,

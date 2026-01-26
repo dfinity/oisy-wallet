@@ -14,7 +14,7 @@ export const WBTC_TOKEN_ID: TokenId = parseTokenId(WBTC_SYMBOL);
 export const WBTC_TOKEN: RequiredErc20Token = {
 	id: WBTC_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Wrapped BTC',
 	symbol: WBTC_SYMBOL,
@@ -24,7 +24,7 @@ export const WBTC_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckWBTC',
 	groupData: WBTC_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true,
+	neverCollapseInTokenGroup: true,
 	buy: {
 		onramperId: 'wbtc_ethereum'
 	}

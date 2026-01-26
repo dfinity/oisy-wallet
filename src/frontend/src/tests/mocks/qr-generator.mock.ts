@@ -1,6 +1,6 @@
-import type { EthereumNetwork } from '$eth/types/network';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import type { Token } from '$lib/types/token';
+import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 interface GenerateUrnParams {
@@ -18,12 +18,17 @@ export const generateUrn = ({
 }: GenerateUrnParams): string | undefined => {
 	let urn: string;
 
-	const { name, standard, network } = token;
+	const {
+		name,
+		standard: { code: standard },
+		network
+	} = token;
+
 	const tokenAddress: string | undefined =
 		'address' in token ? (token.address as string) : undefined;
 
 	if (standard === 'erc20' && isNullish(tokenAddress)) {
-		return undefined;
+		return;
 	}
 
 	const prefix =
@@ -32,7 +37,8 @@ export const generateUrn = ({
 	urn = `${prefix}:${destination}`;
 
 	if (standard === 'ethereum' || standard === 'erc20') {
-		urn += nonNullish(network) ? `@${(network as EthereumNetwork).chainId.toString()}` : '';
+		assertIsNetworkEthereum(network);
+		urn += nonNullish(network) ? `@${network.chainId.toString()}` : '';
 	}
 
 	if (standard === 'erc20') {

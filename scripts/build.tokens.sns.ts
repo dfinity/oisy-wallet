@@ -33,6 +33,7 @@ interface ResponseData {
 		ledger_canister_id: CanisterIdText;
 		index_canister_id: CanisterIdText;
 		root_canister_id: CanisterIdText;
+		governance_canister_id: CanisterIdText;
 	};
 	icrc1_metadata: [[string, { Text: string } | { Nat: [number] }]];
 	meta: { name: string; url: z.infer<typeof UrlSchema> };
@@ -156,7 +157,7 @@ const filterCommittedSns = ({
 }: ResponseData) => lifecycle === 3;
 
 const mapSnsMetadata = ({
-	canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
+	canister_ids: { ledger_canister_id, index_canister_id, root_canister_id, governance_canister_id },
 	icrc1_metadata,
 	meta: { name: alternativeName, url }
 }: ResponseData): SnsTokenWithOptionalMetadata => {
@@ -166,6 +167,7 @@ const mapSnsMetadata = ({
 		ledgerCanisterId: ledger_canister_id,
 		indexCanisterId: index_canister_id,
 		rootCanisterId: root_canister_id,
+		governanceCanisterId: governance_canister_id,
 		...(nonNullish(tokenMetadata) && {
 			metadata: {
 				...tokenMetadata,

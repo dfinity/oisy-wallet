@@ -18,7 +18,7 @@ describe('GldtStakeEarnCard', () => {
 		new Map<symbol, GldtStakeContext>([[GLDT_STAKE_CONTEXT_KEY, { store: initGldtStakeStore() }]]);
 	const gldtToken = {
 		...mockIcrcCustomToken,
-		standard: 'icrc',
+		standard: { code: 'icrc' },
 		ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
 		symbol: 'GLDT'
 	} as IcToken;
@@ -26,10 +26,12 @@ describe('GldtStakeEarnCard', () => {
 	beforeEach(() => {
 		icrcCustomTokensStore.resetAll();
 
-		icrcCustomTokensStore.set({
-			data: mockIcrcCustomToken,
-			certified: false
-		});
+		icrcCustomTokensStore.setAll([
+			{
+				data: mockIcrcCustomToken,
+				certified: false
+			}
+		]);
 	});
 
 	it('should display correct values if GLDT token is not available', () => {

@@ -5,17 +5,22 @@
 	interface Props {
 		title: Snippet;
 		content: Snippet;
+		action?: Snippet;
 	}
 
-	let { content, title }: Props = $props();
+	let { content, title, action }: Props = $props();
 </script>
 
-<div class="rounded-xl bg-surface p-4" in:fade>
-	<div class="relative flex w-full items-start justify-between">
+<div class="flex flex-col rounded-xl bg-surface p-4" in:fade>
+	<div class="relative flex w-full items-center justify-between">
 		{@render title()}
+
+		<div>
+			{@render action?.()}
+		</div>
 	</div>
 
-	<div class="mt-2">
+	<div class="mt-2 flex w-full flex-col">
 		{@render content()}
 	</div>
 </div>

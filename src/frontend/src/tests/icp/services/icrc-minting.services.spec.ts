@@ -6,10 +6,12 @@ import { mockIcrcAccount, mockIdentity } from '$tests/mocks/identity.mock';
 
 describe('icrc-minting.services', () => {
 	describe('isUserMintingAccount', () => {
+		const { mintingAccount: _, ...mockToken } = mockValidIcrcToken;
+
 		const params = {
 			identity: mockIdentity,
 			account: mockIcrcAccount,
-			token: mockValidIcrcToken
+			token: mockToken
 		};
 
 		beforeEach(() => {
@@ -28,7 +30,7 @@ describe('icrc-minting.services', () => {
 			await expect(isUserMintingAccount({ ...params, account: undefined })).resolves.toBeFalsy();
 		});
 
-		it('should return false if minting account is nullish', async () => {
+		it('should return false if minting account service returns a nullish account', async () => {
 			vi.spyOn(icrcLedgerApi, 'getMintingAccount').mockResolvedValueOnce(undefined);
 
 			await expect(isUserMintingAccount(params)).resolves.toBeFalsy();
@@ -52,7 +54,7 @@ describe('icrc-minting.services', () => {
 
 			expect(getMintingAccount).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
-				ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId
+				ledgerCanisterId: mockToken.ledgerCanisterId
 			});
 		});
 
@@ -60,7 +62,7 @@ describe('icrc-minting.services', () => {
 			const error = new Error('Test error');
 			vi.spyOn(icrcLedgerApi, 'getMintingAccount').mockRejectedValueOnce(error);
 
-			await expect(isUserMintingAccount(params)).rejects.toThrow(error);
+			await expect(isUserMintingAccount(params)).rejects.toThrowError(error);
 		});
 
 		it('should work with subaccounts in IcrcAccount', async () => {
@@ -73,6 +75,12 @@ describe('icrc-minting.services', () => {
 			await expect(
 				isUserMintingAccount({ ...params, account: { ...mockIcrcAccount, subaccount } })
 			).resolves.toBeTruthy();
+		});
+
+		it('should not call getMintingAccount if minting account is already in the token information', async () => {
+			await isUserMintingAccount({ ...params, token: mockValidIcrcToken });
+
+			expect(getMintingAccount).not.toHaveBeenCalled();
 		});
 	});
 });

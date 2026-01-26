@@ -1,8 +1,10 @@
+import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 import SendButton from '$lib/components/send/SendButton.svelte';
 import { SEND_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 import { isBusy } from '$lib/derived/busy.derived';
 import { busy } from '$lib/stores/busy.store';
 import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores/hero.store';
+import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -23,15 +25,19 @@ describe('SendButton', () => {
 		mockContextStore = initHeroContext();
 
 		mockContextStore.outflowActionsDisabled.set(false);
+
+		isIcMintingAccount.set(false);
 	});
 
 	it('should render the Hero button', () => {
-		const { getByTestId } = render(SendButton, {
+		const { getByTestId, getByText } = render(SendButton, {
 			props,
 			context: mockContext(mockContextStore)
 		});
 
 		expect(getByTestId(SEND_TOKENS_MODAL_OPEN_BUTTON)).toBeInTheDocument();
+
+		expect(getByText(en.send.text.send)).toBeInTheDocument();
 	});
 
 	it('should be enabled if not busy and outflow actions enabled', async () => {
@@ -89,5 +95,18 @@ describe('SendButton', () => {
 		btn.click();
 
 		expect(mockOnClick).not.toHaveBeenCalled();
+	});
+
+	it('should render the correct text if the user is the minting account', () => {
+		isIcMintingAccount.set(true);
+
+		const { getByTestId, getByText } = render(SendButton, {
+			props,
+			context: mockContext(mockContextStore)
+		});
+
+		expect(getByTestId(SEND_TOKENS_MODAL_OPEN_BUTTON)).toBeInTheDocument();
+
+		expect(getByText(en.mint.text.mint)).toBeInTheDocument();
 	});
 });

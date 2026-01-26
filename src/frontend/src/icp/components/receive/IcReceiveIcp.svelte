@@ -11,12 +11,12 @@
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import { modalIcpReceive } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { isRouteTokens } from '$lib/utils/nav.utils';
+	import { isRouteNfts, isRouteTokens } from '$lib/utils/nav.utils';
 
 	const { tokenStandard, open, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const openReceive = (modalId: symbol) => {
-		if (isTokenIcp({ standard: $tokenStandard }) || isRouteTokens(page)) {
+		if (isTokenIcp({ standard: $tokenStandard }) || isRouteTokens(page) || isRouteNfts(page)) {
 			modalStore.openIcpReceive(modalId);
 			return;
 		}

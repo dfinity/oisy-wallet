@@ -1,5 +1,6 @@
 <script lang="ts">
-	import Earning from '$lib/components/earning/Earning.svelte';
+	import Assets from '$lib/components/tokens/Assets.svelte';
+	import { TokenTypes } from '$lib/enums/token-types';
 </script>
 
-<Earning />
+<Assets tab={TokenTypes.EARNING} />

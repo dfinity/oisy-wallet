@@ -22,14 +22,11 @@ import * as eventsUtils from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
+import { IcpIndexCanister, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import {
-	IndexCanister,
-	type TransactionWithId as TransactionWithIdIcp
-} from '@icp-sdk/canisters/ledger/icp';
-import {
-	IcrcIndexNgCanister,
+	IcrcIndexCanister,
 	IcrcLedgerCanister,
-	type IcrcIndexNgTransactionWithId
+	type IcrcIndexDid
 } from '@icp-sdk/canisters/ledger/icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -44,6 +41,16 @@ vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
 		AuthClientProvider: Object.assign(authClientProvider, {
 			getInstance: authClientProvider
 		})
+	};
+});
+
+vi.mock(import('$lib/services/query.services'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...actual,
+		createQueryAndUpdateWithWarmup: () =>
+			actual.createQueryAndUpdateWithWarmup({ warmupMs: 0, defaultStrategy: 'query_and_update' })
 	};
 });
 
@@ -319,9 +326,9 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	};
 
 	describe('icp-wallet.worker', () => {
-		const indexCanisterMock = mock<IndexCanister>();
+		const indexCanisterMock = mock<IcpIndexCanister>();
 
-		const mockTransaction: TransactionWithIdIcp = {
+		const mockTransaction: IcpIndexDid.TransactionWithId = {
 			id: 123n,
 			transaction: {
 				memo: ZERO,
@@ -350,7 +357,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		};
 
 		beforeEach(() => {
-			vi.spyOn(IndexCanister, 'create').mockImplementation(() => indexCanisterMock);
+			vi.spyOn(IcpIndexCanister, 'create').mockImplementation(() => indexCanisterMock);
 		});
 
 		describe('with transactions', () => {
@@ -507,9 +514,9 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 	describe('icrc-wallet.worker', () => {
 		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
-		const indexCanisterMock = mock<IcrcIndexNgCanister>();
+		const indexCanisterMock = mock<IcrcIndexCanister>();
 
-		const mockTransaction: IcrcIndexNgTransactionWithId = {
+		const mockTransaction: IcrcIndexDid.TransactionWithId = {
 			id: 123n,
 			transaction: {
 				burn: [],
@@ -533,6 +540,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 						created_at_time: []
 					}
 				],
+				fee_collector: [],
 				timestamp: 1n
 			}
 		};
@@ -550,7 +558,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 		beforeEach(() => {
 			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
-			vi.spyOn(IcrcIndexNgCanister, 'create').mockImplementation(() => indexCanisterMock);
+			vi.spyOn(IcrcIndexCanister, 'create').mockImplementation(() => indexCanisterMock);
 
 			spyGetBalance = ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
 		});

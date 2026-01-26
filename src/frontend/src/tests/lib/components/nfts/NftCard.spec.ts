@@ -7,6 +7,7 @@ import {
 	PLAUSIBLE_EVENT_VALUES
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -250,5 +251,20 @@ describe('NftCard', () => {
 
 		// Subtitle should show both id and nft name
 		expect(getByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
+	});
+
+	it('should render first the OISY NFT ID', () => {
+		const mockOisyId = parseNftId('mock-oisy-id');
+
+		const { getByText } = render(NftCard, {
+			props: {
+				nft: { ...mockValidErc721Nft, oisyId: mockOisyId },
+				testId,
+				type: 'card-link',
+				withCollectionLabel: true
+			}
+		});
+
+		expect(getByText(`#${mockOisyId} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
 	});
 });

@@ -17,7 +17,7 @@ export const USDC_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
 export const USDC_TOKEN: RequiredEvmErc20Token = {
 	id: USDC_TOKEN_ID,
 	network: ARBITRUM_MAINNET_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'USD Coin',
 	symbol: USDC_SYMBOL,
@@ -38,7 +38,7 @@ export const ARB_SEPOLIA_USDC_TOKEN_ID: TokenId = parseTokenId(ARB_SEPOLIA_USDC_
 export const ARB_SEPOLIA_USDC_TOKEN: RequiredEvmErc20Token = {
 	id: ARB_SEPOLIA_USDC_TOKEN_ID,
 	network: ARBITRUM_SEPOLIA_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'USDC (Sepolia Testnet)',
 	symbol: USDC_SYMBOL,

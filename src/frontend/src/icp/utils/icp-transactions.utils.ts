@@ -7,11 +7,14 @@ import type {
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
-import type { Transaction, TransactionWithId } from '@icp-sdk/canisters/ledger/icp';
+import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 
 export const mapTransactionIcpToSelf = (
-	tx: TransactionWithId
-): ({ transaction: Transaction & IcTransactionAddOnsInfo } & Pick<TransactionWithId, 'id'>)[] => {
+	tx: IcpIndexDid.TransactionWithId
+): ({ transaction: IcpIndexDid.Transaction & IcTransactionAddOnsInfo } & Pick<
+	IcpIndexDid.TransactionWithId,
+	'id'
+>)[] => {
 	const { transaction, id } = tx;
 	const { operation } = transaction;
 

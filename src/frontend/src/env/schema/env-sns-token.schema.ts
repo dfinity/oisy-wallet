@@ -5,6 +5,7 @@ import * as z from 'zod';
 export const EnvSnsTokenSchema = z.object({
 	...EnvIcTokenSchema.shape,
 	rootCanisterId: z.string(),
+	governanceCanisterId: z.string(),
 	metadata: EnvIcrcTokenMetadataSchema,
 	...IcTokenDeprecatedSchema.shape
 });

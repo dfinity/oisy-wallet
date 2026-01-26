@@ -1,7 +1,7 @@
 [
 	{
 		"id": "sprinkles_s1e5",
-		"title": "earning.cards.sprinkles.title",
+		"titles": ["earning.cards.sprinkles.title"],
 		"description": "earning.cards.sprinkles.description",
 		"logo": "/images/rewards/oisy-reward-logo.svg",
 		"fields": [],
@@ -9,7 +9,7 @@
 	},
 	{
 		"id": "gldt-staking",
-		"title": "earning.cards.gldt.title",
+		"titles": ["earning.cards.gldt.title1", "earning.cards.gldt.title2"],
 		"description": "earning.cards.gldt.description",
 		"logo": "/images/dapps/gold-dao-logo.svg",
 		"fields": ["apy", "currentStaked", "currentEarning", "earningPotential", "terms"],

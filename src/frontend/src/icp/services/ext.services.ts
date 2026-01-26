@@ -1,0 +1,125 @@
+import type { CustomToken, ExtV2Token } from '$declarations/backend/backend.did';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import {
+	EXT_BUILTIN_TOKENS,
+	EXT_BUILTIN_TOKENS_INDEXED
+} from '$env/tokens/tokens-ext/tokens.ext.env';
+import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
+import { extDefaultTokensStore } from '$icp/stores/ext-default-tokens.store';
+import type { ExtCustomToken } from '$icp/types/ext-custom-token';
+import { mapBackendTokens } from '$lib/services/load-tokens.services';
+import { i18n } from '$lib/stores/i18n.store';
+import { toastsError } from '$lib/stores/toasts.store';
+import type { LoadCustomTokenParams } from '$lib/types/custom-token';
+import type { OptionIdentity } from '$lib/types/identity';
+import type { ResultSuccess } from '$lib/types/utils';
+import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
+import { get } from 'svelte/store';
+
+export const loadExtTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
+	await Promise.all([loadDefaultExtTokens(), loadCustomTokens({ identity, useCache: true })]);
+};
+
+const loadDefaultExtTokens = (): ResultSuccess => {
+	extDefaultTokensStore.set(
+		EXT_BUILTIN_TOKENS.map((token) => ({ ...token, id: parseTokenId(token.symbol) }))
+	);
+
+	return { success: true };
+};
+
+export const loadCustomTokens = ({
+	identity,
+	useCache = false
+}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
+	queryAndUpdate<ExtCustomToken[]>({
+		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
+		onLoad: loadCustomTokenData,
+		onUpdateError,
+		identity
+	});
+
+type CustomTokenExtVariant = Omit<CustomToken, 'token'> & { token: { ExtV2: ExtV2Token } };
+
+const filterExtCustomToken = (customToken: CustomToken): customToken is CustomTokenExtVariant =>
+	'ExtV2' in customToken.token;
+
+const mapExtCustomToken = async ({
+	token: {
+		token,
+		enabled,
+		version: versionNullable,
+		section: sectionNullable,
+		allow_external_content_source: allowExternalContentSourceNullable
+	}
+}: {
+	token: CustomTokenExtVariant;
+	// eslint-disable-next-line require-await -- We are going to add an async function to fetch the metadata
+}): Promise<ExtCustomToken | undefined> => {
+	const version = fromNullable(versionNullable);
+	const section = fromNullable(sectionNullable);
+	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
+	const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+
+	const {
+		ExtV2: { canister_id: canisterId }
+	} = token;
+
+	const canisterIdText = canisterId.toString();
+
+	// TODO: add the canister method to fetch metadata from the canister.
+	const metadata = EXT_BUILTIN_TOKENS_INDEXED.get(canisterIdText);
+
+	const { symbol, ...rest } = metadata ?? {
+		symbol: canisterIdText,
+		name: canisterIdText,
+		decimals: 0,
+		network: ICP_NETWORK
+	};
+
+	return {
+		...rest,
+		id: parseTokenId(symbol),
+		canisterId: canisterIdText,
+		symbol,
+		standard: { code: 'ext' as const, version: 'v2' },
+		category: 'custom' as const,
+		enabled,
+		version,
+		...(nonNullish(mappedSection) && {
+			section: mappedSection
+		}),
+		allowExternalContentSource
+	};
+};
+
+const loadCustomTokensWithMetadata = async (
+	params: LoadCustomTokenParams
+): Promise<ExtCustomToken[]> =>
+	await mapBackendTokens<CustomTokenExtVariant, ExtCustomToken>({
+		...params,
+		filterCustomToken: filterExtCustomToken,
+		mapCustomToken: mapExtCustomToken,
+		errorMsg: get(i18n).init.error.ext_custom_tokens
+	});
+
+const loadCustomTokenData = ({
+	response: tokens,
+	certified
+}: {
+	certified: boolean;
+	response: ExtCustomToken[];
+}) => {
+	extCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	extCustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.ext_custom_tokens },
+		err
+	});
+};

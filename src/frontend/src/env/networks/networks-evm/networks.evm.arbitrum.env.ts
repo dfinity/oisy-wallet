@@ -33,7 +33,8 @@ export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
 		alchemyJsonRpcUrl: 'https://arb-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'arbitrum-one' },
-	buy: { onramperId: 'arbitrum' }
+	buy: { onramperId: 'arbitrum' },
+	pay: { openCryptoPay: 'Arbitrum' }
 };
 
 export const ARBITRUM_SEPOLIA_NETWORK_SYMBOL = 'ARB (Sepolia Testnet)';

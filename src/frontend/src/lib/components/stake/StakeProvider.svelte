@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import CollapsibleList from '$lib/components/ui/CollapsibleList.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { stakeProvidersConfig } from '$lib/config/stake.config';
@@ -13,10 +14,11 @@
 
 	interface Props {
 		provider: StakeProvider;
-		content: Snippet;
+		terms: Snippet[];
+		showAllTerms?: boolean;
 	}
 
-	let { provider, content }: Props = $props();
+	let { provider, terms, showAllTerms = false }: Props = $props();
 </script>
 
 <div class="my-4 rounded-lg border border-disabled bg-secondary px-2 py-3">
@@ -47,7 +49,5 @@
 		</ExternalLink>
 	</div>
 
-	<div class="mt-4 flex flex-col px-4">
-		{@render content()}
-	</div>
+	<CollapsibleList hideExpandButton={showAllTerms} items={terms} />
 </div>

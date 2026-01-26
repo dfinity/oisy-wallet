@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { type Snippet, untrack } from 'svelte';
-	import { NFTS_ENABLED } from '$env/nft.env';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { batchLoadTransactions } from '$eth/services/eth-transactions-batch.services';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -23,16 +22,32 @@
 	let { children }: Props = $props();
 
 	let loading = $state(false);
+	let timer = $state<NodeJS.Timeout | undefined>();
+
+	const resetTimer = () => {
+		if (nonNullish(timer)) {
+			clearTimeout(timer);
+			timer = undefined;
+		}
+	};
 
 	let tokens = $derived([
 		...$enabledEthereumTokens,
 		...$enabledErc20Tokens,
 		...$enabledEvmTokens,
-		...(NFTS_ENABLED ? $enabledNonFungibleTokensWithoutSpam : [])
+		...$enabledNonFungibleTokensWithoutSpam
 	]);
 
 	const onLoad = async () => {
 		if (loading) {
+			resetTimer();
+
+			timer = setTimeout(() => {
+				resetTimer();
+
+				onLoad();
+			}, 500);
+
 			return;
 		}
 
@@ -72,6 +87,8 @@
 			return;
 		}
 
+		loading = true;
+
 		await Promise.allSettled(
 			tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
 				if (nonNullish($ethTransactionsStore?.[tokenId])) {
@@ -87,6 +104,8 @@
 				});
 			})
 		);
+
+		loading = false;
 	};
 
 	const debounceLoadFromCache = debounce(loadFromCache);

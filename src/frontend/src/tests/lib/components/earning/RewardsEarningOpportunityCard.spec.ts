@@ -52,7 +52,7 @@ describe('RewardsEarningOpportunityCard', () => {
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
 			{
 				id: currentReward.id,
-				title: 'mock.rewards.title',
+				titles: ['mock.rewards.title'],
 				description: 'mock.rewards.description',
 				logo: '/images/rewards/oisy-reward-logo.svg',
 				fields: [],
@@ -92,7 +92,7 @@ describe('RewardsEarningOpportunityCard', () => {
 		const button = screen.getByRole('button', { name: 'mock.rewards.action' });
 		await button.click();
 
-		expect(navModule.goto).toHaveBeenCalledExactlyOnceWith(AppPath.EarningRewards);
+		expect(navModule.goto).toHaveBeenCalledExactlyOnceWith(AppPath.EarnRewards);
 	});
 
 	it('renders nothing if no matching earning card is found for the current reward', () => {
@@ -134,7 +134,7 @@ describe('RewardsEarningOpportunityCard', () => {
 		const earningCards = [
 			{
 				id: 'abc',
-				title: 'x',
+				titles: ['x'],
 				description: 'y',
 				logo: 'z',
 				actionText: 'a',
@@ -178,7 +178,7 @@ describe('RewardsEarningOpportunityCard', () => {
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
 			{
 				id: 'xyz',
-				title: 'mock.title',
+				titles: ['mock.title'],
 				description: 'mock.desc',
 				logo: 'mock.svg',
 				fields: [],
@@ -235,7 +235,7 @@ describe('RewardsEarningOpportunityCard', () => {
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
 			{
 				id: 'abc',
-				title: 'mock.title',
+				titles: ['mock.title'],
 				description: 'mock.desc',
 				logo: 'x',
 				fields: [],

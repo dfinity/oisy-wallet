@@ -29,8 +29,8 @@ import {
 } from '@dfinity/utils';
 import {
 	MinterNoNewUtxosError,
-	type EstimateWithdrawalFee,
-	type PendingUtxo
+	type CkBtcMinterDid,
+	type EstimateWithdrawalFee
 } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
@@ -80,10 +80,10 @@ const populatePendingUtxos = ({
 	pendingUtxos,
 	tokenId
 }: {
-	pendingUtxos: PendingUtxo[];
+	pendingUtxos: CkBtcMinterDid.PendingUtxo[];
 	tokenId: TokenId;
 }) => {
-	const data: CertifiedData<PendingUtxo[]> = {
+	const data: CertifiedData<CkBtcMinterDid.PendingUtxo[]> = {
 		certified: true,
 		data: pendingUtxos
 	};

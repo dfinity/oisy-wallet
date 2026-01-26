@@ -11,14 +11,17 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { InternetIdentityDomain } from '$lib/types/auth';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 	const modalId = Symbol();
 	const imgStyleClass = 'h-full object-contain mx-auto object-top';
 
-	const handleUnlock = async () => {
-		const { success } = await signIn({});
+	const handleUnlock = async (domain: InternetIdentityDomain) => {
+		const { success } = await signIn({
+			domain
+		});
 
 		if (success === 'ok') {
 			authLocked.unlock({ source: 'login from lock page' });
@@ -29,7 +32,10 @@
 
 	const handleLogout = async () => {
 		authLocked.unlock({ source: 'logout from lock page' });
-		await signOut({ resetUrl: true, clearAllPrincipalsStorages: true, source: 'lock-page' });
+		await signOut({
+			resetUrl: true,
+			source: 'lock-page'
+		});
 	};
 </script>
 
@@ -69,17 +75,30 @@
 				<Button
 					fullWidth
 					innerStyleClass="items-center justify-center"
-					onclick={handleUnlock}
+					onclick={() => handleUnlock(InternetIdentityDomain.VERSION_2_0)}
 					styleClass="mb-3 w-full"
 				>
 					{$i18n.lock.text.unlock}
 					<IconKey />
 				</Button>
+
+				<Button
+					colorStyle="secondary-light"
+					fullWidth
+					innerStyleClass="items-center justify-center"
+					onclick={() => handleUnlock(InternetIdentityDomain.VERSION_1_0)}
+					styleClass="mb-3 w-full"
+				>
+					{$i18n.lock.text.unlock_with_legacy_login}
+					<IconKey />
+				</Button>
+
 				<Button
 					colorStyle="secondary-light"
 					fullWidth
 					innerStyleClass="items-center justify-center"
 					onclick={handleLogout}
+					transparent
 				>
 					{$i18n.lock.text.logout}
 					<IconLogout />

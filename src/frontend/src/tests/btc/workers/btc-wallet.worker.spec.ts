@@ -30,6 +30,16 @@ vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
 	};
 });
 
+vi.mock(import('$lib/services/query.services'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...actual,
+		createQueryAndUpdateWithWarmup: () =>
+			actual.createQueryAndUpdateWithWarmup({ warmupMs: 0, defaultStrategy: 'query_and_update' })
+	};
+});
+
 describe('btc-wallet.worker', () => {
 	let spyGetCertifiedBalance: MockInstance;
 	let spyGetUncertifiedBalance: MockInstance;

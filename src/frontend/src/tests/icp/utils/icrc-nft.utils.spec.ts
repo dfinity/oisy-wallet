@@ -2,7 +2,7 @@ import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import * as icrcNftLedgerApi from '$icp/api/icrc-nft-ledger.api';
 import { isIcrcTokenSupportIcrc7 } from '$icp/utils/icrc-nft.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { IcrcStandardRecord } from '@icp-sdk/canisters/ledger/icrc';
+import type { IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
 
 vi.mock('$icp/api/icrc-nft-ledger.api', () => ({
 	icrc10SupportedStandards: vi.fn()
@@ -20,7 +20,7 @@ describe('icrc-nft.utils', () => {
 		});
 
 		it('should return true when ICRC-7 standard is supported', async () => {
-			const supportedStandards: IcrcStandardRecord[] = [
+			const supportedStandards: IcrcLedgerDid.StandardRecord[] = [
 				{ name: 'ICRC-7', url: 'https://github.com/dfinity/ICRC/tree/main/ICRCs/ICRC-7' },
 				{ name: 'ICRC-10', url: 'https://github.com/dfinity/ICRC/tree/main/ICRCs/ICRC-10' },
 				{ name: 'ICRC-37', url: 'https://github.com/dfinity/ICRC/tree/main/ICRCs/ICRC-37' }

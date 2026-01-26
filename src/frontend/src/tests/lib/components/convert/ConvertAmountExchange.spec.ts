@@ -50,6 +50,6 @@ describe('ConvertAmountExchange', () => {
 		const { exchangeRate: _, ...newProps } = props;
 		const { getByTestId } = render(ConvertAmountExchange, { props: newProps });
 
-		expect(() => getByTestId(skeletonTestId)).toThrow();
+		expect(() => getByTestId(skeletonTestId)).toThrowError();
 	});
 });

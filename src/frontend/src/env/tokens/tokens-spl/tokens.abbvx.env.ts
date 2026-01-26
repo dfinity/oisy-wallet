@@ -14,7 +14,7 @@ export const ABBVX_TOKEN_ID: TokenId = parseTokenId(ABBVX_SYMBOL);
 export const ABBVX_TOKEN: RequiredSpl2022Token = {
 	id: ABBVX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'AbbVie xStock',
 	symbol: ABBVX_SYMBOL,

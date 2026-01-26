@@ -59,7 +59,7 @@ describe('approve.services', () => {
 			const mockError = new Error('Mock Error');
 			allowanceSpy.mockRejectedValueOnce(mockError);
 
-			await expect(erc20ContractAllowance(mockParams)).rejects.toThrow(mockError);
+			await expect(erc20ContractAllowance(mockParams)).rejects.toThrowError(mockError);
 
 			expect(allowanceSpy).toHaveBeenCalledExactlyOnceWith({
 				contract: USDC_TOKEN,
@@ -119,6 +119,7 @@ describe('approve.services', () => {
 			populateApproveSpy.mockResolvedValue({ data: 'mock-approve-data' });
 
 			vi.spyOn(signerApiLib, 'signTransaction')
+				.mockReset()
 				.mockResolvedValueOnce(mockRawTransaction1)
 				.mockResolvedValueOnce(mockRawTransaction2);
 		});
@@ -127,7 +128,7 @@ describe('approve.services', () => {
 			const mockError = new Error('Transaction count error');
 			getTransactionCountSpy.mockRejectedValueOnce(mockError);
 
-			await expect(approve(mockParams)).rejects.toThrow(mockError);
+			await expect(approve(mockParams)).rejects.toThrowError(mockError);
 
 			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
 				address: mockEthAddress,

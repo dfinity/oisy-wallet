@@ -37,10 +37,12 @@ describe('GldtStakeRewards', () => {
 	});
 
 	it('should display correct data and fetch missing exchanges if reward token is disabled', () => {
-		icrcCustomTokensStore.set({
-			data: mockIcrcCustomToken,
-			certified: false
-		});
+		icrcCustomTokensStore.setAll([
+			{
+				data: mockIcrcCustomToken,
+				certified: false
+			}
+		]);
 		const mock = getLoadDisabledIcrcTokensExchangesMock();
 
 		const { container } = render(GldtStakeRewards, {
@@ -55,13 +57,15 @@ describe('GldtStakeRewards', () => {
 	});
 
 	it('should display correct data and skip fetching exchanges if reward token is enabled', () => {
-		icrcCustomTokensStore.set({
-			data: {
-				...mockIcrcCustomToken,
-				enabled: true
-			},
-			certified: false
-		});
+		icrcCustomTokensStore.setAll([
+			{
+				data: {
+					...mockIcrcCustomToken,
+					enabled: true
+				},
+				certified: false
+			}
+		]);
 		const mock = getLoadDisabledIcrcTokensExchangesMock();
 
 		const { container } = render(GldtStakeRewards, {
@@ -76,10 +80,12 @@ describe('GldtStakeRewards', () => {
 	});
 
 	it('should display correct data and skip fetching exchanges if reward token has zero amount', () => {
-		icrcCustomTokensStore.set({
-			data: mockIcrcCustomToken,
-			certified: false
-		});
+		icrcCustomTokensStore.setAll([
+			{
+				data: mockIcrcCustomToken,
+				certified: false
+			}
+		]);
 		const mock = getLoadDisabledIcrcTokensExchangesMock();
 
 		const { container } = render(GldtStakeRewards, {
@@ -94,10 +100,12 @@ describe('GldtStakeRewards', () => {
 	});
 
 	it('should not display anything and skip fetching exchanges if position is unavailable', () => {
-		icrcCustomTokensStore.set({
-			data: mockIcrcCustomToken,
-			certified: false
-		});
+		icrcCustomTokensStore.setAll([
+			{
+				data: mockIcrcCustomToken,
+				certified: false
+			}
+		]);
 		const mock = getLoadDisabledIcrcTokensExchangesMock();
 
 		const { container } = render(GldtStakeRewards, {

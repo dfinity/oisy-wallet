@@ -29,9 +29,9 @@ describe('ckbtc-memo.utils', () => {
 		});
 
 		it('should not decode legacy memo', () => {
-			expect(() => decodeMintMemo(Uint8Array.from([]))).toThrow(new LegacyMintMemoError());
+			expect(() => decodeMintMemo(Uint8Array.from([]))).toThrowError(new LegacyMintMemoError());
 
-			expect(() => decodeMintMemo(new Uint8Array(32))).toThrow(new LegacyMintMemoError());
+			expect(() => decodeMintMemo(new Uint8Array(32))).toThrowError(new LegacyMintMemoError());
 		});
 	});
 

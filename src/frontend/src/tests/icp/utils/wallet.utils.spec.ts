@@ -18,7 +18,7 @@ describe('wallet.utils', () => {
 		it('should initialize the worker for ICRC tokens', () => {
 			const token = {
 				...mockValidIcToken,
-				standard: 'icrc' as const
+				standard: { code: 'icrc' as const }
 			};
 
 			initWalletWorker({ token });
@@ -29,7 +29,7 @@ describe('wallet.utils', () => {
 		it('should initialize the worker for DIP-20 tokens', () => {
 			const token = {
 				...mockValidIcToken,
-				standard: 'dip20' as const
+				standard: { code: 'dip20' as const }
 			};
 
 			initWalletWorker({ token });
@@ -40,7 +40,7 @@ describe('wallet.utils', () => {
 		it('should initialize the worker for ICP token', () => {
 			const token = {
 				...mockValidIcToken,
-				standard: 'icp' as const
+				standard: { code: 'icp' as const }
 			};
 
 			initWalletWorker({ token });
@@ -56,7 +56,7 @@ describe('wallet.utils', () => {
 		it('should call initIcpWalletWorker for all other cases', () => {
 			const token = {
 				...mockValidIcToken,
-				standard: 'ethereum' as const
+				standard: { code: 'ethereum' as const }
 			};
 
 			initWalletWorker({ token });

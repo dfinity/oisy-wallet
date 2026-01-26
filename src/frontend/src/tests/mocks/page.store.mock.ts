@@ -29,13 +29,17 @@ const initPageStoreMock = () => {
 			set({ ...page, data });
 			page.data = data;
 		},
+		mockRoute: (route: Page['route']) => {
+			set({ ...page, route });
+			page.route = route;
+		},
 		mockUrl: (url: URL) => {
-			set({ url });
+			set({ ...page, url });
 			page.url = url;
 		},
 		mockToken: ({ name, network: { id: networkId } }: Token) => {
 			const data = { token: name, network: networkId.description };
-			set({ data });
+			set({ ...page, data });
 			page.data = data;
 		},
 		mockDynamicRoutes: (params: { [key: string]: string }) => {

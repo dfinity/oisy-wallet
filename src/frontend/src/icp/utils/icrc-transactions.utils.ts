@@ -16,10 +16,10 @@ import {
 import {
 	encodeIcrcAccount,
 	fromCandidAccount,
-	type IcrcIndexNgTransactionWithId
+	type IcrcIndexDid
 } from '@icp-sdk/canisters/ledger/icrc';
 
-export const mapTransactionIcrcToSelf = (tx: IcrcIndexNgTransactionWithId): IcrcTransaction[] => {
+export const mapTransactionIcrcToSelf = (tx: IcrcIndexDid.TransactionWithId): IcrcTransaction[] => {
 	const { transaction, id } = tx;
 	const { transfer: t } = transaction;
 

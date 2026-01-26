@@ -11,6 +11,7 @@
 	import type { LogoSize } from '$lib/types/components';
 	import type { Nft } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
 
 	interface Props {
 		nft: Nft;
@@ -33,7 +34,6 @@
 	}: Props = $props();
 
 	const {
-		imageUrl,
 		name,
 		collection: { network }
 	} = $derived(nft);
@@ -48,7 +48,7 @@
 				{color}
 				{ring}
 				size={logoSize}
-				src={imageUrl ?? noNftImage}
+				src={getNftDisplayImageUrl(nft) ?? noNftImage}
 				{testId}
 			/>
 		</NftDisplayGuard>

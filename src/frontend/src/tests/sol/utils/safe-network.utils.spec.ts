@@ -25,7 +25,7 @@ describe('safe-network.utils', () => {
 		);
 
 		it('should return throw when given an invalid network', () => {
-			expect(() => safeMapNetworkIdToNetwork(parseNetworkId('invalid-network-id'))).toThrow(
+			expect(() => safeMapNetworkIdToNetwork(parseNetworkId('invalid-network-id'))).toThrowError(
 				replacePlaceholders(en.init.error.no_solana_network, {
 					$network: 'invalid-network-id'
 				})

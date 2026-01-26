@@ -6,7 +6,7 @@ import AllEarningOpportunityCardList from '$lib/components/earning/AllEarningOpp
 import * as navModule from '$app/navigation';
 import * as tokenFilter from '$icp-eth/utils/token.utils';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
-import * as tokensDerived from '$lib/derived/tokens.derived';
+import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as tokenUtils from '$lib/utils/token.utils';
 
@@ -72,7 +72,7 @@ describe('AllEarningOpportunityCardList', () => {
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
 			{
 				id: mockRewardCampaigns[mockRewardCampaigns.length - 1].id,
-				title: 'mock.rewards.title',
+				titles: ['mock.rewards.title'],
 				description: 'mock.rewards.description',
 				logo: '/images/rewards/oisy-reward-logo.svg',
 				fields: [],
@@ -80,7 +80,7 @@ describe('AllEarningOpportunityCardList', () => {
 			},
 			{
 				id: 'gldt-staking',
-				title: 'mock.gldt.title',
+				titles: ['mock.gldt.title'],
 				description: 'mock.gldt.description',
 				logo: '/mock/logo.svg',
 				fields: [
@@ -110,10 +110,10 @@ describe('AllEarningOpportunityCardList', () => {
 		const enabledFungibleTokensUi = writable([mockGldtToken]);
 		const enabledMainnetFungibleTokensUsdBalance = readable(1000);
 
-		vi.spyOn(tokensDerived, 'enabledFungibleTokensUi', 'get').mockReturnValue(
+		vi.spyOn(tokensUiDerived, 'enabledFungibleTokensUi', 'get').mockReturnValue(
 			enabledFungibleTokensUi
 		);
-		vi.spyOn(tokensDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
+		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
 			enabledMainnetFungibleTokensUsdBalance
 		);
 

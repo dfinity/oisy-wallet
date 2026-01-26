@@ -1,14 +1,15 @@
 import StakeProviderContainer from '$lib/components/stake/StakeProviderContainer.svelte';
-import { stakeProvidersConfig } from '$lib/config/stake.config';
 import { StakeProvider } from '$lib/types/stake';
 import en from '$tests/mocks/i18n.mock';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 describe('StakeProviderContainer', () => {
+	const pageTitle = 'pageTitle';
 	const props = {
 		content: createMockSnippet('content'),
-		provider: StakeProvider.GLDT
+		provider: StakeProvider.GLDT,
+		pageTitle
 	};
 
 	it('renders data correctly if currentApy is not provided', () => {
@@ -17,8 +18,8 @@ describe('StakeProviderContainer', () => {
 		});
 
 		expect(getByTestId('content')).toBeInTheDocument();
-		expect(container).toHaveTextContent(stakeProvidersConfig[props.provider].name);
-		expect(() => getByText(en.stake.text.current_apy_label)).toThrow();
+		expect(container).toHaveTextContent(pageTitle);
+		expect(() => getByText(en.stake.text.current_apy_label)).toThrowError();
 	});
 
 	it('renders data correctly if currentApy is provided', () => {
@@ -30,7 +31,7 @@ describe('StakeProviderContainer', () => {
 		});
 
 		expect(getByTestId('content')).toBeInTheDocument();
-		expect(container).toHaveTextContent(stakeProvidersConfig[props.provider].name);
+		expect(container).toHaveTextContent(pageTitle);
 		expect(getByText(en.stake.text.current_apy_label)).toBeInTheDocument();
 	});
 });

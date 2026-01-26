@@ -56,7 +56,7 @@ describe('AllTransactions', () => {
 			symbol: 'UWT'
 		};
 
-		icrcCustomTokensStore.set({ data: tokenWithoutIndexCanister, certified: true });
+		icrcCustomTokensStore.setAll([{ data: tokenWithoutIndexCanister, certified: true }]);
 
 		const store = get(icrcCustomTokensStore);
 		const tokenId = store?.at(0)?.data.id;
@@ -79,7 +79,7 @@ describe('AllTransactions', () => {
 			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
 		};
 
-		icrcCustomTokensStore.set({ data: tokenWithUnavailableIndexCanister, certified: true });
+		icrcCustomTokensStore.setAll([{ data: tokenWithUnavailableIndexCanister, certified: true }]);
 
 		const store = get(icrcCustomTokensStore);
 		const tokenId = store?.at(0)?.data.id;

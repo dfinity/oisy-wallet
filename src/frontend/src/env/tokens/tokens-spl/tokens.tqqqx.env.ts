@@ -14,7 +14,7 @@ export const TQQQX_TOKEN_ID: TokenId = parseTokenId(TQQQX_SYMBOL);
 export const TQQQX_TOKEN: RequiredSpl2022Token = {
 	id: TQQQX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'TQQQ xStock',
 	symbol: TQQQX_SYMBOL,

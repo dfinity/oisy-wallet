@@ -64,7 +64,7 @@ describe('llm.canister', () => {
 
 			const res = chat(params);
 
-			await expect(res).rejects.toThrow(mockResponseError);
+			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 	});
 });

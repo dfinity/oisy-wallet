@@ -31,7 +31,8 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 		alchemyJsonRpcUrl: 'https://polygon-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'polygon-pos' },
-	buy: { onramperId: 'polygon' }
+	buy: { onramperId: 'polygon' },
+	pay: { openCryptoPay: 'Polygon' }
 };
 
 export const POLYGON_AMOY_NETWORK_SYMBOL = 'POL (Amoy Testnet)';

@@ -54,9 +54,27 @@ describe('spl.derived', () => {
 			const tokens = get(splTokens);
 
 			expect(tokens).toStrictEqual([
-				{ ...mockSplDefaultToken, enabled: true, version: undefined },
-				{ ...BONK_TOKEN, enabled: false, version: undefined },
-				{ ...TRUMP_TOKEN, enabled: false, version: undefined },
+				{
+					...mockSplDefaultToken,
+					enabled: true,
+					version: undefined,
+					section: undefined,
+					allowExternalContentSource: undefined
+				},
+				{
+					...BONK_TOKEN,
+					enabled: false,
+					version: undefined,
+					section: undefined,
+					allowExternalContentSource: undefined
+				},
+				{
+					...TRUMP_TOKEN,
+					enabled: false,
+					version: undefined,
+					section: undefined,
+					allowExternalContentSource: undefined
+				},
 				mockSplCustomToken1,
 				mockSplCustomToken2
 			]);
@@ -75,9 +93,27 @@ describe('spl.derived', () => {
 			const tokens = get(splTokens);
 
 			expect(tokens).toStrictEqual([
-				{ ...mockSplDefaultToken, enabled: true, version: 1n },
-				{ ...BONK_TOKEN, enabled: true, version: undefined },
-				{ ...TRUMP_TOKEN, enabled: false, version: undefined }
+				{
+					...mockSplDefaultToken,
+					enabled: true,
+					version: 1n,
+					section: undefined,
+					allowExternalContentSource: undefined
+				},
+				{
+					...BONK_TOKEN,
+					enabled: true,
+					version: undefined,
+					section: undefined,
+					allowExternalContentSource: undefined
+				},
+				{
+					...TRUMP_TOKEN,
+					enabled: false,
+					version: undefined,
+					section: undefined,
+					allowExternalContentSource: undefined
+				}
 			]);
 		});
 
@@ -96,7 +132,13 @@ describe('spl.derived', () => {
 			const tokens = get(enabledSplTokens);
 
 			expect(tokens).toStrictEqual([
-				{ ...mockSplDefaultToken, enabled: true, version: undefined },
+				{
+					...mockSplDefaultToken,
+					enabled: true,
+					version: undefined,
+					section: undefined,
+					allowExternalContentSource: undefined
+				},
 				{ ...mockSplDefaultToken, enabled: true },
 				mockSplCustomToken2
 			]);
@@ -115,8 +157,20 @@ describe('spl.derived', () => {
 			const tokens = get(enabledSplTokens);
 
 			expect(tokens).toStrictEqual([
-				{ ...mockSplDefaultToken, enabled: true, version: 1n },
-				{ ...BONK_TOKEN, enabled: true, version: undefined },
+				{
+					...mockSplDefaultToken,
+					enabled: true,
+					version: 1n,
+					section: undefined,
+					allowExternalContentSource: undefined
+				},
+				{
+					...BONK_TOKEN,
+					enabled: true,
+					version: undefined,
+					section: undefined,
+					allowExternalContentSource: undefined
+				},
 				{ ...mockSplDefaultToken, enabled: true, version: 1n },
 				{ ...BONK_TOKEN, enabled: true }
 			]);

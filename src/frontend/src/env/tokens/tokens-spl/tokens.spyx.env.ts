@@ -14,7 +14,7 @@ export const SPYX_TOKEN_ID: TokenId = parseTokenId(SPYX_SYMBOL);
 export const SPYX_TOKEN: RequiredSpl2022Token = {
 	id: SPYX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'SP500 xStock',
 	symbol: SPYX_SYMBOL,

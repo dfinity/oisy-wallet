@@ -19,7 +19,7 @@ import {
 	setupCkBtcPendingStores
 } from '$tests/mocks/ic-transactions.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
-import type { ReimbursedDeposit, ReimbursementRequest } from '@icp-sdk/canisters/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 describe('ckbtc-transactions.utils', () => {
@@ -75,10 +75,10 @@ describe('ckbtc-transactions.utils', () => {
 			| { Confirmed: { txid: Uint8Array } }
 			| { Sending: { txid: Uint8Array } }
 			| { AmountTooLow: null }
-			| { WillReimburse: ReimbursementRequest }
+			| { WillReimburse: CkBtcMinterDid.ReimbursementRequest }
 			| { Unknown: null }
 			| { Submitted: { txid: Uint8Array } }
-			| { Reimbursed: ReimbursedDeposit }
+			| { Reimbursed: CkBtcMinterDid.ReimbursedDeposit }
 			| { Pending: null };
 
 		const mockBtcStatuses: BtcStatusesData = {
