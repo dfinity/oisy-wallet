@@ -33,7 +33,6 @@
 	let { onBack, onDone, hideBack = false }: Props = $props();
 
 	const trackingEventKey = 'main_page_button';
-
 </script>
 
 <ContentWithToolbar>
