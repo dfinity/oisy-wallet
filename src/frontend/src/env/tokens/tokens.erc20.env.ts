@@ -13,6 +13,7 @@ import { COPXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.copxon.env';
 import { DAI_TOKEN } from '$env/tokens/tokens-erc20/tokens.dai.env';
 import { DMAIL_TOKEN } from '$env/tokens/tokens-erc20/tokens.dmail.env';
 import { EEMON_TOKEN } from '$env/tokens/tokens-erc20/tokens.eemon.env';
+import { EFAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.efaon.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { FLOKI_TOKEN } from '$env/tokens/tokens-erc20/tokens.floki.env';
 import { IAUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.iauon.env';
@@ -82,6 +83,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	DAI_TOKEN,
 	DMAIL_TOKEN,
 	EEMON_TOKEN,
+	EFAON_TOKEN,
 	FLOKI_TOKEN,
 	IAUON_TOKEN,
 	IVVON_TOKEN,
