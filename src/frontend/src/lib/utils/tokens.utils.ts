@@ -17,7 +17,7 @@ import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import { toastsShow } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -441,3 +441,27 @@ export const filterTokensByNft = ({
 				const isNft = isTokenNonFungible(t);
 				return filterNfts ? isNft : !isNft;
 			});
+
+export const assertExistingTokens = <T extends Token>({
+	existingTokens,
+	token,
+	errorMsg
+}: {
+	existingTokens: T[];
+	token: Omit<T, 'id'>;
+	errorMsg: string;
+}): { valid: boolean } => {
+	if (
+		nonNullish(
+			existingTokens.find(({ symbol }) => symbol.toLowerCase() === token.symbol.toLowerCase())
+		)
+	) {
+		toastsError({
+			msg: { text: errorMsg }
+		});
+
+		return { valid: false };
+	}
+
+	return { valid: true };
+};
