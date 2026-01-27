@@ -3,12 +3,12 @@
 /* v8 ignore start */
 
 import { SIGNER_CANISTER_DERIVATION_PATH } from '$env/signer.env';
-import { schnorr_ed25519_derive } from '$lib/ic-pub-key/src/schnorr/ed25519';
 import { mapDerivationPath } from '$lib/utils/signer.utils.js';
 import {
 	DerivationPath,
 	PublicKeyWithChainCode as Secp256k1PublicKeyWithChainCode
 } from '@dfinity/ic-pub-key/src/ecdsa/secp256k1';
+import { schnorrEd25519Derive } from '@dfinity/ic-pub-key/src/schnorr/ed25519';
 import { assertNonNullish } from '@dfinity/utils';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { Principal } from '@icp-sdk/core/principal';
@@ -116,9 +116,9 @@ export const deriveSolAddress = async (
 
 	const blobString = derivationPathObj.toBlob();
 
-	let schnorr_address = schnorr_ed25519_derive(pubkey, chaincode, blobString);
+	let { response: schnorr_address } = schnorrEd25519Derive(pubkey, chaincode, blobString);
 
-	return schnorr_address;
+	return schnorr_address.public_key.toHex();
 };
 
 /* v8 ignore stop */
