@@ -69,7 +69,7 @@
 				</ExternalLink>
 			</p>
 
-			<p>
+			<p class="mb-0">
 				<ExternalLink
 					ariaLabel={$i18n.auth.help.text.switch_to_new_internet_identity}
 					href={OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL}
