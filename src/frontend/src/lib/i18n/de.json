@@ -161,7 +161,6 @@
 				"identity_legacy_identity_item_2": "Du findest die Nummer auch an erster Stelle der Recovery Phrase die du eventuell füher mal niedergeschrieben hast.",
 				"identity_new_identity_title": "$oisy_name benutzt jetzt Internet Identity 2.0, das zahlreiche Verbesserungen enthält und es dir erlaubt, dich auch via deinem Konto bei Google, Apple oder Microsoft anzumelden.",
 				"identity_new_identity_item_1": "Um deine bestehende Identity zu aktualisieren, klicke auf den “Upgrade your identity“ Button im oberen Bereich des neuen Login Schirmes, und folge den weiteren Schritten.",
-				"identity_new_identity_link": "Erfahre mehr zu Internet Identity 2.0 in unserer Dokumentation",
 				"identity_legacy_sign_in": "Mit Internet Identity 1.0 anmelden (legacy)",
 				"identity_learn_more": "Mehr erfahren in den $oisy_short Docs",
 				"oisy_introduction": "$oisy_short Introduction",

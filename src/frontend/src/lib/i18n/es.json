@@ -161,7 +161,6 @@
 				"identity_legacy_identity_item_2": "Mira el número al comienzo de una frase de recuperación que hayas guardado anteriormente.",
 				"identity_new_identity_title": "$oisy_name ahora usa Internet Identity 2.0, que ofrece varias mejoras y le permite conectar su identidad con sus inicios de sesión en Google, Apple o Microsoft.",
 				"identity_new_identity_item_1": "Para migrar su identidad existente, haga clic en el enlace “Upgrade your Identity” en la parte superior de la nueva página de inicio de sesión y siga los pasos.",
-				"identity_new_identity_link": "Obtenga más información sobre Internet Identity 2.0 en OISY Docs",
 				"identity_legacy_sign_in": "Iniciar sesión con el dominio antiguo de Internet Identity",
 				"identity_learn_more": "Más información en los Docs de $oisy_short",
 				"oisy_introduction": "$oisy_short Introducción",

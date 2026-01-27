@@ -149,7 +149,6 @@ interface I18nAuth {
 			identity_legacy_identity_item_2: string;
 			identity_new_identity_title: string;
 			identity_new_identity_item_1: string;
-			identity_new_identity_link: string;
 			identity_legacy_sign_in: string;
 			identity_learn_more: string;
 			oisy_introduction: string;
