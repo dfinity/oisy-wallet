@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { assertNever, isNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
-	import OpenCryptoPayWizardSteps from '$lib/components/open-crypto-pay/OpenCryptoPayWizardSteps.svelte';
+	import OpenCryptoPayWizard from '$lib/components/open-crypto-pay/OpenCryptoPayWizard.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
@@ -64,7 +64,7 @@
 		{#if currentStep?.name === WizardStepsScanner.SCAN}
 			<ScannerCode {onNext} />
 		{:else if currentStep?.name === WizardStepsScanner.PAY || currentStep?.name === WizardStepsScanner.TOKENS_LIST || currentStep?.name === WizardStepsScanner.PAYING || currentStep?.name === WizardStepsScanner.PAYMENT_FAILED || currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
-			<OpenCryptoPayWizardSteps {currentStep} {modal} {steps} />
+			<OpenCryptoPayWizard {currentStep} {modal} {steps} />
 		{/if}
 	{/key}
 </WizardModal>
