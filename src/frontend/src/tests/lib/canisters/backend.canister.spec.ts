@@ -46,7 +46,7 @@ describe('backend.canister', () => {
 		serviceOverride
 	}: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
 		BackendCanister.create({
-			canisterId: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
+			canisterId: Principal.fromText('d3nvo-aaaaa-aaaar-qagzq-cai'),
 			identity: mockIdentity,
 			certifiedServiceOverride: serviceOverride,
 			serviceOverride

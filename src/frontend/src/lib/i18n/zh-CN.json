@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
-			"test_banner_beta": "这是一个测试版发布。你可能会遇到一些错误。真实资产正在使用中——请谨慎操作。",
-			"internet_identity_banner_first_part": "$oisy_name 现在使用",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "阅读更多"
+			"test_banner_beta": "这是一个测试版发布。你可能会遇到一些错误。真实资产正在使用中——请谨慎操作。"
 		},
 		"alt": {
 			"logo": "$name 标志",
@@ -121,7 +118,6 @@
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
-			"legacy_login": "旧版登录",
 			"asset_types": "跨 Bitcoin、Solana、Ethereum、ICP 等管理资产",
 			"instant_and_private": "内置 AI 助手，隐私保护为默认标准",
 			"advanced_cryptography": "由先进的密码学保障安全 —— 100% 链上",
@@ -1807,7 +1803,6 @@
 			},
 			"title": "",
 			"instruction": "点击此按钮即表示你同意 $link",
-			"instruction_two_buttons": "点击其中一个按钮即表示你同意 $link",
 			"body": ""
 		},
 		"alt": {
