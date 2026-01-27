@@ -139,7 +139,7 @@ describe('network-address.derived', () => {
 		])(
 			'should return $network.id.description address store when network is $network.name',
 			({ network: { id: networkId }, expectedStore }) => {
-				mockPage.mock({ network: networkId.description });
+				mockPage.mockNetwork(networkId.description);
 
 				const actualAddress = get(networkAddressStore);
 
@@ -161,7 +161,7 @@ describe('network-address.derived', () => {
 		])(
 			'should return $network address when network is $network',
 			({ network, expectedAddress }) => {
-				mockPage.mock({ network });
+				mockPage.mockNetwork(network);
 
 				const actualAddress = get(networkAddress);
 
