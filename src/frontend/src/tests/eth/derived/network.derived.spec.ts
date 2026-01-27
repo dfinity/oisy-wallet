@@ -24,7 +24,7 @@ describe('network.derived', () => {
 			const networks: Network[] = [ETHEREUM_NETWORK, SEPOLIA_NETWORK];
 
 			networks.forEach((network) => {
-				mockPage.mock({ network: network.id.description });
+				mockPage.mockNetwork(network.id.description);
 
 				expect(get(selectedEthereumNetwork)).toEqual(network);
 			});
@@ -39,7 +39,7 @@ describe('network.derived', () => {
 			];
 
 			networks.forEach((network) => {
-				mockPage.mock({ network: network.id.description });
+				mockPage.mockNetwork(network.id.description);
 
 				expect(get(selectedEthereumNetwork)).toBeUndefined();
 			});
@@ -48,13 +48,13 @@ describe('network.derived', () => {
 		it('should return `undefined` if Sepolia network is disabled', () => {
 			setupTestnetsStore('disabled');
 
-			mockPage.mock({ network: SEPOLIA_NETWORK.id.description });
+			mockPage.mockNetwork(SEPOLIA_NETWORK.id.description);
 
 			expect(get(selectedEthereumNetwork)).toBeUndefined();
 		});
 
 		it('should return `undefined` if no match is found', () => {
-			mockPage.mock({ network: 'mockNetwork' });
+			mockPage.mockNetwork('mockNetwork');
 
 			expect(get(selectedEthereumNetwork)).toBeUndefined();
 		});

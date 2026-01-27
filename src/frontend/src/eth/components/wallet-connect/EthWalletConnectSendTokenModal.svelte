@@ -28,7 +28,7 @@
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
-	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -192,7 +192,7 @@
 		<CkEthLoader nativeTokenId={$sendTokenId}>
 			{#key currentStep?.name}
 				{#if currentStep?.name === WizardStepsSend.SENDING}
-					<SendProgress
+					<InProgressWizard
 						progressStep={sendProgressStep}
 						steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
 					/>

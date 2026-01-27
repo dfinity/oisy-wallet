@@ -5,6 +5,7 @@ import { BABAON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tok
 import { BIDUON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.biduon.env';
 import { COPXON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.copxon.env';
 import { EEMON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.eemon.env';
+import { EFAON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.efaon.env';
 import { IAUON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.iauon.env';
 import { IVVON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.ivvon.env';
 import { MUON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.muon.env';
@@ -23,6 +24,7 @@ const BSC_BEP20_TOKENS_MAINNET: RequiredEvmBep20Token[] = [
 	BIDUON_TOKEN,
 	COPXON_TOKEN,
 	EEMON_TOKEN,
+	EFAON_TOKEN,
 	IAUON_TOKEN,
 	IVVON_TOKEN,
 	MUON_TOKEN,

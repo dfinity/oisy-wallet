@@ -12,12 +12,13 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import type { Erc20Token } from '$eth/types/erc20';
 import * as appConstants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import { toastsShow } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
 import type { StakeBalances } from '$lib/types/stake-balance';
@@ -27,6 +28,7 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
+	assertExistingTokens,
 	defineEnabledTokens,
 	filterEnabledTokens,
 	filterTokens,
@@ -44,7 +46,7 @@ import {
 import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
-import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { createMockErc20Tokens, mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
@@ -61,6 +63,11 @@ import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()
+}));
+
+vi.mock('$lib/stores/toasts.store', () => ({
+	toastsError: vi.fn(),
+	toastsShow: vi.fn()
 }));
 
 describe('tokens.utils', () => {
@@ -185,7 +192,7 @@ describe('tokens.utils', () => {
 		const mockStakeBalances: StakeBalances = {};
 
 		beforeEach(() => {
-			vi.resetAllMocks();
+			vi.clearAllMocks();
 
 			mockUsdValue.mockImplementation(
 				({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
@@ -942,10 +949,6 @@ describe('tokens.utils', () => {
 
 	describe('saveAllCustomTokens', () => {
 		beforeEach(() => {
-			vi.mock('$lib/stores/toasts.store', () => ({
-				toastsShow: vi.fn()
-			}));
-
 			vi.mock('$lib/services/manage-tokens.services', () => ({
 				saveCustomTokensWithKey: vi.fn().mockResolvedValue(undefined)
 			}));
@@ -1136,6 +1139,82 @@ describe('tokens.utils', () => {
 			const result = filterTokensByNft({ tokens: [], filterNfts: false });
 
 			expect(result).toHaveLength(0);
+		});
+	});
+
+	describe('assertExistingTokens', () => {
+		const mockErrorMsg = 'Token already exists';
+		const mockTokens: Erc20Token[] = createMockErc20Tokens({ n: 5, networkEnv: 'mainnet' });
+		const { id: _, ...mockToken } = mockTokens[mockTokens.length - 1];
+		const mockParams = {
+			existingTokens: mockTokens,
+			token: mockToken,
+			errorMsg: mockErrorMsg
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should return true when existing tokens are empty', () => {
+			const res = assertExistingTokens({
+				...mockParams,
+				existingTokens: [] as Erc20Token[]
+			});
+
+			expect(res).toStrictEqual({ valid: true });
+
+			expect(toastsError).not.toHaveBeenCalled();
+		});
+
+		it('should return true when there is no match', () => {
+			const res = assertExistingTokens({
+				...mockParams,
+				token: { ...mockToken, symbol: 'NEW' }
+			});
+
+			expect(res).toStrictEqual({ valid: true });
+
+			expect(toastsError).not.toHaveBeenCalled();
+		});
+
+		it('should return false and toasts when symbol matches exactly', () => {
+			const res = assertExistingTokens(mockParams);
+
+			expect(res).toStrictEqual({ valid: false });
+
+			expect(toastsError).toHaveBeenCalledExactlyOnceWith({ msg: { text: mockErrorMsg } });
+		});
+
+		it('should be case-insensitive', () => {
+			expect(
+				assertExistingTokens({
+					...mockParams,
+					token: { ...mockToken, symbol: mockToken.symbol.toLowerCase() }
+				})
+			).toStrictEqual({ valid: false });
+
+			expect(
+				assertExistingTokens({
+					...mockParams,
+					token: { ...mockToken, symbol: mockToken.symbol.toUpperCase() }
+				})
+			).toStrictEqual({ valid: false });
+		});
+
+		it('should match the first item', () => {
+			const res = assertExistingTokens({
+				...mockParams,
+				existingTokens: [
+					...mockTokens,
+					mockTokens[mockTokens.length - 1],
+					mockTokens[mockTokens.length - 1]
+				]
+			});
+
+			expect(res).toEqual({ valid: false });
+
+			expect(toastsError).toHaveBeenCalledExactlyOnceWith({ msg: { text: mockErrorMsg } });
 		});
 	});
 });
