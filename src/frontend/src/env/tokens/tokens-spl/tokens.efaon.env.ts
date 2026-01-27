@@ -17,7 +17,7 @@ export const EFAON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
-	name: 'iShares MSCI EAFE ETF',
+	name: 'iShares MSCI EAFE ETF (Ondo Tokenized)',
 	symbol: EFAON_SYMBOL,
 	decimals: EFAON_DECIMALS,
 	icon: iSharesPurple,
