@@ -104,7 +104,7 @@ describe('AuthHelpNewIdentityForm', () => {
 			expect(onDoneMock).toHaveBeenCalledOnce();
 		});
 
-		expect(onDoneMock).toHaveBeenCalledTimes(2);
+		expect(onDoneMock).toHaveBeenCalledOnce();
 		expect(authSpy).toHaveBeenCalledWith({ domain: 'identity.internetcomputer.org' });
 	});
 });
