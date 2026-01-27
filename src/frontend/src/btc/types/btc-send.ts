@@ -4,7 +4,7 @@ export class BtcAmountAssertionError extends Error {}
 
 export enum BtcPrepareSendError {
 	InsufficientBalance = 'insufficient_balance',
-	InsufficientBalanceVerbose = 'insufficient_balance_verbose_btc',
+	// InsufficientBalanceVerbose = 'insufficient_balance_verbose_btc',
 	InsufficientBalanceForFee = 'insufficient_balance_for_fee',
 	MinimumBalance = 'minimum_btc_amount',
 	PendingTransactionsNotAvailable = 'pending_transactions_not_available',
@@ -20,7 +20,7 @@ export class BtcValidationError extends Error {
 
 export enum BtcSendValidationError {
 	InsufficientBalance = 'InsufficientBalance',
-	InsufficientBalanceVerbose = 'InsufficientBalanceVerbose',
+	// InsufficientBalanceVerbose = 'InsufficientBalanceVerbose',
 	InsufficientBalanceForFee = 'InsufficientBalanceForFee',
 	InvalidUtxoData = 'InvalidUtxoData',
 	UtxoLocked = 'UtxoLocked',
