@@ -46,7 +46,7 @@ import { replaceHistory } from '$lib/utils/route.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const signIn = async (
@@ -274,6 +274,8 @@ const logout = async ({
 	// The reset will redirect the user to the root, so any appended message would be lost.
 	if (resetUrl) {
 		await gotoReplaceRoot(clearIdbStorages);
+
+		return;
 	}
 
 	appendMsgToUrl({
@@ -334,14 +336,12 @@ export const displayAndCleanLogoutMsg = async () => {
 
 	const msg: string | null = urlParams.get(PARAM_MSG);
 
-	if (isNullish(msg)) {
-		return;
+	if (nonNullish(msg)) {
+		// For simplicity reason we assume the level pass as query params is one of the type ToastLevel
+		const level: ToastLevel = (urlParams.get(PARAM_LEVEL) as ToastLevel | null) ?? 'success';
+
+		toastsShow({ text: decodeURI(msg), level });
 	}
-
-	// For simplicity reason we assume the level pass as query params is one of the type ToastLevel
-	const level: ToastLevel = (urlParams.get(PARAM_LEVEL) as ToastLevel | null) ?? 'success';
-
-	toastsShow({ text: decodeURI(msg), level });
 
 	cleanUpMsgUrl();
 };

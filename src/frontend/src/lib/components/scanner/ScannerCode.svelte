@@ -21,10 +21,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import type { QrStatus } from '$lib/types/qr-code';
+	import { ScannerResults } from '$lib/types/scanner';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
 
 	interface Props {
-		onNext: () => void;
+		onNext: (results: ScannerResults) => void;
 	}
 
 	let { onNext }: Props = $props();
@@ -63,7 +64,7 @@
 
 			setAvailableTokens(tokensWithFees);
 
-			onNext();
+			onNext(ScannerResults.PAY);
 		} catch (_: unknown) {
 			error = $i18n.scanner.error.code_link_is_not_valid;
 		} finally {
