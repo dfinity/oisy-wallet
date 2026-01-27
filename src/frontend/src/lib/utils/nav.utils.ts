@@ -76,7 +76,7 @@ export const getPageTokenIdentifier = (token: Token): string =>
 		? token.address
 		: isTokenIc(token)
 			? token.ledgerCanisterId
-			: token.name;
+			: token.symbol;
 
 const tokenUrl = ({
 	token,
