@@ -4,7 +4,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export interface ValidateTokenData {
@@ -75,11 +75,7 @@ const assertExistingTokens = ({
 	token: ExtTokenWithoutId;
 }): { valid: boolean } => {
 	if (
-		extTokens.find(
-			({ symbol, name }) =>
-				symbol.toLowerCase() === token.symbol.toLowerCase() ||
-				name.toLowerCase() === token.name.toLowerCase()
-		) !== undefined
+		nonNullish(extTokens.find(({ symbol }) => symbol.toLowerCase() === token.symbol.toLowerCase()))
 	) {
 		toastsError({
 			msg: { text: get(i18n).tokens.error.duplicate_metadata }

@@ -8,7 +8,7 @@ import { mapIcPunksToken } from '$icp/utils/icpunks.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
@@ -80,11 +80,9 @@ const assertExistingTokens = ({
 	token: IcPunksTokenWithoutId;
 }): { valid: boolean } => {
 	if (
-		icPunksTokens.find(
-			({ symbol, name }) =>
-				symbol.toLowerCase() === token.symbol.toLowerCase() ||
-				name.toLowerCase() === token.name.toLowerCase()
-		) !== undefined
+		nonNullish(
+			icPunksTokens.find(({ symbol }) => symbol.toLowerCase() === token.symbol.toLowerCase())
+		)
 	) {
 		toastsError({
 			msg: { text: get(i18n).tokens.error.duplicate_metadata }

@@ -98,11 +98,7 @@ const assertExistingTokens = ({
 	token: IcTokenWithoutId;
 }): { valid: boolean } => {
 	if (
-		icrcTokens.find(
-			({ symbol, name }) =>
-				symbol.toLowerCase() === token.symbol.toLowerCase() ||
-				name.toLowerCase() === token.name.toLowerCase()
-		) !== undefined
+		nonNullish(icrcTokens.find(({ symbol }) => symbol.toLowerCase() === token.symbol.toLowerCase()))
 	) {
 		toastsError({
 			msg: { text: get(i18n).tokens.error.duplicate_metadata }

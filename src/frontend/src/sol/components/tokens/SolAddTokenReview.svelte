@@ -97,8 +97,7 @@
 			if (
 				$splTokens?.find(
 					({ symbol, name }) =>
-						symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
-						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')
+						symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '')
 				) !== undefined
 			) {
 				toastsError({
