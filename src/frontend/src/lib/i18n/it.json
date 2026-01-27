@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Solo a scopo di test!",
-			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "$oisy_name ora utilizza",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Saperne di più"
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo di $name",
@@ -121,7 +118,6 @@
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
-			"legacy_login": "Accesso legacy",
 			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Assistente AI integrato con privacy come standard",
 			"advanced_cryptography": "Protetto da crittografia avanzata – 100% on-chain",
@@ -1807,7 +1803,6 @@
 			},
 			"title": "",
 			"instruction": "Cliccando su questo pulsante, accetti i $link",
-			"instruction_two_buttons": "Cliccando su uno di questi pulsante, accetti i $link",
 			"body": ""
 		},
 		"alt": {

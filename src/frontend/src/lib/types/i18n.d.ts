@@ -46,13 +46,7 @@ interface I18nCore {
 		ellipsis: string;
 		learn_more: string;
 	};
-	info: {
-		test_banner: string;
-		test_banner_beta: string;
-		internet_identity_banner_first_part: string;
-		internet_identity_banner_second_part: string;
-		internet_identity_banner_button: string;
-	};
+	info: { test_banner: string; test_banner_beta: string };
 	alt: {
 		logo: string;
 		go_to_home: string;
@@ -120,7 +114,6 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
-		legacy_login: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
@@ -1444,7 +1437,6 @@ interface I18nTerms_of_use {
 		det: { article: string; possessive: string };
 		title: string;
 		instruction: string;
-		instruction_two_buttons: string;
 		body: string;
 	};
 	alt: { terms_of_use: string };

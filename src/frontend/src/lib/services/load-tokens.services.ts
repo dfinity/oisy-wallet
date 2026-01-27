@@ -9,22 +9,26 @@ export const mapBackendTokens = async <
 	Variant extends BackendCustomToken,
 	T extends CustomToken<Token>
 >({
+	tokens,
 	filterCustomToken,
 	mapCustomToken,
 	errorMsg,
 	...params
 }: LoadCustomTokenParams & {
 	filterCustomToken: (token: BackendCustomToken) => token is Variant;
-	mapCustomToken: (params: Variant & QueryAndUpdateRequestParams) => Promise<T | undefined>;
+	mapCustomToken: (
+		params: { token: Variant } & QueryAndUpdateRequestParams
+	) => Promise<T | undefined>;
 	errorMsg: string;
 }): Promise<T[]> => {
-	const backendCustomTokens: BackendCustomToken[] = await loadNetworkCustomTokens(params);
+	const backendCustomTokens: BackendCustomToken[] =
+		tokens ?? (await loadNetworkCustomTokens(params));
 
 	const customTokenPromises = backendCustomTokens.reduce<Promise<T | undefined>[]>((acc, token) => {
 		if (filterCustomToken(token)) {
 			acc.push(
 				mapCustomToken({
-					...token,
+					token,
 					identity: params.identity,
 					certified: params.certified
 				})

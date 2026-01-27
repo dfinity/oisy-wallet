@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
-			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "$oisy_name agora usa",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Leia mas"
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logotipo $name",
@@ -121,7 +118,6 @@
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
-			"legacy_login": "Login legado",
 			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
 			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
 			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
@@ -1807,7 +1803,6 @@
 			},
 			"title": "",
 			"instruction": "Ao clicar neste botão, você concorda com os $link",
-			"instruction_two_buttons": "Ao clicar em um desses botões, você concorda com os $link",
 			"body": ""
 		},
 		"alt": {

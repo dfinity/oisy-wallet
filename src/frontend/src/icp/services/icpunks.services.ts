@@ -51,14 +51,7 @@ export const loadCustomTokens = ({
 	queryAndUpdate<IcPunksCustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
-		onUpdateError: ({ error: err }) => {
-			icPunksCustomTokensStore.resetAll();
-
-			toastsError({
-				msg: { text: get(i18n).init.error.icpunks_custom_tokens },
-				err
-			});
-		},
+		onUpdateError,
 		identity
 	});
 
@@ -69,14 +62,16 @@ const filterIcPunksCustomToken = (
 ): customToken is CustomTokenIcPunksVariant => 'IcPunks' in customToken.token;
 
 const mapIcPunksCustomToken = async ({
-	token,
-	enabled,
-	version: versionNullable,
-	section: sectionNullable,
-	allow_external_content_source: allowExternalContentSourceNullable,
+	token: {
+		token,
+		enabled,
+		version: versionNullable,
+		section: sectionNullable,
+		allow_external_content_source: allowExternalContentSourceNullable
+	},
 	identity,
 	certified
-}: CustomTokenIcPunksVariant & QueryAndUpdateRequestParams): Promise<
+}: { token: CustomTokenIcPunksVariant } & QueryAndUpdateRequestParams): Promise<
 	IcPunksCustomToken | undefined
 > => {
 	const version = fromNullable(versionNullable);
@@ -134,4 +129,13 @@ const loadCustomTokenData = ({
 	response: IcPunksCustomToken[];
 }) => {
 	icPunksCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	icPunksCustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.icpunks_custom_tokens },
+		err
+	});
 };
