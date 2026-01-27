@@ -861,6 +861,8 @@
 			"unknown_cketh": "无法获取 ckETH 代币。",
 			"destination_address_invalid": "目标地址无效。",
 			"amount_invalid": "金额无效。",
+			"insufficient_funds_verbose": "",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "燃料费不足",
 			"insufficient_funds_for_amount": "金额不足",
 			"insufficient_ethereum_funds_to_cover_the_fees": "以太坊余额不足以支付手续费",

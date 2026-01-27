@@ -861,6 +861,8 @@
 			"unknown_cketh": "Không thể truy xuất token ckETH.",
 			"destination_address_invalid": "Địa chỉ ví không hợp lệ.",
 			"amount_invalid": "Số lượng không hợp lệ.",
+			"insufficient_funds_verbose": "",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Không đủ tiền cho gas",
 			"insufficient_funds_for_amount": "Không đủ tiền cho số lượng",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Không đủ tiền Ethereum để trả phí",

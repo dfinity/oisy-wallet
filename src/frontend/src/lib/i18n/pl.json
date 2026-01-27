@@ -861,6 +861,8 @@
 			"unknown_cketh": "Nie można pobrać tokena ckETH.",
 			"destination_address_invalid": "Adres docelowy jest nieprawidłowy.",
 			"amount_invalid": "Kwota jest nieprawidłowa.",
+			"insufficient_funds_verbose": "",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Niewystarczające środki na gaz",
 			"insufficient_funds_for_amount": "Niewystarczające środki na kwotę",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Niewystarczające środki Ethereum na pokrycie opłat",
