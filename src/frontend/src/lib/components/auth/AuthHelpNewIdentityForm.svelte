@@ -1,6 +1,5 @@
 <script lang="ts">
 	import helpAuthNewIdentityBanner from '$lib/assets/help-auth-new-identity-banner.webp';
-	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -16,7 +15,6 @@
 		HELP_AUTH_DONE_BUTTON,
 		HELP_AUTH_IDENTITY_IMAGE_BANNER,
 		HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK,
-		HELP_AUTH_LEGACY_SIGN_IN_BUTTON,
 		HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK
 	} from '$lib/constants/test-ids.constants';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
@@ -36,19 +34,6 @@
 
 	const trackingEventKey = 'main_page_button';
 
-	const onLegacySignIn = async () => {
-		onDone();
-
-		trackEvent({
-			name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-			metadata: {
-				event_key: trackingEventKey,
-				event_value: 'identity_legacy_sign_in'
-			}
-		});
-
-		await signIn({ domain: InternetIdentityDomain.VERSION_1_0 });
-	};
 </script>
 
 <ContentWithToolbar>
