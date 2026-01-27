@@ -73,37 +73,6 @@
 				{$i18n.auth.help.text.identity_new_identity_item_2}
 			</p>
 
-			<p>
-				<Button
-					ariaLabel={$i18n.auth.help.text.identity_legacy_sign_in}
-					link
-					onclick={onLegacySignIn}
-					styleClass="text-left"
-					testId={HELP_AUTH_LEGACY_SIGN_IN_BUTTON}
-				>
-					{$i18n.auth.help.text.identity_legacy_sign_in}
-				</Button>
-			</p>
-
-			<p>
-				<ExternalLink
-					ariaLabel={$i18n.auth.help.text.identity_new_identity_link}
-					href={OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL}
-					iconAsLast
-					styleClass="font-semibold"
-					testId={HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK}
-					trackEvent={{
-						name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
-						metadata: {
-							event_key: trackingEventKey,
-							event_value: 'identity_new_identity_link'
-						}
-					}}
-				>
-					{replaceOisyPlaceholders($i18n.auth.help.text.identity_new_identity_link)}
-				</ExternalLink>
-			</p>
-
 			<p class="mb-0">
 				<ExternalLink
 					ariaLabel={replaceOisyPlaceholders($i18n.auth.help.text.internet_identity_help_center)}
@@ -120,6 +89,25 @@
 					}}
 				>
 					{replaceOisyPlaceholders($i18n.auth.help.text.internet_identity_help_center)}
+				</ExternalLink>
+			</p>
+
+			<p>
+				<ExternalLink
+					ariaLabel={$i18n.auth.help.text.switch_to_new_internet_identity}
+					href={OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL}
+					iconAsLast
+					styleClass="font-semibold"
+					testId={HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK}
+					trackEvent={{
+						name: PLAUSIBLE_EVENTS.SIGN_IN_CANCELLED_HELP,
+						metadata: {
+							event_key: trackingEventKey,
+							event_value: 'switch_to_new_internet_identity'
+						}
+					}}
+				>
+					{replaceOisyPlaceholders($i18n.auth.help.text.switch_to_new_internet_identity)}
 				</ExternalLink>
 			</p>
 		</div>
