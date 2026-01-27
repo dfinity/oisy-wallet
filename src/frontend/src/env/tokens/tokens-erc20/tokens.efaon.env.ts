@@ -16,7 +16,7 @@ export const EFAON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	name: 'iShares MSCI EAFE ETF',
+	name: 'iShares MSCI EAFE ETF (Ondo Tokenized)',
 	symbol: EFAON_SYMBOL,
 	decimals: EFAON_DECIMALS,
 	icon: iSharesPurple,
