@@ -71,7 +71,7 @@ describe('BtcSendWarnings', () => {
 				}
 			});
 
-			expect(container).toHaveTextContent(en.send.assertion.insufficient_funds);
+			expect(container).toHaveTextContent(en.send.assertion.insufficient_funds_verbose_btc);
 		});
 
 		it('should show insufficient funds for fee warning for InsufficientBalanceForFee error', () => {
