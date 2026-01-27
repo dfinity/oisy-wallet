@@ -70,7 +70,7 @@ export const isRouteEarnGold = ({ route: { id } }: Page): boolean => isEarnGoldP
 
 const tokenUrl = ({
 	token: {
-		name,
+		symbol,
 		network: { id: networkId }
 	},
 	path
@@ -79,7 +79,7 @@ const tokenUrl = ({
 	path: AppPath.Transactions | undefined;
 }): string =>
 	`${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(
-		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
+		symbol.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
 	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
 
 export const networkParam = (networkId: NetworkId | undefined): string =>

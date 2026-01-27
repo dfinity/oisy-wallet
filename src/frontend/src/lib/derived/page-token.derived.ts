@@ -24,8 +24,8 @@ export const pageToken: Readable<OptionToken> = derived(
 	([$routeToken, $routeNetwork, $nativeTokens, $erc20Tokens, $icrcTokens, $splTokens]) =>
 		nonNullish($routeToken)
 			? [...$nativeTokens, ...$erc20Tokens, ...$icrcTokens, ...$splTokens].find(
-					({ name, network: { id: networkId } }) =>
-						name === $routeToken && networkId.description === $routeNetwork
+					({ symbol, network: { id: networkId } }) =>
+						symbol === $routeToken && networkId.description === $routeNetwork
 				)
 			: undefined
 );

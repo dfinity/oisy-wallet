@@ -28,7 +28,7 @@
 	let token = $derived(
 		$allTokens.find(
 			(token) =>
-				token.name === $routeToken &&
+				token.symbol === $routeToken &&
 				$routeNetwork &&
 				token.network.id.description === $routeNetwork
 		)
