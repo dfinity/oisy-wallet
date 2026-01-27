@@ -18,10 +18,7 @@
 		HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK
 	} from '$lib/constants/test-ids.constants';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { InternetIdentityDomain } from '$lib/types/auth';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
