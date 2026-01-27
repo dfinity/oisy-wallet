@@ -95,10 +95,10 @@
 			};
 
 			if (
-				$splTokens?.find(
-					({ symbol, name }) =>
+			nonNullish(	$splTokens?.find(
+					({ symbol, }) =>
 						symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '')
-				) !== undefined
+				))
 			) {
 				toastsError({
 					msg: { text: $i18n.tokens.error.duplicate_metadata }
