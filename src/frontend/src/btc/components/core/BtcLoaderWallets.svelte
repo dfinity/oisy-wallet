@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { BtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -19,12 +18,6 @@
 		isNetworkIdBTCTestnet
 	} from '$lib/utils/network.utils';
 	import { findTwinToken } from '$lib/utils/token.utils';
-
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	let ckBtcToken = $derived(
 		findTwinToken({
@@ -56,6 +49,4 @@
 		});
 </script>
 
-<WalletWorkers {initWalletWorker} tokens={walletWorkerTokens}>
-	{@render children()}
-</WalletWorkers>
+<WalletWorkers {initWalletWorker} tokens={walletWorkerTokens} />

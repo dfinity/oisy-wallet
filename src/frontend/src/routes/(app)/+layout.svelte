@@ -11,7 +11,6 @@
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import LockPage from '$lib/components/auth/LockPage.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
-	import InternetIdentityBanner from '$lib/components/core/InternetIdentityBanner.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
@@ -20,7 +19,6 @@
 	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
 	import { authNotSignedIn, authSignedIn, authIdentity } from '$lib/derived/auth.derived';
@@ -110,10 +108,6 @@
 			class:min-h-[100dvh]={$authNotSignedIn}
 			class:overflow-x-hidden={$authNotSignedIn}
 		>
-			{#if $authNotSignedIn}
-				<InternetIdentityBanner />
-			{/if}
-
 			<Header />
 
 			<AuthGuard>
@@ -121,9 +115,7 @@
 					{#snippet menu()}
 						<NavigationMenu>
 							{#if assetsRoute}
-								<Responsive up="1.5xl">
-									<DappsCarousel />
-								</Responsive>
+								<DappsCarousel wrapperStyleClass="hidden xl:flex" />
 							{/if}
 						</NavigationMenu>
 					{/snippet}
@@ -134,9 +126,7 @@
 
 					<Loaders>
 						{#if assetsRoute}
-							<Responsive down="xl">
-								<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
-							</Responsive>
+							<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
 						{/if}
 
 						{@render children()}

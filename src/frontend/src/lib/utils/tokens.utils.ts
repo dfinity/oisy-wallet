@@ -6,10 +6,10 @@ import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
 import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
 import {
-	icTokenIcrcCustomToken,
 	isTokenDip20,
 	isTokenIc,
-	isTokenIcrc
+	isTokenIcrc,
+	isTokenIcrcCustomToken
 } from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
@@ -22,7 +22,7 @@ import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { StakeBalances } from '$lib/types/stake-balance';
-import type { Token, TokenToPin } from '$lib/types/token';
+import type { Token, TokenId, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -31,7 +31,8 @@ import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
-import { filterEnabledToken, isTokenToggleable, mapTokenUi } from '$lib/utils/token.utils';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -52,20 +53,21 @@ export const sortTokens = <T extends Token>({
 	$exchanges: ExchangesData;
 	$tokensToPin: TokenToPin[];
 }): T[] => {
-	const pinnedTokens = $tokensToPin
-		.map(({ id: pinnedId, network: { id: pinnedNetworkId } }) =>
-			$tokens.find(
-				({ id, network: { id: networkId } }) => id === pinnedId && networkId === pinnedNetworkId
-			)
-		)
-		.filter(nonNullish);
+	const tokenById = new Map<TokenId, T>($tokens.map((token) => [token.id, token]));
 
-	const otherTokens = $tokens.filter(
-		(token) =>
-			!pinnedTokens.some(
-				({ id, network: { id: networkId } }) => id === token.id && networkId === token.network.id
-			)
-	);
+	const pinnedTokens = $tokensToPin.reduce<T[]>((acc, { id: pinnedId }) => {
+		const token = tokenById.get(pinnedId);
+
+		if (nonNullish(token)) {
+			acc.push(token);
+
+			tokenById.delete(pinnedId);
+		}
+
+		return acc;
+	}, []);
+
+	const otherTokens = Array.from(tokenById.values());
 
 	return [
 		...pinnedTokens,
@@ -128,9 +130,13 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 				$exchanges
 			});
 
-			return (tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO) > 0
-				? [[...acc[0], tokenUI], acc[1]]
-				: [acc[0], [...acc[1], tokenUI]];
+			if ((tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO) > 0) {
+				acc[0].push(tokenUI);
+			} else {
+				acc[1].push(tokenUI);
+			}
+
+			return acc;
 		},
 		[[], []]
 	);
@@ -257,7 +263,7 @@ export const filterTokens = <T extends Token>({
 		}
 
 		if (
-			icTokenIcrcCustomToken(token) &&
+			isTokenIcrcCustomToken(token) &&
 			nonNullish(token.alternativeName) &&
 			token.alternativeName.toLowerCase().includes(filter.toLowerCase())
 		) {

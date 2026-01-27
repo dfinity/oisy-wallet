@@ -14,7 +14,6 @@ export const IcFeeSchema = z.object({
 
 export const IcAppMetadataSchema = z.object({
 	exchangeCoinId: CoingeckoCoinsIdSchema.optional(),
-	position: z.number(),
 	explorerUrl: UrlSchema.optional()
 });
 

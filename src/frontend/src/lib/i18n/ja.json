@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
-			"test_banner_beta": "これはベータ版リリースです。不具合が発生する可能性があります。実際の資産が使用されますので、十分ご注意のうえご利用ください。",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"test_banner_beta": "これはベータ版リリースです。不具合が発生する可能性があります。実際の資産が使用されますので、十分ご注意のうえご利用ください。"
 		},
 		"alt": {
 			"logo": "$name ロゴ",
@@ -121,11 +118,10 @@
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "ログイン/新規作成",
-			"legacy_login": "",
 			"asset_types": "BTC / SOL / ETH / ICP など幅広い資産を一元管理",
 			"instant_and_private": "AIアシスタント搭載 ― プライバシーを標準装備",
 			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで",
-			"social_login": ""
+			"social_login": "即時かつプライベートなアクセス + ソーシャルログイン"
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
@@ -155,7 +151,6 @@
 				"description": "あなたはログインまたは新規作成をキャンセルされたようです。どうしてそうなったのかを理解するため、改善に役立てたいと思っています。",
 				"login_page_looks_different": "",
 				"use_identity_number": "",
-				"lost_identity_number": "",
 				"feedback_text": "あなたのフィードバックは、$oisy_shortを改善するために役立ちます。",
 				"thanks_text": "ご協力ありがとうございました！",
 				"useful_links": "",
@@ -171,7 +166,8 @@
 				"identity_legacy_sign_in": "旧Internet Identityドメインでサインイン",
 				"identity_learn_more": "$oisy_short Docsで詳細を確認",
 				"oisy_introduction": "",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "",
 				"need_help": "サインイン",
@@ -1807,7 +1803,6 @@
 			},
 			"title": "",
 			"instruction": "このボタンをクリックすると、以下に同意したことになります。$link",
-			"instruction_two_buttons": "これらのボタンのいずれかをクリックすることで、以下に同意したものとみなされます。$link",
 			"body": ""
 		},
 		"alt": {

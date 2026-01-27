@@ -1,6 +1,7 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { listCustomTokens } from '$lib/api/backend.api';
 import { getIdbAllCustomTokens, setIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
+import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { assertNever, fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
@@ -10,7 +11,6 @@ import { get } from 'svelte/store';
 interface LoadCustomTokensFromBackendParams {
 	identity: OptionIdentity;
 	certified: boolean;
-	filterTokens: (token: CustomToken) => boolean;
 }
 
 type LoadCustomTokensParams = LoadCustomTokensFromBackendParams & {
@@ -19,8 +19,7 @@ type LoadCustomTokensParams = LoadCustomTokensFromBackendParams & {
 
 const loadCustomTokensFromBackend = async ({
 	identity,
-	certified,
-	filterTokens
+	certified
 }: LoadCustomTokensFromBackendParams): Promise<CustomToken[]> => {
 	const tokens = await listCustomTokens({
 		identity,
@@ -28,19 +27,19 @@ const loadCustomTokensFromBackend = async ({
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
+	backendCustomTokens.set(tokens);
+
 	// Caching the custom tokens in the IDB if update call
 	if (certified && tokens.length > 0) {
 		await setIdbAllCustomTokens({ identity, tokens });
 	}
 
-	// We filter the custom tokens, since the backend "Custom Token" potentially supports other types
-	return tokens.filter(filterTokens);
+	return tokens;
 };
 
 export const loadNetworkCustomTokens = async ({
 	identity,
 	certified,
-	filterTokens,
 	useCache = false
 }: LoadCustomTokensParams): Promise<CustomToken[]> => {
 	if (isNullish(identity)) {
@@ -130,13 +129,12 @@ export const loadNetworkCustomTokens = async ({
 				assertNever(token.token, `Unexpected token type: ${token.token}`);
 			};
 
-			return cachedTokens.map(parsePrincipal).filter(filterTokens);
+			return cachedTokens.map(parsePrincipal);
 		}
 	}
 
 	return await loadCustomTokensFromBackend({
 		identity,
-		certified,
-		filterTokens
+		certified
 	});
 };

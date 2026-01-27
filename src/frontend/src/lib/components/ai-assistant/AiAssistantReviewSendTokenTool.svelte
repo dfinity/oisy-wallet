@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import UtxosFeeContexts from '$btc/components/fee/UtxosFeeContexts.svelte';
+	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import { selectedEvmNetwork } from '$evm/derived/network.derived';
@@ -91,13 +93,17 @@
 				sourceNetwork={$selectedEvmNetwork ?? $sendToken.network}
 			/>
 		{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
-			<AiAssistantReviewSendBtcToken
-				{amount}
-				{destination}
-				{onSendCompleted}
-				{sendCompleted}
-				{sendEnabled}
-			/>
+			<UtxosFeeContexts>
+				<UtxosFeeLoader {amount} networkId={$sendTokenNetworkId} source={destination}>
+					<AiAssistantReviewSendBtcToken
+						{amount}
+						{destination}
+						{onSendCompleted}
+						{sendCompleted}
+						{sendEnabled}
+					/>
+				</UtxosFeeLoader>
+			</UtxosFeeContexts>
 		{:else if isNetworkIdSolana($sendToken.network.id)}
 			<AiAssistantReviewSendSolToken
 				{amount}

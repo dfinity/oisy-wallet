@@ -11,6 +11,7 @@ import {
 	type EthFeeStore,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import type { GetFeeData } from '$eth/types/infura';
 import type { EthereumNetwork } from '$eth/types/network';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as tokenUtils from '$eth/utils/token.utils';
@@ -141,7 +142,7 @@ describe('EthFeeContext', () => {
 
 		const provider = infuraMod.infuraProviders(network.id) as unknown as {
 			getFeeData: () => Promise<unknown>;
-			safeEstimateGas: (p: feeServices.GetFeeData) => Promise<bigint>;
+			safeEstimateGas: (p: GetFeeData) => Promise<bigint>;
 		};
 		vi.spyOn(provider, 'safeEstimateGas').mockResolvedValue(25n);
 
@@ -181,7 +182,7 @@ describe('EthFeeContext', () => {
 		const nft = mockValidErc721Nft;
 
 		const provider = infuraMod.infuraProviders(network.id) as unknown as {
-			estimateGas: (p: feeServices.GetFeeData & { data?: string }) => Promise<bigint>;
+			estimateGas: (p: GetFeeData & { data?: string }) => Promise<bigint>;
 		};
 		vi.spyOn(provider, 'estimateGas').mockResolvedValue(90n);
 

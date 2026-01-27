@@ -10,12 +10,14 @@ import {
 	infuraErc1155Providers
 } from '$eth/providers/infura-erc1155.providers';
 import type { EthereumNetwork } from '$eth/types/network';
+import type { NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
+import { SvelteMap } from 'svelte/reactivity';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'
@@ -127,8 +129,37 @@ describe('infura-erc1155.providers', () => {
 				]
 			};
 
+			const expected: NftMetadata = {
+				id: tokenId,
+				name: mockMetadata.name,
+				imageUrl: mockMetadata.image,
+				description: mockMetadata.description,
+				attributes: [
+					{ traitType: 'Issuance Month', value: '2022/06' },
+					{ traitType: 'Pepe', value: 'No' },
+					{ traitType: 'GM', value: 'No' },
+					{ traitType: 'Points - Power', value: '69' },
+					{ traitType: 'Points - Wisdom', value: '100' },
+					{ traitType: 'Points - Loki', value: '0' },
+					{ traitType: 'Points - Speed', value: '25' },
+					{ traitType: 'Bonus', value: 'None' },
+					{ traitType: 'Boost', value: 'None' },
+					{ traitType: 'Type - Meme', value: '1' },
+					{ traitType: 'Type - Season', value: '1' },
+					{ traitType: 'Type - Card', value: '1' },
+					{ traitType: 'Summer', value: 'No' },
+					{ traitType: 'Tulip', value: 'No' },
+					{ traitType: 'SEIZE Artist Profile', value: '6529er' },
+					{ traitType: 'simple_property', value: 'example value' },
+					{ traitType: 'Name', value: '123 Example Value' },
+					{ traitType: 'Name', value: '1,2,3,4' }
+				]
+			};
+
 			beforeEach(() => {
 				vi.clearAllMocks();
+
+				vi.spyOn(SvelteMap.prototype, 'get').mockReturnValue(undefined); // invalidate cache
 
 				global.fetch = vi.fn().mockResolvedValue({
 					json: () => Promise.resolve(mockMetadata)
@@ -147,32 +178,9 @@ describe('infura-erc1155.providers', () => {
 
 				const result = await provider.getNftMetadata(mockParams);
 
-				expect(result).toEqual({
-					id: tokenId,
-					name: mockMetadata.name,
-					imageUrl: mockMetadata.image,
-					description: mockMetadata.description,
-					attributes: [
-						{ traitType: 'Issuance Month', value: '2022/06' },
-						{ traitType: 'Pepe', value: 'No' },
-						{ traitType: 'GM', value: 'No' },
-						{ traitType: 'Points - Power', value: '69' },
-						{ traitType: 'Points - Wisdom', value: '100' },
-						{ traitType: 'Points - Loki', value: '0' },
-						{ traitType: 'Points - Speed', value: '25' },
-						{ traitType: 'Bonus', value: 'None' },
-						{ traitType: 'Boost', value: 'None' },
-						{ traitType: 'Type - Meme', value: '1' },
-						{ traitType: 'Type - Season', value: '1' },
-						{ traitType: 'Type - Card', value: '1' },
-						{ traitType: 'Summer', value: 'No' },
-						{ traitType: 'Tulip', value: 'No' },
-						{ traitType: 'SEIZE Artist Profile', value: '6529er' },
-						{ traitType: 'simple_property', value: 'example value' },
-						{ traitType: 'Name', value: '123 Example Value' },
-						{ traitType: 'Name', value: '1,2,3,4' }
-					]
-				});
+				expect(global.fetch).toHaveBeenCalledOnce();
+
+				expect(result).toEqual(expected);
 			});
 
 			it('should handle metadata gracefully if the contract does not support IERC1155MetadataURI', async () => {
@@ -182,6 +190,8 @@ describe('infura-erc1155.providers', () => {
 
 				const result = await provider.getNftMetadata(mockParams);
 
+				expect(global.fetch).not.toHaveBeenCalled();
+
 				expect(result).toEqual({ id: tokenId });
 			});
 
@@ -189,6 +199,8 @@ describe('infura-erc1155.providers', () => {
 				const provider = new InfuraErc1155Provider(infura);
 
 				await provider.getNftMetadata(mockParams);
+
+				expect(global.fetch).toHaveBeenCalledOnce();
 
 				expect(provider).toBeDefined();
 
@@ -219,6 +231,8 @@ describe('infura-erc1155.providers', () => {
 				const provider = new InfuraErc1155Provider(infura);
 
 				await expect(provider.getNftMetadata(mockParams)).rejects.toThrowError(errorMessage);
+
+				expect(global.fetch).not.toHaveBeenCalled();
 			});
 
 			it('should handle nullish metadata gracefully', async () => {
@@ -230,7 +244,22 @@ describe('infura-erc1155.providers', () => {
 
 				const result = await provider.getNftMetadata(mockParams);
 
+				expect(global.fetch).toHaveBeenCalledOnce();
+
 				expect(result).toEqual({ id: tokenId });
+			});
+
+			it('should return the cached metadata if available', async () => {
+				// Svelte map already has cached value from previous test runs
+				vi.spyOn(SvelteMap.prototype, 'get').mockRestore();
+
+				const provider = new InfuraErc1155Provider(infura);
+
+				const result = await provider.getNftMetadata(mockParams);
+
+				expect(global.fetch).not.toHaveBeenCalled();
+
+				expect(result).toEqual(expected);
 			});
 		});
 

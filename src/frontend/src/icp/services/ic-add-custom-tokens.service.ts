@@ -144,8 +144,6 @@ const loadMetadata = async ({
 			metadata: await metadata(serviceParams),
 			mintingAccount: await getMintingAccount(serviceParams),
 			exchangeCoinId: 'internet-computer',
-			// Position does not matter here
-			position: Number.MAX_VALUE,
 			category: 'custom',
 			...rest
 		});

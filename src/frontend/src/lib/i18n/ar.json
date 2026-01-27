@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
-			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "شعار $name",
@@ -121,7 +118,6 @@
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
-			"legacy_login": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
@@ -155,7 +151,6 @@
 				"description": "",
 				"login_page_looks_different": "",
 				"use_identity_number": "",
-				"lost_identity_number": "",
 				"feedback_text": "",
 				"thanks_text": "شكرًا لك!",
 				"useful_links": "",
@@ -171,7 +166,8 @@
 				"identity_legacy_sign_in": "تسجيل الدخول باستخدام نطاق هوية الإنترنت القديم",
 				"identity_learn_more": "تعرف على المزيد في وثائق $oisy_short",
 				"oisy_introduction": "",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "",
 				"need_help": "هل تحتاج مساعدة في",
@@ -1807,7 +1803,6 @@
 			},
 			"title": "",
 			"instruction": "",
-			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

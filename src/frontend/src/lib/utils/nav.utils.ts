@@ -7,6 +7,7 @@ import {
 	COLLECTION_PARAM,
 	NETWORK_PARAM,
 	NFT_PARAM,
+	PARAM_DELETE_IDB_CACHE,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
 	URI_PARAM
@@ -126,8 +127,8 @@ export const back = async ({ pop }: { pop: boolean }) => {
 	await goto('/');
 };
 
-export const gotoReplaceRoot = async () => {
-	await goto('/', { replaceState: true });
+export const gotoReplaceRoot = async (deleteIdbCache = false) => {
+	await goto(deleteIdbCache ? `/?${PARAM_DELETE_IDB_CACHE}=true` : '/', { replaceState: true });
 };
 
 export const removeSearchParam = ({ url, searchParam }: { url: URL; searchParam: string }) => {

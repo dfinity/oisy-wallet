@@ -1,7 +1,6 @@
 #!/bin/bash
 
 POCKET_IC_SERVER_VERSION=8.0.0
-OISY_UPGRADE_VERSIONS="v0.0.13,v0.0.19"
 BITCOIN_CANISTER_RELEASE="2024-08-30"
 BITCOIN_CANISTER_WASM="ic-btc-canister.wasm.gz"
 CYCLES_LEDGER_CANISTER_URL="$(jq -re .canisters.cycles_ledger.wasm dfx.json)"
@@ -26,15 +25,6 @@ scripts/download-immutable.sh "${CYCLES_LEDGER_CANISTER_URL}" "${CYCLES_LEDGER_C
 
 # Setting the environment variable that will be used in the test to load that particular file relative to the cargo workspace.
 export CYCLES_LEDGER_CANISTER_WASM_FILE="../../${CYCLES_LEDGER_CANISTER_WASM}"
-
-# We use a previous version of the release to ensure upgradability
-IFS=',' read -r -a versions <<<"$OISY_UPGRADE_VERSIONS"
-
-for version in "${versions[@]}"; do
-  OISY_UPGRADE_PATH="./backend-${version}.wasm.gz"
-
-  scripts/download-immutable.sh "https://github.com/dfinity/oisy-wallet/releases/download/${version}/backend.wasm.gz" "$OISY_UPGRADE_PATH"
-done
 
 # Download PocketIC server
 

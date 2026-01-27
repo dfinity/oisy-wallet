@@ -1,8 +1,11 @@
 import BtcConvertForm from '$btc/components/convert/BtcConvertForm.svelte';
 import * as btcPendingSendTransactionsStatusStore from '$btc/derived/btc-pending-sent-transactions-status.derived';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
-	initUtxosFeeStore,
 	UTXOS_FEE_CONTEXT_KEY,
+	initUtxosFeeStore,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -65,6 +68,10 @@ describe('BtcConvertForm', () => {
 		mockPage.reset();
 		store = initUtxosFeeStore();
 		store.reset();
+
+		allUtxosStore.reset();
+		feeRatePercentilesStore.reset();
+		btcPendingSentTransactionsStore.reset();
 	});
 
 	it('should keep the next button clickable if all requirements are met', () => {

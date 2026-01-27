@@ -38,3 +38,10 @@ export const mockIcPunksMetadata: TokenDesc = {
 		}
 	]
 };
+
+export const mockIcPunksCollectionMetadata = {
+	symbol: 'ICPUNKS',
+	name: 'ICPUNKS Collection',
+	description: 'A collection of ICPUNKS NFTs',
+	icon: 'https://example.com/icon.png'
+};

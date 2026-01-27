@@ -2,7 +2,8 @@ import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { isTokenEthereumCustomToken } from '$eth/utils/erc20.utils';
 import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
-import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+import { isTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+import { isIcrcTokenToggleEnabled } from '$icp/utils/token-toggle.utils';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import { pageNft } from '$lib/derived/page-nft.derived';
 import { defaultFallbackToken } from '$lib/derived/token.derived';
@@ -11,7 +12,6 @@ import type { NonFungibleToken } from '$lib/types/nft';
 import type { OptionToken, OptionTokenStandardCode, Token } from '$lib/types/token';
 import { getPageTokenIdentifier } from '$lib/utils/nav.utils';
 import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-import { isIcrcTokenToggleEnabled } from '$lib/utils/token-toggle.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -51,7 +51,7 @@ export const pageTokenStandard: Readable<OptionTokenStandardCode> = derived(
 
 export const pageTokenToggleable: Readable<boolean> = derived([pageToken], ([$pageToken]) => {
 	if (nonNullish($pageToken)) {
-		return icTokenIcrcCustomToken($pageToken)
+		return isTokenIcrcCustomToken($pageToken)
 			? isIcrcTokenToggleEnabled($pageToken)
 			: isTokenEthereumCustomToken($pageToken)
 				? isNotDefaultEthereumToken($pageToken)

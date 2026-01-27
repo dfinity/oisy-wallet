@@ -1,3 +1,6 @@
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
@@ -160,4 +163,10 @@ export const filterAvailableUtxos = ({
 		utxos: confirmedUtxos,
 		pendingUtxoTxIds
 	});
+};
+
+export const resetUtxosDataStores = (): void => {
+	btcPendingSentTransactionsStore.reset();
+	allUtxosStore.reset();
+	feeRatePercentilesStore.reset();
 };

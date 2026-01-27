@@ -9,7 +9,7 @@
 	import { assertIndexLedgerId } from '$icp/services/ic-add-custom-tokens.service';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
+	import { isTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { removeCustomToken, setCustomToken } from '$lib/api/backend.api';
 	import { deleteIdbIcToken, deleteIdbSolToken, deleteIdbEthToken } from '$lib/api/idb-tokens.api';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
@@ -227,7 +227,7 @@
 		}
 
 		try {
-			if (icTokenIcrcCustomToken(tokenToEdit)) {
+			if (isTokenIcrcCustomToken(tokenToEdit)) {
 				loading = true;
 				gotoStep(TokenModalSteps.EDIT_PROGRESS);
 				progress(ProgressStepsAddToken.SAVE);

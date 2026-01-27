@@ -1,3 +1,4 @@
+import { collectionMetadata } from '$icp/api/icpunks.api';
 import type {
 	IcPunksCanisters,
 	IcPunksToken,
@@ -7,25 +8,25 @@ import { mapIcPunksToken } from '$icp/utils/icpunks.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 export interface ValidateTokenData {
 	token: IcPunksTokenWithoutId;
 }
 
-export const loadAndAssertAddCustomToken = ({
+export const loadAndAssertAddCustomToken = async ({
 	identity,
 	icPunksTokens,
 	canisterId
 }: Partial<IcPunksCanisters> & {
 	identity: OptionIdentity;
 	icPunksTokens: IcPunksToken[];
-}): {
+}): Promise<{
 	result: 'success' | 'error';
 	data?: ValidateTokenData;
-} => {
+}> => {
 	assertNonNullish(identity);
 
 	if (isNullish(canisterId)) {
@@ -49,7 +50,7 @@ export const loadAndAssertAddCustomToken = ({
 	try {
 		const params = { identity, ...canisterIds };
 
-		const token = loadMetadata(params);
+		const token = await loadMetadata(params);
 
 		if (isNullish(token)) {
 			toastsError({
@@ -112,12 +113,14 @@ const assertAlreadyAvailable = ({
 	return { alreadyAvailable: false };
 };
 
-const loadMetadata = ({ canisterId }: IcPunksCanisters): IcPunksTokenWithoutId | undefined => {
+const loadMetadata = async ({
+	identity,
+	canisterId
+}: IcPunksCanisters & { identity: Identity }): Promise<IcPunksTokenWithoutId | undefined> => {
 	try {
 		return mapIcPunksToken({
 			canisterId,
-			// We still don't have a way to get the token name from the canisterId, so we use the canisterId as the token name
-			metadata: { name: shortenWithMiddleEllipsis({ text: canisterId }) }
+			metadata: await collectionMetadata({ canisterId, identity, certified: true })
 		});
 	} catch (err: unknown) {
 		toastsError({ msg: { text: get(i18n).tokens.import.error.loading_metadata } });

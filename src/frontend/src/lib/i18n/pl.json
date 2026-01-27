@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",
-			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "logo $name",
@@ -121,11 +118,10 @@
 			"logout": "Wyloguj",
 			"lock": "Zablokuj",
 			"authenticate": "Otwórz lub Utwórz",
-			"legacy_login": "",
 			"asset_types": "Zarządzaj aktywami w BTC, SOL, ETH, ICP i innych kryptowalutach",
 			"instant_and_private": "Wbudowany asystent AI z ochroną prywatności w standardzie",
 			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
-			"social_login": ""
+			"social_login": "Natychmiastowy i prywatny dostęp + logowanie społecznościowe"
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie"
@@ -155,7 +151,6 @@
 				"description": "",
 				"login_page_looks_different": "",
 				"use_identity_number": "",
-				"lost_identity_number": "",
 				"feedback_text": "",
 				"thanks_text": "Dziękuję!",
 				"useful_links": "",
@@ -171,7 +166,8 @@
 				"identity_legacy_sign_in": "Zaloguj się za pomocą starszej domeny Internet Identity",
 				"identity_learn_more": "Dowiedz się więcej w dokumentacji $oisy_short",
 				"oisy_introduction": "",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "",
 				"need_help": "Potrzebujesz pomocy",
@@ -1807,7 +1803,6 @@
 			},
 			"title": "",
 			"instruction": "Klikając ten przycisk, zgadzasz się na $link",
-			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
