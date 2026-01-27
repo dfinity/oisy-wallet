@@ -91,9 +91,7 @@ const tokenUrl = ({
 
 	const identifier = getPageTokenIdentifier(token);
 
-	return `${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(
-		identifier.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
-	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
+	return `${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(identifier)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
 };
 
 export const networkParam = (networkId: NetworkId | undefined): string =>
