@@ -58,7 +58,7 @@ describe('Transactions', () => {
 	});
 
 	it('should not open the manage token modal if an enabled token is used', async () => {
-		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken(ICP_TOKEN);
 
 		render(Transactions);
 
@@ -103,7 +103,7 @@ describe('Transactions', () => {
 			`button[data-tid='${BUTTON_MODAL_CLOSE}']`
 		);
 
-		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken(ICP_TOKEN);
 
 		button?.click();
 

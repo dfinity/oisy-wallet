@@ -63,7 +63,7 @@ describe('page-token.derived', () => {
 		it.each([ICP_TOKEN, BTC_MAINNET_TOKEN, SOLANA_TOKEN, ETHEREUM_TOKEN])(
 			'should find $name token',
 			(token) => {
-				mockPage.mock({ token: token.name, network: token.network.id.description });
+				mockPage.mockToken(token);
 
 				expect(get(pageToken)).toBe(token);
 			}
@@ -77,7 +77,7 @@ describe('page-token.derived', () => {
 					return () => {};
 				});
 
-				mockPage.mock({ token: token.name, network: token.network.id.description });
+				mockPage.mockToken(token);
 
 				expect(get(pageToken)).toBe(token);
 			}
@@ -90,7 +90,7 @@ describe('page-token.derived', () => {
 			});
 			vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
-			mockPage.mock({ token: token.name, network: token.network.id.description });
+			mockPage.mockToken(token);
 
 			expect(get(pageToken)).toBe(token);
 		});
@@ -98,7 +98,7 @@ describe('page-token.derived', () => {
 		it('should find ERC20 token', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
 			erc20CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
 		});
@@ -106,14 +106,14 @@ describe('page-token.derived', () => {
 		it('should find ICRC token', () => {
 			const mockToken = { ...mockIcrcCustomToken, enabled: true };
 			icrcCustomTokensStore.setAll([{ data: mockToken, certified: true }]);
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
 		});
 
 		it('should find SPL token', () => {
 			const mockToken = JUP_TOKEN;
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
 		});
@@ -170,7 +170,7 @@ describe('page-token.derived', () => {
 		it.each([ICP_TOKEN, BTC_MAINNET_TOKEN, SOLANA_TOKEN, ETHEREUM_TOKEN])(
 			'should return the standard for $name token',
 			(token) => {
-				mockPage.mock({ token: token.name, network: token.network.id.description });
+				mockPage.mockToken(token);
 
 				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
@@ -184,7 +184,7 @@ describe('page-token.derived', () => {
 					return () => {};
 				});
 
-				mockPage.mock({ token: token.name, network: token.network.id.description });
+				mockPage.mockToken(token);
 
 				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
@@ -199,7 +199,7 @@ describe('page-token.derived', () => {
 				});
 				vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
-				mockPage.mock({ token: token.name, network: token.network.id.description });
+				mockPage.mockToken(token);
 
 				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
@@ -208,7 +208,7 @@ describe('page-token.derived', () => {
 		it('should return the standard for ERC20 token', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
 			erc20CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});
@@ -216,14 +216,14 @@ describe('page-token.derived', () => {
 		it('should return the standard for ICRC token', () => {
 			const mockToken = { ...mockIcrcCustomToken, enabled: true };
 			icrcCustomTokensStore.setAll([{ data: mockToken, certified: true }]);
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});
 
 		it('should return the standard for SPL token', () => {
 			const mockToken = JUP_TOKEN;
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});
