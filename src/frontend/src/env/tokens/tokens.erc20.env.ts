@@ -6,6 +6,7 @@ import {
 import { ONEINCH_TOKEN } from '$env/tokens/tokens-erc20/tokens.1inch.env';
 import { AMDON_TOKEN } from '$env/tokens/tokens-erc20/tokens.amdon.env';
 import { ARB_TOKEN } from '$env/tokens/tokens-erc20/tokens.arb.env';
+import { ARMON_TOKEN } from '$env/tokens/tokens-erc20/tokens.armon.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.babaon.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.biduon.env';
 import { COPXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.copxon.env';
@@ -18,6 +19,7 @@ import { IVVON_TOKEN } from '$env/tokens/tokens-erc20/tokens.ivvon.env';
 import { JASMY_TOKEN } from '$env/tokens/tokens-erc20/tokens.jasmy.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { MATIC_TOKEN } from '$env/tokens/tokens-erc20/tokens.matic.env';
+import { MUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.muon.env';
 import { NVDAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.nvdaon.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
 import { PBRON_TOKEN } from '$env/tokens/tokens-erc20/tokens.pbron.env';
@@ -72,6 +74,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	ONEINCH_TOKEN,
 	AMDON_TOKEN,
 	ARB_TOKEN,
+	ARMON_TOKEN,
 	BABAON_TOKEN,
 	BIDUON_TOKEN,
 	COPXON_TOKEN,
@@ -82,6 +85,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	IVVON_TOKEN,
 	JASMY_TOKEN,
 	MATIC_TOKEN,
+	MUON_TOKEN,
 	NVDAON_TOKEN,
 	PBRON_TOKEN,
 	PEPECOIN_TOKEN,

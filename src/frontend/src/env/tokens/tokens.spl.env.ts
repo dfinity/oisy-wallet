@@ -6,6 +6,7 @@ import { ACNX_TOKEN } from '$env/tokens/tokens-spl/tokens.acnx.env';
 import { AMBRX_TOKEN } from '$env/tokens/tokens-spl/tokens.ambrx.env';
 import { AMDON_TOKEN } from '$env/tokens/tokens-spl/tokens.amdon.env';
 import { AMZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.amznx.env';
+import { ARMON_TOKEN } from '$env/tokens/tokens-spl/tokens.armon.env';
 import { AVGOX_TOKEN } from '$env/tokens/tokens-spl/tokens.avgox.env';
 import { AZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.aznx.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-spl/tokens.babaon.env';
@@ -35,6 +36,7 @@ import { MAX_TOKEN } from '$env/tokens/tokens-spl/tokens.max.env';
 import { MCDX_TOKEN } from '$env/tokens/tokens-spl/tokens.mcdx.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
+import { MUON_TOKEN } from '$env/tokens/tokens-spl/tokens.muon.env';
 import { NFLXX_TOKEN } from '$env/tokens/tokens-spl/tokens.nflxx.env';
 import { NVDAON_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdaon.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
@@ -68,6 +70,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	AMBRX_TOKEN,
 	AMDON_TOKEN,
 	AMZNX_TOKEN,
+	ARMON_TOKEN,
 	AVGOX_TOKEN,
 	AZNX_TOKEN,
 	BABAON_TOKEN,
@@ -97,6 +100,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	MCDX_TOKEN,
 	METAX_TOKEN,
 	MSTRX_TOKEN,
+	MUON_TOKEN,
 	NFLXX_TOKEN,
 	NVDAON_TOKEN,
 	NVDAX_TOKEN,
