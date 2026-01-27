@@ -48,11 +48,11 @@
 		assertIsNetworkEthereum(network);
 
 		if (
-			[...$erc20Tokens, ...$erc721Tokens]?.find(
+	nonNullish(		[...$erc20Tokens, ...$erc721Tokens]?.find(
 				({ symbol, network: tokenNetwork }) =>
 					(symbol.toLowerCase() === (metadata?.symbol?.toLowerCase() ?? '')) &&
 					tokenNetwork.chainId === network.chainId
-			) !== undefined
+			) )
 		) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.duplicate_metadata }
