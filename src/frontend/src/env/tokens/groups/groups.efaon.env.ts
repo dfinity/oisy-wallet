@@ -9,6 +9,6 @@ export const EFAON_TOKEN_GROUP_ID: TokenGroupId = parseTokenGroupId(EFAON_TOKEN_
 export const EFAON_TOKEN_GROUP: TokenGroupData = {
 	id: EFAON_TOKEN_GROUP_ID,
 	icon: iSharesPurple,
-	name: 'iShares MSCI EAFE ETF',
+	name: 'iShares MSCI EAFE ETF (Ondo Tokenized)',
 	symbol: EFAON_TOKEN_GROUP_SYMBOL
 };
