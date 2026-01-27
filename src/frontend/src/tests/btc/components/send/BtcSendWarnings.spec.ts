@@ -66,7 +66,7 @@ describe('BtcSendWarnings', () => {
 					pendingTransactionsStatus: BtcPendingSentTransactionsStatus.NONE,
 					utxosFee: {
 						...mockUtxosFee,
-						error: BtcPrepareSendError.InsufficientBalance
+						error: BtcPrepareSendError.InsufficientBalanceVerbose
 					}
 				}
 			});
