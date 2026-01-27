@@ -69,10 +69,6 @@
 				{$i18n.auth.help.text.identity_new_identity_item_1}
 			</p>
 
-			<p>
-				{$i18n.auth.help.text.identity_new_identity_item_2}
-			</p>
-
 			<p class="mb-0">
 				<ExternalLink
 					ariaLabel={replaceOisyPlaceholders($i18n.auth.help.text.internet_identity_help_center)}
