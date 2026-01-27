@@ -3,7 +3,7 @@ import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 export class BtcAmountAssertionError extends Error {}
 
 export enum BtcPrepareSendError {
-	InsufficientBalance = 'insufficient_balance',
+	InsufficientBalance = 'insufficient_balance_verbose_btc',
 	InsufficientBalanceForFee = 'insufficient_balance_for_fee',
 	MinimumBalance = 'minimum_btc_amount',
 	PendingTransactionsNotAvailable = 'pending_transactions_not_available',
