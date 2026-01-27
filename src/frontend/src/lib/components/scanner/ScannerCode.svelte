@@ -75,6 +75,7 @@
 		if (status !== 'success' || isNullish(code)) {
 			return;
 		}
+
 		await processCode(code);
 	};
 
@@ -117,9 +118,9 @@
 			{/snippet}
 
 			{#snippet footer()}
-				<Button disabled={isEmptyUri} fullWidth onclick={handleManualConnect}
-					>{$i18n.core.text.continue}</Button
-				>
+				<Button disabled={isEmptyUri} fullWidth onclick={handleManualConnect}>
+					{$i18n.core.text.continue}
+				</Button>
 			{/snippet}
 		</BottomSheet>
 	</Responsive>
@@ -127,9 +128,9 @@
 	{#snippet toolbar()}
 		<Responsive up="md">
 			<ButtonGroup>
-				<Button disabled={isEmptyUri} onclick={handleManualConnect}
-					>{$i18n.core.text.continue}</Button
-				>
+				<Button disabled={isEmptyUri} onclick={handleManualConnect}>
+					{$i18n.core.text.continue}
+				</Button>
 			</ButtonGroup>
 		</Responsive>
 

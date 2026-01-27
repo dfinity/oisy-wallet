@@ -1,4 +1,3 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
@@ -51,28 +50,16 @@ export const loadCustomTokens = ({
 	queryAndUpdate<SplCustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
-		onUpdateError: ({ error: err }) => {
-			splCustomTokensStore.resetAll();
-
-			toastsError({
-				msg: { text: get(i18n).init.error.spl_custom_tokens },
-				err
-			});
-		},
+		onUpdateError,
 		identity
 	});
 
-const loadSplCustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
-	await loadNetworkCustomTokens({
-		...params,
-		filterTokens: ({ token }) => 'SplMainnet' in token || 'SplDevnet' in token
-	});
-
-const loadCustomTokensWithMetadata = async (
-	params: LoadCustomTokenParams
-): Promise<SplCustomToken[]> => {
+const loadCustomTokensWithMetadata = async ({
+	tokens,
+	...params
+}: LoadCustomTokenParams): Promise<SplCustomToken[]> => {
 	const loadCustomContracts = async (): Promise<SplCustomToken[]> => {
-		const splCustomTokens = await loadSplCustomTokens(params);
+		const splCustomTokens = tokens ?? (await loadNetworkCustomTokens(params));
 
 		const [existingTokens, nonExistingTokens] = splCustomTokens.reduce<
 			[SplCustomToken[], SplCustomToken[]]
@@ -182,6 +169,15 @@ const loadCustomTokenData = ({
 	response: SplCustomToken[];
 }) => {
 	splCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	splCustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.spl_custom_tokens },
+		err
+	});
 };
 
 export const getSplMetadata = async ({
