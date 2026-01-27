@@ -31,6 +31,7 @@ import type { NonFungibleToken } from '$lib/types/nft';
 import type { RequiredTokenWithLinkedData } from '$lib/types/token';
 import { getNftIdentifier } from '$lib/utils/nft.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
+import { parseNetworkId } from '$lib/validation/network.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
@@ -119,21 +120,24 @@ describe('page-token.derived', () => {
 		});
 
 		it('should return undefined when token is not found in any list', () => {
-			mockPage.mock({ token: 'non-existent-token' });
+			mockPage.mockToken({ ...ETHEREUM_TOKEN, name: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 		});
 
 		it('should return undefined when token name matches but network does not', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
-			mockPage.mock({ token: mockToken.name, network: 'non-existent-network' });
+			mockPage.mockToken({
+				...mockToken,
+				network: { ...mockToken.network, id: parseNetworkId('non-existent-network') }
+			});
 
 			expect(get(pageToken)).toBeUndefined();
 		});
 
 		it('should return undefined when token network matches but name does not', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
-			mockPage.mock({ token: 'non-existent-token', network: mockToken.network.name });
+			mockPage.mockToken({ ...mockToken, name: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 		});
@@ -154,15 +158,18 @@ describe('page-token.derived', () => {
 		it('should return undefined when page token is undefined', () => {
 			expect(get(pageTokenStandard)).toBeUndefined();
 
-			mockPage.mock({ token: 'non-existent-token' });
+			mockPage.mockToken({ ...ETHEREUM_TOKEN, name: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 
-			mockPage.mock({ token: mockValidErc20Token.name, network: 'non-existent-network' });
+			mockPage.mockToken({
+				...mockValidErc20Token,
+				network: { ...mockValidErc20Token.network, id: parseNetworkId('non-existent-network') }
+			});
 
 			expect(get(pageToken)).toBeUndefined();
 
-			mockPage.mock({ token: 'non-existent-token', network: mockValidErc20Token.network.name });
+			mockPage.mockToken({ ...mockValidErc20Token, name: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 		});
