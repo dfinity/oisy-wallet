@@ -153,7 +153,7 @@ const loadCustomIcrcTokensData = async ({
 		const { enabled, version: v, token } = custom_token;
 
 		if (!('Icrc' in token)) {
-			throw new Error('Token is not Icrc');
+			return;
 		}
 
 		const {

@@ -225,7 +225,7 @@ describe('network-tokens.derived', () => {
 			it.each(networkMap)(
 				'should return all tokens for network $network.name',
 				({ network, tokens }) => {
-					mockPage.mock({ network: network.id.description });
+					mockPage.mockNetwork(network.id.description);
 
 					expect(get(enabledFungibleNetworkTokens)).toEqual(tokens);
 				}
@@ -382,7 +382,7 @@ describe('network-tokens.derived', () => {
 			it.each(networkMap)(
 				'should return all tokens for network $network.name',
 				({ network, tokens }) => {
-					mockPage.mock({ network: network.id.description });
+					mockPage.mockNetwork(network.id.description);
 
 					expect(get(enabledNonFungibleNetworkTokens)).toEqual(tokens);
 				}

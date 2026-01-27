@@ -46,7 +46,7 @@ describe('page-nft.derived', () => {
 		});
 
 		it('should return empty array when no collection in route', () => {
-			mockPage.mock({ network: `${mockNft1.collection.network.id.description}` });
+			mockPage.mockNetwork(`${mockNft1.collection.network.id.description}`);
 
 			expect(get(pageCollectionNfts)).toStrictEqual([]);
 		});

@@ -149,7 +149,7 @@ describe('all-network-tokens.derived', () => {
 		});
 
 		it('should return all fungible tokens for the selected network', () => {
-			mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
+			mockPage.mockNetwork(ETHEREUM_NETWORK_ID.description);
 
 			const tokens = get(allFungibleNetworkTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);
