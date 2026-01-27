@@ -50,7 +50,7 @@
 				{$i18n.auth.help.text.identity_new_identity_item_1}
 			</p>
 
-			<p class="mb-0">
+			<p>
 				<ExternalLink
 					ariaLabel={replaceOisyPlaceholders($i18n.auth.help.text.internet_identity_help_center)}
 					href={OISY_INTERNET_IDENTITY_HELP_CENTER_URL}
