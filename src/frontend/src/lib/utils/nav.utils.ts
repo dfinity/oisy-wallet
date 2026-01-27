@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { goto, pushState } from '$app/navigation';
 import { isTokenErc } from '$eth/utils/erc.utils';
+import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import {
 	AppPath,
@@ -76,7 +77,9 @@ export const getPageTokenIdentifier = (token: Token): string =>
 		? token.address
 		: isTokenIc(token)
 			? token.ledgerCanisterId
-			: token.symbol;
+			: isTokenIcNft(token)
+				? token.canisterId
+				: token.symbol;
 
 const tokenUrl = ({
 	token,
