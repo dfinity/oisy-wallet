@@ -23,13 +23,14 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getPageTokenIdentifier } from '$lib/utils/nav.utils';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
 
 	let token = $derived(
 		$allTokens.find(
 			(token) =>
-				token.name === $routeToken &&
-				$routeNetwork &&
+				getPageTokenIdentifier(token) === $routeToken &&
+				nonNullish($routeNetwork) &&
 				token.network.id.description === $routeNetwork
 		)
 	);
