@@ -129,7 +129,6 @@
 			// no need to raise the error, but we should reload the custom tokens, just to avoid that it is caused by outdated tokens
 			await loadNetworkCustomTokens({
 				identity: $authIdentity,
-				filterTokens: () => true,
 				certified: true
 			});
 		}

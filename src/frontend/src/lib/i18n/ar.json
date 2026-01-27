@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
-			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "شعار $name",
@@ -121,7 +118,6 @@
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
-			"legacy_login": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
@@ -1807,7 +1803,6 @@
 			},
 			"title": "",
 			"instruction": "",
-			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

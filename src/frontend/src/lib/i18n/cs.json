@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
-			"test_banner_beta": "Toto je beta verze. Může se vyskytnout chyba. V sázce jsou skutečné prostředky – používejte prosím s opatrností.",
-			"internet_identity_banner_first_part": "$oisy_name nyní používá",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Přečtěte více"
+			"test_banner_beta": "Toto je beta verze. Může se vyskytnout chyba. V sázce jsou skutečné prostředky – používejte prosím s opatrností."
 		},
 		"alt": {
 			"logo": "logo $name",
@@ -121,7 +118,6 @@
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
-			"legacy_login": "Starší přihlášení",
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
 			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
@@ -1807,7 +1803,6 @@
 			},
 			"title": "",
 			"instruction": "Kliknutím na toto tlačítko souhlasíte s $link",
-			"instruction_two_buttons": "Kliknutím na jedno z těchto tlačítek souhlasíte s $link",
 			"body": ""
 		},
 		"alt": {
