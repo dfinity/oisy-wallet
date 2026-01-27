@@ -8,7 +8,8 @@ import { mapIcPunksToken } from '$icp/utils/icpunks.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { assertExistingTokens } from '$lib/utils/tokens.utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
@@ -60,7 +61,11 @@ export const loadAndAssertAddCustomToken = async ({
 			return { result: 'error' };
 		}
 
-		const { valid } = assertExistingTokens({ token, icPunksTokens });
+		const { valid } = assertExistingTokens({
+			existingTokens: icPunksTokens,
+			token,
+			errorMsg: get(i18n).tokens.error.duplicate_metadata
+		});
 
 		if (!valid) {
 			return { result: 'error' };
@@ -70,28 +75,6 @@ export const loadAndAssertAddCustomToken = async ({
 	} catch (_err: unknown) {
 		return { result: 'error' };
 	}
-};
-
-const assertExistingTokens = ({
-	icPunksTokens,
-	token
-}: {
-	icPunksTokens: IcPunksToken[];
-	token: IcPunksTokenWithoutId;
-}): { valid: boolean } => {
-	if (
-		nonNullish(
-			icPunksTokens.find(({ symbol }) => symbol.toLowerCase() === token.symbol.toLowerCase())
-		)
-	) {
-		toastsError({
-			msg: { text: get(i18n).tokens.error.duplicate_metadata }
-		});
-
-		return { valid: false };
-	}
-
-	return { valid: true };
 };
 
 const assertAlreadyAvailable = ({
