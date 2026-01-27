@@ -1,5 +1,4 @@
 import { pageCollectionNfts, pageNft } from '$lib/derived/page-nft.derived';
-import { NetworkIdSchema } from '$lib/schema/network.schema';
 import { nftStore } from '$lib/stores/nft.store';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -51,10 +50,7 @@ describe('page-nft.derived', () => {
 		});
 
 		it('should return empty array when no network in route', () => {
-			mockPage.mockCollection({
-				...mockNft1.collection,
-				network: { ...mockNft1.collection.network, id: NetworkIdSchema.parse(Symbol()) }
-			});
+			mockPage.mock({ collection: mockNft1.collection.address });
 
 			expect(get(pageCollectionNfts)).toStrictEqual([]);
 		});
@@ -120,12 +116,9 @@ describe('page-nft.derived', () => {
 		});
 
 		it('should return undefined when no network in route', () => {
-			mockPage.mockNft({
-				...mockNft1,
-				collection: {
-					...mockNft1.collection,
-					network: { ...mockNft1.collection.network, id: NetworkIdSchema.parse(Symbol()) }
-				}
+			mockPage.mock({
+				nft: mockNft1.id,
+				collection: mockNft1.collection.address
 			});
 
 			expect(get(pageNft)).toBeUndefined();
