@@ -10,7 +10,6 @@
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	interface Props {
-		listener: OptionWalletConnectListener;
 		proposal: Option<WalletKitTypes.SessionProposal>;
 		steps: WizardSteps<WizardStepsWalletConnect>;
 		modal: WizardModal<WizardStepsWalletConnect> | undefined;
@@ -21,7 +20,6 @@
 	}
 
 	let {
-		listener,
 		proposal,
 		steps,
 		modal = $bindable(),
@@ -47,7 +45,6 @@
 
 	<WalletConnectSessionWizard
 		{currentStep}
-		{listener}
 		{onApprove}
 		{onConnect}
 		{onReject}
