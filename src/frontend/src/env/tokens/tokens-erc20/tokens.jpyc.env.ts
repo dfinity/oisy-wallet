@@ -7,7 +7,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 
 const JPYC_DECIMALS = 18;
 
-const JPYC_SYMBOL = 'NVDAon';
+const JPYC_SYMBOL = 'JPYC';
 
 export const JPYC_TOKEN_ID: TokenId = parseTokenId(JPYC_SYMBOL);
 
