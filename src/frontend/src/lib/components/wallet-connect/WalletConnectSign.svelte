@@ -6,15 +6,13 @@
 	import EthWalletConnectSignModal from '$eth/components/wallet-connect/EthWalletConnectSignModal.svelte';
 	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import {walletConnectListenerStore} from "$lib/stores/wallet-connect.store";
 	import SolWalletConnectSignModal from '$sol/components/wallet-connect/SolWalletConnectSignModal.svelte';
 	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 
-	interface Props {
-		listener: OptionWalletConnectListener;
-	}
 
-	let { listener }: Props = $props();
+
+	let listener = $derived($walletConnectListenerStore);
 
 	let request = $derived(
 		$modalWalletConnectSign

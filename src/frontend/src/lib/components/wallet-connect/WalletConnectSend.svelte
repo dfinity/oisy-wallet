@@ -7,13 +7,9 @@
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import {walletConnectListenerStore} from "$lib/stores/wallet-connect.store";
 
-	interface Props {
-		listener: OptionWalletConnectListener;
-	}
-
-	let { listener }: Props = $props();
+	let listener = $derived($walletConnectListenerStore);
 
 	let request = $derived(
 		$modalWalletConnectSend
