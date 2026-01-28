@@ -1,4 +1,6 @@
 import { page } from '$app/state';
+import type { NetworkId } from '$lib/types/network';
+import type { Nft, NftCollection } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import { resetRouteParams, type RouteParams } from '$lib/utils/nav.utils';
 import type { Page } from '@sveltejs/kit';
@@ -39,6 +41,27 @@ const initPageStoreMock = () => {
 		},
 		mockToken: ({ name, network: { id: networkId } }: Token) => {
 			const data = { token: name, network: networkId.description };
+			set({ ...page, data });
+			page.data = data;
+		},
+		mockNetwork: (network: NetworkId['description']) => {
+			const data = { network };
+			set({ ...page, data });
+			page.data = data;
+		},
+		mockCollection: ({ address, network: { id: networkId } }: NftCollection) => {
+			const data = { collection: address, network: networkId.description };
+			set({ ...page, data });
+			page.data = data;
+		},
+		mockNft: ({
+			id,
+			collection: {
+				address,
+				network: { id: networkId }
+			}
+		}: Nft) => {
+			const data = { nft: id, collection: address, network: networkId.description };
 			set({ ...page, data });
 			page.data = data;
 		},

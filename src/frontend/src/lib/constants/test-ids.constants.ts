@@ -211,7 +211,6 @@ export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';
 export const HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON = 'help-auth-user-identity-number-button';
 export const HELP_AUTH_IDENTITY_IMAGE_BANNER = 'help-auth-identity-image-banner';
-export const HELP_AUTH_LEGACY_SIGN_IN_BUTTON = 'help-auth-legacy-sign-in-button';
 export const HELP_AUTH_BACK_BUTTON = 'help-auth-back-button';
 export const HELP_AUTH_DONE_BUTTON = 'help-auth-done-button';
 export const HELP_AUTH_LEARN_MORE_LINK = 'help-auth-learn-more-link';
