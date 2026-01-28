@@ -11,7 +11,7 @@ import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
-vi.mock('$icp/utils/icrc.utils', () => ({
+vi.mock('$icp/services/icrc.services', () => ({
 	isIcrcTokenSupportIcrc2: vi.fn()
 }));
 

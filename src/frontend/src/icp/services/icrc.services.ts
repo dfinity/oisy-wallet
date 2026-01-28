@@ -7,13 +7,19 @@ import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import {
 	balance,
 	getMintingAccount,
+	icrc1SupportedStandards,
 	allowance as icrcAllowance,
 	metadata
 } from '$icp/api/icrc-ledger.api';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcCkToken, IcInterface, IcToken } from '$icp/types/ic-token';
+import {
+	IcTokenStandards,
+	type IcCkToken,
+	type IcInterface,
+	type IcToken
+} from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import {
@@ -400,4 +406,19 @@ export const hasSufficientIcrcAllowance = async ({
 	const isNotExpired = nonNullish(expiredAt) && expiredAt > expiredBuffer;
 
 	return hasSufficientAllowance && isNotExpired;
+};
+
+export const isIcrcTokenSupportIcrc2 = async ({
+	identity,
+	ledgerCanisterId
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+}) => {
+	const supportedStandards = await icrc1SupportedStandards({
+		identity,
+		ledgerCanisterId
+	});
+
+	return supportedStandards.some(({ name }) => name === IcTokenStandards.icrc2);
 };
