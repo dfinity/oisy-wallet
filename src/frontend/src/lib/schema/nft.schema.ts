@@ -19,11 +19,11 @@ export const NftMetadataSchema = z.object({
 	attributes: z.array(NftAttributeSchema).optional()
 });
 
-export const NftAppearanceSchema = z.object({
+const NftAppearanceSchema = z.object({
 	oisyId: NftIdSchema.optional()
 });
 
-export const NftMediaStatusSchema = z.object({
+const NftMediaStatusSchema = z.object({
 	image: z.enum(MediaStatusEnum),
 	thumbnail: z.enum(MediaStatusEnum)
 });
