@@ -476,6 +476,5 @@
 		{proposal}
 		{steps}
 		bind:modal
-		bind:listener
 	/>
 {/if}

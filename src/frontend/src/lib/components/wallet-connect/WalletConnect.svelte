@@ -9,6 +9,6 @@
 
 <WalletConnectSession bind:listener />
 
-<WalletConnectSign bind:listener />
+<WalletConnectSign {listener} />
 
-<WalletConnectSend bind:listener />
+<WalletConnectSend {listener} />
