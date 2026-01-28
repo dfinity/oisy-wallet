@@ -12,11 +12,9 @@
 		modal: WizardModal<WizardStepsWalletConnect> | undefined;
 		onClose: () => void;
 		onConnect: (uri: string) => void;
-		onApprove: () => void;
-		onReject: () => void;
 	}
 
-	let { steps, modal = $bindable(), onClose, onConnect, onApprove, onReject }: Props = $props();
+	let { steps, modal = $bindable(), onClose, onConnect }: Props = $props();
 
 	let proposal = $derived($walletConnectProposalStore);
 
@@ -34,5 +32,5 @@
 		</WalletConnectModalTitle>
 	{/snippet}
 
-	<WalletConnectSessionWizard {currentStep} {onApprove} {onConnect} {onReject} />
+	<WalletConnectSessionWizard {currentStep} {onConnect} />
 </WizardModal>
