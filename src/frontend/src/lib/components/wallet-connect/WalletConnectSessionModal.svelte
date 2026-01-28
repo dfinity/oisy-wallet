@@ -43,11 +43,5 @@
 		</WalletConnectModalTitle>
 	{/snippet}
 
-	<WalletConnectSessionWizard
-		{currentStep}
-		{onApprove}
-		{onConnect}
-		{onReject}
-		{proposal}
-	/>
+	<WalletConnectSessionWizard {currentStep} {onApprove} {onConnect} {onReject} {proposal} />
 </WizardModal>
