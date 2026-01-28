@@ -1,4 +1,3 @@
-import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import {
 	CKERC20_LEDGER_CANISTER_IDS,
 	IC_CKBTC_LEDGER_CANISTER_ID,
@@ -64,10 +63,7 @@ describe('Info', () => {
 	it('should not render any info components if sourceToken is not a mainnet token', () => {
 		mockEnabledToken(mockValidIcCkToken);
 
-		mockPage.mock({
-			token: mockValidIcCkToken.name,
-			network: ICP_NETWORK_SYMBOL
-		});
+		mockPage.mockToken(mockValidIcCkToken);
 		token.set(mockValidIcCkToken);
 
 		const { getByText } = render(Info);
@@ -80,10 +76,7 @@ describe('Info', () => {
 		it('should render bitcoin info if all conditions are met', () => {
 			mockEnabledToken(mockCkBtcToken);
 
-			mockPage.mock({
-				token: mockCkBtcToken.name,
-				network: ICP_NETWORK_SYMBOL
-			});
+			mockPage.mockToken(mockCkBtcToken);
 			token.set(mockCkBtcToken);
 
 			const { getByText } = render(Info);
@@ -95,10 +88,7 @@ describe('Info', () => {
 			mockEnabledToken(mockCkBtcToken);
 			setupUserNetworksStore('allDisabled');
 
-			mockPage.mock({
-				token: mockCkBtcToken.name,
-				network: ICP_NETWORK_SYMBOL
-			});
+			mockPage.mockToken(mockCkBtcToken);
 			token.set(mockCkBtcToken);
 
 			const { getByText } = render(Info);
@@ -119,10 +109,7 @@ describe('Info', () => {
 		it('should render ethereum info if all conditions are met', () => {
 			mockEnabledToken(mockCkEthToken);
 
-			mockPage.mock({
-				token: mockCkEthToken.name,
-				network: ICP_NETWORK_SYMBOL
-			});
+			mockPage.mockToken(mockCkEthToken);
 			token.set(mockCkEthToken);
 
 			const { getByText } = render(Info);
@@ -136,10 +123,7 @@ describe('Info', () => {
 			mockEnabledToken(mockCkEthToken);
 			setupUserNetworksStore('allDisabled');
 
-			mockPage.mock({
-				token: mockCkEthToken.name,
-				network: ICP_NETWORK_SYMBOL
-			});
+			mockPage.mockToken(mockCkEthToken);
 			token.set(mockCkEthToken);
 
 			const { getByText } = render(Info);
@@ -160,10 +144,7 @@ describe('Info', () => {
 		it('should render ethereum info if all conditions are met', () => {
 			mockEnabledToken(mockCkUsdcToken);
 
-			mockPage.mock({
-				token: mockCkUsdcToken.name,
-				network: ICP_NETWORK_SYMBOL
-			});
+			mockPage.mockToken(mockCkUsdcToken);
 			token.set(mockCkUsdcToken);
 
 			const { getByText } = render(Info);
@@ -177,10 +158,7 @@ describe('Info', () => {
 			mockEnabledToken(mockCkUsdcToken);
 			setupUserNetworksStore('allDisabled');
 
-			mockPage.mock({
-				token: mockCkUsdcToken.name,
-				network: ICP_NETWORK_SYMBOL
-			});
+			mockPage.mockToken(mockCkUsdcToken);
 			token.set(mockCkUsdcToken);
 
 			const { getByText } = render(Info);
