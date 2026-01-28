@@ -5,20 +5,17 @@ import {
 	GHOSTNODE_LEDGER_CANISTER_ID,
 	ICONFUCIUS_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
-import { icrc1SupportedStandards } from '$icp/api/icrc-ledger.api';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import {
-	IcTokenStandards,
-	type IcCkInterface,
-	type IcFee,
-	type IcInterface,
-	type IcToken,
-	type IcTokenWithoutId
+import type {
+	IcCkInterface,
+	IcFee,
+	IcInterface,
+	IcToken,
+	IcTokenWithoutId
 } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -172,21 +169,6 @@ export const isTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token i
 
 const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>
 	'minterCanisterId' in token && 'twinToken' in token;
-
-export const isIcrcTokenSupportIcrc2 = async ({
-	identity,
-	ledgerCanisterId
-}: {
-	identity: OptionIdentity;
-	ledgerCanisterId: CanisterIdText;
-}) => {
-	const supportedStandards = await icrc1SupportedStandards({
-		identity,
-		ledgerCanisterId
-	});
-
-	return supportedStandards.some(({ name }) => name === IcTokenStandards.icrc2);
-};
 
 export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 	...token,
