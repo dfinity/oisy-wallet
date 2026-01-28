@@ -161,7 +161,6 @@
 				"identity_legacy_identity_item_2": "Podívejte se na číslo na začátku fráze pro obnovení, kterou jste si možná dříve uložili.",
 				"identity_new_identity_title": "$oisy_name nyní používá Internet Identity 2.0, která nabízí několik vylepšení a umožňuje propojit vaši identitu s vašimi přihlašovacími údaji na Google, Apple nebo Microsoft.",
 				"identity_new_identity_item_1": "Chcete-li migrovat svou stávající identitu, klikněte na odkaz “Upgrade your identity“ v horní části nové přihlašovací stránky a postupujte podle pokynů.",
-				"identity_legacy_sign_in": "Přihlásit se pomocí staré domény Internet Identity (legacy)",
 				"identity_learn_more": "Více se dozvíte v dokumentaci $oisy_short",
 				"oisy_introduction": "$oisy_short Úvod",
 				"logging_into_oisy": "",

@@ -161,7 +161,6 @@
 				"identity_legacy_identity_item_2": "查看您之前可能保存的恢复短语开头的数字。",
 				"identity_new_identity_title": "$oisy_name 现在使用 Internet Identity 2.0，它提供了多项改进，并允许您将您的身份与您在 Google、Apple 或 Microsoft 上的登录信息关联起来。",
 				"identity_new_identity_item_1": "要迁移您现有的身份，请点击新登录页面顶部的“Upgrade your identity”链接，然后按照步骤操作。",
-				"identity_legacy_sign_in": "使用旧 Internet Identity 域名登录",
 				"identity_learn_more": "在 $oisy_short 文档中了解更多",
 				"oisy_introduction": "",
 				"logging_into_oisy": "",
