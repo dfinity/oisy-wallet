@@ -6,11 +6,9 @@
 	import EthWalletConnectSignModal from '$eth/components/wallet-connect/EthWalletConnectSignModal.svelte';
 	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {walletConnectListenerStore} from "$lib/stores/wallet-connect.store";
+	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 	import SolWalletConnectSignModal from '$sol/components/wallet-connect/SolWalletConnectSignModal.svelte';
 	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
-
-
 
 	let listener = $derived($walletConnectListenerStore);
 

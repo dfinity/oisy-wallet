@@ -7,7 +7,7 @@
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {walletConnectListenerStore} from "$lib/stores/wallet-connect.store";
+	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 
 	let listener = $derived($walletConnectListenerStore);
 
