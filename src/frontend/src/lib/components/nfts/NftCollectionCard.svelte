@@ -6,13 +6,13 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
+	import { MediaStatusEnum } from '$lib/enums/media-status';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES,
 		PLAUSIBLE_EVENT_VALUES,
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
-	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftSortStore } from '$lib/stores/settings.store';
@@ -42,7 +42,7 @@
 	);
 
 	const previewNft = $derived(
-		collection.nfts.find((nft) => getNftDisplayMediaStatus(nft) !== NftMediaStatusEnum.OK) ??
+		collection.nfts.find((nft) => getNftDisplayMediaStatus(nft) !== MediaStatusEnum.OK) ??
 			collection.nfts[0]
 	);
 
