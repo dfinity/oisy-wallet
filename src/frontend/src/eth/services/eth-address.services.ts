@@ -29,10 +29,10 @@ export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddres
 		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 		// HACK: This is not working for Local environment for now, because the library is not aware of the `dfx_test_1` public key (used by Local deployment).
-		return await deriveEthAddress(
-			identity.getPrincipal().toString(),
-			SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey
-		);
+		return deriveEthAddress({
+			user: identity.getPrincipal().toString(),
+			pubkey: SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey
+		});
 	}
 
 	return await getSignerEthAddress({
