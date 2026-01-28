@@ -108,7 +108,7 @@ describe('Scanner', () => {
 		expect(anchor).not.toBeInTheDocument();
 	});
 
-	it('should not render ScannerWizard when modal is closed', () => {
+	it('should not render ScannerModal when modal is closed', () => {
 		mockModalOpen.set(false);
 
 		const { container } = render(Scanner);
@@ -118,7 +118,7 @@ describe('Scanner', () => {
 		expect(childrenCount).toBeGreaterThan(0);
 	});
 
-	it('should render ScannerWizard when modalUniversalScannerOpen is true', async () => {
+	it('should render ScannerModal when modalUniversalScannerOpen is true', async () => {
 		mockModalOpen.set(true);
 
 		const { container } = render(Scanner);

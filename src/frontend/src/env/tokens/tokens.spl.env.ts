@@ -20,6 +20,8 @@ import { CRWDX_TOKEN } from '$env/tokens/tokens-spl/tokens.crwdx.env';
 import { CSCOX_TOKEN } from '$env/tokens/tokens-spl/tokens.cscox.env';
 import { DFDVX_TOKEN } from '$env/tokens/tokens-spl/tokens.dfdvx.env';
 import { DHRX_TOKEN } from '$env/tokens/tokens-spl/tokens.dhrx.env';
+import { EEMON_TOKEN } from '$env/tokens/tokens-spl/tokens.eemon.env';
+import { EFAON_TOKEN } from '$env/tokens/tokens-spl/tokens.efaon.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { GLDX_TOKEN } from '$env/tokens/tokens-spl/tokens.gldx.env';
 import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
@@ -36,6 +38,7 @@ import { MAX_TOKEN } from '$env/tokens/tokens-spl/tokens.max.env';
 import { MCDX_TOKEN } from '$env/tokens/tokens-spl/tokens.mcdx.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
+import { MUON_TOKEN } from '$env/tokens/tokens-spl/tokens.muon.env';
 import { NFLXX_TOKEN } from '$env/tokens/tokens-spl/tokens.nflxx.env';
 import { NVDAON_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdaon.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
@@ -83,6 +86,8 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	CSCOX_TOKEN,
 	DFDVX_TOKEN,
 	DHRX_TOKEN,
+	EEMON_TOKEN,
+	EFAON_TOKEN,
 	EURC_TOKEN,
 	GLDX_TOKEN,
 	GMEX_TOKEN,
@@ -99,6 +104,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	MCDX_TOKEN,
 	METAX_TOKEN,
 	MSTRX_TOKEN,
+	MUON_TOKEN,
 	NFLXX_TOKEN,
 	NVDAON_TOKEN,
 	NVDAX_TOKEN,
