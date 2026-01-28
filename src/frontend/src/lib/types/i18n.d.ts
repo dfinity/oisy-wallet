@@ -144,9 +144,6 @@ interface I18nAuth {
 			useful_links: string;
 			identity_new_identity: string;
 			switch_to_new_internet_identity: string;
-			identity_legacy_identity_title: string;
-			identity_legacy_identity_item_1: string;
-			identity_legacy_identity_item_2: string;
 			identity_new_identity_title: string;
 			identity_new_identity_item_1: string;
 			oisy_introduction: string;
