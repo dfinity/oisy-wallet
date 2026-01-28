@@ -1,7 +1,7 @@
 import { page } from '$app/state';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
-import { resetRouteParams, type RouteParams } from '$lib/utils/nav.utils';
+import { getPageTokenIdentifier, resetRouteParams, type RouteParams } from '$lib/utils/nav.utils';
 import type { Page } from '@sveltejs/kit';
 import { writable } from 'svelte/store';
 
@@ -38,8 +38,11 @@ const initPageStoreMock = () => {
 			set({ ...page, url });
 			page.url = url;
 		},
-		mockToken: ({ name, network: { id: networkId } }: Token) => {
-			const data = { token: name, network: networkId.description };
+		mockToken: (token: Token) => {
+			const {
+				network: { id: networkId }
+			} = token;
+			const data = { token: getPageTokenIdentifier(token), network: networkId.description };
 			set({ ...page, data });
 			page.data = data;
 		},
