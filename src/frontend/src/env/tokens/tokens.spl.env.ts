@@ -21,6 +21,7 @@ import { CSCOX_TOKEN } from '$env/tokens/tokens-spl/tokens.cscox.env';
 import { DFDVX_TOKEN } from '$env/tokens/tokens-spl/tokens.dfdvx.env';
 import { DHRX_TOKEN } from '$env/tokens/tokens-spl/tokens.dhrx.env';
 import { EEMON_TOKEN } from '$env/tokens/tokens-spl/tokens.eemon.env';
+import { EFAON_TOKEN } from '$env/tokens/tokens-spl/tokens.efaon.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { GLDX_TOKEN } from '$env/tokens/tokens-spl/tokens.gldx.env';
 import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
@@ -86,6 +87,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	DFDVX_TOKEN,
 	DHRX_TOKEN,
 	EEMON_TOKEN,
+	EFAON_TOKEN,
 	EURC_TOKEN,
 	GLDX_TOKEN,
 	GMEX_TOKEN,
