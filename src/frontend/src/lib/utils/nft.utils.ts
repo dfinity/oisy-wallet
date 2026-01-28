@@ -1,7 +1,7 @@
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
-import { MediaStatusEnum } from '$lib/enums/media-status';
+import type { MediaStatusEnum } from '$lib/enums/media-status';
 import type {
 	Nft,
 	NftAttribute,

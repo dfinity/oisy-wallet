@@ -9,12 +9,12 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { MediaStatusEnum } from '$lib/enums/media-status';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-    import {MediaStatusEnum} from "$lib/enums/media-status";
 
 	interface Props {
 		collection?: NftCollection;

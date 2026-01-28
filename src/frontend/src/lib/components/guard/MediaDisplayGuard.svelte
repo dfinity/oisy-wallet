@@ -7,8 +7,8 @@
 	import InvalidDataImage from '$lib/components/icons/nfts/InvalidData.svelte';
 	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { MediaStatusEnum } from '$lib/enums/media-status';
 	import { i18n } from '$lib/stores/i18n.store';
-    import {MediaStatusEnum} from "$lib/enums/media-status";
 
 	interface Props {
 		type: 'hero-banner' | 'card' | 'card-selectable' | 'nft-display' | 'nft-logo';

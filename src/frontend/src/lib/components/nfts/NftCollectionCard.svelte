@@ -6,6 +6,7 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
+	import { MediaStatusEnum } from '$lib/enums/media-status';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES,
@@ -21,7 +22,6 @@
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { getNftDisplayImageUrl, getNftDisplayMediaStatus } from '$lib/utils/nft.utils';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
-    import {MediaStatusEnum} from "$lib/enums/media-status";
 
 	interface Props {
 		collection: NftCollectionUi;

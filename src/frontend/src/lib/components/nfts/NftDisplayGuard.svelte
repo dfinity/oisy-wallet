@@ -2,12 +2,12 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import MediaDisplayGuard from '$lib/components/guard/MediaDisplayGuard.svelte';
+	import { MediaStatusEnum } from '$lib/enums/media-status';
 	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
 	import { getNftDisplayMediaStatus } from '$lib/utils/nft.utils';
-    import {MediaStatusEnum} from "$lib/enums/media-status";
 
 	interface Props {
 		nft?: Nft;
