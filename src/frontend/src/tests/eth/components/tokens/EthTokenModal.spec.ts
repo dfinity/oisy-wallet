@@ -18,10 +18,7 @@ describe('EthTokenModal', () => {
 			return () => {};
 		});
 
-		mockPage.mock({
-			token: mockValidErc20Token.name,
-			network: mockValidErc20Token.network.id.description
-		});
+		mockPage.mockToken(mockValidErc20Token);
 	});
 
 	it('displays all required values including the delete button', () => {
