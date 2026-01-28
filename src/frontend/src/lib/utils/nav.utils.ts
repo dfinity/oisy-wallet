@@ -149,10 +149,20 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 
 	const token = searchParams?.get(TOKEN_PARAM);
 
+	const replaceEmoji = (input: string | null): string | null => {
+		if (input === null) {
+			return null;
+		}
+
+		return input.replace(/\\u([\dA-Fa-f]+)/g, (_match, hex) =>
+			String.fromCodePoint(Number(`0x${hex}`))
+		);
+	};
+
 	const uri = searchParams?.get(URI_PARAM);
 
 	return {
-		[TOKEN_PARAM]: nonNullish(token) ? decodeURIComponent(token) : null,
+		[TOKEN_PARAM]: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
 		[NETWORK_PARAM]: searchParams?.get(NETWORK_PARAM),
 		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null,
 		[NFT_PARAM]: searchParams?.get(NFT_PARAM),
