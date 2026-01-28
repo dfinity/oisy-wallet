@@ -469,6 +469,7 @@
 
 {#if $modalWalletConnectAuth}
 	<WalletConnectSessionModal
+		{listener}
 		onApprove={approve}
 		onClose={resetAndClose}
 		onConnect={userConnect}
@@ -476,6 +477,5 @@
 		{proposal}
 		{steps}
 		bind:modal
-		bind:listener
 	/>
 {/if}

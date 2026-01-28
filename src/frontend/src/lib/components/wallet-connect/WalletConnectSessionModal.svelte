@@ -21,7 +21,7 @@
 	}
 
 	let {
-		listener = $bindable(),
+		listener,
 		proposal,
 		steps,
 		modal = $bindable(),
@@ -47,10 +47,10 @@
 
 	<WalletConnectSessionWizard
 		{currentStep}
+		{listener}
 		{onApprove}
 		{onConnect}
 		{onReject}
 		{proposal}
-		bind:listener
 	/>
 </WizardModal>

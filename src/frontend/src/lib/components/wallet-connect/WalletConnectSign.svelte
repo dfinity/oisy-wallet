@@ -14,7 +14,7 @@
 		listener: OptionWalletConnectListener;
 	}
 
-	let { listener = $bindable() }: Props = $props();
+	let { listener }: Props = $props();
 
 	let request = $derived(
 		$modalWalletConnectSign
@@ -39,8 +39,8 @@
 
 {#if $modalWalletConnectSign && nonNullish(request)}
 	{#if nonNullish(ethChainId)}
-		<EthWalletConnectSignModal {request} bind:listener />
+		<EthWalletConnectSignModal {listener} {request} />
 	{:else if nonNullish(solChainId) && nonNullish(sourceSolNetwork)}
-		<SolWalletConnectSignModal network={sourceSolNetwork} {request} bind:listener />
+		<SolWalletConnectSignModal {listener} network={sourceSolNetwork} {request} />
 	{/if}
 {/if}
