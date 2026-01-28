@@ -17,10 +17,7 @@ describe('NftCollection', () => {
 	beforeAll(() => {
 		nftStore.addAll(mockNfts);
 
-		mockPage.mock({
-			network: mockValidErc1155Nft.collection.network.id.description,
-			collection: mockValidErc1155Nft.collection.address
-		});
+		mockPage.mockCollection(mockValidErc1155Nft.collection);
 	});
 
 	it('should render a list of the collections nfts', () => {

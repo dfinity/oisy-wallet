@@ -10,11 +10,9 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { extractMediaUrls } from '$lib/services/url.services';
 import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 import type { NonFungibleToken } from '$lib/types/nft';
-import type { OptionString } from '$lib/types/string';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { mockNftCollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
-import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockNftCollectionUi } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 
@@ -131,12 +129,6 @@ describe('NftCollectionHero', () => {
 	});
 
 	it('should render the root breadcrumb with network query param if userSelectedNetwork is defined', () => {
-		mockPage.mock({
-			network: mockValidErc1155Nft.collection.network as unknown as OptionString
-		});
-		mockPage.mockDynamicRoutes({
-			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
-		});
 		userSelectedNetworkStore.set({
 			key: 'user-selected-network',
 			value: ETHEREUM_NETWORK_ID.description
@@ -159,13 +151,6 @@ describe('NftCollectionHero', () => {
 	});
 
 	it('should render the root breadcrumb without network query param if userSelectedNetwork is not defined', () => {
-		mockPage.mock({
-			network: mockValidErc1155Nft.collection.network as unknown as OptionString
-		});
-		mockPage.mockDynamicRoutes({
-			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
-		});
-
 		const { container } = render(NftCollectionHero, {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
