@@ -110,7 +110,7 @@ export const mockCustomTokensErc20: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(true)
 	},
 	{
 		version: toNullable(),
@@ -122,7 +122,7 @@ export const mockCustomTokensErc20: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(false)
 	}
 ];
 
