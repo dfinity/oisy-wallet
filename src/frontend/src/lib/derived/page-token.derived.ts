@@ -24,15 +24,11 @@ export const pageToken: Readable<OptionToken> = derived(
 	[routeToken, routeNetwork, nativeTokens, enabledErc20Tokens, enabledIcrcTokens, enabledSplTokens],
 	([$routeToken, $routeNetwork, $nativeTokens, $erc20Tokens, $icrcTokens, $splTokens]) =>
 		nonNullish($routeToken)
-			? [...$nativeTokens, ...$erc20Tokens, ...$icrcTokens, ...$splTokens].find((token) => {
-					const {
-						network: { id: networkId }
-					} = token;
-
-					return (
-						getPageTokenIdentifier(token) === $routeToken && networkId.description === $routeNetwork
-					);
-				})
+			? [...$nativeTokens, ...$erc20Tokens, ...$icrcTokens, ...$splTokens].find(
+					(token) =>
+						getPageTokenIdentifier(token) === $routeToken &&
+						token.network.id.description === $routeNetwork
+				)
 			: undefined
 );
 
