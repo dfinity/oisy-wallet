@@ -28,7 +28,7 @@ describe('ContextMenu', () => {
 	});
 
 	it('renders the ic token menu', () => {
-		mockPage.mock({ network: ICP_NETWORK.id.description });
+		mockPage.mockNetwork(ICP_NETWORK.id.description);
 
 		const { container } = render(ContextMenu);
 
@@ -38,7 +38,7 @@ describe('ContextMenu', () => {
 	});
 
 	it('renders the eth token menu', () => {
-		mockPage.mock({ network: DEFAULT_ETHEREUM_NETWORK.id.description });
+		mockPage.mockNetwork(DEFAULT_ETHEREUM_NETWORK.id.description);
 
 		const { container } = render(ContextMenu);
 
@@ -48,7 +48,7 @@ describe('ContextMenu', () => {
 	});
 
 	it('renders the btc token menu', () => {
-		mockPage.mock({ network: BTC_MAINNET_NETWORK.id.description });
+		mockPage.mockNetwork(BTC_MAINNET_NETWORK.id.description);
 
 		const { container } = render(ContextMenu);
 
@@ -58,7 +58,7 @@ describe('ContextMenu', () => {
 	});
 
 	it('renders the sol token menu', () => {
-		mockPage.mock({ network: SOLANA_MAINNET_NETWORK.id.description });
+		mockPage.mockNetwork(SOLANA_MAINNET_NETWORK.id.description);
 
 		const { container } = render(ContextMenu);
 
