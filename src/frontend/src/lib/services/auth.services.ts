@@ -303,8 +303,8 @@ const appendMsgToUrl = ({ msg, deleteIdbCache }: { msg?: ToastMsg; deleteIdbCach
 	if (nonNullish(msg)) {
 		const { text, level } = msg;
 
-		url.searchParams.append(PARAM_MSG, encodeURI(text));
-		url.searchParams.append(PARAM_LEVEL, level);
+		url.searchParams.set(PARAM_MSG, encodeURI(text));
+		url.searchParams.set(PARAM_LEVEL, level);
 	}
 
 	if (deleteIdbCache) {
