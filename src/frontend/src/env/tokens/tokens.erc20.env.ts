@@ -19,6 +19,7 @@ import { FLOKI_TOKEN } from '$env/tokens/tokens-erc20/tokens.floki.env';
 import { IAUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.iauon.env';
 import { IVVON_TOKEN } from '$env/tokens/tokens-erc20/tokens.ivvon.env';
 import { JASMY_TOKEN } from '$env/tokens/tokens-erc20/tokens.jasmy.env';
+import { JPYC_TOKEN } from '$env/tokens/tokens-erc20/tokens.jpyc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { MATIC_TOKEN } from '$env/tokens/tokens-erc20/tokens.matic.env';
 import { MUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.muon.env';
@@ -88,6 +89,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	IAUON_TOKEN,
 	IVVON_TOKEN,
 	JASMY_TOKEN,
+	JPYC_TOKEN,
 	MATIC_TOKEN,
 	MUON_TOKEN,
 	NVDAON_TOKEN,
