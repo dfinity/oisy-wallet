@@ -2,7 +2,7 @@ import { metadata as getIcPunksMetadata } from '$icp/api/icpunks.api';
 import { getExtMetadata } from '$icp/services/ext-metadata.services';
 import { extIndexToIdentifier } from '$icp/utils/ext.utils';
 import { mapDip721Nft, mapExtNft, mapIcPunksNft } from '$icp/utils/nft.utils';
-import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { MediaStatusEnum } from '$lib/enums/media-status';
 import type { NftMetadataWithoutId } from '$lib/types/nft';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
@@ -72,8 +72,8 @@ describe('nft.utils', () => {
 				imageUrl: mockMetadata.imageUrl,
 				thumbnailUrl: mockMetadata.thumbnailUrl,
 				mediaStatus: {
-					image: NftMediaStatusEnum.OK,
-					thumbnail: NftMediaStatusEnum.OK
+					image: MediaStatusEnum.OK,
+					thumbnail: MediaStatusEnum.OK
 				},
 				collection: {
 					...rest,
@@ -99,8 +99,8 @@ describe('nft.utils', () => {
 				imageUrl: `https://${mockValidExtV2Token.canisterId}.raw.icp0.io/?tokenid=${mockIdentifier}`,
 				thumbnailUrl: `https://${mockValidExtV2Token.canisterId}.raw.icp0.io/?tokenid=${mockIdentifier}&type=thumbnail`,
 				mediaStatus: {
-					image: NftMediaStatusEnum.OK,
-					thumbnail: NftMediaStatusEnum.OK
+					image: MediaStatusEnum.OK,
+					thumbnail: MediaStatusEnum.OK
 				},
 				collection: {
 					...rest,
@@ -130,8 +130,8 @@ describe('nft.utils', () => {
 			expect(result).toStrictEqual({
 				id: result.id,
 				mediaStatus: {
-					image: NftMediaStatusEnum.INVALID_DATA,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.INVALID_DATA,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				},
 				collection: {
 					...rest,
@@ -173,8 +173,8 @@ describe('nft.utils', () => {
 				description: mockIcPunksMetadata.desc,
 				imageUrl: `https://${mockValidIcPunksToken.canisterId}.raw.icp0.io${mockIcPunksMetadata.url}`,
 				mediaStatus: {
-					image: NftMediaStatusEnum.OK,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.OK,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				},
 				attributes: mapNftAttributes(
 					mockIcPunksMetadata.properties.map(({ name: trait_type, value }) => ({
@@ -205,8 +205,8 @@ describe('nft.utils', () => {
 				name: mockIcPunksMetadata.name,
 				imageUrl: `https://${mockValidIcPunksToken.canisterId}.raw.icp0.io${mockIcPunksMetadata.url}`,
 				mediaStatus: {
-					image: NftMediaStatusEnum.OK,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.OK,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				},
 				attributes: mapNftAttributes(
 					mockIcPunksMetadata.properties.map(({ name: trait_type, value }) => ({
