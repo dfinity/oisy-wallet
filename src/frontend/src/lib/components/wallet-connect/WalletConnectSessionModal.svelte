@@ -7,7 +7,6 @@
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Option } from '$lib/types/utils';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	interface Props {
 		proposal: Option<WalletKitTypes.SessionProposal>;
