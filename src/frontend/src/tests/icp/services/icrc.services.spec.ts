@@ -27,7 +27,11 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
-import { IcrcLedgerCanister, type IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
+import {
+	IcrcLedgerCanister,
+	fromCandidAccount,
+	type IcrcLedgerDid
+} from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
@@ -77,7 +81,7 @@ describe('icrc.services', () => {
 			version: [1n],
 			enabled: true,
 			section: toNullable(),
-			allow_external_content_source: toNullable()
+			allow_external_content_source: toNullable(true)
 		};
 
 		beforeEach(() => {
@@ -127,9 +131,9 @@ describe('icrc.services', () => {
 				assert('Icrc' in mockCustomToken.token);
 
 				expect(token).not.toBeNull();
-				expect(token).toEqual({
+				expect(token).toStrictEqual({
 					certified: true,
-					data: expect.objectContaining({
+					data: {
 						category: 'custom',
 						decimals: Number(mockDecimals),
 						enabled: true,
@@ -139,12 +143,14 @@ describe('icrc.services', () => {
 							indexCanisterId: mockIndexCanisterId
 						}),
 						ledgerCanisterId: mockLedgerCanisterId,
+						mintingAccount: fromCandidAccount({ owner: mockPrincipal, subaccount: toNullable() }),
 						name: mockName,
 						network: ICP_NETWORK,
 						standard: { code: 'icrc' },
 						symbol: mockSymbol,
-						version: fromNullable(mockCustomToken.version)
-					})
+						version: fromNullable(mockCustomToken.version),
+						allowExternalContentSource: fromNullable(mockCustomToken.allow_external_content_source)
+					}
 				});
 
 				// query + update
@@ -168,7 +174,7 @@ describe('icrc.services', () => {
 					version: [1n],
 					enabled: true,
 					section: toNullable(),
-					allow_external_content_source: toNullable()
+					allow_external_content_source: toNullable(true)
 				};
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
@@ -190,7 +196,7 @@ describe('icrc.services', () => {
 					version: [1n],
 					enabled: true,
 					section: toNullable(),
-					allow_external_content_source: toNullable()
+					allow_external_content_source: toNullable(false)
 				};
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
@@ -204,17 +210,27 @@ describe('icrc.services', () => {
 						tokenLedgerId === dragginzLedgerCanisterId
 				);
 
-				expect(token).toEqual({
+				expect(token).toStrictEqual({
 					certified: true,
-					data: expect.objectContaining({
-						alternativeName: 'Dragginz',
-						explorerUrl: 'https://dashboard.internetcomputer.org/sns/zxeu2-7aaaa-aaaaq-aaafa-cai',
+					data: {
+						category: 'custom',
+						decimals: 8,
+						enabled: true,
 						fee: 100000n,
-						icon: '/icons/sns/zfcdd-tqaaa-aaaaq-aaaga-cai.png',
+						id: expect.any(Symbol),
 						indexCanisterId: dragginzIndexCanisterId,
 						ledgerCanisterId: dragginzLedgerCanisterId,
-						name: 'Draggin Karma Points'
-					})
+						mintingAccount: fromCandidAccount({ owner: mockPrincipal, subaccount: toNullable() }),
+						name: 'Draggin Karma Points',
+						network: ICP_NETWORK,
+						standard: { code: 'icrc' },
+						symbol: 'DKP',
+						version: fromNullable(mockCustomToken.version),
+						allowExternalContentSource: fromNullable(mockCustomToken.allow_external_content_source),
+						alternativeName: 'Dragginz',
+						explorerUrl: 'https://dashboard.internetcomputer.org/sns/zxeu2-7aaaa-aaaaq-aaafa-cai',
+						icon: '/icons/sns/zfcdd-tqaaa-aaaaq-aaaga-cai.png'
+					}
 				});
 
 				expect(spyMetadata).not.toHaveBeenCalled();

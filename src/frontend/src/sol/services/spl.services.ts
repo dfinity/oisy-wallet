@@ -64,12 +64,21 @@ const loadCustomTokensWithMetadata = async ({
 		const [existingTokens, nonExistingTokens] = splCustomTokens.reduce<
 			[SplCustomToken[], SplCustomToken[]]
 		>(
-			([accExisting, accNonExisting], { token, enabled, version: versionNullable }) => {
+			(
+				[accExisting, accNonExisting],
+				{
+					token,
+					enabled,
+					version: versionNullable,
+					allow_external_content_source: allowExternalContentSourceNullable
+				}
+			) => {
 				if (!('SplMainnet' in token || 'SplDevnet' in token)) {
 					return [accExisting, accNonExisting];
 				}
 
 				const version = fromNullable(versionNullable);
+				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
 				const {
 					network: tokenNetwork,
@@ -104,7 +113,8 @@ const loadCustomTokensWithMetadata = async ({
 					standard: { code: 'spl' as const },
 					category: 'custom' as const,
 					enabled,
-					version
+					version,
+					allowExternalContentSource
 				};
 
 				return [accExisting, [...accNonExisting, newToken]];
