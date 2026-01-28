@@ -6,12 +6,12 @@ import {
 	ICONFUCIUS_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import {
-	type IcCkInterface,
-	type IcFee,
-	type IcInterface,
-	type IcToken,
-	type IcTokenWithoutId
+import type {
+	IcCkInterface,
+	IcFee,
+	IcInterface,
+	IcToken,
+	IcTokenWithoutId
 } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
