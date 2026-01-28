@@ -29,9 +29,9 @@ export const pageToken: Readable<OptionToken> = derived(
 						network: { id: networkId }
 					} = token;
 
-					const identifier = getPageTokenIdentifier(token);
-
-					return identifier === $routeToken && networkId.description === $routeNetwork;
+					return (
+						getPageTokenIdentifier(token) === $routeToken && networkId.description === $routeNetwork
+					);
 				})
 			: undefined
 );
