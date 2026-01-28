@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getSdkError } from '@walletconnect/utils';
@@ -14,9 +14,7 @@
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
-	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
-	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
-	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
+	import WalletConnectSessionModal from '$lib/components/wallet-connect/WalletConnectSessionModal.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.constants';
 	import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
@@ -63,7 +61,6 @@
 
 	let steps = $state<WizardSteps<WizardStepsWalletConnect>>([STEP_CONNECT, STEP_REVIEW]);
 
-	let currentStep = $state<WizardStep<WizardStepsWalletConnect> | undefined>();
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
 
 	const close = () => modalStore.close();
@@ -471,23 +468,14 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WizardModal bind:this={modal} onClose={resetAndClose} {steps} bind:currentStep>
-		{#snippet title()}
-			<WalletConnectModalTitle>
-				{`${
-					currentStep?.name === WizardStepsWalletConnect.REVIEW && nonNullish(proposal)
-						? $i18n.wallet_connect.text.session_proposal
-						: $i18n.wallet_connect.text.name
-				}`}
-			</WalletConnectModalTitle>
-		{/snippet}
-
-		{#key currentStep?.name}
-			{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
-				<WalletConnectReview onApprove={approve} onCancel={reject} onReject={reject} {proposal} />
-			{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
-				<WalletConnectForm onConnect={userConnect} />
-			{/if}
-		{/key}
-	</WizardModal>
+	<WalletConnectSessionModal
+		onApprove={approve}
+		onClose={resetAndClose}
+		onConnect={userConnect}
+		onReject={reject}
+		{proposal}
+		{steps}
+		bind:modal
+		bind:listener
+	/>
 {/if}
