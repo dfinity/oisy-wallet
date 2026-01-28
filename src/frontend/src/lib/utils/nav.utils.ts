@@ -1,8 +1,5 @@
 import { browser } from '$app/environment';
 import { goto, pushState } from '$app/navigation';
-import { isTokenErc } from '$eth/utils/erc.utils';
-import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
-import { isTokenIc } from '$icp/utils/icrc.utils';
 import {
 	AppPath,
 	COLLECTION_PARAM,
@@ -19,7 +16,7 @@ import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
-import { isTokenSpl } from '$sol/utils/spl.utils';
+import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
@@ -71,15 +68,6 @@ export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPat
 export const isRouteEarn = ({ route: { id } }: Page): boolean => isEarnPath(id);
 
 export const isRouteEarnGold = ({ route: { id } }: Page): boolean => isEarnGoldPath(id);
-
-export const getPageTokenIdentifier = (token: Token): string =>
-	isTokenErc(token) || isTokenSpl(token)
-		? token.address
-		: isTokenIc(token)
-			? token.ledgerCanisterId
-			: isTokenIcNft(token)
-				? token.canisterId
-				: token.symbol;
 
 const tokenUrl = ({
 	token,

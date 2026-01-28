@@ -23,8 +23,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getPageTokenIdentifier } from '$lib/utils/nav.utils';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
+	import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 
 	let token = $derived(
 		$allTokens.find(
