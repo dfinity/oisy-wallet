@@ -8,7 +8,7 @@ import type {
 } from '$eth/types/alchemy-contract';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { EthereumNetwork } from '$eth/types/network';
-import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { MediaStatusEnum } from '$lib/enums/media-status';
 import type { Nft, OwnedContract } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
@@ -134,12 +134,12 @@ describe('alchemy.providers', () => {
 				collection: {
 					...mapTokenToCollection(mockValidErc1155Token),
 					bannerImageUrl: 'https://download.com',
-					bannerMediaStatus: NftMediaStatusEnum.OK
+					bannerMediaStatus: MediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
 				mediaStatus: {
-					image: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				}
 			},
 			{
@@ -150,12 +150,12 @@ describe('alchemy.providers', () => {
 				collection: {
 					...mapTokenToCollection(mockValidErc1155Token),
 					bannerImageUrl: 'https://download.com',
-					bannerMediaStatus: NftMediaStatusEnum.OK
+					bannerMediaStatus: MediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
 				mediaStatus: {
-					image: NftMediaStatusEnum.OK,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.OK,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				}
 			},
 			{
@@ -166,12 +166,12 @@ describe('alchemy.providers', () => {
 				collection: {
 					...mapTokenToCollection(mockValidErc1155Token),
 					bannerImageUrl: 'https://download.com',
-					bannerMediaStatus: NftMediaStatusEnum.OK
+					bannerMediaStatus: MediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
 				mediaStatus: {
-					image: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				}
 			},
 			{
@@ -182,12 +182,12 @@ describe('alchemy.providers', () => {
 				collection: {
 					...mapTokenToCollection(mockValidErc1155Token),
 					bannerImageUrl: 'https://download.com',
-					bannerMediaStatus: NftMediaStatusEnum.OK
+					bannerMediaStatus: MediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
 				mediaStatus: {
-					image: NftMediaStatusEnum.OK,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.OK,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				}
 			}
 		];
@@ -280,8 +280,8 @@ describe('alchemy.providers', () => {
 						...mapTokenToCollection(mockValidErc1155Token)
 					},
 					mediaStatus: {
-						image: NftMediaStatusEnum.INVALID_DATA,
-						thumbnail: NftMediaStatusEnum.INVALID_DATA
+						image: MediaStatusEnum.INVALID_DATA,
+						thumbnail: MediaStatusEnum.INVALID_DATA
 					}
 				},
 				{
@@ -290,8 +290,8 @@ describe('alchemy.providers', () => {
 						...mapTokenToCollection(mockValidErc1155Token)
 					},
 					mediaStatus: {
-						image: NftMediaStatusEnum.INVALID_DATA,
-						thumbnail: NftMediaStatusEnum.INVALID_DATA
+						image: MediaStatusEnum.INVALID_DATA,
+						thumbnail: MediaStatusEnum.INVALID_DATA
 					}
 				}
 			]);
@@ -341,12 +341,12 @@ describe('alchemy.providers', () => {
 			collection: {
 				...mapTokenToCollection(mockValidErc1155Token),
 				bannerImageUrl: 'https://download.com',
-				bannerMediaStatus: NftMediaStatusEnum.OK
+				bannerMediaStatus: MediaStatusEnum.OK
 			},
 			description: 'lorem ipsum',
 			mediaStatus: {
-				image: NftMediaStatusEnum.OK,
-				thumbnail: NftMediaStatusEnum.INVALID_DATA
+				image: MediaStatusEnum.OK,
+				thumbnail: MediaStatusEnum.INVALID_DATA
 			}
 		};
 
@@ -408,8 +408,8 @@ describe('alchemy.providers', () => {
 					...mapTokenToCollection(mockValidErc1155Token)
 				},
 				mediaStatus: {
-					image: NftMediaStatusEnum.INVALID_DATA,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.INVALID_DATA,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				}
 			});
 		});
@@ -482,8 +482,8 @@ describe('alchemy.providers', () => {
 					...mapTokenToCollection(mockValidErc1155Token)
 				},
 				mediaStatus: {
-					image: NftMediaStatusEnum.INVALID_DATA,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.INVALID_DATA,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				}
 			});
 			expect(Alchemy.prototype.nft?.getNftMetadata).not.toHaveBeenCalled();

@@ -9,7 +9,7 @@ import type {
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { Erc721Metadata } from '$eth/types/erc721';
 import type { EthNonFungibleToken } from '$eth/types/nft';
-import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { MediaStatusEnum } from '$lib/enums/media-status';
 import { i18n } from '$lib/stores/i18n.store';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
@@ -248,7 +248,7 @@ export class AlchemyProvider {
 
 		const mediaStatus = {
 			image: await getMediaStatusOrCache(image?.originalUrl),
-			thumbnail: NftMediaStatusEnum.INVALID_DATA
+			thumbnail: MediaStatusEnum.INVALID_DATA
 		};
 
 		const bannerMediaStatus = await getMediaStatusOrCache(openSeaMetadata?.bannerImageUrl);
