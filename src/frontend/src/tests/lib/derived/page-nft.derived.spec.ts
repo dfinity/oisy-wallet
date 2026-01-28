@@ -125,10 +125,7 @@ describe('page-nft.derived', () => {
 		});
 
 		it('should return undefined when page NFT is undefined', () => {
-			mockPage.mock({
-				collection: mockNft1.collection.address,
-				network: `${mockNft1.collection.network.id.description}`
-			});
+			mockPage.mockCollection(mockNft1.collection);
 
 			expect(get(pageNft)).toBeUndefined();
 
