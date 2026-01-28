@@ -27,7 +27,10 @@
 	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import type { Option } from '$lib/types/utils';
+	import {
+		walletConnectListenerStore as listenerStore,
+		walletConnectProposalStore as proposalStore
+	} from '$lib/stores/wallet-connect.store';
 	import type {
 		OptionWalletConnectListener,
 		WalletConnectListener
@@ -38,11 +41,7 @@
 		SESSION_REQUEST_SOL_SIGN_TRANSACTION
 	} from '$sol/constants/wallet-connect.constants';
 
-	interface Props {
-		listener: OptionWalletConnectListener;
-	}
-
-	let { listener = $bindable() }: Props = $props();
+	let listener = $derived($listenerStore);
 
 	const modalId = Symbol();
 
@@ -69,7 +68,7 @@
 		close();
 	};
 
-	let proposal = $state<Option<WalletKitTypes.SessionProposal>>();
+	let proposal = $derived($proposalStore);
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -103,10 +102,10 @@
 	};
 
 	const resetListener = () => {
-		listener = undefined;
+		listenerStore.reset();
 	};
 
-	const initListener = async () => {
+	const initListener = async (): Promise<OptionWalletConnectListener> => {
 		await disconnectListener();
 
 		try {
@@ -118,11 +117,15 @@
 				return;
 			}
 
-			listener = await initWalletConnect({
+			const newListener = await initWalletConnect({
 				ethAddress: $ethAddress,
 				solAddressMainnet: $solAddressMainnet,
 				solAddressDevnet: $solAddressDevnet
 			});
+
+			listenerStore.set(newListener);
+
+			return newListener;
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.connect },
@@ -199,7 +202,7 @@
 	});
 
 	const onSessionProposal = (sessionProposal: WalletKitTypes.SessionProposal) => {
-		proposal = sessionProposal;
+		proposalStore.set(sessionProposal);
 	};
 
 	const onSessionDelete = () => {
@@ -273,7 +276,15 @@
 		}
 	};
 
+	const attached = new WeakSet<WalletConnectListener>();
+
 	const attachHandlers = (listener: WalletConnectListener) => {
+		if (attached.has(listener)) {
+			return;
+		}
+
+		attached.add(listener);
+
 		listener.sessionProposal(onSessionProposal);
 
 		listener.sessionDelete(onSessionDelete);
@@ -282,6 +293,12 @@
 	};
 
 	const detachHandlers = (listener: WalletConnectListener) => {
+		if (!attached.has(listener)) {
+			return;
+		}
+
+		attached.delete(listener);
+
 		listener.offSessionProposal(onSessionProposal);
 
 		listener.offSessionDelete(onSessionDelete);
@@ -290,16 +307,16 @@
 	};
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
-		await initListener();
+		const newListener = await initListener();
 
-		if (isNullish(listener)) {
+		if (isNullish(newListener)) {
 			return { result: 'error' };
 		}
 
-		attachHandlers(listener);
+		attachHandlers(newListener);
 
 		try {
-			await listener.pair(uri);
+			await newListener.pair(uri);
 		} catch (err: unknown) {
 			resetListener();
 
@@ -407,18 +424,20 @@
 
 		// Create listener, but DO NOT pair()
 		try {
-			listener = await initWalletConnect({
+			const newListener = await initWalletConnect({
 				ethAddress: $ethAddress,
 				solAddressMainnet: $solAddressMainnet,
 				solAddressDevnet: $solAddressDevnet,
 				cleanSlate: false
 			});
 
+			listenerStore.set(newListener);
+
 			// Reattach handlers so incoming requests work after refresh
-			attachHandlers(listener);
+			attachHandlers(newListener);
 
 			// Check for persisted sessions
-			const sessions = listener.getActiveSessions();
+			const sessions = newListener.getActiveSessions();
 
 			// We have no active sessions, we can disconnect the listener.
 			if (Object.keys(sessions).length === 0) {
@@ -476,6 +495,5 @@
 		{proposal}
 		{steps}
 		bind:modal
-		bind:listener
 	/>
 {/if}
