@@ -6,6 +6,7 @@ import en from '$lib/i18n/en.json';
 import * as openCryptoPayServices from '$lib/services/open-crypto-pay.services';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import type { OpenCryptoPayResponse, PayableTokenWithFees } from '$lib/types/open-crypto-pay';
+import { ScannerResults } from '$lib/types/scanner';
 import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
@@ -249,8 +250,8 @@ describe('ScannerCode.svelte', () => {
 		await fireEvent.click(button);
 
 		await waitFor(() => {
-			expect(mockSetData).toHaveBeenCalledWith(mockApiResponse);
-			expect(mockOnNext).toHaveBeenCalled();
+			expect(mockSetData).toHaveBeenCalledExactlyOnceWith(mockApiResponse);
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith(ScannerResults.PAY);
 		});
 	});
 
@@ -329,7 +330,7 @@ describe('ScannerCode.svelte', () => {
 			const button = screen.getByRole('button', { name: en.core.text.continue });
 			await fireEvent.click(button);
 			await waitFor(() => {
-				expect(openCryptoPayUtils.prepareBasePayableTokens).toHaveBeenCalledWith({
+				expect(openCryptoPayUtils.prepareBasePayableTokens).toHaveBeenCalledExactlyOnceWith({
 					transferAmounts: mockApiResponse.transferAmounts,
 					networks: [ETHEREUM_NETWORK],
 					availableTokens: [ETHEREUM_TOKEN]
@@ -346,7 +347,7 @@ describe('ScannerCode.svelte', () => {
 			const button = screen.getByRole('button', { name: en.core.text.continue });
 			await fireEvent.click(button);
 			await waitFor(() => {
-				expect(openCryptoPayServices.calculateTokensWithFees).toHaveBeenCalledWith({
+				expect(openCryptoPayServices.calculateTokensWithFees).toHaveBeenCalledExactlyOnceWith({
 					tokens: mockBaseTokens,
 					userAddress: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 				});
@@ -362,7 +363,7 @@ describe('ScannerCode.svelte', () => {
 			const button = screen.getByRole('button', { name: en.core.text.continue });
 			await fireEvent.click(button);
 			await waitFor(() => {
-				expect(mockSetsetAvailableTokens).toHaveBeenCalledWith(mockTokensWithFees);
+				expect(mockSetsetAvailableTokens).toHaveBeenCalledExactlyOnceWith(mockTokensWithFees);
 			});
 		});
 
@@ -400,8 +401,8 @@ describe('ScannerCode.svelte', () => {
 			const button = screen.getByRole('button', { name: en.core.text.continue });
 			await fireEvent.click(button);
 			await waitFor(() => {
-				expect(mockSetsetAvailableTokens).toHaveBeenCalledWith([]);
-				expect(mockOnNext).toHaveBeenCalled();
+				expect(mockSetsetAvailableTokens).toHaveBeenCalledExactlyOnceWith([]);
+				expect(mockOnNext).toHaveBeenCalledExactlyOnceWith(ScannerResults.PAY);
 			});
 		});
 	});

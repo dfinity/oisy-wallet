@@ -37,7 +37,7 @@ describe('HowToConvertEthereumModal', () => {
 		vi.clearAllMocks();
 
 		mockPage.reset();
-		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
+		mockPage.mockNetwork(ETHEREUM_NETWORK_ID.description);
 	});
 
 	it('should render convert info on initial render', () => {

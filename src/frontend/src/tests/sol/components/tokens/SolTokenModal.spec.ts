@@ -19,10 +19,7 @@ describe('SolTokenModal', () => {
 			return () => {};
 		});
 
-		mockPage.mock({
-			token: mockSplCustomToken.name,
-			network: mockSplCustomToken.network.id.description
-		});
+		mockPage.mockToken(mockSplCustomToken);
 
 		const { container } = render(SplTokenModal);
 
@@ -39,10 +36,7 @@ describe('SolTokenModal', () => {
 	});
 
 	it('displays all required values without the delete button for a default SPL token', () => {
-		mockPage.mock({
-			token: SOLANA_TOKEN.name,
-			network: SOLANA_TOKEN.network.id.description
-		});
+		mockPage.mockToken(SOLANA_TOKEN);
 
 		const { container } = render(SplTokenModal);
 

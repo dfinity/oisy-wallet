@@ -125,7 +125,7 @@ describe('ConvertWizard', () => {
 	});
 
 	it('should display ETH convert wizard if sourceToken network is ETH', () => {
-		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
+		mockPage.mockNetwork(ETHEREUM_NETWORK_ID.description);
 
 		const { getByTestId } = render(ConvertWizard, {
 			props,
