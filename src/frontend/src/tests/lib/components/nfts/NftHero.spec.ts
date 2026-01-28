@@ -9,11 +9,9 @@ import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 import type { Nft } from '$lib/types/nft';
-import type { OptionString } from '$lib/types/string';
 import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
-import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -203,13 +201,6 @@ describe('NftHero', () => {
 	});
 
 	it('should open the send modal in Nft send flow when send button is clicked', async () => {
-		mockPage.mock({
-			network: mockValidErc1155Nft.collection.network as unknown as OptionString
-		});
-		mockPage.mockDynamicRoutes({
-			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
-		});
-
 		const { getByTestId, getByText } = render(NftHero, {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
@@ -233,12 +224,6 @@ describe('NftHero', () => {
 	});
 
 	it('should render the root breadcrumb with network query param if userSelectedNetwork is defined', async () => {
-		mockPage.mock({
-			network: mockValidErc1155Nft.collection.network as unknown as OptionString
-		});
-		mockPage.mockDynamicRoutes({
-			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
-		});
 		userSelectedNetworkStore.set({
 			key: 'user-selected-network',
 			value: ETHEREUM_NETWORK_ID.description
@@ -263,13 +248,6 @@ describe('NftHero', () => {
 	});
 
 	it('should render the root breadcrumb without network query param if userSelectedNetwork is not defined', async () => {
-		mockPage.mock({
-			network: mockValidErc1155Nft.collection.network as unknown as OptionString
-		});
-		mockPage.mockDynamicRoutes({
-			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
-		});
-
 		const { container } = render(NftHero, {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },

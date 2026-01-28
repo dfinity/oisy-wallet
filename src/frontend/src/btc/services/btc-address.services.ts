@@ -77,11 +77,11 @@ export const getBtcAddress = async ({
 		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 		// HACK: This is not working for Local environment for now, because the library is not aware of the `dfx_test_1` public key (used by Local deployment).
-		return await deriveBtcAddress(
-			identity.getPrincipal().toString(),
+		return deriveBtcAddress({
+			user: identity.getPrincipal().toString(),
 			network,
-			SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey
-		);
+			pubkey: SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey
+		});
 	}
 
 	return await getSignerBtcAddress({
