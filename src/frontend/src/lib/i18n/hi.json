@@ -854,7 +854,6 @@
 			"unknown_cketh": "ckETH टोकन पुनः प्राप्त नहीं किया जा सकता है।",
 			"destination_address_invalid": "गंतव्य पता अमान्य है।",
 			"amount_invalid": "राशि अमान्य है।",
-			"insufficient_funds_verbose": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "गैस के लिए अपर्याप्त धन",
 			"insufficient_funds_for_amount": "राशि के लिए अपर्याप्त धन",

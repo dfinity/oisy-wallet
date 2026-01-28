@@ -854,7 +854,6 @@
 			"unknown_cketh": "لا يمكن استرداد توكن ckETH.",
 			"destination_address_invalid": "عنوان الوجهة غير صالح.",
 			"amount_invalid": "المبلغ غير صالح.",
-			"insufficient_funds_verbose": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "أموال غير كافية للغاز",
 			"insufficient_funds_for_amount": "أموال غير كافية للمبلغ",

@@ -854,7 +854,6 @@
 			"unknown_cketh": "Токен ckETH не может быть получен.",
 			"destination_address_invalid": "Адрес получателя недействителен.",
 			"amount_invalid": "Сумма недействительна.",
-			"insufficient_funds_verbose": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Недостаточно средств для газа",
 			"insufficient_funds_for_amount": "Недостаточно средств для этой суммы",
