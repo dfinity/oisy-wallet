@@ -8,7 +8,6 @@ import {
 	HELP_AUTH_DONE_BUTTON,
 	HELP_AUTH_IDENTITY_IMAGE_BANNER,
 	HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK,
-	HELP_AUTH_LEGACY_SIGN_IN_BUTTON,
 	HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK
 } from '$lib/constants/test-ids.constants';
 import * as auth from '$lib/services/auth.services';
@@ -23,7 +22,6 @@ vi.mock('$lib/services/auth.services', () => ({
 
 describe('AuthHelpNewIdentityForm', () => {
 	const imageBannerSelector = `img[data-tid="${HELP_AUTH_IDENTITY_IMAGE_BANNER}"]`;
-	const legacySignInButtonSelector = `button[data-tid="${HELP_AUTH_LEGACY_SIGN_IN_BUTTON}"]`;
 	const switchToNewInternetIdentityLinkSelector = `a[data-tid="${HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK}"]`;
 	const internetIdentityHelpCenterLinkSelector = `a[data-tid="${HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK}"]`;
 	const backButtonSelector = `button[data-tid="${HELP_AUTH_BACK_BUTTON}"]`;
@@ -46,15 +44,6 @@ describe('AuthHelpNewIdentityForm', () => {
 		).toBeInTheDocument();
 
 		expect(getByText(get(i18n).auth.help.text.identity_new_identity_item_1)).toBeInTheDocument();
-
-		expect(getByText(get(i18n).auth.help.text.identity_new_identity_item_2)).toBeInTheDocument();
-
-		const legacySignInButton: HTMLButtonElement | null = container.querySelector(
-			legacySignInButtonSelector
-		);
-
-		expect(legacySignInButton).toBeInTheDocument();
-		expect(getByText(get(i18n).auth.help.text.identity_legacy_sign_in)).toBeInTheDocument();
 
 		const switchToNewInternetIdentityLink: HTMLAnchorElement | null = container.querySelector(
 			switchToNewInternetIdentityLinkSelector
@@ -115,17 +104,7 @@ describe('AuthHelpNewIdentityForm', () => {
 			expect(onDoneMock).toHaveBeenCalledOnce();
 		});
 
-		const legacySignInButton: HTMLButtonElement | null = container.querySelector(
-			legacySignInButtonSelector
-		);
-
-		expect(legacySignInButton).toBeInTheDocument();
-
-		await waitFor(() => {
-			legacySignInButton?.click();
-		});
-
-		expect(onDoneMock).toHaveBeenCalledTimes(2);
-		expect(authSpy).toHaveBeenCalledWith({ domain: 'identity.internetcomputer.org' });
+		expect(onDoneMock).toHaveBeenCalledOnce();
+		expect(authSpy).not.toHaveBeenCalled();
 	});
 });
