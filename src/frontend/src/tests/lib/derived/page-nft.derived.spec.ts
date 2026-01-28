@@ -1,5 +1,6 @@
 import { pageCollectionNfts, pageNft } from '$lib/derived/page-nft.derived';
 import { nftStore } from '$lib/stores/nft.store';
+import { parseNetworkId } from '$lib/validation/network.validation';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
@@ -35,10 +36,7 @@ describe('page-nft.derived', () => {
 		});
 
 		it('should return empty array when the NFT store is not initialized', () => {
-			mockPage.mock({
-				collection: mockNft1.collection.address,
-				network: `${mockNft1.collection.network.id.description}`
-			});
+			mockPage.mockCollection(mockNft1.collection);
 
 			nftStore.resetAll();
 
@@ -60,29 +58,23 @@ describe('page-nft.derived', () => {
 		it.each([mockNft1, mockNft2])(
 			'should find all the NFTs of the collection of $name NFT',
 			(nft) => {
-				mockPage.mock({
-					collection: nft.collection.address,
-					network: `${nft.collection.network.id.description}`
-				});
+				mockPage.mockCollection(nft.collection);
 
 				expect(get(pageCollectionNfts)).toStrictEqual([mockNft1, mockNft2]);
 			}
 		);
 
 		it.each([mockNft3])('should find only one NFT of the collection of $name NFT', (nft) => {
-			mockPage.mock({
-				collection: nft.collection.address,
-				network: `${nft.collection.network.id.description}`
-			});
+			mockPage.mockCollection(nft.collection);
 
 			expect(get(pageCollectionNfts)).toStrictEqual([mockNft3]);
 		});
 
 		it('should return empty array when NFT collection matches but network does not', () => {
 			const mockToken = { ...mockNft1, enabled: true };
-			mockPage.mock({
-				collection: mockToken.collection.address,
-				network: 'non-existent-network'
+			mockPage.mockCollection({
+				...mockToken.collection,
+				network: { ...mockToken.collection.network, id: parseNetworkId('non-existent-network') }
 			});
 
 			expect(get(pageCollectionNfts)).toStrictEqual([]);
@@ -90,9 +82,9 @@ describe('page-nft.derived', () => {
 
 		it('should return empty array when NFT network matches but name does not', () => {
 			const mockToken = { ...mockNft1, enabled: true };
-			mockPage.mock({
-				collection: 'non-existent-collection',
-				network: `${mockToken.collection.network.id.description}`
+			mockPage.mockCollection({
+				...mockToken.collection,
+				address: 'non-existent-collection'
 			});
 
 			expect(get(pageCollectionNfts)).toStrictEqual([]);
@@ -107,11 +99,7 @@ describe('page-nft.derived', () => {
 		});
 
 		it('should return undefined when the NFT store is not initialized', () => {
-			mockPage.mock({
-				nft: mockNft1.id,
-				collection: mockNft1.collection.address,
-				network: `${mockNft1.collection.network.id.description}`
-			});
+			mockPage.mockNft(mockNft1);
 
 			nftStore.resetAll();
 
@@ -137,35 +125,22 @@ describe('page-nft.derived', () => {
 		});
 
 		it('should return undefined when page NFT is undefined', () => {
-			mockPage.mock({
-				collection: mockNft1.collection.address,
-				network: `${mockNft1.collection.network.id.description}`
-			});
+			mockPage.mockCollection(mockNft1.collection);
 
 			expect(get(pageNft)).toBeUndefined();
 
-			mockPage.mock({
-				nft: mockNft1.id.toString(),
-				collection: 'non-existent-collection',
-				network: `${mockNft1.collection.network.id.description}`
-			});
-
-			expect(get(pageNft)).toBeUndefined();
-
-			mockPage.mock({
-				nft: mockNft1.id.toString(),
-				collection: 'non-existent-collection',
-				network: `${mockNft1.collection.network.id.description}`
+			mockPage.mockNft({
+				...mockNft1,
+				collection: { ...mockNft1.collection, address: 'non-existent-collection' }
 			});
 
 			expect(get(pageNft)).toBeUndefined();
 		});
 
 		it('should return undefined when page NFT is not a number', () => {
-			mockPage.mock({
-				nft: 'not-a-number',
-				collection: mockNft1.collection.address,
-				network: `${mockNft1.collection.network.id.description}`
+			mockPage.mockNft({
+				...mockNft1,
+				id: parseNftId('not-a-number')
 			});
 
 			expect(get(pageNft)).toBeUndefined();
