@@ -1,4 +1,5 @@
 import { page } from '$app/state';
+import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import { resetRouteParams, type RouteParams } from '$lib/utils/nav.utils';
