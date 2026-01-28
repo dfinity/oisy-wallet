@@ -69,7 +69,7 @@
 	},
 	"dependencies": {
 		"@dfinity/gix-components": "^9.0.0-next-2025-11-07.2",
-		"@dfinity/ic-pub-key": "^1.0.1",
+		"@dfinity/ic-pub-key": "^1.0.1-next-2026-01-28",
 		"@dfinity/oisy-wallet-signer": "^4.0.0",
 		"@dfinity/utils": "^4.0.2",
 		"@dfinity/verifiable-credentials": "^1.2.0",
