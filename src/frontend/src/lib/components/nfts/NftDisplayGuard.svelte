@@ -3,11 +3,11 @@
 	import type { Snippet } from 'svelte';
 	import MediaDisplayGuard from '$lib/components/guard/MediaDisplayGuard.svelte';
 	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
-	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
 	import { getNftDisplayMediaStatus } from '$lib/utils/nft.utils';
+    import {MediaStatusEnum} from "$lib/enums/media-status";
 
 	interface Props {
 		nft?: Nft;
@@ -20,7 +20,7 @@
 	const { nft, children, showMessage = true, type, location }: Props = $props();
 
 	const mediaStatus = $derived(
-		nonNullish(nft) ? getNftDisplayMediaStatus(nft) : NftMediaStatusEnum.INVALID_DATA
+		nonNullish(nft) ? getNftDisplayMediaStatus(nft) : MediaStatusEnum.INVALID_DATA
 	);
 
 	const hasConsent: boolean | undefined = $derived(

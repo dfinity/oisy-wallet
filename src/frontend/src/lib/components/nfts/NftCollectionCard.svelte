@@ -12,7 +12,6 @@
 		PLAUSIBLE_EVENT_VALUES,
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
-	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftSortStore } from '$lib/stores/settings.store';
@@ -22,6 +21,7 @@
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { getNftDisplayImageUrl, getNftDisplayMediaStatus } from '$lib/utils/nft.utils';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
+    import {MediaStatusEnum} from "$lib/enums/media-status";
 
 	interface Props {
 		collection: NftCollectionUi;
@@ -42,7 +42,7 @@
 	);
 
 	const previewNft = $derived(
-		collection.nfts.find((nft) => getNftDisplayMediaStatus(nft) !== NftMediaStatusEnum.OK) ??
+		collection.nfts.find((nft) => getNftDisplayMediaStatus(nft) !== MediaStatusEnum.OK) ??
 			collection.nfts[0]
 	);
 

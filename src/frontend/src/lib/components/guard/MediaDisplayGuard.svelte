@@ -7,12 +7,12 @@
 	import InvalidDataImage from '$lib/components/icons/nfts/InvalidData.svelte';
 	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
+    import {MediaStatusEnum} from "$lib/enums/media-status";
 
 	interface Props {
 		type: 'hero-banner' | 'card' | 'card-selectable' | 'nft-display' | 'nft-logo';
-		mediaStatus: NftMediaStatusEnum;
+		mediaStatus: MediaStatusEnum;
 		hasConsent?: boolean;
 		loading?: boolean;
 		showMessage?: boolean;
@@ -34,13 +34,13 @@
 </script>
 
 {#if nonNullish(hasConsent) && hasConsent}
-	{#if mediaStatus === NftMediaStatusEnum.OK}
+	{#if mediaStatus === MediaStatusEnum.OK}
 		{@render children()}
-	{:else if mediaStatus === NftMediaStatusEnum.INVALID_DATA}
+	{:else if mediaStatus === MediaStatusEnum.INVALID_DATA}
 		<InvalidDataImage />
-	{:else if mediaStatus === NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE}
+	{:else if mediaStatus === MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE}
 		<UnsupportedMediaTypeImage />
-	{:else if mediaStatus === NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED}
+	{:else if mediaStatus === MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED}
 		<FilesizeLimitExceededImage />
 	{/if}
 {:else}

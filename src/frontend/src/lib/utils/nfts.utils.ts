@@ -1,7 +1,8 @@
 import type { EthAddress } from '$eth/types/address';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { MediaStatusEnum } from '$lib/enums/media-status';
 import { MediaType } from '$lib/enums/media-type';
-import { NftCollectionSchema, NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { NftCollectionSchema } from '$lib/schema/nft.schema';
 import { extractMediaTypeAndSize } from '$lib/services/url.services';
 import type { NftSortingType } from '$lib/stores/settings.store';
 import type { NftError } from '$lib/types/errors';
@@ -297,16 +298,16 @@ export const findNonFungibleToken = ({
 }): NonFungibleToken | undefined =>
 	tokens.find((token) => getNftIdentifier(token) === address && token.network.id === networkId);
 
-export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+export const getMediaStatus = async (mediaUrl?: string): Promise<MediaStatusEnum> => {
 	if (isNullish(mediaUrl)) {
-		return NftMediaStatusEnum.INVALID_DATA;
+		return MediaStatusEnum.INVALID_DATA;
 	}
 
 	try {
 		const url = adaptMetadataResourceUrl(new URL(mediaUrl));
 
 		if (isNullish(url)) {
-			return NftMediaStatusEnum.INVALID_DATA;
+			return MediaStatusEnum.INVALID_DATA;
 		}
 
 		const { type, size } = await extractMediaTypeAndSize(url.href);
@@ -316,15 +317,15 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			// so we can't be sure that the media is valid or not.
 			// For now, we assume that it is valid.
 			// TODO: this is not safe for the size limit, we should check the size of the file.
-			return NftMediaStatusEnum.OK;
+			return MediaStatusEnum.OK;
 		}
 
 		if (!(type === MediaType.Img) && !(type === MediaType.Video)) {
-			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
+			return MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
 		}
 
 		if (Number(size) > NFT_MAX_FILESIZE_LIMIT) {
-			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
+			return MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
 		}
 	} catch (_: unknown) {
 		// The error here is caused by `fetch`, which can fail for various reasons (network error, CORS, DNS, etc).
@@ -332,19 +333,19 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 		// For now, we assume that it is valid to avoid blocking the user.
 		// Ideally, we should load this data in a backend service to avoid CORS issues.
 		// TODO: this is not safe for the size limit, we should check the size of the file in the backend (or similar solutions).
-		return NftMediaStatusEnum.OK;
+		return MediaStatusEnum.OK;
 	}
 
-	return NftMediaStatusEnum.OK;
+	return MediaStatusEnum.OK;
 };
 
 // The CORS policy raises an error everytime we try to access the media URL, so we cache the result to avoid making the same request multiple times.
 // Unfortunately, the CORS errors cannot be removed from the browser: https://stackoverflow.com/questions/52807184/how-to-hide-console-status-error-message-while-fetching-in-react-js
-const mediaStatusCache = new SvelteMap<string, NftMediaStatusEnum>();
+const mediaStatusCache = new SvelteMap<string, MediaStatusEnum>();
 
-export const getMediaStatusOrCache = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+export const getMediaStatusOrCache = async (mediaUrl?: string): Promise<MediaStatusEnum> => {
 	if (isNullish(mediaUrl)) {
-		return NftMediaStatusEnum.INVALID_DATA;
+		return MediaStatusEnum.INVALID_DATA;
 	}
 
 	const cachedStatus = mediaStatusCache.get(mediaUrl);
