@@ -43,6 +43,11 @@ const initPageStoreMock = () => {
 			set({ ...page, data });
 			page.data = data;
 		},
+		mockNetwork: (network: NetworkId['description']) => {
+			const data = { network };
+			set({ ...page, data });
+			page.data = data;
+		},
 		mockCollection: ({ address, network: { id: networkId } }: NftCollection) => {
 			const data = { collection: address, network: networkId.description };
 			set({ ...page, data });
