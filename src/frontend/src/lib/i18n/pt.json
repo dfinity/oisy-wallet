@@ -854,6 +854,7 @@
 			"unknown_cketh": "O token ckETH não pode ser recuperado.",
 			"destination_address_invalid": "Endereço de destino inválido.",
 			"amount_invalid": "Valor inválido.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Fundos insuficientes para gás",
 			"insufficient_funds_for_amount": "Fundos insuficientes para o valor",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fundos Ethereum insuficientes para cobrir as taxas",
