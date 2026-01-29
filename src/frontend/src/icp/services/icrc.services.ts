@@ -7,13 +7,19 @@ import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import {
 	balance,
 	getMintingAccount,
+	icrc1SupportedStandards,
 	allowance as icrcAllowance,
 	metadata
 } from '$icp/api/icrc-ledger.api';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcCkToken, IcInterface, IcToken } from '$icp/types/ic-token';
+import {
+	IcTokenStandards,
+	type IcCkToken,
+	type IcInterface,
+	type IcToken
+} from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import {
@@ -150,7 +156,12 @@ const loadCustomIcrcTokensData = async ({
 	const requestIcrcCustomTokenMetadata = async (
 		custom_token: CustomToken
 	): Promise<IcrcCustomToken | undefined> => {
-		const { enabled, version: v, token } = custom_token;
+		const {
+			token,
+			enabled,
+			version: versionNullable,
+			allow_external_content_source: allowExternalContentSourceNullable
+		} = custom_token;
 
 		if (!('Icrc' in token)) {
 			return;
@@ -183,14 +194,16 @@ const loadCustomIcrcTokensData = async ({
 
 		const t = mapIcrcToken(data);
 
-		const version = fromNullable(v);
+		const version = fromNullable(versionNullable);
+		const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
 		return isNullish(t)
 			? undefined
 			: {
 					...t,
 					enabled,
-					...(nonNullish(version) && { version })
+					version,
+					allowExternalContentSource
 				};
 	};
 
@@ -400,4 +413,19 @@ export const hasSufficientIcrcAllowance = async ({
 	const isNotExpired = nonNullish(expiredAt) && expiredAt > expiredBuffer;
 
 	return hasSufficientAllowance && isNotExpired;
+};
+
+export const isIcrcTokenSupportIcrc2 = async ({
+	identity,
+	ledgerCanisterId
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+}) => {
+	const supportedStandards = await icrc1SupportedStandards({
+		identity,
+		ledgerCanisterId
+	});
+
+	return supportedStandards.some(({ name }) => name === IcTokenStandards.icrc2);
 };

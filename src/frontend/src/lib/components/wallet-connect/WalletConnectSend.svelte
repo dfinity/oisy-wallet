@@ -13,7 +13,7 @@
 		listener: OptionWalletConnectListener;
 	}
 
-	let { listener = $bindable() }: Props = $props();
+	let { listener }: Props = $props();
 
 	let request = $derived(
 		$modalWalletConnectSend
@@ -37,5 +37,5 @@
 </script>
 
 {#if $modalWalletConnectSend && nonNullish(request) && nonNullish(firstTransaction) && nonNullish(sourceNetwork)}
-	<EthWalletConnectSendModal {firstTransaction} {request} {sourceNetwork} bind:listener />
+	<EthWalletConnectSendModal {firstTransaction} {listener} {request} {sourceNetwork} />
 {/if}

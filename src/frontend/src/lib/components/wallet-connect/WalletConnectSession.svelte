@@ -273,7 +273,15 @@
 		}
 	};
 
+	const attached = new WeakSet<WalletConnectListener>();
+
 	const attachHandlers = (listener: WalletConnectListener) => {
+		if (attached.has(listener)) {
+			return;
+		}
+
+		attached.add(listener);
+
 		listener.sessionProposal(onSessionProposal);
 
 		listener.sessionDelete(onSessionDelete);
@@ -282,6 +290,12 @@
 	};
 
 	const detachHandlers = (listener: WalletConnectListener) => {
+		if (!attached.has(listener)) {
+			return;
+		}
+
+		attached.delete(listener);
+
 		listener.offSessionProposal(onSessionProposal);
 
 		listener.offSessionDelete(onSessionDelete);
@@ -476,6 +490,5 @@
 		{proposal}
 		{steps}
 		bind:modal
-		bind:listener
 	/>
 {/if}

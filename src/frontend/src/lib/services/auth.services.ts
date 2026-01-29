@@ -274,8 +274,6 @@ const logout = async ({
 	// The reset will redirect the user to the root, so any appended message would be lost.
 	if (resetUrl) {
 		await gotoReplaceRoot(clearIdbStorages);
-
-		return;
 	}
 
 	appendMsgToUrl({
@@ -305,12 +303,12 @@ const appendMsgToUrl = ({ msg, deleteIdbCache }: { msg?: ToastMsg; deleteIdbCach
 	if (nonNullish(msg)) {
 		const { text, level } = msg;
 
-		url.searchParams.append(PARAM_MSG, encodeURI(text));
-		url.searchParams.append(PARAM_LEVEL, level);
+		url.searchParams.set(PARAM_MSG, encodeURI(text));
+		url.searchParams.set(PARAM_LEVEL, level);
 	}
 
 	if (deleteIdbCache) {
-		url.searchParams.append(PARAM_DELETE_IDB_CACHE, 'true');
+		url.searchParams.set(PARAM_DELETE_IDB_CACHE, 'true');
 	}
 
 	if (nonNullish(msg) || deleteIdbCache) {

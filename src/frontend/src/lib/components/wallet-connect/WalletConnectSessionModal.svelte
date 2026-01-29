@@ -7,10 +7,8 @@
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Option } from '$lib/types/utils';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	interface Props {
-		listener: OptionWalletConnectListener;
 		proposal: Option<WalletKitTypes.SessionProposal>;
 		steps: WizardSteps<WizardStepsWalletConnect>;
 		modal: WizardModal<WizardStepsWalletConnect> | undefined;
@@ -21,7 +19,6 @@
 	}
 
 	let {
-		listener = $bindable(),
 		proposal,
 		steps,
 		modal = $bindable(),
@@ -45,12 +42,5 @@
 		</WalletConnectModalTitle>
 	{/snippet}
 
-	<WalletConnectSessionWizard
-		{currentStep}
-		{onApprove}
-		{onConnect}
-		{onReject}
-		{proposal}
-		bind:listener
-	/>
+	<WalletConnectSessionWizard {currentStep} {onApprove} {onConnect} {onReject} {proposal} />
 </WizardModal>
