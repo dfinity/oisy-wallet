@@ -34,6 +34,7 @@ import {
 	filterTokens,
 	filterTokensByNft,
 	findToken,
+	getCodebaseTokenIconPath,
 	pinEnabledTokensAtTop,
 	pinTokensWithBalanceAtTop,
 	saveAllCustomTokens,
@@ -1215,6 +1216,89 @@ describe('tokens.utils', () => {
 			expect(res).toEqual({ valid: false });
 
 			expect(toastsError).toHaveBeenCalledExactlyOnceWith({ msg: { text: mockErrorMsg } });
+		});
+	});
+
+	describe('getCodebaseTokenIconPath', () => {
+		it('should return the correct icon path for ERC20 tokens', () => {
+			const path = getCodebaseTokenIconPath({ token: mockValidErc20Token });
+
+			expect(path).toBe(
+				`/icons/${mockValidErc20Token.network.id.description?.toLowerCase()}/${mockValidErc20Token.address.toLowerCase()}.webp`
+			);
+		});
+
+		it('should return the correct icon path for SPL tokens', () => {
+			const path = getCodebaseTokenIconPath({ token: mockValidSplToken });
+
+			expect(path).toBe(
+				`/icons/${mockValidSplToken.network.id.description?.toLowerCase()}/${mockValidSplToken.address}.webp`
+			);
+		});
+
+		it('should return undefined for unsupported token standards', () => {
+			const tokens = [
+				ICP_TOKEN,
+				ETHEREUM_TOKEN,
+				SOLANA_TOKEN,
+				BTC_MAINNET_TOKEN,
+				mockValidErc721Token,
+				mockValidErc1155Token,
+				mockValidIcrcToken,
+				mockValidExtV2Token
+			];
+
+			tokens.forEach((token) => {
+				expect(getCodebaseTokenIconPath({ token })).toBeUndefined();
+			});
+		});
+
+		it('should allow to choose the extension of the icon', () => {
+			const pathPng = getCodebaseTokenIconPath({ token: mockValidErc20Token, extension: 'png' });
+
+			expect(pathPng).toBe(
+				`/icons/${mockValidErc20Token.network.id.description?.toLowerCase()}/${mockValidErc20Token.address}.png`
+			);
+
+			const pathJpg = getCodebaseTokenIconPath({ token: mockValidErc20Token, extension: 'svg' });
+
+			expect(pathJpg).toBe(
+				`/icons/${mockValidErc20Token.network.id.description?.toLowerCase()}/${mockValidErc20Token.address}.svg`
+			);
+		});
+
+		it('should consider the network case-sensitiveness', () => {
+			const path1 = getCodebaseTokenIconPath({
+				token: { ...mockValidErc20Token, address: mockValidErc20Token.address.toLowerCase() }
+			});
+
+			expect(path1).toBe(
+				`/icons/${mockValidErc20Token.network.id.description?.toLowerCase()}/${mockValidErc20Token.address.toLowerCase()}.webp`
+			);
+
+			const path2 = getCodebaseTokenIconPath({
+				token: { ...mockValidErc20Token, address: mockValidErc20Token.address.toUpperCase() }
+			});
+
+			expect(path2).toBe(
+				`/icons/${mockValidErc20Token.network.id.description?.toLowerCase()}/${mockValidErc20Token.address.toLowerCase()}.webp`
+			);
+
+			const path3 = getCodebaseTokenIconPath({
+				token: { ...mockValidSplToken, address: mockValidSplToken.address.toLowerCase() }
+			});
+
+			expect(path3).toBe(
+				`/icons/${mockValidSplToken.network.id.description?.toLowerCase()}/${mockValidSplToken.address.toLowerCase()}.webp`
+			);
+
+			const path4 = getCodebaseTokenIconPath({
+				token: { ...mockValidSplToken, address: mockValidSplToken.address.toUpperCase() }
+			});
+
+			expect(path4).toBe(
+				`/icons/${mockValidSplToken.network.id.description?.toLowerCase()}/${mockValidSplToken.address.toUpperCase()}.webp`
+			);
 		});
 	});
 });
