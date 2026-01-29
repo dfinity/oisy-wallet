@@ -29,6 +29,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
+import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
 import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -197,11 +198,11 @@ const loadCustomTokensWithMetadata = async ({
 				address
 			} = token;
 
+			const icon = mapErc20Icon(token.symbol) ?? getCodebaseTokenIconPath({ token });
+
 			const metadata = await safeLoadMetadata({ networkId, address });
 
-			return nonNullish(metadata)
-				? [...(await acc), { ...token, icon: mapErc20Icon(metadata.symbol), ...metadata }]
-				: acc;
+			return nonNullish(metadata) ? [...(await acc), { ...token, icon, ...metadata }] : acc;
 		}, Promise.resolve([]));
 
 		return [...existingTokens, ...customTokens];
