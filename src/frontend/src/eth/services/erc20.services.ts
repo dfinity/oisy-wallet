@@ -101,7 +101,7 @@ const loadCustomTokensWithMetadata = async ({
 			[Erc20CustomToken[], Erc20CustomToken[]]
 		>(
 			(
-				acc,
+				[accExisting, accNonExisting],
 				{
 					token,
 					enabled,
@@ -110,7 +110,7 @@ const loadCustomTokensWithMetadata = async ({
 				}
 			) => {
 				if (!('Erc20' in token)) {
-					return acc;
+					return [accExisting, accNonExisting];
 				}
 
 				if (
@@ -118,10 +118,8 @@ const loadCustomTokensWithMetadata = async ({
 						token.Erc20.chain_id
 					)
 				) {
-					return acc;
+					return [accExisting, accNonExisting];
 				}
-
-				const [accExisting, accNonExisting] = acc;
 
 				const version = fromNullable(versionNullable);
 				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
