@@ -101,7 +101,7 @@ const loadCustomTokensWithMetadata = async ({
 			[Erc20CustomToken[], Erc20CustomToken[]]
 		>(
 			(
-				[accExisting, accNonExisting],
+				acc,
 				{
 					token,
 					enabled,
@@ -110,7 +110,7 @@ const loadCustomTokensWithMetadata = async ({
 				}
 			) => {
 				if (!('Erc20' in token)) {
-					return [accExisting, accNonExisting];
+					return acc;
 				}
 
 				if (
@@ -118,8 +118,10 @@ const loadCustomTokensWithMetadata = async ({
 						token.Erc20.chain_id
 					)
 				) {
-					return [accExisting, accNonExisting];
+					return acc;
 				}
+
+				const [accExisting, accNonExisting] = acc;
 
 				const version = fromNullable(versionNullable);
 				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
@@ -134,7 +136,9 @@ const loadCustomTokensWithMetadata = async ({
 				);
 
 				if (nonNullish(existingToken)) {
-					return [[...accExisting, { ...existingToken, enabled, version }], accNonExisting];
+					accExisting.push({ ...existingToken, enabled, version });
+
+					return [accExisting, accNonExisting];
 				}
 
 				const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
@@ -147,26 +151,24 @@ const loadCustomTokensWithMetadata = async ({
 					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
 				);
 
-				return [
-					accExisting,
-					[
-						...accNonExisting,
-						{
-							id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
-							name: tokenAddress,
-							address: tokenAddress,
-							network,
-							symbol: tokenAddress,
-							decimals: ETHEREUM_DEFAULT_DECIMALS,
-							standard: { code: 'erc20' as const },
-							category: 'custom' as const,
-							exchange: 'erc20' as const,
-							enabled,
-							version,
-							allowExternalContentSource
-						}
-					]
-				];
+				const newToken: Erc20CustomToken = {
+					id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
+					name: tokenAddress,
+					address: tokenAddress,
+					network,
+					symbol: tokenAddress,
+					decimals: ETHEREUM_DEFAULT_DECIMALS,
+					standard: { code: 'erc20' as const },
+					category: 'custom' as const,
+					exchange: 'erc20' as const,
+					enabled,
+					version,
+					allowExternalContentSource
+				};
+
+				accNonExisting.push(newToken);
+
+				return [accExisting, accNonExisting];
 			},
 			[[], []]
 		);
