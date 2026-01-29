@@ -67,6 +67,8 @@
 		close();
 	};
 
+	let proposal = $derived($proposalStore);
+
 	const disconnect = async () => {
 		await disconnectListener();
 
