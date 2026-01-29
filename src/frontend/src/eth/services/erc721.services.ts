@@ -13,6 +13,7 @@ import {
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
+import { queryAndUpdateOrHydrate } from '$lib/services/query.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
@@ -20,13 +21,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
-import {
-	assertNonNullish,
-	fromNullable,
-	isNullish,
-	nonNullish,
-	queryAndUpdate
-} from '@dfinity/utils';
+import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const isInterfaceErc721 = async ({
@@ -51,10 +46,19 @@ export const loadErc721Tokens = async ({
 
 export const loadCustomTokens = ({
 	identity,
+	certified,
+	tokens,
 	useCache = false
-}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
-	queryAndUpdate<Erc721CustomToken[]>({
-		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
+}: LoadCustomTokenParams): Promise<void> =>
+	queryAndUpdateOrHydrate<Erc721CustomToken[], CustomToken>({
+		certified,
+		provided: tokens,
+		request: ({ provided, ...params }) =>
+			loadCustomTokensWithMetadata({
+				...params,
+				tokens: provided,
+				useCache
+			}),
 		onLoad: loadCustomTokenData,
 		onUpdateError,
 		identity
