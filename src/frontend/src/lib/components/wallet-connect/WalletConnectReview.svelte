@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Spinner } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
@@ -13,17 +12,18 @@
 	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Option } from '$lib/types/utils';
+	import { walletConnectProposalStore } from '$lib/stores/wallet-connect.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		proposal: Option<WalletKitTypes.SessionProposal>;
 		onApprove: () => void;
 		onReject: () => void;
 		onCancel: () => void;
 	}
 
-	let { proposal, onApprove, onReject, onCancel }: Props = $props();
+	let { onApprove, onReject, onCancel }: Props = $props();
+
+	let proposal = $derived($walletConnectProposalStore);
 
 	let params = $derived(proposal?.params);
 
