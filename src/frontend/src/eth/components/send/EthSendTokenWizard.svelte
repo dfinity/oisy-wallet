@@ -338,10 +338,6 @@
 
 	const close = () => onClose();
 	const back = () => onSendBack();
-
-	$effect(() => {
-		console.log({ customNonce });
-	});
 </script>
 
 <EthFeeContext

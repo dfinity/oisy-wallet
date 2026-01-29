@@ -181,8 +181,6 @@ export const send = async ({
 	customNonce?: number;
 } & SendParams &
 	RequiredTransactionFeeData): Promise<{ hash: string }> => {
-	console.log('send1', { customNonce });
-
 	progress?.(ProgressStepsSend.INITIALIZATION);
 
 	const { transactionNeededApproval, nonce } = await approve({
@@ -193,8 +191,6 @@ export const send = async ({
 		...rest
 	});
 
-	console.log('send2', { transactionNeededApproval, nonce, customNonce });
-
 	// If we approved a transaction - as, for example, in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we got.
 	const nonceTransaction = transactionNeededApproval ? nonce + 1 : nonce;
 
@@ -204,8 +200,6 @@ export const send = async ({
 		token,
 		...rest
 	});
-
-	console.log('send3', { transactionSent, nonceTransaction });
 
 	// Explicitly do not await to proceed in the background and allow the UI to continue
 	processTransactionSent({ token, transaction: transactionSent });
