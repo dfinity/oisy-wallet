@@ -473,7 +473,7 @@ export const assertExistingTokens = <T extends Token>({
  * The identifier is network-specific (for example, the token address
  * for ERC-20 and SPL tokens), resulting in paths of the form:
  *
- * `images//tokens/{network}/{identifier}.{extension}`
+ * `icons/{network}/{identifier}.{extension}`
  *
  * Supported token types include:
  * - All EVM-compatible ERC-20 tokens
@@ -496,7 +496,7 @@ export const assertExistingTokens = <T extends Token>({
  * Defaults to `'webp'`.
  *
  * @returns The relative icon path
- * (e.g. `/tokens/ethereum/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp`)
+ * (e.g. `/icons/eth/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp`)
  * or `undefined` if the token type is not supported.
  */
 export const getCodebaseTokenIconPath = <T extends Token>({
