@@ -11,6 +11,7 @@ import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { OptionToken, OptionTokenStandardCode, Token } from '$lib/types/token';
 import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -24,8 +25,9 @@ export const pageToken: Readable<OptionToken> = derived(
 	([$routeToken, $routeNetwork, $nativeTokens, $erc20Tokens, $icrcTokens, $splTokens]) =>
 		nonNullish($routeToken)
 			? [...$nativeTokens, ...$erc20Tokens, ...$icrcTokens, ...$splTokens].find(
-					({ name, network: { id: networkId } }) =>
-						name === $routeToken && networkId.description === $routeNetwork
+					(token) =>
+						getPageTokenIdentifier(token) === $routeToken &&
+						token.network.id.description === $routeNetwork
 				)
 			: undefined
 );
