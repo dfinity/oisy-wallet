@@ -156,7 +156,12 @@ const loadCustomIcrcTokensData = async ({
 	const requestIcrcCustomTokenMetadata = async (
 		custom_token: CustomToken
 	): Promise<IcrcCustomToken | undefined> => {
-		const { enabled, version: v, token } = custom_token;
+		const {
+			token,
+			enabled,
+			version: versionNullable,
+			allow_external_content_source: allowExternalContentSourceNullable
+		} = custom_token;
 
 		if (!('Icrc' in token)) {
 			return;
@@ -189,14 +194,16 @@ const loadCustomIcrcTokensData = async ({
 
 		const t = mapIcrcToken(data);
 
-		const version = fromNullable(v);
+		const version = fromNullable(versionNullable);
+		const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
 		return isNullish(t)
 			? undefined
 			: {
 					...t,
 					enabled,
-					...(nonNullish(version) && { version })
+					version,
+					allowExternalContentSource
 				};
 	};
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { type Snippet, untrack } from 'svelte';
 	import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 	import { allUtxosStore } from '$btc/stores/all-utxos.store';
@@ -13,7 +13,7 @@
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
 	interface Props {
-		source: string;
+		source?: string;
 		networkId?: NetworkId;
 		children: Snippet;
 	}
@@ -21,7 +21,7 @@
 	let { source, networkId, children }: Props = $props();
 
 	const loadAllUtxos = async () => {
-		if (isNullish(networkId)) {
+		if (isNullish(networkId) || isNullish(source)) {
 			return;
 		}
 
@@ -45,7 +45,7 @@
 	$effect(() => {
 		[source, networkId];
 
-		untrack(() => isNullish($allUtxosStore?.allUtxos) && loadAllUtxos());
+		untrack(() => nonNullish(source) && isNullish($allUtxosStore?.allUtxos) && loadAllUtxos());
 	});
 </script>
 

@@ -3,9 +3,9 @@ import type { OptionWalletConnectListener, WalletConnectListener } from '$lib/ty
 import type { WalletKitTypes } from '@reown/walletkit';
 import { writable, type Readable } from 'svelte/store';
 
-export type WalletConnectListenerStoreData = OptionWalletConnectListener;
+type WalletConnectListenerStoreData = OptionWalletConnectListener;
 
-export interface WalletConnectListenerStore extends Readable<WalletConnectListenerStoreData> {
+interface WalletConnectListenerStore extends Readable<WalletConnectListenerStoreData> {
 	set: (data: WalletConnectListener) => void;
 	reset: () => void;
 }
@@ -15,7 +15,7 @@ const initWalletConnectListenerStore = (): WalletConnectListenerStore => {
 
 	return {
 		subscribe,
-		set,
+		set: (data: WalletConnectListener) => set(data),
 		reset: () => {
 			set(undefined);
 		}
@@ -24,9 +24,9 @@ const initWalletConnectListenerStore = (): WalletConnectListenerStore => {
 
 export const walletConnectListenerStore = initWalletConnectListenerStore();
 
-export type WalletConnectProposalStoreData = Option<WalletKitTypes.SessionProposal>;
+type WalletConnectProposalStoreData = Option<WalletKitTypes.SessionProposal>;
 
-export interface WalletConnectProposalStore extends Readable<WalletConnectProposalStoreData> {
+interface WalletConnectProposalStore extends Readable<WalletConnectProposalStoreData> {
 	set: (data: WalletKitTypes.SessionProposal) => void;
 }
 
@@ -35,7 +35,7 @@ const initWalletConnectProposalStore = (): WalletConnectProposalStore => {
 
 	return {
 		subscribe,
-		set
+		set: (data: WalletKitTypes.SessionProposal) => set(data)
 	};
 };
 
