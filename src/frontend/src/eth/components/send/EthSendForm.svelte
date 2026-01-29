@@ -10,6 +10,7 @@
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
@@ -19,7 +20,6 @@
 	interface Props {
 		amount: OptionAmount;
 		destination?: string;
-		customNonce?: number;
 		nativeEthereumToken: Token;
 		selectedContact?: ContactUi;
 		onBack: () => void;
@@ -31,7 +31,6 @@
 	let {
 		amount = $bindable(),
 		destination = $bindable(''),
-		customNonce = $bindable(),
 		nativeEthereumToken,
 		selectedContact,
 		onBack,
@@ -73,6 +72,14 @@
 		[nativeEthereumToken, $ethAddress];
 
 		updateHighestNonce();
+	});
+
+	let customNonce = $state<number>();
+
+	const { sendEthCustomNonce } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	$effect(() => {
+		sendEthCustomNonce.set(customNonce);
 	});
 </script>
 
