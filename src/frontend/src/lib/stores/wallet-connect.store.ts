@@ -15,7 +15,7 @@ const initWalletConnectListenerStore = (): WalletConnectListenerStore => {
 
 	return {
 		subscribe,
-		set,
+		set: (data: WalletConnectListener) => set(data),
 		reset: () => {
 			set(undefined);
 		}
