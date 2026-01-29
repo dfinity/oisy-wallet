@@ -55,6 +55,7 @@ describe('erc20.services', () => {
 				category: 'custom',
 				exchange: 'erc20',
 				version: 1n,
+				allowExternalContentSource: undefined,
 				enabled: true,
 				network: ETHEREUM_NETWORK,
 				address: mockEthAddress,
@@ -77,7 +78,8 @@ describe('erc20.services', () => {
 				address: mockEthAddress2.toUpperCase(),
 				decimals: mockMetadata2.decimals,
 				name: mockMetadata2.name,
-				symbol: mockMetadata2.symbol
+				symbol: mockMetadata2.symbol,
+				icon: `/icons/${BASE_NETWORK.id.description?.toLowerCase()}/${mockEthAddress2.toLowerCase()}.webp`
 			}
 		},
 		{
@@ -93,7 +95,8 @@ describe('erc20.services', () => {
 				address: mockEthAddress3,
 				decimals: mockMetadata2.decimals,
 				name: mockMetadata2.name,
-				symbol: mockMetadata2.symbol
+				symbol: mockMetadata2.symbol,
+				icon: `/icons/pol-amoy-testnet/${mockEthAddress3.toLowerCase()}.webp`
 			}
 		}
 	];
@@ -160,7 +163,7 @@ describe('erc20.services', () => {
 				}
 			}));
 
-			expect(tokens).toEqual(expected);
+			expect(tokens).toStrictEqual(expected);
 		});
 
 		it('should not throw error if metadata throws', async () => {
