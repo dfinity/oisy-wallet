@@ -516,6 +516,13 @@ export const getCodebaseTokenIconPath = <T extends Token>({
 
 		const identifier = isCaseSensitive ? address : address.toLowerCase();
 
-		return `/icons/${networkId.description?.toLowerCase()}/${identifier}.${extension}`;
+		const networkSymbol = networkId.description
+			?.toLowerCase()
+			.trim()
+			.replace(/\s+/g, '-') // spaces → -
+			.replace(/[^a-z0-9-]/g, '') // drop everything else
+			.replace(/-+/g, '-'); // collapse multiple -
+
+		return `/icons/${networkSymbol}/${identifier}.${extension}`;
 	}
 };
