@@ -40,7 +40,7 @@ const initPageStoreMock = () => {
 			set({ ...page, url });
 			page.url = url;
 		},
-		mockToken: (token: Token) => {
+		mockToken: <T extends Token>(token: T) => {
 			const {
 				network: { id: networkId }
 			} = token;
