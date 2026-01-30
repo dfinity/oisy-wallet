@@ -1,5 +1,6 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
-import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
+import { ICRC_TOKENS } from '$env/networks/networks.icrc.env';
+import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icp/tokens.icp.ck.env';
 import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
 import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
