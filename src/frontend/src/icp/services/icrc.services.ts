@@ -216,9 +216,6 @@ const loadCustomIcrcTokensData = async ({
 
 	return results.reduce<IcrcCustomToken[]>((acc, result, index) => {
 		if (result.status !== 'fulfilled') {
-			// eslint-disable-next-line no-console -- For development purposes, we want to see the error in the console, but no verbose.
-			console.debug(result.reason);
-
 			trackEvent({
 				name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
 				metadata: {

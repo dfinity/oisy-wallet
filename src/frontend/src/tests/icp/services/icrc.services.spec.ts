@@ -404,13 +404,6 @@ describe('icrc.services', () => {
 
 				expect(spyToastsError).not.toHaveBeenCalled();
 
-				// eslint-disable-next-line no-console
-				expect(console.debug).toHaveBeenCalledTimes(2);
-				// eslint-disable-next-line no-console
-				expect(console.debug).toHaveBeenNthCalledWith(1, err);
-				// eslint-disable-next-line no-console
-				expect(console.debug).toHaveBeenNthCalledWith(2, err);
-
 				expect(trackEvent).toHaveBeenCalledTimes(2);
 				expect(trackEvent).toHaveBeenNthCalledWith(1, {
 					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
@@ -484,13 +477,6 @@ describe('icrc.services', () => {
 				expect(afterTokens).toEqual(initialTokens);
 
 				expect(spyToastsError).not.toHaveBeenCalled();
-
-				// eslint-disable-next-line no-console
-				expect(console.debug).toHaveBeenCalledTimes(2);
-				// eslint-disable-next-line no-console
-				expect(console.debug).toHaveBeenNthCalledWith(1, err);
-				// eslint-disable-next-line no-console
-				expect(console.debug).toHaveBeenNthCalledWith(2, err);
 
 				expect(trackEvent).toHaveBeenCalledTimes(2);
 				expect(trackEvent).toHaveBeenNthCalledWith(1, {
