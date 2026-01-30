@@ -81,11 +81,11 @@ describe('page-token.utils', () => {
 		});
 
 		it('should return the symbol for all other tokens', () => {
-			// @ts-expect-error we test this in purposes
+			// @ts-expect-error we test this on purpose
 			const mockToken1: Token = { ...ICP_TOKEN, standard: { code: 'UNKNOWN_STANDARD' } };
 			const mockToken2: Token = {
 				...ETHEREUM_TOKEN,
-				// @ts-expect-error we test this in purposes
+				// @ts-expect-error we test this on purpose
 				standard: { code: 'ANOTHER_UNKNOWN_STANDARD' }
 			};
 			const tokens = [mockToken1, mockToken2];
