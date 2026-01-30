@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
