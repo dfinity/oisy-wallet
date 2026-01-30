@@ -1,40 +1,11 @@
 import { CKETH_EXPLORER_URL, CKETH_SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
-import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
-import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
-import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.oct.env';
-import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
-import { SHIB_TOKEN_GROUP } from '$env/tokens/groups/groups.shib.env';
-import { UNI_TOKEN_GROUP } from '$env/tokens/groups/groups.uni.env';
-import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
-import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
-import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.wbtc.env';
-import { WSTETH_TOKEN_GROUP } from '$env/tokens/groups/groups.wsteth.env';
-import { XAUT_TOKEN_GROUP } from '$env/tokens/groups/groups.xaut.env';
-import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
-import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
-import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
-import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
-import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
-import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
-import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
-import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
-import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
-import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
-import { ckErc20Production, ckErc20Staging } from '$env/tokens/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
-import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
-import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
-import type { NetworkEnvironment } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { nonNullish } from '@dfinity/utils';
-
-
-
 
 export const IC_CKETH_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKETH_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
@@ -120,34 +91,7 @@ export const CKETH_LEDGER_CANISTER_IDS: NonEmptyArray<CanisterIdText> = [
 	...CKETH_LEDGER_CANISTER_TESTNET_IDS
 ];
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const ICRC_CK_ETH_TOKENS: IcInterface[] = [
 	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
 	...(nonNullish(CKETH_STAGING_DATA) ? [CKETH_STAGING_DATA] : [])
 ];
-
-
-

@@ -8,9 +8,6 @@ import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { nonNullish } from '@dfinity/utils';
 
-
-
-
 export const IC_CKBTC_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
 	'mxzaz-hqaaa-aaaar-qaada-cai';
