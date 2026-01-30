@@ -11,8 +11,8 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
-	import { isEthAddress } from '$lib/utils/account.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import {isEthAddress} from "$eth/utils/account.utils";
 
 	interface Props {
 		amount: OptionAmount;

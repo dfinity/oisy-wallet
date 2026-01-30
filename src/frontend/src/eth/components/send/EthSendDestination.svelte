@@ -7,9 +7,10 @@
 	import type { Network } from '$lib/types/network';
 	import type { OptionToken } from '$lib/types/token';
 	import type { KnownDestinations } from '$lib/types/transactions';
-	import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
+	import { invalidIcpAddress } from '$icp/utils/account.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
+    import {isEthAddress} from "$eth/utils/account.utils";
 
 	interface Props {
 		token: OptionToken;

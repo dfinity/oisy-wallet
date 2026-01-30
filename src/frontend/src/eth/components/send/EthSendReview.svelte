@@ -11,8 +11,8 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isEthAddress } from '$lib/utils/account.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import {isEthAddress} from "$eth/utils/account.utils";
 
 	interface Props {
 		destination?: string;
