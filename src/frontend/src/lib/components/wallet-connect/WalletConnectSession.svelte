@@ -22,7 +22,6 @@
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -67,8 +66,6 @@
 		resetListener();
 		close();
 	};
-
-	let proposal = $derived($proposalStore);
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -333,73 +330,6 @@
 		return { result: 'success' };
 	};
 
-	const reject = async () =>
-		await answer({
-			callback: async () => {
-				if (nonNullish(proposal)) {
-					await listener?.rejectSession(proposal);
-				}
-
-				resetAndClose();
-			}
-		});
-
-	const approve = async () =>
-		await answer({
-			callback: listener?.approveSession,
-			toast: () =>
-				toastsShow({
-					text: $i18n.wallet_connect.info.connected,
-					level: 'success',
-					duration: 2000
-				})
-		});
-
-	const answer = async ({
-		callback,
-		toast
-	}: {
-		callback: ((proposal: WalletKitTypes.SessionProposal) => Promise<void>) | undefined;
-		toast?: () => void;
-	}) => {
-		if (isNullish(listener) || isNullish(callback)) {
-			toastsError({
-				msg: { text: $i18n.wallet_connect.error.no_connection_opened }
-			});
-
-			close();
-			return;
-		}
-
-		if (isNullish(proposal)) {
-			toastsError({
-				msg: { text: $i18n.wallet_connect.error.no_session_approval }
-			});
-
-			close();
-			return;
-		}
-
-		busy.start();
-
-		try {
-			await callback(proposal);
-
-			toast?.();
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.wallet_connect.error.unexpected },
-				err
-			});
-
-			resetListener();
-		}
-
-		busy.stop();
-
-		close();
-	};
-
 	$effect(() => {
 		walletConnectPaired.set(nonNullish(listener));
 	});
@@ -487,13 +417,5 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WalletConnectSessionModal
-		onApprove={approve}
-		onClose={resetAndClose}
-		onConnect={userConnect}
-		onReject={reject}
-		{proposal}
-		{steps}
-		bind:modal
-	/>
+	<WalletConnectSessionModal onClose={resetAndClose} onConnect={userConnect} {steps} bind:modal />
 {/if}
