@@ -1,6 +1,6 @@
 import { EnvIcrcTokenMetadataSchema, EnvIcTokenSchema } from '$env/schema/env-icrc-token.schema';
 import { EnvTokenSymbolSchema } from '$env/schema/env-token-common.schema';
-import { isEthAddress } from '$lib/utils/account.utils';
+import { isEthAddress } from '$eth/utils/account.utils';
 import { isNullish } from '@dfinity/utils';
 import * as z from 'zod';
 
