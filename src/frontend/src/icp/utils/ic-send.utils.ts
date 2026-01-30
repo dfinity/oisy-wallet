@@ -1,9 +1,7 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-import {
-	CKERC20_LEDGER_CANISTER_IDS,
-	CKETH_LEDGER_CANISTER_IDS
-} from '$env/networks/networks.icrc.env';
+import { CKERC20_LEDGER_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { CKBTC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
+import { CKETH_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';

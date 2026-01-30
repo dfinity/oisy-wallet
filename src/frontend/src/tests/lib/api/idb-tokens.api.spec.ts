@@ -1,5 +1,5 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import {
 	clearIdbAllCustomTokens,

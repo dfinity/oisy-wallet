@@ -1,5 +1,4 @@
 import * as exchangeEnv from '$env/exchange.env';
-import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import {
 	ARBITRUM_ETH_TOKEN_ID,
@@ -18,6 +17,7 @@ import {
 	POL_MAINNET_TOKEN_ID
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_MAINNET_TOKEN_ID,
