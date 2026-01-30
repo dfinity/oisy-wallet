@@ -492,7 +492,6 @@
 		onClose={resetAndClose}
 		onConnect={userConnect}
 		onReject={reject}
-		{proposal}
 		{steps}
 		bind:modal
 	/>
