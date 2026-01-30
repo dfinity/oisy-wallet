@@ -3,7 +3,6 @@ import {
 IC_CKETH_LEDGER_CANISTER_ID,
 IC_CKETH_MINTER_CANISTER_ID
 } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
-
 import { eip1559TransactionPrice, withdrawErc20, withdrawEth } from '$icp/api/cketh-minter.api';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
