@@ -13,6 +13,11 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS
+} from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as exchangeServices from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -335,6 +340,8 @@ describe('icrc.services', () => {
 
 				spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 				spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
+
+				vi.spyOn(console, 'debug').mockImplementation(() => {});
 			});
 
 			it('should reset all and toasts on list custom tokens error', async () => {
@@ -397,9 +404,30 @@ describe('icrc.services', () => {
 
 				expect(spyToastsError).not.toHaveBeenCalled();
 
-				expect(console.error).toHaveBeenCalledTimes(2);
-				expect(console.error).toHaveBeenNthCalledWith(1, err);
-				expect(console.error).toHaveBeenNthCalledWith(2, err);
+				// eslint-disable-next-line no-console
+				expect(console.debug).toHaveBeenCalledTimes(2);
+				// eslint-disable-next-line no-console
+				expect(console.debug).toHaveBeenNthCalledWith(1, err);
+				// eslint-disable-next-line no-console
+				expect(console.debug).toHaveBeenNthCalledWith(2, err);
+
+				expect(trackEvent).toHaveBeenCalledTimes(2);
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+						error: err.message
+					}
+				});
+				expect(trackEvent).toHaveBeenNthCalledWith(2, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+						error: err.message
+					}
+				});
 			});
 
 			it('should show a toast on metadata error if the token was enabled', async () => {
@@ -457,9 +485,30 @@ describe('icrc.services', () => {
 
 				expect(spyToastsError).not.toHaveBeenCalled();
 
-				expect(console.error).toHaveBeenCalledTimes(2);
-				expect(console.error).toHaveBeenNthCalledWith(1, err);
-				expect(console.error).toHaveBeenNthCalledWith(2, err);
+				// eslint-disable-next-line no-console
+				expect(console.debug).toHaveBeenCalledTimes(2);
+				// eslint-disable-next-line no-console
+				expect(console.debug).toHaveBeenNthCalledWith(1, err);
+				// eslint-disable-next-line no-console
+				expect(console.debug).toHaveBeenNthCalledWith(2, err);
+
+				expect(trackEvent).toHaveBeenCalledTimes(2);
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+						error: err.message
+					}
+				});
+				expect(trackEvent).toHaveBeenNthCalledWith(2, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+						error: err.message
+					}
+				});
 			});
 
 			it('should not cache the custom tokens in IDB', async () => {

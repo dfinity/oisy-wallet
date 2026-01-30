@@ -30,6 +30,11 @@ import {
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS
+} from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
@@ -211,8 +216,17 @@ const loadCustomIcrcTokensData = async ({
 
 	return results.reduce<IcrcCustomToken[]>((acc, result, index) => {
 		if (result.status !== 'fulfilled') {
-			// For development purposes, we want to see the error in the console.
-			console.error(result.reason);
+			// eslint-disable-next-line no-console -- For development purposes, we want to see the error in the console, but no verbose.
+			console.debug(result.reason);
+
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+					...(mapIcErrorMetadata(result.reason) ?? {})
+				}
+			});
 
 			const { enabled, token } = tokens[index];
 
