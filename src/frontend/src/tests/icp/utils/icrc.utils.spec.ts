@@ -1,5 +1,5 @@
-import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
-import { GHOSTNODE_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icrc.additional.env';
+import { GHOSTNODE_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import {

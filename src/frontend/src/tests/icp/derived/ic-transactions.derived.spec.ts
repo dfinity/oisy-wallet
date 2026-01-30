@@ -2,7 +2,7 @@ import {
 	IC_CKETH_INDEX_CANISTER_ID,
 	IC_CKETH_LEDGER_CANISTER_ID,
 	IC_CKETH_MINTER_CANISTER_ID
-} from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { icKnownDestinations, icTransactions } from '$icp/derived/ic-transactions.derived';

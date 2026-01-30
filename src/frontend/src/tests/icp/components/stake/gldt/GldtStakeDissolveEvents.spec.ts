@@ -2,7 +2,7 @@ import type {
 	DissolveStakeEvent,
 	StakePositionResponse
 } from '$declarations/gldt_stake/gldt_stake.did';
-import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icrc.additional.env';
+import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import GldtStakeDissolveEvents from '$icp/components/stake/gldt/GldtStakeDissolveEvents.svelte';
 import {
 	GLDT_STAKE_CONTEXT_KEY,

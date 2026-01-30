@@ -6,7 +6,7 @@
 	import {
 		BITCOIN_CANISTER_IDS,
 		IC_CKBTC_MINTER_CANISTER_ID
-	} from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
+	} from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 	import { getUtxosQuery } from '$icp/api/bitcoin.api';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { NetworkId } from '$lib/types/network';
