@@ -1,8 +1,5 @@
 import { browser } from '$app/environment';
 import { goto, pushState } from '$app/navigation';
-import { isTokenErc } from '$eth/utils/erc.utils';
-import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
-import { isTokenIc } from '$icp/utils/icrc.utils';
 import {
 	AppPath,
 	COLLECTION_PARAM,
@@ -19,7 +16,6 @@ import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
-import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
@@ -72,30 +68,19 @@ export const isRouteEarn = ({ route: { id } }: Page): boolean => isEarnPath(id);
 
 export const isRouteEarnGold = ({ route: { id } }: Page): boolean => isEarnGoldPath(id);
 
-export const getPageTokenIdentifier = (token: Token): string =>
-	isTokenErc(token) || isTokenSpl(token)
-		? token.address
-		: isTokenIc(token)
-			? token.ledgerCanisterId
-			: isTokenIcNft(token)
-				? token.canisterId
-				: token.symbol;
-
 const tokenUrl = ({
-	token,
+	token: {
+		name,
+		network: { id: networkId }
+	},
 	path
 }: {
 	token: Token;
 	path: AppPath.Transactions | undefined;
-}): string => {
-	const {
-		network: { id: networkId }
-	} = token;
-
-	const identifier = getPageTokenIdentifier(token);
-
-	return `${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(identifier)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
-};
+}): string =>
+	`${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(
+		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
+	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
 
 export const networkParam = (networkId: NetworkId | undefined): string =>
 	isNullish(networkId) ? '' : `${NETWORK_PARAM}=${networkId.description}`;
@@ -164,10 +149,20 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 
 	const token = searchParams?.get(TOKEN_PARAM);
 
+	const replaceEmoji = (input: string | null): string | null => {
+		if (input === null) {
+			return null;
+		}
+
+		return input.replace(/\\u([\dA-Fa-f]+)/g, (_match, hex) =>
+			String.fromCodePoint(Number(`0x${hex}`))
+		);
+	};
+
 	const uri = searchParams?.get(URI_PARAM);
 
 	return {
-		[TOKEN_PARAM]: nonNullish(token) ? decodeURIComponent(token) : null,
+		[TOKEN_PARAM]: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
 		[NETWORK_PARAM]: searchParams?.get(NETWORK_PARAM),
 		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null,
 		[NFT_PARAM]: searchParams?.get(NFT_PARAM),
