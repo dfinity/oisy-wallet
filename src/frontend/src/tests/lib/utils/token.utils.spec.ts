@@ -2,7 +2,7 @@ import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
-import * as tokensIcpCkEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
+import * as tokensIcrcCkEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ckErc20Production } from '$env/tokens/tokens.ckerc20.env';
@@ -420,7 +420,7 @@ describe('token.utils', () => {
 
 		const setupDefaultTokenMock = (canisterId?: string) => {
 			vi.spyOn(
-				tokensIcpCkEnv,
+				tokensIcrcCkEnv,
 				'ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS',
 				'get'
 			).mockReturnValue([canisterId ?? '']);
@@ -428,7 +428,7 @@ describe('token.utils', () => {
 
 		const setupSuggestedTokenMock = (canisterId?: string) => {
 			vi.spyOn(
-				tokensIcpCkEnv,
+				tokensIcrcCkEnv,
 				'ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS',
 				'get'
 			).mockReturnValue([canisterId ?? '']);
