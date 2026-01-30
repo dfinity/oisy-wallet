@@ -1,4 +1,4 @@
-import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icrc.additional.env';
 import GldtStakeEarnCard from '$icp/components/stake/gldt/GldtStakeEarnCard.svelte';
 import {
 	GLDT_STAKE_CONTEXT_KEY,

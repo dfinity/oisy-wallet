@@ -1,4 +1,4 @@
-import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icrc.additional.env';
 import GldtStakeDissolveEvent from '$icp/components/stake/gldt/GldtStakeDissolveEvent.svelte';
 import type { IcToken } from '$icp/types/ic-token';
 import type { TokenId } from '$lib/types/token';

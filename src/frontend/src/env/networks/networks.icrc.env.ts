@@ -17,6 +17,10 @@ import {
 	IC_CKETH_LEDGER_CANISTER_ID,
 	ICRC_CK_ETH_TOKENS
 } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
+import {
+	ADDITIONAL_ICRC_TOKENS,
+	TICRC1_LEDGER_CANISTER_ID
+} from '$env/tokens/tokens-icp/tokens.icrc.additional.env';
 import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcInterface } from '$icp/types/ic-token';
@@ -44,30 +48,6 @@ export const CYCLES_LEDGER_CANISTER_ID: CanisterIdText =
 
 const ADDITIONAL_ICRC_PRODUCTION_DATA = mapIcrcData(additionalIcrcTokens);
 
-export const GLDT_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA.GLDT?.ledgerCanisterId ?? '6c7su-kiaaa-aaaar-qaira-cai';
-
-export const VCHF_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA.VCHF?.ledgerCanisterId ?? 'ly36x-wiaaa-aaaai-aqj7q-cai';
-
-export const VEUR_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA.VEUR?.ledgerCanisterId ?? 'wu6g4-6qaaa-aaaan-qmrza-cai';
-
-export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA.GHOSTNODE?.ledgerCanisterId ?? 'sx3gz-hqaaa-aaaar-qaoca-cai';
-
-export const ICONFUCIUS_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA.ICONFUCIUS?.ledgerCanisterId ?? '5kijx-siaaa-aaaar-qaqda-cai';
-
-export const BITCAT_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA.BITCAT?.ledgerCanisterId ?? 'xlwi6-kyaaa-aaaar-qarya-cai';
-
-export const FORSETISCN_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.FORSETISCN?.ledgerCanisterId ?? 'tta5j-yqaaa-aaaar-qarbq-cai';
-
-const TICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.TICRC1?.ledgerCanisterId ?? '3jkp5-oyaaa-aaaaj-azwqa-cai';
-
 /**
  * All ICRC tokens data
  */
@@ -84,10 +64,6 @@ const ICRC_CK_TOKENS: IcInterface[] = [
 	...ICRC_CK_ETH_TOKENS,
 	...ICRC_CK_ERC20_TOKENS
 ];
-
-const ADDITIONAL_ICRC_TOKENS: IcInterface[] = Object.values(
-	ADDITIONAL_ICRC_PRODUCTION_DATA ?? {}
-).filter(nonNullish);
 
 export const ICRC_TOKENS: IcInterface[] = [
 	...PUBLIC_ICRC_TOKENS,

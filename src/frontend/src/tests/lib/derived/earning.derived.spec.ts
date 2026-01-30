@@ -1,6 +1,6 @@
 import type { StakePositionResponse } from '$declarations/gldt_stake/gldt_stake.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icrc.additional.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
