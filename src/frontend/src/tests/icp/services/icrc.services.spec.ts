@@ -13,6 +13,11 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS
+} from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as exchangeServices from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
