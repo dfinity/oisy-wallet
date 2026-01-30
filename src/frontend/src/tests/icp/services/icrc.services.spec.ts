@@ -462,9 +462,23 @@ describe('icrc.services', () => {
 
 				expect(spyToastsError).not.toHaveBeenCalled();
 
-				expect(console.error).toHaveBeenCalledTimes(2);
-				expect(console.error).toHaveBeenNthCalledWith(1, err);
-				expect(console.error).toHaveBeenNthCalledWith(2, err);
+				expect(trackEvent).toHaveBeenCalledTimes(2);
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+						error: err.message
+					}
+				});
+				expect(trackEvent).toHaveBeenNthCalledWith(2, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+						error: err.message
+					}
+				});
 			});
 
 			it('should not cache the custom tokens in IDB', async () => {
