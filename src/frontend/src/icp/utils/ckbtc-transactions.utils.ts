@@ -4,7 +4,7 @@ import {
 	CKBTC_EXPLORER_URL,
 	CKBTC_TESTNET_EXPLORER_URL
 } from '$env/explorers.env';
-import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';

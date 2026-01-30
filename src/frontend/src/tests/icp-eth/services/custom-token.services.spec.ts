@@ -1,4 +1,4 @@
-import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
+import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
 import { autoLoadIcrcToken, setCustomToken } from '$icp-eth/services/icrc-token.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
