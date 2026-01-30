@@ -1,11 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import {
-		IC_CKETH_MINTER_CANISTER_ID,
-		LOCAL_CKETH_MINTER_CANISTER_ID,
-		STAGING_CKETH_MINTER_CANISTER_ID
-	} from '$env/networks/networks.icrc.env';
 	import { SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env.js';
 	import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
@@ -16,6 +11,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { TokenId } from '$lib/types/token';
+	import {
+		IC_CKETH_MINTER_CANISTER_ID,
+		LOCAL_CKETH_MINTER_CANISTER_ID,
+		STAGING_CKETH_MINTER_CANISTER_ID
+	} from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
 
 	interface Props {
 		nativeTokenId: TokenId;
