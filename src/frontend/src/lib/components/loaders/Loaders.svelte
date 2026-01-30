@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
-	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import CkBtcUpdateBalanceListener from '$icp/components/core/CkBtcUpdateBalanceListener.svelte';
 	import BalancesIdbSetter from '$lib/components/balances/BalancesIdbSetter.svelte';
 	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
@@ -18,6 +17,7 @@
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import LoaderEthTransactions from "$eth/components/loaders/LoaderEthTransactions.svelte";
 
 	interface Props {
 		children: Snippet;
@@ -32,7 +32,7 @@
 			<LoaderTokens>
 				<LoaderEthBalances>
 					<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
-						<LoaderMultipleEthTransactions>
+						<LoaderEthTransactions>
 							<LoaderWallets>
 								<ExchangeWorker>
 									<LoaderMetamask>
@@ -50,7 +50,7 @@
 									</LoaderMetamask>
 								</ExchangeWorker>
 							</LoaderWallets>
-						</LoaderMultipleEthTransactions>
+						</LoaderEthTransactions>
 					</MultipleListeners>
 				</LoaderEthBalances>
 			</LoaderTokens>
