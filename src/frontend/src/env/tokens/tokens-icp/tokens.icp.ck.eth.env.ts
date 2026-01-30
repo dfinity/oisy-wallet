@@ -202,170 +202,23 @@ const CKUSDC_STAGING_DATA: IcCkInterface | undefined = nonNullish(
 		}
 	: undefined;
 
-const CKLINK_STAGING_DATA: IcCkInterface | undefined = nonNullish(
-	CKERC20_STAGING_DATA?.ckSepoliaLINK
-)
-	? {
-			...CKERC20_STAGING_DATA.ckSepoliaLINK,
-			twinToken: SEPOLIA_LINK_TOKEN
-		}
-	: undefined;
 
-const CKPEPE_STAGING_DATA: IcCkInterface | undefined = nonNullish(
-	CKERC20_STAGING_DATA?.ckSepoliaPEPE
-)
-	? {
-			...CKERC20_STAGING_DATA.ckSepoliaPEPE,
-			twinToken: SEPOLIA_PEPE_TOKEN
-		}
-	: undefined;
 
-export const CKUSDC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDC)
-	? {
-			...CKERC20_PRODUCTION_DATA.ckUSDC,
-			twinToken: USDC_TOKEN,
-			groupData: USDC_TOKEN_GROUP
-		}
-	: undefined;
 
-export const IC_CKUSDC_LEDGER_CANISTER_ID = nonNullish(CKUSDC_IC_DATA)
-	? CKUSDC_IC_DATA.ledgerCanisterId
-	: undefined;
 
-const CKLINK_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckLINK)
-	? {
-			...CKERC20_PRODUCTION_DATA.ckLINK,
-			twinToken: LINK_TOKEN,
-			groupData: LINK_TOKEN_GROUP
-		}
-	: undefined;
 
-const CKPEPE_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckPEPE)
-	? {
-			...CKERC20_PRODUCTION_DATA.ckPEPE,
-			twinToken: PEPE_TOKEN,
-			groupData: PEPE_TOKEN_GROUP
-		}
-	: undefined;
 
-const CKOCT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckOCT)
-	? {
-			...CKERC20_PRODUCTION_DATA.ckOCT,
-			twinToken: OCT_TOKEN,
-			groupData: OCT_TOKEN_GROUP
-		}
-	: undefined;
 
-const CKSHIB_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckSHIB)
-	? {
-			...CKERC20_PRODUCTION_DATA.ckSHIB,
-			twinToken: SHIB_TOKEN,
-			groupData: SHIB_TOKEN_GROUP
-		}
-	: undefined;
 
-const CKWBTC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckWBTC)
-	? {
-			...CKERC20_PRODUCTION_DATA.ckWBTC,
-			twinToken: WBTC_TOKEN,
-			groupData: WBTC_TOKEN_GROUP
-		}
-	: undefined;
 
-const CKUSDT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDT)
-	? {
-			...CKERC20_PRODUCTION_DATA.ckUSDT,
-			twinToken: USDT_TOKEN,
-			groupData: USDT_TOKEN_GROUP
-		}
-	: undefined;
 
-export const IC_CKUSDT_LEDGER_CANISTER_ID = nonNullish(CKUSDT_IC_DATA)
-	? CKUSDT_IC_DATA.ledgerCanisterId
-	: undefined;
 
-const CKWSTETH_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckWSTETH)
-	? {
-			...CKERC20_PRODUCTION_DATA.ckWSTETH,
-			twinToken: WSTETH_TOKEN,
-			groupData: WSTETH_TOKEN_GROUP
-		}
-	: undefined;
 
-const CKUNI_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUNI)
-	? {
-			...CKERC20_PRODUCTION_DATA.ckUNI,
-			twinToken: UNI_TOKEN,
-			groupData: UNI_TOKEN_GROUP
-		}
-	: undefined;
-
-const CKEURC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckEURC)
-	? {
-			...CKERC20_PRODUCTION_DATA.ckEURC,
-			twinToken: EURC_TOKEN,
-			groupData: EURC_TOKEN_GROUP
-		}
-	: undefined;
-
-const CKXAUT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckXAUT)
-	? {
-			...CKERC20_PRODUCTION_DATA.ckXAUT,
-			twinToken: XAUT_TOKEN,
-			groupData: XAUT_TOKEN_GROUP
-		}
-	: undefined;
-
-export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
-	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
-	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
-		? [CKUSDC_STAGING_DATA.ledgerCanisterId]
-		: []),
-	...(nonNullish(CKLINK_STAGING_DATA?.ledgerCanisterId)
-		? [CKLINK_STAGING_DATA.ledgerCanisterId]
-		: []),
-	...(nonNullish(CKPEPE_STAGING_DATA?.ledgerCanisterId)
-		? [CKPEPE_STAGING_DATA.ledgerCanisterId]
-		: [])
-];
-
-export const CKERC20_LEDGER_CANISTER_IC_IDS: CanisterIdText[] = [
-	...(nonNullish(CKUSDC_IC_DATA?.ledgerCanisterId) ? [CKUSDC_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKLINK_IC_DATA?.ledgerCanisterId) ? [CKLINK_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKPEPE_IC_DATA?.ledgerCanisterId) ? [CKPEPE_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKOCT_IC_DATA?.ledgerCanisterId) ? [CKOCT_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKSHIB_IC_DATA?.ledgerCanisterId) ? [CKSHIB_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKWBTC_IC_DATA?.ledgerCanisterId) ? [CKWBTC_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKUSDT_IC_DATA?.ledgerCanisterId) ? [CKUSDT_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKWSTETH_IC_DATA?.ledgerCanisterId) ? [CKWSTETH_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKUNI_IC_DATA?.ledgerCanisterId) ? [CKUNI_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKEURC_IC_DATA?.ledgerCanisterId) ? [CKEURC_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKXAUT_IC_DATA?.ledgerCanisterId) ? [CKXAUT_IC_DATA.ledgerCanisterId] : [])
-];
-
-export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
-	...CKERC20_LEDGER_CANISTER_IC_IDS,
-	...CKERC20_LEDGER_CANISTER_TESTNET_IDS
-];
 
 export const ICRC_CK_ETH_TOKENS: IcInterface[] = [
 	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
 	...(nonNullish(CKETH_STAGING_DATA) ? [CKETH_STAGING_DATA] : [])
 ];
 
-export const ICRC_CK_ERC20_TOKENS: IcInterface[] = [
-	...(nonNullish(CKUSDC_LOCAL_DATA) ? [CKUSDC_LOCAL_DATA] : []),
-	...(nonNullish(CKUSDC_STAGING_DATA) ? [CKUSDC_STAGING_DATA] : []),
-	...(nonNullish(CKLINK_STAGING_DATA) ? [CKLINK_STAGING_DATA] : []),
-	...(nonNullish(CKLINK_IC_DATA) ? [CKLINK_IC_DATA] : []),
-	...(nonNullish(CKPEPE_IC_DATA) ? [CKPEPE_IC_DATA] : []),
-	...(nonNullish(CKPEPE_STAGING_DATA) ? [CKPEPE_STAGING_DATA] : []),
-	...(nonNullish(CKOCT_IC_DATA) ? [CKOCT_IC_DATA] : []),
-	...(nonNullish(CKSHIB_IC_DATA) ? [CKSHIB_IC_DATA] : []),
-	...(nonNullish(CKWBTC_IC_DATA) ? [CKWBTC_IC_DATA] : []),
-	...(nonNullish(CKUSDT_IC_DATA) ? [CKUSDT_IC_DATA] : []),
-	...(nonNullish(CKWSTETH_IC_DATA) ? [CKWSTETH_IC_DATA] : []),
-	...(nonNullish(CKUNI_IC_DATA) ? [CKUNI_IC_DATA] : []),
-	...(nonNullish(CKEURC_IC_DATA) ? [CKEURC_IC_DATA] : []),
-	...(nonNullish(CKXAUT_IC_DATA) ? [CKXAUT_IC_DATA] : [])
-];
+
+
