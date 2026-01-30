@@ -1,32 +1,12 @@
 import {
-	CKBTC_IC_DATA,
-	CKBTC_LEDGER_CANISTER_TESTNET_IDS,
-	IC_CKBTC_LEDGER_CANISTER_ID,
-	ICRC_CK_BTC_TOKENS
-} from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
-import {
-	CKERC20_LEDGER_CANISTER_TESTNET_IDS,
-	CKUSDC_IC_DATA,
-	IC_CKUSDC_LEDGER_CANISTER_ID,
-	IC_CKUSDT_LEDGER_CANISTER_ID,
-	ICRC_CK_ERC20_TOKENS
-} from '$env/tokens/tokens-icp/tokens.icp.ck.erc20.env';
-import {
-	CKETH_IC_DATA,
-	CKETH_LEDGER_CANISTER_TESTNET_IDS,
-	IC_CKETH_LEDGER_CANISTER_ID,
-	ICRC_CK_ETH_TOKENS
-} from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
+	CK_LEDGER_CANISTER_TESTNET_IDS,
+	ICRC_CK_TOKENS,
+	PUBLIC_ICRC_TOKENS
+} from '$env/tokens/tokens-icp/tokens.icp.ck.env';
 import {
 	ADDITIONAL_ICRC_TOKENS,
 	TICRC1_LEDGER_CANISTER_ID
 } from '$env/tokens/tokens-icp/tokens.icrc.additional.env';
-  import {CK_LEDGER_CANISTER_TESTNET_IDS,
-	ICRC_CK_TOKENS,
-	PUBLIC_ICRC_TOKENS
-} from '$env/tokens/tokens-icp/tokens.icp.ck.env';
-import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
-import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcInterface } from '$icp/types/ic-token';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
