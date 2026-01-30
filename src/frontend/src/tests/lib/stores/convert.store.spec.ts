@@ -1,8 +1,8 @@
 import {
-	LOCAL_CKBTC_LEDGER_CANISTER_ID,
 	LOCAL_CKETH_LEDGER_CANISTER_ID,
 	LOCAL_CKUSDC_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
+import { LOCAL_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';

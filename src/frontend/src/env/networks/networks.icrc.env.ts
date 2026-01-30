@@ -1,10 +1,4 @@
-import {
-	CKBTC_EXPLORER_URL,
-	CKBTC_TESTNET_EXPLORER_URL,
-	CKETH_EXPLORER_URL,
-	CKETH_SEPOLIA_EXPLORER_URL
-} from '$env/explorers.env';
-import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
+import { CKETH_EXPLORER_URL, CKETH_SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
 import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
@@ -28,13 +22,18 @@ import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
 import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
 import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
-import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import {
+	CKBTC_IC_DATA,
+	CKBTC_LEDGER_CANISTER_TESTNET_IDS,
+	ICRC_CK_BTC_TOKENS,
+	IC_CKBTC_LEDGER_CANISTER_ID
+} from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
 import { ckErc20Production, ckErc20Staging } from '$env/tokens/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
 import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
-import type { LedgerCanisterIdText, MinterCanisterIdText } from '$icp/types/canister';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { mapIcrcData } from '$icp/utils/map-icrc-data';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
@@ -47,39 +46,11 @@ export const IC_CYCLES_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
 	'um5iw-rqaaa-aaaaq-qaaba-cai';
 
-export const IC_CKBTC_LEDGER_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
-	'mxzaz-hqaaa-aaaar-qaada-cai';
-
-export const IC_CKBTC_INDEX_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKBTC_INDEX_CANISTER_ID as OptionCanisterIdText) ??
-	'n5wcd-faaaa-aaaar-qaaea-cai';
-
-export const IC_CKBTC_MINTER_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText) ??
-	'mqygn-kiaaa-aaaar-qaadq-cai';
-
 export const STAGING_CYCLES_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_STAGING_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText;
 
-export const STAGING_CKBTC_LEDGER_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText;
-export const STAGING_CKBTC_INDEX_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKBTC_INDEX_CANISTER_ID as OptionCanisterIdText;
-export const STAGING_CKBTC_MINTER_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText;
-
 export const LOCAL_CYCLES_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText;
-
-export const LOCAL_CKBTC_LEDGER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText;
-export const LOCAL_CKBTC_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKBTC_INDEX_CANISTER_ID as
-	| CanisterIdText
-	| null
-	| undefined;
-export const LOCAL_CKBTC_MINTER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText;
 
 export const CYCLES_LEDGER_CANISTER_ID: CanisterIdText =
 	LOCAL && nonNullish(LOCAL_CYCLES_LEDGER_CANISTER_ID)
@@ -87,58 +58,6 @@ export const CYCLES_LEDGER_CANISTER_ID: CanisterIdText =
 		: (STAGING || BETA || PROD) && nonNullish(STAGING_CYCLES_LEDGER_CANISTER_ID)
 			? STAGING_CYCLES_LEDGER_CANISTER_ID
 			: IC_CYCLES_LEDGER_CANISTER_ID;
-
-const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
-	LOCAL &&
-	nonNullish(LOCAL_CKBTC_LEDGER_CANISTER_ID) &&
-	nonNullish(LOCAL_CKBTC_INDEX_CANISTER_ID) &&
-	nonNullish(LOCAL_CKBTC_MINTER_CANISTER_ID)
-		? {
-				ledgerCanisterId: LOCAL_CKBTC_LEDGER_CANISTER_ID,
-				indexCanisterId: LOCAL_CKBTC_INDEX_CANISTER_ID,
-				minterCanisterId: LOCAL_CKBTC_MINTER_CANISTER_ID,
-				exchangeCoinId: 'bitcoin',
-				twinToken: BTC_TESTNET_TOKEN
-			}
-		: undefined;
-
-const CKBTC_STAGING_DATA: IcCkInterface | undefined =
-	(STAGING || BETA || PROD) &&
-	nonNullish(STAGING_CKBTC_LEDGER_CANISTER_ID) &&
-	nonNullish(STAGING_CKBTC_INDEX_CANISTER_ID) &&
-	nonNullish(STAGING_CKBTC_MINTER_CANISTER_ID)
-		? {
-				ledgerCanisterId: STAGING_CKBTC_LEDGER_CANISTER_ID,
-				indexCanisterId: STAGING_CKBTC_INDEX_CANISTER_ID,
-				minterCanisterId: STAGING_CKBTC_MINTER_CANISTER_ID,
-				exchangeCoinId: 'bitcoin',
-				twinToken: BTC_TESTNET_TOKEN,
-				explorerUrl: CKBTC_TESTNET_EXPLORER_URL
-			}
-		: undefined;
-
-const CKBTC_IC_DATA: IcCkInterface | undefined =
-	STAGING || BETA || PROD
-		? {
-				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
-				indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID,
-				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
-				exchangeCoinId: 'bitcoin',
-				twinToken: BTC_MAINNET_TOKEN,
-				groupData: BTC_TOKEN_GROUP,
-				explorerUrl: CKBTC_EXPLORER_URL
-			}
-		: undefined;
-
-export const CKBTC_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
-	...(nonNullish(STAGING_CKBTC_LEDGER_CANISTER_ID) ? [STAGING_CKBTC_LEDGER_CANISTER_ID] : []),
-	...(nonNullish(LOCAL_CKBTC_LEDGER_CANISTER_ID) ? [LOCAL_CKBTC_LEDGER_CANISTER_ID] : [])
-];
-
-export const CKBTC_LEDGER_CANISTER_IDS: NonEmptyArray<CanisterIdText> = [
-	IC_CKBTC_LEDGER_CANISTER_ID,
-	...CKBTC_LEDGER_CANISTER_TESTNET_IDS
-];
 
 /**
  * ckETH
@@ -480,8 +399,7 @@ export const PUBLIC_ICRC_TOKENS: IcInterface[] = [
 ];
 
 const ICRC_CK_TOKENS: IcInterface[] = [
-	...(nonNullish(CKBTC_LOCAL_DATA) ? [CKBTC_LOCAL_DATA] : []),
-	...(nonNullish(CKBTC_STAGING_DATA) ? [CKBTC_STAGING_DATA] : []),
+	...ICRC_CK_BTC_TOKENS,
 	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
 	...(nonNullish(CKETH_STAGING_DATA) ? [CKETH_STAGING_DATA] : []),
 	...(nonNullish(CKUSDC_LOCAL_DATA) ? [CKUSDC_LOCAL_DATA] : []),
@@ -537,12 +455,3 @@ export const ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS = [
 		? [CKERC20_PRODUCTION_DATA.ckUSDT.ledgerCanisterId]
 		: [])
 ];
-
-export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> = {
-	...(nonNullish(STAGING_CKBTC_MINTER_CANISTER_ID) && {
-		[STAGING_CKBTC_MINTER_CANISTER_ID]: 'g4xu7-jiaaa-aaaan-aaaaq-cai'
-	}),
-	...(nonNullish(IC_CKBTC_MINTER_CANISTER_ID) && {
-		[IC_CKBTC_MINTER_CANISTER_ID]: 'ghsi2-tqaaa-aaaan-aaaca-cai'
-	})
-};
