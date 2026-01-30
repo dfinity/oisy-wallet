@@ -385,7 +385,7 @@ describe('LoaderEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		// the number of calls as before (twice) + mockAdditionalTokens.length
+		// the number of calls as before (twice minus the NFTs) + mockAdditionalTokens.length
 		const index = allExpectedTokens.map(isTokenErc20).lastIndexOf(true);
 		const indexNft = allExpectedTokens.findIndex(isTokenNonFungible);
 		const expectedNewTokens = [
@@ -421,7 +421,7 @@ describe('LoaderEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		// the number of calls as before (twice) + mockAdditionalTokens.length
+		// the number of calls as before (twice minus the NFTs) + mockAdditionalTokens.length
 		const expectedNewTokensWithSepolia = [
 			...expectedNewTokens,
 			...allExpectedTokens.slice(0, index + 1),
@@ -473,7 +473,7 @@ describe('LoaderEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		// the number of calls as before (twice) + mockAdditionalTokens.length
+		// the number of calls as before (twice minus the NFTs) + mockAdditionalTokens.length
 		const index = allExpectedTokens.map(isTokenErc20).lastIndexOf(true);
 		const expectedNewTokens = [
 			...allExpectedTokens,
