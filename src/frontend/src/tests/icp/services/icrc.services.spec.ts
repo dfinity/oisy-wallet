@@ -340,8 +340,6 @@ describe('icrc.services', () => {
 
 				spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 				spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
-
-				vi.spyOn(console, 'debug').mockImplementation(() => {});
 			});
 
 			it('should reset all and toasts on list custom tokens error', async () => {
