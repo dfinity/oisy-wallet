@@ -21,6 +21,11 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
+
 describe('custom-token.services', () => {
 	const backendCanisterMock = mock<BackendCanister>();
 	const ledgerCanisterMock = mock<IcrcLedgerCanister>();
