@@ -7,10 +7,6 @@ import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { nonNullish } from '@dfinity/utils';
 
-/**
- * ckETH
- */
-
 export const IC_CKETH_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKETH_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
 	'ss2fx-dyaaa-aaaar-qacoq-cai';
