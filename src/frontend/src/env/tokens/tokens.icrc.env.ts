@@ -21,7 +21,7 @@ const additionalIcrcTokensParsed = EnvAdditionalIcrcTokensSchema.safeParse(
 	)
 );
 
-const additionalIcrcTokens = additionalIcrcTokensParsed.success
+export const additionalIcrcTokens = additionalIcrcTokensParsed.success
 	? additionalIcrcTokensParsed.data
 	: {};
 
