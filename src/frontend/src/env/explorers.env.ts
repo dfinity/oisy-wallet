@@ -21,7 +21,7 @@ const EXPLORER_URLS = {
 	ARBITRUM: 'https://arbiscan.io',
 	ARBITRUM_SEPOLIA: 'https://sepolia.arbiscan.io',
 	KASPA_MAINNET: 'https://explorer.kaspa.org',
-	KASPA_TESTNET: 'https://explorer-tn.kaspa.org'
+	KASPA_TESTNET: 'https://explorer-tn10.kaspa.org'
 };
 
 export const {

@@ -11,6 +11,7 @@
 		networkEthereum,
 		networkEvm,
 		networkICP,
+		networkKaspa,
 		networkSolana
 	} from '$lib/derived/network.derived';
 	import { pageToken, pageTokenToggleable } from '$lib/derived/page-token.derived';
@@ -60,7 +61,9 @@
 					? modalStore.openBtcToken
 					: $networkSolana
 						? modalStore.openSolToken
-						: () => {};
+						: $networkKaspa
+							? modalStore.openKaspaToken
+							: () => {};
 		fn({
 			id: openModalId,
 			data: fromRoute

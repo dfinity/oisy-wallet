@@ -11,11 +11,13 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
+	import KaspaTransactions from '$kaspa/components/transactions/KaspaTransactions.svelte';
 	import {
 		networkBitcoin,
 		networkEthereum,
 		networkEvm,
 		networkICP,
+		networkKaspa,
 		networkSolana
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
@@ -84,5 +86,7 @@
 		<EthTransactions />
 	{:else if $networkSolana}
 		<SolTransactions />
+	{:else if $networkKaspa}
+		<KaspaTransactions />
 	{/if}
 {/if}
