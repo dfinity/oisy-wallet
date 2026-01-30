@@ -3,7 +3,7 @@
 	import { type Snippet, untrack } from 'svelte';
 	import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 	import { allUtxosStore } from '$btc/stores/all-utxos.store';
-import {
+	import {
 		BITCOIN_CANISTER_IDS,
 		IC_CKBTC_MINTER_CANISTER_ID
 	} from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
