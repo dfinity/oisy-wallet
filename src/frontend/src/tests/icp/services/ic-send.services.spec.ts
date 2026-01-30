@@ -15,9 +15,9 @@ import {
 } from '$icp/services/ck.services';
 import { sendDip20, sendIc, sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import type { IcTransferParams } from '$icp/types/ic-send';
+import * as accountUtils from '$icp/utils/account.utils';
 import * as icrcAccountUtils from '$icp/utils/icrc-account.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
-import * as accountUtils from '$lib/utils/account.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import en from '$tests/mocks/i18n.mock';
 import {
