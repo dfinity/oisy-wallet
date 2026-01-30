@@ -14,6 +14,7 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { isEthAddress } from '$eth/utils/account.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -47,7 +48,6 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-    import {isEthAddress} from "$eth/utils/account.utils";
 
 	interface Props {
 		nativeEthereumToken: Token;
