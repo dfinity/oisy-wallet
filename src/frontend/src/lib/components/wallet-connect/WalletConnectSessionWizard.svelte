@@ -7,16 +7,14 @@
 	interface Props {
 		currentStep: WizardStep<WizardStepsWalletConnect> | undefined;
 		onConnect: (uri: string) => void;
-		onApprove: () => void;
-		onReject: () => void;
 	}
 
-	let { currentStep, onConnect, onApprove, onReject }: Props = $props();
+	let { currentStep, onConnect }: Props = $props();
 </script>
 
 {#key currentStep?.name}
 	{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
-		<WalletConnectReview {onApprove} onCancel={onReject} {onReject} />
+		<WalletConnectReview />
 	{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
 		<WalletConnectForm {onConnect} />
 	{/if}

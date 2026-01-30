@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Spinner } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
@@ -11,17 +12,17 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
+	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { walletConnectProposalStore } from '$lib/stores/wallet-connect.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import {
+		walletConnectListenerStore,
+		walletConnectProposalStore
+	} from '$lib/stores/wallet-connect.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	interface Props {
-		onApprove: () => void;
-		onReject: () => void;
-		onCancel: () => void;
-	}
-
-	let { onApprove, onReject, onCancel }: Props = $props();
+	let listener = $derived($walletConnectListenerStore);
 
 	let proposal = $derived($walletConnectProposalStore);
 
@@ -30,7 +31,6 @@
 	let approve = $derived(acceptedContext(proposal?.verifyContext));
 
 	// Display a cancel button after a while if the WalletConnect initialization never resolves
-
 	let timer = $state<NodeJS.Timeout | undefined>();
 	let displayCancel = $state(false);
 
@@ -44,6 +44,88 @@
 		clearTimeout(timer);
 		timer = undefined;
 	});
+
+	const resetListener = () => {
+		walletConnectListenerStore.reset();
+	};
+
+	const close = () => modalStore.close();
+
+	const resetAndClose = () => {
+		resetListener();
+		close();
+	};
+
+	const answer = async ({
+		callback,
+		toast
+	}: {
+		callback: ((proposal: WalletKitTypes.SessionProposal) => Promise<void>) | undefined;
+		toast?: () => void;
+	}) => {
+		if (isNullish(listener) || isNullish(callback)) {
+			toastsError({
+				msg: { text: $i18n.wallet_connect.error.no_connection_opened }
+			});
+
+			close();
+			return;
+		}
+
+		if (isNullish(proposal)) {
+			toastsError({
+				msg: { text: $i18n.wallet_connect.error.no_session_approval }
+			});
+
+			close();
+			return;
+		}
+
+		busy.start();
+
+		try {
+			await callback(proposal);
+
+			toast?.();
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.wallet_connect.error.unexpected },
+				err
+			});
+
+			resetListener();
+		}
+
+		busy.stop();
+
+		close();
+	};
+
+	const onApprove = async () =>
+		await answer({
+			callback: listener?.approveSession,
+			toast: () =>
+				toastsShow({
+					text: $i18n.wallet_connect.info.connected,
+					level: 'success',
+					duration: 2000
+				})
+		});
+
+	const onReject = async () =>
+		await answer({
+			callback: async () => {
+				if (nonNullish(proposal)) {
+					await listener?.rejectSession(proposal);
+				}
+
+				resetAndClose();
+			}
+		});
+
+	const onCancel = async () => {
+		await onReject();
+	};
 </script>
 
 {#if nonNullish(proposal) && nonNullish(params)}
