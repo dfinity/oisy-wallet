@@ -57,8 +57,7 @@ export const isInvalidDestinationIc = ({
 	}
 
 	if (nonNullish(networkId) && isNetworkIdEthereum(networkId)) {
-		return !
-      (destination);
+		return !isEthAddress(destination);
 	}
 
 	if (isTokenIcrc({ standard: tokenStandard }) || isTokenIcNft({ standard: tokenStandard })) {
