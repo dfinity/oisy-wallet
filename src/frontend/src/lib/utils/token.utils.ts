@@ -1,7 +1,7 @@
 import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
 	ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS
-} from '$env/networks/networks.icrc.env';
+} from '$env/tokens/tokens-icp/tokens.icp.ck.env';
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
