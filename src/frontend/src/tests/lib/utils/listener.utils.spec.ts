@@ -8,9 +8,9 @@ import {
 	BNB_MAINNET_TOKEN,
 	BNB_TESTNET_TOKEN
 } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
-import { CKBTC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
-import { CKERC20_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icp/tokens.icp.ck.erc20.env';
-import { CKETH_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
+import { CKBTC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { CKERC20_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
+import { CKETH_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';

@@ -1,7 +1,7 @@
 import {
 	IC_CKBTC_INDEX_CANISTER_ID,
 	IC_CKBTC_LEDGER_CANISTER_ID
-} from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import type { IcCanisters, IcCkToken, IcToken } from '$icp/types/ic-token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIcrcAccount } from '$tests/mocks/identity.mock';

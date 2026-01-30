@@ -1,4 +1,4 @@
-import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icp/tokens.icp.ck.env';
+import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcp } from '$icp/utils/icrc.utils';
 
