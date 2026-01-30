@@ -19,10 +19,6 @@ import {
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
 import {
-	IC_CKBTC_LEDGER_CANISTER_ID,
-        	IC_CKETH_LEDGER_CANISTER_ID
-} from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
-import {
 	BTC_MAINNET_TOKEN,
 	BTC_MAINNET_TOKEN_ID,
 	BTC_REGTEST_TOKEN_ID,
