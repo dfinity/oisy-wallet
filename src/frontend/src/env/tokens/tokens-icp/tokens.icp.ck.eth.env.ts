@@ -33,9 +33,8 @@ import type { NetworkEnvironment } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { nonNullish } from '@dfinity/utils';
 
-/**
- * ckETH
- */
+
+
 
 export const IC_CKETH_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKETH_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
@@ -121,86 +120,16 @@ export const CKETH_LEDGER_CANISTER_IDS: NonEmptyArray<CanisterIdText> = [
 	...CKETH_LEDGER_CANISTER_TESTNET_IDS
 ];
 
-/**
- * ckERC20
- */
 
-export const LOCAL_CKUSDC_LEDGER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKUSDC_LEDGER_CANISTER_ID as OptionCanisterIdText;
 
-export const LOCAL_CKUSDC_INDEX_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKUSDC_INDEX_CANISTER_ID as OptionCanisterIdText;
 
-const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
-	LOCAL &&
-	nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) &&
-	nonNullish(LOCAL_CKUSDC_INDEX_CANISTER_ID) &&
-	nonNullish(LOCAL_CKETH_MINTER_CANISTER_ID)
-		? {
-				ledgerCanisterId: LOCAL_CKUSDC_LEDGER_CANISTER_ID,
-				indexCanisterId: LOCAL_CKUSDC_INDEX_CANISTER_ID,
-				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
-				exchangeCoinId: 'ethereum',
-				twinToken: SEPOLIA_USDC_TOKEN,
-				...(nonNullish(LOCAL_CKETH_LEDGER_CANISTER_ID) && {
-					feeLedgerCanisterId: LOCAL_CKETH_LEDGER_CANISTER_ID
-				})
-			}
-		: undefined;
 
-const mapCkErc20Data = ({
-	ckErc20Tokens,
-	minterCanisterId,
-	ledgerCanisterId,
-	env
-}: {
-	ckErc20Tokens: EnvCkErc20Tokens;
-	minterCanisterId: OptionCanisterIdText;
-	ledgerCanisterId: OptionCanisterIdText;
-	env: NetworkEnvironment;
-}): Record<EnvTokenSymbol, Omit<IcCkInterface, 'twinToken' | 'position'>> =>
-	Object.entries(ckErc20Tokens).reduce(
-		(acc, [key, value]) => ({
-			...acc,
-			...((STAGING || BETA || PROD) &&
-				nonNullish(value) &&
-				nonNullish(minterCanisterId) && {
-					[key]: {
-						...value,
-						minterCanisterId,
-						exchangeCoinId: 'ethereum',
-						explorerUrl: `${env === 'testnet' ? CKETH_SEPOLIA_EXPLORER_URL : CKETH_EXPLORER_URL}/${value.ledgerCanisterId}`,
-						...(nonNullish(ledgerCanisterId) && {
-							feeLedgerCanisterId: ledgerCanisterId
-						})
-					}
-				})
-		}),
-		{}
-	);
 
-const CKERC20_STAGING_DATA = mapCkErc20Data({
-	ckErc20Tokens: ckErc20Staging,
-	minterCanisterId: STAGING_CKETH_MINTER_CANISTER_ID,
-	ledgerCanisterId: STAGING_CKETH_LEDGER_CANISTER_ID,
-	env: 'testnet'
-});
 
-const CKERC20_PRODUCTION_DATA = mapCkErc20Data({
-	ckErc20Tokens: ckErc20Production,
-	minterCanisterId: IC_CKETH_MINTER_CANISTER_ID,
-	ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
-	env: 'mainnet'
-});
 
-const CKUSDC_STAGING_DATA: IcCkInterface | undefined = nonNullish(
-	CKERC20_STAGING_DATA?.ckSepoliaUSDC
-)
-	? {
-			...CKERC20_STAGING_DATA.ckSepoliaUSDC,
-			twinToken: SEPOLIA_USDC_TOKEN
-		}
-	: undefined;
+
+
+
 
 
 
