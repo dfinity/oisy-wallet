@@ -4,15 +4,17 @@ import {
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	ICRC_CK_BTC_TOKENS
 } from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
-import { CKERC20_LEDGER_CANISTER_TESTNET_IDS } from '$env/tokens/tokens-icp/tokens.icp.ck.erc20.env';
+import {
+	CKERC20_LEDGER_CANISTER_TESTNET_IDS,
+	CKUSDC_IC_DATA,
+	IC_CKUSDC_LEDGER_CANISTER_ID,
+	IC_CKUSDT_LEDGER_CANISTER_ID,
+	ICRC_CK_ERC20_TOKENS
+} from '$env/tokens/tokens-icp/tokens.icp.ck.erc20.env';
 import {
 	CKETH_IC_DATA,
 	CKETH_LEDGER_CANISTER_TESTNET_IDS,
-	CKUSDC_IC_DATA,
 	IC_CKETH_LEDGER_CANISTER_ID,
-	IC_CKUSDC_LEDGER_CANISTER_ID,
-	IC_CKUSDT_LEDGER_CANISTER_ID,
-	ICRC_CK_ERC20_TOKENS,
 	ICRC_CK_ETH_TOKENS
 } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
