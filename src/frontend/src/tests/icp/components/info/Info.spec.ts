@@ -1,6 +1,6 @@
-import { CKERC20_LEDGER_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
+import { CKERC20_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icp/tokens.icp.ck.erc20.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
