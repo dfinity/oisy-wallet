@@ -3,7 +3,7 @@ import NftHero from '$lib/components/nfts/NftHero.svelte';
 import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 import { currentLanguage } from '$lib/derived/i18n.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { MediaStatusEnum } from '$lib/enums/media-status';
 import { extractMediaUrls } from '$lib/services/url.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
@@ -151,7 +151,7 @@ describe('NftHero', () => {
 				nft: {
 					...mockValidErc1155Nft,
 					thumbnailUrl,
-					mediaStatus: { ...mockValidErc1155Nft.mediaStatus, thumbnail: NftMediaStatusEnum.OK }
+					mediaStatus: { ...mockValidErc1155Nft.mediaStatus, thumbnail: MediaStatusEnum.OK }
 				}
 			}
 		});

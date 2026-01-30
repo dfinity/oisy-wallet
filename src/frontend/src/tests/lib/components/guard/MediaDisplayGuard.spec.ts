@@ -4,7 +4,7 @@ import {
 	NFT_PLACEHOLDER_INVALID,
 	NFT_PLACEHOLDER_UNSUPPORTED
 } from '$lib/constants/test-ids.constants';
-import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { MediaStatusEnum } from '$lib/enums/media-status';
 import { i18n } from '$lib/stores/i18n.store';
 import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -15,7 +15,7 @@ describe('MediaDisplayGuard', () => {
 	const mockOnConsentReview = vi.fn();
 	const params = {
 		type: 'card' as const,
-		mediaStatus: NftMediaStatusEnum.OK,
+		mediaStatus: MediaStatusEnum.OK,
 		showMessage: true,
 		onConsentReview: mockOnConsentReview,
 		children: mockSnippet
@@ -108,7 +108,7 @@ describe('MediaDisplayGuard', () => {
 			...params,
 			hasConsent: true,
 			showMessage: false,
-			mediaStatus: NftMediaStatusEnum.INVALID_DATA
+			mediaStatus: MediaStatusEnum.INVALID_DATA
 		});
 
 		const placeholder = getByTestId(NFT_PLACEHOLDER_INVALID);
@@ -121,7 +121,7 @@ describe('MediaDisplayGuard', () => {
 			...params,
 			hasConsent: true,
 			showMessage: false,
-			mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
+			mediaStatus: MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
 		});
 
 		const placeholder = getByTestId(NFT_PLACEHOLDER_FILESIZE);
@@ -134,7 +134,7 @@ describe('MediaDisplayGuard', () => {
 			...params,
 			hasConsent: true,
 			showMessage: false,
-			mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE
+			mediaStatus: MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE
 		});
 
 		const placeholder = getByTestId(NFT_PLACEHOLDER_UNSUPPORTED);

@@ -2,7 +2,7 @@ import {
 	GLDT_LEDGER_CANISTER_ID,
 	VCHF_LEDGER_CANISTER_ID,
 	VEUR_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { GOLDAO_LEDGER_CANISTER_ID } from '$env/tokens/tokens.sns.env';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import type { Token } from '$lib/types/token';
