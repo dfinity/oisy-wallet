@@ -4,7 +4,7 @@ import {
 	FORSETISCN_LEDGER_CANISTER_ID,
 	GHOSTNODE_LEDGER_CANISTER_ID,
 	ICONFUCIUS_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+} from '$env/tokens/tokens-icp/tokens.icrc.additional.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type {
 	IcCkInterface,
