@@ -3,20 +3,20 @@ import {
 	CKBTC_LEDGER_CANISTER_TESTNET_IDS,
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	ICRC_CK_BTC_TOKENS
-} from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import {
 	CKERC20_LEDGER_CANISTER_TESTNET_IDS,
 	CKUSDC_IC_DATA,
 	IC_CKUSDC_LEDGER_CANISTER_ID,
 	IC_CKUSDT_LEDGER_CANISTER_ID,
 	ICRC_CK_ERC20_TOKENS
-} from '$env/tokens/tokens-icp/tokens.icp.ck.erc20.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
 import {
 	CKETH_IC_DATA,
 	CKETH_LEDGER_CANISTER_TESTNET_IDS,
 	IC_CKETH_LEDGER_CANISTER_ID,
 	ICRC_CK_ETH_TOKENS
-} from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcInterface } from '$icp/types/ic-token';
 import { nonNullish } from '@dfinity/utils';

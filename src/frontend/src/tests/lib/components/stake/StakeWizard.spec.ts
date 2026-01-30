@@ -1,4 +1,4 @@
-import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icrc.additional.env';
+import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import {
 	GLDT_STAKE_CONTEXT_KEY,
 	initGldtStakeStore,

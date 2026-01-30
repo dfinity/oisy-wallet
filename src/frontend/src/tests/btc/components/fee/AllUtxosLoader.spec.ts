@@ -6,7 +6,7 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	BITCOIN_CANISTER_IDS,
 	IC_CKBTC_MINTER_CANISTER_ID
-} from '$env/tokens/tokens-icp/tokens.icp.ck.btc.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';

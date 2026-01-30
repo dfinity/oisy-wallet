@@ -28,7 +28,7 @@ import {
 	LOCAL_CKETH_MINTER_CANISTER_ID,
 	STAGING_CKETH_LEDGER_CANISTER_ID,
 	STAGING_CKETH_MINTER_CANISTER_ID
-} from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { ckErc20Production, ckErc20Staging } from '$env/tokens/tokens.ckerc20.env';
 import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';

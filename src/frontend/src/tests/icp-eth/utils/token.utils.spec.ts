@@ -4,7 +4,7 @@ import {
 	GLDT_LEDGER_CANISTER_ID,
 	VCHF_LEDGER_CANISTER_ID,
 	VEUR_LEDGER_CANISTER_ID
-} from '$env/tokens/tokens-icp/tokens.icrc.additional.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';

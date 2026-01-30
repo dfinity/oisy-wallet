@@ -1,5 +1,5 @@
 import type { TokenSymbol } from '$declarations/gldt_stake/gldt_stake.did';
-import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icrc.additional.env';
+import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as gldtStakeApi from '$icp/api/gldt_stake.api';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';

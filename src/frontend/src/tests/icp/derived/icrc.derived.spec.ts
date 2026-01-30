@@ -1,4 +1,4 @@
-import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icp/tokens.icp.ck.env';
+import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import * as tokensIcEnv from '$env/tokens/tokens.ic.env';
 import {
 	allKnownIcrcTokensLedgerCanisterIds,
