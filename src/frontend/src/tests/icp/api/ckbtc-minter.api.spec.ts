@@ -1,4 +1,4 @@
-import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
 import {
 	estimateFee,
 	getBtcAddress,

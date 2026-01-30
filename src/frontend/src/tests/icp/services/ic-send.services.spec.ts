@@ -1,9 +1,7 @@
 import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
-import {
-	CKERC20_LEDGER_CANISTER_IDS,
-	IC_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { CKERC20_LEDGER_CANISTER_IDS } from '$env/networks/networks.icrc.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
 import {
 	icrc1Transfer as icrc1TransferIcp,
 	transfer as transferIcp

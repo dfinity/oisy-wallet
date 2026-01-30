@@ -3,7 +3,7 @@ import {
 	IC_CKETH_INDEX_CANISTER_ID,
 	IC_CKETH_LEDGER_CANISTER_ID,
 	IC_CKETH_MINTER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+} from '$env/tokens/tokens-icp/tokens.icp.ck.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { CanisterInternalError } from '$lib/canisters/errors';

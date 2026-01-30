@@ -4,13 +4,13 @@
 	import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 	import { allUtxosStore } from '$btc/stores/all-utxos.store';
 	import {
-		BITCOIN_CANISTER_IDS,
-		IC_CKBTC_MINTER_CANISTER_ID
+		BITCOIN_CANISTER_IDS
 	} from '$env/networks/networks.icrc.env';
 	import { getUtxosQuery } from '$icp/api/bitcoin.api';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { NetworkId } from '$lib/types/network';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
+	import {IC_CKBTC_MINTER_CANISTER_ID} from "$env/tokens/tokens-icp/tokens.icp.ck.eth.env";
 
 	interface Props {
 		source?: string;
