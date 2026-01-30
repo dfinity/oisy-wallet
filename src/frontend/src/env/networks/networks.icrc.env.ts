@@ -3,7 +3,6 @@ import {
 	ICRC_CK_TOKENS,
 	PUBLIC_ICRC_TOKENS
 } from '$env/tokens/tokens-icp/tokens.icp.ck.env';
-import { ADDITIONAL_ICRC_TOKENS, TICRC1_LEDGER_CANISTER_ID } from '$env/tokens/tokens.icrc.env';
 import type { IcInterface } from '$icp/types/ic-token';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
