@@ -58,6 +58,10 @@ const ADDITIONAL_ICRC_TOKENS: IcInterface[] = Object.values(
 	ADDITIONAL_ICRC_PRODUCTION_DATA ?? {}
 ).filter(nonNullish);
 
+/**
+ * All ICRC tokens data
+ */
+
 export const ICRC_TOKENS: IcInterface[] = [
 	...PUBLIC_ICRC_TOKENS,
 	...ADDITIONAL_ICRC_TOKENS,
