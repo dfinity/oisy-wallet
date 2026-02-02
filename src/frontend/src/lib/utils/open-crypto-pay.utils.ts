@@ -15,7 +15,7 @@ import type {
 	PayableTokenWithFees,
 	PaymentMethodData,
 	PrepareTokensParams,
-	ValidatedDFXPaymentData
+	ValidatedEthPaymentData
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
@@ -246,7 +246,7 @@ export const validateDecodedData = ({
 	token: PayableTokenWithConvertedAmount;
 	amount: bigint;
 	uri: string;
-}): ValidatedDFXPaymentData => {
+}): ValidatedEthPaymentData => {
 	const { feeData, estimatedGasLimit } = token.fee ?? {};
 
 	if (
@@ -314,7 +314,7 @@ export const validateNativeTransfer = ({
 	maxPriorityFeePerGas: bigint;
 	estimatedGasLimit: bigint;
 	uri: string;
-}): ValidatedDFXPaymentData => {
+}): ValidatedEthPaymentData => {
 	const { functionName, destination } = decodedData;
 	const dfxValue = getERC681Value(uri);
 
@@ -369,7 +369,7 @@ export const validateERC20Transfer = ({
 	maxPriorityFeePerGas: bigint;
 	estimatedGasLimit: bigint;
 	uri: string;
-}): ValidatedDFXPaymentData => {
+}): ValidatedEthPaymentData => {
 	const { destination, address } = decodedData;
 	const dfxValue = getERC681Value(uri);
 
