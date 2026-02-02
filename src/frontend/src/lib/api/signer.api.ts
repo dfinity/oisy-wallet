@@ -2,7 +2,8 @@ import type { BtcAddress } from '$btc/types/address';
 import type {
 	BitcoinNetwork,
 	EthSignTransactionRequest,
-	SendBtcResponse
+	SendBtcResponse,
+	SignBtcResponse
 } from '$declarations/signer/signer.did';
 import type { EthAddress } from '$eth/types/address';
 import { SignerCanister } from '$lib/canisters/signer.canister';
@@ -10,7 +11,6 @@ import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
-	SignBtcResponse,
 	SignWithSchnorrParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';

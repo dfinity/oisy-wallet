@@ -5,14 +5,13 @@ import type { BtcAddress } from '$btc/types/address';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
-import type { SendBtcResponse } from '$declarations/signer/signer.did';
+import type { SendBtcResponse, SignBtcResponse } from '$declarations/signer/signer.did';
 import { getPendingTransactionUtxoTxIds, txidStringToUint8Array } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
-import { sendBtc as sendBtcApi, signBtc as signBtcApi } from '$lib/api/signer.api';
+import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { SignBtcResponse } from '$lib/types/api';
 import type { Amount } from '$lib/types/send';
 import { invalidAmount } from '$lib/utils/input.utils';
 import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
@@ -30,13 +29,14 @@ interface CommonBtcServiceParams {
 	onProgress?: () => void;
 }
 
+export type SignBtcParams = CommonBtcServiceParams & {
+	satoshisAmount: bigint;
+};
+
 export type SendBtcParams = CommonBtcServiceParams & {
 	amount: Amount;
 	source: BtcAddress;
 };
-
-// TODO: update this type when btc_caller_sign is available
-export type SignBtcParams = SendBtcParams;
 
 /**
  * This function handles the validation errors thrown by the validateUtxosForSend function
@@ -234,11 +234,10 @@ export const signBtc = async ({
 	utxosFee,
 	network,
 	identity,
-	amount,
+	satoshisAmount,
 	destination
 }: SignBtcParams): Promise<SignBtcResponse> => {
 	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
-	const satoshisAmount = convertNumberToSatoshis({ amount });
 
 	return await signBtcApi({
 		identity,
