@@ -19,6 +19,7 @@
 		onSessionProposal,
 		onSessionRequest
 	} from '$lib/services/wallet-connect-handlers.services';
+	import { resetListener } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -70,10 +71,6 @@
 		}
 
 		resetListener();
-	};
-
-	const resetListener = () => {
-		listenerStore.reset();
 	};
 
 	const initListener = async (): Promise<OptionWalletConnectListener> => {
