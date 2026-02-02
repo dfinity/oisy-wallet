@@ -1,4 +1,6 @@
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { enrichEthEvmPayableToken } from '$eth/utils/eth-open-crypto-pay.utils';
+import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_EVENTS_KEYS } from '$lib/enums/plausible';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -227,3 +229,46 @@ export const extractQuoteData = (data: OpenCryptoPayResponse) => {
 		callback: data.callback
 	};
 };
+
+export const getPaymentUri = ({
+	callback,
+	quoteId,
+	network,
+	rawTransaction
+}: {
+	callback: string;
+	quoteId: string;
+	network: string;
+	rawTransaction: string;
+}): string => {
+	// By dfx documentation we need to replace 'cb' with 'tx' to get the transaction submission endpoint
+	const apiUrl = callback.replace('cb', 'tx');
+
+	return `${apiUrl}?quote=${quoteId}&method=${network}&hex=${rawTransaction}`;
+};
+
+export const getOpenCryptoPayBaseTrackingParams = ({
+	token,
+	providerData
+}: {
+	token?: PayableTokenWithConvertedAmount;
+	providerData?: OpenCryptoPayResponse;
+}) => ({
+	event_context: PLAUSIBLE_EVENT_CONTEXTS.OPEN_CRYPTOPAY,
+	event_subcontext: PLAUSIBLE_EVENT_CONTEXTS.DFX,
+	event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.PRICE,
+	...(nonNullish(providerData) && {
+		event_value: `${providerData.requestedAmount.amount} ${providerData.requestedAmount.asset}`
+	}),
+	...(nonNullish(token) && {
+		token_symbol: token.symbol,
+		token_network: token.network.name,
+		token_name: token.name,
+		token_standard: token.standard.code,
+		token_id: `${token.id.toString()}`,
+		token_usd_value: `${token.amountInUSD}`,
+		...(isTokenErc20(token) && {
+			token_address: token.address
+		})
+	})
+});

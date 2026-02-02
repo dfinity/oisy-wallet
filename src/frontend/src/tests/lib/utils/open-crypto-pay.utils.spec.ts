@@ -1,5 +1,6 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_EVENTS_KEYS } from '$lib/enums/plausible';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -7,6 +8,7 @@ import type { Network } from '$lib/types/network';
 import type {
 	Address,
 	OpenCryptoPayResponse,
+	PayableTokenWithConvertedAmount,
 	PayableTokenWithFees,
 	PaymentMethodData
 } from '$lib/types/open-crypto-pay';
@@ -17,6 +19,8 @@ import {
 	enrichTokensWithUsdAndBalance,
 	extractQuoteData,
 	formatAddress,
+	getOpenCryptoPayBaseTrackingParams,
+	getPaymentUri,
 	mapTokenToPayableToken,
 	prepareBasePayableTokens
 } from '$lib/utils/open-crypto-pay.utils';
@@ -1358,6 +1362,138 @@ describe('open-crypto-pay.utils', () => {
 			const result = extractQuoteData(response);
 
 			expect(result.quoteId).toBe('quote123');
+		});
+	});
+
+	describe('getPaymentUri', () => {
+		it('should construct payment URI with cb replaced by tx', () => {
+			const result = getPaymentUri({
+				callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123',
+				quoteId: 'quote123',
+				network: 'Ethereum',
+				rawTransaction: '0xabc123'
+			});
+
+			expect(result).toBe(
+				'https://api.dfx.swiss/v1/lnurlp/tx/pl_test123?quote=quote123&method=Ethereum&hex=0xabc123'
+			);
+		});
+
+		it('should replace only cb with tx in callback URL', () => {
+			const result = getPaymentUri({
+				callback: 'https://api.test.com/cb/callback/cb',
+				quoteId: 'q1',
+				network: 'Polygon',
+				rawTransaction: '0x123'
+			});
+
+			expect(result).toBe('https://api.test.com/tx/callback/cb?quote=q1&method=Polygon&hex=0x123');
+		});
+	});
+
+	describe('getOpenCryptoPayBaseTrackingParams', () => {
+		const mockProviderData: OpenCryptoPayResponse = {
+			id: 'pl_test123',
+			tag: 'payRequest',
+			callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123',
+			minSendable: 1000,
+			maxSendable: 10000,
+			metadata: '[]',
+			requestedAmount: {
+				asset: 'CHF',
+				amount: '100'
+			},
+			transferAmounts: [],
+			quote: {
+				id: 'quote123',
+				expiration: '2025-12-31T23:59:59.000Z',
+				payment: 'payment123'
+			}
+		};
+
+		const payableTokenData = {
+			amount: '100',
+			minFee: 0.0001,
+			tokenNetwork: 'Ethereum',
+			fee: {
+				feeInWei: 21000000000000000n,
+				feeData: {
+					maxFeePerGas: 12n,
+					maxPriorityFeePerGas: 7n
+				},
+				estimatedGasLimit: 21000n
+			},
+			amountInUSD: 100,
+			feeInUSD: 42,
+			sumInUSD: 142
+		};
+
+		const mockToken: PayableTokenWithConvertedAmount = {
+			...ETHEREUM_TOKEN,
+			...payableTokenData
+		};
+
+		const mockErc20Token: PayableTokenWithConvertedAmount = {
+			...USDC_TOKEN,
+			...payableTokenData
+		};
+
+		it('should return base tracking params without token and providerData', () => {
+			const result = getOpenCryptoPayBaseTrackingParams({});
+
+			expect(result).toEqual({
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.OPEN_CRYPTOPAY,
+				event_subcontext: PLAUSIBLE_EVENT_CONTEXTS.DFX,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.PRICE
+			});
+		});
+
+		it('should include event_value when providerData is provided', () => {
+			const result = getOpenCryptoPayBaseTrackingParams({
+				providerData: mockProviderData
+			});
+
+			expect(result).toEqual({
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.OPEN_CRYPTOPAY,
+				event_subcontext: PLAUSIBLE_EVENT_CONTEXTS.DFX,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.PRICE,
+				event_value: '100 CHF'
+			});
+		});
+
+		it('should include token details when token is provided', () => {
+			const result = getOpenCryptoPayBaseTrackingParams({
+				token: mockToken
+			});
+
+			expect(result).toEqual({
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.OPEN_CRYPTOPAY,
+				event_subcontext: PLAUSIBLE_EVENT_CONTEXTS.DFX,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.PRICE,
+				token_symbol: 'ETH',
+				token_network: mockToken.network.name,
+				token_name: 'Ethereum',
+				token_standard: 'ethereum',
+				token_id: mockToken.id.toString(),
+				token_usd_value: '100'
+			});
+		});
+
+		it('should include token address for ERC20 tokens', () => {
+			const result = getOpenCryptoPayBaseTrackingParams({
+				token: mockErc20Token
+			});
+
+			expect(result.token_address).toBe(USDC_TOKEN.address);
+			expect(result.token_standard).toBe('erc20');
+		});
+
+		it('should not include token address for non-ERC20 tokens', () => {
+			const result = getOpenCryptoPayBaseTrackingParams({
+				token: mockToken
+			});
+
+			expect(result).not.toHaveProperty('token_address');
 		});
 	});
 });

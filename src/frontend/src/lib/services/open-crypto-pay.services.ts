@@ -21,7 +21,7 @@ import type {
 	TransactionBaseParams,
 	ValidatedEthPaymentData
 } from '$lib/types/open-crypto-pay';
-import { decodeLNURL, extractQuoteData } from '$lib/utils/open-crypto-pay.utils';
+import { decodeLNURL, extractQuoteData, getPaymentUri } from '$lib/utils/open-crypto-pay.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { isEmptyString, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -149,23 +149,6 @@ const fetchPaymentUri = async ({
 	const { uri } = await fetchOpenCryptoPay<{ uri: string }>(url);
 
 	return uri;
-};
-
-const getPaymentUri = ({
-	callback,
-	quoteId,
-	network,
-	rawTransaction
-}: {
-	callback: string;
-	quoteId: string;
-	network: string;
-	rawTransaction: string;
-}): string => {
-	// By dfx documentation we need to replace 'cb' with 'tx' to get the transaction submission endpoint
-	const apiUrl = callback.replace('cb', 'tx');
-
-	return `${apiUrl}?quote=${quoteId}&method=${network}&hex=${rawTransaction}`;
 };
 
 const preparePaymentTransaction = async ({
