@@ -273,36 +273,6 @@
 		}
 	};
 
-	const attached = new WeakSet<WalletConnectListener>();
-
-	const attachHandlers = (listener: WalletConnectListener) => {
-		if (attached.has(listener)) {
-			return;
-		}
-
-		attached.add(listener);
-
-		listener.sessionProposal(onSessionProposal);
-
-		listener.sessionDelete(onSessionDelete);
-
-		listener.sessionRequest(onSessionRequest);
-	};
-
-	const detachHandlers = (listener: WalletConnectListener) => {
-		if (!attached.has(listener)) {
-			return;
-		}
-
-		attached.delete(listener);
-
-		listener.offSessionProposal(onSessionProposal);
-
-		listener.offSessionDelete(onSessionDelete);
-
-		listener.offSessionRequest(onSessionRequest);
-	};
-
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		const newListener = await initListener();
 
@@ -310,7 +280,11 @@
 			return { result: 'error' };
 		}
 
-		attachHandlers(newListener);
+		newListener.attachHandlers({
+			onSessionProposal,
+			onSessionDelete,
+			onSessionRequest
+		});
 
 		try {
 			await newListener.pair(uri);
