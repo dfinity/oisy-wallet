@@ -23,15 +23,12 @@
 	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import {
-		walletConnectListenerStore as listenerStore,
-	} from '$lib/stores/wallet-connect.store';
+	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	let listener = $derived($listenerStore);
 
 	const modalId = Symbol();
-
 
 	const STEP_CONNECT: WizardStep<WizardStepsWalletConnect> = {
 		name: WizardStepsWalletConnect.CONNECT,
