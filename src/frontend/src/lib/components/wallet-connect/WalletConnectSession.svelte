@@ -32,7 +32,6 @@
 	} from '$lib/stores/wallet-connect.store';
 	import type {
 		OptionWalletConnectListener,
-		WalletConnectListener
 	} from '$lib/types/wallet-connect';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
