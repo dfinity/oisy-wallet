@@ -96,6 +96,7 @@
 	};
 
 	const resetListener = () => {
+
 		listenerStore.reset();
 	};
 
@@ -286,6 +287,9 @@
 		try {
 			await newListener.pair(uri);
 		} catch (err: unknown) {
+				newListener.detachHandlers()
+
+
 			resetListener();
 
 			toastsError({
