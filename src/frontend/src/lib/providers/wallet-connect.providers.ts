@@ -104,7 +104,7 @@ export class WalletConnectClient extends WalletConnectListener {
 		// During testing, we frequently encountered session approval failures with Uniswap due to the following reason:
 		// Unexpected error while communicating with WalletConnect. / No matching key. pairing: 12345c...
 		// The issue appears to be linked to incorrect cached information used by the WalletConnect library.
-		// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Wec3Wallet object.
+		// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Web3Wallet object.
 		clearLocalStorage();
 
 		const walletKit = await getWalletKit();
