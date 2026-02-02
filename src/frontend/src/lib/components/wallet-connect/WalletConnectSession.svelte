@@ -59,10 +59,6 @@
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
 
 	const close = () => modalStore.close();
-	const resetAndClose = () => {
-		resetListener();
-		close();
-	};
 
 	const disconnect = async () => {
 		await disconnectListener();
