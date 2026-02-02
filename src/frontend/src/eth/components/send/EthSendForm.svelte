@@ -6,6 +6,7 @@
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
+	import { isEthAddress } from '$eth/utils/account.utils';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -14,7 +15,6 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
-	import { isEthAddress } from '$lib/utils/account.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	interface Props {

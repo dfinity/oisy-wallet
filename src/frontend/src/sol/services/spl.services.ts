@@ -10,6 +10,7 @@ import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { hardenMetadata } from '$lib/utils/metadata.utils';
+import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
 import { getTokenInfo } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
@@ -125,7 +126,7 @@ const loadCustomTokensWithMetadata = async ({
 		const customTokens: SplCustomToken[] = await nonExistingTokens.reduce<
 			Promise<SplCustomToken[]>
 		>(async (acc, { symbol: oldSymbol, name: oldName, ...token }) => {
-			const { network, address } = token;
+			const { network, address, icon } = token;
 
 			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
@@ -153,12 +154,17 @@ const loadCustomTokensWithMetadata = async ({
 				return acc;
 			}
 
-			const newToken: SplCustomToken = {
+			const baseToken: SplCustomToken = {
 				...token,
 				owner,
 				symbol,
 				name,
-				...rest,
+				...rest
+			};
+
+			const newToken: SplCustomToken = {
+				...baseToken,
+				icon: icon ?? getCodebaseTokenIconPath({ token: baseToken }),
 				...(nonNullish(metadata) ? hardenMetadata(metadata) : {})
 			};
 

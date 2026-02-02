@@ -1,9 +1,15 @@
-import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { autoLoadIcrcToken, setCustomToken } from '$icp-eth/services/icrc-token.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS
+} from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -19,6 +25,10 @@ import { mock } from 'vitest-mock-extended';
 
 vi.mock('$app/environment', () => ({
 	browser: true
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
 }));
 
 describe('custom-token.services', () => {
@@ -271,9 +281,23 @@ describe('custom-token.services', () => {
 
 					expect(spyToastsError).not.toHaveBeenCalled();
 
-					expect(console.error).toHaveBeenCalledTimes(2);
-					expect(console.error).toHaveBeenNthCalledWith(1, err);
-					expect(console.error).toHaveBeenNthCalledWith(2, err);
+					expect(trackEvent).toHaveBeenCalledTimes(2);
+					expect(trackEvent).toHaveBeenNthCalledWith(1, {
+						name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+						metadata: {
+							event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+							event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+							error: err.message
+						}
+					});
+					expect(trackEvent).toHaveBeenNthCalledWith(2, {
+						name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+						metadata: {
+							event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+							event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+							error: err.message
+						}
+					});
 				}
 			);
 		});

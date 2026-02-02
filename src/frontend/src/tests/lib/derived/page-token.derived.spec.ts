@@ -1,3 +1,4 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
@@ -120,7 +121,7 @@ describe('page-token.derived', () => {
 		});
 
 		it('should return undefined when token is not found in any list', () => {
-			mockPage.mockToken({ ...ETHEREUM_TOKEN, name: 'non-existent-token' });
+			mockPage.mockToken({ ...USDC_TOKEN, address: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 		});
@@ -137,7 +138,7 @@ describe('page-token.derived', () => {
 
 		it('should return undefined when token network matches but name does not', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
-			mockPage.mockToken({ ...mockToken, name: 'non-existent-token' });
+			mockPage.mockToken({ ...mockToken, address: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 		});
@@ -158,7 +159,7 @@ describe('page-token.derived', () => {
 		it('should return undefined when page token is undefined', () => {
 			expect(get(pageTokenStandard)).toBeUndefined();
 
-			mockPage.mockToken({ ...ETHEREUM_TOKEN, name: 'non-existent-token' });
+			mockPage.mockToken({ ...USDC_TOKEN, address: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 
@@ -169,7 +170,7 @@ describe('page-token.derived', () => {
 
 			expect(get(pageToken)).toBeUndefined();
 
-			mockPage.mockToken({ ...mockValidErc20Token, name: 'non-existent-token' });
+			mockPage.mockToken({ ...mockValidErc20Token, address: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 		});
