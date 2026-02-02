@@ -6,6 +6,7 @@ import { erc20PrepareTransaction, ethPrepareTransaction } from '$eth/services/se
 import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { validateEthEvmTransfer } from '$eth/utils/eth-open-crypto-pay.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { signTransaction } from '$lib/api/signer.api';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
@@ -20,7 +21,6 @@ import type {
 	TransactionBaseParams,
 	ValidatedEthPaymentData
 } from '$lib/types/open-crypto-pay';
-import { validateEthEvmTransfer } from '$eth/utils/eth-open-crypto-pay.utils';
 import { decodeLNURL, extractQuoteData } from '$lib/utils/open-crypto-pay.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { isEmptyString, isNullish } from '@dfinity/utils';

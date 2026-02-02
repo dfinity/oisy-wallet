@@ -11,7 +11,10 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { PayableTokenWithConvertedAmount, PayableTokenWithFees } from '$lib/types/open-crypto-pay';
+import type {
+	PayableTokenWithConvertedAmount,
+	PayableTokenWithFees
+} from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
 import { certified } from '$tests/mocks/balances.mock';
