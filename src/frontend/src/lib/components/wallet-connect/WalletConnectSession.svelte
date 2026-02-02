@@ -7,11 +7,15 @@
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
 	import WalletConnectSessionModal from '$lib/components/wallet-connect/WalletConnectSessionModal.svelte';
+	import {
+		walletConnectReviewWizardSteps,
+		walletConnectWizardSteps
+	} from '$lib/config/wallet-connect.config';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.constants';
 	import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnectAuth } from '$lib/derived/modal.derived';
-	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
+	import type { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
@@ -26,17 +30,18 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import {walletConnectReviewWizardSteps, walletConnectWizardSteps} from "$lib/config/wallet-connect.config";
 
 	let listener = $derived($listenerStore);
 
 	const modalId = Symbol();
 
+	let onlyReview = $state(false);
 
-
-	let onlyReview = $state(false)
-
-	let steps = $derived<WizardSteps<WizardStepsWalletConnect>>(onlyReview ? walletConnectReviewWizardSteps({i18n:$i18n}) : walletConnectWizardSteps({i18n:$i18n}));
+	let steps = $derived<WizardSteps<WizardStepsWalletConnect>>(
+		onlyReview
+			? walletConnectReviewWizardSteps({ i18n: $i18n })
+			: walletConnectWizardSteps({ i18n: $i18n })
+	);
 
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
 
