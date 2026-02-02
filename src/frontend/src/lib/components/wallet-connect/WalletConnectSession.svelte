@@ -83,7 +83,7 @@
 				return;
 			}
 
-			detachHandlers(listener);
+			listener.detachHandlers();
 
 			await listener.disconnect();
 		} catch (err: unknown) {
