@@ -417,5 +417,5 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WalletConnectSessionModal onClose={resetAndClose} onConnect={userConnect} {steps} bind:modal />
+	<WalletConnectSessionModal onConnect={userConnect} {steps} bind:modal />
 {/if}
