@@ -25,6 +25,7 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import {resetListener} from "$lib/services/wallet-connect.services";
 
 	let listener = $derived($listenerStore);
 
@@ -77,9 +78,6 @@
 		resetListener();
 	};
 
-	const resetListener = () => {
-		listenerStore.reset();
-	};
 
 	const initListener = async (): Promise<OptionWalletConnectListener> => {
 		await disconnectListener();

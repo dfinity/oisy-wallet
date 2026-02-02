@@ -1,6 +1,7 @@
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener, WalletConnectListener } from '$lib/types/wallet-connect';
 import { isNullish } from '@dfinity/utils';
@@ -90,3 +91,7 @@ export const reject = (params: WalletConnectExecuteParams): Promise<ResultSucces
 		},
 		toastMsg: get(i18n).wallet_connect.error.request_rejected
 	});
+
+export const resetListener = () => {
+	walletConnectListenerStore.reset();
+};

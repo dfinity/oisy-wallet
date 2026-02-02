@@ -6,10 +6,10 @@
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
-		walletConnectListenerStore,
 		walletConnectProposalStore
 	} from '$lib/stores/wallet-connect.store';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import {resetListener} from "$lib/services/wallet-connect.services";
 
 	interface Props {
 		steps: WizardSteps<WizardStepsWalletConnect>;
@@ -24,7 +24,7 @@
 	let currentStep = $state<WizardStep<WizardStepsWalletConnect> | undefined>();
 
 	const onClose = () => {
-		closeModal(() => walletConnectListenerStore.reset());
+		closeModal(resetListener);
 	};
 </script>
 

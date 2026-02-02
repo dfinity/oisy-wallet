@@ -21,6 +21,7 @@
 		walletConnectProposalStore
 	} from '$lib/stores/wallet-connect.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import {resetListener} from "$lib/services/wallet-connect.services";
 
 	let listener = $derived($walletConnectListenerStore);
 
@@ -45,9 +46,6 @@
 		timer = undefined;
 	});
 
-	const resetListener = () => {
-		walletConnectListenerStore.reset();
-	};
 
 	const close = () => modalStore.close();
 
