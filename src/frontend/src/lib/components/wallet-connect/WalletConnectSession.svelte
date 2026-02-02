@@ -23,14 +23,11 @@
 	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import {
-		walletConnectListenerStore as listenerStore,
+	import { walletConnectListenerStore as listenerStore ,
 		walletConnectProposalStore as proposalStore
 	} from '$lib/stores/wallet-connect.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+			import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 		SESSION_REQUEST_SOL_SIGN_TRANSACTION
