@@ -12,6 +12,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
+	import { resetListener } from '$lib/services/wallet-connect.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -21,7 +22,6 @@
 		walletConnectProposalStore
 	} from '$lib/stores/wallet-connect.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {resetListener} from "$lib/services/wallet-connect.services";
 
 	let listener = $derived($walletConnectListenerStore);
 
@@ -45,7 +45,6 @@
 		clearTimeout(timer);
 		timer = undefined;
 	});
-
 
 	const close = () => modalStore.close();
 

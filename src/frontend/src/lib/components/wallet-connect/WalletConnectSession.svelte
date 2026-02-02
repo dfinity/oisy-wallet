@@ -19,16 +19,16 @@
 		onSessionProposal,
 		onSessionRequest
 	} from '$lib/services/wallet-connect-handlers.services';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { initialLoading } from '$lib/stores/loader.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
 	import {
 		connectListener,
 		disconnectListener,
 		resetListener
 	} from '$lib/services/wallet-connect.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { initialLoading } from '$lib/stores/loader.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
 
 	let listener = $derived($listenerStore);
 
