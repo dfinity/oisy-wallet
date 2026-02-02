@@ -4,11 +4,9 @@
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectSessionWizard from '$lib/components/wallet-connect/WalletConnectSessionWizard.svelte';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
+	import { resetListener } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {
-		walletConnectListenerStore,
-		walletConnectProposalStore
-	} from '$lib/stores/wallet-connect.store';
+	import { walletConnectProposalStore } from '$lib/stores/wallet-connect.store';
 	import { closeModal } from '$lib/utils/modal.utils';
 
 	interface Props {
@@ -24,7 +22,7 @@
 	let currentStep = $state<WizardStep<WizardStepsWalletConnect> | undefined>();
 
 	const onClose = () => {
-		closeModal(() => walletConnectListenerStore.reset());
+		closeModal(resetListener);
 	};
 </script>
 
