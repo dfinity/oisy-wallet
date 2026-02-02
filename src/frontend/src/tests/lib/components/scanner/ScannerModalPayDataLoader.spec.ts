@@ -2,6 +2,7 @@ import * as btcTokensDerived from '$btc/derived/tokens.derived';
 import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import * as btcUtxosUtils from '$btc/utils/btc-utxos.utils';
+import * as openCryptoPayEnv from '$env/open-crypto-pay.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import ScannerModalPayDataLoader from '$lib/components/scanner/ScannerModalPayDataLoader.svelte';
@@ -14,6 +15,8 @@ import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('ScannerModalPayDataLoader', () => {
+	vi.spyOn(openCryptoPayEnv, 'OCP_PAY_WITH_BTC_ENABLED', 'get').mockImplementation(() => true);
+
 	const mockEnabledMainnetBitcoinToken = (token?: Token) =>
 		vi
 			.spyOn(btcTokensDerived, 'enabledMainnetBitcoinToken', 'get')
