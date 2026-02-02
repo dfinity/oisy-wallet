@@ -14,16 +14,12 @@ export abstract class WalletConnectListener implements WebSocketListener {
 	abstract pair(uri: string): Promise<PairingTypes.Struct>;
 	abstract approveSession(proposal: WalletKitTypes.SessionProposal): Promise<void>;
 	abstract rejectSession(proposal: WalletKitTypes.SessionProposal): Promise<void>;
-	abstract sessionProposal(callback: (proposal: WalletKitTypes.SessionProposal) => void): void;
-	abstract sessionDelete(callback: () => void): void;
-	abstract sessionRequest(
-		callback: (request: WalletKitTypes.SessionRequest) => Promise<void>
-	): void;
-	abstract offSessionProposal(callback: (proposal: WalletKitTypes.SessionProposal) => void): void;
-	abstract offSessionDelete(callback: () => void): void;
-	abstract offSessionRequest(
-		callback: (request: WalletKitTypes.SessionRequest) => Promise<void>
-	): void;
+	abstract attachHandlers(handlers: {
+		onSessionProposal: (proposal: WalletKitTypes.SessionProposal) => void;
+		onSessionDelete: () => void;
+		onSessionRequest: (request: WalletKitTypes.SessionRequest) => Promise<void>;
+	}): void;
+	abstract detachHandlers(): void;
 	abstract rejectRequest(params: {
 		id: number;
 		topic: string;

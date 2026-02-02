@@ -30,10 +30,7 @@
 		walletConnectListenerStore as listenerStore,
 		walletConnectProposalStore as proposalStore
 	} from '$lib/stores/wallet-connect.store';
-	import type {
-		OptionWalletConnectListener,
-		WalletConnectListener
-	} from '$lib/types/wallet-connect';
+	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
@@ -83,7 +80,7 @@
 				return;
 			}
 
-			detachHandlers(listener);
+			listener.detachHandlers();
 
 			await listener.disconnect();
 		} catch (err: unknown) {
@@ -273,36 +270,6 @@
 		}
 	};
 
-	const attached = new WeakSet<WalletConnectListener>();
-
-	const attachHandlers = (listener: WalletConnectListener) => {
-		if (attached.has(listener)) {
-			return;
-		}
-
-		attached.add(listener);
-
-		listener.sessionProposal(onSessionProposal);
-
-		listener.sessionDelete(onSessionDelete);
-
-		listener.sessionRequest(onSessionRequest);
-	};
-
-	const detachHandlers = (listener: WalletConnectListener) => {
-		if (!attached.has(listener)) {
-			return;
-		}
-
-		attached.delete(listener);
-
-		listener.offSessionProposal(onSessionProposal);
-
-		listener.offSessionDelete(onSessionDelete);
-
-		listener.offSessionRequest(onSessionRequest);
-	};
-
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		const newListener = await initListener();
 
@@ -310,11 +277,17 @@
 			return { result: 'error' };
 		}
 
-		attachHandlers(newListener);
+		newListener.attachHandlers({
+			onSessionProposal,
+			onSessionDelete,
+			onSessionRequest
+		});
 
 		try {
 			await newListener.pair(uri);
 		} catch (err: unknown) {
+			newListener.detachHandlers();
+
 			resetListener();
 
 			toastsError({
@@ -364,7 +337,11 @@
 			listenerStore.set(newListener);
 
 			// Reattach handlers so incoming requests work after refresh
-			attachHandlers(newListener);
+			newListener.attachHandlers({
+				onSessionProposal,
+				onSessionDelete,
+				onSessionRequest
+			});
 
 			// Check for persisted sessions
 			const sessions = newListener.getActiveSessions();
