@@ -24,7 +24,7 @@
 	let currentStep = $state<WizardStep<WizardStepsWalletConnect> | undefined>();
 
 	const onClose = () => {
-		closeModal(() => walletConnectListenerStore.reset())
+		closeModal(() => walletConnectListenerStore.reset());
 	};
 </script>
 
