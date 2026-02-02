@@ -25,7 +25,7 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import {walletConnectReviewWizardStep, walletConnectWizardSteps} from "$lib/config/wallet-connect.config";
+	import {walletConnectReviewWizardSteps, walletConnectWizardSteps} from "$lib/config/wallet-connect.config";
 
 	let listener = $derived($listenerStore);
 
@@ -35,7 +35,7 @@
 
 	let onlyReview = $state(false)
 
-	let steps = $derived<WizardSteps<WizardStepsWalletConnect>>(onlyReview ? walletConnectReviewWizardStep({i18n:$i18n}) : walletConnectWizardSteps({i18n:$i18n}));
+	let steps = $derived<WizardSteps<WizardStepsWalletConnect>>(onlyReview ? walletConnectReviewWizardSteps({i18n:$i18n}) : walletConnectWizardSteps({i18n:$i18n}));
 
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
 
