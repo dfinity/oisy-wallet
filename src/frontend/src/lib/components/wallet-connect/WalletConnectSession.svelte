@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
+	import type { WizardModal, WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, untrack } from 'svelte';
@@ -25,22 +25,17 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import {walletConnectReviewWizardStep, walletConnectWizardSteps} from "$lib/config/wallet-connect.config";
 
 	let listener = $derived($listenerStore);
 
 	const modalId = Symbol();
 
-	const STEP_CONNECT: WizardStep<WizardStepsWalletConnect> = {
-		name: WizardStepsWalletConnect.CONNECT,
-		title: $i18n.wallet_connect.text.name
-	};
 
-	const STEP_REVIEW: WizardStep<WizardStepsWalletConnect> = {
-		name: WizardStepsWalletConnect.REVIEW,
-		title: $i18n.wallet_connect.text.session_proposal
-	};
 
-	let steps = $state<WizardSteps<WizardStepsWalletConnect>>([STEP_CONNECT, STEP_REVIEW]);
+	let onlyReview = $state(false)
+
+	let steps = $derived<WizardSteps<WizardStepsWalletConnect>>(onlyReview ? walletConnectReviewWizardStep({i18n:$i18n}) : walletConnectWizardSteps({i18n:$i18n}));
 
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
 
@@ -163,7 +158,7 @@
 		}
 
 		// No step connect here
-		steps = [STEP_REVIEW];
+		onlyReview = true;
 
 		// We open the WalletConnect auth modal on the review step
 		modalStore.openWalletConnectAuth(modalId);
