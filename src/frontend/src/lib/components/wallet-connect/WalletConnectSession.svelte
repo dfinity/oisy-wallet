@@ -25,6 +25,16 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import {
+		walletConnectListenerStore as listenerStore,
+		walletConnectProposalStore as proposalStore
+	} from '$lib/stores/wallet-connect.store';
+	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import {
+		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+		SESSION_REQUEST_SOL_SIGN_TRANSACTION
+	} from '$sol/constants/wallet-connect.constants';
 
 	let listener = $derived($listenerStore);
 
@@ -48,10 +58,6 @@
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
 
 	const close = () => modalStore.close();
-	const resetAndClose = () => {
-		resetListener();
-		close();
-	};
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -209,6 +215,8 @@
 		try {
 			await newListener.pair(uri);
 		} catch (err: unknown) {
+			newListener.detachHandlers();
+
 			resetListener();
 
 			toastsError({
@@ -324,5 +332,5 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WalletConnectSessionModal onClose={resetAndClose} onConnect={userConnect} {steps} bind:modal />
+	<WalletConnectSessionModal onConnect={userConnect} {steps} bind:modal />
 {/if}
