@@ -2,15 +2,7 @@
 	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import { getSdkError } from '@walletconnect/utils';
 	import { onDestroy, untrack } from 'svelte';
-	import {
-		SESSION_REQUEST_ETH_SEND_TRANSACTION,
-		SESSION_REQUEST_ETH_SIGN,
-		SESSION_REQUEST_ETH_SIGN_LEGACY,
-		SESSION_REQUEST_ETH_SIGN_V4,
-		SESSION_REQUEST_PERSONAL_SIGN
-	} from '$eth/constants/wallet-connect.constants';
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
@@ -18,26 +10,21 @@
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.constants';
 	import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
-	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
+	import { modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import {
+		onSessionDelete,
+		onSessionProposal,
+		onSessionRequest
+	} from '$lib/services/wallet-connect-handlers.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import {
-		walletConnectListenerStore as listenerStore,
-		walletConnectProposalStore as proposalStore
-	} from '$lib/stores/wallet-connect.store';
-	import type {
-		OptionWalletConnectListener,
-	} from '$lib/types/wallet-connect';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {
-		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
-		SESSION_REQUEST_SOL_SIGN_TRANSACTION
-	} from '$sol/constants/wallet-connect.constants';
+	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
+	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	let listener = $derived($listenerStore);
 
@@ -197,81 +184,6 @@
 		untrack(() => uriConnect());
 	});
 
-	const onSessionProposal = (sessionProposal: WalletKitTypes.SessionProposal) => {
-		proposalStore.set(sessionProposal);
-	};
-
-	const onSessionDelete = () => {
-		// Prevent race condition
-		if (isNullish(listener)) {
-			return;
-		}
-
-		resetListener();
-
-		toastsShow({
-			text: $i18n.wallet_connect.info.session_ended,
-			level: 'info',
-			duration: 2000
-		});
-
-		goToFirstStep();
-	};
-
-	const onSessionRequest = async (sessionRequest: WalletKitTypes.SessionRequest) => {
-		// Prevent race condition
-		if (isNullish(listener)) {
-			return;
-		}
-
-		// Another modal, like Send or Receive, is already in progress
-		if (nonNullish($modalStore) && !$modalWalletConnect) {
-			toastsError({
-				msg: {
-					text: $i18n.wallet_connect.error.skipping_request
-				}
-			});
-			return;
-		}
-
-		const {
-			id,
-			topic,
-			params: {
-				request: { method }
-			}
-		} = sessionRequest;
-
-		switch (method) {
-			case SESSION_REQUEST_ETH_SIGN_LEGACY:
-			case SESSION_REQUEST_ETH_SIGN_V4:
-			case SESSION_REQUEST_ETH_SIGN:
-			case SESSION_REQUEST_PERSONAL_SIGN:
-			case SESSION_REQUEST_SOL_SIGN_TRANSACTION:
-			case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION: {
-				modalStore.openWalletConnectSign({ id: signModalId, data: sessionRequest });
-				return;
-			}
-			case SESSION_REQUEST_ETH_SEND_TRANSACTION: {
-				modalStore.openWalletConnectSend({ id: sendModalId, data: sessionRequest });
-				return;
-			}
-			default: {
-				await listener?.rejectRequest({ topic, id, error: getSdkError('UNSUPPORTED_METHODS') });
-
-				toastsError({
-					msg: {
-						text: replacePlaceholders($i18n.wallet_connect.error.method_not_support, {
-							$method: method
-						})
-					}
-				});
-
-				close();
-			}
-		}
-	};
-
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		const newListener = await initListener();
 
@@ -281,8 +193,17 @@
 
 		newListener.attachHandlers({
 			onSessionProposal,
-			onSessionDelete,
-			onSessionRequest
+			onSessionDelete: () =>
+				onSessionDelete({
+					listener: newListener,
+					callback: () => {
+						resetListener();
+
+						goToFirstStep();
+					}
+				}),
+			onSessionRequest: (sessionRequest: WalletKitTypes.SessionRequest) =>
+				onSessionRequest({ listener: newListener, sessionRequest })
 		});
 
 		try {
@@ -339,8 +260,17 @@
 			// Reattach handlers so incoming requests work after refresh
 			newListener.attachHandlers({
 				onSessionProposal,
-				onSessionDelete,
-				onSessionRequest
+				onSessionDelete: () =>
+					onSessionDelete({
+						listener: newListener,
+						callback: () => {
+							resetListener();
+
+							goToFirstStep();
+						}
+					}),
+				onSessionRequest: (sessionRequest: WalletKitTypes.SessionRequest) =>
+					onSessionRequest({ listener: newListener, sessionRequest })
 			});
 
 			// Check for persisted sessions
