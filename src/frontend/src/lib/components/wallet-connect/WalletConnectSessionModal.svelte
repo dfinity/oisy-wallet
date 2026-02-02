@@ -5,6 +5,7 @@
 	import WalletConnectSessionWizard from '$lib/components/wallet-connect/WalletConnectSessionWizard.svelte';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { connectListener, resetListener } from '$lib/services/wallet-connect.services';
+	import { resetListener } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { walletConnectProposalStore } from '$lib/stores/wallet-connect.store';
 	import { closeModal } from '$lib/utils/modal.utils';
