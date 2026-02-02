@@ -129,7 +129,7 @@ export interface TransactionBaseParams {
 	chainId: bigint;
 }
 
-export interface ValidatedDFXPaymentData {
+export interface ValidatedEthPaymentData {
 	destination: string;
 	ethereumChainId: bigint;
 	value: bigint;
