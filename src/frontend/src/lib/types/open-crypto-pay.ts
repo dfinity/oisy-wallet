@@ -1,3 +1,5 @@
+import type { BtcAddress } from '$btc/types/address';
+import type { UtxosFee } from '$btc/types/btc-send';
 import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
 import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
@@ -81,7 +83,7 @@ export interface PayableToken extends Token {
 }
 
 export interface PayableTokenWithFees extends PayableToken {
-	fee?: EthFeeResult;
+	fee?: EthFeeResult | UtxosFee;
 }
 
 export interface PrepareTokensParams {
@@ -94,6 +96,12 @@ export interface PayableTokenWithConvertedAmount extends PayableTokenWithFees {
 	amountInUSD: number;
 	feeInUSD: number;
 	sumInUSD: number;
+}
+
+export interface ValidatedBtcPaymentData {
+	destination: BtcAddress;
+	satoshisAmount: bigint;
+	utxosFee: UtxosFee;
 }
 
 export interface ValidatedPaymentData {
