@@ -337,7 +337,11 @@
 			listenerStore.set(newListener);
 
 			// Reattach handlers so incoming requests work after refresh
-			attachHandlers(newListener);
+			newListener.attachHandlers({
+				onSessionProposal,
+				onSessionDelete,
+				onSessionRequest
+			});
 
 			// Check for persisted sessions
 			const sessions = newListener.getActiveSessions();
