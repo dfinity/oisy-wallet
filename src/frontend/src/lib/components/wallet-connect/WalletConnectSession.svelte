@@ -59,10 +59,6 @@
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
 
 	const close = () => modalStore.close();
-	const resetAndClose = () => {
-		resetListener();
-		close();
-	};
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -394,5 +390,5 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WalletConnectSessionModal onClose={resetAndClose} onConnect={userConnect} {steps} bind:modal />
+	<WalletConnectSessionModal onConnect={userConnect} {steps} bind:modal />
 {/if}
