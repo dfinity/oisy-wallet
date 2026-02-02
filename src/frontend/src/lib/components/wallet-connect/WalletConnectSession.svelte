@@ -20,7 +20,7 @@
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
-	import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
+	import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { initialLoading } from '$lib/stores/loader.store';
@@ -114,7 +114,7 @@
 				return;
 			}
 
-			const newListener = await initWalletConnect({
+			const newListener = await WalletConnectClient.init({
 				ethAddress: $ethAddress,
 				solAddressMainnet: $solAddressMainnet,
 				solAddressDevnet: $solAddressDevnet
@@ -354,7 +354,7 @@
 
 		// Create listener, but DO NOT pair()
 		try {
-			const newListener = await initWalletConnect({
+			const newListener = await WalletConnectClient.init({
 				ethAddress: $ethAddress,
 				solAddressMainnet: $solAddressMainnet,
 				solAddressDevnet: $solAddressDevnet,

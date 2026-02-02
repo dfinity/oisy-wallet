@@ -15,9 +15,9 @@ import {
 } from '$eth/constants/wallet-connect.constants';
 import type { OptionEthAddress } from '$eth/types/address';
 import { WALLET_CONNECT_METADATA } from '$lib/constants/wallet-connect.constants';
-import type {
-	WalletConnectApproveRequestMessage,
-	WalletConnectListener
+import {
+	WalletConnectListener,
+	type WalletConnectApproveRequestMessage
 } from '$lib/types/wallet-connect';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
@@ -57,85 +57,118 @@ const getWalletKit = async () => {
 	return globalWalletKit;
 };
 
-export const initWalletConnect = async ({
-	ethAddress,
-	solAddressMainnet,
-	solAddressDevnet,
-	cleanSlate = true
-}: {
-	ethAddress: OptionEthAddress;
-	solAddressMainnet: OptionSolAddress;
-	solAddressDevnet: OptionSolAddress;
-	cleanSlate?: boolean;
-}): Promise<WalletConnectListener> => {
-	const clearLocalStorage = () => {
-		const keys = Object.keys(localStorage).filter((key) => key.startsWith('wc@'));
-		keys.forEach((key) => localStorage.removeItem(key));
+export class WalletConnectClient extends WalletConnectListener {
+	#walletKit: Awaited<ReturnType<typeof WalletKit.init>>;
+	readonly #ethAddress: OptionEthAddress;
+	readonly #solAddressMainnet: OptionSolAddress;
+	readonly #solAddressDevnet: OptionSolAddress;
+
+	private constructor({
+		walletKit,
+		ethAddress,
+		solAddressMainnet,
+		solAddressDevnet
+	}: {
+		walletKit: Awaited<ReturnType<typeof WalletKit.init>>;
+		ethAddress: OptionEthAddress;
+		solAddressMainnet: OptionSolAddress;
+		solAddressDevnet: OptionSolAddress;
+	}) {
+		super();
+
+		this.#walletKit = walletKit;
+		this.#ethAddress = ethAddress;
+		this.#solAddressMainnet = solAddressMainnet;
+		this.#solAddressDevnet = solAddressDevnet;
+	}
+
+	static init = async ({
+		cleanSlate = true,
+		...rest
+	}: {
+		ethAddress: OptionEthAddress;
+		solAddressMainnet: OptionSolAddress;
+		solAddressDevnet: OptionSolAddress;
+		cleanSlate?: boolean;
+	}): Promise<WalletConnectClient> => {
+		const clearLocalStorage = () => {
+			const keys = Object.keys(localStorage).filter((key) => key.startsWith('wc@'));
+			keys.forEach((key) => localStorage.removeItem(key));
+		};
+
+		// During testing, we frequently encountered session approval failures with Uniswap due to the following reason:
+		// Unexpected error while communicating with WalletConnect. / No matching key. pairing: 12345c...
+		// The issue appears to be linked to incorrect cached information used by the WalletConnect library.
+		// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Web3Wallet object.
+		clearLocalStorage();
+
+		const walletKit = await getWalletKit();
+
+		const client = new WalletConnectClient({
+			walletKit,
+			...rest
+		});
+
+		if (cleanSlate) {
+			// Some previous sessions might have not been properly closed, so we disconnect those to have a clean state.
+			await client.#disconnectActiveSessions();
+		}
+
+		return client;
 	};
 
-	// During testing, we frequently encountered session approval failures with Uniswap due to the following reason:
-	// Unexpected error while communicating with WalletConnect. / No matching key. pairing: 12345c...
-	// The issue appears to be linked to incorrect cached information used by the WalletConnect library.
-	// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Wec3Wallet object.
-	clearLocalStorage();
-
-	const walletKit = await getWalletKit();
-
-	const disconnectActiveSessions = async () => {
+	#disconnectActiveSessions = async () => {
 		const disconnectExistingSessions = async ([_key, session]: [string, { topic: string }]) => {
 			const { topic } = session;
 
-			await walletKit.disconnectSession({
+			await this.#walletKit.disconnectSession({
 				topic,
 				reason: getSdkError('USER_DISCONNECTED')
 			});
 		};
 
-		const promises = Object.entries(walletKit.getActiveSessions()).map(disconnectExistingSessions);
+		const promises = Object.entries(this.#walletKit.getActiveSessions()).map(
+			disconnectExistingSessions
+		);
 		await Promise.all(promises);
 	};
 
-	if (cleanSlate) {
-		// Some previous sessions might have not been properly closed, so we disconnect those to have a clean state.
-		await disconnectActiveSessions();
-	}
-
-	const sessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
-		walletKit.on('session_proposal', callback);
+	sessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
+		this.#walletKit.on('session_proposal', callback);
 	};
 
-	const sessionDelete = (callback: () => void) => {
-		walletKit.on('session_delete', callback);
+	sessionDelete = (callback: () => void) => {
+		this.#walletKit.on('session_delete', callback);
 	};
 
-	const sessionRequest = (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => {
-		walletKit.on('session_request', callback);
+	sessionRequest = (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => {
+		this.#walletKit.on('session_request', callback);
 	};
 
-	const offSessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
-		walletKit.off('session_proposal', callback);
-		walletKit.removeListener('session_proposal', callback);
+	offSessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
+		this.#walletKit.off('session_proposal', callback);
+		this.#walletKit.removeListener('session_proposal', callback);
 	};
 
-	const offSessionDelete = (callback: () => void) => {
-		walletKit.off('session_delete', callback);
-		walletKit.removeListener('session_delete', callback);
+	offSessionDelete = (callback: () => void) => {
+		this.#walletKit.off('session_delete', callback);
+		this.#walletKit.removeListener('session_delete', callback);
 	};
 
-	const offSessionRequest = (
-		callback: (request: WalletKitTypes.SessionRequest) => Promise<void>
-	) => {
-		walletKit.off('session_request', callback);
-		walletKit.removeListener('session_request', callback);
+	offSessionRequest = (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => {
+		this.#walletKit.off('session_request', callback);
+		this.#walletKit.removeListener('session_request', callback);
 	};
 
-	const approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
+	pair = (uri: string) => this.#walletKit.core.pairing.pair({ uri });
+
+	approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
 		const { params } = proposal;
 
 		const namespaces = buildApprovedNamespaces({
 			proposal: params,
 			supportedNamespaces: {
-				...(nonNullish(ethAddress)
+				...(nonNullish(this.#ethAddress)
 					? {
 							eip155: {
 								chains: EIP155_CHAINS_KEYS,
@@ -147,16 +180,16 @@ export const initWalletConnect = async ({
 									SESSION_REQUEST_ETH_SIGN_LEGACY
 								],
 								events: ['accountsChanged', 'chainChanged'],
-								accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${ethAddress}`)
+								accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${this.#ethAddress}`)
 							}
 						}
 					: {}),
-				...(nonNullish(solAddressMainnet) || nonNullish(solAddressDevnet)
+				...(nonNullish(this.#solAddressMainnet) || nonNullish(this.#solAddressDevnet)
 					? {
 							solana: {
 								chains: [
-									...(nonNullish(solAddressMainnet) ? CAIP10_MAINNET_CHAINS_KEYS : []),
-									...(nonNullish(solAddressDevnet) ? CAIP10_DEVNET_CHAINS_KEYS : [])
+									...(nonNullish(this.#solAddressMainnet) ? CAIP10_MAINNET_CHAINS_KEYS : []),
+									...(nonNullish(this.#solAddressDevnet) ? CAIP10_DEVNET_CHAINS_KEYS : [])
 								],
 								methods: [
 									SESSION_REQUEST_SOL_SIGN_TRANSACTION,
@@ -165,16 +198,16 @@ export const initWalletConnect = async ({
 								],
 								events: ['accountsChanged', 'chainChanged'],
 								accounts: [
-									...(nonNullish(solAddressMainnet)
+									...(nonNullish(this.#solAddressMainnet)
 										? [
-												`solana:${SOLANA_MAINNET_NETWORK.chainId}:${solAddressMainnet}`,
-												`${LEGACY_SOLANA_MAINNET_NAMESPACE}:${solAddressMainnet}`
+												`solana:${SOLANA_MAINNET_NETWORK.chainId}:${this.#solAddressMainnet}`,
+												`${LEGACY_SOLANA_MAINNET_NAMESPACE}:${this.#solAddressMainnet}`
 											]
 										: []),
-									...(nonNullish(solAddressDevnet)
+									...(nonNullish(this.#solAddressDevnet)
 										? [
-												`solana:${SOLANA_DEVNET_NETWORK.chainId}:${solAddressDevnet}`,
-												`${LEGACY_SOLANA_DEVNET_NAMESPACE}:${solAddressDevnet}`
+												`solana:${SOLANA_DEVNET_NETWORK.chainId}:${this.#solAddressDevnet}`,
+												`${LEGACY_SOLANA_DEVNET_NAMESPACE}:${this.#solAddressDevnet}`
 											]
 										: [])
 								]
@@ -184,25 +217,25 @@ export const initWalletConnect = async ({
 			}
 		});
 
-		await walletKit.approveSession({
+		await this.#walletKit.approveSession({
 			id: proposal.id,
 			namespaces
 		});
 	};
 
-	const rejectSession = async (proposal: WalletKitTypes.SessionProposal) => {
+	rejectSession = async (proposal: WalletKitTypes.SessionProposal) => {
 		const { id } = proposal;
 
-		await walletKit.rejectSession({
+		await this.#walletKit.rejectSession({
 			id,
 			reason: getSdkError('USER_REJECTED_METHODS')
 		});
 	};
 
-	const respond = async ({ topic, response }: { topic: string; response: JsonRpcResponse }) =>
-		await walletKit.respondSessionRequest({ topic, response });
+	#respond = async ({ topic, response }: { topic: string; response: JsonRpcResponse }) =>
+		await this.#walletKit.respondSessionRequest({ topic, response });
 
-	const rejectRequest = async ({
+	rejectRequest = async ({
 		id,
 		topic,
 		error
@@ -211,7 +244,7 @@ export const initWalletConnect = async ({
 		topic: string;
 		error: ErrorResponse;
 	}) =>
-		await respond({
+		await this.#respond({
 			topic,
 			response: {
 				id,
@@ -220,7 +253,7 @@ export const initWalletConnect = async ({
 			}
 		});
 
-	const approveRequest = async ({
+	approveRequest = async ({
 		id,
 		topic,
 		message
@@ -229,45 +262,31 @@ export const initWalletConnect = async ({
 		topic: string;
 		message: WalletConnectApproveRequestMessage;
 	}) =>
-		await respond({
+		await this.#respond({
 			topic,
 			response: formatJsonRpcResult(id, message)
 		});
 
-	const getActiveSessions = (): Record<string, SessionTypes.Struct> =>
-		walletKit.getActiveSessions();
+	getActiveSessions = (): Record<string, SessionTypes.Struct> =>
+		this.#walletKit.getActiveSessions();
 
-	return {
-		pair: (uri) => walletKit.core.pairing.pair({ uri }),
-		approveSession,
-		rejectSession,
-		rejectRequest,
-		approveRequest,
-		sessionProposal,
-		sessionDelete,
-		sessionRequest,
-		offSessionProposal,
-		offSessionDelete,
-		offSessionRequest,
-		getActiveSessions,
-		disconnect: async () => {
-			const disconnectPairings = async () => {
-				const pairings = walletKit.engine.signClient.core.pairing.pairings.values;
+	disconnect = async () => {
+		const disconnectPairings = async () => {
+			const pairings = this.#walletKit.engine.signClient.core.pairing.pairings.values;
 
-				for (const pairing of pairings) {
-					const { topic } = pairing;
+			for (const pairing of pairings) {
+				const { topic } = pairing;
 
-					await walletKit.disconnectSession({
-						topic,
-						reason: getSdkError('USER_DISCONNECTED')
-					});
-				}
-			};
+				await this.#walletKit.disconnectSession({
+					topic,
+					reason: getSdkError('USER_DISCONNECTED')
+				});
+			}
+		};
 
-			await disconnectActiveSessions();
+		await this.#disconnectActiveSessions();
 
-			// Clean-up in case other pairings are still open.
-			await disconnectPairings();
-		}
+		// Clean-up in case other pairings are still open.
+		await disconnectPairings();
 	};
-};
+}
