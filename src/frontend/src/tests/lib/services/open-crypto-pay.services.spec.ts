@@ -41,8 +41,11 @@ vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
 	extractQuoteData: vi.fn(() => ({
 		quoteId: 'mock-quote-id-123',
 		callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123'
-	})),
-	validateDecodedData: vi.fn(({ decodedData, fee }) => ({
+	}))
+}));
+
+vi.mock('$eth/utils/eth-open-crypto-pay.utils', () => ({
+	validateEthEvmTransfer: vi.fn(({ decodedData, fee }) => ({
 		destination: decodedData?.destination ?? '',
 		ethereumChainId: decodedData?.ethereumChainId ?? '1',
 		value: decodedData?.value ?? 0,
