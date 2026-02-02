@@ -20,11 +20,8 @@ import type {
 	TransactionBaseParams,
 	ValidatedEthPaymentData
 } from '$lib/types/open-crypto-pay';
-import {
-	decodeLNURL,
-	extractQuoteData,
-	validateDecodedData
-} from '$lib/utils/open-crypto-pay.utils';
+import { validateEthEvmTransfer } from '$eth/utils/eth-open-crypto-pay.utils';
+import { decodeLNURL, extractQuoteData } from '$lib/utils/open-crypto-pay.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { isEmptyString, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -189,7 +186,7 @@ const preparePaymentTransaction = async ({
 	progress(ProgressStepsPayment.CREATE_TRANSACTION);
 
 	const decodedData = decodeQrCodeUrn({ urn: uri });
-	const validatedData = validateDecodedData({ decodedData, token, amount, uri });
+	const validatedData = validateEthEvmTransfer({ decodedData, token, amount, uri });
 	const nonce = await getNonce({ from, networkId: token.network.id });
 	const baseParams = buildTransactionBaseParams({ from, nonce, validatedData });
 
