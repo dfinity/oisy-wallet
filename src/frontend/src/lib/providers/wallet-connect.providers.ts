@@ -184,7 +184,7 @@ export class WalletConnectClient extends WalletConnectListener {
 							}
 						}
 					: {}),
-				...(nonNullish(this.#solAddressMainnet) || nonNullish(this.#solAddressMainnet)
+				...(nonNullish(this.#solAddressMainnet) || nonNullish(this.#solAddressDevnet)
 					? {
 							solana: {
 								chains: [
