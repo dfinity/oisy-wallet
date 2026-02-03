@@ -62,7 +62,7 @@
 		});
 	};
 
-	const onConnect = async () => {
+	const onWalletConnectConnect = async () => {
 		// TODO: implement this function
 	};
 
@@ -100,7 +100,7 @@
 		{:else if currentStep?.name === WizardStepsScanner.PAY || currentStep?.name === WizardStepsScanner.TOKENS_LIST || currentStep?.name === WizardStepsScanner.PAYING || currentStep?.name === WizardStepsScanner.PAYMENT_FAILED || currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
 			<OpenCryptoPayWizard {currentStep} {modal} {steps} bind:payProgressStep />
 		{:else if currentStep?.name === WizardStepsScanner.WALLET_CONNECT_CONNECT || currentStep?.name === WizardStepsScanner.WALLET_CONNECT_REVIEW}
-			<WalletConnectSessionWizard {currentStep} {onConnect} />
+			<WalletConnectSessionWizard {currentStep} onConnect={onWalletConnectConnect} />
 		{/if}
 	{/key}
 </WizardModal>
