@@ -19,13 +19,16 @@
 		onSessionProposal,
 		onSessionRequest
 	} from '$lib/services/wallet-connect-handlers.services';
-	import { resetListener } from '$lib/services/wallet-connect.services';
+	import {
+		connectListener,
+		disconnectListener,
+		resetListener
+	} from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	let listener = $derived($listenerStore);
 
@@ -45,8 +48,6 @@
 
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
 
-	const close = () => modalStore.close();
-
 	const disconnect = async () => {
 		await disconnectListener();
 
@@ -55,58 +56,6 @@
 			level: 'info',
 			duration: 2000
 		});
-	};
-
-	const disconnectListener = async () => {
-		try {
-			if (isNullish(listener)) {
-				return;
-			}
-
-			listener.detachHandlers();
-
-			await listener.disconnect();
-		} catch (err: unknown) {
-			toastsError({
-				msg: {
-					text: $i18n.wallet_connect.error.disconnect
-				},
-				err
-			});
-		}
-
-		resetListener();
-	};
-
-	const initListener = async (): Promise<OptionWalletConnectListener> => {
-		await disconnectListener();
-
-		try {
-			// Connect and disconnect buttons are disabled until at least one of the address is loaded; therefore, this should never happen.
-			if (isNullish($ethAddress) && isNullish($solAddressMainnet)) {
-				toastsError({
-					msg: { text: $i18n.send.assertion.address_unknown }
-				});
-				return;
-			}
-
-			const newListener = await WalletConnectClient.init({
-				ethAddress: $ethAddress,
-				solAddressMainnet: $solAddressMainnet,
-				solAddressDevnet: $solAddressDevnet
-			});
-
-			listenerStore.set(newListener);
-
-			return newListener;
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.wallet_connect.error.connect },
-				err
-			});
-
-			resetListener();
-		}
 	};
 
 	$effect(() => {
@@ -125,7 +74,7 @@
 
 		modal.next();
 
-		const { result } = await connect(uri);
+		const { result } = await connectListener({ uri, onSessionDeleteCallback: goToFirstStep });
 
 		if (result === 'error') {
 			modal.back();
@@ -165,7 +114,7 @@
 		// We open the WalletConnect auth modal on the review step
 		modalStore.openWalletConnectAuth(modalId);
 
-		await connect($walletConnectUri);
+		await connectListener({ uri: $walletConnectUri, onSessionDeleteCallback: goToFirstStep });
 	};
 
 	$effect(() => {
@@ -173,48 +122,6 @@
 
 		untrack(() => uriConnect());
 	});
-
-	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
-		const newListener = await initListener();
-
-		if (isNullish(newListener)) {
-			return { result: 'error' };
-		}
-
-		newListener.attachHandlers({
-			onSessionProposal,
-			onSessionDelete: () =>
-				onSessionDelete({
-					listener: newListener,
-					callback: () => {
-						resetListener();
-
-						goToFirstStep();
-					}
-				}),
-			onSessionRequest: (sessionRequest: WalletKitTypes.SessionRequest) =>
-				onSessionRequest({ listener: newListener, sessionRequest })
-		});
-
-		try {
-			await newListener.pair(uri);
-		} catch (err: unknown) {
-			newListener.detachHandlers();
-
-			resetListener();
-
-			toastsError({
-				msg: { text: $i18n.wallet_connect.error.unexpected_pair },
-				err
-			});
-
-			close();
-
-			return { result: 'critical' };
-		}
-
-		return { result: 'success' };
-	};
 
 	$effect(() => {
 		walletConnectPaired.set(nonNullish(listener));
