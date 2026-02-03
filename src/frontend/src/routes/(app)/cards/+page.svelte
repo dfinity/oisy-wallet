@@ -52,7 +52,7 @@
 			console.log('call PUT /auth/profiles or nullify');
 		}
 
-		connected = true;
+		connected = tokens.hasValidAccessToken();
 
 		modalStore.close();
 	};
@@ -74,6 +74,12 @@
 
 		cards = undefined;
 	});
+
+	const onClose = () => {
+		otpSent = false;
+
+		modalStore.close();
+	};
 </script>
 
 {#if !connected}
@@ -108,7 +114,7 @@
 {/if}
 
 {#if $modalCardConnectOpen}
-	<Modal onClose={modalStore.close}>
+	<Modal {onClose}>
 		{#snippet title()}Connect to Zebec{/snippet}
 
 		<ContentWithToolbar>
@@ -121,7 +127,7 @@
 			{/if}
 
 			{#snippet toolbar()}
-				{#if tokens.noTokens()}
+				{#if !otpSent}
 					<Button
 						colorStyle="primary"
 						disabled={invalidEmail}

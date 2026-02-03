@@ -55,6 +55,9 @@ export class InMemoryTokenStore implements TokenStore {
 	setRefreshToken(token: string | null): void {
 		this.refreshToken = token;
 	}
+	hasValidAccessToken(): boolean {
+		return this.getAccessToken() !== null;
+	}
 	noTokens(): boolean {
 		return this.accessToken === null && this.refreshToken === null;
 	}
