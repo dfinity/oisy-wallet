@@ -1,13 +1,8 @@
-import { invalidIcpAddress, isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
+import { invalidIcpAddress, isIcpAccountIdentifier } from '$icp/utils/account.utils';
 import { checkAccountId } from '@icp-sdk/canisters/ledger/icp';
-import * as ethersAddress from 'ethers/address';
 
 vi.mock('@icp-sdk/canisters/ledger/icp', () => ({
 	checkAccountId: vi.fn()
-}));
-
-vi.mock('ethers/address', () => ({
-	isAddress: vi.fn()
 }));
 
 describe('account.utils', () => {
@@ -40,36 +35,6 @@ describe('account.utils', () => {
 			expect(isIcpAccountIdentifier('aaaaa-aa')).toBeFalsy();
 
 			expect(mockCheckAccountId).toHaveBeenCalledExactlyOnceWith('aaaaa-aa');
-		});
-	});
-
-	describe('isEthAddress', () => {
-		const mockIsAddress = vi.spyOn(ethersAddress, 'isAddress');
-
-		beforeEach(() => {
-			vi.resetAllMocks();
-
-			mockIsAddress.mockImplementation(() => true);
-		});
-
-		it('should return false if address is undefined', () => {
-			expect(isEthAddress(undefined)).toBeFalsy();
-
-			expect(mockIsAddress).not.toHaveBeenCalled();
-		});
-
-		it('should return true if isAddress returns true', () => {
-			expect(isEthAddress('0xaaaaa')).toBeTruthy();
-
-			expect(mockIsAddress).toHaveBeenCalledExactlyOnceWith('0xaaaaa');
-		});
-
-		it('should return false if isAddress returns false', () => {
-			mockIsAddress.mockImplementationOnce(() => false);
-
-			expect(isEthAddress('0xaaaaa')).toBeFalsy();
-
-			expect(mockIsAddress).toHaveBeenCalledExactlyOnceWith('0xaaaaa');
 		});
 	});
 

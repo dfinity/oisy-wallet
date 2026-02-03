@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.9.6",
+	"version": "1.9.7",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -85,7 +85,7 @@
 		"@solana-program/token": "^0.9.0",
 		"@solana-program/token-2022": "^0.6.1",
 		"@solana/kit": "^5.1.0",
-		"@velora-dex/sdk": "^9.2.0",
+		"@velora-dex/sdk": "^9.2.1",
 		"alchemy-sdk": "^3.6.5",
 		"bech32": "^1.1.4",
 		"bitcoinjs-lib": "^6.1.7",
@@ -95,7 +95,7 @@
 		"ethers": "^6.16.0",
 		"idb-keyval": "^6.2.2",
 		"svelte-confetti": "^2.3.2",
-		"zod": "^4.2.1"
+		"zod": "^4.3.4"
 	},
 	"devDependencies": {
 		"@dfinity/eslint-config-oisy-wallet": "^0.2.3",

@@ -1,37 +1,44 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
-	import type { WalletKitTypes } from '@reown/walletkit';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectSessionWizard from '$lib/components/wallet-connect/WalletConnectSessionWizard.svelte';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
+	import { connectListener, resetListener } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Option } from '$lib/types/utils';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { walletConnectProposalStore } from '$lib/stores/wallet-connect.store';
+	import { closeModal } from '$lib/utils/modal.utils';
 
 	interface Props {
-		listener: OptionWalletConnectListener;
-		proposal: Option<WalletKitTypes.SessionProposal>;
 		steps: WizardSteps<WizardStepsWalletConnect>;
 		modal: WizardModal<WizardStepsWalletConnect> | undefined;
-		onClose: () => void;
-		onConnect: (uri: string) => void;
-		onApprove: () => void;
-		onReject: () => void;
 	}
 
-	let {
-		listener = $bindable(),
-		proposal,
-		steps,
-		modal = $bindable(),
-		onClose,
-		onConnect,
-		onApprove,
-		onReject
-	}: Props = $props();
+	let { steps, modal = $bindable() }: Props = $props();
+
+	let proposal = $derived($walletConnectProposalStore);
 
 	let currentStep = $state<WizardStep<WizardStepsWalletConnect> | undefined>();
+
+	const onClose = () => {
+		closeModal(resetListener);
+	};
+
+	const goToFirstStep = () => modal?.set?.(0);
+
+	const onConnect = async (uri: string) => {
+		if (isNullish(modal)) {
+			return;
+		}
+
+		modal.next();
+
+		const { result } = await connectListener({ uri, onSessionDeleteCallback: goToFirstStep });
+
+		if (result === 'error') {
+			modal.back();
+		}
+	};
 </script>
 
 <WizardModal bind:this={modal} {onClose} {steps} bind:currentStep>
@@ -45,12 +52,5 @@
 		</WalletConnectModalTitle>
 	{/snippet}
 
-	<WalletConnectSessionWizard
-		{currentStep}
-		{onApprove}
-		{onConnect}
-		{onReject}
-		{proposal}
-		bind:listener
-	/>
+	<WalletConnectSessionWizard {currentStep} {onConnect} />
 </WizardModal>

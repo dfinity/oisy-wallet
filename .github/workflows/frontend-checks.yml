@@ -43,14 +43,14 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Restore Prettier Cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ./node_modules/.cache/prettier/.prettier-cache
           key: ${{ runner.os }}-prettier-cache-format-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
           restore-keys: |
             ${{ runner.os }}-prettier-cache-format-
       - name: Restore ESLint Cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: .eslintcache
           key: ${{ runner.os }}-eslint-cache-format-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
@@ -91,14 +91,14 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Restore Prettier Cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ./node_modules/.cache/prettier/.prettier-cache
           key: ${{ runner.os }}-prettier-cache-lint-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
           restore-keys: |
             ${{ runner.os }}-prettier-cache-lint-
       - name: Restore ESLint Cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: .eslintcache
           key: ${{ runner.os }}-eslint-cache-lint-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
