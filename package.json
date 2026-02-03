@@ -41,6 +41,7 @@
 		"format:file": "prettier --write \"${npm_config_file}\" && eslint --fix \"${npm_config_file}\"",
 		"format": "prettier --write --cache ${CI:+--cache-strategy content} './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,yml,did}' && eslint --fix --concurrency=auto --cache ${CI:+--cache-strategy content} .",
 		"format:backend": "./scripts/format.sh",
+		"format:lint": "npm run format && npm run lint",
 		"generate": "scripts/generate.sh",
 		"deploy": "scripts/deploy.sh",
 		"tags": "node_modules/.bin/semver $(git tag)",
