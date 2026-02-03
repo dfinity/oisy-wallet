@@ -1,6 +1,11 @@
 <script lang="ts">
-	import { isEmptyString, isNullish } from '@dfinity/utils';
+	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
+	import { allUtxosStore } from '$btc/stores/all-utxos.store';
+	import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+	import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+	import { OCP_PAY_WITH_BTC_ENABLED } from '$env/open-crypto-pay.env';
 	import IconChain from '$lib/components/icons/IconChain.svelte';
 	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
 	import ScannerCodeInput from '$lib/components/scanner/ScannerCodeInput.svelte';
@@ -10,7 +15,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { networksMainnets } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import {
@@ -23,6 +28,7 @@
 	import type { QrStatus } from '$lib/types/qr-code';
 	import { ScannerResults } from '$lib/types/scanner';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
+	import { waitReady } from '$lib/utils/timeout.utils';
 
 	interface Props {
 		onNext: (results: ScannerResults) => void;
@@ -47,7 +53,18 @@
 		}
 
 		try {
-			const paymentData = await processOpenCryptoPayCode(code);
+			const isDisabled = (): boolean =>
+				!OCP_PAY_WITH_BTC_ENABLED ||
+				(nonNullish($enabledMainnetBitcoinToken) &&
+					nonNullish($btcAddressMainnet) &&
+					(isNullish($btcPendingSentTransactionsStore[$btcAddressMainnet]) ||
+						isNullish($allUtxosStore?.allUtxos) ||
+						isNullish($feeRatePercentilesStore?.feeRateFromPercentiles)));
+
+			const [, paymentData] = await Promise.all([
+				waitReady({ retries: 20, isDisabled }),
+				processOpenCryptoPayCode(code)
+			]);
 
 			setData(paymentData);
 
