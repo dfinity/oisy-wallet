@@ -75,7 +75,18 @@ export const getBtcAddress = async ({
 	if (FRONTEND_DERIVATION_ENABLED && nonNullish(SIGNER_MASTER_PUB_KEY)) {
 		// We use the same logic of the canister method. The potential error will be handled in the consumer.
 		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
-
+		console.log({
+			local: deriveBtcAddress({
+				user: identity.getPrincipal().toString(),
+				network,
+				pubkey: SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey
+			}),
+			signer: await getSignerBtcAddress({
+				identity,
+				network: mapToSignerBitcoinNetwork({ network }),
+				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+			})
+		});
 		// HACK: This is not working for Local environment for now, because the library is not aware of the `dfx_test_1` public key (used by Local deployment).
 		return deriveBtcAddress({
 			user: identity.getPrincipal().toString(),

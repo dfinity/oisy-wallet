@@ -1,5 +1,6 @@
 import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
 import type { EthAddress } from '$eth/types/address';
 import {
 	getIdbEthAddress,
@@ -27,6 +28,18 @@ export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddres
 	if (FRONTEND_DERIVATION_ENABLED && nonNullish(SIGNER_MASTER_PUB_KEY)) {
 		// We use the same logic of the canister method. The potential error will be handled in the consumer.
 		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+
+		console.log({
+			local: deriveEthAddress({
+				user: identity.getPrincipal().toString(),
+				pubkey: SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey
+			}),
+			signer: await getSignerEthAddress({
+				identity,
+				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+			}),
+			SIGNER_ROOT_KEY_NAME
+		});
 
 		// HACK: This is not working for Local environment for now, because the library is not aware of the `dfx_test_1` public key (used by Local deployment).
 		return deriveEthAddress({
