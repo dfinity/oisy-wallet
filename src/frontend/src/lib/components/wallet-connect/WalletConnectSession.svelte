@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
+	import type { WizardModal, WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, untrack } from 'svelte';
@@ -7,11 +7,15 @@
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
 	import WalletConnectSessionModal from '$lib/components/wallet-connect/WalletConnectSessionModal.svelte';
+	import {
+		walletConnectReviewWizardSteps,
+		walletConnectWizardSteps
+	} from '$lib/config/wallet-connect.config';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.constants';
 	import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnectAuth } from '$lib/derived/modal.derived';
-	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
+	import type { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
@@ -34,17 +38,13 @@
 
 	const modalId = Symbol();
 
-	const STEP_CONNECT: WizardStep<WizardStepsWalletConnect> = {
-		name: WizardStepsWalletConnect.CONNECT,
-		title: $i18n.wallet_connect.text.name
-	};
+	let onlyReview = $state(false);
 
-	const STEP_REVIEW: WizardStep<WizardStepsWalletConnect> = {
-		name: WizardStepsWalletConnect.REVIEW,
-		title: $i18n.wallet_connect.text.session_proposal
-	};
-
-	let steps = $state<WizardSteps<WizardStepsWalletConnect>>([STEP_CONNECT, STEP_REVIEW]);
+	let steps = $derived<WizardSteps<WizardStepsWalletConnect>>(
+		onlyReview
+			? walletConnectReviewWizardSteps({ i18n: $i18n })
+			: walletConnectWizardSteps({ i18n: $i18n })
+	);
 
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
 
@@ -94,7 +94,7 @@
 		}
 
 		// No step connect here
-		steps = [STEP_REVIEW];
+		onlyReview = true;
 
 		// We open the WalletConnect auth modal on the review step
 		modalStore.openWalletConnectAuth(modalId);
