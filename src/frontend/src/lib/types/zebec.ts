@@ -123,24 +123,6 @@ export interface TokenStore {
 	setRefreshToken(token: string | null): void;
 }
 
-export class InMemoryTokenStore implements TokenStore {
-	private accessToken: string | null = null;
-	private refreshToken: string | null = null;
-
-	getAccessToken(): string | null {
-		return this.accessToken;
-	}
-	getRefreshToken(): string | null {
-		return this.refreshToken;
-	}
-	setAccessToken(token: string | null): void {
-		this.accessToken = token;
-	}
-	setRefreshToken(token: string | null): void {
-		this.refreshToken = token;
-	}
-}
-
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 export interface RequestOptions<TBody> {
@@ -150,4 +132,267 @@ export interface RequestOptions<TBody> {
 	auth?: boolean;
 	signal?: AbortSignal;
 	headers?: Record<string, string>;
+}
+
+// --- Cards types ---
+
+export interface CardsHealthResponse {
+	status: 'healthy' | string;
+	message: string;
+}
+
+export type CardProgramType = 'silver' | 'carbon' | string;
+
+export interface CardProgram {
+	type: CardProgramType;
+	name: string;
+	description: string;
+	isRegional: boolean;
+	isInternational: boolean;
+	availableCurrencies: string[];
+	region: string;
+}
+
+export interface UserRegion {
+	name: string;
+	value: string;
+	currencies: string[];
+	countries: string[];
+}
+
+export type CurrencyAmounts = Record<string, number>;
+
+export interface CardsProgramsResponse {
+	userRegion: UserRegion;
+	availablePrograms: CardProgram[];
+	currencies: CurrencyAmounts;
+}
+
+export interface MoneyAmount {
+	amount: number;
+	currencyCode: string;
+}
+
+export interface DepositReceipt {
+	chainName: string;
+	network: string;
+	tokenName: string;
+	tokenAmount: number;
+	txHash: string;
+	buyerAddress: string;
+	packageCounter?: number;
+	// present in /cards/sync example
+	userEmail?: string;
+	purchaseCounter?: number;
+	paymentId?: string;
+}
+
+export interface CardReceipt {
+	deposit: DepositReceipt;
+}
+
+export type CardOrderAction = 'create' | 'reload' | string;
+
+export interface EncryptedPayload {
+	/**
+	 * Docs: { data: "iv:encryptedPayload" }
+	 */
+	data: string;
+}
+
+export interface CardOrderRequestPlain {
+	action: CardOrderAction;
+	amount: MoneyAmount;
+	programId?: string; // required when action=create
+	cardId?: string; // required when action=reload
+	receipt?: {
+		deposit: DepositReceipt;
+	};
+}
+
+export type CardOrderStatus =
+	| 'PENDING'
+	| 'PROCESSING'
+	| 'VALIDATED'
+	| 'SUCCESS'
+	| 'FAILED'
+	| 'CANCELED'
+	| string;
+
+export interface CardOrderResponse {
+	orderId: string;
+	txHash: string;
+	chainId: number;
+	programId: string;
+	cardType: CardProgramType;
+	amount: MoneyAmount;
+	status: CardOrderStatus;
+	createdAt: string;
+	date?: string;
+	chainName?: string;
+	signature?: string;
+	payment?: Record<string, unknown>;
+	recipientWebsiteLink?: string;
+	partnerId?: string;
+}
+
+export type TransactionStatus = 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED' | string;
+
+export interface CardOrderStatusResponse {
+	orderId: string;
+	transactionStatus: TransactionStatus;
+	cardId?: string;
+	cardStatus?: string;
+	isValidated?: boolean;
+	validationResult?: Record<string, unknown>;
+	paymentId?: string;
+	txHash?: string;
+	programId?: string;
+	cardType?: CardProgramType;
+	amount?: MoneyAmount;
+	createdAt?: string;
+	updatedAt?: string;
+	errorMessage?: string;
+	retryCount?: number;
+	message?: string;
+	recipientWebsiteLink?: string;
+}
+
+export interface CardsSyncResponse extends CardOrderResponse {}
+
+export interface CancelOrderResponse {
+	message: string;
+}
+
+export interface PaginationMeta {
+	page: number;
+	take: number;
+	itemCount: number;
+	pageCount: number;
+	hasPreviousPage: boolean;
+	hasNextPage: boolean;
+}
+
+export interface ChainTransactionsResponse {
+	data: CardOrderResponse[];
+	meta: PaginationMeta;
+}
+
+export interface SilverCardSummary {
+	id: string;
+	cardType: 'silver' | string;
+	cardStatus: string;
+	totalLoaded: number;
+	createdAt: string;
+	recipientWebsiteLink: string;
+	balance: string;
+	cardNumber: string;
+	onbeStatus: string;
+}
+
+export interface SilverCardsResponse {
+	cards: SilverCardSummary[];
+	totalCount: number;
+}
+
+export interface CarbonCardResponse extends SilverCardSummary {
+	// docs say carbon can be null if not found
+}
+
+export interface CardDetailsResponse {
+	id: string;
+	cardNumber: string;
+	expirationDate: string;
+	cvv: string;
+	availableBalance: string;
+	cardType: CardProgramType;
+	cardStatus: string;
+	recipientWebsiteLink: string;
+}
+
+export interface CardProfileResponse {
+	recipient: {
+		participantId: string;
+		personId: string;
+		firstName: string;
+		lastName: string;
+		address: {
+			address1: string;
+			address2?: string;
+			city: string;
+			state?: string;
+			postalCode: string;
+			countryCode: string;
+		};
+		emailAddress: string;
+		mobilePhone?: string;
+	};
+}
+
+export interface UpdateCardProfileRequest {
+	firstName: string;
+	lastName: string;
+	address1: string;
+	address2?: string;
+	city: string;
+	state?: string;
+	postalCode: string;
+	countryCode: string;
+	email: string;
+	mobilePhone?: string;
+}
+
+export interface PinResponse {
+	pin: string;
+}
+
+export interface ChangePinRequest {
+	newPIN: string;
+}
+
+export interface CardStatusResponse {
+	status: string;
+	statusDescription?: string;
+}
+
+export interface UpdateCardStatusResponse {
+	success: boolean;
+}
+
+export type SortOrder = 'ASC' | 'DESC';
+
+export interface CardTransactionsQuery {
+	page?: number;
+	take?: number;
+	status?: string;
+	cardType?: string;
+	chain?: string;
+	startDate?: string;
+	endDate?: string;
+	order?: SortOrder;
+	term?: 'allTime' | 'currentMonth' | 'lastSixMonths' | 'lastYear' | string;
+}
+
+export interface CardTransactionsResponse<TItem = string> {
+	data: TItem[];
+}
+
+export interface ReloadHistoryQuery {
+	order?: SortOrder;
+	page?: number;
+	take?: number;
+	q?: string;
+	startDate?: string; // date-time string
+	endDate?: string; // date-time string
+	term?: string;
+	status?: string;
+	cardId?: string;
+	userId?: string;
+	chainName?: string;
+	transactionStatus?: string;
+}
+
+// Not specified in docs, so keep minimal / flexible
+export interface ReloadHistoryResponse {
+	data?: unknown;
 }
