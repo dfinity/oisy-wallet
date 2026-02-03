@@ -1,5 +1,13 @@
+import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
+import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
+import {
+	onSessionDelete,
+	onSessionProposal,
+	onSessionRequest
+} from '$lib/services/wallet-connect-handlers.services';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
+import { modalStore } from '$lib/stores/modal.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -94,4 +102,106 @@ export const reject = (params: WalletConnectExecuteParams): Promise<ResultSucces
 
 export const resetListener = () => {
 	walletConnectListenerStore.reset();
+};
+
+export const disconnectListener = async () => {
+	try {
+		const listener = get(walletConnectListenerStore);
+
+		if (isNullish(listener)) {
+			return;
+		}
+
+		listener.detachHandlers();
+
+		await listener.disconnect();
+	} catch (err: unknown) {
+		toastsError({
+			msg: {
+				text: get(i18n).wallet_connect.error.disconnect
+			},
+			err
+		});
+	}
+
+	resetListener();
+};
+
+const initListener = async (): Promise<OptionWalletConnectListener> => {
+	await disconnectListener();
+
+	try {
+		// Connect and disconnect buttons are disabled until at least one of the address is loaded; therefore, this should never happen.
+		if (isNullish(get(ethAddress)) && isNullish(get(solAddressMainnet))) {
+			toastsError({
+				msg: { text: get(i18n).send.assertion.address_unknown }
+			});
+			return;
+		}
+
+		const newListener = await WalletConnectClient.init({
+			ethAddress: get(ethAddress),
+			solAddressMainnet: get(solAddressMainnet),
+			solAddressDevnet: get(solAddressDevnet)
+		});
+
+		walletConnectListenerStore.set(newListener);
+
+		return newListener;
+	} catch (err: unknown) {
+		toastsError({
+			msg: { text: get(i18n).wallet_connect.error.connect },
+			err
+		});
+
+		resetListener();
+	}
+};
+
+export const connectListener = async ({
+	uri,
+	onSessionDeleteCallback
+}: {
+	uri: string;
+	onSessionDeleteCallback?: () => void;
+}): Promise<{ result: 'success' | 'error' | 'critical' }> => {
+	const newListener = await initListener();
+
+	if (isNullish(newListener)) {
+		return { result: 'error' };
+	}
+
+	newListener.attachHandlers({
+		onSessionProposal,
+		onSessionDelete: () =>
+			onSessionDelete({
+				listener: newListener,
+				callback: () => {
+					resetListener();
+
+					onSessionDeleteCallback?.();
+				}
+			}),
+		onSessionRequest: (sessionRequest: WalletKitTypes.SessionRequest) =>
+			onSessionRequest({ listener: newListener, sessionRequest })
+	});
+
+	try {
+		await newListener.pair(uri);
+	} catch (err: unknown) {
+		newListener.detachHandlers();
+
+		resetListener();
+
+		toastsError({
+			msg: { text: get(i18n).wallet_connect.error.unexpected_pair },
+			err
+		});
+
+		modalStore.close();
+
+		return { result: 'critical' };
+	}
+
+	return { result: 'success' };
 };

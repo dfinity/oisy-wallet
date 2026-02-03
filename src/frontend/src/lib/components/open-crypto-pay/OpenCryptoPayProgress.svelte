@@ -8,9 +8,9 @@
 		payProgressStep?: string;
 	}
 
-	let { payProgressStep = ProgressStepsPayment.REQUEST_DETAILS }: Props = $props();
+	let { payProgressStep }: Props = $props();
 
-	let steps = $state<ProgressSteps>([
+	let steps = $derived<ProgressSteps>([
 		{
 			step: ProgressStepsPayment.REQUEST_DETAILS,
 			text: $i18n.pay.text.request_payment_details,
