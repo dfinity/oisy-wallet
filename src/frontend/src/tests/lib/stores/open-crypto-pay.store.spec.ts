@@ -46,8 +46,8 @@ vi.mock('$lib/stores/balances.store', () => ({
 	}
 }));
 
-vi.mock('$eth/utils/token.utils', () => ({
-	enrichEthEvmToken: vi.fn(({ token }) => ({
+vi.mock('$eth/utils/eth-open-crypto-pay.utils', () => ({
+	enrichEthEvmPayableToken: vi.fn(({ token }) => ({
 		...token
 	}))
 }));

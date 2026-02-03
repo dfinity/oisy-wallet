@@ -1,34 +1,29 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { WalletKitTypes } from '@reown/walletkit';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectSessionWizard from '$lib/components/wallet-connect/WalletConnectSessionWizard.svelte';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
+	import { resetListener } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Option } from '$lib/types/utils';
+	import { walletConnectProposalStore } from '$lib/stores/wallet-connect.store';
+	import { closeModal } from '$lib/utils/modal.utils';
 
 	interface Props {
-		proposal: Option<WalletKitTypes.SessionProposal>;
 		steps: WizardSteps<WizardStepsWalletConnect>;
 		modal: WizardModal<WizardStepsWalletConnect> | undefined;
-		onClose: () => void;
 		onConnect: (uri: string) => void;
-		onApprove: () => void;
-		onReject: () => void;
 	}
 
-	let {
-		proposal,
-		steps,
-		modal = $bindable(),
-		onClose,
-		onConnect,
-		onApprove,
-		onReject
-	}: Props = $props();
+	let { steps, modal = $bindable(), onConnect }: Props = $props();
+
+	let proposal = $derived($walletConnectProposalStore);
 
 	let currentStep = $state<WizardStep<WizardStepsWalletConnect> | undefined>();
+
+	const onClose = () => {
+		closeModal(resetListener);
+	};
 </script>
 
 <WizardModal bind:this={modal} {onClose} {steps} bind:currentStep>
@@ -42,5 +37,5 @@
 		</WalletConnectModalTitle>
 	{/snippet}
 
-	<WalletConnectSessionWizard {currentStep} {onApprove} {onConnect} {onReject} {proposal} />
+	<WalletConnectSessionWizard {currentStep} {onConnect} />
 </WizardModal>

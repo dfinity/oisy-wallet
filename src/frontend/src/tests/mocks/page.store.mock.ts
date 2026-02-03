@@ -3,6 +3,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import { resetRouteParams, type RouteParams } from '$lib/utils/nav.utils';
+import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import type { Page } from '@sveltejs/kit';
 import { writable } from 'svelte/store';
 
@@ -39,8 +40,11 @@ const initPageStoreMock = () => {
 			set({ ...page, url });
 			page.url = url;
 		},
-		mockToken: ({ name, network: { id: networkId } }: Token) => {
-			const data = { token: name, network: networkId.description };
+		mockToken: <T extends Token>(token: T) => {
+			const {
+				network: { id: networkId }
+			} = token;
+			const data = { token: getPageTokenIdentifier(token), network: networkId.description };
 			set({ ...page, data });
 			page.data = data;
 		},

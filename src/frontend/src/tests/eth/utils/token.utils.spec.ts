@@ -1,19 +1,14 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import {
-	calculateUsdValues,
-	enrichEthEvmToken,
-	hasSufficientBalance
-} from '$eth/utils/token.utils';
+import { calculateUsdValues, hasSufficientBalance } from '$eth/utils/token.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { ExchangesData } from '$lib/types/exchange';
 import type { PayableTokenWithFees } from '$lib/types/open-crypto-pay';
 import type { Token } from '$lib/types/token';
 import { certified } from '$tests/mocks/balances.mock';
 
-describe('open-crypto-pay-enrichment.utils', () => {
+describe('token.utils', () => {
 	const mockNativeToken: Token = {
 		...ETHEREUM_TOKEN,
 		decimals: 18
@@ -301,165 +296,6 @@ describe('open-crypto-pay-enrichment.utils', () => {
 			expect(result.amountInUSD).toBe(2000);
 			expect(result.feeInUSD).toBeCloseTo(0.002, 6);
 			expect(result.sumInUSD).toBeCloseTo(2000.002, 3);
-		});
-	});
-
-	describe('enrichEthEvmToken', () => {
-		const nativeTokens: Token[] = [mockNativeToken];
-
-		const exchanges: ExchangesData = {
-			[ETHEREUM_TOKEN.id]: { usd: 2000, usd_market_cap: 1000000 },
-			[USDC_TOKEN.id]: { usd: 1, usd_market_cap: 50000 }
-		};
-
-		const balances: CertifiedStoreData<BalancesData> = {
-			[ETHEREUM_TOKEN.id]: {
-				data: 2000000000000000000n, // 2 ETH
-				certified
-			},
-			[USDC_TOKEN.id]: {
-				data: 2000000000n, // 2000 USDC
-				certified
-			}
-		};
-
-		it('should enrich token with USD values when all conditions met', () => {
-			const result = enrichEthEvmToken({
-				token: mockNativeEthToken,
-				nativeTokens,
-				exchanges,
-				balances
-			});
-
-			expect(result).toBeDefined();
-			expect(result?.amountInUSD).toBeDefined();
-			expect(result?.feeInUSD).toBeDefined();
-			expect(result?.sumInUSD).toBeDefined();
-		});
-
-		it('should return undefined when token has no fee', () => {
-			const tokenWithoutFee = {
-				...mockNativeEthToken,
-				fee: undefined
-			};
-
-			const result = enrichEthEvmToken({
-				token: tokenWithoutFee,
-				nativeTokens,
-				exchanges,
-				balances
-			});
-
-			expect(result).toBeUndefined();
-		});
-
-		it('should return undefined when native token not found', () => {
-			const result = enrichEthEvmToken({
-				token: mockNativeEthToken,
-				nativeTokens: [],
-				exchanges,
-				balances
-			});
-
-			expect(result).toBeUndefined();
-		});
-
-		it('should return undefined when native token price missing', () => {
-			const exchangesWithoutNative: ExchangesData = {
-				[USDC_TOKEN.id]: { usd: 1, usd_market_cap: 50000 }
-			};
-
-			const result = enrichEthEvmToken({
-				token: mockNativeEthToken,
-				nativeTokens,
-				exchanges: exchangesWithoutNative,
-				balances
-			});
-
-			expect(result).toBeUndefined();
-		});
-
-		it('should return undefined when token price missing', () => {
-			const exchangesWithoutToken: ExchangesData = {
-				[ETHEREUM_TOKEN.id]: { usd: 2000, usd_market_cap: 1000000 }
-			};
-
-			const result = enrichEthEvmToken({
-				token: mockErc20Token,
-				nativeTokens,
-				exchanges: exchangesWithoutToken,
-				balances
-			});
-
-			expect(result).toBeUndefined();
-		});
-
-		it('should return undefined when balance insufficient', () => {
-			const insufficientBalances: CertifiedStoreData<BalancesData> = {
-				[ETHEREUM_TOKEN.id]: {
-					data: 100000000000000000n, // 0.1 ETH (insufficient)
-					certified
-				}
-			};
-
-			const result = enrichEthEvmToken({
-				token: mockNativeEthToken,
-				nativeTokens,
-				exchanges,
-				balances: insufficientBalances
-			});
-
-			expect(result).toBeUndefined();
-		});
-
-		it('should enrich ERC20 token correctly', () => {
-			const result = enrichEthEvmToken({
-				token: mockErc20Token,
-				nativeTokens,
-				exchanges,
-				balances
-			});
-
-			expect(result).toBeDefined();
-			expect(result?.amountInUSD).toBeDefined();
-			expect(result?.feeInUSD).toBeDefined();
-			expect(result?.sumInUSD).toBeDefined();
-		});
-
-		it('should preserve original token properties', () => {
-			const result = enrichEthEvmToken({
-				token: mockNativeEthToken,
-				nativeTokens,
-				exchanges,
-				balances
-			});
-
-			expect(result?.id).toBe(mockNativeEthToken.id);
-			expect(result?.symbol).toBe(mockNativeEthToken.symbol);
-			expect(result?.amount).toBe(mockNativeEthToken.amount);
-			expect(result?.fee).toBe(mockNativeEthToken.fee);
-		});
-
-		it('should handle exchanges undefined', () => {
-			const result = enrichEthEvmToken({
-				token: mockNativeEthToken,
-				nativeTokens,
-				exchanges: undefined,
-				balances
-			});
-
-			expect(result).toBeUndefined();
-		});
-
-		it('should handle empty balances', () => {
-			const result = enrichEthEvmToken({
-				token: mockNativeEthToken,
-				nativeTokens,
-				exchanges,
-				balances: {}
-			});
-
-			expect(result).toBeUndefined();
 		});
 	});
 });
