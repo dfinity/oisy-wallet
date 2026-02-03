@@ -13,7 +13,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 
 	interface Props {
-		onConnect: (uri: string) => void;
+		onConnect: (uri: string) => Promise<void>;
 	}
 
 	let { onConnect }: Props = $props();
@@ -32,7 +32,7 @@
 
 	let invalid = $derived(!uri);
 
-	const connect = (): 'success' | 'error' => {
+	const connect = async (): Promise<'success' | 'error'> => {
 		if (!uri) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.missing_uri }
@@ -40,13 +40,13 @@
 			return 'error';
 		}
 
-		onConnect(uri);
+		await onConnect(uri);
 
 		return 'success';
 	};
 
-	const onClick = () => {
-		const result = connect();
+	const onClick =async () => {
+		const result = await connect();
 
 		if (result === 'error') {
 			return;

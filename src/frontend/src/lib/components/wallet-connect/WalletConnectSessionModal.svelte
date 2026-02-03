@@ -26,7 +26,7 @@
 
 	const goToFirstStep = () => modal?.set?.(0);
 
-	// One try to manually sign in by entering the URL manually or scanning a QR code
+
 	const onConnect = async (uri: string) => {
 		if (isNullish(modal)) {
 			return;
