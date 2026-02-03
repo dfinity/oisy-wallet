@@ -5,7 +5,7 @@
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 
 	interface Props {
-		currentStep: WizardStep<T> | undefined;
+		currentStep: WizardStep<WizardStepsWalletConnect> | undefined;
 		onConnect: (uri: string) =>Promise< void>;
 	}
 
