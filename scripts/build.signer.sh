@@ -61,7 +61,7 @@ case "$DFX_NETWORK" in
   # For security reasons, mainnet root key will be hardcoded in the signer canister.
   ic_root_key_der="null"
   ;;
-"ic")
+"ic" | "beta")
   ECDSA_KEY_NAME="key_1"
   # For security reasons, mainnet root key will be hardcoded in the signer canister.
   ic_root_key_der="null"
