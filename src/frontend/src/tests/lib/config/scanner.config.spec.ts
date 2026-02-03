@@ -31,12 +31,12 @@ describe('scanner.config', () => {
 				title: en.scanner.text.payment_failed
 			},
 			{
-				name: WizardStepsScanner.WALLET_CONNECT_REVIEW,
-				title: en.wallet_connect.text.session_proposal
-			},
-			{
 				name: WizardStepsScanner.WALLET_CONNECT_CONNECT,
 				title: en.wallet_connect.text.name
+			},
+			{
+				name: WizardStepsScanner.WALLET_CONNECT_REVIEW,
+				title: en.wallet_connect.text.session_proposal
 			}
 		];
 
