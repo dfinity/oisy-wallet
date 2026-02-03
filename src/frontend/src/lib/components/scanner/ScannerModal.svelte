@@ -5,7 +5,9 @@
 	import OpenCryptoPayWizard from '$lib/components/open-crypto-pay/OpenCryptoPayWizard.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
+	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -14,6 +16,7 @@
 		type PayContext
 	} from '$lib/stores/open-crypto-pay.store';
 	import { ScannerResults } from '$lib/types/scanner';
+	import { getOpenCryptoPayBaseTrackingParams } from '$lib/utils/open-crypto-pay.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	let steps = $derived<WizardSteps<WizardStepsScanner>>(scannerWizardSteps({ i18n: $i18n }));
@@ -22,9 +25,23 @@
 
 	let modal: WizardModal<WizardStepsScanner> | undefined = $state();
 
-	const onClose = () => modalStore.close();
+	const { selectedToken, data } = setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
 
-	setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
+	const onClose = () => {
+		if (currentStep?.name === WizardStepsScanner.PAY) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.PAY,
+				metadata: {
+					...getOpenCryptoPayBaseTrackingParams({
+						token: $selectedToken,
+						providerData: $data
+					}),
+					result_status: 'cancel'
+				}
+			});
+		}
+		modalStore.close();
+	};
 
 	const goToStep = (stepName: WizardStepsScanner) => {
 		if (isNullish(modal)) {
