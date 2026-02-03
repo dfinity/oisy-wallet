@@ -6,6 +6,7 @@ import { erc20PrepareTransaction, ethPrepareTransaction } from '$eth/services/se
 import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { validateEthEvmTransfer } from '$eth/utils/eth-open-crypto-pay.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { signTransaction } from '$lib/api/signer.api';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
@@ -20,11 +21,7 @@ import type {
 	TransactionBaseParams,
 	ValidatedEthPaymentData
 } from '$lib/types/open-crypto-pay';
-import {
-	decodeLNURL,
-	extractQuoteData,
-	validateDecodedData
-} from '$lib/utils/open-crypto-pay.utils';
+import { decodeLNURL, extractQuoteData, getPaymentUri } from '$lib/utils/open-crypto-pay.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { isEmptyString, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -154,23 +151,6 @@ const fetchPaymentUri = async ({
 	return uri;
 };
 
-const getPaymentUri = ({
-	callback,
-	quoteId,
-	network,
-	rawTransaction
-}: {
-	callback: string;
-	quoteId: string;
-	network: string;
-	rawTransaction: string;
-}): string => {
-	// By dfx documentation we need to replace 'cb' with 'tx' to get the transaction submission endpoint
-	const apiUrl = callback.replace('cb', 'tx');
-
-	return `${apiUrl}?quote=${quoteId}&method=${network}&hex=${rawTransaction}`;
-};
-
 const preparePaymentTransaction = async ({
 	token,
 	from,
@@ -189,7 +169,7 @@ const preparePaymentTransaction = async ({
 	progress(ProgressStepsPayment.CREATE_TRANSACTION);
 
 	const decodedData = decodeQrCodeUrn({ urn: uri });
-	const validatedData = validateDecodedData({ decodedData, token, amount, uri });
+	const validatedData = validateEthEvmTransfer({ decodedData, token, amount, uri });
 	const nonce = await getNonce({ from, networkId: token.network.id });
 	const baseParams = buildTransactionBaseParams({ from, nonce, validatedData });
 

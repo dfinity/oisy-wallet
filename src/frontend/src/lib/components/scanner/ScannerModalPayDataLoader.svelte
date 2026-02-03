@@ -6,6 +6,7 @@
 	import FeeRatePercentilesLoader from '$btc/components/fee/FeeRatePercentilesLoader.svelte';
 	import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
 	import { resetUtxosDataStores } from '$btc/utils/btc-utxos.utils';
+	import { OCP_PAY_WITH_BTC_ENABLED } from '$env/open-crypto-pay.env';
 	import { btcAddressMainnet } from '$lib/derived/address.derived';
 
 	interface Props {
@@ -15,13 +16,17 @@
 	let { children }: Props = $props();
 
 	onDestroy(() => {
-		if (nonNullish($enabledMainnetBitcoinToken) && nonNullish($btcAddressMainnet)) {
+		if (
+			OCP_PAY_WITH_BTC_ENABLED &&
+			nonNullish($enabledMainnetBitcoinToken) &&
+			nonNullish($btcAddressMainnet)
+		) {
 			resetUtxosDataStores();
 		}
 	});
 </script>
 
-{#if nonNullish($enabledMainnetBitcoinToken) && nonNullish($btcAddressMainnet)}
+{#if OCP_PAY_WITH_BTC_ENABLED && nonNullish($enabledMainnetBitcoinToken) && nonNullish($btcAddressMainnet)}
 	<BtcPendingSentTransactionsLoader
 		networkId={$enabledMainnetBitcoinToken.network.id}
 		source={$btcAddressMainnet}

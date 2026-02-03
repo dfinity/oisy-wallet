@@ -32,17 +32,25 @@ import { extractQuoteData } from '$lib/utils/open-crypto-pay.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
-vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
-	decodeLNURL: vi.fn((lnurl: string) => {
-		if (lnurl === 'VALID_LNURL') {
-			return 'https://api.dfx.swiss/v1/lnurlp/pl_test123';
-		}
-	}),
-	extractQuoteData: vi.fn(() => ({
-		quoteId: 'mock-quote-id-123',
-		callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123'
-	})),
-	validateDecodedData: vi.fn(({ decodedData, fee }) => ({
+vi.mock('$lib/utils/open-crypto-pay.utils', async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...(actual as Record<string, unknown>),
+		decodeLNURL: vi.fn((lnurl: string) => {
+			if (lnurl === 'VALID_LNURL') {
+				return 'https://api.dfx.swiss/v1/lnurlp/pl_test123';
+			}
+		}),
+		extractQuoteData: vi.fn(() => ({
+			quoteId: 'mock-quote-id-123',
+			callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123'
+		}))
+	};
+});
+
+vi.mock('$eth/utils/eth-open-crypto-pay.utils', () => ({
+	validateEthEvmTransfer: vi.fn(({ decodedData, fee }) => ({
 		destination: decodedData?.destination ?? '',
 		ethereumChainId: decodedData?.ethereumChainId ?? '1',
 		value: decodedData?.value ?? 0,

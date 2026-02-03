@@ -63,6 +63,11 @@ export class WalletConnectClient extends WalletConnectListener {
 	readonly #solAddressMainnet: OptionSolAddress;
 	readonly #solAddressDevnet: OptionSolAddress;
 
+	#onSessionProposalCallback: ((proposal: WalletKitTypes.SessionProposal) => void) | null = null;
+	#onSessionDeleteCallback: (() => void) | null = null;
+	#onSessionRequestCallback: ((request: WalletKitTypes.SessionRequest) => Promise<void>) | null =
+		null;
+
 	private constructor({
 		walletKit,
 		ethAddress,
@@ -133,31 +138,68 @@ export class WalletConnectClient extends WalletConnectListener {
 		await Promise.all(promises);
 	};
 
-	sessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
+	#sessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
 		this.#walletKit.on('session_proposal', callback);
 	};
 
-	sessionDelete = (callback: () => void) => {
+	#sessionDelete = (callback: () => void) => {
 		this.#walletKit.on('session_delete', callback);
 	};
 
-	sessionRequest = (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => {
+	#sessionRequest = (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => {
 		this.#walletKit.on('session_request', callback);
 	};
 
-	offSessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
+	#offSessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
 		this.#walletKit.off('session_proposal', callback);
 		this.#walletKit.removeListener('session_proposal', callback);
 	};
 
-	offSessionDelete = (callback: () => void) => {
+	#offSessionDelete = (callback: () => void) => {
 		this.#walletKit.off('session_delete', callback);
 		this.#walletKit.removeListener('session_delete', callback);
 	};
 
-	offSessionRequest = (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => {
+	#offSessionRequest = (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => {
 		this.#walletKit.off('session_request', callback);
 		this.#walletKit.removeListener('session_request', callback);
+	};
+
+	attachHandlers = ({
+		onSessionProposal,
+		onSessionDelete,
+		onSessionRequest
+	}: {
+		onSessionProposal: (proposal: WalletKitTypes.SessionProposal) => void;
+		onSessionDelete: () => void;
+		onSessionRequest: (request: WalletKitTypes.SessionRequest) => Promise<void>;
+	}): void => {
+		this.detachHandlers();
+
+		this.#sessionProposal(onSessionProposal);
+		this.#sessionDelete(onSessionDelete);
+		this.#sessionRequest(onSessionRequest);
+
+		this.#onSessionProposalCallback = onSessionProposal;
+		this.#onSessionDeleteCallback = onSessionDelete;
+		this.#onSessionRequestCallback = onSessionRequest;
+	};
+
+	detachHandlers = (): void => {
+		if (nonNullish(this.#onSessionProposalCallback)) {
+			this.#offSessionProposal(this.#onSessionProposalCallback);
+			this.#onSessionProposalCallback = null;
+		}
+
+		if (nonNullish(this.#onSessionDeleteCallback)) {
+			this.#offSessionDelete(this.#onSessionDeleteCallback);
+			this.#onSessionDeleteCallback = null;
+		}
+
+		if (nonNullish(this.#onSessionRequestCallback)) {
+			this.#offSessionRequest(this.#onSessionRequestCallback);
+			this.#onSessionRequestCallback = null;
+		}
 	};
 
 	pair = (uri: string) => this.#walletKit.core.pairing.pair({ uri });
