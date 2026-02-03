@@ -18,6 +18,7 @@
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import WalletConnectListener from '$lib/components/wallet-connect/WalletConnectListener.svelte';
 
 	interface Props {
 		children: Snippet;
@@ -59,6 +60,8 @@
 </LoaderUserProfile>
 
 <Guards />
+
+<WalletConnectListener />
 
 <!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->
 <CkBtcUpdateBalanceListener />

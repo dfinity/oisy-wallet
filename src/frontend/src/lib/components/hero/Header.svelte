@@ -11,7 +11,6 @@
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import Pay from '$lib/components/pay/Pay.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
-	import WalletConnectListener from '$lib/components/wallet-connect/WalletConnectListener.svelte';
 	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import {
@@ -22,6 +21,7 @@
 	} from '$lib/derived/modal.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
+	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
 	let networkSwitcherOpen = $state(false);
@@ -58,7 +58,7 @@
 		{/if}
 
 		{#if $authSignedIn}
-			<WalletConnectListener />
+			<WalletConnect />
 
 			{#if UNIVERSAL_SCANNER_ENABLED}
 				<!-- TODO: Re-enable the scanner button when it includes WalletConnect and remove the modal from pay button -->
