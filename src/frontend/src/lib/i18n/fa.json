@@ -854,6 +854,7 @@
 			"unknown_cketh": "توکن ckETH قابل بازیابی نیست.",
 			"destination_address_invalid": "آدرس مقصد نامعتبر است.",
 			"amount_invalid": "مقدار نامعتبر است.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "موجودی ناکافی برای گس",
 			"insufficient_funds_for_amount": "موجودی ناکافی برای مبلغ",
 			"insufficient_ethereum_funds_to_cover_the_fees": "موجودی اتریوم برای پوشش کارمزدها کافی نیست",
