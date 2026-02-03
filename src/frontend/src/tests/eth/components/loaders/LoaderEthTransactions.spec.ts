@@ -5,7 +5,7 @@ import {
 	SEPOLIA_TOKEN_ID,
 	SUPPORTED_ETHEREUM_TOKENS
 } from '$env/tokens/tokens.eth.env';
-import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
+import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
@@ -16,6 +16,7 @@ import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 import * as appConstants from '$lib/constants/app.constants';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { syncTransactionsFromCache } from '$lib/services/listener.services';
+import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockErc1155CustomTokens } from '$tests/mocks/erc1155-tokens.mock';
 import { createMockErc20CustomTokens } from '$tests/mocks/erc20-tokens.mock';
@@ -47,7 +48,7 @@ vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
 }));
 
-describe('LoaderMultipleEthTransactions', () => {
+describe('LoaderEthTransactions', () => {
 	const timeout = WALLET_TIMER_INTERVAL_MILLIS;
 
 	const mockMainnetErc20CertifiedCustomTokens = createMockErc20CustomTokens({
@@ -155,7 +156,7 @@ describe('LoaderMultipleEthTransactions', () => {
 
 	describe('on mount', () => {
 		it('should sync balances from the IDB cache', async () => {
-			render(LoaderMultipleEthTransactions, props);
+			render(LoaderEthTransactions, props);
 
 			await tick();
 
@@ -175,7 +176,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		it('should not sync balances from the IDB cache if not signed in', async () => {
 			mockAuthStore(null);
 
-			render(LoaderMultipleEthTransactions, props);
+			render(LoaderEthTransactions, props);
 
 			await tick();
 
@@ -185,7 +186,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		it('should sync balances from the IDB cache only for tokens that have not been initialized', async () => {
 			ethTransactionsStore.set({ tokenId: allExpectedTokens[0].id, transactions: [] });
 
-			render(LoaderMultipleEthTransactions, props);
+			render(LoaderEthTransactions, props);
 
 			await tick();
 
@@ -204,14 +205,15 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should load transactions for all Ethereum and Sepolia tokens (native and ERC20) when testnets flag is enabled', async () => {
-		render(LoaderMultipleEthTransactions, props);
+		render(LoaderEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
+			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
 				networkId,
 				standard
@@ -222,14 +224,15 @@ describe('LoaderMultipleEthTransactions', () => {
 	it('should not load transactions multiple times for the same list if the stores do not change', async () => {
 		setupTestnetsStore('enabled');
 
-		render(LoaderMultipleEthTransactions, props);
+		render(LoaderEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
+			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
 				networkId,
 				standard
@@ -241,8 +244,9 @@ describe('LoaderMultipleEthTransactions', () => {
 		// same number of calls as before
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
+			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
 				networkId,
 				standard
@@ -253,7 +257,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	it('should not load transactions for testnet tokens when testnets flag is disabled', async () => {
 		setupTestnetsStore('disabled');
 
-		render(LoaderMultipleEthTransactions, props);
+		render(LoaderEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
@@ -261,8 +265,9 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+		expectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
+			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
 				networkId,
 				standard
@@ -279,7 +284,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('onlyTestnets');
 
-		render(LoaderMultipleEthTransactions, props);
+		render(LoaderEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
@@ -311,14 +316,15 @@ describe('LoaderMultipleEthTransactions', () => {
 			start: 100
 		});
 
-		render(LoaderMultipleEthTransactions, props);
+		render(LoaderEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
+			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
 				networkId,
 				standard
@@ -330,19 +336,21 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		// the number of calls as before (twice) + mockAdditionalTokens.length
+		// the number of calls as before (twice minus the NFTs) + mockAdditionalTokens.length
 		const index = allExpectedTokens.map(isTokenErc20).lastIndexOf(true);
+		const indexNft = allExpectedTokens.findIndex(isTokenNonFungible);
 		const expectedNewTokens = [
 			...allExpectedTokens,
 			...allExpectedTokens.slice(0, index + 1),
 			...mockAdditionalTokens.map(({ data: token }) => token),
-			...allExpectedTokens.slice(index + 1)
+			...allExpectedTokens.slice(index + 1, indexNft)
 		];
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
+			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
 				networkId,
 				standard
@@ -354,14 +362,15 @@ describe('LoaderMultipleEthTransactions', () => {
 		const mockLoadEthereumTransactions = vi.mocked(loadEthereumTransactions);
 		mockLoadEthereumTransactions.mockResolvedValue({ success: true });
 
-		render(LoaderMultipleEthTransactions, props);
+		render(LoaderEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
+			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
 				networkId,
 				standard
@@ -376,19 +385,21 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		// the number of calls as before (twice) + mockAdditionalTokens.length
+		// the number of calls as before (twice minus the NFTs) + mockAdditionalTokens.length
 		const index = allExpectedTokens.map(isTokenErc20).lastIndexOf(true);
+		const indexNft = allExpectedTokens.findIndex(isTokenNonFungible);
 		const expectedNewTokens = [
 			...allExpectedTokens,
 			...allExpectedTokens.slice(0, index + 1),
 			...mockAdditionalTokens,
-			...allExpectedTokens.slice(index + 1)
+			...allExpectedTokens.slice(index + 1, indexNft)
 		];
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
+			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
 				networkId,
 				standard
@@ -410,20 +421,21 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		// the number of calls as before (twice) + mockAdditionalTokens.length
+		// the number of calls as before (twice minus the NFTs) + mockAdditionalTokens.length
 		const expectedNewTokensWithSepolia = [
 			...expectedNewTokens,
 			...allExpectedTokens.slice(0, index + 1),
 			...mockAdditionalTokens,
 			...mockNewAdditionalTokens.map(({ data: token }) => token),
-			...allExpectedTokens.slice(index + 1)
+			...allExpectedTokens.slice(index + 1, indexNft)
 		];
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokensWithSepolia.length);
 
 		expectedNewTokensWithSepolia.forEach(
-			({ id: tokenId, network: { id: networkId }, standard }, index) => {
-				expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+			({ id: tokenId, network: { id: networkId }, standard }) => {
+				// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+				expect(loadEthereumTransactions).toHaveBeenCalledWith({
 					tokenId,
 					networkId,
 					standard
@@ -438,14 +450,15 @@ describe('LoaderMultipleEthTransactions', () => {
 			.mockResolvedValueOnce({ success: false })
 			.mockResolvedValue({ success: true });
 
-		render(LoaderMultipleEthTransactions, props);
+		render(LoaderEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
+			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
 				networkId,
 				standard
@@ -460,7 +473,7 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		// the number of calls as before (twice) + mockAdditionalTokens.length
+		// the number of calls as before (twice minus the NFTs) + mockAdditionalTokens.length
 		const index = allExpectedTokens.map(isTokenErc20).lastIndexOf(true);
 		const expectedNewTokens = [
 			...allExpectedTokens,
@@ -469,8 +482,9 @@ describe('LoaderMultipleEthTransactions', () => {
 			...allExpectedTokens.slice(index + 1)
 		];
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, {
+		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }) => {
+			// Since the calls happen in parallel, in different subcomponents, we cannot guarantee the order of the calls
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId,
 				networkId,
 				standard

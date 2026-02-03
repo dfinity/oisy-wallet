@@ -30,8 +30,8 @@ export const estimateTransactionSize = ({
 	numInputs: number;
 	numOutputs: number;
 }): number => {
-	// version (4) and locktime (4) and input count (1) and output count (1)
-	const baseSize = 10;
+	// version (4) and locktime (4) and input count (1), output count (1) and SegWit marker + flag (0.5 -> rounding to 1)
+	const baseSize = 11;
 
 	// P2WPKH input size: outpoint (36) and scriptSig length (1) and scriptSig (0) and sequence (4) = 41 bytes
 	// Plus witness data: witness stack items (1) and signature (72) and pubkey (33) = 106 bytes
