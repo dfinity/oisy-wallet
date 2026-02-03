@@ -7,7 +7,7 @@
 	import OpenCryptoPayTokensList from '$lib/components/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 	import PaymentFailed from '$lib/components/open-crypto-pay/PaymentFailed.svelte';
 	import PaymentSucceeded from '$lib/components/open-crypto-pay/PaymentSucceeded.svelte';
-	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
+	import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
@@ -17,11 +17,10 @@
 		modal: WizardModal<WizardStepsScanner>;
 		steps: WizardSteps<WizardStepsScanner>;
 		currentStep?: WizardStep<WizardStepsScanner>;
+		payProgressStep: ProgressStepsPayment;
 	}
 
-	let { modal, steps, currentStep }: Props = $props();
-
-	let payProgressStep = $state(ProgressStepsPayment.REQUEST_DETAILS);
+	let { modal, steps, currentStep, payProgressStep = $bindable() }: Props = $props();
 
 	const onClose = () => modalStore.close();
 

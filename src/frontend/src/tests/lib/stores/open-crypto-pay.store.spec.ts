@@ -1,3 +1,4 @@
+import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -9,6 +10,15 @@ import type {
 	PayableTokenWithFees
 } from '$lib/types/open-crypto-pay';
 import { get } from 'svelte/store';
+
+vi.mock('$btc/derived/tokens.derived', () => ({
+	enabledMainnetBitcoinToken: {
+		subscribe: vi.fn((callback) => {
+			callback(undefined);
+			return () => {};
+		})
+	}
+}));
 
 vi.mock('$eth/derived/tokens.derived', () => ({
 	enabledEthereumTokens: {
@@ -328,6 +338,11 @@ describe('OpenCryptoPayStore', () => {
 	describe('combined operations', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
+
+			vi.spyOn(enabledMainnetBitcoinToken, 'subscribe').mockImplementation((fn) => {
+				fn(undefined);
+				return () => {};
+			});
 
 			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {
 				fn([]);

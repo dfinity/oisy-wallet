@@ -6,7 +6,10 @@
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import WalletConnectSessionWizard from '$lib/components/wallet-connect/WalletConnectSessionWizard.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
+	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -15,6 +18,7 @@
 		type PayContext
 	} from '$lib/stores/open-crypto-pay.store';
 	import { ScannerResults } from '$lib/types/scanner';
+	import { getOpenCryptoPayBaseTrackingParams } from '$lib/utils/open-crypto-pay.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	let steps = $derived<WizardSteps<WizardStepsScanner>>(scannerWizardSteps({ i18n: $i18n }));
@@ -23,9 +27,28 @@
 
 	let modal: WizardModal<WizardStepsScanner> | undefined = $state();
 
-	const onClose = () => modalStore.close();
+	let payProgressStep = $state(ProgressStepsPayment.REQUEST_DETAILS);
 
-	setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
+	const { selectedToken, data: payData } = setContext<PayContext>(
+		PAY_CONTEXT_KEY,
+		initPayContext()
+	);
+
+	const onClose = () => {
+		if (currentStep?.name === WizardStepsScanner.PAY) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.PAY,
+				metadata: {
+					...getOpenCryptoPayBaseTrackingParams({
+						token: $selectedToken,
+						providerData: $payData
+					}),
+					result_status: 'cancel'
+				}
+			});
+		}
+		modalStore.close();
+	};
 
 	const goToStep = (stepName: WizardStepsScanner) => {
 		if (isNullish(modal)) {
@@ -75,7 +98,7 @@
 		{#if currentStep?.name === WizardStepsScanner.SCAN}
 			<ScannerCode {onNext} />
 		{:else if currentStep?.name === WizardStepsScanner.PAY || currentStep?.name === WizardStepsScanner.TOKENS_LIST || currentStep?.name === WizardStepsScanner.PAYING || currentStep?.name === WizardStepsScanner.PAYMENT_FAILED || currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
-			<OpenCryptoPayWizard {currentStep} {modal} {steps} />
+			<OpenCryptoPayWizard {currentStep} {modal} {steps} bind:payProgressStep />
 		{:else if currentStep?.name === WizardStepsScanner.WALLET_CONNECT_CONNECT || currentStep?.name === WizardStepsScanner.WALLET_CONNECT_REVIEW}
 			<WalletConnectSessionWizard {currentStep} {onConnect} />
 		{/if}
