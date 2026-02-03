@@ -6,6 +6,7 @@
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -25,7 +26,12 @@
 
 	let modal: WizardModal<WizardStepsScanner> | undefined = $state();
 
-	const { selectedToken, data } = setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
+	let payProgressStep = $state(ProgressStepsPayment.REQUEST_DETAILS);
+
+	const { selectedToken, data: payData } = setContext<PayContext>(
+		PAY_CONTEXT_KEY,
+		initPayContext()
+	);
 
 	const onClose = () => {
 		if (currentStep?.name === WizardStepsScanner.PAY) {
@@ -34,7 +40,7 @@
 				metadata: {
 					...getOpenCryptoPayBaseTrackingParams({
 						token: $selectedToken,
-						providerData: $data
+						providerData: $payData
 					}),
 					result_status: 'cancel'
 				}
@@ -81,7 +87,7 @@
 		{#if currentStep?.name === WizardStepsScanner.SCAN}
 			<ScannerCode {onNext} />
 		{:else if currentStep?.name === WizardStepsScanner.PAY || currentStep?.name === WizardStepsScanner.TOKENS_LIST || currentStep?.name === WizardStepsScanner.PAYING || currentStep?.name === WizardStepsScanner.PAYMENT_FAILED || currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
-			<OpenCryptoPayWizard {currentStep} {modal} {steps} />
+			<OpenCryptoPayWizard {currentStep} {modal} {steps} bind:payProgressStep />
 		{/if}
 	{/key}
 </WizardModal>
