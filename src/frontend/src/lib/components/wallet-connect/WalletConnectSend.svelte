@@ -7,13 +7,9 @@
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 
-	interface Props {
-		listener: OptionWalletConnectListener;
-	}
-
-	let { listener = $bindable() }: Props = $props();
+	let listener = $derived($walletConnectListenerStore);
 
 	let request = $derived(
 		$modalWalletConnectSend
@@ -37,5 +33,5 @@
 </script>
 
 {#if $modalWalletConnectSend && nonNullish(request) && nonNullish(firstTransaction) && nonNullish(sourceNetwork)}
-	<EthWalletConnectSendModal {firstTransaction} {request} {sourceNetwork} bind:listener />
+	<EthWalletConnectSendModal {firstTransaction} {listener} {request} {sourceNetwork} />
 {/if}

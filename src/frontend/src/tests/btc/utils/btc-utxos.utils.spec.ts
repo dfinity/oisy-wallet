@@ -84,8 +84,8 @@ describe('btc-utxos.utils', () => {
 				numOutputs: 2
 			});
 
-			// Base (10) + inputs (2 * 68) + outputs (2 * 31) = 10 + 136 + 62 = 208
-			expect(result).toBe(208);
+			// Base (11) + inputs (2 * 68) + outputs (2 * 31) = 11 + 136 + 62 = 209
+			expect(result).toBe(209);
 		});
 
 		it('should handle single input and output', () => {
@@ -94,8 +94,8 @@ describe('btc-utxos.utils', () => {
 				numOutputs: 1
 			});
 
-			// Base (10) + inputs (1 * 68) + outputs (1 * 31) = 10 + 68 + 31 = 109
-			expect(result).toBe(109);
+			// Base (11) + inputs (1 * 68) + outputs (1 * 31) = 11 + 68 + 31 = 110
+			expect(result).toBe(110);
 		});
 
 		it('should handle 0n inputs and outputs', () => {
@@ -104,8 +104,8 @@ describe('btc-utxos.utils', () => {
 				numOutputs: 0
 			});
 
-			// Base (10) + inputs (0 * 68) + outputs (0 * 31) = 10
-			expect(result).toBe(10);
+			// Base (11) + inputs (0 * 68) + outputs (0 * 31) = 11
+			expect(result).toBe(11);
 		});
 
 		it('should handle large number of inputs and outputs', () => {
@@ -114,8 +114,8 @@ describe('btc-utxos.utils', () => {
 				numOutputs: 5
 			});
 
-			// Base (10) + inputs (10 * 68) + outputs (5 * 31) = 10 + 680 + 155 = 845
-			expect(result).toBe(845);
+			// Base (11) + inputs (10 * 68) + outputs (5 * 31) = 11 + 680 + 155 = 846
+			expect(result).toBe(846);
 		});
 	});
 
@@ -160,11 +160,11 @@ describe('btc-utxos.utils', () => {
 				feeRateMiliSatoshisPerVByte: 1000n
 			});
 
-			// With 1 sat/vbyte and estimated tx size of 140 bytes, fee = 140 sats
-			// Change = 500_000 - 100_000 - 140 = 399_860
-			expect(result.changeAmount).toBe(399_860n);
+			// With 1 sat/vbyte and estimated tx size of 141 bytes, fee = 141 sats
+			// Change = 500_000 - 100_000 - 141 = 399_859
+			expect(result.changeAmount).toBe(399_859n);
 			expect(result.sufficientFunds).toBeTruthy();
-			expect(result.feeSatoshis).toBe(140n);
+			expect(result.feeSatoshis).toBe(141n);
 		});
 
 		it('should return empty result when no UTXOs available', () => {
@@ -192,9 +192,9 @@ describe('btc-utxos.utils', () => {
 
 			expect(result.sufficientFunds).toBeFalsy();
 			expect(result.feeSatoshis).toBeGreaterThan(ZERO); // Should have calculated fee even when insufficient
-			// With 1 input and 2 outputs, tx size = 10 + 1*68 + 2*31 = 140 bytes
-			// Fee = 140 * 100 = 14000 satoshis
-			expect(result.feeSatoshis).toBe(14000n);
+			// With 1 input and 2 outputs, tx size = 11 + 1*68 + 2*31 = 141 bytes
+			// Fee = 141 * 100 = 14100 satoshis
+			expect(result.feeSatoshis).toBe(14100n);
 		});
 
 		it('should handle 0n fee rate', () => {

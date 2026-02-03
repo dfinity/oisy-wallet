@@ -1,9 +1,9 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { WETH_TOKEN_GROUP } from '$env/tokens/groups/groups.weth.env';
 import weth from '$eth/assets/weth.svg';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { WETH_TOKEN_GROUP } from '../groups/groups.weth.env';
 
 const WETH_DECIMALS = 18;
 

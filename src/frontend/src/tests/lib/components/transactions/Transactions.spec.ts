@@ -12,6 +12,12 @@ describe('Transactions', () => {
 	const timeout = 12000;
 	const mockGoTo = vi.fn();
 
+	const mockToken = {
+		...mockValidIcrcToken,
+		name: 'WaterNeuron',
+		ledgerCanisterId: 'jcmow-hyaaa-aaaaq-aadlq-cai'
+	};
+
 	beforeEach(() => {
 		vi.useFakeTimers();
 		vi.clearAllMocks();
@@ -35,7 +41,7 @@ describe('Transactions', () => {
 	});
 
 	it('should open the manage token modal if a disabled token is used', async () => {
-		mockPage.mockToken({ ...mockValidIcrcToken, name: 'WaterNeuron' });
+		mockPage.mockToken(mockToken);
 
 		render(Transactions);
 
@@ -47,7 +53,7 @@ describe('Transactions', () => {
 	});
 
 	it('should not open the manage token modal if a not supported token is used', async () => {
-		mockPage.mockToken({ ...mockValidIcrcToken, name: 'WaterGlas' });
+		mockPage.mockToken({ ...mockToken, ledgerCanisterId: 'WaterGlas' });
 
 		render(Transactions);
 
@@ -69,7 +75,7 @@ describe('Transactions', () => {
 	});
 
 	it('should redirect the user to the activity page if the modal gets closed', async () => {
-		mockPage.mockToken({ ...mockValidIcrcToken, name: 'WaterNeuron' });
+		mockPage.mockToken(mockToken);
 
 		const { container } = render(Transactions);
 
@@ -89,7 +95,7 @@ describe('Transactions', () => {
 	});
 
 	it('should not redirect the user if the modal gets closed and pageToken is nonNullish', async () => {
-		mockPage.mockToken({ ...mockValidIcrcToken, name: 'WaterNeuron' });
+		mockPage.mockToken(mockToken);
 
 		const { container } = render(Transactions);
 
@@ -111,7 +117,7 @@ describe('Transactions', () => {
 	});
 
 	it('should redirect the user to the activity page if token does not exist', async () => {
-		mockPage.mockToken({ ...mockValidIcrcToken, name: 'UNKNOWN' });
+		mockPage.mockToken({ ...mockToken, ledgerCanisterId: 'UNKNOWN' });
 
 		render(Transactions);
 

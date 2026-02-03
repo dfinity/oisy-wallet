@@ -1,7 +1,9 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import {
 	hasSufficientIcrcAllowance,
+	isIcrcTokenSupportIcrc2,
 	loadCustomTokens,
 	loadDisabledIcrcTokensBalances,
 	loadDisabledIcrcTokensExchanges
@@ -11,6 +13,11 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS
+} from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as exchangeServices from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -25,7 +32,11 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
-import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
+import {
+	IcrcLedgerCanister,
+	fromCandidAccount,
+	type IcrcLedgerDid
+} from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
@@ -75,7 +86,7 @@ describe('icrc.services', () => {
 			version: [1n],
 			enabled: true,
 			section: toNullable(),
-			allow_external_content_source: toNullable()
+			allow_external_content_source: toNullable(true)
 		};
 
 		beforeEach(() => {
@@ -125,9 +136,9 @@ describe('icrc.services', () => {
 				assert('Icrc' in mockCustomToken.token);
 
 				expect(token).not.toBeNull();
-				expect(token).toEqual({
+				expect(token).toStrictEqual({
 					certified: true,
-					data: expect.objectContaining({
+					data: {
 						category: 'custom',
 						decimals: Number(mockDecimals),
 						enabled: true,
@@ -137,12 +148,14 @@ describe('icrc.services', () => {
 							indexCanisterId: mockIndexCanisterId
 						}),
 						ledgerCanisterId: mockLedgerCanisterId,
+						mintingAccount: fromCandidAccount({ owner: mockPrincipal, subaccount: toNullable() }),
 						name: mockName,
 						network: ICP_NETWORK,
 						standard: { code: 'icrc' },
 						symbol: mockSymbol,
-						version: fromNullable(mockCustomToken.version)
-					})
+						version: fromNullable(mockCustomToken.version),
+						allowExternalContentSource: fromNullable(mockCustomToken.allow_external_content_source)
+					}
 				});
 
 				// query + update
@@ -166,7 +179,7 @@ describe('icrc.services', () => {
 					version: [1n],
 					enabled: true,
 					section: toNullable(),
-					allow_external_content_source: toNullable()
+					allow_external_content_source: toNullable(true)
 				};
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
@@ -188,7 +201,7 @@ describe('icrc.services', () => {
 					version: [1n],
 					enabled: true,
 					section: toNullable(),
-					allow_external_content_source: toNullable()
+					allow_external_content_source: toNullable(false)
 				};
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
@@ -202,17 +215,27 @@ describe('icrc.services', () => {
 						tokenLedgerId === dragginzLedgerCanisterId
 				);
 
-				expect(token).toEqual({
+				expect(token).toStrictEqual({
 					certified: true,
-					data: expect.objectContaining({
-						alternativeName: 'Dragginz',
-						explorerUrl: 'https://dashboard.internetcomputer.org/sns/zxeu2-7aaaa-aaaaq-aaafa-cai',
+					data: {
+						category: 'custom',
+						decimals: 8,
+						enabled: true,
 						fee: 100000n,
-						icon: '/icons/sns/zfcdd-tqaaa-aaaaq-aaaga-cai.png',
+						id: expect.any(Symbol),
 						indexCanisterId: dragginzIndexCanisterId,
 						ledgerCanisterId: dragginzLedgerCanisterId,
-						name: 'Draggin Karma Points'
-					})
+						mintingAccount: fromCandidAccount({ owner: mockPrincipal, subaccount: toNullable() }),
+						name: 'Draggin Karma Points',
+						network: ICP_NETWORK,
+						standard: { code: 'icrc' },
+						symbol: 'DKP',
+						version: fromNullable(mockCustomToken.version),
+						allowExternalContentSource: fromNullable(mockCustomToken.allow_external_content_source),
+						alternativeName: 'Dragginz',
+						explorerUrl: 'https://dashboard.internetcomputer.org/sns/zxeu2-7aaaa-aaaaq-aaafa-cai',
+						icon: '/icons/sns/zfcdd-tqaaa-aaaaq-aaaga-cai.png'
+					}
 				});
 
 				expect(spyMetadata).not.toHaveBeenCalled();
@@ -379,9 +402,23 @@ describe('icrc.services', () => {
 
 				expect(spyToastsError).not.toHaveBeenCalled();
 
-				expect(console.error).toHaveBeenCalledTimes(2);
-				expect(console.error).toHaveBeenNthCalledWith(1, err);
-				expect(console.error).toHaveBeenNthCalledWith(2, err);
+				expect(trackEvent).toHaveBeenCalledTimes(2);
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+						error: err.message
+					}
+				});
+				expect(trackEvent).toHaveBeenNthCalledWith(2, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+						error: err.message
+					}
+				});
 			});
 
 			it('should show a toast on metadata error if the token was enabled', async () => {
@@ -439,9 +476,23 @@ describe('icrc.services', () => {
 
 				expect(spyToastsError).not.toHaveBeenCalled();
 
-				expect(console.error).toHaveBeenCalledTimes(2);
-				expect(console.error).toHaveBeenNthCalledWith(1, err);
-				expect(console.error).toHaveBeenNthCalledWith(2, err);
+				expect(trackEvent).toHaveBeenCalledTimes(2);
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+						error: err.message
+					}
+				});
+				expect(trackEvent).toHaveBeenNthCalledWith(2, {
+					name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+						error: err.message
+					}
+				});
 			});
 
 			it('should not cache the custom tokens in IDB', async () => {
@@ -695,6 +746,82 @@ describe('icrc.services', () => {
 					amount: mockAmount
 				})
 			).rejects.toThrowError(err);
+		});
+	});
+
+	describe('isIcrcTokenSupportIcrc2', () => {
+		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
+
+		const params = {
+			identity: mockIdentity,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
+		};
+
+		const expectedParams = { certified: true };
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
+		});
+
+		it('returns true when ICRC-2 standard is supported', async () => {
+			const supportedStandards: IcrcLedgerDid.StandardRecord[] = [
+				{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
+				{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' },
+				{ name: 'ICRC-3', url: 'https://github.com/dfinity/ICRC-3' }
+			];
+
+			vi.mocked(ledgerCanisterMock.icrc1SupportedStandards).mockResolvedValue(supportedStandards);
+
+			const result = await isIcrcTokenSupportIcrc2(params);
+
+			expect(result).toBeTruthy();
+			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
+		});
+
+		it('returns false when ICRC-2 standard is not supported', async () => {
+			const supportedStandards = [
+				{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
+				{ name: 'ICRC-3', url: 'https://github.com/dfinity/ICRC-3' }
+			];
+
+			vi.mocked(ledgerCanisterMock.icrc1SupportedStandards).mockResolvedValue(supportedStandards);
+
+			const result = await isIcrcTokenSupportIcrc2(params);
+
+			expect(result).toBeFalsy();
+			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
+		});
+
+		it('returns false when no standards are supported', async () => {
+			const supportedStandards: [] = [];
+
+			vi.mocked(ledgerCanisterMock.icrc1SupportedStandards).mockResolvedValue(supportedStandards);
+
+			const result = await isIcrcTokenSupportIcrc2(params);
+
+			expect(result).toBeFalsy();
+			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
+		});
+
+		it('returns true when only ICRC-2 is supported', async () => {
+			const supportedStandards = [{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }];
+
+			vi.mocked(ledgerCanisterMock.icrc1SupportedStandards).mockResolvedValue(supportedStandards);
+
+			const result = await isIcrcTokenSupportIcrc2(params);
+
+			expect(result).toBeTruthy();
+			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
 		});
 	});
 });

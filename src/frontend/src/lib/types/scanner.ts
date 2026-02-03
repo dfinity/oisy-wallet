@@ -1,3 +1,4 @@
 export enum ScannerResults {
-	PAY = 'pay'
+	PAY = 'pay',
+	WALLET_CONNECT = 'wallet_connect'
 }
