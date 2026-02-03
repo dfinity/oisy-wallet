@@ -11,7 +11,11 @@
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
-	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdBitcoin,
+		isNetworkIdEthereum,
+		isNetworkIdEvm
+	} from '$lib/utils/network.utils';
 
 	interface Props {
 		onClose: () => void;
@@ -25,7 +29,7 @@
 {#if nonNullish($availableTokens) && $availableTokens.length > 0}
 	<List noPadding>
 		{#each $availableTokens as token (token.id)}
-			{#if isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)}
+			{#if isNetworkIdBitcoin(token.network.id) || isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)}
 				<ListItem styleClass="first-of-type:border-t-1">
 					<LogoButton
 						dividers={false}
