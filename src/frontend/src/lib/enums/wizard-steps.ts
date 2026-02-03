@@ -106,5 +106,7 @@ export enum WizardStepsScanner {
 	TOKENS_LIST = 'Tokens List',
 	PAYING = 'Paying',
 	PAYMENT_CONFIRMED = 'Payment Confirmed',
-	PAYMENT_FAILED = 'Payment Failed'
+	PAYMENT_FAILED = 'Payment Failed',
+	WALLET_CONNECT_REVIEW = WizardStepsWalletConnect.REVIEW,
+	WALLET_CONNECT_CONNECT = WizardStepsWalletConnect.CONNECT
 }
