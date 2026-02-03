@@ -1,5 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { MediaStatusEnum } from '$lib/enums/media-status';
 import type { Nft, NftCollectionUi, NonFungibleToken } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -40,8 +40,8 @@ export const mockValidErc721Nft: Nft = {
 		allowExternalContentSource: true
 	},
 	mediaStatus: {
-		image: NftMediaStatusEnum.OK,
-		thumbnail: NftMediaStatusEnum.INVALID_DATA
+		image: MediaStatusEnum.OK,
+		thumbnail: MediaStatusEnum.INVALID_DATA
 	}
 };
 
@@ -62,8 +62,8 @@ export const mockValidErc1155Nft: Nft = {
 		allowExternalContentSource: true
 	},
 	mediaStatus: {
-		image: NftMediaStatusEnum.OK,
-		thumbnail: NftMediaStatusEnum.INVALID_DATA
+		image: MediaStatusEnum.OK,
+		thumbnail: MediaStatusEnum.INVALID_DATA
 	},
 	acquiredAt: new Date('2023-01-01T00:00:00.000Z')
 };
@@ -78,8 +78,8 @@ export const mockValidExtNft: Nft = {
 		address: mockValidExtV2Token.canisterId
 	},
 	mediaStatus: {
-		image: NftMediaStatusEnum.OK,
-		thumbnail: NftMediaStatusEnum.OK
+		image: MediaStatusEnum.OK,
+		thumbnail: MediaStatusEnum.OK
 	}
 };
 
@@ -91,8 +91,8 @@ export const mockValidDip721Nft: Nft = {
 		address: mockValidDip721Token.canisterId
 	},
 	mediaStatus: {
-		image: NftMediaStatusEnum.OK,
-		thumbnail: NftMediaStatusEnum.OK
+		image: MediaStatusEnum.OK,
+		thumbnail: MediaStatusEnum.OK
 	}
 };
 
@@ -104,8 +104,8 @@ export const mockValidIcPunksNft: Nft = {
 		address: mockValidIcPunksToken.canisterId
 	},
 	mediaStatus: {
-		image: NftMediaStatusEnum.OK,
-		thumbnail: NftMediaStatusEnum.OK
+		image: MediaStatusEnum.OK,
+		thumbnail: MediaStatusEnum.OK
 	}
 };
 

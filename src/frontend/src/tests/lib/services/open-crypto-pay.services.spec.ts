@@ -26,23 +26,31 @@ import type {
 	PayableToken,
 	PayableTokenWithConvertedAmount,
 	TransactionBaseParams,
-	ValidatedDFXPaymentData
+	ValidatedEthPaymentData
 } from '$lib/types/open-crypto-pay';
 import { extractQuoteData } from '$lib/utils/open-crypto-pay.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
-vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
-	decodeLNURL: vi.fn((lnurl: string) => {
-		if (lnurl === 'VALID_LNURL') {
-			return 'https://api.dfx.swiss/v1/lnurlp/pl_test123';
-		}
-	}),
-	extractQuoteData: vi.fn(() => ({
-		quoteId: 'mock-quote-id-123',
-		callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123'
-	})),
-	validateDecodedData: vi.fn(({ decodedData, fee }) => ({
+vi.mock('$lib/utils/open-crypto-pay.utils', async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...(actual as Record<string, unknown>),
+		decodeLNURL: vi.fn((lnurl: string) => {
+			if (lnurl === 'VALID_LNURL') {
+				return 'https://api.dfx.swiss/v1/lnurlp/pl_test123';
+			}
+		}),
+		extractQuoteData: vi.fn(() => ({
+			quoteId: 'mock-quote-id-123',
+			callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123'
+		}))
+	};
+});
+
+vi.mock('$eth/utils/eth-open-crypto-pay.utils', () => ({
+	validateEthEvmTransfer: vi.fn(({ decodedData, fee }) => ({
 		destination: decodedData?.destination ?? '',
 		ethereumChainId: decodedData?.ethereumChainId ?? '1',
 		value: decodedData?.value ?? 0,
@@ -374,7 +382,7 @@ describe('open-crypto-pay.service', () => {
 	describe('buildTransactionBaseParams', () => {
 		const userAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as EthAddress;
 
-		const validatedData: ValidatedDFXPaymentData = {
+		const validatedData: ValidatedEthPaymentData = {
 			destination: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
 			ethereumChainId: 1n,
 			value: 1000000000000n,
@@ -502,7 +510,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should preserve BigInt fee values', () => {
-			const data: ValidatedDFXPaymentData = {
+			const data: ValidatedEthPaymentData = {
 				...validatedData,
 				feeData: {
 					maxFeePerGas: 999n,
@@ -523,7 +531,7 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should preserve BigInt gas limit', () => {
-			const data: ValidatedDFXPaymentData = {
+			const data: ValidatedEthPaymentData = {
 				...validatedData,
 				estimatedGasLimit: 50000n
 			};

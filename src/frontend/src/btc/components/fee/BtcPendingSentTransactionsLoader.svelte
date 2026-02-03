@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { type Snippet, untrack } from 'svelte';
 	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 	import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
@@ -7,7 +7,7 @@
 	import type { NetworkId } from '$lib/types/network';
 
 	interface Props {
-		source: string;
+		source?: string;
 		networkId?: NetworkId;
 		children: Snippet;
 	}
@@ -19,6 +19,7 @@
 
 		untrack(
 			() =>
+				nonNullish(source) &&
 				isNullish($btcPendingSentTransactionsStore[source]) &&
 				loadBtcPendingSentTransactions({
 					identity: $authIdentity,

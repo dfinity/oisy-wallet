@@ -16,7 +16,7 @@
 		listener: OptionWalletConnectListener;
 	}
 
-	let { request, firstTransaction, sourceNetwork, listener = $bindable() }: Props = $props();
+	let { request, firstTransaction, sourceNetwork, listener }: Props = $props();
 
 	let token = $derived(
 		[...$enabledEthereumTokens, ...$enabledEvmTokens].find(

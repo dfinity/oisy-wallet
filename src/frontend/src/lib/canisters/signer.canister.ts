@@ -22,6 +22,7 @@ import {
 import type {
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
+	SignBtcResponse,
 	SignWithSchnorrParams
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -180,6 +181,35 @@ export class SignerCanister extends Canister<SignerService> {
 		utxosToSpend,
 		...rest
 	}: SendBtcParams): Promise<SendBtcResponse> => {
+		const { btc_caller_send } = this.caller({
+			certified: true
+		});
+
+		const response = await btc_caller_send(
+			{
+				address_type: P2WPKH,
+				utxos_to_spend: utxosToSpend,
+				fee_satoshis: feeSatoshis,
+				...rest
+			},
+			[SIGNER_PAYMENT_TYPE]
+		);
+
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
+		}
+
+		throw mapSignerCanisterSendBtcError(response.Err);
+	};
+
+	signBtc = async ({
+		feeSatoshis,
+		utxosToSpend,
+		...rest
+	}: SendBtcParams): Promise<SignBtcResponse> => {
+		// TODO: replace with signer's btc_caller_sign when the respective method is available
+		// Note: btc_caller_sign will accept the same params as btc_caller_send so only the function name should be changed
 		const { btc_caller_send } = this.caller({
 			certified: true
 		});
