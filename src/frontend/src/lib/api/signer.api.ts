@@ -10,6 +10,7 @@ import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
+	SignBtcResponse,
 	SignWithSchnorrParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -60,6 +61,16 @@ export const signTransaction = async ({
 	const { signTransaction } = await signerCanister({ identity });
 
 	return signTransaction({ transaction });
+};
+
+// TODO: update params and response types when signer's caller_btc_sign is available
+export const signBtc = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SendBtcParams>): Promise<SignBtcResponse> => {
+	const { signBtc } = await signerCanister({ identity });
+
+	return signBtc(params);
 };
 
 export const signMessage = async ({
