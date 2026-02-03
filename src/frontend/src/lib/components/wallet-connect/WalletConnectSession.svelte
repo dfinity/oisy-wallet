@@ -66,21 +66,6 @@
 
 	const goToFirstStep = () => modal?.set?.(0);
 
-	// One try to manually sign in by entering the URL manually or scanning a QR code
-	const userConnect = async (uri: string) => {
-		if (isNullish(modal)) {
-			return;
-		}
-
-		modal.next();
-
-		const { result } = await connectListener({ uri, onSessionDeleteCallback: goToFirstStep });
-
-		if (result === 'error') {
-			modal.back();
-		}
-	};
-
 	// One try to sign in using the Oisy Wallet listed in the WalletConnect app, and the sign-in occurs through URL
 	const uriConnect = async () => {
 		if (isNullish($walletConnectUri)) {
@@ -223,5 +208,5 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WalletConnectSessionModal onConnect={userConnect} {steps} bind:modal />
+	<WalletConnectSessionModal {steps} bind:modal />
 {/if}
