@@ -13,7 +13,7 @@ case $ENV in
   # Represents more an ID than a URL
   POUH_ISSUER_VC_URL="https://${POUH_ISSUER_CANISTER_ID}.icp0.io/"
   ;;
-"ic")
+"ic" | "beta")
   ECDSA_KEY_NAME="key_1"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"
