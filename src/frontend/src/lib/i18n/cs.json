@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
-			"test_banner_beta": "Toto je beta verze. Může se vyskytnout chyba. V sázce jsou skutečné prostředky – používejte prosím s opatrností.",
-			"internet_identity_banner_first_part": "$oisy_name nyní používá",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Přečtěte více"
+			"test_banner_beta": "Toto je beta verze. Může se vyskytnout chyba. V sázce jsou skutečné prostředky – používejte prosím s opatrností."
 		},
 		"alt": {
 			"logo": "logo $name",
@@ -121,7 +118,6 @@
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
-			"legacy_login": "Starší přihlášení",
 			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
 			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
 			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
@@ -160,15 +156,8 @@
 				"useful_links": "Užitečné odkazy",
 				"identity_new_identity": "Peněženka $oisy_short přepíná doménu Internet Identity na: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "$oisy_name přepíná na Internet Identity 2.0",
-				"identity_legacy_identity_title": "Už nevidíte své číslo Internet Identity na přihlašovací obrazovce? Své číslo Internet Identity můžete zjistit některým z následujících způsobů:",
-				"identity_legacy_identity_item_1": "Projděte si seznam čísel, která jste dříve používali na <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> nebo <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
-				"identity_legacy_identity_item_2": "Podívejte se na číslo na začátku fráze pro obnovení, kterou jste si možná dříve uložili.",
 				"identity_new_identity_title": "$oisy_name nyní používá Internet Identity 2.0, která nabízí několik vylepšení a umožňuje propojit vaši identitu s vašimi přihlašovacími údaji na Google, Apple nebo Microsoft.",
 				"identity_new_identity_item_1": "Chcete-li migrovat svou stávající identitu, klikněte na odkaz “Upgrade your identity“ v horní části nové přihlašovací stránky a postupujte podle pokynů.",
-				"identity_new_identity_item_2": "Stále můžete používat starší přihlašovací stránku se svým číslem Internet Identity. Stačí kliknout na odkaz níže a zobrazit starší přihlašovací obrazovku.",
-				"identity_new_identity_link": "Více informací o Internet Identity 2.0 naleznete v dokumentech OISY.",
-				"identity_legacy_sign_in": "Přihlásit se pomocí staré domény Internet Identity (legacy)",
-				"identity_learn_more": "Více se dozvíte v dokumentaci $oisy_short",
 				"oisy_introduction": "$oisy_short Úvod",
 				"logging_into_oisy": "",
 				"creating_a_wallet": "",
@@ -865,6 +854,7 @@
 			"unknown_cketh": "Token ckETH nelze získat.",
 			"destination_address_invalid": "Cílová adresa je neplatná.",
 			"amount_invalid": "Částka je neplatná.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Nedostatek prostředků na gas/poplatky",
 			"insufficient_funds_for_amount": "Nedostatek prostředků na částku",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Nedostatek prostředků Ethereum k pokrytí poplatků",
@@ -1807,7 +1797,6 @@
 			},
 			"title": "",
 			"instruction": "Kliknutím na toto tlačítko souhlasíte s $link",
-			"instruction_two_buttons": "Kliknutím na jedno z těchto tlačítek souhlasíte s $link",
 			"body": ""
 		},
 		"alt": {

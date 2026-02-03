@@ -17,7 +17,7 @@ import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import { toastsShow } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -27,7 +27,7 @@ import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
+import { areAddressesPartiallyEqual, getCaseSensitiveness } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
@@ -441,3 +441,88 @@ export const filterTokensByNft = ({
 				const isNft = isTokenNonFungible(t);
 				return filterNfts ? isNft : !isNft;
 			});
+
+export const assertExistingTokens = <T extends Token>({
+	existingTokens,
+	token,
+	errorMsg
+}: {
+	existingTokens: T[];
+	token: Omit<T, 'id'>;
+	errorMsg: string;
+}): { valid: boolean } => {
+	if (
+		nonNullish(
+			existingTokens.find(({ symbol }) => symbol.toLowerCase() === token.symbol.toLowerCase())
+		)
+	) {
+		toastsError({
+			msg: { text: errorMsg }
+		});
+
+		return { valid: false };
+	}
+
+	return { valid: true };
+};
+
+/**
+ * Returns the path to a token icon stored in the codebase.
+ *
+ * Icons are organised in the `static` folder **per network and per identifier**.
+ * The identifier is network-specific (for example, the token address
+ * for ERC-20 and SPL tokens), resulting in paths of the form:
+ *
+ * `icons/{network}/{identifier}.{extension}`
+ *
+ * Supported token types include:
+ * - All EVM-compatible ERC-20 tokens
+ * - Solana SPL tokens
+ *
+ * Address matching follows **network-specific case-sensitiveness rules**:
+ * - Case-sensitive networks use the address as-is
+ * - Case-insensitive networks use the lower-cased address
+ *
+ * For unsupported token
+ * types, this function returns `undefined`.
+ *
+ * @template T - A token type extending {@link Token}
+ *
+ * @param params
+ * @param params.token - A token object containing network information
+ * and a valid address. The address must match the network’s addressing
+ * rules in order for the icon to resolve correctly.
+ * @param params.extension - Optional file extension for the icon asset.
+ * Defaults to `'webp'`.
+ *
+ * @returns The relative icon path
+ * (e.g. `/icons/eth/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp`)
+ * or `undefined` if the token type is not supported.
+ */
+export const getCodebaseTokenIconPath = <T extends Token>({
+	token,
+	extension = 'webp'
+}: {
+	token: T;
+	extension?: 'webp' | 'svg' | 'png';
+}): string | undefined => {
+	if (isTokenErc20(token) || isTokenSpl(token)) {
+		const {
+			address,
+			network: { id: networkId }
+		} = token;
+
+		const isCaseSensitive = getCaseSensitiveness({ networkId });
+
+		const identifier = isCaseSensitive ? address : address.toLowerCase();
+
+		const networkSymbol = networkId.description
+			?.toLowerCase()
+			.trim()
+			.replace(/\s+/g, '-') // spaces → -
+			.replace(/[^a-z0-9-]/g, '') // drop everything else
+			.replace(/-+/g, '-'); // collapse multiple -
+
+		return `/icons/${networkSymbol}/${identifier}.${extension}`;
+	}
+};

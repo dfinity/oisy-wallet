@@ -46,13 +46,7 @@ interface I18nCore {
 		ellipsis: string;
 		learn_more: string;
 	};
-	info: {
-		test_banner: string;
-		test_banner_beta: string;
-		internet_identity_banner_first_part: string;
-		internet_identity_banner_second_part: string;
-		internet_identity_banner_button: string;
-	};
+	info: { test_banner: string; test_banner_beta: string };
 	alt: {
 		logo: string;
 		go_to_home: string;
@@ -120,7 +114,6 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
-		legacy_login: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
@@ -151,15 +144,8 @@ interface I18nAuth {
 			useful_links: string;
 			identity_new_identity: string;
 			switch_to_new_internet_identity: string;
-			identity_legacy_identity_title: string;
-			identity_legacy_identity_item_1: string;
-			identity_legacy_identity_item_2: string;
 			identity_new_identity_title: string;
 			identity_new_identity_item_1: string;
-			identity_new_identity_item_2: string;
-			identity_new_identity_link: string;
-			identity_legacy_sign_in: string;
-			identity_learn_more: string;
 			oisy_introduction: string;
 			logging_into_oisy: string;
 			creating_a_wallet: string;
@@ -658,6 +644,7 @@ interface I18nSend {
 		unknown_cketh: string;
 		destination_address_invalid: string;
 		amount_invalid: string;
+		insufficient_funds_verbose_btc: string;
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
 		insufficient_ethereum_funds_to_cover_the_fees: string;
@@ -1444,7 +1431,6 @@ interface I18nTerms_of_use {
 		det: { article: string; possessive: string };
 		title: string;
 		instruction: string;
-		instruction_two_buttons: string;
 		body: string;
 	};
 	alt: { terms_of_use: string };

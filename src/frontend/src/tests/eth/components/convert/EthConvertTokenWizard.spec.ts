@@ -158,7 +158,7 @@ describe('EthConvertTokenWizard', () => {
 		});
 
 		mockPage.reset();
-		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
+		mockPage.mockNetwork(ETHEREUM_NETWORK_ID.description);
 
 		ethAddressStore.reset();
 

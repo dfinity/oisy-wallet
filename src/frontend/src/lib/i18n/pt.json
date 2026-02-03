@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
-			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "$oisy_name agora usa",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Leia mas"
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logotipo $name",
@@ -121,7 +118,6 @@
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
-			"legacy_login": "Login legado",
 			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
 			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
 			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain",
@@ -160,15 +156,8 @@
 				"useful_links": "Links úteis",
 				"identity_new_identity": "A carteira $oisy_short muda o domínio da Internet Identity para: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "",
-				"identity_legacy_identity_title": "",
-				"identity_legacy_identity_item_1": "",
-				"identity_legacy_identity_item_2": "",
 				"identity_new_identity_title": "",
 				"identity_new_identity_item_1": "",
-				"identity_new_identity_item_2": "",
-				"identity_new_identity_link": "",
-				"identity_legacy_sign_in": "Entrar com o domínio Internet Identity legacy",
-				"identity_learn_more": "Saiba mais nos Docs do $oisy_short",
 				"oisy_introduction": "",
 				"logging_into_oisy": "",
 				"creating_a_wallet": "",
@@ -865,6 +854,7 @@
 			"unknown_cketh": "O token ckETH não pode ser recuperado.",
 			"destination_address_invalid": "Endereço de destino inválido.",
 			"amount_invalid": "Valor inválido.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Fundos insuficientes para gás",
 			"insufficient_funds_for_amount": "Fundos insuficientes para o valor",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fundos Ethereum insuficientes para cobrir as taxas",
@@ -1807,7 +1797,6 @@
 			},
 			"title": "",
 			"instruction": "Ao clicar neste botão, você concorda com os $link",
-			"instruction_two_buttons": "Ao clicar em um desses botões, você concorda com os $link",
 			"body": ""
 		},
 		"alt": {

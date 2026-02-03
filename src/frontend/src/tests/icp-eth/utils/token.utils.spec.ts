@@ -1,10 +1,10 @@
+import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
+import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import {
 	GLDT_LEDGER_CANISTER_ID,
 	VCHF_LEDGER_CANISTER_ID,
 	VEUR_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
-import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
-import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';

@@ -1,9 +1,8 @@
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
-import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
-import { enrichEthEvmToken } from '$eth/utils/token.utils';
+import { enrichEthEvmPayableToken } from '$eth/utils/eth-open-crypto-pay.utils';
+import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_EVENTS_KEYS } from '$lib/enums/plausible';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import { i18n } from '$lib/stores/i18n.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
 import type {
@@ -13,17 +12,12 @@ import type {
 	PayableTokenWithConvertedAmount,
 	PayableTokenWithFees,
 	PaymentMethodData,
-	PrepareTokensParams,
-	ValidatedDFXPaymentData
+	PrepareTokensParams
 } from '$lib/types/open-crypto-pay';
-import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
-import { isEthAddress } from '$lib/utils/account.utils';
-import { isNetworkEthereum, isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
-import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
+import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
-import Decimal from 'decimal.js';
-import { get } from 'svelte/store';
 
 /**
  * Decodes LNURL according to LNURL-01 standard
@@ -190,7 +184,7 @@ const enrichTokenWithUsdAndBalance = ({
 
 	// ETH/EVM networks
 	if (isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)) {
-		return enrichEthEvmToken({
+		return enrichEthEvmPayableToken({
 			token,
 			nativeTokens,
 			exchanges,
@@ -236,181 +230,45 @@ export const extractQuoteData = (data: OpenCryptoPayResponse) => {
 	};
 };
 
-export const validateDecodedData = ({
-	decodedData,
-	token,
-	amount,
-	uri
+export const getPaymentUri = ({
+	callback,
+	quoteId,
+	network,
+	rawTransaction
 }: {
-	decodedData: DecodedUrn | undefined;
-	token: PayableTokenWithConvertedAmount;
-	amount: bigint;
-	uri: string;
-}): ValidatedDFXPaymentData => {
-	const { feeData, estimatedGasLimit } = token.fee ?? {};
+	callback: string;
+	quoteId: string;
+	network: string;
+	rawTransaction: string;
+}): string => {
+	// By dfx documentation we need to replace 'cb' with 'tx' to get the transaction submission endpoint
+	const apiUrl = callback.replace('cb', 'tx');
 
-	if (
-		isNullish(feeData?.maxFeePerGas) ||
-		isNullish(feeData?.maxPriorityFeePerGas) ||
-		isNullish(estimatedGasLimit) ||
-		isNullish(decodedData)
-	) {
-		throw new Error(get(i18n).scanner.error.data_is_incompleted);
-	}
-
-	const params = {
-		decodedData,
-		amount,
-		maxFeePerGas: feeData.maxFeePerGas,
-		maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-		estimatedGasLimit,
-		token,
-		uri
-	};
-
-	return isDefaultEthereumToken(token)
-		? validateNativeTransfer(params)
-		: validateERC20Transfer(params);
+	return `${apiUrl}?quote=${quoteId}&method=${network}&hex=${rawTransaction}`;
 };
 
-export const getERC681Value = (uri: string): bigint | undefined => {
-	try {
-		const params = new URLSearchParams(uri.split('?')[1] || '');
-		const value = params.get('value') ?? params.get('uint256');
-
-		if (isEmptyString(value)) {
-			return;
-		}
-
-		if (value.includes('e') || value.includes('E') || value.includes('.')) {
-			const decimal = new Decimal(value);
-
-			if (!decimal.isFinite()) {
-				return;
-			}
-
-			return BigInt(decimal.toString());
-		}
-
-		return BigInt(value);
-	} catch (_: unknown) {
-		// If it is not parseable, we can handle a nullish value
-	}
-};
-
-export const validateNativeTransfer = ({
-	decodedData,
-	amount,
-	maxFeePerGas,
-	maxPriorityFeePerGas,
-	estimatedGasLimit,
+export const getOpenCryptoPayBaseTrackingParams = ({
 	token,
-	uri
+	providerData
 }: {
-	decodedData: DecodedUrn;
-	amount: bigint;
-	token: PayableTokenWithConvertedAmount;
-	maxFeePerGas: bigint;
-	maxPriorityFeePerGas: bigint;
-	estimatedGasLimit: bigint;
-	uri: string;
-}): ValidatedDFXPaymentData => {
-	const { functionName, destination } = decodedData;
-	const dfxValue = getERC681Value(uri);
-
-	const {
-		pay: {
-			error: { data_is_incompleted, amount_does_not_match, recipient_address_is_not_valid }
-		}
-	} = get(i18n);
-
-	if (
-		!isNetworkEthereum(token.network) ||
-		isNullish(destination) ||
-		nonNullish(functionName) ||
-		isNullish(dfxValue)
-	) {
-		throw new Error(data_is_incompleted);
-	}
-
-	if (amount !== dfxValue) {
-		throw new Error(amount_does_not_match);
-	}
-
-	if (!isEthAddress(destination)) {
-		throw new Error(recipient_address_is_not_valid);
-	}
-
-	return {
-		destination,
-		feeData: {
-			maxFeePerGas,
-			maxPriorityFeePerGas
-		},
-		estimatedGasLimit,
-		value: amount,
-		ethereumChainId: token.network.chainId
-	};
-};
-
-export const validateERC20Transfer = ({
-	decodedData,
-	token,
-	amount,
-	maxFeePerGas,
-	maxPriorityFeePerGas,
-	estimatedGasLimit,
-	uri
-}: {
-	decodedData: DecodedUrn;
-	token: PayableTokenWithConvertedAmount;
-	amount: bigint;
-	maxFeePerGas: bigint;
-	maxPriorityFeePerGas: bigint;
-	estimatedGasLimit: bigint;
-	uri: string;
-}): ValidatedDFXPaymentData => {
-	const { destination, address } = decodedData;
-	const dfxValue = getERC681Value(uri);
-
-	const {
-		pay: {
-			error: {
-				data_is_incompleted,
-				amount_does_not_match,
-				recipient_address_is_not_valid,
-				token_address_mismatch
-			}
-		}
-	} = get(i18n);
-
-	if (!isTokenErc20(token) || isNullish(destination) || isNullish(address) || isNullish(dfxValue)) {
-		throw new Error(data_is_incompleted);
-	}
-
-	const tokenContractAddress = token.address.toLowerCase();
-	const urnContractAddress = destination.toLowerCase();
-
-	if (tokenContractAddress !== urnContractAddress) {
-		throw new Error(token_address_mismatch);
-	}
-
-	if (amount !== dfxValue) {
-		throw new Error(amount_does_not_match);
-	}
-
-	if (!isEthAddress(address)) {
-		throw new Error(recipient_address_is_not_valid);
-	}
-
-	return {
-		destination: address,
-		feeData: {
-			maxFeePerGas,
-			maxPriorityFeePerGas
-		},
-		estimatedGasLimit,
-		ethereumChainId: token.network.chainId,
-		value: amount
-	};
-};
+	token?: PayableTokenWithConvertedAmount;
+	providerData?: OpenCryptoPayResponse;
+}) => ({
+	event_context: PLAUSIBLE_EVENT_CONTEXTS.OPEN_CRYPTOPAY,
+	event_subcontext: PLAUSIBLE_EVENT_CONTEXTS.DFX,
+	event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.PRICE,
+	...(nonNullish(providerData) && {
+		event_value: `${providerData.requestedAmount.amount} ${providerData.requestedAmount.asset}`
+	}),
+	...(nonNullish(token) && {
+		token_symbol: token.symbol,
+		token_network: token.network.name,
+		token_name: token.name,
+		token_standard: token.standard.code,
+		token_id: `${token.id.toString()}`,
+		token_usd_value: `${token.amountInUSD}`,
+		...(isTokenErc20(token) && {
+			token_address: token.address
+		})
+	})
+});

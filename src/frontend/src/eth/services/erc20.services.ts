@@ -1,4 +1,3 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
 import {
 	SUPPORTED_EVM_NETWORKS,
 	SUPPORTED_EVM_NETWORKS_CHAIN_IDS
@@ -30,6 +29,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
+import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
 import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -87,33 +87,29 @@ export const loadCustomTokens = ({
 	queryAndUpdate<Erc20CustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
-		onUpdateError: ({ error: err }) => {
-			erc20CustomTokensStore.resetAll();
-
-			toastsError({
-				msg: { text: get(i18n).init.error.erc20_custom_tokens },
-				err
-			});
-		},
+		onUpdateError,
 		identity
 	});
 
-const loadErc20CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
-	await loadNetworkCustomTokens({
-		...params,
-		filterTokens: ({ token }) => 'Erc20' in token
-	});
-
-const loadCustomTokensWithMetadata = async (
-	params: LoadCustomTokenParams
-): Promise<Erc20CustomToken[]> => {
+const loadCustomTokensWithMetadata = async ({
+	tokens,
+	...params
+}: LoadCustomTokenParams): Promise<Erc20CustomToken[]> => {
 	const loadCustomContracts = async (): Promise<Erc20CustomToken[]> => {
-		const erc20CustomTokens = await loadErc20CustomTokens(params);
+		const erc20CustomTokens = tokens ?? (await loadNetworkCustomTokens(params));
 
 		const [existingTokens, nonExistingTokens] = erc20CustomTokens.reduce<
 			[Erc20CustomToken[], Erc20CustomToken[]]
 		>(
-			([accExisting, accNonExisting], { token, enabled, version: versionNullable }) => {
+			(
+				[accExisting, accNonExisting],
+				{
+					token,
+					enabled,
+					version: versionNullable,
+					allow_external_content_source: allowExternalContentSourceNullable
+				}
+			) => {
 				if (!('Erc20' in token)) {
 					return [accExisting, accNonExisting];
 				}
@@ -127,6 +123,7 @@ const loadCustomTokensWithMetadata = async (
 				}
 
 				const version = fromNullable(versionNullable);
+				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
 				const {
 					Erc20: { token_address: tokenAddress, chain_id: tokenChainId }
@@ -138,7 +135,9 @@ const loadCustomTokensWithMetadata = async (
 				);
 
 				if (nonNullish(existingToken)) {
-					return [[...accExisting, { ...existingToken, enabled, version }], accNonExisting];
+					accExisting.push({ ...existingToken, enabled, version });
+
+					return [accExisting, accNonExisting];
 				}
 
 				const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
@@ -151,25 +150,24 @@ const loadCustomTokensWithMetadata = async (
 					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
 				);
 
-				return [
-					accExisting,
-					[
-						...accNonExisting,
-						{
-							id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
-							name: tokenAddress,
-							address: tokenAddress,
-							network,
-							symbol: tokenAddress,
-							decimals: ETHEREUM_DEFAULT_DECIMALS,
-							standard: { code: 'erc20' as const },
-							category: 'custom' as const,
-							exchange: 'erc20' as const,
-							enabled,
-							version
-						}
-					]
-				];
+				const newToken: Erc20CustomToken = {
+					id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
+					name: tokenAddress,
+					address: tokenAddress,
+					network,
+					symbol: tokenAddress,
+					decimals: ETHEREUM_DEFAULT_DECIMALS,
+					standard: { code: 'erc20' as const },
+					category: 'custom' as const,
+					exchange: 'erc20' as const,
+					enabled,
+					version,
+					allowExternalContentSource
+				};
+
+				accNonExisting.push(newToken);
+
+				return [accExisting, accNonExisting];
 			},
 			[[], []]
 		);
@@ -200,11 +198,11 @@ const loadCustomTokensWithMetadata = async (
 				address
 			} = token;
 
+			const icon = mapErc20Icon(token.symbol) ?? getCodebaseTokenIconPath({ token });
+
 			const metadata = await safeLoadMetadata({ networkId, address });
 
-			return nonNullish(metadata)
-				? [...(await acc), { ...token, icon: mapErc20Icon(metadata.symbol), ...metadata }]
-				: acc;
+			return nonNullish(metadata) ? [...(await acc), { ...token, icon, ...metadata }] : acc;
 		}, Promise.resolve([]));
 
 		return [...existingTokens, ...customTokens];
@@ -221,4 +219,13 @@ const loadCustomTokenData = ({
 	response: Erc20CustomToken[];
 }) => {
 	erc20CustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	erc20CustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.erc20_custom_tokens },
+		err
+	});
 };

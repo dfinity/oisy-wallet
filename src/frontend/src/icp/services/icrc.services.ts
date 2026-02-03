@@ -1,5 +1,6 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
-import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
+import { ICRC_TOKENS } from '$env/networks/networks.icrc.env';
+import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
 import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
@@ -7,13 +8,19 @@ import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import {
 	balance,
 	getMintingAccount,
+	icrc1SupportedStandards,
 	allowance as icrcAllowance,
 	metadata
 } from '$icp/api/icrc-ledger.api';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcCkToken, IcInterface, IcToken } from '$icp/types/ic-token';
+import {
+	IcTokenStandards,
+	type IcCkToken,
+	type IcInterface,
+	type IcToken
+} from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import {
@@ -24,6 +31,11 @@ import {
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS
+} from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
@@ -32,6 +44,7 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
+import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
@@ -63,27 +76,13 @@ export const loadCustomTokens = ({
 	identity,
 	useCache = false,
 	onSuccess
-}: {
-	identity: OptionIdentity;
-	useCache?: boolean;
+}: Omit<LoadCustomTokenParams, 'certified'> & {
 	onSuccess?: () => void;
 }): Promise<void> =>
 	queryAndUpdate<IcrcCustomToken[]>({
 		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
 		onLoad: (params) => loadIcrcCustomData({ ...params, onSuccess }),
-		onUpdateError: ({ error: err }) => {
-			icrcCustomTokensStore.resetAll();
-
-			trackEvent({
-				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
-				metadata: mapIcErrorMetadata(err)
-			});
-
-			toastsError({
-				msg: { text: get(i18n).init.error.icrc_canisters },
-				err
-			});
-		},
+		onUpdateError: onCustomTokensUpdateError,
 		identity
 	});
 
@@ -96,14 +95,7 @@ const loadDefaultIcrc = ({
 		request: (params) =>
 			requestIcrcMetadata({ ...params, ...data, ledgerCanisterId, category: 'default' }),
 		onLoad: loadIcrcData,
-		onUpdateError: ({ error: err }) => {
-			icrcDefaultTokensStore.reset(ledgerCanisterId);
-
-			trackEvent({
-				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
-				metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
-			});
-		},
+		onUpdateError: (params) => onDefaultTokensUpdateError({ ...params, ledgerCanisterId }),
 		identity: new AnonymousIdentity()
 	});
 
@@ -134,21 +126,19 @@ const loadIcrcData = ({
 const loadIcrcCustomTokens = async ({
 	identity,
 	certified,
+	tokens,
 	useCache = false
-}: {
-	identity: OptionIdentity;
-	certified: boolean;
-	useCache?: boolean;
-}): Promise<IcrcCustomToken[]> => {
-	const tokens = await loadNetworkCustomTokens({
-		identity,
-		certified,
-		filterTokens: ({ token }) => 'Icrc' in token,
-		useCache
-	});
+}: LoadCustomTokenParams): Promise<IcrcCustomToken[]> => {
+	const customTokens =
+		tokens ??
+		(await loadNetworkCustomTokens({
+			identity,
+			certified,
+			useCache
+		}));
 
 	return await loadCustomIcrcTokensData({
-		tokens,
+		tokens: customTokens,
 		identity,
 		certified
 	});
@@ -172,10 +162,15 @@ const loadCustomIcrcTokensData = async ({
 	const requestIcrcCustomTokenMetadata = async (
 		custom_token: CustomToken
 	): Promise<IcrcCustomToken | undefined> => {
-		const { enabled, version: v, token } = custom_token;
+		const {
+			token,
+			enabled,
+			version: versionNullable,
+			allow_external_content_source: allowExternalContentSourceNullable
+		} = custom_token;
 
 		if (!('Icrc' in token)) {
-			throw new Error('Token is not Icrc');
+			return;
 		}
 
 		const {
@@ -205,14 +200,16 @@ const loadCustomIcrcTokensData = async ({
 
 		const t = mapIcrcToken(data);
 
-		const version = fromNullable(v);
+		const version = fromNullable(versionNullable);
+		const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
 		return isNullish(t)
 			? undefined
 			: {
 					...t,
 					enabled,
-					...(nonNullish(version) && { version })
+					version,
+					allowExternalContentSource
 				};
 	};
 
@@ -220,8 +217,14 @@ const loadCustomIcrcTokensData = async ({
 
 	return results.reduce<IcrcCustomToken[]>((acc, result, index) => {
 		if (result.status !== 'fulfilled') {
-			// For development purposes, we want to see the error in the console.
-			console.error(result.reason);
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS.ICRC,
+					...(mapIcErrorMetadata(result.reason) ?? {})
+				}
+			});
 
 			const { enabled, token } = tokens[index];
 
@@ -266,6 +269,35 @@ const loadIcrcCustomData = ({
 	onSuccess?.();
 
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {
+	icrcCustomTokensStore.resetAll();
+
+	trackEvent({
+		name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+		metadata: mapIcErrorMetadata(err)
+	});
+
+	toastsError({
+		msg: { text: get(i18n).init.error.icrc_canisters },
+		err
+	});
+};
+
+const onDefaultTokensUpdateError = ({
+	error: err,
+	ledgerCanisterId
+}: {
+	error: unknown;
+	ledgerCanisterId: LedgerCanisterIdText;
+}) => {
+	icrcDefaultTokensStore.reset(ledgerCanisterId);
+
+	trackEvent({
+		name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+		metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
+	});
 };
 
 // TODO: Refactor to use queryAndUpdate
@@ -393,4 +425,19 @@ export const hasSufficientIcrcAllowance = async ({
 	const isNotExpired = nonNullish(expiredAt) && expiredAt > expiredBuffer;
 
 	return hasSufficientAllowance && isNotExpired;
+};
+
+export const isIcrcTokenSupportIcrc2 = async ({
+	identity,
+	ledgerCanisterId
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+}) => {
+	const supportedStandards = await icrc1SupportedStandards({
+		identity,
+		ledgerCanisterId
+	});
+
+	return supportedStandards.some(({ name }) => name === IcTokenStandards.icrc2);
 };

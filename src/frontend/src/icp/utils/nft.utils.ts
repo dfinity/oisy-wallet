@@ -5,7 +5,7 @@ import type { Dip721Token } from '$icp/types/dip721-token';
 import type { ExtToken } from '$icp/types/ext-token';
 import type { IcPunksToken } from '$icp/types/icpunks-token';
 import { extIndexToIdentifier, parseExtTokenIndex } from '$icp/utils/ext.utils';
-import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { MediaStatusEnum } from '$lib/enums/media-status';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { getMediaStatusOrCache } from '$lib/utils/nfts.utils';
@@ -76,8 +76,8 @@ export const mapDip721Nft = ({
 	token
 }: { index: bigint; token: Dip721Token } & QueryParams): Nft => {
 	const mediaStatus = {
-		image: NftMediaStatusEnum.INVALID_DATA,
-		thumbnail: NftMediaStatusEnum.INVALID_DATA
+		image: MediaStatusEnum.INVALID_DATA,
+		thumbnail: MediaStatusEnum.INVALID_DATA
 	};
 
 	return {
@@ -120,7 +120,7 @@ export const mapIcPunksNft = async ({
 
 	const mediaStatus = {
 		image: await getMediaStatusOrCache(imageUrl),
-		thumbnail: NftMediaStatusEnum.INVALID_DATA
+		thumbnail: MediaStatusEnum.INVALID_DATA
 	};
 
 	return {

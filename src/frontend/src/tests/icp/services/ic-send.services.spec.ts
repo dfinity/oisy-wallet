@@ -1,9 +1,7 @@
 import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
-import {
-	CKERC20_LEDGER_CANISTER_IDS,
-	IC_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { CKERC20_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import {
 	icrc1Transfer as icrc1TransferIcp,
 	transfer as transferIcp
@@ -17,9 +15,9 @@ import {
 } from '$icp/services/ck.services';
 import { sendDip20, sendIc, sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import type { IcTransferParams } from '$icp/types/ic-send';
+import * as accountUtils from '$icp/utils/account.utils';
 import * as icrcAccountUtils from '$icp/utils/icrc-account.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
-import * as accountUtils from '$lib/utils/account.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import en from '$tests/mocks/i18n.mock';
 import {

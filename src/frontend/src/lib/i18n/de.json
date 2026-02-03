@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
-			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können.",
-			"internet_identity_banner_first_part": "$oisy_name benutzt jetzt",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Mehr erfahren"
+			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können."
 		},
 		"alt": {
 			"logo": "$name-Logo",
@@ -121,7 +118,6 @@
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
-			"legacy_login": "Legacy Login",
 			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
 			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
@@ -160,15 +156,8 @@
 				"useful_links": "Hilfreiche Links",
 				"identity_new_identity": "$oisy_short Wallet wechselt die Internet Identity-Domain zu: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "$oisy_name switches to Internet Identity 2.0",
-				"identity_legacy_identity_title": "Du siehst deine Internet Identity Number auf dem Einloggen Schirm nicht mehr? Du kannst sie mit einer der folgenden Methoden wiederfinden:",
-				"identity_legacy_identity_item_1": "Überprüfe die angezeigten Nummern auf einer der Seiten auf denen du dich früher mal angemeldet hast: <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> oder <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
-				"identity_legacy_identity_item_2": "Du findest die Nummer auch an erster Stelle der Recovery Phrase die du eventuell füher mal niedergeschrieben hast.",
 				"identity_new_identity_title": "$oisy_name benutzt jetzt Internet Identity 2.0, das zahlreiche Verbesserungen enthält und es dir erlaubt, dich auch via deinem Konto bei Google, Apple oder Microsoft anzumelden.",
 				"identity_new_identity_item_1": "Um deine bestehende Identity zu aktualisieren, klicke auf den “Upgrade your identity“ Button im oberen Bereich des neuen Login Schirmes, und folge den weiteren Schritten.",
-				"identity_new_identity_item_2": "Du kannst noch den alten Login Schirm mit deiner Identity Nummer verwenden. Klicke dazu den unten stehenden Link.",
-				"identity_new_identity_link": "Erfahre mehr zu Internet Identity 2.0 in unserer Dokumentation",
-				"identity_legacy_sign_in": "Mit Internet Identity 1.0 anmelden (legacy)",
-				"identity_learn_more": "Mehr erfahren in den $oisy_short Docs",
 				"oisy_introduction": "$oisy_short Introduction",
 				"logging_into_oisy": "",
 				"creating_a_wallet": "",
@@ -865,6 +854,7 @@
 			"unknown_cketh": "Das ckETH-Token kann nicht abgerufen werden.",
 			"destination_address_invalid": "Zieladresse ist ungültig.",
 			"amount_invalid": "Betrag ist ungültig.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Unzureichende Mittel für Gas.",
 			"insufficient_funds_for_amount": "Unzureichende Mittel für den Betrag.",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Unzureichende Ethereum-Mittel, um die Gebühren zu decken.",
@@ -1807,7 +1797,6 @@
 			},
 			"title": "",
 			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
-			"instruction_two_buttons": "Durch Klicken einer dieser Schaltflächen stimmst du den $link zu",
 			"body": ""
 		},
 		"alt": {

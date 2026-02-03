@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Solo a scopo di test!",
-			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "$oisy_name ora utilizza",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Saperne di più"
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo di $name",
@@ -121,7 +118,6 @@
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
-			"legacy_login": "Accesso legacy",
 			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Assistente AI integrato con privacy come standard",
 			"advanced_cryptography": "Protetto da crittografia avanzata – 100% on-chain",
@@ -160,15 +156,8 @@
 				"useful_links": "Collegamenti utili",
 				"identity_new_identity": "Il wallet $oisy_short cambia il dominio Internet Identity in: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "$oisy_name è passato a Internet Identity 2.0",
-				"identity_legacy_identity_title": "Non vedi più il tuo numero di Internet Identity nella schermata di accesso? Puoi recuperarlo utilizzando uno dei seguenti metodi:",
-				"identity_legacy_identity_item_1": "Rivedi l'elenco dei numeri di Internet Identity che hai utilizzato in precedenza in <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> o <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
-				"identity_legacy_identity_item_2": "Osserva il numero all'inizio di una frase di recupero che potresti aver salvato in precedenza.",
 				"identity_new_identity_title": "$oisy_name ora utilizza Internet Identity 2.0, che offre diversi miglioramenti e consente di collegare la propria identità ai propri dati di accesso su Google, Apple o Microsoft.",
 				"identity_new_identity_item_1": "Per migrare la tua identità esistente, clicca sul link “Upgrade your Identity” nella parte superiore della nuova pagina di accesso e segui i passaggi.",
-				"identity_new_identity_item_2": "Puoi continuare a utilizzare la pagina di accesso legacy con il tuo numero di Internet Identity. Clicca sul link qui sotto per accedere alla schermata di accesso legacy.",
-				"identity_new_identity_link": "Scopri di più su Internet Identity 2.0 su OISY Docs",
-				"identity_legacy_sign_in": "Accedi con il vecchio dominio Internet Identity (legacy)",
-				"identity_learn_more": "Scopri di più sui Docs di $oisy_short",
 				"oisy_introduction": "Introduzione all'$oisy_short",
 				"logging_into_oisy": "",
 				"creating_a_wallet": "",
@@ -865,6 +854,7 @@
 			"unknown_cketh": "Il token ckETH non può essere recuperato.",
 			"destination_address_invalid": "L'indirizzo di destinazione non è valido.",
 			"amount_invalid": "L'importo non è valido.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Saldo insufficiente per il gas",
 			"insufficient_funds_for_amount": "Saldo insufficiente",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Saldo Ethereum insufficiente per coprire le fee",
@@ -1807,7 +1797,6 @@
 			},
 			"title": "",
 			"instruction": "Cliccando su questo pulsante, accetti i $link",
-			"instruction_two_buttons": "Cliccando su uno di questi pulsante, accetti i $link",
 			"body": ""
 		},
 		"alt": {

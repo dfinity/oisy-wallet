@@ -12,12 +12,13 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import type { Erc20Token } from '$eth/types/erc20';
 import * as appConstants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import { toastsShow } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
 import type { StakeBalances } from '$lib/types/stake-balance';
@@ -27,11 +28,13 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
+	assertExistingTokens,
 	defineEnabledTokens,
 	filterEnabledTokens,
 	filterTokens,
 	filterTokensByNft,
 	findToken,
+	getCodebaseTokenIconPath,
 	pinEnabledTokensAtTop,
 	pinTokensWithBalanceAtTop,
 	saveAllCustomTokens,
@@ -44,7 +47,7 @@ import {
 import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
-import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { createMockErc20Tokens, mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
@@ -61,6 +64,11 @@ import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()
+}));
+
+vi.mock('$lib/stores/toasts.store', () => ({
+	toastsError: vi.fn(),
+	toastsShow: vi.fn()
 }));
 
 describe('tokens.utils', () => {
@@ -185,7 +193,7 @@ describe('tokens.utils', () => {
 		const mockStakeBalances: StakeBalances = {};
 
 		beforeEach(() => {
-			vi.resetAllMocks();
+			vi.clearAllMocks();
 
 			mockUsdValue.mockImplementation(
 				({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
@@ -942,10 +950,6 @@ describe('tokens.utils', () => {
 
 	describe('saveAllCustomTokens', () => {
 		beforeEach(() => {
-			vi.mock('$lib/stores/toasts.store', () => ({
-				toastsShow: vi.fn()
-			}));
-
 			vi.mock('$lib/services/manage-tokens.services', () => ({
 				saveCustomTokensWithKey: vi.fn().mockResolvedValue(undefined)
 			}));
@@ -1136,6 +1140,165 @@ describe('tokens.utils', () => {
 			const result = filterTokensByNft({ tokens: [], filterNfts: false });
 
 			expect(result).toHaveLength(0);
+		});
+	});
+
+	describe('assertExistingTokens', () => {
+		const mockErrorMsg = 'Token already exists';
+		const mockTokens: Erc20Token[] = createMockErc20Tokens({ n: 5, networkEnv: 'mainnet' });
+		const { id: _, ...mockToken } = mockTokens[mockTokens.length - 1];
+		const mockParams = {
+			existingTokens: mockTokens,
+			token: mockToken,
+			errorMsg: mockErrorMsg
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should return true when existing tokens are empty', () => {
+			const res = assertExistingTokens({
+				...mockParams,
+				existingTokens: [] as Erc20Token[]
+			});
+
+			expect(res).toStrictEqual({ valid: true });
+
+			expect(toastsError).not.toHaveBeenCalled();
+		});
+
+		it('should return true when there is no match', () => {
+			const res = assertExistingTokens({
+				...mockParams,
+				token: { ...mockToken, symbol: 'NEW' }
+			});
+
+			expect(res).toStrictEqual({ valid: true });
+
+			expect(toastsError).not.toHaveBeenCalled();
+		});
+
+		it('should return false and toasts when symbol matches exactly', () => {
+			const res = assertExistingTokens(mockParams);
+
+			expect(res).toStrictEqual({ valid: false });
+
+			expect(toastsError).toHaveBeenCalledExactlyOnceWith({ msg: { text: mockErrorMsg } });
+		});
+
+		it('should be case-insensitive', () => {
+			expect(
+				assertExistingTokens({
+					...mockParams,
+					token: { ...mockToken, symbol: mockToken.symbol.toLowerCase() }
+				})
+			).toStrictEqual({ valid: false });
+
+			expect(
+				assertExistingTokens({
+					...mockParams,
+					token: { ...mockToken, symbol: mockToken.symbol.toUpperCase() }
+				})
+			).toStrictEqual({ valid: false });
+		});
+
+		it('should match the first item', () => {
+			const res = assertExistingTokens({
+				...mockParams,
+				existingTokens: [
+					...mockTokens,
+					mockTokens[mockTokens.length - 1],
+					mockTokens[mockTokens.length - 1]
+				]
+			});
+
+			expect(res).toEqual({ valid: false });
+
+			expect(toastsError).toHaveBeenCalledExactlyOnceWith({ msg: { text: mockErrorMsg } });
+		});
+	});
+
+	describe('getCodebaseTokenIconPath', () => {
+		it('should return the correct icon path for ERC20 tokens', () => {
+			const path = getCodebaseTokenIconPath({ token: mockValidErc20Token });
+
+			expect(path).toBe(
+				`/icons/${mockValidErc20Token.network.id.description?.toLowerCase()}/${mockValidErc20Token.address.toLowerCase()}.webp`
+			);
+		});
+
+		it('should return the correct icon path for SPL tokens', () => {
+			const path = getCodebaseTokenIconPath({ token: mockValidSplToken });
+
+			expect(path).toBe(
+				`/icons/${mockValidSplToken.network.id.description?.toLowerCase()}/${mockValidSplToken.address}.webp`
+			);
+		});
+
+		it('should return undefined for unsupported token standards', () => {
+			const tokens = [
+				ICP_TOKEN,
+				ETHEREUM_TOKEN,
+				SOLANA_TOKEN,
+				BTC_MAINNET_TOKEN,
+				mockValidErc721Token,
+				mockValidErc1155Token,
+				mockValidIcrcToken,
+				mockValidExtV2Token
+			];
+
+			tokens.forEach((token) => {
+				expect(getCodebaseTokenIconPath({ token })).toBeUndefined();
+			});
+		});
+
+		it('should allow to choose the extension of the icon', () => {
+			const pathPng = getCodebaseTokenIconPath({ token: mockValidErc20Token, extension: 'png' });
+
+			expect(pathPng).toBe(
+				`/icons/${mockValidErc20Token.network.id.description?.toLowerCase()}/${mockValidErc20Token.address}.png`
+			);
+
+			const pathJpg = getCodebaseTokenIconPath({ token: mockValidErc20Token, extension: 'svg' });
+
+			expect(pathJpg).toBe(
+				`/icons/${mockValidErc20Token.network.id.description?.toLowerCase()}/${mockValidErc20Token.address}.svg`
+			);
+		});
+
+		it('should consider the network case-sensitiveness', () => {
+			const path1 = getCodebaseTokenIconPath({
+				token: { ...mockValidErc20Token, address: mockValidErc20Token.address.toLowerCase() }
+			});
+
+			expect(path1).toBe(
+				`/icons/${mockValidErc20Token.network.id.description?.toLowerCase()}/${mockValidErc20Token.address.toLowerCase()}.webp`
+			);
+
+			const path2 = getCodebaseTokenIconPath({
+				token: { ...mockValidErc20Token, address: mockValidErc20Token.address.toUpperCase() }
+			});
+
+			expect(path2).toBe(
+				`/icons/${mockValidErc20Token.network.id.description?.toLowerCase()}/${mockValidErc20Token.address.toLowerCase()}.webp`
+			);
+
+			const path3 = getCodebaseTokenIconPath({
+				token: { ...mockValidSplToken, address: mockValidSplToken.address.toLowerCase() }
+			});
+
+			expect(path3).toBe(
+				`/icons/${mockValidSplToken.network.id.description?.toLowerCase()}/${mockValidSplToken.address.toLowerCase()}.webp`
+			);
+
+			const path4 = getCodebaseTokenIconPath({
+				token: { ...mockValidSplToken, address: mockValidSplToken.address.toUpperCase() }
+			});
+
+			expect(path4).toBe(
+				`/icons/${mockValidSplToken.network.id.description?.toLowerCase()}/${mockValidSplToken.address.toUpperCase()}.webp`
+			);
 		});
 	});
 });

@@ -51,11 +51,11 @@ const getSolanaPublicKey = async ({
 		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 		// HACK: This is not working for Local environment for now, because the library is not aware of the `dfx_test_1` public key (used by Local deployment).
-		const publicKey = await deriveSolAddress(
-			identity.getPrincipal().toString(),
-			[SOLANA_DERIVATION_PATH_PREFIX, ...derivationPath],
-			SIGNER_MASTER_PUB_KEY.schnorr.ed25519.pubkey
-		);
+		const publicKey = deriveSolAddress({
+			user: identity.getPrincipal().toString(),
+			derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...derivationPath],
+			pubkey: SIGNER_MASTER_PUB_KEY.schnorr.ed25519.pubkey
+		});
 
 		return Buffer.from(publicKey, 'hex');
 	}

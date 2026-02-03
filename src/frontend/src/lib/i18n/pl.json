@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",
-			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "$oisy_name teraz używa",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Przeczytaj więcej"
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "logo $name",
@@ -121,7 +118,6 @@
 			"logout": "Wyloguj",
 			"lock": "Zablokuj",
 			"authenticate": "Otwórz lub Utwórz",
-			"legacy_login": "Starsze logowanie",
 			"asset_types": "Zarządzaj aktywami w BTC, SOL, ETH, ICP i innych kryptowalutach",
 			"instant_and_private": "Wbudowany asystent AI z ochroną prywatności w standardzie",
 			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
@@ -160,15 +156,8 @@
 				"useful_links": "",
 				"identity_new_identity": "Portfel $oisy_short przełącza domenę Internet Identity na: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "",
-				"identity_legacy_identity_title": "",
-				"identity_legacy_identity_item_1": "",
-				"identity_legacy_identity_item_2": "",
 				"identity_new_identity_title": "",
 				"identity_new_identity_item_1": "",
-				"identity_new_identity_item_2": "",
-				"identity_new_identity_link": "",
-				"identity_legacy_sign_in": "Zaloguj się za pomocą starszej domeny Internet Identity",
-				"identity_learn_more": "Dowiedz się więcej w dokumentacji $oisy_short",
 				"oisy_introduction": "",
 				"logging_into_oisy": "",
 				"creating_a_wallet": "",
@@ -865,6 +854,7 @@
 			"unknown_cketh": "Nie można pobrać tokena ckETH.",
 			"destination_address_invalid": "Adres docelowy jest nieprawidłowy.",
 			"amount_invalid": "Kwota jest nieprawidłowa.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Niewystarczające środki na gaz",
 			"insufficient_funds_for_amount": "Niewystarczające środki na kwotę",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Niewystarczające środki Ethereum na pokrycie opłat",
@@ -1807,7 +1797,6 @@
 			},
 			"title": "",
 			"instruction": "Klikając ten przycisk, zgadzasz się na $link",
-			"instruction_two_buttons": "Klikając jeden z tych przycisków, zgadzasz się na $link",
 			"body": ""
 		},
 		"alt": {

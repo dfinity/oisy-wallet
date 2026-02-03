@@ -29,10 +29,10 @@ describe('load-tokens.services', () => {
 		): customToken is CustomTokenIcrcVariant => 'Icrc' in customToken.token;
 
 		const mapBackendTokensImpl = ({
-			enabled,
-			version: v,
-			token
-		}: CustomTokenIcrcVariant): IcrcCustomToken => {
+			token: { enabled, version: v, token }
+		}: {
+			token: CustomTokenIcrcVariant;
+		}): IcrcCustomToken => {
 			const {
 				Icrc: { ledger_id, index_id }
 			} = token;
@@ -62,8 +62,9 @@ describe('load-tokens.services', () => {
 		const expectedFilteredTokens: CustomTokenIcrcVariant[] =
 			mockCustomTokens.filter(filterBackendTokensImpl);
 
-		const expectedMappedTokens: IcrcCustomToken[] =
-			expectedFilteredTokens.map(mapBackendTokensImpl);
+		const expectedMappedTokens: IcrcCustomToken[] = expectedFilteredTokens.map((token) =>
+			mapBackendTokensImpl({ token })
+		);
 
 		const mapBackendTokensTyped = (params: Params) =>
 			mapBackendTokens<CustomTokenIcrcVariant, IcrcCustomToken>(params);
@@ -93,7 +94,7 @@ describe('load-tokens.services', () => {
 
 			filterCustomToken.mockImplementation(filterBackendTokensImpl);
 
-			mapCustomToken.mockImplementation((token) => Promise.resolve(mapBackendTokensImpl(token)));
+			mapCustomToken.mockImplementation((params) => Promise.resolve(mapBackendTokensImpl(params)));
 		});
 
 		it('should not fetch the custom tokens from the backend if they are provided', async () => {
@@ -157,7 +158,7 @@ describe('load-tokens.services', () => {
 
 			expectedFilteredTokens.forEach((token, index) =>
 				expect(mapCustomToken).toHaveBeenNthCalledWith(index + 1, {
-					...token,
+					token,
 					identity: loadParams.identity,
 					certified: loadParams.certified
 				})
@@ -191,7 +192,7 @@ describe('load-tokens.services', () => {
 
 			expectedFilteredTokens.forEach((token, index) =>
 				expect(mapCustomToken).toHaveBeenNthCalledWith(index + 1, {
-					...token,
+					token,
 					identity: loadParams.identity,
 					certified: true
 				})
@@ -230,7 +231,7 @@ describe('load-tokens.services', () => {
 
 			expectedFilteredTokens.forEach((token, index) =>
 				expect(mapCustomToken).toHaveBeenNthCalledWith(index + 1, {
-					...token,
+					token,
 					identity: loadParams.identity,
 					certified: false
 				})
@@ -278,7 +279,7 @@ describe('load-tokens.services', () => {
 
 			expectedFilteredTokens.forEach((token, index) =>
 				expect(mapCustomToken).toHaveBeenNthCalledWith(index + 1, {
-					...token,
+					token,
 					identity: loadParams.identity,
 					certified: false
 				})

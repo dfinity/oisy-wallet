@@ -6,7 +6,7 @@ import {
 } from '$env/tokens/tokens.btc.env';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userNetworks } from '$lib/derived/user-networks.derived';
-import type { Token } from '$lib/types/token';
+import type { OptionToken, Token } from '$lib/types/token';
 import { defineEnabledTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -21,4 +21,10 @@ export const enabledBitcoinTokens: Readable<Token[]> = derived(
 			testnetTokens: [BTC_TESTNET_TOKEN],
 			localTokens: [BTC_REGTEST_TOKEN]
 		})
+);
+
+export const enabledMainnetBitcoinToken: Readable<OptionToken> = derived(
+	[enabledBitcoinTokens],
+	([$enabledBitcoinTokens]) =>
+		$enabledBitcoinTokens.find(({ network: { env } }) => env === 'mainnet')
 );

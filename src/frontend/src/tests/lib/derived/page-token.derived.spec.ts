@@ -1,3 +1,4 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
@@ -31,6 +32,7 @@ import type { NonFungibleToken } from '$lib/types/nft';
 import type { RequiredTokenWithLinkedData } from '$lib/types/token';
 import { getNftIdentifier } from '$lib/utils/nft.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
+import { parseNetworkId } from '$lib/validation/network.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
@@ -63,7 +65,7 @@ describe('page-token.derived', () => {
 		it.each([ICP_TOKEN, BTC_MAINNET_TOKEN, SOLANA_TOKEN, ETHEREUM_TOKEN])(
 			'should find $name token',
 			(token) => {
-				mockPage.mock({ token: token.name, network: token.network.id.description });
+				mockPage.mockToken(token);
 
 				expect(get(pageToken)).toBe(token);
 			}
@@ -77,7 +79,7 @@ describe('page-token.derived', () => {
 					return () => {};
 				});
 
-				mockPage.mock({ token: token.name, network: token.network.id.description });
+				mockPage.mockToken(token);
 
 				expect(get(pageToken)).toBe(token);
 			}
@@ -90,7 +92,7 @@ describe('page-token.derived', () => {
 			});
 			vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
-			mockPage.mock({ token: token.name, network: token.network.id.description });
+			mockPage.mockToken(token);
 
 			expect(get(pageToken)).toBe(token);
 		});
@@ -98,7 +100,7 @@ describe('page-token.derived', () => {
 		it('should find ERC20 token', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
 			erc20CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
 		});
@@ -106,34 +108,37 @@ describe('page-token.derived', () => {
 		it('should find ICRC token', () => {
 			const mockToken = { ...mockIcrcCustomToken, enabled: true };
 			icrcCustomTokensStore.setAll([{ data: mockToken, certified: true }]);
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
 		});
 
 		it('should find SPL token', () => {
 			const mockToken = JUP_TOKEN;
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
 		});
 
 		it('should return undefined when token is not found in any list', () => {
-			mockPage.mock({ token: 'non-existent-token' });
+			mockPage.mockToken({ ...USDC_TOKEN, address: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 		});
 
 		it('should return undefined when token name matches but network does not', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
-			mockPage.mock({ token: mockToken.name, network: 'non-existent-network' });
+			mockPage.mockToken({
+				...mockToken,
+				network: { ...mockToken.network, id: parseNetworkId('non-existent-network') }
+			});
 
 			expect(get(pageToken)).toBeUndefined();
 		});
 
 		it('should return undefined when token network matches but name does not', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
-			mockPage.mock({ token: 'non-existent-token', network: mockToken.network.name });
+			mockPage.mockToken({ ...mockToken, address: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 		});
@@ -154,15 +159,18 @@ describe('page-token.derived', () => {
 		it('should return undefined when page token is undefined', () => {
 			expect(get(pageTokenStandard)).toBeUndefined();
 
-			mockPage.mock({ token: 'non-existent-token' });
+			mockPage.mockToken({ ...USDC_TOKEN, address: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 
-			mockPage.mock({ token: mockValidErc20Token.name, network: 'non-existent-network' });
+			mockPage.mockToken({
+				...mockValidErc20Token,
+				network: { ...mockValidErc20Token.network, id: parseNetworkId('non-existent-network') }
+			});
 
 			expect(get(pageToken)).toBeUndefined();
 
-			mockPage.mock({ token: 'non-existent-token', network: mockValidErc20Token.network.name });
+			mockPage.mockToken({ ...mockValidErc20Token, address: 'non-existent-token' });
 
 			expect(get(pageToken)).toBeUndefined();
 		});
@@ -170,7 +178,7 @@ describe('page-token.derived', () => {
 		it.each([ICP_TOKEN, BTC_MAINNET_TOKEN, SOLANA_TOKEN, ETHEREUM_TOKEN])(
 			'should return the standard for $name token',
 			(token) => {
-				mockPage.mock({ token: token.name, network: token.network.id.description });
+				mockPage.mockToken(token);
 
 				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
@@ -184,7 +192,7 @@ describe('page-token.derived', () => {
 					return () => {};
 				});
 
-				mockPage.mock({ token: token.name, network: token.network.id.description });
+				mockPage.mockToken(token);
 
 				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
@@ -199,7 +207,7 @@ describe('page-token.derived', () => {
 				});
 				vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
-				mockPage.mock({ token: token.name, network: token.network.id.description });
+				mockPage.mockToken(token);
 
 				expect(get(pageTokenStandard)).toBe(token.standard.code);
 			}
@@ -208,7 +216,7 @@ describe('page-token.derived', () => {
 		it('should return the standard for ERC20 token', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
 			erc20CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});
@@ -216,14 +224,14 @@ describe('page-token.derived', () => {
 		it('should return the standard for ICRC token', () => {
 			const mockToken = { ...mockIcrcCustomToken, enabled: true };
 			icrcCustomTokensStore.setAll([{ data: mockToken, certified: true }]);
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});
 
 		it('should return the standard for SPL token', () => {
 			const mockToken = JUP_TOKEN;
-			mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+			mockPage.mockToken(mockToken);
 
 			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
 		});

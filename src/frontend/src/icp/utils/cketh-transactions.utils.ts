@@ -4,10 +4,8 @@ import {
 	ETHEREUM_EXPLORER_URL,
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import {
-	ICRC_LEDGER_CANISTER_TESTNET_IDS,
-	STAGING_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
+import { STAGING_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';

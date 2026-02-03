@@ -56,14 +56,7 @@ export const loadCustomTokens = ({
 	queryAndUpdate<Erc721CustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
-		onUpdateError: ({ error: err }) => {
-			erc721CustomTokensStore.resetAll();
-
-			toastsError({
-				msg: { text: get(i18n).init.error.erc721_custom_tokens },
-				err
-			});
-		},
+		onUpdateError,
 		identity
 	});
 
@@ -99,12 +92,16 @@ const filterErc721CustomToken = (
 ): customToken is CustomTokenErc721Variant => 'Erc721' in customToken.token;
 
 const mapErc721CustomToken = async ({
-	token,
-	enabled,
-	version: versionNullable,
-	section: sectionNullable,
-	allow_external_content_source: allowExternalContentSourceNullable
-}: CustomTokenErc721Variant): Promise<Erc721CustomToken | undefined> => {
+	token: {
+		token,
+		enabled,
+		version: versionNullable,
+		section: sectionNullable,
+		allow_external_content_source: allowExternalContentSourceNullable
+	}
+}: {
+	token: CustomTokenErc721Variant;
+}): Promise<Erc721CustomToken | undefined> => {
 	const version = fromNullable(versionNullable);
 	const section = fromNullable(sectionNullable);
 	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
@@ -169,4 +166,13 @@ const loadCustomTokenData = ({
 	response: Erc721CustomToken[];
 }) => {
 	erc721CustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	erc721CustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.erc721_custom_tokens },
+		err
+	});
 };

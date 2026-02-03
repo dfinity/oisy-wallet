@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "À des fins de test uniquement !",
-			"test_banner_beta": "Il s'agit d'une version bêta. Vous pourriez rencontrer des bugs. De vrais actifs sont en jeu - veuillez utiliser avec précaution.",
-			"internet_identity_banner_first_part": "$oisy_name utilise maintenant",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "En savoir plus"
+			"test_banner_beta": "Il s'agit d'une version bêta. Vous pourriez rencontrer des bugs. De vrais actifs sont en jeu - veuillez utiliser avec précaution."
 		},
 		"alt": {
 			"logo": "Logo de $name",
@@ -121,7 +118,6 @@
 			"logout": "Se déconnecter",
 			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
-			"legacy_login": "Connexion legacy",
 			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
 			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
 			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain",
@@ -160,15 +156,8 @@
 				"useful_links": "Liens utiles",
 				"identity_new_identity": "Le portefeuille $oisy_short change le domaine Internet Identity en : <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "$oisy_name passe à Internet Identity 2.0 (en anglais)",
-				"identity_legacy_identity_title": "Vous ne voyez plus votre numéro d'Internet Identity sur l'écran de connexion ? Vous pouvez le retrouver en utilisant l'une des méthodes suivantes :",
-				"identity_legacy_identity_item_1": "Consultez la liste des numéros d'Internet Identity que vous avez précédemment utilisés chez <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> ou <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
-				"identity_legacy_identity_item_2": "Look at the number at the beginning of a recovery phrase you may have saved earlier.",
 				"identity_new_identity_title": "$oisy_name utilise désormais Internet Identity 2.0, qui offre plusieurs améliorations et vous permet de connecter votre identité à vos identifiants sur Google, Apple ou Microsoft.",
 				"identity_new_identity_item_1": "Pour migrer votre identité existante, cliquez sur le lien « Upgrade your identity » en haut de la nouvelle page de connexion et suivez les étapes.",
-				"identity_new_identity_item_2": "Vous pouvez toujours utiliser l'ancienne page de connexion avec votre Internet Identity. Cliquez simplement sur le lien ci-dessous pour y accéder.",
-				"identity_new_identity_link": "En savoir plus sur Internet Identity 2.0 (en anglais)",
-				"identity_legacy_sign_in": "Se connecter avec le domaine Internet Identity hérité",
-				"identity_learn_more": "En savoir plus sur les Docs de $oisy_short",
 				"oisy_introduction": "Introduction à $oisy_short (en anglais)",
 				"logging_into_oisy": "",
 				"creating_a_wallet": "",
@@ -865,6 +854,7 @@
 			"unknown_cketh": "Le token ckETH ne peut pas être récupéré.",
 			"destination_address_invalid": "L'adresse de destination est invalide.",
 			"amount_invalid": "Le montant est invalide.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Fonds insuffisants pour le gaz",
 			"insufficient_funds_for_amount": "Fonds insuffisants pour le montant",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fonds Ethereum insuffisants pour couvrir les frais",
@@ -1807,7 +1797,6 @@
 			},
 			"title": "",
 			"instruction": "En cliquant sur ce bouton, vous acceptez les $link",
-			"instruction_two_buttons": "En cliquant sur l'un des boutons, vous acceptez les $link",
 			"body": ""
 		},
 		"alt": {

@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
-			"test_banner_beta": "Đây là phiên bản thử nghiệm. Bạn có thể gặp một số lỗi. Tài sản thật đang được sử dụng - vui lòng cẩn trọng.",
-			"internet_identity_banner_first_part": "$oisy_name hiện sử dụng",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Đọc thêm"
+			"test_banner_beta": "Đây là phiên bản thử nghiệm. Bạn có thể gặp một số lỗi. Tài sản thật đang được sử dụng - vui lòng cẩn trọng."
 		},
 		"alt": {
 			"logo": "Logo $name",
@@ -121,7 +118,6 @@
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
-			"legacy_login": "Đăng nhập kế thừa",
 			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
 			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
 			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
@@ -160,15 +156,8 @@
 				"useful_links": "",
 				"identity_new_identity": "Ví $oisy_short chuyển đổi tên miền Internet Identity thành: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "",
-				"identity_legacy_identity_title": "",
-				"identity_legacy_identity_item_1": "",
-				"identity_legacy_identity_item_2": "",
 				"identity_new_identity_title": "",
 				"identity_new_identity_item_1": "",
-				"identity_new_identity_item_2": "",
-				"identity_new_identity_link": "",
-				"identity_legacy_sign_in": "Đăng nhập bằng tên miền Internet Identity cũ",
-				"identity_learn_more": "Tìm hiểu thêm trên Tài liệu $oisy_short",
 				"oisy_introduction": "",
 				"logging_into_oisy": "",
 				"creating_a_wallet": "",
@@ -865,6 +854,7 @@
 			"unknown_cketh": "Không thể truy xuất token ckETH.",
 			"destination_address_invalid": "Địa chỉ ví không hợp lệ.",
 			"amount_invalid": "Số lượng không hợp lệ.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Không đủ tiền cho gas",
 			"insufficient_funds_for_amount": "Không đủ tiền cho số lượng",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Không đủ tiền Ethereum để trả phí",
@@ -1807,7 +1797,6 @@
 			},
 			"title": "",
 			"instruction": "Bằng cách nhấp vào nút này, bạn đồng ý với $link",
-			"instruction_two_buttons": "Bằng cách nhấp vào một trong những nút này, bạn đồng ý với $link",
 			"body": ""
 		},
 		"alt": {

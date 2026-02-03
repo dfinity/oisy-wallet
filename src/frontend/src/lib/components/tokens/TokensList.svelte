@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { isIOS } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
-	import { flip } from 'svelte/animate';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { goto } from '$app/navigation';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
@@ -97,10 +95,6 @@
 		modifiedTokens.set(id, { id, ...rest });
 	};
 
-	let ios = $derived(isIOS());
-
-	let flipParams = $derived({ duration: ios ? 0 : 250 });
-
 	const tokenKey = ({ id: tokenId, network: { id: networkId } }: TokenUi): string =>
 		`token:${tokenId.description}:${networkId.description}`;
 
@@ -122,7 +116,7 @@
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each tokensWithKey as { tokenOrGroup, key } (key)}
-				<div class="overflow-hidden rounded-xl" animate:flip={flipParams}>
+				<div class="overflow-hidden rounded-xl">
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
 
@@ -169,7 +163,7 @@
 					{/snippet}
 
 					{#each enableMoreTokensWithKey as { tokenOrGroup, key } (key)}
-						<div class="overflow-hidden rounded-xl" animate:flip={flipParams}>
+						<div class="overflow-hidden rounded-xl">
 							<div class="transition-colors duration-300 hover:bg-primary">
 								{#if !isTokenUiGroup(tokenOrGroup)}
 									<TokenCard data={tokenOrGroup.token} {onToggle} />

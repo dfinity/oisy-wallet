@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
-			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "$name लोगो",
@@ -121,7 +118,6 @@
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
-			"legacy_login": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
@@ -160,15 +156,8 @@
 				"useful_links": "",
 				"identity_new_identity": "$oisy_short वॉलेट इंटरनेट आइडेंटिटी डोमेन को: <span class=\"font-bold\">identity.internetcomputer.org</span> पर स्विच करता है",
 				"switch_to_new_internet_identity": "",
-				"identity_legacy_identity_title": "",
-				"identity_legacy_identity_item_1": "",
-				"identity_legacy_identity_item_2": "",
 				"identity_new_identity_title": "",
 				"identity_new_identity_item_1": "",
-				"identity_new_identity_item_2": "",
-				"identity_new_identity_link": "",
-				"identity_legacy_sign_in": "विरासत इंटरनेट आइडेंटिटी डोमेन के साथ साइन इन करें",
-				"identity_learn_more": "$oisy_short डॉक्स पर अधिक जानें",
 				"oisy_introduction": "",
 				"logging_into_oisy": "",
 				"creating_a_wallet": "",
@@ -865,6 +854,7 @@
 			"unknown_cketh": "ckETH टोकन पुनः प्राप्त नहीं किया जा सकता है।",
 			"destination_address_invalid": "गंतव्य पता अमान्य है।",
 			"amount_invalid": "राशि अमान्य है।",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "गैस के लिए अपर्याप्त धन",
 			"insufficient_funds_for_amount": "राशि के लिए अपर्याप्त धन",
 			"insufficient_ethereum_funds_to_cover_the_fees": "शुल्क को कवर करने के लिए अपर्याप्त एथेरियम धन",
@@ -1807,7 +1797,6 @@
 			},
 			"title": "",
 			"instruction": "",
-			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {

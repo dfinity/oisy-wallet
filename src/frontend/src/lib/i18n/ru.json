@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
-			"test_banner_beta": "Это бета-версия. Пожалуйста, используйте с осторожностью.",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"test_banner_beta": "Это бета-версия. Пожалуйста, используйте с осторожностью."
 		},
 		"alt": {
 			"logo": "Логотип $name",
@@ -121,7 +118,6 @@
 			"logout": "Выйти",
 			"lock": "Закрыть",
 			"authenticate": "Открыть или создать",
-			"legacy_login": "",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP и другие",
 			"instant_and_private": "Приватный доступ в любой момент",
 			"advanced_cryptography": "Защищено передовой криптографией - 100% onchain",
@@ -160,15 +156,8 @@
 				"useful_links": "",
 				"identity_new_identity": "Кошелек $oisy_short переключает домен Internet Identity на: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "",
-				"identity_legacy_identity_title": "",
-				"identity_legacy_identity_item_1": "",
-				"identity_legacy_identity_item_2": "",
 				"identity_new_identity_title": "",
 				"identity_new_identity_item_1": "",
-				"identity_new_identity_item_2": "",
-				"identity_new_identity_link": "",
-				"identity_legacy_sign_in": "Войти с устаревшим доменом Internet Identity",
-				"identity_learn_more": "Узнайте больше в документации $oisy_short",
 				"oisy_introduction": "",
 				"logging_into_oisy": "",
 				"creating_a_wallet": "",
@@ -865,6 +854,7 @@
 			"unknown_cketh": "Токен ckETH не может быть получен.",
 			"destination_address_invalid": "Адрес получателя недействителен.",
 			"amount_invalid": "Сумма недействительна.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Недостаточно средств для газа",
 			"insufficient_funds_for_amount": "Недостаточно средств для этой суммы",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Недостаточно средств Ethereum для покрытия комиссий",
@@ -1807,7 +1797,6 @@
 			},
 			"title": "",
 			"instruction": "Нажимая на кнопку вы одобряете $link",
-			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
