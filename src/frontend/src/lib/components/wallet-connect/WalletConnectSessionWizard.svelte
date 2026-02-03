@@ -6,7 +6,7 @@
 
 	interface Props {
 		currentStep: WizardStep<WizardStepsWalletConnect> | undefined;
-		onConnect: (uri: string) =>Promise< void>;
+		onConnect: (uri: string) => Promise<void>;
 	}
 
 	let { currentStep, onConnect }: Props = $props();

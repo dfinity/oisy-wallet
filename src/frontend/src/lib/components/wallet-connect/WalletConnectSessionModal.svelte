@@ -26,7 +26,6 @@
 
 	const goToFirstStep = () => modal?.set?.(0);
 
-
 	const onConnect = async (uri: string) => {
 		if (isNullish(modal)) {
 			return;

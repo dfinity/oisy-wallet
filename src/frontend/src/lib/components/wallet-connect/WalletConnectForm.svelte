@@ -45,7 +45,7 @@
 		return 'success';
 	};
 
-	const onClick =async () => {
+	const onClick = async () => {
 		const result = await connect();
 
 		if (result === 'error') {
