@@ -1,6 +1,5 @@
 import { isNullish } from '@dfinity/utils';
 import { checkAccountId } from '@icp-sdk/canisters/ledger/icp';
-import { isAddress } from 'ethers/address';
 
 export const isIcpAccountIdentifier = (address: string | undefined): boolean => {
 	if (isNullish(address)) {
@@ -15,14 +14,6 @@ export const isIcpAccountIdentifier = (address: string | undefined): boolean => 
 	}
 
 	return false;
-};
-
-export const isEthAddress = (address: string | undefined): boolean => {
-	if (isNullish(address)) {
-		return false;
-	}
-
-	return isAddress(address);
 };
 
 export const invalidIcpAddress = (address: string | undefined): boolean =>

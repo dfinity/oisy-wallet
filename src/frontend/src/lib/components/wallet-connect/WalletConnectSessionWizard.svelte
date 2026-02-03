@@ -1,25 +1,20 @@
-<script lang="ts">
+<script generics="T extends WizardStepsWalletConnect | WizardStepsScanner" lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import type { WalletKitTypes } from '@reown/walletkit';
 	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
-	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
-	import type { Option } from '$lib/types/utils';
+	import { type WizardStepsScanner, WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 
 	interface Props {
-		proposal: Option<WalletKitTypes.SessionProposal>;
-		currentStep: WizardStep<WizardStepsWalletConnect> | undefined;
-		onConnect: (uri: string) => void;
-		onApprove: () => void;
-		onReject: () => void;
+		currentStep: WizardStep<T> | undefined;
+		onConnect: (uri: string) => Promise<void>;
 	}
 
-	let { proposal, currentStep, onConnect, onApprove, onReject }: Props = $props();
+	let { currentStep, onConnect }: Props = $props();
 </script>
 
 {#key currentStep?.name}
 	{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
-		<WalletConnectReview {onApprove} onCancel={onReject} {onReject} {proposal} />
+		<WalletConnectReview />
 	{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
 		<WalletConnectForm {onConnect} />
 	{/if}
