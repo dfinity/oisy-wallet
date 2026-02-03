@@ -4,8 +4,8 @@
 	import { setContext } from 'svelte';
 	import OpenCryptoPayWizard from '$lib/components/open-crypto-pay/OpenCryptoPayWizard.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
-	import WalletConnectSessionWizard from '$lib/components/wallet-connect/WalletConnectSessionWizard.svelte';
 	import ScannerModalPayDataLoader from '$lib/components/scanner/ScannerModalPayDataLoader.svelte';
+	import WalletConnectSessionWizard from '$lib/components/wallet-connect/WalletConnectSessionWizard.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
@@ -101,8 +101,8 @@
 				<ScannerCode {onNext} />
 			{:else if currentStep?.name === WizardStepsScanner.PAY || currentStep?.name === WizardStepsScanner.TOKENS_LIST || currentStep?.name === WizardStepsScanner.PAYING || currentStep?.name === WizardStepsScanner.PAYMENT_FAILED || currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
 				<OpenCryptoPayWizard {currentStep} {modal} {steps} bind:payProgressStep />
-    {:else if currentStep?.name === WizardStepsScanner.WALLET_CONNECT_CONNECT || currentStep?.name === WizardStepsScanner.WALLET_CONNECT_REVIEW}
-			<WalletConnectSessionWizard {currentStep} onConnect={onWalletConnectConnect} />
+			{:else if currentStep?.name === WizardStepsScanner.WALLET_CONNECT_CONNECT || currentStep?.name === WizardStepsScanner.WALLET_CONNECT_REVIEW}
+				<WalletConnectSessionWizard {currentStep} onConnect={onWalletConnectConnect} />
 			{/if}
 		{/key}
 	</WizardModal>
