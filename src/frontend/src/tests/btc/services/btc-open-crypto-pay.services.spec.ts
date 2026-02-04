@@ -242,9 +242,9 @@ describe('btc-open-crypto-pay.services', () => {
 				readable(mockBtcAddress)
 			);
 			vi.mocked(btcSendServices.signBtc).mockResolvedValue({
-			txid: mockTxid,
-			signed_transaction_hex: 'abc123hex'
-		});
+				txid: mockTxid,
+				signed_transaction_hex: 'abc123hex'
+			});
 			vi.mocked(fetchOpenCryptoPay).mockResolvedValue(undefined);
 			vi.mocked(backendApi.addPendingBtcTransaction).mockResolvedValue(true);
 		});
