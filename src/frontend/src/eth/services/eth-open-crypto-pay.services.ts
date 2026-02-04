@@ -1,18 +1,33 @@
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
+import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import type { InfuraProvider } from '$eth/providers/infura.providers';
 import { getErc20FeeData, getEthFeeDataWithProvider } from '$eth/services/fee.services';
-import type { OptionEthAddress } from '$eth/types/address';
+import { getNonce } from '$eth/services/nonce.services';
+import { erc20PrepareTransaction, ethPrepareTransaction } from '$eth/services/send.services';
+import type { EthAddress } from '$eth/types/address';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthFeeResult } from '$eth/types/pay';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
-import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { isDefaultEthereumToken, isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
+import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
-import type { PayableToken } from '$lib/types/open-crypto-pay';
+import { ethAddress } from '$lib/derived/address.derived';
+import { ProgressStepsPayment } from '$lib/enums/progress-steps';
+import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
+import { i18n } from '$lib/stores/i18n.store';
+import type {
+	PayParams,
+	PayableToken,
+	TransactionBaseParams,
+	ValidatedEthPaymentData
+} from '$lib/types/open-crypto-pay';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
+import { getPaymentUri } from '$lib/utils/open-crypto-pay.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 /**
  * Estimates gas limit for a token transfer.
@@ -64,14 +79,10 @@ const estimateGasLimit = async ({
 	});
 };
 
-export const calculateEthFee = async ({
-	userAddress,
-	token
-}: {
-	userAddress: OptionEthAddress;
-	token: PayableToken;
-}): Promise<EthFeeResult | undefined> => {
-	if (isNullish(userAddress)) {
+export const calculateEthFee = async (token: PayableToken): Promise<EthFeeResult | undefined> => {
+	const address = get(ethAddress);
+
+	if (isNullish(address)) {
 		return;
 	}
 
@@ -82,8 +93,8 @@ export const calculateEthFee = async ({
 	const { feeData, provider, params } = await getEthFeeDataWithProvider({
 		networkId: network.id,
 		chainId: network.chainId,
-		from: userAddress,
-		to: userAddress
+		from: address,
+		to: address
 	});
 
 	const { safeEstimateGas } = provider;
@@ -116,4 +127,72 @@ export const calculateEthFee = async ({
 	const feeInWei = gasPrice * estimatedGasLimit;
 
 	return { feeInWei, feeData, estimatedGasLimit };
+};
+
+export const buildTransactionBaseParams = ({
+	from,
+	nonce,
+	validatedData
+}: {
+	from: EthAddress;
+	nonce: number;
+	validatedData: ValidatedEthPaymentData;
+}): TransactionBaseParams => ({
+	from,
+	to: validatedData.destination,
+	amount: validatedData.value,
+	maxPriorityFeePerGas: validatedData.feeData.maxPriorityFeePerGas,
+	maxFeePerGas: validatedData.feeData.maxFeePerGas,
+	nonce,
+	gas: validatedData.estimatedGasLimit,
+	chainId: validatedData.ethereumChainId
+});
+
+export const payEth = async ({
+	token,
+	identity,
+	validatedData,
+	progress,
+	quoteId,
+	callback
+}: Omit<PayParams, 'data' | 'amount'> & {
+	validatedData: ValidatedEthPaymentData;
+}) => {
+	const address = get(ethAddress);
+
+	if (isNullish(address)) {
+		throw new Error('ETH address is not available');
+	}
+
+	const nonce = await getNonce({ from: address, networkId: token.network.id });
+	const baseParams = buildTransactionBaseParams({
+		from: address,
+		nonce,
+		validatedData
+	});
+
+	const transaction = isDefaultEthereumToken(token)
+		? ethPrepareTransaction(baseParams)
+		: await erc20PrepareTransaction({
+				...baseParams,
+				token,
+				populate: infuraErc20Providers(token.network.id).populateTransaction
+			});
+
+	const rawTransaction = await signTransaction({
+		identity,
+		transaction,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+	progress(ProgressStepsPayment.PAY);
+
+	const apiUrl = getPaymentUri({
+		callback,
+		quoteId,
+		network: token.network.pay?.openCryptoPay ?? token.network.name,
+		rawTransaction
+	});
+
+	await fetchOpenCryptoPay(apiUrl);
 };

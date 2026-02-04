@@ -24,6 +24,7 @@ import {
 	mapTokenToPayableToken,
 	prepareBasePayableTokens
 } from '$lib/utils/open-crypto-pay.utils';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
 
 describe('open-crypto-pay.utils', () => {
 	describe('decodeLNURL', () => {
@@ -865,28 +866,32 @@ describe('open-crypto-pay.utils', () => {
 				symbol: 'ETH',
 				name: 'Ethereum',
 				decimals: 18,
-				network: mockNetworks[0]
+				network: mockNetworks[0],
+				standard: { code: 'ethereum' }
 			} as unknown as Token,
 			{
 				id: 'usdt-token',
 				symbol: 'USDT',
 				name: 'Tether',
 				decimals: 6,
-				network: mockNetworks[0]
+				network: mockNetworks[0],
+				standard: { code: 'erc20' }
 			} as unknown as Token,
 			{
 				id: 'matic-token',
 				symbol: 'MATIC',
 				name: 'Polygon',
 				decimals: 18,
-				network: mockNetworks[1]
+				network: mockNetworks[1],
+				standard: { code: 'polygon' }
 			} as unknown as Token,
 			{
 				id: 'bnb-token',
 				symbol: 'BNB',
 				name: 'BNB',
 				decimals: 18,
-				network: mockNetworks[2]
+				network: mockNetworks[2],
+				standard: { code: 'bsc' }
 			} as unknown as Token
 		];
 
@@ -894,7 +899,8 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: [],
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens
+				availableTokens: mockAvailableTokens,
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			expect(result).toEqual([]);
@@ -904,7 +910,8 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: [],
-				availableTokens: mockAvailableTokens
+				availableTokens: mockAvailableTokens,
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			expect(result).toEqual([]);
@@ -914,7 +921,8 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: []
+				availableTokens: [],
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			expect(result).toEqual([]);
@@ -924,7 +932,8 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: [],
 				networks: [],
-				availableTokens: []
+				availableTokens: [],
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			expect(result).toEqual([]);
@@ -934,7 +943,8 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens
+				availableTokens: mockAvailableTokens,
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			expect(result).toHaveLength(4);
@@ -980,7 +990,8 @@ describe('open-crypto-pay.utils', () => {
 						id: 'solana',
 						name: 'Solana',
 						pay: { openCryptoPay: 'Solana' }
-					} as unknown as Network
+					} as unknown as Network,
+					standard: { code: 'solana' }
 				} as unknown as Token
 			];
 
@@ -994,7 +1005,8 @@ describe('open-crypto-pay.utils', () => {
 						pay: { openCryptoPay: 'Solana' }
 					} as unknown as Network
 				],
-				availableTokens: tokensWithUnsupported
+				availableTokens: tokensWithUnsupported,
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			expect(result).toHaveLength(4);
@@ -1009,14 +1021,16 @@ describe('open-crypto-pay.utils', () => {
 					symbol: 'DAI',
 					name: 'DAI',
 					decimals: 18,
-					network: mockNetworks[0]
+					network: mockNetworks[0],
+					standard: { code: 'erc20' }
 				} as unknown as Token
 			];
 
 			const result = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: tokensWithMissingAsset
+				availableTokens: tokensWithMissingAsset,
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			expect(result).toHaveLength(4);
@@ -1027,7 +1041,8 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: [mockAvailableTokens[0]]
+				availableTokens: [mockAvailableTokens[0]],
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			expect(result).toHaveLength(1);
@@ -1038,7 +1053,8 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: [mockTransferAmounts[0]],
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens
+				availableTokens: mockAvailableTokens,
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			expect(result).toHaveLength(2);
@@ -1060,7 +1076,8 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: transferWithUnavailable,
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens
+				availableTokens: mockAvailableTokens,
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			expect(result).toHaveLength(4);
@@ -1070,13 +1087,15 @@ describe('open-crypto-pay.utils', () => {
 			const result1 = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens
+				availableTokens: mockAvailableTokens,
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			const result2 = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens
+				availableTokens: mockAvailableTokens,
+				btcAddressMainnet: mockBtcAddress
 			});
 
 			expect(result1).not.toBe(result2);

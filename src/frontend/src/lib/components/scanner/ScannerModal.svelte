@@ -4,8 +4,11 @@
 	import { setContext } from 'svelte';
 	import OpenCryptoPayWizard from '$lib/components/open-crypto-pay/OpenCryptoPayWizard.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
+	import ScannerModalPayDataLoader from '$lib/components/scanner/ScannerModalPayDataLoader.svelte';
+	import WalletConnectSessionWizard from '$lib/components/wallet-connect/WalletConnectSessionWizard.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -25,7 +28,12 @@
 
 	let modal: WizardModal<WizardStepsScanner> | undefined = $state();
 
-	const { selectedToken, data } = setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
+	let payProgressStep = $state(ProgressStepsPayment.REQUEST_DETAILS);
+
+	const { selectedToken, data: payData } = setContext<PayContext>(
+		PAY_CONTEXT_KEY,
+		initPayContext()
+	);
 
 	const onClose = () => {
 		if (currentStep?.name === WizardStepsScanner.PAY) {
@@ -34,7 +42,7 @@
 				metadata: {
 					...getOpenCryptoPayBaseTrackingParams({
 						token: $selectedToken,
-						providerData: $data
+						providerData: $payData
 					}),
 					result_status: 'cancel'
 				}
@@ -55,9 +63,19 @@
 		});
 	};
 
+	const onWalletConnectConnect = async () => {
+		// TODO: implement this function
+	};
+
 	const onNext = (results: ScannerResults) => {
 		if (results === ScannerResults.PAY) {
 			goToStep(WizardStepsScanner.PAY);
+
+			return;
+		}
+
+		if (results === ScannerResults.WALLET_CONNECT) {
+			// TODO: implement wallet connect flow
 
 			return;
 		}
@@ -66,22 +84,26 @@
 	};
 </script>
 
-<WizardModal
-	bind:this={modal}
-	disablePointerEvents={currentStep?.name === WizardStepsScanner.TOKENS_LIST}
-	{onClose}
-	{steps}
-	bind:currentStep
->
-	{#snippet title()}
-		{currentStep?.title}
-	{/snippet}
+<ScannerModalPayDataLoader>
+	<WizardModal
+		bind:this={modal}
+		disablePointerEvents={currentStep?.name === WizardStepsScanner.TOKENS_LIST}
+		{onClose}
+		{steps}
+		bind:currentStep
+	>
+		{#snippet title()}
+			{currentStep?.title}
+		{/snippet}
 
-	{#key currentStep?.name}
-		{#if currentStep?.name === WizardStepsScanner.SCAN}
-			<ScannerCode {onNext} />
-		{:else if currentStep?.name === WizardStepsScanner.PAY || currentStep?.name === WizardStepsScanner.TOKENS_LIST || currentStep?.name === WizardStepsScanner.PAYING || currentStep?.name === WizardStepsScanner.PAYMENT_FAILED || currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
-			<OpenCryptoPayWizard {currentStep} {modal} {steps} />
-		{/if}
-	{/key}
-</WizardModal>
+		{#key currentStep?.name}
+			{#if currentStep?.name === WizardStepsScanner.SCAN}
+				<ScannerCode {onNext} />
+			{:else if currentStep?.name === WizardStepsScanner.PAY || currentStep?.name === WizardStepsScanner.TOKENS_LIST || currentStep?.name === WizardStepsScanner.PAYING || currentStep?.name === WizardStepsScanner.PAYMENT_FAILED || currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
+				<OpenCryptoPayWizard {currentStep} {modal} {steps} bind:payProgressStep />
+			{:else if currentStep?.name === WizardStepsScanner.WALLET_CONNECT_CONNECT || currentStep?.name === WizardStepsScanner.WALLET_CONNECT_REVIEW}
+				<WalletConnectSessionWizard {currentStep} onConnect={onWalletConnectConnect} />
+			{/if}
+		{/key}
+	</WizardModal>
+</ScannerModalPayDataLoader>

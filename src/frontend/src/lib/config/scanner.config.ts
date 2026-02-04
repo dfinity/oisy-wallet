@@ -28,5 +28,13 @@ export const scannerWizardSteps = ({
 	{
 		name: WizardStepsScanner.PAYMENT_FAILED,
 		title: i18n.scanner.text.payment_failed
+	},
+	{
+		name: WizardStepsScanner.WALLET_CONNECT_CONNECT,
+		title: i18n.wallet_connect.text.name
+	},
+	{
+		name: WizardStepsScanner.WALLET_CONNECT_REVIEW,
+		title: i18n.wallet_connect.text.session_proposal
 	}
 ];

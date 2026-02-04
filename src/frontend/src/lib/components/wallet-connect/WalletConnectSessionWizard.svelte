@@ -1,12 +1,12 @@
-<script lang="ts">
+<script generics="T extends WizardStepsWalletConnect | WizardStepsScanner" lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
-	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
+	import { type WizardStepsScanner, WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 
 	interface Props {
-		currentStep: WizardStep<WizardStepsWalletConnect> | undefined;
-		onConnect: (uri: string) => void;
+		currentStep: WizardStep<T> | undefined;
+		onConnect: (uri: string) => Promise<void>;
 	}
 
 	let { currentStep, onConnect }: Props = $props();
