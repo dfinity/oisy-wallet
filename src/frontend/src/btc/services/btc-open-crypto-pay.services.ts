@@ -46,16 +46,13 @@ export const payBtc = async ({
 }: Omit<PayParams, 'data' | 'amount'> & {
 	validatedData: ValidatedBtcPaymentData;
 }) => {
-	// TODO: update the usage below when signBtc is pointing to btc_caller_sign
-	const { txid } = await signBtc({
+	const { txid, signed_transaction_hex } = await signBtc({
 		identity,
 		network: token.network.env,
 		utxosFee: validatedData.utxosFee,
-		amount: `${validatedData.satoshisAmount}`,
-		destination: validatedData.destination,
-		source: ''
+		satoshisAmount: validatedData.satoshisAmount,
+		destination: validatedData.destination
 	});
-	const signed_transaction_hex = '';
 
 	progress(ProgressStepsPayment.PAY);
 

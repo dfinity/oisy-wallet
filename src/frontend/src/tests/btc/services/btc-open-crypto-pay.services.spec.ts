@@ -241,7 +241,10 @@ describe('btc-open-crypto-pay.services', () => {
 			vi.spyOn(addressDerived, 'btcAddressMainnet', 'get').mockReturnValue(
 				readable(mockBtcAddress)
 			);
-			vi.mocked(btcSendServices.signBtc).mockResolvedValue({ txid: mockTxid });
+			vi.mocked(btcSendServices.signBtc).mockResolvedValue({
+				txid: mockTxid,
+				signed_transaction_hex: 'abc123hex'
+			});
 			vi.mocked(fetchOpenCryptoPay).mockResolvedValue(undefined);
 			vi.mocked(backendApi.addPendingBtcTransaction).mockResolvedValue(true);
 		});
@@ -260,9 +263,8 @@ describe('btc-open-crypto-pay.services', () => {
 				identity: mockIdentity,
 				network: mockToken.network.env,
 				utxosFee: mockValidatedData.utxosFee,
-				amount: '100000',
-				destination: mockValidatedData.destination,
-				source: ''
+				satoshisAmount: mockValidatedData.satoshisAmount,
+				destination: mockValidatedData.destination
 			});
 		});
 
@@ -290,7 +292,7 @@ describe('btc-open-crypto-pay.services', () => {
 			});
 
 			expect(fetchOpenCryptoPay).toHaveBeenCalledWith(
-				'https://api.dfx.swiss/v1/lnurlp/tx/pl_test?quote=quote-123&method=Bitcoin&hex='
+				'https://api.dfx.swiss/v1/lnurlp/tx/pl_test?quote=quote-123&method=Bitcoin&hex=abc123hex'
 			);
 		});
 
