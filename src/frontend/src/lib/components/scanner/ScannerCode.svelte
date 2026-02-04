@@ -50,16 +50,15 @@
 
 		try {
 			const isDisabled = (): boolean =>
-				!OCP_PAY_WITH_BTC_ENABLED ||
-				(nonNullish($enabledMainnetBitcoinToken) &&
-					nonNullish($btcAddressMainnet) &&
-					(isNullish($btcPendingSentTransactionsStore[$btcAddressMainnet]) ||
-						isNullish($allUtxosStore?.allUtxos) ||
-						isNullish($feeRatePercentilesStore?.feeRateFromPercentiles)));
+				nonNullish($enabledMainnetBitcoinToken) &&
+				nonNullish($btcAddressMainnet) &&
+				(isNullish($btcPendingSentTransactionsStore[$btcAddressMainnet]) ||
+					isNullish($allUtxosStore?.allUtxos) ||
+					isNullish($feeRatePercentilesStore?.feeRateFromPercentiles));
 
-			const [, paymentData] = await Promise.all([
-				waitReady({ retries: 20, isDisabled }),
-				processOpenCryptoPayCode(code)
+			const [paymentData] = await Promise.all([
+				processOpenCryptoPayCode(code),
+				...(OCP_PAY_WITH_BTC_ENABLED ? [waitReady({ retries: 20, isDisabled })] : [])
 			]);
 
 			setData(paymentData);
