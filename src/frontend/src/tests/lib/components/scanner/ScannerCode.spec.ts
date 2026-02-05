@@ -385,10 +385,9 @@ describe('ScannerCode.svelte', () => {
 			const button = screen.getByRole('button', { name: en.core.text.continue });
 			await fireEvent.click(button);
 			await waitFor(() => {
-				expect(openCryptoPayServices.calculateTokensWithFees).toHaveBeenCalledExactlyOnceWith({
-					tokens: mockBaseTokens,
-					userAddress: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-				});
+				expect(openCryptoPayServices.calculateTokensWithFees).toHaveBeenCalledExactlyOnceWith(
+					mockBaseTokens
+				);
 			});
 		});
 

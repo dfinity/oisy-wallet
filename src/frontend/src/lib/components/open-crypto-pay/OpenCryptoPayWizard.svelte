@@ -7,7 +7,6 @@
 	import OpenCryptoPayTokensList from '$lib/components/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 	import PaymentFailed from '$lib/components/open-crypto-pay/PaymentFailed.svelte';
 	import PaymentSucceeded from '$lib/components/open-crypto-pay/PaymentSucceeded.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
@@ -51,12 +50,7 @@
 	const progress = (step: ProgressStepsPayment) => (payProgressStep = step);
 
 	const pay = async () => {
-		if (
-			isNullish($selectedToken) ||
-			isNullish($data) ||
-			isNullish($ethAddress) ||
-			isNullish($authIdentity)
-		) {
+		if (isNullish($selectedToken) || isNullish($data) || isNullish($authIdentity)) {
 			return;
 		}
 
@@ -78,7 +72,6 @@
 			await payApi({
 				token: $selectedToken,
 				data: $data,
-				from: $ethAddress,
 				identity: $authIdentity,
 				progress,
 				amount

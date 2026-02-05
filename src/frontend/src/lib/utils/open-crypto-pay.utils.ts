@@ -1,8 +1,17 @@
+import { enrichBtcPayableToken, validateBtcTransfer } from '$btc/utils/btc-open-crypto-pay.utils';
+import { isBitcoinToken } from '$btc/utils/token.utils';
+import { OCP_PAY_WITH_BTC_ENABLED } from '$env/open-crypto-pay.env';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
-import { enrichEthEvmPayableToken } from '$eth/utils/eth-open-crypto-pay.utils';
+import {
+	enrichEthEvmPayableToken,
+	validateEthEvmTransfer
+} from '$eth/utils/eth-open-crypto-pay.utils';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import { getPendingTransactions } from '$icp/utils/btc.utils';
 import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_EVENTS_KEYS } from '$lib/enums/plausible';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
 import type {
@@ -12,12 +21,15 @@ import type {
 	PayableTokenWithConvertedAmount,
 	PayableTokenWithFees,
 	PaymentMethodData,
-	PrepareTokensParams
+	PrepareTokensParams,
+	ValidatedBtcPaymentData,
+	ValidatedEthPaymentData
 } from '$lib/types/open-crypto-pay';
+import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
-import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
+import { get } from 'svelte/store';
 
 /**
  * Decodes LNURL according to LNURL-01 standard
@@ -132,7 +144,8 @@ export const mapTokenToPayableToken = ({
 export const prepareBasePayableTokens = ({
 	transferAmounts,
 	networks,
-	availableTokens
+	availableTokens,
+	btcAddressMainnet
 }: PrepareTokensParams): PayableToken[] => {
 	if (transferAmounts.length === 0 || networks.length === 0 || availableTokens.length === 0) {
 		return [];
@@ -145,8 +158,21 @@ export const prepareBasePayableTokens = ({
 
 	return availableTokens.reduce<PayableToken[]>((acc, token) => {
 		const payableToken = mapTokenToPayableToken({ token, methodDataMap });
+
 		if (nonNullish(payableToken)) {
-			acc.push(payableToken);
+			if (isBitcoinToken(payableToken)) {
+				if (!OCP_PAY_WITH_BTC_ENABLED) {
+					return acc;
+				}
+
+				const btcPendingSentTransactions = getPendingTransactions(btcAddressMainnet ?? '');
+
+				if (nonNullish(btcPendingSentTransactions) && btcPendingSentTransactions.length === 0) {
+					acc.push(payableToken);
+				}
+			} else {
+				acc.push(payableToken);
+			}
 		}
 		return acc;
 	}, []);
@@ -154,11 +180,11 @@ export const prepareBasePayableTokens = ({
 
 /**
  * Routes token enrichment to appropriate network-specific handler.
- * Currently supports:
+ * Currently, supports:
+ * - Bitcoin
  * - Ethereum/EVM networks
  *
  * Future support:
- * - Bitcoin
  * - ICP
  * - Solana
  *
@@ -182,8 +208,15 @@ const enrichTokenWithUsdAndBalance = ({
 		return;
 	}
 
-	// ETH/EVM networks
-	if (isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)) {
+	if (isBitcoinToken(token)) {
+		return enrichBtcPayableToken({
+			token,
+			exchanges,
+			balances
+		});
+	}
+
+	if (isDefaultEthereumToken(token) || isTokenErc20(token)) {
 		return enrichEthEvmPayableToken({
 			token,
 			nativeTokens,
@@ -228,6 +261,34 @@ export const extractQuoteData = (data: OpenCryptoPayResponse) => {
 		quoteId: data.quote.id,
 		callback: data.callback
 	};
+};
+
+export const validateDecodedData = ({
+	decodedData,
+	token,
+	amount,
+	uri
+}: {
+	decodedData: DecodedUrn | undefined;
+	token: PayableTokenWithConvertedAmount;
+	amount: bigint;
+	uri: string;
+}): ValidatedEthPaymentData | ValidatedBtcPaymentData | undefined => {
+	if (isNullish(decodedData)) {
+		throw new Error(get(i18n).scanner.error.data_is_incompleted);
+	}
+
+	if (isBitcoinToken(token)) {
+		return validateBtcTransfer({
+			decodedData,
+			amount,
+			token
+		});
+	}
+
+	if (isDefaultEthereumToken(token) || isTokenErc20(token)) {
+		return validateEthEvmTransfer({ decodedData, amount, token, uri });
+	}
 };
 
 export const getPaymentUri = ({

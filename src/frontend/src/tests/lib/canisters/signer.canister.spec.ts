@@ -646,11 +646,10 @@ describe('signer.canister', () => {
 		});
 	});
 
-	// TODO: replace btc_caller_send with btc_caller_sign
 	describe('signBtc', () => {
 		it('signs BTC correctly', async () => {
-			const response = { Ok: { txid: '1' } };
-			service.btc_caller_send.mockResolvedValue(response);
+			const response = { Ok: { txid: '1', signed_transaction_hex: 'abc123hex' } };
+			service.btc_caller_sign.mockResolvedValue(response);
 
 			const { signBtc } = await createSignerCanister({
 				serviceOverride: service
@@ -659,7 +658,7 @@ describe('signer.canister', () => {
 			const res = await signBtc(sendBtcParams);
 
 			expect(res).toEqual(response.Ok);
-			expect(service.btc_caller_send).toHaveBeenCalledWith(
+			expect(service.btc_caller_sign).toHaveBeenCalledWith(
 				{
 					fee_satoshis: sendBtcParams.feeSatoshis,
 					network: sendBtcParams.network,
@@ -671,8 +670,8 @@ describe('signer.canister', () => {
 			);
 		});
 
-		it('should throw an error if btc_caller_send returns an internal error', async () => {
-			service.btc_caller_send.mockResolvedValue(internalErrorResponse);
+		it('should throw an error if btc_caller_sign returns an internal error', async () => {
+			service.btc_caller_sign.mockResolvedValue(internalErrorResponse);
 
 			const { signBtc } = await createSignerCanister({
 				serviceOverride: service
@@ -685,8 +684,8 @@ describe('signer.canister', () => {
 			);
 		});
 
-		it('should throw an error if btc_caller_send returns a payment error', async () => {
-			service.btc_caller_send.mockResolvedValue(paymentErrorResponse);
+		it('should throw an error if btc_caller_sign returns a payment error', async () => {
+			service.btc_caller_sign.mockResolvedValue(paymentErrorResponse);
 
 			const { signBtc } = await createSignerCanister({
 				serviceOverride: service
@@ -706,10 +705,10 @@ describe('signer.canister', () => {
 			['InvalidDestinationAddress', { InvalidDestinationAddress: { address: 'mock-destination' } }],
 			['InvalidSourceAddress', { InvalidSourceAddress: { address: 'mock-source' } }]
 			// eslint-disable-next-line local-rules/prefer-object-params -- It is a simple list of cases
-		])(`should throw an error if btc_caller_send returns a build error %s`, async (_, error) => {
+		])(`should throw an error if btc_caller_sign returns a build error %s`, async (_, error) => {
 			const errorResponse = { Err: { BuildP2wpkhError: error } };
 
-			service.btc_caller_send.mockResolvedValue(errorResponse);
+			service.btc_caller_sign.mockResolvedValue(errorResponse);
 
 			const { signBtc } = await createSignerCanister({
 				serviceOverride: service
@@ -722,9 +721,9 @@ describe('signer.canister', () => {
 			);
 		});
 
-		it('should throw an error if btc_caller_send returns a generic canister error', async () => {
+		it('should throw an error if btc_caller_sign returns a generic canister error', async () => {
 			// @ts-expect-error we test this in purposes
-			service.btc_caller_send.mockResolvedValue(genericErrorResponse);
+			service.btc_caller_sign.mockResolvedValue(genericErrorResponse);
 
 			const { signBtc } = await createSignerCanister({
 				serviceOverride: service
@@ -737,8 +736,8 @@ describe('signer.canister', () => {
 			);
 		});
 
-		it('should throw an error if btc_caller_send throws', async () => {
-			service.btc_caller_send.mockImplementation(() => {
+		it('should throw an error if btc_caller_sign throws', async () => {
+			service.btc_caller_sign.mockImplementation(() => {
 				throw mockResponseError;
 			});
 
@@ -751,9 +750,9 @@ describe('signer.canister', () => {
 			await expect(res).rejects.toThrowError(mockResponseError);
 		});
 
-		it('should throw an error if btc_caller_send returns an unexpected response', async () => {
+		it('should throw an error if btc_caller_sign returns an unexpected response', async () => {
 			// @ts-expect-error we test this in purposes
-			service.btc_caller_send.mockResolvedValue({ test: 'unexpected' });
+			service.btc_caller_sign.mockResolvedValue({ test: 'unexpected' });
 
 			const { signBtc } = await createSignerCanister({
 				serviceOverride: service

@@ -15,7 +15,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
-	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
+	import { btcAddressMainnet } from '$lib/derived/address.derived';
 	import { networksMainnets } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import {
@@ -48,22 +48,17 @@
 
 		error = '';
 
-		if (isNullish($ethAddress)) {
-			return;
-		}
-
 		try {
 			const isDisabled = (): boolean =>
-				!OCP_PAY_WITH_BTC_ENABLED ||
-				(nonNullish($enabledMainnetBitcoinToken) &&
-					nonNullish($btcAddressMainnet) &&
-					(isNullish($btcPendingSentTransactionsStore[$btcAddressMainnet]) ||
-						isNullish($allUtxosStore?.allUtxos) ||
-						isNullish($feeRatePercentilesStore?.feeRateFromPercentiles)));
+				nonNullish($enabledMainnetBitcoinToken) &&
+				nonNullish($btcAddressMainnet) &&
+				(isNullish($btcPendingSentTransactionsStore[$btcAddressMainnet]) ||
+					isNullish($allUtxosStore?.allUtxos) ||
+					isNullish($feeRatePercentilesStore?.feeRateFromPercentiles));
 
-			const [, paymentData] = await Promise.all([
-				waitReady({ retries: 20, isDisabled }),
-				processOpenCryptoPayCode(code)
+			const [paymentData] = await Promise.all([
+				processOpenCryptoPayCode(code),
+				...(OCP_PAY_WITH_BTC_ENABLED ? [waitReady({ retries: 20, isDisabled })] : [])
 			]);
 
 			setData(paymentData);
@@ -71,13 +66,11 @@
 			const baseTokens = prepareBasePayableTokens({
 				transferAmounts: paymentData.transferAmounts,
 				networks: $networksMainnets,
-				availableTokens: $enabledTokens
+				availableTokens: $enabledTokens,
+				btcAddressMainnet: $btcAddressMainnet
 			});
 
-			const tokensWithFees = await calculateTokensWithFees({
-				tokens: baseTokens,
-				userAddress: $ethAddress
-			});
+			const tokensWithFees = await calculateTokensWithFees(baseTokens);
 
 			setAvailableTokens(tokensWithFees);
 

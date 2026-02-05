@@ -1,36 +1,32 @@
-import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import type { InfuraErc20Provider } from '$eth/providers/infura-erc20.providers';
-import * as infuraErc20ProvidersLib from '$eth/providers/infura-erc20.providers';
+import * as ethPayServices from '$eth/services/eth-open-crypto-pay.services';
+import { buildTransactionBaseParams } from '$eth/services/eth-open-crypto-pay.services';
 import { getNonce } from '$eth/services/nonce.services';
-import * as payServices from '$eth/services/pay.services';
-import * as sendServicesLib from '$eth/services/send.services';
 import { ethPrepareTransaction } from '$eth/services/send.services';
 import type { EthAddress } from '$eth/types/address';
 import type { EthFeeResult } from '$eth/types/pay';
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
+import * as addressDerived from '$lib/derived/address.derived';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import {
-	buildTransactionBaseParams,
 	calculateTokensWithFees,
 	pay,
-	prepareErc20Transaction,
 	processOpenCryptoPayCode
 } from '$lib/services/open-crypto-pay.services';
 import type {
 	OpenCryptoPayResponse,
 	PayableToken,
 	PayableTokenWithConvertedAmount,
-	TransactionBaseParams,
 	ValidatedEthPaymentData
 } from '$lib/types/open-crypto-pay';
 import { extractQuoteData } from '$lib/utils/open-crypto-pay.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { readable } from 'svelte/store';
 
 vi.mock('$lib/utils/open-crypto-pay.utils', async (importOriginal) => {
 	const actual = await importOriginal();
@@ -66,9 +62,13 @@ vi.mock('$lib/rest/open-crypto-pay.rest', () => ({
 	fetchOpenCryptoPay: vi.fn()
 }));
 
-vi.mock('$eth/services/pay.services', () => ({
-	calculateEthFee: vi.fn()
-}));
+vi.mock('$eth/services/eth-open-crypto-pay.services', async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...(actual as Record<string, unknown>),
+		calculateEthFee: vi.fn()
+	};
+});
 
 vi.mock('$lib/api/signer.api', () => ({
 	signTransaction: vi.fn()
@@ -232,8 +232,6 @@ describe('open-crypto-pay.service', () => {
 	});
 
 	describe('calculateTokensWithFees', () => {
-		const userAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-
 		const mockPayableToken: PayableToken = {
 			...ETHEREUM_TOKEN,
 			amount: '1.5',
@@ -266,101 +264,74 @@ describe('open-crypto-pay.service', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-			vi.mocked(payServices.calculateEthFee).mockResolvedValue(mockFeeResult);
+			vi.mocked(ethPayServices.calculateEthFee).mockResolvedValue(mockFeeResult);
 		});
 
 		it('should return empty array for empty tokens array', async () => {
-			const result = await calculateTokensWithFees({
-				tokens: [],
-				userAddress
-			});
+			const result = await calculateTokensWithFees([]);
 
 			expect(result).toEqual([]);
-			expect(payServices.calculateEthFee).not.toHaveBeenCalled();
+			expect(ethPayServices.calculateEthFee).not.toHaveBeenCalled();
 		});
 
 		it('should calculate fee for single native ETH token', async () => {
-			const result = await calculateTokensWithFees({
-				tokens: [mockPayableToken],
-				userAddress
-			});
+			const result = await calculateTokensWithFees([mockPayableToken]);
 
 			expect(result).toHaveLength(1);
 			expect(result[0]).toMatchObject({
 				...mockPayableToken,
 				fee: mockFeeResult
 			});
-			expect(payServices.calculateEthFee).toHaveBeenCalledWith({
-				userAddress,
-				token: mockPayableToken
-			});
+			expect(ethPayServices.calculateEthFee).toHaveBeenCalledWith(mockPayableToken);
 		});
 
 		it('should calculate fee for ERC20 token', async () => {
-			const result = await calculateTokensWithFees({
-				tokens: [mockErc20Token],
-				userAddress
-			});
+			const result = await calculateTokensWithFees([mockErc20Token]);
 
 			expect(result).toHaveLength(1);
 			expect(result[0].fee).toBeDefined();
-			expect(payServices.calculateEthFee).toHaveBeenCalledWith({
-				userAddress,
-				token: mockErc20Token
-			});
+			expect(ethPayServices.calculateEthFee).toHaveBeenCalledWith(mockErc20Token);
 		});
 
 		it('should skip non-Ethereum tokens', async () => {
-			const result = await calculateTokensWithFees({
-				tokens: [mockBtcToken],
-				userAddress
-			});
+			const result = await calculateTokensWithFees([mockBtcToken]);
 
 			expect(result).toHaveLength(1);
 			expect(result[0].fee).toBeUndefined();
-			expect(payServices.calculateEthFee).not.toHaveBeenCalled();
+			expect(ethPayServices.calculateEthFee).not.toHaveBeenCalled();
 		});
 
 		it('should handle mixed tokens (ETH, ERC20, Bitcoin)', async () => {
 			const tokens = [mockPayableToken, mockErc20Token, mockBtcToken];
 
-			const result = await calculateTokensWithFees({
-				tokens,
-				userAddress
-			});
+			const result = await calculateTokensWithFees(tokens);
 
 			expect(result).toHaveLength(3);
 			expect(result[0].fee).toBeDefined();
 			expect(result[1].fee).toBeDefined();
 			expect(result[2].fee).toBeUndefined();
-			expect(payServices.calculateEthFee).toHaveBeenCalledTimes(2);
+			expect(ethPayServices.calculateEthFee).toHaveBeenCalledTimes(2);
 		});
 
 		it('should return token without fee when calculateEthFee returns undefined', async () => {
-			vi.mocked(payServices.calculateEthFee).mockResolvedValue(undefined);
+			vi.mocked(ethPayServices.calculateEthFee).mockResolvedValue(undefined);
 
-			const result = await calculateTokensWithFees({
-				tokens: [mockPayableToken],
-				userAddress
-			});
+			const result = await calculateTokensWithFees([mockPayableToken]);
 
 			expect(result).toHaveLength(1);
 			expect(result[0].fee).toBeUndefined();
 		});
 
 		it('should handle errors gracefully and exclude failed tokens', async () => {
-			vi.mocked(payServices.calculateEthFee).mockRejectedValue(new Error('Network error'));
+			vi.mocked(ethPayServices.calculateEthFee).mockRejectedValue(new Error('Network error'));
 
-			const result = await calculateTokensWithFees({
-				tokens: [mockPayableToken],
-				userAddress
-			});
+			const result = await calculateTokensWithFees([mockPayableToken]);
 
 			expect(result).toHaveLength(0);
 		});
 
 		it('should process all tokens even if some fail', async () => {
-			vi.mocked(payServices.calculateEthFee)
+			vi.mocked(ethPayServices.calculateEthFee)
 				.mockRejectedValueOnce(new Error('Network error'))
 				.mockResolvedValueOnce(mockFeeResult);
 
@@ -369,10 +340,7 @@ describe('open-crypto-pay.service', () => {
 				{ ...mockPayableToken, id: 'token-2', symbol: 'ETH2' }
 			] as unknown as PayableToken[];
 
-			const result = await calculateTokensWithFees({
-				tokens,
-				userAddress
-			});
+			const result = await calculateTokensWithFees(tokens);
 
 			expect(result).toHaveLength(1);
 			expect(result[0].fee).toBeDefined();
@@ -575,168 +543,6 @@ describe('open-crypto-pay.service', () => {
 		});
 	});
 
-	describe('prepareErc20Transaction', () => {
-		const baseParams: TransactionBaseParams = {
-			from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as EthAddress,
-			to: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-			amount: 1000000000000000000n,
-			maxPriorityFeePerGas: 7n,
-			maxFeePerGas: 12n,
-			nonce: 5,
-			gas: 25000n,
-			chainId: 1n
-		};
-
-		const mockToken: PayableTokenWithConvertedAmount = {
-			...USDC_TOKEN,
-			amount: '100',
-			minFee: 0.0001,
-			tokenNetwork: 'Ethereum',
-			amountInUSD: 100,
-			feeInUSD: 10,
-			sumInUSD: 110,
-			fee: {
-				feeInWei: 300000n,
-				feeData: {
-					maxFeePerGas: 12n,
-					maxPriorityFeePerGas: 7n
-				},
-				estimatedGasLimit: 25000n
-			}
-		} as PayableTokenWithConvertedAmount;
-
-		const populateTransactionSpy = vi.fn();
-		const erc20PrepareTransactionSpy = vi.fn();
-
-		const mockErc20Provider = {
-			populateTransaction: populateTransactionSpy
-		} as unknown as InfuraErc20Provider;
-
-		beforeEach(() => {
-			vi.clearAllMocks();
-
-			vi.spyOn(infuraErc20ProvidersLib, 'infuraErc20Providers').mockReturnValue(mockErc20Provider);
-			vi.spyOn(sendServicesLib, 'erc20PrepareTransaction').mockImplementation(
-				erc20PrepareTransactionSpy
-			);
-
-			erc20PrepareTransactionSpy.mockResolvedValue({} as EthSignTransactionRequest);
-		});
-
-		it('should call erc20PrepareTransaction with correct params', async () => {
-			const mockTransaction = {
-				type: 'erc20-transaction'
-			} as unknown as EthSignTransactionRequest;
-
-			erc20PrepareTransactionSpy.mockResolvedValue(mockTransaction);
-
-			const result = await prepareErc20Transaction({
-				baseParams,
-				token: mockToken
-			});
-
-			expect(erc20PrepareTransactionSpy).toHaveBeenCalledWith({
-				...baseParams,
-				token: mockToken,
-				populate: populateTransactionSpy
-			});
-			expect(result).toEqual(mockTransaction);
-		});
-
-		it('should get populate function from correct network', async () => {
-			await prepareErc20Transaction({
-				baseParams,
-				token: mockToken
-			});
-
-			expect(infuraErc20ProvidersLib.infuraErc20Providers).toHaveBeenCalledWith(
-				mockToken.network.id
-			);
-		});
-
-		it('should call erc20PrepareTransaction exactly once', async () => {
-			await prepareErc20Transaction({
-				baseParams,
-				token: mockToken
-			});
-
-			expect(erc20PrepareTransactionSpy).toHaveBeenCalledOnce();
-		});
-
-		it('should return transaction from erc20PrepareTransaction', async () => {
-			const expectedTransaction = {
-				to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-				value: ZERO,
-				data: '0xa9059cbb...',
-				nonce: baseParams.nonce
-			} as unknown as EthSignTransactionRequest;
-
-			erc20PrepareTransactionSpy.mockResolvedValue(expectedTransaction);
-
-			const result = await prepareErc20Transaction({
-				baseParams,
-				token: mockToken
-			});
-
-			expect(result).toEqual(expectedTransaction);
-		});
-
-		it('should handle different base params', async () => {
-			const differentParams: TransactionBaseParams = {
-				...baseParams,
-				amount: 2000000000n,
-				nonce: 15
-			};
-
-			await prepareErc20Transaction({
-				baseParams: differentParams,
-				token: mockToken
-			});
-
-			expect(erc20PrepareTransactionSpy).toHaveBeenCalledWith(
-				expect.objectContaining({
-					amount: 2000000000n,
-					nonce: 15
-				})
-			);
-		});
-
-		it('should handle erc20PrepareTransaction returning complex transaction', async () => {
-			const complexTransaction = {
-				to: 'test-address',
-				value: ZERO,
-				data: '0xa9059cbb00000000000000000000000000000000000000000000000000000000000000640000000000000000000000000000000000000000000000000de0b6b3a7640000',
-				nonce: baseParams.nonce,
-				gasLimit: baseParams.gas,
-				maxFeePerGas: baseParams.maxFeePerGas,
-				maxPriorityFeePerGas: baseParams.maxPriorityFeePerGas,
-				chainId: baseParams.chainId,
-				type: 2
-			} as unknown as EthSignTransactionRequest;
-
-			erc20PrepareTransactionSpy.mockResolvedValue(complexTransaction);
-
-			const result = await prepareErc20Transaction({
-				baseParams,
-				token: mockToken
-			});
-
-			expect(result).toEqual(complexTransaction);
-		});
-
-		it('should propagate errors from erc20PrepareTransaction', async () => {
-			const error = new Error('Failed to prepare transaction');
-			erc20PrepareTransactionSpy.mockRejectedValue(error);
-
-			await expect(
-				prepareErc20Transaction({
-					baseParams,
-					token: mockToken
-				})
-			).rejects.toThrowError('Failed to prepare transaction');
-		});
-	});
-
 	describe('pay', () => {
 		const mockToken: PayableTokenWithConvertedAmount = {
 			...ETHEREUM_TOKEN,
@@ -776,12 +582,13 @@ describe('open-crypto-pay.service', () => {
 			transferAmounts: []
 		};
 
-		const from = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as EthAddress;
 		const mockRawTransaction = '0x02f8...';
 		const mockProgress = vi.fn();
+		const mockEthAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+			vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
 		});
 
 		it('should complete payment flow successfully', async () => {
@@ -808,7 +615,6 @@ describe('open-crypto-pay.service', () => {
 			await pay({
 				token: mockToken,
 				data: mockData,
-				from,
 				identity: mockIdentity,
 				progress: mockProgress,
 				amount: 100000n
@@ -846,7 +652,6 @@ describe('open-crypto-pay.service', () => {
 			await pay({
 				token: mockToken,
 				data: mockData,
-				from,
 				identity: mockIdentity,
 				progress: mockProgress,
 				amount: 100000n
@@ -879,7 +684,6 @@ describe('open-crypto-pay.service', () => {
 			await pay({
 				token: mockToken,
 				data: mockData,
-				from,
 				identity: mockIdentity,
 				progress: mockProgress,
 				amount: 100000n
@@ -914,7 +718,6 @@ describe('open-crypto-pay.service', () => {
 			await pay({
 				token: mockToken,
 				data: mockData,
-				from,
 				identity: mockIdentity,
 				progress: mockProgress,
 				amount: 100000n
@@ -951,7 +754,6 @@ describe('open-crypto-pay.service', () => {
 			await pay({
 				token: mockToken,
 				data: mockData,
-				from,
 				identity: mockIdentity,
 				progress: mockProgress,
 				amount: 100000n
@@ -975,7 +777,6 @@ describe('open-crypto-pay.service', () => {
 				pay({
 					token: mockToken,
 					data: mockData,
-					from,
 					identity: mockIdentity,
 					progress: mockProgress,
 					amount: 100000n
@@ -1007,7 +808,6 @@ describe('open-crypto-pay.service', () => {
 				pay({
 					token: mockToken,
 					data: mockData,
-					from,
 					identity: mockIdentity,
 					progress: mockProgress,
 					amount: 100000n
