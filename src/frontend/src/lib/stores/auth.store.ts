@@ -4,8 +4,6 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 
 import {
 	AUTH_MAX_TIME_TO_LIVE,
-	AUTH_POPUP_HEIGHT,
-	AUTH_POPUP_WIDTH,
 	INTERNET_IDENTITY_CANISTER_ID,
 	TEST
 } from '$lib/constants/app.constants';
@@ -14,7 +12,6 @@ import { InternetIdentityDomain } from '$lib/types/auth';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
-import { popupCenter } from '$lib/utils/window.utils';
 import type { AuthClient } from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
 import { writable, type Readable } from 'svelte/store';
@@ -125,7 +122,6 @@ const initAuthStore = (): AuthStore => {
 					},
 					onError: reject,
 					identityProvider,
-					windowOpenerFeatures: popupCenter({ width: AUTH_POPUP_WIDTH, height: AUTH_POPUP_HEIGHT }),
 					...getOptionalDerivationOrigin()
 				});
 			}),
