@@ -107,7 +107,7 @@ const initAuthStore = (): AuthStore => {
 						maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
 						onSuccess: () => {
 							set({ identity: authClient?.getIdentity() });
-	
+
 							try {
 								// If the user has more than one tab open in the same browser,
 								// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
@@ -121,20 +121,23 @@ const initAuthStore = (): AuthStore => {
 								// We just print a warning in the console for debugging purposes.
 								console.warn('Auth BroadcastChannel posting failed', err);
 							}
-	
+
 							resolve();
 						},
 						onError: reject,
 						identityProvider,
-						windowOpenerFeatures: popupCenter({ width: AUTH_POPUP_WIDTH, height: AUTH_POPUP_HEIGHT }),
+						windowOpenerFeatures: popupCenter({
+							width: AUTH_POPUP_WIDTH,
+							height: AUTH_POPUP_HEIGHT
+						}),
 						...getOptionalDerivationOrigin()
-					})
+					});
 				} else {
 					await authClient.login({
 						maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
 						onSuccess: () => {
 							set({ identity: authClient?.getIdentity() });
-	
+
 							try {
 								// If the user has more than one tab open in the same browser,
 								// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
@@ -148,14 +151,14 @@ const initAuthStore = (): AuthStore => {
 								// We just print a warning in the console for debugging purposes.
 								console.warn('Auth BroadcastChannel posting failed', err);
 							}
-	
+
 							resolve();
 						},
 						onError: reject,
 						identityProvider,
 						...getOptionalDerivationOrigin()
-					})
-				};
+					});
+				}
 			}),
 
 		signOut: async () => {
