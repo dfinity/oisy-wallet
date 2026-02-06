@@ -1,6 +1,5 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import OpenCryptoPay from '$lib/components/open-crypto-pay/OpenCryptoPay.svelte';
-import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import en from '$lib/i18n/en.json';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import type {
@@ -131,33 +130,28 @@ describe('OpenCryptoPay', () => {
 		availableTokens: writable(availableTokens)
 	});
 
-	const props = {
-		payProgressStep: ProgressStepsPayment.REQUEST_DETAILS,
-		onPay: vi.fn(),
-		onPaySucceeded: vi.fn(),
-		onPayFailed: vi.fn()
-	};
-
 	const renderWithContext = ({
 		data = undefined,
 		selectedToken = undefined,
 		onSelectToken = vi.fn(),
 		isTokenSelecting = false,
+		onPayClick = vi.fn(),
 		availableTokens = []
 	}: {
 		data?: OpenCryptoPayResponse | undefined;
 		selectedToken?: PayableTokenWithConvertedAmount | undefined;
 		onSelectToken?: () => void;
 		isTokenSelecting?: boolean;
+		onPayClick?: () => void;
 		availableTokens?: PayableTokenWithConvertedAmount[];
 	} = {}) => {
 		const mockContext = createMockContext({ data, selectedToken, availableTokens });
 
 		return render(OpenCryptoPay, {
 			props: {
-				...props,
 				onSelectToken,
-				isTokenSelecting
+				isTokenSelecting,
+				onPayClick
 			},
 			context: new Map([[PAY_CONTEXT_KEY, mockContext]])
 		});

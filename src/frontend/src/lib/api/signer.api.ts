@@ -2,7 +2,8 @@ import type { BtcAddress } from '$btc/types/address';
 import type {
 	BitcoinNetwork,
 	EthSignTransactionRequest,
-	SendBtcResponse
+	SendBtcResponse,
+	SignBtcResponse
 } from '$declarations/signer/signer.did';
 import type { EthAddress } from '$eth/types/address';
 import { SignerCanister } from '$lib/canisters/signer.canister';
@@ -60,6 +61,15 @@ export const signTransaction = async ({
 	const { signTransaction } = await signerCanister({ identity });
 
 	return signTransaction({ transaction });
+};
+
+export const signBtc = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SendBtcParams>): Promise<SignBtcResponse> => {
+	const { signBtc } = await signerCanister({ identity });
+
+	return signBtc(params);
 };
 
 export const signMessage = async ({

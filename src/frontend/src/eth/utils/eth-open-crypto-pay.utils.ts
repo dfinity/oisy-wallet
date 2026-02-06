@@ -1,3 +1,4 @@
+import type { EthFeeResult } from '$eth/types/pay';
 import { isEthAddress } from '$eth/utils/account.utils';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -38,7 +39,7 @@ export const enrichEthEvmPayableToken = ({
 	}
 
 	// This function is specifically for ETH/EVM tokens, so we can safely cast to EthFeeResult
-	const ethFee = token.fee;
+	const ethFee = token.fee as EthFeeResult;
 
 	const nativeToken = nativeTokens.find(({ network: { id } }) => id === token.network.id);
 
@@ -115,12 +116,12 @@ export const validateEthEvmTransfer = ({
 	token,
 	uri
 }: {
-	decodedData: DecodedUrn | undefined;
+	decodedData: DecodedUrn;
 	amount: bigint;
 	token: PayableTokenWithConvertedAmount;
 	uri: string;
 }): ValidatedEthPaymentData => {
-	const ethFee = token.fee;
+	const ethFee = token.fee as EthFeeResult;
 	const { feeData, estimatedGasLimit } = ethFee ?? {};
 
 	if (

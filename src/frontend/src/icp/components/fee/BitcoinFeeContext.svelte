@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet, untrack } from 'svelte';
 	import { queryEstimateFee } from '$icp/services/ckbtc.services';
 	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
@@ -14,11 +14,12 @@
 	interface Props {
 		token: Token;
 		amount?: OptionAmount;
+		minimumAmount?: bigint;
 		networkId?: NetworkId;
 		children: Snippet;
 	}
 
-	let { token, amount, networkId, children }: Props = $props();
+	let { token, amount, networkId, minimumAmount, children }: Props = $props();
 
 	let ckBTC = $derived(isTokenCkBtcLedger(token));
 
@@ -35,6 +36,16 @@
 		}
 
 		if (isNullish(amount) || amount === '') {
+			store.setFee(null);
+			return;
+		}
+
+		const parsedAmount = parseToken({
+			value: `${amount}`,
+			unitName: token.decimals
+		});
+
+		if (nonNullish(minimumAmount) && parsedAmount < minimumAmount) {
 			store.setFee(null);
 			return;
 		}

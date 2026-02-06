@@ -415,6 +415,7 @@ export const idlFactory = ({ IDL }) => {
 		SplMainnet: SplToken,
 		IcPunks: ExtV2Token,
 		Erc1155: ErcToken,
+		Erc4626: ErcToken,
 		Dip721: ExtV2Token
 	});
 	const TokenSection = IDL.Variant({ Spam: IDL.Null, Hidden: IDL.Null });

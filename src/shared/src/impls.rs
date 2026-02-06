@@ -105,6 +105,11 @@ impl From<&Token> for CustomTokenId {
                 token_address,
                 chain_id,
                 ..
+            })
+            | Token::Erc4626(ErcToken {
+                token_address,
+                chain_id,
+                ..
             }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
             Token::ExtV2(token) => CustomTokenId::ExtV2(token.canister_id),
             Token::Dip721(token) => CustomTokenId::Dip721(token.canister_id),
@@ -580,7 +585,10 @@ impl Validate for Token {
         match self {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
-            Token::Erc20(token) | Token::Erc721(token) | Token::Erc1155(token) => token.validate(),
+            Token::Erc20(token)
+            | Token::Erc721(token)
+            | Token::Erc1155(token)
+            | Token::Erc4626(token) => token.validate(),
             Token::ExtV2(token) => token.validate(),
             Token::Dip721(token) => token.validate(),
             Token::IcPunks(token) => token.validate(),
