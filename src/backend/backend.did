@@ -330,6 +330,7 @@ type Token = variant {
 	SplMainnet : SplToken;
 	IcPunks : ExtV2Token;
 	Erc1155 : ErcToken;
+	Erc4626 : ErcToken;
 	Dip721 : ExtV2Token
 };
 type TokenAccountId = variant {

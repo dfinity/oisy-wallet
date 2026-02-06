@@ -89,7 +89,8 @@ export const calculateUtxoSelection = ({
 			numInputs: selectedUtxos.length,
 			numOutputs: 2
 		});
-		estimatedFee = (BigInt(txSize) * feeRateMiliSatoshisPerVByte) / 1000n;
+		// Round up to ensure fee meets minimum rate requirements
+		estimatedFee = (BigInt(txSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
 		const totalRequired = amountSatoshis + estimatedFee;
 
 		// Check if we have enough to cover amount and fee

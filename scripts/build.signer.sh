@@ -20,7 +20,7 @@ print_help() {
 
 DFX_NETWORK="${DFX_NETWORK:-local}"
 
-SIGNER_RELEASE="v0.2.8"
+SIGNER_RELEASE="v0.3.0"
 SIGNER_RELEASE_URL="https://github.com/dfinity/chain-fusion-signer/releases/download/${SIGNER_RELEASE}"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${SIGNER_RELEASE_URL}/signer.did"
@@ -61,7 +61,7 @@ case "$DFX_NETWORK" in
   # For security reasons, mainnet root key will be hardcoded in the signer canister.
   ic_root_key_der="null"
   ;;
-"ic")
+"ic" | "beta")
   ECDSA_KEY_NAME="key_1"
   # For security reasons, mainnet root key will be hardcoded in the signer canister.
   ic_root_key_der="null"
