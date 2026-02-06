@@ -102,6 +102,7 @@ const initAuthStore = (): AuthStore => {
 						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
 					: `https://${domain ?? InternetIdentityDomain.VERSION_1_0}${domain === InternetIdentityDomain.VERSION_2_0 ? '/?feature_flag_guided_upgrade=true' : ''}`;
 
+				if (window.opener) {} else {
 				await authClient.login({
 					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
 					onSuccess: () => {
@@ -125,9 +126,9 @@ const initAuthStore = (): AuthStore => {
 					},
 					onError: reject,
 					identityProvider,
-					if (window.opener) {} else {windowOpenerFeatures: popupCenter({ width: AUTH_POPUP_WIDTH, height: AUTH_POPUP_HEIGHT })},
+					windowOpenerFeatures: popupCenter({ width: AUTH_POPUP_WIDTH, height: AUTH_POPUP_HEIGHT }),
 					...getOptionalDerivationOrigin()
-				});
+				})};
 			}),
 
 		signOut: async () => {
