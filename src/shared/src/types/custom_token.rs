@@ -82,6 +82,7 @@ pub enum Token {
     ExtV2(ExtV2Token) = 6,
     Dip721(Dip721Token) = 7,
     IcPunks(IcPunksToken) = 8,
+    Erc4626(ErcToken) = 9,
 }
 
 /// User preferences for any token
