@@ -21,11 +21,6 @@ import { certified } from '$tests/mocks/balances.mock';
 
 describe('eth-open-crypto-pay.utils', () => {
 	describe('enrichEthEvmPayableToken', () => {
-		const mockNativeToken: Token = {
-			...ETHEREUM_TOKEN,
-			decimals: 18
-		};
-
 		const mockErc20Token: PayableTokenWithFees = {
 			...USDC_TOKEN,
 			amount: '100',
@@ -56,7 +51,7 @@ describe('eth-open-crypto-pay.utils', () => {
 			}
 		};
 
-		const nativeTokens: Token[] = [mockNativeToken];
+		const nativeTokens: Token[] = [ETHEREUM_TOKEN];
 
 		const exchanges: ExchangesData = {
 			[ETHEREUM_TOKEN.id]: { usd: 2000, usd_market_cap: 1000000 },
@@ -961,7 +956,7 @@ describe('eth-open-crypto-pay.utils', () => {
 			it('should throw error when decodedData is undefined', () => {
 				expect(() =>
 					validateEthEvmTransfer({
-						decodedData: undefined,
+						decodedData: undefined as unknown as DecodedUrn,
 						token: nativeToken,
 						amount: 1000000000000000000n,
 						uri: 'ethereum:0x9C2242a0B71FD84661Fd4bC56b75c90Fac6d10FC@1?value=1000000000000000000'
