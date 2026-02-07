@@ -205,20 +205,22 @@ export const idlFactory = ({ IDL }) => {
 		P2SH: IDL.Text,
 		P2TR: IDL.Text
 	});
-	const EthAddress = IDL.Variant({ Public: IDL.Text });
-	const Icrcv2AccountId = IDL.Variant({
-		Account: IDL.Vec(IDL.Nat8),
-		WithPrincipal: IDL.Record({
-			owner: IDL.Principal,
-			subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
-		})
-	});
-	const TokenAccountId = IDL.Variant({
-		Btc: BtcAddress,
-		Eth: EthAddress,
-		Sol: IDL.Text,
-		Icrcv2: Icrcv2AccountId
-	});
+const EthAddress = IDL.Variant({ Public: IDL.Text });
+const KaspaAddress = IDL.Variant({ Public: IDL.Text });
+const Icrcv2AccountId = IDL.Variant({
+  Account: IDL.Vec(IDL.Nat8),
+  WithPrincipal: IDL.Record({
+    owner: IDL.Principal,
+    subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
+  })
+});
+const TokenAccountId = IDL.Variant({
+  Btc: BtcAddress,
+  Eth: EthAddress,
+  Kaspa: KaspaAddress,
+  Sol: IDL.Text,
+  Icrcv2: Icrcv2AccountId
+});
 	const ContactAddressData = IDL.Record({
 		label: IDL.Opt(IDL.Text),
 		token_account_id: TokenAccountId

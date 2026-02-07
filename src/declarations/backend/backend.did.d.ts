@@ -213,6 +213,7 @@ export interface ErcToken {
 	chain_id: bigint;
 }
 export type EthAddress = { Public: string };
+export type KaspaAddress = { Public: string };
 export interface ExperimentalFeatureSettings {
 	enabled: boolean;
 }
@@ -364,10 +365,11 @@ export type Token =
 	| { Erc4626: ErcToken }
 	| { Dip721: ExtV2Token };
 export type TokenAccountId =
-	| { Btc: BtcAddress }
-	| { Eth: EthAddress }
-	| { Sol: string }
-	| { Icrcv2: Icrcv2AccountId };
+  | { Btc: BtcAddress }
+  | { Eth: EthAddress }
+  | { Kaspa: KaspaAddress }
+  | { Sol: string }
+  | { Icrcv2: Icrcv2AccountId };
 export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {

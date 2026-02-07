@@ -2,8 +2,8 @@ use candid::{CandidType, Deserialize, Principal};
 use serde::Serialize;
 
 use super::{
-    account::{EthAddress, SolPrincipal},
-    network::marker_trait::{BitcoinMainnet, BitcoinRegtest, BitcoinTestnet, InternetComputer},
+	account::{EthAddress, SolPrincipal},
+	network::marker_trait::{BitcoinMainnet, BitcoinRegtest, BitcoinTestnet, InternetComputer},
 };
 use crate::types::network::marker_trait::Network;
 

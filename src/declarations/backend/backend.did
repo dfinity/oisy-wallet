@@ -192,6 +192,7 @@ type DefiniteCanisterSettingsArgs = record {
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
+type KaspaAddress = variant { Public : text };
 type ExperimentalFeatureSettings = record { enabled : bool };
 type ExperimentalFeatureSettingsFor = variant { AiAssistantBeta };
 type ExperimentalFeaturesSettings = record {
@@ -331,10 +332,11 @@ type Token = variant {
 	Erc1155 : ErcToken
 };
 type TokenAccountId = variant {
-	Btc : BtcAddress;
-	Eth : EthAddress;
-	Sol : text;
-	Icrcv2 : Icrcv2AccountId
+  Btc : BtcAddress;
+  Eth : EthAddress;
+  Kaspa : KaspaAddress;
+  Sol : text;
+  Icrcv2 : Icrcv2AccountId
 };
 type TokenSection = variant { Spam; Hidden };
 type TopUpCyclesLedgerError = variant {

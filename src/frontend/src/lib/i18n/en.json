@@ -1664,12 +1664,13 @@
 		}
 	},
 	"address": {
-		"types": {
-			"Icrcv2": "Internet Computer",
-			"Btc": "Bitcoin",
-			"Eth": "Ethereum",
-			"Sol": "Solana"
-		},
+"types": {
+				"Icrcv2": "Internet Computer",
+				"Btc": "Bitcoin",
+				"Eth": "Ethereum",
+				"Sol": "Solana",
+				"Kaspa": "Kaspa"
+			},
 		"form": {
 			"new_address": "New address",
 			"address_placeholder": "Enter or paste address",

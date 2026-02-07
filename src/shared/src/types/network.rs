@@ -184,9 +184,19 @@ pub mod marker_trait {
     pub struct EthereumMainnet {}
     impl Network for EthereumMainnet {}
 
-    /// A marker trait, used to indicate that a type is to be used with the Ethereum Sepolia
-    /// testnet.
-    #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-    pub struct EthereumSepolia {}
-    impl Network for EthereumSepolia {}
+/// A marker trait, used to indicate that a type is to be used with the Ethereum Sepolia
+/// testnet.
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct EthereumSepolia {}
+impl Network for EthereumSepolia {}
+
+/// A marker trait, used to indicate that a type is to be used with the Kaspa mainnet.
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct KaspaMainnet {}
+impl Network for KaspaMainnet {}
+
+/// A marker trait, used to indicate that a type is to be used with the Kaspa testnet.
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct KaspaTestnet {}
+impl Network for KaspaTestnet {}
 }

@@ -12,8 +12,8 @@ use serde::Serialize;
 
 use super::token_id::TokenId;
 use crate::types::network::marker_trait::{
-    BitcoinMainnet, BitcoinRegtest, BitcoinTestnet, EthereumMainnet, EthereumSepolia,
-    InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet,
+	BitcoinMainnet, BitcoinRegtest, BitcoinTestnet, EthereumMainnet, EthereumSepolia,
+	InternetComputer, KaspaMainnet, KaspaTestnet, Network, SolanaDevnet, SolanaLocal, SolanaMainnet,
 };
 
 pub mod conversion;
@@ -27,10 +27,11 @@ where
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum TokenAccountId {
-    Icrcv2(Icrcv2AccountId),
-    Sol(SolPrincipal),
-    Btc(BtcAddress),
-    Eth(EthAddress),
+	Icrcv2(Icrcv2AccountId),
+	Sol(SolPrincipal),
+	Btc(BtcAddress),
+	Eth(EthAddress),
+	Kaspa(KaspaAddress),
 }
 
 /// An account identifier for Internet Computer tokens.
@@ -197,3 +198,33 @@ impl AccountId<EthereumMainnet> for EthAddress {}
 impl AccountId<EthereumSepolia> for EthAddress {}
 impl TokenId<EthereumMainnet> for EthAddress {}
 impl TokenId<EthereumSepolia> for EthAddress {}
+
+/// A Kaspa address
+///
+/// # Format
+/// Kaspa addresses use Bech32 encoding with a prefix indicating the network:
+/// - Mainnet: `kaspa:`
+/// - Testnet: `kaspatest:`
+/// - Devnet: `kaspadev:`
+/// - Simnet: `kaspasim:`
+///
+/// The address body starts with 'q' (P2PK) or 'p' (P2SH) followed by Bech32 characters.
+///
+/// # Example
+/// - `kaspa:qyp9cat9eecq5f8tqjk4wp7w576vfm0ey8cx0j9qlyxg5q4u` (mainnet)
+/// - `kaspatest:qyp9cat9eecq5f8tqjk4wp7w576vfm0ey8cx0j9qlyxg5q4u` (testnet)
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum KaspaAddress {
+	/// A public Kaspa address.
+	///
+	/// # Format
+	/// A string starting with network prefix (e.g., "kaspa:", "kaspatest:").
+	///
+	/// # Example
+	/// - `kaspa:qyp9cat9eecq5f8tqjk4wp7w576vfm0ey8cx0j9qlyxg5q4u`
+	Public(String),
+}
+impl AccountId<KaspaMainnet> for KaspaAddress {}
+impl AccountId<KaspaTestnet> for KaspaAddress {}
+impl TokenId<KaspaMainnet> for KaspaAddress {}
+impl TokenId<KaspaTestnet> for KaspaAddress {}

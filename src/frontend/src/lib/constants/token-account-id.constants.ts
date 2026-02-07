@@ -3,6 +3,7 @@ import { SUPPORTED_BITCOIN_MAINNET_NETWORKS } from '$env/networks/networks.btc.e
 import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_MAINNET_NETWORKS } from '$env/networks/networks.sol.env';
+import { SUPPORTED_KASPA_MAINNET_NETWORKS } from '$env/networks/networks.kaspa.env';
 import type { Network } from '$lib/types/network';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 import type { NonEmptyArray } from '$lib/types/utils';
@@ -11,7 +12,8 @@ export const TOKEN_ACCOUNT_ID_TO_NETWORKS: { [key in TokenAccountIdTypes]: Netwo
 	Icrcv2: [ICP_NETWORK],
 	Btc: SUPPORTED_BITCOIN_MAINNET_NETWORKS,
 	Eth: [...SUPPORTED_ETHEREUM_MAINNET_NETWORKS, ...SUPPORTED_EVM_MAINNET_NETWORKS],
-	Sol: SUPPORTED_SOLANA_MAINNET_NETWORKS
+	Sol: SUPPORTED_SOLANA_MAINNET_NETWORKS,
+	Kaspa: SUPPORTED_KASPA_MAINNET_NETWORKS
 };
 
 // The type definition '[key in TokenAccountIdType]' of TOKEN_ACCOUNT_ID_TO_NETWORKS ensures
@@ -24,7 +26,8 @@ export const TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER: { [key in TokenAccountIdTypes]: 
 	Btc: 1,
 	Eth: 2,
 	Icrcv2: 3,
-	Sol: 4
+	Sol: 4,
+	Kaspa: 5
 };
 
 export const TOKEN_ACCOUNT_ID_TYPES_CASE_SENSITIVE: { [key in TokenAccountIdTypes]: boolean } = {
@@ -32,5 +35,6 @@ export const TOKEN_ACCOUNT_ID_TYPES_CASE_SENSITIVE: { [key in TokenAccountIdType
 	Eth: false,
 	Icrcv2: false,
 	// Solana is case-sensitive for the addresses
-	Sol: true
+	Sol: true,
+	Kaspa: false
 };
