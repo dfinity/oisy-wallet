@@ -321,3 +321,8 @@ export const modalPayDialogOpen: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'pay-dialog'
 );
+
+export const modalCardConnectOpen: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'card-connect'
+);
