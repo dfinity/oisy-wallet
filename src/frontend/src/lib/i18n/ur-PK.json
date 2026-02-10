@@ -113,15 +113,15 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
+			"title_part_1": "آپ کے ڈیجیٹل اثاثے۔",
+			"title_part_2": "نجی اور محفوظ",
 			"logout": "",
 			"lock": "",
-			"authenticate": "",
-			"asset_types": "",
-			"instant_and_private": "",
-			"advanced_cryptography": "",
-			"social_login": ""
+			"authenticate": "کھولیں یا بنائیں",
+			"asset_types": "Bitcoin، Solana، Ethereum، ICP، اور مزید پر اثاثوں کا نظم کریں۔",
+			"instant_and_private": "معیار کے طور پر رازداری کے ساتھ بلٹ ان AI اسسٹنٹ",
+			"advanced_cryptography": "اعلی درجے کی خفیہ نگاری کے ذریعے محفوظ",
+			"social_login": "فوری اور نجی رسائی + سماجی لاگ ان"
 		},
 		"alt": {
 			"preview": ""
