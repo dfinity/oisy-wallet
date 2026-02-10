@@ -67,12 +67,12 @@
 	},
 	"navigation": {
 		"text": {
-			"tokens": "",
-			"settings": "",
-			"dapp_explorer": "",
-			"activity": "",
+			"tokens": "اثاثے",
+			"settings": "ترتیبات",
+			"dapp_explorer": "دریافت کریں۔",
+			"activity": "سرگرمی",
 			"airdrops": "",
-			"earning": "",
+			"earning": "کمائیں",
 			"source_code_on_github": "",
 			"view_on_explorer": "",
 			"source_code": "",
@@ -1090,7 +1090,7 @@
 	},
 	"tokens": {
 		"text": {
-			"title": "",
+			"title": "ٹوکنز",
 			"contract_address": "",
 			"token_address": "",
 			"balance": "",
@@ -1831,8 +1831,8 @@
 	},
 	"earning": {
 		"text": {
-			"title": "",
-			"tab_title": "",
+			"title": "کمائیں",
+			"tab_title": "کمائی",
 			"earning_opportunities": "",
 			"header_title": "",
 			"header_description": "",
