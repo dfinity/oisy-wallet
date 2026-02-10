@@ -14,7 +14,7 @@ export const mapErc20Token = ({ id, symbol, name, ...rest }: MapErc20TokenParams
 	standard: { code: 'erc20' },
 	name,
 	symbol,
-	icon: mapErc20Icon(symbol),
+	icon: undefined,
 	...rest
 });
 
