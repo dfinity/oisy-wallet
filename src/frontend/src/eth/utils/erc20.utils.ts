@@ -19,17 +19,6 @@ export const mapErc20Token = ({ id, symbol, name, ...rest }: MapErc20TokenParams
 	...rest
 });
 
-export const mapErc20Icon = (symbol: string): string | undefined => {
-	switch (symbol.toLowerCase()) {
-		// ICP in production. ckICP was used on staging because the definitive name and symbol had not been decided.
-		case 'icp':
-		case 'ckicp':
-			return icpDark;
-		default:
-			return undefined;
-	}
-};
-
 export const isTokenErc20 = (token: Token): token is Erc20Token => token.standard.code === 'erc20';
 
 export const isTokenErc20CustomToken = (token: Token): token is Erc20CustomToken =>
