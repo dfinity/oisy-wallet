@@ -1,8 +1,9 @@
 {
 	"core": {
 		"text": {
-			"cancel": "取消",
-			"next": "下一步",
+			"cancel": "",
+			"next": ""
 		}
 	}
 }
+
