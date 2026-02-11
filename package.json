@@ -95,7 +95,7 @@
 		"ethers": "^6.16.0",
 		"idb-keyval": "^6.2.2",
 		"svelte-confetti": "^2.3.2",
-		"zod": "^4.3.4"
+		"zod": "^4.3.5"
 	},
 	"devDependencies": {
 		"@dfinity/eslint-config-oisy-wallet": "^0.2.3",
