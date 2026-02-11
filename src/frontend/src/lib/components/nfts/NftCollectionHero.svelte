@@ -15,7 +15,6 @@
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
-	import { parseNetworkId } from '$lib/validation/network.validation';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -28,9 +27,8 @@
 		{
 			label: $i18n.navigation.text.tokens,
 			url: nftsUrl({
-				originSelectedNetwork: nonNullish($userSelectedNetworkStore)
-					? parseNetworkId($userSelectedNetworkStore)
-					: undefined
+				originSelectedNetwork: ($userSelectedNetworkStore)
+
 			})
 		}
 	]);

@@ -49,7 +49,7 @@
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
 
 	const networkId = $derived(
-		nonNullish($userSelectedNetworkStore) ? parseNetworkId($userSelectedNetworkStore) : undefined
+		($userSelectedNetworkStore)
 	);
 
 	let fromRoute = $state<NavigationTarget | null>(null);

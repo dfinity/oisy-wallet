@@ -176,7 +176,7 @@ export const switchNetwork = async ({
 	userSelectedNetworkStore
 }: {
 	networkId: Option<NetworkId>;
-	userSelectedNetworkStore: Writable<string | undefined>;
+	userSelectedNetworkStore: Writable<NetworkId | undefined>;
 }) => {
 	const url = new URL(window.location.href);
 
@@ -185,7 +185,7 @@ export const switchNetwork = async ({
 		userSelectedNetworkStore.set(undefined);
 	} else {
 		url.searchParams.set(NETWORK_PARAM, networkId.description);
-		userSelectedNetworkStore.set(networkId.description);
+		userSelectedNetworkStore.set(networkId);
 	}
 
 	await goto(url, { replaceState: true, noScroll: true });

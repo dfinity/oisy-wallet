@@ -224,7 +224,7 @@ describe('NftHero', () => {
 	});
 
 	it('should render the root breadcrumb with network query param if userSelectedNetwork is defined', async () => {
-		userSelectedNetworkStore.set(ETHEREUM_NETWORK_ID.description);
+		userSelectedNetworkStore.set(ETHEREUM_NETWORK_ID);
 
 		const { container } = render(NftHero, {
 			props: {

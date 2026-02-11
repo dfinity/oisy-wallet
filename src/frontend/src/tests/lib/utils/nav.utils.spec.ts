@@ -731,7 +731,7 @@ describe('nav.utils', () => {
 		});
 
 		it('should handle a nullish network ID', async () => {
-			userSelectedNetworkStore.set(ICP_NETWORK_ID.description);
+			userSelectedNetworkStore.set(ICP_NETWORK_ID);
 
 			await switchNetwork({ networkId: undefined, userSelectedNetworkStore });
 

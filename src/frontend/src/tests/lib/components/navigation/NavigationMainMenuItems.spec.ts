@@ -68,7 +68,7 @@ describe('NavigationMainMenuItems', () => {
 	});
 
 	it('should incorporate the network query param if userSelectedNetwork is set', () => {
-		userSelectedNetworkStore.set(ETHEREUM_NETWORK_ID.description);
+		userSelectedNetworkStore.set(ETHEREUM_NETWORK_ID);
 
 		const { getByTestId } = render(NavigationMainMenuItems);
 
