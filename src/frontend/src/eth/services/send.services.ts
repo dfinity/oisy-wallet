@@ -16,7 +16,6 @@ import type { EthereumNetwork, NetworkChainId } from '$eth/types/network';
 import type { SendParams } from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
-import { isErc20Icp } from '$eth/utils/token.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import {
 	toCkErc20HelperContractAddress,
