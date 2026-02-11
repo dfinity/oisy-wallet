@@ -1796,7 +1796,7 @@
 				"possessive": ""
 			},
 			"title": "",
-			"instruction": "اس بٹن پر کلک کرکے، آپ اتفاق کرتے ہیں۔$link",
+			"instruction": "$linkاس بٹن پر کلک کرکے، آپ اتفاق کرتے ہیں۔",
 			"body": ""
 		},
 		"alt": {
