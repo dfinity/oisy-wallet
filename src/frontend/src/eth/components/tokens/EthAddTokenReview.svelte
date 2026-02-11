@@ -8,6 +8,7 @@
 	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
+	import type { ContractAddress } from '$eth/types/address';
 	import type { Erc1155Metadata } from '$eth/types/erc1155';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc721Metadata } from '$eth/types/erc721';
@@ -20,7 +21,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Network } from '$lib/types/network';
+	import type { Network, NetworkId } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
@@ -40,7 +41,9 @@
 			toastsError({
 				msg: { text: $i18n.tokens.error.incomplete_metadata }
 			});
+
 			onBack();
+
 			return;
 		}
 
@@ -64,6 +67,32 @@
 		}
 	};
 
+	const getErcMetadata = async ({
+		networkId,
+		address
+	}: {
+		networkId: NetworkId;
+		address: ContractAddress['address'];
+	}): Promise<Erc20Metadata | Erc721Metadata | Erc1155Metadata | undefined> => {
+		const { metadata: metadataApiErc20, isErc20 } = infuraErc20Providers(networkId);
+
+		if (await isErc20({ contractAddress: address })) {
+			return await metadataApiErc20({ address });
+		}
+
+		const { metadata: metadataApiErc721, isInterfaceErc721 } = infuraErc721Providers(networkId);
+
+		if (await isInterfaceErc721({ address })) {
+			return await metadataApiErc721({ address });
+		}
+
+		const { metadata: metadataApiErc1155, isInterfaceErc1155 } = infuraErc1155Providers(networkId);
+
+		if (await isInterfaceErc1155({ address })) {
+			return await metadataApiErc1155({ address });
+		}
+	};
+
 	onMount(async () => {
 		if (isNullish(contractAddress)) {
 			toastsError({
@@ -71,6 +100,7 @@
 			});
 
 			onBack();
+
 			return;
 		}
 
@@ -80,6 +110,7 @@
 			});
 
 			onBack();
+
 			return;
 		}
 
@@ -101,26 +132,15 @@
 			});
 
 			onBack();
+
 			return;
 		}
 
-		const { metadata: metadataApiErc20, isErc20 } = infuraErc20Providers(network.id);
+
 		try {
-			if (await isErc20({ contractAddress })) {
-				metadata = await metadataApiErc20({ address: contractAddress });
-				validateMetadata();
-			} else {
-				const { metadata: metadataApiErc721, isInterfaceErc721 } = infuraErc721Providers(
-					network.id
-				);
-				if (await isInterfaceErc721({ address: contractAddress })) {
-					metadata = await metadataApiErc721({ address: contractAddress });
-					validateMetadata();
-				} else {
-					const { metadata: metadataApiErc1155 } = infuraErc1155Providers(network.id);
-					metadata = await metadataApiErc1155({ address: contractAddress });
-				}
-			}
+			metadata = await getErcMetadata({ networkId: network.id, address: contractAddress });
+
+			validateMetadata();
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
