@@ -180,7 +180,7 @@
 	});
 
 	// When arriving via a deep link with a network param, the NFT breadcrumb
-	// would drop that filter because it depends on `userSelectedNetworkStore`,
+	// would drop that filter because its route depends on `userSelectedNetworkStore`,
 	// which is only updated through explicit user actions.
 	// We initialise the store from the URL on first load to preserve navigation
 	// context without promoting the route to the source of truth.
