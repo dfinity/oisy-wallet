@@ -743,7 +743,7 @@ describe('nav.utils', () => {
 		it('should go to the URL with the set network ID', async () => {
 			await switchNetwork({ networkId: ICP_NETWORK_ID, userSelectedNetworkStore });
 
-			expect(get(userSelectedNetworkStore)).toBe(ICP_NETWORK_ID.description);
+			expect(get(userSelectedNetworkStore)).toBe(ICP_NETWORK_ID);
 
 			const newUrl = new URL(`${baseUrl}?${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`);
 
