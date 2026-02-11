@@ -1,3 +1,5 @@
+import { replaceState } from '$app/navigation';
+
 /**
  * Update browser URL. To be use only for really particular use case that do not include navigation and loading data.
  */
@@ -7,7 +9,7 @@ export const replaceHistory = (url: URL) => {
 		return;
 	}
 
-	history.replaceState(history.state ?? {}, '', url);
+	replaceState(url, history.state ?? {});
 };
 
 /**
