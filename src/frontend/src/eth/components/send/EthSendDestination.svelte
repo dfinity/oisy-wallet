@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { isEthAddress } from '$eth/utils/account.utils';
-	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { invalidIcpAddress } from '$icp/utils/account.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -34,20 +33,9 @@
 
 	let networkICP = $derived(isNetworkICP(network));
 
-	let erc20Icp = $derived(isErc20Icp(token));
-
 	const isInvalidDestination = (): boolean => {
 		if (isNullishOrEmpty(destination)) {
 			return false;
-		}
-
-		// Avoid flickering when users enter an address and the network is about to be selected automatically.
-		if (erc20Icp && isNullish(network)) {
-			return false;
-		}
-
-		if (erc20Icp && networkICP) {
-			return invalidIcpAddress(destination);
 		}
 
 		return !isEthAddress(destination);
