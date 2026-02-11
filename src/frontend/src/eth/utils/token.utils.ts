@@ -14,7 +14,7 @@ import { zeroPadValue } from 'ethers/utils';
 
 export const isErc20Icp = (token: OptionToken): boolean =>
 	// token?.symbol === ERC20_ICP_SYMBOL &&
-	isTokenErc20(token) &&
+	isTokenErc20(token?) &&
 	token?.address.toLowerCase() === ERC20_ICP_ADDRESS.toLowerCase() &&
 	token?.network.id === ETHEREUM_NETWORK_ID;
 // isTokenErc20(token) && token?.address === ERC20_ICP_ADDRESS && token?.network.id === ETHEREUM_NETWORK_ID; TEST
