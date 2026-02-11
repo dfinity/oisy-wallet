@@ -26,26 +26,22 @@
 
 	const { token, nft }: Props = $props();
 
-	const breadcrumbItems = $derived.by(() => {
-		let breadcrumbs = [
-			{
-				label: $i18n.navigation.text.tokens,
-				url: nftsUrl({
-					originSelectedNetwork: $userSelectedNetworkStore
-				})
-			}
-		];
-		if (nonNullish(nft) && nonNullish(nft.collection.name)) {
-			breadcrumbs = [
-				...breadcrumbs,
-				{
-					label: nft.collection.name,
-					url: nftsUrl({ collection: nft?.collection })
-				}
-			];
-		}
-		return breadcrumbs;
-	});
+	const breadcrumbItems = $derived([
+		{
+			label: $i18n.navigation.text.tokens,
+			url: nftsUrl({
+				originSelectedNetwork: $userSelectedNetworkStore
+			})
+		},
+		...(nonNullish(nft) && nonNullish(nft.collection.name)
+			? [
+					{
+						label: nft.collection.name,
+						url: nftsUrl({ collection: nft?.collection })
+					}
+				]
+			: [])
+	]);
 
 	const normalizedNftName = $derived(nonNullish(nft) ? getNftDisplayName(nft) : undefined);
 
