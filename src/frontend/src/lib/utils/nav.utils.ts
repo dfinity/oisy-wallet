@@ -10,7 +10,6 @@ import {
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
-import type { StorageStore } from '$lib/stores/storage.store';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
@@ -19,6 +18,7 @@ import type { Option } from '$lib/types/utils';
 import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
+import type { Writable } from 'svelte/store';
 
 const normalizePath = (s: string | null) =>
 	nonNullish(s) ? (s.endsWith('/') ? s : `${s}/`) : null;
@@ -176,16 +176,16 @@ export const switchNetwork = async ({
 	userSelectedNetworkStore
 }: {
 	networkId: Option<NetworkId>;
-	userSelectedNetworkStore: StorageStore<string | undefined>;
+	userSelectedNetworkStore: Writable<NetworkId | undefined>;
 }) => {
 	const url = new URL(window.location.href);
 
 	if (isNullish(networkId) || isNullish(networkId.description)) {
 		url.searchParams.delete(NETWORK_PARAM);
-		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+		userSelectedNetworkStore.set(undefined);
 	} else {
 		url.searchParams.set(NETWORK_PARAM, networkId.description);
-		userSelectedNetworkStore.set({ key: 'user-selected-network', value: networkId.description });
+		userSelectedNetworkStore.set(networkId);
 	}
 
 	await goto(url, { replaceState: true, noScroll: true });
