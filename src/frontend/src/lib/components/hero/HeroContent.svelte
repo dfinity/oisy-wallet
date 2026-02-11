@@ -3,7 +3,6 @@
 	import { setContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/state';
-	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import {
 		isGLDTToken as isGLDTTokenUtil,
@@ -11,7 +10,6 @@
 		isVEURToken as isVEURTokenUtil
 	} from '$icp-eth/utils/token.utils';
 	import Back from '$lib/components/core/Back.svelte';
-	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
 	import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
 	import Actions from '$lib/components/hero/Actions.svelte';
 	import Balance from '$lib/components/hero/Balance.svelte';
@@ -168,7 +166,4 @@
 		<Actions />
 	</div>
 
-	{#if isErc20Icp($pageToken)}
-		<Erc20Icp />
-	{/if}
 </div>
