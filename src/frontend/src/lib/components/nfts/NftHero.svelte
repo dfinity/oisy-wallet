@@ -32,8 +32,7 @@
 			{
 				label: $i18n.navigation.text.tokens,
 				url: nftsUrl({
-					originSelectedNetwork: ($userSelectedNetworkStore)
-
+					originSelectedNetwork: $userSelectedNetworkStore
 				})
 			}
 		];
