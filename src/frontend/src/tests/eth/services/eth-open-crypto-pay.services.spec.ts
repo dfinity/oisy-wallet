@@ -27,10 +27,6 @@ vi.mock('$eth/providers/infura.providers', () => ({
 	infuraProviders: vi.fn(() => mockProvider)
 }));
 
-vi.mock('$eth/providers/infura-erc20-icp.providers', () => ({
-	infuraErc20IcpProviders: vi.fn(() => ({ getFeeData: vi.fn() }))
-}));
-
 vi.mock('$eth/providers/infura-erc20.providers', () => ({
 	infuraErc20Providers: vi.fn(() => ({ getFeeData: vi.fn() }))
 }));
