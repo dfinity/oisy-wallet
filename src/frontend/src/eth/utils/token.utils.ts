@@ -6,7 +6,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { PayableToken } from '$lib/types/open-crypto-pay';
-import type { OptionToken, Token, TokenId } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { zeroPadValue } from 'ethers/utils';
 
