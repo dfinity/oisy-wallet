@@ -12,8 +12,8 @@ import { formatToken } from '$lib/utils/format.utils';
 import { zeroPadValue } from 'ethers/utils';
 
 export const isErc20Icp = (token: OptionToken): boolean =>
-	token?.symbol === ERC20_ICP_SYMBOL && 
-	token?.address.toLowerCase() === ERC20_ICP_ADDRESS.toLowerCase() && 
+	token?.symbol === ERC20_ICP_SYMBOL &&
+	token?.address.toLowerCase() === ERC20_ICP_ADDRESS.toLowerCase() &&
 	isTokenErc20(token);
 // isTokenErc20(token) && token?.address === ERC20_ICP_ADDRESS && token?.network.id === ETHEREUM_NETWORK_ID; TEST
 
