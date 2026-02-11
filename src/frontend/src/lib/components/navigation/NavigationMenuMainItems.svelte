@@ -19,9 +19,10 @@
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
 	} from '$lib/constants/test-ids.constants';
+	import { pageNetworkId } from '$lib/derived/page-network.derived';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { activeAssetsTabStore, userSelectedNetworkStore } from '$lib/stores/settings.store';
+	import { activeAssetsTabStore } from '$lib/stores/settings.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
@@ -34,7 +35,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
 		testIdPrefix?: string;
@@ -47,9 +47,7 @@
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
 
-	const networkId = $derived(
-		nonNullish($userSelectedNetworkStore) ? parseNetworkId($userSelectedNetworkStore) : undefined
-	);
+	const networkId = $derived($pageNetworkId);
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 

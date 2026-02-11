@@ -7,11 +7,11 @@ import { MediaStatusEnum } from '$lib/enums/media-status';
 import { extractMediaUrls } from '$lib/services/url.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
-import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 import type { Nft } from '$lib/types/nft';
 import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -31,7 +31,7 @@ describe('NftHero', () => {
 
 		vi.mocked(extractMediaUrls).mockResolvedValue([]);
 
-		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+		mockPage.mockNetwork(undefined);
 
 		openFullscreenSpy = vi
 			.spyOn(modalStore, 'openNftFullscreenDisplay')
@@ -224,10 +224,7 @@ describe('NftHero', () => {
 	});
 
 	it('should render the root breadcrumb with network query param if userSelectedNetwork is defined', async () => {
-		userSelectedNetworkStore.set({
-			key: 'user-selected-network',
-			value: ETHEREUM_NETWORK_ID.description
-		});
+		mockPage.mockNetwork(ETHEREUM_NETWORK_ID.description);
 
 		const { container } = render(NftHero, {
 			props: {

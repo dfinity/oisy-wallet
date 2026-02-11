@@ -8,11 +8,11 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { extractMediaUrls } from '$lib/services/url.services';
-import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftCollectionUi } from '$tests/mocks/nfts.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 
@@ -40,7 +40,7 @@ describe('NftCollectionHero', () => {
 
 		vi.mocked(extractMediaUrls).mockResolvedValue([]);
 
-		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+		mockPage.mockNetwork(undefined);
 	});
 
 	it('should render the collection data', async () => {
@@ -129,10 +129,7 @@ describe('NftCollectionHero', () => {
 	});
 
 	it('should render the root breadcrumb with network query param if userSelectedNetwork is defined', () => {
-		userSelectedNetworkStore.set({
-			key: 'user-selected-network',
-			value: ETHEREUM_NETWORK_ID.description
-		});
+		mockPage.mockNetwork(ETHEREUM_NETWORK_ID.description);
 
 		const { container } = render(NftCollectionHero, {
 			props: {

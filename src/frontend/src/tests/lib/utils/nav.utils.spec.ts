@@ -13,7 +13,6 @@ import {
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
-import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 import {
 	back,
 	gotoReplaceRoot,
@@ -51,7 +50,6 @@ import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
-import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 describe('nav.utils', () => {
@@ -726,27 +724,16 @@ describe('nav.utils', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-
-			userSelectedNetworkStore.reset({ key: 'user-selected-network' });
 		});
 
 		it('should handle a nullish network ID', async () => {
-			userSelectedNetworkStore.set({
-				key: 'user-selected-network',
-				value: ICP_NETWORK_ID.description
-			});
-
-			await switchNetwork({ networkId: undefined, userSelectedNetworkStore });
-
-			expect(get(userSelectedNetworkStore)).toBeUndefined();
+			await switchNetwork({ networkId: undefined });
 
 			expect(goto).toHaveBeenCalledExactlyOnceWith(baseUrl, { replaceState: true, noScroll: true });
 		});
 
 		it('should go to the URL with the set network ID', async () => {
-			await switchNetwork({ networkId: ICP_NETWORK_ID, userSelectedNetworkStore });
-
-			expect(get(userSelectedNetworkStore)).toBe(ICP_NETWORK_ID.description);
+			await switchNetwork({ networkId: ICP_NETWORK_ID });
 
 			const newUrl = new URL(`${baseUrl}?${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`);
 
