@@ -733,7 +733,7 @@ describe('nav.utils', () => {
 		it('should handle a nullish network ID', async () => {
 			userSelectedNetworkStore.set(ICP_NETWORK_ID);
 
-			await switchNetwork({ networkId: undefined, userSelectedNetworkStore });
+			await switchNetwork({ networkId: undefined });
 
 			expect(get(userSelectedNetworkStore)).toBeUndefined();
 
@@ -741,7 +741,7 @@ describe('nav.utils', () => {
 		});
 
 		it('should go to the URL with the set network ID', async () => {
-			await switchNetwork({ networkId: ICP_NETWORK_ID, userSelectedNetworkStore });
+			await switchNetwork({ networkId: ICP_NETWORK_ID });
 
 			expect(get(userSelectedNetworkStore)).toBe(ICP_NETWORK_ID);
 
