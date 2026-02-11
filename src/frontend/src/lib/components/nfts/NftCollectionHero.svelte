@@ -11,7 +11,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';

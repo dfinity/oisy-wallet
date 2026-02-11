@@ -21,7 +21,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { activeAssetsTabStore, userSelectedNetworkStore } from '$lib/stores/settings.store';
+	import { activeAssetsTabStore, } from '$lib/stores/settings.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
@@ -35,6 +35,7 @@
 		networkUrl
 	} from '$lib/utils/nav.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation.js';
+	import {userSelectedNetworkStore} from "$lib/stores/user-selected-network.store";
 
 	interface Props {
 		testIdPrefix?: string;

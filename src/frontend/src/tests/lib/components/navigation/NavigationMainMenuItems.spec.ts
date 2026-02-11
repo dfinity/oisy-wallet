@@ -10,7 +10,8 @@ import {
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import { TokenTypes } from '$lib/enums/token-types';
-import { activeAssetsTabStore, userSelectedNetworkStore } from '$lib/stores/settings.store';
+import { activeAssetsTabStore } from '$lib/stores/settings.store';
+import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -21,7 +22,7 @@ describe('NavigationMainMenuItems', () => {
 		vi.clearAllMocks();
 
 		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
-		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+		userSelectedNetworkStore.set(undefined);
 	});
 
 	it('renders all basic navigation items', () => {
@@ -67,10 +68,7 @@ describe('NavigationMainMenuItems', () => {
 	});
 
 	it('should incorporate the network query param if userSelectedNetwork is set', () => {
-		userSelectedNetworkStore.set({
-			key: 'user-selected-network',
-			value: ETHEREUM_NETWORK_ID.description
-		});
+		userSelectedNetworkStore.set(ETHEREUM_NETWORK_ID.description);
 
 		const { getByTestId } = render(NavigationMainMenuItems);
 
