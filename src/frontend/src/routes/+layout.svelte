@@ -179,6 +179,8 @@
 		}
 	});
 
+	// When the page is opened via a deep link containing a network param, the NFT breadcrumb would otherwise drop that filter.
+	// We initialise the user-selected network from the URL so NFT breadcrumb navigation preserves the original context without making the route the source of truth.
 	onMount(() => {
 		userSelectedNetworkStore.set($networkId);
 	});
