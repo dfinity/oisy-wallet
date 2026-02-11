@@ -136,7 +136,6 @@
 			return;
 		}
 
-
 		try {
 			metadata = await getErcMetadata({ networkId: network.id, address: contractAddress });
 
