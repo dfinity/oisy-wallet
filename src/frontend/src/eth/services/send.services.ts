@@ -2,7 +2,6 @@ import type { EthSignTransactionRequest } from '$declarations/signer/signer.did'
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraCkErc20Providers } from '$eth/providers/infura-ckerc20.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
-import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { approve } from '$eth/services/approve.services';
@@ -310,10 +309,7 @@ const sendTransaction = async ({
 					...signParams,
 					to,
 					token,
-					populate:
-						isErc20Icp(token) && networkICP
-							? infuraErc20IcpProviders(networkId).populateTransaction
-							: infuraErc20Providers(networkId).populateTransaction
+					populate: infuraErc20Providers(networkId).populateTransaction
 				}));
 
 	progress?.(ProgressStepsSend.SIGN_TRANSFER);
