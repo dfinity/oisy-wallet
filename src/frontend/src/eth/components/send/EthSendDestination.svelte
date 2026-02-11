@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
 	import { isEthAddress } from '$eth/utils/account.utils';
-	import { invalidIcpAddress } from '$icp/utils/account.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkContacts } from '$lib/types/contacts';
@@ -9,7 +7,6 @@
 	import type { OptionToken } from '$lib/types/token';
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNetworkICP } from '$lib/utils/network.utils';
 
 	interface Props {
 		token: OptionToken;
@@ -30,8 +27,6 @@
 		networkContacts,
 		onQRCodeScan
 	}: Props = $props();
-
-	let networkICP = $derived(isNetworkICP(network));
 
 	const isInvalidDestination = (): boolean => {
 		if (isNullishOrEmpty(destination)) {
