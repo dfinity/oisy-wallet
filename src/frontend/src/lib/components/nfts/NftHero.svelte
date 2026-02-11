@@ -14,11 +14,10 @@
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
-	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { getNftDisplayImageUrl, getNftDisplayName } from '$lib/utils/nft.utils';
-	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -32,9 +31,7 @@
 			{
 				label: $i18n.navigation.text.tokens,
 				url: nftsUrl({
-					originSelectedNetwork: nonNullish($userSelectedNetworkStore)
-						? parseNetworkId($userSelectedNetworkStore)
-						: undefined
+					originSelectedNetwork: $userSelectedNetworkStore
 				})
 			}
 		];

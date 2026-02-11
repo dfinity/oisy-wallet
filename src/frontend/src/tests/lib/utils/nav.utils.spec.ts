@@ -13,7 +13,7 @@ import {
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
-import { userSelectedNetworkStore } from '$lib/stores/settings.store';
+import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import {
 	back,
 	gotoReplaceRoot,
@@ -727,14 +727,11 @@ describe('nav.utils', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+			userSelectedNetworkStore.set(undefined);
 		});
 
 		it('should handle a nullish network ID', async () => {
-			userSelectedNetworkStore.set({
-				key: 'user-selected-network',
-				value: ICP_NETWORK_ID.description
-			});
+			userSelectedNetworkStore.set(ICP_NETWORK_ID);
 
 			await switchNetwork({ networkId: undefined, userSelectedNetworkStore });
 
@@ -746,7 +743,7 @@ describe('nav.utils', () => {
 		it('should go to the URL with the set network ID', async () => {
 			await switchNetwork({ networkId: ICP_NETWORK_ID, userSelectedNetworkStore });
 
-			expect(get(userSelectedNetworkStore)).toBe(ICP_NETWORK_ID.description);
+			expect(get(userSelectedNetworkStore)).toBe(ICP_NETWORK_ID);
 
 			const newUrl = new URL(`${baseUrl}?${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`);
 
