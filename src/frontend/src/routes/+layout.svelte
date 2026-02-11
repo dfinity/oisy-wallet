@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isIOS, Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -15,6 +16,7 @@
 	} from '$lib/constants/analytics.constants';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
+	import { networkId } from '$lib/derived/network.derived';
 	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
@@ -175,6 +177,10 @@
 				unlockBodyScroll();
 			}
 		}
+	});
+
+	onMount(() => {
+		userSelectedNetworkStore.set($networkId);
 	});
 </script>
 
