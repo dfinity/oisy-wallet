@@ -35,7 +35,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
 		testIdPrefix?: string;

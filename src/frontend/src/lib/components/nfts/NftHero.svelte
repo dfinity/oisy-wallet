@@ -18,7 +18,6 @@
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { getNftDisplayImageUrl, getNftDisplayName } from '$lib/utils/nft.utils';
-	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
 		token?: NonFungibleToken;
