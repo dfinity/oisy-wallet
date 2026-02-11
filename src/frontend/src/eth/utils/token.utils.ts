@@ -1,5 +1,6 @@
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens/tokens.erc20.env';
-import { ERC20_ICP_SYMBOL } from '$eth/constants/erc20-icp.constants';
+import { ERC20_ICP_ADDRESS, ERC20_ICP_SYMBOL } from '$eth/constants/erc20-icp.constants';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
