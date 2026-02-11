@@ -165,5 +165,4 @@
 	<div class="flex w-full justify-center text-left" in:slide|local={SLIDE_PARAMS}>
 		<Actions />
 	</div>
-
 </div>
