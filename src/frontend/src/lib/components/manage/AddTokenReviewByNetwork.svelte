@@ -33,6 +33,7 @@
 		isNetworkIdSOLDevnet
 	} from '$lib/utils/network.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
+	import {infuraErc20Providers} from "$eth/providers/infura-erc20.providers";
 
 	interface Props {
 		network?: Network;
@@ -156,7 +157,10 @@
 			return;
 		}
 
-		if (ethMetadata.decimals >= 0) {
+			const {  isErc20 } = infuraErc20Providers(network.id);
+
+
+		if (await isErc20({ contractAddress:ethContractAddress })) {
 			await saveTokens([{ ...newToken, networkKey: 'Erc20' }]);
 
 			return;
