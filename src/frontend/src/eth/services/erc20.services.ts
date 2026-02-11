@@ -20,7 +20,7 @@ import type { Erc20ContractAddress } from '$eth/types/address';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { EthereumNetwork } from '$eth/types/network';
-import { mapErc20Icon, mapErc20Token } from '$eth/utils/erc20.utils';
+import { mapErc20Token } from '$eth/utils/erc20.utils';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
@@ -198,7 +198,7 @@ const loadCustomTokensWithMetadata = async ({
 				address
 			} = token;
 
-			const icon = mapErc20Icon(token.symbol) ?? getCodebaseTokenIconPath({ token });
+			const icon = getCodebaseTokenIconPath({ token });
 
 			const metadata = await safeLoadMetadata({ networkId, address });
 
