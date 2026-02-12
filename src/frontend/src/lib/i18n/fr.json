@@ -404,6 +404,11 @@
 				"name": "Kamino",
 				"one_liner": "Kamino est le plus grand protocole d'emprunt et de prêt sur Solana, alimentant une part importante de l'activité DeFi du réseau.",
 				"description": "Kamino est une plateforme de finance décentralisée (DeFi) sur la blockchain Solana qui intègre la fourniture de liquidités, le prêt et le trading avec effet de levier dans une seule suite de produits. Elle simplifie ces stratégies DeFi, en particulier grâce à ses coffres de liquidité automatisés et son système Kamino Lend, et utilise une gestion de liquidité concentrée pour augmenter l'efficacité du capital pour ses utilisateurs."
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
