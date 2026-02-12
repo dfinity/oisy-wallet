@@ -67,32 +67,6 @@
 		}
 	};
 
-	const getErcMetadata = async ({
-		networkId,
-		address
-	}: {
-		networkId: NetworkId;
-		address: ContractAddress['address'];
-	}): Promise<Erc20Metadata | Erc721Metadata | Erc1155Metadata | undefined> => {
-		const { metadata: metadataApiErc20, isErc20 } = infuraErc20Providers(networkId);
-
-		if (await isErc20({ contractAddress: address })) {
-			return await metadataApiErc20({ address });
-		}
-
-		const { metadata: metadataApiErc721, isInterfaceErc721 } = infuraErc721Providers(networkId);
-
-		if (await isInterfaceErc721({ address })) {
-			return await metadataApiErc721({ address });
-		}
-
-		const { metadata: metadataApiErc1155, isInterfaceErc1155 } = infuraErc1155Providers(networkId);
-
-		if (await isInterfaceErc1155({ address })) {
-			return await metadataApiErc1155({ address });
-		}
-	};
-
 	onMount(async () => {
 		if (isNullish(contractAddress)) {
 			toastsError({
@@ -137,9 +111,46 @@
 		}
 
 		try {
-			metadata = await getErcMetadata({ networkId: network.id, address: contractAddress });
+			const { metadata: metadataApiErc20, isErc20 } = infuraErc20Providers(network.id);
 
-			validateMetadata();
+			if (await isErc20({ contractAddress })) {
+				metadata = await metadataApiErc20({ address: contractAddress });
+
+				validateMetadata();
+
+				return;
+			}
+
+			const { metadata: metadataApiErc721, isInterfaceErc721 } = infuraErc721Providers(network.id);
+
+			if (await isInterfaceErc721({ address: contractAddress })) {
+				metadata = await metadataApiErc721({ address: contractAddress });
+
+				validateMetadata();
+
+				return;
+			}
+
+			const { metadata: metadataApiErc1155, isInterfaceErc1155 } = infuraErc1155Providers(
+				network.id
+			);
+
+			if (await isInterfaceErc1155({ address: contractAddress })) {
+				metadata = await metadataApiErc1155({ address: contractAddress });
+
+				// ERC1155 do not need to implement `symbol` and `name`, so we skip the validation for this standard
+
+				return;
+			}
+
+			// In case we are not able to determine the token standard, we display an error message
+			if (isNullish(metadata)) {
+				toastsError({
+					msg: { text: $i18n.tokens.error.unrecognised_erc_interface }
+				});
+
+				onBack();
+			}
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
