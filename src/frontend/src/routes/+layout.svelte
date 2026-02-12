@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isIOS, Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
-	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -26,6 +25,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 
 	interface Props {
 		children: Snippet;
