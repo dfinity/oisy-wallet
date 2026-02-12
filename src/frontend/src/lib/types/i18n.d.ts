@@ -274,6 +274,7 @@ interface I18nDapps {
 		kamino: { name: string; one_liner: string; description: string };
 		helium: { name: string; one_liner: string; description: string };
 		ostrich: { name: string; one_liner: string; description: string };
+		sphere_finance: { name: string; one_liner: string; description: string };
 	};
 }
 
