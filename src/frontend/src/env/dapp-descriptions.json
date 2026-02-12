@@ -493,5 +493,19 @@
 		"stats": "",
 		"logo": "/images/dapps/helium-logo.webp",
 		"screenshots": ["/images/dapps/helium-screenshot.webp"]
+	},
+	{
+		"id": "sphere-finance",
+		"name": "dapps.descriptions.sphere_finance.name",
+		"oneLiner": "dapps.descriptions.sphere_finance.one_liner",
+		"website": "https://app.sphere.finance/",
+		"twitter": "https://x.com/SphereDeFi",
+		"discord": "https://discord.com/invite/spheredefi",
+		"tags": ["dapps.categories.defi"],
+		"stats": "",
+		"usesInternetIdentity": false,
+		"description": "dapps.descriptions.sphere_finance.description",
+		"logo": "/images/dapps/sphere-finance-logo.webp",
+		"screenshots": ["/images/dapps/sphere-finance-screenshot.webp"]
 	}
 ]
