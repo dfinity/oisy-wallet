@@ -1,4 +1,5 @@
 import * as exchangeEnv from '$env/exchange.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import {
 	ARBITRUM_ETH_TOKEN_ID,
@@ -32,6 +33,7 @@ import {
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
+import { ERC20_ICP_ADDRESS, ERC20_ICP_SYMBOL } from '$eth/constants/erc20-icp.constants';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -385,7 +387,13 @@ describe('exchange.derived', () => {
 		it('should return values for ERC20 token ICP', () => {
 			erc20CustomTokensStore.setAll([
 				{
-					data: { ...mockErc20DefaultToken, exchange: 'icp', enabled: true },
+					data: {
+						...mockErc20DefaultToken,
+						symbol: ERC20_ICP_SYMBOL,
+						address: ERC20_ICP_ADDRESS,
+						network: ETHEREUM_NETWORK,
+						enabled: true
+					},
 					certified: false
 				}
 			]);
