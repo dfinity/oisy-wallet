@@ -395,6 +395,11 @@
 				"one_liner": "Solana上の分散型NFTプラットフォーム",
 				"description": "Magic Eden は、複数のブロックチェーンに対応した NFT マーケットプレイスで、ユーザーは NFT（非代替性トークン）の作成・購入・販売・取引を行うことができます。使いやすいインターフェース、低い取引手数料、そしてクリエイターやコレクター向けの多様なツールで知られています。"
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"solayer": {
 				"name": "Solayer",
 				"one_liner": "Solana上の分散型ゲームプラットフォーム",
@@ -406,6 +411,11 @@
 				"description": "Kamino は、Solana ブロックチェーン上の分散型金融（DeFi）プラットフォームで、流動性提供、レンディング、レバレッジ取引を単一のプロダクト群として統合しています。自動化された 流動性ボールト や Kamino Lend を通じて、これらの DeFi 戦略を簡素化しており、集中流動性管理を活用することで、ユーザーの 資本効率を高めています。"
 			},
 			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
