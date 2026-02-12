@@ -8,7 +8,6 @@
 	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
-	import type { ContractAddress } from '$eth/types/address';
 	import type { Erc1155Metadata } from '$eth/types/erc1155';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc721Metadata } from '$eth/types/erc721';
@@ -21,7 +20,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Network, NetworkId } from '$lib/types/network';
+	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
