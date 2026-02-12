@@ -447,6 +447,20 @@
 		"screenshots": ["/images/dapps/opensea-screenshot.webp"]
 	},
 	{
+		"id": "sanctum",
+		"name": "dapps.descriptions.sanctum.name",
+		"oneLiner": "dapps.descriptions.sanctum.one_liner",
+		"website": "https://app.sanctum.so/",
+		"twitter": "https://x.com/sanctumso",
+		"discord": "https://discord.com/invite/sanctumso",
+		"tags": ["dapps.categories.defi"],
+		"description": "dapps.descriptions.sanctum.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/sanctum-logo.webp",
+		"screenshots": ["/images/dapps/sanctum-screenshot.webp"]
+	},
+	{
 		"id": "solayer",
 		"name": "dapps.descriptions.solayer.name",
 		"oneLiner": "dapps.descriptions.solayer.one_liner",

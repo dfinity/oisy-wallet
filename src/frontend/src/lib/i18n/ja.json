@@ -395,6 +395,11 @@
 				"one_liner": "Solana上の分散型NFTプラットフォーム",
 				"description": "Magic Eden は、複数のブロックチェーンに対応した NFT マーケットプレイスで、ユーザーは NFT（非代替性トークン）の作成・購入・販売・取引を行うことができます。使いやすいインターフェース、低い取引手数料、そしてクリエイターやコレクター向けの多様なツールで知られています。"
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"solayer": {
 				"name": "Solayer",
 				"one_liner": "Solana上の分散型ゲームプラットフォーム",
