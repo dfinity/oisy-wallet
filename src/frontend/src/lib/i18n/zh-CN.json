@@ -404,6 +404,11 @@
 				"name": "Kamino",
 				"one_liner": "Kamino 是 Solana 上最大的借贷协议，支撑着该网络中相当大比例的 DeFi 活动。",
 				"description": "Kamino 是一个运行在 Solana 区块链上的去中心化金融（DeFi）平台，将流动性提供、借贷和杠杆交易整合为一套产品体系。它通过自动化流动性金库和 Kamino Lend 系统简化了这些 DeFi 策略，并利用集中流动性管理来提升用户的资金效率。"
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
