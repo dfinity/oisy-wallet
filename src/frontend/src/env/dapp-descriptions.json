@@ -493,5 +493,19 @@
 		"stats": "",
 		"logo": "/images/dapps/helium-logo.webp",
 		"screenshots": ["/images/dapps/helium-screenshot.webp"]
+	},
+	{
+		"id": "ostrich",
+		"name": "dapps.descriptions.ostrich.name",
+		"oneLiner": "dapps.descriptions.ostrich.one_liner",
+		"website": "https://app.ostrich.exchange/",
+		"discord": "https://discord.gg/BntNDR2zsD",
+		"twitter": "https://x.com/ostrich_hq",
+		"tags": ["dapps.categories.defi"],
+		"description": "dapps.descriptions.ostrich.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/ostrich-logo.png",
+		"screenshots": ["/images/dapps/ostrich-screenshot.webp"]
 	}
 ]
