@@ -600,6 +600,7 @@
 			"no_infura_erc721_provider": "Pas de fournisseur Infura ERC721 pour le réseau $network",
 			"no_infura_erc1155_provider": "Pas de fournisseur Infura ERC1155 pour le réseau $network",
 			"no_infura_erc20_icp_provider": "Pas de fournisseur Infura ERC20 ICP pour le réseau $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Pas de réseau Solana pour le réseau $network",
 			"loading_address": "Erreur lors du chargement de l'adresse $symbol.",
 			"loading_balance": "Erreur lors du chargement du solde $symbol pour le réseau $network.",

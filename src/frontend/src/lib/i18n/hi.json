@@ -600,6 +600,7 @@
 			"no_infura_erc721_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC721 प्रदाता नहीं है",
 			"no_infura_erc1155_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC1155 प्रदाता नहीं है",
 			"no_infura_erc20_icp_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC20 ICP प्रदाता नहीं है",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "नेटवर्क $network के लिए कोई सोलाना नेटवर्क नहीं है",
 			"loading_address": "$symbol पता लोड करते समय त्रुटि।",
 			"loading_balance": "नेटवर्क $network के लिए $symbol बैलेंस लोड करते समय त्रुटि।",
