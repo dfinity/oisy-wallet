@@ -3,6 +3,7 @@ import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.s
 import { loadCustomTokens as loadCustomErc721Tokens } from '$eth/services/erc721.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { loadCustomTokens as loadCustomExtTokens } from '$icp/services/ext.services';
 import { loadCustomTokens as loadCustomIcPunksTokens } from '$icp/services/icpunks.services';
@@ -51,6 +52,12 @@ const hideTokenByKey = (token: SaveCustomTokenWithKey) => {
 
 	if (token.networkKey === 'Erc20') {
 		erc20CustomTokensStore.resetByIdentifier(parseErcIdentifier(token));
+
+		return;
+	}
+
+	if (token.networkKey === 'Erc4626') {
+		erc4626CustomTokensStore.resetByIdentifier(parseErcIdentifier(token));
 
 		return;
 	}
