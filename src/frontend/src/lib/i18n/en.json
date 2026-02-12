@@ -404,6 +404,11 @@
 				"name": "Kamino",
 				"one_liner": "Kamino is the largest borrowing and lending protocol on Solana, powering a significant share of the network’s DeFi activity.",
 				"description": "Kamino is a decentralized finance (DeFi) platform on the Solana blockchain that integrates liquidity provision, lending, and leveraged trading into a single suite of products. It simplifies these DeFi strategies, especially through its automated liquidity vaults and Kamino Lend system, and uses concentrated liquidity management to increase capital efficiency for its users."
+			},
+			"helium": {
+				"name": "Helium",
+				"one_liner": "A community‑built decentralized wireless network using Hotspots to deliver LoRaWAN IoT and mobile offload services—powered by token incentives on Solana.",
+				"description": "Helium is a decentralized wireless network where individuals deploy Hotspots to provide LoRaWAN and mobile network coverage in exchange for token incentives. The network transitioned to Solana for better scalability and now integrates with the mobile and IoT sectors. All data and rewards are settled on-chain, making Helium a key player in decentralized infrastructure."
 			}
 		}
 	},
@@ -600,6 +605,7 @@
 			"no_infura_erc721_provider": "No Infura ERC721 provider for network $network",
 			"no_infura_erc1155_provider": "No Infura ERC1155 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 ICP provider for network $network",
+			"no_infura_erc4626_provider": "No Infura ERC4626 provider for network $network",
 			"no_solana_network": "No Solana network for network $network",
 			"loading_address": "Error while loading the $symbol address.",
 			"loading_balance": "Error while loading $symbol balance for network $network.",

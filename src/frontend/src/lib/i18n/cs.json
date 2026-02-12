@@ -404,6 +404,11 @@
 				"name": "Kamino",
 				"one_liner": "Kamino je největší protokol pro půjčování a zapůjčování na síti Solana, který pohání významnou část DeFi aktivit této sítě.",
 				"description": "Kamino je decentralizovaná finanční (DeFi) platforma na blockchainu Solana, která integruje poskytování likvidity, půjčování a pákové obchodování do jedné sady produktů. Zjednodušuje tyto DeFi strategie, zejména prostřednictvím svých automatizovaných likviditních vaultů a systému Kamino Lend, a využívá správu koncentrované likvidity ke zvýšení kapitálové efektivity pro své uživatele."
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -600,6 +605,7 @@
 			"no_infura_erc721_provider": "Žádný poskytovatel Infura ERC721 pro síť $network",
 			"no_infura_erc1155_provider": "Žádný poskytovatel Infura ERC1155 pro síť $network",
 			"no_infura_erc20_icp_provider": "Žádný poskytovatel Infura ERC20 ICP pro síť $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Žádná síť Solana pro síť $network",
 			"loading_address": "Chyba při načítání adresy $symbol.",
 			"loading_balance": "Chyba při načítání zůstatku $symbol pro síť $network.",

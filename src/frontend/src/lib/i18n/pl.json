@@ -404,6 +404,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -600,6 +605,7 @@
 			"no_infura_erc721_provider": "Brak dostawcy Infura ERC721 dla sieci $network",
 			"no_infura_erc1155_provider": "Brak dostawcy Infura ERC1155 dla sieci $network",
 			"no_infura_erc20_icp_provider": "Brak dostawcy Infura ERC20 ICP dla sieci $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Brak sieci Solana dla sieci $network",
 			"loading_address": "Błąd podczas ładowania adresu $symbol.",
 			"loading_balance": "Błąd podczas ładowania salda $symbol dla sieci $network.",
