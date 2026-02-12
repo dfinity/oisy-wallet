@@ -10,7 +10,7 @@ import {
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
-import type { StorageStore } from '$lib/stores/storage.store';
+import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
@@ -171,21 +171,15 @@ export const resetRouteParams = (): RouteParams => ({
 	[URI_PARAM]: null
 });
 
-export const switchNetwork = async ({
-	networkId,
-	userSelectedNetworkStore
-}: {
-	networkId: Option<NetworkId>;
-	userSelectedNetworkStore: StorageStore<string | undefined>;
-}) => {
+export const switchNetwork = async ({ networkId }: { networkId: Option<NetworkId> }) => {
 	const url = new URL(window.location.href);
 
 	if (isNullish(networkId) || isNullish(networkId.description)) {
 		url.searchParams.delete(NETWORK_PARAM);
-		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+		userSelectedNetworkStore.set(undefined);
 	} else {
 		url.searchParams.set(NETWORK_PARAM, networkId.description);
-		userSelectedNetworkStore.set({ key: 'user-selected-network', value: networkId.description });
+		userSelectedNetworkStore.set(networkId);
 	}
 
 	await goto(url, { replaceState: true, noScroll: true });
