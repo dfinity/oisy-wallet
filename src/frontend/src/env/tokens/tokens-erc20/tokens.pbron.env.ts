@@ -21,6 +21,5 @@ export const PBRON_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: PBRON_DECIMALS,
 	icon: pbron,
 	address: '0xD08DDb436e731f32455Fe302723eE0FD2E9E8706',
-	exchange: 'erc20',
 	groupData: PBRON_TOKEN_GROUP
 };

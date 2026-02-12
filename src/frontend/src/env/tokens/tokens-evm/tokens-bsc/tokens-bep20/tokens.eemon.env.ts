@@ -21,6 +21,5 @@ export const EEMON_TOKEN: RequiredEvmBep20Token = {
 	decimals: EEMON_DECIMALS,
 	icon: iSharesPurple,
 	address: '0x00c81d35edDF44c75d4Db9E07bDCdC236eB0ebcf',
-	exchange: 'erc20',
 	groupData: EEMON_TOKEN_GROUP
 };

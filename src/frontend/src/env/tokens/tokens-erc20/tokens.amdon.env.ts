@@ -21,6 +21,5 @@ export const AMDON_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: AMDON_DECIMALS,
 	icon: amdon,
 	address: '0x0C1f3412A44Ff99E40bF14e06e5Ea321aE7B3938',
-	exchange: 'erc20',
 	groupData: AMDON_TOKEN_GROUP
 };

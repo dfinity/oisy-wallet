@@ -21,7 +21,6 @@ export const EURC_TOKEN: RequiredErc20Token = {
 	decimals: EURC_DECIMALS,
 	icon: eurc,
 	address: '0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckEURC',
 	groupData: EURC_TOKEN_GROUP,
 	neverCollapseInTokenGroup: true
@@ -41,7 +40,6 @@ export const SEPOLIA_EURC_TOKEN: RequiredErc20Token = {
 	decimals: EURC_DECIMALS,
 	icon: eurc,
 	address: '0x08210F9170F89Ab7658F0B5E3fF39b0E03C594D4',
-	exchange: 'erc20',
 	// TODO: is there a ckSepoliaEURC ?
 	twinTokenSymbol: 'ckSepoliaEURC'
 };

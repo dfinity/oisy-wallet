@@ -19,6 +19,5 @@ export const DAI_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: DAI_SYMBOL,
 	decimals: DAI_DECIMALS,
 	icon: dai,
-	address: '0x6b175474e89094c44da98b954eedeac495271d0f',
-	exchange: 'erc20'
+	address: '0x6b175474e89094c44da98b954eedeac495271d0f'
 };
