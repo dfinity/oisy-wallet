@@ -122,6 +122,7 @@
 				{isNftsPage}
 				onAddToken={modal.next}
 				onSave={saveTokens}
+				bind:network
 			/>
 		{/if}
 	{/key}
