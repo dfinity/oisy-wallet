@@ -22,7 +22,6 @@ describe('erc4626.derived', () => {
 	const mockErc4626Base: Omit<Erc4626Token, 'id' | 'network' | 'symbol' | 'address'> = {
 		...mockValidToken,
 		standard: { code: 'erc4626' },
-		exchange: 'erc4626',
 		assetAddress: '0xassetAddress',
 		assetDecimals: 6
 	};
