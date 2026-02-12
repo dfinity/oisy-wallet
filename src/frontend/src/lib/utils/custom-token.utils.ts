@@ -99,6 +99,10 @@ export const toCustomToken = ({
 			return { Erc20: toErcCustomToken(rest) };
 		}
 
+		if (networkKey === 'Erc4626') {
+			return { Erc4626: toErcCustomToken(rest) };
+		}
+
 		if (networkKey === 'Erc721') {
 			return { Erc721: toErcCustomToken(rest) };
 		}
