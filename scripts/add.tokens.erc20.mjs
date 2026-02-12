@@ -194,7 +194,7 @@ export const ${mainnetToken}: RequiredErc20Token = {
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
 	address: '${contractAddress}',
-twinTokenSymbol: 'ck${symbol}'
+	twinTokenSymbol: 'ck${symbol}'
 };
 `
 			: '';
@@ -216,7 +216,7 @@ export const ${testnetToken}: RequiredErc20Token = {
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
 	address: '${testnetContractAddress}',
-twinTokenSymbol: 'ckSepolia${symbol}'
+	twinTokenSymbol: 'ckSepolia${symbol}'
 };
 `
 			: '';
