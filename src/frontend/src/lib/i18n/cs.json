@@ -409,6 +409,11 @@
 				"name": "Kamino",
 				"one_liner": "Kamino je největší protokol pro půjčování a zapůjčování na síti Solana, který pohání významnou část DeFi aktivit této sítě.",
 				"description": "Kamino je decentralizovaná finanční (DeFi) platforma na blockchainu Solana, která integruje poskytování likvidity, půjčování a pákové obchodování do jedné sady produktů. Zjednodušuje tyto DeFi strategie, zejména prostřednictvím svých automatizovaných likviditních vaultů a systému Kamino Lend, a využívá správu koncentrované likvidity ke zvýšení kapitálové efektivity pro své uživatele."
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},

@@ -272,6 +272,7 @@ interface I18nDapps {
 		sanctum: { name: string; one_liner: string; description: string };
 		solayer: { name: string; one_liner: string; description: string };
 		kamino: { name: string; one_liner: string; description: string };
+		helium: { name: string; one_liner: string; description: string };
 	};
 }
 

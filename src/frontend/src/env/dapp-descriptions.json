@@ -492,5 +492,20 @@
 		"stats": "",
 		"logo": "/images/dapps/kamino-logo.svg",
 		"screenshots": ["/images/dapps/kamino-screenshot.webp"]
+	},
+	{
+		"id": "helium",
+		"name": "dapps.descriptions.helium.name",
+		"oneLiner": "dapps.descriptions.helium.one_liner",
+		"website": "https://www.helium.com/",
+		"github": "https://github.com/helium",
+		"twitter": "https://twitter.com/helium",
+		"tags": ["dapps.categories.tools"],
+		"description": "dapps.descriptions.helium.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/helium-logo.webp",
+		"screenshots": ["/images/dapps/helium-screenshot.webp"]
 	}
 ]
