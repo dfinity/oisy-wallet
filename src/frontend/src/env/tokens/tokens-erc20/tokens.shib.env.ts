@@ -21,7 +21,6 @@ export const SHIB_TOKEN: RequiredErc20Token = {
 	decimals: SHIB_DECIMALS,
 	icon: shib,
 	address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckSHIB',
 	groupData: SHIB_TOKEN_GROUP,
 	neverCollapseInTokenGroup: true,

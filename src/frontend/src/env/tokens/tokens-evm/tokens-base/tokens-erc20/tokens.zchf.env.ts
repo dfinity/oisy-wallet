@@ -21,6 +21,5 @@ export const ZCHF_TOKEN: RequiredEvmErc20Token = {
 	decimals: ZCHF_DECIMALS,
 	icon: zchf,
 	address: '0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553',
-	exchange: 'erc20',
 	groupData: ZCHF_TOKEN_GROUP
 };

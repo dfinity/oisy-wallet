@@ -27,6 +27,7 @@ import {
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
+import { ERC20_ICP_ADDRESS } from '$eth/constants/erc20-icp.constants';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcCkToken } from '$icp/types/ic-token';
@@ -89,7 +90,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 				};
 			}, {}),
 			...$erc20Tokens
-				.filter(({ exchange }) => exchange === 'icp')
+				.filter(({ address }) => address.toLowerCase() === ERC20_ICP_ADDRESS.toLowerCase())
 				.reduce(
 					(acc, { id }) => ({
 						...acc,

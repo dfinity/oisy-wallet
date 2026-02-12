@@ -100,7 +100,6 @@ const mockVeloraOptimalRate: OptimalRate = {
 					destDecimals: 6,
 					swapExchanges: [
 						{
-							exchange: 'uniswap_v2',
 							percent: 100,
 							srcAmount: '1000000000000000000',
 							destAmount: '900000000'

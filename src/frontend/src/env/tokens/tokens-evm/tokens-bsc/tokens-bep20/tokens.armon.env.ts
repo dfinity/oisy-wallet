@@ -21,6 +21,5 @@ export const ARMON_TOKEN: RequiredEvmBep20Token = {
 	decimals: ARMON_DECIMALS,
 	icon: armon,
 	address: '0x527C6436E1eAa4f2065CDE4090F798Cb5D031dD6',
-	exchange: 'erc20',
 	groupData: ARMON_TOKEN_GROUP
 };

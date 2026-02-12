@@ -19,6 +19,5 @@ export const FLOKI_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: FLOKI_SYMBOL,
 	decimals: FLOKI_DECIMALS,
 	icon: floki,
-	address: '0xcf0c122c6b73ff809c693db761e7baebe62b6a2e',
-	exchange: 'erc20'
+	address: '0xcf0c122c6b73ff809c693db761e7baebe62b6a2e'
 };

@@ -21,6 +21,5 @@ export const MUON_TOKEN: RequiredEvmBep20Token = {
 	decimals: MUON_DECIMALS,
 	icon: muon,
 	address: '0x8b6ACf6041A81567f012Ff6A4C6D96d5818d74bF',
-	exchange: 'erc20',
 	groupData: MUON_TOKEN_GROUP
 };

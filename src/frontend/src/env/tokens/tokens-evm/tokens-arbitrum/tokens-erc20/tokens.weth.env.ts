@@ -21,6 +21,5 @@ export const WETH_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: WETH_DECIMALS,
 	icon: weth,
 	address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
-	exchange: 'erc20',
 	groupData: WETH_TOKEN_GROUP
 };

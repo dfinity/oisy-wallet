@@ -21,6 +21,5 @@ export const IAUON_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: IAUON_DECIMALS,
 	icon: isharesRed,
 	address: '0x4f0CA3df1c2e6b943cf82E649d576ffe7B2fABCF',
-	exchange: 'erc20',
 	groupData: IAUON_TOKEN_GROUP
 };
