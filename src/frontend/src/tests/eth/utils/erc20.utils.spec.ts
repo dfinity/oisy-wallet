@@ -12,15 +12,12 @@ import {
 	isTokenEthereumCustomToken,
 	mapErc20Token
 } from '$eth/utils/erc20.utils';
-import icpDark from '$icp/assets/icp-dark.svg';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
 
 describe('erc20.utils', () => {
 	const iconCases = [
-		['icp', icpDark],
-		['ckicp', icpDark],
 		['unknown', undefined],
 		['OTHER', undefined]
 	] as const;
@@ -46,7 +43,7 @@ describe('erc20.utils', () => {
 				standard: { code: 'erc20' },
 				name: 'TokenName',
 				symbol: 'ckICP',
-				icon: icpDark
+				icon: undefined
 			});
 		});
 

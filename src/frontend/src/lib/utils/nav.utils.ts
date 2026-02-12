@@ -10,6 +10,7 @@ import {
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
+import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
@@ -18,7 +19,6 @@ import type { Option } from '$lib/types/utils';
 import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
-import type { Writable } from 'svelte/store';
 
 const normalizePath = (s: string | null) =>
 	nonNullish(s) ? (s.endsWith('/') ? s : `${s}/`) : null;
@@ -171,13 +171,7 @@ export const resetRouteParams = (): RouteParams => ({
 	[URI_PARAM]: null
 });
 
-export const switchNetwork = async ({
-	networkId,
-	userSelectedNetworkStore
-}: {
-	networkId: Option<NetworkId>;
-	userSelectedNetworkStore: Writable<NetworkId | undefined>;
-}) => {
+export const switchNetwork = async ({ networkId }: { networkId: Option<NetworkId> }) => {
 	const url = new URL(window.location.href);
 
 	if (isNullish(networkId) || isNullish(networkId.description)) {
