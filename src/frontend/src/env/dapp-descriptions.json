@@ -456,7 +456,6 @@
 		"tags": ["dapps.categories.defi"],
 		"description": "dapps.descriptions.sanctum.description",
 		"usesInternetIdentity": false,
-		"display": "Large",
 		"stats": "",
 		"logo": "/images/dapps/sanctum-logo.webp",
 		"screenshots": ["/images/dapps/sanctum-screenshot.webp"]
