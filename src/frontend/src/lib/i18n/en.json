@@ -409,6 +409,11 @@
 				"name": "Helium",
 				"one_liner": "A community‑built decentralized wireless network using Hotspots to deliver LoRaWAN IoT and mobile offload services—powered by token incentives on Solana.",
 				"description": "Helium is a decentralized wireless network where individuals deploy Hotspots to provide LoRaWAN and mobile network coverage in exchange for token incentives. The network transitioned to Solana for better scalability and now integrates with the mobile and IoT sectors. All data and rewards are settled on-chain, making Helium a key player in decentralized infrastructure."
+			},
+			"ostrich": {
+				"name": "Ostrich",
+				"one_liner": "An on-chain global orderbook built on Arbitrum for trading real-world assets—equities (U.S., China, Germany, UK), metals, forex, commodities, and crypto—all directly from your wallet with no custodians, brokers, or sign‑ups.",
+				"description": "Ostrich is a decentralized global orderbook on Arbitrum, allowing users to trade tokenized real-world assets like equities, metals, forex, and commodities directly from their wallets. It removes the need for brokers, custodians, or KYC, enabling 24/7 global market access. Users can trade both crypto and traditional assets trustlessly using decentralized infrastructure."
 			}
 		}
 	},

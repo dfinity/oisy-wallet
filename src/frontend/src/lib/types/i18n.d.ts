@@ -272,6 +272,7 @@ interface I18nDapps {
 		solayer: { name: string; one_liner: string; description: string };
 		kamino: { name: string; one_liner: string; description: string };
 		helium: { name: string; one_liner: string; description: string };
+		ostrich: { name: string; one_liner: string; description: string };
 	};
 }
 
