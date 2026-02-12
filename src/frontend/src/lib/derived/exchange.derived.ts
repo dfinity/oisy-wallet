@@ -1,5 +1,4 @@
 import { EXCHANGE_DISABLED } from '$env/exchange.env';
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import {
 	ARBITRUM_ETH_TOKEN_ID,
 	ARBITRUM_SEPOLIA_ETH_TOKEN_ID
@@ -28,9 +27,9 @@ import {
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
-import { ERC20_ICP_ADDRESS } from '$eth/constants/erc20-icp.constants';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import { isErc20Icp } from '$eth/utils/token.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -90,19 +89,13 @@ export const exchanges: Readable<ExchangesData> = derived(
 					...tokens.reduce((inner, token) => ({ ...inner, [token.id]: currentPrice }), {})
 				};
 			}, {}),
-			...$erc20Tokens
-				.filter(
-					({ address, network: { id: networkId } }) =>
-						address.toLowerCase() === ERC20_ICP_ADDRESS.toLowerCase() &&
-						networkId === ETHEREUM_NETWORK_ID
-				)
-				.reduce(
-					(acc, { id }) => ({
-						...acc,
-						[id]: icpPrice
-					}),
-					{}
-				),
+			...$erc20Tokens.filter(isErc20Icp).reduce(
+				(acc, { id }) => ({
+					...acc,
+					[id]: icpPrice
+				}),
+				{}
+			),
 			...$icrcTokens.reduce((acc, token) => {
 				const { id, ledgerCanisterId, exchangeCoinId } = token;
 
