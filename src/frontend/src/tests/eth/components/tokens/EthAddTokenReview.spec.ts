@@ -223,7 +223,7 @@ describe('EthAddTokenReview', () => {
 			expect(mockErc1155Metadata).not.toHaveBeenCalled();
 
 			expect(toastsError).toHaveBeenCalledWith({
-				msg: { text: en.tokens.error.incomplete_metadata }
+				msg: { text: en.tokens.error.unrecognised_erc_interface }
 			});
 		});
 	});
