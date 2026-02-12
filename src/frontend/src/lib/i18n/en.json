@@ -600,6 +600,7 @@
 			"no_infura_erc721_provider": "No Infura ERC721 provider for network $network",
 			"no_infura_erc1155_provider": "No Infura ERC1155 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 ICP provider for network $network",
+			"no_infura_erc4626_provider": "No Infura ERC4626 provider for network $network",
 			"no_solana_network": "No Solana network for network $network",
 			"loading_address": "Error while loading the $symbol address.",
 			"loading_balance": "Error while loading $symbol balance for network $network.",
