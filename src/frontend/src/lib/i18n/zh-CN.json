@@ -395,6 +395,11 @@
 				"one_liner": "Magic Eden 是一个多链 NFT 市场，允许用户在不同区块链上创建、购买、出售和交易非同质化代币（NFT）。",
 				"description": "Magic Eden 是一个多链 NFT 市场，允许用户在不同区块链上创建、购买、出售和交易非同质化代币（NFT）。它以用户友好的界面、低交易费用以及为创作者和收藏者提供的多种工具而闻名。"
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"solayer": {
 				"name": "Solayer",
 				"one_liner": "一个基于 Solana 的高速 DeFi 平台，提供原生流动性质押（sSOL）、稳定币（sUSD）以及通过 Emerald Card 进行的现实世界支付。",
