@@ -27,7 +27,6 @@ import {
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
-import { ERC20_ICP_ADDRESS } from '$eth/constants/erc20-icp.constants';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isErc20Icp } from '$eth/utils/token.utils';
