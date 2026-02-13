@@ -7,6 +7,7 @@ import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
+import { polygon, polygonAmoy } from 'viem/chains';
 
 export const POLYGON_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_POLYGON_MAINNET_DISABLED
@@ -28,7 +29,8 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 		infura: 'matic',
 		alchemy: 'matic',
 		alchemyDeprecated: Network.MATIC_MAINNET,
-		alchemyJsonRpcUrl: 'https://polygon-mainnet.g.alchemy.com/v2'
+		alchemyJsonRpcUrl: 'https://polygon-mainnet.g.alchemy.com/v2',
+		viemChain: polygon
 	},
 	exchange: { coingeckoId: 'polygon-pos' },
 	buy: { onramperId: 'polygon' },
@@ -51,7 +53,8 @@ export const POLYGON_AMOY_NETWORK: EthereumNetwork = {
 		infura: 'matic-amoy',
 		alchemy: 'matic-amoy',
 		alchemyDeprecated: Network.MATIC_AMOY,
-		alchemyJsonRpcUrl: 'https://polygon-amoy.g.alchemy.com/v2'
+		alchemyJsonRpcUrl: 'https://polygon-amoy.g.alchemy.com/v2',
+		viemChain: polygonAmoy
 	}
 };
 
