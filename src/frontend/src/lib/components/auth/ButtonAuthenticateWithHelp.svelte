@@ -17,15 +17,22 @@
 		fullWidth?: boolean;
 		helpAlignment?: 'inherit' | 'center';
 		needHelpLink?: boolean;
+		asPopup?: boolean;
 	}
 
-	let { fullWidth = false, helpAlignment = 'inherit', needHelpLink = true }: Props = $props();
+	let {
+		fullWidth = false,
+		helpAlignment = 'inherit',
+		needHelpLink = true,
+		asPopup = false
+	}: Props = $props();
 
 	const modalId = Symbol();
 
 	const onAuthenticate = async (domain: InternetIdentityDomain) => {
 		const { success } = await signIn({
-			domain
+			domain,
+			asPopup
 		});
 
 		if (success === 'ok') {
