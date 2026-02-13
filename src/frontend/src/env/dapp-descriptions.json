@@ -52,7 +52,7 @@
 		"description": "dapps.descriptions.openchat.description",
 		"usesInternetIdentity": true,
 		"display": "Large",
-		"stats": "dapps.descriptions.decideid.stats",
+		"stats": "dapps.descriptions.openchat.stats",
 		"logo": "/images/dapps/open-chat-logo.svg",
 		"screenshots": ["/images/dapps/open-chat.webp"],
 		"carousel": {
@@ -82,7 +82,7 @@
 		"callToAction": "dapps.descriptions.decideid.call_to_action",
 		"website": "https://decideai.xyz/id",
 		"twitter": "https://twitter.com/DecideAI_",
-		"tags": ["dapps.categories.verifiable_credentials"],
+		"tags": ["dapps.categories.tools"],
 		"stats": "dapps.descriptions.decideid.stats",
 		"description": "dapps.descriptions.decideid.description",
 		"usesInternetIdentity": true,
