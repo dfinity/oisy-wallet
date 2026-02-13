@@ -36,6 +36,8 @@ import {
 import { ERC20_ICP_ADDRESS, ERC20_ICP_SYMBOL } from '$eth/constants/erc20-icp.constants';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
+import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
+import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
@@ -52,6 +54,7 @@ import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SplToken } from '$sol/types/spl';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -233,6 +236,9 @@ describe('exchange.derived', () => {
 			erc20DefaultTokensStore.reset();
 			erc20CustomTokensStore.resetAll();
 
+			erc4626DefaultTokensStore.reset();
+			erc4626CustomTokensStore.resetAll();
+
 			icrcDefaultTokensStore.resetAll();
 			icrcCustomTokensStore.resetAll();
 
@@ -382,6 +388,21 @@ describe('exchange.derived', () => {
 				[mockSplDefaultToken.id]: mockSplTokenPrice1,
 				[mockSplCustomToken.id]: mockSplTokenPrice2
 			});
+		});
+
+		it('should return values for ERC4626 tokens', () => {
+			const mockErc4626TokenPrice = { usd: 99.99 };
+
+			erc4626DefaultTokensStore.set([mockValidErc4626Token]);
+			erc4626CustomTokensStore.setAll([
+				{ data: { ...mockValidErc4626Token, enabled: true }, certified: false }
+			]);
+
+			exchangeStore.set([{ [mockValidErc4626Token.address.toLowerCase()]: mockErc4626TokenPrice }]);
+
+			const result = get(exchanges);
+
+			expect(result?.[mockValidErc4626Token.id]).toEqual(mockErc4626TokenPrice);
 		});
 
 		it('should return values for ERC20 token ICP', () => {
