@@ -15,8 +15,8 @@ updates:
     schedule:
       interval: weekly
     commit-message:
-      prefix: 'chore(cargo deps): '
-      prefix-development: 'chore(cargo deps-dev): '
+      prefix: 'chore(cargo-deps): '
+      prefix-development: 'chore(cargo-deps-dev): '
     cooldown:
       default-days: 30
 
@@ -34,8 +34,8 @@ updates:
     schedule:
       interval: weekly
     commit-message:
-      prefix: 'chore(npm deps): '
-      prefix-development: 'chore(npm deps-dev): '
+      prefix: 'chore(npm-deps): '
+      prefix-development: 'chore(npm-deps-dev): '
     cooldown:
       default-days: 30
     allow:
