@@ -57,6 +57,10 @@ vi.mock('$eth/services/erc721.services', () => ({
 	loadCustomTokens: vi.fn()
 }));
 
+vi.mock('$eth/services/erc4626.services', () => ({
+	loadCustomErc4626Tokens: vi.fn()
+}));
+
 vi.mock('$eth/services/erc1155.services', () => ({
 	loadCustomTokens: vi.fn()
 }));
