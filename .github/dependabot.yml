@@ -8,7 +8,7 @@ updates:
     schedule:
       interval: weekly
     commit-message:
-      prefix: 'chore(github deps): '
+      prefix: 'chore(github-actions): '
 
   - package-ecosystem: cargo
     directory: '/'
