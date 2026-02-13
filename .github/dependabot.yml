@@ -9,7 +9,6 @@ updates:
       interval: weekly
     commit-message:
       prefix: 'chore(github deps): '
-      prefix-development: 'chore(github deps-dev): '
 
   - package-ecosystem: cargo
     directory: '/'
