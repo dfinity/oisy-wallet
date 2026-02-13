@@ -208,7 +208,6 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "Social Media",
-			"verifiable_credentials": "Verifiable Credentials",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Game",
@@ -216,7 +215,7 @@
 			"ai": "AI",
 			"nft": "NFT",
 			"rwa": "RWA",
-			"new": " NEW "
+			"new": "* NEW *"
 		},
 		"descriptions": {
 			"kongswap": {
