@@ -19,6 +19,5 @@ export const JASMY_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: JASMY_SYMBOL,
 	decimals: JASMY_DECIMALS,
 	icon: jasmy,
-	address: '0x7420B4b9a0110cdC71fB720908340C03F9Bc03EC',
-	exchange: 'erc20'
+	address: '0x7420B4b9a0110cdC71fB720908340C03F9Bc03EC'
 };

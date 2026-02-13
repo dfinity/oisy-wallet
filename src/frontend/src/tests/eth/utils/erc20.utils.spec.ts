@@ -30,7 +30,6 @@ describe('erc20.utils', () => {
 			name: 'TokenName',
 			symbol: 'ckICP',
 			address: mockValidErc20Token.address,
-			exchange: mockValidErc20Token.exchange,
 			decimals: mockValidErc20Token.decimals,
 			network: mockValidErc20Token.network,
 			category: mockValidErc20Token.category

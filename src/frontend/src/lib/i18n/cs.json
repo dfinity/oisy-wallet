@@ -395,6 +395,11 @@
 				"one_liner": "Multichainové NFT tržiště pro tvůrce a sběratele.",
 				"description": "Magic Eden je NFT tržiště podporující více blockchainů s důrazem na jednoduchost a nízké poplatky."
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"solayer": {
 				"name": "Solayer",
 				"one_liner": "Vysokorychlostní DeFi platforma na síti Solana nabízející nativní liquid staking (sSOL), stablecoin (sUSD) a možnost utrácení v reálném světě prostřednictvím karty Emerald.",
@@ -406,6 +411,16 @@
 				"description": "Kamino je decentralizovaná finanční (DeFi) platforma na blockchainu Solana, která integruje poskytování likvidity, půjčování a pákové obchodování do jedné sady produktů. Zjednodušuje tyto DeFi strategie, zejména prostřednictvím svých automatizovaných likviditních vaultů a systému Kamino Lend, a využívá správu koncentrované likvidity ke zvýšení kapitálové efektivity pro své uživatele."
 			},
 			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -626,6 +641,7 @@
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
 			"icrc_canister_loading": "Token s Ledger kanystrem $ledgerCanisterId nelze načíst, protože v současné době neodpovídá.",
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
 			"erc1155_custom_tokens": "Chyba při načítání vlastních tokenů ERC1155.",
 			"spl_custom_tokens": "Chyba při načítání vlastních tokenů SPL.",

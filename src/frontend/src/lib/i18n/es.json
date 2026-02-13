@@ -395,6 +395,11 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"solayer": {
 				"name": "",
 				"one_liner": "",
@@ -406,6 +411,16 @@
 				"description": ""
 			},
 			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -626,6 +641,7 @@
 			"icrc_canisters": "Error al cargar los canisters de ICRC.",
 			"icrc_canister_loading": "El token con el canister de Ledger $ledgerCanisterId no se pudo cargar porque actualmente no responde.",
 			"erc20_custom_tokens": "Error al cargar los tokens ERC20 personalizados.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Error al cargar los tokens ERC721 personalizados.",
 			"erc1155_custom_tokens": "Error al cargar los tokens ERC1155 personalizados.",
 			"spl_custom_tokens": "Error al cargar los tokens SPL personalizados.",

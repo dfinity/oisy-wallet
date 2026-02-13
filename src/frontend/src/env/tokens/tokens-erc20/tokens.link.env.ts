@@ -21,7 +21,6 @@ export const LINK_TOKEN: RequiredErc20Token = {
 	decimals: LINK_DECIMALS,
 	icon: link,
 	address: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckLINK',
 	groupData: LINK_TOKEN_GROUP,
 	neverCollapseInTokenGroup: true,
@@ -44,6 +43,5 @@ export const SEPOLIA_LINK_TOKEN: RequiredErc20Token = {
 	decimals: LINK_DECIMALS,
 	icon: link,
 	address: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckSepoliaLINK'
 };

@@ -395,6 +395,11 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"solayer": {
 				"name": "",
 				"one_liner": "",
@@ -406,6 +411,16 @@
 				"description": ""
 			},
 			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -626,6 +641,7 @@
 			"icrc_canisters": "Errore durante il caricamento dei canister ICRC.",
 			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Errore durante il caricamento del token personalizzato ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
 			"erc1155_custom_tokens": "Errore durante il caricamento del token personalizzato ERC1155.",
 			"spl_custom_tokens": "Errore durante il caricamento del token personalizzato SPL.",

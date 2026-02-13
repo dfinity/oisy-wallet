@@ -21,6 +21,5 @@ export const SLVON_TOKEN: RequiredEvmBep20Token = {
 	decimals: SLVON_DECIMALS,
 	icon: isharesRed,
 	address: '0x8b872732b07be325a8803CDB480D9d20B6f8d11B',
-	exchange: 'erc20',
 	groupData: SLVON_TOKEN_GROUP
 };

@@ -395,6 +395,11 @@
 				"one_liner": "Magic Eden est un marché NFT multi-chaînes qui permet aux utilisateurs de créer, acheter, vendre et échanger des jetons non fongibles (NFT) sur différentes blockchains.",
 				"description": "Magic Eden est un marché NFT multi-chaînes qui permet aux utilisateurs de créer, acheter, vendre et échanger des jetons non fongibles (NFT) sur différentes blockchains. Il est connu pour son interface conviviale, ses faibles frais de transaction et divers outils pour les créateurs et les collectionneurs."
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"solayer": {
 				"name": "Solayer",
 				"one_liner": "Une plateforme DeFi haute vitesse sur Solana offrant du staking liquide natif (sSOL), un stablecoin (sUSD) et des dépenses dans le monde réel avec la carte Emerald.",
@@ -406,6 +411,16 @@
 				"description": "Kamino est une plateforme de finance décentralisée (DeFi) sur la blockchain Solana qui intègre la fourniture de liquidités, le prêt et le trading avec effet de levier dans une seule suite de produits. Elle simplifie ces stratégies DeFi, en particulier grâce à ses coffres de liquidité automatisés et son système Kamino Lend, et utilise une gestion de liquidité concentrée pour augmenter l'efficacité du capital pour ses utilisateurs."
 			},
 			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -626,6 +641,7 @@
 			"icrc_canisters": "Erreur lors du chargement des canisters ICRC.",
 			"icrc_canister_loading": "Le token avec le canister Ledger $ledgerCanisterId n'a pas pu être chargé car il ne répond pas actuellement.",
 			"erc20_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC721.",
 			"erc1155_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC1155.",
 			"spl_custom_tokens": "Erreur lors du chargement des tokens personnalisés SPL.",

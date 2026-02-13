@@ -269,9 +269,12 @@ interface I18nDapps {
 		opensea: { name: string; one_liner: string; description: string };
 		pacifica: { name: string; one_liner: string; description: string };
 		magic_eden: { name: string; one_liner: string; description: string };
+		sanctum: { name: string; one_liner: string; description: string };
 		solayer: { name: string; one_liner: string; description: string };
 		kamino: { name: string; one_liner: string; description: string };
 		helium: { name: string; one_liner: string; description: string };
+		ostrich: { name: string; one_liner: string; description: string };
+		sphere_finance: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -421,6 +424,7 @@ interface I18nInit {
 		icrc_canisters: string;
 		icrc_canister_loading: string;
 		erc20_custom_tokens: string;
+		erc4626_custom_tokens: string;
 		erc721_custom_tokens: string;
 		erc1155_custom_tokens: string;
 		spl_custom_tokens: string;

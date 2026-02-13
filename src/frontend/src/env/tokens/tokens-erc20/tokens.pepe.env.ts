@@ -21,7 +21,6 @@ export const PEPE_TOKEN: RequiredErc20Token = {
 	decimals: PEPE_DECIMALS,
 	icon: pepe,
 	address: '0x6982508145454Ce325dDbE47a25d4ec3d2311933',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckPEPE',
 	groupData: PEPE_TOKEN_GROUP,
 	neverCollapseInTokenGroup: true,
@@ -44,6 +43,5 @@ export const SEPOLIA_PEPE_TOKEN: RequiredErc20Token = {
 	decimals: PEPE_DECIMALS,
 	icon: pepe,
 	address: '0x560eF9F39E4B08f9693987cad307f6FBfd97B2F6',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckSepoliaPEPE'
 };

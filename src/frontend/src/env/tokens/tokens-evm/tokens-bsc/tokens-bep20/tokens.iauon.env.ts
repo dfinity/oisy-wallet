@@ -21,6 +21,5 @@ export const IAUON_TOKEN: RequiredEvmBep20Token = {
 	decimals: IAUON_DECIMALS,
 	icon: isharesRed,
 	address: '0xcB2a0F46f67dC4c58a316F1c008EDef5c2311795',
-	exchange: 'erc20',
 	groupData: IAUON_TOKEN_GROUP
 };
