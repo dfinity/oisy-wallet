@@ -102,63 +102,39 @@ const initAuthStore = (): AuthStore => {
 						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
 					: `https://${domain ?? InternetIdentityDomain.VERSION_1_0}${domain === InternetIdentityDomain.VERSION_2_0 ? '/?feature_flag_guided_upgrade=true' : ''}`;
 
-				if (window.opener) {
-					await authClient.login({
-						maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
-						onSuccess: () => {
-							set({ identity: authClient?.getIdentity() });
+				await authClient.login({
+					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
+					onSuccess: () => {
+						set({ identity: authClient?.getIdentity() });
 
-							try {
-								// If the user has more than one tab open in the same browser,
-								// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
-								// This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
-								// To mitigate this, we use a BroadcastChannel to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
-								const bc = AuthBroadcastChannel.getInstance();
-								bc.postLoginSuccess();
-							} catch (err: unknown) {
-								// We don't really care if the broadcast channel fails to open or if it fails to post messages.
-								// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
-								// We just print a warning in the console for debugging purposes.
-								console.warn('Auth BroadcastChannel posting failed', err);
+						try {
+							// If the user has more than one tab open in the same browser,
+							// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
+							// This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
+							// To mitigate this, we use a BroadcastChannel to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
+							const bc = AuthBroadcastChannel.getInstance();
+							bc.postLoginSuccess();
+						} catch (err: unknown) {
+							// We don't really care if the broadcast channel fails to open or if it fails to post messages.
+							// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
+							// We just print a warning in the console for debugging purposes.
+							console.warn('Auth BroadcastChannel posting failed', err);
+						}
+
+						resolve();
+					},
+					onError: reject,
+					identityProvider,
+					...(window.opener
+						? {
+								windowOpenerFeatures: popupCenter({
+									width: AUTH_POPUP_WIDTH,
+									height: AUTH_POPUP_HEIGHT
+								})
 							}
-
-							resolve();
-						},
-						onError: reject,
-						identityProvider,
-						windowOpenerFeatures: popupCenter({
-							width: AUTH_POPUP_WIDTH,
-							height: AUTH_POPUP_HEIGHT
-						}),
-						...getOptionalDerivationOrigin()
-					});
-				} else {
-					await authClient.login({
-						maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
-						onSuccess: () => {
-							set({ identity: authClient?.getIdentity() });
-
-							try {
-								// If the user has more than one tab open in the same browser,
-								// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
-								// This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
-								// To mitigate this, we use a BroadcastChannel to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
-								const bc = AuthBroadcastChannel.getInstance();
-								bc.postLoginSuccess();
-							} catch (err: unknown) {
-								// We don't really care if the broadcast channel fails to open or if it fails to post messages.
-								// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
-								// We just print a warning in the console for debugging purposes.
-								console.warn('Auth BroadcastChannel posting failed', err);
-							}
-
-							resolve();
-						},
-						onError: reject,
-						identityProvider,
-						...getOptionalDerivationOrigin()
-					});
-				}
+						: {}),
+					...getOptionalDerivationOrigin()
+				});
 			}),
 
 		signOut: async () => {
