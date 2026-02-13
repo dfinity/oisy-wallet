@@ -447,20 +447,6 @@
 		"screenshots": ["/images/dapps/opensea-screenshot.webp"]
 	},
 	{
-		"id": "sanctum",
-		"name": "dapps.descriptions.sanctum.name",
-		"oneLiner": "dapps.descriptions.sanctum.one_liner",
-		"website": "https://app.sanctum.so/",
-		"twitter": "https://x.com/sanctumso",
-		"discord": "https://discord.com/invite/sanctumso",
-		"tags": ["dapps.categories.defi", "dapps.categories.aa_new"],
-		"description": "dapps.descriptions.sanctum.description",
-		"usesInternetIdentity": false,
-		"stats": "",
-		"logo": "/images/dapps/sanctum-logo.webp",
-		"screenshots": ["/images/dapps/sanctum-screenshot.webp"]
-	},
-	{
 		"id": "solayer",
 		"name": "dapps.descriptions.solayer.name",
 		"oneLiner": "dapps.descriptions.solayer.one_liner",
@@ -509,18 +495,18 @@
 		"screenshots": ["/images/dapps/helium-screenshot.webp"]
 	},
 	{
-		"id": "sphere-finance",
-		"name": "dapps.descriptions.sphere_finance.name",
-		"oneLiner": "dapps.descriptions.sphere_finance.one_liner",
-		"website": "https://app.sphere.finance/",
-		"twitter": "https://x.com/SphereDeFi",
-		"discord": "https://discord.com/invite/spheredefi",
+		"id": "sanctum",
+		"name": "dapps.descriptions.sanctum.name",
+		"oneLiner": "dapps.descriptions.sanctum.one_liner",
+		"website": "https://app.sanctum.so/",
+		"twitter": "https://x.com/sanctumso",
+		"discord": "https://discord.com/invite/sanctumso",
 		"tags": ["dapps.categories.defi", "dapps.categories.aa_new"],
-		"stats": "",
+		"description": "dapps.descriptions.sanctum.description",
 		"usesInternetIdentity": false,
-		"description": "dapps.descriptions.sphere_finance.description",
-		"logo": "/images/dapps/sphere-finance-logo.webp",
-		"screenshots": ["/images/dapps/sphere-finance-screenshot.webp"]
+		"stats": "",
+		"logo": "/images/dapps/sanctum-logo.webp",
+		"screenshots": ["/images/dapps/sanctum-screenshot.webp"]
 	},
 	{
 		"id": "ostrich",
@@ -537,6 +523,20 @@
 		"screenshots": ["/images/dapps/ostrich-screenshot.webp"]
 	},
 	{
+		"id": "sphere-finance",
+		"name": "dapps.descriptions.sphere_finance.name",
+		"oneLiner": "dapps.descriptions.sphere_finance.one_liner",
+		"website": "https://app.sphere.finance/",
+		"twitter": "https://x.com/SphereDeFi",
+		"discord": "https://discord.com/invite/spheredefi",
+		"tags": ["dapps.categories.defi", "dapps.categories.aa_new"],
+		"stats": "",
+		"usesInternetIdentity": false,
+		"description": "dapps.descriptions.sphere_finance.description",
+		"logo": "/images/dapps/sphere-finance-logo.webp",
+		"screenshots": ["/images/dapps/sphere-finance-screenshot.webp"]
+	},
+	{
 		"id": "binaryx",
 		"name": "dapps.descriptions.binaryx.name",
 		"oneLiner": "dapps.descriptions.binaryx.one_liner",
@@ -550,5 +550,20 @@
 		"stats": "",
 		"logo": "/images/dapps/binaryx-logo.webp",
 		"screenshots": ["/images/dapps/binaryx-screenshot.webp"]
+	},
+	{
+		"id": "realt",
+		"name": "dapps.descriptions.realt.name",
+		"oneLiner": "dapps.descriptions.realt.one_liner",
+		"website": "https://realt.co/",
+		"twitter": "https://twitter.com/RealTPlatform",
+		"discord": "https://discord.gg/aPSWyGxMUk",
+		"telegram": "https://t.me/Realtoken_welcome",
+		"tags": ["dapps.categories.rwa", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.realt.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/realt-logo.webp",
+		"screenshots": ["/images/dapps/realt-screenshot.webp"]
 	}
 ]

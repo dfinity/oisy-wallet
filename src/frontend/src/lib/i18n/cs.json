@@ -396,11 +396,6 @@
 				"one_liner": "Multichainové NFT tržiště pro tvůrce a sběratele.",
 				"description": "Magic Eden je NFT tržiště podporující více blockchainů s důrazem na jednoduchost a nízké poplatky."
 			},
-			"sanctum": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"solayer": {
 				"name": "Solayer",
 				"one_liner": "Vysokorychlostní DeFi platforma na síti Solana nabízející nativní liquid staking (sSOL), stablecoin (sUSD) a možnost utrácení v reálném světě prostřednictvím karty Emerald.",
@@ -416,6 +411,11 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"ostrich": {
 				"name": "",
 				"one_liner": "",
@@ -427,6 +427,11 @@
 				"description": ""
 			},
 			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"realt": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

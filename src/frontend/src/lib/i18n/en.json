@@ -396,11 +396,6 @@
 				"one_liner": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains.",
 				"description": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains. It is known for its user-friendly interface, low transaction fees, and various tools for creators and collectors."
 			},
-			"sanctum": {
-				"name": "Sanctum",
-				"one_liner": "A Solana-native liquid staking protocol with instant swaps between LSTs and tools for launching your own.",
-				"description": "Sanctum is a liquid staking infrastructure protocol on Solana enabling instant, slippage-free swaps between liquid staking tokens (LSTs). It supports ecosystem growth by allowing new LSTs to tap into shared liquidity, and offers tools for issuing branded tokens with automated minting and redemption. The platform’s Infinity pool, Router, and Reserve systems help deliver deep liquidity, composability, and safety across the staking landscape."
-			},
 			"solayer": {
 				"name": "Solayer",
 				"one_liner": "A high-speed DeFi platform on Solana offering native liquid staking (sSOL), a stablecoin (sUSD), and real-world spending with the Emerald Card.",
@@ -416,6 +411,11 @@
 				"one_liner": "A community‑built decentralized wireless network using Hotspots to deliver LoRaWAN IoT and mobile offload services—powered by token incentives on Solana.",
 				"description": "Helium is a decentralized wireless network where individuals deploy Hotspots to provide LoRaWAN and mobile network coverage in exchange for token incentives. The network transitioned to Solana for better scalability and now integrates with the mobile and IoT sectors. All data and rewards are settled on-chain, making Helium a key player in decentralized infrastructure."
 			},
+			"sanctum": {
+				"name": "Sanctum",
+				"one_liner": "A Solana-native liquid staking protocol with instant swaps between LSTs and tools for launching your own.",
+				"description": "Sanctum is a liquid staking infrastructure protocol on Solana enabling instant, slippage-free swaps between liquid staking tokens (LSTs). It supports ecosystem growth by allowing new LSTs to tap into shared liquidity, and offers tools for issuing branded tokens with automated minting and redemption. The platform’s Infinity pool, Router, and Reserve systems help deliver deep liquidity, composability, and safety across the staking landscape."
+			},
 			"ostrich": {
 				"name": "Ostrich",
 				"one_liner": "An on-chain global orderbook built on Arbitrum for trading real-world assets—equities (U.S., China, Germany, UK), metals, forex, commodities, and crypto—all directly from your wallet with no custodians, brokers, or sign‑ups.",
@@ -430,6 +430,11 @@
 				"name": "BinaryX",
 				"one_liner": "Here’s a compact, image‑length–style description for Binaryx, designed to fit the same format and brevity as your image example",
 				"description": "BinaryX is a tokenized real estate investment platform offering fractional ownership and passive income from global properties. Investors can buy into legally structured DAO-LLCs representing rental or off-plan real estate starting from just $50. Yield is distributed from rental income or asset appreciation, and properties can be traded on a secondary marketplace."
+			},
+			"realt": {
+				"name": "RealT",
+				"one_liner": "Fractional and frictionless real estate investing",
+				"description": "RealT lets investors buy fractional ownership of real estate properties—using digital tokens on Ethereum or related chains—to access income from rents and property appreciation with much lower minimum entry (as low as ~$50). Properties are legally held via LLCs, and token holders receive asset income (rent distributions) regularly; the tokens also allow secondary trading, making property ownership more accessible, liquid, and global. By combining legal real estate ownership, blockchain tokenization, and yield distribution, RealT aims to democratize property investment and remove traditional barriers of high cost, management, and geographic restrictions."
 			}
 		}
 	},
