@@ -435,6 +435,11 @@
 				"name": "RealT",
 				"one_liner": "Fractional and frictionless real estate investing",
 				"description": "RealT lets investors buy fractional ownership of real estate properties—using digital tokens on Ethereum or related chains—to access income from rents and property appreciation with much lower minimum entry (as low as ~$50). Properties are legally held via LLCs, and token holders receive asset income (rent distributions) regularly; the tokens also allow secondary trading, making property ownership more accessible, liquid, and global. By combining legal real estate ownership, blockchain tokenization, and yield distribution, RealT aims to democratize property investment and remove traditional barriers of high cost, management, and geographic restrictions."
+			},
+			"parcl": {
+				"name": "Parcl",
+				"one_liner": "A Solana‑based perpetuals exchange offering synthetic real‑estate markets—trade real‑estate price indexes with cross‑margin and LP‑backed liquidity.",
+				"description": "Parcl is a Solana-based decentralized exchange for real-estate price perpetuals, enabling users to long or short synthetic property indexes. It uses price data from Parcl Labs and LP-backed liquidity for cross-margined trading. The protocol is tailored to traders seeking exposure to real-world asset performance without holding the underlying property."
 			}
 		}
 	},

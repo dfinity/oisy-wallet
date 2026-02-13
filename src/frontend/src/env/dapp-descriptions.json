@@ -565,5 +565,18 @@
 		"stats": "",
 		"logo": "/images/dapps/realt-logo.webp",
 		"screenshots": ["/images/dapps/realt-screenshot.webp"]
+	},
+	{
+		"id": "parcl",
+		"name": "dapps.descriptions.parcl.name",
+		"oneLiner": "dapps.descriptions.parcl.one_liner",
+		"website": "https://parcl.co/",
+		"twitter": "https://x.com/ParclLabs",
+		"tags": ["dapps.categories.rwa", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.parcl.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/parcl-logo.webp",
+		"screenshots": ["/images/dapps/parcl-screenshot.webp"]
 	}
 ]
