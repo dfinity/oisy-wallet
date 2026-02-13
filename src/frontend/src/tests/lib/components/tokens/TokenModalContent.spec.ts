@@ -3,8 +3,8 @@ import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-import en from '$tests/mocks/i18n.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
