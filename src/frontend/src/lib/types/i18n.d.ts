@@ -196,7 +196,6 @@ interface I18nDapps {
 	categories: {
 		defi: string;
 		social_media: string;
-		verifiable_credentials: string;
 		staking: string;
 		walletconnect: string;
 		game: string;
