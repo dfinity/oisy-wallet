@@ -641,6 +641,7 @@
 			"icrc_canisters": "Erro ao carregar os canisters ICRC.",
 			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Erro ao carregar o token personalizado ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Erro ao carregar o token personalizado ERC721.",
 			"erc1155_custom_tokens": "Erro ao carregar o token personalizado ERC1155.",
 			"spl_custom_tokens": "Erro ao carregar o token personalizado SPL.",
