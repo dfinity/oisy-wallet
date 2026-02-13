@@ -4,6 +4,7 @@
 	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 	import { setContext } from 'svelte';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+	import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
@@ -188,7 +189,7 @@
 			? decodeQrCodeETH({
 					...params,
 					ethereumTokens: $enabledEthereumTokens,
-					erc20Tokens: $enabledErc20Tokens
+					ercTokens: [...$enabledErc20Tokens, ...$enabledErc4626Tokens]
 				})
 			: decodeQrCode(params);
 	};

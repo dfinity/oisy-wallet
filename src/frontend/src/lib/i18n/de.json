@@ -208,13 +208,14 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "Soziale Medien",
-			"verifiable_credentials": "Bescheinigungen",
 			"staking": "Beteiligungen",
 			"walletconnect": "Wallet Connect",
 			"game": "Spiele",
 			"tools": "Tools",
 			"ai": "KI",
-			"nft": "NFT"
+			"nft": "NFT",
+			"rwa": "",
+			"aa_new": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -401,6 +402,41 @@
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"realt": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -600,6 +636,7 @@
 			"no_infura_erc721_provider": "Kein Infura-ERC721-Anbieter für Netzwerk $network",
 			"no_infura_erc1155_provider": "Kein Infura-ERC1155-Anbieter für Netzwerk $network",
 			"no_infura_erc20_icp_provider": "Kein Infura-ERC20-ICP-Anbieter für Netzwerk $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Kein Solana-Netzwerk für Netzwerk $network",
 			"loading_address": "Fehler beim Laden der Adresse für $symbol.",
 			"loading_balance": "Fehler beim Laden des $symbol-Saldos für Netzwerk $network.",
@@ -620,6 +657,7 @@
 			"icrc_canisters": "Fehler beim Laden der ICRC-Canisters.",
 			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
 			"erc1155_custom_tokens": "Fehler beim Laden der ERC1155-Benutzertoken.",
 			"spl_custom_tokens": "Fehler beim Laden der SPL-Benutzertoken.",

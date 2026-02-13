@@ -114,6 +114,17 @@ describe('token.utils', () => {
 			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 		});
 
+		it('should return the untouched amount if the token is ERC4626', () => {
+			const result = getMaxTransactionAmount({
+				balance,
+				fee,
+				tokenDecimals,
+				tokenStandard: { code: 'erc4626' }
+			});
+
+			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
+		});
+
 		it('should return the untouched amount if the token is SPL', () => {
 			const result = getMaxTransactionAmount({
 				balance,

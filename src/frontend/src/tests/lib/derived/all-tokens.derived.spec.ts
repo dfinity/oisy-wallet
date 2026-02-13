@@ -26,9 +26,11 @@ import * as tokensIcEnv from '$env/tokens/tokens.ic.env';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
+import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcTokens } from '$icp/derived/icrc.derived';
@@ -43,6 +45,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -79,8 +82,14 @@ describe('all-tokens.derived', () => {
 		...mockValidErc20Token,
 		id: parseTokenId('DUM'),
 		address: mockEthAddress,
-		exchange: 'erc20',
 		enabled: false
+	};
+
+	const mockErc4626Token: Erc4626CustomToken = {
+		...mockValidErc4626Token,
+		id: parseTokenId('vTEST'),
+		address: mockEthAddress,
+		enabled: true
 	};
 
 	const mockErc721Token: Erc721CustomToken = {
@@ -110,6 +119,11 @@ describe('all-tokens.derived', () => {
 			return () => {};
 		});
 
+		vi.spyOn(erc4626Tokens, 'subscribe').mockImplementation((fn) => {
+			fn([]);
+			return () => {};
+		});
+
 		// Mock the store subscriptions with empty arrays by default
 		vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
 			fn([]);
@@ -133,6 +147,11 @@ describe('all-tokens.derived', () => {
 		it('should merge all tokens into a single array', () => {
 			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
 				fn([mockErc20Token]);
+				return () => {};
+			});
+
+			vi.spyOn(erc4626Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc4626Token]);
 				return () => {};
 			});
 
@@ -169,6 +188,7 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
+				mockErc4626Token.id.description,
 				mockIcrcToken.id.description,
 				mockIcrcToken2.id.description,
 				mockDip20Token.id.description,
@@ -300,6 +320,11 @@ describe('all-tokens.derived', () => {
 				return () => {};
 			});
 
+			vi.spyOn(erc4626Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc4626Token]);
+				return () => {};
+			});
+
 			vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
 				fn([mockErc721Token]);
 				return () => {};
@@ -333,6 +358,7 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
+				mockErc4626Token.id.description,
 				mockIcrcToken.id.description,
 				mockIcrcToken2.id.description,
 				mockDip20Token.id.description,

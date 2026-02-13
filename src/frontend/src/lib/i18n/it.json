@@ -208,13 +208,14 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "Social Media",
-			"verifiable_credentials": "Credenziali Verificabili",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Gioco",
 			"tools": "Strumenti",
 			"ai": "",
-			"nft": ""
+			"nft": "",
+			"rwa": "",
+			"aa_new": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -401,6 +402,41 @@
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"realt": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -600,6 +636,7 @@
 			"no_infura_erc721_provider": "Nessun provider Infura ERC721 per la rete $network",
 			"no_infura_erc1155_provider": "Nessun provider Infura ERC1155 per la rete $network",
 			"no_infura_erc20_icp_provider": "Nessun provider Infura ERC20 ICP per la rete $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Nessuna rete Solana per la rete $network",
 			"loading_address": "Errore durante il caricamento dell'indirizzo $symbol.",
 			"loading_balance": "Errore durante il caricamento del saldo $symbol per la rete $network.",
@@ -620,6 +657,7 @@
 			"icrc_canisters": "Errore durante il caricamento dei canister ICRC.",
 			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Errore durante il caricamento del token personalizzato ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
 			"erc1155_custom_tokens": "Errore durante il caricamento del token personalizzato ERC1155.",
 			"spl_custom_tokens": "Errore durante il caricamento del token personalizzato SPL.",

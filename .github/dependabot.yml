@@ -7,11 +7,25 @@ updates:
     directory: '/'
     schedule:
       interval: weekly
+    commit-message:
+      prefix: 'chore(github-actions): '
 
   - package-ecosystem: cargo
     directory: '/'
     schedule:
       interval: weekly
+    commit-message:
+      prefix: 'chore(cargo-deps): '
+      prefix-development: 'chore(cargo-deps-dev): '
+    cooldown:
+      default-days: 30
+
+  - package-ecosystem: rust-toolchain
+    directory: '/'
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: 'chore(rust): '
     cooldown:
       default-days: 30
 
@@ -19,6 +33,9 @@ updates:
     directory: '/'
     schedule:
       interval: weekly
+    commit-message:
+      prefix: 'chore(npm-deps): '
+      prefix-development: 'chore(npm-deps-dev): '
     cooldown:
       default-days: 30
     allow:

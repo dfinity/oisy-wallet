@@ -5,10 +5,13 @@ import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
+import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { extTokens } from '$icp/derived/ext.derived';
 import { icPunksTokens } from '$icp/derived/icpunks.derived';
@@ -52,10 +55,11 @@ export const nativeTokens: Readable<Token[]> = derived(
 );
 
 export const fungibleTokens: Readable<Token[]> = derived(
-	[nativeTokens, erc20Tokens, icrcTokens, splTokens],
-	([$nativeTokens, $erc20Tokens, $icrcTokens, $splTokens]) => [
+	[nativeTokens, erc20Tokens, erc4626Tokens, icrcTokens, splTokens],
+	([$nativeTokens, $erc20Tokens, $erc4626Tokens, $icrcTokens, $splTokens]) => [
 		...$nativeTokens,
 		...$erc20Tokens,
+		...$erc4626Tokens,
 		...$icrcTokens,
 		...$splTokens
 	]
@@ -166,6 +170,11 @@ export const enabledNonFungibleTokensWithoutSpam: Readable<NonFungibleToken[]> =
 export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 	[enabledTokens],
 	([$enabledTokens]) => $enabledTokens.filter(isTokenErc20)
+);
+
+export const enabledErc4626Tokens: Readable<Erc4626Token[]> = derived(
+	[enabledTokens],
+	([$enabledTokens]) => $enabledTokens.filter(isTokenErc4626)
 );
 
 /**

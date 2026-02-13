@@ -208,13 +208,14 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "Réseaux sociaux",
-			"verifiable_credentials": "Identifiants Vérifiables",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Jeu",
 			"tools": "Outils",
 			"ai": "IA",
-			"nft": "NFT"
+			"nft": "NFT",
+			"rwa": "",
+			"aa_new": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -404,6 +405,41 @@
 				"name": "Kamino",
 				"one_liner": "Kamino est le plus grand protocole d'emprunt et de prêt sur Solana, alimentant une part importante de l'activité DeFi du réseau.",
 				"description": "Kamino est une plateforme de finance décentralisée (DeFi) sur la blockchain Solana qui intègre la fourniture de liquidités, le prêt et le trading avec effet de levier dans une seule suite de produits. Elle simplifie ces stratégies DeFi, en particulier grâce à ses coffres de liquidité automatisés et son système Kamino Lend, et utilise une gestion de liquidité concentrée pour augmenter l'efficacité du capital pour ses utilisateurs."
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"realt": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -600,6 +636,7 @@
 			"no_infura_erc721_provider": "Pas de fournisseur Infura ERC721 pour le réseau $network",
 			"no_infura_erc1155_provider": "Pas de fournisseur Infura ERC1155 pour le réseau $network",
 			"no_infura_erc20_icp_provider": "Pas de fournisseur Infura ERC20 ICP pour le réseau $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Pas de réseau Solana pour le réseau $network",
 			"loading_address": "Erreur lors du chargement de l'adresse $symbol.",
 			"loading_balance": "Erreur lors du chargement du solde $symbol pour le réseau $network.",
@@ -620,6 +657,7 @@
 			"icrc_canisters": "Erreur lors du chargement des canisters ICRC.",
 			"icrc_canister_loading": "Le token avec le canister Ledger $ledgerCanisterId n'a pas pu être chargé car il ne répond pas actuellement.",
 			"erc20_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC721.",
 			"erc1155_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC1155.",
 			"spl_custom_tokens": "Erreur lors du chargement des tokens personnalisés SPL.",

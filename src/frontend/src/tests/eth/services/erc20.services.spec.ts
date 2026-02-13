@@ -30,6 +30,7 @@ vi.mock('$lib/api/backend.api', () => ({
 }));
 
 vi.mock('$eth/providers/infura-erc20.providers', () => ({
+	InfuraErc20Provider: vi.fn(class {}),
 	infuraErc20Providers: vi.fn()
 }));
 
@@ -53,7 +54,6 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
 				version: 1n,
 				allowExternalContentSource: undefined,
 				enabled: true,
@@ -70,7 +70,6 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
 				version: 2n,
 				allowExternalContentSource: true,
 				enabled: true,
@@ -87,7 +86,6 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
 				version: undefined,
 				allowExternalContentSource: false,
 				enabled: false,

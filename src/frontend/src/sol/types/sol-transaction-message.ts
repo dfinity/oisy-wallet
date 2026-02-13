@@ -1,9 +1,9 @@
 import type {
-	BaseTransactionMessage,
+	TransactionMessage,
 	TransactionMessageWithFeePayer,
 	TransactionMessageWithLifetime
 } from '@solana/transaction-messages';
 
-export type CompilableTransactionMessage = BaseTransactionMessage &
+export type CompilableTransactionMessage = TransactionMessage &
 	TransactionMessageWithFeePayer &
 	TransactionMessageWithLifetime;

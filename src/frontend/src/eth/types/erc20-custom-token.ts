@@ -9,5 +9,5 @@ export type SaveErc20CustomToken = Pick<
 > &
 	Partial<Pick<Erc20CustomToken, 'id'>>;
 
-export type EthereumCustomToken = Omit<Erc20CustomToken, 'address' | 'exchange'> &
-	Partial<Pick<Erc20Token, 'address' | 'exchange'>>;
+export type EthereumCustomToken = Omit<Erc20CustomToken, 'address'> &
+	Partial<Pick<Erc20Token, 'address'>>;

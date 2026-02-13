@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { enabledErc1155Tokens } from '$eth/derived/erc1155.derived';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
 import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -138,6 +139,7 @@ const loadErcTransactions = async ({
 	const tokens = [
 		...get(enabledErc20Tokens),
 		...get(enabledErc721Tokens),
+		...get(enabledErc4626Tokens),
 		...get(enabledErc1155Tokens)
 	];
 	const token = tokens.find(

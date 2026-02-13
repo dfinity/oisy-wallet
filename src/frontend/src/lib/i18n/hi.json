@@ -208,13 +208,14 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "सोशल मीडिया",
-			"verifiable_credentials": "सत्यापन योग्य क्रेडेंशियल्स",
 			"staking": "स्टेकिंग",
 			"walletconnect": "वॉलेटकनेक्ट",
 			"game": "गेम",
 			"tools": "टूल्स",
 			"ai": "",
-			"nft": ""
+			"nft": "",
+			"rwa": "",
+			"aa_new": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -401,6 +402,41 @@
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"realt": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -600,6 +636,7 @@
 			"no_infura_erc721_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC721 प्रदाता नहीं है",
 			"no_infura_erc1155_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC1155 प्रदाता नहीं है",
 			"no_infura_erc20_icp_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC20 ICP प्रदाता नहीं है",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "नेटवर्क $network के लिए कोई सोलाना नेटवर्क नहीं है",
 			"loading_address": "$symbol पता लोड करते समय त्रुटि।",
 			"loading_balance": "नेटवर्क $network के लिए $symbol बैलेंस लोड करते समय त्रुटि।",
@@ -620,6 +657,7 @@
 			"icrc_canisters": "ICRC कैनिस्टर लोड करते समय त्रुटि।",
 			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "ERC20 कस्टम टोकन लोड करते समय त्रुटि।",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "ERC721 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc1155_custom_tokens": "ERC1155 कस्टम टोकन लोड करते समय त्रुटि।",
 			"spl_custom_tokens": "SPL कस्टम टोकन लोड करते समय त्रुटि।",

@@ -4,6 +4,7 @@
 	import { fade } from 'svelte/transition';
 	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 	import { erc721Tokens } from '$eth/derived/erc721.derived';
 	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
@@ -40,7 +41,9 @@
 			toastsError({
 				msg: { text: $i18n.tokens.error.incomplete_metadata }
 			});
+
 			onBack();
+
 			return;
 		}
 
@@ -71,6 +74,7 @@
 			});
 
 			onBack();
+
 			return;
 		}
 
@@ -80,6 +84,7 @@
 			});
 
 			onBack();
+
 			return;
 		}
 
@@ -87,7 +92,7 @@
 		assertIsNetworkEthereum(network);
 
 		if (
-			[...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens]?.find(
+			[...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens, ...$erc4626Tokens]?.find(
 				({ address, network: tokenNetwork }) =>
 					areAddressesEqual({
 						address1: address,
@@ -101,25 +106,50 @@
 			});
 
 			onBack();
+
 			return;
 		}
 
-		const { metadata: metadataApiErc20, isErc20 } = infuraErc20Providers(network.id);
 		try {
+			const { metadata: metadataApiErc20, isErc20 } = infuraErc20Providers(network.id);
+
 			if (await isErc20({ contractAddress })) {
 				metadata = await metadataApiErc20({ address: contractAddress });
+
 				validateMetadata();
-			} else {
-				const { metadata: metadataApiErc721, isInterfaceErc721 } = infuraErc721Providers(
-					network.id
-				);
-				if (await isInterfaceErc721({ address: contractAddress })) {
-					metadata = await metadataApiErc721({ address: contractAddress });
-					validateMetadata();
-				} else {
-					const { metadata: metadataApiErc1155 } = infuraErc1155Providers(network.id);
-					metadata = await metadataApiErc1155({ address: contractAddress });
-				}
+
+				return;
+			}
+
+			const { metadata: metadataApiErc721, isInterfaceErc721 } = infuraErc721Providers(network.id);
+
+			if (await isInterfaceErc721({ address: contractAddress })) {
+				metadata = await metadataApiErc721({ address: contractAddress });
+
+				validateMetadata();
+
+				return;
+			}
+
+			const { metadata: metadataApiErc1155, isInterfaceErc1155 } = infuraErc1155Providers(
+				network.id
+			);
+
+			if (await isInterfaceErc1155({ address: contractAddress })) {
+				metadata = await metadataApiErc1155({ address: contractAddress });
+
+				// ERC1155 do not need to implement `symbol` and `name`, so we skip the validation for this standard
+
+				return;
+			}
+
+			// In case we are not able to determine the token standard, we display an error message
+			if (isNullish(metadata)) {
+				toastsError({
+					msg: { text: $i18n.tokens.error.unrecognised_erc_interface }
+				});
+
+				onBack();
 			}
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });

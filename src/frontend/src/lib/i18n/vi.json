@@ -208,13 +208,14 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "Mạng xã hội",
-			"verifiable_credentials": "Thông tin xác thực",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Trò chơi",
 			"tools": "Công cụ",
 			"ai": "AI",
-			"nft": ""
+			"nft": "",
+			"rwa": "",
+			"aa_new": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -401,6 +402,41 @@
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"realt": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -600,6 +636,7 @@
 			"no_infura_erc721_provider": "Không có nhà cung cấp Infura ERC721 cho mạng $network",
 			"no_infura_erc1155_provider": "Không có nhà cung cấp Infura ERC1155 cho mạng $network",
 			"no_infura_erc20_icp_provider": "Không có nhà cung cấp Infura ERC20 Icp cho mạng $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Không có mạng Solana cho mạng $network",
 			"loading_address": "Lỗi khi tải địa chỉ $symbol.",
 			"loading_balance": "Lỗi khi tải số dư $symbol cho mạng $network.",
@@ -620,6 +657,7 @@
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
 			"icrc_canister_loading": "Token với canister Ledger $ledgerCanisterId không thể được tải vì hiện tại nó không phản hồi.",
 			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",
 			"erc1155_custom_tokens": "Lỗi khi tải các token ERC1155.",
 			"spl_custom_tokens": "Lỗi khi tải các token tùy chỉnh SPL.",

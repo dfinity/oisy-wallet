@@ -20,7 +20,7 @@ import type { Erc20ContractAddress } from '$eth/types/address';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { EthereumNetwork } from '$eth/types/network';
-import { mapErc20Icon, mapErc20Token } from '$eth/utils/erc20.utils';
+import { mapErc20Token } from '$eth/utils/erc20.utils';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
@@ -91,6 +91,24 @@ export const loadCustomTokens = ({
 		identity
 	});
 
+export const safeLoadMetadata = async ({
+	networkId,
+	address
+}: {
+	networkId: NetworkId;
+	address: Erc20ContractAddress;
+}) => {
+	try {
+		// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
+		return await infuraErc20Providers(networkId).metadata({ address });
+	} catch (err: unknown) {
+		console.error(
+			`Error loading metadata for custom ERC20 token ${address} on network ${networkId.description}`,
+			err
+		);
+	}
+};
+
 const loadCustomTokensWithMetadata = async ({
 	tokens,
 	...params
@@ -159,7 +177,6 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: ETHEREUM_DEFAULT_DECIMALS,
 					standard: { code: 'erc20' as const },
 					category: 'custom' as const,
-					exchange: 'erc20' as const,
 					enabled,
 					version,
 					allowExternalContentSource
@@ -172,24 +189,6 @@ const loadCustomTokensWithMetadata = async ({
 			[[], []]
 		);
 
-		const safeLoadMetadata = async ({
-			networkId,
-			address
-		}: {
-			networkId: NetworkId;
-			address: Erc20ContractAddress;
-		}) => {
-			try {
-				// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
-				return await infuraErc20Providers(networkId).metadata({ address });
-			} catch (err: unknown) {
-				console.error(
-					`Error loading metadata for custom ERC20 token ${address} on network ${networkId.description}`,
-					err
-				);
-			}
-		};
-
 		const customTokens: Erc20CustomToken[] = await nonExistingTokens.reduce<
 			Promise<Erc20CustomToken[]>
 		>(async (acc, token) => {
@@ -198,7 +197,7 @@ const loadCustomTokensWithMetadata = async ({
 				address
 			} = token;
 
-			const icon = mapErc20Icon(token.symbol) ?? getCodebaseTokenIconPath({ token });
+			const icon = getCodebaseTokenIconPath({ token });
 
 			const metadata = await safeLoadMetadata({ networkId, address });
 

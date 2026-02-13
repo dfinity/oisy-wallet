@@ -196,13 +196,14 @@ interface I18nDapps {
 	categories: {
 		defi: string;
 		social_media: string;
-		verifiable_credentials: string;
 		staking: string;
 		walletconnect: string;
 		game: string;
 		tools: string;
 		ai: string;
 		nft: string;
+		rwa: string;
+		aa_new: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -271,6 +272,13 @@ interface I18nDapps {
 		magic_eden: { name: string; one_liner: string; description: string };
 		solayer: { name: string; one_liner: string; description: string };
 		kamino: { name: string; one_liner: string; description: string };
+		helium: { name: string; one_liner: string; description: string };
+		sanctum: { name: string; one_liner: string; description: string };
+		ostrich: { name: string; one_liner: string; description: string };
+		sphere_finance: { name: string; one_liner: string; description: string };
+		binaryx: { name: string; one_liner: string; description: string };
+		realt: { name: string; one_liner: string; description: string };
+		parcl: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -399,6 +407,7 @@ interface I18nInit {
 		no_infura_erc721_provider: string;
 		no_infura_erc1155_provider: string;
 		no_infura_erc20_icp_provider: string;
+		no_infura_erc4626_provider: string;
 		no_solana_network: string;
 		loading_address: string;
 		loading_balance: string;
@@ -419,6 +428,7 @@ interface I18nInit {
 		icrc_canisters: string;
 		icrc_canister_loading: string;
 		erc20_custom_tokens: string;
+		erc4626_custom_tokens: string;
 		erc721_custom_tokens: string;
 		erc1155_custom_tokens: string;
 		spl_custom_tokens: string;

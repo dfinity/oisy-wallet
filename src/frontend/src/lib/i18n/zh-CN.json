@@ -208,13 +208,14 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "社交媒体",
-			"verifiable_credentials": "可验证凭证",
 			"staking": "质押",
 			"walletconnect": "WalletConnect",
 			"game": "游戏",
 			"tools": "工具包",
 			"ai": "人工智能",
-			"nft": "NFT"
+			"nft": "NFT",
+			"rwa": "",
+			"aa_new": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -404,6 +405,41 @@
 				"name": "Kamino",
 				"one_liner": "Kamino 是 Solana 上最大的借贷协议，支撑着该网络中相当大比例的 DeFi 活动。",
 				"description": "Kamino 是一个运行在 Solana 区块链上的去中心化金融（DeFi）平台，将流动性提供、借贷和杠杆交易整合为一套产品体系。它通过自动化流动性金库和 Kamino Lend 系统简化了这些 DeFi 策略，并利用集中流动性管理来提升用户的资金效率。"
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"realt": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -600,6 +636,7 @@
 			"no_infura_erc721_provider": "没有 $network 网络的 Infura ERC721 提供商",
 			"no_infura_erc1155_provider": "没有 $network 网络的 Infura ERC1155 提供商",
 			"no_infura_erc20_icp_provider": "没有 $network 网络的 Infura ERC20 ICP 提供商",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "没有 $network 网络的 Solana 网络配置",
 			"loading_address": "加载 $symbol 地址时出错。",
 			"loading_balance": "加载 $network 网络上的 $symbol 余额时出错。",
@@ -620,6 +657,7 @@
 			"icrc_canisters": "加载 ICRC 容器时出错。",
 			"icrc_canister_loading": "无法加载带有 Ledger 容器 $ledgerCanisterId 的令牌，因为它目前没有响应。",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",
 			"spl_custom_tokens": "加载 SPL 用户代币时出错。",
