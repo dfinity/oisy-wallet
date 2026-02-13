@@ -9,7 +9,7 @@ const ICP_ONESEC_DECIMALS = 8;
 
 const ICP_ONESEC_SYMBOL = 'ICP';
 
-export const ICP_ONESEC_TOKEN_ID: TokenId = parseTokenId(ICP_SYMBOL);
+export const ICP_ONESEC_TOKEN_ID: TokenId = parseTokenId(ICP_ONESEC_SYMBOL);
 
 export const ICP_ONESEC_TOKEN: RequiredAdditionalErc20Token = {
 	id: ICP_ONESEC_TOKEN_ID,
