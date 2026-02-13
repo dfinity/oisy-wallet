@@ -1,5 +1,4 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { ICP_ONESEC_TOKEN_GROUP } from '$env/tokens/groups/groups.icp.onesec.env';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import icp from '$icp/assets/icp-onesec.webp';
 import type { TokenId } from '$lib/types/token';
