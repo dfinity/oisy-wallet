@@ -21,6 +21,5 @@ export const ICP_ONESEC_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: ICP_DECIMALS,
 	icon: icp,
 	address: '0x00f3C42833C3170159af4E92dbb451Fb3F708917',
-	exchange: 'erc20',
-	groupData: ICP_ONESEC_TOKEN_GROUP
+	exchange: 'erc20'
 };
