@@ -118,10 +118,10 @@
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
-			"sign_in_with_identity_number": "Iniciar sesion con numero de identidad",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
-			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena"
+			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena",
+			"social_login": ""
 		},
 		"alt": {
 			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil"
@@ -149,36 +149,25 @@
 			"text": {
 				"title": "Titulo",
 				"description": "descripcion",
-				"new_auth_version": "Nueva version de autenticación",
-				"could_not_enter_identity_number": "no se pudo ingresar el numero de identidad",
-				"lost_identity": "Perdí mi número de Internet Identity",
-				"security": "Me preocupaba la seguridad o la privacidad",
-				"got_confused": "se confundio",
-				"no_signup_needed": "no necesita registro",
-				"other": "Otro...",
+				"login_page_looks_different": "",
+				"use_identity_number": "",
 				"feedback_text": "retroalimentacion",
 				"thanks_text": "¡Gracias!",
+				"useful_links": "",
 				"identity_new_identity": "$oisy_short Wallet cambia el dominio de Internet Identity a: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "Como resultado, tu número de Internet Identity podría no aparecer automáticamente, y puede que necesites volver a introducirlo.",
-				"identity_legacy_sign_in": "Iniciar sesión con el dominio antiguo de Internet Identity",
-				"identity_learn_more": "Más información en los Docs de $oisy_short",
-				"other_title": "¡Gracias por tus comentarios!",
-				"other_description": "Aquí tienes algunos recursos útiles sobre <span class=\"font-bold\">seguridad</span> y <span class=\"font-bold\">privacidad</span> en $oisy_short e Internet Identity. Esperamos que te ayuden a tomar una decisión informada:",
-				"other_introduction": "Introducción a $oisy_short",
-				"other_docs": "Docs de $oisy_short: Internet Identity",
-				"other_private_key": "¿Quién controla la clave privada para los activos nativos?",
-				"other_asset_control": "Control de Activos, Recuperación y Gobernanza en $oisy_short Wallet",
+				"switch_to_new_internet_identity": "",
+				"identity_new_identity_title": "",
+				"identity_new_identity_item_1": "",
+				"oisy_introduction": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
+				"asset_control": "",
+				"internet_identity_help_center": "",
 				"need_help": "Necesito ayuda",
 				"sign_in": "¿ iniciar sesión?"
 			},
 			"alt": {
-				"internet_identity": "Imagen de la nueva Internet Identity",
-				"identity_learn_more": "Más información sobre la antigua Internet Identity",
-				"other_introduction": "Abrir Introducción a $oisy_short",
-				"other_docs": "Abrir docs de $oisy_short: Internet Identity",
-				"other_private_key": "Obtener ayuda sobre quién controla la clave privada para los activos nativos",
-				"other_asset_control": "Obtener información sobre Control de Activos, Recuperación y Gobernanza en $oisy_short Wallet",
-				"sign_in": "¿Necesitas ayuda para iniciar sesión?"
+				"internet_identity": "Imagen de la nueva Internet Identity"
 			}
 		}
 	},
@@ -187,6 +176,7 @@
 			"title_part_1": "Desbloquear para continuar",
 			"title_part_2": "Anteriormente bloqueaste tu billetera para mantenerla segura. Continúa donde lo dejaste o cierra sesión.",
 			"unlock": "Desbloquear",
+			"unlock_with_legacy_login": "",
 			"logout": "Cerrar sesión",
 			"logout_clear_cash_message": "Cerrar sesión borrará todos los datos en caché",
 			"learn_more": "Saber más"
@@ -218,13 +208,14 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "Redes Sociales",
-			"verifiable_credentials": "Credenciales Verificables",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Juego",
 			"tools": "Herramientas",
 			"ai": "IA",
-			"nft": "nft"
+			"nft": "nft",
+			"rwa": "",
+			"aa_new": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -645,6 +636,7 @@
 			"no_infura_erc721_provider": "No hay proveedor de Infura ERC721 para la red $network",
 			"no_infura_erc1155_provider": "No hay proveedor de Infura ERC1155 para la red $network",
 			"no_infura_erc20_icp_provider": "No hay proveedor de Infura ERC20 ICP para la red $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "No hay red Solana para la red $network",
 			"loading_address": "Error al cargar la dirección de $symbol.",
 			"loading_balance": "Error al cargar el saldo de $symbol para la red $network.",
@@ -665,13 +657,14 @@
 			"icrc_canisters": "Error al cargar los canisters de ICRC.",
 			"icrc_canister_loading": "El token con el canister de Ledger $ledgerCanisterId no se pudo cargar porque actualmente no responde.",
 			"erc20_custom_tokens": "Error al cargar los tokens ERC20 personalizados.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Error al cargar los tokens ERC721 personalizados.",
 			"erc1155_custom_tokens": "Error al cargar los tokens ERC1155 personalizados.",
-			"erc20_user_tokens": "Error al cargar los tokens de usuario ERC20.",
 			"spl_custom_tokens": "Error al cargar los tokens SPL personalizados.",
-			"erc20_user_token": "Error al habilitar el token gemelo ERC20.",
+			"erc20_custom_token": "",
 			"icrc_custom_token": "Error al cargar el token ICRC personalizado.",
 			"ext_custom_tokens": "",
+			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Tu billetera requiere algunos datos iniciales que aún no se han cargado. Por favor, inténtalo de nuevo.",
 			"allow_signing": "Ocurrió un problema al configurar tu billetera para firmar. Has sido desconectado. Si el problema persiste, contacta con el soporte.",
 			"waiting_for_allowed_cycles_aborted": "Preparación del ledger de ciclos abortada. Por favor, intenta iniciar sesión más tarde",
@@ -899,6 +892,7 @@
 			"unknown_cketh": "El token ckETH no se puede recuperar.",
 			"destination_address_invalid": "La dirección de destino es inválida.",
 			"amount_invalid": "La cantidad es inválida.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Fondos insuficientes para el gas",
 			"insufficient_funds_for_amount": "Fondos insuficientes para la cantidad",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fondos de Ethereum insuficientes para cubrir las comisiones",
@@ -941,6 +935,20 @@
 			"fee_calc_unsupported_standard": "No se pudo calcular la comisión ya que el estándar de token proporcionado no es compatible."
 		}
 	},
+	"mint": {
+		"text": {
+			"mint": "",
+			"minting": "",
+			"mint_review_subtitle": ""
+		}
+	},
+	"burn": {
+		"text": {
+			"burn": "",
+			"burning": "",
+			"burn_review_subtitle": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "scanear codigo qr",
@@ -953,9 +961,7 @@
 			"phone_number": "numero telefonico",
 			"email_address": "direccion de email",
 			"website": "sitio web",
-			"pay_to": "pagar a",
-			"powered_by": "impulsado por",
-			"recipient": "destinatario",
+			"enter_manually": "",
 			"url_or_code": "url o codigo",
 			"enter_or_paste_code": "ingresar o pegar codigo",
 			"scan": "scanear",
@@ -1195,6 +1201,7 @@
 				"unexpected_ledger": "Algo salió mal al validar el canister de Ledger.",
 				"unexpected_index": "Algo salió mal al validar el canister de Índice.",
 				"unexpected_index_ledger": "Algo salió mal al cargar el ID de Ledger relacionado con el canister de Índice.",
+				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "El ID de Ledger no está relacionado con el canister de Índice.",
 				"missing_ledger_id": "Falta el ID de Ledger. ¿Proporcionaste un valor?",
 				"missing_canister_id": "",
@@ -1528,6 +1535,8 @@
 			"title": "Transacciones",
 			"buy_or_receive": "¡Realiza tu primera transacción, y compra o recibe tokens ahora!",
 			"transaction_history": "Tu historial de transacciones aparecerá aquí",
+			"minter_transaction_history": "",
+			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "La información de las transacciones de BTC se obtiene de terceros centrales y debe ser verificada de forma independiente.",
 			"transaction_history_unavailable": "Historial de transacciones no disponible",
 			"missing_index_canister_explanation": "En este momento, $oisy_short no puede mostrar tus transacciones de tokens pasadas porque el emisor aún no ha proporcionado la función de seguimiento. Debería añadirse pronto. Mientras tanto, no te preocupes — puedes seguir enviando y recibiendo tus tokens como de costumbre.",
@@ -1826,7 +1835,6 @@
 			},
 			"title": "",
 			"instruction": "Al hacer clic en este botón, aceptas los $link",
-			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
@@ -1908,8 +1916,8 @@
 			"unstake_now": "deshacer apuesta ahora",
 			"unstaking": "desestacar",
 			"unstake_token": "token de desparticipación",
-			"enable_token_text": "habilitar texto del token",
 			"enable_token_text": "",
+			"enable_token_button": "",
 			"review": "revisar",
 			"executing_transaction": "ejecutando transaccón",
 			"unsupported_token_staking": "staking de tokens no admitidos",
@@ -1930,7 +1938,6 @@
 			"included_dissolve_fee": "tarifa de disolución incluida",
 			"delayed_dissolve_terms": "términos de disolución retrasada",
 			"delayed_dissolve_info": "información de disolución retrasada",
- 
 			"immediate_dissolve_terms": "términos de disolución inmediata",
 			"amount_to_receive": "cantidad a recibir",
 			"unclaimed_rewards": "recompensas no reclamadas",
