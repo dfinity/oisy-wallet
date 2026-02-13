@@ -398,9 +398,7 @@ describe('exchange.derived', () => {
 				{ data: { ...mockValidErc4626Token, enabled: true }, certified: false }
 			]);
 
-			exchangeStore.set([
-				{ [mockValidErc4626Token.address.toLowerCase()]: mockErc4626TokenPrice }
-			]);
+			exchangeStore.set([{ [mockValidErc4626Token.address.toLowerCase()]: mockErc4626TokenPrice }]);
 
 			const result = get(exchanges);
 
