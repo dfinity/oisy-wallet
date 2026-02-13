@@ -19,6 +19,5 @@ export const ICP_ONESEC_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: ICP_SYMBOL,
 	decimals: ICP_DECIMALS,
 	icon: icp,
-	address: '0x00f3C42833C3170159af4E92dbb451Fb3F708917',
-	exchange: 'erc20'
+	address: '0x00f3C42833C3170159af4E92dbb451Fb3F708917'
 };
