@@ -1,5 +1,9 @@
 import NftSorting from '$lib/components/nfts/NftSortMenu.svelte';
-import { TRACK_NFT_SORT_CHANGE } from '$lib/constants/analytics.constants';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_EVENTS_KEYS,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import * as analyticsServices from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftSortStore } from '$lib/stores/settings.store';
@@ -78,12 +82,16 @@ describe('NftSorting', () => {
 
 		expect(nftSortStoreSpy).toHaveBeenCalledWith({
 			key: 'nft-sort',
-			value: { order: 'asc', type: 'date' }
+			value: { order: 'desc', type: 'date' }
 		});
 
 		expect(trackEventSpy).toHaveBeenCalledWith({
-			name: TRACK_NFT_SORT_CHANGE,
-			metadata: { type: 'date', order: 'asc' }
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.SORT_DESC,
+				event_value: 'date'
+			}
 		});
 	});
 
@@ -107,12 +115,16 @@ describe('NftSorting', () => {
 
 		expect(nftSortStoreSpy).toHaveBeenCalledWith({
 			key: 'nft-sort',
-			value: { order: 'desc', type: 'date' }
+			value: { order: 'asc', type: 'date' }
 		});
 
 		expect(trackEventSpy).toHaveBeenCalledWith({
-			name: TRACK_NFT_SORT_CHANGE,
-			metadata: { type: 'date', order: 'desc' }
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.SORT_ASC,
+				event_value: 'date'
+			}
 		});
 	});
 
@@ -140,8 +152,12 @@ describe('NftSorting', () => {
 		});
 
 		expect(trackEventSpy).toHaveBeenCalledWith({
-			name: TRACK_NFT_SORT_CHANGE,
-			metadata: { type: 'collection-name', order: 'asc' }
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.SORT_ASC,
+				event_value: 'collection-name'
+			}
 		});
 	});
 
@@ -169,8 +185,12 @@ describe('NftSorting', () => {
 		});
 
 		expect(trackEventSpy).toHaveBeenCalledWith({
-			name: TRACK_NFT_SORT_CHANGE,
-			metadata: { type: 'collection-name', order: 'desc' }
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.SORT_DESC,
+				event_value: 'collection-name'
+			}
 		});
 	});
 

@@ -1,9 +1,7 @@
 import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
-import {
-	CKERC20_LEDGER_CANISTER_IDS,
-	IC_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { CKERC20_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import {
 	icrc1Transfer as icrc1TransferIcp,
 	transfer as transferIcp
@@ -17,9 +15,9 @@ import {
 } from '$icp/services/ck.services';
 import { sendDip20, sendIc, sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import type { IcTransferParams } from '$icp/types/ic-send';
+import * as accountUtils from '$icp/utils/account.utils';
 import * as icrcAccountUtils from '$icp/utils/icrc-account.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
-import * as accountUtils from '$lib/utils/account.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import en from '$tests/mocks/i18n.mock';
 import {
@@ -30,8 +28,8 @@ import {
 	mockValidIcrcToken
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipalText2 } from '$tests/mocks/identity.mock';
-import { decodeIcrcAccount } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
+import { decodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 
 vi.mock('$lib/utils/wallet.utils', () => ({
 	waitAndTriggerWallet: vi.fn()
@@ -137,7 +135,7 @@ describe('ic-send.services', () => {
 				it('should handle invalid destination addresses', async () => {
 					vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(true);
 
-					await expect(sendIc(mockParams)).rejects.toThrow(en.send.error.invalid_destination);
+					await expect(sendIc(mockParams)).rejects.toThrowError(en.send.error.invalid_destination);
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
 					expect(mockProgress).not.toHaveBeenCalled();
@@ -147,7 +145,7 @@ describe('ic-send.services', () => {
 				it('should throw if the service throws', async () => {
 					vi.mocked(transferIcrc).mockRejectedValueOnce(new Error('Test error'));
 
-					await expect(sendIc(mockParams)).rejects.toThrow('Test error');
+					await expect(sendIc(mockParams)).rejects.toThrowError('Test error');
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
 					expect(mockProgress).toHaveBeenCalledOnce();
@@ -262,7 +260,7 @@ describe('ic-send.services', () => {
 					vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(true);
 					vi.spyOn(accountUtils, 'invalidIcpAddress').mockReturnValueOnce(true);
 
-					await expect(sendIc(mockParams)).rejects.toThrow(en.send.error.invalid_destination);
+					await expect(sendIc(mockParams)).rejects.toThrowError(en.send.error.invalid_destination);
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
 					expect(mockProgress).not.toHaveBeenCalled();
@@ -275,7 +273,7 @@ describe('ic-send.services', () => {
 
 					vi.mocked(icrc1TransferIcp).mockRejectedValueOnce(new Error('Test error 1'));
 
-					await expect(sendIc(mockParams)).rejects.toThrow('Test error 1');
+					await expect(sendIc(mockParams)).rejects.toThrowError('Test error 1');
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
 					expect(mockProgress).toHaveBeenCalledOnce();
@@ -289,7 +287,7 @@ describe('ic-send.services', () => {
 
 					vi.mocked(transferIcp).mockRejectedValueOnce(new Error('Test error 2'));
 
-					await expect(sendIc(mockParams)).rejects.toThrow('Test error 2');
+					await expect(sendIc(mockParams)).rejects.toThrowError('Test error 2');
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
 					expect(mockProgress).toHaveBeenCalledOnce();
@@ -350,7 +348,7 @@ describe('ic-send.services', () => {
 				it('should handle invalid destination addresses', async () => {
 					vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(true);
 
-					await expect(sendIc(mockParams)).rejects.toThrow(en.send.error.invalid_destination);
+					await expect(sendIc(mockParams)).rejects.toThrowError(en.send.error.invalid_destination);
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
 					expect(mockProgress).not.toHaveBeenCalled();
@@ -360,7 +358,7 @@ describe('ic-send.services', () => {
 				it('should throw if the service throws', async () => {
 					vi.mocked(transferDip20).mockRejectedValueOnce(new Error('Test error'));
 
-					await expect(sendIc(mockParams)).rejects.toThrow('Test error');
+					await expect(sendIc(mockParams)).rejects.toThrowError('Test error');
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
 					expect(mockProgress).toHaveBeenCalledOnce();
@@ -422,7 +420,7 @@ describe('ic-send.services', () => {
 				it('should throw if the service throws', async () => {
 					vi.mocked(convertCkBTCToBtc).mockRejectedValueOnce(new Error('Test error'));
 
-					await expect(sendIc(mockParams)).rejects.toThrow('Test error');
+					await expect(sendIc(mockParams)).rejects.toThrowError('Test error');
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
 					expect(mockProgress).not.toHaveBeenCalled();
@@ -482,7 +480,7 @@ describe('ic-send.services', () => {
 					it('should throw if the service throws', async () => {
 						vi.mocked(convertCkETHToEth).mockRejectedValueOnce(new Error('Test error'));
 
-						await expect(sendIc(mockParams)).rejects.toThrow('Test error');
+						await expect(sendIc(mockParams)).rejects.toThrowError('Test error');
 
 						expect(mockSendCompleted).not.toHaveBeenCalled();
 						expect(mockProgress).not.toHaveBeenCalled();
@@ -537,7 +535,7 @@ describe('ic-send.services', () => {
 					it('should throw if the service throws', async () => {
 						vi.mocked(convertCkErc20ToErc20).mockRejectedValueOnce(new Error('Test error'));
 
-						await expect(sendIc(mockParams)).rejects.toThrow('Test error');
+						await expect(sendIc(mockParams)).rejects.toThrowError('Test error');
 
 						expect(mockSendCompleted).not.toHaveBeenCalled();
 						expect(mockProgress).not.toHaveBeenCalled();
@@ -585,7 +583,7 @@ describe('ic-send.services', () => {
 		it('should handle invalid destination addresses', () => {
 			vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(true);
 
-			expect(() => sendIcrc(mockParams)).toThrow(en.send.error.invalid_destination);
+			expect(() => sendIcrc(mockParams)).toThrowError(en.send.error.invalid_destination);
 
 			expect(mockProgress).not.toHaveBeenCalled();
 		});
@@ -593,7 +591,7 @@ describe('ic-send.services', () => {
 		it('should throw if the service throws', async () => {
 			vi.mocked(transferIcrc).mockRejectedValueOnce(new Error('Test error'));
 
-			await expect(sendIcrc(mockParams)).rejects.toThrow('Test error');
+			await expect(sendIcrc(mockParams)).rejects.toThrowError('Test error');
 
 			expect(mockProgress).toHaveBeenCalledOnce();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
@@ -671,7 +669,7 @@ describe('ic-send.services', () => {
 			vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(true);
 			vi.spyOn(accountUtils, 'invalidIcpAddress').mockReturnValueOnce(true);
 
-			expect(() => sendIcp(mockParams)).toThrow(en.send.error.invalid_destination);
+			expect(() => sendIcp(mockParams)).toThrowError(en.send.error.invalid_destination);
 
 			expect(mockProgress).not.toHaveBeenCalled();
 		});
@@ -682,7 +680,7 @@ describe('ic-send.services', () => {
 
 			vi.mocked(icrc1TransferIcp).mockRejectedValueOnce(new Error('Test error 1'));
 
-			await expect(sendIcp(mockParams)).rejects.toThrow('Test error 1');
+			await expect(sendIcp(mockParams)).rejects.toThrowError('Test error 1');
 
 			expect(mockProgress).toHaveBeenCalledOnce();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
@@ -694,7 +692,7 @@ describe('ic-send.services', () => {
 
 			vi.mocked(transferIcp).mockRejectedValueOnce(new Error('Test error 2'));
 
-			await expect(sendIcp(mockParams)).rejects.toThrow('Test error 2');
+			await expect(sendIcp(mockParams)).rejects.toThrowError('Test error 2');
 
 			expect(mockProgress).toHaveBeenCalledOnce();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
@@ -738,7 +736,7 @@ describe('ic-send.services', () => {
 		it('should handle invalid destination addresses', () => {
 			vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(true);
 
-			expect(() => sendDip20(mockParams)).toThrow(en.send.error.invalid_destination);
+			expect(() => sendDip20(mockParams)).toThrowError(en.send.error.invalid_destination);
 
 			expect(mockProgress).not.toHaveBeenCalled();
 		});
@@ -746,7 +744,7 @@ describe('ic-send.services', () => {
 		it('should throw if the service throws', async () => {
 			vi.mocked(transferDip20).mockRejectedValueOnce(new Error('Test error'));
 
-			await expect(sendDip20(mockParams)).rejects.toThrow('Test error');
+			await expect(sendDip20(mockParams)).rejects.toThrowError('Test error');
 
 			expect(mockProgress).toHaveBeenCalledOnce();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);

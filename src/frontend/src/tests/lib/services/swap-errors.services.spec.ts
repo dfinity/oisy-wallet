@@ -11,7 +11,7 @@ describe('SwapError Service', () => {
 					message: en.swap.error.withdraw_failed,
 					variant: 'error'
 				})
-			).toThrow(SwapError);
+			).toThrowError(SwapError);
 		});
 
 		it('throws SwapError without message', () => {
@@ -19,7 +19,7 @@ describe('SwapError Service', () => {
 				throwSwapError({
 					code: SwapErrorCodes.WITHDRAW_FAILED
 				})
-			).toThrow(SwapError);
+			).toThrowError(SwapError);
 		});
 
 		it('throws SwapError without swapSucceded', () => {
@@ -27,7 +27,7 @@ describe('SwapError Service', () => {
 				throwSwapError({
 					code: SwapErrorCodes.WITHDRAW_FAILED
 				})
-			).toThrow(SwapError);
+			).toThrowError(SwapError);
 		});
 
 		it('throws SwapError with swapSucceded', () => {
@@ -36,7 +36,7 @@ describe('SwapError Service', () => {
 					code: SwapErrorCodes.WITHDRAW_FAILED,
 					swapSucceded: true
 				})
-			).toThrow(SwapError);
+			).toThrowError(SwapError);
 		});
 
 		it('throws correct message when provided', () => {
@@ -45,7 +45,7 @@ describe('SwapError Service', () => {
 					code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
 					message: en.swap.error.swap_failed_withdraw_success
 				})
-			).toThrow(en.swap.error.swap_failed_withdraw_success);
+			).toThrowError(en.swap.error.swap_failed_withdraw_success);
 		});
 
 		it('includes variant if provided', () => {

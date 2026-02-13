@@ -1,4 +1,4 @@
-import type { ExperimentalFeatureSettingsFor } from '$declarations/backend/declarations/backend.did';
+import type { ExperimentalFeatureSettingsFor } from '$declarations/backend/backend.did';
 import { userExperimentalFeaturesSettings } from '$lib/derived/user-profile.derived';
 import type {
 	ExperimentalFeatureId,

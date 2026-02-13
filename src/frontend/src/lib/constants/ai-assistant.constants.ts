@@ -1,4 +1,5 @@
-import type { tool } from '$declarations/llm/declarations/llm.did';
+import type { tool } from '$declarations/llm/llm.did';
+import { ToolResultType } from '$lib/types/ai-assistant';
 import { toNullable } from '@dfinity/utils';
 
 export const AI_ASSISTANT_LLM_MODEL = 'qwen3:32b';
@@ -232,3 +233,10 @@ export const getAiAssistantToolsDescription = ({
 	] as tool[];
 
 export const MAX_SUPPORTED_AI_ASSISTANT_CHAT_LENGTH = 100;
+
+export const TOOL_CALLS_LIMITS: Record<ToolResultType, number> = {
+	[ToolResultType.REVIEW_SEND_TOKENS]: 1,
+	[ToolResultType.SHOW_BALANCE]: 10,
+	[ToolResultType.SHOW_ALL_CONTACTS]: 1,
+	[ToolResultType.SHOW_FILTERED_CONTACTS]: 10
+};

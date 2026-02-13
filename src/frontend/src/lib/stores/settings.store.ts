@@ -1,3 +1,4 @@
+import { TokenTypes as TokenTypesEnum, type TokenTypes } from '$lib/enums/token-types';
 import { initStorageStore } from '$lib/stores/storage.store';
 
 export interface SettingsData {
@@ -43,4 +44,9 @@ export const nftSortStore = initStorageStore<NftSortingType>({
 export const nftGroupByCollectionStore = initStorageStore<boolean>({
 	key: 'nft-group-by-collection',
 	defaultValue: true
+});
+
+export const activeAssetsTabStore = initStorageStore<TokenTypes>({
+	key: 'active-assets-tab',
+	defaultValue: TokenTypesEnum.TOKENS
 });

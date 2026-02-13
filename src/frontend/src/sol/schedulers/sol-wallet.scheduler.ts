@@ -1,8 +1,10 @@
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import { retryWithDelay } from '$lib/services/rest.services';
 import type { OptionIdentity } from '$lib/types/identity';
 import type {
+	PostMessageCommon,
 	PostMessageDataRequestSol,
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
@@ -38,6 +40,8 @@ interface SolWalletData {
 }
 
 export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> {
+	#ref: PostMessageCommon['ref'] | undefined;
+
 	private timer = new SchedulerTimer('syncSolWalletStatus');
 
 	private store: SolWalletStore = {
@@ -49,7 +53,15 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		this.timer.stop();
 	}
 
+	protected setRef(data: PostMessageDataRequestSol | undefined) {
+		this.#ref = nonNullish(data)
+			? `${data.tokenAddress ?? SOLANA_TOKEN.symbol}-${data.solanaNetwork}`
+			: undefined;
+	}
+
 	async start(data: PostMessageDataRequestSol | undefined) {
+		this.setRef(data);
+
 		await this.timer.start<PostMessageDataRequestSol>({
 			interval: SOL_WALLET_TIMER_INTERVAL_MILLIS,
 			job: this.syncWallet,
@@ -179,14 +191,24 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	};
 
 	private postMessageWallet(data: SolPostMessageDataResponseWallet) {
+		if (isNullish(this.#ref)) {
+			return;
+		}
+
 		this.timer.postMsg<SolPostMessageDataResponseWallet>({
+			ref: this.#ref,
 			msg: 'syncSolWallet',
 			data
 		});
 	}
 
 	protected postMessageWalletError({ error }: { error: unknown }) {
+		if (isNullish(this.#ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageDataResponseError>({
+			ref: this.#ref,
 			msg: 'syncSolWalletError',
 			data: {
 				error

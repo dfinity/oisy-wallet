@@ -27,13 +27,25 @@ vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
 
 let workerInstance: Worker;
 
-vi.mock('$lib/workers/workers?worker', () => ({
-	default: vi.fn().mockImplementation(() => {
-		// @ts-expect-error testing this on purpose with a mock class
-		workerInstance = new Worker();
-		return workerInstance;
-	})
-}));
+vi.mock('$lib/workers/workers?worker', () => {
+	class MockWorkers {
+		constructor() {
+			// @ts-expect-error testing this on purpose with a mock class
+			workerInstance = new Worker();
+			return workerInstance;
+		}
+	}
+
+	return {
+		default: MockWorkers
+	};
+});
+
+const mockId = 'abcdefgh';
+
+vi.stubGlobal('crypto', {
+	randomUUID: vi.fn().mockReturnValue(mockId)
+});
 
 describe('worker.pow-protection.services', () => {
 	describe('PowProtectorWorker', () => {
@@ -52,27 +64,27 @@ describe('worker.pow-protection.services', () => {
 		it('should start the worker and send the correct start message', () => {
 			worker.start();
 
-			expect(postMessageSpy).toHaveBeenCalledOnce();
-			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-				msg: 'startPowProtectionTimer'
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'startPowProtectionTimer',
+				workerId: mockId
 			});
 		});
 
 		it('should trigger the worker and send the correct trigger message', () => {
 			worker.trigger();
 
-			expect(postMessageSpy).toHaveBeenCalledOnce();
-			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-				msg: 'triggerPowProtectionTimer'
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'triggerPowProtectionTimer',
+				workerId: mockId
 			});
 		});
 
 		it('should destroy the worker', () => {
 			worker.destroy();
 
-			expect(postMessageSpy).toHaveBeenCalledOnce();
-			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-				msg: 'stopPowProtectionTimer'
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'stopPowProtectionTimer',
+				workerId: mockId
 			});
 
 			expect(workerInstance.terminate).toHaveBeenCalledOnce();

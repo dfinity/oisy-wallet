@@ -1,7 +1,5 @@
-import {
-	IC_CKBTC_LEDGER_CANISTER_ID,
-	IC_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -15,7 +13,7 @@ import type { Token, TokenId } from '$lib/types/token';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockCkBtcMinterInfo, mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
-import type { PendingUtxo } from '@dfinity/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 	Array.from({ length: n }, () => ({
@@ -59,7 +57,7 @@ export const setupCkBtcPendingStores = () => {
 				{
 					...mockCkBtcPendingUtxoTransaction,
 					outpoint: { txid: [0], vout: '' }
-				} as unknown as PendingUtxo
+				} as unknown as CkBtcMinterDid.PendingUtxo
 			],
 			certified: true
 		}

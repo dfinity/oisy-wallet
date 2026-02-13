@@ -34,7 +34,7 @@
 
 	<div class="flex min-w-0 flex-1 flex-col justify-center" class:gap-1={withGap}>
 		<div
-			class="flex min-w-0 items-center gap-2 text-left font-bold leading-5"
+			class="flex min-w-0 items-center gap-2 text-left leading-5 font-bold"
 			class:items-center={isNullish(description)}
 		>
 			{@render children?.()}

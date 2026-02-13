@@ -8,12 +8,17 @@
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
+	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
@@ -32,6 +37,7 @@
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
+		isGasless: boolean;
 	}
 
 	let {
@@ -43,13 +49,16 @@
 		isApproveNeeded,
 		onShowTokensList,
 		onClose,
-		onNext
+		onNext,
+		isGasless
 	}: Props = $props();
 
 	const { sourceToken, destinationToken, sourceTokenBalance } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	let errorType: TokenActionErrorType = $state<TokenActionErrorType | undefined>(undefined);
+	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	let errorType = $state<TokenActionErrorType | undefined>();
 
 	const {
 		feeStore: storeFeeData,
@@ -62,7 +71,7 @@
 
 	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
 	const totalFee = $derived(
-		isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
+		isGasless ? ZERO : isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
 	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
@@ -83,6 +92,14 @@
 					})
 				: ZERO;
 
+		if (userAmount > parsedSendBalance) {
+			return 'insufficient-funds';
+		}
+
+		if (isGasless) {
+			return;
+		}
+
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sourceToken?.id) || isSupportedEvmNativeTokenId($sourceToken?.id)) {
 			const total = userAmount + ($minGasFee ?? ZERO);
@@ -99,7 +116,9 @@
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
 		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
-		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee) {
+		const maxFeeToCheck = isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee;
+
+		if (nonNullish(maxFeeToCheck) && ethBalance < maxFeeToCheck) {
 			return 'insufficient-funds-for-fee';
 		}
 	};
@@ -147,18 +166,25 @@
 			{/if}
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider {slippageValue} on:icShowProviderList />
-				<EthFeeDisplay {isApproveNeeded}>
-					{#snippet label()}
-						<Html text={$i18n.fee.text.total_fee} />
-					{/snippet}
-				</EthFeeDisplay>
+				<SwapProvider {slippageValue} />
 
-				<SwapEthFeeInfo
-					decimals={$feeDecimalsStore}
-					feeSymbol={$feeSymbolStore}
-					feeTokenId={$feeTokenIdStore}
-				/>
+				{#if nonNullish($swapAmountsStore?.selectedProvider)}
+					{#if isGasless}
+						<SwapGaslessFee />
+					{:else}
+						<EthFeeDisplay {isApproveNeeded}>
+							{#snippet label()}
+								<Html text={$i18n.fee.text.total_fee} />
+							{/snippet}
+						</EthFeeDisplay>
+
+						<SwapEthFeeInfo
+							decimals={$feeDecimalsStore}
+							feeSymbol={$feeSymbolStore}
+							feeTokenId={$feeTokenIdStore}
+						/>
+					{/if}
+				{/if}
 			</div>
 		{/if}
 	{/snippet}

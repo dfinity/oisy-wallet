@@ -17,6 +17,5 @@ export const onPowProtectionMessage = async ({
 			return;
 		case 'triggerPowProtectionTimer':
 			await scheduler.trigger(data);
-			return;
 	}
 };

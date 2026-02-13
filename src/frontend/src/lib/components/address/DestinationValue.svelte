@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
+	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';

@@ -1,7 +1,9 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 import type { Token } from '$lib/types/token';
+import { formatToken } from '$lib/utils/format.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
@@ -26,6 +28,17 @@ describe('TokenModalContent', () => {
 
 		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
 		expect(getByText(ICP_TOKEN.decimals)).toBeInTheDocument();
+
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
+		expect(
+			getByText(
+				`${formatToken({
+					value: ICP_TOKEN.fee,
+					unitName: ICP_TOKEN.decimals,
+					displayDecimals: ICP_TOKEN.decimals
+				})} ${ICP_TOKEN.symbol}`
+			)
+		).toBeInTheDocument();
 	});
 
 	it('renders all values correctly for ICRC token with index canister', () => {
@@ -44,7 +57,7 @@ describe('TokenModalContent', () => {
 		expect(getByText(mockValidIcrcToken.name)).toBeInTheDocument();
 
 		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
-		expect(getByText(mockValidIcrcToken.standard)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.standard.code)).toBeInTheDocument();
 
 		expect(getByText(en.tokens.import.text.index_canister_id)).toBeInTheDocument();
 		expect(getByText(mockIndexCanisterId)).toBeInTheDocument();
@@ -53,6 +66,28 @@ describe('TokenModalContent', () => {
 
 		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
 		expect(getByText(mockValidIcrcToken.decimals)).toBeInTheDocument();
+
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
+		expect(
+			getByText(
+				`${formatToken({
+					value: mockValidIcrcToken.fee,
+					unitName: mockValidIcrcToken.decimals,
+					displayDecimals: mockValidIcrcToken.decimals
+				})} ${mockValidIcrcToken.symbol}`
+			)
+		).toBeInTheDocument();
+	});
+
+	it('renders standard for ERC4626 token', () => {
+		const { getByText } = render(TokenModalContent, {
+			props: {
+				token: mockValidErc4626Token as Token
+			}
+		});
+
+		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
+		expect(getByText(mockValidErc4626Token.standard.code)).toBeInTheDocument();
 	});
 
 	it('renders all values correctly for ICRC token without index canister', () => {
@@ -72,7 +107,7 @@ describe('TokenModalContent', () => {
 		expect(getByText(mockValidIcrcToken.name)).toBeInTheDocument();
 
 		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
-		expect(getByText(mockValidIcrcToken.standard)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.standard.code)).toBeInTheDocument();
 
 		expect(getByText(en.tokens.import.text.index_canister_id)).toBeInTheDocument();
 		expect(getByText(en.tokens.details.missing_index_canister_id_label)).toBeInTheDocument();
@@ -82,5 +117,16 @@ describe('TokenModalContent', () => {
 
 		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
 		expect(getByText(mockValidIcrcToken.decimals)).toBeInTheDocument();
+
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
+		expect(
+			getByText(
+				`${formatToken({
+					value: mockValidIcrcToken.fee,
+					unitName: mockValidIcrcToken.decimals,
+					displayDecimals: mockValidIcrcToken.decimals
+				})} ${mockValidIcrcToken.symbol}`
+			)
+		).toBeInTheDocument();
 	});
 });

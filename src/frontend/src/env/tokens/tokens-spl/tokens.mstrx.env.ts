@@ -14,7 +14,7 @@ export const MSTRX_TOKEN_ID: TokenId = parseTokenId(MSTRX_SYMBOL);
 export const MSTRX_TOKEN: RequiredSpl2022Token = {
 	id: MSTRX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'MicroStrategy xStock',
 	symbol: MSTRX_SYMBOL,

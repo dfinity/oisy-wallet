@@ -69,27 +69,15 @@ describe('loader.services', () => {
 				throw new CanisterInternalError('Test');
 			});
 
-			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
-			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
-			vi.spyOn(console, 'warn').mockImplementation(() => {});
-
 			const result = await initSignerAllowance();
 
 			expect(result.success).toBeFalsy();
-
-			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
-				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
-			);
 		});
 
 		it('should sign out and ultimately reload the window', async () => {
 			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
-
-			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
-			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
-			vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 			const spySignOut = vi.spyOn(authServices, 'errorSignOut');
 
@@ -99,23 +87,17 @@ describe('loader.services', () => {
 
 			expect(spySignOut).toHaveBeenCalledOnce();
 			expect(spy).toHaveBeenCalledOnce();
-
-			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
-				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
-			);
 		});
 	});
 
 	describe('initLoader', () => {
 		const mockValidateAddresses = vi.fn();
 		const mockProgressAndLoad = vi.fn();
-		const mockSetProgressModal = vi.fn();
 
 		const mockParams = {
 			identity: mockIdentity,
 			validateAddresses: mockValidateAddresses,
-			progressAndLoad: mockProgressAndLoad,
-			setProgressModal: mockSetProgressModal
+			progressAndLoad: mockProgressAndLoad
 		};
 
 		beforeEach(() => {

@@ -6,12 +6,11 @@
 	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import type { OptionBalance } from '$lib/types/balance';
-	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 
 	interface Props {
 		destination: string | null;
-		amount: OptionAmount;
+		amount?: bigint;
 		token: Token;
 		exchangeRate?: number;
 		balance: OptionBalance;

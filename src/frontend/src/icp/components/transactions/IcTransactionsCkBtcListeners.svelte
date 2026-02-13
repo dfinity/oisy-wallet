@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
-	import { initBtcStatusesWorker } from '$icp/services/worker.btc-statuses.services';
+	import { BtcStatusesWorker } from '$icp/services/worker.btc-statuses.services';
 	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
@@ -21,7 +21,7 @@
 </script>
 
 {#if nonNullish(token)}
-	<IcCkListener initFn={initBtcStatusesWorker} {token} {twinToken} />
+	<IcCkListener initFn={BtcStatusesWorker.init} {token} {twinToken} />
 
 	{#if !minterInfoLoaded}
 		<IcCkListener initFn={initCkBTCMinterInfoWorker} {token} {twinToken} />

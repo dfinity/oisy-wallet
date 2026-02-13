@@ -1,19 +1,18 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { onDestroy, type Snippet, untrack } from 'svelte';
+	import { type Snippet, untrack } from 'svelte';
 	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 	import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
 
 	interface Props {
-		tokens: TokenUiOrGroupUi[] | undefined;
-		animating: boolean;
+		tokens?: TokenUiOrGroupUi[];
 		children: Snippet;
 	}
 
 	// We start `tokens` as undefined to avoid showing an empty list before the first update.
-	let { tokens = $bindable(), animating, children }: Props = $props();
+	let { tokens = $bindable(), children }: Props = $props();
 
 	let groupedTokens: TokenUiOrGroupUi[] = $derived(
 		groupTokensByTwin($combinedDerivedSortedFungibleNetworkTokensUi)
@@ -26,46 +25,34 @@
 		})
 	);
 
-	let timer = $state<NodeJS.Timeout | undefined>();
+	let rafId: number | null = null;
 
-	const clearTimer = () => {
-		if (nonNullish(timer)) {
-			clearTimeout(timer);
-			timer = undefined;
+	const clearUpRaf = () => {
+		// coalesce to 1 update per frame
+		if (nonNullish(rafId)) {
+			cancelAnimationFrame(rafId);
 		}
-	};
-
-	const apply = () => {
-		tokens = [...sortedTokensOrGroups];
 	};
 
 	const updateTokensToDisplay = () => {
-		if (!animating) {
-			apply();
+		clearUpRaf();
 
-			clearTimer();
+		rafId = requestAnimationFrame(() => {
+			rafId = null;
 
-			return;
-		}
+			tokens = sortedTokensOrGroups;
+		});
 
-		scheduleRetry();
-	};
-
-	const scheduleRetry = () => {
-		if (nonNullish(timer)) {
-			return;
-		}
-
-		timer = setTimeout(updateTokensToDisplay, 500);
+		return () => {
+			clearUpRaf();
+		};
 	};
 
 	$effect(() => {
-		[sortedTokensOrGroups, animating];
+		[sortedTokensOrGroups];
 
 		untrack(() => updateTokensToDisplay());
 	});
-
-	onDestroy(clearTimer);
 </script>
 
 {@render children()}

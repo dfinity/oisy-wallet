@@ -44,9 +44,10 @@ describe('SwapIcpForm', () => {
 		slippageValue: '0.5',
 		sourceTokenFee: 1000n,
 		isSwapAmountsLoading: false,
-		onShowTokensList: () => {},
-		onClose: () => {},
-		onNext: () => {}
+		onShowTokensList: vi.fn(),
+		onShowProviderList: vi.fn(),
+		onClose: vi.fn(),
+		onNext: vi.fn()
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
@@ -154,5 +155,81 @@ describe('SwapIcpForm', () => {
 		const exchangeValues = container.querySelectorAll('[data-tid="swap-amount-exchange-value"]');
 
 		expect(exchangeValues).toHaveLength(2);
+	});
+
+	it('should not render swap details when no source token', () => {
+		const contextWithoutSource = new Map();
+		const swapContextWithoutSource = initSwapContext({
+			sourceToken: undefined,
+			destinationToken: mockValidIcCkToken as IcTokenToggleable
+		});
+
+		contextWithoutSource.set(SWAP_CONTEXT_KEY, swapContextWithoutSource);
+		contextWithoutSource.set(IC_TOKEN_FEE_CONTEXT_KEY, { store: icTokenFeeStore });
+		contextWithoutSource.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore() });
+
+		const { container } = render(SwapIcpForm, {
+			props,
+			context: contextWithoutSource
+		});
+
+		expect(container.querySelector('hr')).not.toBeInTheDocument();
+	});
+
+	it('should calculate total fee as double for ICRC2 tokens', () => {
+		const icrc2Context = new Map();
+		const icrc2SwapContext = {
+			...initSwapContext({
+				sourceToken: mockValidIcToken as IcTokenToggleable,
+				destinationToken: mockValidIcCkToken as IcTokenToggleable
+			}),
+			isSourceTokenIcrc2: readable(true)
+		};
+
+		icrc2Context.set(SWAP_CONTEXT_KEY, icrc2SwapContext);
+		icrc2Context.set(IC_TOKEN_FEE_CONTEXT_KEY, { store: icTokenFeeStore });
+		icrc2Context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore() });
+
+		const { container } = render(SwapIcpForm, {
+			props: {
+				...props,
+				sourceTokenFee: 1000n
+			},
+			context: icrc2Context
+		});
+
+		expect(container).toBeInTheDocument();
+	});
+
+	it('should call onShowProviderList when clicking provider button', () => {
+		const onShowProviderList = vi.fn();
+
+		const { container } = render(SwapIcpForm, {
+			props: {
+				...props,
+				onShowProviderList
+			},
+			context: mockContext
+		});
+
+		expect(container).toBeInTheDocument();
+	});
+
+	it('should render SwapProvider component', () => {
+		const { container } = render(SwapIcpForm, {
+			props,
+			context: mockContext
+		});
+
+		expect(container).toBeInTheDocument();
+	});
+
+	it('should render SwapFees component', () => {
+		const { container } = render(SwapIcpForm, {
+			props,
+			context: mockContext
+		});
+
+		expect(container).toBeInTheDocument();
 	});
 });

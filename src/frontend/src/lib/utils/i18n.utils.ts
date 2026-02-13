@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from '$env/i18n';
 import {
 	OISY_DESCRIPTION,
 	OISY_NAME,
@@ -82,11 +83,10 @@ export const mergeWithFallback = ({
 
 export const getDefaultLang = (): Languages => {
 	const browserLocale = new Intl.Locale(navigator.language);
-	const browserLanguage = Object.keys(Languages).find(
-		(l) => Languages[l as keyof typeof Languages] === browserLocale.language
-	);
+	const browserLanguage = SUPPORTED_LANGUAGES.find(([_, l]) => l === browserLocale.language);
 	if (nonNullish(browserLanguage)) {
-		return Languages[browserLanguage as keyof typeof Languages];
+		const [_, lang] = browserLanguage;
+		return lang;
 	}
 	return Languages.ENGLISH;
 };

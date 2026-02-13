@@ -1,8 +1,6 @@
-import {
-	LOCAL_CKBTC_LEDGER_CANISTER_ID,
-	LOCAL_CKETH_LEDGER_CANISTER_ID,
-	LOCAL_CKUSDC_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { LOCAL_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { LOCAL_CKUSDC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
+import { LOCAL_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { IcCkToken } from '$icp/types/ic-token';
@@ -12,7 +10,7 @@ import { validateUserAmount } from '$lib/utils/user-amount.utils';
 import { mockCkBtcMinterInfo as mockCkBtcMinterInfoData } from '$tests/mocks/ckbtc.mock';
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
-import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh/dist/candid/minter';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 import type { MockInstance } from 'vitest';
 
 describe('validateUserAmount', () => {
@@ -20,7 +18,7 @@ describe('validateUserAmount', () => {
 	const balance = 9000000n;
 	const fee = 10000n;
 	const mockCkEthMinterInfo = {
-		data: { minimum_withdrawal_amount: [500n] } as CkEthMinterInfo,
+		data: { minimum_withdrawal_amount: [500n] } as CkEthMinterDid.MinterInfo,
 		certified: true
 	};
 	const mockCkBtcMinterInfo = {

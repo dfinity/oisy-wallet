@@ -5,10 +5,10 @@ import {
 } from '$lib/stores/certified-setter.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
-import type { PendingUtxo } from '@dfinity/ckbtc';
 import { nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
-export type CkBtcPendingUtxosData = CertifiedData<PendingUtxo[]>;
+export type CkBtcPendingUtxosData = CertifiedData<CkBtcMinterDid.PendingUtxo[]>;
 
 interface CkBtcPendingUtxosStore extends CertifiedSetterStoreStore<CkBtcPendingUtxosData> {
 	filter: (params: { tokenId: TokenId; utxosIds: CertifiedData<UtxoTxidText[]> }) => void;

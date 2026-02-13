@@ -1,5 +1,4 @@
 import {
-	NetworkAppMetadataSchema,
 	NetworkEnvironmentSchema,
 	NetworkIdSchema,
 	NetworkSchema
@@ -17,7 +16,7 @@ describe('network.schema', () => {
 		it('should fail validation with a string instead of a symbol', () => {
 			const invalidNetworkId = 'NetworkId';
 
-			expect(() => NetworkIdSchema.parse(invalidNetworkId)).toThrow();
+			expect(() => NetworkIdSchema.parse(invalidNetworkId)).toThrowError();
 		});
 	});
 
@@ -37,31 +36,7 @@ describe('network.schema', () => {
 		it('should fail validation with an unsupported network environment', () => {
 			const invalidEnv = 'unsupported-env';
 
-			expect(() => NetworkEnvironmentSchema.parse(invalidEnv)).toThrow();
-		});
-	});
-
-	describe('NetworkAppMetadataSchema', () => {
-		it('should validate complete metadata', () => {
-			const validMetadata = {
-				explorerUrl: 'https://example.com/explorer'
-			};
-
-			expect(NetworkAppMetadataSchema.parse(validMetadata)).toEqual(validMetadata);
-		});
-
-		it('should fail validation with an invalid explorer URL', () => {
-			const invalidMetadata = {
-				explorerUrl: 'invalid-url'
-			};
-
-			expect(() => NetworkAppMetadataSchema.parse(invalidMetadata)).toThrow();
-		});
-
-		it('should fail validation with missing explorer URL', () => {
-			const invalidMetadata = {};
-
-			expect(() => NetworkAppMetadataSchema.parse(invalidMetadata)).toThrow();
+			expect(() => NetworkEnvironmentSchema.parse(invalidEnv)).toThrowError();
 		});
 	});
 
@@ -69,13 +44,15 @@ describe('network.schema', () => {
 		const validNetworkWithRequiredFields = {
 			id: parseNetworkId('NetworkId'),
 			env: 'testnet',
-			name: 'Test Network'
+			name: 'Test Network',
+			explorerUrl: 'https://example.com/explorer'
 		};
 
 		const validNetwork = {
 			...validNetworkWithRequiredFields,
 			icon: 'https://example.com/icon.svg',
-			buy: { onramperId: 'icp' }
+			buy: { onramperId: 'icp' },
+			pay: { openCryptoPay: 'Internet Computer' }
 		};
 
 		it('should validate a complete network', () => {
@@ -91,19 +68,19 @@ describe('network.schema', () => {
 		it('should fail validation when id is missing', () => {
 			const { id: _, ...invalidNetwork } = validNetwork;
 
-			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
+			expect(() => NetworkSchema.parse(invalidNetwork)).toThrowError();
 		});
 
 		it('should fail validation when env is missing', () => {
 			const { env: _, ...invalidNetwork } = validNetwork;
 
-			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
+			expect(() => NetworkSchema.parse(invalidNetwork)).toThrowError();
 		});
 
 		it('should fail validation when name is missing', () => {
 			const { name: _, ...invalidNetwork } = validNetwork;
 
-			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
+			expect(() => NetworkSchema.parse(invalidNetwork)).toThrowError();
 		});
 
 		it('should fail validation when icon is not a valid SVG string', () => {
@@ -112,7 +89,7 @@ describe('network.schema', () => {
 				icon: 'https://example.com/invalid-icon.png'
 			};
 
-			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
+			expect(() => NetworkSchema.parse(invalidNetwork)).toThrowError();
 		});
 
 		it('should fail validation when iconBW is not a valid SVG string', () => {
@@ -121,7 +98,25 @@ describe('network.schema', () => {
 				icon: 'https://example.com/invalid-icon-bw.png'
 			};
 
-			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
+			expect(() => NetworkSchema.parse(invalidNetwork)).toThrowError();
+		});
+
+		it('should accept supportsNft value as true', () => {
+			const result = NetworkSchema.parse({ ...validNetwork, supportsNft: true });
+
+			expect(result.supportsNft).toBeTruthy();
+		});
+
+		it('should accept supportsNft value as false', () => {
+			const result = NetworkSchema.parse({ ...validNetwork, supportsNft: false });
+
+			expect(result.supportsNft).toBeFalsy();
+		});
+
+		it('supportsNft value should be optional and undefined when not provided', () => {
+			const result = NetworkSchema.parse(validNetwork);
+
+			expect(result.supportsNft).toBeUndefined();
 		});
 	});
 });

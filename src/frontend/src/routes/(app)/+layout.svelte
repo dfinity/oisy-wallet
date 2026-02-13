@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
+	import { type Snippet, untrack } from 'svelte';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
+	import { icrcAccount } from '$icp/derived/ic.derived';
+	import { isUserMintingAccount } from '$icp/services/icrc-minting.services';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
+	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import LockPage from '$lib/components/auth/LockPage.svelte';
@@ -16,14 +19,19 @@
 	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
+	import { authNotSignedIn, authSignedIn, authIdentity } from '$lib/derived/auth.derived';
 	import { isAuthLocked } from '$lib/derived/locked.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import { isRouteNfts, isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
+	import {
+		isRouteEarning,
+		isRouteNfts,
+		isRouteTokens,
+		isRouteTransactions
+	} from '$lib/utils/nav.utils';
 
 	interface Props {
 		children: Snippet;
@@ -36,21 +44,52 @@
 	let nftsRoute = $derived(isRouteNfts(page));
 	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
 
+	let earningRoute = $derived(isRouteEarning(page));
+
+	let assetsRoute = $derived(tokensRoute || nftsRoute || earningRoute);
+
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
-	let showHero = $derived((tokensRoute || nftsRoute || transactionsRoute) && !nftsCollectionRoute);
+	let showHero = $derived((assetsRoute || transactionsRoute) && !nftsCollectionRoute);
 
 	$effect(() => {
 		token.set(nftsCollectionRoute ? ($pageNonFungibleToken ?? $pageToken) : $pageToken); // we could be on the nfts page without a pageNonFungibleToken set
 	});
 
+	const updateIcMintingAccountStatus = async () => {
+		try {
+			const isMintingAccount =
+				transactionsRoute && nonNullish($pageToken) && isTokenIc($pageToken)
+					? await isUserMintingAccount({
+							identity: $authIdentity,
+							account: $icrcAccount,
+							token: $pageToken
+						})
+					: false;
+
+			isIcMintingAccount.set(isMintingAccount);
+		} catch (_: unknown) {
+			isIcMintingAccount.set(false);
+		}
+	};
+
+	$effect(() => {
+		[$authIdentity, $icrcAccount, $pageToken, transactionsRoute];
+
+		untrack(() => updateIcMintingAccountStatus());
+	});
+
 	// Source: https://svelte.dev/blog/view-transitions
 	onNavigate((navigation) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore -- The ViewTransition api is still a "Candidate recommendation", so it's not embedded in TSs' definition yet
 		if (isNullish(document.startViewTransition)) {
 			return;
 		}
 
 		return new Promise((resolve) => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore -- The ViewTransition api is still a "Candidate recommendation", so it's not embedded in TSs' definition yet
 			document.startViewTransition(async () => {
 				resolve();
 				await navigation.complete;
@@ -64,9 +103,10 @@
 {:else}
 	<div class:h-dvh={$authNotSignedIn}>
 		<div
-			class="relative flex flex-col overflow-x-hidden pb-5 md:pb-0"
+			class="relative flex flex-col pb-5 md:pb-0"
 			class:h-full={$authSignedIn}
 			class:min-h-[100dvh]={$authNotSignedIn}
+			class:overflow-x-hidden={$authNotSignedIn}
 		>
 			<Header />
 
@@ -74,12 +114,8 @@
 				<SplitPane>
 					{#snippet menu()}
 						<NavigationMenu>
-							{#if tokensRoute || nftsRoute}
-								<Responsive up="xl">
-									<div class="hidden xl:block" transition:fade>
-										<DappsCarousel />
-									</div>
-								</Responsive>
+							{#if assetsRoute}
+								<DappsCarousel wrapperStyleClass="hidden xl:flex" />
 							{/if}
 						</NavigationMenu>
 					{/snippet}
@@ -89,15 +125,19 @@
 					{/if}
 
 					<Loaders>
+						{#if assetsRoute}
+							<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
+						{/if}
+
 						{@render children()}
 					</Loaders>
 				</SplitPane>
 
-				<Responsive down="md">
-					<div class="z-3 fixed bottom-16 right-2 block md:hidden">
+				{#if !$aiAssistantConsoleOpen}
+					<div class="fixed right-4 bottom-16 z-2 block">
 						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
-				</Responsive>
+				{/if}
 
 				<MobileNavigationMenu>
 					<NavigationMenuMainItems testIdPrefix="mobile" />

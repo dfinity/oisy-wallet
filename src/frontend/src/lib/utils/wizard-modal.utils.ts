@@ -5,9 +5,11 @@ import type {
 	WizardStepsConvert,
 	WizardStepsHowToConvert,
 	WizardStepsReceive,
+	WizardStepsScanner,
 	WizardStepsSend,
 	WizardStepsSwap
 } from '$lib/enums/wizard-steps';
+import type { WizardStepsGetTokenType } from '$lib/types/get-token';
 import type { WizardModal, WizardSteps } from '@dfinity/gix-components';
 
 type StepName =
@@ -18,16 +20,18 @@ type StepName =
 	| WizardStepsHowToConvert
 	| WizardStepsReceive
 	| AddressBookSteps
-	| TokenModalSteps;
+	| TokenModalSteps
+	| WizardStepsGetTokenType
+	| WizardStepsScanner;
 
-export const goToWizardStep = ({
+export const goToWizardStep = <T extends StepName>({
 	modal,
 	steps,
 	stepName
 }: {
-	modal: WizardModal<StepName>;
-	steps: WizardSteps<StepName>;
-	stepName: StepName;
+	modal: WizardModal<T>;
+	steps: WizardSteps<T>;
+	stepName: T;
 }) => {
 	const stepNumber = steps.findIndex(({ name }) => name === stepName);
 	modal.set(Math.max(stepNumber, 0));

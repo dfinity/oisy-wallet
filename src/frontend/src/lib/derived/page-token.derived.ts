@@ -1,24 +1,21 @@
-import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
-import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
+import { isTokenEthereumCustomToken } from '$eth/utils/erc20.utils';
 import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
-import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
-import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+import { isTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+import { isIcrcTokenToggleEnabled } from '$icp/utils/token-toggle.utils';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import { pageNft } from '$lib/derived/page-nft.derived';
 import { defaultFallbackToken } from '$lib/derived/token.derived';
-import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import type { NonFungibleToken } from '$lib/types/nft';
-import type { OptionToken, OptionTokenStandard, Token } from '$lib/types/token';
+import type { OptionToken, OptionTokenStandardCode, Token } from '$lib/types/token';
 import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-import { isIcrcTokenToggleEnabled } from '$lib/utils/token-toggle.utils';
+import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
-import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
-import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -28,50 +25,28 @@ export const pageToken: Readable<OptionToken> = derived(
 	[
 		routeToken,
 		routeNetwork,
-		enabledBitcoinTokens,
-		enabledEthereumTokens,
-		enabledSolanaTokens,
-		enabledEvmTokens,
+		nativeTokens,
 		enabledErc20Tokens,
+		enabledErc4626Tokens,
 		enabledIcrcTokens,
 		enabledSplTokens
 	],
 	([
 		$routeToken,
 		$routeNetwork,
-		$enabledBitcoinTokens,
-		$enabledEthereumTokens,
-		$enabledSolanaTokens,
-		$enabledEvmTokens,
+		$nativeTokens,
 		$erc20Tokens,
+		$erc4626Tokens,
 		$icrcTokens,
 		$splTokens
-	]) => {
-		if (isNullish($routeToken)) {
-			return undefined;
-		}
-
-		if ($routeToken === ICP_TOKEN.name) {
-			return ICP_TOKEN;
-		}
-
-		if ($routeToken === TESTICP_TOKEN.name) {
-			return TESTICP_TOKEN;
-		}
-
-		return [
-			...$enabledBitcoinTokens,
-			...$enabledEthereumTokens,
-			...$enabledSolanaTokens,
-			...$enabledEvmTokens,
-			...$erc20Tokens,
-			...$icrcTokens,
-			...$splTokens
-		].find(
-			({ name, network: { id: networkId } }) =>
-				name === $routeToken && networkId.description === $routeNetwork
-		);
-	}
+	]) =>
+		nonNullish($routeToken)
+			? [...$nativeTokens, ...$erc20Tokens, ...$erc4626Tokens, ...$icrcTokens, ...$splTokens].find(
+					(token) =>
+						getPageTokenIdentifier(token) === $routeToken &&
+						token.network.id.description === $routeNetwork
+				)
+			: undefined
 );
 
 /**
@@ -82,19 +57,19 @@ export const pageTokenWithFallback: Readable<Token> = derived(
 	([$pageToken, $defaultFallbackToken]) => $pageToken ?? $defaultFallbackToken
 );
 
-export const pageTokenStandard: Readable<OptionTokenStandard> = derived(
+export const pageTokenStandard: Readable<OptionTokenStandardCode> = derived(
 	[pageToken],
-	([$pageToken]) => $pageToken?.standard
+	([$pageToken]) => $pageToken?.standard.code
 );
 
 export const pageTokenToggleable: Readable<boolean> = derived([pageToken], ([$pageToken]) => {
 	if (nonNullish($pageToken)) {
-		return icTokenIcrcCustomToken($pageToken)
+		return isTokenIcrcCustomToken($pageToken)
 			? isIcrcTokenToggleEnabled($pageToken)
-			: isTokenEthereumUserToken($pageToken)
+			: isTokenEthereumCustomToken($pageToken)
 				? isNotDefaultEthereumToken($pageToken)
 				: isTokenSpl($pageToken)
-					? isTokenSplToggleable($pageToken)
+					? isTokenSplCustomToken($pageToken)
 					: false;
 	}
 

@@ -13,12 +13,11 @@ export const MATIC_TOKEN_ID: TokenId = parseTokenId(MATIC_SYMBOL);
 export const MATIC_TOKEN: RequiredAdditionalErc20Token = {
 	id: MATIC_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Matic Token',
 	symbol: MATIC_SYMBOL,
 	decimals: MATIC_DECIMALS,
 	icon: matic,
-	address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
-	exchange: 'erc20'
+	address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
 };

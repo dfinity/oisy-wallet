@@ -80,7 +80,7 @@ describe('infura.rest', () => {
 
 			const infuraRest = new InfuraGasRest(chainId);
 
-			await expect(infuraRest.getSuggestedFeeData()).rejects.toThrow(
+			await expect(infuraRest.getSuggestedFeeData()).rejects.toThrowError(
 				'Fetching gas data with Infura Gas API failed.'
 			);
 		});

@@ -11,7 +11,7 @@ import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
-vi.mock('$icp/utils/icrc.utils', () => ({
+vi.mock('$icp/services/icrc.services', () => ({
 	isIcrcTokenSupportIcrc2: vi.fn()
 }));
 
@@ -27,7 +27,13 @@ const BASE_PROPS = {
 	receiveAmount: 2,
 	slippageValue: '0.5',
 	swapProgressStep: ProgressStepsSwap.INITIALIZATION,
-	swapFailedProgressSteps: []
+	swapFailedProgressSteps: [],
+	isSwapAmountsLoading: false,
+	onShowTokensList: vi.fn(),
+	onShowProviderList: vi.fn(),
+	onClose: vi.fn(),
+	onNext: vi.fn(),
+	onBack: vi.fn()
 };
 
 describe('SwapIcpWizard', () => {

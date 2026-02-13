@@ -3,6 +3,7 @@ export const themeVariables = {
 		// we need to use rem instead of px because the default tailwind values changed to rem,
 		// and mixing units breaks custom screen definitions
 		xs: '28rem', // 448px
+		'1.5xs': '32rem', // 512px
 		'1.5md': '56rem', // 896px
 		'1.5lg': '72rem', // 1152px
 		'1.5xl': '88rem', // 1408px

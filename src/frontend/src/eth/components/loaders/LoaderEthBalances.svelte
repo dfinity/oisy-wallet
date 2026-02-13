@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
@@ -8,7 +8,7 @@
 	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
+	import { enabledErc20Tokens, enabledErc4626Tokens } from '$lib/derived/tokens.derived';
 	import { syncBalancesFromCache } from '$lib/services/listener.services';
 
 	interface Props {
@@ -18,6 +18,14 @@
 	let { children }: Props = $props();
 
 	let loading = $state(false);
+	let timer = $state<NodeJS.Timeout | undefined>();
+
+	const resetTimer = () => {
+		if (nonNullish(timer)) {
+			clearTimeout(timer);
+			timer = undefined;
+		}
+	};
 
 	const onLoad = async () => {
 		if (isNullish($ethAddress)) {
@@ -25,6 +33,14 @@
 		}
 
 		if (loading) {
+			resetTimer();
+
+			timer = setTimeout(() => {
+				resetTimer();
+
+				onLoad();
+			}, 500);
+
 			return;
 		}
 
@@ -35,7 +51,7 @@
 			loadEthBalances([...$enabledEthereumTokens, ...$enabledEvmTokens]),
 			loadErc20Balances({
 				address: $ethAddress,
-				erc20Tokens: $enabledErc20Tokens
+				tokens: [...$enabledErc20Tokens, ...$enabledErc4626Tokens]
 			})
 		]);
 
@@ -46,7 +62,14 @@
 
 	$effect(() => {
 		// To trigger the load function when any of the dependencies change.
-		[$ethAddress, $enabledEthereumTokens, $enabledEvmTokens, $enabledErc20Tokens];
+		[
+			$ethAddress,
+			$enabledEthereumTokens,
+			$enabledEvmTokens,
+			$enabledErc20Tokens,
+			$enabledErc4626Tokens
+		];
+
 		debounceLoad();
 	});
 
@@ -57,20 +80,27 @@
 			return;
 		}
 
+		loading = true;
+
 		await Promise.allSettled(
-			[...$enabledEthereumTokens, ...$enabledEvmTokens, ...$enabledErc20Tokens].map(
-				async ({ id: tokenId, network: { id: networkId } }) => {
-					await syncBalancesFromCache({
-						principal,
-						tokenId,
-						networkId
-					});
-				}
-			)
+			[
+				...$enabledEthereumTokens,
+				...$enabledEvmTokens,
+				...$enabledErc20Tokens,
+				...$enabledErc4626Tokens
+			].map(async ({ id: tokenId, network: { id: networkId } }) => {
+				await syncBalancesFromCache({
+					principal,
+					tokenId,
+					networkId
+				});
+			})
 		);
+
+		loading = false;
 	});
 </script>
 
-<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad}>
-	{@render children?.()}
-</IntervalLoader>
+{@render children?.()}
+
+<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad} />

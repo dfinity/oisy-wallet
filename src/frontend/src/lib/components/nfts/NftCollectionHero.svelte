@@ -9,9 +9,12 @@
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { AppPath } from '$lib/constants/routes.constants';
+	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -20,16 +23,36 @@
 
 	const { token, nfts }: Props = $props();
 
-	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts }]);
+	const breadcrumbItems = $derived([
+		{
+			label: $i18n.navigation.text.tokens,
+			url: nftsUrl({
+				originSelectedNetwork: $userSelectedNetworkStore
+			})
+		}
+	]);
 
 	const firstNft = $derived(nfts?.[0]);
+	const firstNftDisplayImageUrl = $derived(
+		nonNullish(firstNft) ? getNftDisplayImageUrl(firstNft) : undefined
+	);
+
 	const bannerUrl = $derived(nonNullish(firstNft) ? firstNft.collection.bannerImageUrl : undefined);
+
+	let displayImageUrl = $derived(bannerUrl ?? firstNftDisplayImageUrl);
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div class="flex h-64 w-full">
-		<NftDisplayGuard nft={nfts?.[0]} type="hero-banner">
-			<BgImg imageUrl={bannerUrl ?? nfts?.[0]?.imageUrl} size="cover" />
+		<NftDisplayGuard
+			location={{
+				source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION,
+				subSource: 'hero'
+			}}
+			nft={firstNft}
+			type="hero-banner"
+		>
+			<BgImg imageUrl={displayImageUrl} size="cover" />
 		</NftDisplayGuard>
 	</div>
 
@@ -59,6 +82,6 @@
 			</div>
 		{/if}
 
-		<NftMetadataList {token} />
+		<NftMetadataList source={PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION} {token} />
 	</div>
 </div>

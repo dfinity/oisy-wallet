@@ -7,20 +7,55 @@ updates:
     directory: '/'
     schedule:
       interval: weekly
+    commit-message:
+      prefix: 'chore(github-actions): '
 
   - package-ecosystem: cargo
     directory: '/'
     schedule:
       interval: weekly
+    commit-message:
+      prefix: 'chore(cargo-deps): '
+      prefix-development: 'chore(cargo-deps-dev): '
+    cooldown:
+      default-days: 30
+
+  - package-ecosystem: rust-toolchain
+    directory: '/'
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: 'chore(rust): '
+    cooldown:
+      default-days: 30
 
   - package-ecosystem: npm
     directory: '/'
     schedule:
       interval: weekly
+    commit-message:
+      prefix: 'chore(npm-deps): '
+      prefix-development: 'chore(npm-deps-dev): '
+    cooldown:
+      default-days: 30
     allow:
       - dependency-type: all
     ignore:
       - dependency-name: '@dfinity/*'
+      - dependency-name: '@icp-sdk/*'
       - dependency-name: '@types/*'
       - dependency-name: 'typescript'
     open-pull-requests-limit: 10
+    groups:
+      solana-kit:
+        patterns:
+          - '@solana-program/compute-budget'
+          - '@solana-program/system'
+          - '@solana-program/token'
+          - '@solana-program/token-2022'
+          - '@solana/kit'
+      vitest-group:
+        patterns:
+          - 'vitest'
+          - 'vitest-mock-extended'
+          - '@vitest/coverage-v8'

@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 
 	interface Props {
 		onLoad: () => Promise<void>;
 		interval: number;
 		skipInitialLoad?: boolean;
-		children?: Snippet;
 	}
 
-	let { onLoad, interval, skipInitialLoad = false, children }: Props = $props();
+	let { onLoad, interval, skipInitialLoad = false }: Props = $props();
 
 	// A reference to the `onLoad` function that will be scheduled repeatedly.
 	// We set this only after the initial load has finished, to avoid race conditions.
@@ -35,6 +34,12 @@
 
 		clearTimeout(timer);
 		timer = undefined;
+	};
+
+	const resetTimer = () => {
+		stopTimer();
+
+		timer = startTimer();
 	};
 
 	// Lifecycle: on component mount
@@ -64,6 +69,18 @@
 
 		return () => stopTimer();
 	});
-</script>
 
-{@render children?.()}
+	let intervalEffectInitialRun = true;
+
+	$effect(() => {
+		[interval];
+
+		if (intervalEffectInitialRun) {
+			intervalEffectInitialRun = false;
+
+			return;
+		}
+
+		untrack(() => resetTimer());
+	});
+</script>

@@ -1,4 +1,4 @@
-import type { UserProfile } from '$declarations/backend/declarations/backend.did';
+import type { UserProfile } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';

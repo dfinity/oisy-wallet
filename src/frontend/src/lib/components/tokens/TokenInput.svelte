@@ -131,11 +131,11 @@
 						{disabled}
 						error={nonNullish(errorType)}
 						{loading}
+						{onBlur}
+						{onFocus}
 						{onInput}
 						{placeholder}
 						bind:value={amount}
-						on:focus={onFocus}
-						on:blur={onBlur}
 					/>
 				{:else if displayUnit === 'usd'}
 					<TokenInputCurrencyFiat
@@ -145,12 +145,12 @@
 						error={nonNullish(errorType)}
 						{exchangeRate}
 						{loading}
+						{onBlur}
+						{onFocus}
 						{onInput}
 						{placeholder}
 						tokenDecimals={token.decimals}
 						bind:tokenAmount={amount}
-						on:focus={onFocus}
-						on:blur={onBlur}
 					/>
 				{/if}
 			{:else}

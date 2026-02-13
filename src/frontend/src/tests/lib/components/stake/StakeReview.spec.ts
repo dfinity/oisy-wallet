@@ -2,7 +2,6 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import StakeReview from '$lib/components/stake/StakeReview.svelte';
 import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
-import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { render } from '@testing-library/svelte';
 
 describe('StakeReview', () => {
@@ -11,10 +10,10 @@ describe('StakeReview', () => {
 
 	const props = {
 		amount: 0.01,
-		destination: mockPrincipalText,
 		disabled: false,
-		onStake: () => {},
-		onBack: () => {}
+		onConfirm: () => {},
+		onBack: () => {},
+		actionButtonLabel: 'Stake'
 	};
 
 	it('should keep the next button clickable if all requirements are met', () => {

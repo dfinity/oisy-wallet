@@ -1,17 +1,22 @@
 import type { EthAddress } from '$eth/types/address';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
-import { NftCollectionSchema, NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { MediaStatusEnum } from '$lib/enums/media-status';
+import { MediaType } from '$lib/enums/media-type';
+import { NftCollectionSchema } from '$lib/schema/nft.schema';
+import { extractMediaTypeAndSize } from '$lib/services/url.services';
 import type { NftSortingType } from '$lib/stores/settings.store';
 import type { NftError } from '$lib/types/errors';
-import type { NetworkId } from '$lib/types/network';
+import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
+import { getNftIdentifier } from '$lib/utils/nft.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import { SvelteMap } from 'svelte/reactivity';
 
 export const findNft = ({
 	nfts,
-	token: { address: tokenAddress, network: tokenNetwork },
+	token,
 	tokenId
 }: {
 	nfts: Nft[];
@@ -20,21 +25,15 @@ export const findNft = ({
 }): Nft | undefined =>
 	nfts.find(
 		({ id, collection: { address, network } }) =>
-			address === tokenAddress && network.id === tokenNetwork.id && id === tokenId
+			address === getNftIdentifier(token) && network.id === token.network.id && id === tokenId
 	);
 
-export const findNftsByToken = ({
-	nfts,
-	token: { address: tokenAddress, network: tokenNetwork }
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-}): Nft[] =>
+export const findNftsByToken = ({ nfts, token }: { nfts: Nft[]; token: NonFungibleToken }): Nft[] =>
 	nfts.filter((nft) =>
 		areAddressesEqual({
 			address1: nft.collection.address,
-			address2: tokenAddress,
-			networkId: tokenNetwork.id
+			address2: getNftIdentifier(token),
+			networkId: token.network.id
 		})
 	);
 
@@ -43,8 +42,11 @@ export const findNftsByNetwork = ({
 	networkId
 }: {
 	nfts: Nft[];
-	networkId: NetworkId;
-}): Nft[] => nfts.filter((nft) => nft.collection.network.id === networkId);
+	networkId: OptionNetworkId;
+}): Nft[] =>
+	nonNullish(networkId)
+		? nfts.filter((nft) => nft.collection.network.id === networkId)
+		: nfts.filter((nft) => nft.collection.network.env !== 'testnet');
 
 export const findNewNftIds = ({
 	nfts,
@@ -55,48 +57,6 @@ export const findNewNftIds = ({
 	token: NonFungibleToken;
 	inventory: NftId[];
 }): NftId[] => inventory.filter((tokenId) => isNullish(findNft({ nfts, token, tokenId })));
-
-export const findRemovedNfts = ({
-	nfts,
-	token,
-	inventory
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-	inventory: NftId[];
-}): Nft[] =>
-	nfts.filter(
-		(nft) =>
-			nft.collection.network === token.network &&
-			nft.collection.address === token.address &&
-			isNullish(inventory.find((nftId) => nftId === nft.id))
-	);
-
-export const getUpdatedNfts = ({
-	nfts,
-	token,
-	inventory
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-	inventory: Nft[];
-}): Nft[] =>
-	(nfts ?? []).reduce<Nft[]>((acc, nft) => {
-		if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
-			return acc;
-		}
-
-		const ownedNft = inventory.find((ownedNft) => ownedNft.id === nft.id);
-
-		if (nonNullish(ownedNft) && nft.balance !== ownedNft.balance) {
-			acc.push({
-				...nft,
-				balance: ownedNft.balance
-			});
-		}
-
-		return acc;
-	}, []);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
@@ -135,13 +95,17 @@ export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: N
 
 export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 	NftCollectionSchema.parse({
-		address: token.address,
+		address: getNftIdentifier(token),
 		id: token.id,
 		network: token.network,
 		standard: token.standard,
+		section: token.section,
 		...(notEmptyString(token.symbol) && { symbol: token.symbol }),
 		...(notEmptyString(token.name) && { name: token.name }),
-		...(notEmptyString(token.description) && { description: token.description })
+		...(notEmptyString(token.description) && { description: token.description }),
+		...(nonNullish(token.allowExternalContentSource) && {
+			allowExternalContentSource: token.allowExternalContentSource
+		})
 	});
 
 export const getEnabledNfts = ({
@@ -159,8 +123,9 @@ export const getEnabledNfts = ({
 			}
 		}) =>
 			$enabledNonFungibleNetworkTokens.some(
-				({ address: contractAddress, network: { id: contractNetworkId } }) =>
-					contractAddress === nftContractAddress && contractNetworkId === nftContractNetworkId
+				(token) =>
+					getNftIdentifier(token) === nftContractAddress &&
+					token.network.id === nftContractNetworkId
 			)
 	);
 
@@ -331,47 +296,36 @@ export const findNonFungibleToken = ({
 	address: EthAddress;
 	networkId: NetworkId;
 }): NonFungibleToken | undefined =>
-	tokens.find((token) => token.address === address && token.network.id === networkId);
+	tokens.find((token) => getNftIdentifier(token) === address && token.network.id === networkId);
 
-// We offer this util so we don't mistakenly take the value from the nfts collection prop,
-// as it is not updated after updating the consent. Going through this function ensures no stale data
-export const getAllowMediaForNft = (params: {
-	tokens: NonFungibleToken[];
-	address: EthAddress;
-	networkId: NetworkId;
-}): boolean | undefined => findNonFungibleToken(params)?.allowExternalContentSource;
-
-export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+export const getMediaStatus = async (mediaUrl?: string): Promise<MediaStatusEnum> => {
 	if (isNullish(mediaUrl)) {
-		return NftMediaStatusEnum.INVALID_DATA;
+		return MediaStatusEnum.INVALID_DATA;
 	}
 
 	try {
 		const url = adaptMetadataResourceUrl(new URL(mediaUrl));
 
 		if (isNullish(url)) {
-			return NftMediaStatusEnum.INVALID_DATA;
+			return MediaStatusEnum.INVALID_DATA;
 		}
 
-		const response = await fetch(url.href, { method: 'HEAD' });
-
-		const type = response.headers.get('Content-Type');
-		const size = response.headers.get('Content-Length');
+		const { type, size } = await extractMediaTypeAndSize(url.href);
 
 		if (isNullish(type) || isNullish(size)) {
 			// Not all servers return the Content-Type and Content-Length headers,
 			// so we can't be sure that the media is valid or not.
 			// For now, we assume that it is valid.
 			// TODO: this is not safe for the size limit, we should check the size of the file.
-			return NftMediaStatusEnum.OK;
+			return MediaStatusEnum.OK;
 		}
 
-		if (!type.startsWith('image/')) {
-			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
+		if (!(type === MediaType.Img) && !(type === MediaType.Video)) {
+			return MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
 		}
 
 		if (Number(size) > NFT_MAX_FILESIZE_LIMIT) {
-			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
+			return MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
 		}
 	} catch (_: unknown) {
 		// The error here is caused by `fetch`, which can fail for various reasons (network error, CORS, DNS, etc).
@@ -379,8 +333,30 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 		// For now, we assume that it is valid to avoid blocking the user.
 		// Ideally, we should load this data in a backend service to avoid CORS issues.
 		// TODO: this is not safe for the size limit, we should check the size of the file in the backend (or similar solutions).
-		return NftMediaStatusEnum.OK;
+		return MediaStatusEnum.OK;
 	}
 
-	return NftMediaStatusEnum.OK;
+	return MediaStatusEnum.OK;
+};
+
+// The CORS policy raises an error everytime we try to access the media URL, so we cache the result to avoid making the same request multiple times.
+// Unfortunately, the CORS errors cannot be removed from the browser: https://stackoverflow.com/questions/52807184/how-to-hide-console-status-error-message-while-fetching-in-react-js
+const mediaStatusCache = new SvelteMap<string, MediaStatusEnum>();
+
+export const getMediaStatusOrCache = async (mediaUrl?: string): Promise<MediaStatusEnum> => {
+	if (isNullish(mediaUrl)) {
+		return MediaStatusEnum.INVALID_DATA;
+	}
+
+	const cachedStatus = mediaStatusCache.get(mediaUrl);
+
+	if (nonNullish(cachedStatus)) {
+		return cachedStatus;
+	}
+
+	const status = await getMediaStatus(mediaUrl);
+
+	mediaStatusCache.set(mediaUrl, status);
+
+	return status;
 };

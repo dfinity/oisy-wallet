@@ -12,7 +12,7 @@
 </script>
 
 <div
-	class={`duration-250 flex w-full items-center rounded-lg border border-solid bg-primary shadow-inner transition-colors focus-within:border-2 ${styleClass ?? ''}`}
+	class={`flex w-full items-center rounded-lg border border-solid bg-primary shadow-inner transition-colors duration-250 focus-within:border-2 ${styleClass ?? ''}`}
 	class:border-brand-primary={focused && !error}
 	class:border-error-solid={error}
 	class:border-tertiary={!focused && !error}

@@ -14,7 +14,7 @@ export const CMCSAX_TOKEN_ID: TokenId = parseTokenId(CMCSAX_SYMBOL);
 export const CMCSAX_TOKEN: RequiredSpl2022Token = {
 	id: CMCSAX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Comcast xStock',
 	symbol: CMCSAX_SYMBOL,

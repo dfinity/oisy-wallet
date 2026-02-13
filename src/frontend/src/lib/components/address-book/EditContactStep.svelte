@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import imageCompression from 'browser-image-compression';
-	import type { ContactImage } from '$declarations/backend/declarations/backend.did';
+	import type { ContactImage } from '$declarations/backend/backend.did';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';

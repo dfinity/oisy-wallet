@@ -3,6 +3,7 @@ import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { IcInterface } from '$icp/types/ic-token';
 import { LOCAL } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
+import { decodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 
 /**
  * Additional ICRC tokens from JSON file
@@ -15,7 +16,12 @@ export const mapIcrcData = (
 			...acc,
 			...(!LOCAL &&
 				nonNullish(value) && {
-					[key]: value
+					[key]: {
+						...value,
+						...(nonNullish(value.mintingAccount)
+							? { mintingAccount: decodeIcrcAccount(value.mintingAccount) }
+							: {})
+					}
 				})
 		}),
 		{}

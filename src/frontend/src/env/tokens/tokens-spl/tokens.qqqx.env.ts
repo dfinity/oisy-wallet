@@ -14,7 +14,7 @@ export const QQQX_TOKEN_ID: TokenId = parseTokenId(QQQX_SYMBOL);
 export const QQQX_TOKEN: RequiredSpl2022Token = {
 	id: QQQX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Nasdaq xStock',
 	symbol: QQQX_SYMBOL,

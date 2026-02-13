@@ -1,14 +1,19 @@
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
 	calculateUtxoSelection,
 	estimateTransactionSize,
 	extractUtxoTxIds,
 	filterAvailableUtxos,
 	filterLockedUtxos,
+	resetUtxosDataStores,
 	type UtxoSelectionResult
 } from '$btc/utils/btc-utxos.utils';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import type { Utxo } from '@dfinity/ckbtc';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
+import { get } from 'svelte/store';
 
 describe('btc-utxos.utils', () => {
 	const createMockUtxo = ({
@@ -21,7 +26,7 @@ describe('btc-utxos.utils', () => {
 		height?: number;
 		txid?: Uint8Array;
 		vout?: number;
-	}): Utxo => ({
+	}): CkBtcMinterDid.Utxo => ({
 		value: BigInt(value),
 		height,
 		outpoint: {
@@ -39,7 +44,7 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should convert number array to hex string with byte reversal', () => {
-			const txid = [1, 2, 3, 4];
+			const txid = Uint8Array.from([1, 2, 3, 4]);
 			const result = utxoTxIdToString(txid);
 
 			expect(result).toBe('04030201');
@@ -79,8 +84,8 @@ describe('btc-utxos.utils', () => {
 				numOutputs: 2
 			});
 
-			// Base (10) + inputs (2 * 68) + outputs (2 * 31) = 10 + 136 + 62 = 208
-			expect(result).toBe(208);
+			// Base (11) + inputs (2 * 68) + outputs (2 * 31) = 11 + 136 + 62 = 209
+			expect(result).toBe(209);
 		});
 
 		it('should handle single input and output', () => {
@@ -89,8 +94,8 @@ describe('btc-utxos.utils', () => {
 				numOutputs: 1
 			});
 
-			// Base (10) + inputs (1 * 68) + outputs (1 * 31) = 10 + 68 + 31 = 109
-			expect(result).toBe(109);
+			// Base (11) + inputs (1 * 68) + outputs (1 * 31) = 11 + 68 + 31 = 110
+			expect(result).toBe(110);
 		});
 
 		it('should handle 0n inputs and outputs', () => {
@@ -99,8 +104,8 @@ describe('btc-utxos.utils', () => {
 				numOutputs: 0
 			});
 
-			// Base (10) + inputs (0 * 68) + outputs (0 * 31) = 10
-			expect(result).toBe(10);
+			// Base (11) + inputs (0 * 68) + outputs (0 * 31) = 11
+			expect(result).toBe(11);
 		});
 
 		it('should handle large number of inputs and outputs', () => {
@@ -109,8 +114,8 @@ describe('btc-utxos.utils', () => {
 				numOutputs: 5
 			});
 
-			// Base (10) + inputs (10 * 68) + outputs (5 * 31) = 10 + 680 + 155 = 845
-			expect(result).toBe(845);
+			// Base (11) + inputs (10 * 68) + outputs (5 * 31) = 11 + 680 + 155 = 846
+			expect(result).toBe(846);
 		});
 	});
 
@@ -155,11 +160,11 @@ describe('btc-utxos.utils', () => {
 				feeRateMiliSatoshisPerVByte: 1000n
 			});
 
-			// With 1 sat/vbyte and estimated tx size of 140 bytes, fee = 140 sats
-			// Change = 500_000 - 100_000 - 140 = 399_860
-			expect(result.changeAmount).toBe(399_860n);
+			// With 1 sat/vbyte and estimated tx size of 141 bytes, fee = 141 sats
+			// Change = 500_000 - 100_000 - 141 = 399_859
+			expect(result.changeAmount).toBe(399_859n);
 			expect(result.sufficientFunds).toBeTruthy();
-			expect(result.feeSatoshis).toBe(140n);
+			expect(result.feeSatoshis).toBe(141n);
 		});
 
 		it('should return empty result when no UTXOs available', () => {
@@ -187,9 +192,9 @@ describe('btc-utxos.utils', () => {
 
 			expect(result.sufficientFunds).toBeFalsy();
 			expect(result.feeSatoshis).toBeGreaterThan(ZERO); // Should have calculated fee even when insufficient
-			// With 1 input and 2 outputs, tx size = 10 + 1*68 + 2*31 = 140 bytes
-			// Fee = 140 * 100 = 14000 satoshis
-			expect(result.feeSatoshis).toBe(14000n);
+			// With 1 input and 2 outputs, tx size = 11 + 1*68 + 2*31 = 141 bytes
+			// Fee = 141 * 100 = 14100 satoshis
+			expect(result.feeSatoshis).toBe(14100n);
 		});
 
 		it('should handle 0n fee rate', () => {
@@ -407,6 +412,37 @@ describe('btc-utxos.utils', () => {
 
 			expect(calculatedFee).toBe(ZERO);
 			expect(selection.feeSatoshis).toBe(ZERO);
+		});
+	});
+
+	describe('resetUtxosDataStores', () => {
+		beforeEach(() => {
+			allUtxosStore.reset();
+			feeRatePercentilesStore.reset();
+			btcPendingSentTransactionsStore.reset();
+		});
+
+		it('should reset all UTXO-related stores', () => {
+			allUtxosStore.setAllUtxos({
+				allUtxos: [createMockUtxo({ value: 100_000 })]
+			});
+			feeRatePercentilesStore.setFeeRateFromPercentiles({
+				feeRateFromPercentiles: 5000n
+			});
+			btcPendingSentTransactionsStore.setPendingTransactions({
+				address: 'test-address',
+				pendingTransactions: []
+			});
+
+			expect(get(allUtxosStore)?.allUtxos).toBeDefined();
+			expect(get(feeRatePercentilesStore)?.feeRateFromPercentiles).toBeDefined();
+			expect(get(btcPendingSentTransactionsStore)['test-address']).toBeDefined();
+
+			resetUtxosDataStores();
+
+			expect(get(allUtxosStore)).toBeNull();
+			expect(get(feeRatePercentilesStore)).toBeNull();
+			expect(get(btcPendingSentTransactionsStore)).toEqual({});
 		});
 	});
 });

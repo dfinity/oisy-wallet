@@ -40,7 +40,7 @@ const tokens: TokenUi[] = [
 		network: ICP_NETWORK,
 		balance: bn2Bi,
 		usdBalance: 100000,
-		standard: 'icrc',
+		standard: { code: 'icrc' },
 		category: 'default',
 		decimals: BTC_MAINNET_TOKEN.decimals,
 		name: 'Chain key Bitcoin',
@@ -57,7 +57,7 @@ const tokens: TokenUi[] = [
 		network: ICP_NETWORK,
 		balance: 5n,
 		usdBalance: 15000,
-		standard: 'icrc',
+		standard: { code: 'icrc' },
 		category: 'default',
 		decimals: ETHEREUM_TOKEN.decimals,
 		name: 'Chain key Ethereum',
@@ -568,11 +568,11 @@ describe('token-group.utils', () => {
 
 				assert('token' in tokenResult);
 
-				expect(tokenResult.token).toEqual(tokens[index]);
+				expect(tokenResult.token).toStrictEqual(tokens[index]);
 			});
 		});
 
-		it('should create groups of single-element tokens if they have group data but alone', () => {
+		it('should create token elements if tokens have group data but alone', () => {
 			const tokens = [mockToken, mockSecondToken, mockThirdToken];
 
 			const result = groupTokens(tokens);
@@ -582,20 +582,13 @@ describe('token-group.utils', () => {
 			result.slice(0, -1).forEach((tokenResult, index) => {
 				const currentToken = tokens[index];
 
-				expect(tokenResult).toHaveProperty('group');
+				expect(tokenResult).toHaveProperty('token');
 
-				assert('group' in tokenResult);
+				assert('token' in tokenResult);
 
-				const { group } = tokenResult;
+				const { token } = tokenResult;
 
-				expect(group).toEqual({
-					id: currentToken.groupData?.id,
-					decimals: currentToken.decimals,
-					groupData: currentToken.groupData,
-					tokens: [currentToken],
-					balance: currentToken.balance,
-					usdBalance: currentToken.usdBalance
-				});
+				expect(token).toStrictEqual(currentToken);
 			});
 
 			expect(last(result)).toHaveProperty('token');
@@ -607,15 +600,13 @@ describe('token-group.utils', () => {
 			const result = groupTokens(tokens);
 
 			expect(result).toHaveLength(2);
-
-			result.forEach((groupResult) => {
-				expect(groupResult).toHaveProperty('group');
-			});
+			expect(result[0]).toHaveProperty('group');
+			expect(result[1]).toHaveProperty('token');
 
 			assert('group' in result[0]);
-			assert('group' in result[1]);
+			assert('token' in result[1]);
 
-			const [{ group: group0 }, { group: group1 }] = result;
+			const [{ group: group0 }, { token: token1 }] = result;
 
 			expect(group0).toStrictEqual({
 				id: mockToken.groupData?.id,
@@ -626,14 +617,7 @@ describe('token-group.utils', () => {
 				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance
 			});
 
-			expect(group1).toStrictEqual({
-				id: mockSecondToken.groupData?.id,
-				decimals: mockSecondToken.decimals,
-				groupData: mockSecondToken.groupData,
-				tokens: [mockSecondToken],
-				balance: mockSecondToken.balance,
-				usdBalance: mockSecondToken.usdBalance
-			});
+			expect(token1).toStrictEqual(mockSecondToken);
 		});
 
 		it('should group tokens with the same group data respecting the order they arrive in', () => {
@@ -642,15 +626,13 @@ describe('token-group.utils', () => {
 			const result = groupTokens(tokens);
 
 			expect(result).toHaveLength(2);
-
-			result.forEach((groupResult) => {
-				expect(groupResult).toHaveProperty('group');
-			});
+			expect(result[0]).toHaveProperty('group');
+			expect(result[1]).toHaveProperty('token');
 
 			assert('group' in result[0]);
-			assert('group' in result[1]);
+			assert('token' in result[1]);
 
-			const [{ group: group0 }, { group: group1 }] = result;
+			const [{ group: group0 }, { token: token1 }] = result;
 
 			expect(group0).toStrictEqual({
 				id: mockTwinToken1.groupData?.id,
@@ -661,14 +643,7 @@ describe('token-group.utils', () => {
 				usdBalance: mockTwinToken1.usdBalance + mockToken.usdBalance + mockTwinToken2.usdBalance
 			});
 
-			expect(group1).toStrictEqual({
-				id: mockSecondToken.groupData?.id,
-				decimals,
-				groupData: mockSecondToken.groupData,
-				tokens: [mockSecondToken],
-				balance: mockSecondToken.balance,
-				usdBalance: mockSecondToken.usdBalance
-			});
+			expect(token1).toStrictEqual(mockSecondToken);
 		});
 
 		it('should not re-sort the groups even if the total balance of a group would put it in a higher position in the list', () => {
@@ -678,24 +653,15 @@ describe('token-group.utils', () => {
 			const result = groupTokens(tokens);
 
 			expect(result).toHaveLength(2);
+			expect(result[0]).toHaveProperty('token');
+			expect(result[1]).toHaveProperty('group');
 
-			result.forEach((groupResult) => {
-				expect(groupResult).toHaveProperty('group');
-			});
-
-			assert('group' in result[0]);
+			assert('token' in result[0]);
 			assert('group' in result[1]);
 
-			const [{ group: group0 }, { group: group1 }] = result;
+			const [{ token: token0 }, { group: group1 }] = result;
 
-			expect(group0).toStrictEqual({
-				id: mockSecondToken.groupData?.id,
-				decimals,
-				groupData: mockSecondToken.groupData,
-				tokens: [mockSecondToken],
-				balance: mockSecondToken.balance,
-				usdBalance: mockSecondToken.usdBalance
-			});
+			expect(token0).toStrictEqual(mockSecondToken);
 
 			expect(group1).toStrictEqual({
 				id: mockToken.groupData?.id,

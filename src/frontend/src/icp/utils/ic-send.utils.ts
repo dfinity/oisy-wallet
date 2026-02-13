@@ -1,16 +1,16 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-import {
-	CKBTC_LEDGER_CANISTER_IDS,
-	CKERC20_LEDGER_CANISTER_IDS,
-	CKETH_LEDGER_CANISTER_IDS
-} from '$env/networks/networks.icrc.env';
+import { CKBTC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { CKERC20_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
+import { CKETH_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { isEthAddress } from '$eth/utils/account.utils';
 import type { IcToken } from '$icp/types/ic-token';
+import { invalidIcpAddress } from '$icp/utils/account.utils';
+import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
-import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
@@ -60,7 +60,7 @@ export const isInvalidDestinationIc = ({
 		return !isEthAddress(destination);
 	}
 
-	if (isTokenIcrc({ standard: tokenStandard })) {
+	if (isTokenIcrc({ standard: tokenStandard }) || isTokenIcNft({ standard: tokenStandard })) {
 		return invalidIcrcAddress(destination);
 	}
 

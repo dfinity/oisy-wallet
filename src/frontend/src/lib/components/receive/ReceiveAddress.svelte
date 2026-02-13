@@ -46,24 +46,22 @@
 
 		{#snippet content()}
 			{#if nonNullish(text)}
-				<p class="mb-1.5 break-normal py-2 text-tertiary">
+				<p class="mb-1.5 py-2 break-normal text-tertiary">
 					{@render text?.()}
 				</p>
 			{/if}
 
 			<div
 				class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
-				class:mt-3={isNullish(text)}
+				class:mt-1.5={isNullish(text)}
 				data-tid={testId}
 			>
-				<div class="h-8 w-8">
-					<NetworkLogo color="white" {network} size="sm" />
-				</div>
+				<NetworkLogo color="white" {network} size="sm" />
 
 				{#if nonNullish(address)}
 					<output
 						id="ic-wallet-address"
-						class="break-all text-sm"
+						class="flex-1 text-sm break-all"
 						data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
 						in:fade>{address}</output
 					>

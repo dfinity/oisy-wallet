@@ -14,7 +14,9 @@
 		ckEthereumNativeToken?: TokenType;
 		children?: Snippet;
 	}
+
 	let { token, ckEthereumNativeToken: ckEthereumNativeTokenProp, children }: Props = $props();
+
 	let ckEthereumNativeToken: TokenType = $derived(
 		nonNullish(ckEthereumNativeTokenProp)
 			? ckEthereumNativeTokenProp
@@ -22,6 +24,7 @@
 					(t) => (token as IcCkToken)?.twinToken?.network.id === t.network.id
 				) as TokenType)
 	);
+
 	let minterCanisterId: CanisterIdText | undefined = $derived(
 		(token as OptionIcCkToken)?.minterCanisterId
 	);

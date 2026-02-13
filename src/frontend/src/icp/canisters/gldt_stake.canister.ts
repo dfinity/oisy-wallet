@@ -1,14 +1,19 @@
 import type {
+	Args_2,
+	DailyAnalytics,
 	_SERVICE as GldtStakeService,
 	ManageStakePositionArgs,
+	Response,
 	StakePositionResponse
-} from '$declarations/gldt_stake/declarations/gldt_stake.did';
+} from '$declarations/gldt_stake/gldt_stake.did';
 import { idlFactory as idlCertifiedFactoryGldtStake } from '$declarations/gldt_stake/gldt_stake.factory.certified.did';
 import { idlFactory as idlFactoryGldtStake } from '$declarations/gldt_stake/gldt_stake.factory.did';
 import { mapGldtStakeCanisterError } from '$icp/canisters/gldt_stake.errors';
 import { getAgent } from '$lib/actors/agents.ic';
+import { ZERO } from '$lib/constants/app.constants';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices } from '@dfinity/utils';
+import { Canister, createServices, fromNullable, toNullable } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export class GldtStakeCanister extends Canister<GldtStakeService> {
 	static async create({
@@ -35,6 +40,23 @@ export class GldtStakeCanister extends Canister<GldtStakeService> {
 		return get_apy_overall(null);
 	};
 
+	getConfig = (): Promise<Response> => {
+		const { get_config } = this.caller({ certified: true });
+
+		return get_config(null);
+	};
+
+	getDailyAnalytics = async (params?: Args_2): Promise<DailyAnalytics> => {
+		const defaultParams = { starting_day: ZERO, limit: toNullable(1n) };
+
+		const { get_daily_analytics } = this.caller({ certified: true });
+
+		const [data] = await get_daily_analytics({ ...defaultParams, ...(params ?? {}) });
+		const [_, dailyAnalytics] = data;
+
+		return dailyAnalytics;
+	};
+
 	manageStakePosition = async (
 		params: ManageStakePositionArgs
 	): Promise<StakePositionResponse | undefined> => {
@@ -47,5 +69,17 @@ export class GldtStakeCanister extends Canister<GldtStakeService> {
 		}
 
 		throw mapGldtStakeCanisterError(response.Err);
+	};
+
+	getPosition = async ({
+		principal
+	}: {
+		principal: Principal;
+	}): Promise<StakePositionResponse | undefined> => {
+		const { get_position } = this.caller({ certified: true });
+
+		const response = await get_position(principal);
+
+		return fromNullable(response);
 	};
 }

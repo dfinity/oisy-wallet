@@ -29,13 +29,25 @@ vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
 
 let workerInstance: Worker;
 
-vi.mock('$lib/workers/workers?worker', () => ({
-	default: vi.fn().mockImplementation(() => {
-		// @ts-expect-error testing this on purpose with a mock class
-		workerInstance = new Worker();
-		return workerInstance;
-	})
-}));
+vi.mock('$lib/workers/workers?worker', () => {
+	class MockWorkers {
+		constructor() {
+			// @ts-expect-error testing this on purpose with a mock class
+			workerInstance = new Worker();
+			return workerInstance;
+		}
+	}
+
+	return {
+		default: MockWorkers
+	};
+});
+
+const mockId = 'abcdefgh';
+
+vi.stubGlobal('crypto', {
+	randomUUID: vi.fn().mockReturnValue(mockId)
+});
 
 describe('worker.icrc-wallet.services', () => {
 	describe('IcrcWalletWorker', () => {
@@ -59,9 +71,9 @@ describe('worker.icrc-wallet.services', () => {
 			it('should start the worker and send the correct start message', () => {
 				worker.start();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					msg: 'startIcrcWalletTimer',
+					workerId: mockId,
 					data: {
 						indexCanisterId,
 						ledgerCanisterId,
@@ -73,18 +85,18 @@ describe('worker.icrc-wallet.services', () => {
 			it('should stop the worker and send the correct stop message', () => {
 				worker.stop();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-					msg: 'stopIcrcWalletTimer'
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+					msg: 'stopIcrcWalletTimer',
+					workerId: mockId
 				});
 			});
 
 			it('should trigger the worker and send the correct trigger message', () => {
 				worker.trigger();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					msg: 'triggerIcrcWalletTimer',
+					workerId: mockId,
 					data: {
 						indexCanisterId,
 						ledgerCanisterId,
@@ -96,9 +108,9 @@ describe('worker.icrc-wallet.services', () => {
 			it('should destroy the worker', () => {
 				worker.destroy();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-					msg: 'stopIcrcWalletTimer'
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+					msg: 'stopIcrcWalletTimer',
+					workerId: mockId
 				});
 
 				expect(workerInstance.terminate).toHaveBeenCalledOnce();
@@ -112,8 +124,30 @@ describe('worker.icrc-wallet.services', () => {
 			});
 
 			describe('onmessage', () => {
+				it('should return early if there is no reference', () => {
+					const payload = {
+						msg: 'syncIcrcWallet',
+						data: { balance: 1000 }
+					};
+					workerInstance.onmessage?.({ data: payload } as MessageEvent);
+
+					expect(syncWallet).not.toHaveBeenCalled();
+				});
+
+				it('should return early if the reference does not match', () => {
+					const payload = {
+						ref: 'some-other-ref',
+						msg: 'syncIcrcWallet',
+						data: { balance: 1000 }
+					};
+					workerInstance.onmessage?.({ data: payload } as MessageEvent);
+
+					expect(syncWallet).not.toHaveBeenCalled();
+				});
+
 				it('should handle syncIcrcWallet message', () => {
 					const payload = {
+						ref: ledgerCanisterId,
 						msg: 'syncIcrcWallet',
 						data: { balance: 1000 }
 					};
@@ -127,6 +161,7 @@ describe('worker.icrc-wallet.services', () => {
 
 				it('should handle syncIcrcWalletError message', () => {
 					const payload = {
+						ref: ledgerCanisterId,
 						msg: 'syncIcrcWalletError',
 						data: { error: 'error' }
 					};
@@ -141,6 +176,7 @@ describe('worker.icrc-wallet.services', () => {
 
 				it('should handle syncIcrcWalletCleanUp message', () => {
 					const payload = {
+						ref: ledgerCanisterId,
 						msg: 'syncIcrcWalletCleanUp',
 						data: { transactionIds: ['id1', 'id2'] }
 					};
@@ -155,14 +191,15 @@ describe('worker.icrc-wallet.services', () => {
 
 				it('should restart the worker with ledger only on error', () => {
 					const payload = {
+						ref: ledgerCanisterId,
 						msg: 'syncIcrcWalletError',
 						data: { error: 'error' }
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(postMessageSpy).toHaveBeenCalledOnce();
-					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+					expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 						msg: 'startIcrcWalletTimer',
+						workerId: mockId,
 						data: {
 							ledgerCanisterId,
 							env
@@ -172,6 +209,7 @@ describe('worker.icrc-wallet.services', () => {
 
 				it('should restart the worker with ledger only on error but only once', () => {
 					const payload = {
+						ref: ledgerCanisterId,
 						msg: 'syncIcrcWalletError',
 						data: { error: 'error' }
 					};
@@ -180,9 +218,9 @@ describe('worker.icrc-wallet.services', () => {
 						workerInstance.onmessage?.({ data: payload } as MessageEvent);
 					});
 
-					expect(postMessageSpy).toHaveBeenCalledOnce();
-					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+					expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 						msg: 'startIcrcWalletTimer',
+						workerId: mockId,
 						data: {
 							ledgerCanisterId,
 							env
@@ -209,9 +247,9 @@ describe('worker.icrc-wallet.services', () => {
 			it('should start the worker and send the correct start message', () => {
 				worker.start();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					msg: 'startIcrcWalletTimer',
+					workerId: mockId,
 					data: {
 						ledgerCanisterId,
 						env
@@ -222,18 +260,18 @@ describe('worker.icrc-wallet.services', () => {
 			it('should stop the worker and send the correct stop message', () => {
 				worker.stop();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-					msg: 'stopIcrcWalletTimer'
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+					msg: 'stopIcrcWalletTimer',
+					workerId: mockId
 				});
 			});
 
 			it('should trigger the worker and send the correct trigger message', () => {
 				worker.trigger();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					msg: 'triggerIcrcWalletTimer',
+					workerId: mockId,
 					data: {
 						ledgerCanisterId,
 						env
@@ -242,8 +280,30 @@ describe('worker.icrc-wallet.services', () => {
 			});
 
 			describe('onmessage', () => {
+				it('should return early if there is no reference', () => {
+					const payload = {
+						msg: 'syncIcrcWallet',
+						data: { balance: 1000 }
+					};
+					workerInstance.onmessage?.({ data: payload } as MessageEvent);
+
+					expect(syncWallet).not.toHaveBeenCalled();
+				});
+
+				it('should return early if the reference does not match', () => {
+					const payload = {
+						ref: 'some-other-ref',
+						msg: 'syncIcrcWallet',
+						data: { balance: 1000 }
+					};
+					workerInstance.onmessage?.({ data: payload } as MessageEvent);
+
+					expect(syncWallet).not.toHaveBeenCalled();
+				});
+
 				it('should handle syncIcrcWallet message', () => {
 					const payload = {
+						ref: ledgerCanisterId,
 						msg: 'syncIcrcWallet',
 						data: { balance: 1000 }
 					};
@@ -257,6 +317,7 @@ describe('worker.icrc-wallet.services', () => {
 
 				it('should handle syncIcrcWalletError message', () => {
 					const payload = {
+						ref: ledgerCanisterId,
 						msg: 'syncIcrcWalletError',
 						data: { error: 'error' }
 					};
@@ -271,6 +332,7 @@ describe('worker.icrc-wallet.services', () => {
 
 				it('should handle syncIcrcWalletCleanUp message', () => {
 					const payload = {
+						ref: ledgerCanisterId,
 						msg: 'syncIcrcWalletCleanUp',
 						data: { transactionIds: ['id1', 'id2'] }
 					};

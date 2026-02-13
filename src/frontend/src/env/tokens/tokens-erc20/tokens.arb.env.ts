@@ -14,14 +14,13 @@ export const ARB_TOKEN_ID: TokenId = parseTokenId(ARB_SYMBOL);
 export const ARB_TOKEN: RequiredAdditionalErc20Token = {
 	id: ARB_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Arbitrum',
 	symbol: ARB_SYMBOL,
 	decimals: ARB_DECIMALS,
 	icon: arb,
 	address: '0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1',
-	exchange: 'erc20',
 	groupData: ARB_TOKEN_GROUP,
 	buy: {
 		onramperId: 'arb_ethereum'

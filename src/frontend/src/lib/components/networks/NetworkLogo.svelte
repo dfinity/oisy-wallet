@@ -19,6 +19,8 @@
 
 	const isPseudoNetwork = $derived(network.id === ICP_PSEUDO_TESTNET_NETWORK_ID);
 	const isTestnet = $derived(network.env === 'testnet' && !isPseudoNetwork);
+
+	const { icon, name } = $derived(network ?? {});
 </script>
 
 {#if transparent}
@@ -28,10 +30,10 @@
 		data-tid={`${testId}-transparent-container`}
 	>
 		<Logo
-			alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
+			alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
 			{color}
 			{size}
-			src={network.icon}
+			src={icon}
 			testId={`${testId}-transparent`}
 		/>
 	</div>
@@ -44,11 +46,11 @@
 		<span class="inline-flex" class:invert-on-dark-theme={!isTestnet}>
 			<Logo
 				alt={replacePlaceholders($i18n.core.alt.logo, {
-					$name: network.name
+					$name: name
 				})}
 				{color}
 				{size}
-				src={network.icon}
+				src={icon}
 				testId={`${testId}-default`}
 			/>
 		</span>

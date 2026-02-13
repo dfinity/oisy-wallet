@@ -22,24 +22,24 @@ describe('CoingeckoCoinsIdSchema', () => {
 	it('should fail validation for an unsupported coin ID', () => {
 		const invalidData = 'dogecoin';
 
-		expect(() => CoingeckoCoinsIdSchema.parse(invalidData)).toThrow();
+		expect(() => CoingeckoCoinsIdSchema.parse(invalidData)).toThrowError();
 	});
 
 	it('should fail validation for a number instead of a string', () => {
 		const invalidData = 123;
 
-		expect(() => CoingeckoCoinsIdSchema.parse(invalidData)).toThrow();
+		expect(() => CoingeckoCoinsIdSchema.parse(invalidData)).toThrowError();
 	});
 
 	it('should fail validation for null', () => {
 		const invalidData = null;
 
-		expect(() => CoingeckoCoinsIdSchema.parse(invalidData)).toThrow();
+		expect(() => CoingeckoCoinsIdSchema.parse(invalidData)).toThrowError();
 	});
 
 	it('should fail validation for undefined', () => {
 		const invalidData = undefined;
 
-		expect(() => CoingeckoCoinsIdSchema.parse(invalidData)).toThrow();
+		expect(() => CoingeckoCoinsIdSchema.parse(invalidData)).toThrowError();
 	});
 });

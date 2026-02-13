@@ -171,6 +171,18 @@ div.modal {
 		--toolbar-height: 90px;
 	}
 
+	// This is a fix to get rid of scroll bleed through modals on IOS
+	// TODO: these should go into gix-components
+	pointer-events: auto !important;
+	touch-action: none !important;
+
+	.container-wrapper {
+		overflow-y: auto !important;
+		-webkit-overflow-scrolling: touch !important;
+		touch-action: pan-y !important;
+		overscroll-behavior: contain !important;
+	}
+
 	div.wrapper.dialog > div.header {
 		// TODO: Improve padding definition when the Modal of GIX Components has an updated way of setting it and not being hard-coded (https://github.com/dfinity/gix-components/blob/1c4ab390f9cab1d0e3ec73a23384e045679eb6b8/src/lib/components/Modal.svelte#L195)
 		--dialog-padding-y: 1rem;

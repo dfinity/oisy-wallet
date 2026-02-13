@@ -14,17 +14,16 @@ export const LINK_TOKEN_ID: TokenId = parseTokenId(LINK_SYMBOL);
 export const LINK_TOKEN: RequiredErc20Token = {
 	id: LINK_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'ChainLink Token',
 	symbol: LINK_SYMBOL,
 	decimals: LINK_DECIMALS,
 	icon: link,
 	address: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckLINK',
 	groupData: LINK_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true,
+	neverCollapseInTokenGroup: true,
 	buy: {
 		onramperId: 'link_ethereum'
 	}
@@ -37,13 +36,12 @@ export const SEPOLIA_LINK_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_LINK_SYMBOL);
 export const SEPOLIA_LINK_TOKEN: RequiredErc20Token = {
 	id: SEPOLIA_LINK_TOKEN_ID,
 	network: SEPOLIA_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'ChainLink Token',
 	symbol: LINK_SYMBOL,
 	decimals: LINK_DECIMALS,
 	icon: link,
 	address: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckSepoliaLINK'
 };

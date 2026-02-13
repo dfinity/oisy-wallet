@@ -11,7 +11,7 @@ describe('token.validation', () => {
 		it('should fail to parse non-string input', () => {
 			const invalidInput = 123;
 
-			expect(() => parseTokenId(invalidInput as unknown as string)).toThrow();
+			expect(() => parseTokenId(invalidInput as unknown as string)).toThrowError();
 		});
 	});
 });

@@ -27,6 +27,8 @@
 		loading?: boolean;
 		autofocus?: boolean;
 		onInput: () => void;
+		onBlur: () => void;
+		onFocus: () => void;
 	}
 
 	let {
@@ -39,7 +41,9 @@
 		error = false,
 		loading = false,
 		autofocus = false,
-		onInput
+		onInput,
+		onBlur,
+		onFocus
 	}: Props = $props();
 
 	let displayValue = $state<OptionAmount>();
@@ -89,13 +93,13 @@
 	{disabled}
 	{error}
 	{loading}
+	{onBlur}
+	{onFocus}
 	onInput={handleInput}
 	{placeholder}
 	styleClass="no-padding"
 	testId={TOKEN_INPUT_CURRENCY_FIAT}
 	bind:value={displayValue}
-	on:focus
-	on:blur
 >
 	{#snippet prefix()}
 		<span

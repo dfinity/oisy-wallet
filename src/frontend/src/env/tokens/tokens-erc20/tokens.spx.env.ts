@@ -14,13 +14,12 @@ export const SPX_TOKEN_ID: TokenId = parseTokenId(SPX_SYMBOL);
 export const SPX_TOKEN: RequiredAdditionalErc20Token = {
 	id: SPX_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'SPX6900',
 	symbol: SPX_SYMBOL,
 	decimals: SPX_DECIMALS,
 	icon: spx,
 	address: '0xe0f63a424a4439cbe457d80e4f4b51ad25b2c56c',
-	exchange: 'erc20',
 	groupData: SPX_TOKEN_GROUP
 };

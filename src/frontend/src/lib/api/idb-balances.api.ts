@@ -1,8 +1,6 @@
 import { browser } from '$app/environment';
 import type { Balance } from '$lib/types/balance';
 import type { GetIdbBalancesParams, SetIdbBalancesParams } from '$lib/types/idb-balances';
-import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
-import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { clear, createStore, get, set as idbSet, type UseStore } from 'idb-keyval';
 
@@ -45,8 +43,5 @@ export const setIdbBalancesStore = async ({
 
 export const getIdbBalances = (params: GetIdbBalancesParams): Promise<Balance | undefined> =>
 	get(toKey(params), idbBalancesStore);
-
-export const deleteIdbBalances = (principal: Principal): Promise<void> =>
-	delMultiKeysByPrincipal({ principal, store: idbBalancesStore });
 
 export const clearIdbBalances = (): Promise<void> => clear(idbBalancesStore);

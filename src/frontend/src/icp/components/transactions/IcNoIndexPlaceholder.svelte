@@ -5,7 +5,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let placeholderType: 'missing' | 'not-working' = 'missing';
+	interface Props {
+		placeholderType?: 'missing' | 'not-working';
+	}
+
+	let { placeholderType = 'missing' }: Props = $props();
 </script>
 
 <div class="py-12" data-tid="ic-no-index-placeholder">

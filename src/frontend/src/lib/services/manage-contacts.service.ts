@@ -1,4 +1,4 @@
-import type { ContactImage } from '$declarations/backend/declarations/backend.did';
+import type { ContactImage } from '$declarations/backend/backend.did';
 import {
 	createContact as createContactApi,
 	deleteContact as deleteContactApi,
@@ -9,7 +9,7 @@ import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 import { compareContactAddresses } from '$lib/utils/contact-address.utils';
 import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 
 export const loadContacts = async (identity: Identity): Promise<void> => {
 	contactsStore.reset();

@@ -14,6 +14,7 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { isEthAddress } from '$eth/utils/account.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -44,7 +45,6 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Address } from '$lib/types/address';
 	import type { Token, TokenId } from '$lib/types/token';
-	import { isEthAddress } from '$lib/utils/account.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -167,11 +167,6 @@
 			metadata: sharedTrackingEventMetadata
 		});
 
-		const sendTrackingEventMetadata = {
-			...sharedTrackingEventMetadata,
-			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
-		};
-
 		if (isNullish($authIdentity)) {
 			return;
 		}
@@ -224,6 +219,14 @@
 			return;
 		}
 
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
+			source: AI_ASSISTANT_SEND_TOKEN_SOURCE,
+			maxFeePerGas: maxFeePerGas.toString(),
+			maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+			gas: gas.toString()
+		};
+
 		try {
 			loading = true;
 
@@ -264,7 +267,7 @@
 </script>
 
 <CkEthLoader isSendFlow={true} nativeTokenId={nativeEthereumToken.id}>
-	<div class="mb-8 mt-2">
+	<div class="mt-2 mb-8">
 		<EthFeeContext
 			{amount}
 			{destination}

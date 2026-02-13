@@ -1,8 +1,18 @@
-import { getApyOverall, manageStakePosition } from '$icp/api/gldt_stake.api';
+import {
+	getApyOverall,
+	getConfig,
+	getDailyAnalytics,
+	getPosition,
+	manageStakePosition
+} from '$icp/api/gldt_stake.api';
 import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
 import * as appConstants from '$lib/constants/app.constants';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { stakePositionMockResponse } from '$tests/mocks/gldt_stake.mock';
+import {
+	configMockResponse,
+	dailyAnalyticsMockResponse,
+	stakePositionMockResponse
+} from '$tests/mocks/gldt_stake.mock';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mock } from 'vitest-mock-extended';
@@ -39,7 +49,29 @@ describe('gldt_stake.api', () => {
 				identity: null
 			});
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
+		});
+	});
+
+	describe('getDailyAnalytics', () => {
+		it('correctly calls the gldt_stake canister getDailyAnalytics method', async () => {
+			mockAuthStore();
+			gldtStakeCanisterMock.getDailyAnalytics.mockResolvedValue(dailyAnalyticsMockResponse);
+
+			const result = await getDailyAnalytics({
+				identity: mockIdentity
+			});
+
+			expect(gldtStakeCanisterMock.getDailyAnalytics).toHaveBeenCalledOnce();
+			expect(result).toBe(dailyAnalyticsMockResponse);
+		});
+
+		it('throws an error if the gldt_stake canister getDailyAnalytics method called without identity', async () => {
+			const res = getDailyAnalytics({
+				identity: null
+			});
+
+			await expect(res).rejects.toThrowError();
 		});
 	});
 
@@ -63,7 +95,51 @@ describe('gldt_stake.api', () => {
 				identity: null
 			});
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
+		});
+	});
+
+	describe('getPosition', () => {
+		it('correctly calls the gldt_stake canister getPosition method', async () => {
+			mockAuthStore();
+			gldtStakeCanisterMock.getPosition.mockResolvedValue(stakePositionMockResponse);
+
+			const result = await getPosition({
+				identity: mockIdentity
+			});
+
+			expect(gldtStakeCanisterMock.getPosition).toHaveBeenCalledOnce();
+			expect(result).toBe(stakePositionMockResponse);
+		});
+
+		it('throws an error if the gldt_stake canister getPosition method called without identity', async () => {
+			const res = getPosition({
+				identity: null
+			});
+
+			await expect(res).rejects.toThrowError();
+		});
+	});
+
+	describe('getConfig', () => {
+		it('correctly calls the gldt_stake canister getConfig method', async () => {
+			mockAuthStore();
+			gldtStakeCanisterMock.getConfig.mockResolvedValue(configMockResponse);
+
+			const result = await getConfig({
+				identity: mockIdentity
+			});
+
+			expect(gldtStakeCanisterMock.getConfig).toHaveBeenCalledOnce();
+			expect(result).toBe(configMockResponse);
+		});
+
+		it('throws an error if the gldt_stake canister getConfig method called without identity', async () => {
+			const res = getConfig({
+				identity: null
+			});
+
+			await expect(res).rejects.toThrowError();
 		});
 	});
 });

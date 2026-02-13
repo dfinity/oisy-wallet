@@ -6,11 +6,7 @@ export const TRACK_SIGN_IN_ERROR_COUNT = 'sign_in_error';
 export const TRACK_SYNC_AUTH_AUTHENTICATED_COUNT = 'sync_auth_authenticated';
 export const TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT = 'sync_auth_not_authenticated';
 export const TRACK_SYNC_AUTH_ERROR_COUNT = 'sync_auth_error';
-export const TRACK_HELP_LOST_INTERNET_IDENTITY = 'help_lost_internet_identity';
 export const TRACK_HELP_SIGNING_IN = 'help_signing_in';
-export const TRACK_HELP_CONCERNED_ABOUT_SECURITY = 'help_concerned_about_security';
-export const TRACK_HELP_GOT_CONFUSED = 'help_got_confused';
-export const TRACK_HELP_OTHER = 'help_other';
 export const TRACK_SIGN_OUT_SUCCESS = 'sign_out_success';
 export const TRACK_SIGN_OUT_ERROR = 'sign_out_error';
 export const TRACK_SIGN_OUT_WITH_WARNING = 'sign_out_with_warning';
@@ -48,6 +44,8 @@ export const TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR = 'ic_loading_transaction
 export const TRACK_COUNT_CKETH_LOADING_MINTER_INFO_ERROR = 'ic_cketh_load_minter_info_error';
 export const TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR = 'ic_ckbtc_load_minter_info_error';
 export const TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR = 'ic_loading_icrc_canister_error';
+export const TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR =
+	'ic_loading_nfts_from_collection_error';
 
 // Solana
 export const TRACK_COUNT_SOL_SEND_SUCCESS = 'sol_send_success';
@@ -183,3 +181,13 @@ export const TRACK_NFT_CONSENT_GIVEN = 'nft_consent_given';
 export const TRACK_NFT_OPEN = 'nft_open';
 export const TRACK_NFT_OPEN_CONSENT_MODAL = 'nft_open_consent_modal';
 export const TRACK_NFT_SPAM_HIDE_ACTION = 'nft_spam_hide_action';
+
+// Stake
+export const TRACK_COUNT_STAKE_SUCCESS = 'stake_success';
+export const TRACK_COUNT_STAKE_ERROR = 'stake_error';
+export const TRACK_COUNT_UNSTAKE_SUCCESS = 'unstake_success';
+export const TRACK_COUNT_UNSTAKE_ERROR = 'unstake_error';
+export const TRACK_COUNT_CLAIM_STAKING_REWARD_SUCCESS = 'claim_staking_reward_success';
+export const TRACK_COUNT_CLAIM_STAKING_REWARD_ERROR = 'claim_staking_reward_error';
+export const TRACK_COUNT_WITHDRAW_SUCCESS = 'dissolved_tokens_withdraw_success';
+export const TRACK_COUNT_WITHDRAW_ERROR = 'dissolved_tokens_withdraw_error';

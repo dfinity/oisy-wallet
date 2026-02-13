@@ -14,13 +14,12 @@ export const WETH_TOKEN_ID: TokenId = parseTokenId(WETH_SYMBOL);
 export const WETH_TOKEN: RequiredAdditionalErc20Token = {
 	id: WETH_TOKEN_ID,
 	network: ARBITRUM_MAINNET_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Wrapped Ether',
 	symbol: WETH_SYMBOL,
 	decimals: WETH_DECIMALS,
 	icon: weth,
 	address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
-	exchange: 'erc20',
 	groupData: WETH_TOKEN_GROUP
 };

@@ -1,4 +1,4 @@
-import type { ContactImage, ImageMimeType } from '$declarations/backend/declarations/backend.did';
+import type { ContactImage, ImageMimeType } from '$declarations/backend/backend.did';
 import { isNullish } from '@dfinity/utils';
 
 const parseDataUrl = (dataUrl: string): { mime: string; data: Uint8Array } => {

@@ -14,7 +14,7 @@ export const GOOGLX_TOKEN_ID: TokenId = parseTokenId(GOOGLX_SYMBOL);
 export const GOOGLX_TOKEN: RequiredSpl2022Token = {
 	id: GOOGLX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Alphabet xStock',
 	symbol: GOOGLX_SYMBOL,

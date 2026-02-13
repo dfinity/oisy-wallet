@@ -1,7 +1,10 @@
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
+import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
-import { Principal } from '@dfinity/principal';
+import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
+import { Principal } from '@icp-sdk/core/principal';
 
 describe('custom-token.utils', () => {
 	describe('toCustomToken', () => {
@@ -97,6 +100,63 @@ describe('custom-token.utils', () => {
 			});
 		});
 
+		it('should return correct type for ExtV2 network key', () => {
+			const networkKey = 'ExtV2';
+
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey,
+					canisterId: mockExtV2TokenCanisterId
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					ExtV2: {
+						canister_id: Principal.fromText(mockExtV2TokenCanisterId)
+					}
+				}
+			});
+		});
+
+		it('should return correct type for Dip721 network key', () => {
+			const networkKey = 'Dip721';
+
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey,
+					canisterId: mockDip721TokenCanisterId
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					Dip721: {
+						canister_id: Principal.fromText(mockDip721TokenCanisterId)
+					}
+				}
+			});
+		});
+
+		it('should return correct type for IcPunks network key', () => {
+			const networkKey = 'IcPunks';
+
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey,
+					canisterId: mockIcPunksCanisterId
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					IcPunks: {
+						canister_id: Principal.fromText(mockIcPunksCanisterId)
+					}
+				}
+			});
+		});
+
 		it('should return correct type for Ethereum/EVM Erc20 network key', () => {
 			expect(
 				toCustomToken({
@@ -109,6 +169,25 @@ describe('custom-token.utils', () => {
 				...partialExpected,
 				token: {
 					Erc20: {
+						token_address: 'mock-token-address',
+						chain_id: 123n
+					}
+				}
+			});
+		});
+
+		it('should return correct type for Ethereum/EVM Erc4626 network key', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey: 'Erc4626',
+					address: 'mock-token-address',
+					chainId: 123n
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					Erc4626: {
 						token_address: 'mock-token-address',
 						chain_id: 123n
 					}
@@ -206,7 +285,7 @@ describe('custom-token.utils', () => {
 					decimals: 8,
 					symbol: 'mock-symbol'
 				})
-			).toThrow('Unsupported network key: UnsupportedNetwork');
+			).toThrowError('Unsupported network key: UnsupportedNetwork');
 		});
 	});
 });

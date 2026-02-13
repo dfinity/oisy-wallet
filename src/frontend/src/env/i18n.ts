@@ -13,6 +13,8 @@ export const LANGUAGES = {
 	[Languages.JAPANESE]: '日本語',
 	[Languages.POLISH]: 'Polski',
 	[Languages.PORTUGUESE]: 'Português',
+	[Languages.RUSSIAN]: 'Русский',
+	[Languages.SPANISH]: 'Español',
 	[Languages.VIETNAMESE]: 'Tiếng việt',
 	[Languages.CHINESE_SIMPLIFIED]: '中文 (简体)'
 };

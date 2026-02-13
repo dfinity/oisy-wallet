@@ -14,7 +14,7 @@ export const JUP_TOKEN_ID: TokenId = parseTokenId(JUP_SYMBOL);
 export const JUP_TOKEN: RequiredSplToken = {
 	id: JUP_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Jupiter',
 	symbol: JUP_SYMBOL,

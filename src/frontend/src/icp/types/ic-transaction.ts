@@ -1,24 +1,20 @@
-import type { Event } from '$declarations/xtc_ledger/declarations/xtc_ledger.did';
+import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { icpTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType } from '$lib/types/transaction';
-import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
-import type {
-	IcrcTransaction as IcrcTransactionCandid,
-	IcrcTransactionWithId
-} from '@dfinity/ledger-icrc';
+import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 
 export interface IcTransactionAddOnsInfo {
 	transferToSelf?: 'send' | 'receive';
 }
 
-export type IcpTransaction = { transaction: Transaction & IcTransactionAddOnsInfo } & Pick<
-	TransactionWithId,
-	'id'
->;
+export type IcpTransaction = {
+	transaction: IcpIndexDid.Transaction & IcTransactionAddOnsInfo;
+} & Pick<IcpIndexDid.TransactionWithId, 'id'>;
 export type IcrcTransaction = {
-	transaction: IcrcTransactionCandid & IcTransactionAddOnsInfo;
-} & Pick<IcrcTransactionWithId, 'id'>;
+	transaction: IcrcIndexDid.Transaction & IcTransactionAddOnsInfo;
+} & Pick<IcrcIndexDid.TransactionWithId, 'id'>;
 export type Dip20Transaction = { transaction: Event & IcTransactionAddOnsInfo } & Pick<
 	Dip20TransactionWithId,
 	'id'

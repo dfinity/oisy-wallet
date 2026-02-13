@@ -14,7 +14,7 @@ export const TSLAX_TOKEN_ID: TokenId = parseTokenId(TSLAX_SYMBOL);
 export const TSLAX_TOKEN: RequiredSpl2022Token = {
 	id: TSLAX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Tesla xStock',
 	symbol: TSLAX_SYMBOL,

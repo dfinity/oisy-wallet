@@ -1,6 +1,9 @@
 import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
-import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
-import * as btcUtxosApi from '$btc/services/btc-utxos.service';
+import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
+import * as btcUtxosService from '$btc/services/btc-utxos.service';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
 import {
 	UTXOS_FEE_CONTEXT_KEY,
@@ -12,6 +15,7 @@ import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import * as bitcoinApi from '$icp/api/bitcoin.api';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import * as backendApi from '$lib/api/backend.api';
 import * as signerApi from '$lib/api/signer.api';
@@ -72,11 +76,6 @@ describe('BtcConvertTokenWizard', () => {
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
-	const mockprepareBtcSendApi = () =>
-		vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue({
-			feeSatoshis: mockUtxosFee.feeSatoshis,
-			utxos: mockUtxosFee.utxos
-		});
 	const mockBackendApi = () =>
 		vi
 			.spyOn(backendApi, 'addPendingBtcTransaction')
@@ -94,9 +93,9 @@ describe('BtcConvertTokenWizard', () => {
 		vi
 			.spyOn(addressesStore, 'btcAddressMainnet', 'get')
 			.mockImplementation(() => readable(mockBtcAddress));
-	const mockBtcPendingSentTransactionsStore = () =>
+	const mockLoadBtcPendingSentTransactions = () =>
 		vi
-			.spyOn(btcPendingSentTransactionsStore, 'loadBtcPendingSentTransactions')
+			.spyOn(btcPendingSentTransactionsServices, 'loadBtcPendingSentTransactions')
 			.mockResolvedValue({ success: true });
 	const mockUtxosFeeStore = (utxosFee?: UtxosFee) => {
 		const store = utxosFeeStore.initUtxosFeeStore();
@@ -111,9 +110,26 @@ describe('BtcConvertTokenWizard', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		mockPage.reset();
-		mockBtcPendingSentTransactionsStore();
-		mockprepareBtcSendApi();
+		mockLoadBtcPendingSentTransactions();
+
+		allUtxosStore.reset();
+		feeRatePercentilesStore.reset();
+		btcPendingSentTransactionsStore.reset();
+
+		vi.spyOn(btcUtxosService, 'prepareBtcSend').mockResolvedValue({
+			feeSatoshis: mockUtxosFee.feeSatoshis,
+			utxos: mockUtxosFee.utxos
+		});
+		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
+			utxos: [],
+			tip_block_hash: new Uint8Array(),
+			tip_height: 100,
+			next_page: []
+		});
+		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
 	});
 
 	it('should call sendBtc if all requirements are met', async () => {

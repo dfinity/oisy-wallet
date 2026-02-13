@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Identity } from '@dfinity/agent';
 	import {
 		type ProgressStep,
 		WizardModal,
@@ -7,6 +6,7 @@
 		type WizardSteps
 	} from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onDestroy } from 'svelte';
 	import HideTokenReview from '$lib/components/tokens/HideTokenReview.svelte';

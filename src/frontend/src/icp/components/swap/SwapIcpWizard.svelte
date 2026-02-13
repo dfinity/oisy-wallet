@@ -4,13 +4,13 @@
 	import { getContext } from 'svelte';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import SwapIcpForm from '$icp/components/swap/SwapIcpForm.svelte';
+	import { isIcrcTokenSupportIcrc2 } from '$icp/services/icrc.services';
 	import {
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext as IcTokenFeeContextType
 	} from '$icp/stores/ic-token-fee.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
-	import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
@@ -46,6 +46,7 @@
 		currentStep?: WizardStep;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -59,6 +60,7 @@
 		currentStep,
 		isSwapAmountsLoading,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext,
 		onBack
@@ -246,9 +248,9 @@
 				{isSwapAmountsLoading}
 				{onClose}
 				{onNext}
+				{onShowProviderList}
 				{onShowTokensList}
 				{sourceTokenFee}
-				on:icShowProviderList
 				bind:swapAmount
 				bind:receiveAmount
 				bind:slippageValue

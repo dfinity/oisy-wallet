@@ -2,15 +2,21 @@ import { browser } from '$app/environment';
 import { goto, pushState } from '$app/navigation';
 import {
 	AppPath,
+	COLLECTION_PARAM,
 	NETWORK_PARAM,
+	NFT_PARAM,
+	PARAM_DELETE_IDB_CACHE,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
+import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import type { NetworkId } from '$lib/types/network';
+import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
+import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
@@ -30,10 +36,14 @@ export const isTokensPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`;
 export const isNftsPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`) ?? false;
-export const isRewardsPath = (path: string | null) =>
-	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 export const isEarningPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}`) ?? false;
+export const isRewardsPath = (path: string | null) =>
+	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
+export const isEarnPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}`) ?? false;
+export const isEarnGoldPath = (path: string | null) =>
+	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.EarnGold}`;
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
@@ -51,26 +61,32 @@ export const isRouteTokens = ({ route: { id } }: Page): boolean => isTokensPath(
 
 export const isRouteNfts = ({ route: { id } }: Page): boolean => isNftsPath(id);
 
-export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
-
 export const isRouteEarning = ({ route: { id } }: Page): boolean => isEarningPath(id);
 
+export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
+
+export const isRouteEarn = ({ route: { id } }: Page): boolean => isEarnPath(id);
+
+export const isRouteEarnGold = ({ route: { id } }: Page): boolean => isEarnGoldPath(id);
+
 const tokenUrl = ({
-	token: {
-		name,
-		network: { id: networkId }
-	},
+	token,
 	path
 }: {
 	token: Token;
 	path: AppPath.Transactions | undefined;
-}): string =>
-	`${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(
-		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
-	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
+}): string => {
+	const {
+		network: { id: networkId }
+	} = token;
+
+	const identifier = getPageTokenIdentifier(token);
+
+	return `${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(identifier)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
+};
 
 export const networkParam = (networkId: NetworkId | undefined): string =>
-	isNullish(networkId) ? '' : `${NETWORK_PARAM}=${networkId.description ?? ''}`;
+	isNullish(networkId) ? '' : `${NETWORK_PARAM}=${networkId.description}`;
 
 export const networkUrl = ({
 	path,
@@ -100,8 +116,8 @@ export const back = async ({ pop }: { pop: boolean }) => {
 	await goto('/');
 };
 
-export const gotoReplaceRoot = async () => {
-	await goto('/', { replaceState: true });
+export const gotoReplaceRoot = async (deleteIdbCache = false) => {
+	await goto(deleteIdbCache ? `/?${PARAM_DELETE_IDB_CACHE}=true` : '/', { replaceState: true });
 };
 
 export const removeSearchParam = ({ url, searchParam }: { url: URL; searchParam: string }) => {
@@ -114,6 +130,9 @@ export interface RouteParams {
 	[NETWORK_PARAM]: OptionString;
 	// WalletConnect URI parameter
 	[URI_PARAM]: OptionString;
+	// NFT URI parameters
+	[NFT_PARAM]: OptionString;
+	[COLLECTION_PARAM]: OptionString;
 }
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
@@ -121,7 +140,9 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 		return {
 			[TOKEN_PARAM]: undefined,
 			[NETWORK_PARAM]: undefined,
-			[URI_PARAM]: undefined
+			[URI_PARAM]: undefined,
+			[NFT_PARAM]: undefined,
+			[COLLECTION_PARAM]: undefined
 		};
 	}
 
@@ -131,39 +152,71 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 
 	const token = searchParams?.get(TOKEN_PARAM);
 
-	const replaceEmoji = (input: string | null): string | null => {
-		if (input === null) {
-			return null;
-		}
-
-		return input.replace(/\\u([\dA-Fa-f]+)/g, (_match, hex) =>
-			String.fromCodePoint(Number(`0x${hex}`))
-		);
-	};
-
 	const uri = searchParams?.get(URI_PARAM);
 
 	return {
-		[TOKEN_PARAM]: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
+		[TOKEN_PARAM]: nonNullish(token) ? decodeURIComponent(token) : null,
 		[NETWORK_PARAM]: searchParams?.get(NETWORK_PARAM),
-		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null
+		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null,
+		[NFT_PARAM]: searchParams?.get(NFT_PARAM),
+		[COLLECTION_PARAM]: searchParams?.get(COLLECTION_PARAM)
 	};
 };
 
 export const resetRouteParams = (): RouteParams => ({
 	[TOKEN_PARAM]: null,
+	[NFT_PARAM]: null,
+	[COLLECTION_PARAM]: null,
 	[NETWORK_PARAM]: null,
 	[URI_PARAM]: null
 });
 
-export const switchNetwork = async (networkId: Option<NetworkId>) => {
+export const switchNetwork = async ({ networkId }: { networkId: Option<NetworkId> }) => {
 	const url = new URL(window.location.href);
 
 	if (isNullish(networkId) || isNullish(networkId.description)) {
 		url.searchParams.delete(NETWORK_PARAM);
+		userSelectedNetworkStore.set(undefined);
 	} else {
 		url.searchParams.set(NETWORK_PARAM, networkId.description);
+		userSelectedNetworkStore.set(networkId);
 	}
 
 	await goto(url, { replaceState: true, noScroll: true });
+};
+
+// Todo: remove fromRoute
+export const nftsUrl = (
+	params:
+		| {
+				nft?: Nft;
+		  }
+		| {
+				collection?: NftCollection;
+		  }
+		| {
+				originSelectedNetwork?: NetworkId;
+		  }
+): string => {
+	let url = `${AppPath.Nfts}`;
+
+	if ('nft' in params && nonNullish(params.nft)) {
+		url += `?${NFT_PARAM}=${params.nft.id}`;
+		url += `&${COLLECTION_PARAM}=${params.nft.collection.address}`;
+		if (nonNullish(params.nft.collection.network.id.description)) {
+			url += `&${NETWORK_PARAM}=${params.nft.collection.network.id.description}`;
+		}
+	} else if ('collection' in params && nonNullish(params.collection)) {
+		url += `?${COLLECTION_PARAM}=${params.collection.address}`;
+		if (nonNullish(params.collection.network.id.description)) {
+			url += `&${NETWORK_PARAM}=${params.collection.network.id.description}`;
+		}
+	} else if (
+		'originSelectedNetwork' in params &&
+		nonNullish(params.originSelectedNetwork?.description)
+	) {
+		url += `?${NETWORK_PARAM}=${params.originSelectedNetwork.description}`;
+	}
+
+	return url;
 };

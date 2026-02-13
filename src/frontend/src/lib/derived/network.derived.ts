@@ -1,6 +1,3 @@
-import type { OptionEthAddress } from '$eth/types/address';
-import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-import { ethAddress } from '$lib/derived/address.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
 import { networks } from '$lib/derived/networks.derived';
 import type { Network, NetworkId } from '$lib/types/network';
@@ -19,17 +16,17 @@ import {
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const networkId: Readable<NetworkId | undefined> = derived(
+export const selectedNetwork: Readable<Network | undefined> = derived(
 	[networks, routeNetwork],
 	([$networks, $routeNetwork]) =>
 		nonNullish($routeNetwork)
-			? $networks.find(({ id }) => id.description === $routeNetwork)?.id
+			? $networks.find(({ id }) => id.description === $routeNetwork)
 			: undefined
 );
 
-export const selectedNetwork: Readable<Network | undefined> = derived(
-	[networks, networkId],
-	([$networks, $networkId]) => $networks.find(({ id }) => id === $networkId)
+export const networkId: Readable<NetworkId | undefined> = derived(
+	[selectedNetwork],
+	([$selectedNetwork]) => $selectedNetwork?.id
 );
 
 export const pseudoNetworkICPTestnet: Readable<boolean> = derived([networkId], ([$networkId]) =>
@@ -77,8 +74,13 @@ export const pseudoNetworkChainFusion: Readable<boolean> = derived(
 	([$selectedNetwork]) => isNullish($selectedNetwork)
 );
 
-export const networkAddress: Readable<OptionEthAddress | string> = derived(
-	[ethAddress, icrcAccountIdentifierText, networkICP],
-	([$address, $icrcAccountIdentifierStore, $networkICP]) =>
-		$networkICP ? $icrcAccountIdentifierStore : $address
+export const selectedNetworkNftSupported: Readable<boolean> = derived(
+	[selectedNetwork],
+	([$selectedNetwork]) =>
+		isNullish($selectedNetwork) ? true : ($selectedNetwork.supportsNft ?? false)
+);
+
+export const selectedNetworkNftUnsupported: Readable<boolean> = derived(
+	[selectedNetworkNftSupported],
+	([$selectedNetworkNftSupported]) => !$selectedNetworkNftSupported
 );

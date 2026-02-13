@@ -14,7 +14,7 @@ export const NVDAX_TOKEN_ID: TokenId = parseTokenId(NVDAX_SYMBOL);
 export const NVDAX_TOKEN: RequiredSpl2022Token = {
 	id: NVDAX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'NVIDIA xStock',
 	symbol: NVDAX_SYMBOL,

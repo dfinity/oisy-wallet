@@ -14,7 +14,7 @@ export const POPCAT_TOKEN_ID: TokenId = parseTokenId(POPCAT_SYMBOL);
 export const POPCAT_TOKEN: RequiredSplToken = {
 	id: POPCAT_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Popcat',
 	symbol: POPCAT_SYMBOL,

@@ -285,7 +285,7 @@
 <svelte:window onresize={onResize} />
 
 <div
-	class={`carousel-container ${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pb-10 pt-3 shadow-sm`}
+	class={`carousel-container ${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pt-3 pb-10 shadow-sm`}
 	class:pb-3={nonNullish(slides) && slides.length <= 1}
 	data-tid={CAROUSEL_CONTAINER}
 	out:slide={SLIDE_PARAMS}
@@ -297,7 +297,7 @@
 	</div>
 	{#if nonNullish(slides) && slides.length > 1}
 		<div
-			class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
+			class={`absolute right-0 bottom-2 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
 			out:slide={SLIDE_PARAMS}
 		>
 			<Indicators {currentSlide} {onIndicatorClick} {totalSlides} />

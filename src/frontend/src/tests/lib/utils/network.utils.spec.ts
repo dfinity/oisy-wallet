@@ -7,7 +7,10 @@ import {
 	BSC_MAINNET_NETWORK_ID,
 	SUPPORTED_BSC_NETWORK_IDS
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
-import { SUPPORTED_EVM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
+import {
+	SUPPORTED_EVM_NETWORKS,
+	SUPPORTED_EVM_NETWORK_IDS
+} from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import * as btcNetworkEnv from '$env/networks/networks.btc.env';
 import {
@@ -21,6 +24,7 @@ import {
 	ETHEREUM_NETWORK_ID,
 	SEPOLIA_NETWORK,
 	SEPOLIA_NETWORK_ID,
+	SUPPORTED_ETHEREUM_NETWORKS,
 	SUPPORTED_ETHEREUM_NETWORK_IDS
 } from '$env/networks/networks.eth.env';
 import {
@@ -28,7 +32,6 @@ import {
 	ICP_NETWORK_ID,
 	ICP_PSEUDO_TESTNET_NETWORK_ID
 } from '$env/networks/networks.icp.env';
-import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_DEVNET_NETWORK_ID,
@@ -39,14 +42,17 @@ import {
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import {
+	assertIsNetworkEthereum,
 	filterTokensForSelectedNetwork,
 	filterTokensForSelectedNetworks,
+	isNetworkEthereum,
 	isNetworkICP,
 	isNetworkIdArbitrum,
 	isNetworkIdBTCMainnet,
@@ -66,11 +72,40 @@ import {
 	isNetworkIdSolana,
 	isNetworkSolana,
 	isPseudoNetworkIdIcpTestnet,
+	mapCkBtcBitcoinNetworkToBackendBitcoinNetwork,
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 
 describe('network utils', () => {
+	describe('isNetworkEthereum', () => {
+		it.each([...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS])(
+			'should return true for $name network',
+			(network) => {
+				expect(isNetworkEthereum(network)).toBeTruthy();
+			}
+		);
+
+		it('should return false for non-Ethereum network', () => {
+			expect(isNetworkEthereum(ICP_NETWORK)).toBeFalsy();
+		});
+	});
+
+	describe('assertIsNetworkEthereum', () => {
+		it.each([...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS])(
+			'should not throw for $name network',
+			(network) => {
+				expect(() => assertIsNetworkEthereum(network)).not.toThrowError();
+			}
+		);
+
+		it('should throw for non-Ethereum network', () => {
+			expect(() => assertIsNetworkEthereum(ICP_NETWORK)).toThrowError(
+				`Network ${ICP_NETWORK.name} is not an Ethereum or EVM network`
+			);
+		});
+	});
+
 	describe('isNetworkICP', () => {
 		it('should return true for ICP network', () => {
 			expect(isNetworkICP(ICP_NETWORK)).toBeTruthy();
@@ -334,6 +369,27 @@ describe('network utils', () => {
 			expect(mapNetworkIdToBitcoinNetwork(ETHEREUM_NETWORK_ID)).toBeUndefined();
 			expect(mapNetworkIdToBitcoinNetwork(SEPOLIA_NETWORK_ID)).toBeUndefined();
 			expect(mapNetworkIdToBitcoinNetwork(ICP_NETWORK_ID)).toBeUndefined();
+		});
+	});
+
+	describe('mapCkBtcBitcoinNetworkToBackendBitcoinNetwork', () => {
+		it('should map network to bitcoin network', () => {
+			expect(mapCkBtcBitcoinNetworkToBackendBitcoinNetwork('mainnet')).toStrictEqual({
+				mainnet: null
+			});
+			expect(mapCkBtcBitcoinNetworkToBackendBitcoinNetwork('testnet')).toStrictEqual({
+				testnet: null
+			});
+			expect(mapCkBtcBitcoinNetworkToBackendBitcoinNetwork('regtest')).toStrictEqual({
+				regtest: null
+			});
+		});
+
+		it('should return `undefined` with non bitcoin network', () => {
+			// @ts-expect-error Testing invalid input types
+			expect(mapCkBtcBitcoinNetworkToBackendBitcoinNetwork('ethereum')).toBeUndefined();
+			// @ts-expect-error Testing invalid input types
+			expect(mapCkBtcBitcoinNetworkToBackendBitcoinNetwork('any-other-network')).toBeUndefined();
 		});
 	});
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ReceiveQrCode from '$lib/components/receive/ReceiveQrCode.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -14,6 +15,7 @@
 		copyButtonTestId?: string;
 		network: Network;
 		copyAriaLabel: string;
+		text?: Snippet;
 	}
 
 	let {
@@ -23,7 +25,8 @@
 		testId,
 		copyButtonTestId,
 		network,
-		copyAriaLabel
+		copyAriaLabel,
+		text
 	}: Props = $props();
 
 	// TODO: replace properties (address, labels etc.) with a mandatory property of type ReceiveQrCode
@@ -39,6 +42,7 @@
 	{network}
 	qrCodeAction={{ enabled: false }}
 	{testId}
+	{text}
 >
 	{#snippet title()}
 		{addressLabel ?? $i18n.wallet.text.address}

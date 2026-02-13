@@ -2,7 +2,8 @@ import {
 	IC_CKETH_INDEX_CANISTER_ID,
 	IC_CKETH_LEDGER_CANISTER_ID,
 	IC_CKETH_MINTER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { icKnownDestinations, icTransactions } from '$icp/derived/ic-transactions.derived';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
@@ -13,6 +14,7 @@ import { token } from '$lib/stores/token.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { setupCkBTCStores } from '$tests/utils/ckbtc-stores.test-utils';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import { get } from 'svelte/store';
@@ -110,12 +112,13 @@ describe('ic-transactions.derived', () => {
 
 		beforeEach(() => {
 			const mockToken: IcCkToken = {
+				...mockValidIcCkToken,
 				id: tokenId,
-				standard: 'icrc',
+				standard: { code: 'icrc' },
 				ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
 				indexCanisterId: IC_CKETH_INDEX_CANISTER_ID,
 				minterCanisterId: IC_CKETH_MINTER_CANISTER_ID
-			} as unknown as IcCkToken;
+			};
 
 			token.set(mockToken);
 

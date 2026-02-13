@@ -14,7 +14,7 @@ export const AAPLX_TOKEN_ID: TokenId = parseTokenId(AAPLX_SYMBOL);
 export const AAPLX_TOKEN: RequiredSpl2022Token = {
 	id: AAPLX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Apple xStock',
 	symbol: AAPLX_SYMBOL,

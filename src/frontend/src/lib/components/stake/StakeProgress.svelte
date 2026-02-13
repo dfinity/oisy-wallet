@@ -17,18 +17,8 @@
 			state: 'in_progress'
 		},
 		{
-			step: ProgressStepsStake.SIGN_APPROVE,
-			text: $i18n.send.text.signing_approval,
-			state: 'next'
-		},
-		{
 			step: ProgressStepsStake.APPROVE,
 			text: $i18n.send.text.approving,
-			state: 'next'
-		},
-		{
-			step: ProgressStepsStake.SIGN_TRANSFER,
-			text: $i18n.send.text.signing_transaction,
 			state: 'next'
 		},
 		{

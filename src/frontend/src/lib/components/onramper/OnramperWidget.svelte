@@ -10,6 +10,7 @@
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
+	import { BUY_MODAL_ONRAMPER_IFRAME } from '$lib/constants/test-ids.constants';
 	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { networkBitcoin, networkEthereum, networkSolana } from '$lib/derived/network.derived';
@@ -106,7 +107,7 @@
 <!-- "In order to do customer verification before purchase, we require the following permissions to be given to the app. So this is definitely merely for the KYC  and also for fraud detection algorithms i suppose" -->
 
 <div
-	class="absolute bottom-0 left-0 right-0 top-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
+	class="absolute top-0 right-0 bottom-0 left-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
 	class:invisible={themeLoaded}
 	class:opacity-0={themeLoaded}
 	class:opacity-100={!themeLoaded}
@@ -116,6 +117,7 @@
 
 <iframe
 	allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
+	data-tid={BUY_MODAL_ONRAMPER_IFRAME}
 	height="680px"
 	onload={changeThemeOnIframeLoad}
 	sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"

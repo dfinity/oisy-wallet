@@ -2,6 +2,7 @@ import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR } from '$lib/constants/analytics.constants';
@@ -74,7 +75,7 @@ const loadErc20Balance = async ({
 	token: contract,
 	address: optionAddress
 }: {
-	token: Erc20Token;
+	token: Erc20Token | Erc4626Token;
 	address?: OptionEthAddress;
 }): Promise<ResultSuccess> => {
 	const address = optionAddress ?? get(addressStore);
@@ -127,13 +128,13 @@ export const loadEthBalances = async (tokens: Token[]): Promise<ResultSuccess> =
 
 export const loadErc20Balances = async ({
 	address,
-	erc20Tokens
+	tokens
 }: {
 	address: OptionEthAddress;
-	erc20Tokens: Erc20Token[];
+	tokens: (Erc20Token | Erc4626Token)[];
 }): Promise<ResultSuccess> => {
 	const results = await Promise.all([
-		...erc20Tokens.map((token) => loadErc20Balance({ token, address }))
+		...tokens.map((token) => loadErc20Balance({ token, address }))
 	]);
 
 	return { success: results.every(({ success }) => success === true) };

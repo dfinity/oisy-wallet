@@ -4,10 +4,8 @@ import {
 	ETHEREUM_EXPLORER_URL,
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import {
-	ICRC_LEDGER_CANISTER_TESTNET_IDS,
-	STAGING_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
+import { STAGING_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
@@ -103,7 +101,7 @@ export const mapCkEthereumTransaction = ({
 	}
 
 	if (nonNullish(burn)) {
-		const memo = fromNullable(burn.memo) ?? [];
+		const memo = fromNullable(burn.memo) ?? new Uint8Array();
 
 		const burnMemo = burnMemoInfo(memo);
 
@@ -125,7 +123,7 @@ export const mapCkEthereumTransaction = ({
 };
 
 const mintMemoInfo = (
-	memo: Uint8Array | number[]
+	memo: Uint8Array
 ): { fromAddress: string | undefined; reimbursement: boolean } | undefined => {
 	try {
 		const [mintType, [fromAddress]] = decodeMintMemo(memo);
@@ -142,9 +140,7 @@ const mintMemoInfo = (
 	}
 };
 
-const burnMemoInfo = (
-	memo: Uint8Array | number[]
-): { toAddress: string | undefined } | undefined => {
+const burnMemoInfo = (memo: Uint8Array): { toAddress: string | undefined } | undefined => {
 	try {
 		const [_, [toAddress]] = decodeBurnMemo(memo);
 		return {

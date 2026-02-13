@@ -3,7 +3,8 @@ use std::sync::LazyLock;
 use candid::Principal;
 use shared::types::{
     custom_token::{
-        ChainId, CustomToken, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId, Token,
+        ChainId, CustomToken, Dip721Token, ErcToken, ErcTokenId, ExtV2Token, IcPunksToken,
+        IcrcToken, SplToken, SplTokenId, Token,
     },
     TokenVersion,
 };
@@ -71,6 +72,19 @@ static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     section: None,
     allow_external_content_source: None,
 });
+static ERC4626_TOKEN_ID: LazyLock<ErcTokenId> =
+    LazyLock::new(|| ErcTokenId("0x0d877dc7c8fa3ad980dfdb18b48ec9f8768359c4".to_string()));
+static ERC4626_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
+static ERC4626_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Erc20(ErcToken {
+        token_address: ERC4626_TOKEN_ID.clone(),
+        chain_id: ERC4626_CHAIN_ID.clone(),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
 static ERC721_TOKEN_ID: LazyLock<ErcTokenId> =
     LazyLock::new(|| ErcTokenId("0x8821bee2ba0df28761afff119d66390d594cd280".to_string()));
 static ERC721_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 137);
@@ -97,6 +111,33 @@ static ERC1155_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     section: None,
     allow_external_content_source: Some(false),
 });
+static EXT_V2_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::ExtV2(ExtV2Token {
+        canister_id: Principal::from_text("ckbgq-4yaaa-aaaak-qi2xq-cai").unwrap(),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
+static DIP721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Dip721(Dip721Token {
+        canister_id: Principal::from_text("qcg3w-tyaaa-aaaah-qakea-cai").unwrap(),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
+static ICPUNKS_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::IcPunks(IcPunksToken {
+        canister_id: Principal::from_text("qcg3w-tyaaa-aaaah-qakea-cai").unwrap(),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
 static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
     vec![
         USER_TOKEN.clone(),
@@ -105,6 +146,10 @@ static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
         ERC20_TOKEN.clone(),
         ERC721_TOKEN.clone(),
         ERC1155_TOKEN.clone(),
+        ERC4626_TOKEN.clone(),
+        EXT_V2_TOKEN.clone(),
+        DIP721_TOKEN.clone(),
+        ICPUNKS_TOKEN.clone(),
     ]
 });
 
@@ -155,8 +200,28 @@ fn test_remove_custom_erc1155_token() {
 }
 
 #[test]
+fn test_remove_custom_erc4626_token() {
+    test_remove_custom_token(&ERC4626_TOKEN)
+}
+
+#[test]
 fn test_remove_custom_icrc_token() {
     test_remove_custom_token(&USER_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_ext_v2_token() {
+    test_remove_custom_token(&EXT_V2_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_di721_token() {
+    test_remove_custom_token(&DIP721_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_icpunks_token() {
+    test_remove_custom_token(&ICPUNKS_TOKEN)
 }
 
 #[test]

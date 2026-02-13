@@ -35,14 +35,14 @@ import { createSigner, signTransaction, type CreateSignerParams } from '$sol/uti
 import {
 	decodeTransactionMessage,
 	mapSolTransactionMessage,
-	parseSolBase64TransactionMessage,
-	transactionMessageHasBlockhashLifetime
+	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	getBase58Decoder,
 	getBase64Decoder,
 	getTransactionEncoder,
+	isTransactionMessageWithBlockhashLifetime,
 	address as solAddress,
 	type Base64EncodedWireTransaction
 } from '@solana/kit';
@@ -134,7 +134,7 @@ const getSignatureWithSending = async ({
 
 	// It should not happen, since we receive transaction with blockhash lifetime,
 	// but just to guarantee the correct type casting
-	if (!transactionMessageHasBlockhashLifetime(transactionMessageRaw)) {
+	if (!isTransactionMessageWithBlockhashLifetime(transactionMessageRaw)) {
 		console.warn(
 			'WalletConnect Solana transaction does not have blockhash lifetime, cannot be sent'
 		);

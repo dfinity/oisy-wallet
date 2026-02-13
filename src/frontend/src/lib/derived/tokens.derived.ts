@@ -5,93 +5,91 @@ import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
+import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
-import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
-import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
+import { extTokens } from '$icp/derived/ext.derived';
+import { icPunksTokens } from '$icp/derived/icpunks.derived';
+import { icrcChainFusionDefaultTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
-import { exchanges } from '$lib/derived/exchange.derived';
-import { balancesStore } from '$lib/stores/balances.store';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import type { CustomToken } from '$lib/types/custom-token';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
-import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
-import { isTokenFungible } from '$lib/utils/nft.utils';
-import {
-	filterEnabledTokens,
-	sumMainnetTokensUsdBalancesPerNetwork
-} from '$lib/utils/tokens.utils';
+import { filterEnabledTokens } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const tokens: Readable<Token[]> = derived(
+export const nativeTokens: Readable<Token[]> = derived(
 	[
-		erc20Tokens,
-		erc721Tokens,
-		erc1155Tokens,
-		sortedIcrcTokens,
-		splTokens,
 		defaultIcpTokens,
-		enabledEthereumTokens,
 		enabledBitcoinTokens,
-		enabledSolanaTokens,
-		enabledEvmTokens
+		enabledEthereumTokens,
+		enabledEvmTokens,
+		enabledSolanaTokens
 	],
 	([
-		$erc20Tokens,
-		$erc721Tokens,
-		$erc1155Tokens,
-		$icrcTokens,
-		$splTokens,
 		$defaultIcpTokens,
-		$enabledEthereumTokens,
 		$enabledBitcoinTokens,
-		$enabledSolanaTokens,
-		$enabledEvmTokens
+		$enabledEthereumTokens,
+		$enabledEvmTokens,
+		$enabledSolanaTokens
 	]) => [
 		...$defaultIcpTokens,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
-		...$enabledEvmTokens,
+		...$enabledEvmTokens
+	]
+);
+
+export const fungibleTokens: Readable<Token[]> = derived(
+	[nativeTokens, erc20Tokens, erc4626Tokens, icrcTokens, splTokens],
+	([$nativeTokens, $erc20Tokens, $erc4626Tokens, $icrcTokens, $splTokens]) => [
+		...$nativeTokens,
 		...$erc20Tokens,
-		...$erc721Tokens,
-		...$erc1155Tokens,
+		...$erc4626Tokens,
 		...$icrcTokens,
 		...$splTokens
 	]
 );
 
-export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
-	$tokens.filter(isTokenFungible)
+export const nonFungibleTokens: Readable<CustomToken<NonFungibleToken>[]> = derived(
+	[erc721Tokens, erc1155Tokens, extTokens, icPunksTokens],
+	([$erc721Tokens, $erc1155Tokens, $extTokens, $icPunksTokens]) => [
+		...$erc721Tokens,
+		...$erc1155Tokens,
+		...$extTokens,
+		...$icPunksTokens
+	]
 );
 
-export const nonFungibleTokens: Readable<NonFungibleToken[]> = derived(
-	[erc721Tokens, erc1155Tokens],
-	([$erc721Tokens, $erc1155Tokens]) => [...$erc721Tokens, ...$erc1155Tokens]
-);
-
-export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
-	$tokens.filter((token) => isDefaultEthereumToken(token))
+export const tokens: Readable<Token[]> = derived(
+	[fungibleTokens, nonFungibleTokens],
+	([$fungibleTokens, $nonFungibleTokens]) => [...$fungibleTokens, ...$nonFungibleTokens]
 );
 
 export const tokensToPin: Readable<TokenToPin[]> = derived(
-	[icrcChainFusionDefaultTokens, defaultEthereumTokens],
-	([$icrcChainFusionDefaultTokens, $defaultEthereumTokens]) => [
+	[icrcChainFusionDefaultTokens, enabledEvmTokens],
+	([$icrcChainFusionDefaultTokens, $enabledEvmTokens]) => [
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
 		TESTICP_TOKEN,
 		SOLANA_TOKEN,
 		...$icrcChainFusionDefaultTokens,
-		...$defaultEthereumTokens.filter((token) => token !== ETHEREUM_TOKEN)
+		...$enabledEvmTokens
 	]
 );
 
@@ -124,12 +122,59 @@ export const enabledNonFungibleTokens: Readable<NonFungibleToken[]> = derived(
 	filterEnabledTokens
 );
 
+const enabledNonFungibleTokensBySection: Readable<
+	Record<CustomTokenSection | 'null', NonFungibleToken[]>
+> = derived([enabledNonFungibleTokens], ([$enabledNonFungibleTokens]) =>
+	$enabledNonFungibleTokens.reduce<Record<CustomTokenSection | 'null', NonFungibleToken[]>>(
+		(acc, token) => {
+			const { section } = token;
+
+			const key = isNullish(section) ? 'null' : section;
+
+			(acc[key] ??= []).push(token);
+
+			return acc;
+		},
+		{} as Record<CustomTokenSection | 'null', NonFungibleToken[]>
+	)
+);
+
+export const enabledNonFungibleTokensWithoutSection: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleTokensBySection],
+	([$enabledNonFungibleTokensBySection]) => $enabledNonFungibleTokensBySection['null'] ?? []
+);
+
+export const enabledNonFungibleTokensBySectionHidden: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleTokensBySection],
+	([$enabledNonFungibleTokensBySection]) =>
+		$enabledNonFungibleTokensBySection[CustomTokenSection.HIDDEN] ?? []
+);
+
+export const enabledNonFungibleTokensBySectionSpam: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleTokensBySection],
+	([$enabledNonFungibleTokensBySection]) =>
+		$enabledNonFungibleTokensBySection[CustomTokenSection.SPAM] ?? []
+);
+
+export const enabledNonFungibleTokensWithoutSpam: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleTokensWithoutSection, enabledNonFungibleTokensBySectionHidden],
+	([$enabledNonFungibleTokensWithoutSection, $enabledNonFungibleTokensBySectionHidden]) => [
+		...$enabledNonFungibleTokensWithoutSection,
+		...$enabledNonFungibleTokensBySectionHidden
+	]
+);
+
 /**
- * It isn't performant to post filter again the Erc20 tokens that are enabled, but it's code wise convenient to avoid duplication of logic.
+ * It isn't performant to post filter again the Erc20 tokens that are enabled, but it's codewise convenient to avoid duplication of logic.
  */
 export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 	[enabledTokens],
 	([$enabledTokens]) => $enabledTokens.filter(isTokenErc20)
+);
+
+export const enabledErc4626Tokens: Readable<Erc4626Token[]> = derived(
+	[enabledTokens],
+	([$enabledTokens]) => $enabledTokens.filter(isTokenErc4626)
 );
 
 /**
@@ -147,15 +192,3 @@ export const enabledIcTokens: Readable<IcToken[]> = derived([enabledTokens], ([$
 export const enabledSplTokens: Readable<SplToken[]> = derived([enabledTokens], ([$enabledTokens]) =>
 	$enabledTokens.filter(isTokenSpl)
 );
-
-/**
- * A store with NetworkId-number dictionary with total USD balance of mainnet tokens per network.
- */
-export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdBalancePerNetwork> =
-	derived([enabledTokens, balancesStore, exchanges], ([$enabledTokens, $balances, $exchanges]) =>
-		sumMainnetTokensUsdBalancesPerNetwork({
-			$tokens: $enabledTokens,
-			$balances,
-			$exchanges
-		})
-	);

@@ -14,13 +14,12 @@ export const SPX_TOKEN_ID: TokenId = parseTokenId(SPX_SYMBOL);
 export const SPX_TOKEN: RequiredEvmErc20Token = {
 	id: SPX_TOKEN_ID,
 	network: BASE_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'SPX6900',
 	symbol: SPX_SYMBOL,
 	decimals: SPX_DECIMALS,
 	icon: spx,
 	address: '0x50dA645f148798F68EF2d7dB7C1CB22A6819bb2C',
-	exchange: 'erc20',
 	groupData: SPX_TOKEN_GROUP
 };

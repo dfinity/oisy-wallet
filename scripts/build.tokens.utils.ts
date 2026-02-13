@@ -1,10 +1,15 @@
 import type { EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { AnonymousIdentity, type HttpAgent } from '@dfinity/agent';
-import { IcrcLedgerCanister, mapTokenMetadata } from '@dfinity/ledger-icrc';
-import type { IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc/dist/types/types/ledger.responses';
-import { Principal } from '@dfinity/principal';
-import { createAgent } from '@dfinity/utils';
+import { createAgent, fromDefinedNullable } from '@dfinity/utils';
+import {
+	IcrcLedgerCanister,
+	fromCandidAccount,
+	mapTokenMetadata,
+	type IcrcAccount,
+	type IcrcTokenMetadataResponse
+} from '@icp-sdk/canisters/ledger/icrc';
+import { AnonymousIdentity, type HttpAgent } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { closeSync, openSync, writeSync } from 'node:fs';
 
 export const agent: HttpAgent = await createAgent({
@@ -27,6 +32,40 @@ export const loadMetadata = async (
 	const metadata = await getMetadata(Principal.from(ledgerCanisterId));
 
 	return mapTokenMetadata(metadata);
+};
+
+export const getIndexPrincipal = async (
+	ledgerCanisterId: LedgerCanisterIdText
+): Promise<Principal | undefined> => {
+	const { getIndexPrincipal } = IcrcLedgerCanister.create({
+		agent,
+		canisterId: Principal.from(ledgerCanisterId)
+	});
+
+	try {
+		return await getIndexPrincipal({ certified: true });
+	} catch (_: unknown) {
+		// This method is just to get the index principal if the token supports the method `icrc106_get_index_principal`.
+		// So if it fails, we do not really care and consider it as not supported.
+	}
+};
+
+export const getMintingAccount = async (
+	ledgerCanisterId: LedgerCanisterIdText
+): Promise<IcrcAccount | undefined> => {
+	const { getMintingAccount } = IcrcLedgerCanister.create({
+		agent,
+		canisterId: Principal.from(ledgerCanisterId)
+	});
+
+	try {
+		const account = await getMintingAccount({ certified: true });
+
+		return fromCandidAccount(fromDefinedNullable(account));
+	} catch (_: unknown) {
+		// This method is just to get the minting account.
+		// So if it fails, we do not really care and consider it as non-existent.
+	}
 };
 
 export const saveLogo = ({

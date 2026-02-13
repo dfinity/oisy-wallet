@@ -10,7 +10,7 @@ export const mockTokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN
 export const mockValidToken: Token = {
 	id: parseTokenId('TokenId'),
 	network: ICP_NETWORK,
-	standard: 'icp',
+	standard: { code: 'icp' },
 	category: 'default',
 	name: 'SampleToken',
 	symbol: 'STK',

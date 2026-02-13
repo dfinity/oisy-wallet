@@ -37,7 +37,6 @@
 		});
 
 		modalStore.openCkBTCReceive(modalId);
-		return;
 	};
 
 	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));

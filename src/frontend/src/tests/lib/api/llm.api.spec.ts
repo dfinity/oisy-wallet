@@ -1,4 +1,4 @@
-import type { chat_request_v1, chat_response_v1 } from '$declarations/llm/declarations/llm.did';
+import type { chat_request_v1, chat_response_v1 } from '$declarations/llm/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import { LlmCanister } from '$lib/canisters/llm.canister';
 import * as appConstants from '$lib/constants/app.constants';
@@ -50,7 +50,7 @@ describe('llm.api', () => {
 				request
 			});
 
-			await expect(res).rejects.toThrow();
+			await expect(res).rejects.toThrowError();
 		});
 	});
 });

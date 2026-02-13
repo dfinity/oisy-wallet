@@ -176,9 +176,11 @@ describe('PowProtector', () => {
 					$theme: 'light'
 				});
 
-				const banner = getByAltText(altText);
+				await waitFor(() => {
+					const banner = getByAltText(altText);
 
-				expect(banner).toBeInTheDocument();
+					expect(banner).toBeInTheDocument();
+				});
 			});
 
 			it('should display the POW protector title and description', async () => {

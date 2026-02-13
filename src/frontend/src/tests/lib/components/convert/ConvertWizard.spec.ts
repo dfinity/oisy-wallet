@@ -1,6 +1,11 @@
+import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
+import * as btcUtxosService from '$btc/services/btc-utxos.service';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
-	initUtxosFeeStore,
 	UTXOS_FEE_CONTEXT_KEY,
+	initUtxosFeeStore,
 	type UtxosFeeContext
 } from '$btc/stores/utxos-fee.store';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
@@ -14,6 +19,7 @@ import {
 	initEthFeeStore,
 	type EthFeeContext
 } from '$eth/stores/eth-fee.store';
+import * as bitcoinApi from '$icp/api/bitcoin.api';
 import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 import {
 	BTC_CONVERT_FORM_TEST_ID,
@@ -28,8 +34,8 @@ import {
 	type ConvertContext
 } from '$lib/stores/convert.store';
 import {
-	initTokenActionValidationErrorsContext,
 	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
 import type { Token } from '$lib/types/token';
@@ -70,7 +76,7 @@ describe('ConvertWizard', () => {
 	const mockContext = (sourceToken: Token) =>
 		new Map<
 			symbol,
-			ConvertContext | TokenActionValidationErrorsContext | UtxosFeeContext | EthFeeContext
+			UtxosFeeContext | EthFeeContext | ConvertContext | TokenActionValidationErrorsContext
 		>([
 			[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }],
 			[
@@ -90,6 +96,22 @@ describe('ConvertWizard', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		allUtxosStore.reset();
+		feeRatePercentilesStore.reset();
+		btcPendingSentTransactionsStore.reset();
+
+		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
+			utxos: [],
+			tip_block_hash: new Uint8Array(),
+			tip_height: 100,
+			next_page: []
+		});
+		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
+		vi.spyOn(
+			btcPendingSentTransactionsServices,
+			'loadBtcPendingSentTransactions'
+		).mockResolvedValue({ success: true });
+
 		mockPage.reset();
 	});
 
@@ -103,7 +125,7 @@ describe('ConvertWizard', () => {
 	});
 
 	it('should display ETH convert wizard if sourceToken network is ETH', () => {
-		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
+		mockPage.mockNetwork(ETHEREUM_NETWORK_ID.description);
 
 		const { getByTestId } = render(ConvertWizard, {
 			props,

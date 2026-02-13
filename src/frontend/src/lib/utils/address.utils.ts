@@ -9,28 +9,11 @@ import type { NetworkId } from '$lib/types/network';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
-import { parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const mapAddress = <T extends Address>(
 	$addressStore: AddressStoreData<T>
 ): OptionAddress<T> => mapCertifiedData($addressStore);
-
-export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
-	if (isNullish(address)) {
-		return false;
-	}
-
-	try {
-		parseBtcAddress(address);
-		return true;
-	} catch (_: unknown) {
-		return false;
-	}
-};
-
-export const invalidBtcAddress = (address: BtcAddress | undefined): boolean =>
-	!isBtcAddress(address);
 
 export const mapNetworkIdToAddressType = (
 	networkId: NetworkId | undefined

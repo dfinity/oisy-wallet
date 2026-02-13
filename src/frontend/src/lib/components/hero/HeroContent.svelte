@@ -4,6 +4,7 @@
 	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { isErc20Icp } from '$eth/utils/token.utils';
+	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import {
 		isGLDTToken as isGLDTTokenUtil,
 		isVCHFToken as isVCHFTokenUtil,
@@ -33,13 +34,15 @@
 		networkICP,
 		networkSolana,
 		pseudoNetworkChainFusion,
-		networkArbitrum
+		networkArbitrum,
+		selectedNetworkNftUnsupported
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
-	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
 
@@ -48,15 +51,17 @@
 			? mapTokenUi({
 					token: $pageToken,
 					$balances: $balancesStore,
+					$stakeBalances,
 					$exchanges
 				})
 			: undefined
 	);
 
-	const { loading, outflowActionsDisabled, ...rest } = initHeroContext();
+	const { loading, outflowActionsDisabled, inflowActionsDisabled, ...rest } = initHeroContext();
 	setContext<HeroContext>(HERO_CONTEXT_KEY, {
 		loading,
 		outflowActionsDisabled,
+		inflowActionsDisabled,
 		...rest
 	});
 
@@ -70,8 +75,16 @@
 
 	let isTransactionsPage = $derived(isRouteTransactions(page));
 
+	let isNftsPage = $derived(isRouteNfts(page));
+
+	let hasNoUsableBalance = $derived(!$isIcMintingAccount && ($balanceZero || isNullish($balance)));
+
 	$effect(() => {
-		outflowActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
+		outflowActionsDisabled.set(isTransactionsPage && hasNoUsableBalance);
+	});
+
+	$effect(() => {
+		inflowActionsDisabled.set(isNftsPage && $selectedNetworkNftUnsupported);
 	});
 
 	let isTrumpToken = $derived(nonNullish($pageToken) ? isTrumpTokenUtil($pageToken) : false);
@@ -88,7 +101,7 @@
 </script>
 
 <div
-	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary bg-pos-0 p-3 text-center text-primary-inverted transition-all duration-500 ease-in-out md:rounded-[28px] md:p-5"
+	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center text-primary-inverted transition-all duration-500 ease-in-out md:rounded-[28px] md:p-5"
 	class:bg-center={isVeurToken}
 	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken}
 	class:bg-gradient-to-r={isGradientToRight}

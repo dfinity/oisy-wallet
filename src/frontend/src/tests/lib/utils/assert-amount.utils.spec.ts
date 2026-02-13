@@ -6,8 +6,8 @@ import {
 	assertErc20Amount
 } from '$lib/utils/assert-amount.utils';
 import { mockCkBtcMinterInfo } from '$tests/mocks/ckbtc.mock';
-import type { MinterInfo as CkBtcMinterInfo } from '@dfinity/ckbtc';
-import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 
 describe('asserts-amount.utils', () => {
 	describe('assertAmount', () => {
@@ -115,7 +115,7 @@ describe('asserts-amount.utils', () => {
 						data: {
 							...params.minterInfo.data,
 							retrieve_btc_min_amount: 5000n
-						} as CkBtcMinterInfo
+						} as CkBtcMinterDid.MinterInfo
 					}
 				})
 			).toBe('minimum-amount-not-reached');
@@ -144,7 +144,7 @@ describe('asserts-amount.utils', () => {
 			balance: 2000n,
 			fee: 100n,
 			minterInfo: {
-				data: { minimum_withdrawal_amount: [500n] } as CkEthMinterInfo,
+				data: { minimum_withdrawal_amount: [500n] } as CkEthMinterDid.MinterInfo,
 				certified: true
 			}
 		};
@@ -194,7 +194,7 @@ describe('asserts-amount.utils', () => {
 						data: {
 							...params.minterInfo.data,
 							minimum_withdrawal_amount: [5000n]
-						} as CkEthMinterInfo
+						} as CkEthMinterDid.MinterInfo
 					}
 				})
 			).toBe('minimum-amount-not-reached');

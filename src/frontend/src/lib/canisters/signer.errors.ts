@@ -3,7 +3,7 @@ import type {
 	PaymentError,
 	GetAddressError as SignerCanisterBtcError,
 	SendBtcError as SignerCanisterSendBtcError
-} from '$declarations/signer/declarations/signer.did';
+} from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { jsonReplacer } from '@dfinity/utils';
 

@@ -5,9 +5,10 @@ import type { EnvAdditionalIcrcTokensWithMetadata } from '$env/types/env-icrc-ad
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { isNullish, jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { loadMetadata, saveLogo } from './build.tokens.utils';
+import { getIndexPrincipal, getMintingAccount, loadMetadata, saveLogo } from './build.tokens.utils';
 import { ADDITIONAL_ICRC_JSON_FILE } from './constants.mjs';
 
 interface TokensAndIcons {
@@ -39,7 +40,7 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 				throw new Error(`Data is missing for token symbol ${key}.`);
 			}
 
-			const { ledgerCanisterId, ...rest } = token;
+			const { ledgerCanisterId, indexCanisterId: originalIndexCanisterId, ...rest } = token;
 
 			if (isNullish(ledgerCanisterId)) {
 				throw new Error(`Ledger canister ID is missing for token symbol ${key}.`);
@@ -61,11 +62,23 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 
 			const { icon, ...metadata } = metadataWithIcon;
 
+			const putativeIndexCanisterPrincipal = await getIndexPrincipal(ledgerCanisterId);
+
+			const indexCanisterId = nonNullish(putativeIndexCanisterPrincipal)
+				? putativeIndexCanisterPrincipal.toText()
+				: originalIndexCanisterId;
+
+			const mintingAccount = await getMintingAccount(ledgerCanisterId);
+
 			return {
 				tokens: {
 					...accTokens,
 					[key]: {
 						ledgerCanisterId,
+						...(nonNullish(indexCanisterId) ? { indexCanisterId } : {}),
+						...(nonNullish(mintingAccount)
+							? { mintingAccount: encodeIcrcAccount(mintingAccount) }
+							: {}),
 						...rest,
 						...metadata
 					}

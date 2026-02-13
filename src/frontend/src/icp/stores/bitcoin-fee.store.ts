@@ -1,5 +1,5 @@
 import type { Option } from '$lib/types/utils';
-import type { EstimateWithdrawalFee } from '@dfinity/ckbtc';
+import type { EstimateWithdrawalFee } from '@icp-sdk/canisters/ckbtc';
 import { writable, type Readable } from 'svelte/store';
 
 export type BitcoinFeeStoreData = Option<{

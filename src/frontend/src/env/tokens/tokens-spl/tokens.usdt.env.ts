@@ -15,7 +15,7 @@ export const USDT_TOKEN_ID: TokenId = parseTokenId(USDT_SYMBOL);
 export const USDT_TOKEN: RequiredSplToken = {
 	id: USDT_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Tether USD',
 	symbol: USDT_SYMBOL,

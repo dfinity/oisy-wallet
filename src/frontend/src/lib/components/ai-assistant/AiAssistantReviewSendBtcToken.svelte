@@ -3,18 +3,20 @@
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
-	import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
+	import BtcUtxosFeeDisplay from '$btc/components/send/BtcUtxosFeeDisplay.svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
 	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
+	import { getBtcSourceAddress } from '$btc/services/btc-address.services';
 	import {
 		handleBtcValidationError,
 		sendBtc,
 		validateBtcSend
 	} from '$btc/services/btc-send.services';
-	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
-	import { getBtcSourceAddress } from '$btc/utils/btc-address.utils';
+	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
+	import { BtcValidationError } from '$btc/types/btc-send';
 	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
 	import { invalidSendAmount } from '$btc/utils/input.utils';
+	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
 		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
@@ -54,6 +56,8 @@
 	const { sendTokenNetworkId, sendTokenDecimals, sendToken, sendBalance, sendTokenSymbol } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	const { store: storeUtxosFeeData } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
+
 	let source = $derived(getBtcSourceAddress($sendTokenNetworkId));
 
 	let loading = $state(false);
@@ -81,7 +85,7 @@
 		}
 	});
 
-	let utxosFee = $derived<UtxosFee | undefined>(undefined);
+	let utxosFee = $derived($storeUtxosFeeData?.utxosFee);
 
 	let invalidDestination = $derived(
 		isInvalidDestinationBtc({
@@ -114,11 +118,6 @@
 			name: AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
 			metadata: sharedTrackingEventMetadata
 		});
-
-		const sendTrackingEventMetadata = {
-			...sharedTrackingEventMetadata,
-			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
-		};
 
 		if (isNullish($authIdentity)) {
 			return;
@@ -161,36 +160,45 @@
 
 		loading = true;
 
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
+			source: AI_ASSISTANT_SEND_TOKEN_SOURCE,
+			feeSatoshis: utxosFee.feeSatoshis.toString()
+		};
+
 		// Validate UTXOs before proceeding
-		try {
-			await validateBtcSend({
-				utxosFee,
-				source,
-				amount,
-				network,
-				identity: $authIdentity
-			});
-		} catch (err: unknown) {
-			loading = false;
-			sendCompleted = false;
+		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED) {
+			try {
+				await validateBtcSend({
+					utxosFee,
+					source,
+					amount,
+					network,
+					identity: $authIdentity
+				});
+			} catch (err: unknown) {
+				loading = false;
+				sendCompleted = false;
 
-			// Handle BtcValidationError with specific toastsError for each type
-			if (err instanceof BtcValidationError) {
-				handleBtcValidationError({ err });
+				// Handle BtcValidationError with specific toastsError for each type
+				if (err instanceof BtcValidationError) {
+					handleBtcValidationError({ err });
+				}
+
+				trackEvent({
+					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
+					metadata: sendTrackingEventMetadata
+				});
+
+				toastsError({
+					msg: { text: $i18n.send.error.unexpected },
+					err
+				});
+
+				return;
 			}
-
-			trackEvent({
-				name: TRACK_COUNT_BTC_VALIDATION_ERROR,
-				metadata: sendTrackingEventMetadata
-			});
-
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
-
-			return;
 		}
+
 		try {
 			await sendBtc({
 				destination,
@@ -224,8 +232,8 @@
 	};
 </script>
 
-<div class="mb-8 mt-2">
-	<BtcUtxosFee {amount} networkId={$sendTokenNetworkId} {source} bind:utxosFee />
+<div class="mt-2 mb-8">
+	<BtcUtxosFeeDisplay />
 </div>
 
 {#if !sendCompleted}

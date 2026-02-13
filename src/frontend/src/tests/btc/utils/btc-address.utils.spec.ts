@@ -1,5 +1,5 @@
 import { getBtcAddressString, parseBtcAddress } from '$btc/utils/btc-address.utils';
-import type { BtcAddress } from '$declarations/backend/declarations/backend.did';
+import type { BtcAddress } from '$declarations/backend/backend.did';
 import { assertNonNullish } from '@dfinity/utils';
 
 describe('btc-address.utils', () => {
@@ -124,9 +124,9 @@ describe('btc-address.utils', () => {
 
 		it('should return undefined for invalid BtcAddress objects', () => {
 			// @ts-expect-error Testing invalid input
-			expect(() => getBtcAddressString({})).toThrow();
+			expect(() => getBtcAddressString({})).toThrowError();
 			// @ts-expect-error Testing invalid input
-			expect(() => getBtcAddressString({ InvalidType: 'address' })).toThrow();
+			expect(() => getBtcAddressString({ InvalidType: 'address' })).toThrowError();
 		});
 	});
 

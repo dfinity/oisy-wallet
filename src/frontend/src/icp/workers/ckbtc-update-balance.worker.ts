@@ -17,6 +17,5 @@ export const onCkBtcUpdateBalanceMessage = async ({
 			return;
 		case 'startCkBTCUpdateBalanceTimer':
 			await scheduler.start(data);
-			return;
 	}
 };

@@ -14,15 +14,14 @@ export const WSTETH_TOKEN_ID: TokenId = parseTokenId(WSTETH_SYMBOL);
 export const WSTETH_TOKEN: RequiredErc20Token = {
 	id: WSTETH_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Wrapped liquid staked Ether 2.0',
 	symbol: WSTETH_SYMBOL,
 	decimals: WSTETH_DECIMALS,
 	icon: wsteth,
 	address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckWSTETH',
 	groupData: WSTETH_TOKEN_GROUP,
-	alwaysShowInTokenGroup: true
+	neverCollapseInTokenGroup: true
 };

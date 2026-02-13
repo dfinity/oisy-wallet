@@ -2,7 +2,7 @@ import { CKETH_EXPLORER_URL, CKETH_SEPOLIA_EXPLORER_URL } from '$env/explorers.e
 import {
 	IC_CKETH_LEDGER_CANISTER_ID,
 	STAGING_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import type { IcrcTransaction } from '$icp/types/ic-transaction';
@@ -16,8 +16,8 @@ import {
 	cleanupCkEthPendingStore,
 	setupCkEthPendingStore
 } from '$tests/mocks/ic-transactions.mock';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 describe('mapCkEthereumTransaction', () => {
@@ -49,6 +49,7 @@ describe('mapCkEthereumTransaction', () => {
 					spender: []
 				}
 			],
+			fee_collector: [],
 			timestamp: BigInt('1730723519954194000')
 		}
 	};

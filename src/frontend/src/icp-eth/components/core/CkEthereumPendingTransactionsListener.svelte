@@ -43,7 +43,7 @@
 	let twinToken = $derived(nonNullish(token) && isIcCkToken(token) ? token.twinToken : undefined);
 
 	let toContractAddress = $derived(
-		nonNullish(twinToken) && twinToken.standard === 'erc20'
+		nonNullish(twinToken) && twinToken.standard.code === 'erc20'
 			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '')
 			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '')
 	);

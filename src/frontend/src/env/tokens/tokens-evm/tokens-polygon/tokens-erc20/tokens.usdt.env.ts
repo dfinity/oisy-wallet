@@ -14,14 +14,13 @@ export const USDT_TOKEN_ID: TokenId = parseTokenId(USDT_SYMBOL);
 export const USDT_TOKEN: RequiredEvmBep20Token = {
 	id: USDT_TOKEN_ID,
 	network: POLYGON_MAINNET_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'Tether USD',
 	symbol: USDT_SYMBOL,
 	decimals: USDT_DECIMALS,
 	icon: usdt,
 	address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
-	exchange: 'erc20',
 	groupData: USDT_TOKEN_GROUP,
 	buy: {
 		onramperId: 'usdt_polygon'

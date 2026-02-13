@@ -1,5 +1,5 @@
 import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
-import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
@@ -19,7 +19,7 @@ import {
 	setupCkBtcPendingStores
 } from '$tests/mocks/ic-transactions.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
-import type { ReimbursedDeposit, ReimbursementRequest } from '@dfinity/ckbtc/dist/candid/minter';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 describe('ckbtc-transactions.utils', () => {
@@ -72,13 +72,13 @@ describe('ckbtc-transactions.utils', () => {
 
 		type RetrieveBtcStatusV2 =
 			| { Signing: null }
-			| { Confirmed: { txid: Uint8Array | number[] } }
-			| { Sending: { txid: Uint8Array | number[] } }
+			| { Confirmed: { txid: Uint8Array } }
+			| { Sending: { txid: Uint8Array } }
 			| { AmountTooLow: null }
-			| { WillReimburse: ReimbursementRequest }
+			| { WillReimburse: CkBtcMinterDid.ReimbursementRequest }
 			| { Unknown: null }
-			| { Submitted: { txid: Uint8Array | number[] } }
-			| { Reimbursed: ReimbursedDeposit }
+			| { Submitted: { txid: Uint8Array } }
+			| { Reimbursed: CkBtcMinterDid.ReimbursedDeposit }
 			| { Pending: null };
 
 		const mockBtcStatuses: BtcStatusesData = {

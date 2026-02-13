@@ -1,18 +1,12 @@
 <script lang="ts">
 	import { IconWallet } from '@dfinity/gix-components';
-	import {
-		ICRC25_PERMISSION_GRANTED,
-		ICRC27_ACCOUNTS,
-		type IcrcScope,
-		type IcrcScopedMethod,
-		type PermissionsConfirmation
-	} from '@dfinity/oisy-wallet-signer';
+	import { ICRC25_PERMISSION_GRANTED, ICRC27_ACCOUNTS } from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type Component, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import IconShield from '$lib/components/icons/IconShield.svelte';
+	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -26,11 +20,9 @@
 		permissionsPrompt: { payload, reset: resetPrompt }
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
-	let scopes: IcrcScope[];
-	$: scopes = $payload?.requestedScopes ?? [];
+	let scopes = $derived($payload?.requestedScopes ?? []);
 
-	let confirm: PermissionsConfirmation | undefined;
-	$: confirm = $payload?.confirm;
+	let confirm = $derived($payload?.confirm);
 
 	/**
 	 * During the initial UX review, it was decided that permissions should not be permanently denied when "Rejected," but instead should be ignored.
@@ -67,8 +59,7 @@
 
 	const onApprove = () => approvePermissions();
 
-	let listItems: Record<IcrcScopedMethod, { icon: Component; label: string }>;
-	$: listItems = {
+	let listItems = $derived({
 		icrc27_accounts: {
 			icon: IconWallet,
 			label: replaceOisyPlaceholders($i18n.signer.permissions.text.icrc27_accounts)
@@ -77,29 +68,28 @@
 			icon: IconShield,
 			label: $i18n.signer.permissions.text.icrc49_call_canister
 		}
-	};
+	});
 
-	let requestAccountsPermissions = false;
-	$: requestAccountsPermissions = nonNullish(
-		scopes.find(({ scope: { method } }) => method === ICRC27_ACCOUNTS)
+	let requestAccountsPermissions = $derived(
+		nonNullish(scopes.find(({ scope: { method } }) => method === ICRC27_ACCOUNTS))
 	);
 </script>
 
 {#if nonNullish($payload)}
-	<form method="POST" on:submit={onApprove} in:fade>
+	<form method="POST" onsubmit={onApprove} in:fade>
 		<h2 class="mb-4 text-center">{$i18n.signer.permissions.text.title}</h2>
 
 		<SignerOrigin payload={$payload} />
 
 		<div class="mb-6 rounded-lg border border-brand-subtle-10 bg-brand-subtle-20 p-6">
-			<p class="break-normal font-bold">{$i18n.signer.permissions.text.requested_permissions}</p>
+			<p class="font-bold break-normal">{$i18n.signer.permissions.text.requested_permissions}</p>
 
 			<ul class="mt-2.5 flex list-none flex-col gap-1">
 				{#each scopes as { scope: { method } } (method)}
-					{@const { icon, label } = listItems[method]}
+					{@const { icon: Icon, label } = listItems[method]}
 
-					<li class="flex items-center gap-2 break-normal pb-1.5">
-						<svelte:component this={icon} size="24" />
+					<li class="flex items-center gap-2 pb-1.5 break-normal">
+						<Icon size="24" />
 						{label}
 					</li>
 				{/each}

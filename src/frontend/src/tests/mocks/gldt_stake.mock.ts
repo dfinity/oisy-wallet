@@ -1,12 +1,16 @@
-import type { StakePositionResponse } from '$declarations/gldt_stake/declarations/gldt_stake.did';
-import type { Duration } from '$declarations/gldt_stake/gldt_stake.did';
+import type {
+	DailyAnalytics,
+	Duration,
+	Response,
+	StakePositionResponse
+} from '$declarations/gldt_stake/gldt_stake.did';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 
 export const stakePositionMockResponse = {
 	staked: 10000n,
 	dissolve_delay: {
-		secs: 100n,
+		secs: 10000000000n,
 		nanos: 1000
 	} as Duration,
 	claimable_rewards: toNullable([{ ICP: null }, 100n]),
@@ -15,12 +19,28 @@ export const stakePositionMockResponse = {
 	owned_by: mockPrincipal,
 	dissolve_events: [
 		{
-			dissolved_date: 1000n,
+			dissolved_date: 1764237501193n,
 			completed: true,
 			amount: 1000n,
-			percentage: 1000
+			percentage: 1
 		}
 	],
 	weighted_stake: 1000n,
 	instant_dissolve_fee: 1000n
 } as StakePositionResponse;
+
+export const dailyAnalyticsMockResponse = {
+	apy: 5,
+	staked_gldt: 1000000n,
+	rewards: toNullable([{ ICP: null }, 100n]),
+	weighted_stake: 1000n
+} as DailyAnalytics;
+
+export const configMockResponse = {
+	reward_tokens: ['ICP'],
+	max_dissolve_events: 5n,
+	early_unlock_fee: 0.05,
+	unlock_delay: 50000n,
+	stake_limit_max: 100000000n,
+	stake_limit_min: 10000n
+} as Response;

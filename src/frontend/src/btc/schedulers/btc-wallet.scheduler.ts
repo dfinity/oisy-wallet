@@ -7,9 +7,9 @@ import {
 } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
-import type { PendingTransaction } from '$declarations/backend/declarations/backend.did';
+import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
-import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
+import { BITCOIN_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
 import { getBtcWalletBalance } from '$icp/utils/btc.utils';
 import { getPendingBtcTransactions } from '$lib/api/backend.api';
@@ -18,6 +18,7 @@ import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/
 import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import { createQueryAndUpdateWithWarmup } from '$lib/services/query.services';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type {
@@ -29,16 +30,15 @@ import {
 	mapCkBtcBitcoinNetworkToBackendBitcoinNetwork,
 	mapToSignerBitcoinNetwork
 } from '$lib/utils/network.utils';
-import type { Identity } from '@dfinity/agent';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import {
 	assertNonNullish,
 	isNullish,
 	jsonReplacer,
 	nonNullish,
-	queryAndUpdate,
 	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
+import type { Identity } from '@icp-sdk/core/agent';
 
 interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 	bitcoinNetwork: BitcoinNetwork;
@@ -59,6 +59,16 @@ interface BtcWalletData {
 }
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
+	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
+
+	private get queryAndUpdateWithWarmup() {
+		if (isNullish(this._queryAndUpdateWithWarmup)) {
+			this._queryAndUpdateWithWarmup = createQueryAndUpdateWithWarmup();
+		}
+
+		return this._queryAndUpdateWithWarmup;
+	}
+
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
 
 	private failedSyncCounter = 0;
@@ -120,6 +130,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			};
 		}
 	}
+
 	private async loadBtcTransactionsData({ btcAddress }: { btcAddress: BtcAddress }): Promise<{
 		transactions: CertifiedData<BtcTransactionUi>[];
 		latestBitcoinBlockHeight: number;
@@ -150,9 +161,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				})),
 				latestBitcoinBlockHeight
 			};
-		} catch (error) {
-			// We don't want to disrupt the user experience if we can't fetch the transactions or latest block height.
-			console.error('Error fetching BTC transactions data:', error);
+		} catch (_: unknown) {
 			// TODO: Return an error instead of an empty array.
 			return {
 				transactions: [],
@@ -270,7 +279,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		const btcAddress = data?.btcAddress.data;
 		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
 
-		await queryAndUpdate<BtcWalletData>({
+		await this.queryAndUpdateWithWarmup<BtcWalletData>({
 			request: ({ identity: _, certified }) =>
 				this.loadWalletData({
 					certified,
@@ -290,8 +299,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				if (FAILURE_THRESHOLD <= this.failedSyncCounter) {
 					this.postMessageWalletError({ error });
 				}
-			},
-			resolution: 'all_settled'
+			}
 		});
 	};
 

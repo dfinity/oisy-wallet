@@ -22,13 +22,25 @@ vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
 
 let workerInstance: Worker;
 
-vi.mock('$lib/workers/workers?worker', () => ({
-	default: vi.fn().mockImplementation(() => {
-		// @ts-expect-error testing this on purpose with a mock class
-		workerInstance = new Worker();
-		return workerInstance;
-	})
-}));
+vi.mock('$lib/workers/workers?worker', () => {
+	class MockWorkers {
+		constructor() {
+			// @ts-expect-error testing this on purpose with a mock class
+			workerInstance = new Worker();
+			return workerInstance;
+		}
+	}
+
+	return {
+		default: MockWorkers
+	};
+});
+
+const mockId = 'abcdefgh';
+
+vi.stubGlobal('crypto', {
+	randomUUID: vi.fn().mockReturnValue(mockId)
+});
 
 describe('worker.auth.services', () => {
 	describe('AuthWorker', () => {
@@ -52,20 +64,27 @@ describe('worker.auth.services', () => {
 			worker.syncAuthIdle(mockData);
 
 			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
-				msg: 'startIdleTimer'
+				msg: 'startIdleTimer',
+				workerId: mockId
 			});
 		});
 
 		it('should stop the worker and send the correct stop message if the identity is nullish', () => {
 			worker.syncAuthIdle({ ...mockData, auth: { identity: null } });
 
-			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({ msg: 'stopIdleTimer' });
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'stopIdleTimer',
+				workerId: mockId
+			});
 		});
 
 		it('should stop the worker and send the correct stop message if it is in locked state', () => {
 			worker.syncAuthIdle({ ...mockData, locked: true });
 
-			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({ msg: 'stopIdleTimer' });
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'stopIdleTimer',
+				workerId: mockId
+			});
 		});
 
 		describe('onmessage', () => {

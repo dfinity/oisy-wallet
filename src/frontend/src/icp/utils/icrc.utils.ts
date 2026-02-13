@@ -4,42 +4,37 @@ import {
 	FORSETISCN_LEDGER_CANISTER_ID,
 	GHOSTNODE_LEDGER_CANISTER_ID,
 	ICONFUCIUS_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
-import { icrc1SupportedStandards } from '$icp/api/icrc-ledger.api';
+} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import {
-	IcTokenStandards,
-	type IcCkInterface,
-	type IcFee,
-	type IcInterface,
-	type IcToken
-} from '$icp/types/ic-token';
 import type {
-	IcTokenExtended,
-	IcTokenWithoutIdExtended,
-	IcrcCustomToken
-} from '$icp/types/icrc-custom-token';
+	IcCkInterface,
+	IcFee,
+	IcInterface,
+	IcToken,
+	IcTokenWithoutId
+} from '$icp/types/ic-token';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	IcrcMetadataResponseEntries,
 	mapTokenMetadata,
-	type IcrcTokenMetadataResponse,
-	type IcrcValue
-} from '@dfinity/ledger-icrc';
-import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	type IcrcLedgerDid,
+	type IcrcTokenMetadataResponse
+} from '@icp-sdk/canisters/ledger/icrc';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	metadata: IcrcTokenMetadataResponse;
 	category: TokenCategory;
-	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
+	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
 };
 
-const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
+export const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
 	[BITCAT_LEDGER_CANISTER_ID]: 'BITCAT',
 	[FORSETISCN_LEDGER_CANISTER_ID]: 'FORSETISCN',
 	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE',
@@ -77,7 +72,7 @@ export const mapIcrcToken = ({
 	icrcCustomTokens,
 	ledgerCanisterId,
 	...rest
-}: IcrcLoadData): IcTokenExtended | undefined => {
+}: IcrcLoadData): IcToken | undefined => {
 	const token = mapOptionalToken(metadata);
 
 	if (isNullish(token)) {
@@ -98,7 +93,7 @@ export const mapIcrcToken = ({
 	return {
 		id: parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
-		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? 'icrc',
+		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? { code: 'icrc' },
 		symbol,
 		...(notEmptyString(icon) && { icon }),
 		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
@@ -120,23 +115,19 @@ const mapOptionalToken = (response: IcrcTokenMetadataResponse): IcrcTokenMetadat
 
 // eslint-disable-next-line local-rules/prefer-object-params -- This is a sorting function, so the parameters will be provided not as an object but as separate arguments.
 export const sortIcTokens = (
-	{ name: nameA, position: positionA, exchangeCoinId: exchangeCoinIdA }: IcToken,
-	{ name: nameB, position: positionB, exchangeCoinId: exchangeCoinIdB }: IcToken
+	{ name: nameA, exchangeCoinId: exchangeCoinIdA }: IcToken,
+	{ name: nameB, exchangeCoinId: exchangeCoinIdB }: IcToken
 ) =>
-	positionA === positionB
-		? exchangeCoinIdA === exchangeCoinIdB ||
-			isNullish(exchangeCoinIdA) ||
-			isNullish(exchangeCoinIdB)
-			? nameA.localeCompare(nameB)
-			: exchangeCoinIdA.localeCompare(exchangeCoinIdB)
-		: positionA - positionB;
+	exchangeCoinIdA === exchangeCoinIdB || isNullish(exchangeCoinIdA) || isNullish(exchangeCoinIdB)
+		? nameA.localeCompare(nameB)
+		: exchangeCoinIdA.localeCompare(exchangeCoinIdB);
 
 export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	icrcCustomTokens,
 	ledgerCanisterId
 }: {
 	ledgerCanisterId: CanisterIdText;
-	icrcCustomTokens: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
+	icrcCustomTokens: Record<LedgerCanisterIdText, IcTokenWithoutId>;
 }): IcrcTokenMetadataResponse | undefined => {
 	const token = icrcCustomTokens[ledgerCanisterId];
 
@@ -146,7 +137,9 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 
 	const { symbol, icon: tokenIcon, name, fee, decimals } = token;
 
-	const icon: [IcrcMetadataResponseEntries.LOGO, IcrcValue] | undefined = nonNullish(tokenIcon)
+	const icon: [IcrcMetadataResponseEntries.LOGO, IcrcLedgerDid.Value] | undefined = nonNullish(
+		tokenIcon
+	)
 		? [IcrcMetadataResponseEntries.LOGO, { Text: tokenIcon }]
 		: undefined;
 
@@ -159,38 +152,24 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	];
 };
 
-export const isTokenIcp = (token: Partial<IcToken>): token is IcToken => token.standard === 'icp';
+export const isTokenIcp = (token: Partial<IcToken>): token is IcToken =>
+	token.standard?.code === 'icp';
 
-export const isTokenIcrc = (token: Partial<IcToken>): token is IcToken => token.standard === 'icrc';
+export const isTokenIcrc = (token: Partial<IcToken>): token is IcToken =>
+	token.standard?.code === 'icrc';
 
 export const isTokenDip20 = (token: Partial<IcToken>): token is IcToken =>
-	token.standard === 'dip20';
+	token.standard?.code === 'dip20';
 
 export const isTokenIc = (token: Partial<IcToken>): token is IcToken =>
 	isTokenIcp(token) || isTokenIcrc(token) || isTokenDip20(token);
 
-export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
-	isTokenIc(token) && 'enabled' in token;
+export const isTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
+	isTokenIc(token) && isTokenToggleable(token);
 
 const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>
 	'minterCanisterId' in token && 'twinToken' in token;
 
-export const isIcrcTokenSupportIcrc2 = async ({
-	identity,
-	ledgerCanisterId
-}: {
-	identity: OptionIdentity;
-	ledgerCanisterId: CanisterIdText;
-}) => {
-	const supportedStandards = await icrc1SupportedStandards({
-		identity,
-		ledgerCanisterId
-	});
-
-	return supportedStandards.some(({ name }) => name === IcTokenStandards.icrc2);
-};
-
-// TODO: create tests
 export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 	...token,
 	...(isIcCkInterface(token) && nonNullish(token.twinToken)
@@ -203,7 +182,6 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 		: {})
 });
 
-// TODO: create tests
 export const mapTokenOisySymbol = (token: IcInterface): IcInterface => ({
 	...token,
 	...(nonNullish(CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId])

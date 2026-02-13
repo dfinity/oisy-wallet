@@ -81,29 +81,24 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  * If the addresses are loaded from the IDB:
  * - The addresses will be validated.
  * - The additional data will be loaded.
- * - The progress modal will not be displayed.
  * If the addresses are loaded from the backend:
  * - The signer allowance will be initialized.
  * - The additional data will be loaded.
- * - The progress modal will be displayed.
  *
  * @param {Object} params The parameters to initialize the loader.
  * @param {OptionIdentity} params.identity The identity to use for the request.
  * @param {Function} params.validateAddresses The function to validate the addresses.
  * @param {Function} params.progressAndLoad The function to set the next step of the Progress modal and load the additional data.
- * @param {Function} params.setProgressModal The function to set the progress modal.
  * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialized (user profile settings and addresses are loaded).
  */
 export const initLoader = async ({
 	identity,
 	validateAddresses,
-	progressAndLoad,
-	setProgressModal
+	progressAndLoad
 }: {
 	identity: OptionIdentity;
 	validateAddresses: () => void;
 	progressAndLoad: () => void;
-	setProgressModal: (value: boolean) => void;
 }): Promise<void> => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
@@ -137,9 +132,6 @@ export const initLoader = async ({
 
 		return;
 	}
-
-	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
-	setProgressModal(true);
 
 	if (!POW_FEATURE_ENABLED) {
 		if (FRONTEND_DERIVATION_ENABLED) {

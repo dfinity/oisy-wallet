@@ -13,6 +13,7 @@ describe('StakeForm', () => {
 
 	const props = {
 		amount: 0.01,
+		disabled: false,
 		destination: mockPrincipalText,
 		onClose: () => {},
 		onNext: () => {}
@@ -40,6 +41,18 @@ describe('StakeForm', () => {
 			props: {
 				...props,
 				amount: undefined
+			},
+			context: mockContext()
+		});
+
+		expect(getByTestId(STAKE_FORM_REVIEW_BUTTON)).toHaveAttribute('disabled');
+	});
+
+	it('should disable the next button clickable if disabled prop is true', () => {
+		const { getByTestId } = render(StakeForm, {
+			props: {
+				...props,
+				disabled: true
 			},
 			context: mockContext()
 		});

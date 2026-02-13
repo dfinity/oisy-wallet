@@ -1,7 +1,7 @@
 import { isAuthLocked, isLocked } from '$lib/derived/locked.derived';
 import { authLocked } from '$lib/stores/locked.store';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
+import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { get } from 'svelte/store';
 
 describe('auth.derived', () => {

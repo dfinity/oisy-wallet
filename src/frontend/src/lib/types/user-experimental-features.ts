@@ -1,4 +1,4 @@
-import type { ExperimentalFeatureSettingsFor } from '$declarations/backend/declarations/backend.did';
+import type { ExperimentalFeatureSettingsFor } from '$declarations/backend/backend.did';
 
 interface UserExperimentalFeatureSettings {
 	enabled: boolean;

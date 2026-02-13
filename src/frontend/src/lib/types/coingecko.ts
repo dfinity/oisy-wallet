@@ -1,7 +1,6 @@
 // https://www.coingecko.com/api/documentation
 
 import type { EthAddress } from '$eth/types/address';
-import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { Currency } from '$lib/enums/currency';
 import type {
@@ -72,8 +71,3 @@ export type CoingeckoSimpleTokenPriceResponse = CoingeckoResponse<CoingeckoSimpl
 export type CoingeckoPriceResponse =
 	| CoingeckoSimplePriceResponse
 	| CoingeckoSimpleTokenPriceResponse;
-
-export interface CoingeckoErc20PriceParams {
-	coingeckoPlatformId: CoingeckoPlatformId;
-	contractAddresses: Erc20ContractAddress[];
-}

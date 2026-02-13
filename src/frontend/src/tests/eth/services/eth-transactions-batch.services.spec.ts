@@ -16,21 +16,14 @@ vi.mock('$eth/services/eth-transactions.services', () => ({
 
 describe('eth-transactions-batch.services', () => {
 	describe('batchLoadTransactions', () => {
-		const mockTokensNotLoaded = [ETHEREUM_TOKEN, SEPOLIA_TOKEN];
-		const mockTokensAlreadyLoaded = [USDC_TOKEN];
-
-		const mockTokens = [...mockTokensNotLoaded, ...mockTokensAlreadyLoaded];
-
-		const mockTokensAlreadyLoadedIds = mockTokensAlreadyLoaded.map((token) => token.id);
+		const mockTokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN, USDC_TOKEN];
 
 		const mockTransactionResult = { success: true };
 
-		const expectedReturn: PromiseSettledResult<ResultByToken>[] = mockTokensNotLoaded.map(
-			(token) => ({
-				status: 'fulfilled',
-				value: { ...mockTransactionResult, tokenId: token.id }
-			})
-		);
+		const expectedReturn: PromiseSettledResult<ResultByToken>[] = mockTokens.map((token) => ({
+			status: 'fulfilled',
+			value: { ...mockTransactionResult, tokenId: token.id }
+		}));
 
 		const mockError = new Error('Failed to load transactions');
 
@@ -41,21 +34,22 @@ describe('eth-transactions-batch.services', () => {
 			vi.resetAllMocks;
 		});
 
-		it('should create promises for tokens not already loaded', async () => {
+		it('should create promises for tokens', async () => {
 			vi.mocked(loadEthereumTransactions).mockImplementation(({ tokenId }) =>
 				Promise.resolve({ ...mockTransactionResult, tokenId })
 			);
 
 			const generator = batchLoadTransactions({
-				tokens: mockTokens,
-				tokensAlreadyLoaded: mockTokensAlreadyLoadedIds
+				tokens: mockTokens
 			});
 
 			const result = await generator.next();
 
-			expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockTokensNotLoaded.length);
+			expect(loadEthereumTransactions).toHaveBeenCalledTimes(
+				mockTokens.slice(0, ETHERSCAN_MAX_CALLS_PER_SECOND).length
+			);
 
-			mockTokensNotLoaded.forEach((token) => {
+			mockTokens.slice(0, ETHERSCAN_MAX_CALLS_PER_SECOND).forEach((token) => {
 				expect(loadEthereumTransactions).toHaveBeenCalledWith({
 					tokenId: token.id,
 					networkId: token.network.id,
@@ -68,27 +62,12 @@ describe('eth-transactions-batch.services', () => {
 				batchSize: expect.any(Number)
 			});
 
-			expect(result.value).toEqual(expectedReturn);
-		});
-
-		it('should not call loadEthereumTransactions for tokens already loaded', () => {
-			batchLoadTransactions({
-				tokens: mockTokens,
-				tokensAlreadyLoaded: mockTokensAlreadyLoadedIds
-			});
-
-			mockTokensAlreadyLoaded.forEach((token) => {
-				expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
-					tokenId: token.id,
-					networkId: token.network.id,
-					standard: token.standard
-				});
-			});
+			expect(result.value).toEqual(expectedReturn.slice(0, ETHERSCAN_MAX_CALLS_PER_SECOND));
 		});
 
 		it('should handle rejected promises gracefully', async () => {
 			vi.mocked(loadEthereumTransactions).mockImplementationOnce(({ tokenId }) =>
-				tokenId === mockTokensNotLoaded[0].id
+				tokenId === mockTokens[0].id
 					? Promise.reject(mockError)
 					: Promise.resolve({ ...mockTransactionResult, tokenId })
 			);
@@ -102,8 +81,7 @@ describe('eth-transactions-batch.services', () => {
 			];
 
 			const generator = batchLoadTransactions({
-				tokens: mockTokens,
-				tokensAlreadyLoaded: []
+				tokens: mockTokens
 			});
 
 			expect(batch).toHaveBeenCalled();
@@ -121,8 +99,7 @@ describe('eth-transactions-batch.services', () => {
 
 		it('should respect ETHERSCAN_MAX_CALLS_PER_SECOND as batchSize', () => {
 			batchLoadTransactions({
-				tokens: mockTokens,
-				tokensAlreadyLoaded: []
+				tokens: mockTokens
 			});
 
 			expect(batch).toHaveBeenCalledWith({

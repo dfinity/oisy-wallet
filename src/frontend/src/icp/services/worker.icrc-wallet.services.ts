@@ -14,11 +14,13 @@ import type {
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
+import { isIOS } from '@dfinity/gix-components';
 import { nonNullish } from '@dfinity/utils';
 
 export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		tokenId: TokenId,
 		private readonly ledgerCanisterId: IcToken['ledgerCanisterId'],
 		private readonly indexCanisterId: IcToken['indexCanisterId'],
@@ -26,45 +28,52 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<
-				| PostMessageDataResponseWallet
-				| PostMessageDataResponseError
-				| PostMessageDataResponseWalletCleanUp
-			>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					| PostMessageDataResponseWallet
+					| PostMessageDataResponseError
+					| PostMessageDataResponseWalletCleanUp
+				>
+			>) => {
+				const { ref, msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncIcrcWallet':
-					syncWallet({
-						tokenId,
-						data: data as PostMessageDataResponseWallet
-					});
+				// This is an additional guard because it may happen that the worker is initialised as a singleton.
+				// In this case, we need to check if we should treat the message or if the message was intended for another worker.
+				if (ref !== this.ledgerCanisterId) {
 					return;
-				case 'syncIcrcWalletError':
-					onLoadTransactionsError({
-						tokenId,
-						error: data.error
-					});
+				}
 
-					// In case of error, we start the listener again, but only with the ledgerCanisterId,
-					// to make it request only the balance and not the transactions
-					if (nonNullish(indexCanisterId)) {
-						this.restartWorkerWithLedgerOnly();
-					}
+				switch (msg) {
+					case 'syncIcrcWallet':
+						syncWallet({
+							tokenId,
+							data: data as PostMessageDataResponseWallet
+						});
+						return;
+					case 'syncIcrcWalletError':
+						onLoadTransactionsError({
+							tokenId,
+							error: data.error
+						});
 
-					return;
-				case 'syncIcrcWalletCleanUp':
-					onTransactionsCleanUp({
-						tokenId,
-						transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
-					});
-					return;
+						// In case of error, we start the listener again, but only with the ledgerCanisterId,
+						// to make it request only the balance and not the transactions
+						if (nonNullish(indexCanisterId)) {
+							this.restartWorkerWithLedgerOnly();
+						}
+
+						return;
+					case 'syncIcrcWalletCleanUp':
+						onTransactionsCleanUp({
+							tokenId,
+							transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
+						});
+				}
 			}
-		};
+		);
 	}
 
 	static async init({
@@ -75,7 +84,7 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	}: IcToken): Promise<IcrcWalletWorker> {
 		await syncWalletFromCache({ tokenId, networkId });
 
-		const worker = await AppWorker.getInstance();
+		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
 		return new IcrcWalletWorker(worker, tokenId, ledgerCanisterId, indexCanisterId, env);
 	}
 
@@ -104,14 +113,14 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcrc>>({
 			msg: 'startIcrcWalletTimer',
 			data: {
 				indexCanisterId: this.indexCanisterId,
 				ledgerCanisterId: this.ledgerCanisterId,
 				env: this.env
 			}
-		} as PostMessage<PostMessageDataRequestIcrc>);
+		});
 	};
 
 	stop = () => {
@@ -119,13 +128,13 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcrc>>({
 			msg: 'triggerIcrcWalletTimer',
 			data: {
 				indexCanisterId: this.indexCanisterId,
 				ledgerCanisterId: this.ledgerCanisterId,
 				env: this.env
 			}
-		} as PostMessage<PostMessageDataRequestIcrc>);
+		});
 	};
 }
