@@ -208,13 +208,14 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "社交媒体",
-			"verifiable_credentials": "可验证凭证",
 			"staking": "质押",
 			"walletconnect": "WalletConnect",
 			"game": "游戏",
 			"tools": "工具包",
 			"ai": "人工智能",
-			"nft": "NFT"
+			"nft": "NFT",
+			"rwa": "",
+			"aa_new": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -421,6 +422,11 @@
 				"description": ""
 			},
 			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
