@@ -646,6 +646,7 @@
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
 			"icrc_canister_loading": "Token s Ledger kanystrem $ledgerCanisterId nelze načíst, protože v současné době neodpovídá.",
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
 			"erc1155_custom_tokens": "Chyba při načítání vlastních tokenů ERC1155.",
 			"spl_custom_tokens": "Chyba při načítání vlastních tokenů SPL.",

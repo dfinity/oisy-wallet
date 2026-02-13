@@ -30,6 +30,7 @@ vi.mock('$lib/api/backend.api', () => ({
 }));
 
 vi.mock('$eth/providers/infura-erc20.providers', () => ({
+	InfuraErc20Provider: vi.fn(class {}),
 	infuraErc20Providers: vi.fn()
 }));
 
