@@ -203,6 +203,7 @@ interface I18nDapps {
 		tools: string;
 		ai: string;
 		nft: string;
+		rwa: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -275,6 +276,7 @@ interface I18nDapps {
 		helium: { name: string; one_liner: string; description: string };
 		ostrich: { name: string; one_liner: string; description: string };
 		sphere_finance: { name: string; one_liner: string; description: string };
+		binaryx: { name: string; one_liner: string; description: string };
 	};
 }
 

@@ -214,7 +214,8 @@
 			"game": "Игра",
 			"tools": "Инструменты",
 			"ai": "ИИ",
-			"nft": "NFT"
+			"nft": "NFT",
+			"rwa": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -421,6 +422,11 @@
 				"description": ""
 			},
 			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
