@@ -30,13 +30,6 @@ updates:
     cooldown:
       default-days: 30
 
-  - package-ecosystem: rust-toolchain
-    directory: '/'
-    schedule:
-      interval: weekly
-    cooldown:
-      default-days: 30
-
   - package-ecosystem: npm
     directory: '/'
     schedule:
