@@ -521,5 +521,20 @@
 		"stats": "",
 		"logo": "/images/dapps/ostrich-logo.png",
 		"screenshots": ["/images/dapps/ostrich-screenshot.webp"]
+	},
+	{
+		"id": "binaryx",
+		"name": "dapps.descriptions.binaryx.name",
+		"oneLiner": "dapps.descriptions.binaryx.one_liner",
+		"website": "https://www.binaryx.com/",
+		"twitter": "https://twitter.com/BinaryxPlatform",
+		"discord": "https://discord.com/invite/f4mTchBKC8",
+		"telegram", "https://t.me/+2IWJ9yBYPcliZjg6",
+		"tags": ["dapps.categories.rwa"],
+		"description": "dapps.descriptions.binaryx.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/binaryx-logo.webp",
+		"screenshots": ["/images/dapps/binaryx-screenshot.webp"]
 	}
 ]
