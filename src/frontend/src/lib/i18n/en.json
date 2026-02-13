@@ -395,6 +395,11 @@
 				"one_liner": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains.",
 				"description": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains. It is known for its user-friendly interface, low transaction fees, and various tools for creators and collectors."
 			},
+			"sanctum": {
+				"name": "Sanctum",
+				"one_liner": "A Solana-native liquid staking protocol with instant swaps between LSTs and tools for launching your own.",
+				"description": "Sanctum is a liquid staking infrastructure protocol on Solana enabling instant, slippage-free swaps between liquid staking tokens (LSTs). It supports ecosystem growth by allowing new LSTs to tap into shared liquidity, and offers tools for issuing branded tokens with automated minting and redemption. The platform’s Infinity pool, Router, and Reserve systems help deliver deep liquidity, composability, and safety across the staking landscape."
+			},
 			"solayer": {
 				"name": "Solayer",
 				"one_liner": "A high-speed DeFi platform on Solana offering native liquid staking (sSOL), a stablecoin (sUSD), and real-world spending with the Emerald Card.",
@@ -404,6 +409,21 @@
 				"name": "Kamino",
 				"one_liner": "Kamino is the largest borrowing and lending protocol on Solana, powering a significant share of the network’s DeFi activity.",
 				"description": "Kamino is a decentralized finance (DeFi) platform on the Solana blockchain that integrates liquidity provision, lending, and leveraged trading into a single suite of products. It simplifies these DeFi strategies, especially through its automated liquidity vaults and Kamino Lend system, and uses concentrated liquidity management to increase capital efficiency for its users."
+			},
+			"helium": {
+				"name": "Helium",
+				"one_liner": "A community‑built decentralized wireless network using Hotspots to deliver LoRaWAN IoT and mobile offload services—powered by token incentives on Solana.",
+				"description": "Helium is a decentralized wireless network where individuals deploy Hotspots to provide LoRaWAN and mobile network coverage in exchange for token incentives. The network transitioned to Solana for better scalability and now integrates with the mobile and IoT sectors. All data and rewards are settled on-chain, making Helium a key player in decentralized infrastructure."
+			},
+			"ostrich": {
+				"name": "Ostrich",
+				"one_liner": "An on-chain global orderbook built on Arbitrum for trading real-world assets—equities (U.S., China, Germany, UK), metals, forex, commodities, and crypto—all directly from your wallet with no custodians, brokers, or sign‑ups.",
+				"description": "Ostrich is a decentralized global orderbook on Arbitrum, allowing users to trade tokenized real-world assets like equities, metals, forex, and commodities directly from their wallets. It removes the need for brokers, custodians, or KYC, enabling 24/7 global market access. Users can trade both crypto and traditional assets trustlessly using decentralized infrastructure."
+			},
+			"sphere_finance": {
+				"name": "Sphere Finance",
+				"one_liner": "A meta‑governance DeFi protocol focused on governance acquisition, treasury yield farming, and building linked yield‑generating tools around the $SPHERE token.",
+				"description": "Sphere Finance is a DeFi meta-governance protocol that acquires governance tokens and builds tools to maximize protocol revenue around its native token, $SPHERE. It automates capital allocation across partner protocols and uses its treasury to generate yield. Governance is earned through veTETU-style staking, aligning incentives with long-term protocol health."
 			}
 		}
 	},
@@ -600,6 +620,7 @@
 			"no_infura_erc721_provider": "No Infura ERC721 provider for network $network",
 			"no_infura_erc1155_provider": "No Infura ERC1155 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 ICP provider for network $network",
+			"no_infura_erc4626_provider": "No Infura ERC4626 provider for network $network",
 			"no_solana_network": "No Solana network for network $network",
 			"loading_address": "Error while loading the $symbol address.",
 			"loading_balance": "Error while loading $symbol balance for network $network.",

@@ -395,6 +395,11 @@
 				"one_liner": "Solana上の分散型NFTプラットフォーム",
 				"description": "Magic Eden は、複数のブロックチェーンに対応した NFT マーケットプレイスで、ユーザーは NFT（非代替性トークン）の作成・購入・販売・取引を行うことができます。使いやすいインターフェース、低い取引手数料、そしてクリエイターやコレクター向けの多様なツールで知られています。"
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"solayer": {
 				"name": "Solayer",
 				"one_liner": "Solana上の分散型ゲームプラットフォーム",
@@ -404,6 +409,21 @@
 				"name": "Kamino",
 				"one_liner": "Solana ネットワークにおける DeFi 活動の大きな割合を支えている、Solana 上で最大規模の借入・貸付プロトコル",
 				"description": "Kamino は、Solana ブロックチェーン上の分散型金融（DeFi）プラットフォームで、流動性提供、レンディング、レバレッジ取引を単一のプロダクト群として統合しています。自動化された 流動性ボールト や Kamino Lend を通じて、これらの DeFi 戦略を簡素化しており、集中流動性管理を活用することで、ユーザーの 資本効率を高めています。"
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -600,6 +620,7 @@
 			"no_infura_erc721_provider": "ネットワーク$networkのInfura ERC721プロバイダーが存在しません。",
 			"no_infura_erc1155_provider": "ネットワーク$networkのInfura ERC1155プロバイダーが存在しません。",
 			"no_infura_erc20_icp_provider": "ネットワーク$networkのInfura ERC20 ICPプロバイダーが存在しません。",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "ネットワーク$networkのSolanaネットワークが存在しません。",
 			"loading_address": "$symbolアドレスの読み込み中にエラーが発生しました。",
 			"loading_balance": "ネットワーク$networkの$symbol残高の読み込み中にエラーが発生しました。",

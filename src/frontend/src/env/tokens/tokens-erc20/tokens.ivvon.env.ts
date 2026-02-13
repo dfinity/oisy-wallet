@@ -21,6 +21,5 @@ export const IVVON_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: IVVON_DECIMALS,
 	icon: isharesPurple,
 	address: '0x62cA254a363dc3c748e7E955c20447aB5bF06fF7',
-	exchange: 'erc20',
 	groupData: IVVON_TOKEN_GROUP
 };

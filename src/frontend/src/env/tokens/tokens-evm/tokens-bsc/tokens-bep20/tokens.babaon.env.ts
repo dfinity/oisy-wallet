@@ -21,6 +21,5 @@ export const BABAON_TOKEN: RequiredEvmBep20Token = {
 	decimals: BABAON_DECIMALS,
 	icon: babaon,
 	address: '0xd5964f3fcee8D649995AB88F04b8982539c282D2',
-	exchange: 'erc20',
 	groupData: BABAON_TOKEN_GROUP
 };

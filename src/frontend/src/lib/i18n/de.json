@@ -395,12 +395,32 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"solayer": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"ostrich": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -600,6 +620,7 @@
 			"no_infura_erc721_provider": "Kein Infura-ERC721-Anbieter für Netzwerk $network",
 			"no_infura_erc1155_provider": "Kein Infura-ERC1155-Anbieter für Netzwerk $network",
 			"no_infura_erc20_icp_provider": "Kein Infura-ERC20-ICP-Anbieter für Netzwerk $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Kein Solana-Netzwerk für Netzwerk $network",
 			"loading_address": "Fehler beim Laden der Adresse für $symbol.",
 			"loading_balance": "Fehler beim Laden des $symbol-Saldos für Netzwerk $network.",

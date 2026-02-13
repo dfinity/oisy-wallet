@@ -21,6 +21,5 @@ export const MUON_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: MUON_DECIMALS,
 	icon: muon,
 	address: '0x050362Ab1072Cb2Ce74d74770E22A3203Ad04ee5',
-	exchange: 'erc20',
 	groupData: MUON_TOKEN_GROUP
 };

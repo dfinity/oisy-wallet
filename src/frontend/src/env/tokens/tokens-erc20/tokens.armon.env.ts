@@ -21,6 +21,5 @@ export const ARMON_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: ARMON_DECIMALS,
 	icon: armon,
 	address: '0x5Bf1b2A808598C0eF4Af1673a5457d86fE6d7B3d',
-	exchange: 'erc20',
 	groupData: ARMON_TOKEN_GROUP
 };

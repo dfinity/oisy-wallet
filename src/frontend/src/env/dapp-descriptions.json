@@ -447,6 +447,20 @@
 		"screenshots": ["/images/dapps/opensea-screenshot.webp"]
 	},
 	{
+		"id": "sanctum",
+		"name": "dapps.descriptions.sanctum.name",
+		"oneLiner": "dapps.descriptions.sanctum.one_liner",
+		"website": "https://app.sanctum.so/",
+		"twitter": "https://x.com/sanctumso",
+		"discord": "https://discord.com/invite/sanctumso",
+		"tags": ["dapps.categories.defi"],
+		"description": "dapps.descriptions.sanctum.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/sanctum-logo.webp",
+		"screenshots": ["/images/dapps/sanctum-screenshot.webp"]
+	},
+	{
 		"id": "solayer",
 		"name": "dapps.descriptions.solayer.name",
 		"oneLiner": "dapps.descriptions.solayer.one_liner",
@@ -478,5 +492,48 @@
 		"stats": "",
 		"logo": "/images/dapps/kamino-logo.svg",
 		"screenshots": ["/images/dapps/kamino-screenshot.webp"]
+	},
+	{
+		"id": "helium",
+		"name": "dapps.descriptions.helium.name",
+		"oneLiner": "dapps.descriptions.helium.one_liner",
+		"website": "https://www.helium.com/",
+		"github": "https://github.com/helium",
+		"twitter": "https://twitter.com/helium",
+		"tags": ["dapps.categories.tools"],
+		"description": "dapps.descriptions.helium.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/helium-logo.webp",
+		"screenshots": ["/images/dapps/helium-screenshot.webp"]
+	},
+	{
+		"id": "sphere-finance",
+		"name": "dapps.descriptions.sphere_finance.name",
+		"oneLiner": "dapps.descriptions.sphere_finance.one_liner",
+		"website": "https://app.sphere.finance/",
+		"twitter": "https://x.com/SphereDeFi",
+		"discord": "https://discord.com/invite/spheredefi",
+		"tags": ["dapps.categories.defi"],
+		"stats": "",
+		"usesInternetIdentity": false,
+		"description": "dapps.descriptions.sphere_finance.description",
+		"logo": "/images/dapps/sphere-finance-logo.webp",
+		"screenshots": ["/images/dapps/sphere-finance-screenshot.webp"]
+	},
+	{
+		"id": "ostrich",
+		"name": "dapps.descriptions.ostrich.name",
+		"oneLiner": "dapps.descriptions.ostrich.one_liner",
+		"website": "https://app.ostrich.exchange/",
+		"discord": "https://discord.gg/BntNDR2zsD",
+		"twitter": "https://x.com/ostrich_hq",
+		"tags": ["dapps.categories.defi"],
+		"description": "dapps.descriptions.ostrich.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/ostrich-logo.png",
+		"screenshots": ["/images/dapps/ostrich-screenshot.webp"]
 	}
 ]

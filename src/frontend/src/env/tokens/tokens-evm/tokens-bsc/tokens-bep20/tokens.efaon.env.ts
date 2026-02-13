@@ -21,6 +21,5 @@ export const EFAON_TOKEN: RequiredEvmBep20Token = {
 	decimals: EFAON_DECIMALS,
 	icon: iSharesPurple,
 	address: '0x38B9A53bfDc5dba58a29bD6992341927C2fca637',
-	exchange: 'erc20',
 	groupData: EFAON_TOKEN_GROUP
 };

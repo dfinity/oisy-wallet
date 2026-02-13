@@ -10,6 +10,7 @@ export const TokenStandardCodeSchema = z.enum([
 	'erc20',
 	'erc721',
 	'erc1155',
+	'erc4626',
 	'icp',
 	'icrc',
 	'dip20',

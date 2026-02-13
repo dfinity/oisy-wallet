@@ -21,6 +21,5 @@ export const BIDUON_TOKEN: RequiredEvmBep20Token = {
 	decimals: BIDUON_DECIMALS,
 	icon: biduon,
 	address: '0x467e59ce5D5fe01686D4A80dd1E1DAE13549AA6c',
-	exchange: 'erc20',
 	groupData: BIDUON_TOKEN_GROUP
 };

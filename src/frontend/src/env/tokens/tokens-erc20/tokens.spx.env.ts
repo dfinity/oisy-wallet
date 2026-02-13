@@ -21,6 +21,5 @@ export const SPX_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: SPX_DECIMALS,
 	icon: spx,
 	address: '0xe0f63a424a4439cbe457d80e4f4b51ad25b2c56c',
-	exchange: 'erc20',
 	groupData: SPX_TOKEN_GROUP
 };

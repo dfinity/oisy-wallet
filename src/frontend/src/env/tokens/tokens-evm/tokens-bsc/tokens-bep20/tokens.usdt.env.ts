@@ -21,7 +21,6 @@ export const USDT_TOKEN: RequiredEvmBep20Token = {
 	decimals: USDT_DECIMALS,
 	icon: usdt,
 	address: '0x55d398326f99059ff775485246999027b3197955',
-	exchange: 'erc20',
 	groupData: USDT_TOKEN_GROUP,
 	buy: {
 		onramperId: 'usdt_bsc'
