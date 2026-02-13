@@ -419,6 +419,11 @@
 				"name": "Ostrich",
 				"one_liner": "An on-chain global orderbook built on Arbitrum for trading real-world assets—equities (U.S., China, Germany, UK), metals, forex, commodities, and crypto—all directly from your wallet with no custodians, brokers, or sign‑ups.",
 				"description": "Ostrich is a decentralized global orderbook on Arbitrum, allowing users to trade tokenized real-world assets like equities, metals, forex, and commodities directly from their wallets. It removes the need for brokers, custodians, or KYC, enabling 24/7 global market access. Users can trade both crypto and traditional assets trustlessly using decentralized infrastructure."
+			},
+			"sphere_finance": {
+				"name": "Sphere Finance",
+				"one_liner": "A meta‑governance DeFi protocol focused on governance acquisition, treasury yield farming, and building linked yield‑generating tools around the $SPHERE token.",
+				"description": "Sphere Finance is a DeFi meta-governance protocol that acquires governance tokens and builds tools to maximize protocol revenue around its native token, $SPHERE. It automates capital allocation across partner protocols and uses its treasury to generate yield. Governance is earned through veTETU-style staking, aligning incentives with long-term protocol health."
 			}
 		}
 	},
