@@ -4,7 +4,11 @@ import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { LOCAL } from '$lib/constants/app.constants';
-import { enabledErc20Tokens, enabledIcTokens } from '$lib/derived/tokens.derived';
+import {
+	enabledErc20Tokens,
+	enabledErc4626Tokens,
+	enabledIcTokens
+} from '$lib/derived/tokens.derived';
 import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
@@ -20,6 +24,7 @@ export const transactionsStoreWithTokens: Readable<TransactionsStoreCheckParams[
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		enabledErc20Tokens,
+		enabledErc4626Tokens,
 		enabledIcTokens,
 		enabledSolanaTokens,
 		enabledSplTokens
@@ -32,6 +37,7 @@ export const transactionsStoreWithTokens: Readable<TransactionsStoreCheckParams[
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$enabledErc20Tokens,
+		$enabledErc4626Tokens,
 		$enabledIcTokens,
 		$enabledSolanaTokens,
 		$enabledSplTokens
@@ -43,7 +49,7 @@ export const transactionsStoreWithTokens: Readable<TransactionsStoreCheckParams[
 			: [{ transactionsStoreData: $btcTransactionsStore, tokens: $enabledBitcoinTokens }]),
 		{
 			transactionsStoreData: $ethTransactionsStore,
-			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens]
+			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledErc4626Tokens]
 		},
 		{ transactionsStoreData: $icTransactionsStore, tokens: $enabledIcTokens },
 		{
