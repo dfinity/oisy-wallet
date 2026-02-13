@@ -8,7 +8,7 @@
 			"done": "Hecho",
 			"close": "Cerrar",
 			"change": "Cambiar",
-			"continue": "Continuar",
+			"continue": "continuar o seguir",
 			"apply": "Aplicar",
 			"retry": "Reintentar",
 			"refresh": "Actualizar",
@@ -31,9 +31,9 @@
 			"edit": "Editar",
 			"no_results": "Sin resultados",
 			"paste": "Pegar",
-			"to": "A",
+			"to": "A", or "para"
 			"add": "Añadir",
-			"more_items": "+$items artículos más",
+			"more_items": " más articulos",
 			"select": "Seleccionar",
 			"language": "Idioma",
 			"currency": "Moneda",
@@ -41,7 +41,7 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": "Aprender mas"
+			"learn_more": "aprender mas"
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
@@ -57,12 +57,12 @@
 			"switch_currency": "Cambiar moneda",
 			"more": "Mas",
 			"less": "Menos",
-			"learn_more": "Siga el enlace para obtener más información."
+			"learn_more": "aprender mas"
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
-			"standalone_mode": "",
-			"video_not_supported": ""
+			"standalone_mode": "modo independiente",
+			"video_not_supported": "video no compatible"
 		}
 	},
 	"navigation": {
@@ -81,7 +81,7 @@
 			"support": "Soporte",
 			"confirm_navigate": "¿Estás seguro de que quieres salir?",
 			"vip_qr_code": "Códigos QR VIP",
-			"binance_qr_code": "QR de Binance Clubhouse",
+			"binance_qr_code": "QR de Binance ",
 			"refer_a_friend": "Recomienda a tus amigos",
 			"address_book": "Contactos",
 			"hide_balances": "Ocultar saldos",
@@ -118,10 +118,10 @@
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
+			"sign_in_with_identity_number": "Iniciar sesion con numero de identidad",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
-			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena",
-			"social_login": "Acceso instantáneo y privado + inicio de sesión social"
+			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena"
 		},
 		"alt": {
 			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil"
@@ -147,27 +147,38 @@
 		},
 		"help": {
 			"text": {
-				"title": "Su proceso de inicio de sesión se interrumpió",
-				"description": "Parece que cancelaste tu inicio de sesión o registro. Nos gustaría saber qué sucedió para mejorar tu experiencia.",
-				"login_page_looks_different": "¿Por qué la página de inicio de sesión se ve diferente?",
-				"use_identity_number": "Quiero utilizar mi número de Internet Identity",
-				"feedback_text": "Sus comentarios nos ayudan a mejorar $oisy_short.",
+				"title": "Titulo",
+				"description": "descripcion",
+				"new_auth_version": "Nueva version de autenticación",
+				"could_not_enter_identity_number": "no se pudo ingresar el numero de identidad",
+				"lost_identity": "Perdí mi número de Internet Identity",
+				"security": "Me preocupaba la seguridad o la privacidad",
+				"got_confused": "se confundio",
+				"no_signup_needed": "no necesita registro",
+				"other": "Otro...",
+				"feedback_text": "retroalimentacion",
 				"thanks_text": "¡Gracias!",
-				"useful_links": "Enlaces útiles",
 				"identity_new_identity": "$oisy_short Wallet cambia el dominio de Internet Identity a: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"switch_to_new_internet_identity": "$oisy_name cambia a Internet Identity 2.0",
-				"identity_new_identity_title": "$oisy_name ahora usa Internet Identity 2.0, que ofrece varias mejoras y le permite conectar su identidad con sus inicios de sesión en Google, Apple o Microsoft.",
-				"identity_new_identity_item_1": "Para migrar su identidad existente, haga clic en el enlace “Upgrade your Identity” en la parte superior de la nueva página de inicio de sesión y siga los pasos.",
-				"oisy_introduction": "$oisy_short Introducción",
-				"logging_into_oisy": "",
-				"creating_a_wallet": "",
-				"asset_control": "",
-				"internet_identity_help_center": "Centro de ayuda de Internet Identity 2.0",
+				"identity_legacy_description": "Como resultado, tu número de Internet Identity podría no aparecer automáticamente, y puede que necesites volver a introducirlo.",
+				"identity_legacy_sign_in": "Iniciar sesión con el dominio antiguo de Internet Identity",
+				"identity_learn_more": "Más información en los Docs de $oisy_short",
+				"other_title": "¡Gracias por tus comentarios!",
+				"other_description": "Aquí tienes algunos recursos útiles sobre <span class=\"font-bold\">seguridad</span> y <span class=\"font-bold\">privacidad</span> en $oisy_short e Internet Identity. Esperamos que te ayuden a tomar una decisión informada:",
+				"other_introduction": "Introducción a $oisy_short",
+				"other_docs": "Docs de $oisy_short: Internet Identity",
+				"other_private_key": "¿Quién controla la clave privada para los activos nativos?",
+				"other_asset_control": "Control de Activos, Recuperación y Gobernanza en $oisy_short Wallet",
 				"need_help": "Necesito ayuda",
 				"sign_in": "¿ iniciar sesión?"
 			},
 			"alt": {
-				"internet_identity": "Imagen de la nueva Internet Identity"
+				"internet_identity": "Imagen de la nueva Internet Identity",
+				"identity_learn_more": "Más información sobre la antigua Internet Identity",
+				"other_introduction": "Abrir Introducción a $oisy_short",
+				"other_docs": "Abrir docs de $oisy_short: Internet Identity",
+				"other_private_key": "Obtener ayuda sobre quién controla la clave privada para los activos nativos",
+				"other_asset_control": "Obtener información sobre Control de Activos, Recuperación y Gobernanza en $oisy_short Wallet",
+				"sign_in": "¿Necesitas ayuda para iniciar sesión?"
 			}
 		}
 	},
@@ -176,7 +187,6 @@
 			"title_part_1": "Desbloquear para continuar",
 			"title_part_2": "Anteriormente bloqueaste tu billetera para mantenerla segura. Continúa donde lo dejaste o cierra sesión.",
 			"unlock": "Desbloquear",
-			"unlock_with_legacy_login": "",
 			"logout": "Cerrar sesión",
 			"logout_clear_cash_message": "Cerrar sesión borrará todos los datos en caché",
 			"learn_more": "Saber más"
@@ -208,14 +218,13 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "Redes Sociales",
+			"verifiable_credentials": "Credenciales Verificables",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Juego",
 			"tools": "Herramientas",
 			"ai": "IA",
-			"nft": "",
-			"rwa": "",
-			"aa_new": ""
+			"nft": "nft"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -405,36 +414,6 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
-			},
-			"helium": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"sanctum": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"ostrich": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"binaryx": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"realt": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
 			}
 		}
 	},
@@ -583,7 +562,7 @@
 			"incubated_with": "Incubado con",
 			"by": "por",
 			"dfinity_foundation": "Fundación DFINITY",
-			"copyright": "© 2026",
+			"copyright": "© 2025",
 			"ai_assistant_console_button": "Asistente de $oisy_short"
 		},
 		"alt": {
@@ -631,7 +610,6 @@
 			"no_infura_erc721_provider": "No hay proveedor de Infura ERC721 para la red $network",
 			"no_infura_erc1155_provider": "No hay proveedor de Infura ERC1155 para la red $network",
 			"no_infura_erc20_icp_provider": "No hay proveedor de Infura ERC20 ICP para la red $network",
-			"no_infura_erc4626_provider": "",
 			"no_solana_network": "No hay red Solana para la red $network",
 			"loading_address": "Error al cargar la dirección de $symbol.",
 			"loading_balance": "Error al cargar el saldo de $symbol para la red $network.",
@@ -652,14 +630,13 @@
 			"icrc_canisters": "Error al cargar los canisters de ICRC.",
 			"icrc_canister_loading": "El token con el canister de Ledger $ledgerCanisterId no se pudo cargar porque actualmente no responde.",
 			"erc20_custom_tokens": "Error al cargar los tokens ERC20 personalizados.",
-			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Error al cargar los tokens ERC721 personalizados.",
 			"erc1155_custom_tokens": "Error al cargar los tokens ERC1155 personalizados.",
+			"erc20_user_tokens": "Error al cargar los tokens de usuario ERC20.",
 			"spl_custom_tokens": "Error al cargar los tokens SPL personalizados.",
-			"erc20_custom_token": "Error al habilitar el token gemelo ERC20.",
+			"erc20_user_token": "Error al habilitar el token gemelo ERC20.",
 			"icrc_custom_token": "Error al cargar el token ICRC personalizado.",
 			"ext_custom_tokens": "",
-			"icpunks_custom_tokens": "",
 			"loading_wallet_timeout": "Tu billetera requiere algunos datos iniciales que aún no se han cargado. Por favor, inténtalo de nuevo.",
 			"allow_signing": "Ocurrió un problema al configurar tu billetera para firmar. Has sido desconectado. Si el problema persiste, contacta con el soporte.",
 			"waiting_for_allowed_cycles_aborted": "Preparación del ledger de ciclos abortada. Por favor, intenta iniciar sesión más tarde",
@@ -887,7 +864,6 @@
 			"unknown_cketh": "El token ckETH no se puede recuperar.",
 			"destination_address_invalid": "La dirección de destino es inválida.",
 			"amount_invalid": "La cantidad es inválida.",
-			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Fondos insuficientes para el gas",
 			"insufficient_funds_for_amount": "Fondos insuficientes para la cantidad",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fondos de Ethereum insuficientes para cubrir las comisiones",
@@ -930,55 +906,43 @@
 			"fee_calc_unsupported_standard": "No se pudo calcular la comisión ya que el estándar de token proporcionado no es compatible."
 		}
 	},
-	"mint": {
-		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
-		}
-	},
-	"burn": {
-		"text": {
-			"burn": "",
-			"burning": "",
-			"burn_review_subtitle": ""
-		}
-	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "",
-			"pay_to": "",
-			"powered_by": "",
-			"recipient": "",
-			"name": "",
-			"address": "",
-			"country": "",
-			"phone_number": "",
-			"email_address": "",
-			"website": "",
-			"enter_manually": "",
-			"url_or_code": "",
-			"enter_or_paste_code": "",
-			"scan": "",
-			"pay": "",
-			"pay_amount": "",
-			"go_to_assets": "",
-			"supported_tokens": "",
-			"no_supported_tokens": "",
-			"pay_with": "",
-			"select_token": "",
-			"select_different_token": "",
-			"tokens_available": "",
-			"select_token_to_pay": "",
-			"pay_at_successful": "",
-			"pay_at_failure": "",
-			"try_again": "",
-			"payment_confirmed": "",
-			"payment_failed": ""
+			"scan_qr_code": "scanear codigo qr",
+			"pay_to": "pagar a",
+			"powered_by": "impulsado por",
+			"recipient": "destinatario",
+			"name": "nombre",
+			"address": "direccion",
+			"country": "pais",
+			"phone_number": "numero telefonico",
+			"email_address": "direccion de email",
+			"website": "sitio web",
+			"pay_to": "pagar a",
+			"powered_by": "impulsado por",
+			"recipient": "destinatario",
+			"url_or_code": "url o codigo",
+			"enter_or_paste_code": "ingresar o pegar codigo",
+			"scan": "scanear",
+			"pay": "pagar",
+			"pay_amount": "monto a pagar",
+			"go_to_assets": "ir a los activos",
+			"supported_tokens": "tokens compatibles",
+			"no_supported_tokens": "tokens no compatibles",
+			"pay_with": "pagar con",
+			"select_token": "seleccionar token",
+			"select_different_token": "seleccionar un token diferente",
+			"tokens_available": "tokens disponibles",
+			"select_token_to_pay": "seleccionar token para pagar",
+			"pay_at_successful": "pago éxito o pago exitoso o éxito al pagar",
+			"pay_at_failure": "pagar en caso de fallo",
+			"try_again": "intentar otra vez",
+			"payment_confirmed": "pago confirmado",
+			"payment_failed": "pago fallido"
 		},
 		"error": {
-			"code_link_is_not_valid": "",
-			"data_is_incompleted": ""
+			"code_link_is_not_valid": "el enlace del codigo no es valido",
+			"data_is_incompleted": "los datos estan incompletos"
 		}
 	},
 	"convert": {
@@ -1100,25 +1064,25 @@
 	},
 	"pay": {
 		"text": {
-			"pay": "",
-			"dialog_title": "",
-			"dialog_description": "",
-			"dialog_button": "",
-			"where_you_can_pay": "",
-			"request_payment_details": "",
-			"creating_transaction": "",
-			"signing_transaction": "",
-			"paying": ""
+			"pay": "pagar",
+			"dialog_title": "Titulo del dialogo",
+			"dialog_description": "descripcion del dialogo",
+			"dialog_button": "boton de dialogo",
+			"where_you_can_pay": "donde puedes pagar",
+			"request_payment_details": "detalles de solicitud de pago",
+			"creating_transaction": "creando transaccion",
+			"signing_transaction": "transaccion de firma",
+			"paying": "pagando"
 		},
 		"error": {
-			"data_is_incompleted": "",
-			"amount_does_not_match": "",
-			"recipient_address_is_not_valid": "",
-			"token_address_mismatch": ""
+			"data_is_incompleted": "los datos están incompletos ",
+			"amount_does_not_match": "la cantidad no coincide",
+			"recipient_address_is_not_valid": "la dirección de destinatario no es válida ",
+			"token_address_mismatch": "falta de coincidencia de la direccion del token"
 		},
 		"alt": {
-			"pay": "",
-			"where_you_can_pay": ""
+			"pay": "pagar",
+			"where_you_can_pay": "donde puedes pagar"
 		}
 	},
 	"tokens": {
@@ -1196,7 +1160,6 @@
 				"unexpected_ledger": "Algo salió mal al validar el canister de Ledger.",
 				"unexpected_index": "Algo salió mal al validar el canister de Índice.",
 				"unexpected_index_ledger": "Algo salió mal al cargar el ID de Ledger relacionado con el canister de Índice.",
-				"unrecognized_nft_canister_id_standard": "",
 				"invalid_ledger_id": "El ID de Ledger no está relacionado con el canister de Índice.",
 				"missing_ledger_id": "Falta el ID de Ledger. ¿Proporcionaste un valor?",
 				"missing_canister_id": "",
@@ -1213,7 +1176,7 @@
 				"title": "Gestionar tokens",
 				"title_nft": "Gestionar colecciones de NFT",
 				"manage_list": "Gestionar tokens",
-				"manage_list_nft": "",
+				"manage_list_nft": "Gestionar nft",
 				"list_settings": "Configuración de la lista",
 				"import_token": "Importar token",
 				"import_nft": "Importar colección de NFT",
@@ -1279,8 +1242,8 @@
 			"title": "NFTs",
 			"title_empty": "Tus NFTs aparecerán aquí",
 			"description_empty": "Parece que todavía no has recibido NFTs",
-			"title_not_supported": "",
-			"description_not_supported": "",
+			"title_not_supported": "titulo no compatible",
+			"description_not_supported": "descripción no compatible",
 			"grouping": "Agrupación",
 			"as_plain_list": "Mostrar como lista simple",
 			"by_collection": "Agrupar por colección",
@@ -1301,8 +1264,8 @@
 			"collections": "Colecciones",
 			"all_assets": "Todos los activos",
 			"address_copied": "Dirección $address copiada",
-			"collection_name_copied": "",
-			"id_copied": "",
+			"collection_name_copied": " nombre coleccion de copiado",
+			"id_copied": "id copiado",
 			"spam": "Spam",
 			"not_spam": "No es spam",
 			"spam_warning": "¿Mover '$collection' a spam?",
@@ -1318,8 +1281,8 @@
 			"review_button": "Revisar",
 			"collection_name": "Nombre de la colección",
 			"media_urls": "URLs de medios",
-			"media_url": "URL de medios",
-			"received_at": "Recibido en",
+			"media_url": "url de medios",
+			"received_at": "recibido en",
 			"display_preference": "Preferencia de visualización",
 			"review_preference": "Revisar preferencia",
 			"media_enabled": "Medios habilitados",
@@ -1335,7 +1298,7 @@
 			"token_id": "ID del Token",
 			"go_to_collection": "Ir a la colección",
 			"could_not_update_section": "No se pudo actualizar la sección de la colección. Por favor, inténtalo de nuevo",
-			"media_stored_at_different_location": ""
+			"media_stored_at_different_location": "medios almacenados en una ubicacion diferente"
 		},
 		"alt": {
 			"placeholder_image": "Aún no hay NFTs",
@@ -1479,7 +1442,7 @@
 			"for": "Para",
 			"for_copied": "Dirección del gastador copiada al portapapeles.",
 			"expiration": "Vencimiento",
-			"approve_label": "Aprobar $approveAmount"
+			"approve_label": "etiqueta de aprobación"
 		},
 		"status": {
 			"confirmed": "Confirmado",
@@ -1530,8 +1493,6 @@
 			"title": "Transacciones",
 			"buy_or_receive": "¡Realiza tu primera transacción, y compra o recibe tokens ahora!",
 			"transaction_history": "Tu historial de transacciones aparecerá aquí",
-			"minter_transaction_history": "",
-			"mint_burn_transactions_unavailable": "",
 			"mainnet_btc_transactions_info": "La información de las transacciones de BTC se obtiene de terceros centrales y debe ser verificada de forma independiente.",
 			"transaction_history_unavailable": "Historial de transacciones no disponible",
 			"missing_index_canister_explanation": "En este momento, $oisy_short no puede mostrar tus transacciones de tokens pasadas porque el emisor aún no ha proporcionado la función de seguimiento. Debería añadirse pronto. Mientras tanto, no te preocupes — puedes seguir enviando y recibiendo tus tokens como de costumbre.",
@@ -1830,6 +1791,7 @@
 			},
 			"title": "",
 			"instruction": "Al hacer clic en este botón, aceptas los $link",
+			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
@@ -1864,107 +1826,108 @@
 	},
 	"earning": {
 		"text": {
-			"title": "",
-			"tab_title": "",
-			"earning_opportunities": "",
-			"header_title": "",
-			"header_description": "",
-			"go_to_earn": ""
+			"title": "título",
+			"tab_title": "título de la pestaña",
+			"earning_opportunities": "oportunidades de ingresos",
+			"header_title": "título del encabezado",
+			"header_description": "descripción del encabezado",
+			"go_to_earn": "ir a ganar"
 		},
 		"cards": {
 			"gldt": {
-				"title1": "",
-				"title2": "",
-				"description": "",
-				"action": ""
+				"title1": "título 1",
+				"title2": "título 2",
+				"description": "descripción",
+				"action": "acción"
 			},
 			"sprinkles": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "título",
+				"description": "descripción",
+				"action": "acción"
 			}
 		},
 		"card_fields": {
 			"apy": "",
-			"currentStaked": "",
-			"currentEarning": "",
-			"earningPotential": "",
-			"terms": ""
+			"currentStaked": "Estacado actual",
+			"currentEarning": "ganancias actuales",
+			"earningPotential": "potencial de ingresos",
+			"terms": "términos"
 		},
 		"terms": {
 			"flexible": ""
 		},
 		"providers": {
 			"goldDaoStaking": {
-				"cardTitle": ""
+				"cardTitle": "título de la tarjeta"
 			}
 		}
 	},
 	"stake": {
 		"text": {
 			"gldt_stake_page_description": "",
-			"stake": "",
-			"stake_now": "",
-			"stake_amount": "",
-			"not_enough_to_stake": "",
-			"unstake": "",
-			"unstake_now": "",
-			"unstaking": "",
-			"unstake_token": "",
+			"stake": "apostar",
+			"stake_now": "apuesta ahora",
+			"stake_amount": "monto de la apuesta",
+			"not_enough_to_stake": "no suficiente para apostar",
+			"unstake": "deshacer apuesta",
+			"unstake_now": "deshacer apuesta ahora",
+			"unstaking": "desestacar",
+			"unstake_token": "token de desparticipación",
+			"enable_token_text": "habilitar texto del token",
 			"enable_token_text": "",
-			"enable_token_button": "",
-			"review": "",
-			"executing_transaction": "",
-			"unsupported_token_staking": "",
-			"provider": "",
-			"earning_potential": "",
-			"earning_potential_hint": "",
-			"active_earning": "",
-			"active_earning_per_year": "",
-			"unproductive_assets": "",
-			"invested_assets": "",
-			"visit_provider": "",
-			"current_apy_label": "",
-			"stake_review_subtitle": "",
-			"unstake_review_subtitle": "",
-			"delayed_dissolve": "",
-			"immediate_dissolve": "",
-			"included_token_fee": "",
-			"included_dissolve_fee": "",
-			"delayed_dissolve_terms": "",
-			"delayed_dissolve_info": "",
-			"immediate_dissolve_terms": "",
-			"amount_to_receive": "",
-			"unclaimed_rewards": "",
-			"unlock_requests": "",
-			"unlocking_in": "",
-			"unlocked": "",
-			"withdraw": "",
-			"withdraw_successful": "",
-			"claim_reward": "",
+			"review": "revisar",
+			"executing_transaction": "ejecutando transaccón",
+			"unsupported_token_staking": "staking de tokens no admitidos",
+			"provider": "proveedor",
+			"earning_potential": "potencial de ganancias",
+			"earning_potential_hint": "pista sobre el potencial de ingresos",
+			"active_earning": "ganancias activas",
+			"active_earning_per_year": "ganancias activas por año",
+			"unproductive_assets": "activos improductivos",
+			"invested_assets": "activos invertidos",
+			"visit_provider": "visitar proveedor",
+			"current_apy_label": "etiqueta apy actual",
+			"stake_review_subtitle": "subtítulo de revisión de participación",
+			"unstake_review_subtitle": "subtítulo de revisión de anulación de participación ",
+			"delayed_dissolve": "disolución retardada",
+			"immediate_dissolve": "disolución inmediata",
+			"included_token_fee": "tarifa de token incluida",
+			"included_dissolve_fee": "tarifa de disolución incluida",
+			"delayed_dissolve_terms": "términos de disolución retrasada",
+			"delayed_dissolve_info": "información de disolución retrasada",
+ 
+			"immediate_dissolve_terms": "términos de disolución inmediata",
+			"amount_to_receive": "cantidad a recibir",
+			"unclaimed_rewards": "recompensas no reclamadas",
+			"unlock_requests": "solicitudes de desbloqueo",
+			"unlocking_in": "desbloqueo en",
+			"unlocked": "desbloqueado",
+			"withdraw": "retirar",
+			"withdraw_successful": "retiro exitoso",
+			"claim_reward": "reclamar recompensa",
 			"claim_rewards": "",
-			"claim_reward_short": "",
-			"claim_now": "",
-			"claiming": "",
-			"get_tokens_with_amount": "",
-			"get_tokens": "",
-			"reward_claimed": "",
-			"staked": "",
-			"unstaked": "",
+			"claim_reward_short": "reclamar recompensa corta",
+			"claim_now": "reclamar ahora",
+			"claiming": "reclamado",
+			"get_tokens_with_amount": "obtener tokens con cantidad",
+			"get_tokens": "obtener tokens",
+			"reward_claimed": "recompensa reclamada",
+			"staked": "estacada",
+			"unstaked": "sin estacar",
 			"title_empty_1": "",
 			"title_empty_2_usd": "",
 			"title_empty_2_apy": "",
 			"title_empty_3": "",
-			"description_empty": "",
-			"full_history": "",
-			"recent_history": "",
+			"description_empty": "descripción vacía",
+			"full_history": "historial completo",
+			"recent_history": "historial reciente",
 			"gldt_stake_carousel_slide_title": "",
 			"gldt_stake_carousel_slide_cta": ""
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "",
-			"unexpected_error_on_unstake": "",
-			"dissolvement_limit_reached": ""
+			"unexpected_error_on_withdraw": "error inesperado al retirarse",
+			"unexpected_error_on_unstake": "error inesperado al deshacer",
+			"dissolvement_limit_reached": "limite de disoluión alcanzado"
 		},
 		"terms": {
 			"gldt": {
@@ -1999,66 +1962,66 @@
 	"get_token": {
 		"text": {
 			"title": "",
-			"swap_to_token": "",
-			"ready_to_swap": "",
-			"convert_assets": "",
-			"convertible_assets": "",
-			"how_to_convert": "",
-			"get_more_token": "",
-			"receive_token": "",
-			"receive_token_title": "",
-			"receive_token_text": "",
-			"buy_assets": "",
-			"buy_assets_title": "",
-			"buy_assets_text": ""
+			"swap_to_token": "intercambio por token",
+			"ready_to_swap": "listo para intercambiar",
+			"convert_assets": "convertir activos",
+			"convertible_assets": "activos convertibles",
+			"how_to_convert": "cómo convertir",
+			"get_more_token": "obtener más token",
+			"receive_token": "recibir token",
+			"receive_token_title": "título del token de recepción ",
+			"receive_token_text": "texto del token de recepción ",
+			"buy_assets": "comprar activos",
+			"buy_assets_title": "comprar activos título",
+			"buy_assets_text": "comprar activos texto"
 		}
 	},
 	"temporal": {
 		"seconds_to_duration": {
-			"year": "",
-			"year_plural": "",
-			"month": "",
-			"month_plural": "",
-			"day": "",
-			"day_plural": "",
-			"hour": "",
-			"hour_plural": "",
-			"minute": "",
-			"minute_plural": "",
-			"second": "",
-			"second_plural": ""
+			"year": "año",
+			"year_plural": "años",
+			"month": "mes",
+			"month_plural": "meses",
+			"day": "dia",
+			"day_plural": "dias",
+			"hour": "hora",
+			"hour_plural": "horas",
+			"minute": "minuto",
+			"minute_plural": "minutos",
+			"second": "segundo",
+			"second_plural": "segundos"
 		}
 	},
 	"ai_assistant": {
 		"text": {
 			"title": "",
-			"welcome_message": "",
-			"action_button_contacts_title": "",
-			"action_button_contacts_subtitle": "",
-			"action_button_contacts_prompt": "",
-			"action_button_send_tokens_title": "",
-			"action_button_send_tokens_subtitle": "",
-			"action_button_send_tokens_prompt": "",
-			"action_button_show_balance_title": "",
-			"action_button_show_balance_subtitle": "",
-			"action_button_show_balance_prompt": "",
-			"select_contact_message": "",
-			"send_to_message": "",
-			"send_message": "",
-			"send_message_input_placeholder": "",
-			"send_token_on_network_message": "",
-			"send_token_message": "",
-			"send_on_network_message": "",
-			"send_token_succeeded": "",
-			"show_total_balance_tool_card_title": "",
-			"no_contacts_found_message": "",
-			"loading": "",
-			"reset_chat_history": "",
-			"feature_description": ""
+			"welcome_message": "mensaje de bienvenida",
+			"action_button_contacts_title": "botón de acción_ contactos_título ",
+			"action_button_contacts_subtitle": "botón de acción_ contactos_subtítulo",
+			"action_button_contacts_prompt": "botón de acción_ contactos_prompt",
+			"action_button_send_tokens_title": "título del botón de acción enviar tokens",
+			"action_button_send_tokens_subtitle": "botón_ de_acción_enviar_tokens_subtítulo",
+			"action_button_send_tokens_prompt": "botón de acción enviar tokens",
+			"action_button_show_balance_title": "botón de acción mostrar título de saldo",
+			"action_button_show_balance_subtitle": "botón de acción mostrar subtítulo de saldo ",
+			"action_button_show_balance_prompt": "botón de acción mostrar mensaje de saldo",
+			"select_contact_message": "seleccionar mensaje de contacto",
+			"send_to_message": "enviar a mensaje",
+			"send_message": "enviar mensaje",
+			"send_message_input_placeholder": "marcador de posición de mensaje de envío",
+			"send_token_on_network_message": "enviar token al mensaje de red",
+			"send_token_message": "enviar mensaje de token",
+			"send_on_network_message": "enviar mensaje en red",
+			"send_token_succeeded": "envío de token correcto",
+			"show_total_balance_tool_card_title": "título de la tarjeta de la herramienta mostrar saldo total",
+			"no_contacts_found_message": "mensaje de no contactos encontrados",
+			"loading": "cargando",
+			"reset_chat_history": "restablecer el historial de chat",
+			"feature_description": "descripción de la caracteristica"
 		},
 		"errors": {
-			"unknown": "",
-			"no_response": ""
+			"unknown": "desconocido",
+			"no_response": "sin respuesta"
 		}
 	}
 }
