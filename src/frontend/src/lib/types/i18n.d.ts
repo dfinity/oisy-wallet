@@ -270,13 +270,14 @@ interface I18nDapps {
 		opensea: { name: string; one_liner: string; description: string };
 		pacifica: { name: string; one_liner: string; description: string };
 		magic_eden: { name: string; one_liner: string; description: string };
-		sanctum: { name: string; one_liner: string; description: string };
 		solayer: { name: string; one_liner: string; description: string };
 		kamino: { name: string; one_liner: string; description: string };
 		helium: { name: string; one_liner: string; description: string };
+		sanctum: { name: string; one_liner: string; description: string };
 		ostrich: { name: string; one_liner: string; description: string };
 		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
+		realt: { name: string; one_liner: string; description: string };
 	};
 }
 
