@@ -13,6 +13,7 @@ import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/toke
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
@@ -37,6 +38,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -100,6 +102,14 @@ describe('page-token.derived', () => {
 		it('should find ERC20 token', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
 			erc20CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
+			mockPage.mockToken(mockToken);
+
+			expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
+		});
+
+		it('should find ERC4626 token', () => {
+			const mockToken = { ...mockValidErc4626Token, enabled: true };
+			erc4626CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
 			mockPage.mockToken(mockToken);
 
 			expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
@@ -216,6 +226,14 @@ describe('page-token.derived', () => {
 		it('should return the standard for ERC20 token', () => {
 			const mockToken = { ...mockValidErc20Token, enabled: true };
 			erc20CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
+			mockPage.mockToken(mockToken);
+
+			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
+		});
+
+		it('should return the standard for ERC4626 token', () => {
+			const mockToken = { ...mockValidErc4626Token, enabled: true };
+			erc4626CustomTokensStore.setAll([{ data: mockToken, certified: true }]);
 			mockPage.mockToken(mockToken);
 
 			expect(get(pageTokenStandard)).toBe(mockToken.standard.code);
