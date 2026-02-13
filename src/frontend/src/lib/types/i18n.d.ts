@@ -278,6 +278,7 @@ interface I18nDapps {
 		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		realt: { name: string; one_liner: string; description: string };
+		parcl: { name: string; one_liner: string; description: string };
 	};
 }
 
