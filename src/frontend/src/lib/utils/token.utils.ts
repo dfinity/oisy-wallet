@@ -46,7 +46,11 @@ export const getMaxTransactionAmount = ({
 }): string => {
 	const value =
 		(balance ?? ZERO) -
-		(tokenStandard.code !== 'erc20' && tokenStandard.code !== 'spl' ? fee : ZERO);
+		(tokenStandard.code !== 'erc20' &&
+		tokenStandard.code !== 'erc4626' &&
+		tokenStandard.code !== 'spl'
+			? fee
+			: ZERO);
 
 	return value <= ZERO
 		? ZERO.toString()
