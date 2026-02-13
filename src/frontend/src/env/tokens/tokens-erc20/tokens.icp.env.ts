@@ -13,7 +13,7 @@ export const ICP_TOKEN_ID: TokenId = parseTokenId(ICP_SYMBOL);
 export const ICP_ONESEC_TOKEN: RequiredAdditionalErc20Token = {
 	id: ICP_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
+	standard: { code: 'erc20' },
 	category: 'default',
 	name: 'ICP (Onesec)',
 	symbol: ICP_SYMBOL,
