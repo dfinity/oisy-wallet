@@ -8,10 +8,10 @@ const ICP_DECIMALS = 8;
 
 const ICP_SYMBOL = 'ICP•OneSec';
 
-export const ICP_ONESEC_TOKEN_ID: TokenId = parseTokenId(ICP_SYMBOL);
+export const ICP_TOKEN_ID: TokenId = parseTokenId(ICP_SYMBOL);
 
 export const ICP_ONESEC_TOKEN: RequiredAdditionalErc20Token = {
-	id: ICP_ONESEC_TOKEN_ID,
+	id: ICP_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
 	standard: 'erc20',
 	category: 'default',
