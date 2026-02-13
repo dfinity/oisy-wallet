@@ -523,6 +523,21 @@
 		"screenshots": ["/images/dapps/sphere-finance-screenshot.webp"]
 	},
 	{
+		"id": "realt",
+		"name": "dapps.descriptions.realt.name",
+		"oneLiner": "dapps.descriptions.realt.one_liner",
+		"website": "https://realt.co/",
+		"twitter": "https://twitter.com/RealTPlatform",
+		"discord": "https://discord.gg/aPSWyGxMUk",
+		"telegram": "https://t.me/Realtoken_welcome",
+		"tags": ["dapps.categories.rwa"],
+		"description": "dapps.descriptions.realt.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/realt-logo.png",
+		"screenshots": ["/images/dapps/realt-screenshot.webp"]
+	},
+	{
 		"id": "ostrich",
 		"name": "dapps.descriptions.ostrich.name",
 		"oneLiner": "dapps.descriptions.ostrich.one_liner",
