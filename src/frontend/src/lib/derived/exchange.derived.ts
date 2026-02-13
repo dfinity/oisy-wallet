@@ -58,6 +58,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 		const solPrice = $exchangeStore?.solana;
 		const bnbPrice = $exchangeStore?.binancecoin;
 		const polPrice = $exchangeStore?.['polygon-ecosystem-token'];
+
 		return {
 			// TODO: improve feed price on testnets, for now we assume that 1 token mainnet = 1 token testnet
 			[BTC_TESTNET_TOKEN_ID]: btcPrice,
