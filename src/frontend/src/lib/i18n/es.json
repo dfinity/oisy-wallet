@@ -8,7 +8,7 @@
 			"done": "Hecho",
 			"close": "Cerrar",
 			"change": "Cambiar",
-			"continue": "continuar o seguir",
+			"continue": "Continuar",
 			"apply": "Aplicar",
 			"retry": "Reintentar",
 			"refresh": "Actualizar",
@@ -31,9 +31,9 @@
 			"edit": "Editar",
 			"no_results": "Sin resultados",
 			"paste": "Pegar",
-			"to": "A", or "para"
+			"to": "A",
 			"add": "Añadir",
-			"more_items": " más articulos",
+			"more_items": "+$items artículos más",
 			"select": "Seleccionar",
 			"language": "Idioma",
 			"currency": "Moneda",
@@ -41,7 +41,7 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": "aprender mas"
+			"learn_more": "Aprender mas"
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
@@ -57,12 +57,12 @@
 			"switch_currency": "Cambiar moneda",
 			"more": "Mas",
 			"less": "Menos",
-			"learn_more": "aprender mas"
+			"learn_more": "Aprender mas"
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
-			"standalone_mode": "modo independiente",
-			"video_not_supported": "video no compatible"
+			"standalone_mode": "Modo independiente",
+			"video_not_supported": "Video no compatible"
 		}
 	},
 	"navigation": {
@@ -81,7 +81,7 @@
 			"support": "Soporte",
 			"confirm_navigate": "¿Estás seguro de que quieres salir?",
 			"vip_qr_code": "Códigos QR VIP",
-			"binance_qr_code": "QR de Binance ",
+			"binance_qr_code": "%QR de Binance Clubhouse",
 			"refer_a_friend": "Recomienda a tus amigos",
 			"address_book": "Contactos",
 			"hide_balances": "Ocultar saldos",
