@@ -203,7 +203,6 @@ interface I18nDapps {
 		ai: string;
 		nft: string;
 		rwa: string;
-		new: string;
 	};
 	descriptions: {
 		kongswap: {
