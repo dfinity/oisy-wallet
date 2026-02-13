@@ -69,6 +69,7 @@
 			$enabledErc20Tokens,
 			$enabledErc4626Tokens
 		];
+
 		debounceLoad();
 	});
 
