@@ -206,16 +206,17 @@
 			"website": "$dAppName की छवि"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "सोशल मीडिया",
-			"staking": "स्टेकिंग",
-			"walletconnect": "वॉलेटकनेक्ट",
-			"game": "गेम",
-			"tools": "टूल्स",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "",
+			"defi": "DeFi",
+			"game": "गेम",
 			"nft": "",
 			"rwa": "",
-			"aa_new": ""
+			"social_media": "सोशल मीडिया",
+			"staking": "स्टेकिंग",
+			"tools": "टूल्स",
+			"walletconnect": "वॉलेटकनेक्ट"
 		},
 		"descriptions": {
 			"kongswap": {

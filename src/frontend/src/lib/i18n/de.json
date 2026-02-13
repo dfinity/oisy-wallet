@@ -206,16 +206,17 @@
 			"website": "Bild von $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Soziale Medien",
-			"staking": "Beteiligungen",
-			"walletconnect": "Wallet Connect",
-			"game": "Spiele",
-			"tools": "Tools",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "KI",
+			"defi": "DeFi",
+			"game": "Spiele",
 			"nft": "NFT",
 			"rwa": "",
-			"aa_new": ""
+			"social_media": "Soziale Medien",
+			"staking": "Beteiligungen",
+			"tools": "Tools",
+			"walletconnect": "Wallet Connect"
 		},
 		"descriptions": {
 			"kongswap": {
