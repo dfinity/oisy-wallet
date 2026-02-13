@@ -21,7 +21,6 @@ export const BAUTOPILOT_USDC_TOKEN: RequiredErc4626Token = {
 	decimals: BAUTOPILOT_USDC_DECIMALS,
 	icon: usdc,
 	address: '0x0d877dc7c8fa3ad980dfdb18b48ec9f8768359c4',
-	exchange: 'erc4626',
 	assetAddress: USDC_TOKEN.address,
 	assetDecimals: USDC_TOKEN.decimals
 };

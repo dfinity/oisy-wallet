@@ -21,6 +21,5 @@ export const PBRON_TOKEN: RequiredEvmBep20Token = {
 	decimals: PBRON_DECIMALS,
 	icon: pbron,
 	address: '0x2b1d5cDeCC356530a746C5754231EfaEAca64022',
-	exchange: 'erc20',
 	groupData: PBRON_TOKEN_GROUP
 };

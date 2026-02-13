@@ -79,7 +79,6 @@ describe('all-tokens.derived', () => {
 		...mockValidErc20Token,
 		id: parseTokenId('DUM'),
 		address: mockEthAddress,
-		exchange: 'erc20',
 		enabled: false
 	};
 

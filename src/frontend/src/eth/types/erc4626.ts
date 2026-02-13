@@ -1,7 +1,6 @@
 import type { ContractAddress, Erc20ContractAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
-import type { Exchange } from '$lib/types/exchange';
 import type { RequiredToken, Token, TokenStandardCode } from '$lib/types/token';
 
 type Erc4626Standard = Extract<TokenStandardCode, 'erc4626'>;
@@ -17,7 +16,6 @@ export type RequiredErc4626Token = RequiredToken<Erc4626Token>;
 export type Erc4626ContractAddress = Erc20ContractAddress;
 
 export type Erc4626Contract = ContractAddress & {
-	exchange: Exchange;
 	assetAddress: Erc20ContractAddress;
 	assetDecimals: number;
 };

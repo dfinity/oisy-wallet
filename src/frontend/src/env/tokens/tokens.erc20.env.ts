@@ -52,8 +52,7 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	{
 		// Weenus
-		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9',
-		exchange: 'erc20'
+		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9'
 	}
 ];
 

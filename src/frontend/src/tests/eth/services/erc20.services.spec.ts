@@ -53,7 +53,6 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
 				version: 1n,
 				allowExternalContentSource: undefined,
 				enabled: true,
@@ -70,7 +69,6 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
 				version: 2n,
 				allowExternalContentSource: true,
 				enabled: true,
@@ -87,7 +85,6 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
 				version: undefined,
 				allowExternalContentSource: false,
 				enabled: false,

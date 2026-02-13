@@ -21,7 +21,6 @@ export const WBTC_TOKEN: RequiredErc20Token = {
 	decimals: WBTC_DECIMALS,
 	icon: wbtc,
 	address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckWBTC',
 	groupData: WBTC_TOKEN_GROUP,
 	neverCollapseInTokenGroup: true,
