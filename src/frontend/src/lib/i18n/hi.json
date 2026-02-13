@@ -208,13 +208,14 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "सोशल मीडिया",
-			"verifiable_credentials": "सत्यापन योग्य क्रेडेंशियल्स",
 			"staking": "स्टेकिंग",
 			"walletconnect": "वॉलेटकनेक्ट",
 			"game": "गेम",
 			"tools": "टूल्स",
 			"ai": "",
-			"nft": ""
+			"nft": "",
+			"rwa": "",
+			"aa_new": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -421,6 +422,11 @@
 				"description": ""
 			},
 			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

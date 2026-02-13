@@ -208,13 +208,14 @@
 		"categories": {
 			"defi": "التمويل اللامركزي",
 			"social_media": "وسائل التواصل الاجتماعي",
-			"verifiable_credentials": "بيانات الاعتماد القابلة للتحقق",
 			"staking": "التخزين",
 			"walletconnect": "WalletConnect",
 			"game": "لعبة",
 			"tools": "أدوات",
 			"ai": "",
-			"nft": ""
+			"nft": "",
+			"rwa": "",
+			"aa_new": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -421,6 +422,11 @@
 				"description": ""
 			},
 			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
