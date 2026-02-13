@@ -208,13 +208,14 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "Социальные сети",
-			"verifiable_credentials": "Verifiable credentials",
 			"staking": "Стейкинг",
 			"walletconnect": "WalletConnect",
 			"game": "Игра",
 			"tools": "Инструменты",
 			"ai": "ИИ",
-			"nft": "NFT"
+			"nft": "NFT",
+			"rwa": "",
+			"aa_new": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -421,6 +422,11 @@
 				"description": ""
 			},
 			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

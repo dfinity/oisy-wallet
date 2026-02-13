@@ -196,13 +196,14 @@ interface I18nDapps {
 	categories: {
 		defi: string;
 		social_media: string;
-		verifiable_credentials: string;
 		staking: string;
 		walletconnect: string;
 		game: string;
 		tools: string;
 		ai: string;
 		nft: string;
+		rwa: string;
+		aa_new: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -275,6 +276,7 @@ interface I18nDapps {
 		helium: { name: string; one_liner: string; description: string };
 		ostrich: { name: string; one_liner: string; description: string };
 		sphere_finance: { name: string; one_liner: string; description: string };
+		binaryx: { name: string; one_liner: string; description: string };
 	};
 }
 
