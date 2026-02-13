@@ -424,6 +424,7 @@ interface I18nInit {
 		icrc_canisters: string;
 		icrc_canister_loading: string;
 		erc20_custom_tokens: string;
+		erc4626_custom_tokens: string;
 		erc721_custom_tokens: string;
 		erc1155_custom_tokens: string;
 		spl_custom_tokens: string;

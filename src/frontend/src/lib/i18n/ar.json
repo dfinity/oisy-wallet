@@ -641,6 +641,7 @@
 			"icrc_canisters": "خطأ أثناء تحميل حاويات ICRC.",
 			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20 المخصصة.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC721 المخصصة.",
 			"erc1155_custom_tokens": "",
 			"spl_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم SPL المخصصة.",
