@@ -1,5 +1,12 @@
 [
 	{
+		"canisterId": "afeuw-qaaaa-aaaap-aakya-cai",
+		"standardVersion": "ext",
+		"metadata": {
+			"name": "Revelation Walls"
+		}
+	},
+	{
 		"canisterId": "24ark-haaaa-aaaam-qazoa-cai",
 		"standardVersion": "ext",
 		"metadata": {
