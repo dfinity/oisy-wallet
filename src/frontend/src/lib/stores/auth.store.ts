@@ -27,6 +27,7 @@ let authClient: Option<AuthClient>;
 
 export interface AuthSignInParams {
 	domain?: InternetIdentityDomain;
+	asPopup?: boolean;
 }
 
 export interface AuthStore extends Readable<AuthStoreData> {
@@ -85,7 +86,7 @@ const initAuthStore = (): AuthStore => {
 			await sync({ forceSync: true });
 		},
 
-		signIn: ({ domain }: AuthSignInParams) =>
+		signIn: ({ domain, asPopup }: AuthSignInParams) =>
 			// eslint-disable-next-line no-async-promise-executor
 			new Promise<void>(async (resolve, reject) => {
 				// When signing in, we require the authClient to be safely defined through the sync method (called when the window loads).
@@ -125,7 +126,14 @@ const initAuthStore = (): AuthStore => {
 					},
 					onError: reject,
 					identityProvider,
-					windowOpenerFeatures: popupCenter({ width: AUTH_POPUP_WIDTH, height: AUTH_POPUP_HEIGHT }),
+					...(asPopup
+						? {
+								windowOpenerFeatures: popupCenter({
+									width: AUTH_POPUP_WIDTH,
+									height: AUTH_POPUP_HEIGHT
+								})
+							}
+						: {}),
 					...getOptionalDerivationOrigin()
 				});
 			}),
