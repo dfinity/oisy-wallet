@@ -206,16 +206,17 @@
 			"website": "$dAppName 的图像"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "社交媒体",
-			"staking": "质押",
-			"walletconnect": "WalletConnect",
-			"game": "游戏",
-			"tools": "工具包",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "人工智能",
+			"defi": "DeFi",
+			"game": "游戏",
 			"nft": "NFT",
 			"rwa": "",
-			"aa_new": ""
+			"social_media": "社交媒体",
+			"staking": "质押",
+			"tools": "工具包",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
