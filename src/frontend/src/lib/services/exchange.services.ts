@@ -158,7 +158,8 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 			data.currentPolPrice,
 			data.currentErc20Prices,
 			data.currentIcrcPrices,
-			data.currentSplPrices
+			data.currentSplPrices,
+			data.currentErc4626Prices
 		]);
 
 		if (nonNullish(data.currentExchangeRate)) {

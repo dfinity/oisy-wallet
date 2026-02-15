@@ -6,34 +6,23 @@ import {
 	SUPPORTED_ETHEREUM_NETWORKS,
 	SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS
 } from '$env/networks/networks.eth.env';
-import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC4626_TOKENS } from '$env/tokens/tokens.erc4626.env';
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
-import { ERC4626_ABI } from '$eth/constants/erc4626.constants';
 import { infuraErc4626Providers } from '$eth/providers/infura-erc4626.providers';
 import { safeLoadMetadata as safeLoadErc20Metadata } from '$eth/services/erc20.services';
 import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
 import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
-import type { Erc4626ContractAddress, Erc4626TokensExchangeData } from '$eth/types/erc4626';
+import type { Erc4626ContractAddress } from '$eth/types/erc4626';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
-import {
-	assertNonNullish,
-	fromNullable,
-	isNullish,
-	nonNullish,
-	queryAndUpdate
-} from '@dfinity/utils';
-import { Contract } from 'ethers/contract';
-import { InfuraProvider } from 'ethers/providers';
+import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const isInterfaceErc4626 = async ({
@@ -246,51 +235,4 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.erc4626_custom_tokens },
 		err
 	});
-};
-
-export const calculateErc4626Prices = async ({
-	erc20Prices,
-	erc4626TokensExchangeData
-}: {
-	erc20Prices: CoingeckoSimpleTokenPriceResponse | null;
-	erc4626TokensExchangeData: Erc4626TokensExchangeData[];
-}): Promise<CoingeckoSimpleTokenPriceResponse> => {
-	const results: CoingeckoSimpleTokenPriceResponse = {};
-
-	await Promise.all(
-		erc4626TokensExchangeData.map(
-			async ({ vaultAddress, vaultDecimals, assetAddress, assetDecimals, infura, exchange }) => {
-				try {
-					if (isNullish(exchange?.coingeckoId)) {
-						return;
-					}
-
-					const assetPrice = erc20Prices?.[assetAddress.toLowerCase()]?.usd;
-
-					if (isNullish(assetPrice)) {
-						return;
-					}
-
-					const provider = new InfuraProvider(infura, INFURA_API_KEY);
-					const contract = new Contract(vaultAddress, ERC4626_ABI, provider);
-
-					const oneShare = 10n ** BigInt(vaultDecimals);
-					const assets = await contract.convertToAssets(oneShare);
-
-					const assetsPerShare = Number(assets) / 10 ** assetDecimals;
-					const sharePriceUsd = assetsPerShare * assetPrice;
-
-					results[vaultAddress.toLowerCase()] = {
-						usd: sharePriceUsd,
-						// no value is available, therefore, we set it as 0
-						usd_market_cap: 0
-					};
-				} catch (err: unknown) {
-					console.error(`Error calculating ERC4626 vault price for ${vaultAddress}:`, err);
-				}
-			}
-		)
-	);
-
-	return results;
 };

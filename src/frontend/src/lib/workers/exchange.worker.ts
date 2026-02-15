@@ -1,3 +1,5 @@
+import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
+import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
@@ -52,7 +54,8 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 			currentCurrency: data?.currentCurrency ?? Currency.USD,
 			erc20ContractAddresses: data?.erc20Addresses ?? [],
 			icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
-			splTokenAddresses: data?.splAddresses ?? []
+			splTokenAddresses: data?.splAddresses ?? [],
+			erc4626TokensExchangeData: data?.erc4626TokensExchangeData ?? []
 		});
 
 	// We sync now but also schedule the update afterward
@@ -86,12 +89,14 @@ const syncExchange = async ({
 	currentCurrency,
 	erc20ContractAddresses,
 	icrcLedgerCanisterIds,
-	splTokenAddresses
+	splTokenAddresses,
+	erc4626TokensExchangeData
 }: {
 	currentCurrency: Currency;
 	erc20ContractAddresses: Erc20ContractAddressWithNetwork[];
 	icrcLedgerCanisterIds: LedgerCanisterIdText[];
 	splTokenAddresses: SplTokenAddress[];
+	erc4626TokensExchangeData: Erc4626TokensExchangeData[];
 }) => {
 	// Avoid duplicating the sync if already in progress and not yet finished
 	if (syncInProgress) {
@@ -157,6 +162,11 @@ const syncExchange = async ({
 			exchangeRatePOLToUsd()
 		]);
 
+		const currentErc4626Prices = await calculateErc4626Prices({
+			erc20Prices: currentErc20Prices,
+			erc4626TokensExchangeData
+		});
+
 		postMessage({
 			msg: 'syncExchange',
 			data: {
@@ -171,6 +181,7 @@ const syncExchange = async ({
 				currentIcrcPrices,
 				currentSolPrice,
 				currentSplPrices,
+				currentErc4626Prices,
 				currentBnbPrice,
 				currentPolPrice
 			}

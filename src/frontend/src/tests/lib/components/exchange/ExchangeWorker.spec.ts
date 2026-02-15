@@ -49,7 +49,8 @@ describe('ExchangeWorker', () => {
 			currentCurrency: Currency.USD,
 			erc20Addresses: [],
 			icrcCanisterIds: [],
-			splAddresses: []
+			splAddresses: [],
+			erc4626TokensExchangeData: []
 		});
 	});
 
@@ -64,7 +65,8 @@ describe('ExchangeWorker', () => {
 			currentCurrency: Currency.USD,
 			erc20Addresses: [],
 			icrcCanisterIds: [],
-			splAddresses: []
+			splAddresses: [],
+			erc4626TokensExchangeData: []
 		});
 
 		currencyStore.switchCurrency(Currency.CHF);
@@ -78,7 +80,8 @@ describe('ExchangeWorker', () => {
 			currentCurrency: Currency.CHF,
 			erc20Addresses: [],
 			icrcCanisterIds: [],
-			splAddresses: []
+			splAddresses: [],
+			erc4626TokensExchangeData: []
 		});
 
 		currencyStore.switchCurrency(Currency.USD);
@@ -92,7 +95,8 @@ describe('ExchangeWorker', () => {
 			currentCurrency: Currency.USD,
 			erc20Addresses: [],
 			icrcCanisterIds: [],
-			splAddresses: []
+			splAddresses: [],
+			erc4626TokensExchangeData: []
 		});
 	});
 
