@@ -7,9 +7,11 @@ import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -152,13 +154,14 @@ const loadErcTransactions = async ({
 	}
 
 	try {
-		const transactions = isTokenErc20(token)
-			? await loadErc20Transactions({ networkId, token, address })
-			: isTokenErc721(token)
-				? await loadErc721Transactions({ networkId, token, address })
-				: isTokenErc1155(token)
-					? await loadErc1155Transactions({ networkId, token, address })
-					: [];
+		const transactions =
+			isTokenErc20(token) || isTokenErc4626(token)
+				? await loadErc20Transactions({ networkId, token, address })
+				: isTokenErc721(token)
+					? await loadErc721Transactions({ networkId, token, address })
+					: isTokenErc1155(token)
+						? await loadErc1155Transactions({ networkId, token, address })
+						: [];
 
 		const certifiedTransactions = transactions.map((transaction) => ({
 			data: transaction,
@@ -206,7 +209,7 @@ const loadErc20Transactions = async ({
 	address
 }: {
 	networkId: NetworkId;
-	token: Erc20CustomToken;
+	token: Erc20CustomToken | Erc4626CustomToken;
 	address: Address;
 }): Promise<Transaction[]> => {
 	const { erc20Transactions } = etherscanProviders(networkId);
