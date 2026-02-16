@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
+	import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 	import { isTokenIcrc, isTokenDip20, isTokenIc } from '$icp/utils/icrc.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -141,7 +142,7 @@
 				</ModalListItem>
 			{/if}
 
-			{#if isTokenIcrc(token) || isTokenErc20(token) || isTokenDip20(token)}
+			{#if isTokenIcrc(token) || isTokenErc20(token) || isTokenDip20(token) || isTokenErc4626(token)}
 				<ModalListItem>
 					{#snippet label()}
 						{$i18n.tokens.details.standard}

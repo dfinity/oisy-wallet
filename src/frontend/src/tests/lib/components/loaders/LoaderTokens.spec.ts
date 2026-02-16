@@ -1,8 +1,10 @@
 import * as erc1155Derived from '$eth/derived/erc1155.derived';
 import * as erc20Derived from '$eth/derived/erc20.derived';
+import * as erc4626Derived from '$eth/derived/erc4626.derived';
 import * as erc721Derived from '$eth/derived/erc721.derived';
 import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 import { loadErc20Tokens } from '$eth/services/erc20.services';
+import { loadErc4626Tokens } from '$eth/services/erc4626.services';
 import { loadErc721Tokens } from '$eth/services/erc721.services';
 import * as extDerived from '$icp/derived/ext.derived';
 import * as icPunksDerived from '$icp/derived/icpunks.derived';
@@ -58,6 +60,10 @@ vi.mock('$eth/services/erc1155.services', () => ({
 	loadErc1155Tokens: vi.fn()
 }));
 
+vi.mock('$eth/services/erc4626.services', () => ({
+	loadErc4626Tokens: vi.fn()
+}));
+
 vi.mock('$icp/services/icrc.services', () => ({
 	loadIcrcTokens: vi.fn()
 }));
@@ -82,6 +88,7 @@ describe('LoaderTokens', () => {
 	const erc20NotInitStore = writable(true);
 	const erc721NotInitStore = writable(true);
 	const erc1155NotInitStore = writable(true);
+	const erc4626NotInitStore = writable(true);
 	const erc721InitStore = writable(false);
 	const erc1155InitStore = writable(false);
 	const extNotInitStore = writable(true);
@@ -108,6 +115,7 @@ describe('LoaderTokens', () => {
 		erc20NotInitStore.set(true);
 		erc721NotInitStore.set(true);
 		erc1155NotInitStore.set(true);
+		erc4626NotInitStore.set(true);
 		erc721InitStore.set(false);
 		erc1155InitStore.set(false);
 		extNotInitStore.set(true);
@@ -132,6 +140,10 @@ describe('LoaderTokens', () => {
 
 		vi.spyOn(erc1155Derived, 'erc1155CustomTokensInitialized', 'get').mockReturnValue(
 			erc1155InitStore
+		);
+
+		vi.spyOn(erc4626Derived, 'erc4626CustomTokensNotInitialized', 'get').mockReturnValue(
+			erc4626NotInitStore
 		);
 
 		vi.spyOn(extDerived, 'extCustomTokensNotInitialized', 'get').mockReturnValue(extNotInitStore);
@@ -174,6 +186,7 @@ describe('LoaderTokens', () => {
 			expect(loadErc20Tokens).not.toHaveBeenCalled();
 			expect(loadErc721Tokens).not.toHaveBeenCalled();
 			expect(loadErc1155Tokens).not.toHaveBeenCalled();
+			expect(loadErc4626Tokens).not.toHaveBeenCalled();
 			expect(loadSplTokens).not.toHaveBeenCalled();
 		});
 	});
@@ -187,6 +200,7 @@ describe('LoaderTokens', () => {
 			expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadErc4626Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadIcPunksTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
@@ -198,6 +212,7 @@ describe('LoaderTokens', () => {
 			erc20NotInitStore.set(true);
 			erc721NotInitStore.set(true);
 			erc1155NotInitStore.set(true);
+			erc4626NotInitStore.set(true);
 
 			render(LoaderTokens, { children: mockSnippet });
 
@@ -205,6 +220,7 @@ describe('LoaderTokens', () => {
 				expect(loadErc20Tokens).not.toHaveBeenCalled();
 				expect(loadErc721Tokens).not.toHaveBeenCalled();
 				expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				expect(loadErc4626Tokens).not.toHaveBeenCalled();
 			});
 
 			userProfileStore.set({
@@ -225,6 +241,7 @@ describe('LoaderTokens', () => {
 				expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 				expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 				expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+				expect(loadErc4626Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			});
 		});
 
@@ -234,6 +251,7 @@ describe('LoaderTokens', () => {
 			erc20NotInitStore.set(false);
 			erc721NotInitStore.set(false);
 			erc1155NotInitStore.set(false);
+			erc4626NotInitStore.set(false);
 
 			render(LoaderTokens, { children: mockSnippet });
 
@@ -241,6 +259,7 @@ describe('LoaderTokens', () => {
 				expect(loadErc20Tokens).not.toHaveBeenCalled();
 				expect(loadErc721Tokens).not.toHaveBeenCalled();
 				expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				expect(loadErc4626Tokens).not.toHaveBeenCalled();
 			});
 		});
 
@@ -268,6 +287,7 @@ describe('LoaderTokens', () => {
 				expect(loadErc20Tokens).not.toHaveBeenCalled();
 				expect(loadErc721Tokens).not.toHaveBeenCalled();
 				expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				expect(loadErc4626Tokens).not.toHaveBeenCalled();
 			});
 		});
 
@@ -278,6 +298,7 @@ describe('LoaderTokens', () => {
 				expect(loadErc20Tokens).not.toHaveBeenCalled();
 				expect(loadErc721Tokens).not.toHaveBeenCalled();
 				expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				expect(loadErc4626Tokens).not.toHaveBeenCalled();
 			});
 
 			setupTestnetsStore('enabled');
@@ -299,11 +320,13 @@ describe('LoaderTokens', () => {
 			erc20NotInitStore.set(true);
 			erc721NotInitStore.set(true);
 			erc1155NotInitStore.set(true);
+			erc4626NotInitStore.set(true);
 
 			await waitFor(() => {
 				expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 				expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 				expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+				expect(loadErc4626Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			});
 		});
 	});

@@ -128,7 +128,7 @@ describe('LoaderEthBalances', () => {
 		expect(loadErc20Balances).toHaveBeenCalledOnce();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
 			address: mockEthAddress,
-			erc20Tokens: mockErc20DefaultTokens
+			tokens: mockErc20DefaultTokens
 		});
 	});
 
@@ -159,7 +159,7 @@ describe('LoaderEthBalances', () => {
 		expect(loadErc20Balances).toHaveBeenCalledOnce();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
 			address: mockEthAddress,
-			erc20Tokens: mockErc20DefaultTokens
+			tokens: mockErc20DefaultTokens
 		});
 
 		ethAddressStore.set({ data: mockEthAddress2, certified: false });
@@ -172,7 +172,7 @@ describe('LoaderEthBalances', () => {
 		expect(loadErc20Balances).toHaveBeenCalledTimes(2);
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(2, {
 			address: mockEthAddress2,
-			erc20Tokens: mockErc20DefaultTokens
+			tokens: mockErc20DefaultTokens
 		});
 
 		vi.unstubAllGlobals();
@@ -197,7 +197,7 @@ describe('LoaderEthBalances', () => {
 		expect(loadErc20Balances).toHaveBeenCalledOnce();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
 			address: mockEthAddress,
-			erc20Tokens: mockErc20DefaultTokens
+			tokens: mockErc20DefaultTokens
 		});
 	});
 });

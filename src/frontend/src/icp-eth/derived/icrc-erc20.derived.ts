@@ -1,4 +1,5 @@
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+import { enabledErc4626AssetAddresses } from '$eth/derived/erc4626.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
@@ -45,13 +46,18 @@ const enabledIcrcTwinTokensAddresses: Readable<Erc20ContractAddressWithNetwork[]
 
 export const enabledMergedErc20TokensAddresses: Readable<Erc20ContractAddressWithNetwork[]> =
 	derived(
-		[enabledIcrcTwinTokensAddresses, enabledErc20TokensAddresses],
-		([$enabledIcrcTwinTokensAddresses, $enabledErc20TokensAddresses]) => [
+		[enabledIcrcTwinTokensAddresses, enabledErc20TokensAddresses, enabledErc4626AssetAddresses],
+		([
+			$enabledIcrcTwinTokensAddresses,
+			$enabledErc20TokensAddresses,
+			$enabledErc4626AssetAddresses
+		]) => [
 			...new Map(
-				[...$enabledErc20TokensAddresses, ...$enabledIcrcTwinTokensAddresses].map((item) => [
-					`${item.address}|${item.coingeckoId}`,
-					item
-				])
+				[
+					...$enabledErc20TokensAddresses,
+					...$enabledIcrcTwinTokensAddresses,
+					...$enabledErc4626AssetAddresses
+				].map((item) => [`${item.address}|${item.coingeckoId}`, item])
 			).values()
 		]
 	);

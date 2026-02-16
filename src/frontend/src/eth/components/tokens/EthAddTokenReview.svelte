@@ -4,6 +4,7 @@
 	import { fade } from 'svelte/transition';
 	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 	import { erc721Tokens } from '$eth/derived/erc721.derived';
 	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
@@ -91,7 +92,7 @@
 		assertIsNetworkEthereum(network);
 
 		if (
-			[...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens]?.find(
+			[...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens, ...$erc4626Tokens]?.find(
 				({ address, network: tokenNetwork }) =>
 					areAddressesEqual({
 						address1: address,

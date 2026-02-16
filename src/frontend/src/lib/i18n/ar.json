@@ -206,15 +206,17 @@
 			"website": "صورة $dAppName"
 		},
 		"categories": {
-			"defi": "التمويل اللامركزي",
-			"social_media": "وسائل التواصل الاجتماعي",
-			"verifiable_credentials": "بيانات الاعتماد القابلة للتحقق",
-			"staking": "التخزين",
-			"walletconnect": "WalletConnect",
-			"game": "لعبة",
-			"tools": "أدوات",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "",
-			"nft": ""
+			"defi": "التمويل اللامركزي",
+			"game": "لعبة",
+			"nft": "",
+			"rwa": "",
+			"social_media": "وسائل التواصل الاجتماعي",
+			"staking": "التخزين",
+			"tools": "أدوات",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -395,11 +397,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sanctum": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"solayer": {
 				"name": "",
 				"one_liner": "",
@@ -415,12 +412,32 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"ostrich": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"realt": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -641,6 +658,7 @@
 			"icrc_canisters": "خطأ أثناء تحميل حاويات ICRC.",
 			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20 المخصصة.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC721 المخصصة.",
 			"erc1155_custom_tokens": "",
 			"spl_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم SPL المخصصة.",

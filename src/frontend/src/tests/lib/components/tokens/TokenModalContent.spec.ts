@@ -3,6 +3,7 @@ import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
@@ -76,6 +77,17 @@ describe('TokenModalContent', () => {
 				})} ${mockValidIcrcToken.symbol}`
 			)
 		).toBeInTheDocument();
+	});
+
+	it('renders standard for ERC4626 token', () => {
+		const { getByText } = render(TokenModalContent, {
+			props: {
+				token: mockValidErc4626Token as Token
+			}
+		});
+
+		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
+		expect(getByText(mockValidErc4626Token.standard.code)).toBeInTheDocument();
 	});
 
 	it('renders all values correctly for ICRC token without index canister', () => {

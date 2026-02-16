@@ -1,5 +1,6 @@
 import { loadCustomTokens as loadCustomErc1155Tokens } from '$eth/services/erc1155.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
+import { loadCustomErc4626Tokens } from '$eth/services/erc4626.services';
 import { loadCustomTokens as loadCustomErc721Tokens } from '$eth/services/erc721.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
@@ -105,6 +106,7 @@ export const saveCustomTokens = async ({
 	// Reload all custom tokens for simplicity reason.
 	await Promise.all([
 		loadCustomErc20Tokens({ identity }),
+		loadCustomErc4626Tokens({ identity }),
 		loadCustomErc721Tokens({ identity }),
 		loadCustomErc1155Tokens({ identity }),
 		loadCustomIcrcTokens({ identity }),

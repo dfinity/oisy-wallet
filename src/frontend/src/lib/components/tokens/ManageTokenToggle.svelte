@@ -2,6 +2,7 @@
 	import { Toggle } from '@dfinity/gix-components';
 	import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+	import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 	import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import type { Dip721CustomToken } from '$icp/types/dip721-custom-token';
@@ -14,6 +15,7 @@
 	type TokenToggleable =
 		| Erc20CustomToken
 		| SplCustomToken
+		| Erc4626CustomToken
 		| Erc721CustomToken
 		| Erc1155CustomToken
 		| ExtCustomToken

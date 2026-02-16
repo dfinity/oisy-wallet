@@ -1,5 +1,6 @@
 import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { SaveErc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 import {
 	MANAGE_TOKENS_MODAL_ROUTE,
@@ -44,6 +45,7 @@ export const saveTokens = async <
 		| SaveSplCustomToken
 		| SaveErc721CustomToken
 		| SaveErc1155CustomToken
+		| SaveErc4626CustomToken
 		| TokenToggleable<Token>
 >({
 	tokens,

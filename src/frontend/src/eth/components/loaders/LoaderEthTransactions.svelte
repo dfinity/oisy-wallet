@@ -11,6 +11,7 @@
 	} from '$lib/constants/app.constants';
 	import {
 		enabledErc20Tokens,
+		enabledErc4626Tokens,
 		enabledNonFungibleTokensWithoutSpam
 	} from '$lib/derived/tokens.derived';
 	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
@@ -24,6 +25,7 @@
 	let fungibleTokens = $derived([
 		...$enabledEthereumTokens,
 		...$enabledErc20Tokens,
+		...$enabledErc4626Tokens,
 		...$enabledEvmTokens
 	]);
 

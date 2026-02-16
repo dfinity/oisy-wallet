@@ -23,7 +23,9 @@ export const calculateBtcFee = (token: PayableToken): UtxosFee | undefined => {
 		return;
 	}
 
-	const feeRateMiliSatoshisPerVByteProvider = nonNullish(token.minFee) ? token.minFee * 1000 : 0;
+	const feeRateMiliSatoshisPerVByteProvider = nonNullish(token.minFee)
+		? Math.round(token.minFee * 1000)
+		: 0;
 	const feeRateMiliSatoshisPerVByte = BigInt(
 		Math.max(Number(feeRateMiliSatoshisPerVByteStore), feeRateMiliSatoshisPerVByteProvider)
 	);

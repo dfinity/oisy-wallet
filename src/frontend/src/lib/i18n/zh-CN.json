@@ -206,15 +206,17 @@
 			"website": "$dAppName 的图像"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "社交媒体",
-			"verifiable_credentials": "可验证凭证",
-			"staking": "质押",
-			"walletconnect": "WalletConnect",
-			"game": "游戏",
-			"tools": "工具包",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "人工智能",
-			"nft": "NFT"
+			"defi": "DeFi",
+			"game": "游戏",
+			"nft": "NFT",
+			"rwa": "",
+			"social_media": "社交媒体",
+			"staking": "质押",
+			"tools": "工具包",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -395,11 +397,6 @@
 				"one_liner": "Magic Eden 是一个多链 NFT 市场，允许用户在不同区块链上创建、购买、出售和交易非同质化代币（NFT）。",
 				"description": "Magic Eden 是一个多链 NFT 市场，允许用户在不同区块链上创建、购买、出售和交易非同质化代币（NFT）。它以用户友好的界面、低交易费用以及为创作者和收藏者提供的多种工具而闻名。"
 			},
-			"sanctum": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"solayer": {
 				"name": "Solayer",
 				"one_liner": "一个基于 Solana 的高速 DeFi 平台，提供原生流动性质押（sSOL）、稳定币（sUSD）以及通过 Emerald Card 进行的现实世界支付。",
@@ -415,12 +412,32 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"ostrich": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"realt": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -641,6 +658,7 @@
 			"icrc_canisters": "加载 ICRC 容器时出错。",
 			"icrc_canister_loading": "无法加载带有 Ledger 容器 $ledgerCanisterId 的令牌，因为它目前没有响应。",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",
 			"spl_custom_tokens": "加载 SPL 用户代币时出错。",

@@ -1,5 +1,6 @@
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20, isTokenErc20CustomToken } from '$eth/utils/erc20.utils';
+import { isTokenErc4626CustomToken } from '$eth/utils/erc4626.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
 import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
@@ -364,6 +365,10 @@ const normaliseTokenForSave = (token: Token): SaveCustomTokenWithKey | undefined
 
 	if (isTokenErc721CustomToken(token)) {
 		return { ...token, chainId: token.network.chainId, networkKey: 'Erc721' };
+	}
+
+	if (isTokenErc4626CustomToken(token)) {
+		return { ...token, chainId: token.network.chainId, networkKey: 'Erc4626' };
 	}
 
 	if (isTokenErc1155CustomToken(token)) {

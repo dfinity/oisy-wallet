@@ -206,15 +206,17 @@
 			"website": "Obraz $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Media społecznościowe",
-			"verifiable_credentials": "Poświadczenia weryfikowalne",
-			"staking": "Staking",
-			"walletconnect": "WalletConnect",
-			"game": "Gra",
-			"tools": "Narzędzia",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "",
-			"nft": ""
+			"defi": "DeFi",
+			"game": "Gra",
+			"nft": "",
+			"rwa": "",
+			"social_media": "Media społecznościowe",
+			"staking": "Staking",
+			"tools": "Narzędzia",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -395,11 +397,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sanctum": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"solayer": {
 				"name": "",
 				"one_liner": "",
@@ -415,12 +412,32 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"ostrich": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"realt": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -641,6 +658,7 @@
 			"icrc_canisters": "Błąd podczas ładowania kanistrów ICRC.",
 			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC721.",
 			"erc1155_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC1155.",
 			"spl_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów SPL.",

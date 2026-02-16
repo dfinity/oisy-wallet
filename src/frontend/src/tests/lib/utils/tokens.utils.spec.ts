@@ -48,6 +48,7 @@ import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balan
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { createMockErc20Tokens, mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
@@ -1065,6 +1066,25 @@ describe('tokens.utils', () => {
 			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([expect.objectContaining(token)]),
+					identity: mockIdentity
+				})
+			);
+		});
+
+		it('should call saveCustomTokensWithKey when ERC4626 tokens are present', async () => {
+			const token = { ...mockValidErc4626Token, enabled: true } as unknown as TokenUi;
+
+			await saveAllCustomTokens({
+				tokens: [token],
+				$authIdentity: mockIdentity,
+				$i18n: i18nMock
+			});
+
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tokens: expect.arrayContaining([
+						expect.objectContaining({ ...token, networkKey: 'Erc4626' })
+					]),
 					identity: mockIdentity
 				})
 			);

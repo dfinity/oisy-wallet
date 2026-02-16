@@ -4,6 +4,7 @@
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
+	import { isInterfaceErc4626 } from '$eth/services/erc4626.services';
 	import { isInterfaceErc721 } from '$eth/services/erc721.services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc721Metadata } from '$eth/types/erc721';
@@ -153,6 +154,17 @@
 
 		if (isErc1155) {
 			await saveTokens([{ ...newToken, networkKey: 'Erc1155' }]);
+
+			return;
+		}
+
+		const isErc4626 = await isInterfaceErc4626({
+			address: ethContractAddress,
+			networkId: network.id
+		});
+
+		if (isErc4626) {
+			await saveTokens([{ ...newToken, networkKey: 'Erc4626' }]);
 
 			return;
 		}
