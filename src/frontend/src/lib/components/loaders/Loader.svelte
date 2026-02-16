@@ -34,7 +34,6 @@
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { initLoader } from '$lib/services/loader.services';
 	import { initialLoading } from '$lib/stores/loader.store';
-	import { emit } from '$lib/utils/events.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
