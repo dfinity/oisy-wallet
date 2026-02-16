@@ -1,6 +1,5 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { WETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.weth.env';
-import weth from '$eth/assets/weth.svg';
 import type { RequiredErc4626Token } from '$eth/types/erc4626';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -19,7 +18,8 @@ export const BAUTOPILOT_WETH_TOKEN: RequiredErc4626Token = {
 	name: 'Autopilot wETH Base',
 	symbol: BAUTOPILOT_WETH_SYMBOL,
 	decimals: BAUTOPILOT_WETH_DECIMALS,
-	icon: weth,
+	// TODO: add custom icon
+	icon: '',
 	address: '0x7872893e528Fe2c0829e405960db5B742112aa97',
 	assetAddress: WETH_TOKEN.address,
 	assetDecimals: WETH_TOKEN.decimals
