@@ -22,6 +22,12 @@ import { isNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
+}));
+
 describe('AiAssistantReviewSendEthToken', () => {
 	const sendAmount = 0.001;
 	const mockFees = {
