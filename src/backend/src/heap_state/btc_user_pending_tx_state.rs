@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use candid::Principal;
 use ic_cdk::api::management_canister::bitcoin::Utxo;
@@ -32,6 +32,19 @@ pub struct BtcUserPendingTransactions {
     max_pending_transactions: usize,
     /// Maximum number of addresses per user.
     max_addresses_per_user: usize,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct OutpointKey {
+    txid: Vec<u8>,
+    vout: u32,
+}
+
+pub fn outpoint_key(u: &Utxo) -> OutpointKey {
+    OutpointKey {
+        txid: u.outpoint.txid.clone(),
+        vout: u.outpoint.vout,
+    }
 }
 
 impl BtcUserPendingTransactions {
@@ -132,6 +145,33 @@ impl BtcUserPendingTransactions {
             }
         }
     }
+
+    /// Checks whether the provided UTXOs intersect with any existing pending
+    /// transactions for a specific principal.
+    ///
+    /// This method is used to prevent double reservation of the same UTXOs.
+    /// A conflict occurs if at least one UTXO in `new_utxos` is already present
+    /// in the UTXO set of any stored pending transaction for the given principal.
+    ///
+    /// The check is performed across all addresses associated with the principal.
+    /// If the principal has no pending transactions stored, the method returns `false`.
+    ///
+    /// Returns:
+    /// - `true` if there is at least one overlapping UTXO.
+    /// - `false` if no overlap is found.
+    pub fn has_intersecting_pending_utxos(&self, principal: Principal, new_utxos: &[Utxo]) -> bool {
+        let new_keys: HashSet<OutpointKey> = new_utxos.iter().map(outpoint_key).collect();
+
+        let Some(address_map) = self.pending_transactions_map.get(&principal) else {
+            return false;
+        };
+
+        address_map
+            .values()
+            .flat_map(|txs| txs.iter())
+            .flat_map(|tx| tx.utxos.iter())
+            .any(|u| new_keys.contains(&outpoint_key(u)))
+    }
 }
 
 #[cfg(test)]
@@ -171,6 +211,14 @@ mod tests {
         },
         value: 8000,
         height: 160,
+    };
+    const UTXO_5: Utxo = Utxo {
+        outpoint: Outpoint {
+            txid: vec![],
+            vout: 9,
+        },
+        value: 9000,
+        height: 200,
     };
 
     const PRINCIPAL_TEXT_1: &str =
@@ -462,5 +510,131 @@ mod tests {
         let pending_txs =
             btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 2);
+    }
+
+    #[test]
+    fn test_has_intersecting_pending_utxos_true_across_addresses() {
+        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let existing = StoredPendingTransaction {
+            txid: vec![1],
+            utxos: vec![UTXO_1],
+            created_at_timestamp_ns: 1_000_000,
+        };
+
+        btc_user_pending_transactions
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), existing)
+            .unwrap();
+
+        assert!(btc_user_pending_transactions.has_intersecting_pending_utxos(principal, &[UTXO_1]));
+    }
+
+    #[test]
+    fn test_has_intersecting_pending_utxos_false_when_disjoint() {
+        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let existing = StoredPendingTransaction {
+            txid: vec![1],
+            utxos: vec![UTXO_1],
+            created_at_timestamp_ns: 1_000_000,
+        };
+
+        btc_user_pending_transactions
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), existing)
+            .unwrap();
+
+        assert!(!btc_user_pending_transactions.has_intersecting_pending_utxos(principal, &[UTXO_5]));
+    }
+
+    #[test]
+    fn test_has_intersecting_pending_utxos_false_other_principal() {
+        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let principal_1 = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+        let principal_2 = Principal::from_text(PRINCIPAL_TEXT_2).unwrap();
+
+        let existing = StoredPendingTransaction {
+            txid: vec![1],
+            utxos: vec![UTXO_1],
+            created_at_timestamp_ns: 1_000_000,
+        };
+
+        btc_user_pending_transactions
+            .add_pending_transaction(principal_1, ADDRESS_1.to_string(), existing)
+            .unwrap();
+
+        assert!(
+            !btc_user_pending_transactions.has_intersecting_pending_utxos(principal_2, &[UTXO_1])
+        );
+    }
+
+    #[test]
+    fn test_has_intersecting_pending_utxos_false_for_self_duplicates_when_no_pending_exists() {
+        let btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        assert!(!btc_user_pending_transactions
+            .has_intersecting_pending_utxos(principal, &[UTXO_1, UTXO_1]));
+    }
+
+    #[test]
+    fn test_has_intersecting_pending_utxos_true_when_second_call_reuses_same_utxos() {
+        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        // First call reserves UTXO_1 and UTXO_2
+        let first = StoredPendingTransaction {
+            txid: vec![1],
+            utxos: vec![UTXO_1, UTXO_2],
+            created_at_timestamp_ns: 1_000_000,
+        };
+        btc_user_pending_transactions
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), first)
+            .unwrap();
+
+        // Second call attempts to reuse the exact same set => must intersect
+        assert!(btc_user_pending_transactions
+            .has_intersecting_pending_utxos(principal, &[UTXO_1, UTXO_2]));
+    }
+
+    #[test]
+    fn test_has_intersecting_pending_utxos_true_when_second_call_partially_overlaps() {
+        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        // First call reserves UTXO_1 and UTXO_2
+        let first = StoredPendingTransaction {
+            txid: vec![1],
+            utxos: vec![UTXO_1, UTXO_2],
+            created_at_timestamp_ns: 1_000_000,
+        };
+        btc_user_pending_transactions
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), first)
+            .unwrap();
+
+        // Second call overlaps on UTXO_2 only => still must intersect
+        assert!(btc_user_pending_transactions
+            .has_intersecting_pending_utxos(principal, &[UTXO_2, UTXO_5]));
+    }
+
+    #[test]
+    fn test_has_intersecting_pending_utxos_true_when_overlap_is_same_outpoint_even_if_fields_differ(
+    ) {
+        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        // UTXO_3 and UTXO_4 share the same outpoint (txid=[], vout=2) but differ in value/height.
+        // If your overlap logic is correct (outpoint-based), this should count as intersection.
+        let first = StoredPendingTransaction {
+            txid: vec![1],
+            utxos: vec![UTXO_3],
+            created_at_timestamp_ns: 1_000_000,
+        };
+        btc_user_pending_transactions
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), first)
+            .unwrap();
+
+        assert!(btc_user_pending_transactions.has_intersecting_pending_utxos(principal, &[UTXO_4]));
     }
 }

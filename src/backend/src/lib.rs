@@ -1,4 +1,4 @@
-use std::{cell::RefCell, time::Duration};
+use std::{cell::RefCell, collections::HashSet, time::Duration};
 
 use bitcoin_utils::estimate_fee;
 use candid::{candid_method, Principal};
@@ -67,6 +67,7 @@ use user_profile_model::UserProfileModel;
 use crate::{
     bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
+    heap_state::btc_user_pending_tx_state::{outpoint_key, OutpointKey},
     token::{add_to_user_token, remove_from_user_token},
     types::{ContactMap, PowChallengeMap},
     user_profile::{
@@ -85,6 +86,7 @@ mod impls;
 mod pow;
 pub mod random;
 pub mod signer;
+mod sol;
 mod state;
 mod token;
 mod types;
@@ -432,6 +434,7 @@ pub async fn btc_add_pending_transaction(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
         let principal = ic_cdk::caller();
+
         let current_utxos = bitcoin_api::get_all_utxos(
             params.network,
             params.address.clone(),
@@ -439,10 +442,40 @@ pub async fn btc_add_pending_transaction(
         )
         .await
         .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+
         let now_ns = time();
+
+        let current_keys: HashSet<OutpointKey> = current_utxos.iter().map(outpoint_key).collect();
+
+        let all_param_utxos_are_current = params
+            .utxos
+            .iter()
+            .all(|u| current_keys.contains(&outpoint_key(u)));
+
+        if !all_param_utxos_are_current {
+            return Err(BtcAddPendingTransactionError::InternalError {
+                msg: "Some provided UTXOs are not present in the current UTXO set".to_string(),
+            });
+        }
+
+        let unique_keys: HashSet<OutpointKey> = params.utxos.iter().map(outpoint_key).collect();
+
+        if unique_keys.len() != params.utxos.len() {
+            return Err(BtcAddPendingTransactionError::InternalError {
+                msg: "Duplicate UTXOs provided in request".to_string(),
+            });
+        }
 
         with_btc_pending_transactions(|pending_transactions| {
             pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+
+            if pending_transactions.has_intersecting_pending_utxos(principal, &params.utxos) {
+                return Err(BtcAddPendingTransactionError::InternalError {
+                    msg: "Some provided UTXOs are already reserved by a pending transaction"
+                        .to_string(),
+                });
+            }
+
             let current_pending_transaction = StoredPendingTransaction {
                 txid: params.txid,
                 utxos: params.utxos,
