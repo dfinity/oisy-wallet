@@ -194,16 +194,17 @@ interface I18nDapps {
 		website: string;
 	};
 	categories: {
-		defi: string;
-		social_media: string;
-		staking: string;
-		walletconnect: string;
-		game: string;
-		tools: string;
+		aa_new: string;
+		ab_icp: string;
 		ai: string;
+		defi: string;
+		game: string;
 		nft: string;
 		rwa: string;
-		aa_new: string;
+		social_media: string;
+		staking: string;
+		tools: string;
+		walletconnect: string;
 	};
 	descriptions: {
 		kongswap: {
