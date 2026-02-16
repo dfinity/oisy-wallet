@@ -1,3 +1,4 @@
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import * as api from '$lib/api/backend.api';
@@ -140,6 +141,7 @@ describe('loader.services', () => {
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [
+				BTC_MAINNET_NETWORK_ID,
 				ETHEREUM_NETWORK_ID,
 				SOLANA_MAINNET_NETWORK_ID
 			]);
@@ -156,6 +158,7 @@ describe('loader.services', () => {
 							...mockNetworksSettings,
 							testnets: { show_testnets: true },
 							networks: [
+								[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ BaseMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
@@ -188,6 +191,7 @@ describe('loader.services', () => {
 							...mockNetworksSettings,
 							testnets: { show_testnets: true },
 							networks: [
+								[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ BaseMainnet: null }, { enabled: true, is_testnet: false }],
 								[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
