@@ -432,9 +432,12 @@ pub async fn btc_add_pending_transaction(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
         let principal = ic_cdk::caller();
+        let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+            .await
+            .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
         let current_utxos = bitcoin_api::get_all_utxos(
             params.network,
-            params.address.clone(),
+            source_address.clone(),
             Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
         )
         .await
@@ -449,7 +452,7 @@ pub async fn btc_add_pending_transaction(
                 created_at_timestamp_ns: now_ns,
             };
             pending_transactions
-                .add_pending_transaction(principal, params.address, current_pending_transaction)
+                .add_pending_transaction(principal, source_address, current_pending_transaction)
                 .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
         })
     }

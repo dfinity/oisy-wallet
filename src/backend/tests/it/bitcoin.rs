@@ -62,7 +62,6 @@ fn test_select_user_utxos_fee_pending_transaction_error() {
     let add_request = BtcAddPendingTransactionRequest {
         txid: txid.clone(),
         utxos: utxos.clone(),
-        address: address.clone(),
         network: BitcoinNetwork::Regtest,
     };
 
@@ -119,7 +118,6 @@ fn test_add_and_read_pending_transactions() {
     let add_request = BtcAddPendingTransactionRequest {
         txid: txid.clone(),
         utxos: utxos.clone(),
-        address: address.clone(),
         network: BitcoinNetwork::Regtest,
     };
 

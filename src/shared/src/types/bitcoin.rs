@@ -62,7 +62,6 @@ pub enum SelectedUtxosFeeError {
 pub struct BtcAddPendingTransactionRequest {
     pub txid: Vec<u8>,
     pub utxos: Vec<Utxo>,
-    pub address: String,
     pub network: BitcoinNetwork,
 }
 
