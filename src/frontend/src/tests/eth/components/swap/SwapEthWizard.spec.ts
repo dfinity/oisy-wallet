@@ -15,6 +15,12 @@ vi.mock('$lib/utils/parse.utils', () => ({
 	parseToken: vi.fn()
 }));
 
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
+}));
+
 const mockToken = { ...mockValidErc20Token, enabled: true };
 const mockDestToken = { ...ETHEREUM_TOKEN, enabled: true };
 

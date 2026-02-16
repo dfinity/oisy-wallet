@@ -49,6 +49,12 @@ vi.mock('$eth/services/fee.services', () => ({
 	getErc20FeeData: vi.fn()
 }));
 
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
+}));
+
 describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
