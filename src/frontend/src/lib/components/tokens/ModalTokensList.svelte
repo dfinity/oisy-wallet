@@ -44,7 +44,9 @@
 	let seeded = $state(false);
 
 	$effect(() => {
-		if (seeded) {return;}
+		if (seeded) {
+			return;
+		}
 
 		filter = $filterQuery ?? '';
 
