@@ -14,7 +14,6 @@ import type { MockInstance } from 'vitest';
 
 describe('address.services', () => {
 	const mockGetAddress = vi.fn();
-	const mockSetIdbAddress = vi.fn();
 	const mockUpdateIdbAddressLastUsage = vi.fn();
 
 	const mockNetworkId = ETHEREUM_NETWORK_ID;
@@ -64,7 +63,6 @@ describe('address.services', () => {
 
 			expect(result).toEqual({ success: false });
 			expect(mockAddressStore.reset).toHaveBeenCalledOnce();
-			expect(mockSetIdbAddress).not.toHaveBeenCalled();
 			expect(spyToastsError).toHaveBeenCalledWith({
 				msg: {
 					text: replacePlaceholders(en.init.error.loading_address, {
