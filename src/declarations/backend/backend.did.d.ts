@@ -71,7 +71,6 @@ export type BtcAddPendingTransactionError = {
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
 	network: BitcoinNetwork;
-	address: string;
 	utxos: Array<Utxo>;
 }
 export type BtcAddPendingTransactionResult = { Ok: null } | { Err: BtcAddPendingTransactionError };

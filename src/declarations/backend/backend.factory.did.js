@@ -124,7 +124,6 @@ export const idlFactory = ({ IDL }) => {
 	const BtcAddPendingTransactionRequest = IDL.Record({
 		txid: IDL.Vec(IDL.Nat8),
 		network: BitcoinNetwork,
-		address: IDL.Text,
 		utxos: IDL.Vec(Utxo)
 	});
 	const BtcAddPendingTransactionError = IDL.Variant({
