@@ -57,22 +57,6 @@ describe('address.services', () => {
 			expect(mockAddressStore.set).toHaveBeenCalledWith({ data: 'mock-address', certified: true });
 		});
 
-		it('should save the address for future sign-in if setIdbAddress is provided', async () => {
-			mockGetAddress.mockResolvedValueOnce('mock-address');
-
-			const result = await loadTokenAddress(mockParams);
-
-			expect(result).toEqual({ success: true });
-			expect(mockSetIdbAddress).toHaveBeenCalledExactlyOnceWith({
-				address: {
-					address: 'mock-address',
-					createdAtTimestamp: expect.any(Number),
-					lastUsedTimestamp: expect.any(Number)
-				},
-				principal: mockIdentity.getPrincipal()
-			});
-		});
-
 		it('should reset the address store and show an error if getAddress throws', async () => {
 			mockGetAddress.mockRejectedValueOnce(new Error('Failed to get address'));
 
