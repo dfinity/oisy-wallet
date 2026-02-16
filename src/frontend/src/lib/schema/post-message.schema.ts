@@ -1,4 +1,5 @@
 import type { BtcAddress } from '$btc/types/address';
+import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import {
 	IcCanistersSchema,
@@ -69,7 +70,8 @@ export const PostMessageDataRequestExchangeTimerSchema = z.object({
 	// TODO: generate zod schema for Erc20ContractAddressWithNetwork
 	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
-	splAddresses: z.array(z.custom<SplTokenAddress>())
+	splAddresses: z.array(z.custom<SplTokenAddress>()),
+	erc4626TokensExchangeData: z.array(z.custom<Erc4626TokensExchangeData>())
 });
 
 export const PostMessageDataRequestIcrcSchema = z.object({
@@ -176,6 +178,7 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
+	currentErc4626Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>()
 });

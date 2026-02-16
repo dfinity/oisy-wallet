@@ -1,3 +1,4 @@
+import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
@@ -17,6 +18,10 @@ import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers
 vi.mock('$lib/rest/coingecko.rest', () => ({
 	simplePrice: vi.fn(),
 	simpleTokenPrice: vi.fn()
+}));
+
+vi.mock('$eth/services/erc4626-exchange.services', () => ({
+	calculateErc4626Prices: vi.fn()
 }));
 
 describe('exchange.worker', () => {
@@ -62,6 +67,8 @@ describe('exchange.worker', () => {
 						).reduce((acc, address) => ({ ...acc, [address]: { usd: 1 } }), {})
 					)
 			);
+
+			vi.mocked(calculateErc4626Prices).mockResolvedValue({});
 		});
 
 		afterEach(() => {
@@ -97,7 +104,8 @@ describe('exchange.worker', () => {
 					currentCurrency: Currency.USD,
 					erc20Addresses: mockErc20ContractAddresses,
 					icrcCanisterIds: mockIcrcLedgerCanisterIds,
-					splAddresses: mockSplTokenAddresses
+					splAddresses: mockSplTokenAddresses,
+					erc4626TokensExchangeData: []
 				}
 			};
 
@@ -145,6 +153,7 @@ describe('exchange.worker', () => {
 						currentBnbPrice: { binancecoin: { usd: 1 } },
 						currentBtcPrice: { bitcoin: { usd: 1 } },
 						currentErc20Prices: {},
+						currentErc4626Prices: {},
 						currentEthPrice: { ethereum: { usd: 1 } },
 						currentIcpPrice: { 'internet-computer': { usd: 1 } },
 						currentIcrcPrices: null,
@@ -234,7 +243,8 @@ describe('exchange.worker', () => {
 								currentCurrency: Currency.JPY,
 								erc20Addresses: mockErc20ContractAddresses,
 								icrcCanisterIds: [],
-								splAddresses: []
+								splAddresses: [],
+								erc4626TokensExchangeData: []
 							}
 						}
 					};
@@ -284,7 +294,8 @@ describe('exchange.worker', () => {
 								currentCurrency: Currency.CHF,
 								erc20Addresses: [],
 								icrcCanisterIds: mockIcrcLedgerCanisterIds,
-								splAddresses: []
+								splAddresses: [],
+								erc4626TokensExchangeData: []
 							}
 						}
 					};
@@ -312,7 +323,8 @@ describe('exchange.worker', () => {
 								currentCurrency: Currency.EUR,
 								erc20Addresses: [],
 								icrcCanisterIds: [],
-								splAddresses: mockSplTokenAddresses
+								splAddresses: mockSplTokenAddresses,
+								erc4626TokensExchangeData: []
 							}
 						}
 					};
@@ -338,7 +350,8 @@ describe('exchange.worker', () => {
 								currentCurrency: Currency.JPY,
 								erc20Addresses: [],
 								icrcCanisterIds: [],
-								splAddresses: []
+								splAddresses: [],
+								erc4626TokensExchangeData: []
 							}
 						}
 					};
@@ -364,7 +377,8 @@ describe('exchange.worker', () => {
 								currentCurrency: Currency.USD,
 								erc20Addresses: [],
 								icrcCanisterIds: [],
-								splAddresses: []
+								splAddresses: [],
+								erc4626TokensExchangeData: []
 							}
 						}
 					};
@@ -451,6 +465,7 @@ describe('exchange.worker', () => {
 								'0xdef': { usd: 1 },
 								'0xghi': { usd: 1 }
 							},
+							currentErc4626Prices: {},
 							currentEthPrice: { ethereum: { usd: 1 } },
 							currentIcpPrice: { 'internet-computer': { usd: 1 } },
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
@@ -506,6 +521,7 @@ describe('exchange.worker', () => {
 								'0xdef': { usd: 1 },
 								'0xghi': { usd: 1 }
 							},
+							currentErc4626Prices: {},
 							currentEthPrice: { ethereum: { usd: 1 } },
 							currentIcpPrice: { 'internet-computer': { usd: 1 } },
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },

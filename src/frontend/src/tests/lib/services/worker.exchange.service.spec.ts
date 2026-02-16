@@ -59,7 +59,8 @@ describe('worker.exchange.services', () => {
 			currentCurrency: Currency.EUR,
 			erc20Addresses: [{ address: mockEthAddress, coingeckoId: 'ethereum' }],
 			icrcCanisterIds: [mockIcrcCustomToken.ledgerCanisterId],
-			splAddresses: [mockSplAddress]
+			splAddresses: [mockSplAddress],
+			erc4626TokensExchangeData: []
 		};
 
 		beforeEach(async () => {
@@ -113,6 +114,7 @@ describe('worker.exchange.services', () => {
 					currentIcrcPrices: {},
 					currentSolPrice: { solana: { usd: 100 } },
 					currentSplPrices: {},
+					currentErc4626Prices: {},
 					currentBnbPrice: { binancecoin: { usd: 400 } },
 					currentPolPrice: {}
 				};

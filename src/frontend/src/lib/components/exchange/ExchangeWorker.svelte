@@ -2,6 +2,7 @@
 	import { debounce } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { EXCHANGE_DISABLED } from '$env/exchange.env';
+	import { erc4626TokensExchangeData } from '$eth/derived/erc4626.derived';
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
@@ -33,7 +34,8 @@
 			currentCurrency: $currentCurrency,
 			erc20Addresses: $enabledMergedErc20TokensAddresses,
 			icrcCanisterIds: $enabledIcrcLedgerCanisterIdsNoCk,
-			splAddresses: $enabledSplTokenAddresses
+			splAddresses: $enabledSplTokenAddresses,
+			erc4626TokensExchangeData: $erc4626TokensExchangeData
 		});
 	};
 
@@ -45,7 +47,8 @@
 			$currentCurrency,
 			$enabledMergedErc20TokensAddresses,
 			$enabledIcrcLedgerCanisterIdsNoCk,
-			$enabledSplTokenAddresses
+			$enabledSplTokenAddresses,
+			$erc4626TokensExchangeData
 		];
 		debounceSyncTimer();
 	});
