@@ -86,7 +86,6 @@ mod impls;
 mod pow;
 pub mod random;
 pub mod signer;
-mod sol;
 mod state;
 mod token;
 mod types;
