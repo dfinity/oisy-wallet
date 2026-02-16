@@ -432,6 +432,14 @@ pub async fn btc_add_pending_transaction(
     async fn inner(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
+        let unique_keys: HashSet<OutpointKey> = params.utxos.iter().map(outpoint_key).collect();
+
+        if unique_keys.len() != params.utxos.len() {
+            return Err(BtcAddPendingTransactionError::InternalError {
+                msg: "Duplicate UTXOs provided in request".to_string(),
+            });
+        }
+
         let principal = ic_cdk::caller();
 
         let current_utxos = bitcoin_api::get_all_utxos(
@@ -454,14 +462,6 @@ pub async fn btc_add_pending_transaction(
         if !all_param_utxos_are_current {
             return Err(BtcAddPendingTransactionError::InternalError {
                 msg: "Some provided UTXOs are not present in the current UTXO set".to_string(),
-            });
-        }
-
-        let unique_keys: HashSet<OutpointKey> = params.utxos.iter().map(outpoint_key).collect();
-
-        if unique_keys.len() != params.utxos.len() {
-            return Err(BtcAddPendingTransactionError::InternalError {
-                msg: "Duplicate UTXOs provided in request".to_string(),
             });
         }
 
