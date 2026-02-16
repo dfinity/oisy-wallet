@@ -61,8 +61,7 @@ validate_on_deserialize!(SelectedUtxosFeeResponse);
 impl Validate for BtcAddPendingTransactionRequest {
     fn validate(&self) -> Result<(), candid::Error> {
         validate_txid_bytes(&self.txid)?;
-        validate_utxo_vec(&self.utxos)?;
-        validate_address(&self.address)
+        validate_utxo_vec(&self.utxos)
     }
 }
 validate_on_deserialize!(BtcAddPendingTransactionRequest);
