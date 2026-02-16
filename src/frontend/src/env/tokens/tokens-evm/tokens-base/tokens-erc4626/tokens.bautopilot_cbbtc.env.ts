@@ -18,8 +18,9 @@ export const BAUTOPILOT_CBBTC_TOKEN: RequiredErc4626Token = {
 	symbol: BAUTOPILOT_CBBTC_SYMBOL,
 	decimals: BAUTOPILOT_CBBTC_DECIMALS,
 	address: '0x31a421271414641cb5063b71594b642d2666db6b',
-	// TODO: add cbBTC (ERC20) token to the list and use its data below
+	// TODO: add custom icon
 	icon: '',
+	// TODO: add cbBTC (ERC20) token to the list and use its data below
 	assetAddress: '0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf',
 	assetDecimals: 8
 };

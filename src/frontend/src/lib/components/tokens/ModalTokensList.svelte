@@ -36,11 +36,22 @@
 		onTokenButtonClick
 	}: Props = $props();
 
-	const { filteredTokens, filterNetwork, setFilterQuery } = getContext<ModalTokensListContext>(
-		MODAL_TOKENS_LIST_CONTEXT_KEY
-	);
+	const { filteredTokens, filterNetwork, filterQuery, setFilterQuery } =
+		getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
 	let filter = $state('');
+
+	let seeded = $state(false);
+
+	$effect(() => {
+		if (seeded) {
+			return;
+		}
+
+		filter = $filterQuery ?? '';
+
+		seeded = true;
+	});
 
 	$effect(() => {
 		setFilterQuery(filter);
