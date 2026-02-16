@@ -14,7 +14,6 @@ import type { MockInstance } from 'vitest';
 
 describe('address.services', () => {
 	const mockGetAddress = vi.fn();
-	const mockUpdateIdbAddressLastUsage = vi.fn();
 
 	const mockNetworkId = ETHEREUM_NETWORK_ID;
 	const mockAddress = mockEthAddress;
@@ -79,7 +78,6 @@ describe('address.services', () => {
 			networkId: mockNetworkId,
 			address: mockAddress,
 			getAddress: mockGetAddress,
-			updateIdbAddressLastUsage: mockUpdateIdbAddressLastUsage,
 			addressStore: mockAddressStore
 		};
 
@@ -96,9 +94,6 @@ describe('address.services', () => {
 				data: mockAddress,
 				certified: true
 			});
-			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(
-				mockIdentity.getPrincipal()
-			);
 		});
 
 		it('should return error when address does not match certified address', async () => {
