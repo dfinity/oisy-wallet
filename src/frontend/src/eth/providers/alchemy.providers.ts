@@ -8,6 +8,7 @@ import type {
 } from '$eth/types/alchemy-contract';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { Erc721Metadata } from '$eth/types/erc721';
+import type { EthereumChainId } from '$eth/types/network';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import { MediaStatusEnum } from '$lib/enums/media-status';
 import { i18n } from '$lib/stores/i18n.store';
@@ -35,6 +36,7 @@ import {
 import type { Listener } from 'ethers/utils';
 import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
+import { createPublicClient, http, isHash, type Chain } from 'viem';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -213,18 +215,37 @@ const updateCachedContractMetadata = ({
 };
 
 export class AlchemyProvider {
+	private readonly provider;
 	/**
 	 * TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
 	 * @deprecated This approach works for now but does not align with the new architectural requirements.
 	 */
 	private readonly deprecatedProvider: Alchemy;
 
-	constructor(private readonly network: Network) {
+	constructor(
+		private readonly network: Network,
+		private readonly viemChain: Chain,
+		private readonly alchemyJsonRpcUrl: string,
+		private readonly chainId: EthereumChainId
+	) {
 		this.deprecatedProvider = new Alchemy({
 			apiKey: ALCHEMY_API_KEY,
 			network: this.network
 		});
+
+		this.provider = createPublicClient({
+			chain: this.viemChain,
+			transport: http(`${this.alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`)
+		});
 	}
+
+	wait = async (hash: string) => {
+		if (!isHash(hash)) {
+			throw new Error(`Invalid transaction hash while waiting for transaction receipt: ${hash}`);
+		}
+
+		await this.provider.waitForTransactionReceipt({ hash });
+	};
 
 	private mapNftFromRpc = async ({
 		nft: {
@@ -278,20 +299,25 @@ export class AlchemyProvider {
 	};
 
 	getTransaction = async (hash: string): Promise<TransactionResponseWithBigInt | null> => {
-		const transaction = await this.deprecatedProvider.core.getTransaction(hash);
+		if (!isHash(hash)) {
+			throw new Error(`Invalid transaction hash while fetching transaction details: ${hash}`);
+		}
+
+		const transaction = await this.provider.getTransaction({ hash });
 
 		if (isNullish(transaction)) {
 			return transaction;
 		}
 
-		const { value, gasLimit, gasPrice, chainId, ...rest } = transaction;
+		const { to, blockNumber, gas: gasLimit, input: data, ...rest } = transaction;
 
 		return {
 			...rest,
-			value: value.toBigInt(),
-			gasLimit: gasLimit.toBigInt(),
-			gasPrice: gasPrice?.toBigInt(),
-			chainId: BigInt(chainId)
+			gasLimit,
+			data,
+			to: to ?? undefined,
+			blockNumber: Number(blockNumber),
+			chainId: this.chainId
 		};
 	};
 
@@ -452,9 +478,9 @@ const providers: Record<NetworkId, AlchemyProvider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyProvider>>(
-	(acc, { id, providers: { alchemy: _, alchemyDeprecated } }) => ({
+	(acc, { id, chainId, providers: { alchemyDeprecated, viemChain, alchemyJsonRpcUrl } }) => ({
 		...acc,
-		[id]: new AlchemyProvider(alchemyDeprecated)
+		[id]: new AlchemyProvider(alchemyDeprecated, viemChain, alchemyJsonRpcUrl, chainId)
 	}),
 	{}
 );
