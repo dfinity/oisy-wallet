@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { validateBtcAddressMainnet } from '$btc/services/btc-address.services';
-	import { POW_FEATURE_ENABLED } from '$env/pow.env';
 	import { validateEthAddress } from '$eth/services/eth-address.services';
 	import {
 		networkBitcoinMainnetEnabled,
@@ -8,13 +7,14 @@
 		networkEvmMainnetEnabled,
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
-	import { initSignerAllowance } from '$lib/services/loader.services';
 	import {
 		btcAddressMainnetStore,
 		ethAddressStore,
 		solAddressMainnetStore
 	} from '$lib/stores/address.store';
 	import { validateSolAddressMainnet } from '$sol/services/sol-address.services';
+	import {POW_FEATURE_ENABLED} from "$env/pow.env";
+	import {initSignerAllowance} from "$lib/services/loader.services";
 
 	let signerAllowanceLoaded = false;
 

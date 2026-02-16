@@ -114,12 +114,9 @@
 		}
 	});
 
-	const validateAddresses = () => emit({ message: 'oisyValidateAddresses' });
-
 	onMount(async () => {
 		await initLoader({
 			identity: $authIdentity,
-			validateAddresses,
 			progressAndLoad
 		});
 	});
