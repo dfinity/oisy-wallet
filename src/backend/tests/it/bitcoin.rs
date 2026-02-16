@@ -57,7 +57,6 @@ fn test_select_user_utxos_fee_pending_transaction_error() {
 
     let txid = vec![];
     let utxos = vec![UTXO_1];
-    let address = MOCK_ADDRESS.to_string();
 
     let add_request = BtcAddPendingTransactionRequest {
         txid: txid.clone(),
