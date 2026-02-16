@@ -206,16 +206,17 @@
 			"website": "Изображение $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Социальные сети",
-			"staking": "Стейкинг",
-			"walletconnect": "WalletConnect",
-			"game": "Игра",
-			"tools": "Инструменты",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "ИИ",
+			"defi": "DeFi",
+			"game": "Игра",
 			"nft": "NFT",
 			"rwa": "",
-			"aa_new": ""
+			"social_media": "Социальные сети",
+			"staking": "Стейкинг",
+			"tools": "Инструменты",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {

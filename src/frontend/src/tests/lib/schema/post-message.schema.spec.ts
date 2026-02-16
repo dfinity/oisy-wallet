@@ -94,7 +94,8 @@ describe('post-message.schema', () => {
 				currentCurrency: Currency.USD,
 				erc20Addresses: [mockValidErc20Address],
 				icrcCanisterIds: [mockValidIndexCanisterId],
-				splAddresses: [mockValidSplAddress]
+				splAddresses: [mockValidSplAddress],
+				erc4626TokensExchangeData: []
 			};
 
 			expect(PostMessageDataRequestExchangeTimerSchema.parse(validData)).toEqual(validData);
@@ -105,7 +106,8 @@ describe('post-message.schema', () => {
 				currentCurrency: Currency.USD,
 				erc20Addresses: ['invalid_address', mockValidErc20Address],
 				icrcCanisterIds: [mockValidIndexCanisterId],
-				splAddresses: [mockValidSplAddress]
+				splAddresses: [mockValidSplAddress],
+				erc4626TokensExchangeData: []
 			};
 
 			expect(PostMessageDataRequestExchangeTimerSchema.parse(validData)).toEqual(validData);
@@ -115,7 +117,8 @@ describe('post-message.schema', () => {
 			const invalidData = {
 				erc20Addresses: [mockValidErc20Address],
 				icrcCanisterIds: ['invalid_canister_id'],
-				splAddresses: [mockValidSplAddress]
+				splAddresses: [mockValidSplAddress],
+				erc4626TokensExchangeData: []
 			};
 
 			expect(() => PostMessageDataRequestExchangeTimerSchema.parse(invalidData)).toThrowError();
@@ -124,17 +127,26 @@ describe('post-message.schema', () => {
 		it('should throw an error if either field is missing', () => {
 			const missingErc20Addresses = {
 				icrcCanisterIds: [mockValidIndexCanisterId],
-				splAddresses: [mockValidSplAddress]
+				splAddresses: [mockValidSplAddress],
+				erc4626TokensExchangeData: []
 			};
 
 			const missingIcrcCanisterIds = {
 				erc20Addresses: [mockValidErc20Address],
-				splAddresses: [mockValidSplAddress]
+				splAddresses: [mockValidSplAddress],
+				erc4626TokensExchangeData: []
 			};
 
 			const missingSplAddresses = {
 				erc20Addresses: [mockValidErc20Address],
-				icrcCanisterIds: [mockValidIndexCanisterId]
+				icrcCanisterIds: [mockValidIndexCanisterId],
+				erc4626TokensExchangeData: []
+			};
+
+			const missingErc4626TokensExchangeData = {
+				erc20Addresses: [mockValidErc20Address],
+				icrcCanisterIds: [mockValidIndexCanisterId],
+				splAddresses: [mockValidSplAddress]
 			};
 
 			expect(() =>
@@ -145,6 +157,9 @@ describe('post-message.schema', () => {
 			).toThrowError();
 			expect(() =>
 				PostMessageDataRequestExchangeTimerSchema.parse(missingSplAddresses)
+			).toThrowError();
+			expect(() =>
+				PostMessageDataRequestExchangeTimerSchema.parse(missingErc4626TokensExchangeData)
 			).toThrowError();
 		});
 	});

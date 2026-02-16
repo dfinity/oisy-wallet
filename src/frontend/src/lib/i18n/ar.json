@@ -206,16 +206,17 @@
 			"website": "صورة $dAppName"
 		},
 		"categories": {
-			"defi": "التمويل اللامركزي",
-			"social_media": "وسائل التواصل الاجتماعي",
-			"staking": "التخزين",
-			"walletconnect": "WalletConnect",
-			"game": "لعبة",
-			"tools": "أدوات",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "",
+			"defi": "التمويل اللامركزي",
+			"game": "لعبة",
 			"nft": "",
 			"rwa": "",
-			"aa_new": ""
+			"social_media": "وسائل التواصل الاجتماعي",
+			"staking": "التخزين",
+			"tools": "أدوات",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
