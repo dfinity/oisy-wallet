@@ -154,6 +154,7 @@ describe('exchange.worker', () => {
 					data: {
 						currentExchangeRate: {
 							exchangeRateToUsd: 1,
+							exchangeRate24hChangeMultiplier: 1,
 							currency: Currency.USD
 						},
 						currentBnbPrice: { binancecoin: { usd: 1 } },
@@ -474,6 +475,7 @@ describe('exchange.worker', () => {
 						data: {
 							currentExchangeRate: {
 								exchangeRateToUsd: 1,
+								exchangeRate24hChangeMultiplier: 1,
 								currency: Currency.USD
 							},
 							currentBnbPrice: { binancecoin: { usd: 1 } },
@@ -534,6 +536,7 @@ describe('exchange.worker', () => {
 						data: {
 							currentExchangeRate: {
 								exchangeRateToUsd: 1 / 3,
+								exchangeRate24hChangeMultiplier: 1.03 / 1.05,
 								currency: Currency.JPY
 							},
 							currentBnbPrice: { binancecoin: { usd: 1, usd_24h_change: 3 } },
