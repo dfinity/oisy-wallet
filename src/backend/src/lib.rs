@@ -442,11 +442,11 @@ pub async fn btc_add_pending_transaction(
         }
 
         let principal = ic_cdk::caller();
-      
+
         let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
-      
+
         let current_utxos = bitcoin_api::get_all_utxos(
             params.network,
             source_address.clone(),
