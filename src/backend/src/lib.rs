@@ -431,6 +431,10 @@ pub async fn btc_add_pending_transaction(
     async fn inner(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
+        if params.utxos.is_empty() {
+            return Err(BtcAddPendingTransactionError::EmptyUtxos);
+        }
+
         let unique_keys: HashSet<(&[u8], u32)> = params
             .utxos
             .iter()
