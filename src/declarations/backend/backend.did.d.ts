@@ -65,9 +65,12 @@ export type ApproveError =
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
 export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
-export type BtcAddPendingTransactionError = {
-	InternalError: { msg: string };
-};
+export type BtcAddPendingTransactionError =
+	| { InvalidUtxos: null }
+	| { EmptyUtxos: null }
+	| { DuplicateUtxos: null }
+	| { InternalError: { msg: string } }
+	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
 	network: BitcoinNetwork;
@@ -91,6 +94,9 @@ export type BtcGetFeePercentilesResult =
 			Ok: BtcGetFeePercentilesResponse;
 	  }
 	| { Err: SelectedUtxosFeeError };
+export type BtcGetPendingTransactionsError = {
+	InternalError: { msg: string };
+};
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
@@ -102,7 +108,7 @@ export type BtcGetPendingTransactionsResult =
 	| {
 			Ok: BtcGetPendingTransactionsReponse;
 	  }
-	| { Err: BtcAddPendingTransactionError };
+	| { Err: BtcGetPendingTransactionsError };
 export type BtcSelectUserUtxosFeeResult =
 	| { Ok: SelectedUtxosFeeResponse }
 	| { Err: SelectedUtxosFeeError };
