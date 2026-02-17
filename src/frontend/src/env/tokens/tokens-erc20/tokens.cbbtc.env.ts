@@ -7,7 +7,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 
 export const CBBTC_DECIMALS = 8;
 
-export const CBTC_SYMBOL = 'cbBTC';
+export const CBBTC_SYMBOL = 'cbBTC';
 
 export const CBBTC_TOKEN_ID: TokenId = parseTokenId(CBBTC_SYMBOL);
 
