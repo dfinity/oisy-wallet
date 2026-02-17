@@ -46,7 +46,8 @@ describe('exchange.services', () => {
 
 			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
 				ids: 'bitcoin',
-				vs_currencies: `${Currency.USD},${Currency.EUR}`
+				vs_currencies: `${Currency.USD},${Currency.EUR}`,
+				include_24hr_change: true
 			});
 
 			vi.clearAllMocks();
@@ -55,7 +56,8 @@ describe('exchange.services', () => {
 
 			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
 				ids: 'bitcoin',
-				vs_currencies: `${Currency.USD},${Currency.CHF}`
+				vs_currencies: `${Currency.USD},${Currency.CHF}`,
+				include_24hr_change: true
 			});
 		});
 
