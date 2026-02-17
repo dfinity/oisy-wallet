@@ -36,7 +36,7 @@ describe('exchange.services', () => {
 		});
 
 		it('should return 1 for USD', async () => {
-			await expect(exchangeRateUsdToCurrency(Currency.USD)).resolves.toBe(1);
+			await expect(exchangeRateUsdToCurrency(Currency.USD)).resolves.toStrictEqual({ rate: 1 });
 
 			expect(simplePrice).not.toHaveBeenCalled();
 		});
@@ -46,7 +46,8 @@ describe('exchange.services', () => {
 
 			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
 				ids: 'bitcoin',
-				vs_currencies: `${Currency.USD},${Currency.EUR}`
+				vs_currencies: `${Currency.USD},${Currency.EUR}`,
+				include_24hr_change: true
 			});
 
 			vi.clearAllMocks();
@@ -55,7 +56,8 @@ describe('exchange.services', () => {
 
 			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
 				ids: 'bitcoin',
-				vs_currencies: `${Currency.USD},${Currency.CHF}`
+				vs_currencies: `${Currency.USD},${Currency.CHF}`,
+				include_24hr_change: true
 			});
 		});
 
@@ -64,7 +66,7 @@ describe('exchange.services', () => {
 
 			const rate = await exchangeRateUsdToCurrency(Currency.EUR);
 
-			expect(rate).toBe(2); // 10000 / 5000
+			expect(rate).toStrictEqual({ rate: 2 }); // 10000 / 5000
 		});
 
 		it('should return undefined for a nullish response', async () => {

@@ -1,4 +1,4 @@
-use std::{cell::RefCell, time::Duration};
+use std::{cell::RefCell, collections::HashSet, time::Duration};
 
 use bitcoin_utils::estimate_fee;
 use candid::{candid_method, Principal};
@@ -431,10 +431,26 @@ pub async fn btc_add_pending_transaction(
     async fn inner(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
+        if params.utxos.is_empty() {
+            return Err(BtcAddPendingTransactionError::EmptyUtxos);
+        }
+
+        let unique_keys: HashSet<(&[u8], u32)> = params
+            .utxos
+            .iter()
+            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .collect();
+
+        if unique_keys.len() != params.utxos.len() {
+            return Err(BtcAddPendingTransactionError::DuplicateUtxos);
+        }
+
         let principal = ic_cdk::caller();
+
         let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+
         let current_utxos = bitcoin_api::get_all_utxos(
             params.network,
             source_address.clone(),
@@ -442,10 +458,30 @@ pub async fn btc_add_pending_transaction(
         )
         .await
         .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+
         let now_ns = time();
+
+        let current_keys: HashSet<(&[u8], u32)> = current_utxos
+            .iter()
+            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .collect();
+
+        let all_param_utxos_are_current = params
+            .utxos
+            .iter()
+            .all(|u| current_keys.contains(&(u.outpoint.txid.as_slice(), u.outpoint.vout)));
+
+        if !all_param_utxos_are_current {
+            return Err(BtcAddPendingTransactionError::InvalidUtxos);
+        }
 
         with_btc_pending_transactions(|pending_transactions| {
             pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+
+            if pending_transactions.has_intersecting_pending_utxos(principal, &params.utxos) {
+                return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
+            }
+
             let current_pending_transaction = StoredPendingTransaction {
                 txid: params.txid,
                 utxos: params.utxos,

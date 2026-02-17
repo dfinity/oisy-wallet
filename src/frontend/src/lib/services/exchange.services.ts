@@ -15,7 +15,7 @@ import {
 	formatKongSwapToCoingeckoPrices
 } from '$lib/utils/exchange.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 const fetchIcrcPricesFromCoingecko = (
 	ledgerCanisterIds: LedgerCanisterIdText[]
@@ -24,7 +24,8 @@ const fetchIcrcPricesFromCoingecko = (
 		id: 'internet-computer',
 		vs_currencies: Currency.USD,
 		contract_addresses: ledgerCanisterIds,
-		include_market_cap: true
+		include_market_cap: true,
+		include_24hr_change: true
 	});
 
 const fetchIcrcPricesFromKongSwap = async (
@@ -41,56 +42,69 @@ const fetchIcrcPricesFromKongSwap = async (
 // Until we find a proper IC solution (like the exchange canister, for example), we use this workaround.
 export const exchangeRateUsdToCurrency = async (
 	currency: Currency
-): Promise<number | undefined> => {
+): Promise<{ rate: number } | undefined> => {
 	if (currency === Currency.USD) {
-		return 1;
+		return { rate: 1 };
 	}
 
 	const prices = await simplePrice({
 		ids: 'bitcoin',
-		vs_currencies: `${Currency.USD},${currency}`
+		vs_currencies: `${Currency.USD},${currency}`,
+		include_24hr_change: true
 	});
 
 	const btcToUsd = prices?.bitcoin?.usd;
 	const btcToCurrency = prices?.bitcoin?.[currency];
 
-	return nonNullish(btcToUsd) && nonNullish(btcToCurrency) ? btcToUsd / btcToCurrency : undefined;
+	if (isNullish(btcToUsd) || isNullish(btcToCurrency)) {
+		return;
+	}
+
+	const rate = btcToUsd / btcToCurrency;
+
+	return { rate };
 };
 
 export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'ethereum',
-		vs_currencies: Currency.USD
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
 	});
 
 export const exchangeRateBTCToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'bitcoin',
-		vs_currencies: Currency.USD
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
 	});
 
 export const exchangeRateICPToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'internet-computer',
-		vs_currencies: Currency.USD
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
 	});
 
 export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'solana',
-		vs_currencies: Currency.USD
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
 	});
 
 export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'binancecoin',
-		vs_currencies: Currency.USD
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
 	});
 
 export const exchangeRatePOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'polygon-ecosystem-token',
-		vs_currencies: Currency.USD
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
 	});
 
 export const exchangeRateERC20ToUsd = async ({
@@ -105,7 +119,8 @@ export const exchangeRateERC20ToUsd = async ({
 		id,
 		vs_currencies: Currency.USD,
 		contract_addresses: contractAddresses.map(({ address }) => address),
-		include_market_cap: true
+		include_market_cap: true,
+		include_24hr_change: true
 	});
 };
 
@@ -143,7 +158,8 @@ export const exchangeRateSPLToUsd = async (
 		id: 'solana',
 		vs_currencies: Currency.USD,
 		contract_addresses: tokenAddresses,
-		include_market_cap: true
+		include_market_cap: true,
+		include_24hr_change: true
 	});
 };
 
