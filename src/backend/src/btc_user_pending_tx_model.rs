@@ -195,7 +195,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, sync::LazyLock};
+    use std::{cell::RefCell, collections::HashMap, sync::LazyLock};
 
     use ic_cdk::api::management_canister::bitcoin::Outpoint;
     use ic_stable_structures::{
