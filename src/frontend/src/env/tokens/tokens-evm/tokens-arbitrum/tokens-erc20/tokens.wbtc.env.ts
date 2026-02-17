@@ -11,7 +11,7 @@ export const WBTC_SYMBOL = 'WBTC';
 
 export const WBTC_TOKEN_ID: TokenId = parseTokenId(WBTC_SYMBOL);
 
-export const ZCHF_TOKEN: RequiredEvmErc20Token = {
+export const WBTC_TOKEN: RequiredEvmErc20Token = {
 	id: WBTC_TOKEN_ID,
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
