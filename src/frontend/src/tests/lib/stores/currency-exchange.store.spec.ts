@@ -100,5 +100,31 @@ describe('currency-exchange.store', () => {
 				expect(get(mockStore).currency).toEqual(Currency.USD);
 			});
 		});
+
+		describe('setExchangeRate24hChangeMultiplier', () => {
+			it('should set the exchange rate 24h change multiplier', () => {
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBeNull();
+
+				mockStore.setExchangeRate24hChangeMultiplier(1.5);
+
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBe(1.5);
+
+				mockStore.setExchangeRate24hChangeMultiplier(101);
+
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBe(101);
+			});
+
+			it('should not change the currency', () => {
+				expect(get(mockStore).currency).toEqual(Currency.USD);
+
+				mockStore.setExchangeRate24hChangeMultiplier(1.5);
+
+				expect(get(mockStore).currency).toEqual(Currency.USD);
+
+				mockStore.setExchangeRate24hChangeMultiplier(101);
+
+				expect(get(mockStore).currency).toEqual(Currency.USD);
+			});
+		});
 	});
 });
