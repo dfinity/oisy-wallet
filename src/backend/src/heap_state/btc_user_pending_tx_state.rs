@@ -90,14 +90,14 @@ impl BtcUserPendingTransactions {
 
     /// Prunes pending transactions for a specific principal.
     /// A pending transaction can be pruned for two reasons:
-    /// - Transaction is older than 1 day. We consider that if a pending transaction is older than
-    ///   one day it means it failed and we can free to utxos to be used again.
+    /// - Transaction is older than 1 hour. We consider that if a pending transaction is older than
+    ///   one hour it means it failed and we can free to utxos to be used again.
     /// - None of the transaction's utxos are present in the current utxos list. We use the pending
     ///   transactions to avoid double spending. Once we know that a utxos is not available, we can
     ///   remove the pending transaction. Normally, all utxos of a pending transaction should be
     ///   present or not. Partial presence could happen if the utxos of a pending transaction were
     ///   not really used in the transaction. We don't remove in partial presence because, in the
-    ///   end, partial presence will be temporary for one day.
+    ///   end, partial presence will be temporary for one hour.
     #[allow(dead_code)]
     pub fn prune_pending_transactions(
         &mut self,
@@ -114,11 +114,13 @@ impl BtcUserPendingTransactions {
                     .filter(|pending_transaction| {
                         let is_old =
                             pending_transaction.created_at_timestamp_ns + HOUR_IN_NS < now_ns;
-                        let all_utxos_found = pending_transaction
+
+                        let none_of_tx_utxos_are_still_present = pending_transaction
                             .utxos
                             .iter()
                             .all(|utxo| !current_utxos.contains(utxo));
-                        !is_old && !all_utxos_found
+
+                        !is_old && !none_of_tx_utxos_are_still_present
                     })
                     .collect();
                 if pruned_list.is_empty() {
