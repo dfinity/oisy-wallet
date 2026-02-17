@@ -67,6 +67,7 @@ export type ArgumentValue = { Int: number } | { String: string };
 export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
 export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
+	| { EmptyUtxos: null }
 	| { DuplicateUtxos: null }
 	| { InternalError: { msg: string } }
 	| { UtxosAlreadyReserved: null };

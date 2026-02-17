@@ -56,6 +56,7 @@ type ArgumentValue = variant { Int : int32; String : text };
 type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type BtcAddPendingTransactionError = variant {
 	InvalidUtxos;
+	EmptyUtxos;
 	DuplicateUtxos;
 	InternalError : record { msg : text };
 	UtxosAlreadyReserved

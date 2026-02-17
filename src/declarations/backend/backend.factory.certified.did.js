@@ -128,6 +128,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const BtcAddPendingTransactionError = IDL.Variant({
 		InvalidUtxos: IDL.Null,
+		EmptyUtxos: IDL.Null,
 		DuplicateUtxos: IDL.Null,
 		InternalError: IDL.Record({ msg: IDL.Text }),
 		UtxosAlreadyReserved: IDL.Null
