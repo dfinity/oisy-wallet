@@ -60,7 +60,6 @@ type BtcAddPendingTransactionError = variant {
 type BtcAddPendingTransactionRequest = record {
 	txid : blob;
 	network : BitcoinNetwork;
-	address : text;
 	utxos : vec Utxo
 };
 type BtcAddPendingTransactionResult = variant {
