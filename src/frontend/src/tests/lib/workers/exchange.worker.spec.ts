@@ -115,27 +115,33 @@ describe('exchange.worker', () => {
 				expect(simplePrice).toHaveBeenCalledTimes(6);
 				expect(simplePrice).toHaveBeenNthCalledWith(1, {
 					ids: 'ethereum',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(2, {
 					ids: 'bitcoin',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(3, {
 					ids: 'internet-computer',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(4, {
 					ids: 'solana',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(5, {
 					ids: 'binancecoin',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(6, {
 					ids: 'polygon-ecosystem-token',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 			});
 
@@ -256,31 +262,36 @@ describe('exchange.worker', () => {
 						id: 'ethereum',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x123', '0xabc'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
 						id: 'base',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x456'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
 						id: 'binance-smart-chain',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x789'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(4, {
 						id: 'polygon-pos',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xdef'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(5, {
 						id: 'arbitrum-one',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xghi'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
@@ -307,7 +318,8 @@ describe('exchange.worker', () => {
 						id: 'internet-computer',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockIcrcLedgerCanisterIds,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
@@ -336,7 +348,8 @@ describe('exchange.worker', () => {
 						id: 'solana',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockSplTokenAddresses,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
@@ -363,7 +376,8 @@ describe('exchange.worker', () => {
 
 					expect(simplePrice).toHaveBeenNthCalledWith(1, {
 						ids: 'bitcoin',
-						vs_currencies: `${Currency.USD},${Currency.JPY}`
+						vs_currencies: `${Currency.USD},${Currency.JPY}`,
+						include_24hr_change: true
 					});
 				});
 
@@ -401,45 +415,52 @@ describe('exchange.worker', () => {
 						id: 'ethereum',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x123', '0xabc'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
 						id: 'base',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x456'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
 						id: 'binance-smart-chain',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x789'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(4, {
 						id: 'polygon-pos',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xdef'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(5, {
 						id: 'arbitrum-one',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xghi'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(6, {
 						id: 'internet-computer',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockIcrcLedgerCanisterIds,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(7, {
 						id: 'solana',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockSplTokenAddresses,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
