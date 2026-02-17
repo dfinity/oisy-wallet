@@ -12,7 +12,8 @@ export interface CurrencyExchangeStore extends Readable<CurrencyExchangeData> {
 export const initCurrencyExchangeStore = (): CurrencyExchangeStore => {
 	const DEFAULT: CurrencyExchangeData = {
 		currency: Currency.USD,
-		exchangeRateToUsd: 1
+		exchangeRateToUsd: 1,
+		exchangeRate24hChangeMultiplier: null
 	};
 
 	const { subscribe, set, update } = writable<CurrencyExchangeData>(DEFAULT);
@@ -20,7 +21,11 @@ export const initCurrencyExchangeStore = (): CurrencyExchangeStore => {
 	return {
 		setExchangeRateCurrency: (currency: CurrencyExchangeData['currency']) => {
 			// When the currency changes, we reset the exchange rate to null to avoid showing wrong data in the UI
-			set({ currency, exchangeRateToUsd: currency === Currency.USD ? 1 : null });
+			set({
+				currency,
+				exchangeRateToUsd: currency === Currency.USD ? 1 : null,
+				exchangeRate24hChangeMultiplier: null
+			});
 		},
 		setExchangeRate: (exchangeRate: CurrencyExchangeData['exchangeRateToUsd']) =>
 			update((state) => ({ ...state, exchangeRateToUsd: exchangeRate })),

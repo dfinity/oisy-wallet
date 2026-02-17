@@ -945,7 +945,7 @@ describe('format.utils', () => {
 					formatCurrency({
 						value,
 						currency,
-						exchangeRate: { currency, exchangeRateToUsd: 1 },
+						exchangeRate: { currency, exchangeRateToUsd: 1, exchangeRate24hChangeMultiplier: 1 },
 						language
 					})
 				).toBe(expected);
@@ -957,7 +957,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1234.56,
 					currency: Currency.EUR,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH
 				})
 			).toBeUndefined();
@@ -968,7 +972,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1234.56,
 					currency: Currency.EUR,
-					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: null },
+					exchangeRate: {
+						currency: Currency.EUR,
+						exchangeRateToUsd: null,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH
 				})
 			).toBeUndefined();
@@ -979,7 +987,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH
 				})
 			).toBe('$0.00');
@@ -988,7 +1000,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1234.56,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 0 },
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 0,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH
 				})
 			).toBeUndefined();
@@ -999,7 +1015,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1000,
 					currency: Currency.CHF,
-					exchangeRate: { currency: Currency.CHF, exchangeRateToUsd: 1.2 },
+					exchangeRate: {
+						currency: Currency.CHF,
+						exchangeRateToUsd: 1.2,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH
 				})
 			).toBe('CHF 833.33'); // 1000 / 1.2 = 833.33
@@ -1010,7 +1030,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1234.56,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					hideSymbol: true
 				})
@@ -1020,7 +1044,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 987654321.12,
 					currency: Currency.EUR,
-					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.EUR,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					hideSymbol: true
 				})
@@ -1030,7 +1058,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0.99,
 					currency: Currency.CHF,
-					exchangeRate: { currency: Currency.CHF, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.CHF,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					hideSymbol: true
 				})
@@ -1040,7 +1072,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1000000,
 					currency: Currency.JPY,
-					exchangeRate: { currency: Currency.JPY, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.JPY,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.CHINESE_SIMPLIFIED,
 					hideSymbol: true
 				})
@@ -1052,7 +1088,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1234.56,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					normalizeSeparators: true
 				})
@@ -1062,7 +1102,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 987654321.12,
 					currency: Currency.EUR,
-					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.EUR,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					normalizeSeparators: true
 				})
@@ -1072,7 +1116,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0.99,
 					currency: Currency.GBP,
-					exchangeRate: { currency: Currency.GBP, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.GBP,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					normalizeSeparators: true
 				})
@@ -1082,7 +1130,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1000000,
 					currency: Currency.JPY,
-					exchangeRate: { currency: Currency.JPY, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.JPY,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					normalizeSeparators: true
 				})
@@ -1092,7 +1144,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 123456789.99,
 					currency: Currency.CHF,
-					exchangeRate: { currency: Currency.CHF, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.CHF,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					normalizeSeparators: true
 				})
@@ -1102,7 +1158,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					normalizeSeparators: true
 				})
@@ -1112,7 +1172,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: -1234.56,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					normalizeSeparators: true
 				})
@@ -1122,7 +1186,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: -987654321.12,
 					currency: Currency.EUR,
-					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.EUR,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					normalizeSeparators: true
 				})
@@ -1132,7 +1200,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1000000.99,
 					currency: Currency.JPY,
-					exchangeRate: { currency: Currency.JPY, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.JPY,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ITALIAN,
 					normalizeSeparators: true
 				})
@@ -1144,7 +1216,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0.00000001,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					notBelowThreshold: true
 				})
@@ -1154,7 +1230,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0.01,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					notBelowThreshold: true
 				})
@@ -1164,7 +1244,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0.1,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					notBelowThreshold: true
 				})
@@ -1174,7 +1258,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					notBelowThreshold: true
 				})
@@ -1184,7 +1272,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0.00000001,
 					currency: Currency.CHF,
-					exchangeRate: { currency: Currency.CHF, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.CHF,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					notBelowThreshold: true
 				})
@@ -1194,7 +1286,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0.00000001,
 					currency: Currency.EUR,
-					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.EUR,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					notBelowThreshold: true
 				})
@@ -1204,7 +1300,11 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0.00000001,
 					currency: Currency.JPY,
-					exchangeRate: { currency: Currency.JPY, exchangeRateToUsd: 1 },
+					exchangeRate: {
+						currency: Currency.JPY,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
 					language: Languages.ENGLISH,
 					notBelowThreshold: true
 				})

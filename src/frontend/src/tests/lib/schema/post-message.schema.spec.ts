@@ -430,6 +430,7 @@ describe('post-message.schema', () => {
 			const validData = {
 				currentExchangeRate: {
 					exchangeRateToUsd: 1.5,
+					exchangeRate24hChangeMultiplier: 3.5,
 					currency: Currency.EUR
 				},
 				currentEthPrice: mockValidPrice,

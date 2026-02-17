@@ -20,7 +20,8 @@ describe('currency-exchange.store', () => {
 
 			expect(get(store)).toEqual({
 				currency: Currency.USD,
-				exchangeRateToUsd: 1
+				exchangeRateToUsd: 1,
+				exchangeRate24hChangeMultiplier: null
 			});
 		});
 
