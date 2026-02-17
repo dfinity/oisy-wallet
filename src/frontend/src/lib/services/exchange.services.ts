@@ -55,7 +55,7 @@ export const exchangeRateUsdToCurrency = async (
 	const btcToCurrency = prices?.bitcoin?.[currency];
 
 	if (isNullish(btcToUsd) || isNullish(btcToCurrency)) {
-		return undefined;
+		return;
 	}
 
 	const rate = btcToUsd / btcToCurrency;
