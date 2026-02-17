@@ -55,7 +55,11 @@ type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
 type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type BtcAddPendingTransactionError = variant {
-	InternalError : record { msg : text }
+	InvalidUtxos;
+	EmptyUtxos;
+	DuplicateUtxos;
+	InternalError : record { msg : text };
+	UtxosAlreadyReserved
 };
 type BtcAddPendingTransactionRequest = record {
 	txid : blob;
@@ -79,6 +83,9 @@ type BtcGetFeePercentilesResult = variant {
 	Ok : BtcGetFeePercentilesResponse;
 	Err : SelectedUtxosFeeError
 };
+type BtcGetPendingTransactionsError = variant {
+	InternalError : record { msg : text }
+};
 type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
@@ -88,7 +95,7 @@ type BtcGetPendingTransactionsRequest = record {
 };
 type BtcGetPendingTransactionsResult = variant {
 	Ok : BtcGetPendingTransactionsReponse;
-	Err : BtcAddPendingTransactionError
+	Err : BtcGetPendingTransactionsError
 };
 type BtcSelectUserUtxosFeeResult = variant {
 	Ok : SelectedUtxosFeeResponse;

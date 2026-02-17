@@ -171,7 +171,7 @@ const syncExchange = async ({
 			msg: 'syncExchange',
 			data: {
 				currentExchangeRate: {
-					exchangeRateToUsd: currentExchangeRate,
+					exchangeRateToUsd: currentExchangeRate?.rate,
 					currency: currentCurrency
 				},
 				currentEthPrice,
