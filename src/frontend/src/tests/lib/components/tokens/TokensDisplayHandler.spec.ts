@@ -1,4 +1,4 @@
-import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+import { sortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 import { showZeroBalances } from '$lib/derived/settings.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -42,7 +42,7 @@ describe('TokensDisplayHandler', () => {
 	});
 
 	it('should apply tokens immediately', async () => {
-		const initial = get(combinedDerivedSortedFungibleNetworkTokensUi);
+		const initial = get(sortedFungibleNetworkTokensUi);
 
 		const { getByTestId } = render(TokensDisplayHandlerTest, {
 			props
@@ -56,7 +56,7 @@ describe('TokensDisplayHandler', () => {
 	});
 
 	it('should call the utils functions with the correct arguments', async () => {
-		const initial = get(combinedDerivedSortedFungibleNetworkTokensUi);
+		const initial = get(sortedFungibleNetworkTokensUi);
 		const expected: TokenUiOrGroupUi[] = initial.map((token) => ({ token }));
 
 		render(TokensDisplayHandlerTest, {
@@ -95,7 +95,7 @@ describe('TokensDisplayHandler', () => {
 
 		await tick();
 
-		const newTokens = get(combinedDerivedSortedFungibleNetworkTokensUi);
+		const newTokens = get(sortedFungibleNetworkTokensUi);
 		const newExpected: TokenUiOrGroupUi[] = newTokens.map((token) => ({ token }));
 
 		expect(newTokens).not.toHaveLength(initial.length);

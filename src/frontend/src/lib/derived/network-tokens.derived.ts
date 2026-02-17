@@ -40,7 +40,7 @@ export const enabledNonFungibleNetworkTokensWithoutSpam: Readable<NonFungibleTok
 /**
  * Fungible network tokens sorted by market cap, with the ones to pin at the top of the list.
  */
-const combinedDerivedSortedFungibleNetworkTokens: Readable<Token[]> = derived(
+const sortedFungibleNetworkTokens: Readable<Token[]> = derived(
 	[enabledFungibleNetworkTokens, tokensToPin, exchanges],
 	([$tokens, $tokensToPin, $exchanges]) => sortTokens({ $tokens, $exchanges, $tokensToPin })
 );
@@ -48,8 +48,8 @@ const combinedDerivedSortedFungibleNetworkTokens: Readable<Token[]> = derived(
 /**
  * All fungible tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
  */
-export const combinedDerivedSortedFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[combinedDerivedSortedFungibleNetworkTokens, balancesStore, stakeBalances, exchanges],
+export const sortedFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
+	[sortedFungibleNetworkTokens, balancesStore, stakeBalances, exchanges],
 	([$enabledNetworkTokens, $balances, $stakeBalances, $exchanges]) =>
 		pinTokensWithBalanceAtTop({
 			$tokens: $enabledNetworkTokens,
