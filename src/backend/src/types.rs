@@ -5,11 +5,10 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    backend_config::Config, contact::StoredContacts, custom_token::CustomToken,
-    pow::StoredChallenge, token::UserToken, user_profile::StoredUserProfile, Timestamp,
+    backend_config::Config, bitcoin::StoredPendingTransaction, contact::StoredContacts,
+    custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
+    user_profile::StoredUserProfile, Timestamp,
 };
-
-use crate::btc_user_pending_tx_model::StoredPendingTransaction;
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 pub type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;

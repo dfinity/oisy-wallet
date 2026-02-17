@@ -94,6 +94,14 @@ pub struct PendingTransaction {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct StoredPendingTransaction {
+    pub txid: Vec<u8>,
+    pub utxos: Vec<Utxo>,
+    pub created_at_timestamp_ns: u64,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct BtcGetPendingTransactionsReponse {
     pub transactions: Vec<PendingTransaction>,
 }

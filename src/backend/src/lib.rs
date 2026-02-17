@@ -1,7 +1,7 @@
 use std::{cell::RefCell, collections::HashSet, time::Duration};
 
 use bitcoin_utils::estimate_fee;
-use btc_user_pending_tx_model::{BtcUserPendingTransactionsModel, StoredPendingTransaction};
+use btc_user_pending_tx_model::BtcUserPendingTransactionsModel;
 use candid::{candid_method, Principal};
 use config::find_credential_config;
 use ic_cdk::{api::time, eprintln, export_candid, init, post_upgrade, query, update};
@@ -24,7 +24,7 @@ use shared::{
             BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
-            SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
+            SelectedUtxosFeeRequest, SelectedUtxosFeeResponse, StoredPendingTransaction,
         },
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},

@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use candid::{CandidType, Deserialize, Principal};
+use candid::Principal;
 use ic_cdk::api::management_canister::bitcoin::Utxo;
 
 #[allow(dead_code)]
@@ -10,12 +10,7 @@ const MAX_ADDRESS_COUNT_PER_USER: usize = 20;
 #[allow(dead_code)]
 const HOUR_IN_NS: u64 = 60 * 60 * 1_000_000_000;
 
-#[derive(Clone, PartialEq, Eq, Debug, CandidType, Deserialize)]
-pub struct StoredPendingTransaction {
-    pub txid: Vec<u8>,
-    pub utxos: Vec<Utxo>,
-    pub created_at_timestamp_ns: u64,
-}
+use shared::types::bitcoin::StoredPendingTransaction;
 
 // With this structure, if multiple users share the same address
 // they wouldn't share the pending transactions.
