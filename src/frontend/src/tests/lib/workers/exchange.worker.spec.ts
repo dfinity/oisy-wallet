@@ -507,7 +507,11 @@ describe('exchange.worker', () => {
 								(Array.isArray(ids) ? ids : ids.split(',')).reduce(
 									(acc, id) => ({
 										...acc,
-										[id]: { usd: 1, ...(vs_currencies.includes(',') ? { jpy: 3 } : {}) }
+										[id]: {
+											usd: 1,
+											usd_24h_change: 3,
+											...(vs_currencies.includes(',') ? { jpy: 3, jpy_24h_change: 5 } : {})
+										}
 									}),
 									{}
 								)
@@ -532,8 +536,8 @@ describe('exchange.worker', () => {
 								exchangeRateToUsd: 1 / 3,
 								currency: Currency.JPY
 							},
-							currentBnbPrice: { binancecoin: { usd: 1 } },
-							currentBtcPrice: { bitcoin: { usd: 1 } },
+							currentBnbPrice: { binancecoin: { usd: 1, usd_24h_change: 3 } },
+							currentBtcPrice: { bitcoin: { usd: 1, usd_24h_change: 3 } },
 							currentErc20Prices: {
 								'0x123': { usd: 1 },
 								'0x456': { usd: 1 },
@@ -543,11 +547,11 @@ describe('exchange.worker', () => {
 								'0xghi': { usd: 1 }
 							},
 							currentErc4626Prices: {},
-							currentEthPrice: { ethereum: { usd: 1 } },
-							currentIcpPrice: { 'internet-computer': { usd: 1 } },
+							currentEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } },
+							currentIcpPrice: { 'internet-computer': { usd: 1, usd_24h_change: 3 } },
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
-							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
-							currentSolPrice: { solana: { usd: 1 } },
+							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1, usd_24h_change: 3 } },
+							currentSolPrice: { solana: { usd: 1, usd_24h_change: 3 } },
 							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } }
 						}
 					});
