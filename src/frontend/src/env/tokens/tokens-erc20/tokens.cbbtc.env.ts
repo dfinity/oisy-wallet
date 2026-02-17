@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { CBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.cbbtc.env';
-import type { RequiredErc20Token } from '$eth/types/erc20';
+import { CBBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.cbbtc.env';
+import type { RequiredAdditionalErc20Token  } from '$eth/types/erc20';
 import cbbtc from '$icp-eth/assets/cbbtc.webp';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -11,7 +11,7 @@ export const CBTC_SYMBOL = 'cbBTC';
 
 export const CBBTC_TOKEN_ID: TokenId = parseTokenId(CBBTC_SYMBOL);
 
-export const CBBTC_TOKEN: RequiredErc20Token = {
+export const CBBTC_TOKEN: RequiredAdditionalErc20Token  = {
 	id: CBBTC_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
