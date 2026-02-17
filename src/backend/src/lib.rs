@@ -1,11 +1,9 @@
 use std::{cell::RefCell, collections::HashSet, time::Duration};
 
 use bitcoin_utils::estimate_fee;
+use btc_user_pending_tx_model::BtcUserPendingTransactionsModel;
 use candid::{candid_method, Principal};
 use config::find_credential_config;
-use heap_state::{
-    btc_user_pending_tx_state::StoredPendingTransaction, state::with_btc_pending_transactions,
-};
 use ic_cdk::{api::time, eprintln, export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use ic_stable_structures::{
@@ -26,7 +24,7 @@ use shared::{
             BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
-            SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
+            SelectedUtxosFeeRequest, SelectedUtxosFeeResponse, StoredPendingTransaction,
         },
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
@@ -58,8 +56,8 @@ use shared::{
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
-    Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
-    UserTokenMap,
+    BtcUserPendingTransactionsMap, Candid, ConfigCell, CustomTokenMap, StoredPrincipal,
+    UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
@@ -77,10 +75,10 @@ use crate::{
 
 mod bitcoin_api;
 mod bitcoin_utils;
+mod btc_user_pending_tx_model;
 mod config;
 mod contacts;
 mod guards;
-mod heap_state;
 mod impls;
 mod pow;
 pub mod random;
@@ -101,6 +99,7 @@ const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
+const BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(7);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -117,6 +116,9 @@ thread_local! {
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
+            btc_user_pending_transactions: BtcUserPendingTransactionsMap::init(
+                mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),
+            ),
         })
     );
 }
@@ -155,6 +157,7 @@ pub struct State {
     user_profile_updated: UserProfileUpdatedMap,
     pow_challenge: PowChallengeMap,
     contact: ContactMap,
+    btc_user_pending_transactions: BtcUserPendingTransactionsMap,
 }
 
 fn set_config(arg: InitArg) {
@@ -372,9 +375,14 @@ pub async fn btc_select_user_utxos_fee(
         .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
         let now_ns = time();
 
-        let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
-            pending_transactions.prune_pending_transactions(principal, &all_utxos, now_ns);
-            !pending_transactions
+        let has_pending_transactions = mutate_state(|state| {
+            let mut model = BtcUserPendingTransactionsModel::new(
+                &mut state.btc_user_pending_transactions,
+                None,
+                None,
+            );
+            model.prune_pending_transactions(principal, &all_utxos, now_ns);
+            !model
                 .get_pending_transactions(&principal, &source_address)
                 .is_empty()
         });
@@ -475,10 +483,15 @@ pub async fn btc_add_pending_transaction(
             return Err(BtcAddPendingTransactionError::InvalidUtxos);
         }
 
-        with_btc_pending_transactions(|pending_transactions| {
-            pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+        mutate_state(|state| {
+            let mut model = BtcUserPendingTransactionsModel::new(
+                &mut state.btc_user_pending_transactions,
+                None,
+                None,
+            );
+            model.prune_pending_transactions(principal, &current_utxos, now_ns);
 
-            if pending_transactions.has_intersecting_pending_utxos(principal, &params.utxos) {
+            if model.has_intersecting_pending_utxos(principal, &params.utxos) {
                 return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
             }
 
@@ -487,7 +500,7 @@ pub async fn btc_add_pending_transaction(
                 utxos: params.utxos,
                 created_at_timestamp_ns: now_ns,
             };
-            pending_transactions
+            model
                 .add_pending_transaction(principal, source_address, current_pending_transaction)
                 .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
         })
@@ -517,11 +530,14 @@ pub async fn btc_get_pending_transactions(
         .await
         .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
 
-        let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
-            pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
-            pending_transactions
-                .get_pending_transactions(&principal, &params.address)
-                .clone()
+        let stored_transactions = mutate_state(|state| {
+            let mut model = BtcUserPendingTransactionsModel::new(
+                &mut state.btc_user_pending_transactions,
+                None,
+                None,
+            );
+            model.prune_pending_transactions(principal, &current_utxos, now_ns);
+            model.get_pending_transactions(&principal, &params.address)
         });
 
         let pending_transactions = stored_transactions

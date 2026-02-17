@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { type Snippet, untrack } from 'svelte';
-	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+	import { sortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 	import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
@@ -15,7 +15,7 @@
 	let { tokens = $bindable(), children }: Props = $props();
 
 	let groupedTokens: TokenUiOrGroupUi[] = $derived(
-		groupTokensByTwin($combinedDerivedSortedFungibleNetworkTokensUi)
+		groupTokensByTwin($sortedFungibleNetworkTokensUi)
 	);
 
 	let sortedTokensOrGroups: TokenUiOrGroupUi[] = $derived(

@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use candid::Principal;
 use ic_cdk::api::management_canister::bitcoin::Utxo;
@@ -10,35 +10,33 @@ const MAX_ADDRESS_COUNT_PER_USER: usize = 20;
 #[allow(dead_code)]
 const HOUR_IN_NS: u64 = 60 * 60 * 1_000_000_000;
 
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub struct StoredPendingTransaction {
-    pub txid: Vec<u8>,
-    pub utxos: Vec<Utxo>,
-    pub created_at_timestamp_ns: u64,
-}
+use shared::types::bitcoin::StoredPendingTransaction;
 
-type BitcoinAddress = String;
 // With this structure, if multiple users share the same address
 // they wouldn't share the pending transactions.
 // This is not possible with the current implementation of the addresses in CFS.
 // But something to have in mind for the future.
-type PendingTransactionsMap = HashMap<BitcoinAddress, Vec<StoredPendingTransaction>>;
+use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
 
 #[allow(dead_code)]
-pub struct BtcUserPendingTransactions {
+pub struct BtcUserPendingTransactionsModel<'a> {
     /// Map of `user_principal` to `PendingTransactionsMap`;
-    pending_transactions_map: HashMap<Principal, PendingTransactionsMap>,
+    pending_transactions_map: &'a mut BtcUserPendingTransactionsMap,
     /// Maximum number of transactions that will be stored per `(principal, address)` tuple.
     max_pending_transactions: usize,
     /// Maximum number of addresses per user.
     max_addresses_per_user: usize,
 }
 
-impl BtcUserPendingTransactions {
+impl<'a> BtcUserPendingTransactionsModel<'a> {
     #[allow(dead_code)]
-    pub fn new(max_pending_txs: Option<usize>, max_addresses_per_user: Option<usize>) -> Self {
+    pub fn new(
+        pending_transactions_map: &'a mut BtcUserPendingTransactionsMap,
+        max_pending_txs: Option<usize>,
+        max_addresses_per_user: Option<usize>,
+    ) -> Self {
         Self {
-            pending_transactions_map: HashMap::new(),
+            pending_transactions_map,
             max_pending_transactions: max_pending_txs.unwrap_or(MAX_PENDING_TRANSACTIONS),
             max_addresses_per_user: max_addresses_per_user.unwrap_or(MAX_ADDRESS_COUNT_PER_USER),
         }
@@ -50,11 +48,12 @@ impl BtcUserPendingTransactions {
         &self,
         principal: &Principal,
         address: &str,
-    ) -> &Vec<StoredPendingTransaction> {
-        static EMPTY_VEC: Vec<StoredPendingTransaction> = Vec::new();
+    ) -> Vec<StoredPendingTransaction> {
+        let stored_principal = StoredPrincipal(*principal);
         self.pending_transactions_map
-            .get(principal)
-            .map_or(&EMPTY_VEC, |map| map.get(address).unwrap_or(&EMPTY_VEC))
+            .get(&stored_principal)
+            .and_then(|map| map.0.get(address).cloned())
+            .unwrap_or_default()
     }
 
     /// Adds a pending transaction for a specific principal and address.
@@ -66,25 +65,28 @@ impl BtcUserPendingTransactions {
         address: String,
         new_transaction: StoredPendingTransaction,
     ) -> Result<(), String> {
-        if let Some(address_map) = self.pending_transactions_map.get_mut(&principal) {
-            if let Some(list) = address_map.get_mut(&address) {
-                if list.len() >= self.max_pending_transactions {
-                    return Err("Maximum pending transactions reached".to_string());
-                }
-                list.push(new_transaction);
-            } else {
-                if address_map.keys().len() >= self.max_addresses_per_user {
-                    return Err("Maximum address per user reached".to_string());
-                }
-                let list: Vec<StoredPendingTransaction> = vec![new_transaction];
-                address_map.insert(address, list);
+        let stored_principal = StoredPrincipal(principal);
+        let mut address_map = self
+            .pending_transactions_map
+            .get(&stored_principal)
+            .map(|c| c.0)
+            .unwrap_or_default();
+
+        if let Some(list) = address_map.get_mut(&address) {
+            if list.len() >= self.max_pending_transactions {
+                return Err("Maximum pending transactions reached".to_string());
             }
+            list.push(new_transaction);
         } else {
-            let mut address_map: PendingTransactionsMap = HashMap::new();
+            if address_map.keys().len() >= self.max_addresses_per_user {
+                return Err("Maximum address per user reached".to_string());
+            }
             let list: Vec<StoredPendingTransaction> = vec![new_transaction];
             address_map.insert(address, list);
-            self.pending_transactions_map.insert(principal, address_map);
         }
+
+        self.pending_transactions_map
+            .insert(stored_principal, Candid(address_map));
         Ok(())
     }
 
@@ -105,32 +107,50 @@ impl BtcUserPendingTransactions {
         current_utxos: &[Utxo],
         now_ns: u64,
     ) {
-        if let Some(address_map) = self.pending_transactions_map.get_mut(&principal) {
-            let mut addresses_to_remove = Vec::new();
-            for (address, transactions) in address_map.iter_mut() {
-                let pruned_list: Vec<StoredPendingTransaction> = transactions
-                    .clone()
-                    .into_iter()
-                    .filter(|pending_transaction| {
-                        let is_old =
-                            pending_transaction.created_at_timestamp_ns + HOUR_IN_NS < now_ns;
+        let stored_principal = StoredPrincipal(principal);
+        let Some(mut address_map) = self
+            .pending_transactions_map
+            .get(&stored_principal)
+            .map(|c| c.0)
+        else {
+            return;
+        };
 
-                        let none_of_tx_utxos_are_still_present = pending_transaction
-                            .utxos
-                            .iter()
-                            .all(|utxo| !current_utxos.contains(utxo));
+        let mut changed = false;
+        let mut addresses_to_remove = Vec::new();
+        for (address, transactions) in &mut address_map {
+            let initial_len = transactions.len();
+            transactions.retain(|pending_transaction| {
+                let is_old = pending_transaction.created_at_timestamp_ns + HOUR_IN_NS < now_ns;
 
-                        !is_old && !none_of_tx_utxos_are_still_present
-                    })
-                    .collect();
-                if pruned_list.is_empty() {
-                    addresses_to_remove.push(address.clone());
-                } else {
-                    *transactions = pruned_list;
-                }
+                let none_of_tx_utxos_are_still_present = pending_transaction
+                    .utxos
+                    .iter()
+                    .all(|utxo| !current_utxos.contains(utxo));
+
+                !is_old && !none_of_tx_utxos_are_still_present
+            });
+
+            if transactions.len() != initial_len {
+                changed = true;
             }
-            for address in &addresses_to_remove {
-                address_map.remove(address.as_str());
+
+            if transactions.is_empty() {
+                addresses_to_remove.push(address.clone());
+            }
+        }
+
+        for address in &addresses_to_remove {
+            address_map.remove(address.as_str());
+            changed = true;
+        }
+
+        if changed {
+            if address_map.is_empty() {
+                self.pending_transactions_map.remove(&stored_principal);
+            } else {
+                self.pending_transactions_map
+                    .insert(stored_principal, Candid(address_map));
             }
         }
     }
@@ -154,11 +174,13 @@ impl BtcUserPendingTransactions {
             .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
             .collect();
 
-        let Some(address_map) = self.pending_transactions_map.get(&principal) else {
+        let stored_principal = StoredPrincipal(principal);
+        let Some(address_map) = self.pending_transactions_map.get(&stored_principal) else {
             return false;
         };
 
         address_map
+            .0
             .values()
             .flat_map(|txs| txs.iter())
             .flat_map(|tx| tx.utxos.iter())
@@ -168,9 +190,13 @@ impl BtcUserPendingTransactions {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::LazyLock;
+    use std::{cell::RefCell, collections::HashMap, sync::LazyLock};
 
     use ic_cdk::api::management_canister::bitcoin::Outpoint;
+    use ic_stable_structures::{
+        memory_manager::{MemoryId, MemoryManager},
+        DefaultMemoryImpl,
+    };
 
     use super::*;
 
@@ -228,19 +254,30 @@ mod tests {
     const ADDRESS_3: &str = "test-address-3";
     const ADDRESS_4: &str = "test-address-4";
 
+    fn setup() -> (
+        BtcUserPendingTransactionsMap,
+        RefCell<MemoryManager<DefaultMemoryImpl>>,
+    ) {
+        let memory_manager = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+        let map =
+            BtcUserPendingTransactionsMap::init(memory_manager.borrow().get(MemoryId::new(0)));
+        (map, memory_manager)
+    }
+
     #[test]
     fn test_get_pending_transactions_empty() {
-        let btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
-        let pending_txs =
-            btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert!(pending_txs.is_empty());
     }
 
     #[test]
     fn test_add_pending_transaction_per_address() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
         let tx = StoredPendingTransaction {
             txid: vec![],
@@ -249,28 +286,23 @@ mod tests {
         };
 
         // Add the pending transaction
-        let result = btc_user_pending_transactions.add_pending_transaction(
-            principal,
-            ADDRESS_1.to_string(),
-            tx.clone(),
-        );
+        let result = model.add_pending_transaction(principal, ADDRESS_1.to_string(), tx.clone());
         assert!(result.is_ok());
 
         // Check that the transaction was added
-        let pending_txs =
-            btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 1);
         assert_eq!(pending_txs[0], tx);
 
         // Check that the transaction was added to the proper address
-        let pending_txs =
-            btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_2);
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_2);
         assert!(pending_txs.is_empty());
     }
 
     #[test]
     fn test_add_pending_transaction_does_not_add_other_principal() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal1 = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
         let principal2 = Principal::from_text(PRINCIPAL_TEXT_2).unwrap();
         let tx = StoredPendingTransaction {
@@ -279,22 +311,18 @@ mod tests {
             created_at_timestamp_ns: 1_000_000,
         };
 
-        let result = btc_user_pending_transactions.add_pending_transaction(
-            principal1,
-            ADDRESS_1.to_string(),
-            tx.clone(),
-        );
+        let result = model.add_pending_transaction(principal1, ADDRESS_1.to_string(), tx.clone());
         assert!(result.is_ok());
 
-        let pending_txs =
-            btc_user_pending_transactions.get_pending_transactions(&principal2, ADDRESS_1);
+        let pending_txs = model.get_pending_transactions(&principal2, ADDRESS_1);
         assert!(pending_txs.is_empty());
     }
 
     // Test for add_pending_transaction when max_pending_transactions is reached
     #[test]
     fn test_add_pending_transaction_max_limit() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(Some(3), None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, Some(3), None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         let tx1 = StoredPendingTransaction {
@@ -319,22 +347,18 @@ mod tests {
         };
 
         // Add 3 transactions (max_pending_transactions = 3)
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), tx1)
             .unwrap();
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), tx2)
             .unwrap();
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), tx3)
             .unwrap();
 
         // Try adding a 4th transaction and expect an error
-        let result = btc_user_pending_transactions.add_pending_transaction(
-            principal,
-            ADDRESS_1.to_string(),
-            tx4,
-        );
+        let result = model.add_pending_transaction(principal, ADDRESS_1.to_string(), tx4);
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), "Maximum pending transactions reached");
     }
@@ -342,7 +366,8 @@ mod tests {
     // Test for add_pending_transaction when max_addresses_per_user is reached
     #[test]
     fn test_add_pending_transaction_max_address_limit() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, Some(3));
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, Some(3));
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         let tx1 = StoredPendingTransaction {
@@ -367,29 +392,26 @@ mod tests {
         };
 
         // Add 3 transactions (max_addresses_per_user = 3)
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), tx1)
             .unwrap();
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_2.to_string(), tx2)
             .unwrap();
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_3.to_string(), tx3)
             .unwrap();
 
         // Try adding a 4th address and expect an error
-        let result = btc_user_pending_transactions.add_pending_transaction(
-            principal,
-            ADDRESS_4.to_string(),
-            tx4,
-        );
+        let result = model.add_pending_transaction(principal, ADDRESS_4.to_string(), tx4);
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), "Maximum address per user reached");
     }
 
     #[test]
     fn test_prune_old_pending_transactions() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         let yesterday_ns = 1_000_000;
@@ -400,7 +422,7 @@ mod tests {
             utxos: vec![(*UTXO_1).clone()],
             created_at_timestamp_ns: yesterday_ns,
         };
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), old_transaction.clone())
             .unwrap();
 
@@ -409,27 +431,26 @@ mod tests {
             utxos: vec![(*UTXO_2).clone()],
             created_at_timestamp_ns: now_ns,
         };
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), valid_transaction.clone())
             .unwrap();
 
-        let pending_txs =
-            btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 2);
 
         let all_utxos = &[(*UTXO_1).clone(), (*UTXO_2).clone()];
 
-        btc_user_pending_transactions.prune_pending_transactions(principal, all_utxos, now_ns + 1);
+        model.prune_pending_transactions(principal, all_utxos, now_ns + 1);
 
-        let pending_txs =
-            btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 1);
         assert_eq!(pending_txs[0], valid_transaction);
     }
 
     #[test]
     fn test_prune_with_available_utxos() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         let now_ns = 1_000_000_000_000;
@@ -445,33 +466,28 @@ mod tests {
             created_at_timestamp_ns: now_ns,
         };
 
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), transaction_1.clone())
             .unwrap();
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), transaction_2.clone())
             .unwrap();
 
-        let pending_txs =
-            btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 2);
 
         let available_utxos = &[(*UTXO_1).clone()];
-        btc_user_pending_transactions.prune_pending_transactions(
-            principal,
-            available_utxos,
-            now_ns,
-        );
+        model.prune_pending_transactions(principal, available_utxos, now_ns);
 
-        let pending_txs =
-            btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 1);
         assert_eq!(pending_txs[0], transaction_1);
     }
 
     #[test]
     fn test_does_not_prune_with_partial_available_utxos() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         let now_ns = 1_000_000_000_000;
@@ -487,32 +503,27 @@ mod tests {
             created_at_timestamp_ns: now_ns,
         };
 
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), transaction_1.clone())
             .unwrap();
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), transaction_2.clone())
             .unwrap();
 
-        let pending_txs =
-            btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 2);
 
         let available_utxos = &[(*UTXO_1).clone(), (*UTXO_3).clone()];
-        btc_user_pending_transactions.prune_pending_transactions(
-            principal,
-            available_utxos,
-            now_ns,
-        );
+        model.prune_pending_transactions(principal, available_utxos, now_ns);
 
-        let pending_txs =
-            btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 2);
     }
 
     #[test]
     fn test_has_intersecting_pending_utxos_true_across_addresses() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         let existing_1 = StoredPendingTransaction {
@@ -526,20 +537,19 @@ mod tests {
             created_at_timestamp_ns: 1_000_000,
         };
 
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), existing_1)
             .unwrap();
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_2.to_string(), existing_2)
             .unwrap();
 
-        assert!(btc_user_pending_transactions
-            .has_intersecting_pending_utxos(principal, &[(*UTXO_2).clone()]));
+        assert!(model.has_intersecting_pending_utxos(principal, &[(*UTXO_2).clone()]));
     }
 
     #[test]
     fn test_has_intersecting_pending_utxos_false_when_disjoint() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         let existing = StoredPendingTransaction {
@@ -548,17 +558,19 @@ mod tests {
             created_at_timestamp_ns: 1_000_000,
         };
 
-        btc_user_pending_transactions
-            .add_pending_transaction(principal, ADDRESS_1.to_string(), existing)
-            .unwrap();
+        map.insert(
+            StoredPrincipal(principal),
+            Candid(HashMap::from([(ADDRESS_1.to_string(), vec![existing])])),
+        );
 
-        assert!(!btc_user_pending_transactions
-            .has_intersecting_pending_utxos(principal, &[(*UTXO_5).clone()]));
+        let model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        assert!(!model.has_intersecting_pending_utxos(principal, &[(*UTXO_5).clone()]));
     }
 
     #[test]
     fn test_has_intersecting_pending_utxos_false_other_principal() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal_1 = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
         let principal_2 = Principal::from_text(PRINCIPAL_TEXT_2).unwrap();
 
@@ -568,26 +580,27 @@ mod tests {
             created_at_timestamp_ns: 1_000_000,
         };
 
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal_1, ADDRESS_1.to_string(), existing)
             .unwrap();
 
-        assert!(!btc_user_pending_transactions
-            .has_intersecting_pending_utxos(principal_2, &[(*UTXO_1).clone()]));
+        assert!(!model.has_intersecting_pending_utxos(principal_2, &[(*UTXO_1).clone()]));
     }
 
     #[test]
     fn test_has_intersecting_pending_utxos_false_for_self_duplicates_when_no_pending_exists() {
-        let btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
-        assert!(!btc_user_pending_transactions
+        assert!(!model
             .has_intersecting_pending_utxos(principal, &[(*UTXO_1).clone(), (*UTXO_1).clone()]));
     }
 
     #[test]
     fn test_has_intersecting_pending_utxos_true_when_second_call_reuses_same_utxos() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         // First call reserves UTXO_1 and UTXO_2
@@ -596,18 +609,19 @@ mod tests {
             utxos: vec![(*UTXO_1).clone(), (*UTXO_2).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), first)
             .unwrap();
 
         // Second call attempts to reuse the exact same set => must intersect
-        assert!(btc_user_pending_transactions
+        assert!(model
             .has_intersecting_pending_utxos(principal, &[(*UTXO_1).clone(), (*UTXO_2).clone()]));
     }
 
     #[test]
     fn test_has_intersecting_pending_utxos_true_when_second_call_partially_overlaps() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         // First call reserves UTXO_1 and UTXO_2
@@ -616,19 +630,20 @@ mod tests {
             utxos: vec![(*UTXO_1).clone(), (*UTXO_2).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), first)
             .unwrap();
 
         // Second call overlaps on UTXO_2 only => still must intersect
-        assert!(btc_user_pending_transactions
+        assert!(model
             .has_intersecting_pending_utxos(principal, &[(*UTXO_2).clone(), (*UTXO_5).clone()]));
     }
 
     #[test]
     fn test_has_intersecting_pending_utxos_true_when_overlap_is_same_outpoint_even_if_fields_differ(
     ) {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         // UTXO_3 and UTXO_4 share the same outpoint (txid=[], vout=2) but differ in value/height.
@@ -638,17 +653,17 @@ mod tests {
             utxos: vec![(*UTXO_3).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), first)
             .unwrap();
 
-        assert!(btc_user_pending_transactions
-            .has_intersecting_pending_utxos(principal, &[(*UTXO_4).clone()]));
+        assert!(model.has_intersecting_pending_utxos(principal, &[(*UTXO_4).clone()]));
     }
 
     #[test]
     fn test_has_intersecting_pending_utxos_false_when_vout_matches_but_txid_differs() {
-        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         // Existing pending uses TXID_A, vout=7
@@ -665,7 +680,7 @@ mod tests {
             created_at_timestamp_ns: 1_000_000,
         };
 
-        btc_user_pending_transactions
+        model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), pending)
             .unwrap();
 
@@ -679,8 +694,42 @@ mod tests {
             height: 2,
         };
 
-        assert!(
-            !btc_user_pending_transactions.has_intersecting_pending_utxos(principal, &[candidate])
-        );
+        assert!(!model.has_intersecting_pending_utxos(principal, &[candidate]));
+    }
+
+    #[test]
+    fn test_persistence_across_reinit() {
+        let (memory_manager, _map) = {
+            let memory_manager = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+            let map =
+                BtcUserPendingTransactionsMap::init(memory_manager.borrow().get(MemoryId::new(0)));
+            (memory_manager, map)
+        };
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+        let address = ADDRESS_1.to_string();
+        let tx = StoredPendingTransaction {
+            txid: vec![1, 2, 3],
+            utxos: vec![(*UTXO_1).clone()],
+            created_at_timestamp_ns: 1_234_567,
+        };
+
+        {
+            let memory = memory_manager.borrow().get(MemoryId::new(0));
+            let mut map = BtcUserPendingTransactionsMap::init(memory);
+            let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+            model
+                .add_pending_transaction(principal, address.clone(), tx.clone())
+                .unwrap();
+        }
+
+        // Re-init with same memory
+        {
+            let memory = memory_manager.borrow().get(MemoryId::new(0));
+            let mut map = BtcUserPendingTransactionsMap::init(memory);
+            let model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+            let pending_txs = model.get_pending_transactions(&principal, &address);
+            assert_eq!(pending_txs.len(), 1);
+            assert_eq!(pending_txs[0], tx);
+        }
     }
 }

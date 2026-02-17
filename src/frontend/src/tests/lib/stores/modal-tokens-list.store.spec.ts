@@ -36,7 +36,9 @@ describe('modalTokensListStore', () => {
 			balance: ckBtcBalance,
 			decimals: ckBtcToken.decimals,
 			exchangeRate: ckBtcExchangeValue
-		})
+		}),
+		usdPrice: 1,
+		usdPriceChangePercentage24h: undefined
 	};
 	const mockTokenUi2 = {
 		...mockToken2,
@@ -45,7 +47,9 @@ describe('modalTokensListStore', () => {
 			balance: icpBalance,
 			decimals: ICP_TOKEN.decimals,
 			exchangeRate: icpExchangeValue
-		})
+		}),
+		usdPrice: 2,
+		usdPriceChangePercentage24h: undefined
 	};
 
 	beforeEach(() => {
@@ -163,7 +167,9 @@ describe('modalTokensListStore', () => {
 				balance: ethBalance,
 				decimals: ETHEREUM_TOKEN.decimals,
 				exchangeRate: ethExchangeValue
-			})
+			}),
+			usdPrice: 3,
+			usdPriceChangePercentage24h: undefined
 		};
 		const mockTokenUi4 = {
 			...mockToken4,
@@ -172,7 +178,9 @@ describe('modalTokensListStore', () => {
 				balance: ethBalance,
 				decimals: ARB_TOKEN.decimals,
 				exchangeRate: ethExchangeValue
-			})
+			}),
+			usdPrice: 3,
+			usdPriceChangePercentage24h: undefined
 		};
 
 		beforeEach(() => {
