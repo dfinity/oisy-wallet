@@ -55,7 +55,7 @@
 					{formatCurrency({
 						value: 0,
 						currency: $currentCurrency,
-						exchangeRate: { currency: $currentCurrency, exchangeRateToUsd: 1 },
+						exchangeRate: { currency: $currentCurrency, exchangeRateToUsd: 1 ,exchangeRate24hChangeMultiplier:1},
 						language: $currentLanguage
 					})}
 				{/if}
