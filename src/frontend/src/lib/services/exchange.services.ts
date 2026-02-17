@@ -41,26 +41,39 @@ const fetchIcrcPricesFromKongSwap = async (
 // Until we find a proper IC solution (like the exchange canister, for example), we use this workaround.
 export const exchangeRateUsdToCurrency = async (
 	currency: Currency
-): Promise<{ rate: number } | undefined> => {
+): Promise<{ rate: number; fx24hChangeMultiplier: number } | undefined> => {
 	if (currency === Currency.USD) {
-		return { rate: 1 };
+		return { rate: 1, fx24hChangeMultiplier: 1 };
 	}
 
 	const prices = await simplePrice({
 		ids: 'bitcoin',
-		vs_currencies: `${Currency.USD},${currency}`
+		vs_currencies: `${Currency.USD},${currency}`,
+		include_24hr_change: true
 	});
 
 	const btcToUsd = prices?.bitcoin?.usd;
 	const btcToCurrency = prices?.bitcoin?.[currency];
 
-	if (isNullish(btcToUsd) || isNullish(btcToCurrency)) {
+	const btcToUsdChangePct = prices?.bitcoin?.usd_24h_change;
+	const btcToCurrencyChangePct = prices?.bitcoin?.[`${currency}_24h_change`];
+
+	if (
+		isNullish(btcToUsd) ||
+		isNullish(btcToCurrency) ||
+		isNullish(btcToUsdChangePct) ||
+		isNullish(btcToCurrencyChangePct)
+	) {
 		return;
 	}
 
 	const rate = btcToUsd / btcToCurrency;
 
-	return { rate };
+	const a = btcToUsdChangePct / 100;
+	const b = btcToCurrencyChangePct / 100;
+	const fx24hChangeMultiplier = (1 + a) / (1 + b);
+
+	return { rate, fx24hChangeMultiplier };
 };
 
 export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>

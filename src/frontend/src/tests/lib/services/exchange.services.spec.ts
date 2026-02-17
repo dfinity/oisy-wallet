@@ -36,7 +36,10 @@ describe('exchange.services', () => {
 		});
 
 		it('should return 1 for USD', async () => {
-			await expect(exchangeRateUsdToCurrency(Currency.USD)).resolves.toStrictEqual({ rate: 1 });
+			await expect(exchangeRateUsdToCurrency(Currency.USD)).resolves.toStrictEqual({
+				rate: 1,
+				fx24hChangeMultiplier: 1
+			});
 
 			expect(simplePrice).not.toHaveBeenCalled();
 		});
@@ -46,7 +49,8 @@ describe('exchange.services', () => {
 
 			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
 				ids: 'bitcoin',
-				vs_currencies: `${Currency.USD},${Currency.EUR}`
+				vs_currencies: `${Currency.USD},${Currency.EUR}`,
+				include_24hr_change: true
 			});
 
 			vi.clearAllMocks();
@@ -55,16 +59,19 @@ describe('exchange.services', () => {
 
 			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
 				ids: 'bitcoin',
-				vs_currencies: `${Currency.USD},${Currency.CHF}`
+				vs_currencies: `${Currency.USD},${Currency.CHF}`,
+				include_24hr_change: true
 			});
 		});
 
 		it('should return the correct exchange rate for a valid currency', async () => {
-			vi.mocked(simplePrice).mockResolvedValue({ bitcoin: { usd: 10000, eur: 5000 } });
+			vi.mocked(simplePrice).mockResolvedValue({
+				bitcoin: { usd: 10000, eur: 5000, usd_24h_change: 3, eur_24h_change: 18 }
+			});
 
 			const rate = await exchangeRateUsdToCurrency(Currency.EUR);
 
-			expect(rate).toStrictEqual({ rate: 2 }); // 10000 / 5000
+			expect(rate).toStrictEqual({ rate: 2, fx24hChangeMultiplier: 1.03 / 1.18 }); // 10000 / 5000
 		});
 
 		it('should return undefined for a nullish response', async () => {
@@ -84,7 +91,19 @@ describe('exchange.services', () => {
 		});
 
 		it('should return undefined for a nullish price for BTC to currency', async () => {
-			vi.mocked(simplePrice).mockResolvedValue({ bitcoin: { usd: 10000 } });
+			vi.mocked(simplePrice).mockResolvedValue({
+				bitcoin: { usd: 10000, usd_24h_change: 3, eur_24h_change: 18 }
+			});
+
+			const rate = await exchangeRateUsdToCurrency(Currency.EUR);
+
+			expect(rate).toBeUndefined();
+		});
+
+		it('should return undefined for a nullish 24-hour change for BTC to currency', async () => {
+			vi.mocked(simplePrice).mockResolvedValue({
+				bitcoin: { usd: 10000, eur: 5000, usd_24h_change: 3 }
+			});
 
 			const rate = await exchangeRateUsdToCurrency(Currency.EUR);
 
