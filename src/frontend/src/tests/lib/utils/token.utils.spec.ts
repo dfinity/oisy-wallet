@@ -249,6 +249,8 @@ describe('token.utils', () => {
 			...ETHEREUM_TOKEN,
 			balance: bn3Bi,
 			usdBalance: Number(bn3Bi),
+			usdPrice: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd,
+			usdPriceChangePercentage24h: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd_24h_change,
 			stakeBalance: 123n,
 			stakeUsdBalance: Number(123n),
 			claimableStakeBalance: 456n,
@@ -278,6 +280,8 @@ describe('token.utils', () => {
 			expect(result).toEqual({
 				...expected,
 				usdBalance: undefined,
+				usdPrice: undefined,
+				usdPriceChangePercentage24h: undefined,
 				stakeUsdBalance: undefined,
 				claimableStakeBalanceUsd: undefined
 			});
