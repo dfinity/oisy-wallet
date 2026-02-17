@@ -31,7 +31,8 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 		infura: 'mainnet',
 		alchemy: 'mainnet',
 		alchemyDeprecated: Network.ETH_MAINNET,
-		alchemyJsonRpcUrl: 'https://eth-mainnet.g.alchemy.com/v2'
+		alchemyJsonRpcUrl: 'https://eth-mainnet.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://eth-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'ethereum' },
 	buy: { onramperId: 'ethereum' },
@@ -54,7 +55,8 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 		infura: 'sepolia',
 		alchemy: 'sepolia',
 		alchemyDeprecated: Network.ETH_SEPOLIA,
-		alchemyJsonRpcUrl: 'https://eth-sepolia.g.alchemy.com/v2'
+		alchemyJsonRpcUrl: 'https://eth-sepolia.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://eth-sepolia.g.alchemy.com/v2'
 	}
 };
 
