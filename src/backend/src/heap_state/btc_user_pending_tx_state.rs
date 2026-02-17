@@ -166,50 +166,56 @@ impl BtcUserPendingTransactions {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::LazyLock;
+
     use ic_cdk::api::management_canister::bitcoin::Outpoint;
 
     use super::*;
 
-    const UTXO_1: Utxo = Utxo {
+    const TXID_A: &[u8] = &[0xAA; 32];
+    const TXID_B: &[u8] = &[0xBB; 32];
+    const TXID_C: &[u8] = &[0xCC; 32];
+
+    const UTXO_1: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
-            txid: vec![],
+            txid: TXID_A.to_vec(),
             vout: 0,
         },
         value: 1000,
         height: 100,
-    };
-    const UTXO_2: Utxo = Utxo {
+    });
+    const UTXO_2: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
-            txid: vec![],
+            txid: TXID_A.to_vec(),
             vout: 1,
         },
         value: 2000,
         height: 120,
-    };
-    const UTXO_3: Utxo = Utxo {
+    });
+    const UTXO_3: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
-            txid: vec![],
+            txid: TXID_B.to_vec(),
             vout: 2,
         },
         value: 3000,
         height: 150,
-    };
-    const UTXO_4: Utxo = Utxo {
+    });
+    const UTXO_4: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
-            txid: vec![],
+            txid: TXID_B.to_vec(),
             vout: 2,
         },
         value: 8000,
         height: 160,
-    };
-    const UTXO_5: Utxo = Utxo {
+    });
+    const UTXO_5: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
-            txid: vec![],
+            txid: TXID_C.to_vec(),
             vout: 9,
         },
         value: 9000,
         height: 200,
-    };
+    });
 
     const PRINCIPAL_TEXT_1: &str =
         "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
@@ -236,7 +242,7 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
         let tx = StoredPendingTransaction {
             txid: vec![],
-            utxos: vec![UTXO_1],
+            utxos: vec![(*UTXO_1).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
 
@@ -267,7 +273,7 @@ mod tests {
         let principal2 = Principal::from_text(PRINCIPAL_TEXT_2).unwrap();
         let tx = StoredPendingTransaction {
             txid: vec![],
-            utxos: vec![UTXO_1],
+            utxos: vec![(*UTXO_1).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
 
@@ -291,22 +297,22 @@ mod tests {
 
         let tx1 = StoredPendingTransaction {
             txid: vec![1, 2, 3],
-            utxos: vec![UTXO_1],
+            utxos: vec![(*UTXO_1).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
         let tx2 = StoredPendingTransaction {
             txid: vec![4, 5, 6],
-            utxos: vec![UTXO_2],
+            utxos: vec![(*UTXO_2).clone()],
             created_at_timestamp_ns: 2_000_000,
         };
         let tx3 = StoredPendingTransaction {
             txid: vec![7, 8, 9],
-            utxos: vec![UTXO_3],
+            utxos: vec![(*UTXO_3).clone()],
             created_at_timestamp_ns: 3_000_000,
         };
         let tx4 = StoredPendingTransaction {
             txid: vec![10, 11, 12],
-            utxos: vec![UTXO_4],
+            utxos: vec![(*UTXO_4).clone()],
             created_at_timestamp_ns: 4_000_000,
         };
 
@@ -339,22 +345,22 @@ mod tests {
 
         let tx1 = StoredPendingTransaction {
             txid: vec![1, 2, 3],
-            utxos: vec![UTXO_1],
+            utxos: vec![(*UTXO_1).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
         let tx2 = StoredPendingTransaction {
             txid: vec![4, 5, 6],
-            utxos: vec![UTXO_2],
+            utxos: vec![(*UTXO_2).clone()],
             created_at_timestamp_ns: 2_000_000,
         };
         let tx3 = StoredPendingTransaction {
             txid: vec![7, 8, 9],
-            utxos: vec![UTXO_3],
+            utxos: vec![(*UTXO_3).clone()],
             created_at_timestamp_ns: 3_000_000,
         };
         let tx4 = StoredPendingTransaction {
             txid: vec![10, 11, 12],
-            utxos: vec![UTXO_4],
+            utxos: vec![(*UTXO_4).clone()],
             created_at_timestamp_ns: 4_000_000,
         };
 
@@ -389,7 +395,7 @@ mod tests {
 
         let old_transaction = StoredPendingTransaction {
             txid: vec![1, 2, 3],
-            utxos: vec![UTXO_1],
+            utxos: vec![(*UTXO_1).clone()],
             created_at_timestamp_ns: yesterday_ns,
         };
         btc_user_pending_transactions
@@ -398,7 +404,7 @@ mod tests {
 
         let valid_transaction = StoredPendingTransaction {
             txid: vec![4, 5, 6],
-            utxos: vec![UTXO_2],
+            utxos: vec![(*UTXO_2).clone()],
             created_at_timestamp_ns: now_ns,
         };
         btc_user_pending_transactions
@@ -409,7 +415,7 @@ mod tests {
             btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 2);
 
-        let all_utxos = &[UTXO_1, UTXO_2];
+        let all_utxos = &[(*UTXO_1).clone(), (*UTXO_2).clone()];
 
         btc_user_pending_transactions.prune_pending_transactions(principal, all_utxos, now_ns + 1);
 
@@ -428,12 +434,12 @@ mod tests {
 
         let transaction_1 = StoredPendingTransaction {
             txid: vec![1, 2, 3],
-            utxos: vec![UTXO_1],
+            utxos: vec![(*UTXO_1).clone()],
             created_at_timestamp_ns: now_ns,
         };
         let transaction_2 = StoredPendingTransaction {
             txid: vec![4, 5, 6],
-            utxos: vec![UTXO_2],
+            utxos: vec![(*UTXO_2).clone()],
             created_at_timestamp_ns: now_ns,
         };
 
@@ -448,7 +454,7 @@ mod tests {
             btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 2);
 
-        let available_utxos = &[UTXO_1];
+        let available_utxos = &[(*UTXO_1).clone()];
         btc_user_pending_transactions.prune_pending_transactions(
             principal,
             available_utxos,
@@ -470,12 +476,12 @@ mod tests {
 
         let transaction_1 = StoredPendingTransaction {
             txid: vec![1, 2, 3],
-            utxos: vec![UTXO_1],
+            utxos: vec![(*UTXO_1).clone()],
             created_at_timestamp_ns: now_ns,
         };
         let transaction_2 = StoredPendingTransaction {
             txid: vec![4, 5, 6],
-            utxos: vec![UTXO_2, UTXO_3],
+            utxos: vec![(*UTXO_2).clone(), (*UTXO_3).clone()],
             created_at_timestamp_ns: now_ns,
         };
 
@@ -490,7 +496,7 @@ mod tests {
             btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 2);
 
-        let available_utxos = &[UTXO_1, UTXO_3];
+        let available_utxos = &[(*UTXO_1).clone(), (*UTXO_3).clone()];
         btc_user_pending_transactions.prune_pending_transactions(
             principal,
             available_utxos,
@@ -509,12 +515,12 @@ mod tests {
 
         let existing_1 = StoredPendingTransaction {
             txid: vec![1],
-            utxos: vec![UTXO_1],
+            utxos: vec![(*UTXO_1).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
         let existing_2 = StoredPendingTransaction {
             txid: vec![2],
-            utxos: vec![UTXO_2],
+            utxos: vec![(*UTXO_2).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
 
@@ -525,7 +531,8 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_2.to_string(), existing_2)
             .unwrap();
 
-        assert!(btc_user_pending_transactions.has_intersecting_pending_utxos(principal, &[UTXO_2]));
+        assert!(btc_user_pending_transactions
+            .has_intersecting_pending_utxos(principal, &[(*UTXO_2).clone()]));
     }
 
     #[test]
@@ -535,7 +542,7 @@ mod tests {
 
         let existing = StoredPendingTransaction {
             txid: vec![1],
-            utxos: vec![UTXO_1],
+            utxos: vec![(*UTXO_1).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
 
@@ -543,7 +550,8 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_1.to_string(), existing)
             .unwrap();
 
-        assert!(!btc_user_pending_transactions.has_intersecting_pending_utxos(principal, &[UTXO_5]));
+        assert!(!btc_user_pending_transactions
+            .has_intersecting_pending_utxos(principal, &[(*UTXO_5).clone()]));
     }
 
     #[test]
@@ -554,7 +562,7 @@ mod tests {
 
         let existing = StoredPendingTransaction {
             txid: vec![1],
-            utxos: vec![UTXO_1],
+            utxos: vec![(*UTXO_1).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
 
@@ -562,9 +570,8 @@ mod tests {
             .add_pending_transaction(principal_1, ADDRESS_1.to_string(), existing)
             .unwrap();
 
-        assert!(
-            !btc_user_pending_transactions.has_intersecting_pending_utxos(principal_2, &[UTXO_1])
-        );
+        assert!(!btc_user_pending_transactions
+            .has_intersecting_pending_utxos(principal_2, &[(*UTXO_1).clone()]));
     }
 
     #[test]
@@ -573,7 +580,7 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         assert!(!btc_user_pending_transactions
-            .has_intersecting_pending_utxos(principal, &[UTXO_1, UTXO_1]));
+            .has_intersecting_pending_utxos(principal, &[(*UTXO_1).clone(), (*UTXO_1).clone()]));
     }
 
     #[test]
@@ -584,7 +591,7 @@ mod tests {
         // First call reserves UTXO_1 and UTXO_2
         let first = StoredPendingTransaction {
             txid: vec![1],
-            utxos: vec![UTXO_1, UTXO_2],
+            utxos: vec![(*UTXO_1).clone(), (*UTXO_2).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
         btc_user_pending_transactions
@@ -593,7 +600,7 @@ mod tests {
 
         // Second call attempts to reuse the exact same set => must intersect
         assert!(btc_user_pending_transactions
-            .has_intersecting_pending_utxos(principal, &[UTXO_1, UTXO_2]));
+            .has_intersecting_pending_utxos(principal, &[(*UTXO_1).clone(), (*UTXO_2).clone()]));
     }
 
     #[test]
@@ -604,7 +611,7 @@ mod tests {
         // First call reserves UTXO_1 and UTXO_2
         let first = StoredPendingTransaction {
             txid: vec![1],
-            utxos: vec![UTXO_1, UTXO_2],
+            utxos: vec![(*UTXO_1).clone(), (*UTXO_2).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
         btc_user_pending_transactions
@@ -613,7 +620,7 @@ mod tests {
 
         // Second call overlaps on UTXO_2 only => still must intersect
         assert!(btc_user_pending_transactions
-            .has_intersecting_pending_utxos(principal, &[UTXO_2, UTXO_5]));
+            .has_intersecting_pending_utxos(principal, &[(*UTXO_2).clone(), (*UTXO_5).clone()]));
     }
 
     #[test]
@@ -626,13 +633,52 @@ mod tests {
         // If your overlap logic is correct (outpoint-based), this should count as intersection.
         let first = StoredPendingTransaction {
             txid: vec![1],
-            utxos: vec![UTXO_3],
+            utxos: vec![(*UTXO_3).clone()],
             created_at_timestamp_ns: 1_000_000,
         };
         btc_user_pending_transactions
             .add_pending_transaction(principal, ADDRESS_1.to_string(), first)
             .unwrap();
 
-        assert!(btc_user_pending_transactions.has_intersecting_pending_utxos(principal, &[UTXO_4]));
+        assert!(btc_user_pending_transactions
+            .has_intersecting_pending_utxos(principal, &[(*UTXO_4).clone()]));
+    }
+
+    #[test]
+    fn test_has_intersecting_pending_utxos_false_when_vout_matches_but_txid_differs() {
+        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        // Existing pending uses TXID_A, vout=7
+        let pending = StoredPendingTransaction {
+            txid: vec![1],
+            utxos: vec![Utxo {
+                outpoint: Outpoint {
+                    txid: TXID_A.to_vec(),
+                    vout: 7,
+                },
+                value: 1111,
+                height: 1,
+            }],
+            created_at_timestamp_ns: 1_000_000,
+        };
+
+        btc_user_pending_transactions
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), pending)
+            .unwrap();
+
+        // New utxo has same vout=7 but different txid => must NOT intersect
+        let candidate = Utxo {
+            outpoint: Outpoint {
+                txid: TXID_B.to_vec(),
+                vout: 7,
+            },
+            value: 2222,
+            height: 2,
+        };
+
+        assert!(
+            !btc_user_pending_transactions.has_intersecting_pending_utxos(principal, &[candidate])
+        );
     }
 }
