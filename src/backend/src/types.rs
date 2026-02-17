@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use candid::{CandidType, Deserialize, Principal};
 use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
@@ -6,6 +8,8 @@ use shared::types::{
     backend_config::Config, contact::StoredContacts, custom_token::CustomToken,
     pow::StoredChallenge, token::UserToken, user_profile::StoredUserProfile, Timestamp,
 };
+
+use crate::btc_user_pending_tx_model::StoredPendingTransaction;
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 pub type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
@@ -26,3 +30,7 @@ where
 pub struct StoredPrincipal(pub Principal);
 // Define a new type for the contact storage
 pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VMem>;
+
+pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>;
+pub type BtcUserPendingTransactionsMap =
+    StableBTreeMap<StoredPrincipal, Candid<PendingTransactionsMap>, VMem>;
