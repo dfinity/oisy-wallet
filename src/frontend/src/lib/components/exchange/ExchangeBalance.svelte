@@ -27,9 +27,7 @@
 
 	const totalUsd = $derived(sumTokensUiUsdBalance($sortedFungibleNetworkTokensUi));
 
-	const totalStakeUsd = $derived(
-		sumTokensUiUsdStakeBalance($sortedFungibleNetworkTokensUi)
-	);
+	const totalStakeUsd = $derived(sumTokensUiUsdStakeBalance($sortedFungibleNetworkTokensUi));
 
 	let balance = $derived(
 		formatCurrency({
