@@ -14,6 +14,7 @@ interface NetworkProviders {
 		alchemy: Networkish;
 		alchemyDeprecated: AlchemyNetwork;
 		alchemyJsonRpcUrl: string;
+		alchemyWsUrl: string;
 	};
 }
 
