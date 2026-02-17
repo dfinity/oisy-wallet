@@ -12,12 +12,11 @@ import {
 	networkEvmMainnetEnabled,
 	networkSolanaMainnetEnabled
 } from '$lib/derived/networks.derived';
-import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
+import { loadAddresses } from '$lib/services/addresses.services';
 import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { initialLoading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -78,26 +77,20 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  * Initializes the loader by loading the user profile settings and addresses.
  *
  * If the user profile settings cannot be loaded, the user will be signed out.
- * If the addresses are loaded from the IDB:
- * - The addresses will be validated.
- * - The additional data will be loaded.
- * If the addresses are loaded from the backend:
+ * If the addresses are loaded from the backend correctly:
  * - The signer allowance will be initialized.
  * - The additional data will be loaded.
  *
  * @param {Object} params The parameters to initialize the loader.
  * @param {OptionIdentity} params.identity The identity to use for the request.
- * @param {Function} params.validateAddresses The function to validate the addresses.
  * @param {Function} params.progressAndLoad The function to set the next step of the Progress modal and load the additional data.
  * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialized (user profile settings and addresses are loaded).
  */
 export const initLoader = async ({
 	identity,
-	validateAddresses,
 	progressAndLoad
 }: {
 	identity: OptionIdentity;
-	validateAddresses: () => void;
 	progressAndLoad: () => void;
 }): Promise<void> => {
 	if (isNullish(identity)) {
@@ -114,25 +107,6 @@ export const initLoader = async ({
 		return;
 	}
 
-	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
-	const enabledNetworkIds: NetworkId[] = [
-		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
-		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
-		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
-	];
-
-	const { success: addressIdbSuccess, err } = await loadIdbAddresses(enabledNetworkIds);
-
-	if (addressIdbSuccess) {
-		initialLoading.set(false);
-
-		progressAndLoad();
-
-		validateAddresses();
-
-		return;
-	}
-
 	if (!POW_FEATURE_ENABLED) {
 		if (FRONTEND_DERIVATION_ENABLED) {
 			// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
@@ -146,14 +120,15 @@ export const initLoader = async ({
 			}
 		}
 	}
-	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
 
-	// We don't need to load the addresses of the disabled networks.
-	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) =>
-		enabledNetworkIds.includes(networkId)
-	);
+	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
+	const enabledNetworkIds: NetworkId[] = [
+		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
+		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
+		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
+	];
 
-	const { success: addressSuccess } = await loadAddresses(networkIds);
+	const { success: addressSuccess } = await loadAddresses(enabledNetworkIds);
 
 	if (!addressSuccess) {
 		await signOut({});
