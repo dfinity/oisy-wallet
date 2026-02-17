@@ -49,7 +49,7 @@
 
 	let { usdPrice } = $derived(data);
 
-	let formattedUsdPrice = $derived(
+	let formattedExchangeRate = $derived(
 		nonNullish(usdPrice)
 			? formatCurrency({
 					value: usdPrice,
@@ -90,7 +90,7 @@
 		{#snippet subtitle()}
 			<span class:ml-2={!asNetwork} class:text-sm={asNetwork}>
 				{#if !asNetwork}
-					{formattedUsdPrice}
+					{formattedExchangeRate}
 				{/if}
 			</span>
 		{/snippet}
