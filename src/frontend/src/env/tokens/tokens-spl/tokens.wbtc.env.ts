@@ -13,7 +13,7 @@ export const WBTC_SYMBOL = 'WBTC';
 export const WBTC_TOKEN_ID: TokenId = parseTokenId(WBTC_SYMBOL);
 
 export const WBTC_TOKEN: RequiredSplToken = {
-	id: USDT_TOKEN_ID,
+	id: WBTC_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
