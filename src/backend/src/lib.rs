@@ -67,7 +67,6 @@ use user_profile_model::UserProfileModel;
 use crate::{
     bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
-    heap_state::btc_user_pending_tx_state::{outpoint_key, OutpointKey},
     token::{add_to_user_token, remove_from_user_token},
     types::{ContactMap, PowChallengeMap},
     user_profile::{
@@ -432,7 +431,11 @@ pub async fn btc_add_pending_transaction(
     async fn inner(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
-        let unique_keys: HashSet<OutpointKey> = params.utxos.iter().map(outpoint_key).collect();
+        let unique_keys: HashSet<(&[u8], u32)> = params
+            .utxos
+            .iter()
+            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .collect();
 
         if unique_keys.len() != params.utxos.len() {
             return Err(BtcAddPendingTransactionError::DuplicateUtxos);
@@ -450,12 +453,15 @@ pub async fn btc_add_pending_transaction(
 
         let now_ns = time();
 
-        let current_keys: HashSet<OutpointKey> = current_utxos.iter().map(outpoint_key).collect();
+        let current_keys: HashSet<(&[u8], u32)> = current_utxos
+            .iter()
+            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .collect();
 
         let all_param_utxos_are_current = params
             .utxos
             .iter()
-            .all(|u| current_keys.contains(&outpoint_key(u)));
+            .all(|u| current_keys.contains(&(u.outpoint.txid.as_slice(), u.outpoint.vout)));
 
         if !all_param_utxos_are_current {
             return Err(BtcAddPendingTransactionError::InvalidUtxos);

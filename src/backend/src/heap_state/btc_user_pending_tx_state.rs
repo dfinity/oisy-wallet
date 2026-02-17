@@ -34,19 +34,6 @@ pub struct BtcUserPendingTransactions {
     max_addresses_per_user: usize,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
-pub struct OutpointKey {
-    txid: Vec<u8>,
-    vout: u32,
-}
-
-pub fn outpoint_key(u: &Utxo) -> OutpointKey {
-    OutpointKey {
-        txid: u.outpoint.txid.clone(),
-        vout: u.outpoint.vout,
-    }
-}
-
 impl BtcUserPendingTransactions {
     #[allow(dead_code)]
     pub fn new(max_pending_txs: Option<usize>, max_addresses_per_user: Option<usize>) -> Self {
@@ -160,7 +147,10 @@ impl BtcUserPendingTransactions {
     /// - `true` if there is at least one overlapping UTXO.
     /// - `false` if no overlap is found.
     pub fn has_intersecting_pending_utxos(&self, principal: Principal, new_utxos: &[Utxo]) -> bool {
-        let new_keys: HashSet<OutpointKey> = new_utxos.iter().map(outpoint_key).collect();
+        let new_keys: HashSet<(&[u8], u32)> = new_utxos
+            .iter()
+            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .collect();
 
         let Some(address_map) = self.pending_transactions_map.get(&principal) else {
             return false;
@@ -170,7 +160,7 @@ impl BtcUserPendingTransactions {
             .values()
             .flat_map(|txs| txs.iter())
             .flat_map(|tx| tx.utxos.iter())
-            .any(|u| new_keys.contains(&outpoint_key(u)))
+            .any(|u| new_keys.contains(&(u.outpoint.txid.as_slice(), u.outpoint.vout)))
     }
 }
 
@@ -535,8 +525,7 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_2.to_string(), existing_2)
             .unwrap();
 
-      assert!(btc_user_pending_transactions
-            .has_intersecting_pending_utxos(principal, &[UTXO_2]));
+        assert!(btc_user_pending_transactions.has_intersecting_pending_utxos(principal, &[UTXO_2]));
     }
 
     #[test]
