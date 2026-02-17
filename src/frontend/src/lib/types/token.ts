@@ -57,6 +57,8 @@ export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], '
 export interface TokenFinancialData {
 	balance?: Exclude<OptionBalance, undefined>;
 	usdBalance?: number;
+	usdPrice?: number;
+	usdPriceChangePercentage24h?: number;
 	stakeBalance?: bigint;
 	stakeUsdBalance?: number;
 	claimableStakeBalance?: bigint;
