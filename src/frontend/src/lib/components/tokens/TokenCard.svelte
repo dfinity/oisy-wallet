@@ -8,11 +8,15 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TOKEN_CARD, type TOKEN_GROUP } from '$lib/constants/test-ids.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
+	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -41,6 +45,19 @@
 
 	let token: TokenToggleable<Token> | undefined = $derived(
 		isCardDataTogglableToken(data) ? data : undefined
+	);
+
+	let { usdPrice } = $derived(data);
+
+	let formattedExchangeRate = $derived(
+		nonNullish(usdPrice)
+			? formatCurrency({
+					value: usdPrice,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})
+			: undefined
 	);
 </script>
 
@@ -71,9 +88,9 @@
 		{/snippet}
 
 		{#snippet subtitle()}
-			<span class:text-sm={asNetwork}>
+			<span class:ml-2={!asNetwork} class:text-sm={asNetwork}>
 				{#if !asNetwork}
-					<Divider />{data.name}
+					{formattedExchangeRate}
 				{/if}
 			</span>
 		{/snippet}
