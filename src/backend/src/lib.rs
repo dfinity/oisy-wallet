@@ -435,9 +435,7 @@ pub async fn btc_add_pending_transaction(
         let unique_keys: HashSet<OutpointKey> = params.utxos.iter().map(outpoint_key).collect();
 
         if unique_keys.len() != params.utxos.len() {
-            return Err(BtcAddPendingTransactionError::InternalError {
-                msg: "Duplicate UTXOs provided in request".to_string(),
-            });
+            return Err(BtcAddPendingTransactionError::DuplicateUtxos);
         }
 
         let principal = ic_cdk::caller();
@@ -460,19 +458,14 @@ pub async fn btc_add_pending_transaction(
             .all(|u| current_keys.contains(&outpoint_key(u)));
 
         if !all_param_utxos_are_current {
-            return Err(BtcAddPendingTransactionError::InternalError {
-                msg: "Some provided UTXOs are not present in the current UTXO set".to_string(),
-            });
+            return Err(BtcAddPendingTransactionError::InvalidUtxos);
         }
 
         with_btc_pending_transactions(|pending_transactions| {
             pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
 
             if pending_transactions.has_intersecting_pending_utxos(principal, &params.utxos) {
-                return Err(BtcAddPendingTransactionError::InternalError {
-                    msg: "Some provided UTXOs are already reserved by a pending transaction"
-                        .to_string(),
-                });
+                return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
             }
 
             let current_pending_transaction = StoredPendingTransaction {
