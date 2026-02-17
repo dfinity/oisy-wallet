@@ -11,7 +11,12 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 
 const POLYGON_ERC20_TOKENS_AMOY: RequiredEvmErc20Token[] = [AMOY_USDC_TOKEN];
 
-const POLYGON_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [USDC_TOKEN, USDT_TOKEN, WBTC_TOKEN, ZCHF_TOKEN];
+const POLYGON_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [
+	USDC_TOKEN,
+	USDT_TOKEN,
+	WBTC_TOKEN,
+	ZCHF_TOKEN
+];
 
 export const POLYGON_ERC20_TOKENS: RequiredEvmErc20Token[] = defineSupportedTokens({
 	mainnetFlag: POLYGON_MAINNET_ENABLED,
