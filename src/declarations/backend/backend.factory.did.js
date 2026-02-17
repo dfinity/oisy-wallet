@@ -128,7 +128,10 @@ export const idlFactory = ({ IDL }) => {
 		utxos: IDL.Vec(Utxo)
 	});
 	const BtcAddPendingTransactionError = IDL.Variant({
-		InternalError: IDL.Record({ msg: IDL.Text })
+		InvalidUtxos: IDL.Null,
+		DuplicateUtxos: IDL.Null,
+		InternalError: IDL.Record({ msg: IDL.Text }),
+		UtxosAlreadyReserved: IDL.Null
 	});
 	const BtcAddPendingTransactionResult = IDL.Variant({
 		Ok: IDL.Null,
@@ -159,9 +162,12 @@ export const idlFactory = ({ IDL }) => {
 	const BtcGetPendingTransactionsReponse = IDL.Record({
 		transactions: IDL.Vec(PendingTransaction)
 	});
+	const BtcGetPendingTransactionsError = IDL.Variant({
+		InternalError: IDL.Record({ msg: IDL.Text })
+	});
 	const BtcGetPendingTransactionsResult = IDL.Variant({
 		Ok: BtcGetPendingTransactionsReponse,
-		Err: BtcAddPendingTransactionError
+		Err: BtcGetPendingTransactionsError
 	});
 	const SelectedUtxosFeeRequest = IDL.Record({
 		network: BitcoinNetwork,
