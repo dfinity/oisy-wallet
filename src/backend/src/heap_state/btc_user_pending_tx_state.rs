@@ -517,17 +517,26 @@ mod tests {
         let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
-        let existing = StoredPendingTransaction {
+        let existing_1 = StoredPendingTransaction {
             txid: vec![1],
             utxos: vec![UTXO_1],
             created_at_timestamp_ns: 1_000_000,
         };
+        let existing_2 = StoredPendingTransaction {
+            txid: vec![2],
+            utxos: vec![UTXO_2],
+            created_at_timestamp_ns: 1_000_000,
+        };
 
         btc_user_pending_transactions
-            .add_pending_transaction(principal, ADDRESS_1.to_string(), existing)
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), existing_1)
+            .unwrap();
+        btc_user_pending_transactions
+            .add_pending_transaction(principal, ADDRESS_2.to_string(), existing_2)
             .unwrap();
 
-        assert!(btc_user_pending_transactions.has_intersecting_pending_utxos(principal, &[UTXO_1]));
+      assert!(btc_user_pending_transactions
+            .has_intersecting_pending_utxos(principal, &[UTXO_2]));
     }
 
     #[test]
