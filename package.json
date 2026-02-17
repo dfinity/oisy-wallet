@@ -85,7 +85,7 @@
 		"@solana-program/token": "^0.9.0",
 		"@solana-program/token-2022": "^0.6.1",
 		"@solana/kit": "^5.4.0",
-		"@velora-dex/sdk": "^9.2.1",
+		"@velora-dex/sdk": "^9.3.0",
 		"alchemy-sdk": "^3.6.5",
 		"bech32": "^1.1.4",
 		"bitcoinjs-lib": "^6.1.7",
