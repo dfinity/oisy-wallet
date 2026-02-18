@@ -33,14 +33,16 @@
 	);
 </script>
 
-<span
-	class="text-sm"
-	class:text-error-primary={exchangeRateChangeSign === 'negative'}
-	class:text-success-primary={exchangeRateChangeSign === 'positive'}
-	class:text-tertiary={exchangeRateChangeSign === 'zero'}
->
-	<span class="inline-block transform" class:rotate-180={exchangeRateChangeSign === 'positive'}>
-		{exchangeRateChangeSymbol}
+{#if nonNullish(usdPriceChangePercentage24h)}
+	<span
+		class="text-sm"
+		class:text-error-primary={exchangeRateChangeSign === 'negative'}
+		class:text-success-primary={exchangeRateChangeSign === 'positive'}
+		class:text-tertiary={exchangeRateChangeSign === 'zero'}
+	>
+		<span class="inline-block transform" class:rotate-180={exchangeRateChangeSign === 'positive'}>
+			{exchangeRateChangeSymbol}
+		</span>
+		{formattedExchangeRateChange}
 	</span>
-	{formattedExchangeRateChange}
-</span>
+{/if}

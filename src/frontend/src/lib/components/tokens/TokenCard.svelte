@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import Divider from '$lib/components/common/Divider.svelte';
+	import ExchangeRateChange from '$lib/components/exchange/ExchangeRateChange.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
@@ -16,11 +17,10 @@
 	import type { Token } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
-	import { format24hChangeInCurrency, formatCurrency } from '$lib/utils/format.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
 	import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import ExchangeRateChange from "$lib/components/exchange/ExchangeRateChange.svelte";
 
 	interface Props {
 		data: CardData;
@@ -59,27 +59,6 @@
 					language: $currentLanguage
 				})
 			: undefined
-	);
-
-	let parsedExchangeRateChange = $derived(
-		nonNullish(usdPriceChangePercentage24h)
-			? format24hChangeInCurrency({
-					usdChangePct: usdPriceChangePercentage24h,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
-				})
-			: undefined
-	);
-
-	let { formattedAbs: formattedExchangeRateChange, sign: exchangeRateChangeSign } = $derived(
-		nonNullish(parsedExchangeRateChange)
-			? parsedExchangeRateChange
-			: { formattedAbs: undefined, sign: undefined }
-	);
-
-	let exchangeRateChangeSymbol = $derived(
-		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '▸' : '▾') : undefined
 	);
 
 	let name = $derived(getTokenDisplayName(data));
