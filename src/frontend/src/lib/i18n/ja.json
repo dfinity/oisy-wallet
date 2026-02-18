@@ -2023,6 +2023,9 @@
 			"minute_plural": "分",
 			"second": "秒",
 			"second_plural": "秒"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

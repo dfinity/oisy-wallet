@@ -2023,6 +2023,9 @@
 			"minute_plural": "минут",
 			"second": "секунда",
 			"second_plural": "секунд"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

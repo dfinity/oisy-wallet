@@ -1613,6 +1613,7 @@ interface I18nTemporal {
 		second: string;
 		second_plural: string;
 	};
+	time_frame: { t_24h: string };
 }
 
 interface I18nAi_assistant {

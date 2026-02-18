@@ -2023,6 +2023,9 @@
 			"minute_plural": "分钟（复数）",
 			"second": "秒（单数）",
 			"second_plural": "秒（复数）"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {
