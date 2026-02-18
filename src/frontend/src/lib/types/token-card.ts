@@ -12,6 +12,7 @@ export type CardData = Pick<
 	| 'balance'
 	| 'usdBalance'
 	| 'usdPrice'
+	| 'usdPriceChangePercentage24h'
 > &
 	Partial<Pick<TokenUi, 'network'>> & {
 		tokenCount?: number;

@@ -16,7 +16,7 @@
 	import type { Token } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
-	import { formatCurrency } from '$lib/utils/format.utils';
+	import { format24hChangeInCurrency, formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -47,7 +47,7 @@
 		isCardDataTogglableToken(data) ? data : undefined
 	);
 
-	let { usdPrice } = $derived(data);
+	let { usdPrice, usdPriceChangePercentage24h } = $derived(data);
 
 	let formattedExchangeRate = $derived(
 		nonNullish(usdPrice)
@@ -58,6 +58,27 @@
 					language: $currentLanguage
 				})
 			: undefined
+	);
+
+	let parsedExchangeRateChange = $derived(
+		nonNullish(usdPriceChangePercentage24h)
+			? format24hChangeInCurrency({
+					usdChangePct: usdPriceChangePercentage24h,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})
+			: undefined
+	);
+
+	let { formattedAbs: formattedExchangeRateChange, sign: exchangeRateChangeSign } = $derived(
+		nonNullish(parsedExchangeRateChange)
+			? parsedExchangeRateChange
+			: { formattedAbs: undefined, sign: undefined }
+	);
+
+	let exchangeRateChangeSymbol = $derived(
+		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '▸' : '▾') : undefined
 	);
 </script>
 
@@ -91,6 +112,20 @@
 			<span class:ml-2={!asNetwork} class:text-sm={asNetwork}>
 				{#if !asNetwork}
 					{formattedExchangeRate}
+					<span
+						class="ml-1 text-sm"
+						class:text-error-primary={exchangeRateChangeSign === 'negative'}
+						class:text-success-primary={exchangeRateChangeSign === 'positive'}
+						class:text-tertiary={exchangeRateChangeSign === 'zero'}
+					>
+						<span
+							class="inline-block transform"
+							class:rotate-180={exchangeRateChangeSign === 'positive'}
+						>
+							{exchangeRateChangeSymbol}
+						</span>
+						{formattedExchangeRateChange}
+					</span>
 				{/if}
 			</span>
 		{/snippet}

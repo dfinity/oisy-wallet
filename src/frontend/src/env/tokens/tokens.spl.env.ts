@@ -12,6 +12,7 @@ import { AZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.aznx.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-spl/tokens.babaon.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-spl/tokens.biduon.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { CBBTC_TOKEN } from '$env/tokens/tokens-spl/tokens.cbbtc.env';
 import { CMCSAX_TOKEN } from '$env/tokens/tokens-spl/tokens.cmcsax.env';
 import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
 import { COPXON_TOKEN } from '$env/tokens/tokens-spl/tokens.copxon.env';
@@ -79,6 +80,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	BABAON_TOKEN,
 	BIDUON_TOKEN,
 	BONK_TOKEN,
+	CBBTC_TOKEN,
 	CMCSAX_TOKEN,
 	COINX_TOKEN,
 	COPXON_TOKEN,
