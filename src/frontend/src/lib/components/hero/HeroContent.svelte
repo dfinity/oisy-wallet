@@ -13,6 +13,7 @@
 	import Back from '$lib/components/core/Back.svelte';
 	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
 	import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
+	import ExchangeRateChange from '$lib/components/exchange/ExchangeRateChange.svelte';
 	import Actions from '$lib/components/hero/Actions.svelte';
 	import Balance from '$lib/components/hero/Balance.svelte';
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
@@ -46,7 +47,7 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
-	import { format24hChangeInCurrency, formatCurrency } from '$lib/utils/format.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { getTokenDisplayName, mapTokenUi } from '$lib/utils/token.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
@@ -77,27 +78,6 @@
 					language: $currentLanguage
 				})
 			: undefined
-	);
-
-	let parsedExchangeRateChange = $derived(
-		nonNullish(usdPriceChangePercentage24h)
-			? format24hChangeInCurrency({
-					usdChangePct: usdPriceChangePercentage24h,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
-				})
-			: undefined
-	);
-
-	let { formattedAbs: formattedExchangeRateChange, sign: exchangeRateChangeSign } = $derived(
-		nonNullish(parsedExchangeRateChange)
-			? parsedExchangeRateChange
-			: { formattedAbs: undefined, sign: undefined }
-	);
-
-	let exchangeRateChangeSymbol = $derived(
-		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '▸' : '▾') : undefined
 	);
 
 	const { loading, outflowActionsDisabled, inflowActionsDisabled, ...rest } = initHeroContext();
@@ -181,16 +161,14 @@
 >
 	{#if isTransactionsPage}
 		<div class="flex w-full flex-col gap-6" in:slide={SLIDE_PARAMS}>
-			<div
-				class="grid w-full grid-cols-[1fr_auto_1fr] items-center justify-between justify-stretch gap-1 sm:gap-2"
-			>
+			<div class="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 sm:gap-2">
 				<Back color="current" onlyArrow />
 
 				<div
-					class="text-md my-0.5 flex w-full min-w-0 flex-row items-center justify-between gap-4 overflow-hidden text-nowrap"
+					class="text-md my-0.5 flex w-full min-w-0 flex-row items-center justify-between gap-4 text-nowrap"
 				>
 					{#if nonNullish(pageTokenUi)}
-						<div class="flex flex-row items-center justify-center gap-2" in:fade>
+						<div class="flex flex-row items-center justify-center gap-1 sm:gap-2" in:fade>
 							<TokenLogo data={pageTokenUi} logoSize="sm" ring />
 
 							<div class="flex flex-col text-left">
@@ -212,22 +190,7 @@
 								{formattedExchangeRate}
 							</span>
 
-							<span
-								class="rounded px-1 text-sm"
-								class:bg-error-subtle-30={exchangeRateChangeSign === 'negative'}
-								class:text-error-primary={exchangeRateChangeSign === 'negative'}
-								class:text-success-primary={exchangeRateChangeSign === 'positive'}
-								class:text-tertiary={exchangeRateChangeSign === 'zero'}
-							>
-								<span
-									class="inline-block transform text-lg leading-none"
-									class:rotate-180={exchangeRateChangeSign === 'positive'}
-								>
-									{exchangeRateChangeSymbol}
-								</span>
-								{formattedExchangeRateChange}
-								<span class="text-[11px]">(24h)</span>
-							</span>
+							<ExchangeRateChange {usdPriceChangePercentage24h} />
 						</div>
 					{:else}
 						<SkeletonLogo size="small" />
