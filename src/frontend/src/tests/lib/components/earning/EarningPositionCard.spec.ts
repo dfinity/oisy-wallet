@@ -31,7 +31,8 @@ describe('EarningPositionCard', () => {
 				exchangeRate24hChangeMultiplier: 1
 			}),
 			setExchangeRate: vi.fn(),
-			setExchangeRateCurrency: vi.fn()
+			setExchangeRateCurrency: vi.fn(),
+			setExchangeRate24hChangeMultiplier: vi.fn()
 		});
 
 		// formatCurrency mock
