@@ -165,7 +165,7 @@
 				<Back color="current" onlyArrow />
 
 				<div
-					class="text-md my-0.5 flex w-full min-w-0 flex-row items-center justify-between gap-4 text-nowrap"
+					class="sm:text-md my-0.5 flex w-full min-w-0 flex-row items-center justify-between gap-4 text-sm text-nowrap"
 				>
 					{#if nonNullish(pageTokenUi)}
 						<div class="flex flex-row items-center justify-center gap-1 sm:gap-2" in:fade>
@@ -178,7 +178,7 @@
 
 								<div class="flex flex-row items-center justify-center gap-1">
 									<NetworkLogo network={pageTokenUi.network} size="xxs" transparent />
-									<span class="text-sm">
+									<span class="text-xs sm:text-sm">
 										{pageTokenUi.network.name}
 									</span>
 								</div>
@@ -186,11 +186,13 @@
 						</div>
 
 						<div class="flex flex-col text-right">
-							<span class="font-semibold">
+							<span class="leading-none font-semibold">
 								{formattedExchangeRate}
 							</span>
 
-							<ExchangeRateChange {usdPriceChangePercentage24h} withBackground timeFrame="24h" />
+							<span>
+								<ExchangeRateChange timeFrame="24h" {usdPriceChangePercentage24h} withBackground />
+							</span>
 						</div>
 					{:else}
 						<SkeletonLogo size="small" />

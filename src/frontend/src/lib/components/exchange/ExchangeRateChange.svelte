@@ -42,7 +42,7 @@
 
 {#if nonNullish(parsedExchangeRateChange)}
 	<span
-		class="px-1 text-sm"
+		class="px-1 text-xs sm:text-sm"
 		class:bg-error-subtle-30={withBackground && exchangeRateChangeSign === 'negative'}
 		class:bg-success-subtle-30={withBackground && exchangeRateChangeSign === 'positive'}
 		class:rounded={withBackground}
@@ -58,7 +58,7 @@
 		</span>
 		{formattedExchangeRateChange}
 		{#if nonNullish(parsedTimeFrame)}
-			<span class="text-[11px]">{`(${parsedTimeFrame})`}</span>
+			<span class="sm:text-[11px] text-[9px]">{`(${parsedTimeFrame})`}</span>
 		{/if}
 	</span>
 {/if}
