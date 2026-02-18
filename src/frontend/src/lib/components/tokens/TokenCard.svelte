@@ -111,11 +111,16 @@
 		{/snippet}
 
 		{#snippet subtitle()}
-			<span class:ml-2={!asNetwork} class:text-sm={asNetwork}>
+			<span
+				class="flex items-center gap-1 sm:gap-2"
+				class:ml-2={!asNetwork}
+				class:sm:ml-4={!asNetwork}
+				class:text-sm={asNetwork}
+			>
 				{#if !asNetwork}
 					{formattedExchangeRate}
 					<span
-						class="ml-1 text-sm"
+						class="text-sm"
 						class:text-error-primary={exchangeRateChangeSign === 'negative'}
 						class:text-success-primary={exchangeRateChangeSign === 'positive'}
 						class:text-tertiary={exchangeRateChangeSign === 'zero'}
