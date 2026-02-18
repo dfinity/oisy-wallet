@@ -20,7 +20,8 @@ describe('mapHeaderData', () => {
 		groupData: mockGroup,
 		tokens: [mockToken, ICP_TOKEN],
 		balance: bn1Bi,
-		usdBalance: 300
+		usdBalance: 300,
+		usdPrice: 150
 	};
 
 	it('should correctly map the token group to card data', () => {
@@ -33,6 +34,7 @@ describe('mapHeaderData', () => {
 			oisySymbol: { oisySymbol: mockGroup.symbol },
 			balance: bn1Bi,
 			usdBalance: 300,
+			usdPrice: 150,
 			tokenCount: 2
 		};
 
@@ -40,7 +42,7 @@ describe('mapHeaderData', () => {
 	});
 
 	it('should handle edge cases like empty data in token group', () => {
-		const { balance: _balance, usdBalance: _usdBalance, ...rest } = tokenGroup;
+		const { balance: _balance, usdBalance: _usdBalance, usdPrice: _usdPrice, ...rest } = tokenGroup;
 
 		const expected: CardData = {
 			name: mockGroup.name,

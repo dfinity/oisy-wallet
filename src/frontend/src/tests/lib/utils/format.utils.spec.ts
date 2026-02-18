@@ -1018,8 +1018,8 @@ describe('format.utils', () => {
 					currency: Currency.CHF,
 					exchangeRate: {
 						currency: Currency.CHF,
-						exchangeRateToUsd: 1,
-						exchangeRate24hChangeMultiplier: 1.2
+						exchangeRateToUsd: 1.2,
+						exchangeRate24hChangeMultiplier: 1
 					},
 					language: Languages.ENGLISH
 				})
