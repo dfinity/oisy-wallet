@@ -33,7 +33,8 @@ const tokens: TokenUi[] = [
 		...BTC_MAINNET_TOKEN,
 		balance: bn1Bi,
 		usdBalance: 50000,
-		usdPrice: 40000
+		usdPrice: 40000,
+		usdPriceChangePercentage24h: 1.2
 	},
 	{
 		...mockValidIcCkToken,
@@ -42,6 +43,7 @@ const tokens: TokenUi[] = [
 		balance: bn2Bi,
 		usdBalance: 100000,
 		usdPrice: 80000,
+		usdPriceChangePercentage24h: 2.3,
 		standard: { code: 'icrc' },
 		category: 'default',
 		decimals: BTC_MAINNET_TOKEN.decimals,
@@ -52,7 +54,8 @@ const tokens: TokenUi[] = [
 		...ETHEREUM_TOKEN,
 		balance: 10n,
 		usdBalance: 20000,
-		usdPrice: 2000
+		usdPrice: 2000,
+		usdPriceChangePercentage24h: -0.5
 	},
 	{
 		...mockValidIcCkToken,
@@ -61,6 +64,7 @@ const tokens: TokenUi[] = [
 		balance: 5n,
 		usdBalance: 15000,
 		usdPrice: 3000,
+		usdPriceChangePercentage24h: 3.1,
 		standard: { code: 'icrc' },
 		category: 'default',
 		decimals: ETHEREUM_TOKEN.decimals,
@@ -71,7 +75,8 @@ const tokens: TokenUi[] = [
 		...ICP_TOKEN,
 		balance: 50n,
 		usdBalance: 1000,
-		usdPrice: 20
+		usdPrice: 20,
+		usdPriceChangePercentage24h: -8
 	}
 ];
 
@@ -538,21 +543,24 @@ describe('token-group.utils', () => {
 			decimals,
 			balance: bn1Bi,
 			usdBalance: 100,
-			usdPrice: 1000
+			usdPrice: 1000,
+			usdPriceChangePercentage24h: 10
 		};
 		const mockSecondToken = {
 			...BTC_MAINNET_TOKEN,
 			decimals,
 			balance: bn3Bi,
 			usdBalance: 300,
-			usdPrice: 30000
+			usdPrice: 30000,
+			usdPriceChangePercentage24h: -5
 		};
 		const mockThirdToken = {
 			...ICP_TOKEN,
 			decimals,
 			balance: bn2Bi,
 			usdBalance: 200,
-			usdPrice: 20
+			usdPrice: 20,
+			usdPriceChangePercentage24h: -8
 		};
 
 		// We mock the tokens to have the same "main token"
@@ -562,6 +570,7 @@ describe('token-group.utils', () => {
 			balance: bn2Bi,
 			usdBalance: 250,
 			usdPrice: 123,
+			usdPriceChangePercentage24h: 5,
 			groupData: mockToken.groupData
 		};
 		const mockTwinToken2 = {
@@ -570,6 +579,7 @@ describe('token-group.utils', () => {
 			balance: bn1Bi,
 			usdBalance: 450,
 			usdPrice: 321,
+			usdPriceChangePercentage24h: -3,
 			groupData: mockToken.groupData
 		};
 
@@ -640,7 +650,8 @@ describe('token-group.utils', () => {
 				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
 				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance,
-				usdPrice: mockToken.usdPrice
+				usdPrice: mockToken.usdPrice,
+				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
 			});
 
 			expect(token1).toStrictEqual(mockSecondToken);
@@ -667,7 +678,8 @@ describe('token-group.utils', () => {
 				tokens: [mockTwinToken1, mockToken, mockTwinToken2],
 				balance: mockTwinToken1.balance + mockToken.balance + mockTwinToken2.balance,
 				usdBalance: mockTwinToken1.usdBalance + mockToken.usdBalance + mockTwinToken2.usdBalance,
-				usdPrice: mockTwinToken1.usdPrice
+				usdPrice: mockTwinToken1.usdPrice,
+				usdPriceChangePercentage24h: mockTwinToken1.usdPriceChangePercentage24h
 			});
 
 			expect(token1).toStrictEqual(mockSecondToken);
@@ -697,7 +709,8 @@ describe('token-group.utils', () => {
 				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
 				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance,
-				usdPrice: mockToken.usdPrice
+				usdPrice: mockToken.usdPrice,
+				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
 			});
 		});
 
@@ -725,7 +738,8 @@ describe('token-group.utils', () => {
 				tokens: [mockToken, mockTwinToken, mockTwinToken2],
 				balance: undefined,
 				usdBalance: mockToken.usdBalance + mockTwinToken2.usdBalance,
-				usdPrice: mockToken.usdPrice
+				usdPrice: mockToken.usdPrice,
+				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
 			});
 		});
 	});
