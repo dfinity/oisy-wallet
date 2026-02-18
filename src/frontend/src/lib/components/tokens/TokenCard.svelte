@@ -16,10 +16,10 @@
 	import type { Token } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
-	import { formatCurrency } from '$lib/utils/format.utils';
+	import { format24hChangeInCurrency, formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		data: CardData;
@@ -47,7 +47,7 @@
 		isCardDataTogglableToken(data) ? data : undefined
 	);
 
-	let { usdPrice } = $derived(data);
+	let { usdPrice, usdPriceChangePercentage24h } = $derived(data);
 
 	let formattedExchangeRate = $derived(
 		nonNullish(usdPrice)
@@ -59,6 +59,29 @@
 				})
 			: undefined
 	);
+
+	let parsedExchangeRateChange = $derived(
+		nonNullish(usdPriceChangePercentage24h)
+			? format24hChangeInCurrency({
+					usdChangePct: usdPriceChangePercentage24h,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})
+			: undefined
+	);
+
+	let { formattedAbs: formattedExchangeRateChange, sign: exchangeRateChangeSign } = $derived(
+		nonNullish(parsedExchangeRateChange)
+			? parsedExchangeRateChange
+			: { formattedAbs: undefined, sign: undefined }
+	);
+
+	let exchangeRateChangeSymbol = $derived(
+		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '▸' : '▾') : undefined
+	);
+
+	let name = $derived(getTokenDisplayName(data));
 </script>
 
 <div class="flex w-full flex-col">
@@ -88,9 +111,28 @@
 		{/snippet}
 
 		{#snippet subtitle()}
-			<span class:ml-2={!asNetwork} class:text-sm={asNetwork}>
+			<span
+				class="flex items-center gap-1 sm:gap-2"
+				class:ml-2={!asNetwork}
+				class:sm:ml-4={!asNetwork}
+				class:text-sm={asNetwork}
+			>
 				{#if !asNetwork}
 					{formattedExchangeRate}
+					<span
+						class="text-sm"
+						class:text-error-primary={exchangeRateChangeSign === 'negative'}
+						class:text-success-primary={exchangeRateChangeSign === 'positive'}
+						class:text-tertiary={exchangeRateChangeSign === 'zero'}
+					>
+						<span
+							class="inline-block transform"
+							class:rotate-180={exchangeRateChangeSign === 'positive'}
+						>
+							{exchangeRateChangeSymbol}
+						</span>
+						{formattedExchangeRateChange}
+					</span>
 				{/if}
 			</span>
 		{/snippet}
@@ -113,13 +155,18 @@
 		{#snippet description()}
 			<span class:text-sm={asNetwork}>
 				{#if data?.networks}
+					<span class="text-primary">{data.name}</span>
+					{replacePlaceholders($i18n.tokens.text.on_network, { $network: '' })}
 					{#each [...new Set(data.networks.map((n) => n.name))] as network, index (network)}
 						{#if index !== 0}
 							<Divider />
 						{/if}{network}
 					{/each}
 				{:else if !asNetwork && nonNullish(data.network)}
-					{data.network.name}
+					<span class="text-primary">{name}</span>
+					{#if name !== data.network.name}
+						{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
+					{/if}
 				{/if}
 			</span>
 		{/snippet}

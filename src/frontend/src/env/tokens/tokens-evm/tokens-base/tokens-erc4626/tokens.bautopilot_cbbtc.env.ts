@@ -1,4 +1,5 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { CBBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.cbbtc.env';
 import type { RequiredErc4626Token } from '$eth/types/erc4626';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -20,7 +21,6 @@ export const BAUTOPILOT_CBBTC_TOKEN: RequiredErc4626Token = {
 	address: '0x31a421271414641cb5063b71594b642d2666db6b',
 	// TODO: add custom icon
 	icon: '',
-	// TODO: add cbBTC (ERC20) token to the list and use its data below
-	assetAddress: '0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf',
-	assetDecimals: 8
+	assetAddress: CBBTC_TOKEN.address,
+	assetDecimals: CBBTC_TOKEN.decimals
 };

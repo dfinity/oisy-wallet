@@ -19,6 +19,7 @@ import {
 	filterEnabledToken,
 	findTwinToken,
 	getMaxTransactionAmount,
+	getTokenDisplayName,
 	getTokenDisplaySymbol,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
@@ -593,6 +594,25 @@ describe('token.utils', () => {
 			const result = getTokenDisplaySymbol(mockIcrcCustomToken);
 
 			expect(result).toBe(mockIcrcCustomToken.symbol);
+		});
+	});
+
+	describe('getTokenDisplayName', () => {
+		it('should return oisy name if exists', () => {
+			const oisyName = 'OISY Name';
+
+			const result = getTokenDisplayName({
+				...mockIcrcCustomToken,
+				oisyName: { oisyName }
+			});
+
+			expect(result).toBe(oisyName);
+		});
+
+		it('should return token name if oisy name does not exist', () => {
+			const result = getTokenDisplayName(mockIcrcCustomToken);
+
+			expect(result).toBe(mockIcrcCustomToken.name);
 		});
 	});
 
