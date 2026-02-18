@@ -15,7 +15,8 @@ interface NetworkProviders {
 		alchemy: Networkish;
 		alchemyDeprecated: AlchemyNetwork;
 		alchemyJsonRpcUrl: string;
-		viemChain: Chain;
+		alchemyWsUrl: string;
+    		viemChain: Chain;
 	};
 }
 

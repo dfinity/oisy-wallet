@@ -28,7 +28,8 @@ describe('TokenFeeValue', () => {
 			currency: 'usd',
 			exchangeRate: {
 				currency: 'usd',
-				exchangeRateToUsd: 1
+				exchangeRateToUsd: 1,
+				exchangeRate24hChangeMultiplier: null
 			},
 			language: 'en',
 			notBelowThreshold: true

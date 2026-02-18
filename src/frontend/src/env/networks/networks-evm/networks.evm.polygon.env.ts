@@ -30,7 +30,8 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 		alchemy: 'matic',
 		alchemyDeprecated: Network.MATIC_MAINNET,
 		alchemyJsonRpcUrl: 'https://polygon-mainnet.g.alchemy.com/v2',
-		viemChain: polygon
+		alchemyWsUrl: 'wss://polygon-mainnet.g.alchemy.com/v2',
+    		viemChain: polygon
 	},
 	exchange: { coingeckoId: 'polygon-pos' },
 	buy: { onramperId: 'polygon' },
@@ -54,7 +55,8 @@ export const POLYGON_AMOY_NETWORK: EthereumNetwork = {
 		alchemy: 'matic-amoy',
 		alchemyDeprecated: Network.MATIC_AMOY,
 		alchemyJsonRpcUrl: 'https://polygon-amoy.g.alchemy.com/v2',
-		viemChain: polygonAmoy
+		alchemyWsUrl: 'wss://polygon-amoy.g.alchemy.com/v2',
+    	viemChain: polygonAmoy
 	}
 };
 

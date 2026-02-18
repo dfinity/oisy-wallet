@@ -194,16 +194,17 @@ interface I18nDapps {
 		website: string;
 	};
 	categories: {
-		defi: string;
-		social_media: string;
-		staking: string;
-		walletconnect: string;
-		game: string;
-		tools: string;
+		aa_new: string;
+		ab_icp: string;
 		ai: string;
+		defi: string;
+		game: string;
 		nft: string;
 		rwa: string;
-		aa_new: string;
+		social_media: string;
+		staking: string;
+		tools: string;
+		walletconnect: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -278,6 +279,7 @@ interface I18nDapps {
 		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		realt: { name: string; one_liner: string; description: string };
+		parcl: { name: string; one_liner: string; description: string };
 	};
 }
 

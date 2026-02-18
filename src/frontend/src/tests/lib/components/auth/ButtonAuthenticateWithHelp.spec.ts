@@ -57,7 +57,31 @@ describe('ButtonAuthenticateWithHelp', () => {
 
 		await waitFor(() => signInButton?.click());
 
-		expect(authSpy).toHaveBeenCalledExactlyOnceWith({ domain: InternetIdentityDomain.VERSION_2_0 });
+		expect(authSpy).toHaveBeenCalledExactlyOnceWith({
+			domain: InternetIdentityDomain.VERSION_2_0,
+			asPopup: false
+		});
+	});
+
+	it('should call sign in as pop-up', async () => {
+		const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
+
+		const { container } = render(ButtonAuthenticateWithHelp, {
+			props: {
+				asPopup: true
+			}
+		});
+
+		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
+		expect(signInButton).toBeInTheDocument();
+
+		await waitFor(() => signInButton?.click());
+
+		expect(authSpy).toHaveBeenCalledExactlyOnceWith({
+			domain: InternetIdentityDomain.VERSION_2_0,
+			asPopup: true
+		});
 	});
 
 	it('should set the lock store to false on successful sign in', async () => {

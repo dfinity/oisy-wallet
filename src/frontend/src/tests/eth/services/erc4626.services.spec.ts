@@ -33,6 +33,17 @@ vi.mock('$eth/services/erc20.services', () => ({
 	safeLoadMetadata: vi.fn()
 }));
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { InfuraProvider: provider };
+});
+
+vi.mock('ethers/contract', () => {
+	const contract = vi.fn();
+	contract.prototype.convertToAssets = vi.fn();
+	return { Contract: contract };
+});
+
 describe('erc4626.services', () => {
 	const mockMetadata1 = {
 		name: 'Test Vault',

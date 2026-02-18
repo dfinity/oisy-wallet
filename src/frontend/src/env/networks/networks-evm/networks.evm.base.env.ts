@@ -30,7 +30,8 @@ export const BASE_NETWORK: EthereumNetwork = {
 		alchemy: 'base',
 		alchemyDeprecated: Network.BASE_MAINNET,
 		alchemyJsonRpcUrl: 'https://base-mainnet.g.alchemy.com/v2',
-		viemChain: base
+		alchemyWsUrl: 'wss://base-mainnet.g.alchemy.com/v2',
+    		viemChain: base
 	},
 	exchange: { coingeckoId: 'base' },
 	buy: { onramperId: 'base' },
@@ -54,7 +55,8 @@ export const BASE_SEPOLIA_NETWORK: EthereumNetwork = {
 		alchemy: 'base-sepolia',
 		alchemyDeprecated: Network.BASE_SEPOLIA,
 		alchemyJsonRpcUrl: 'https://base-sepolia.g.alchemy.com/v2',
-		viemChain: baseSepolia
+		alchemyWsUrl: 'wss://base-sepolia.g.alchemy.com/v2',
+    		viemChain: baseSepolia
 	}
 };
 

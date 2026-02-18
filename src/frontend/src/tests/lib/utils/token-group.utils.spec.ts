@@ -32,7 +32,8 @@ const tokens: TokenUi[] = [
 	{
 		...BTC_MAINNET_TOKEN,
 		balance: bn1Bi,
-		usdBalance: 50000
+		usdBalance: 50000,
+		usdPrice: 40000
 	},
 	{
 		...mockValidIcCkToken,
@@ -40,6 +41,7 @@ const tokens: TokenUi[] = [
 		network: ICP_NETWORK,
 		balance: bn2Bi,
 		usdBalance: 100000,
+		usdPrice: 80000,
 		standard: { code: 'icrc' },
 		category: 'default',
 		decimals: BTC_MAINNET_TOKEN.decimals,
@@ -49,7 +51,8 @@ const tokens: TokenUi[] = [
 	{
 		...ETHEREUM_TOKEN,
 		balance: 10n,
-		usdBalance: 20000
+		usdBalance: 20000,
+		usdPrice: 2000
 	},
 	{
 		...mockValidIcCkToken,
@@ -57,6 +60,7 @@ const tokens: TokenUi[] = [
 		network: ICP_NETWORK,
 		balance: 5n,
 		usdBalance: 15000,
+		usdPrice: 3000,
 		standard: { code: 'icrc' },
 		category: 'default',
 		decimals: ETHEREUM_TOKEN.decimals,
@@ -66,7 +70,8 @@ const tokens: TokenUi[] = [
 	{
 		...ICP_TOKEN,
 		balance: 50n,
-		usdBalance: 1000
+		usdBalance: 1000,
+		usdPrice: 20
 	}
 ];
 
@@ -528,9 +533,27 @@ describe('token-group.utils', () => {
 		// We normalize the decimals, to avoid having to mock the normalizing of balances
 		const { decimals } = ETHEREUM_TOKEN;
 
-		const mockToken = { ...ETHEREUM_TOKEN, decimals, balance: bn1Bi, usdBalance: 100 };
-		const mockSecondToken = { ...BTC_MAINNET_TOKEN, decimals, balance: bn3Bi, usdBalance: 300 };
-		const mockThirdToken = { ...ICP_TOKEN, decimals, balance: bn2Bi, usdBalance: 200 };
+		const mockToken = {
+			...ETHEREUM_TOKEN,
+			decimals,
+			balance: bn1Bi,
+			usdBalance: 100,
+			usdPrice: 1000
+		};
+		const mockSecondToken = {
+			...BTC_MAINNET_TOKEN,
+			decimals,
+			balance: bn3Bi,
+			usdBalance: 300,
+			usdPrice: 30000
+		};
+		const mockThirdToken = {
+			...ICP_TOKEN,
+			decimals,
+			balance: bn2Bi,
+			usdBalance: 200,
+			usdPrice: 20
+		};
 
 		// We mock the tokens to have the same "main token"
 		const mockTwinToken1 = {
@@ -538,6 +561,7 @@ describe('token-group.utils', () => {
 			decimals,
 			balance: bn2Bi,
 			usdBalance: 250,
+			usdPrice: 123,
 			groupData: mockToken.groupData
 		};
 		const mockTwinToken2 = {
@@ -545,6 +569,7 @@ describe('token-group.utils', () => {
 			decimals,
 			balance: bn1Bi,
 			usdBalance: 450,
+			usdPrice: 321,
 			groupData: mockToken.groupData
 		};
 
@@ -614,7 +639,8 @@ describe('token-group.utils', () => {
 				groupData: mockToken.groupData,
 				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
-				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance
+				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance,
+				usdPrice: mockToken.usdPrice
 			});
 
 			expect(token1).toStrictEqual(mockSecondToken);
@@ -640,7 +666,8 @@ describe('token-group.utils', () => {
 				groupData: mockTwinToken1.groupData,
 				tokens: [mockTwinToken1, mockToken, mockTwinToken2],
 				balance: mockTwinToken1.balance + mockToken.balance + mockTwinToken2.balance,
-				usdBalance: mockTwinToken1.usdBalance + mockToken.usdBalance + mockTwinToken2.usdBalance
+				usdBalance: mockTwinToken1.usdBalance + mockToken.usdBalance + mockTwinToken2.usdBalance,
+				usdPrice: mockTwinToken1.usdPrice
 			});
 
 			expect(token1).toStrictEqual(mockSecondToken);
@@ -669,7 +696,8 @@ describe('token-group.utils', () => {
 				groupData: mockToken.groupData,
 				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
-				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance
+				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance,
+				usdPrice: mockToken.usdPrice
 			});
 		});
 
@@ -696,7 +724,8 @@ describe('token-group.utils', () => {
 				groupData: mockToken.groupData,
 				tokens: [mockToken, mockTwinToken, mockTwinToken2],
 				balance: undefined,
-				usdBalance: mockToken.usdBalance + mockTwinToken2.usdBalance
+				usdBalance: mockToken.usdBalance + mockTwinToken2.usdBalance,
+				usdPrice: mockToken.usdPrice
 			});
 		});
 	});

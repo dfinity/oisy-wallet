@@ -1,6 +1,5 @@
-import { SOLANA_KEY_ID, SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
-import * as idbApi from '$lib/api/idb-addresses.api';
 import * as signerApi from '$lib/api/signer.api';
 import {
 	solAddressDevnetStore,
@@ -9,14 +8,12 @@ import {
 } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { LoadIdbAddressError } from '$lib/types/errors';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import {
 	getSolAddressDevnet,
 	getSolAddressLocal,
 	getSolAddressMainnet,
-	loadIdbSolAddressMainnet,
 	loadSolAddressDevnet,
 	loadSolAddressLocal,
 	loadSolAddressMainnet,
@@ -38,8 +35,6 @@ describe('sol-address.services', () => {
 	const mockPublicKey = new Uint8Array([1, 2, 3]);
 
 	let spyGetSchnorrPublicKey: MockInstance;
-	let spyGetIdbAddress: MockInstance;
-	let spyUpdateIdbAddressLastUsage: MockInstance;
 	let spyToastsError: MockInstance;
 	let mockDecoder: { decode: MockInstance; read: MockInstance };
 
@@ -55,8 +50,6 @@ describe('sol-address.services', () => {
 		vi.mocked(getAddressDecoder).mockReturnValue(mockDecoder as never);
 
 		spyGetSchnorrPublicKey = vi.spyOn(signerApi, 'getSchnorrPublicKey');
-		spyGetIdbAddress = vi.spyOn(idbApi, 'getIdbSolAddressMainnet');
-		spyUpdateIdbAddressLastUsage = vi.spyOn(idbApi, 'updateIdbSolAddressMainnetLastUsage');
 		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 	});
 
@@ -124,33 +117,6 @@ describe('sol-address.services', () => {
 				},
 				err: error
 			});
-		});
-	});
-
-	describe('Load Address from IndexedDB', () => {
-		it('should successfully load address from IDB', async () => {
-			spyGetIdbAddress.mockResolvedValue({ address: mockSolAddress });
-
-			const result = await loadIdbSolAddressMainnet();
-
-			expect(result).toEqual({ success: true });
-			expect(get(solAddressMainnetStore)).toEqual({
-				data: mockSolAddress,
-				certified: false
-			});
-			expect(spyUpdateIdbAddressLastUsage).toHaveBeenCalledWith(mockIdentity.getPrincipal());
-		});
-
-		it('should handle missing IDB address', async () => {
-			spyGetIdbAddress.mockResolvedValue(undefined);
-
-			const result = await loadIdbSolAddressMainnet();
-
-			expect(result).toEqual({
-				success: false,
-				err: new LoadIdbAddressError(SOLANA_MAINNET_NETWORK_ID)
-			});
-			expect(spyUpdateIdbAddressLastUsage).not.toHaveBeenCalled();
 		});
 	});
 

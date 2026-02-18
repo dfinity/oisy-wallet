@@ -206,16 +206,17 @@
 			"website": "Obrázek $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Sociální média",
-			"staking": "Staking",
-			"walletconnect": "WalletConnect",
-			"game": "Hra",
-			"tools": "Nářadí",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "AI",
+			"defi": "DeFi",
+			"game": "Hra",
 			"nft": "NFT",
 			"rwa": "",
-			"aa_new": ""
+			"social_media": "Sociální média",
+			"staking": "Staking",
+			"tools": "Nářadí",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -432,6 +433,11 @@
 				"description": ""
 			},
 			"realt": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
