@@ -7,7 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Token } from '$lib/types/token';
-	import {getTokenDisplayName} from "$lib/utils/token.utils";
+	import { getTokenDisplayName } from '$lib/utils/token.utils';
 
 	interface Props {
 		token: Token;
