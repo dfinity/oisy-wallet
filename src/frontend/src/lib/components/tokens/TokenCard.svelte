@@ -150,6 +150,8 @@
 		{#snippet description()}
 			<span class:text-sm={asNetwork}>
 				{#if data?.networks}
+					<span class="text-primary">{data.name}</span>
+					{replacePlaceholders($i18n.tokens.text.on_network, { $network: '' })}
 					{#each [...new Set(data.networks.map((n) => n.name))] as network, index (network)}
 						{#if index !== 0}
 							<Divider />
