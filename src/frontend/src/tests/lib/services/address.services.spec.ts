@@ -1,13 +1,11 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import {
 	certifyAddress,
-	loadIdbTokenAddress,
 	loadTokenAddress,
 	type LoadTokenAddressParams
 } from '$lib/services/address.services';
 import { authStore } from '$lib/stores/auth.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { LoadIdbAddressError } from '$lib/types/errors';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -16,9 +14,6 @@ import type { MockInstance } from 'vitest';
 
 describe('address.services', () => {
 	const mockGetAddress = vi.fn();
-	const mockSetIdbAddress = vi.fn();
-	const mockGetIdbAddress = vi.fn();
-	const mockUpdateIdbAddressLastUsage = vi.fn();
 
 	const mockNetworkId = ETHEREUM_NETWORK_ID;
 	const mockAddress = mockEthAddress;
@@ -41,7 +36,6 @@ describe('address.services', () => {
 		const mockParams: LoadTokenAddressParams<string> = {
 			networkId: mockNetworkId,
 			getAddress: mockGetAddress,
-			setIdbAddress: mockSetIdbAddress,
 			addressStore: mockAddressStore
 		};
 
@@ -61,22 +55,6 @@ describe('address.services', () => {
 			expect(mockAddressStore.set).toHaveBeenCalledWith({ data: 'mock-address', certified: true });
 		});
 
-		it('should save the address for future sign-in if setIdbAddress is provided', async () => {
-			mockGetAddress.mockResolvedValueOnce('mock-address');
-
-			const result = await loadTokenAddress(mockParams);
-
-			expect(result).toEqual({ success: true });
-			expect(mockSetIdbAddress).toHaveBeenCalledExactlyOnceWith({
-				address: {
-					address: 'mock-address',
-					createdAtTimestamp: expect.any(Number),
-					lastUsedTimestamp: expect.any(Number)
-				},
-				principal: mockIdentity.getPrincipal()
-			});
-		});
-
 		it('should reset the address store and show an error if getAddress throws', async () => {
 			mockGetAddress.mockRejectedValueOnce(new Error('Failed to get address'));
 
@@ -84,7 +62,6 @@ describe('address.services', () => {
 
 			expect(result).toEqual({ success: false });
 			expect(mockAddressStore.reset).toHaveBeenCalledOnce();
-			expect(mockSetIdbAddress).not.toHaveBeenCalled();
 			expect(spyToastsError).toHaveBeenCalledWith({
 				msg: {
 					text: replacePlaceholders(en.init.error.loading_address, {
@@ -96,61 +73,11 @@ describe('address.services', () => {
 		});
 	});
 
-	describe('loadIdbTokenAddress', () => {
-		const mockParams = {
-			networkId: mockNetworkId,
-			getIdbAddress: mockGetIdbAddress,
-			updateIdbAddressLastUsage: mockUpdateIdbAddressLastUsage,
-			addressStore: mockAddressStore
-		};
-
-		it('should return an error if no IDB address is found', async () => {
-			mockGetIdbAddress.mockResolvedValueOnce(undefined);
-
-			const result = await loadIdbTokenAddress(mockParams);
-
-			expect(result).toEqual({ success: false, err: new LoadIdbAddressError(mockNetworkId) });
-			expect(mockGetIdbAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
-			expect(mockAddressStore.set).not.toHaveBeenCalled();
-			expect(mockUpdateIdbAddressLastUsage).not.toHaveBeenCalled();
-		});
-
-		it('should set the address and update last usage on success', async () => {
-			const mockAddress = 'test-address';
-			mockGetIdbAddress.mockResolvedValueOnce({ address: mockAddress });
-
-			const result = await loadIdbTokenAddress(mockParams);
-
-			expect(result).toEqual({ success: true });
-			expect(mockGetIdbAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
-			expect(mockAddressStore.set).toHaveBeenCalledWith({ data: mockAddress, certified: false });
-			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(
-				mockIdentity.getPrincipal()
-			);
-		});
-
-		it('should handle errors gracefully and return a failure result', async () => {
-			mockGetIdbAddress.mockRejectedValueOnce(new Error('Test error'));
-
-			const result = await loadIdbTokenAddress(mockParams);
-
-			expect(result).toEqual({ success: false, err: new LoadIdbAddressError(mockNetworkId) });
-			expect(mockGetIdbAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
-			expect(mockUpdateIdbAddressLastUsage).not.toHaveBeenCalled();
-			expect(mockAddressStore.set).not.toHaveBeenCalled();
-
-			expect(console.error).toHaveBeenCalledExactlyOnceWith(
-				`Error encountered while searching for locally stored ${mockNetworkId.description} public address in the browser.`
-			);
-		});
-	});
-
 	describe('certifyAddress', () => {
 		const mockParams = {
 			networkId: mockNetworkId,
 			address: mockAddress,
 			getAddress: mockGetAddress,
-			updateIdbAddressLastUsage: mockUpdateIdbAddressLastUsage,
 			addressStore: mockAddressStore
 		};
 
@@ -167,9 +94,6 @@ describe('address.services', () => {
 				data: mockAddress,
 				certified: true
 			});
-			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(
-				mockIdentity.getPrincipal()
-			);
 		});
 
 		it('should return error when address does not match certified address', async () => {

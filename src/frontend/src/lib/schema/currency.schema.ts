@@ -9,5 +9,6 @@ export const CurrencyDataSchema = z.object({
 
 export const CurrencyExchangeDataSchema = z.object({
 	...CurrencyDataSchema.shape,
-	exchangeRateToUsd: z.number().nullable()
+	exchangeRateToUsd: z.number().nullable(),
+	exchangeRate24hChangeMultiplier: z.number().nullable()
 });

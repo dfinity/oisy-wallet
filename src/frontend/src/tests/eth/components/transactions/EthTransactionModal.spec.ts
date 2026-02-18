@@ -12,6 +12,12 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
+}));
+
 const [mockEthTransactionUi] = createMockEthTransactionsUi(1);
 const [mockErc721TransactionUi] = createMockNftTransactionsUi(1);
 

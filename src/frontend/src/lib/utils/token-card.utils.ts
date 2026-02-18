@@ -14,7 +14,9 @@ export const mapHeaderData = ({
 	tokens,
 	decimals,
 	balance,
-	usdBalance
+	usdBalance,
+	usdPrice,
+	usdPriceChangePercentage24h
 }: TokenUiGroup): CardData => ({
 	name,
 	symbol,
@@ -24,6 +26,8 @@ export const mapHeaderData = ({
 	oisySymbol: { oisySymbol: symbol },
 	balance,
 	usdBalance,
+	usdPrice,
+	usdPriceChangePercentage24h,
 	tokenCount: tokens.length
 });
 

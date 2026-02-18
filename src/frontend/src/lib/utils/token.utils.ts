@@ -183,6 +183,8 @@ export const mapTokenUi = <T extends Token>({
 			$balances,
 			$exchanges
 		}),
+		usdPrice: $exchanges?.[token.id]?.usd,
+		usdPriceChangePercentage24h: $exchanges?.[token.id]?.usd_24h_change,
 		...(nonNullish(staked)
 			? {
 					stakeBalance: staked,

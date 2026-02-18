@@ -28,7 +28,8 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 		infura: 'bnb',
 		alchemy: 'bnb',
 		alchemyDeprecated: Network.BNB_MAINNET,
-		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2'
+		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://bnb-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'binance-smart-chain' },
 	buy: { onramperId: 'bsc' },
@@ -51,7 +52,8 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 		infura: 'bnbt',
 		alchemy: 'bnbt',
 		alchemyDeprecated: Network.BNB_TESTNET,
-		alchemyJsonRpcUrl: 'https://bnb-testnet.g.alchemy.com/v2'
+		alchemyJsonRpcUrl: 'https://bnb-testnet.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://bnb-testnet.g.alchemy.com/v2'
 	}
 };
 

@@ -29,11 +29,16 @@ describe('EarningYearlyAmount', () => {
 
 		vi.spyOn(currencyExchange, 'currencyExchangeStore', 'get').mockReturnValue({
 			subscribe: (fn: (v: CurrencyExchangeData) => void) => {
-				fn({ currency: CurrencyEnum.USD, exchangeRateToUsd: 1 });
+				fn({
+					currency: CurrencyEnum.USD,
+					exchangeRateToUsd: 1,
+					exchangeRate24hChangeMultiplier: 1
+				});
 				return () => {};
 			},
 			setExchangeRateCurrency: vi.fn(),
-			setExchangeRate: vi.fn()
+			setExchangeRate: vi.fn(),
+			setExchangeRate24hChangeMultiplier: vi.fn()
 		} as CurrencyExchangeStore);
 
 		vi.spyOn(currencyDerived, 'currentCurrency', 'get').mockReturnValue({

@@ -27,10 +27,12 @@ describe('EarningPositionCard', () => {
 		vi.spyOn(currencyStore, 'currencyExchangeStore', 'get').mockReturnValue({
 			...staticStore({
 				currency: Currency.USD,
-				exchangeRateToUsd: 1
+				exchangeRateToUsd: 1,
+				exchangeRate24hChangeMultiplier: 1
 			}),
 			setExchangeRate: vi.fn(),
-			setExchangeRateCurrency: vi.fn()
+			setExchangeRateCurrency: vi.fn(),
+			setExchangeRate24hChangeMultiplier: vi.fn()
 		});
 
 		// formatCurrency mock

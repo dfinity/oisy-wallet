@@ -6,7 +6,7 @@ import { mockTokens } from '$tests/mocks/tokens.mock';
 export const mockOneUsd = 1;
 
 export const mockExchanges: ExchangesData = mockTokens.reduce<ExchangesData>((acc, token) => {
-	acc[token.id] = { usd: mockOneUsd };
+	acc[token.id] = { usd: mockOneUsd, usd_24h_change: 3.5 };
 	return acc;
 }, {});
 
