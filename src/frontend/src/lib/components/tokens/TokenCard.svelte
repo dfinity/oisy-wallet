@@ -158,9 +158,7 @@
 				{:else if !asNetwork && nonNullish(data.network)}
 					<span class="text-primary">{name}</span>
 					{#if name !== data.network.name}
-						<span class="font-normal">
 							{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
-						</span>
 					{/if}
 				{/if}
 			</span>
