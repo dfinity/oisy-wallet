@@ -19,7 +19,7 @@
 	import { format24hChangeInCurrency, formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		data: CardData;
@@ -80,6 +80,8 @@
 	let exchangeRateChangeSymbol = $derived(
 		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '▸' : '▾') : undefined
 	);
+
+	let name = $derived(getTokenDisplayName(data));
 </script>
 
 <div class="flex w-full flex-col">
@@ -159,7 +161,10 @@
 						{/if}{network}
 					{/each}
 				{:else if !asNetwork && nonNullish(data.network)}
-					{data.network.name}
+					<span class="text-primary">{name}</span>
+					{#if name !== data.network.name}
+						{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
+					{/if}
 				{/if}
 			</span>
 		{/snippet}
