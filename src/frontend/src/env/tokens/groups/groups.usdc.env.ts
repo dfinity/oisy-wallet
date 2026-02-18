@@ -9,6 +9,6 @@ export const USDC_TOKEN_GROUP_ID: TokenGroupId = parseTokenGroupId(USDC_TOKEN_GR
 export const USDC_TOKEN_GROUP: TokenGroupData = {
 	id: USDC_TOKEN_GROUP_ID,
 	icon: usdc,
-	name: 'USDC',
+	name: 'USD Coin',
 	symbol: USDC_TOKEN_GROUP_SYMBOL
 };
