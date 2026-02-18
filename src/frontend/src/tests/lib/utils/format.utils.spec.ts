@@ -3,6 +3,7 @@ import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import {
+	format24hChangeInCurrency,
 	formatCurrency,
 	formatNanosecondsToDate,
 	formatSecondsToDate,
@@ -1329,6 +1330,180 @@ describe('format.utils', () => {
 
 		it('parses stake apy number correctly if it is zero', () => {
 			expect(formatStakeApyNumber(0)).toEqual('0');
+		});
+	});
+
+	describe('format24hChangeInCurrency', () => {
+		const usdChangePct = 3.5;
+		const params = {
+			usdChangePct,
+			currency: Currency.USD,
+			exchangeRate: {
+				currency: Currency.USD,
+				exchangeRateToUsd: 1,
+				exchangeRate24hChangeMultiplier: 1
+			},
+			language: Languages.ENGLISH
+		};
+
+		it('should return undefined when currency mismatches exchange rate currency', () => {
+			expect(
+				format24hChangeInCurrency({
+					...params,
+					currency: Currency.EUR
+				})
+			).toBeUndefined();
+		});
+
+		it('should return undefined when exchangeRate24hChangeMultiplier is nullish', () => {
+			expect(
+				format24hChangeInCurrency({
+					...params,
+					exchangeRate: { ...params.exchangeRate, exchangeRate24hChangeMultiplier: null }
+				})
+			).toBeUndefined();
+		});
+
+		it('should return undefined when exchangeRate24hChangeMultiplier is 0', () => {
+			expect(
+				format24hChangeInCurrency({
+					...params,
+					exchangeRate: { ...params.exchangeRate, exchangeRate24hChangeMultiplier: 0 }
+				})
+			).toBeUndefined();
+		});
+
+		it('should return sign=zero and formats absolute with two decimals for 0', () => {
+			const result = format24hChangeInCurrency({
+				...params,
+				usdChangePct: 0
+			});
+
+			expect(result).toEqual({ formattedAbs: '0.00%', sign: 'zero' });
+		});
+
+		it('should treat -0 as zero', () => {
+			const minusZero = -0;
+
+			const result = format24hChangeInCurrency({
+				...params,
+				usdChangePct: minusZero
+			});
+
+			expect(result).toEqual({ formattedAbs: '0.00%', sign: 'zero' });
+		});
+
+		it('should formats <10% with two decimals and returns positive sign', () => {
+			const result = format24hChangeInCurrency({
+				...params,
+				usdChangePct: 6.456
+			});
+
+			expect(result).toEqual({ formattedAbs: '6.46%', sign: 'positive' });
+		});
+
+		it('should formats <10% with two decimals and returns negative sign', () => {
+			const result = format24hChangeInCurrency({
+				...params,
+				usdChangePct: -6.456
+			});
+
+			expect(result).toEqual({ formattedAbs: '6.46%', sign: 'negative' });
+		});
+
+		it('should formats >=10% and <100% with one decimal', () => {
+			const result = format24hChangeInCurrency({
+				...params,
+				usdChangePct: 10
+			});
+
+			expect(result).toEqual({ formattedAbs: '10.0%', sign: 'positive' });
+		});
+
+		it('should formats >=100% with no decimals', () => {
+			const result = format24hChangeInCurrency({
+				...params,
+				usdChangePct: 100.4
+			});
+
+			expect(result).toEqual({ formattedAbs: '100%', sign: 'positive' });
+		});
+
+		it('should round correctly for >=100% with no decimals', () => {
+			const result = format24hChangeInCurrency({
+				...params,
+				usdChangePct: 100.5
+			});
+
+			expect(result).toEqual({ formattedAbs: '101%', sign: 'positive' });
+		});
+
+		it('boundary: 9.999% stays in the two-decimal bucket (even if rounds to 10.00%)', () => {
+			const result = format24hChangeInCurrency({
+				...params,
+				usdChangePct: 9.999
+			});
+
+			expect(result).toEqual({ formattedAbs: '10.00%', sign: 'positive' });
+		});
+
+		it('boundary: 99.99% stays in the one-decimal bucket (even if rounds to 100.0%)', () => {
+			const result = format24hChangeInCurrency({
+				...params,
+				usdChangePct: 99.99
+			});
+
+			expect(result).toEqual({ formattedAbs: '100.0%', sign: 'positive' });
+		});
+
+		it('should compute currency change when exchange rate multiplier differs from 1', () => {
+			// usdMultiplier = 1.10
+			// currencyMultiplier = 1.10 / 1.05 = 1.047619...
+			// pct = 4.7619... => 4.76% (two decimals bucket)
+			const result = format24hChangeInCurrency({
+				...params,
+				usdChangePct: 10,
+				exchangeRate: {
+					...params.exchangeRate,
+					currency: Currency.USD,
+					exchangeRate24hChangeMultiplier: 1.05
+				}
+			});
+
+			expect(result).toEqual({ formattedAbs: '4.76%', sign: 'positive' });
+		});
+
+		it('should compute negative currency change when exchange rate moves more than USD', () => {
+			// usdMultiplier = 1.01
+			// currencyMultiplier = 1.01 / 1.05 = 0.961904...
+			// pct = -3.8095... => 3.81% (two decimals bucket), negative sign
+			const result = format24hChangeInCurrency({
+				...params,
+				usdChangePct: 1,
+				exchangeRate: {
+					...params.exchangeRate,
+					currency: Currency.USD,
+					exchangeRate24hChangeMultiplier: 1.05
+				}
+			});
+
+			expect(result).toEqual({ formattedAbs: '3.81%', sign: 'negative' });
+		});
+
+		it('should format 0.001% with two decimals for both signs', () => {
+			expect(
+				format24hChangeInCurrency({
+					...params,
+					usdChangePct: 0.001
+				})
+			).toEqual({ formattedAbs: '0.00%', sign: 'zero' });
+
+			expect(
+				format24hChangeInCurrency({
+					...params,
+					usdChangePct: -0.001
+				})
+			).toEqual({ formattedAbs: '0.00%', sign: 'zero' });
 		});
 	});
 });

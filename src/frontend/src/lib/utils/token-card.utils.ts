@@ -15,7 +15,8 @@ export const mapHeaderData = ({
 	decimals,
 	balance,
 	usdBalance,
-	usdPrice
+	usdPrice,
+	usdPriceChangePercentage24h
 }: TokenUiGroup): CardData => ({
 	name,
 	symbol,
@@ -26,6 +27,7 @@ export const mapHeaderData = ({
 	balance,
 	usdBalance,
 	usdPrice,
+	usdPriceChangePercentage24h,
 	tokenCount: tokens.length
 });
 

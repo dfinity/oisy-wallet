@@ -73,6 +73,18 @@ describe('currency-exchange.store', () => {
 
 				expect(get(mockStore).exchangeRateToUsd).toBe(1);
 			});
+
+			it('should reset the 24h change multiplier when the exchange rate currency is changed', () => {
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBeNull();
+
+				mockStore.setExchangeRate24hChangeMultiplier(2);
+
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBe(2);
+
+				mockStore.setExchangeRateCurrency(Currency.EUR);
+
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBeNull();
+			});
 		});
 
 		describe('setExchangeRate', () => {
@@ -96,6 +108,32 @@ describe('currency-exchange.store', () => {
 				expect(get(mockStore).currency).toEqual(Currency.USD);
 
 				mockStore.setExchangeRate(101);
+
+				expect(get(mockStore).currency).toEqual(Currency.USD);
+			});
+		});
+
+		describe('setExchangeRate24hChangeMultiplier', () => {
+			it('should set the exchange rate 24h change multiplier', () => {
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBeNull();
+
+				mockStore.setExchangeRate24hChangeMultiplier(1.5);
+
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBe(1.5);
+
+				mockStore.setExchangeRate24hChangeMultiplier(101);
+
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBe(101);
+			});
+
+			it('should not change the currency', () => {
+				expect(get(mockStore).currency).toEqual(Currency.USD);
+
+				mockStore.setExchangeRate24hChangeMultiplier(1.5);
+
+				expect(get(mockStore).currency).toEqual(Currency.USD);
+
+				mockStore.setExchangeRate24hChangeMultiplier(101);
 
 				expect(get(mockStore).currency).toEqual(Currency.USD);
 			});

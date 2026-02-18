@@ -5,6 +5,9 @@ import { writable, type Readable } from 'svelte/store';
 export interface CurrencyExchangeStore extends Readable<CurrencyExchangeData> {
 	setExchangeRateCurrency: (currency: CurrencyExchangeData['currency']) => void;
 	setExchangeRate: (exchangeRate: CurrencyExchangeData['exchangeRateToUsd']) => void;
+	setExchangeRate24hChangeMultiplier: (
+		exchangeRate24hChangeMultiplier: CurrencyExchangeData['exchangeRate24hChangeMultiplier']
+	) => void;
 }
 
 // Since the currencyStore is a type of storage store, we cannot use it in the workers (no browser API support), especially in the one that updates the exchange rate of the current currency.
@@ -29,6 +32,9 @@ export const initCurrencyExchangeStore = (): CurrencyExchangeStore => {
 		},
 		setExchangeRate: (exchangeRate: CurrencyExchangeData['exchangeRateToUsd']) =>
 			update((state) => ({ ...state, exchangeRateToUsd: exchangeRate })),
+		setExchangeRate24hChangeMultiplier: (
+			exchangeRate24hChangeMultiplier: CurrencyExchangeData['exchangeRate24hChangeMultiplier']
+		) => update((state) => ({ ...state, exchangeRate24hChangeMultiplier })),
 		subscribe
 	};
 };
