@@ -6,6 +6,7 @@ import {
 	USDC_TOKEN
 } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdt.env';
+import { WBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.wbtc.env';
 import { WETH_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.weth.env';
 import { ZCHF_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.zchf.env';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
@@ -18,6 +19,7 @@ const ARBITRUM_ERC20_TOKENS_MAINNET: RequiredEvmErc20Token[] = [
 	USDT_TOKEN,
 	ARB_TOKEN,
 	BONK_TOKEN,
+	WBTC_TOKEN,
 	WETH_TOKEN,
 	ZCHF_TOKEN
 ];

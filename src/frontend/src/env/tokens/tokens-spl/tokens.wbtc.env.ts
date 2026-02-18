@@ -1,9 +1,10 @@
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.wbtc.env';
 import wbtc from '$eth/assets/wbtc.webp';
-import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import type { RequiredSplToken } from '$sol/types/spl';
 
 export const WBTC_DECIMALS = 8;
 
@@ -11,20 +12,19 @@ export const WBTC_SYMBOL = 'WBTC';
 
 export const WBTC_TOKEN_ID: TokenId = parseTokenId(WBTC_SYMBOL);
 
-export const WBTC_TOKEN: RequiredErc20Token = {
+export const WBTC_TOKEN: RequiredSplToken = {
 	id: WBTC_TOKEN_ID,
-	network: ETHEREUM_NETWORK,
-	standard: { code: 'erc20' },
+	network: SOLANA_MAINNET_NETWORK,
+	standard: { code: 'spl' },
 	category: 'default',
 	name: 'Wrapped BTC',
 	symbol: WBTC_SYMBOL,
 	decimals: WBTC_DECIMALS,
 	icon: wbtc,
-	address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-	twinTokenSymbol: 'ckWBTC',
+	address: '5XZw2LKTyrfvfiskJ78AMpackRjPcyCif1WhUsPDuVqQ',
+	owner: TOKEN_PROGRAM_ADDRESS,
 	groupData: WBTC_TOKEN_GROUP,
-	neverCollapseInTokenGroup: true,
 	buy: {
-		onramperId: 'wbtc_ethereum'
+		onramperId: 'wbtc_solana'
 	}
 };
