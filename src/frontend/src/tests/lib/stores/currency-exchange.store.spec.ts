@@ -73,6 +73,18 @@ describe('currency-exchange.store', () => {
 
 				expect(get(mockStore).exchangeRateToUsd).toBe(1);
 			});
+
+			it('should reset the 24h change multiplier when the exchange rate currency is changed', () => {
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBeNull();
+
+				mockStore.setExchangeRate24hChangeMultiplier(2);
+
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBe(2);
+
+				mockStore.setExchangeRateCurrency(Currency.EUR);
+
+				expect(get(mockStore).exchangeRate24hChangeMultiplier).toBeNull();
+			});
 		});
 
 		describe('setExchangeRate', () => {
