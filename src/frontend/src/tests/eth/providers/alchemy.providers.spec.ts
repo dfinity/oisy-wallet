@@ -14,6 +14,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
+import { mockEthTransaction } from '$tests/mocks/eth-transactions.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import {
@@ -24,12 +25,37 @@ import {
 	type OwnedNftsResponse
 } from 'alchemy-sdk';
 import { SvelteMap } from 'svelte/reactivity';
+import * as viemMod from 'viem';
+import { createPublicClient, http, type PublicClient } from 'viem';
+import type { MockInstance } from 'vitest';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
 		Alchemy: vi.fn()
+	};
+});
+
+vi.mock(import('viem'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	const mockWaitForTransactionReceipt = vi.fn();
+	const mockGetTransaction = vi.fn();
+
+	const mockPublicClient = {
+		waitForTransactionReceipt: mockWaitForTransactionReceipt,
+		getTransaction: mockGetTransaction
+	} as unknown as PublicClient;
+
+	return {
+		...actual,
+		createPublicClient: vi.fn().mockReturnValue(mockPublicClient),
+		http: vi.fn().mockImplementation((url) => url),
+		__mocks: {
+			mockWaitForTransactionReceipt,
+			mockGetTransaction
+		}
 	};
 });
 
@@ -45,11 +71,113 @@ describe('alchemy.providers', () => {
 	it('should create the correct map of providers', () => {
 		expect(Alchemy).toHaveBeenCalledTimes(networks.length);
 
-		networks.forEach(({ providers: { alchemy: _, alchemyDeprecated } }, index) => {
-			expect(Alchemy).toHaveBeenNthCalledWith(index + 1, {
-				apiKey: ALCHEMY_API_KEY,
-				network: alchemyDeprecated
+		networks.forEach(
+			({ providers: { alchemy: _, alchemyDeprecated, alchemyJsonRpcUrl, viemChain } }, index) => {
+				expect(Alchemy).toHaveBeenNthCalledWith(index + 1, {
+					apiKey: ALCHEMY_API_KEY,
+					network: alchemyDeprecated
+				});
+
+				expect(http).toHaveBeenNthCalledWith(index + 1, `${alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`);
+				expect(createPublicClient).toHaveBeenNthCalledWith(index + 1, {
+					chain: viemChain,
+					transport: `${alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`
+				});
+			}
+		);
+	});
+
+	describe('wait', () => {
+		let mockWaitForTransactionReceipt: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			({ mockWaitForTransactionReceipt } = (
+				viemMod as unknown as {
+					__mocks: { mockWaitForTransactionReceipt: ReturnType<typeof vi.fn> };
+				}
+			).__mocks);
+
+			mockWaitForTransactionReceipt.mockResolvedValue({ status: 'success' });
+		});
+
+		it('should wait for the transaction receipt', async () => {
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			await provider.wait(mockEthAddress);
+
+			expect(mockWaitForTransactionReceipt).toHaveBeenCalledExactlyOnceWith({
+				hash: mockEthAddress
 			});
+		});
+
+		it('should throw an error if the input is not an hash', async () => {
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			await expect(provider.wait('notAnHash')).rejects.toThrowError(
+				'Invalid transaction hash while waiting for transaction receipt: notAnHash'
+			);
+		});
+	});
+
+	describe('getTransaction', () => {
+		let mockGetTransaction: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			({ mockGetTransaction } = (
+				viemMod as unknown as {
+					__mocks: { mockGetTransaction: ReturnType<typeof vi.fn> };
+				}
+			).__mocks);
+
+			mockGetTransaction.mockResolvedValue({
+				...mockEthTransaction,
+				blockNumber: 123n,
+				gas: 21000n,
+				input: '0x123456789'
+			});
+		});
+
+		it('should return the transaction details', async () => {
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			const transaction = await provider.getTransaction(mockEthAddress);
+
+			expect(transaction).toStrictEqual({
+				...mockEthTransaction,
+				blockNumber: 123,
+				gasLimit: 21000n,
+				data: '0x123456789'
+			});
+
+			expect(mockGetTransaction).toHaveBeenCalledExactlyOnceWith({
+				hash: mockEthAddress
+			});
+		});
+
+		it('should handle a nullish response', async () => {
+			mockGetTransaction.mockResolvedValue(undefined);
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			const transaction = await provider.getTransaction(mockEthAddress);
+
+			expect(transaction).toBeUndefined();
+
+			expect(mockGetTransaction).toHaveBeenCalledExactlyOnceWith({
+				hash: mockEthAddress
+			});
+		});
+
+		it('should throw an error if the input is not an hash', async () => {
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			await expect(provider.getTransaction('notAnHash')).rejects.toThrowError(
+				'Invalid transaction hash while fetching transaction details: notAnHash'
+			);
 		});
 	});
 
@@ -670,7 +798,7 @@ describe('alchemy.providers', () => {
 				expect(provider).toBeInstanceOf(AlchemyProvider);
 
 				expect(provider).toHaveProperty('deprecatedProvider');
-				expect(provider).not.toHaveProperty('provider');
+				expect(provider).toHaveProperty('provider');
 			});
 		});
 

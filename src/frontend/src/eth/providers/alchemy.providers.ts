@@ -35,7 +35,7 @@ import {
 import type { Listener } from 'ethers/utils';
 import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
-import { createPublicClient, http, isHash, type Chain } from 'viem';
+import { type PublicClient, createPublicClient, http, isHash, type Chain } from 'viem';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'> & {
 	wssUrl: string;
@@ -295,7 +295,7 @@ const updateCachedContractMetadata = ({
 };
 
 export class AlchemyProvider {
-	private readonly provider;
+	private readonly provider: PublicClient;
 	/**
 	 * TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
 	 * @deprecated This approach works for now but does not align with the new architectural requirements.
