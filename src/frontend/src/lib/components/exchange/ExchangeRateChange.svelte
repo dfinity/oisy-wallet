@@ -58,7 +58,7 @@
 		</span>
 		{formattedExchangeRateChange}
 		{#if nonNullish(parsedTimeFrame)}
-			<span class="sm:text-[11px] text-[9px]">{`(${parsedTimeFrame})`}</span>
+			<span class="text-[9px] sm:text-[11px]">{`(${parsedTimeFrame})`}</span>
 		{/if}
 	</span>
 {/if}
