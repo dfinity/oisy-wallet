@@ -80,7 +80,8 @@ const mapNewTokenGroup = (token: TokenUiGroupable): TokenUiGroup => ({
 	tokens: [token],
 	balance: token.balance,
 	usdBalance: token.usdBalance,
-	usdPrice: token.usdPrice
+	usdPrice: token.usdPrice,
+	usdPriceChangePercentage24h: token.usdPriceChangePercentage24h
 });
 
 interface GroupTokenParams {
