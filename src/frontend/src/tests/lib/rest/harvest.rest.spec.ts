@@ -77,9 +77,7 @@ describe('Harvest REST client', () => {
 					})
 			} as unknown as Response);
 
-			await expect(fetchHarvestVaults()).rejects.toThrowError(
-				'Invalid Harvest vaults response.'
-			);
+			await expect(fetchHarvestVaults()).rejects.toThrowError('Invalid Harvest vaults response.');
 		});
 
 		it('returns an empty array when all networks are empty', async () => {
