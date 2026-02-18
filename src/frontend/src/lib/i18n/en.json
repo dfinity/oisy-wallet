@@ -417,11 +417,6 @@
 				"one_liner": "A Solana-native liquid staking protocol with instant swaps between LSTs and tools for launching your own.",
 				"description": "Sanctum is a liquid staking infrastructure protocol on Solana enabling instant, slippage-free swaps between liquid staking tokens (LSTs). It supports ecosystem growth by allowing new LSTs to tap into shared liquidity, and offers tools for issuing branded tokens with automated minting and redemption. The platform’s Infinity pool, Router, and Reserve systems help deliver deep liquidity, composability, and safety across the staking landscape."
 			},
-			"ostrich": {
-				"name": "Ostrich",
-				"one_liner": "An on-chain global orderbook built on Arbitrum for trading real-world assets—equities (U.S., China, Germany, UK), metals, forex, commodities, and crypto—all directly from your wallet with no custodians, brokers, or sign‑ups.",
-				"description": "Ostrich is a decentralized global orderbook on Arbitrum, allowing users to trade tokenized real-world assets like equities, metals, forex, and commodities directly from their wallets. It removes the need for brokers, custodians, or KYC, enabling 24/7 global market access. Users can trade both crypto and traditional assets trustlessly using decentralized infrastructure."
-			},
 			"sphere_finance": {
 				"name": "Sphere Finance",
 				"one_liner": "A meta‑governance DeFi protocol focused on governance acquisition, treasury yield farming, and building linked yield‑generating tools around the $SPHERE token.",
