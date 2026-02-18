@@ -427,11 +427,6 @@
 				"one_liner": "Here’s a compact, image‑length–style description for Binaryx, designed to fit the same format and brevity as your image example",
 				"description": "BinaryX is a tokenized real estate investment platform offering fractional ownership and passive income from global properties. Investors can buy into legally structured DAO-LLCs representing rental or off-plan real estate starting from just $50. Yield is distributed from rental income or asset appreciation, and properties can be traded on a secondary marketplace."
 			},
-			"realt": {
-				"name": "RealT",
-				"one_liner": "Fractional and frictionless real estate investing",
-				"description": "RealT lets investors buy fractional ownership of real estate properties—using digital tokens on Ethereum or related chains—to access income from rents and property appreciation with much lower minimum entry (as low as ~$50). Properties are legally held via LLCs, and token holders receive asset income (rent distributions) regularly; the tokens also allow secondary trading, making property ownership more accessible, liquid, and global. By combining legal real estate ownership, blockchain tokenization, and yield distribution, RealT aims to democratize property investment and remove traditional barriers of high cost, management, and geographic restrictions."
-			},
 			"parcl": {
 				"name": "Parcl",
 				"one_liner": "A Solana‑based perpetuals exchange offering synthetic real‑estate markets—trade real‑estate price indexes with cross‑margin and LP‑backed liquidity.",

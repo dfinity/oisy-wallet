@@ -538,21 +538,6 @@
 		"screenshots": ["/images/dapps/binaryx-screenshot.webp"]
 	},
 	{
-		"id": "realt",
-		"name": "dapps.descriptions.realt.name",
-		"oneLiner": "dapps.descriptions.realt.one_liner",
-		"website": "https://realt.co/",
-		"twitter": "https://twitter.com/RealTPlatform",
-		"discord": "https://discord.gg/aPSWyGxMUk",
-		"telegram": "https://t.me/Realtoken_welcome",
-		"tags": ["dapps.categories.rwa", "dapps.categories.aa_new"],
-		"description": "dapps.descriptions.realt.description",
-		"usesInternetIdentity": false,
-		"stats": "",
-		"logo": "/images/dapps/realt-logo.webp",
-		"screenshots": ["/images/dapps/realt-screenshot.webp"]
-	},
-	{
 		"id": "parcl",
 		"name": "dapps.descriptions.parcl.name",
 		"oneLiner": "dapps.descriptions.parcl.one_liner",
