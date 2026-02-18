@@ -187,7 +187,7 @@
 				<Back color="current" onlyArrow />
 
 				<div
-					class="my-0.5 flex w-full min-w-0 flex-row items-center justify-between gap-4 overflow-hidden text-md text-nowrap"
+					class="text-md my-0.5 flex w-full min-w-0 flex-row items-center justify-between gap-4 overflow-hidden text-nowrap"
 				>
 					{#if nonNullish(pageTokenUi)}
 						<div class="flex flex-row items-center justify-center gap-2" in:fade>
@@ -213,10 +213,10 @@
 							</span>
 
 							<span
-								class="text-sm rounded px-1"
+								class="rounded px-1 text-sm"
+								class:bg-error-subtle-30={exchangeRateChangeSign === 'negative'}
 								class:text-error-primary={exchangeRateChangeSign === 'negative'}
 								class:text-success-primary={exchangeRateChangeSign === 'positive'}
-								class:bg-error-subtle-30={exchangeRateChangeSign === 'negative'}
 								class:text-tertiary={exchangeRateChangeSign === 'zero'}
 							>
 								<span
