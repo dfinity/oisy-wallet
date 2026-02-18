@@ -111,18 +111,21 @@
 		{#snippet subtitle()}
 			<span class:ml-2={!asNetwork} class:text-sm={asNetwork}>
 				{#if !asNetwork}
-						{formattedExchangeRate}
+					{formattedExchangeRate}
+					<span
+						class="ml-1 text-sm"
+						class:text-error-primary={exchangeRateChangeSign === 'negative'}
+						class:text-success-primary={exchangeRateChangeSign === 'positive'}
+						class:text-tertiary={exchangeRateChangeSign === 'zero'}
+					>
 						<span
-							class="text-sm ml-1"
-							class:text-error-primary={exchangeRateChangeSign === 'negative'}
-							class:text-success-primary={exchangeRateChangeSign === 'positive'}
-							class:text-tertiary={exchangeRateChangeSign === 'zero'}
+							class="inline-block transform"
+							class:rotate-180={exchangeRateChangeSign === 'positive'}
 						>
-							<span class="transform inline-block" class:rotate-180={exchangeRateChangeSign === 'positive'} >
-								{exchangeRateChangeSymbol}
-							</span>
-							{formattedExchangeRateChange}
+							{exchangeRateChangeSymbol}
 						</span>
+						{formattedExchangeRateChange}
+					</span>
 				{/if}
 			</span>
 		{/snippet}
