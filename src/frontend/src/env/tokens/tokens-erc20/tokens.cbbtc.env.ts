@@ -1,7 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { CBBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.cbbtc.env';
-import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import cbbtc from '$eth/assets/cbbtc.webp';
+import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
