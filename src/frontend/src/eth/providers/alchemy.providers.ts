@@ -313,6 +313,10 @@ export class AlchemyProvider {
 			network: this.network
 		});
 
+		// The `ethers` library is currently not accepting the BSC network, so we cannot use it as a provider for all our networks.
+		// There is an issue open with `ethers` to add support for BSC: https://github.com/ethers-io/ethers.js/issues/5040
+		// We decided to add `viem` instead which can be used for all EVM networks, in the meanwhile.
+		// TODO: Rely on a single library for the provider, and remove the deprecated one.
 		this.provider = createPublicClient({
 			chain: this.viemChain,
 			transport: http(`${this.alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`)
