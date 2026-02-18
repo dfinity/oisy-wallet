@@ -56,7 +56,7 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 		alchemyDeprecated: Network.BNB_TESTNET,
 		alchemyJsonRpcUrl: 'https://bnb-testnet.g.alchemy.com/v2',
 		alchemyWsUrl: 'wss://bnb-testnet.g.alchemy.com/v2',
-    		viemChain: bscTestnet
+		viemChain: bscTestnet
 	}
 };
 

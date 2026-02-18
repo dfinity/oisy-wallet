@@ -33,7 +33,7 @@ export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
 		alchemyDeprecated: Network.ARB_MAINNET,
 		alchemyJsonRpcUrl: 'https://arb-mainnet.g.alchemy.com/v2',
 		alchemyWsUrl: 'wss://arb-mainnet.g.alchemy.com/v2',
-    		viemChain: arbitrum
+		viemChain: arbitrum
 	},
 	exchange: { coingeckoId: 'arbitrum-one' },
 	buy: { onramperId: 'arbitrum' },
@@ -60,7 +60,7 @@ export const ARBITRUM_SEPOLIA_NETWORK: EthereumNetwork = {
 		alchemyDeprecated: Network.ARB_SEPOLIA,
 		alchemyJsonRpcUrl: 'https://arb-sepolia.g.alchemy.com/v2',
 		alchemyWsUrl: 'wss://arb-sepolia.g.alchemy.com/v2',
-    		viemChain: arbitrumSepolia
+		viemChain: arbitrumSepolia
 	}
 };
 
