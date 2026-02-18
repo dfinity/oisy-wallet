@@ -33,7 +33,7 @@
 	);
 </script>
 
-{#if nonNullish(usdPriceChangePercentage24h)}
+{#if nonNullish(parsedExchangeRateChange)}
 	<span
 		class="text-sm"
 		class:text-error-primary={exchangeRateChangeSign === 'negative'}
