@@ -509,20 +509,6 @@
 		"screenshots": ["/images/dapps/sanctum-screenshot.webp"]
 	},
 	{
-		"id": "ostrich",
-		"name": "dapps.descriptions.ostrich.name",
-		"oneLiner": "dapps.descriptions.ostrich.one_liner",
-		"website": "https://app.ostrich.exchange/",
-		"discord": "https://discord.gg/BntNDR2zsD",
-		"twitter": "https://x.com/ostrich_hq",
-		"tags": ["dapps.categories.defi", "dapps.categories.aa_new"],
-		"description": "dapps.descriptions.ostrich.description",
-		"usesInternetIdentity": false,
-		"stats": "",
-		"logo": "/images/dapps/ostrich-logo.png",
-		"screenshots": ["/images/dapps/ostrich-screenshot.webp"]
-	},
-	{
 		"id": "sphere-finance",
 		"name": "dapps.descriptions.sphere_finance.name",
 		"oneLiner": "dapps.descriptions.sphere_finance.one_liner",
