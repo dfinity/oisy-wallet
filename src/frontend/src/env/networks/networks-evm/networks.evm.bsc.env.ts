@@ -7,6 +7,7 @@ import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
+import { bsc, bscTestnet } from 'viem/chains';
 
 export const BSC_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_BSC_MAINNET_DISABLED
@@ -29,7 +30,8 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 		alchemy: 'bnb',
 		alchemyDeprecated: Network.BNB_MAINNET,
 		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2',
-		alchemyWsUrl: 'wss://bnb-mainnet.g.alchemy.com/v2'
+		alchemyWsUrl: 'wss://bnb-mainnet.g.alchemy.com/v2',
+		viemChain: bsc
 	},
 	exchange: { coingeckoId: 'binance-smart-chain' },
 	buy: { onramperId: 'bsc' },
@@ -53,7 +55,8 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 		alchemy: 'bnbt',
 		alchemyDeprecated: Network.BNB_TESTNET,
 		alchemyJsonRpcUrl: 'https://bnb-testnet.g.alchemy.com/v2',
-		alchemyWsUrl: 'wss://bnb-testnet.g.alchemy.com/v2'
+		alchemyWsUrl: 'wss://bnb-testnet.g.alchemy.com/v2',
+		viemChain: bscTestnet
 	}
 };
 

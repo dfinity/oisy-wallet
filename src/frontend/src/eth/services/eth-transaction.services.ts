@@ -65,7 +65,7 @@ const processPendingTransaction = async ({
 		network: { id: networkId }
 	} = token;
 
-	const { getTransaction } = alchemyProviders(networkId);
+	const { getTransaction, wait } = alchemyProviders(networkId);
 	const transaction = await getTransaction(hash);
 
 	if (isNullish(transaction)) {
@@ -101,9 +101,7 @@ const processPendingTransaction = async ({
 		]
 	});
 
-	const { wait } = transaction;
-
-	await wait();
+	await wait(hash);
 
 	await processMinedTransaction({ token });
 };

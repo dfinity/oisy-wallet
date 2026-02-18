@@ -95,6 +95,7 @@
 		"ethers": "^6.16.0",
 		"idb-keyval": "^6.2.2",
 		"svelte-confetti": "^2.3.2",
+		"viem": "^2.45.3",
 		"zod": "^4.3.5"
 	},
 	"devDependencies": {
