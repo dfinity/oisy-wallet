@@ -20,6 +20,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
 	import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import ExchangeRateChange from "$lib/components/exchange/ExchangeRateChange.svelte";
 
 	interface Props {
 		data: CardData;
@@ -119,20 +120,7 @@
 			>
 				{#if !asNetwork}
 					{formattedExchangeRate}
-					<span
-						class="text-sm"
-						class:text-error-primary={exchangeRateChangeSign === 'negative'}
-						class:text-success-primary={exchangeRateChangeSign === 'positive'}
-						class:text-tertiary={exchangeRateChangeSign === 'zero'}
-					>
-						<span
-							class="inline-block transform"
-							class:rotate-180={exchangeRateChangeSign === 'positive'}
-						>
-							{exchangeRateChangeSymbol}
-						</span>
-						{formattedExchangeRateChange}
-					</span>
+					<ExchangeRateChange {usdPriceChangePercentage24h} />
 				{/if}
 			</span>
 		{/snippet}
