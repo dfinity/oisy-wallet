@@ -190,7 +190,7 @@
 								{formattedExchangeRate}
 							</span>
 
-							<ExchangeRateChange {usdPriceChangePercentage24h} />
+							<ExchangeRateChange {usdPriceChangePercentage24h} withBackground timeFrame="24h" />
 						</div>
 					{:else}
 						<SkeletonLogo size="small" />
