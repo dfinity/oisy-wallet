@@ -35,7 +35,7 @@ import {
 import type { Listener } from 'ethers/utils';
 import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
-import { type PublicClient, createPublicClient, http, isHash, type Chain } from 'viem';
+import { createPublicClient, http, isHash, type Chain, type PublicClient } from 'viem';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'> & {
 	wssUrl: string;
