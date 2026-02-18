@@ -2,7 +2,7 @@ import cbbtc from '$eth/assets/cbbtc.webp';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 
-const CBBTC_TOKEN_GROUP_SYMBOL = 'CBBTC';
+const CBBTC_TOKEN_GROUP_SYMBOL = 'cbBTC';
 
 export const CBBTC_TOKEN_GROUP_ID: TokenGroupId = parseTokenGroupId(CBBTC_TOKEN_GROUP_SYMBOL);
 
