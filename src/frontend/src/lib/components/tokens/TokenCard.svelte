@@ -160,7 +160,7 @@
 				{:else if !asNetwork && nonNullish(data.network)}
 					<span class="text-primary">{name}</span>
 					{#if name !== data.network.name}
-							{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
+						{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
 					{/if}
 				{/if}
 			</span>
