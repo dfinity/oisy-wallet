@@ -75,7 +75,8 @@
 					value: usdPrice,
 					currency: $currentCurrency,
 					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
+					language: $currentLanguage,
+			useMinSignificantDigits: true
 				})
 			: undefined
 	);
