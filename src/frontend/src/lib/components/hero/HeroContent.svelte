@@ -165,20 +165,20 @@
 				<Back color="current" onlyArrow />
 
 				<div
-					class="sm:text-md my-0.5 flex w-full min-w-0 flex-row items-center justify-between gap-4 text-sm text-nowrap"
+					class="sm:text-md my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-sm text-nowrap"
 				>
 					{#if nonNullish(pageTokenUi)}
-						<div class="flex flex-row items-center justify-center gap-1 sm:gap-2" in:fade>
+						<div class="flex min-w-0 items-center justify-center gap-1 sm:gap-2" in:fade>
 							<TokenLogo data={pageTokenUi} logoSize="sm" ring />
 
 							<div class="flex flex-col text-left">
-								<span class="font-semibold">
+								<span class="font-semibold truncate">
 									{getTokenDisplayName(pageTokenUi)}
 								</span>
 
-								<div class="flex flex-row items-center justify-center gap-1">
+								<div class="flex items-center justify-center gap-1">
 									<NetworkLogo network={pageTokenUi.network} size="xxs" transparent />
-									<span class="text-xs sm:text-sm">
+									<span class="text-xs sm:text-sm truncate">
 										{pageTokenUi.network.name}
 									</span>
 								</div>
