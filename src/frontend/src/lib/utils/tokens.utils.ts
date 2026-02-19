@@ -38,6 +38,8 @@ import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
+/*eslint no-unused-vars: "off"*/
+
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
  *
