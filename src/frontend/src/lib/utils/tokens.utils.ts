@@ -12,8 +12,8 @@ import {
 	isTokenIcrc,
 	isTokenIcrcCustomToken
 } from '$icp/utils/icrc.utils';
-import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
-import { LOCAL, ZERO } from '$lib/constants/app.constants';
+import { isIcCkToken } from '$icp/validation/ic-token.validation';
+import { LOCAL } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -23,7 +23,7 @@ import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { StakeBalances } from '$lib/types/stake-balance';
-import type { Token, TokenId, TokenToPin } from '$lib/types/token';
+import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -53,9 +53,7 @@ export const sortTokens = <T extends Token>({
 	$tokens: T[];
 	$exchanges: ExchangesData;
 	$tokensToPin: TokenToPin[];
-}): T[] => {
-	return [...$tokens];
-};
+}): T[] => [...$tokens];
 
 /**
  * Pins tokens by USD value, balance and name.
@@ -82,11 +80,7 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 	$balances: CertifiedStoreData<BalancesData>;
 	$stakeBalances: StakeBalances;
 	$exchanges: ExchangesData;
-}): TokenUi<T>[] => {
-
-	return $tokens.map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges }));
-	
-};
+}): TokenUi<T>[] => $tokens.map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges }));
 
 /**
  * Calculates total USD balance of the provided UI tokens list.
