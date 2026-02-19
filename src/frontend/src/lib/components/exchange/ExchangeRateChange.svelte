@@ -32,7 +32,7 @@
 	);
 
 	let exchangeRateChangeSymbol = $derived(
-		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '▸' : '⏷') : undefined
+		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '⏵' : '⏷') : undefined
 	);
 
 	let parsedTimeFrame = $derived(

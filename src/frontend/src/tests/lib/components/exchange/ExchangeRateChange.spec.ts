@@ -64,7 +64,7 @@ describe('ExchangeRateChange', () => {
 
 		expect(getByText('0.00%')).toBeInTheDocument();
 
-		expect(getByText('▸')).toBeInTheDocument();
+		expect(getByText('⏵')).toBeInTheDocument();
 	});
 
 	it('should render the proper background', async () => {
