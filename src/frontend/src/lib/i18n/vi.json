@@ -2023,6 +2023,9 @@
 			"minute_plural": "phút",
 			"second": "giây",
 			"second_plural": "giây"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

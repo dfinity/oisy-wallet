@@ -34,7 +34,7 @@ describe('ExchangeRateChange', () => {
 
 		expect(getByText('1.23%')).toBeInTheDocument();
 
-		const symbol = getByText('▾');
+		const symbol = getByText('⏷');
 
 		expect(symbol).toBeInTheDocument();
 		expect(symbol).toHaveClass('rotate-180');
@@ -49,7 +49,7 @@ describe('ExchangeRateChange', () => {
 
 		expect(getByText('123%')).toBeInTheDocument();
 
-		const symbol = getByText('▾');
+		const symbol = getByText('⏷');
 
 		expect(symbol).toBeInTheDocument();
 		expect(symbol).not.toHaveClass('rotate-180');
@@ -64,6 +64,35 @@ describe('ExchangeRateChange', () => {
 
 		expect(getByText('0.00%')).toBeInTheDocument();
 
-		expect(getByText('▸')).toBeInTheDocument();
+		expect(getByText('⏵')).toBeInTheDocument();
+	});
+
+	it('should render the proper background', async () => {
+		const { getByText, rerender } = render(ExchangeRateChange, {
+			props: {
+				usdPriceChangePercentage24h: 1.23456,
+				withBackground: true
+			}
+		});
+
+		expect(getByText('1.23%')).toHaveClass('bg-success-subtle-30');
+
+		await rerender({
+			usdPriceChangePercentage24h: -123.456,
+			withBackground: true
+		});
+
+		expect(getByText('123%')).toHaveClass('bg-error-subtle-30');
+	});
+
+	it('should render the time-frame', () => {
+		const { getByText } = render(ExchangeRateChange, {
+			props: {
+				usdPriceChangePercentage24h: 1.23456,
+				timeFrame: '24h'
+			}
+		});
+
+		expect(getByText('(24h)')).toBeInTheDocument();
 	});
 });
