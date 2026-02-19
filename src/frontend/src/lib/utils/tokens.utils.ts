@@ -47,8 +47,8 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  */
 export const sortTokens = <T extends Token>({
 	$tokens,
-	$exchanges,
-	$tokensToPin
+	_$exchanges,
+	_$tokensToPin
 }: {
 	$tokens: T[];
 	$exchanges: ExchangesData;
