@@ -166,7 +166,7 @@
 				<Back color="current" onlyArrow />
 
 				<div
-					class="text-xs sm:text-base my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-nowrap"
+					class="my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-xs text-nowrap sm:text-base"
 				>
 					{#if nonNullish(pageTokenUi)}
 						<div class="flex min-w-0 items-center justify-center gap-1 sm:gap-2" in:fade>
