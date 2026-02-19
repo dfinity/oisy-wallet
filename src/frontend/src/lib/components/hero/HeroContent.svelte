@@ -13,9 +13,11 @@
 	import Back from '$lib/components/core/Back.svelte';
 	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
 	import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
+	import ExchangeRateChange from '$lib/components/exchange/ExchangeRateChange.svelte';
 	import Actions from '$lib/components/hero/Actions.svelte';
 	import Balance from '$lib/components/hero/Balance.svelte';
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
@@ -24,7 +26,9 @@
 		balanceZero,
 		noPositiveBalanceAndNotAllBalancesZero
 	} from '$lib/derived/balances.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import {
 		networkBase,
 		networkBitcoin,
@@ -41,9 +45,11 @@
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
+	import { formatCurrency } from '$lib/utils/format.utils';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
-	import { mapTokenUi } from '$lib/utils/token.utils';
+	import { getTokenDisplayName, mapTokenUi } from '$lib/utils/token.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
 
 	let pageTokenUi = $derived(
@@ -53,6 +59,23 @@
 					$balances: $balancesStore,
 					$stakeBalances,
 					$exchanges
+				})
+			: undefined
+	);
+
+	let { usdPrice, usdPriceChangePercentage24h } = $derived(
+		nonNullish(pageTokenUi)
+			? pageTokenUi
+			: { usdPrice: undefined, usdPriceChangePercentage24h: undefined }
+	);
+
+	let formattedExchangeRate = $derived(
+		nonNullish(usdPrice)
+			? formatCurrency({
+					value: usdPrice,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
 				})
 			: undefined
 	);
@@ -138,19 +161,42 @@
 >
 	{#if isTransactionsPage}
 		<div class="flex w-full flex-col gap-6" in:slide={SLIDE_PARAMS}>
-			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
+			<div class="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 sm:gap-2">
 				<Back color="current" onlyArrow />
 
-				<div>
-					<div class="my-0.5 flex items-center justify-center">
-						{#if nonNullish($pageToken)}
-							<div in:fade>
-								<TokenLogo badge={{ type: 'network' }} data={$pageToken} ring />
+				<div
+					class="sm:text-md my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-sm text-nowrap"
+				>
+					{#if nonNullish(pageTokenUi)}
+						<div class="flex min-w-0 items-center justify-center gap-1 sm:gap-2" in:fade>
+							<TokenLogo data={pageTokenUi} logoSize="sm" ring />
+
+							<div class="flex flex-col text-left">
+								<span class="truncate font-semibold">
+									{getTokenDisplayName(pageTokenUi)}
+								</span>
+
+								<div class="flex items-center justify-center gap-1">
+									<NetworkLogo network={pageTokenUi.network} size="xxs" transparent />
+									<span class="truncate text-xs sm:text-sm">
+										{pageTokenUi.network.name}
+									</span>
+								</div>
 							</div>
-						{:else}
-							<SkeletonLogo size="small" />
-						{/if}
-					</div>
+						</div>
+
+						<div class="flex flex-col text-right">
+							<span class="leading-none font-semibold">
+								{formattedExchangeRate}
+							</span>
+
+							<span>
+								<ExchangeRateChange timeFrame="24h" {usdPriceChangePercentage24h} withBackground />
+							</span>
+						</div>
+					{:else}
+						<SkeletonLogo size="small" />
+					{/if}
 				</div>
 
 				<ContextMenu />
