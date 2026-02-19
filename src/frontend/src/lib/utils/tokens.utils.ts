@@ -54,7 +54,7 @@ export const sortTokens = <T extends Token>({
 	$exchanges: ExchangesData;
 	$tokensToPin: TokenToPin[];
 }): T[] => {
-	return 0;
+	return ...$tokens;
 };
 
 /**
