@@ -79,11 +79,10 @@ export const sortTokens = <T extends Token>({
 
 	return tokens.sort((a, b) => {
 		// Deprecated last
-		if (isIcToken(a) && (a.deprecated ?? false)) {
-			return 1;
-		}
-		if (isIcToken(b) && (b.deprecated ?? false)) {
-			return -1;
+		const aDeprecated = isIcToken(a) && (a.deprecated ?? false);
+		const bDeprecated = isIcToken(b) && (b.deprecated ?? false);
+		if (aDeprecated !== bDeprecated) {
+			return aDeprecated ? 1 : -1;
 		}
 
 		// USD Balance descending
