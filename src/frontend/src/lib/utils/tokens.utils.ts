@@ -54,41 +54,7 @@ export const sortTokens = <T extends Token>({
 	$exchanges: ExchangesData;
 	$tokensToPin: TokenToPin[];
 }): T[] => {
-	const tokenById = new Map<TokenId, T>($tokens.map((token) => [token.id, token]));
-
-	const pinnedTokens = $tokensToPin.reduce<T[]>((acc, { id: pinnedId }) => {
-		const token = tokenById.get(pinnedId);
-
-		if (nonNullish(token)) {
-			acc.push(token);
-
-			tokenById.delete(pinnedId);
-		}
-
-		return acc;
-	}, []);
-
-	const otherTokens = Array.from(tokenById.values());
-
-	return [
-		...pinnedTokens,
-		...otherTokens.sort((a, b) => {
-			// Deprecated SNSes such as CTS
-			if (isIcToken(a) && (a.deprecated ?? false)) {
-				return 1;
-			}
-
-			if (isIcToken(b) && (b.deprecated ?? false)) {
-				return -1;
-			}
-
-			return (
-				($exchanges[b.id]?.usd_market_cap ?? 0) - ($exchanges[a.id]?.usd_market_cap ?? 0) ||
-				a.name.localeCompare(b.name) ||
-				a.network.name.localeCompare(b.network.name)
-			);
-		})
-	];
+	return 0;
 };
 
 /**
@@ -117,42 +83,9 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 	$stakeBalances: StakeBalances;
 	$exchanges: ExchangesData;
 }): TokenUi<T>[] => {
-	// If balances data are nullish, there is no need to sort.
-	if (isNullish($balances)) {
-		return $tokens.map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges }));
-	}
 
-	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi<T>[], TokenUi<T>[]]>(
-		(acc, token) => {
-			const tokenUI: TokenUi<T> = mapTokenUi<T>({
-				token,
-				$balances,
-				$stakeBalances,
-				$exchanges
-			});
-
-			if ((tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO) > 0) {
-				acc[0].push(tokenUI);
-			} else {
-				acc[1].push(tokenUI);
-			}
-
-			return acc;
-		},
-		[[], []]
-	);
-
-	return [
-		...positiveBalances.sort(
-			(a, b) =>
-				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+((b.balance ?? ZERO) > (a.balance ?? ZERO)) -
-					+((b.balance ?? ZERO) < (a.balance ?? ZERO)) ||
-				a.name.localeCompare(b.name) ||
-				a.network.name.localeCompare(b.network.name)
-		),
-		...nonPositiveBalances
-	];
+	return $tokens.map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges }));
+	
 };
 
 /**
