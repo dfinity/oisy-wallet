@@ -32,7 +32,7 @@
 	);
 
 	let exchangeRateChangeSymbol = $derived(
-		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '▸' : '▾') : undefined
+		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '▸' : '⏷') : undefined
 	);
 
 	let parsedTimeFrame = $derived(
@@ -50,10 +50,7 @@
 		class:text-success-primary={exchangeRateChangeSign === 'positive'}
 		class:text-tertiary={exchangeRateChangeSign === 'zero'}
 	>
-		<span
-			class="inline-block transform text-lg leading-none"
-			class:rotate-180={exchangeRateChangeSign === 'positive'}
-		>
+		<span class="inline-block transform" class:rotate-180={exchangeRateChangeSign === 'positive'}>
 			{exchangeRateChangeSymbol}
 		</span>
 		{formattedExchangeRateChange}
