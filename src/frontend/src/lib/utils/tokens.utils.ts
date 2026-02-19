@@ -80,7 +80,8 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 	$balances: CertifiedStoreData<BalancesData>;
 	$stakeBalances: StakeBalances;
 	$exchanges: ExchangesData;
-}): TokenUi<T>[] => $tokens.map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges }));
+}): TokenUi<T>[] =>
+	$tokens.map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges }));
 
 /**
  * Calculates total USD balance of the provided UI tokens list.
