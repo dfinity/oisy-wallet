@@ -166,7 +166,7 @@
 				<Back color="current" onlyArrow />
 
 				<div
-					class="sm:text-md my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-sm text-nowrap"
+					class="my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-xs text-nowrap sm:text-base"
 				>
 					{#if nonNullish(pageTokenUi)}
 						<div class="flex min-w-0 items-center justify-center gap-1 sm:gap-2" in:fade>
@@ -179,7 +179,7 @@
 
 								<div class="flex items-center justify-center gap-1">
 									<NetworkLogo network={pageTokenUi.network} size="xxs" transparent />
-									<span class="truncate text-xs sm:text-sm">
+									<span class="truncate">
 										{pageTokenUi.network.name}
 									</span>
 								</div>
@@ -187,7 +187,7 @@
 						</div>
 
 						<div class="flex flex-col text-right">
-							<span class="leading-none font-semibold">
+							<span class="font-semibold">
 								{formattedExchangeRate}
 							</span>
 
