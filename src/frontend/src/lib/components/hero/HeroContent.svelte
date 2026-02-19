@@ -76,7 +76,7 @@
 					currency: $currentCurrency,
 					exchangeRate: $currencyExchangeStore,
 					language: $currentLanguage,
-			useMinSignificantDigits: true
+					useMinSignificantDigits: true
 				})
 			: undefined
 	);
