@@ -32,7 +32,7 @@
 	);
 
 	let exchangeRateChangeSymbol = $derived(
-		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '▸' : '▾') : undefined
+		nonNullish(exchangeRateChangeSign) ? (exchangeRateChangeSign === 'zero' ? '⏵' : '⏷') : undefined
 	);
 
 	let parsedTimeFrame = $derived(
@@ -42,7 +42,7 @@
 
 {#if nonNullish(parsedExchangeRateChange)}
 	<span
-		class="px-1 text-sm"
+		class="px-1 text-xs sm:text-sm"
 		class:bg-error-subtle-30={withBackground && exchangeRateChangeSign === 'negative'}
 		class:bg-success-subtle-30={withBackground && exchangeRateChangeSign === 'positive'}
 		class:rounded={withBackground}
@@ -50,15 +50,12 @@
 		class:text-success-primary={exchangeRateChangeSign === 'positive'}
 		class:text-tertiary={exchangeRateChangeSign === 'zero'}
 	>
-		<span
-			class="inline-block transform text-lg leading-none"
-			class:rotate-180={exchangeRateChangeSign === 'positive'}
-		>
+		<span class="inline-block transform" class:rotate-180={exchangeRateChangeSign === 'positive'}>
 			{exchangeRateChangeSymbol}
 		</span>
 		{formattedExchangeRateChange}
 		{#if nonNullish(parsedTimeFrame)}
-			<span class="text-[11px]">{`(${parsedTimeFrame})`}</span>
+			<span class="text-[9px] sm:text-[11px]">{`(${parsedTimeFrame})`}</span>
 		{/if}
 	</span>
 {/if}

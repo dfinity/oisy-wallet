@@ -34,7 +34,7 @@ describe('ExchangeRateChange', () => {
 
 		expect(getByText('1.23%')).toBeInTheDocument();
 
-		const symbol = getByText('▾');
+		const symbol = getByText('⏷');
 
 		expect(symbol).toBeInTheDocument();
 		expect(symbol).toHaveClass('rotate-180');
@@ -49,7 +49,7 @@ describe('ExchangeRateChange', () => {
 
 		expect(getByText('123%')).toBeInTheDocument();
 
-		const symbol = getByText('▾');
+		const symbol = getByText('⏷');
 
 		expect(symbol).toBeInTheDocument();
 		expect(symbol).not.toHaveClass('rotate-180');
@@ -64,7 +64,7 @@ describe('ExchangeRateChange', () => {
 
 		expect(getByText('0.00%')).toBeInTheDocument();
 
-		expect(getByText('▸')).toBeInTheDocument();
+		expect(getByText('⏵')).toBeInTheDocument();
 	});
 
 	it('should render the proper background', async () => {

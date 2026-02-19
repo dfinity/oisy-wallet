@@ -221,7 +221,8 @@ export const formatCurrency = ({
 	language,
 	notBelowThreshold = false,
 	hideSymbol = false,
-	normalizeSeparators = false
+	normalizeSeparators = false,
+	useMinSignificantDigits = false
 }: {
 	value: number;
 	currency: Currency;
@@ -230,6 +231,7 @@ export const formatCurrency = ({
 	notBelowThreshold?: boolean;
 	hideSymbol?: boolean;
 	normalizeSeparators?: boolean;
+	useMinSignificantDigits?: boolean;
 }): string | undefined => {
 	if (currency !== exchangeRateCurrency) {
 		// There could be a case where, after a currency switch, the exchange rate is still the one of the old currency, until the worker updates it
@@ -245,14 +247,46 @@ export const formatCurrency = ({
 
 	const convertedValue = value / exchangeRateToUsd;
 
+	const decimalDigits = getCurrencyDecimalDigits({ currency, language });
+
+	const getSignificantOpts = (): Partial<Intl.NumberFormatOptions> => {
+		if (!useMinSignificantDigits) {
+			return {};
+		}
+
+		// Threshold: 2dp -> 1, 0dp (JPY) -> 100, 3dp -> 0.1, etc.
+		const threshold = Math.pow(10, 2 - decimalDigits);
+
+		if (Math.abs(convertedValue) >= threshold) {
+			return {};
+		}
+
+		// Baseline: 2dp currencies => 4 fraction digits, JPY => 2 fraction digits
+		const baselineFractionDigits = decimalDigits + 2;
+
+		// Ensure at least 4 significant digits for very small numbers
+		const abs = Math.abs(convertedValue);
+		const fractionFor4Sig =
+			abs === 0 ? baselineFractionDigits : Math.max(0, -Math.floor(Math.log10(abs)) + (4 - 1));
+
+		const maxFractionDigits = Math.max(baselineFractionDigits, fractionFor4Sig);
+
+		return {
+			minimumFractionDigits: baselineFractionDigits,
+			maximumFractionDigits: maxFractionDigits
+		};
+	};
+
+	const significantOpts = getSignificantOpts();
+
 	const currencyFormatter = new Intl.NumberFormat(locale, {
 		style: 'currency',
 		currency: currency.toUpperCase(),
-		...(hideSymbol && { currencyDisplay: 'code' })
+		...(hideSymbol && { currencyDisplay: 'code' }),
+		...significantOpts
 	});
 
 	if (notBelowThreshold) {
-		const decimalDigits = getCurrencyDecimalDigits({ currency, language });
 		const minThreshold = 1 / Math.pow(10, decimalDigits);
 
 		if (Math.abs(convertedValue) < minThreshold) {

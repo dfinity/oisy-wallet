@@ -1311,6 +1311,66 @@ describe('format.utils', () => {
 				})
 			).toBe('< ¥1');
 		});
+
+		it('should keep at least 4 significant digits for values below threshold when enabled', () => {
+			expect(
+				formatCurrency({
+					value: 0.9998,
+					currency: Currency.USD,
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH,
+					useMinSignificantDigits: true
+				})
+			).toBe('$0.9998');
+
+			expect(
+				formatCurrency({
+					value: 0.000012345678,
+					currency: Currency.USD,
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH,
+					useMinSignificantDigits: true
+				})
+			).toBe('$0.00001235');
+		});
+
+		it('should use the JPY threshold (below 100 => 2 decimals) when enabled', () => {
+			expect(
+				formatCurrency({
+					value: 99.1234,
+					currency: Currency.JPY,
+					exchangeRate: {
+						currency: Currency.JPY,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH,
+					useMinSignificantDigits: true
+				})
+			).toBe('¥99.12');
+
+			expect(
+				formatCurrency({
+					value: 100.1234,
+					currency: Currency.JPY,
+					exchangeRate: {
+						currency: Currency.JPY,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH,
+					useMinSignificantDigits: true
+				})
+			).toBe('¥100');
+		});
 	});
 
 	describe('formatStakeApyNumber', () => {
