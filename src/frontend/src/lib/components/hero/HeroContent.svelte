@@ -172,13 +172,13 @@
 							<TokenLogo data={pageTokenUi} logoSize="sm" ring />
 
 							<div class="flex flex-col text-left">
-								<span class="font-semibold truncate">
+								<span class="truncate font-semibold">
 									{getTokenDisplayName(pageTokenUi)}
 								</span>
 
 								<div class="flex items-center justify-center gap-1">
 									<NetworkLogo network={pageTokenUi.network} size="xxs" transparent />
-									<span class="text-xs sm:text-sm truncate">
+									<span class="truncate text-xs sm:text-sm">
 										{pageTokenUi.network.name}
 									</span>
 								</div>
