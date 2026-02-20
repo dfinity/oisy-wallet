@@ -1,5 +1,6 @@
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+import { tokensSortType } from '$lib/derived/settings.derived';
 import { stakeBalances } from '$lib/derived/stake.derived';
 import {
 	enabledFungibleTokens,
@@ -41,13 +42,21 @@ export const enabledNonFungibleNetworkTokensWithoutSpam: Readable<NonFungibleTok
  * All fungible tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
  */
 export const sortedFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[enabledFungibleNetworkTokens, tokensToPin, balancesStore, stakeBalances, exchanges],
-	([$enabledNetworkTokens, $tokensToPin, $balances, $stakeBalances, $exchanges]) =>
+	[
+		enabledFungibleNetworkTokens,
+		tokensToPin,
+		balancesStore,
+		stakeBalances,
+		exchanges,
+		tokensSortType
+	],
+	([$enabledNetworkTokens, $tokensToPin, $balances, $stakeBalances, $exchanges, $tokensSortType]) =>
 		sortTokens({
 			$tokens: $enabledNetworkTokens,
 			$balances,
 			$stakeBalances,
 			$exchanges,
-			$tokensToPin
+			$tokensToPin,
+			primarySortStrategy: $tokensSortType
 		})
 );
