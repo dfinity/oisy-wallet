@@ -35,7 +35,7 @@ export class ExchangeWorker extends AppWorker {
 	}
 
 	static async init(): Promise<ExchangeWorker> {
-		const worker = await AppWorker.getInstance();
+		const worker = await AppWorker.getInstance({ asSingleton: true });
 		return new ExchangeWorker(worker);
 	}
 
