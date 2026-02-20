@@ -16,7 +16,7 @@ import {
 	exchangeRateSPLToUsd,
 	exchangeRateUsdToCurrency
 } from '$lib/services/exchange.services';
-import type { CoingeckoPlatformId } from '$lib/types/coingecko';
+import type { CoingeckoPlatformId, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
 import type {
 	PostMessage,
@@ -134,26 +134,34 @@ const syncExchange = async ({
 	);
 
 	try {
-		const erc20Prices = await Promise.all(
+		const erc20PricesSettled = await Promise.allSettled(
 			erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params))
 		);
 
+		const erc20Prices = erc20PricesSettled
+			.filter(
+				(result): result is PromiseFulfilledResult<CoingeckoSimpleTokenPriceResponse | null> =>
+					result.status === 'fulfilled'
+			)
+			.map((result) => result.value)
+			.filter(nonNullish);
+
+		const currentErc20Prices = erc20Prices.reduce((acc, prices) => ({ ...acc, ...prices }), {});
+
 		const [
-			currentExchangeRate,
-			currentEthPrice,
-			currentBtcPrice,
-			currentErc20Prices,
-			currentIcpPrice,
-			currentIcrcPrices,
-			currentSolPrice,
-			currentSplPrices,
-			currentBnbPrice,
-			currentPolPrice
-		] = await Promise.all([
+			currentExchangeRateResult,
+			currentEthPriceResult,
+			currentBtcPriceResult,
+			currentIcpPriceResult,
+			currentIcrcPricesResult,
+			currentSolPriceResult,
+			currentSplPricesResult,
+			currentBnbPriceResult,
+			currentPolPriceResult
+		] = await Promise.allSettled([
 			exchangeRateUsdToCurrency(currentCurrency),
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
-			erc20Prices.reduce((acc, prices) => ({ ...acc, ...prices }), {}),
 			exchangeRateICPToUsd(),
 			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
 			exchangeRateSOLToUsd(),
@@ -161,6 +169,27 @@ const syncExchange = async ({
 			exchangeRateBNBToUsd(),
 			exchangeRatePOLToUsd()
 		]);
+
+		const currentExchangeRate =
+			currentExchangeRateResult.status === 'fulfilled'
+				? currentExchangeRateResult.value
+				: undefined;
+		const currentEthPrice =
+			currentEthPriceResult.status === 'fulfilled' ? currentEthPriceResult.value : undefined;
+		const currentBtcPrice =
+			currentBtcPriceResult.status === 'fulfilled' ? currentBtcPriceResult.value : undefined;
+		const currentIcpPrice =
+			currentIcpPriceResult.status === 'fulfilled' ? currentIcpPriceResult.value : undefined;
+		const currentIcrcPrices =
+			currentIcrcPricesResult.status === 'fulfilled' ? currentIcrcPricesResult.value : undefined;
+		const currentSolPrice =
+			currentSolPriceResult.status === 'fulfilled' ? currentSolPriceResult.value : undefined;
+		const currentSplPrices =
+			currentSplPricesResult.status === 'fulfilled' ? currentSplPricesResult.value : undefined;
+		const currentBnbPrice =
+			currentBnbPriceResult.status === 'fulfilled' ? currentBnbPriceResult.value : undefined;
+		const currentPolPrice =
+			currentPolPriceResult.status === 'fulfilled' ? currentPolPriceResult.value : undefined;
 
 		const currentErc4626Prices = await calculateErc4626Prices({
 			erc20Prices: currentErc20Prices,
@@ -189,7 +218,6 @@ const syncExchange = async ({
 		} as PostMessage<PostMessageDataResponseExchange>);
 	} catch (err: unknown) {
 		console.error('Unexpected error while fetching symbol average price:', err);
-		stopTimer();
 
 		postMessage({
 			msg: 'syncExchangeError',
