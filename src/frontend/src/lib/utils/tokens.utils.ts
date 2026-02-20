@@ -46,10 +46,11 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * 1. Deprecation status (non-deprecated tokens first).
  * 2. USD balance (descending).
  * 3. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
- * 4. Token name (ascending, locale-aware).
- * 5. Network name (ascending, locale-aware).
- * 6. Token balance (descending).
- * 7. USD market cap (descending).
+ * 4. Token symbol (ascending, locale-aware).
+ * 5. Token name (ascending, locale-aware).
+ * 6. Network name (ascending, locale-aware).
+ * 7. Token balance (descending).
+ * 8. USD market cap (descending).
  *
  * @param $tokens - The list of tokens to map and sort.
  * @param $balances - Certified balances data used to compute token balances.
@@ -104,6 +105,7 @@ export const sortTokens = <T extends Token>({
 		}
 
 		return (
+			a.symbol.localeCompare(b.symbol) ||
 			a.name.localeCompare(b.name) ||
 			a.network.name.localeCompare(b.network.name) ||
 			+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO)) ||
