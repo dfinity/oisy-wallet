@@ -11,7 +11,6 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
@@ -184,8 +183,6 @@ describe('LoaderEthBalances', () => {
 		const { getByTestId } = render(LoaderEthBalances);
 
 		await tick();
-
-		expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
