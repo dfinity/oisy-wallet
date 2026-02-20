@@ -27,7 +27,7 @@ export class AuthWorker extends AppWorker {
 	}
 
 	static async init(): Promise<AuthWorker> {
-		const worker = await AppWorker.getInstance();
+		const worker = await AppWorker.getInstance({ asSingleton: true });
 		return new AuthWorker(worker);
 	}
 

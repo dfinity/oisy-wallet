@@ -11,11 +11,22 @@ vi.mock('$lib/services/auth.services', () => ({
 }));
 
 const postMessageSpy = vi.fn();
+const addEventListenerSpy = vi.fn();
+const removeEventListenerSpy = vi.fn();
 
 class MockWorker {
 	postMessage = postMessageSpy;
 	onmessage: ((event: MessageEvent) => void) | null = null;
 	terminate: () => void = vi.fn();
+	addEventListener = addEventListenerSpy;
+	removeEventListener = removeEventListenerSpy;
+
+	#listeners: Record<string, ((event: any) => void)[]> = {};
+
+	dispatchEvent = (event: any) => {
+		this.onmessage?.(event);
+		this.#listeners['message']?.forEach((l) => l(event));
+	};
 }
 
 vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
@@ -52,6 +63,8 @@ describe('worker.auth.services', () => {
 
 		beforeEach(async () => {
 			vi.clearAllMocks();
+
+			AppWorker.resetForTesting();
 
 			worker = await AuthWorker.init();
 		});
@@ -90,7 +103,7 @@ describe('worker.auth.services', () => {
 		describe('onmessage', () => {
 			it('should handle signOutIdleTimer message', () => {
 				const payload = { msg: 'signOutIdleTimer' };
-				workerInstance.onmessage?.({ data: payload } as MessageEvent);
+				(workerInstance as unknown as MockWorker).dispatchEvent({ data: payload } as MessageEvent);
 
 				expect(idleSignOut).toHaveBeenCalledExactlyOnceWith();
 			});
@@ -104,11 +117,13 @@ describe('worker.auth.services', () => {
 					authRemainingTime: 123_456
 				};
 				const payload = { msg: 'delegationRemainingTime', data: mockData };
-				workerInstance.onmessage?.({ data: payload } as MessageEvent);
+				(workerInstance as unknown as MockWorker).dispatchEvent({ data: payload } as MessageEvent);
 
 				expect(get(authRemainingTimeStore)).toBe(123_456);
 
-				workerInstance.onmessage?.({ data: { msg: 'delegationRemainingTime' } } as MessageEvent);
+				(workerInstance as unknown as MockWorker).dispatchEvent({
+					data: { msg: 'delegationRemainingTime' }
+				} as MessageEvent);
 
 				expect(get(authRemainingTimeStore)).toBe(undefined);
 			});
