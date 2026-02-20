@@ -180,7 +180,7 @@ describe('LoaderEthBalances', () => {
 	it('should not handle errors', async () => {
 		vi.mocked(loadEthBalances).mockRejectedValue(new Error('Error loading balances'));
 
-		const { getByTestId } = render(LoaderEthBalances);
+		render(LoaderEthBalances);
 
 		await tick();
 
