@@ -129,7 +129,8 @@ export const sortTokens = <T extends Token>({
 		}
 
 		return (
-			a.symbol.localeCompare(b.symbol) ||
+			// If the choice is to prioritise symbol sorting, it will have already happened before
+			(primarySortStrategy !== 'symbol' && a.symbol.localeCompare(b.symbol)) ||
 			a.name.localeCompare(b.name) ||
 			a.network.name.localeCompare(b.network.name) ||
 			+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO)) ||
