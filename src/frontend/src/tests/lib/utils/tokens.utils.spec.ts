@@ -166,31 +166,73 @@ describe('tokens.utils', () => {
 			expect(result.at(-1)?.id).toBe(mockDeprecatedToken.id);
 		});
 
-		it('should sort by name, then network name, then balance, then market cap when USD balance is tied and unpinned', () => {
+		it('should sort by symbol (ascending) when USD balance is tied and unpinned', () => {
+			const tokenSymbolA: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-SYM-A'),
+				symbol: 'AAA',
+				name: 'Zulu',
+				network: { ...ICP_NETWORK, name: 'A Network' }
+			};
+
+			const tokenSymbolZ: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-SYM-Z'),
+				symbol: 'ZZZ',
+				name: 'Alpha',
+				network: { ...ICP_NETWORK, name: 'B Network' }
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenSymbolA.id]: { data: ZERO, certified },
+				[tokenSymbolZ.id]: { data: ZERO, certified }
+			};
+
+			const $exchanges: ExchangesData = {
+				[tokenSymbolA.id]: { usd_market_cap: 1, usd: 0 },
+				[tokenSymbolZ.id]: { usd_market_cap: 999, usd: 0 }
+			};
+
+			const result = sortTokens({
+				$tokens: [tokenSymbolZ, tokenSymbolA],
+				$balances,
+				$stakeBalances: {},
+				$exchanges,
+				$tokensToPin: []
+			});
+
+			expect(result.map((t) => t.id)).toEqual([tokenSymbolA.id, tokenSymbolZ.id]);
+		});
+
+		it('should sort by symbol, then name, then network name, then balance, then market cap when USD balance is tied and unpinned', () => {
 			const NETWORK_A = { ...ICP_NETWORK, name: 'A Network' };
 			const NETWORK_B = { ...ICP_NETWORK, name: 'B Network' };
 
 			const tokenA: Token = {
 				...mockValidToken,
 				id: parseTokenId('TokenId-A'),
+				symbol: 'AAA',
 				name: 'Alpha',
 				network: NETWORK_A
 			};
 			const tokenB: Token = {
 				...mockValidToken,
 				id: parseTokenId('TokenId-B'),
+				symbol: 'AAA',
 				name: 'Alpha',
 				network: NETWORK_B
 			};
 			const tokenC: Token = {
 				...mockValidToken,
 				id: parseTokenId('TokenId-C'),
+				symbol: 'BBB',
 				name: 'Beta',
 				network: NETWORK_A
 			};
 			const tokenD: Token = {
 				...mockValidToken,
 				id: parseTokenId('TokenId-D'),
+				symbol: 'BBB',
 				name: 'Beta',
 				network: NETWORK_A
 			};
@@ -224,12 +266,14 @@ describe('tokens.utils', () => {
 			const tokenA: Token = {
 				...mockValidToken,
 				id: parseTokenId('TokenId-N1'),
+				symbol: 'SAME',
 				name: 'SameName',
 				network: { ...ICP_NETWORK, name: 'A Network' }
 			};
 			const tokenB: Token = {
 				...mockValidToken,
 				id: parseTokenId('TokenId-N2'),
+				symbol: 'SAME',
 				name: 'SameName',
 				network: { ...ICP_NETWORK, name: 'B Network' }
 			};
@@ -259,12 +303,14 @@ describe('tokens.utils', () => {
 			const tokenHighBalanceLowMcap: Token = {
 				...mockValidToken,
 				id: parseTokenId('TokenId-BAL1'),
+				symbol: 'SAME',
 				name: 'SameName',
 				network: ICP_NETWORK
 			};
 			const tokenLowBalanceHighMcap: Token = {
 				...mockValidToken,
 				id: parseTokenId('TokenId-BAL2'),
+				symbol: 'SAME',
 				name: 'SameName',
 				network: ICP_NETWORK
 			};
