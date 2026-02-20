@@ -65,15 +65,6 @@
 	// Show all if hideZeros = false and sort
 	const tokensToShow: TokenUi[] = $derived(
 		(hideZeros ? truncatedTokens : filteredTokens).sort((a, b) => {
-			const balanceA = a.usdBalance ?? 0;
-			const balanceB = b.usdBalance ?? 0;
-			// higher balances show first
-			if (balanceA > balanceB) {
-				return -1;
-			}
-			if (balanceA < balanceB) {
-				return 1;
-			}
 			// if same balance order by Native > CK > others
 			return showTokenInGroup(a) ? -1 : isCkToken(a) && !showTokenInGroup(b) ? -1 : 1;
 		})
