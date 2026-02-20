@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { BOB_TOKEN_GROUP } from '$env/tokens/groups/groups.bob.env';
-import bob from '$eth/assets/bob.webp';
+import bob from '$eth/assets/bob.png';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
