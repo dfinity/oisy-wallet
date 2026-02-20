@@ -64,10 +64,10 @@
 
 	// Show all if hideZeros = false and sort
 	const tokensToShow: TokenUi[] = $derived(
-		(hideZeros ? truncatedTokens : filteredTokens).sort((a, b) => {
+		(hideZeros ? truncatedTokens : filteredTokens).sort((a, b) => 
 			// if same balance order by Native > CK > others
-			return showTokenInGroup(a) ? -1 : isCkToken(a) && !showTokenInGroup(b) ? -1 : 1;
-		})
+			 showTokenInGroup(a) ? -1 : isCkToken(a) && !showTokenInGroup(b) ? -1 : 1
+		)
 	);
 
 	// Count tokens that are not displayed
