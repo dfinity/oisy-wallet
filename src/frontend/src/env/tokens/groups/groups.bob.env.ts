@@ -1,6 +1,6 @@
+import bob from '$eth/assets/bob.png';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
-import bob from '$eth/assets/bob.png';
 
 const BOB_TOKEN_GROUP_SYMBOL = 'BOB';
 
