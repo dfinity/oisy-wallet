@@ -8,7 +8,7 @@ export const BOB_TOKEN_GROUP_ID: TokenGroupId = parseTokenGroupId(BOB_TOKEN_GROU
 
 export const BOB_TOKEN_GROUP: TokenGroupData = {
 	id: BOB_TOKEN_GROUP_ID,
-	icon: BOB,
+	icon: bob,
 	name: 'BOB',
 	symbol: BOB_TOKEN_GROUP_SYMBOL
 };
