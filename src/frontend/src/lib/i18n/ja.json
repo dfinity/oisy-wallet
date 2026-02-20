@@ -176,7 +176,6 @@
 			"title_part_1": "ロックを解除して続行",
 			"title_part_2": "ウォレットは安全のためロックされています。中断したところから再開するか、ログアウトしてください。",
 			"unlock": "ロック解除",
-			"unlock_with_legacy_login": "",
 			"logout": "ログアウト",
 			"logout_clear_cash_message": "ログアウトすると、キャッシュされたデータがすべて消去されます。",
 			"learn_more": "詳細を見る"
