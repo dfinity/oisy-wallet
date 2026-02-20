@@ -24,12 +24,6 @@
 	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
-
 	let timer: NodeJS.Timeout | undefined = undefined;
 	let syncInProgress = false;
 
@@ -141,5 +135,3 @@
 		triggerTimer();
 	});
 </script>
-
-{@render children()}
