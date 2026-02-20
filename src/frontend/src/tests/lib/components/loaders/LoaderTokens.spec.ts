@@ -27,7 +27,6 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
 	mockNetworksSettings,
@@ -156,7 +155,7 @@ describe('LoaderTokens', () => {
 	});
 
 	it('should always load ICRC tokens', async () => {
-		render(LoaderTokens, { children: mockSnippet });
+		render(LoaderTokens);
 
 		await waitFor(() => {
 			expect(loadIcrcTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
@@ -164,7 +163,7 @@ describe('LoaderTokens', () => {
 	});
 
 	it('should always load EXT tokens', async () => {
-		render(LoaderTokens, { children: mockSnippet });
+		render(LoaderTokens);
 
 		await waitFor(() => {
 			expect(loadExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
@@ -172,7 +171,7 @@ describe('LoaderTokens', () => {
 	});
 
 	it('should always load ICPunks tokens', async () => {
-		render(LoaderTokens, { children: mockSnippet });
+		render(LoaderTokens);
 
 		await waitFor(() => {
 			expect(loadIcPunksTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
@@ -180,7 +179,7 @@ describe('LoaderTokens', () => {
 	});
 
 	it('should not load non-ICRC tokens if networks are all disabled', async () => {
-		render(LoaderTokens, { children: mockSnippet });
+		render(LoaderTokens);
 
 		await waitFor(() => {
 			expect(loadErc20Tokens).not.toHaveBeenCalled();
@@ -192,7 +191,7 @@ describe('LoaderTokens', () => {
 	});
 
 	it('should load non-ICRC tokens if networks are all enabled', async () => {
-		render(LoaderTokens, { children: mockSnippet });
+		render(LoaderTokens);
 
 		setupUserNetworksStore('allEnabled');
 
@@ -214,7 +213,7 @@ describe('LoaderTokens', () => {
 			erc1155NotInitStore.set(true);
 			erc4626NotInitStore.set(true);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadErc20Tokens).not.toHaveBeenCalled();
@@ -253,7 +252,7 @@ describe('LoaderTokens', () => {
 			erc1155NotInitStore.set(false);
 			erc4626NotInitStore.set(false);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadErc20Tokens).not.toHaveBeenCalled();
@@ -264,7 +263,7 @@ describe('LoaderTokens', () => {
 		});
 
 		it('should load ERC tokens only when an Ethereum or EVM network is actually enabled', async () => {
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			userProfileStore.set({
 				certified: false,
@@ -292,7 +291,7 @@ describe('LoaderTokens', () => {
 		});
 
 		it('should load ERC tokens for testnets if testnets are enabled and the stores are not initialized', async () => {
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadErc20Tokens).not.toHaveBeenCalled();
@@ -337,7 +336,7 @@ describe('LoaderTokens', () => {
 
 			extNotInitStore.set(false);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadExtTokens).not.toHaveBeenCalled();
@@ -351,7 +350,7 @@ describe('LoaderTokens', () => {
 
 			icPunksNotInitStore.set(false);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadIcPunksTokens).not.toHaveBeenCalled();
@@ -363,7 +362,7 @@ describe('LoaderTokens', () => {
 		it('should load SPL tokens on Solana mainnet when the stores are not initialized', async () => {
 			splNotInitStore.set(true);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadSplTokens).not.toHaveBeenCalled();
@@ -393,7 +392,7 @@ describe('LoaderTokens', () => {
 
 			splNotInitStore.set(false);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadSplTokens).not.toHaveBeenCalled();
@@ -401,7 +400,7 @@ describe('LoaderTokens', () => {
 		});
 
 		it('should load SPL tokens on Solana devnet when testnets are enabled and the stores are not initialized', async () => {
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadSplTokens).not.toHaveBeenCalled();
@@ -431,7 +430,7 @@ describe('LoaderTokens', () => {
 		});
 
 		it('should load SPL tokens on Solana localnet only when LOCAL is true and the stores are not initialized', async () => {
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadSplTokens).not.toHaveBeenCalled();
