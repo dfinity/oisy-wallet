@@ -41,7 +41,8 @@
 			"more": "更多",
 			"less": "更少",
 			"ellipsis": "…",
-			"learn_more": "了解更多"
+			"learn_more": "了解更多",
+			"sorting": ""
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
@@ -1285,7 +1286,6 @@
 			"by_collection": "按集合分组",
 			"show_spam": "显示垃圾内容",
 			"show_hidden": "显示已隐藏",
-			"sorting": "排序方式",
 			"recents_first": "最新优先",
 			"oldest_first": "最早优先",
 			"collection_atoz": "集合名称 A-Z",

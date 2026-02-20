@@ -41,7 +41,8 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": ""
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",
@@ -1285,7 +1286,6 @@
 			"by_collection": "Grupuj według kolekcji",
 			"show_spam": "Pokaż spam",
 			"show_hidden": "Pokaż ukryte",
-			"sorting": "Sortowanie",
 			"recents_first": "Najnowsze najpierw",
 			"oldest_first": "Najstarsze najpierw",
 			"collection_atoz": "Nazwa kolekcji A-Z",

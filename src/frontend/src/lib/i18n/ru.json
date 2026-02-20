@@ -41,7 +41,8 @@
 			"more": "Больше",
 			"less": "Меньше",
 			"ellipsis": "…",
-			"learn_more": "Узнать больше"
+			"learn_more": "Узнать больше",
+			"sorting": ""
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
@@ -1285,7 +1286,6 @@
 			"by_collection": "По коллекции",
 			"show_spam": "Показывать спам",
 			"show_hidden": "Показать скрытое",
-			"sorting": "Сортировка",
 			"recents_first": "Сначала недавние",
 			"oldest_first": "Сначала последние",
 			"collection_atoz": "Коллекции от A до Z",

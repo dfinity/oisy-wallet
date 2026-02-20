@@ -41,7 +41,8 @@
 			"more": "Více",
 			"less": "Méně",
 			"ellipsis": "…",
-			"learn_more": "Zjistit více"
+			"learn_more": "Zjistit více",
+			"sorting": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -1285,7 +1286,6 @@
 			"by_collection": "Seskupit podle kolekce",
 			"show_spam": "Zobrazit spam",
 			"show_hidden": "Zobrazit skryté",
-			"sorting": "Řazení",
 			"recents_first": "Od nejnovějších",
 			"oldest_first": "Od nejstarších",
 			"collection_atoz": "Název kolekce A-Z",

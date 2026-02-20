@@ -41,7 +41,8 @@
 			"more": "さらに",
 			"less": "少なく",
 			"ellipsis": "…",
-			"learn_more": "詳細を見る"
+			"learn_more": "詳細を見る",
+			"sorting": ""
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -1285,7 +1286,6 @@
 			"by_collection": "コレクションでグループ化",
 			"show_spam": "スパムを表示",
 			"show_hidden": "非表示を表示",
-			"sorting": "並べ替え",
 			"recents_first": "新しい順",
 			"oldest_first": "古い順",
 			"collection_atoz": "コレクション名 A-Z",
