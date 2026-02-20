@@ -23,6 +23,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
+import { distinctDerived } from '$lib/utils/derived.utils';
 import { filterEnabledTokens } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
@@ -31,7 +32,7 @@ import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const nativeTokens: Readable<Token[]> = derived(
+export const nativeTokens: Readable<Token[]> = distinctDerived(
 	[
 		defaultIcpTokens,
 		enabledBitcoinTokens,
@@ -54,7 +55,7 @@ export const nativeTokens: Readable<Token[]> = derived(
 	]
 );
 
-export const fungibleTokens: Readable<Token[]> = derived(
+export const fungibleTokens: Readable<Token[]> = distinctDerived(
 	[nativeTokens, erc20Tokens, erc4626Tokens, icrcTokens, splTokens],
 	([$nativeTokens, $erc20Tokens, $erc4626Tokens, $icrcTokens, $splTokens]) => [
 		...$nativeTokens,
@@ -65,7 +66,7 @@ export const fungibleTokens: Readable<Token[]> = derived(
 	]
 );
 
-export const nonFungibleTokens: Readable<CustomToken<NonFungibleToken>[]> = derived(
+export const nonFungibleTokens: Readable<CustomToken<NonFungibleToken>[]> = distinctDerived(
 	[erc721Tokens, erc1155Tokens, extTokens, icPunksTokens],
 	([$erc721Tokens, $erc1155Tokens, $extTokens, $icPunksTokens]) => [
 		...$erc721Tokens,
@@ -75,7 +76,7 @@ export const nonFungibleTokens: Readable<CustomToken<NonFungibleToken>[]> = deri
 	]
 );
 
-export const tokens: Readable<Token[]> = derived(
+export const tokens: Readable<Token[]> = distinctDerived(
 	[fungibleTokens, nonFungibleTokens],
 	([$fungibleTokens, $nonFungibleTokens]) => [...$fungibleTokens, ...$nonFungibleTokens]
 );
@@ -96,7 +97,7 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 /**
  * All user-enabled tokens.
  */
-export const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledTokens);
+export const enabledTokens: Readable<Token[]> = distinctDerived([tokens], filterEnabledTokens);
 
 /**
  * All user-enabled unique tokens symbols.
