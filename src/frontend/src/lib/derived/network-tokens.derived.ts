@@ -12,7 +12,7 @@ import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
+import { sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -38,23 +38,16 @@ export const enabledNonFungibleNetworkTokensWithoutSpam: Readable<NonFungibleTok
 );
 
 /**
- * Fungible network tokens sorted by market cap, with the ones to pin at the top of the list.
- */
-const sortedFungibleNetworkTokens: Readable<Token[]> = derived(
-	[enabledFungibleNetworkTokens, tokensToPin, exchanges],
-	([$tokens, $tokensToPin, $exchanges]) => sortTokens({ $tokens, $exchanges, $tokensToPin })
-);
-
-/**
  * All fungible tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
  */
 export const sortedFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[sortedFungibleNetworkTokens, balancesStore, stakeBalances, exchanges],
-	([$enabledNetworkTokens, $balances, $stakeBalances, $exchanges]) =>
-		pinTokensWithBalanceAtTop({
+	[enabledFungibleNetworkTokens, tokensToPin, balancesStore, stakeBalances, exchanges],
+	([$enabledNetworkTokens, $tokensToPin, $balances, $stakeBalances, $exchanges]) =>
+		sortTokens({
 			$tokens: $enabledNetworkTokens,
 			$balances,
 			$stakeBalances,
-			$exchanges
+			$exchanges,
+			$tokensToPin
 		})
 );
