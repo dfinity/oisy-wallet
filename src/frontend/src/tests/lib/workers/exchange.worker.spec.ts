@@ -190,7 +190,7 @@ describe('exchange.worker', () => {
 				expect(postMessageMock).toHaveBeenCalledTimes(11);
 			});
 
-			it('should not post an error message if the sync fails', async () => {
+			it('should post a sync success message even if some price fetches fail', async () => {
 				const mockErrorMessage = 'Sync failed';
 				const mockError = new Error(mockErrorMessage);
 				vi.mocked(simplePrice).mockRejectedValueOnce(mockError);
@@ -203,7 +203,7 @@ describe('exchange.worker', () => {
 				});
 
 				expect(console.error).toHaveBeenCalledExactlyOnceWith(
-					'Unexpected error while fetching symbol average price:',
+					'Error while fetching exchange rate:',
 					mockError
 				);
 			});

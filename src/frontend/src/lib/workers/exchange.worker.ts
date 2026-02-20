@@ -138,15 +138,33 @@ const syncExchange = async ({
 			erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params))
 		);
 
-		const erc20Prices = erc20PricesSettled
-			.filter(
-				(result): result is PromiseFulfilledResult<CoingeckoSimpleTokenPriceResponse | null> =>
-					result.status === 'fulfilled'
-			)
-			.map((result) => result.value)
-			.filter(nonNullish);
+		const currentErc20Prices = erc20PricesSettled.reduce<CoingeckoSimpleTokenPriceResponse>(
+			(acc, result) => {
+				if (result.status === 'fulfilled' && nonNullish(result.value)) {
+					Object.assign(acc, result.value);
+				}
+				return acc;
+			},
+			{}
+		);
 
-		const currentErc20Prices = erc20Prices.reduce((acc, prices) => ({ ...acc, ...prices }), {});
+		const results = await Promise.allSettled([
+			exchangeRateUsdToCurrency(currentCurrency),
+			exchangeRateETHToUsd(),
+			exchangeRateBTCToUsd(),
+			exchangeRateICPToUsd(),
+			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
+			exchangeRateSOLToUsd(),
+			exchangeRateSPLToUsd(splTokenAddresses),
+			exchangeRateBNBToUsd(),
+			exchangeRatePOLToUsd()
+		]);
+
+		results.forEach((result) => {
+			if (result.status === 'rejected') {
+				console.error('Error while fetching exchange rate:', result.reason);
+			}
+		});
 
 		const [
 			currentExchangeRateResult,
@@ -158,17 +176,7 @@ const syncExchange = async ({
 			currentSplPricesResult,
 			currentBnbPriceResult,
 			currentPolPriceResult
-		] = await Promise.allSettled([
-			exchangeRateUsdToCurrency(currentCurrency),
-			exchangeRateETHToUsd(),
-			exchangeRateBTCToUsd(),
-			exchangeRateICPToUsd(),
-			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
-			exchangeRateSOLToUsd(),
-			exchangeRateSPLToUsd(splTokenAddresses),
-			exchangeRateBNBToUsd(),
-			exchangeRatePOLToUsd()
-		]);
+		] = results;
 
 		const currentExchangeRate =
 			currentExchangeRateResult.status === 'fulfilled'
