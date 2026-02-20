@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapListeners } from '$lib/utils/listener.utils';

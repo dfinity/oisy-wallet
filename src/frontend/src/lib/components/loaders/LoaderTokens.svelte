@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
 	import { erc1155CustomTokensNotInitialized } from '$eth/derived/erc1155.derived';
 	import { erc20CustomTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { erc4626CustomTokensNotInitialized } from '$eth/derived/erc4626.derived';
