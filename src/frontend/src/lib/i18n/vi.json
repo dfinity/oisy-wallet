@@ -1143,7 +1143,10 @@
 			"hide_more_networks": "Ẩn thêm mạng",
 			"on_network": " trên mạng $network",
 			"delete_token": "Xóa token",
-			"edit_token": "Chỉnh sửa token"
+			"edit_token": "Chỉnh sửa token",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Chi tiết token",

@@ -1143,7 +1143,10 @@
 			"hide_more_networks": "Ocultar más redes",
 			"on_network": "en red ",
 			"delete_token": "Eliminar token",
-			"edit_token": "Editar token"
+			"edit_token": "Editar token",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Detalles del token",

@@ -1143,7 +1143,10 @@
 			"hide_more_networks": "Nascondi altre reti",
 			"on_network": " su $network",
 			"delete_token": "Elimina token",
-			"edit_token": "Modifica token"
+			"edit_token": "Modifica token",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Dettagli del token",

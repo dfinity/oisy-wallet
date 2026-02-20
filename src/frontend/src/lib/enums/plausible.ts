@@ -46,6 +46,7 @@ export enum PLAUSIBLE_EVENT_SOURCES {
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	GROUP = 'group',
 	VISIBILITY = 'visibility',
+	SORT = 'sort',
 	SORT_ASC = 'sort_asc',
 	SORT_DESC = 'sort_desc',
 	PRICE = 'price'

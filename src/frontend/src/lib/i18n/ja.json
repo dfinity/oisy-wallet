@@ -1143,7 +1143,10 @@
 			"hide_more_networks": "ネットワークを非表示",
 			"on_network": "$network上",
 			"delete_token": "トークンを削除",
-			"edit_token": "トークンを編集"
+			"edit_token": "トークンを編集",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "トークンの詳細",

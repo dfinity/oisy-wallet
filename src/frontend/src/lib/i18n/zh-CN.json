@@ -1143,7 +1143,10 @@
 			"hide_more_networks": "隐藏更多网络",
 			"on_network": " 于 $network",
 			"delete_token": "删除代币",
-			"edit_token": "编辑代币"
+			"edit_token": "编辑代币",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "代币详情",
