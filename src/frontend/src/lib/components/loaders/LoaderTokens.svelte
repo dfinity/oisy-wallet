@@ -37,12 +37,6 @@
 	import { splCustomTokensNotInitialized } from '$sol/derived/spl.derived';
 	import { loadSplTokens } from '$sol/services/spl.services';
 
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
-
 	$effect(() => {
 		loadIcrcTokens({ identity: $authIdentity });
 	});
@@ -115,8 +109,6 @@
 		}
 	});
 </script>
-
-{@render children()}
 
 <LoaderCollections />
 
