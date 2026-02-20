@@ -166,7 +166,7 @@ describe('tokens.utils', () => {
 			expect(result.at(-1)?.id).toBe(mockDeprecatedToken.id);
 		});
 
-		it('should sort by symbol (descending) when USD balance is tied and unpinned', () => {
+		it('should sort by symbol (ascending) when USD balance is tied and unpinned', () => {
 			const tokenSymbolA: Token = {
 				...mockValidToken,
 				id: parseTokenId('TokenId-SYM-A'),
