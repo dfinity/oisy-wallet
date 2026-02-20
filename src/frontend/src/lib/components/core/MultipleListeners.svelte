@@ -6,10 +6,9 @@
 
 	interface Props {
 		tokens: OptionToken[];
-		children: Snippet;
 	}
 
-	let { tokens, children }: Props = $props();
+	let { tokens }: Props = $props();
 
 	let listeners = $derived($authSignedIn ? mapListeners(tokens) : []);
 </script>
@@ -17,5 +16,3 @@
 {#each listeners as { token, listener: Listener } (token.id)}
 	<Listener {token} />
 {/each}
-
-{@render children()}
