@@ -1,4 +1,4 @@
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { AuthClient, IdbStorage, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
 
@@ -7,6 +7,8 @@ export class AuthClientProvider {
 
 	// We use a dedicated storage for the auth client to better manage it, e.g. clear it for a new login
 	readonly #storage: IdbStorage;
+
+	#authClient: AuthClient | undefined;
 
 	private constructor() {
 		this.#storage = new IdbStorage();
@@ -23,6 +25,12 @@ export class AuthClientProvider {
 	createAuthClient = async (
 		{ hideConsoleWarn }: { hideConsoleWarn: boolean } = { hideConsoleWarn: true }
 	): Promise<AuthClient> => {
+		const authClient = this.#authClient;
+
+		if (nonNullish(authClient)) {
+			return authClient;
+		}
+
 		const hideWarn = (): (() => void) => {
 			// TODO: Workaround for agent-js. Disable the console.warn "You are using a custom storage provider..."
 			// printed in the browser console as pseudo-documentation. There is no opt-out, and we know our custom storage
@@ -39,13 +47,15 @@ export class AuthClientProvider {
 		const redoConsoleWarn = hideConsoleWarn ? hideWarn() : undefined;
 
 		try {
-			return await AuthClient.create({
+			this.#authClient = await AuthClient.create({
 				storage: this.#storage,
 				idleOptions: {
 					disableIdle: true,
 					disableDefaultIdleCallback: true
 				}
 			});
+
+			return this.#authClient;
 		} finally {
 			redoConsoleWarn?.();
 		}
@@ -81,5 +91,13 @@ export class AuthClientProvider {
 
 	get storage(): IdbStorage {
 		return this.#storage;
+	}
+
+	/**
+	 * Reset the internal state of the provider.
+	 * This is notably useful for testing purposes to ensure that each test starts with a clean state.
+	 */
+	reset() {
+		this.#authClient = undefined;
 	}
 }
