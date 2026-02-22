@@ -176,7 +176,6 @@
 			"title_part_1": "Deine Wallet ist gesichert",
 			"title_part_2": "Du hast deine Wallet gesperrt. Entsperre sie um fortzufahren, oder logge dich aus.",
 			"unlock": "Entsperren",
-			"unlock_with_legacy_login": "Entsperren via Legacy Login",
 			"logout": "Ausloggen",
 			"logout_clear_cash_message": "Ausloggen wird alle lokal gecachten Daten löschen",
 			"learn_more": "Erfahre mehr"

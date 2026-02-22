@@ -163,7 +163,6 @@ interface I18nLock {
 		title_part_1: string;
 		title_part_2: string;
 		unlock: string;
-		unlock_with_legacy_login: string;
 		logout: string;
 		logout_clear_cash_message: string;
 		learn_more: string;
