@@ -30,33 +30,33 @@
 <LoaderUserProfile>
 	<PowProtector>
 		<Loader>
-			<LoaderTokens>
-				<LoaderEthBalances>
-					<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
-						<LoaderEthTransactions>
-							<LoaderWallets>
-								<ExchangeWorker>
-									<LoaderMetamask>
-										<UserSnapshotWorker>
-											<LoaderContacts>
-												<TransactionsIdbSetter>
-													<BalancesIdbSetter>
-														<LoaderHarvest>
-															<StakeContext>
-																{@render children()}
-															</StakeContext>
-														</LoaderHarvest>
-													</BalancesIdbSetter>
-												</TransactionsIdbSetter>
-											</LoaderContacts>
-										</UserSnapshotWorker>
-									</LoaderMetamask>
-								</ExchangeWorker>
-							</LoaderWallets>
-						</LoaderEthTransactions>
-					</MultipleListeners>
-				</LoaderEthBalances>
-			</LoaderTokens>
+			<LoaderTokens />
+
+			<LoaderEthBalances />
+
+			<MultipleListeners tokens={$enabledFungibleNetworkTokens} />
+
+			<LoaderEthTransactions />
+
+			<LoaderWallets />
+
+			<ExchangeWorker />
+
+			<LoaderMetamask />
+
+			<UserSnapshotWorker />
+
+			<LoaderContacts />
+
+			<TransactionsIdbSetter />
+
+			<BalancesIdbSetter />
+
+			<LoaderHarvest />
+
+			<StakeContext>
+				{@render children()}
+			</StakeContext>
 		</Loader>
 	</PowProtector>
 </LoaderUserProfile>
