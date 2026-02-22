@@ -126,7 +126,7 @@ export abstract class AppWorker {
 	};
 
 	/**
-	 * Reset the internal state of the provider.
+	 * Reset the internal state of the worker service.
 	 * This is notably useful for testing purposes to ensure that each test starts with a clean state.
 	 */
 	static resetForTesting() {
