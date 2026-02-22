@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
-	import { onDestroy, onMount, type Snippet } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { EXCHANGE_DISABLED } from '$env/exchange.env';
 	import { erc4626TokensExchangeData } from '$eth/derived/erc4626.derived';
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
@@ -8,12 +8,6 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { enabledSplTokenAddresses } from '$sol/derived/spl.derived';
-
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	let worker = $state<ExchangeWorker | undefined>();
 
@@ -53,5 +47,3 @@
 		debounceSyncTimer();
 	});
 </script>
-
-{@render children()}

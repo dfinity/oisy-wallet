@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -15,12 +14,6 @@
 		enabledNonFungibleTokensWithoutSpam
 	} from '$lib/derived/tokens.derived';
 	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
-
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	let fungibleTokens = $derived([
 		...$enabledEthereumTokens,
@@ -43,5 +36,3 @@
 <LoaderMultipleEthTransactions interval={WALLET_TIMER_INTERVAL_MILLIS} tokens={fungibleTokens} />
 
 <LoaderMultipleEthTransactions interval={nftInterval} tokens={nonFungibleTokens} />
-
-{@render children()}

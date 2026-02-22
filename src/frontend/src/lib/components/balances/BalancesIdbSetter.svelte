@@ -1,16 +1,10 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
-	import { type Snippet, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 	import { setIdbBalancesStore } from '$lib/api/idb-balances.api';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
-
-	interface Props {
-		children?: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	// We don't need to track identity and tokens changes for every store, since we are interested in the final result of the balances store.
 	// And the balances store will be updated when the identity or tokens change too.
@@ -29,5 +23,3 @@
 		debounceSetIdbBalancesStore();
 	});
 </script>
-
-{@render children?.()}
