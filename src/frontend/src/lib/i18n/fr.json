@@ -176,7 +176,6 @@
 			"title_part_1": "Déverrouillez pour continuer",
 			"title_part_2": "Vous avez précédemment verrouillé votre portefeuille pour le protéger. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
 			"unlock": "Ouvrir",
-			"unlock_with_legacy_login": "",
 			"logout": "Se déconnecter",
 			"logout_clear_cash_message": "La déconnexion effacera toutes les données mises en cache",
 			"learn_more": "En savoir plus"
