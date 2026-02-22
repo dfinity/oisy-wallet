@@ -1,25 +1,20 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { type Snippet, untrack } from 'svelte';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { untrack } from 'svelte';
 	import { batchLoadTransactions } from '$eth/services/eth-transactions-batch.services';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
-	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import {
-		enabledErc20Tokens,
-		enabledNonFungibleTokensWithoutSpam
-	} from '$lib/derived/tokens.derived';
 	import { syncTransactionsFromCache } from '$lib/services/listener.services';
+	import type { Token } from '$lib/types/token';
 
 	interface Props {
-		children: Snippet;
+		tokens: Token[];
+		interval: number;
 	}
 
-	let { children }: Props = $props();
+	let { tokens, interval }: Props = $props();
 
 	let loading = $state(false);
 	let timer = $state<NodeJS.Timeout | undefined>();
@@ -30,13 +25,6 @@
 			timer = undefined;
 		}
 	};
-
-	let tokens = $derived([
-		...$enabledEthereumTokens,
-		...$enabledErc20Tokens,
-		...$enabledEvmTokens,
-		...$enabledNonFungibleTokensWithoutSpam
-	]);
 
 	const onLoad = async () => {
 		if (loading) {
@@ -117,6 +105,4 @@
 	});
 </script>
 
-{@render children()}
-
-<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad} />
+<IntervalLoader {interval} {onLoad} />

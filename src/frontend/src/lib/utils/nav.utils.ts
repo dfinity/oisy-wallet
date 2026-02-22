@@ -5,16 +5,18 @@ import {
 	COLLECTION_PARAM,
 	NETWORK_PARAM,
 	NFT_PARAM,
+	PARAM_DELETE_IDB_CACHE,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
-import type { StorageStore } from '$lib/stores/storage.store';
+import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
+import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
@@ -68,18 +70,20 @@ export const isRouteEarn = ({ route: { id } }: Page): boolean => isEarnPath(id);
 export const isRouteEarnGold = ({ route: { id } }: Page): boolean => isEarnGoldPath(id);
 
 const tokenUrl = ({
-	token: {
-		name,
-		network: { id: networkId }
-	},
+	token,
 	path
 }: {
 	token: Token;
 	path: AppPath.Transactions | undefined;
-}): string =>
-	`${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(
-		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
-	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
+}): string => {
+	const {
+		network: { id: networkId }
+	} = token;
+
+	const identifier = getPageTokenIdentifier(token);
+
+	return `${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(identifier)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
+};
 
 export const networkParam = (networkId: NetworkId | undefined): string =>
 	isNullish(networkId) ? '' : `${NETWORK_PARAM}=${networkId.description}`;
@@ -112,8 +116,8 @@ export const back = async ({ pop }: { pop: boolean }) => {
 	await goto('/');
 };
 
-export const gotoReplaceRoot = async () => {
-	await goto('/', { replaceState: true });
+export const gotoReplaceRoot = async (deleteIdbCache = false) => {
+	await goto(deleteIdbCache ? `/?${PARAM_DELETE_IDB_CACHE}=true` : '/', { replaceState: true });
 };
 
 export const removeSearchParam = ({ url, searchParam }: { url: URL; searchParam: string }) => {
@@ -148,20 +152,10 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 
 	const token = searchParams?.get(TOKEN_PARAM);
 
-	const replaceEmoji = (input: string | null): string | null => {
-		if (input === null) {
-			return null;
-		}
-
-		return input.replace(/\\u([\dA-Fa-f]+)/g, (_match, hex) =>
-			String.fromCodePoint(Number(`0x${hex}`))
-		);
-	};
-
 	const uri = searchParams?.get(URI_PARAM);
 
 	return {
-		[TOKEN_PARAM]: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
+		[TOKEN_PARAM]: nonNullish(token) ? decodeURIComponent(token) : null,
 		[NETWORK_PARAM]: searchParams?.get(NETWORK_PARAM),
 		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null,
 		[NFT_PARAM]: searchParams?.get(NFT_PARAM),
@@ -177,21 +171,15 @@ export const resetRouteParams = (): RouteParams => ({
 	[URI_PARAM]: null
 });
 
-export const switchNetwork = async ({
-	networkId,
-	userSelectedNetworkStore
-}: {
-	networkId: Option<NetworkId>;
-	userSelectedNetworkStore: StorageStore<string | undefined>;
-}) => {
+export const switchNetwork = async ({ networkId }: { networkId: Option<NetworkId> }) => {
 	const url = new URL(window.location.href);
 
 	if (isNullish(networkId) || isNullish(networkId.description)) {
 		url.searchParams.delete(NETWORK_PARAM);
-		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+		userSelectedNetworkStore.set(undefined);
 	} else {
 		url.searchParams.set(NETWORK_PARAM, networkId.description);
-		userSelectedNetworkStore.set({ key: 'user-selected-network', value: networkId.description });
+		userSelectedNetworkStore.set(networkId);
 	}
 
 	await goto(url, { replaceState: true, noScroll: true });

@@ -24,7 +24,7 @@
 		request: WalletKitTypes.SessionRequest;
 	}
 
-	let { listener = $bindable(), request }: Props = $props();
+	let { listener, request }: Props = $props();
 
 	let method = $derived(request.params.request.method);
 

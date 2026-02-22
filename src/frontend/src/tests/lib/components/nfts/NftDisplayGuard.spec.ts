@@ -6,8 +6,8 @@ import {
 	NFT_PLACEHOLDER_UNSUPPORTED
 } from '$lib/constants/test-ids.constants';
 import { modalNftImageConsent } from '$lib/derived/modal.derived';
+import { MediaStatusEnum } from '$lib/enums/media-status';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
-import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -170,8 +170,8 @@ describe('NftDisplayGuard', () => {
 			nft: {
 				...getNftAzuki(true),
 				mediaStatus: {
-					image: NftMediaStatusEnum.INVALID_DATA,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.INVALID_DATA,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				}
 			},
 			children: mockSnippet,
@@ -190,8 +190,8 @@ describe('NftDisplayGuard', () => {
 			nft: {
 				...getNftAzuki(true),
 				mediaStatus: {
-					image: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				}
 			},
 			children: mockSnippet,
@@ -210,8 +210,8 @@ describe('NftDisplayGuard', () => {
 			nft: {
 				...getNftAzuki(true),
 				mediaStatus: {
-					image: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE,
-					thumbnail: NftMediaStatusEnum.INVALID_DATA
+					image: MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE,
+					thumbnail: MediaStatusEnum.INVALID_DATA
 				}
 			},
 			children: mockSnippet,

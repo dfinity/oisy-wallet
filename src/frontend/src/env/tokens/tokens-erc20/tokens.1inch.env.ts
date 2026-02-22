@@ -19,6 +19,5 @@ export const ONEINCH_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: ONEINCH_SYMBOL,
 	decimals: ONEINCH_DECIMALS,
 	icon: oneInch,
-	address: '0x111111111117dc0aa78b770fa6a738034120c302',
-	exchange: 'erc20'
+	address: '0x111111111117dc0aa78b770fa6a738034120c302'
 };

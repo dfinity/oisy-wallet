@@ -21,6 +21,5 @@ export const BONK_TOKEN: RequiredEvmErc20Token = {
 	decimals: BONK_DECIMALS,
 	icon: bonk,
 	address: '0x09199d9a5f4448d0848e4395d065e1ad9c4a1f74',
-	exchange: 'erc20',
 	groupData: BONK_TOKEN_GROUP
 };

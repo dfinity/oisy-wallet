@@ -11,7 +11,6 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
@@ -128,7 +127,7 @@ describe('LoaderEthBalances', () => {
 		expect(loadErc20Balances).toHaveBeenCalledOnce();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
 			address: mockEthAddress,
-			erc20Tokens: mockErc20DefaultTokens
+			tokens: mockErc20DefaultTokens
 		});
 	});
 
@@ -159,7 +158,7 @@ describe('LoaderEthBalances', () => {
 		expect(loadErc20Balances).toHaveBeenCalledOnce();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
 			address: mockEthAddress,
-			erc20Tokens: mockErc20DefaultTokens
+			tokens: mockErc20DefaultTokens
 		});
 
 		ethAddressStore.set({ data: mockEthAddress2, certified: false });
@@ -172,7 +171,7 @@ describe('LoaderEthBalances', () => {
 		expect(loadErc20Balances).toHaveBeenCalledTimes(2);
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(2, {
 			address: mockEthAddress2,
-			erc20Tokens: mockErc20DefaultTokens
+			tokens: mockErc20DefaultTokens
 		});
 
 		vi.unstubAllGlobals();
@@ -181,15 +180,9 @@ describe('LoaderEthBalances', () => {
 	it('should not handle errors', async () => {
 		vi.mocked(loadEthBalances).mockRejectedValue(new Error('Error loading balances'));
 
-		const { getByTestId } = render(LoaderEthBalances, {
-			props: {
-				children: mockSnippet
-			}
-		});
+		render(LoaderEthBalances);
 
 		await tick();
-
-		expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
@@ -197,7 +190,7 @@ describe('LoaderEthBalances', () => {
 		expect(loadErc20Balances).toHaveBeenCalledOnce();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
 			address: mockEthAddress,
-			erc20Tokens: mockErc20DefaultTokens
+			tokens: mockErc20DefaultTokens
 		});
 	});
 });

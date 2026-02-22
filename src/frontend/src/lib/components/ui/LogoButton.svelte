@@ -76,15 +76,19 @@
 				{/if}
 				<span class="mr-2 flex">{@render logo()}</span>
 				<span class="flex min-w-0 flex-col text-left">
-					<span class="truncate text-nowrap">
+					<span class="flex min-w-0 items-center">
 						{#if nonNullish(title)}
-							<span class="text-lg font-bold text-primary">{@render title()}</span>
+							<span class="min-w-0 truncate text-lg font-bold text-nowrap text-primary">
+								{@render title()}
+							</span>
 						{/if}
 						{#if nonNullish(subtitle)}
 							{#if dividers}
 								<span class="text-tertiary"><Divider /></span>
 							{/if}
-							<span class="text-base text-tertiary">{@render subtitle()}</span>
+							<span class="text-base text-nowrap text-tertiary">
+								{@render subtitle()}
+							</span>
 						{/if}
 					</span>
 					{#if nonNullish(description)}

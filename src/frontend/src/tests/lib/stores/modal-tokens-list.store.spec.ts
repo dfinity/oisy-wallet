@@ -36,7 +36,9 @@ describe('modalTokensListStore', () => {
 			balance: ckBtcBalance,
 			decimals: ckBtcToken.decimals,
 			exchangeRate: ckBtcExchangeValue
-		})
+		}),
+		usdPrice: 1,
+		usdPriceChangePercentage24h: undefined
 	};
 	const mockTokenUi2 = {
 		...mockToken2,
@@ -45,7 +47,9 @@ describe('modalTokensListStore', () => {
 			balance: icpBalance,
 			decimals: ICP_TOKEN.decimals,
 			exchangeRate: icpExchangeValue
-		})
+		}),
+		usdPrice: 2,
+		usdPriceChangePercentage24h: undefined
 	};
 
 	beforeEach(() => {
@@ -163,7 +167,9 @@ describe('modalTokensListStore', () => {
 				balance: ethBalance,
 				decimals: ETHEREUM_TOKEN.decimals,
 				exchangeRate: ethExchangeValue
-			})
+			}),
+			usdPrice: 3,
+			usdPriceChangePercentage24h: undefined
 		};
 		const mockTokenUi4 = {
 			...mockToken4,
@@ -172,7 +178,9 @@ describe('modalTokensListStore', () => {
 				balance: ethBalance,
 				decimals: ARB_TOKEN.decimals,
 				exchangeRate: ethExchangeValue
-			})
+			}),
+			usdPrice: 3,
+			usdPriceChangePercentage24h: undefined
 		};
 
 		beforeEach(() => {
@@ -215,7 +223,7 @@ describe('modalTokensListStore', () => {
 
 			expect(result).toHaveLength(2);
 
-			expect(result).toEqual([mockTokenUi4, mockTokenUi3]);
+			expect(result).toEqual([mockTokenUi3, mockTokenUi4]);
 		});
 
 		it('should filter tokens by multiple network IDs', () => {
@@ -228,7 +236,7 @@ describe('modalTokensListStore', () => {
 			const result = get(filteredTokens);
 
 			expect(result).toHaveLength(2);
-			expect(result).toEqual([mockTokenUi4, mockTokenUi3]);
+			expect(result).toEqual([mockTokenUi3, mockTokenUi4]);
 		});
 
 		it('should combine filterNetworksIds with filterNetwork', () => {
@@ -290,7 +298,7 @@ describe('modalTokensListStore', () => {
 				filterZeroBalance: false
 			});
 
-			expect(get(filteredTokens)).toEqual([mockTokenUi4, mockTokenUi3]);
+			expect(get(filteredTokens)).toEqual([mockTokenUi3, mockTokenUi4]);
 		});
 
 		it('should clear filterNetworksIds when changed setFilterNetworksIds to empty array', () => {
@@ -299,13 +307,13 @@ describe('modalTokensListStore', () => {
 				filterZeroBalance: false
 			});
 
-			expect(get(filteredTokens)).toEqual([mockTokenUi4, mockTokenUi3]);
+			expect(get(filteredTokens)).toEqual([mockTokenUi3, mockTokenUi4]);
 
 			setFilterNetworksIds([]);
 
 			const result = get(filteredTokens);
 
-			expect(result).toEqual([mockTokenUi4, mockTokenUi3]);
+			expect(result).toEqual([mockTokenUi3, mockTokenUi4]);
 		});
 	});
 });

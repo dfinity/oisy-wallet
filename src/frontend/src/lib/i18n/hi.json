@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
-			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "$name लोगो",
@@ -121,7 +118,6 @@
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
-			"legacy_login": "",
 			"asset_types": "",
 			"instant_and_private": "",
 			"advanced_cryptography": "",
@@ -155,23 +151,16 @@
 				"description": "",
 				"login_page_looks_different": "",
 				"use_identity_number": "",
-				"lost_identity_number": "",
 				"feedback_text": "",
 				"thanks_text": "धन्यवाद!",
 				"useful_links": "",
 				"identity_new_identity": "$oisy_short वॉलेट इंटरनेट आइडेंटिटी डोमेन को: <span class=\"font-bold\">identity.internetcomputer.org</span> पर स्विच करता है",
 				"switch_to_new_internet_identity": "",
-				"identity_legacy_identity_title": "",
-				"identity_legacy_identity_item_1": "",
-				"identity_legacy_identity_item_2": "",
 				"identity_new_identity_title": "",
 				"identity_new_identity_item_1": "",
-				"identity_new_identity_item_2": "",
-				"identity_new_identity_link": "",
-				"identity_legacy_sign_in": "विरासत इंटरनेट आइडेंटिटी डोमेन के साथ साइन इन करें",
-				"identity_learn_more": "$oisy_short डॉक्स पर अधिक जानें",
 				"oisy_introduction": "",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "",
 				"need_help": "मदद चाहिए",
@@ -187,7 +176,6 @@
 			"title_part_1": "जारी रखने के लिए अनलॉक करें",
 			"title_part_2": "आपने पहले अपने वॉलेट को सुरक्षित रखने के लिए लॉक किया था। जहाँ से छोड़ा था वहीं से शुरू करें या लॉग आउट करें।",
 			"unlock": "अनलॉक करें",
-			"unlock_with_legacy_login": "",
 			"logout": "लॉगआउट करें",
 			"logout_clear_cash_message": "लॉग आउट करने से सभी कैश्ड डेटा साफ़ हो जाएगा",
 			"learn_more": "और जानें"
@@ -217,15 +205,17 @@
 			"website": "$dAppName की छवि"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "सोशल मीडिया",
-			"verifiable_credentials": "सत्यापन योग्य क्रेडेंशियल्स",
-			"staking": "स्टेकिंग",
-			"walletconnect": "वॉलेटकनेक्ट",
-			"game": "गेम",
-			"tools": "टूल्स",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "",
-			"nft": ""
+			"defi": "DeFi",
+			"game": "गेम",
+			"nft": "",
+			"rwa": "",
+			"social_media": "सोशल मीडिया",
+			"staking": "स्टेकिंग",
+			"tools": "टूल्स",
+			"walletconnect": "वॉलेटकनेक्ट"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -412,6 +402,31 @@
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -611,6 +626,7 @@
 			"no_infura_erc721_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC721 प्रदाता नहीं है",
 			"no_infura_erc1155_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC1155 प्रदाता नहीं है",
 			"no_infura_erc20_icp_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC20 ICP प्रदाता नहीं है",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "नेटवर्क $network के लिए कोई सोलाना नेटवर्क नहीं है",
 			"loading_address": "$symbol पता लोड करते समय त्रुटि।",
 			"loading_balance": "नेटवर्क $network के लिए $symbol बैलेंस लोड करते समय त्रुटि।",
@@ -631,6 +647,7 @@
 			"icrc_canisters": "ICRC कैनिस्टर लोड करते समय त्रुटि।",
 			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "ERC20 कस्टम टोकन लोड करते समय त्रुटि।",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "ERC721 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc1155_custom_tokens": "ERC1155 कस्टम टोकन लोड करते समय त्रुटि।",
 			"spl_custom_tokens": "SPL कस्टम टोकन लोड करते समय त्रुटि।",
@@ -865,6 +882,7 @@
 			"unknown_cketh": "ckETH टोकन पुनः प्राप्त नहीं किया जा सकता है।",
 			"destination_address_invalid": "गंतव्य पता अमान्य है।",
 			"amount_invalid": "राशि अमान्य है।",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "गैस के लिए अपर्याप्त धन",
 			"insufficient_funds_for_amount": "राशि के लिए अपर्याप्त धन",
 			"insufficient_ethereum_funds_to_cover_the_fees": "शुल्क को कवर करने के लिए अपर्याप्त एथेरियम धन",
@@ -1807,7 +1825,6 @@
 			},
 			"title": "",
 			"instruction": "",
-			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
@@ -2005,6 +2022,9 @@
 			"minute_plural": "मिनट",
 			"second": "सेकंड",
 			"second_plural": "सेकंड"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
-			"test_banner_beta": "Это бета-версия. Пожалуйста, используйте с осторожностью.",
-			"internet_identity_banner_first_part": "",
-			"internet_identity_banner_second_part": "",
-			"internet_identity_banner_button": ""
+			"test_banner_beta": "Это бета-версия. Пожалуйста, используйте с осторожностью."
 		},
 		"alt": {
 			"logo": "Логотип $name",
@@ -121,7 +118,6 @@
 			"logout": "Выйти",
 			"lock": "Закрыть",
 			"authenticate": "Открыть или создать",
-			"legacy_login": "",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP и другие",
 			"instant_and_private": "Приватный доступ в любой момент",
 			"advanced_cryptography": "Защищено передовой криптографией - 100% onchain",
@@ -155,23 +151,16 @@
 				"description": "Похоже вы отменили свой вход в систему или регистрацию. Мы хотели бы понять что произошло чтобы улучшить ваш пользовательский опыт.",
 				"login_page_looks_different": "",
 				"use_identity_number": "",
-				"lost_identity_number": "",
 				"feedback_text": "Ваши отзывы помогают нам улучшать $oisy_short.",
 				"thanks_text": "Спасибо!",
 				"useful_links": "",
 				"identity_new_identity": "Кошелек $oisy_short переключает домен Internet Identity на: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "",
-				"identity_legacy_identity_title": "",
-				"identity_legacy_identity_item_1": "",
-				"identity_legacy_identity_item_2": "",
 				"identity_new_identity_title": "",
 				"identity_new_identity_item_1": "",
-				"identity_new_identity_item_2": "",
-				"identity_new_identity_link": "",
-				"identity_legacy_sign_in": "Войти с устаревшим доменом Internet Identity",
-				"identity_learn_more": "Узнайте больше в документации $oisy_short",
 				"oisy_introduction": "",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "",
 				"need_help": "Нужна помощь",
@@ -187,7 +176,6 @@
 			"title_part_1": "Разблокируйте, чтобы продолжить",
 			"title_part_2": "Вы ранее заблокировали свой кошелёк для безопасности. Продолжите работу с того места, где остановились или выйдите из него.",
 			"unlock": "Разблокировать",
-			"unlock_with_legacy_login": "",
 			"logout": "Выйти из системы",
 			"logout_clear_cash_message": "Выйти и очистить сообщение об активах",
 			"learn_more": "Узнать больше"
@@ -217,15 +205,17 @@
 			"website": "Изображение $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Социальные сети",
-			"verifiable_credentials": "Verifiable credentials",
-			"staking": "Стейкинг",
-			"walletconnect": "WalletConnect",
-			"game": "Игра",
-			"tools": "Инструменты",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "ИИ",
-			"nft": "NFT"
+			"defi": "DeFi",
+			"game": "Игра",
+			"nft": "NFT",
+			"rwa": "",
+			"social_media": "Социальные сети",
+			"staking": "Стейкинг",
+			"tools": "Инструменты",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -415,6 +405,31 @@
 				"name": "Kamino",
 				"one_liner": "Kamino — крупнейший протокол заимствования и кредитования в сети Solana, обеспечивающий значительную долю активности DeFi в сети.",
 				"description": "Kamino — это децентрализованная финансовая (DeFi) платформа на блокчейне Solana, которая объединяет предоставление ликвидности, кредитование и торговлю с использованием заемных средств в единый набор продуктов. Она упрощает эти стратегии DeFi, особенно благодаря автоматизированным хранилищам ликвидности и системе Kamino Lend и использует концентрированное управление ликвидностью для повышения эффективности использования капитала для своих пользователей."
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -611,6 +626,7 @@
 			"no_infura_erc721_provider": "Нет поставщика Infura ERC721 для сети $network",
 			"no_infura_erc1155_provider": "Нет поставщика Infura ERC1155 для сети $network",
 			"no_infura_erc20_icp_provider": "Нет поставщика Infura ERC20 ICP для сети $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Нет сети Solana для сети $network",
 			"loading_address": "Ошибка при загрузке адреса $symbol.",
 			"loading_balance": "Ошибка при загрузке баланса $symbol для сети $network.",
@@ -631,6 +647,7 @@
 			"icrc_canisters": "Ошибка при загрузке контейнеров ICRC.",
 			"icrc_canister_loading": "Токен $ledgerCanisterId не может быть загружен, поскольку он в настоящее время не отвечает.",
 			"erc20_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-721.",
 			"erc1155_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-1155.",
 			"spl_custom_tokens": "Ошибка при загрузке пользовательских токенов SPL.",
@@ -865,6 +882,7 @@
 			"unknown_cketh": "Токен ckETH не может быть получен.",
 			"destination_address_invalid": "Адрес получателя недействителен.",
 			"amount_invalid": "Сумма недействительна.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Недостаточно средств для газа",
 			"insufficient_funds_for_amount": "Недостаточно средств для этой суммы",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Недостаточно средств Ethereum для покрытия комиссий",
@@ -1807,7 +1825,6 @@
 			},
 			"title": "",
 			"instruction": "Нажимая на кнопку вы одобряете $link",
-			"instruction_two_buttons": "",
 			"body": ""
 		},
 		"alt": {
@@ -2005,6 +2022,9 @@
 			"minute_plural": "минут",
 			"second": "секунда",
 			"second_plural": "секунд"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

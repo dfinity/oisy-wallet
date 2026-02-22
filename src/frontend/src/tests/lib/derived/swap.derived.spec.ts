@@ -17,7 +17,7 @@ describe('swap.derived', () => {
 		});
 
 		it('should return selected token as sourceToken and undefined for destinationToken', () => {
-			mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
+			mockPage.mockToken(ICP_TOKEN);
 
 			balancesStore.set({
 				id: ICP_TOKEN_ID,
@@ -31,7 +31,7 @@ describe('swap.derived', () => {
 		});
 
 		it('should return selected token as destinationToken and undefined for sourceToken', () => {
-			mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
+			mockPage.mockToken(ICP_TOKEN);
 
 			balancesStore.set({
 				id: ICP_TOKEN_ID,
@@ -45,7 +45,7 @@ describe('swap.derived', () => {
 		});
 
 		it('should return selected ETH token as sourceToken and undefined for destinationToken', () => {
-			mockPage.mock({ token: ETHEREUM_TOKEN.name, network: ETHEREUM_TOKEN.network.id.description });
+			mockPage.mockToken(ETHEREUM_TOKEN);
 
 			balancesStore.set({
 				id: ETHEREUM_TOKEN_ID,
@@ -59,7 +59,7 @@ describe('swap.derived', () => {
 		});
 
 		it('should return selected ETH token as destinationToken and undefined for sourceToken', () => {
-			mockPage.mock({ token: ETHEREUM_TOKEN.name, network: ETHEREUM_TOKEN.network.id.description });
+			mockPage.mockToken(ETHEREUM_TOKEN);
 
 			balancesStore.set({
 				id: ETHEREUM_TOKEN_ID,

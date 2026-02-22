@@ -3,9 +3,9 @@ import type {
 	TransactionStatusSchema,
 	TransactionTypeSchema
 } from '$lib/schema/transaction.schema';
-import type { TransactionResponse as AlchemyTransactionResponse } from 'alchemy-sdk';
 import type { FeeData } from 'ethers/providers';
 import type { Transaction as EthersTransactionLib } from 'ethers/transaction';
+import type { Transaction as AlchemyTransaction } from 'viem';
 import type * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
@@ -20,13 +20,6 @@ export type EthersTransaction = Pick<
 	gasPrice?: bigint;
 };
 
-// TODO: Remove this type when `alchemy-sdk` upgrades to `ethers` v6 since `TransactionResponse` will be with BigInt
-export type TransactionResponseWithBigInt = Omit<
-	AlchemyTransactionResponse,
-	'value' | 'gasLimit' | 'gasPrice' | 'chainId'
-> &
-	Pick<EthersTransaction, 'value' | 'gasLimit' | 'gasPrice' | 'chainId'>;
-
 export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
 	Required<Pick<EthersTransaction, 'from'>> & {
 		blockNumber?: number;
@@ -35,6 +28,13 @@ export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
 		displayTimestamp?: number;
 		tokenId?: number;
 	};
+
+export type TransactionResponseWithBigInt = Omit<
+	AlchemyTransaction,
+	'gas' | 'chainId' | 'to' | 'blockNumber' | 'input'
+> &
+	Pick<EthersTransaction, 'gasLimit' | 'chainId' | 'to' | 'data'> &
+	Pick<Transaction, 'blockNumber'>;
 
 export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
 	gas: bigint;

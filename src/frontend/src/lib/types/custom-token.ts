@@ -1,4 +1,7 @@
-import type { Token as BackendToken } from '$declarations/backend/backend.did';
+import type {
+	CustomToken as BackendCustomToken,
+	Token as BackendToken
+} from '$declarations/backend/backend.did';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Dip721Token } from '$icp/types/dip721-token';
 import type { ExtToken } from '$icp/types/ext-token';
@@ -43,7 +46,7 @@ export type SaveCustomToken = CustomTokenState &
 export type SaveCustomTokenWithKey = CustomTokenState &
 	(
 		| TokenVariant<'Icrc', IcrcSaveCustomToken>
-		| TokenVariant<'Erc20' | 'Erc721' | 'Erc1155', ErcSaveCustomToken>
+		| TokenVariant<'Erc20' | 'Erc721' | 'Erc1155' | 'Erc4626', ErcSaveCustomToken>
 		| TokenVariant<'SplDevnet' | 'SplMainnet', SplSaveCustomToken>
 		| TokenVariant<'ExtV2', ExtSaveCustomToken>
 		| TokenVariant<'Dip721', Dip721SaveCustomToken>
@@ -51,7 +54,7 @@ export type SaveCustomTokenWithKey = CustomTokenState &
 	);
 
 export type SaveCustomErcVariant = CustomTokenState &
-	TokenVariant<'Erc20' | 'Erc721' | 'Erc1155', ErcSaveCustomToken>;
+	TokenVariant<'Erc20' | 'Erc721' | 'Erc1155' | 'Erc4626', ErcSaveCustomToken>;
 export type SaveCustomErc721Variant = CustomTokenState & TokenVariant<'Erc721', ErcSaveCustomToken>;
 export type SaveCustomErc1155Variant = CustomTokenState &
 	TokenVariant<'Erc1155', ErcSaveCustomToken>;
@@ -59,4 +62,7 @@ export type SaveCustomExtVariant = CustomTokenState & TokenVariant<'ExtV2', ExtS
 
 export type CustomToken<T extends Token> = TokenToggleable<T>;
 
-export type LoadCustomTokenParams = QueryAndUpdateRequestParams & { useCache?: boolean };
+export type LoadCustomTokenParams = QueryAndUpdateRequestParams & {
+	tokens?: BackendCustomToken[];
+	useCache?: boolean;
+};

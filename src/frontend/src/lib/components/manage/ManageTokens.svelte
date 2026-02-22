@@ -13,7 +13,9 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkICPTestnet, selectedNetwork } from '$lib/derived/network.derived';
+	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
@@ -21,11 +23,13 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { ExchangesData } from '$lib/types/exchange';
+	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
 	interface Props {
+		network?: Network;
 		initialSearch?: string;
 		infoElement?: Snippet;
 		isNftsPage?: boolean;
@@ -33,7 +37,14 @@
 		onAddToken: () => void;
 	}
 
-	let { initialSearch, infoElement, isNftsPage, onSave, onAddToken }: Props = $props();
+	let {
+		network = $bindable(),
+		initialSearch,
+		infoElement,
+		isNftsPage,
+		onSave,
+		onAddToken
+	}: Props = $props();
 
 	// To avoid strange behaviour when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
@@ -55,6 +66,8 @@
 			? pinEnabledTokensAtTop(
 					sortTokens({
 						$tokens: $allTokens,
+						$balances: $balancesStore,
+						$stakeBalances,
 						$exchanges: exchangesStaticData,
 						$tokensToPin
 					})
@@ -69,7 +82,7 @@
 		initModalTokensListContext({
 			tokens: [],
 			filterZeroBalance: false,
-			filterNetwork: $selectedNetwork,
+			filterNetwork: network ?? $selectedNetwork,
 			// TODO: This statement is not reactive. Check if it is intentional or not.
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally
@@ -82,7 +95,9 @@
 		})
 	);
 
-	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+	const { setTokens, filterNetwork } = getContext<ModalTokensListContext>(
+		MODAL_TOKENS_LIST_CONTEXT_KEY
+	);
 
 	const updateContextTokens = () => {
 		// Keep the context list in sync only until the user starts editing.
@@ -97,6 +112,12 @@
 		[userHasEdited, allTokensSorted];
 
 		untrack(() => updateContextTokens());
+	});
+
+	$effect(() => {
+		if (nonNullish($filterNetwork)) {
+			network = $filterNetwork;
+		}
 	});
 
 	let showNetworks = $state(false);

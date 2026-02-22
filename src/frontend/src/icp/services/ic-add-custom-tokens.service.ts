@@ -7,6 +7,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import { assertExistingTokens } from '$lib/utils/tokens.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
@@ -78,7 +79,11 @@ export const loadAndAssertAddCustomToken = async ({
 			return { result: 'error' };
 		}
 
-		const { valid } = assertExistingTokens({ token, icrcTokens });
+		const { valid } = assertExistingTokens({
+			existingTokens: icrcTokens,
+			token,
+			errorMsg: get(i18n).tokens.error.duplicate_metadata
+		});
 
 		if (!valid) {
 			return { result: 'error' };
@@ -88,30 +93,6 @@ export const loadAndAssertAddCustomToken = async ({
 	} catch (_err: unknown) {
 		return { result: 'error' };
 	}
-};
-
-const assertExistingTokens = ({
-	icrcTokens,
-	token
-}: {
-	icrcTokens: IcToken[];
-	token: IcTokenWithoutId;
-}): { valid: boolean } => {
-	if (
-		icrcTokens.find(
-			({ symbol, name }) =>
-				symbol.toLowerCase() === token.symbol.toLowerCase() ||
-				name.toLowerCase() === token.name.toLowerCase()
-		) !== undefined
-	) {
-		toastsError({
-			msg: { text: get(i18n).tokens.error.duplicate_metadata }
-		});
-
-		return { valid: false };
-	}
-
-	return { valid: true };
 };
 
 const assertAlreadyAvailable = ({

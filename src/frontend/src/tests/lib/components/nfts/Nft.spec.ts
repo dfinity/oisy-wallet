@@ -12,11 +12,7 @@ describe('Nft', () => {
 	beforeAll(() => {
 		nftStore.addAll([mockNft]);
 
-		mockPage.mock({
-			network: mockValidErc1155Nft.collection.network.id.description,
-			collection: mockValidErc1155Nft.collection.address,
-			nft: mockNft.id
-		});
+		mockPage.mockNft(mockNft);
 	});
 
 	it('should render the nft', () => {

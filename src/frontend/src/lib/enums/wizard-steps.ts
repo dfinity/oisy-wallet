@@ -33,7 +33,6 @@ export enum WizardStepsSwap {
 
 export enum WizardStepsAuthHelp {
 	OVERVIEW = 'Overview',
-	HELP_LEGACY_IDENTITY = 'Help Legacy Identity',
 	HELP_NEW_IDENTITY = 'Help New Identity'
 }
 
@@ -107,5 +106,7 @@ export enum WizardStepsScanner {
 	TOKENS_LIST = 'Tokens List',
 	PAYING = 'Paying',
 	PAYMENT_CONFIRMED = 'Payment Confirmed',
-	PAYMENT_FAILED = 'Payment Failed'
+	PAYMENT_FAILED = 'Payment Failed',
+	WALLET_CONNECT_CONNECT = WizardStepsWalletConnect.CONNECT,
+	WALLET_CONNECT_REVIEW = WizardStepsWalletConnect.REVIEW
 }

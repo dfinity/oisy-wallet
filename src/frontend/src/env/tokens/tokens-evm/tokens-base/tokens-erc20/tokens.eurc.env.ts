@@ -24,7 +24,6 @@ export const EURC_TOKEN: RequiredEvmErc20Token = {
 	decimals: EURC_DECIMALS,
 	icon: eurc,
 	address: '0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42',
-	exchange: 'erc20',
 	groupData: EURC_TOKEN_GROUP
 };
 
@@ -41,6 +40,5 @@ export const SEPOLIA_EURC_TOKEN: RequiredEvmErc20Token = {
 	symbol: EURC_SYMBOL,
 	decimals: EURC_DECIMALS,
 	icon: eurc,
-	address: '0x808456652fdb597867f38412077A9182bf77359F',
-	exchange: 'erc20'
+	address: '0x808456652fdb597867f38412077A9182bf77359F'
 };

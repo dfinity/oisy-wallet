@@ -208,18 +208,17 @@ export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
-export const HELP_AUTH_LOST_IDENTITY_BUTTON = 'help-auth-lost-identity-button';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';
 export const HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON = 'help-auth-user-identity-number-button';
 export const HELP_AUTH_IDENTITY_IMAGE_BANNER = 'help-auth-identity-image-banner';
-export const HELP_AUTH_LEGACY_SIGN_IN_BUTTON = 'help-auth-legacy-sign-in-button';
 export const HELP_AUTH_BACK_BUTTON = 'help-auth-back-button';
 export const HELP_AUTH_DONE_BUTTON = 'help-auth-done-button';
 export const HELP_AUTH_LEARN_MORE_LINK = 'help-auth-learn-more-link';
 export const HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK =
 	'help-auth-switch-to-new-internet-identity-link';
 export const HELP_AUTH_INTRODUCTION_LINK = 'help-auth-introduction-link';
-export const HELP_AUTH_PRIVATE_KEY_LINK = 'help-auth-private-key-link';
+export const HELP_AUTH_LOGGING_INTO_OISY_LINK = 'help-auth-logging-into-oisy-link';
+export const HELP_AUTH_CREATING_A_WALLET_LINK = 'help-auth-creating-a-wallet-link';
 export const HELP_AUTH_ASSET_CONTROL_LINK = 'help-auth-asset-control-link';
 export const HELP_AUTH_INTERNET_IDENTITY_HELP_CENTER_LINK =
 	'help-auth-internet-identity-help-center-link';

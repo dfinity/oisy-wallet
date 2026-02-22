@@ -1,10 +1,8 @@
 import BtcConvertForm from '$btc/components/convert/BtcConvertForm.svelte';
 import * as btcPendingSendTransactionsStatusStore from '$btc/derived/btc-pending-sent-transactions-status.derived';
-import { ALL_UTXOS_CONTEXT_KEY, initAllUtxosStore } from '$btc/stores/all-utxos.store';
-import {
-	FEE_RATE_PERCENTILES_CONTEXT_KEY,
-	initFeeRatePercentilesStore
-} from '$btc/stores/fee-rate-percentiles.store';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
 	UTXOS_FEE_CONTEXT_KEY,
 	initUtxosFeeStore,
@@ -32,8 +30,6 @@ describe('BtcConvertForm', () => {
 	}) =>
 		new Map([
 			[UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore }],
-			[ALL_UTXOS_CONTEXT_KEY, { store: initAllUtxosStore() }],
-			[FEE_RATE_PERCENTILES_CONTEXT_KEY, { store: initFeeRatePercentilesStore() }],
 			[
 				CONVERT_CONTEXT_KEY,
 				{
@@ -72,6 +68,10 @@ describe('BtcConvertForm', () => {
 		mockPage.reset();
 		store = initUtxosFeeStore();
 		store.reset();
+
+		allUtxosStore.reset();
+		feeRatePercentilesStore.reset();
+		btcPendingSentTransactionsStore.reset();
 	});
 
 	it('should keep the next button clickable if all requirements are met', () => {

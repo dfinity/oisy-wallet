@@ -1,7 +1,7 @@
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
-import type { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import type { MediaStatusEnum } from '$lib/enums/media-status';
 import type {
 	Nft,
 	NftAttribute,
@@ -57,7 +57,7 @@ export const getNftDisplayImageUrl = (nft: Nft): string | undefined =>
  * @param nft - the NFT for which to get the display media status
  * @returns the thumbnail status if defined, otherwise the image status
  */
-export const getNftDisplayMediaStatus = (nft: Nft): NftMediaStatusEnum =>
+export const getNftDisplayMediaStatus = (nft: Nft): MediaStatusEnum =>
 	nonNullish(nft.thumbnailUrl) ? nft.mediaStatus.thumbnail : nft.mediaStatus.image;
 
 /**

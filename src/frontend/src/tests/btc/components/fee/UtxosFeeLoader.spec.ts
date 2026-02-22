@@ -1,16 +1,10 @@
 import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
 import { DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE } from '$btc/constants/btc.constants';
+import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
-import {
-	ALL_UTXOS_CONTEXT_KEY,
-	initAllUtxosStore,
-	type AllUtxosStore
-} from '$btc/stores/all-utxos.store';
-import {
-	FEE_RATE_PERCENTILES_CONTEXT_KEY,
-	initFeeRatePercentilesStore,
-	type FeeRatePercentilesStore
-} from '$btc/stores/fee-rate-percentiles.store';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
 	UTXOS_FEE_CONTEXT_KEY,
 	initUtxosFeeStore,
@@ -31,20 +25,8 @@ describe('UtxosFeeLoader', () => {
 	const mockAllUtxos = [mockUtxo];
 	const mockFeeRateFromPercentiles = 5000n;
 
-	const mockContext = ({
-		utxosFeeStore,
-		allUtxosStore,
-		feeRatePercentilesStore
-	}: {
-		utxosFeeStore: UtxosFeeStore;
-		allUtxosStore: AllUtxosStore;
-		feeRatePercentilesStore: FeeRatePercentilesStore;
-	}) =>
-		new Map([
-			[UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore }],
-			[ALL_UTXOS_CONTEXT_KEY, { store: allUtxosStore }],
-			[FEE_RATE_PERCENTILES_CONTEXT_KEY, { store: feeRatePercentilesStore }]
-		]);
+	const mockContext = ({ utxosFeeStore }: { utxosFeeStore: UtxosFeeStore }) =>
+		new Map([[UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore }]]);
 
 	const mockBtcReviewResult = {
 		feeSatoshis: 700n,
@@ -67,9 +49,12 @@ describe('UtxosFeeLoader', () => {
 			.spyOn(btcUtxosService, 'getFeeRateFromPercentiles')
 			.mockResolvedValue(mockFeeRateFromPercentiles);
 
+	const mockLoadBtcPendingSentTransactions = () =>
+		vi
+			.spyOn(btcPendingSentTransactionsServices, 'loadBtcPendingSentTransactions')
+			.mockResolvedValue({ success: true });
+
 	let utxosFeeStore: UtxosFeeStore;
-	let allUtxosStore: AllUtxosStore;
-	let feeRatePercentilesStore: FeeRatePercentilesStore;
 
 	const props = {
 		source,
@@ -78,16 +63,30 @@ describe('UtxosFeeLoader', () => {
 		children: mockSnippet
 	};
 
+	const setupStoresWithData = () => {
+		allUtxosStore.setAllUtxos({ allUtxos: mockAllUtxos });
+		feeRatePercentilesStore.setFeeRateFromPercentiles({
+			feeRateFromPercentiles: mockFeeRateFromPercentiles
+		});
+		btcPendingSentTransactionsStore.setPendingTransactions({
+			address: source,
+			pendingTransactions: []
+		});
+	};
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		mockPage.reset();
 		utxosFeeStore = initUtxosFeeStore();
-		allUtxosStore = initAllUtxosStore();
-		feeRatePercentilesStore = initFeeRatePercentilesStore();
+
+		allUtxosStore.reset();
+		feeRatePercentilesStore.reset();
+		btcPendingSentTransactionsStore.reset();
 
 		mockGetUtxosQuery();
 		mockGetFeeRateFromPercentiles();
+		mockLoadBtcPendingSentTransactions();
 	});
 
 	it('should call prepareBtcSend with proper params', async () => {
@@ -95,10 +94,11 @@ describe('UtxosFeeLoader', () => {
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 
 		mockAuthStore();
+		setupStoresWithData();
 
 		render(UtxosFeeLoader, {
 			props,
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await waitFor(() => {
@@ -122,10 +122,11 @@ describe('UtxosFeeLoader', () => {
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 
 		mockAuthStore(null);
+		setupStoresWithData();
 
 		render(UtxosFeeLoader, {
 			props,
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await waitFor(() => {
@@ -138,10 +139,11 @@ describe('UtxosFeeLoader', () => {
 		const { networkId: _, ...newProps } = props;
 
 		mockAuthStore();
+		setupStoresWithData();
 
 		render(UtxosFeeLoader, {
 			props: newProps,
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await waitFor(() => {
@@ -153,13 +155,14 @@ describe('UtxosFeeLoader', () => {
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 
 		mockAuthStore();
+		setupStoresWithData();
 
 		render(UtxosFeeLoader, {
 			props: {
 				...props,
 				amountError: true
 			},
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await waitFor(() => {
@@ -172,10 +175,11 @@ describe('UtxosFeeLoader', () => {
 		const { amount: _, ...newProps } = props;
 
 		mockAuthStore();
+		setupStoresWithData();
 
 		render(UtxosFeeLoader, {
 			props: newProps,
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await waitFor(() => {
@@ -193,10 +197,11 @@ describe('UtxosFeeLoader', () => {
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 
 		mockAuthStore();
+		setupStoresWithData();
 
 		render(UtxosFeeLoader, {
 			props: { ...props, amount: 0 },
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await waitFor(() => {
@@ -214,10 +219,11 @@ describe('UtxosFeeLoader', () => {
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 
 		mockAuthStore();
+		setupStoresWithData();
 
 		const { rerender } = render(UtxosFeeLoader, {
 			props,
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await rerender({ ...props, amount: 0 });
@@ -231,6 +237,7 @@ describe('UtxosFeeLoader', () => {
 	it('should not call prepareBtcSend if the same amount is already in the store', async () => {
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 		mockAuthStore();
+		setupStoresWithData();
 
 		utxosFeeStore.setUtxosFee({
 			utxosFee: {
@@ -242,7 +249,7 @@ describe('UtxosFeeLoader', () => {
 
 		render(UtxosFeeLoader, {
 			props,
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await waitFor(() => {
@@ -254,6 +261,7 @@ describe('UtxosFeeLoader', () => {
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 		const resetSpy = vi.spyOn(utxosFeeStore, 'reset');
 		mockAuthStore();
+		setupStoresWithData();
 
 		utxosFeeStore.setUtxosFee({
 			utxosFee: {
@@ -265,7 +273,7 @@ describe('UtxosFeeLoader', () => {
 
 		render(UtxosFeeLoader, {
 			props: { ...props, amount: 5 },
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await waitFor(() => {
@@ -278,10 +286,11 @@ describe('UtxosFeeLoader', () => {
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 
 		mockAuthStore();
+		setupStoresWithData();
 
 		render(UtxosFeeLoader, {
 			props: { ...props, source: '' },
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await waitFor(() => {
@@ -290,22 +299,22 @@ describe('UtxosFeeLoader', () => {
 	});
 
 	it('should not call prepareBtcSend if allUtxos is not available', async () => {
-		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
-			utxos: [],
-			tip_block_hash: new Uint8Array(),
-			tip_height: 100,
-			next_page: []
-		});
-
-		vi.spyOn(allUtxosStore, 'setAllUtxos').mockImplementation(() => {});
-
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 
 		mockAuthStore();
 
+		feeRatePercentilesStore.setFeeRateFromPercentiles({
+			feeRateFromPercentiles: mockFeeRateFromPercentiles
+		});
+		btcPendingSentTransactionsStore.setPendingTransactions({
+			address: source,
+			pendingTransactions: []
+		});
+		allUtxosStore.setAllUtxos({ allUtxos: undefined });
+
 		render(UtxosFeeLoader, {
 			props,
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await waitFor(() => {
@@ -314,15 +323,40 @@ describe('UtxosFeeLoader', () => {
 	});
 
 	it('should not call prepareBtcSend if feeRateFromPercentiles is not available', async () => {
-		vi.spyOn(feeRatePercentilesStore, 'setFeeRateFromPercentiles').mockImplementation(() => {});
-
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 
 		mockAuthStore();
 
+		allUtxosStore.setAllUtxos({ allUtxos: mockAllUtxos });
+		btcPendingSentTransactionsStore.setPendingTransactions({
+			address: source,
+			pendingTransactions: []
+		});
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: undefined });
+
 		render(UtxosFeeLoader, {
 			props,
-			context: mockContext({ utxosFeeStore, allUtxosStore, feeRatePercentilesStore })
+			context: mockContext({ utxosFeeStore })
+		});
+
+		await waitFor(() => {
+			expect(prepareBtcSendSpy).not.toHaveBeenCalled();
+		});
+	});
+
+	it('should not call prepareBtcSend if btcPendingSentTransactions is not available for source', async () => {
+		const prepareBtcSendSpy = mockPrepareBtcSend();
+
+		mockAuthStore();
+
+		allUtxosStore.setAllUtxos({ allUtxos: mockAllUtxos });
+		feeRatePercentilesStore.setFeeRateFromPercentiles({
+			feeRateFromPercentiles: mockFeeRateFromPercentiles
+		});
+
+		render(UtxosFeeLoader, {
+			props,
+			context: mockContext({ utxosFeeStore })
 		});
 
 		await waitFor(() => {

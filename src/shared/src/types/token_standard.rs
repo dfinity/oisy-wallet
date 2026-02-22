@@ -23,6 +23,13 @@ pub enum TokenStandard {
     /// Standard for the Ethereum blockchain
     ///
     /// # Used for:
+    /// - Vaults on ETH and other EVM networks.
+    ///
+    /// - [ERC4626 Spec](https://eips.ethereum.org/EIPS/eip-4626)
+    ERC4626,
+    /// Standard for the Ethereum blockchain
+    ///
+    /// # Used for:
     /// - Most NFTs on ETH and other EVM networks.
     ///
     /// - [ERC721 Spec](https://eips.ethereum.org/EIPS/eip-721)

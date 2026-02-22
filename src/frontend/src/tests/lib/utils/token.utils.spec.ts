@@ -1,11 +1,9 @@
-import * as NetworksModule from '$env/networks/networks.icrc.env';
-import {
-	IC_CKBTC_LEDGER_CANISTER_ID,
-	IC_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import * as tokensIcrcCkEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ckErc20Production } from '$env/tokens/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
@@ -21,6 +19,7 @@ import {
 	filterEnabledToken,
 	findTwinToken,
 	getMaxTransactionAmount,
+	getTokenDisplayName,
 	getTokenDisplaySymbol,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
@@ -111,6 +110,17 @@ describe('token.utils', () => {
 				fee,
 				tokenDecimals,
 				tokenStandard: { code: 'erc20' }
+			});
+
+			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
+		});
+
+		it('should return the untouched amount if the token is ERC4626', () => {
+			const result = getMaxTransactionAmount({
+				balance,
+				fee,
+				tokenDecimals,
+				tokenStandard: { code: 'erc4626' }
 			});
 
 			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
@@ -240,6 +250,8 @@ describe('token.utils', () => {
 			...ETHEREUM_TOKEN,
 			balance: bn3Bi,
 			usdBalance: Number(bn3Bi),
+			usdPrice: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd,
+			usdPriceChangePercentage24h: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd_24h_change,
 			stakeBalance: 123n,
 			stakeUsdBalance: Number(123n),
 			claimableStakeBalance: 456n,
@@ -269,6 +281,8 @@ describe('token.utils', () => {
 			expect(result).toEqual({
 				...expected,
 				usdBalance: undefined,
+				usdPrice: undefined,
+				usdPriceChangePercentage24h: undefined,
 				stakeUsdBalance: undefined,
 				claimableStakeBalanceUsd: undefined
 			});
@@ -422,7 +436,7 @@ describe('token.utils', () => {
 
 		const setupDefaultTokenMock = (canisterId?: string) => {
 			vi.spyOn(
-				NetworksModule,
+				tokensIcrcCkEnv,
 				'ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS',
 				'get'
 			).mockReturnValue([canisterId ?? '']);
@@ -430,7 +444,7 @@ describe('token.utils', () => {
 
 		const setupSuggestedTokenMock = (canisterId?: string) => {
 			vi.spyOn(
-				NetworksModule,
+				tokensIcrcCkEnv,
 				'ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS',
 				'get'
 			).mockReturnValue([canisterId ?? '']);
@@ -580,6 +594,25 @@ describe('token.utils', () => {
 			const result = getTokenDisplaySymbol(mockIcrcCustomToken);
 
 			expect(result).toBe(mockIcrcCustomToken.symbol);
+		});
+	});
+
+	describe('getTokenDisplayName', () => {
+		it('should return oisy name if exists', () => {
+			const oisyName = 'OISY Name';
+
+			const result = getTokenDisplayName({
+				...mockIcrcCustomToken,
+				oisyName: { oisyName }
+			});
+
+			expect(result).toBe(oisyName);
+		});
+
+		it('should return token name if oisy name does not exist', () => {
+			const result = getTokenDisplayName(mockIcrcCustomToken);
+
+			expect(result).toBe(mockIcrcCustomToken.name);
 		});
 	});
 

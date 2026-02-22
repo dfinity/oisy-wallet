@@ -7,7 +7,7 @@ export const replaceHistory = (url: URL) => {
 		return;
 	}
 
-	history.replaceState({}, '', url);
+	history.replaceState(history.state ?? {}, '', url);
 };
 
 /**

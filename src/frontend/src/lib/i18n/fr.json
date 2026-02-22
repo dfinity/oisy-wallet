@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "À des fins de test uniquement !",
-			"test_banner_beta": "Il s'agit d'une version bêta. Vous pourriez rencontrer des bugs. De vrais actifs sont en jeu - veuillez utiliser avec précaution.",
-			"internet_identity_banner_first_part": "$oisy_name utilise maintenant",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "En savoir plus"
+			"test_banner_beta": "Il s'agit d'une version bêta. Vous pourriez rencontrer des bugs. De vrais actifs sont en jeu - veuillez utiliser avec précaution."
 		},
 		"alt": {
 			"logo": "Logo de $name",
@@ -121,7 +118,6 @@
 			"logout": "Se déconnecter",
 			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
-			"legacy_login": "Connexion legacy",
 			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
 			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
 			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain",
@@ -155,23 +151,16 @@
 				"description": "Il semble que vous ayez annulé votre connexion ou votre inscription. Nous aimerions comprendre ce qu'il s'est passé afin d'améliorer votre expérience.",
 				"login_page_looks_different": "Pourquoi la page de connexion est-elle différente ?",
 				"use_identity_number": "Je souhaite utiliser mon numéro d'Internet Identity",
-				"lost_identity_number": "J'ai perdu mon numéro d'Internet Identity",
 				"feedback_text": "Vos commentaires nous aident à améliorer $oisy_short.",
 				"thanks_text": "Merci !",
 				"useful_links": "Liens utiles",
 				"identity_new_identity": "Le portefeuille $oisy_short change le domaine Internet Identity en : <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "$oisy_name passe à Internet Identity 2.0 (en anglais)",
-				"identity_legacy_identity_title": "Vous ne voyez plus votre numéro d'Internet Identity sur l'écran de connexion ? Vous pouvez le retrouver en utilisant l'une des méthodes suivantes :",
-				"identity_legacy_identity_item_1": "Consultez la liste des numéros d'Internet Identity que vous avez précédemment utilisés chez <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> ou <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
-				"identity_legacy_identity_item_2": "Look at the number at the beginning of a recovery phrase you may have saved earlier.",
 				"identity_new_identity_title": "$oisy_name utilise désormais Internet Identity 2.0, qui offre plusieurs améliorations et vous permet de connecter votre identité à vos identifiants sur Google, Apple ou Microsoft.",
 				"identity_new_identity_item_1": "Pour migrer votre identité existante, cliquez sur le lien « Upgrade your identity » en haut de la nouvelle page de connexion et suivez les étapes.",
-				"identity_new_identity_item_2": "Vous pouvez toujours utiliser l'ancienne page de connexion avec votre Internet Identity. Cliquez simplement sur le lien ci-dessous pour y accéder.",
-				"identity_new_identity_link": "En savoir plus sur Internet Identity 2.0 (en anglais)",
-				"identity_legacy_sign_in": "Se connecter avec le domaine Internet Identity hérité",
-				"identity_learn_more": "En savoir plus sur les Docs de $oisy_short",
 				"oisy_introduction": "Introduction à $oisy_short (en anglais)",
-				"private_key": "Who controls the private key for the native assets?",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet",
 				"internet_identity_help_center": "Centre d'aide Internet Identity 2.0 (en anglais)",
 				"need_help": "Besoin d'aide pour",
@@ -187,7 +176,6 @@
 			"title_part_1": "Déverrouillez pour continuer",
 			"title_part_2": "Vous avez précédemment verrouillé votre portefeuille pour le protéger. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
 			"unlock": "Ouvrir",
-			"unlock_with_legacy_login": "",
 			"logout": "Se déconnecter",
 			"logout_clear_cash_message": "La déconnexion effacera toutes les données mises en cache",
 			"learn_more": "En savoir plus"
@@ -217,15 +205,17 @@
 			"website": "Image de $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Réseaux sociaux",
-			"verifiable_credentials": "Identifiants Vérifiables",
-			"staking": "Staking",
-			"walletconnect": "WalletConnect",
-			"game": "Jeu",
-			"tools": "Outils",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "IA",
-			"nft": "NFT"
+			"defi": "DeFi",
+			"game": "Jeu",
+			"nft": "NFT",
+			"rwa": "",
+			"social_media": "Réseaux sociaux",
+			"staking": "Staking",
+			"tools": "Outils",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -415,6 +405,31 @@
 				"name": "Kamino",
 				"one_liner": "Kamino est le plus grand protocole d'emprunt et de prêt sur Solana, alimentant une part importante de l'activité DeFi du réseau.",
 				"description": "Kamino est une plateforme de finance décentralisée (DeFi) sur la blockchain Solana qui intègre la fourniture de liquidités, le prêt et le trading avec effet de levier dans une seule suite de produits. Elle simplifie ces stratégies DeFi, en particulier grâce à ses coffres de liquidité automatisés et son système Kamino Lend, et utilise une gestion de liquidité concentrée pour augmenter l'efficacité du capital pour ses utilisateurs."
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -611,6 +626,7 @@
 			"no_infura_erc721_provider": "Pas de fournisseur Infura ERC721 pour le réseau $network",
 			"no_infura_erc1155_provider": "Pas de fournisseur Infura ERC1155 pour le réseau $network",
 			"no_infura_erc20_icp_provider": "Pas de fournisseur Infura ERC20 ICP pour le réseau $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Pas de réseau Solana pour le réseau $network",
 			"loading_address": "Erreur lors du chargement de l'adresse $symbol.",
 			"loading_balance": "Erreur lors du chargement du solde $symbol pour le réseau $network.",
@@ -631,6 +647,7 @@
 			"icrc_canisters": "Erreur lors du chargement des canisters ICRC.",
 			"icrc_canister_loading": "Le token avec le canister Ledger $ledgerCanisterId n'a pas pu être chargé car il ne répond pas actuellement.",
 			"erc20_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC721.",
 			"erc1155_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC1155.",
 			"spl_custom_tokens": "Erreur lors du chargement des tokens personnalisés SPL.",
@@ -865,6 +882,7 @@
 			"unknown_cketh": "Le token ckETH ne peut pas être récupéré.",
 			"destination_address_invalid": "L'adresse de destination est invalide.",
 			"amount_invalid": "Le montant est invalide.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Fonds insuffisants pour le gaz",
 			"insufficient_funds_for_amount": "Fonds insuffisants pour le montant",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fonds Ethereum insuffisants pour couvrir les frais",
@@ -1807,7 +1825,6 @@
 			},
 			"title": "",
 			"instruction": "En cliquant sur ce bouton, vous acceptez les $link",
-			"instruction_two_buttons": "En cliquant sur l'un des boutons, vous acceptez les $link",
 			"body": ""
 		},
 		"alt": {
@@ -2005,6 +2022,9 @@
 			"minute_plural": "minutes",
 			"second": "seconde",
 			"second_plural": "secondes"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

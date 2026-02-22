@@ -40,7 +40,7 @@ describe('network.derived', () => {
 		});
 
 		it('should return true when no network is selected', () => {
-			mockPage.mock({ network: undefined });
+			mockPage.mockNetwork(undefined);
 
 			expect(get(selectedNetworkNftSupported)).toBeTruthy();
 		});
@@ -48,7 +48,7 @@ describe('network.derived', () => {
 		it.each(networksThatUSupportNfts)(
 			'should return true for $id network that supports NFTs',
 			(network) => {
-				mockPage.mock({ network: network.id.description });
+				mockPage.mockNetwork(network.id.description);
 
 				expect(get(selectedNetworkNftSupported)).toBeTruthy();
 			}
@@ -57,7 +57,7 @@ describe('network.derived', () => {
 		it.each(networksThatDoNotSupportNfts)(
 			'should return false for $id network that does not support NFTs',
 			(network) => {
-				mockPage.mock({ network: network.id.description });
+				mockPage.mockNetwork(network.id.description);
 
 				expect(get(selectedNetworkNftSupported)).toBeFalsy();
 			}
@@ -78,7 +78,7 @@ describe('network.derived', () => {
 		});
 
 		it('should return false when no network is selected', () => {
-			mockPage.mock({ network: undefined });
+			mockPage.mockNetwork(undefined);
 
 			expect(get(selectedNetworkNftUnsupported)).toBeFalsy();
 		});
@@ -86,7 +86,7 @@ describe('network.derived', () => {
 		it.each(networksThatUSupportNfts)(
 			'should return false for $id network that supports NFTs',
 			(network) => {
-				mockPage.mock({ network: network.id.description });
+				mockPage.mockNetwork(network.id.description);
 
 				expect(get(selectedNetworkNftUnsupported)).toBeFalsy();
 			}
@@ -95,7 +95,7 @@ describe('network.derived', () => {
 		it.each(networksThatDoNotSupportNfts)(
 			'should return true for $id network that does not support NFTs',
 			(network) => {
-				mockPage.mock({ network: network.id.description });
+				mockPage.mockNetwork(network.id.description);
 
 				expect(get(selectedNetworkNftUnsupported)).toBeTruthy();
 			}

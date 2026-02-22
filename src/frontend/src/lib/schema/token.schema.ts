@@ -10,6 +10,7 @@ export const TokenStandardCodeSchema = z.enum([
 	'erc20',
 	'erc721',
 	'erc1155',
+	'erc4626',
 	'icp',
 	'icrc',
 	'dip20',
@@ -48,7 +49,8 @@ const TokenOisyNameSchema = z.object({
 export const TokenAppearanceSchema = z.object({
 	oisySymbol: TokenOisySymbolSchema.optional(),
 	oisyName: TokenOisyNameSchema.optional(),
-	neverCollapseInTokenGroup: z.boolean().optional()
+	neverCollapseInTokenGroup: z.boolean().optional(),
+	allowExternalContentSource: z.boolean().optional()
 });
 
 const TokenBuySchema = z.object({

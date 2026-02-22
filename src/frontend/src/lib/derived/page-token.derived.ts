@@ -1,4 +1,5 @@
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
 import { isTokenEthereumCustomToken } from '$eth/utils/erc20.utils';
 import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
@@ -11,6 +12,7 @@ import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { OptionToken, OptionTokenStandardCode, Token } from '$lib/types/token';
 import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -20,12 +22,29 @@ import { derived, type Readable } from 'svelte/store';
  * A token derived from the route URL - i.e. if the URL contains a query parameters "token", then this store tries to derive the object from it.
  */
 export const pageToken: Readable<OptionToken> = derived(
-	[routeToken, routeNetwork, nativeTokens, enabledErc20Tokens, enabledIcrcTokens, enabledSplTokens],
-	([$routeToken, $routeNetwork, $nativeTokens, $erc20Tokens, $icrcTokens, $splTokens]) =>
+	[
+		routeToken,
+		routeNetwork,
+		nativeTokens,
+		enabledErc20Tokens,
+		enabledErc4626Tokens,
+		enabledIcrcTokens,
+		enabledSplTokens
+	],
+	([
+		$routeToken,
+		$routeNetwork,
+		$nativeTokens,
+		$erc20Tokens,
+		$erc4626Tokens,
+		$icrcTokens,
+		$splTokens
+	]) =>
 		nonNullish($routeToken)
-			? [...$nativeTokens, ...$erc20Tokens, ...$icrcTokens, ...$splTokens].find(
-					({ name, network: { id: networkId } }) =>
-						name === $routeToken && networkId.description === $routeNetwork
+			? [...$nativeTokens, ...$erc20Tokens, ...$erc4626Tokens, ...$icrcTokens, ...$splTokens].find(
+					(token) =>
+						getPageTokenIdentifier(token) === $routeToken &&
+						token.network.id.description === $routeNetwork
 				)
 			: undefined
 );

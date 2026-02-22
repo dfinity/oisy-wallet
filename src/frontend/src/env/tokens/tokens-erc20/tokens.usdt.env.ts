@@ -21,7 +21,6 @@ export const USDT_TOKEN: RequiredErc20Token = {
 	decimals: USDT_DECIMALS,
 	icon: usdt,
 	address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckUSDT',
 	groupData: USDT_TOKEN_GROUP,
 	neverCollapseInTokenGroup: true,

@@ -7,8 +7,8 @@ import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.et
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { MediaStatusEnum } from '$lib/enums/media-status';
 import { NetworkSchema } from '$lib/schema/network.schema';
-import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId } from '$lib/types/nft';
 import {
@@ -808,7 +808,7 @@ describe('nfts.utils', () => {
 
 			const result = await getMediaStatus('https://example.com/image.png');
 
-			expect(result).toBe(NftMediaStatusEnum.OK);
+			expect(result).toBe(MediaStatusEnum.OK);
 		});
 
 		it('returns OK for valid gif under the size limit', async () => {
@@ -825,7 +825,7 @@ describe('nfts.utils', () => {
 
 			const result = await getMediaStatus('https://example.com/image.gif');
 
-			expect(result).toBe(NftMediaStatusEnum.OK);
+			expect(result).toBe(MediaStatusEnum.OK);
 		});
 
 		it('returns OK for valid video under the size limit', async () => {
@@ -842,13 +842,13 @@ describe('nfts.utils', () => {
 
 			const result = await getMediaStatus('https://example.com/video.mp4');
 
-			expect(result).toBe(NftMediaStatusEnum.OK);
+			expect(result).toBe(MediaStatusEnum.OK);
 		});
 
 		it('returns INVALID_DATA for invalid URL', async () => {
 			const result = await getMediaStatus('not-a-url');
 
-			expect(result).toBe(NftMediaStatusEnum.OK);
+			expect(result).toBe(MediaStatusEnum.OK);
 		});
 
 		it('returns INVALID_DATA when fetch throws', async () => {
@@ -856,7 +856,7 @@ describe('nfts.utils', () => {
 
 			const result = await getMediaStatus('https://example.com/image.png');
 
-			expect(result).toBe(NftMediaStatusEnum.OK);
+			expect(result).toBe(MediaStatusEnum.OK);
 		});
 
 		it('returns INVALID_DATA when headers are missing', async () => {
@@ -866,7 +866,7 @@ describe('nfts.utils', () => {
 
 			const result = await getMediaStatus('https://example.com/image.png');
 
-			expect(result).toBe(NftMediaStatusEnum.OK);
+			expect(result).toBe(MediaStatusEnum.OK);
 		});
 
 		it('returns NON_SUPPORTED_MEDIA_TYPE for non-image and non-video type', async () => {
@@ -879,7 +879,7 @@ describe('nfts.utils', () => {
 
 			const result = await getMediaStatus('https://example.com/page.html');
 
-			expect(result).toBe(NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
+			expect(result).toBe(MediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
 		});
 
 		it('returns FILESIZE_LIMIT_EXCEEDED when file size exceeds the limit', async () => {
@@ -896,7 +896,7 @@ describe('nfts.utils', () => {
 
 			const result = await getMediaStatus('https://example.com/large.jpg');
 
-			expect(result).toBe(NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED);
+			expect(result).toBe(MediaStatusEnum.FILESIZE_LIMIT_EXCEEDED);
 		});
 
 		it('fetches the data for IPFS URLs', async () => {
@@ -913,7 +913,7 @@ describe('nfts.utils', () => {
 
 			const result = await getMediaStatus('ipfs://ipfs-image-url');
 
-			expect(result).toBe(NftMediaStatusEnum.OK);
+			expect(result).toBe(MediaStatusEnum.OK);
 
 			expect(global.fetch).toHaveBeenCalledExactlyOnceWith('https://ipfs.io/ipfs/ipfs-image-url', {
 				method: 'HEAD'
@@ -942,7 +942,7 @@ describe('nfts.utils', () => {
 		it('should fetch and cache value if not available', async () => {
 			const result = await getMediaStatusOrCache(mockUrl);
 
-			expect(result).toBe(NftMediaStatusEnum.OK);
+			expect(result).toBe(MediaStatusEnum.OK);
 
 			expect(global.fetch).toHaveBeenCalledExactlyOnceWith(mockUrl, { method: 'HEAD' });
 		});
@@ -961,7 +961,7 @@ describe('nfts.utils', () => {
 
 			const result = await getMediaStatusOrCache(mockUrl);
 
-			expect(result).toBe(NftMediaStatusEnum.OK);
+			expect(result).toBe(MediaStatusEnum.OK);
 
 			expect(global.fetch).not.toHaveBeenCalled();
 		});

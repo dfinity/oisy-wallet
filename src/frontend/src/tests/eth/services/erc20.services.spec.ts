@@ -30,6 +30,7 @@ vi.mock('$lib/api/backend.api', () => ({
 }));
 
 vi.mock('$eth/providers/infura-erc20.providers', () => ({
+	InfuraErc20Provider: vi.fn(class {}),
 	infuraErc20Providers: vi.fn()
 }));
 
@@ -53,8 +54,8 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
 				version: 1n,
+				allowExternalContentSource: undefined,
 				enabled: true,
 				network: ETHEREUM_NETWORK,
 				address: mockEthAddress,
@@ -69,14 +70,15 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
 				version: 2n,
+				allowExternalContentSource: true,
 				enabled: true,
 				network: BASE_NETWORK,
 				address: mockEthAddress2.toUpperCase(),
 				decimals: mockMetadata2.decimals,
 				name: mockMetadata2.name,
-				symbol: mockMetadata2.symbol
+				symbol: mockMetadata2.symbol,
+				icon: `/icons/${BASE_NETWORK.id.description?.toLowerCase()}/${mockEthAddress2.toLowerCase()}.webp`
 			}
 		},
 		{
@@ -84,14 +86,15 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				exchange: 'erc20',
 				version: undefined,
+				allowExternalContentSource: false,
 				enabled: false,
 				network: POLYGON_AMOY_NETWORK,
 				address: mockEthAddress3,
 				decimals: mockMetadata2.decimals,
 				name: mockMetadata2.name,
-				symbol: mockMetadata2.symbol
+				symbol: mockMetadata2.symbol,
+				icon: `/icons/pol-amoy-testnet/${mockEthAddress3.toLowerCase()}.webp`
 			}
 		}
 	];
@@ -158,7 +161,7 @@ describe('erc20.services', () => {
 				}
 			}));
 
-			expect(tokens).toEqual(expected);
+			expect(tokens).toStrictEqual(expected);
 		});
 
 		it('should not throw error if metadata throws', async () => {

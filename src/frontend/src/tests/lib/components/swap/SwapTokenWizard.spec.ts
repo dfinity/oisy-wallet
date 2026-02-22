@@ -26,7 +26,7 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 	}))
 }));
 
-vi.mock('$icp/utils/icrc.utils', () => ({
+vi.mock('$icp/services/icrc.services', () => ({
 	isIcrcTokenSupportIcrc2: vi.fn()
 }));
 

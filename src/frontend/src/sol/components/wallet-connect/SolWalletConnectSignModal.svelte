@@ -39,7 +39,7 @@
 		network: SolanaNetwork;
 	}
 
-	let { listener = $bindable(), request, network }: Props = $props();
+	let { listener, request, network }: Props = $props();
 
 	/**
 	 * Transaction

@@ -1,8 +1,10 @@
 import * as erc1155Derived from '$eth/derived/erc1155.derived';
 import * as erc20Derived from '$eth/derived/erc20.derived';
+import * as erc4626Derived from '$eth/derived/erc4626.derived';
 import * as erc721Derived from '$eth/derived/erc721.derived';
 import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 import { loadErc20Tokens } from '$eth/services/erc20.services';
+import { loadErc4626Tokens } from '$eth/services/erc4626.services';
 import { loadErc721Tokens } from '$eth/services/erc721.services';
 import * as extDerived from '$icp/derived/ext.derived';
 import * as icPunksDerived from '$icp/derived/icpunks.derived';
@@ -11,6 +13,7 @@ import { loadIcPunksTokens } from '$icp/services/icpunks.services';
 import { loadIcrcTokens } from '$icp/services/icrc.services';
 import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 import * as appConstants from '$lib/constants/app.constants';
+import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	ethAddressStore,
 	solAddressDevnetStore,
@@ -23,7 +26,7 @@ import { loadSplTokens } from '$sol/services/spl.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
 	mockNetworksSettings,
@@ -56,6 +59,10 @@ vi.mock('$eth/services/erc1155.services', () => ({
 	loadErc1155Tokens: vi.fn()
 }));
 
+vi.mock('$eth/services/erc4626.services', () => ({
+	loadErc4626Tokens: vi.fn()
+}));
+
 vi.mock('$icp/services/icrc.services', () => ({
 	loadIcrcTokens: vi.fn()
 }));
@@ -80,6 +87,7 @@ describe('LoaderTokens', () => {
 	const erc20NotInitStore = writable(true);
 	const erc721NotInitStore = writable(true);
 	const erc1155NotInitStore = writable(true);
+	const erc4626NotInitStore = writable(true);
 	const erc721InitStore = writable(false);
 	const erc1155InitStore = writable(false);
 	const extNotInitStore = writable(true);
@@ -90,6 +98,9 @@ describe('LoaderTokens', () => {
 		vi.clearAllMocks();
 
 		mockAuthStore();
+
+		// Set the route to the NFTs page to trigger the NFTs interval loaders
+		mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Nfts}` });
 
 		setupTestnetsStore('disabled');
 		setupUserNetworksStore('allDisabled');
@@ -103,6 +114,7 @@ describe('LoaderTokens', () => {
 		erc20NotInitStore.set(true);
 		erc721NotInitStore.set(true);
 		erc1155NotInitStore.set(true);
+		erc4626NotInitStore.set(true);
 		erc721InitStore.set(false);
 		erc1155InitStore.set(false);
 		extNotInitStore.set(true);
@@ -129,6 +141,10 @@ describe('LoaderTokens', () => {
 			erc1155InitStore
 		);
 
+		vi.spyOn(erc4626Derived, 'erc4626CustomTokensNotInitialized', 'get').mockReturnValue(
+			erc4626NotInitStore
+		);
+
 		vi.spyOn(extDerived, 'extCustomTokensNotInitialized', 'get').mockReturnValue(extNotInitStore);
 
 		vi.spyOn(icPunksDerived, 'icPunksCustomTokensNotInitialized', 'get').mockReturnValue(
@@ -139,7 +155,7 @@ describe('LoaderTokens', () => {
 	});
 
 	it('should always load ICRC tokens', async () => {
-		render(LoaderTokens, { children: mockSnippet });
+		render(LoaderTokens);
 
 		await waitFor(() => {
 			expect(loadIcrcTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
@@ -147,7 +163,7 @@ describe('LoaderTokens', () => {
 	});
 
 	it('should always load EXT tokens', async () => {
-		render(LoaderTokens, { children: mockSnippet });
+		render(LoaderTokens);
 
 		await waitFor(() => {
 			expect(loadExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
@@ -155,7 +171,7 @@ describe('LoaderTokens', () => {
 	});
 
 	it('should always load ICPunks tokens', async () => {
-		render(LoaderTokens, { children: mockSnippet });
+		render(LoaderTokens);
 
 		await waitFor(() => {
 			expect(loadIcPunksTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
@@ -163,18 +179,19 @@ describe('LoaderTokens', () => {
 	});
 
 	it('should not load non-ICRC tokens if networks are all disabled', async () => {
-		render(LoaderTokens, { children: mockSnippet });
+		render(LoaderTokens);
 
 		await waitFor(() => {
 			expect(loadErc20Tokens).not.toHaveBeenCalled();
 			expect(loadErc721Tokens).not.toHaveBeenCalled();
 			expect(loadErc1155Tokens).not.toHaveBeenCalled();
+			expect(loadErc4626Tokens).not.toHaveBeenCalled();
 			expect(loadSplTokens).not.toHaveBeenCalled();
 		});
 	});
 
 	it('should load non-ICRC tokens if networks are all enabled', async () => {
-		render(LoaderTokens, { children: mockSnippet });
+		render(LoaderTokens);
 
 		setupUserNetworksStore('allEnabled');
 
@@ -182,6 +199,7 @@ describe('LoaderTokens', () => {
 			expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadErc4626Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadExtTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadIcPunksTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
@@ -193,13 +211,15 @@ describe('LoaderTokens', () => {
 			erc20NotInitStore.set(true);
 			erc721NotInitStore.set(true);
 			erc1155NotInitStore.set(true);
+			erc4626NotInitStore.set(true);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadErc20Tokens).not.toHaveBeenCalled();
 				expect(loadErc721Tokens).not.toHaveBeenCalled();
 				expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				expect(loadErc4626Tokens).not.toHaveBeenCalled();
 			});
 
 			userProfileStore.set({
@@ -220,6 +240,7 @@ describe('LoaderTokens', () => {
 				expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 				expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 				expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+				expect(loadErc4626Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			});
 		});
 
@@ -229,18 +250,20 @@ describe('LoaderTokens', () => {
 			erc20NotInitStore.set(false);
 			erc721NotInitStore.set(false);
 			erc1155NotInitStore.set(false);
+			erc4626NotInitStore.set(false);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadErc20Tokens).not.toHaveBeenCalled();
 				expect(loadErc721Tokens).not.toHaveBeenCalled();
 				expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				expect(loadErc4626Tokens).not.toHaveBeenCalled();
 			});
 		});
 
 		it('should load ERC tokens only when an Ethereum or EVM network is actually enabled', async () => {
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			userProfileStore.set({
 				certified: false,
@@ -263,16 +286,18 @@ describe('LoaderTokens', () => {
 				expect(loadErc20Tokens).not.toHaveBeenCalled();
 				expect(loadErc721Tokens).not.toHaveBeenCalled();
 				expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				expect(loadErc4626Tokens).not.toHaveBeenCalled();
 			});
 		});
 
 		it('should load ERC tokens for testnets if testnets are enabled and the stores are not initialized', async () => {
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadErc20Tokens).not.toHaveBeenCalled();
 				expect(loadErc721Tokens).not.toHaveBeenCalled();
 				expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				expect(loadErc4626Tokens).not.toHaveBeenCalled();
 			});
 
 			setupTestnetsStore('enabled');
@@ -294,11 +319,13 @@ describe('LoaderTokens', () => {
 			erc20NotInitStore.set(true);
 			erc721NotInitStore.set(true);
 			erc1155NotInitStore.set(true);
+			erc4626NotInitStore.set(true);
 
 			await waitFor(() => {
 				expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 				expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 				expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+				expect(loadErc4626Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			});
 		});
 	});
@@ -309,7 +336,7 @@ describe('LoaderTokens', () => {
 
 			extNotInitStore.set(false);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadExtTokens).not.toHaveBeenCalled();
@@ -323,7 +350,7 @@ describe('LoaderTokens', () => {
 
 			icPunksNotInitStore.set(false);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadIcPunksTokens).not.toHaveBeenCalled();
@@ -335,7 +362,7 @@ describe('LoaderTokens', () => {
 		it('should load SPL tokens on Solana mainnet when the stores are not initialized', async () => {
 			splNotInitStore.set(true);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadSplTokens).not.toHaveBeenCalled();
@@ -365,7 +392,7 @@ describe('LoaderTokens', () => {
 
 			splNotInitStore.set(false);
 
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadSplTokens).not.toHaveBeenCalled();
@@ -373,7 +400,7 @@ describe('LoaderTokens', () => {
 		});
 
 		it('should load SPL tokens on Solana devnet when testnets are enabled and the stores are not initialized', async () => {
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadSplTokens).not.toHaveBeenCalled();
@@ -403,7 +430,7 @@ describe('LoaderTokens', () => {
 		});
 
 		it('should load SPL tokens on Solana localnet only when LOCAL is true and the stores are not initialized', async () => {
-			render(LoaderTokens, { children: mockSnippet });
+			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(loadSplTokens).not.toHaveBeenCalled();

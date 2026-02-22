@@ -21,7 +21,8 @@
 	} from '$lib/constants/test-ids.constants';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { activeAssetsTabStore, userSelectedNetworkStore } from '$lib/stores/settings.store';
+	import { activeAssetsTabStore } from '$lib/stores/settings.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
@@ -34,7 +35,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
 		testIdPrefix?: string;
@@ -47,9 +47,7 @@
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
 
-	const networkId = $derived(
-		nonNullish($userSelectedNetworkStore) ? parseNetworkId($userSelectedNetworkStore) : undefined
-	);
+	const networkId = $derived($userSelectedNetworkStore);
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 

@@ -1,9 +1,9 @@
 import * as appNavigation from '$app/navigation';
-import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import Transactions from '$lib/components/transactions/Transactions.svelte';
 import { BUTTON_MODAL_CLOSE } from '$lib/constants/test-ids.constants';
 import { modalStore } from '$lib/stores/modal.store';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -11,6 +11,12 @@ import { get } from 'svelte/store';
 describe('Transactions', () => {
 	const timeout = 12000;
 	const mockGoTo = vi.fn();
+
+	const mockToken = {
+		...mockValidIcrcToken,
+		name: 'WaterNeuron',
+		ledgerCanisterId: 'jcmow-hyaaa-aaaaq-aadlq-cai'
+	};
 
 	beforeEach(() => {
 		vi.useFakeTimers();
@@ -35,7 +41,7 @@ describe('Transactions', () => {
 	});
 
 	it('should open the manage token modal if a disabled token is used', async () => {
-		mockPage.mock({ token: 'WaterNeuron', network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken(mockToken);
 
 		render(Transactions);
 
@@ -47,7 +53,7 @@ describe('Transactions', () => {
 	});
 
 	it('should not open the manage token modal if a not supported token is used', async () => {
-		mockPage.mock({ token: 'WaterGlas', network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken({ ...mockToken, ledgerCanisterId: 'WaterGlas' });
 
 		render(Transactions);
 
@@ -58,7 +64,7 @@ describe('Transactions', () => {
 	});
 
 	it('should not open the manage token modal if an enabled token is used', async () => {
-		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken(ICP_TOKEN);
 
 		render(Transactions);
 
@@ -69,7 +75,7 @@ describe('Transactions', () => {
 	});
 
 	it('should redirect the user to the activity page if the modal gets closed', async () => {
-		mockPage.mock({ token: 'WaterNeuron', network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken(mockToken);
 
 		const { container } = render(Transactions);
 
@@ -89,7 +95,7 @@ describe('Transactions', () => {
 	});
 
 	it('should not redirect the user if the modal gets closed and pageToken is nonNullish', async () => {
-		mockPage.mock({ token: 'WaterNeuron', network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken(mockToken);
 
 		const { container } = render(Transactions);
 
@@ -103,7 +109,7 @@ describe('Transactions', () => {
 			`button[data-tid='${BUTTON_MODAL_CLOSE}']`
 		);
 
-		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken(ICP_TOKEN);
 
 		button?.click();
 
@@ -111,7 +117,7 @@ describe('Transactions', () => {
 	});
 
 	it('should redirect the user to the activity page if token does not exist', async () => {
-		mockPage.mock({ token: 'UNKNOWN', network: ICP_NETWORK_SYMBOL });
+		mockPage.mockToken({ ...mockToken, ledgerCanisterId: 'UNKNOWN' });
 
 		render(Transactions);
 

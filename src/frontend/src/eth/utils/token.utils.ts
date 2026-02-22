@@ -1,25 +1,22 @@
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens/tokens.erc20.env';
-import { ERC20_ICP_SYMBOL } from '$eth/constants/erc20-icp.constants';
+import { ERC20_ICP_ADDRESS, ERC20_ICP_SYMBOL } from '$eth/constants/erc20-icp.constants';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { ExchangesData } from '$lib/types/exchange';
-import type {
-	PayableToken,
-	PayableTokenWithConvertedAmount,
-	PayableTokenWithFees
-} from '$lib/types/open-crypto-pay';
+import type { PayableToken } from '$lib/types/open-crypto-pay';
 import type { OptionToken, Token, TokenId } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
-import { parseToken } from '$lib/utils/parse.utils';
-import { isNullish } from '@dfinity/utils';
 import { zeroPadValue } from 'ethers/utils';
 
 export const isErc20Icp = (token: OptionToken): boolean =>
-	token?.symbol === ERC20_ICP_SYMBOL && isTokenErc20(token);
+	token?.symbol === ERC20_ICP_SYMBOL &&
+	isTokenErc20(token) &&
+	token?.address.toLowerCase() === ERC20_ICP_ADDRESS.toLowerCase() &&
+	token?.network.id === ETHEREUM_NETWORK_ID;
 
 export const isSupportedErc20TwinTokenId = (tokenId: TokenId): boolean =>
 	ERC20_TWIN_TOKENS_IDS.includes(tokenId);
@@ -99,67 +96,5 @@ export const calculateUsdValues = ({
 		amountInUSD,
 		feeInUSD,
 		sumInUSD: amountInUSD + feeInUSD
-	};
-};
-
-/**
- * Enriches ETH/EVM token with USD values and validates sufficient balance.
- */
-export const enrichEthEvmToken = ({
-	token,
-	nativeTokens,
-	exchanges,
-	balances
-}: {
-	token: PayableTokenWithFees;
-	nativeTokens: Token[];
-	exchanges: ExchangesData | undefined;
-	balances: CertifiedStoreData<BalancesData>;
-}): PayableTokenWithConvertedAmount | undefined => {
-	if (isNullish(token.fee)) {
-		return;
-	}
-
-	const nativeToken = nativeTokens.find(({ network: { id } }) => id === token.network.id);
-
-	if (isNullish(nativeToken)) {
-		return;
-	}
-
-	const nativeTokenPrice = exchanges?.[nativeToken.id]?.usd;
-	const tokenPrice = exchanges?.[token.id]?.usd;
-
-	if (isNullish(nativeTokenPrice) || isNullish(tokenPrice)) {
-		return;
-	}
-
-	const tokenAmount = parseToken({
-		value: token.amount,
-		unitName: token.decimals
-	});
-
-	const isBalanceSufficient = hasSufficientBalance({
-		token,
-		tokenAmount,
-		feeInWei: token.fee.feeInWei,
-		nativeToken,
-		balances
-	});
-
-	if (!isBalanceSufficient) {
-		return;
-	}
-
-	const usdValues = calculateUsdValues({
-		token,
-		nativeToken,
-		feeInWei: token.fee.feeInWei,
-		tokenPrice,
-		nativeTokenPrice
-	});
-
-	return {
-		...token,
-		...usdValues
 	};
 };

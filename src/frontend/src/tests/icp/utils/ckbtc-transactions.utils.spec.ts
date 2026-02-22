@@ -1,5 +1,5 @@
 import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
-import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';

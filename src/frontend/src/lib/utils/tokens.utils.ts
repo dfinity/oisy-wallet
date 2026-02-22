@@ -1,5 +1,6 @@
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20, isTokenErc20CustomToken } from '$eth/utils/erc20.utils';
+import { isTokenErc4626CustomToken } from '$eth/utils/erc4626.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
 import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
@@ -17,7 +18,7 @@ import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import { toastsShow } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -27,7 +28,7 @@ import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
+import { areAddressesPartiallyEqual, getCaseSensitiveness } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
@@ -38,120 +39,79 @@ import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
- * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
+ * Maps tokens to their UI representation and sorts them using balance-aware and pin-aware prioritisation.
  *
- * @param $tokens - The list of tokens to sort.
- * @param $tokensToPin - The list of tokens to pin at the top of the list.
- * @param $exchanges - The exchange rates for the tokens.
+ * Sorting priority (in order):
+ *
+ * 1. Deprecation status (non-deprecated tokens first).
+ * 2. USD balance (descending).
+ * 3. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
+ * 4. Token symbol (ascending, locale-aware).
+ * 5. Token name (ascending, locale-aware).
+ * 6. Network name (ascending, locale-aware).
+ * 7. Token balance (descending).
+ * 8. USD market cap (descending).
+ *
+ * @param $tokens - The list of tokens to map and sort.
+ * @param $balances - Certified balances data used to compute token balances.
+ * @param $stakeBalances - Staked balances used in the UI mapping.
+ * @param $exchanges - Exchange rate data used to compute USD balance and market cap.
+ * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
+ * @returns A sorted array of mapped token UI objects.
  */
 export const sortTokens = <T extends Token>({
 	$tokens,
-	$exchanges,
-	$tokensToPin
-}: {
-	$tokens: T[];
-	$exchanges: ExchangesData;
-	$tokensToPin: TokenToPin[];
-}): T[] => {
-	const tokenById = new Map<TokenId, T>($tokens.map((token) => [token.id, token]));
-
-	const pinnedTokens = $tokensToPin.reduce<T[]>((acc, { id: pinnedId }) => {
-		const token = tokenById.get(pinnedId);
-
-		if (nonNullish(token)) {
-			acc.push(token);
-
-			tokenById.delete(pinnedId);
-		}
-
-		return acc;
-	}, []);
-
-	const otherTokens = Array.from(tokenById.values());
-
-	return [
-		...pinnedTokens,
-		...otherTokens.sort((a, b) => {
-			// Deprecated SNSes such as CTS
-			if (isIcToken(a) && (a.deprecated ?? false)) {
-				return 1;
-			}
-
-			if (isIcToken(b) && (b.deprecated ?? false)) {
-				return -1;
-			}
-
-			return (
-				($exchanges[b.id]?.usd_market_cap ?? 0) - ($exchanges[a.id]?.usd_market_cap ?? 0) ||
-				a.name.localeCompare(b.name) ||
-				a.network.name.localeCompare(b.network.name)
-			);
-		})
-	];
-};
-
-/**
- * Pins tokens by USD value, balance and name.
- *
- * The function pins on top of the list the tokens that have a balance and/or an exchange rate.
- * It sorts first the ones that have an exchange rate and balance non-zero, according to their usd value (descending).
- * Then, it sorts the ones that have only a balance non-zero and no exchange rate, according to their balance (descending).
- * Finally, it leaves the rest of the tokens untouched.
- * In case of a tie, it sorts by token name and network name.
- *
- * @param $tokens - The list of tokens to sort.
- * @param $balancesStore - The balances' data for the tokens.
- * @param $exchanges - The exchange rates data for the tokens.
- * @returns The sorted list of tokens.
- *
- */
-export const pinTokensWithBalanceAtTop = <T extends Token>({
-	$tokens,
 	$balances,
 	$stakeBalances,
-	$exchanges
+	$exchanges,
+	$tokensToPin
 }: {
 	$tokens: T[];
 	$balances: CertifiedStoreData<BalancesData>;
 	$stakeBalances: StakeBalances;
 	$exchanges: ExchangesData;
+	$tokensToPin: TokenToPin[];
 }): TokenUi<T>[] => {
-	// If balances data are nullish, there is no need to sort.
-	if (isNullish($balances)) {
-		return $tokens.map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges }));
-	}
+	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
 
-	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi<T>[], TokenUi<T>[]]>(
-		(acc, token) => {
-			const tokenUI: TokenUi<T> = mapTokenUi<T>({
-				token,
-				$balances,
-				$stakeBalances,
-				$exchanges
-			});
-
-			if ((tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO) > 0) {
-				acc[0].push(tokenUI);
-			} else {
-				acc[1].push(tokenUI);
-			}
-
-			return acc;
-		},
-		[[], []]
+	const tokens = $tokens.map((token) =>
+		mapTokenUi({ token, $balances, $stakeBalances, $exchanges })
 	);
 
-	return [
-		...positiveBalances.sort(
-			(a, b) =>
-				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+((b.balance ?? ZERO) > (a.balance ?? ZERO)) -
-					+((b.balance ?? ZERO) < (a.balance ?? ZERO)) ||
-				a.name.localeCompare(b.name) ||
-				a.network.name.localeCompare(b.network.name)
-		),
-		...nonPositiveBalances
-	];
+	return tokens.sort((a, b) => {
+		// Deprecated last
+		const aDeprecated = isIcToken(a) && (a.deprecated ?? false);
+		const bDeprecated = isIcToken(b) && (b.deprecated ?? false);
+		if (aDeprecated !== bDeprecated) {
+			return aDeprecated ? 1 : -1;
+		}
+
+		// USD Balance descending
+		const usdBalanceDiff = (b.usdBalance ?? 0) - (a.usdBalance ?? 0);
+		if (usdBalanceDiff !== 0) {
+			return usdBalanceDiff;
+		}
+
+		// Pinned tokens (pinned first; pinned order = order provided)
+		const aPin = pinIndexById.get(a.id);
+		const bPin = pinIndexById.get(b.id);
+		const aPinned = aPin !== undefined;
+		const bPinned = bPin !== undefined;
+		if (aPinned !== bPinned) {
+			return aPinned ? -1 : 1;
+		}
+		if (aPinned && bPinned) {
+			return aPin - bPin;
+		}
+
+		return (
+			a.symbol.localeCompare(b.symbol) ||
+			a.name.localeCompare(b.name) ||
+			a.network.name.localeCompare(b.network.name) ||
+			+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO)) ||
+			($exchanges[b.id]?.usd_market_cap ?? 0) - ($exchanges[a.id]?.usd_market_cap ?? 0)
+		);
+	});
 };
 
 /**
@@ -366,6 +326,10 @@ const normaliseTokenForSave = (token: Token): SaveCustomTokenWithKey | undefined
 		return { ...token, chainId: token.network.chainId, networkKey: 'Erc721' };
 	}
 
+	if (isTokenErc4626CustomToken(token)) {
+		return { ...token, chainId: token.network.chainId, networkKey: 'Erc4626' };
+	}
+
 	if (isTokenErc1155CustomToken(token)) {
 		return { ...token, chainId: token.network.chainId, networkKey: 'Erc1155' };
 	}
@@ -441,3 +405,88 @@ export const filterTokensByNft = ({
 				const isNft = isTokenNonFungible(t);
 				return filterNfts ? isNft : !isNft;
 			});
+
+export const assertExistingTokens = <T extends Token>({
+	existingTokens,
+	token,
+	errorMsg
+}: {
+	existingTokens: T[];
+	token: Omit<T, 'id'>;
+	errorMsg: string;
+}): { valid: boolean } => {
+	if (
+		nonNullish(
+			existingTokens.find(({ symbol }) => symbol.toLowerCase() === token.symbol.toLowerCase())
+		)
+	) {
+		toastsError({
+			msg: { text: errorMsg }
+		});
+
+		return { valid: false };
+	}
+
+	return { valid: true };
+};
+
+/**
+ * Returns the path to a token icon stored in the codebase.
+ *
+ * Icons are organised in the `static` folder **per network and per identifier**.
+ * The identifier is network-specific (for example, the token address
+ * for ERC-20 and SPL tokens), resulting in paths of the form:
+ *
+ * `icons/{network}/{identifier}.{extension}`
+ *
+ * Supported token types include:
+ * - All EVM-compatible ERC-20 tokens
+ * - Solana SPL tokens
+ *
+ * Address matching follows **network-specific case-sensitiveness rules**:
+ * - Case-sensitive networks use the address as-is
+ * - Case-insensitive networks use the lower-cased address
+ *
+ * For unsupported token
+ * types, this function returns `undefined`.
+ *
+ * @template T - A token type extending {@link Token}
+ *
+ * @param params
+ * @param params.token - A token object containing network information
+ * and a valid address. The address must match the network’s addressing
+ * rules in order for the icon to resolve correctly.
+ * @param params.extension - Optional file extension for the icon asset.
+ * Defaults to `'webp'`.
+ *
+ * @returns The relative icon path
+ * (e.g. `/icons/eth/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp`)
+ * or `undefined` if the token type is not supported.
+ */
+export const getCodebaseTokenIconPath = <T extends Token>({
+	token,
+	extension = 'webp'
+}: {
+	token: T;
+	extension?: 'webp' | 'svg' | 'png';
+}): string | undefined => {
+	if (isTokenErc20(token) || isTokenSpl(token)) {
+		const {
+			address,
+			network: { id: networkId }
+		} = token;
+
+		const isCaseSensitive = getCaseSensitiveness({ networkId });
+
+		const identifier = isCaseSensitive ? address : address.toLowerCase();
+
+		const networkSymbol = networkId.description
+			?.toLowerCase()
+			.trim()
+			.replace(/\s+/g, '-') // spaces → -
+			.replace(/[^a-z0-9-]/g, '') // drop everything else
+			.replace(/-+/g, '-'); // collapse multiple -
+
+		return `/icons/${networkSymbol}/${identifier}.${extension}`;
+	}
+};

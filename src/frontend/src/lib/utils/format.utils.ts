@@ -221,7 +221,8 @@ export const formatCurrency = ({
 	language,
 	notBelowThreshold = false,
 	hideSymbol = false,
-	normalizeSeparators = false
+	normalizeSeparators = false,
+	useMinSignificantDigits = false
 }: {
 	value: number;
 	currency: Currency;
@@ -230,6 +231,7 @@ export const formatCurrency = ({
 	notBelowThreshold?: boolean;
 	hideSymbol?: boolean;
 	normalizeSeparators?: boolean;
+	useMinSignificantDigits?: boolean;
 }): string | undefined => {
 	if (currency !== exchangeRateCurrency) {
 		// There could be a case where, after a currency switch, the exchange rate is still the one of the old currency, until the worker updates it
@@ -245,14 +247,46 @@ export const formatCurrency = ({
 
 	const convertedValue = value / exchangeRateToUsd;
 
+	const decimalDigits = getCurrencyDecimalDigits({ currency, language });
+
+	const getSignificantOpts = (): Partial<Intl.NumberFormatOptions> => {
+		if (!useMinSignificantDigits) {
+			return {};
+		}
+
+		// Threshold: 2dp -> 1, 0dp (JPY) -> 100, 3dp -> 0.1, etc.
+		const threshold = Math.pow(10, 2 - decimalDigits);
+
+		if (Math.abs(convertedValue) >= threshold) {
+			return {};
+		}
+
+		// Baseline: 2dp currencies => 4 fraction digits, JPY => 2 fraction digits
+		const baselineFractionDigits = decimalDigits + 2;
+
+		// Ensure at least 4 significant digits for very small numbers
+		const abs = Math.abs(convertedValue);
+		const fractionFor4Sig =
+			abs === 0 ? baselineFractionDigits : Math.max(0, -Math.floor(Math.log10(abs)) + (4 - 1));
+
+		const maxFractionDigits = Math.max(baselineFractionDigits, fractionFor4Sig);
+
+		return {
+			minimumFractionDigits: baselineFractionDigits,
+			maximumFractionDigits: maxFractionDigits
+		};
+	};
+
+	const significantOpts = getSignificantOpts();
+
 	const currencyFormatter = new Intl.NumberFormat(locale, {
 		style: 'currency',
 		currency: currency.toUpperCase(),
-		...(hideSymbol && { currencyDisplay: 'code' })
+		...(hideSymbol && { currencyDisplay: 'code' }),
+		...significantOpts
 	});
 
 	if (notBelowThreshold) {
-		const decimalDigits = getCurrencyDecimalDigits({ currency, language });
 		const minThreshold = 1 / Math.pow(10, decimalDigits);
 
 		if (Math.abs(convertedValue) < minThreshold) {
@@ -300,4 +334,60 @@ export const formatStakeApyNumber = (apy: number): string => {
 	}
 
 	return '0';
+};
+
+export const format24hChangeInCurrency = ({
+	usdChangePct,
+	currency,
+	exchangeRate: { exchangeRate24hChangeMultiplier, currency: exchangeRateCurrency },
+	language
+}: {
+	usdChangePct: number;
+	currency: Currency;
+	exchangeRate: CurrencyExchangeData;
+	language: Languages;
+}): { formattedAbs: string; sign: 'positive' | 'negative' | 'zero' } | undefined => {
+	if (currency !== exchangeRateCurrency) {
+		// After a currency switch, the exchange rate might still be for the old currency
+		return;
+	}
+
+	if (isNullish(exchangeRate24hChangeMultiplier) || exchangeRate24hChangeMultiplier === 0) {
+		return;
+	}
+
+	const locale = USE_NATIVE_CURRENCY_LOCALE[language] ? language : 'en-US';
+
+	const usdMultiplier = 1 + usdChangePct / 100;
+	const currencyMultiplier = usdMultiplier / exchangeRate24hChangeMultiplier;
+	const currencyChangePct = (currencyMultiplier - 1) * 100;
+
+	const raw = Object.is(currencyChangePct, -0) ? 0 : currencyChangePct;
+
+	const absPct = Math.abs(raw);
+
+	// decimals rule:
+	// 1) >= 100% -> 0 decimals
+	// 2) >= 10%  -> 1 decimal
+	// 3) < 10%   -> 2 decimals
+	const fractionDigits = absPct >= 100 ? 0 : absPct >= 10 ? 1 : 2;
+
+	const percentFormatter = new Intl.NumberFormat(locale, {
+		style: 'percent',
+		signDisplay: 'never',
+		minimumFractionDigits: fractionDigits,
+		maximumFractionDigits: fractionDigits
+	});
+
+	// Decide rounding first, then decide sign from the rounded value
+	const roundedAbsPct = Number(absPct.toFixed(fractionDigits));
+
+	// sign (treat -0 as 0)
+	const sign: 'positive' | 'negative' | 'zero' =
+		roundedAbsPct === 0 ? 'zero' : raw > 0 ? 'positive' : 'negative';
+
+	return {
+		formattedAbs: percentFormatter.format(absPct / 100),
+		sign
+	};
 };

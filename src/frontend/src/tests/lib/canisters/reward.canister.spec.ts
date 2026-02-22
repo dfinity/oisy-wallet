@@ -21,7 +21,7 @@ describe('reward.canister', () => {
 		serviceOverride
 	}: Pick<CreateCanisterOptions<RewardService>, 'serviceOverride'>): Promise<RewardCanister> =>
 		RewardCanister.create({
-			canisterId: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
+			canisterId: Principal.fromText('vi6cu-aiaaa-aaaad-aad7q-cai'),
 			identity: mockIdentity,
 			certifiedServiceOverride: serviceOverride,
 			serviceOverride

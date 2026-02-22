@@ -124,11 +124,14 @@ export const idlFactory = ({ IDL }) => {
 	const BtcAddPendingTransactionRequest = IDL.Record({
 		txid: IDL.Vec(IDL.Nat8),
 		network: BitcoinNetwork,
-		address: IDL.Text,
 		utxos: IDL.Vec(Utxo)
 	});
 	const BtcAddPendingTransactionError = IDL.Variant({
-		InternalError: IDL.Record({ msg: IDL.Text })
+		InvalidUtxos: IDL.Null,
+		EmptyUtxos: IDL.Null,
+		DuplicateUtxos: IDL.Null,
+		InternalError: IDL.Record({ msg: IDL.Text }),
+		UtxosAlreadyReserved: IDL.Null
 	});
 	const BtcAddPendingTransactionResult = IDL.Variant({
 		Ok: IDL.Null,
@@ -159,9 +162,12 @@ export const idlFactory = ({ IDL }) => {
 	const BtcGetPendingTransactionsReponse = IDL.Record({
 		transactions: IDL.Vec(PendingTransaction)
 	});
+	const BtcGetPendingTransactionsError = IDL.Variant({
+		InternalError: IDL.Record({ msg: IDL.Text })
+	});
 	const BtcGetPendingTransactionsResult = IDL.Variant({
 		Ok: BtcGetPendingTransactionsReponse,
-		Err: BtcAddPendingTransactionError
+		Err: BtcGetPendingTransactionsError
 	});
 	const SelectedUtxosFeeRequest = IDL.Record({
 		network: BitcoinNetwork,
@@ -415,6 +421,7 @@ export const idlFactory = ({ IDL }) => {
 		SplMainnet: SplToken,
 		IcPunks: ExtV2Token,
 		Erc1155: ErcToken,
+		Erc4626: ErcToken,
 		Dip721: ExtV2Token
 	});
 	const TokenSection = IDL.Variant({ Spam: IDL.Null, Hidden: IDL.Null });

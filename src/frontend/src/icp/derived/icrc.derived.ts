@@ -1,7 +1,7 @@
 import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
 	ICRC_CK_TOKENS_LEDGER_CANISTER_IDS
-} from '$env/networks/networks.icrc.env';
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { SUPPORTED_ICP_LEDGER_CANISTER_IDS } from '$env/tokens/tokens.icp.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';

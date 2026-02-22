@@ -19,6 +19,5 @@ export const PEPECOIN_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: PEPECOIN_SYMBOL,
 	decimals: PEPECOIN_DECIMALS,
 	icon: pepecoin,
-	address: '0xA9E8aCf069C58aEc8825542845Fd754e41a9489A',
-	exchange: 'erc20'
+	address: '0xA9E8aCf069C58aEc8825542845Fd754e41a9489A'
 };

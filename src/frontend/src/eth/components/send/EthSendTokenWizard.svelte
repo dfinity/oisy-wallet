@@ -49,7 +49,8 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenDecimals, sendTokenId, sendToken, sendEthCustomNonce } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Props
@@ -99,7 +100,7 @@
 		})
 	);
 
-	let customNonce = $state<number | undefined>();
+	let customNonce = $derived($sendEthCustomNonce);
 
 	/**
 	 * Fee context store
@@ -373,7 +374,6 @@
 				{onTokensList}
 				{selectedContact}
 				bind:destination
-				bind:customNonce
 				bind:amount
 			>
 				{#snippet cancel()}

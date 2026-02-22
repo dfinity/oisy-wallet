@@ -27,8 +27,4 @@ export const initAllUtxosStore = (): AllUtxosStore => {
 	};
 };
 
-export interface AllUtxosContext {
-	store: AllUtxosStore;
-}
-
-export const ALL_UTXOS_CONTEXT_KEY = Symbol('all-utxos');
+export const allUtxosStore = initAllUtxosStore();

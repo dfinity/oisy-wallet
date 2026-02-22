@@ -16,17 +16,17 @@ import {
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const networkId: Readable<NetworkId | undefined> = derived(
+export const selectedNetwork: Readable<Network | undefined> = derived(
 	[networks, routeNetwork],
 	([$networks, $routeNetwork]) =>
 		nonNullish($routeNetwork)
-			? $networks.find(({ id }) => id.description === $routeNetwork)?.id
+			? $networks.find(({ id }) => id.description === $routeNetwork)
 			: undefined
 );
 
-export const selectedNetwork: Readable<Network | undefined> = derived(
-	[networks, networkId],
-	([$networks, $networkId]) => $networks.find(({ id }) => id === $networkId)
+export const networkId: Readable<NetworkId | undefined> = derived(
+	[selectedNetwork],
+	([$selectedNetwork]) => $selectedNetwork?.id
 );
 
 export const pseudoNetworkICPTestnet: Readable<boolean> = derived([networkId], ([$networkId]) =>

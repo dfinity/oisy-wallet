@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
-			"test_banner_beta": "这是一个测试版发布。你可能会遇到一些错误。真实资产正在使用中——请谨慎操作。",
-			"internet_identity_banner_first_part": "$oisy_name 现在使用",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "阅读更多"
+			"test_banner_beta": "这是一个测试版发布。你可能会遇到一些错误。真实资产正在使用中——请谨慎操作。"
 		},
 		"alt": {
 			"logo": "$name 标志",
@@ -121,7 +118,6 @@
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
-			"legacy_login": "旧版登录",
 			"asset_types": "跨 Bitcoin、Solana、Ethereum、ICP 等管理资产",
 			"instant_and_private": "内置 AI 助手，隐私保护为默认标准",
 			"advanced_cryptography": "由先进的密码学保障安全 —— 100% 链上",
@@ -155,23 +151,16 @@
 				"description": "看起来你取消了登录或注册。我们希望了解发生了什么，以便改进你的使用体验。",
 				"login_page_looks_different": "为什么登录页面看起来不一样？",
 				"use_identity_number": "我想使用我的 Internet Identity I号码",
-				"lost_identity_number": "我的互联网身份号码丢失了",
 				"feedback_text": "你的反馈将帮助我们让 $oisy_short 变得更好。",
 				"thanks_text": "谢谢您！",
 				"useful_links": "有用的链接",
 				"identity_new_identity": "$oisy_short 钱包已切换 Internet Identity 域名为：<span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "$oisy_name 切换到 Internet Identity 2.0（英文版）",
-				"identity_legacy_identity_title": "登录界面上看不到您的互联网身份号码了吗？您可以通过以下任一方法查找您的身份号码：",
-				"identity_legacy_identity_item_1": "查看您之前在 <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> 或 <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a> 使用过的 Internet IdentityI 号码列表",
-				"identity_legacy_identity_item_2": "查看您之前可能保存的恢复短语开头的数字。",
 				"identity_new_identity_title": "$oisy_name 现在使用 Internet Identity 2.0，它提供了多项改进，并允许您将您的身份与您在 Google、Apple 或 Microsoft 上的登录信息关联起来。",
 				"identity_new_identity_item_1": "要迁移您现有的身份，请点击新登录页面顶部的“Upgrade your identity”链接，然后按照步骤操作。",
-				"identity_new_identity_item_2": "您仍然可以使用旧版登录页面和您的互联网身份号码。只需点击下方链接即可访问旧版登录页面。",
-				"identity_new_identity_link": "在 OISY Docs 上了解更多关于互联网身份 2.0 的信息（英文版）",
-				"identity_legacy_sign_in": "使用旧 Internet Identity 域名登录",
-				"identity_learn_more": "在 $oisy_short 文档中了解更多",
 				"oisy_introduction": "",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "",
 				"need_help": "需要帮助",
@@ -187,7 +176,6 @@
 			"title_part_1": "解锁以继续",
 			"title_part_2": "您之前已锁定钱包以确保其安全。请从上次中断的地方继续操作或退出。",
 			"unlock": "开锁",
-			"unlock_with_legacy_login": "",
 			"logout": "退出登录",
 			"logout_clear_cash_message": "注销将清除所有缓存数据",
 			"learn_more": "了解更多"
@@ -217,15 +205,17 @@
 			"website": "$dAppName 的图像"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "社交媒体",
-			"verifiable_credentials": "可验证凭证",
-			"staking": "质押",
-			"walletconnect": "WalletConnect",
-			"game": "游戏",
-			"tools": "工具包",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "人工智能",
-			"nft": "NFT"
+			"defi": "DeFi",
+			"game": "游戏",
+			"nft": "NFT",
+			"rwa": "",
+			"social_media": "社交媒体",
+			"staking": "质押",
+			"tools": "工具包",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -415,6 +405,31 @@
 				"name": "Kamino",
 				"one_liner": "Kamino 是 Solana 上最大的借贷协议，支撑着该网络中相当大比例的 DeFi 活动。",
 				"description": "Kamino 是一个运行在 Solana 区块链上的去中心化金融（DeFi）平台，将流动性提供、借贷和杠杆交易整合为一套产品体系。它通过自动化流动性金库和 Kamino Lend 系统简化了这些 DeFi 策略，并利用集中流动性管理来提升用户的资金效率。"
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -611,6 +626,7 @@
 			"no_infura_erc721_provider": "没有 $network 网络的 Infura ERC721 提供商",
 			"no_infura_erc1155_provider": "没有 $network 网络的 Infura ERC1155 提供商",
 			"no_infura_erc20_icp_provider": "没有 $network 网络的 Infura ERC20 ICP 提供商",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "没有 $network 网络的 Solana 网络配置",
 			"loading_address": "加载 $symbol 地址时出错。",
 			"loading_balance": "加载 $network 网络上的 $symbol 余额时出错。",
@@ -631,6 +647,7 @@
 			"icrc_canisters": "加载 ICRC 容器时出错。",
 			"icrc_canister_loading": "无法加载带有 Ledger 容器 $ledgerCanisterId 的令牌，因为它目前没有响应。",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",
 			"spl_custom_tokens": "加载 SPL 用户代币时出错。",
@@ -865,6 +882,7 @@
 			"unknown_cketh": "无法获取 ckETH 代币。",
 			"destination_address_invalid": "目标地址无效。",
 			"amount_invalid": "金额无效。",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "燃料费不足",
 			"insufficient_funds_for_amount": "金额不足",
 			"insufficient_ethereum_funds_to_cover_the_fees": "以太坊余额不足以支付手续费",
@@ -1807,7 +1825,6 @@
 			},
 			"title": "",
 			"instruction": "点击此按钮即表示你同意 $link",
-			"instruction_two_buttons": "点击其中一个按钮即表示你同意 $link",
 			"body": ""
 		},
 		"alt": {
@@ -2005,6 +2022,9 @@
 			"minute_plural": "分钟（复数）",
 			"second": "秒（单数）",
 			"second_plural": "秒（复数）"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

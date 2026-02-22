@@ -12,6 +12,7 @@ import type {
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address as solAddress, type Address, type Lamports, type Signature } from '@solana/kit';
+import { SvelteMap } from 'svelte/reactivity';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport
 export const loadSolLamportsBalance = async ({
@@ -107,6 +108,11 @@ export const getRpcTransaction = async ({
 	}).send();
 };
 
+const cachedTransactions = new SvelteMap<
+	SolanaNetworkType,
+	SvelteMap<SolSignature['signature'], SolRpcTransaction>
+>();
+
 export const fetchTransactionDetailForSignature = async ({
 	signature,
 	network
@@ -114,6 +120,22 @@ export const fetchTransactionDetailForSignature = async ({
 	signature: SolSignature;
 	network: SolanaNetworkType;
 }): Promise<SolRpcTransaction | null> => {
+	const networkCache =
+		cachedTransactions.get(network) ??
+		(() => {
+			const map = new SvelteMap<SolSignature['signature'], SolRpcTransaction>();
+
+			cachedTransactions.set(network, map);
+
+			return map;
+		})();
+
+	const cachedTransaction = networkCache.get(signature.signature);
+
+	if (nonNullish(cachedTransaction)) {
+		return cachedTransaction;
+	}
+
 	const { confirmationStatus } = signature;
 
 	const rpcTransaction: SolRpcTransactionRaw | null = await getRpcTransaction({
@@ -125,13 +147,19 @@ export const fetchTransactionDetailForSignature = async ({
 		return null;
 	}
 
-	return {
+	const transaction = {
 		...rpcTransaction,
 		version: rpcTransaction.version,
 		confirmationStatus,
 		id: signature.toString(),
 		signature: signature.signature
 	};
+
+	if (confirmationStatus === 'finalized') {
+		networkCache.set(signature.signature, transaction);
+	}
+
+	return transaction;
 };
 
 export const loadTokenAccount = async ({

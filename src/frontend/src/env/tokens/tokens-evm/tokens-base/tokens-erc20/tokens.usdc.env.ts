@@ -24,7 +24,6 @@ export const USDC_TOKEN: RequiredEvmErc20Token = {
 	decimals: USDC_DECIMALS,
 	icon: usdc,
 	address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-	exchange: 'erc20',
 	groupData: USDC_TOKEN_GROUP,
 	buy: {
 		onramperId: 'usdc_base'
@@ -44,6 +43,5 @@ export const SEPOLIA_USDC_TOKEN: RequiredEvmErc20Token = {
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,
 	icon: usdc,
-	address: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
-	exchange: 'erc20'
+	address: '0x036CbD53842c5426634e7929541eC2318f3dCF7e'
 };

@@ -1,4 +1,3 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
@@ -11,6 +10,7 @@ import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { hardenMetadata } from '$lib/utils/metadata.utils';
+import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
 import { getTokenInfo } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
@@ -51,38 +51,35 @@ export const loadCustomTokens = ({
 	queryAndUpdate<SplCustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
-		onUpdateError: ({ error: err }) => {
-			splCustomTokensStore.resetAll();
-
-			toastsError({
-				msg: { text: get(i18n).init.error.spl_custom_tokens },
-				err
-			});
-		},
+		onUpdateError,
 		identity
 	});
 
-const loadSplCustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
-	await loadNetworkCustomTokens({
-		...params,
-		filterTokens: ({ token }) => 'SplMainnet' in token || 'SplDevnet' in token
-	});
-
-const loadCustomTokensWithMetadata = async (
-	params: LoadCustomTokenParams
-): Promise<SplCustomToken[]> => {
+const loadCustomTokensWithMetadata = async ({
+	tokens,
+	...params
+}: LoadCustomTokenParams): Promise<SplCustomToken[]> => {
 	const loadCustomContracts = async (): Promise<SplCustomToken[]> => {
-		const splCustomTokens = await loadSplCustomTokens(params);
+		const splCustomTokens = tokens ?? (await loadNetworkCustomTokens(params));
 
 		const [existingTokens, nonExistingTokens] = splCustomTokens.reduce<
 			[SplCustomToken[], SplCustomToken[]]
 		>(
-			([accExisting, accNonExisting], { token, enabled, version: versionNullable }) => {
+			(
+				[accExisting, accNonExisting],
+				{
+					token,
+					enabled,
+					version: versionNullable,
+					allow_external_content_source: allowExternalContentSourceNullable
+				}
+			) => {
 				if (!('SplMainnet' in token || 'SplDevnet' in token)) {
 					return [accExisting, accNonExisting];
 				}
 
 				const version = fromNullable(versionNullable);
+				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
 				const {
 					network: tokenNetwork,
@@ -117,7 +114,8 @@ const loadCustomTokensWithMetadata = async (
 					standard: { code: 'spl' as const },
 					category: 'custom' as const,
 					enabled,
-					version
+					version,
+					allowExternalContentSource
 				};
 
 				return [accExisting, [...accNonExisting, newToken]];
@@ -128,7 +126,7 @@ const loadCustomTokensWithMetadata = async (
 		const customTokens: SplCustomToken[] = await nonExistingTokens.reduce<
 			Promise<SplCustomToken[]>
 		>(async (acc, { symbol: oldSymbol, name: oldName, ...token }) => {
-			const { network, address } = token;
+			const { network, address, icon } = token;
 
 			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
@@ -156,12 +154,17 @@ const loadCustomTokensWithMetadata = async (
 				return acc;
 			}
 
-			const newToken: SplCustomToken = {
+			const baseToken: SplCustomToken = {
 				...token,
 				owner,
 				symbol,
 				name,
-				...rest,
+				...rest
+			};
+
+			const newToken: SplCustomToken = {
+				...baseToken,
+				icon: icon ?? getCodebaseTokenIconPath({ token: baseToken }),
 				...(nonNullish(metadata) ? hardenMetadata(metadata) : {})
 			};
 
@@ -182,6 +185,15 @@ const loadCustomTokenData = ({
 	response: SplCustomToken[];
 }) => {
 	splCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+const onUpdateError = ({ error: err }: { error: unknown }) => {
+	splCustomTokensStore.resetAll();
+
+	toastsError({
+		msg: { text: get(i18n).init.error.spl_custom_tokens },
+		err
+	});
 };
 
 export const getSplMetadata = async ({

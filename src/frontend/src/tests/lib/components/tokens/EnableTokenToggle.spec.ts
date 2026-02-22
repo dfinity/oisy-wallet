@@ -7,6 +7,7 @@ import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.consta
 import type { Token } from '$lib/types/token';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -23,6 +24,7 @@ describe('EnableTokenToggle', () => {
 	const mockToggleableExtToken = { ...mockValidExtV2Token, enabled: true };
 	const mockToggleableDip721Token = { ...mockValidDip721Token, enabled: true };
 	const mockToggleableIcPunksToken = { ...mockValidIcPunksToken, enabled: true };
+	const mockToggleableErc4626Token = { ...mockValidErc4626Token, enabled: true };
 	const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
 	const mockToggleableBtcToken = { ...BTC_MAINNET_TOKEN, enabled: true };
 	const mockToggleableSolToken = { ...SOLANA_TOKEN, enabled: true };
@@ -89,6 +91,14 @@ describe('EnableTokenToggle', () => {
 		});
 
 		expect(getByTestId(getTestIdForToggle(mockToggleableIcPunksToken))).toBeInTheDocument();
+	});
+
+	it('renders toggle ERC4626 token', () => {
+		const { getByTestId } = render(EnableTokenToggle, {
+			props: { token: mockToggleableErc4626Token, onToggle: mockOnToggle }
+		});
+
+		expect(getByTestId(getTestIdForToggle(mockToggleableErc4626Token))).toBeInTheDocument();
 	});
 
 	it('should call onToggle on clicking it', async () => {

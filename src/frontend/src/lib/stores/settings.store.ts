@@ -46,11 +46,6 @@ export const nftGroupByCollectionStore = initStorageStore<boolean>({
 	defaultValue: true
 });
 
-export const userSelectedNetworkStore = initStorageStore<string | undefined>({
-	key: 'user-selected-network',
-	defaultValue: undefined
-});
-
 export const activeAssetsTabStore = initStorageStore<TokenTypes>({
 	key: 'active-assets-tab',
 	defaultValue: TokenTypesEnum.TOKENS

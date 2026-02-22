@@ -329,6 +329,8 @@ describe('token.schema', () => {
 			icon: 'https://example.com/icon.png',
 			oisySymbol: { oisySymbol: 'OSYM' },
 			oisyName: { prefix: 'OS', oisyName: 'OisyToken' },
+			neverCollapseInTokenGroup: false,
+			allowExternalContentSource: true,
 			buy: { onramperId: 'valid-id' }
 		};
 

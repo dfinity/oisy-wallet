@@ -1,9 +1,8 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import {
 	clearIdbAllCustomTokens,
-	deleteIdbAllCustomTokens,
 	deleteIdbEthToken,
 	deleteIdbIcToken,
 	deleteIdbSolToken,
@@ -141,15 +140,6 @@ describe('idb-tokens.api', () => {
 
 			expect(result).toEqual(mockTokens);
 			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
-		});
-	});
-
-	describe('deleteIdbAllCustomTokens', () => {
-		it('should delete all custom tokens', async () => {
-			await deleteIdbAllCustomTokens(mockPrincipal);
-
-			expect(idbKeyval.del).toHaveBeenCalledOnce();
-			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
 		});
 	});
 

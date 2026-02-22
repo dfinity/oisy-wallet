@@ -4,6 +4,7 @@
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
+	import { isEthAddress } from '$eth/utils/account.utils';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -11,7 +12,6 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isEthAddress } from '$lib/utils/account.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	interface Props {

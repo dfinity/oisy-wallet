@@ -4,7 +4,6 @@ import * as auth from '$lib/services/auth.services';
 import { authLocked } from '$lib/stores/locked.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { InternetIdentityDomain } from '$lib/types/auth';
-import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -58,21 +57,31 @@ describe('ButtonAuthenticateWithHelp', () => {
 
 		await waitFor(() => signInButton?.click());
 
-		expect(authSpy).toHaveBeenCalledExactlyOnceWith({ domain: InternetIdentityDomain.VERSION_2_0 });
+		expect(authSpy).toHaveBeenCalledExactlyOnceWith({
+			domain: InternetIdentityDomain.VERSION_2_0,
+			asPopup: false
+		});
 	});
 
-	it('should call sign in with the correct domain on the secondary button click', async () => {
+	it('should call sign in as pop-up', async () => {
 		const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
 
-		const { getByText } = render(ButtonAuthenticateWithHelp);
+		const { container } = render(ButtonAuthenticateWithHelp, {
+			props: {
+				asPopup: true
+			}
+		});
 
-		const secondarySignInButton = getByText(en.auth.text.legacy_login) as HTMLButtonElement | null;
+		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 
-		expect(secondarySignInButton).toBeInTheDocument();
+		expect(signInButton).toBeInTheDocument();
 
-		await waitFor(() => secondarySignInButton?.click());
+		await waitFor(() => signInButton?.click());
 
-		expect(authSpy).toHaveBeenCalledExactlyOnceWith({ domain: InternetIdentityDomain.VERSION_1_0 });
+		expect(authSpy).toHaveBeenCalledExactlyOnceWith({
+			domain: InternetIdentityDomain.VERSION_2_0,
+			asPopup: true
+		});
 	});
 
 	it('should set the lock store to false on successful sign in', async () => {

@@ -58,7 +58,11 @@ describe('EarningCard', () => {
 			$amount: `${formatCurrency({
 				value: mockProviderUi.totalEarningPerYear,
 				currency: Currency.USD,
-				exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+				exchangeRate: {
+					currency: Currency.USD,
+					exchangeRateToUsd: 1,
+					exchangeRate24hChangeMultiplier: 1
+				},
 				language: Languages.ENGLISH
 			})}`
 		});
@@ -73,7 +77,11 @@ describe('EarningCard', () => {
 			formatCurrency({
 				value: mockProviderUi.totalPositionUsd,
 				currency: Currency.USD,
-				exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+				exchangeRate: {
+					currency: Currency.USD,
+					exchangeRateToUsd: 1,
+					exchangeRate24hChangeMultiplier: 1
+				},
 				language: Languages.ENGLISH
 			}) ?? '';
 

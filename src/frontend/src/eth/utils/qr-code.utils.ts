@@ -1,4 +1,5 @@
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 import type { OptionToken, Token } from '$lib/types/token';
@@ -12,13 +13,13 @@ export const decodeQrCode = ({
 	code,
 	expectedToken,
 	ethereumTokens,
-	erc20Tokens
+	ercTokens
 }: {
 	status: QrStatus;
 	code?: string;
 	expectedToken: OptionToken;
 	ethereumTokens: Token[];
-	erc20Tokens: Erc20Token[];
+	ercTokens: (Erc20Token | Erc4626Token)[];
 }): QrResponse => {
 	if (status !== 'success') {
 		return { status };
@@ -80,7 +81,7 @@ export const decodeQrCode = ({
 
 		if (nonNullish(tokenAddress)) {
 			return (
-				erc20Tokens.find(
+				ercTokens.find(
 					(token) =>
 						token.address.toLowerCase() === tokenAddress.toLowerCase() &&
 						token.network.chainId.toString() === parsedEthereumChainId.toString()

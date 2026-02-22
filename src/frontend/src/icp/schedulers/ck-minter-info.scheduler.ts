@@ -7,7 +7,13 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { assertNonNullish, isNullish, jsonReplacer } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	isNullish,
+	jsonReplacer,
+	queryAndUpdate,
+	type QueryAndUpdateParams
+} from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 
@@ -61,13 +67,22 @@ export class CkMinterInfoScheduler<
 			'No data - minterCanisterId - provided to fetch the minter information.'
 		);
 
-		await this.queryAndUpdateWithWarmup<T>({
+		const params: QueryAndUpdateParams<T> = {
 			request: ({ identity: _, certified }) =>
 				this.minterInfo({ minterCanisterId, identity, certified }),
-			onLoad: ({ certified, ...rest }) => this.syncMinterInfo({ certified, ...rest }),
+			onLoad: ({ certified, ...rest }) => {
+				this.syncMinterInfo({ certified, ...rest });
+			},
 			onUpdateError: ({ error }) => this.postMessageWalletError(error),
 			identity
-		});
+		};
+
+		// if the interval is "disabled", the sync will only be triggered once; therefore, it makes sense to do "update" only
+		if (this.interval === 'disabled') {
+			await queryAndUpdate<T>({ ...params, strategy: 'update' });
+		} else {
+			await this.queryAndUpdateWithWarmup<T>(params);
+		}
 	};
 
 	private syncMinterInfo = ({ response, certified }: { response: T; certified: boolean }) => {

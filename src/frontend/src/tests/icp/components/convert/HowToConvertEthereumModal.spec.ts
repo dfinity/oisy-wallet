@@ -13,6 +13,12 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
+}));
+
 describe('HowToConvertEthereumModal', () => {
 	const props = {
 		sourceToken: ETHEREUM_TOKEN,
@@ -37,7 +43,7 @@ describe('HowToConvertEthereumModal', () => {
 		vi.clearAllMocks();
 
 		mockPage.reset();
-		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
+		mockPage.mockNetwork(ETHEREUM_NETWORK_ID.description);
 	});
 
 	it('should render convert info on initial render', () => {

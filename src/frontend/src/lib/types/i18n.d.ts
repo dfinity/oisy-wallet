@@ -46,13 +46,7 @@ interface I18nCore {
 		ellipsis: string;
 		learn_more: string;
 	};
-	info: {
-		test_banner: string;
-		test_banner_beta: string;
-		internet_identity_banner_first_part: string;
-		internet_identity_banner_second_part: string;
-		internet_identity_banner_button: string;
-	};
+	info: { test_banner: string; test_banner_beta: string };
 	alt: {
 		logo: string;
 		go_to_home: string;
@@ -120,7 +114,6 @@ interface I18nAuth {
 		logout: string;
 		lock: string;
 		authenticate: string;
-		legacy_login: string;
 		asset_types: string;
 		instant_and_private: string;
 		advanced_cryptography: string;
@@ -146,23 +139,16 @@ interface I18nAuth {
 			description: string;
 			login_page_looks_different: string;
 			use_identity_number: string;
-			lost_identity_number: string;
 			feedback_text: string;
 			thanks_text: string;
 			useful_links: string;
 			identity_new_identity: string;
 			switch_to_new_internet_identity: string;
-			identity_legacy_identity_title: string;
-			identity_legacy_identity_item_1: string;
-			identity_legacy_identity_item_2: string;
 			identity_new_identity_title: string;
 			identity_new_identity_item_1: string;
-			identity_new_identity_item_2: string;
-			identity_new_identity_link: string;
-			identity_legacy_sign_in: string;
-			identity_learn_more: string;
 			oisy_introduction: string;
-			private_key: string;
+			logging_into_oisy: string;
+			creating_a_wallet: string;
 			asset_control: string;
 			internet_identity_help_center: string;
 			need_help: string;
@@ -177,7 +163,6 @@ interface I18nLock {
 		title_part_1: string;
 		title_part_2: string;
 		unlock: string;
-		unlock_with_legacy_login: string;
 		logout: string;
 		logout_clear_cash_message: string;
 		learn_more: string;
@@ -208,15 +193,17 @@ interface I18nDapps {
 		website: string;
 	};
 	categories: {
-		defi: string;
-		social_media: string;
-		verifiable_credentials: string;
-		staking: string;
-		walletconnect: string;
-		game: string;
-		tools: string;
+		aa_new: string;
+		ab_icp: string;
 		ai: string;
+		defi: string;
+		game: string;
 		nft: string;
+		rwa: string;
+		social_media: string;
+		staking: string;
+		tools: string;
+		walletconnect: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -285,6 +272,11 @@ interface I18nDapps {
 		magic_eden: { name: string; one_liner: string; description: string };
 		solayer: { name: string; one_liner: string; description: string };
 		kamino: { name: string; one_liner: string; description: string };
+		helium: { name: string; one_liner: string; description: string };
+		sanctum: { name: string; one_liner: string; description: string };
+		sphere_finance: { name: string; one_liner: string; description: string };
+		binaryx: { name: string; one_liner: string; description: string };
+		parcl: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -413,6 +405,7 @@ interface I18nInit {
 		no_infura_erc721_provider: string;
 		no_infura_erc1155_provider: string;
 		no_infura_erc20_icp_provider: string;
+		no_infura_erc4626_provider: string;
 		no_solana_network: string;
 		loading_address: string;
 		loading_balance: string;
@@ -433,6 +426,7 @@ interface I18nInit {
 		icrc_canisters: string;
 		icrc_canister_loading: string;
 		erc20_custom_tokens: string;
+		erc4626_custom_tokens: string;
 		erc721_custom_tokens: string;
 		erc1155_custom_tokens: string;
 		spl_custom_tokens: string;
@@ -658,6 +652,7 @@ interface I18nSend {
 		unknown_cketh: string;
 		destination_address_invalid: string;
 		amount_invalid: string;
+		insufficient_funds_verbose_btc: string;
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
 		insufficient_ethereum_funds_to_cover_the_fees: string;
@@ -1444,7 +1439,6 @@ interface I18nTerms_of_use {
 		det: { article: string; possessive: string };
 		title: string;
 		instruction: string;
-		instruction_two_buttons: string;
 		body: string;
 	};
 	alt: { terms_of_use: string };
@@ -1618,6 +1612,7 @@ interface I18nTemporal {
 		second: string;
 		second_plural: string;
 	};
+	time_frame: { t_24h: string };
 }
 
 interface I18nAi_assistant {

@@ -2,19 +2,13 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet, untrack } from 'svelte';
 	import AllUtxosLoader from '$btc/components/fee/AllUtxosLoader.svelte';
+	import BtcPendingSentTransactionsLoader from '$btc/components/fee/BtcPendingSentTransactionsLoader.svelte';
 	import FeeRatePercentilesLoader from '$btc/components/fee/FeeRatePercentilesLoader.svelte';
 	import { DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE } from '$btc/constants/btc.constants';
-	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
-	import {
-		ALL_UTXOS_CONTEXT_KEY,
-		type AllUtxosContext as AllUtxosContextType
-	} from '$btc/stores/all-utxos.store';
+	import { allUtxosStore } from '$btc/stores/all-utxos.store';
 	import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
-	import {
-		FEE_RATE_PERCENTILES_CONTEXT_KEY,
-		type FeeRatePercentilesContext as FeeRatePercentilesContextType
-	} from '$btc/stores/fee-rate-percentiles.store';
+	import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 	import {
 		UTXOS_FEE_CONTEXT_KEY,
 		type UtxosFeeContext as UtxosFeeContextType
@@ -35,12 +29,6 @@
 	let { source, amount, networkId, amountError = false, children }: Props = $props();
 
 	const { store } = getContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY);
-
-	const { store: allUtxosStore } = getContext<AllUtxosContextType>(ALL_UTXOS_CONTEXT_KEY);
-
-	const { store: feeRatePercentilesStore } = getContext<FeeRatePercentilesContextType>(
-		FEE_RATE_PERCENTILES_CONTEXT_KEY
-	);
 
 	let allUtxos = $derived($allUtxosStore?.allUtxos);
 	let feeRateFromPercentiles = $derived($feeRatePercentilesStore?.feeRateFromPercentiles);
@@ -92,18 +80,6 @@
 	};
 
 	$effect(() => {
-		[networkId, source];
-
-		untrack(() =>
-			loadBtcPendingSentTransactions({
-				identity: $authIdentity,
-				networkId,
-				address: source
-			})
-		);
-	});
-
-	$effect(() => {
 		[amount, networkId, source];
 
 		if (
@@ -116,8 +92,10 @@
 	});
 </script>
 
-<AllUtxosLoader {networkId} {source}>
-	<FeeRatePercentilesLoader {networkId}>
-		{@render children()}
-	</FeeRatePercentilesLoader>
-</AllUtxosLoader>
+<BtcPendingSentTransactionsLoader {networkId} {source}>
+	<AllUtxosLoader {networkId} {source}>
+		<FeeRatePercentilesLoader {networkId}>
+			{@render children()}
+		</FeeRatePercentilesLoader>
+	</AllUtxosLoader>
+</BtcPendingSentTransactionsLoader>

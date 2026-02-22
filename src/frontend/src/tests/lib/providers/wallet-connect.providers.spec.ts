@@ -1,5 +1,5 @@
 import { UNEXPECTED_ERROR, WALLET_CONNECT_METADATA } from '$lib/constants/wallet-connect.constants';
-import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
+import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
@@ -7,7 +7,7 @@ import { Core } from '@walletconnect/core';
 import { getSdkError } from '@walletconnect/utils';
 
 describe('wallet-connect.providers', () => {
-	describe('initWalletConnect', () => {
+	describe('WalletConnectClient', () => {
 		const mockProposal: WalletKitTypes.SessionProposal = {
 			id: 123_456,
 			params: {},
@@ -65,11 +65,11 @@ describe('wallet-connect.providers', () => {
 		});
 
 		it('should create a new WalletKit instance only if none exists', async () => {
-			await initWalletConnect(mockParams);
+			await WalletConnectClient.init(mockParams);
 
 			expect(WalletKit.init).toHaveBeenCalledExactlyOnceWith(initParams);
 
-			await initWalletConnect(mockParams);
+			await WalletConnectClient.init(mockParams);
 
 			// Called only once from the first tests
 			expect(WalletKit.init).toHaveBeenCalledExactlyOnceWith(initParams);
@@ -81,7 +81,7 @@ describe('wallet-connect.providers', () => {
 				session2: { topic: 'topic2' }
 			});
 
-			await initWalletConnect(mockParams);
+			await WalletConnectClient.init(mockParams);
 
 			expect(mockDisconnectSession).toHaveBeenCalledTimes(2);
 			expect(mockDisconnectSession).toHaveBeenNthCalledWith(1, {
@@ -100,7 +100,7 @@ describe('wallet-connect.providers', () => {
 				session2: { topic: 'topic2' }
 			});
 
-			await initWalletConnect({ ...mockParams, cleanSlate: true });
+			await WalletConnectClient.init({ ...mockParams, cleanSlate: true });
 
 			expect(mockDisconnectSession).toHaveBeenCalledTimes(2);
 			expect(mockDisconnectSession).toHaveBeenNthCalledWith(1, {
@@ -119,7 +119,7 @@ describe('wallet-connect.providers', () => {
 				session2: { topic: 'topic2' }
 			});
 
-			await initWalletConnect({ ...mockParams, cleanSlate: false });
+			await WalletConnectClient.init({ ...mockParams, cleanSlate: false });
 
 			expect(mockDisconnectSession).not.toHaveBeenCalled();
 		});
@@ -128,7 +128,7 @@ describe('wallet-connect.providers', () => {
 			it('should pair with a specific provided URI', async () => {
 				const mockUri = 'wc:1234@1?bridge=https%3A%2F%2Fbridge.walletconnect.org&key=abcd';
 
-				const listener = await initWalletConnect(mockParams);
+				const listener = await WalletConnectClient.init(mockParams);
 
 				await listener.pair(mockUri);
 
@@ -140,7 +140,7 @@ describe('wallet-connect.providers', () => {
 
 		describe('rejectSession', () => {
 			it('should call rejectSession with the correct params', async () => {
-				const listener = await initWalletConnect(mockParams);
+				const listener = await WalletConnectClient.init(mockParams);
 
 				await listener.rejectSession(mockProposal);
 
@@ -153,7 +153,7 @@ describe('wallet-connect.providers', () => {
 
 		describe('rejectRequest', () => {
 			it('should respond to the session request with the correct params', async () => {
-				const listener = await initWalletConnect(mockParams);
+				const listener = await WalletConnectClient.init(mockParams);
 
 				await listener.rejectRequest({
 					id: mockProposal.id,
@@ -174,7 +174,7 @@ describe('wallet-connect.providers', () => {
 
 		describe('approveRequest', () => {
 			it('should respond to the session request with the correct params', async () => {
-				const listener = await initWalletConnect(mockParams);
+				const listener = await WalletConnectClient.init(mockParams);
 
 				await listener.approveRequest({
 					id: mockProposal.id,
@@ -193,105 +193,139 @@ describe('wallet-connect.providers', () => {
 			});
 		});
 
-		describe('sessionProposal', () => {
-			it('should set a listener for the session proposal event', async () => {
-				const callback = vi.fn();
+		describe('attachHandlers', () => {
+			it('should set a listener for the session events', async () => {
+				const onSessionProposal = vi.fn();
+				const onSessionDelete = vi.fn();
+				const onSessionRequest = vi.fn();
 
-				const listener = await initWalletConnect(mockParams);
+				const listener = await WalletConnectClient.init(mockParams);
 
-				await listener.sessionProposal(callback);
+				listener.attachHandlers({
+					onSessionProposal,
+					onSessionDelete,
+					onSessionRequest
+				});
 
-				expect(mockOn).toHaveBeenCalledExactlyOnceWith('session_proposal', callback);
+				expect(mockOn).toHaveBeenCalledTimes(3);
+				expect(mockOn).toHaveBeenNthCalledWith(1, 'session_proposal', onSessionProposal);
+				expect(mockOn).toHaveBeenNthCalledWith(2, 'session_delete', onSessionDelete);
+				expect(mockOn).toHaveBeenNthCalledWith(3, 'session_request', onSessionRequest);
+			});
+
+			it('should detach previously attached handlers before attaching new ones', async () => {
+				const firstOnSessionProposal = vi.fn();
+				const firstOnSessionDelete = vi.fn();
+				const firstOnSessionRequest = vi.fn();
+
+				const secondOnSessionProposal = vi.fn();
+				const secondOnSessionDelete = vi.fn();
+				const secondOnSessionRequest = vi.fn();
+
+				const listener = await WalletConnectClient.init(mockParams);
+
+				listener.attachHandlers({
+					onSessionProposal: firstOnSessionProposal,
+					onSessionDelete: firstOnSessionDelete,
+					onSessionRequest: firstOnSessionRequest
+				});
+
+				listener.attachHandlers({
+					onSessionProposal: secondOnSessionProposal,
+					onSessionDelete: secondOnSessionDelete,
+					onSessionRequest: secondOnSessionRequest
+				});
+
+				expect(mockOff).toHaveBeenCalledTimes(3);
+				expect(mockOff).toHaveBeenNthCalledWith(1, 'session_proposal', firstOnSessionProposal);
+				expect(mockOff).toHaveBeenNthCalledWith(2, 'session_delete', firstOnSessionDelete);
+				expect(mockOff).toHaveBeenNthCalledWith(3, 'session_request', firstOnSessionRequest);
+
+				expect(mockOn).toHaveBeenCalledTimes(6);
+				expect(mockOn).toHaveBeenNthCalledWith(1, 'session_proposal', firstOnSessionProposal);
+				expect(mockOn).toHaveBeenNthCalledWith(2, 'session_delete', firstOnSessionDelete);
+				expect(mockOn).toHaveBeenNthCalledWith(3, 'session_request', firstOnSessionRequest);
+				expect(mockOn).toHaveBeenNthCalledWith(4, 'session_proposal', secondOnSessionProposal);
+				expect(mockOn).toHaveBeenNthCalledWith(5, 'session_delete', secondOnSessionDelete);
+				expect(mockOn).toHaveBeenNthCalledWith(6, 'session_request', secondOnSessionRequest);
 			});
 		});
 
-		describe('sessionDelete', () => {
-			it('should set a listener for the session delete event', async () => {
-				const callback = vi.fn();
+		describe('detachHandlers', () => {
+			it('should do nothing if no handlers were attached', async () => {
+				const listener = await WalletConnectClient.init(mockParams);
 
-				const listener = await initWalletConnect(mockParams);
+				listener.detachHandlers();
 
-				await listener.sessionDelete(callback);
-
-				expect(mockOn).toHaveBeenCalledExactlyOnceWith('session_delete', callback);
-			});
-		});
-
-		describe('sessionRequest', () => {
-			it('should set a listener for the session request event', async () => {
-				const callback = vi.fn();
-
-				const listener = await initWalletConnect(mockParams);
-
-				await listener.sessionRequest(callback);
-
-				expect(mockOn).toHaveBeenCalledExactlyOnceWith('session_request', callback);
-			});
-		});
-
-		describe('offSessionProposal', () => {
-			it('should un-set a listener for the session proposal event', async () => {
-				const callback = vi.fn();
-
-				const listener = await initWalletConnect(mockParams);
-
-				await listener.offSessionProposal(callback);
-
-				expect(mockOff).toHaveBeenCalledExactlyOnceWith('session_proposal', callback);
+				expect(mockOff).not.toHaveBeenCalled();
+				expect(mockRemoveListener).not.toHaveBeenCalled();
 			});
 
-			it('should remove a listener for the session proposal event', async () => {
-				const callback = vi.fn();
+			it('should un-set a listener for the session events', async () => {
+				const onSessionProposal = vi.fn();
+				const onSessionDelete = vi.fn();
+				const onSessionRequest = vi.fn();
 
-				const listener = await initWalletConnect(mockParams);
+				const listener = await WalletConnectClient.init(mockParams);
 
-				await listener.offSessionProposal(callback);
+				listener.attachHandlers({
+					onSessionProposal,
+					onSessionDelete,
+					onSessionRequest
+				});
 
-				expect(mockRemoveListener).toHaveBeenCalledExactlyOnceWith('session_proposal', callback);
-			});
-		});
+				listener.detachHandlers();
 
-		describe('offSessionDelete', () => {
-			it('should un-set a listener for the session delete event', async () => {
-				const callback = vi.fn();
-
-				const listener = await initWalletConnect(mockParams);
-
-				await listener.offSessionDelete(callback);
-
-				expect(mockOff).toHaveBeenCalledExactlyOnceWith('session_delete', callback);
-			});
-
-			it('should remove a listener for the session delete event', async () => {
-				const callback = vi.fn();
-
-				const listener = await initWalletConnect(mockParams);
-
-				await listener.offSessionDelete(callback);
-
-				expect(mockRemoveListener).toHaveBeenCalledExactlyOnceWith('session_delete', callback);
-			});
-		});
-
-		describe('offSessionRequest', () => {
-			it('should un-set a listener for the session request event', async () => {
-				const callback = vi.fn();
-
-				const listener = await initWalletConnect(mockParams);
-
-				await listener.offSessionRequest(callback);
-
-				expect(mockOff).toHaveBeenCalledExactlyOnceWith('session_request', callback);
+				expect(mockOff).toHaveBeenCalledTimes(3);
+				expect(mockOff).toHaveBeenNthCalledWith(1, 'session_proposal', onSessionProposal);
+				expect(mockOff).toHaveBeenNthCalledWith(2, 'session_delete', onSessionDelete);
+				expect(mockOff).toHaveBeenNthCalledWith(3, 'session_request', onSessionRequest);
 			});
 
-			it('should remove a listener for the session request event', async () => {
-				const callback = vi.fn();
+			it('should remove a listener for the session events', async () => {
+				const onSessionProposal = vi.fn();
+				const onSessionDelete = vi.fn();
+				const onSessionRequest = vi.fn();
 
-				const listener = await initWalletConnect(mockParams);
+				const listener = await WalletConnectClient.init(mockParams);
 
-				await listener.offSessionRequest(callback);
+				listener.attachHandlers({
+					onSessionProposal,
+					onSessionDelete,
+					onSessionRequest
+				});
 
-				expect(mockRemoveListener).toHaveBeenCalledExactlyOnceWith('session_request', callback);
+				listener.detachHandlers();
+
+				expect(mockRemoveListener).toHaveBeenCalledTimes(3);
+				expect(mockRemoveListener).toHaveBeenNthCalledWith(
+					1,
+					'session_proposal',
+					onSessionProposal
+				);
+				expect(mockRemoveListener).toHaveBeenNthCalledWith(2, 'session_delete', onSessionDelete);
+				expect(mockRemoveListener).toHaveBeenNthCalledWith(3, 'session_request', onSessionRequest);
+			});
+
+			it('should be safe to call multiple times', async () => {
+				const onSessionProposal = vi.fn();
+				const onSessionDelete = vi.fn();
+				const onSessionRequest = vi.fn();
+
+				const listener = await WalletConnectClient.init(mockParams);
+
+				listener.attachHandlers({
+					onSessionProposal,
+					onSessionDelete,
+					onSessionRequest
+				});
+
+				listener.detachHandlers();
+				listener.detachHandlers();
+				listener.detachHandlers();
+
+				expect(mockOff).toHaveBeenCalledTimes(3);
+				expect(mockRemoveListener).toHaveBeenCalledTimes(3);
 			});
 		});
 
@@ -302,7 +336,7 @@ describe('wallet-connect.providers', () => {
 					session2: { topic: 'topic2' }
 				});
 
-				const listener = await initWalletConnect(mockParams);
+				const listener = await WalletConnectClient.init(mockParams);
 
 				const sessions = await listener.getActiveSessions();
 

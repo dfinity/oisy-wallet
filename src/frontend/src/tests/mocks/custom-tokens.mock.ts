@@ -2,9 +2,9 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
 import { IC_PUNKS_BUILTIN_TOKENS } from '$env/tokens/tokens-icpunks/tokens.icpunks.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
@@ -110,7 +110,7 @@ export const mockCustomTokensErc20: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
-		allow_external_content_source: toNullable()
+		allow_external_content_source: toNullable(true)
 	},
 	{
 		version: toNullable(),
@@ -122,7 +122,46 @@ export const mockCustomTokensErc20: CustomToken[] = [
 			}
 		},
 		section: toNullable(),
+		allow_external_content_source: toNullable(false)
+	}
+];
+
+export const mockCustomTokensErc4626: CustomToken[] = [
+	{
+		version: toNullable(1n),
+		enabled: true,
+		token: {
+			Erc4626: {
+				chain_id: ETHEREUM_NETWORK.chainId,
+				token_address: mockEthAddress
+			}
+		},
+		section: toNullable(),
 		allow_external_content_source: toNullable()
+	},
+	{
+		version: toNullable(2n),
+		enabled: true,
+		token: {
+			Erc4626: {
+				chain_id: BASE_NETWORK.chainId,
+				token_address: mockEthAddress2.toUpperCase()
+			}
+		},
+		section: toNullable(),
+		allow_external_content_source: toNullable(true)
+	},
+	{
+		version: toNullable(),
+		enabled: false,
+		token: {
+			Erc4626: {
+				chain_id: POLYGON_AMOY_NETWORK.chainId,
+				token_address: mockEthAddress3
+			}
+		},
+		section: toNullable(),
+		allow_external_content_source: toNullable(false)
 	}
 ];
 

@@ -4,6 +4,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { assertExistingTokens } from '$lib/utils/tokens.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -55,7 +56,11 @@ export const loadAndAssertAddCustomToken = ({
 			return { result: 'error' };
 		}
 
-		const { valid } = assertExistingTokens({ token, extTokens });
+		const { valid } = assertExistingTokens({
+			existingTokens: extTokens,
+			token,
+			errorMsg: get(i18n).tokens.error.duplicate_metadata
+		});
 
 		if (!valid) {
 			return { result: 'error' };
@@ -65,30 +70,6 @@ export const loadAndAssertAddCustomToken = ({
 	} catch (_err: unknown) {
 		return { result: 'error' };
 	}
-};
-
-const assertExistingTokens = ({
-	extTokens,
-	token
-}: {
-	extTokens: ExtToken[];
-	token: ExtTokenWithoutId;
-}): { valid: boolean } => {
-	if (
-		extTokens.find(
-			({ symbol, name }) =>
-				symbol.toLowerCase() === token.symbol.toLowerCase() ||
-				name.toLowerCase() === token.name.toLowerCase()
-		) !== undefined
-	) {
-		toastsError({
-			msg: { text: get(i18n).tokens.error.duplicate_metadata }
-		});
-
-		return { valid: false };
-	}
-
-	return { valid: true };
 };
 
 const assertAlreadyAvailable = ({

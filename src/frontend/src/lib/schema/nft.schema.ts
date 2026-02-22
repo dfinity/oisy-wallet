@@ -1,4 +1,5 @@
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { MediaStatusEnum } from '$lib/enums/media-status';
 import { TokenSchema, TokenStandardCodeSchema } from '$lib/schema/token.schema';
 import * as z from 'zod';
 
@@ -18,20 +19,13 @@ export const NftMetadataSchema = z.object({
 	attributes: z.array(NftAttributeSchema).optional()
 });
 
-export const NftAppearanceSchema = z.object({
+const NftAppearanceSchema = z.object({
 	oisyId: NftIdSchema.optional()
 });
 
-export enum NftMediaStatusEnum {
-	OK = 'ok',
-	FILESIZE_LIMIT_EXCEEDED = 'filesize_limit_exceeded',
-	NON_SUPPORTED_MEDIA_TYPE = 'non_supported_media_type',
-	INVALID_DATA = 'invalid_data'
-}
-
-export const NftMediaStatusSchema = z.object({
-	image: z.enum(NftMediaStatusEnum),
-	thumbnail: z.enum(NftMediaStatusEnum)
+const NftMediaStatusSchema = z.object({
+	image: z.enum(MediaStatusEnum),
+	thumbnail: z.enum(MediaStatusEnum)
 });
 
 export const NftCollectionSchema = z.object({
@@ -40,7 +34,7 @@ export const NftCollectionSchema = z.object({
 	name: z.string().optional(),
 	symbol: z.string().optional(),
 	bannerImageUrl: z.url().optional(),
-	bannerMediaStatus: z.enum(NftMediaStatusEnum).optional(),
+	bannerMediaStatus: z.enum(MediaStatusEnum).optional(),
 	description: z.string().optional(),
 	newestAcquiredAt: z.date().optional(),
 	allowExternalContentSource: z.boolean().optional(),

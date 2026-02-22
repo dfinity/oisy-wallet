@@ -1,14 +1,8 @@
+import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
-import {
-	ALL_UTXOS_CONTEXT_KEY,
-	initAllUtxosStore,
-	type AllUtxosContext
-} from '$btc/stores/all-utxos.store';
-import {
-	FEE_RATE_PERCENTILES_CONTEXT_KEY,
-	initFeeRatePercentilesStore,
-	type FeeRatePercentilesContext
-} from '$btc/stores/fee-rate-percentiles.store';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
 	UTXOS_FEE_CONTEXT_KEY,
 	initUtxosFeeStore,
@@ -29,13 +23,17 @@ import * as solanaApi from '$sol/api/solana.api';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { render } from '@testing-library/svelte';
 
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
+}));
+
 describe('AiAssistantReviewSendTokenTool', () => {
 	const mockContext = (token: Token) =>
-		new Map<symbol, SendContext | UtxosFeeContext | AllUtxosContext | FeeRatePercentilesContext>([
+		new Map<symbol, SendContext | UtxosFeeContext>([
 			[SEND_CONTEXT_KEY, initSendContext({ token })],
-			[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }],
-			[ALL_UTXOS_CONTEXT_KEY, { store: initAllUtxosStore() }],
-			[FEE_RATE_PERCENTILES_CONTEXT_KEY, { store: initFeeRatePercentilesStore() }]
+			[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }]
 		]);
 
 	const props = {
@@ -49,6 +47,10 @@ describe('AiAssistantReviewSendTokenTool', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		allUtxosStore.reset();
+		feeRatePercentilesStore.reset();
+		btcPendingSentTransactionsStore.reset();
+
 		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(ZERO);
 		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
 			utxos: [],
@@ -57,6 +59,10 @@ describe('AiAssistantReviewSendTokenTool', () => {
 			next_page: []
 		});
 		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
+		vi.spyOn(
+			btcPendingSentTransactionsServices,
+			'loadBtcPendingSentTransactions'
+		).mockResolvedValue({ success: true });
 	});
 
 	it('renders correctly for a BTC token', () => {

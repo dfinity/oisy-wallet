@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",
-			"test_banner_beta": "",
-			"internet_identity_banner_first_part": "$oisy_name teraz używa",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Przeczytaj więcej"
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "logo $name",
@@ -121,7 +118,6 @@
 			"logout": "Wyloguj",
 			"lock": "Zablokuj",
 			"authenticate": "Otwórz lub Utwórz",
-			"legacy_login": "Starsze logowanie",
 			"asset_types": "Zarządzaj aktywami w BTC, SOL, ETH, ICP i innych kryptowalutach",
 			"instant_and_private": "Wbudowany asystent AI z ochroną prywatności w standardzie",
 			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
@@ -155,23 +151,16 @@
 				"description": "",
 				"login_page_looks_different": "",
 				"use_identity_number": "",
-				"lost_identity_number": "",
 				"feedback_text": "",
 				"thanks_text": "Dziękuję!",
 				"useful_links": "",
 				"identity_new_identity": "Portfel $oisy_short przełącza domenę Internet Identity na: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "",
-				"identity_legacy_identity_title": "",
-				"identity_legacy_identity_item_1": "",
-				"identity_legacy_identity_item_2": "",
 				"identity_new_identity_title": "",
 				"identity_new_identity_item_1": "",
-				"identity_new_identity_item_2": "",
-				"identity_new_identity_link": "",
-				"identity_legacy_sign_in": "Zaloguj się za pomocą starszej domeny Internet Identity",
-				"identity_learn_more": "Dowiedz się więcej w dokumentacji $oisy_short",
 				"oisy_introduction": "",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "",
 				"need_help": "Potrzebujesz pomocy",
@@ -187,7 +176,6 @@
 			"title_part_1": "Odblokuj, aby kontynuować",
 			"title_part_2": "Wcześniej zablokowałeś swój portfel, aby go zabezpieczyć. Wznów od miejsca, w którym skończyłeś, lub wyloguj się.",
 			"unlock": "Odblokuj",
-			"unlock_with_legacy_login": "",
 			"logout": "Wyloguj",
 			"logout_clear_cash_message": "Wylogowanie usunie wszystkie dane z pamięci podręcznej",
 			"learn_more": "Dowiedz się więcej"
@@ -217,15 +205,17 @@
 			"website": "Obraz $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Media społecznościowe",
-			"verifiable_credentials": "Poświadczenia weryfikowalne",
-			"staking": "Staking",
-			"walletconnect": "WalletConnect",
-			"game": "Gra",
-			"tools": "Narzędzia",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "",
-			"nft": ""
+			"defi": "DeFi",
+			"game": "Gra",
+			"nft": "",
+			"rwa": "",
+			"social_media": "Media społecznościowe",
+			"staking": "Staking",
+			"tools": "Narzędzia",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -412,6 +402,31 @@
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -611,6 +626,7 @@
 			"no_infura_erc721_provider": "Brak dostawcy Infura ERC721 dla sieci $network",
 			"no_infura_erc1155_provider": "Brak dostawcy Infura ERC1155 dla sieci $network",
 			"no_infura_erc20_icp_provider": "Brak dostawcy Infura ERC20 ICP dla sieci $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Brak sieci Solana dla sieci $network",
 			"loading_address": "Błąd podczas ładowania adresu $symbol.",
 			"loading_balance": "Błąd podczas ładowania salda $symbol dla sieci $network.",
@@ -631,6 +647,7 @@
 			"icrc_canisters": "Błąd podczas ładowania kanistrów ICRC.",
 			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC20.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC721.",
 			"erc1155_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC1155.",
 			"spl_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów SPL.",
@@ -865,6 +882,7 @@
 			"unknown_cketh": "Nie można pobrać tokena ckETH.",
 			"destination_address_invalid": "Adres docelowy jest nieprawidłowy.",
 			"amount_invalid": "Kwota jest nieprawidłowa.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Niewystarczające środki na gaz",
 			"insufficient_funds_for_amount": "Niewystarczające środki na kwotę",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Niewystarczające środki Ethereum na pokrycie opłat",
@@ -1807,7 +1825,6 @@
 			},
 			"title": "",
 			"instruction": "Klikając ten przycisk, zgadzasz się na $link",
-			"instruction_two_buttons": "Klikając jeden z tych przycisków, zgadzasz się na $link",
 			"body": ""
 		},
 		"alt": {
@@ -2005,6 +2022,9 @@
 			"minute_plural": "minuty",
 			"second": "sekunda",
 			"second_plural": "sekundy"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

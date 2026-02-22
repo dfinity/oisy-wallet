@@ -19,6 +19,5 @@ export const RNDR_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: RNDR_SYMBOL,
 	decimals: RNDR_DECIMALS,
 	icon: rndr,
-	address: '0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24',
-	exchange: 'erc20'
+	address: '0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24'
 };

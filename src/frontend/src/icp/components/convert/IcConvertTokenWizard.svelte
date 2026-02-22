@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import IcConvertForm from '$icp/components/convert/IcConvertForm.svelte';
 	import IcConvertProgress from '$icp/components/convert/IcConvertProgress.svelte';
@@ -83,7 +83,8 @@
 		onQRCodeScan
 	}: Props = $props();
 
-	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+	const { sourceToken, destinationToken, minterInfo } =
+		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	let defaultDestination = $derived(
 		isTokenCkBtcLedger($sourceToken) ? ($btcAddressMainnet ?? '') : ($ethAddress ?? '')
@@ -92,6 +93,12 @@
 	let isDestinationCustom = $derived(!isNullishOrEmpty(customDestination));
 
 	let networkId = $derived($destinationToken.network.id);
+
+	let minimumBtcRetrieveAmount = $derived(
+		nonNullish($minterInfo) && 'retrieve_btc_min_amount' in $minterInfo.data
+			? $minterInfo.data.retrieve_btc_min_amount
+			: undefined
+	);
 
 	/**
 	 * Bitcoin fee context store
@@ -201,7 +208,12 @@
 </script>
 
 <EthereumFeeContext {networkId}>
-	<BitcoinFeeContext amount={sendAmount} {networkId} token={$sourceToken}>
+	<BitcoinFeeContext
+		amount={sendAmount}
+		minimumAmount={minimumBtcRetrieveAmount}
+		{networkId}
+		token={$sourceToken}
+	>
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsConvert.CONVERT}
 				<IcConvertForm

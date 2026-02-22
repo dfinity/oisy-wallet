@@ -29,7 +29,7 @@
 {:else if utxosFee?.error === BtcPrepareSendError.InsufficientBalance}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
-			<span>{$i18n.send.assertion.insufficient_funds}</span>
+			<span>{$i18n.send.assertion.insufficient_funds_verbose_btc}</span>
 		</MessageBox>
 	</div>
 {:else if utxosFee?.error === BtcPrepareSendError.InsufficientBalanceForFee}

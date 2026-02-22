@@ -176,6 +176,25 @@ describe('custom-token.utils', () => {
 			});
 		});
 
+		it('should return correct type for Ethereum/EVM Erc4626 network key', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey: 'Erc4626',
+					address: 'mock-token-address',
+					chainId: 123n
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					Erc4626: {
+						token_address: 'mock-token-address',
+						chain_id: 123n
+					}
+				}
+			});
+		});
+
 		it('should return correct type for Ethereum/EVM Erc721 network key', () => {
 			expect(
 				toCustomToken({

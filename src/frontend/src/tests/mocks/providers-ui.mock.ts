@@ -1,5 +1,5 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { GLDT_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import type { IcToken } from '$icp/types/ic-token';
 import { stakeProvidersConfig } from '$lib/config/stake.config';
 import type { ProviderUi } from '$lib/types/provider-ui';

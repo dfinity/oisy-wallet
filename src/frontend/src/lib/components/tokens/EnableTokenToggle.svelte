@@ -3,6 +3,7 @@
 	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 	import { isTokenErc20CustomToken } from '$eth/utils/erc20.utils';
+	import { isTokenErc4626CustomToken } from '$eth/utils/erc4626.utils';
 	import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 	import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
@@ -25,7 +26,7 @@
 
 {#if isTokenIcrcCustomToken(token)}
 	<IcManageTokenToggle onIcToken={(t) => onToggle(t)} {token} />
-{:else if isTokenErc20CustomToken(token) || isTokenSplCustomToken(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token) || isTokenExtCustomToken(token) || isTokenDip721CustomToken(token) || isTokenIcPunksCustomToken(token)}
+{:else if isTokenErc20CustomToken(token) || isTokenSplCustomToken(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token) || isTokenExtCustomToken(token) || isTokenDip721CustomToken(token) || isTokenIcPunksCustomToken(token) || isTokenErc4626CustomToken(token)}
 	<ManageTokenToggle onShowOrHideToken={(t) => onToggle(t)} {token} />
 {:else if isBitcoinToken(token)}
 	<BtcManageTokenToggle />

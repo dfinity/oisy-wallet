@@ -45,10 +45,7 @@
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
-			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado.",
-			"internet_identity_banner_first_part": "$oisy_name ahora utiliza",
-			"internet_identity_banner_second_part": "<span class=\"font-bold\">Internet Identity 2.0</span>",
-			"internet_identity_banner_button": "Leer mas"
+			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado."
 		},
 		"alt": {
 			"logo": "Logotipo",
@@ -121,7 +118,6 @@
 			"logout": "Cerrar sesión",
 			"lock": "Bloquear",
 			"authenticate": "Abrir o Crear",
-			"legacy_login": "Acceso de legado",
 			"asset_types": "Gestiona activos en Bitcoin, Solana, Ethereum, ICP y más",
 			"instant_and_private": "Asistente de IA integrado con la privacidad como estándar",
 			"advanced_cryptography": "Asegurado por criptografía avanzada - 100% en la cadena",
@@ -155,23 +151,16 @@
 				"description": "Parece que cancelaste tu inicio de sesión o registro. Nos gustaría saber qué sucedió para mejorar tu experiencia.",
 				"login_page_looks_different": "¿Por qué la página de inicio de sesión se ve diferente?",
 				"use_identity_number": "Quiero utilizar mi número de Internet Identity",
-				"lost_identity_number": "Perdí mi número de Internet Identity",
 				"feedback_text": "Sus comentarios nos ayudan a mejorar $oisy_short.",
 				"thanks_text": "¡Gracias!",
 				"useful_links": "Enlaces útiles",
 				"identity_new_identity": "$oisy_short Wallet cambia el dominio de Internet Identity a: <span class=\"font-bold\">identity.internetcomputer.org</span>",
 				"switch_to_new_internet_identity": "$oisy_name cambia a Internet Identity 2.0",
-				"identity_legacy_identity_title": "¿Ya no ves tu número de Internet Identity en la pantalla de inicio de sesión? Puedes encontrarlo mediante cualquiera de los siguientes métodos:",
-				"identity_legacy_identity_item_1": "Revise la lista de números de identidad que ha utilizado anteriormente en <a href=\"https://identity.ic0.app\" target=\"_blank\">https://identity.ic0.app</a> o <a href=\"https://identity.internetcomputer.org\" target=\"_blank\">https://identity.internetcomputer.org</a>",
-				"identity_legacy_identity_item_2": "Mira el número al comienzo de una frase de recuperación que hayas guardado anteriormente.",
 				"identity_new_identity_title": "$oisy_name ahora usa Internet Identity 2.0, que ofrece varias mejoras y le permite conectar su identidad con sus inicios de sesión en Google, Apple o Microsoft.",
 				"identity_new_identity_item_1": "Para migrar su identidad existente, haga clic en el enlace “Upgrade your Identity” en la parte superior de la nueva página de inicio de sesión y siga los pasos.",
-				"identity_new_identity_item_2": "Aún puedes usar la página de inicio de sesión legacy con tu número de Internet Identity. Simplemente haz clic en el enlace de abajo para acceder a la pantalla de inicio de sesión antigua.",
-				"identity_new_identity_link": "Obtenga más información sobre Internet Identity 2.0 en OISY Docs",
-				"identity_legacy_sign_in": "Iniciar sesión con el dominio antiguo de Internet Identity",
-				"identity_learn_more": "Más información en los Docs de $oisy_short",
 				"oisy_introduction": "$oisy_short Introducción",
-				"private_key": "",
+				"logging_into_oisy": "",
+				"creating_a_wallet": "",
 				"asset_control": "",
 				"internet_identity_help_center": "Centro de ayuda de Internet Identity 2.0",
 				"need_help": "Necesito ayuda",
@@ -187,7 +176,6 @@
 			"title_part_1": "Desbloquear para continuar",
 			"title_part_2": "Anteriormente bloqueaste tu billetera para mantenerla segura. Continúa donde lo dejaste o cierra sesión.",
 			"unlock": "Desbloquear",
-			"unlock_with_legacy_login": "",
 			"logout": "Cerrar sesión",
 			"logout_clear_cash_message": "Cerrar sesión borrará todos los datos en caché",
 			"learn_more": "Saber más"
@@ -217,15 +205,17 @@
 			"website": "Imagen de $dAppName"
 		},
 		"categories": {
-			"defi": "DeFi",
-			"social_media": "Redes Sociales",
-			"verifiable_credentials": "Credenciales Verificables",
-			"staking": "Staking",
-			"walletconnect": "WalletConnect",
-			"game": "Juego",
-			"tools": "Herramientas",
+			"aa_new": "",
+			"ab_icp": "",
 			"ai": "IA",
-			"nft": ""
+			"defi": "DeFi",
+			"game": "Juego",
+			"nft": "",
+			"rwa": "",
+			"social_media": "Redes Sociales",
+			"staking": "Staking",
+			"tools": "Herramientas",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -412,6 +402,31 @@
 				"description": ""
 			},
 			"kamino": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"helium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sanctum": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"sphere_finance": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"binaryx": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"parcl": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -611,6 +626,7 @@
 			"no_infura_erc721_provider": "No hay proveedor de Infura ERC721 para la red $network",
 			"no_infura_erc1155_provider": "No hay proveedor de Infura ERC1155 para la red $network",
 			"no_infura_erc20_icp_provider": "No hay proveedor de Infura ERC20 ICP para la red $network",
+			"no_infura_erc4626_provider": "",
 			"no_solana_network": "No hay red Solana para la red $network",
 			"loading_address": "Error al cargar la dirección de $symbol.",
 			"loading_balance": "Error al cargar el saldo de $symbol para la red $network.",
@@ -631,6 +647,7 @@
 			"icrc_canisters": "Error al cargar los canisters de ICRC.",
 			"icrc_canister_loading": "El token con el canister de Ledger $ledgerCanisterId no se pudo cargar porque actualmente no responde.",
 			"erc20_custom_tokens": "Error al cargar los tokens ERC20 personalizados.",
+			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Error al cargar los tokens ERC721 personalizados.",
 			"erc1155_custom_tokens": "Error al cargar los tokens ERC1155 personalizados.",
 			"spl_custom_tokens": "Error al cargar los tokens SPL personalizados.",
@@ -865,6 +882,7 @@
 			"unknown_cketh": "El token ckETH no se puede recuperar.",
 			"destination_address_invalid": "La dirección de destino es inválida.",
 			"amount_invalid": "La cantidad es inválida.",
+			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_gas": "Fondos insuficientes para el gas",
 			"insufficient_funds_for_amount": "Fondos insuficientes para la cantidad",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fondos de Ethereum insuficientes para cubrir las comisiones",
@@ -1807,7 +1825,6 @@
 			},
 			"title": "",
 			"instruction": "Al hacer clic en este botón, aceptas los $link",
-			"instruction_two_buttons": "Al hacer clic en uno de los botones, aceptas los $link",
 			"body": ""
 		},
 		"alt": {
@@ -2005,6 +2022,9 @@
 			"minute_plural": "",
 			"second": "",
 			"second_plural": ""
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

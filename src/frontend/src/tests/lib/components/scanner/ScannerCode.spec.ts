@@ -6,7 +6,9 @@ import en from '$lib/i18n/en.json';
 import * as openCryptoPayServices from '$lib/services/open-crypto-pay.services';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import type { OpenCryptoPayResponse, PayableTokenWithFees } from '$lib/types/open-crypto-pay';
+import { ScannerResults } from '$lib/types/scanner';
 import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
+import * as timeoutUtils from '$lib/utils/timeout.utils';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -19,10 +21,47 @@ vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
 	prepareBasePayableTokens: vi.fn()
 }));
 
+vi.mock('$lib/utils/timeout.utils', () => ({
+	waitReady: vi.fn().mockResolvedValue('ready')
+}));
+
+vi.mock('$env/open-crypto-pay.env', () => ({
+	OCP_PAY_WITH_BTC_ENABLED: true
+}));
+
+vi.mock('$btc/derived/tokens.derived', async () => {
+	const { readable } = await import('svelte/store');
+	return {
+		enabledMainnetBitcoinToken: readable(undefined)
+	};
+});
+
+vi.mock('$btc/stores/all-utxos.store', async () => {
+	const { readable } = await import('svelte/store');
+	return {
+		allUtxosStore: readable(null)
+	};
+});
+
+vi.mock('$btc/stores/btc-pending-sent-transactions.store', async () => {
+	const { readable } = await import('svelte/store');
+	return {
+		btcPendingSentTransactionsStore: readable({})
+	};
+});
+
+vi.mock('$btc/stores/fee-rate-percentiles.store', async () => {
+	const { readable } = await import('svelte/store');
+	return {
+		feeRatePercentilesStore: readable(null)
+	};
+});
+
 vi.mock('$lib/derived/address.derived', async () => {
 	const { writable } = await import('svelte/store');
 	return {
-		ethAddress: writable('0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+		ethAddress: writable('0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'),
+		btcAddressMainnet: writable(undefined)
 	};
 });
 
@@ -249,8 +288,8 @@ describe('ScannerCode.svelte', () => {
 		await fireEvent.click(button);
 
 		await waitFor(() => {
-			expect(mockSetData).toHaveBeenCalledWith(mockApiResponse);
-			expect(mockOnNext).toHaveBeenCalled();
+			expect(mockSetData).toHaveBeenCalledExactlyOnceWith(mockApiResponse);
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith(ScannerResults.PAY);
 		});
 	});
 
@@ -329,7 +368,7 @@ describe('ScannerCode.svelte', () => {
 			const button = screen.getByRole('button', { name: en.core.text.continue });
 			await fireEvent.click(button);
 			await waitFor(() => {
-				expect(openCryptoPayUtils.prepareBasePayableTokens).toHaveBeenCalledWith({
+				expect(openCryptoPayUtils.prepareBasePayableTokens).toHaveBeenCalledExactlyOnceWith({
 					transferAmounts: mockApiResponse.transferAmounts,
 					networks: [ETHEREUM_NETWORK],
 					availableTokens: [ETHEREUM_TOKEN]
@@ -346,10 +385,9 @@ describe('ScannerCode.svelte', () => {
 			const button = screen.getByRole('button', { name: en.core.text.continue });
 			await fireEvent.click(button);
 			await waitFor(() => {
-				expect(openCryptoPayServices.calculateTokensWithFees).toHaveBeenCalledWith({
-					tokens: mockBaseTokens,
-					userAddress: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-				});
+				expect(openCryptoPayServices.calculateTokensWithFees).toHaveBeenCalledExactlyOnceWith(
+					mockBaseTokens
+				);
 			});
 		});
 
@@ -362,7 +400,7 @@ describe('ScannerCode.svelte', () => {
 			const button = screen.getByRole('button', { name: en.core.text.continue });
 			await fireEvent.click(button);
 			await waitFor(() => {
-				expect(mockSetsetAvailableTokens).toHaveBeenCalledWith(mockTokensWithFees);
+				expect(mockSetsetAvailableTokens).toHaveBeenCalledExactlyOnceWith(mockTokensWithFees);
 			});
 		});
 
@@ -400,8 +438,70 @@ describe('ScannerCode.svelte', () => {
 			const button = screen.getByRole('button', { name: en.core.text.continue });
 			await fireEvent.click(button);
 			await waitFor(() => {
-				expect(mockSetsetAvailableTokens).toHaveBeenCalledWith([]);
-				expect(mockOnNext).toHaveBeenCalled();
+				expect(mockSetsetAvailableTokens).toHaveBeenCalledExactlyOnceWith([]);
+				expect(mockOnNext).toHaveBeenCalledExactlyOnceWith(ScannerResults.PAY);
+			});
+		});
+	});
+
+	describe('waitReady for BTC data', () => {
+		it('should call waitReady with correct parameters', async () => {
+			vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockResolvedValue(mockApiResponse);
+
+			renderWithContext();
+			await openManualEntry();
+
+			const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+			await fireEvent.input(input, { target: { value: 'valid-code' } });
+
+			const button = screen.getByRole('button', { name: en.core.text.continue });
+			await fireEvent.click(button);
+
+			await waitFor(() => {
+				expect(timeoutUtils.waitReady).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						retries: 20,
+						isDisabled: expect.any(Function)
+					})
+				);
+			});
+		});
+
+		it('should proceed successfully when waitReady returns timeout', async () => {
+			vi.mocked(timeoutUtils.waitReady).mockResolvedValue('timeout');
+			vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockResolvedValue(mockApiResponse);
+
+			renderWithContext();
+			await openManualEntry();
+
+			const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+			await fireEvent.input(input, { target: { value: 'valid-code' } });
+
+			const button = screen.getByRole('button', { name: en.core.text.continue });
+			await fireEvent.click(button);
+
+			await waitFor(() => {
+				expect(mockSetData).toHaveBeenCalledExactlyOnceWith(mockApiResponse);
+				expect(mockOnNext).toHaveBeenCalledExactlyOnceWith(ScannerResults.PAY);
+			});
+		});
+
+		it('should proceed successfully when waitReady returns ready', async () => {
+			vi.mocked(timeoutUtils.waitReady).mockResolvedValue('ready');
+			vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockResolvedValue(mockApiResponse);
+
+			renderWithContext();
+			await openManualEntry();
+
+			const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+			await fireEvent.input(input, { target: { value: 'valid-code' } });
+
+			const button = screen.getByRole('button', { name: en.core.text.continue });
+			await fireEvent.click(button);
+
+			await waitFor(() => {
+				expect(mockSetData).toHaveBeenCalledExactlyOnceWith(mockApiResponse);
+				expect(mockOnNext).toHaveBeenCalledExactlyOnceWith(ScannerResults.PAY);
 			});
 		});
 	});

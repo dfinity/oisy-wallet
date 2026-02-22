@@ -32,4 +32,4 @@ export const getCurrencyDecimalDigits = ({
 	language: Languages;
 }): number =>
 	new Intl.NumberFormat(language, { style: 'currency', currency }).resolvedOptions()
-		.maximumFractionDigits;
+		.maximumFractionDigits ?? 0;

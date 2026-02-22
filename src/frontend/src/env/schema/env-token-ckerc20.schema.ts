@@ -1,7 +1,7 @@
 import { EnvIcrcTokenMetadataSchema, EnvIcTokenSchema } from '$env/schema/env-icrc-token.schema';
 import { EnvTokenSymbolSchema } from '$env/schema/env-token-common.schema';
-import { isEthAddress } from '$lib/utils/account.utils';
 import { isNullish } from '@dfinity/utils';
+import { isAddress } from 'ethers/address';
 import * as z from 'zod';
 
 const EnvErc20ContractAddressSchema = z.custom<string>((data: unknown) => {
@@ -9,7 +9,7 @@ const EnvErc20ContractAddressSchema = z.custom<string>((data: unknown) => {
 		return false;
 	}
 
-	return isEthAddress(data);
+	return isAddress(data);
 }, 'Invalid ERC20 Contract Address');
 
 export const EnvCkErc20TokenDataSchema = EnvIcTokenSchema.extend({

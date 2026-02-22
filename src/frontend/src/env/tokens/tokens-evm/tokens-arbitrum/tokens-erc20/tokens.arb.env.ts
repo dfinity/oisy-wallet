@@ -21,7 +21,6 @@ export const ARB_TOKEN: RequiredEvmErc20Token = {
 	decimals: ARB_DECIMALS,
 	icon: arb,
 	address: '0x912CE59144191C1204E64559FE8253a0e49E6548',
-	exchange: 'erc20',
 	groupData: ARB_TOKEN_GROUP,
 	buy: {
 		onramperId: 'arb_arbitrum'

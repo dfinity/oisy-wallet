@@ -9,11 +9,15 @@ import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
-import { hasSufficientIcrcAllowance, loadCustomTokens } from '$icp/services/icrc.services';
+import {
+	hasSufficientIcrcAllowance,
+	isIcrcTokenSupportIcrc2,
+	loadCustomTokens
+} from '$icp/services/icrc.services';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken, IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-import { isIcrcTokenSupportIcrc2, isTokenIcrc } from '$icp/utils/icrc.utils';
+import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import {

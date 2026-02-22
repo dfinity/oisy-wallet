@@ -646,6 +646,124 @@ describe('signer.canister', () => {
 		});
 	});
 
+	describe('signBtc', () => {
+		it('signs BTC correctly', async () => {
+			const response = { Ok: { txid: '1', signed_transaction_hex: 'abc123hex' } };
+			service.btc_caller_sign.mockResolvedValue(response);
+
+			const { signBtc } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = await signBtc(sendBtcParams);
+
+			expect(res).toEqual(response.Ok);
+			expect(service.btc_caller_sign).toHaveBeenCalledWith(
+				{
+					fee_satoshis: sendBtcParams.feeSatoshis,
+					network: sendBtcParams.network,
+					utxos_to_spend: sendBtcParams.utxosToSpend,
+					address_type: P2WPKH,
+					outputs: sendBtcParams.outputs
+				},
+				[SIGNER_PAYMENT_TYPE]
+			);
+		});
+
+		it('should throw an error if btc_caller_sign returns an internal error', async () => {
+			service.btc_caller_sign.mockResolvedValue(internalErrorResponse);
+
+			const { signBtc } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = signBtc(sendBtcParams);
+
+			await expect(res).rejects.toThrowError(
+				new CanisterInternalError(internalErrorResponse.Err.InternalError.msg)
+			);
+		});
+
+		it('should throw an error if btc_caller_sign returns a payment error', async () => {
+			service.btc_caller_sign.mockResolvedValue(paymentErrorResponse);
+
+			const { signBtc } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = signBtc(sendBtcParams);
+
+			await expect(res).rejects.toThrowError(
+				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
+			);
+		});
+
+		it.each([
+			['NotEnoughFunds', { NotEnoughFunds: { available: 1000n, required: 2000n } }],
+			['WrongBitcoinNetwork', { WrongBitcoinNetwork: null }],
+			['NotP2WPKHSourceAddress', { NotP2WPKHSourceAddress: null }],
+			['InvalidDestinationAddress', { InvalidDestinationAddress: { address: 'mock-destination' } }],
+			['InvalidSourceAddress', { InvalidSourceAddress: { address: 'mock-source' } }]
+			// eslint-disable-next-line local-rules/prefer-object-params -- It is a simple list of cases
+		])(`should throw an error if btc_caller_sign returns a build error %s`, async (_, error) => {
+			const errorResponse = { Err: { BuildP2wpkhError: error } };
+
+			service.btc_caller_sign.mockResolvedValue(errorResponse);
+
+			const { signBtc } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = signBtc(sendBtcParams);
+
+			await expect(res).rejects.toThrowError(
+				new CanisterInternalError(JSON.stringify(error, jsonReplacer))
+			);
+		});
+
+		it('should throw an error if btc_caller_sign returns a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_caller_sign.mockResolvedValue(genericErrorResponse);
+
+			const { signBtc } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = signBtc(sendBtcParams);
+
+			await expect(res).rejects.toThrowError(
+				new CanisterInternalError('Unknown SignerCanisterSendBtcError')
+			);
+		});
+
+		it('should throw an error if btc_caller_sign throws', async () => {
+			service.btc_caller_sign.mockImplementation(() => {
+				throw mockResponseError;
+			});
+
+			const { signBtc } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = signBtc(sendBtcParams);
+
+			await expect(res).rejects.toThrowError(mockResponseError);
+		});
+
+		it('should throw an error if btc_caller_sign returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_caller_sign.mockResolvedValue({ test: 'unexpected' });
+
+			const { signBtc } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = signBtc(sendBtcParams);
+
+			await expect(res).rejects.toThrowError();
+		});
+	});
+
 	describe('getSchnorrPublicKey', () => {
 		it('returns correct Schnorr public key', async () => {
 			const publicKey = Uint8Array.from([1, 2, 3]);

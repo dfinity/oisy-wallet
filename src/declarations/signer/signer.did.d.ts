@@ -182,14 +182,15 @@ export type RejectionCode_1 =
 	| { CanisterReject: null };
 export type Result = { Ok: GetAddressResponse } | { Err: GetAddressError };
 export type Result_1 = { Ok: GetBalanceResponse } | { Err: GetAddressError };
+export type Result_10 = { Ok: [SignWithEcdsaResponse] } | { Err: EthAddressError };
 export type Result_2 = { Ok: SendBtcResponse } | { Err: SendBtcError };
-export type Result_3 = { Ok: EthAddressResponse } | { Err: EthAddressError };
-export type Result_4 = { Ok: EthPersonalSignResponse } | { Err: EthAddressError };
-export type Result_5 = { Ok: EthSignPrehashResponse } | { Err: EthAddressError };
-export type Result_6 = { Ok: [EcdsaPublicKeyResponse] } | { Err: EthAddressError };
-export type Result_7 = { Ok: [SignWithEcdsaResponse] } | { Err: EthAddressError };
-export type Result_8 = { Ok: [EcdsaPublicKeyResponse] } | { Err: EthAddressError };
-export type Result_9 = { Ok: [SignWithEcdsaResponse] } | { Err: EthAddressError };
+export type Result_3 = { Ok: SignBtcResponse } | { Err: SendBtcError };
+export type Result_4 = { Ok: EthAddressResponse } | { Err: EthAddressError };
+export type Result_5 = { Ok: EthPersonalSignResponse } | { Err: EthAddressError };
+export type Result_6 = { Ok: EthSignPrehashResponse } | { Err: EthAddressError };
+export type Result_7 = { Ok: [EcdsaPublicKeyResponse] } | { Err: EthAddressError };
+export type Result_8 = { Ok: [SignWithEcdsaResponse] } | { Err: EthAddressError };
+export type Result_9 = { Ok: [EcdsaPublicKeyResponse] } | { Err: EthAddressError };
 export type SchnorrAlgorithm = { ed25519: null } | { bip340secp256k1: null };
 export interface SchnorrKeyId {
 	algorithm: SchnorrAlgorithm;
@@ -213,6 +214,10 @@ export interface SendBtcRequest {
 }
 export interface SendBtcResponse {
 	txid: string;
+}
+export interface SignBtcResponse {
+	txid: string;
+	signed_transaction_hex: string;
 }
 export interface SignWithEcdsaArgument {
 	key_id: EcdsaKeyId;
@@ -268,21 +273,22 @@ export interface _SERVICE {
 	btc_caller_address: ActorMethod<[GetAddressRequest, [] | [PaymentType]], Result>;
 	btc_caller_balance: ActorMethod<[GetBalanceRequest, [] | [PaymentType]], Result_1>;
 	btc_caller_send: ActorMethod<[SendBtcRequest, [] | [PaymentType]], Result_2>;
+	btc_caller_sign: ActorMethod<[SendBtcRequest, [] | [PaymentType]], Result_3>;
 	config: ActorMethod<[], Config>;
-	eth_address: ActorMethod<[EthAddressRequest, [] | [PaymentType]], Result_3>;
-	eth_address_of_caller: ActorMethod<[[] | [PaymentType]], Result_3>;
-	eth_personal_sign: ActorMethod<[EthPersonalSignRequest, [] | [PaymentType]], Result_4>;
-	eth_sign_prehash: ActorMethod<[EthSignPrehashRequest, [] | [PaymentType]], Result_5>;
-	eth_sign_transaction: ActorMethod<[EthSignTransactionRequest, [] | [PaymentType]], Result_5>;
+	eth_address: ActorMethod<[EthAddressRequest, [] | [PaymentType]], Result_4>;
+	eth_address_of_caller: ActorMethod<[[] | [PaymentType]], Result_4>;
+	eth_personal_sign: ActorMethod<[EthPersonalSignRequest, [] | [PaymentType]], Result_5>;
+	eth_sign_prehash: ActorMethod<[EthSignPrehashRequest, [] | [PaymentType]], Result_6>;
+	eth_sign_transaction: ActorMethod<[EthSignTransactionRequest, [] | [PaymentType]], Result_6>;
 	generic_caller_ecdsa_public_key: ActorMethod<
 		[EcdsaPublicKeyArgument, [] | [PaymentType]],
-		Result_6
+		Result_7
 	>;
-	generic_sign_with_ecdsa: ActorMethod<[[] | [PaymentType], SignWithEcdsaArgument], Result_7>;
+	generic_sign_with_ecdsa: ActorMethod<[[] | [PaymentType], SignWithEcdsaArgument], Result_8>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
-	schnorr_public_key: ActorMethod<[SchnorrPublicKeyArgument, [] | [PaymentType]], Result_8>;
-	schnorr_sign: ActorMethod<[SignWithSchnorrArgument, [] | [PaymentType]], Result_9>;
+	schnorr_public_key: ActorMethod<[SchnorrPublicKeyArgument, [] | [PaymentType]], Result_9>;
+	schnorr_sign: ActorMethod<[SignWithSchnorrArgument, [] | [PaymentType]], Result_10>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

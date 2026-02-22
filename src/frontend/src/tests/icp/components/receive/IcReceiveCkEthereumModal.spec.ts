@@ -16,6 +16,12 @@ import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: () => ({
+		disconnect: async () => {}
+	})
+}));
+
 describe('IcReceiveCkEthereumModal', () => {
 	const props = {
 		sourceToken: ETHEREUM_TOKEN,

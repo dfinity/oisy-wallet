@@ -168,7 +168,7 @@ describe('eth-balance.services', () => {
 
 		const mockParams = {
 			address: mockEthAddress,
-			erc20Tokens: mockErc20DefaultTokens
+			tokens: mockErc20DefaultTokens
 		};
 
 		const mockBalance = 123n;

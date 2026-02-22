@@ -19,6 +19,5 @@ export const WEETH_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: WEETH_SYMBOL,
 	decimals: WEETH_DECIMALS,
 	icon: weeth,
-	address: '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee',
-	exchange: 'erc20'
+	address: '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee'
 };

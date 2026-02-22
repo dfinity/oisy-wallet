@@ -5,12 +5,6 @@ import {
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
 } from '$env/networks/networks.btc.env';
-import {
-	getIdbBtcAddressMainnet,
-	setIdbBtcAddressMainnet,
-	setIdbBtcAddressTestnet,
-	updateIdbBtcAddressMainnetLastUsage
-} from '$lib/api/idb-addresses.api';
 import { getBtcAddress as getSignerBtcAddress } from '$lib/api/signer.api';
 import { SIGNER_MASTER_PUB_KEY } from '$lib/constants/signer.constants';
 import {
@@ -21,7 +15,6 @@ import {
 import { deriveBtcAddress } from '$lib/ic-pub-key/src/cli';
 import {
 	certifyAddress,
-	loadIdbTokenAddress,
 	loadTokenAddress,
 	validateAddress,
 	type LoadTokenAddressParams
@@ -33,7 +26,6 @@ import {
 	type AddressStoreData
 } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -48,20 +40,16 @@ import { get } from 'svelte/store';
 
 const bitcoinMapper: Record<
 	BitcoinNetwork,
-	Pick<LoadTokenAddressParams<BtcAddress>, 'addressStore' | 'setIdbAddress'>
+	Pick<LoadTokenAddressParams<BtcAddress>, 'addressStore'>
 > = {
 	mainnet: {
-		addressStore: btcAddressMainnetStore,
-		setIdbAddress: setIdbBtcAddressMainnet
+		addressStore: btcAddressMainnetStore
 	},
 	testnet: {
-		addressStore: btcAddressTestnetStore,
-		setIdbAddress: setIdbBtcAddressTestnet
+		addressStore: btcAddressTestnetStore
 	},
 	regtest: {
-		addressStore: btcAddressRegtestStore,
-		// No need to store the regtest in the local storage because it's only used locally.
-		setIdbAddress: null
+		addressStore: btcAddressRegtestStore
 	}
 };
 
@@ -77,11 +65,11 @@ export const getBtcAddress = async ({
 		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 		// HACK: This is not working for Local environment for now, because the library is not aware of the `dfx_test_1` public key (used by Local deployment).
-		return await deriveBtcAddress(
-			identity.getPrincipal().toString(),
+		return deriveBtcAddress({
+			user: identity.getPrincipal().toString(),
 			network,
-			SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey
-		);
+			pubkey: SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey
+		});
 	}
 
 	return await getSignerBtcAddress({
@@ -122,20 +110,11 @@ export const loadBtcAddressMainnet = (): Promise<ResultSuccess> =>
 		network: 'mainnet'
 	});
 
-export const loadIdbBtcAddressMainnet = (): Promise<ResultSuccess<LoadIdbAddressError>> =>
-	loadIdbTokenAddress<BtcAddress>({
-		networkId: BTC_MAINNET_NETWORK_ID,
-		getIdbAddress: getIdbBtcAddressMainnet,
-		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage,
-		addressStore: btcAddressMainnetStore
-	});
-
 const certifyBtcAddressMainnet = (address: BtcAddress): Promise<ResultSuccess<string>> =>
 	certifyAddress<BtcAddress>({
 		networkId: BTC_MAINNET_NETWORK_ID,
 		address,
 		getAddress: (identity: OptionIdentity) => getBtcAddress({ identity, network: 'mainnet' }),
-		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage,
 		addressStore: btcAddressMainnetStore
 	});
 

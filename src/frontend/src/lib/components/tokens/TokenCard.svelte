@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import Divider from '$lib/components/common/Divider.svelte';
+	import ExchangeRateChange from '$lib/components/exchange/ExchangeRateChange.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
@@ -8,14 +9,18 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TOKEN_CARD, type TOKEN_GROUP } from '$lib/constants/test-ids.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
+	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		data: CardData;
@@ -42,6 +47,21 @@
 	let token: TokenToggleable<Token> | undefined = $derived(
 		isCardDataTogglableToken(data) ? data : undefined
 	);
+
+	let { usdPrice, usdPriceChangePercentage24h } = $derived(data);
+
+	let formattedExchangeRate = $derived(
+		nonNullish(usdPrice)
+			? formatCurrency({
+					value: usdPrice,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})
+			: undefined
+	);
+
+	let name = $derived(getTokenDisplayName(data));
 </script>
 
 <div class="flex w-full flex-col">
@@ -71,9 +91,15 @@
 		{/snippet}
 
 		{#snippet subtitle()}
-			<span class:text-sm={asNetwork}>
+			<span
+				class="flex items-center gap-1 sm:gap-2"
+				class:ml-2={!asNetwork}
+				class:sm:ml-4={!asNetwork}
+				class:text-sm={asNetwork}
+			>
 				{#if !asNetwork}
-					<Divider />{data.name}
+					{formattedExchangeRate}
+					<ExchangeRateChange {usdPriceChangePercentage24h} />
 				{/if}
 			</span>
 		{/snippet}
@@ -96,13 +122,22 @@
 		{#snippet description()}
 			<span class:text-sm={asNetwork}>
 				{#if data?.networks}
-					{#each [...new Set(data.networks.map((n) => n.name))] as network, index (network)}
+					{@const networks = [...new Set(data.networks.map((n) => n.name))].sort((a, b) =>
+						a.localeCompare(b)
+					)}
+
+					<span class="text-primary">{data.name}</span>
+					{replacePlaceholders($i18n.tokens.text.on_network, { $network: '' })}
+					{#each networks as network, index (network)}
 						{#if index !== 0}
 							<Divider />
 						{/if}{network}
 					{/each}
 				{:else if !asNetwork && nonNullish(data.network)}
-					{data.network.name}
+					<span class="text-primary">{name}</span>
+					{#if name !== data.network.name}
+						{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
+					{/if}
 				{/if}
 			</span>
 		{/snippet}

@@ -5,19 +5,18 @@
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
+	import { isEthAddress } from '$eth/utils/account.utils';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
-	import { isEthAddress } from '$lib/utils/account.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	interface Props {
 		amount: OptionAmount;
 		destination?: string;
-		customNonce?: number;
 		nativeEthereumToken: Token;
 		selectedContact?: ContactUi;
 		onBack: () => void;
@@ -29,7 +28,6 @@
 	let {
 		amount = $bindable(),
 		destination = $bindable(''),
-		customNonce = $bindable(),
 		nativeEthereumToken,
 		selectedContact,
 		onBack,

@@ -7,6 +7,7 @@ import type {
 	EthSignTransactionRequest,
 	GetBalanceRequest,
 	SendBtcResponse,
+	SignBtcResponse,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
@@ -185,6 +186,33 @@ export class SignerCanister extends Canister<SignerService> {
 		});
 
 		const response = await btc_caller_send(
+			{
+				address_type: P2WPKH,
+				utxos_to_spend: utxosToSpend,
+				fee_satoshis: feeSatoshis,
+				...rest
+			},
+			[SIGNER_PAYMENT_TYPE]
+		);
+
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
+		}
+
+		throw mapSignerCanisterSendBtcError(response.Err);
+	};
+
+	signBtc = async ({
+		feeSatoshis,
+		utxosToSpend,
+		...rest
+	}: SendBtcParams): Promise<SignBtcResponse> => {
+		const { btc_caller_sign } = this.caller({
+			certified: true
+		});
+
+		const response = await btc_caller_sign(
 			{
 				address_type: P2WPKH,
 				utxos_to_spend: utxosToSpend,

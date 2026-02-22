@@ -11,7 +11,6 @@ import { get } from 'svelte/store';
 interface LoadCustomTokensFromBackendParams {
 	identity: OptionIdentity;
 	certified: boolean;
-	filterTokens: (token: CustomToken) => boolean;
 }
 
 type LoadCustomTokensParams = LoadCustomTokensFromBackendParams & {
@@ -20,8 +19,7 @@ type LoadCustomTokensParams = LoadCustomTokensFromBackendParams & {
 
 const loadCustomTokensFromBackend = async ({
 	identity,
-	certified,
-	filterTokens
+	certified
 }: LoadCustomTokensFromBackendParams): Promise<CustomToken[]> => {
 	const tokens = await listCustomTokens({
 		identity,
@@ -36,14 +34,12 @@ const loadCustomTokensFromBackend = async ({
 		await setIdbAllCustomTokens({ identity, tokens });
 	}
 
-	// We filter the custom tokens, since the backend "Custom Token" potentially supports other types
-	return tokens.filter(filterTokens);
+	return tokens;
 };
 
 export const loadNetworkCustomTokens = async ({
 	identity,
 	certified,
-	filterTokens,
 	useCache = false
 }: LoadCustomTokensParams): Promise<CustomToken[]> => {
 	if (isNullish(identity)) {
@@ -124,6 +120,7 @@ export const loadNetworkCustomTokens = async ({
 					'Erc20' in token.token ||
 					'Erc721' in token.token ||
 					'Erc1155' in token.token ||
+					'Erc4626' in token.token ||
 					'SplMainnet' in token.token ||
 					'SplDevnet' in token.token
 				) {
@@ -133,17 +130,12 @@ export const loadNetworkCustomTokens = async ({
 				assertNever(token.token, `Unexpected token type: ${token.token}`);
 			};
 
-			return cachedTokens.reduce<CustomToken[]>((acc, token) => {
-				const parsed = parsePrincipal(token);
-
-				return filterTokens(parsed) ? [...acc, parsed] : acc;
-			}, []);
+			return cachedTokens.map(parsePrincipal);
 		}
 	}
 
 	return await loadCustomTokensFromBackend({
 		identity,
-		certified,
-		filterTokens
+		certified
 	});
 };

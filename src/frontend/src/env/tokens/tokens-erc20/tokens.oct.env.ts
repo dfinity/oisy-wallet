@@ -21,7 +21,6 @@ export const OCT_TOKEN: RequiredErc20Token = {
 	decimals: OCT_DECIMALS,
 	icon: oct,
 	address: '0xF5cFBC74057C610c8EF151A439252680AC68c6DC',
-	exchange: 'erc20',
 	twinTokenSymbol: 'ckOCT',
 	groupData: OCT_TOKEN_GROUP,
 	neverCollapseInTokenGroup: true,

@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
 	import { erc1155CustomTokensNotInitialized } from '$eth/derived/erc1155.derived';
 	import { erc20CustomTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { erc4626CustomTokensNotInitialized } from '$eth/derived/erc4626.derived';
 	import { erc721CustomTokensNotInitialized } from '$eth/derived/erc721.derived';
 	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
+	import { loadErc4626Tokens } from '$eth/services/erc4626.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { extCustomTokensNotInitialized } from '$icp/derived/ext.derived';
 	import { icPunksCustomTokensNotInitialized } from '$icp/derived/icpunks.derived';
@@ -35,12 +36,6 @@
 	import { splCustomTokensNotInitialized } from '$sol/derived/spl.derived';
 	import { loadSplTokens } from '$sol/services/spl.services';
 
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
-
 	$effect(() => {
 		loadIcrcTokens({ identity: $authIdentity });
 	});
@@ -54,6 +49,7 @@
 	let loadErc20 = $derived(loadErc && $erc20CustomTokensNotInitialized);
 	let loadErc721 = $derived(loadErc && $erc721CustomTokensNotInitialized);
 	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized);
+	let loadErc4626 = $derived(loadErc && $erc4626CustomTokensNotInitialized);
 
 	let loadSplMainnet = $derived(nonNullish($solAddressMainnet) && $networkSolanaMainnetEnabled);
 	let loadSplDevnet = $derived(
@@ -89,6 +85,12 @@
 	});
 
 	$effect(() => {
+		if (loadErc4626) {
+			loadErc4626Tokens({ identity: $authIdentity });
+		}
+	});
+
+	$effect(() => {
 		if (loadSpl) {
 			loadSplTokens({ identity: $authIdentity });
 		}
@@ -106,8 +108,6 @@
 		}
 	});
 </script>
-
-{@render children()}
 
 <LoaderCollections />
 

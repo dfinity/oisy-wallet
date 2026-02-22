@@ -64,6 +64,11 @@ export const initSendContext = ({
 			$sendDestination === encodeIcrcAccount($sendToken.mintingAccount)
 	);
 
+	// WizardModal re-renders content on step change (e.g. when switching between SendForm to SendReview steps)
+	// So, the `customNonce` property cannot be passed between components because it is reset even if is `$bindable`
+	// To persist the value between components, we need to put it in a context outside the WizardModal
+	const sendEthCustomNonce = writable<number | undefined>();
+
 	return {
 		sendToken,
 		sendTokenDecimals,
@@ -74,7 +79,8 @@ export const initSendContext = ({
 		sendTokenNetworkId,
 		sendBalance,
 		sendDestination,
-		isIcBurning
+		isIcBurning,
+		sendEthCustomNonce
 	};
 };
 
@@ -89,6 +95,7 @@ export interface SendContext {
 	sendBalance: Readable<OptionBalance>;
 	sendDestination: Writable<Address>;
 	isIcBurning: Readable<boolean>;
+	sendEthCustomNonce: Writable<number | undefined>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');

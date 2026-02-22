@@ -8,6 +8,8 @@ const ERC20_ICP_BURN_API = 'function burnToAccountId(uint256 _amount, bytes32 _t
 
 export const ERC20_ICP_ABI = [...ERC20_ABI, ERC20_ICP_BURN_API];
 
+export const ERC20_ICP_ADDRESS = '0x054B8f99D15cC5B35a42a926635977d62692F25b';
+
 export const ERC20_ICP_SYMBOL = PROD || BETA ? 'ICP' : 'ckICP';
 
 export const ERC20_ICP_REPO_URL = 'https://github.com/dfinity/erc20-icp';
