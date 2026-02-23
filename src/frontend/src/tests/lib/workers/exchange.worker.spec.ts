@@ -148,8 +148,7 @@ describe('exchange.worker', () => {
 			it('should post a message with synced prices', async () => {
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
-				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 					msg: 'syncExchange',
 					data: {
 						currentExchangeRate: {
@@ -191,31 +190,31 @@ describe('exchange.worker', () => {
 				expect(postMessageMock).toHaveBeenCalledTimes(11);
 			});
 
-			it('should post an error message if the sync fails', async () => {
+			it('should post a sync success message even if some price fetches fail', async () => {
 				const mockErrorMessage = 'Sync failed';
 				const mockError = new Error(mockErrorMessage);
 				vi.mocked(simplePrice).mockRejectedValueOnce(mockError);
 
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
-				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
-					msg: 'syncExchangeError',
-					data: { err: mockErrorMessage }
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: expect.any(Object)
 				});
 
-				expect(console.error).toHaveBeenCalledOnce();
-				expect(console.error).toHaveBeenNthCalledWith(
-					1,
-					'Unexpected error while fetching symbol average price:',
+				expect(console.error).toHaveBeenCalledExactlyOnceWith(
+					'Error while fetching exchange rate:',
 					mockError
 				);
 			});
 
-			it('should stop the timer if the sync fails', async () => {
+			it('should not stop the timer if the sync fails', async () => {
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: expect.any(Object)
+				});
 
 				vi.clearAllMocks();
 
@@ -225,10 +224,7 @@ describe('exchange.worker', () => {
 
 				await vi.advanceTimersByTimeAsync(SYNC_EXCHANGE_TIMER_INTERVAL * 10);
 
-				expect(postMessageMock).not.toHaveBeenCalledWith({
-					msg: 'syncExchange',
-					data: expect.any(Object)
-				});
+				expect(postMessageMock).toHaveBeenCalledTimes(10);
 			});
 
 			it('should handle empty payload', async () => {
@@ -314,8 +310,7 @@ describe('exchange.worker', () => {
 
 					await onExchangeMessage(mockEvent);
 
-					expect(simpleTokenPrice).toHaveBeenCalledOnce();
-					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
+					expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
 						id: 'internet-computer',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockIcrcLedgerCanisterIds,
@@ -344,8 +339,7 @@ describe('exchange.worker', () => {
 
 					await onExchangeMessage(mockEvent);
 
-					expect(simpleTokenPrice).toHaveBeenCalledOnce();
-					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
+					expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
 						id: 'solana',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockSplTokenAddresses,

@@ -176,7 +176,6 @@
 			"title_part_1": "Unlock to continue",
 			"title_part_2": "You previously locked your wallet to keep it safe. Resume where you left off or log out.",
 			"unlock": "Unlock",
-			"unlock_with_legacy_login": "Unlock with legacy login",
 			"logout": "Log out",
 			"logout_clear_cash_message": "Logging out will clear all cached data",
 			"learn_more": "Learn more"

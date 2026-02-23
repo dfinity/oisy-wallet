@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
-	import { type Snippet, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
@@ -14,12 +14,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-
-	interface Props {
-		children?: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	// We separate the reactivity to avoid triggering the effects for independent stores
 	// We don't need to track identity and tokens changes for every store, since we are interested in the final result of the transactions' store.
@@ -81,5 +75,3 @@
 		debounceSetIdbSolTransactions();
 	});
 </script>
-
-{@render children?.()}
