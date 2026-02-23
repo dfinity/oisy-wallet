@@ -1,14 +1,8 @@
 <script lang="ts">
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount } from 'svelte';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { fetchHarvestVaults } from '$lib/rest/harvest.rest';
 	import { harvestVaultsStore } from '$lib/stores/harvest.store';
-
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	onMount(async () => {
 		if (!EARNING_ENABLED) {
@@ -24,5 +18,3 @@
 		}
 	});
 </script>
-
-{@render children()}

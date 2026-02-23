@@ -1142,7 +1142,10 @@
 			"hide_more_networks": "अधिक नेटवर्क छुपाएं",
 			"on_network": " $network पर",
 			"delete_token": "टोकन मिटाएँ",
-			"edit_token": "टोकन संपादित करें"
+			"edit_token": "टोकन संपादित करें",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "टोकन विवरण",

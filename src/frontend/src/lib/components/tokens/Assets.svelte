@@ -16,6 +16,7 @@
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
+	import TokensSortMenu from '$lib/components/tokens/TokensSortMenu.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
@@ -93,6 +94,9 @@
 					</div>
 					{#if tab === TokenTypes.TOKENS}
 						<div class="flex">
+							<TokensSortMenu />
+						</div>
+						<div class="ml-1 flex">
 							<TokensMenu />
 						</div>
 					{:else if tab === TokenTypes.NFTS}

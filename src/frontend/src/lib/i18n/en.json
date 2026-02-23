@@ -1142,7 +1142,10 @@
 			"hide_more_networks": "Hide more networks",
 			"on_network": " on $network",
 			"delete_token": "Delete token",
-			"edit_token": "Edit token"
+			"edit_token": "Edit token",
+			"sort_by_value": "Value",
+			"sort_by_performance": "Token performance",
+			"sort_by_symbol": "Symbol"
 		},
 		"details": {
 			"title": "Token details",

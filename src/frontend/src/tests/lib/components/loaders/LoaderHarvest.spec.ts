@@ -2,7 +2,6 @@ import LoaderHarvest from '$lib/components/loaders/LoaderHarvest.svelte';
 import * as harvestRest from '$lib/rest/harvest.rest';
 import { harvestVaultsStore } from '$lib/stores/harvest.store';
 import type { HarvestVault } from '$lib/types/harvest';
-import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -35,7 +34,7 @@ describe('LoaderHarvest', () => {
 		it('should fetch and set harvest vaults on mount', async () => {
 			const spy = vi.spyOn(harvestRest, 'fetchHarvestVaults').mockResolvedValueOnce([mockVault]);
 
-			render(LoaderHarvest, { children: mockSnippet });
+			render(LoaderHarvest);
 
 			await waitFor(() => {
 				expect(spy).toHaveBeenCalledOnce();
@@ -53,7 +52,7 @@ describe('LoaderHarvest', () => {
 			const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 			vi.spyOn(harvestRest, 'fetchHarvestVaults').mockRejectedValueOnce(error);
 
-			render(LoaderHarvest, { children: mockSnippet });
+			render(LoaderHarvest);
 
 			await waitFor(() => {
 				expect(consoleSpy).toHaveBeenCalledWith('Failed to load Harvest vaults.', error);
@@ -71,7 +70,7 @@ describe('LoaderHarvest', () => {
 		it('should not fetch harvest vaults', () => {
 			const spy = vi.spyOn(harvestRest, 'fetchHarvestVaults');
 
-			render(LoaderHarvest, { children: mockSnippet });
+			render(LoaderHarvest);
 
 			expect(spy).not.toHaveBeenCalled();
 		});

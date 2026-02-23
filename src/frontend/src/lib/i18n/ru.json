@@ -1142,7 +1142,10 @@
 			"hide_more_networks": "Скрыть больше сетей",
 			"on_network": " в сети $network",
 			"delete_token": "Удалить токен",
-			"edit_token": "Редактировать токен"
+			"edit_token": "Редактировать токен",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Сведения о токене",

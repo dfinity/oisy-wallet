@@ -3,7 +3,6 @@ import { Currency } from '$lib/enums/currency';
 import { ExchangeWorker as ExchangeWorkerObj } from '$lib/services/worker.exchange.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { currencyStore } from '$lib/stores/currency.store';
-import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 describe('ExchangeWorker', () => {
@@ -31,7 +30,7 @@ describe('ExchangeWorker', () => {
 	});
 
 	it('should initialize the worker on mount', async () => {
-		render(ExchangeWorker, { children: mockSnippet });
+		render(ExchangeWorker);
 
 		await waitTimer();
 
@@ -39,7 +38,7 @@ describe('ExchangeWorker', () => {
 	});
 
 	it('should start the worker once when mounted', async () => {
-		render(ExchangeWorker, { children: mockSnippet });
+		render(ExchangeWorker);
 
 		await waitTimer();
 
@@ -55,7 +54,7 @@ describe('ExchangeWorker', () => {
 	});
 
 	it('should handle currency change', async () => {
-		render(ExchangeWorker, { children: mockSnippet });
+		render(ExchangeWorker);
 
 		await waitTimer();
 
@@ -101,7 +100,7 @@ describe('ExchangeWorker', () => {
 	});
 
 	it('should not be triggered by current currency exchange rate', async () => {
-		render(ExchangeWorker, { children: mockSnippet });
+		render(ExchangeWorker);
 
 		await waitTimer();
 
