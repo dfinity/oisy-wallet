@@ -54,7 +54,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * @param $tokens - The list of tokens to sort.
  * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
  * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
- * @returns A sorted array of mapped token UI objects.
+ * @returns A sorted array of token UI objects.
  */
 export const sortTokens = <T extends Token>({
 	$tokens,
