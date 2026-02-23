@@ -57,7 +57,7 @@ describe('TokensSortMenu', () => {
 		await waitFor(() => {
 			expect(getByText(get(i18n).tokens.text.sort_by_value)).toBeInTheDocument();
 			expect(getByText(get(i18n).tokens.text.sort_by_performance)).toBeInTheDocument();
-			expect(getByText(get(i18n).tokens.text.sort_by_performance)).toBeInTheDocument();
+			expect(getByText(get(i18n).tokens.text.sort_by_symbol)).toBeInTheDocument();
 		});
 	});
 
