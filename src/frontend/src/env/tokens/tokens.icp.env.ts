@@ -6,9 +6,9 @@ import {
 	ICP_NETWORK,
 	ICP_PSEUDO_TESTNET_NETWORK
 } from '$env/networks/networks.icp.env';
+import { ICP_TOKEN_GROUP } from '$env/tokens/groups/groups.icp.env';
 import icpLight from '$icp/assets/icp-light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
-import { ICP_TOKEN_GROUP } from '$env/tokens/groups/groups.icp.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import { buildIndexedIcTokens } from '$icp/utils/ic-tokens.utils';
