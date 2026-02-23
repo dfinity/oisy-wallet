@@ -41,7 +41,8 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": "Aprender mas"
+			"learn_more": "Aprender mas",
+			"sorting": "Ordenar"
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
@@ -1284,7 +1285,6 @@
 			"by_collection": "Agrupar por colección",
 			"show_spam": "Mostrar spam",
 			"show_hidden": "Mostrar ocultos",
-			"sorting": "Ordenar",
 			"recents_first": "Más recientes primero",
 			"oldest_first": "Más antiguos primero",
 			"collection_atoz": "Nombre de la colección A-Z",
