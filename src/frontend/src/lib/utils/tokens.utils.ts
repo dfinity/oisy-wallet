@@ -109,7 +109,7 @@ export const sortTokens = <T extends Token>({
 			}
 		}
 
-		// Otherwise, default sorting by value
+		// Tie-breaker after primary strategy
 		// USD Balance descending
 		const usdBalanceDiff = (b.usdBalance ?? 0) - (a.usdBalance ?? 0);
 		if (usdBalanceDiff !== 0) {
