@@ -5,11 +5,13 @@ import { stakeBalances } from '$lib/derived/stake.derived';
 import { tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenUi } from '$lib/types/token-ui';
+import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+import { groupTokens } from '$lib/utils/token-group.utils';
 import { mapTokenUi } from '$lib/utils/token.utils';
 import { sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
-const enabledFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
+export const enabledFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[enabledFungibleNetworkTokens, balancesStore, stakeBalances, exchanges],
 	([$tokens, $balances, $stakeBalances, $exchanges]) =>
 		$tokens.map((token) =>
@@ -22,8 +24,13 @@ const enabledFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
 		)
 );
 
-export const sortedFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[enabledFungibleNetworkTokensUi, tokensToPin, tokensSortType],
+export const enabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
+	[enabledFungibleNetworkTokensUi],
+	([$tokens]) => groupTokens($tokens)
+);
+
+export const sortedFungibleNetworkTokensUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
+	[enabledNetworkTokenUiOrGroupUi, tokensToPin, tokensSortType],
 	([$tokens, $tokensToPin, $tokensSortType]) =>
 		sortTokens({
 			$tokens,
