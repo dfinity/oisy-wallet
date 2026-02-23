@@ -23,6 +23,7 @@ describe('token-card.utils', () => {
 			balance: bn1Bi,
 			usdBalance: 300,
 			usdPrice: 150,
+			usdMarketCap: 1000000,
 			usdPriceChangePercentage24h: 3.5
 		};
 
@@ -37,6 +38,7 @@ describe('token-card.utils', () => {
 				balance: bn1Bi,
 				usdBalance: 300,
 				usdPrice: 150,
+				usdMarketCap: 1000000,
 				usdPriceChangePercentage24h: 3.5,
 				tokenCount: 2
 			};
@@ -49,6 +51,7 @@ describe('token-card.utils', () => {
 				balance: _balance,
 				usdBalance: _usdBalance,
 				usdPrice: _usdPrice,
+				usdMarketCap: _usdMarketCap,
 				usdPriceChangePercentage24h: _usdPriceChangePercentage24h,
 				...rest
 			} = tokenGroup;
