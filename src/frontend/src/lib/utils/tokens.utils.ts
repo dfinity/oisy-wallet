@@ -23,17 +23,40 @@ import type { Token, TokenId, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
+import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import type { TokensSortType } from '$lib/types/tokens-sort';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual, getCaseSensitiveness } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
+import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { filterEnabledToken } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | TokenUiOrGroupUi) => {
+	const t =
+		'group' in tokenOrGroup || 'token' in tokenOrGroup ? tokenOrGroup : { token: tokenOrGroup };
+
+	const isGroup = isTokenUiGroup(t);
+
+	const item = isGroup ? t.group : t.token;
+
+	return {
+		deprecated: isGroup ? false : (t.token.deprecated ?? false),
+		id: isGroup ? t.group.groupData.id : t.token.id,
+		symbol: isGroup ? t.group.groupData.symbol : t.token.symbol,
+		name: isGroup ? t.group.groupData.name : t.token.name,
+		networkName: isGroup ? '' : t.token.network.name,
+		usdBalance: item.usdBalance,
+		usdPriceChangePercentage24h: item.usdPriceChangePercentage24h,
+		usdMarketCap: item.usdMarketCap,
+		balance: item.balance
+	};
+};
 
 /**
  * Sorts tokens using balance-aware and pin-aware prioritisation.
@@ -67,58 +90,88 @@ export const sortTokens = <T extends Token>({
 }): TokenUi<T>[] => {
 	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
 
-	return $tokens.sort((a, b) => {
-		// Deprecated last
-		const aDeprecated = a.deprecated ?? false;
-		const bDeprecated = b.deprecated ?? false;
-		if (aDeprecated !== bDeprecated) {
-			return aDeprecated ? 1 : -1;
-		}
+	const tokens = $tokens.map((token) => ({
+		token,
+		unwrapped: unwrapTokenSortFields(token)
+	}));
 
-		// If the choice is to prioritise performance sorting
-		if (primarySortStrategy === 'performance') {
-			const performanceDiff =
-				(b.usdPriceChangePercentage24h ?? 0) - (a.usdPriceChangePercentage24h ?? 0);
-			if (performanceDiff !== 0) {
-				return performanceDiff;
+	return tokens
+		.sort((a, b) => {
+			const {
+				unwrapped: {
+					deprecated: aDeprecated,
+					usdPriceChangePercentage24h: aUsdPriceChangePercentage24h,
+					symbol: aSymbol,
+					usdBalance: aUsdBalance,
+					name: aName,
+					networkName: aNetworkName,
+					balance: aBalance,
+					usdMarketCap: aUsdMarketCap
+				}
+			} = a;
+			const {
+				unwrapped: {
+					deprecated: bDeprecated,
+					usdPriceChangePercentage24h: bUsdPriceChangePercentage24h,
+					symbol: bSymbol,
+					usdBalance: bUsdBalance,
+					name: bName,
+					networkName: bNetworkName,
+					balance: bBalance,
+					usdMarketCap: bUsdMarketCap
+				}
+			} = b;
+
+			// Deprecated last
+			if (aDeprecated !== bDeprecated) {
+				return aDeprecated ? 1 : -1;
 			}
-		}
 
-		// If the choice is to prioritise symbol sorting
-		if (primarySortStrategy === 'symbol') {
-			const symbolDiff = a.symbol.localeCompare(b.symbol);
-			if (symbolDiff !== 0) {
-				return symbolDiff;
+			// If the choice is to prioritise performance sorting
+			if (primarySortStrategy === 'performance') {
+				const performanceDiff =
+					(bUsdPriceChangePercentage24h ?? 0) - (aUsdPriceChangePercentage24h ?? 0);
+				if (performanceDiff !== 0) {
+					return performanceDiff;
+				}
 			}
-		}
 
-		// Tie-breaker after primary strategy
-		// USD Balance descending
-		const usdBalanceDiff = (b.usdBalance ?? 0) - (a.usdBalance ?? 0);
-		if (usdBalanceDiff !== 0) {
-			return usdBalanceDiff;
-		}
+			// If the choice is to prioritise symbol sorting
+			if (primarySortStrategy === 'symbol') {
+				const symbolDiff = aSymbol.localeCompare(bSymbol);
+				if (symbolDiff !== 0) {
+					return symbolDiff;
+				}
+			}
 
-		// Pinned tokens (pinned first; pinned order = order provided)
-		const aPin = pinIndexById.get(a.id);
-		const bPin = pinIndexById.get(b.id);
-		const aPinned = aPin !== undefined;
-		const bPinned = bPin !== undefined;
-		if (aPinned !== bPinned) {
-			return aPinned ? -1 : 1;
-		}
-		if (aPinned && bPinned) {
-			return aPin - bPin;
-		}
+			// Tie-breaker after primary strategy
+			// USD Balance descending
+			const usdBalanceDiff = (bUsdBalance ?? 0) - (aUsdBalance ?? 0);
+			if (usdBalanceDiff !== 0) {
+				return usdBalanceDiff;
+			}
 
-		return (
-			a.symbol.localeCompare(b.symbol) ||
-			a.name.localeCompare(b.name) ||
-			a.network.name.localeCompare(b.network.name) ||
-			+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO)) ||
-			(b.usdMarketCap ?? 0) - (a.usdMarketCap ?? 0)
-		);
-	});
+			// Pinned tokens (pinned first; pinned order = order provided)
+			const aPin = pinIndexById.get(a.token.id);
+			const bPin = pinIndexById.get(b.token.id);
+			const aPinned = aPin !== undefined;
+			const bPinned = bPin !== undefined;
+			if (aPinned !== bPinned) {
+				return aPinned ? -1 : 1;
+			}
+			if (aPinned && bPinned) {
+				return aPin - bPin;
+			}
+
+			return (
+				aSymbol.localeCompare(bSymbol) ||
+				aName.localeCompare(bName) ||
+				aNetworkName.localeCompare(bNetworkName) ||
+				+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO)) ||
+				(bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0)
+			);
+		})
+		.map(({ token }) => token);
 };
 
 /**
