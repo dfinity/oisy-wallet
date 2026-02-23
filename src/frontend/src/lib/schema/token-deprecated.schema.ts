@@ -1,5 +1,5 @@
 import * as z from 'zod';
 
-export const IcTokenDeprecatedSchema = z.object({
+export const TokenDeprecatedSchema = z.object({
 	deprecated: z.boolean().optional()
 });

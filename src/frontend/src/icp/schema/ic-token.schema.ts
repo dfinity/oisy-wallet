@@ -1,5 +1,4 @@
 import { EnvIcrcTokenMetadataSchema } from '$env/schema/env-icrc-token.schema';
-import { IcTokenDeprecatedSchema } from '$icp/schema/ic-token-deprecated.schema';
 import { CoingeckoCoinsIdSchema } from '$lib/schema/coingecko.schema';
 import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
 import { TokenSchema } from '$lib/schema/token.schema';
@@ -49,7 +48,6 @@ export const IcTokenSchema = z.object({
 	...TokenSchema.shape,
 	...IcFeeSchema.shape,
 	...IcInterfaceSchema.shape,
-	...IcTokenDeprecatedSchema.shape,
 	...EnvIcrcTokenMetadataSchema.pick({ alternativeName: true }).shape
 });
 

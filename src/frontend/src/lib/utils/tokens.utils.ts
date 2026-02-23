@@ -46,7 +46,7 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 	const item = isGroup ? t.group : t.token;
 
 	return {
-		deprecated: item.deprecated ?? false,
+		deprecated: isGroup ? false : (item.deprecated ?? false),
 		id: isGroup ? t.group.groupData.id : t.token.id,
 		symbol: isGroup ? t.group.groupData.symbol : t.token.symbol,
 		name: isGroup ? t.group.groupData.name : t.token.name,
@@ -131,7 +131,7 @@ export function sortTokens<T extends Token>({
 
 	const tokens = $tokens.map((token) => ({
 		token,
-		unwrapped: unwrapTokenSortFields({ tokenOrGroup: token, pinIndexById })
+		unwrapped: unwrapTokenSortFields(token)
 	}));
 
 	return tokens
