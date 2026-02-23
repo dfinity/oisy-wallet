@@ -357,13 +357,13 @@ describe('tokens.utils', () => {
 			};
 
 			const $balances: CertifiedStoreData<BalancesData> = {
-				[tokenPerfHigh.id]: { data: 1n, certified },
+				[tokenPerfHigh.id]: { data: 999n, certified },
 				[tokenPerfLow.id]: { data: 999n, certified }
 			};
 
 			const $exchanges: ExchangesData = {
-				[tokenPerfHigh.id]: { usd: 1, usd_market_cap: 0 },
-				[tokenPerfLow.id]: { usd: 1, usd_market_cap: 0 }
+				[tokenPerfHigh.id]: { usd: 1, usd_market_cap: 0, usd_24h_change: 3 },
+				[tokenPerfLow.id]: { usd: 1, usd_market_cap: 0, usd_24h_change: -3 }
 			};
 
 			const result = sortTokens({
