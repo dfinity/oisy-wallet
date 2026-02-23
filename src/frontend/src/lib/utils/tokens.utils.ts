@@ -51,7 +51,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  *
  * Additionally, if `primarySortStrategy` is set, it overrides the default sorting by value.
  *
- * @param $tokens - The list of tokens to map and sort.
+ * @param $tokens - The list of tokens to sort.
  * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
  * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
  * @returns A sorted array of mapped token UI objects.
