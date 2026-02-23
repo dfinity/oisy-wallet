@@ -66,7 +66,7 @@
 	let { usdPrice, usdPriceChangePercentage24h } = $derived(
 		nonNullish(pageTokenUi)
 			? pageTokenUi
-			: { usdPrice: undefined, usdPriceChangePercentage24h: undefined }
+			: { usdPrice: undefined, usdMarketCap:undefined,usdPriceChangePercentage24h: undefined }
 	);
 
 	let formattedExchangeRate = $derived(
