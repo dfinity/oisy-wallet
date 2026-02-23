@@ -12,7 +12,7 @@ import {
 	isTokenIcrc,
 	isTokenIcrcCustomToken
 } from '$icp/utils/icrc.utils';
-import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
+import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
@@ -86,8 +86,8 @@ export const sortTokens = <T extends Token>({
 
 	return tokens.sort((a, b) => {
 		// Deprecated last
-		const aDeprecated = isIcToken(a) && (a.deprecated ?? false);
-		const bDeprecated = isIcToken(b) && (b.deprecated ?? false);
+		const aDeprecated = a.deprecated ?? false;
+		const bDeprecated = b.deprecated ?? false;
 		if (aDeprecated !== bDeprecated) {
 			return aDeprecated ? 1 : -1;
 		}
