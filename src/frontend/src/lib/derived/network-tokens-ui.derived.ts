@@ -9,6 +9,8 @@ import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { groupTokens } from '$lib/utils/token-group.utils';
 import { mapTokenUi } from '$lib/utils/token.utils';
 import { sortTokensUi } from '$lib/utils/tokens-ui.utils';
+import { mapTokenUi } from '$lib/utils/token.utils';
+import { sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
 const enabledFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
