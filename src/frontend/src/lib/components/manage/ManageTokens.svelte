@@ -65,7 +65,7 @@
 	});
 
 	let allTokensUi: TokenUi<CustomToken<Token>>[] = $derived(
-		$allTokens.reduce<CustomToken<Token>[]>((acc, token) => {
+		$allTokens.reduce<TokenUi<CustomToken<Token>>[]>((acc, token) => {
 			if (isNullish(exchangesStaticData)) {
 				return acc;
 			}
