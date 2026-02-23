@@ -96,9 +96,8 @@ export abstract class AppWorker {
 			return;
 		}
 
-		// If it's a singleton, we could have several listeners on the same instance of the worker and we cannot terminate it.
-		// Ideally, we should have a way to terminate the worker if we find out that there are no more listeners on it.
-		// TODO: Terminate the worker when there are no more listeners even from other instances of `AppWorker`.
+		// If it's a singleton, we can have several listeners on the same instance of the worker.
+		// We track references across all `AppWorker` instances and terminate the worker when there are no more listeners.
 		this.#removeListener();
 
 		AppWorker.#singletonRefCount--;
