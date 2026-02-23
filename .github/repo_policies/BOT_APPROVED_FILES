@@ -18,6 +18,7 @@ src/frontend/src/icp-eth/assets/*.svg
 src/frontend/src/**/*.svelte
 src/frontend/src/tests/**/*.spec.ts
 src/frontend/src/tests/**/*.mock.ts
+src/frontend/src/tests/**/*.test-utils.ts
 .github/actions/*.yml
 .github/workflows/*.yml
 vitest.config.ts
