@@ -53,7 +53,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * 7. Token balance (descending).
  * 8. USD market cap (descending).
  *
- * Additionally, if `prioritySortType` is set, it overrides the default sorting by value.
+ * Additionally, if `primarySortStrategy` is set, it overrides the default sorting by value.
  *
  * @param $tokens - The list of tokens to map and sort.
  * @param $balances - Certified balances data used to compute token balances.
