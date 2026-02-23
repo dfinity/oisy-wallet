@@ -172,6 +172,8 @@ export const mapTokenUi = <T extends Token>({
 }): TokenUi<T> => {
 	const { staked, claimable } = $stakeBalances[token.id] ?? {};
 
+	const exchange = $exchanges?.[token.id];
+
 	return {
 		...token,
 		// There is a difference between undefined and null for the balance.
@@ -183,8 +185,9 @@ export const mapTokenUi = <T extends Token>({
 			$balances,
 			$exchanges
 		}),
-		usdPrice: $exchanges?.[token.id]?.usd,
-		usdPriceChangePercentage24h: $exchanges?.[token.id]?.usd_24h_change,
+		usdPrice: exchange?.usd,
+		usdMarketCap: exchange?.usd_market_cap,
+		usdPriceChangePercentage24h: exchange?.usd_24h_change,
 		...(nonNullish(staked)
 			? {
 					stakeBalance: staked,
