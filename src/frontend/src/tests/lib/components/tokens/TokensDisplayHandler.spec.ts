@@ -2,7 +2,7 @@ import { sortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.deriv
 import { showZeroBalances } from '$lib/derived/settings.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
-import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
+import { filterTokenGroups, groupTokens } from '$lib/utils/token-group.utils';
 import TokensDisplayHandlerTest from '$tests/lib/components/tokens/TokensDisplayHandlerTest.svelte';
 import {
 	mockNetworksSettings,
@@ -19,8 +19,8 @@ vi.mock(import('$lib/utils/token-group.utils'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
-		groupTokensByTwin: vi
-			.fn<typeof groupTokensByTwin>()
+		groupTokens: vi
+			.fn<typeof groupTokens>()
 			.mockImplementation((tokens) => tokens.map((token) => ({ token }))),
 		filterTokenGroups: vi
 			.fn<typeof filterTokenGroups>()
@@ -63,7 +63,7 @@ describe('TokensDisplayHandler', () => {
 			props
 		});
 
-		expect(groupTokensByTwin).toHaveBeenCalledExactlyOnceWith(initial);
+		expect(groupTokens).toHaveBeenCalledExactlyOnceWith(initial);
 
 		expect(filterTokenGroups).toHaveBeenCalledExactlyOnceWith({
 			groupedTokens: expected,
@@ -100,9 +100,9 @@ describe('TokensDisplayHandler', () => {
 
 		expect(newTokens).not.toHaveLength(initial.length);
 
-		expect(groupTokensByTwin).toHaveBeenCalledTimes(2);
-		expect(groupTokensByTwin).toHaveBeenNthCalledWith(1, initial);
-		expect(groupTokensByTwin).toHaveBeenNthCalledWith(2, newTokens);
+		expect(groupTokens).toHaveBeenCalledTimes(2);
+		expect(groupTokens).toHaveBeenNthCalledWith(1, initial);
+		expect(groupTokens).toHaveBeenNthCalledWith(2, newTokens);
 
 		expect(filterTokenGroups).toHaveBeenCalledTimes(2);
 		expect(filterTokenGroups).toHaveBeenNthCalledWith(1, {
