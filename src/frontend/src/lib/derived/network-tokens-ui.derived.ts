@@ -5,24 +5,28 @@ import { stakeBalances } from '$lib/derived/stake.derived';
 import { tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenUi } from '$lib/types/token-ui';
+import { mapTokenUi } from '$lib/utils/token.utils';
 import { sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
+const enabledFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
+	[enabledFungibleNetworkTokens, balancesStore, stakeBalances, exchanges],
+	([$tokens, $balances, $stakeBalances, $exchanges]) =>
+		$tokens.map((token) =>
+			mapTokenUi({
+				token,
+				$balances,
+				$stakeBalances,
+				$exchanges
+			})
+		)
+);
+
 export const sortedFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[
-		enabledFungibleNetworkTokens,
-		tokensToPin,
-		balancesStore,
-		stakeBalances,
-		exchanges,
-		tokensSortType
-	],
-	([$tokens, $tokensToPin, $balances, $stakeBalances, $exchanges, $tokensSortType]) =>
+	[enabledFungibleNetworkTokensUi, tokensToPin, tokensSortType],
+	([$tokens, $tokensToPin, $tokensSortType]) =>
 		sortTokens({
 			$tokens,
-			$balances,
-			$stakeBalances,
-			$exchanges,
 			$tokensToPin,
 			primarySortStrategy: $tokensSortType
 		})
