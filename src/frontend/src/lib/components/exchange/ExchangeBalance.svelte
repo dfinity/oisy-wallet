@@ -8,7 +8,7 @@
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { sortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
+	import {enabledFungibleNetworkTokensUi} from '$lib/derived/network-tokens-ui.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
@@ -25,9 +25,9 @@
 
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
-	const totalUsd = $derived(sumTokensUiUsdBalance($sortedFungibleNetworkTokensUi));
+	const totalUsd = $derived(sumTokensUiUsdBalance($enabledFungibleNetworkTokensUi));
 
-	const totalStakeUsd = $derived(sumTokensUiUsdStakeBalance($sortedFungibleNetworkTokensUi));
+	const totalStakeUsd = $derived(sumTokensUiUsdStakeBalance($enabledFungibleNetworkTokensUi));
 
 	let balance = $derived(
 		formatCurrency({
