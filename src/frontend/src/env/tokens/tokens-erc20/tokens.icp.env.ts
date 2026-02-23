@@ -1,7 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_TOKEN_GROUP } from '$env/tokens/groups/groups.icp.env';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
-import icp from '$icp/assets/icp-onesec.webp';
+import icp from '$icp/assets/icp-light.svg';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
