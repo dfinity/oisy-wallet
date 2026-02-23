@@ -1,7 +1,3 @@
-import { AuthClientProvider } from '$lib/providers/auth-client.providers';
-import { AuthClientNotInitializedError } from '$lib/types/errors';
-import { isNullish, nonNullish } from '@dfinity/utils';
-
 import {
 	AUTH_MAX_TIME_TO_LIVE,
 	AUTH_POPUP_HEIGHT,
@@ -10,11 +6,14 @@ import {
 	TEST
 } from '$lib/constants/app.constants';
 import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { InternetIdentityDomain } from '$lib/types/auth';
+import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { AuthClient } from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
 import { writable, type Readable } from 'svelte/store';

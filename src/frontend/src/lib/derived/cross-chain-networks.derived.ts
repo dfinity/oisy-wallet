@@ -1,5 +1,4 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 import type { Network, NetworkId } from '$lib/types/network';
