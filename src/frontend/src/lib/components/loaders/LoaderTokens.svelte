@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
 	import { erc1155CustomTokensNotInitialized } from '$eth/derived/erc1155.derived';
 	import { erc20CustomTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { erc4626CustomTokensNotInitialized } from '$eth/derived/erc4626.derived';
@@ -36,12 +35,6 @@
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { splCustomTokensNotInitialized } from '$sol/derived/spl.derived';
 	import { loadSplTokens } from '$sol/services/spl.services';
-
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	$effect(() => {
 		loadIcrcTokens({ identity: $authIdentity });
@@ -115,8 +108,6 @@
 		}
 	});
 </script>
-
-{@render children()}
 
 <LoaderCollections />
 

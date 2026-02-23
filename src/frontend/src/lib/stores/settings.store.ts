@@ -1,5 +1,6 @@
 import { TokenTypes as TokenTypesEnum, type TokenTypes } from '$lib/enums/token-types';
 import { initStorageStore } from '$lib/stores/storage.store';
+import type { TokensSortingType } from '$lib/types/tokens-sort';
 
 export interface SettingsData {
 	enabled: boolean;
@@ -23,6 +24,13 @@ export const showHiddenStore = initStorageStore<SettingsData>({
 export const showSpamStore = initStorageStore<SettingsData>({
 	key: 'show-spam',
 	defaultValue: { enabled: false }
+});
+
+export const tokensSortStore = initStorageStore<TokensSortingType>({
+	key: 'tokens-sort',
+	defaultValue: {
+		type: 'value'
+	}
 });
 
 export type NftSortOrder = 'asc' | 'desc';

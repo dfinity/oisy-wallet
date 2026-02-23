@@ -86,17 +86,6 @@
 					colorStyle="secondary-light"
 					fullWidth
 					innerStyleClass="items-center justify-center"
-					onclick={() => handleUnlock(InternetIdentityDomain.VERSION_1_0)}
-					styleClass="mb-3 w-full"
-				>
-					{$i18n.lock.text.unlock_with_legacy_login}
-					<IconKey />
-				</Button>
-
-				<Button
-					colorStyle="secondary-light"
-					fullWidth
-					innerStyleClass="items-center justify-center"
 					onclick={handleLogout}
 					transparent
 				>

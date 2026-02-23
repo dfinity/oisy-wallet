@@ -3,7 +3,6 @@ import { SOL_DEVNET_EXPLORER_URL, SOL_MAINNET_EXPLORER_URL } from '$env/explorer
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { QUICKNODE_API_KEY } from '$env/rest/quicknode.env';
 import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
-
 import solDevnetIcon from '$lib/assets/networks/solana-devnet.svg';
 import solMainnetIcon from '$lib/assets/networks/solana-mainnet.svg';
 import type { Network, NetworkId } from '$lib/types/network';

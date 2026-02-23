@@ -176,7 +176,6 @@
 			"title_part_1": "解锁以继续",
 			"title_part_2": "您之前已锁定钱包以确保其安全。请从上次中断的地方继续操作或退出。",
 			"unlock": "开锁",
-			"unlock_with_legacy_login": "",
 			"logout": "退出登录",
 			"logout_clear_cash_message": "注销将清除所有缓存数据",
 			"learn_more": "了解更多"
