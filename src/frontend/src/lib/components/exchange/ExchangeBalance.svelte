@@ -8,7 +8,7 @@
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import {enabledFungibleNetworkTokensUi} from '$lib/derived/network-tokens-ui.derived';
+	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
