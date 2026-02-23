@@ -1,4 +1,4 @@
-import icp from '$icp/assets/icp-onesec.webp';
+import icp from '$icp/assets/icp-light.svg';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 
