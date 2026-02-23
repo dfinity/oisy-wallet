@@ -129,7 +129,7 @@ export const sortTokens = <T extends Token>({
 		}
 
 		return (
-			( a.symbol.localeCompare(b.symbol)) ||
+			a.symbol.localeCompare(b.symbol) ||
 			a.name.localeCompare(b.name) ||
 			a.network.name.localeCompare(b.network.name) ||
 			+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO)) ||
