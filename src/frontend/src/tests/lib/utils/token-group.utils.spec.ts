@@ -33,6 +33,7 @@ const tokens: TokenUi[] = [
 		balance: bn1Bi,
 		usdBalance: 50000,
 		usdPrice: 40000,
+		usdMarketCap: 800000000000,
 		usdPriceChangePercentage24h: 1.2
 	},
 	{
@@ -42,6 +43,7 @@ const tokens: TokenUi[] = [
 		balance: bn2Bi,
 		usdBalance: 100000,
 		usdPrice: 80000,
+		usdMarketCap: 1600000000000,
 		usdPriceChangePercentage24h: 2.3,
 		standard: { code: 'icrc' },
 		category: 'default',
@@ -54,6 +56,7 @@ const tokens: TokenUi[] = [
 		balance: 10n,
 		usdBalance: 20000,
 		usdPrice: 2000,
+		usdMarketCap: 240000000000,
 		usdPriceChangePercentage24h: -0.5
 	},
 	{
@@ -63,6 +66,7 @@ const tokens: TokenUi[] = [
 		balance: 5n,
 		usdBalance: 15000,
 		usdPrice: 3000,
+		usdMarketCap: 450000000000,
 		usdPriceChangePercentage24h: 3.1,
 		standard: { code: 'icrc' },
 		category: 'default',
@@ -75,6 +79,7 @@ const tokens: TokenUi[] = [
 		balance: 50n,
 		usdBalance: 1000,
 		usdPrice: 20,
+		usdMarketCap: 20000000000,
 		usdPriceChangePercentage24h: -8
 	}
 ];
@@ -396,6 +401,7 @@ describe('token-group.utils', () => {
 			balance: bn1Bi,
 			usdBalance: 100,
 			usdPrice: 1000,
+			usdMarketCap: 100000000000,
 			usdPriceChangePercentage24h: 10
 		};
 		const mockSecondToken = {
@@ -404,6 +410,7 @@ describe('token-group.utils', () => {
 			balance: bn3Bi,
 			usdBalance: 300,
 			usdPrice: 30000,
+			usdMarketCap: 600000000000,
 			usdPriceChangePercentage24h: -5
 		};
 		const mockThirdToken = {
@@ -412,6 +419,7 @@ describe('token-group.utils', () => {
 			balance: bn2Bi,
 			usdBalance: 200,
 			usdPrice: 20,
+			usdMarketCap: 40000000000,
 			usdPriceChangePercentage24h: -8
 		};
 
@@ -422,6 +430,7 @@ describe('token-group.utils', () => {
 			balance: bn2Bi,
 			usdBalance: 250,
 			usdPrice: 123,
+			usdMarketCap: 123000000000,
 			usdPriceChangePercentage24h: 5,
 			groupData: mockToken.groupData
 		};
@@ -431,6 +440,7 @@ describe('token-group.utils', () => {
 			balance: bn1Bi,
 			usdBalance: 450,
 			usdPrice: 321,
+			usdMarketCap: 321000000000,
 			usdPriceChangePercentage24h: -3,
 			groupData: mockToken.groupData
 		};
@@ -503,6 +513,7 @@ describe('token-group.utils', () => {
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
 				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance,
 				usdPrice: mockToken.usdPrice,
+				usdMarketCap: mockToken.usdMarketCap,
 				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
 			});
 
@@ -531,6 +542,7 @@ describe('token-group.utils', () => {
 				balance: mockTwinToken1.balance + mockToken.balance + mockTwinToken2.balance,
 				usdBalance: mockTwinToken1.usdBalance + mockToken.usdBalance + mockTwinToken2.usdBalance,
 				usdPrice: mockTwinToken1.usdPrice,
+				usdMarketCap: mockTwinToken1.usdMarketCap,
 				usdPriceChangePercentage24h: mockTwinToken1.usdPriceChangePercentage24h
 			});
 
@@ -562,6 +574,7 @@ describe('token-group.utils', () => {
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
 				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance,
 				usdPrice: mockToken.usdPrice,
+				usdMarketCap: mockToken.usdMarketCap,
 				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
 			});
 		});
@@ -591,6 +604,7 @@ describe('token-group.utils', () => {
 				balance: undefined,
 				usdBalance: mockToken.usdBalance + mockTwinToken2.usdBalance,
 				usdPrice: mockToken.usdPrice,
+				usdMarketCap: mockToken.usdMarketCap,
 				usdPriceChangePercentage24h: mockToken.usdPriceChangePercentage24h
 			});
 		});

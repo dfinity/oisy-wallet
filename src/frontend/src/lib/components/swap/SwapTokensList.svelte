@@ -18,6 +18,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { Token } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
+	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { sortTokens } from '$lib/utils/tokens.utils';
 
 	interface Props {
@@ -32,18 +33,26 @@
 
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
+	let tokensUi: TokenUi[] = $derived(
+		[
+			{ ...ICP_TOKEN, enabled: true },
+			...$allSortedIcrcTokens,
+			...(VELORA_SWAP_ENABLED ? $allCrossChainSwapTokens : [])
+		]
+			.filter((token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id)
+			.map((token: Token) =>
+				mapTokenUi({
+					token,
+					$balances: $balancesStore,
+					$stakeBalances,
+					$exchanges
+				})
+			)
+	);
+
 	let tokens: TokenUi[] = $derived(
 		sortTokens({
-			$tokens: [
-				{ ...ICP_TOKEN, enabled: true },
-				...$allSortedIcrcTokens,
-				...(VELORA_SWAP_ENABLED ? $allCrossChainSwapTokens : [])
-			].filter(
-				(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
-			),
-			$exchanges,
-			$balances: $balancesStore,
-			$stakeBalances,
+			$tokens: tokensUi,
 			$tokensToPin
 		})
 	);

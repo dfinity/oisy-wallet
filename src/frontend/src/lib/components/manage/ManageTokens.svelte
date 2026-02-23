@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onMount, setContext, type Snippet, untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
@@ -22,10 +22,13 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import type { CustomToken } from '$lib/types/custom-token';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token-ui';
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
 	interface Props {
@@ -61,18 +64,32 @@
 		};
 	});
 
-	let allTokensSorted: Token[] = $derived(
-		nonNullish(exchangesStaticData)
-			? pinEnabledTokensAtTop(
-					sortTokens({
-						$tokens: $allTokens,
-						$balances: $balancesStore,
-						$stakeBalances,
-						$exchanges: exchangesStaticData,
-						$tokensToPin
-					})
-				)
-			: []
+	let allTokensUi: TokenUi<CustomToken<Token>>[] = $derived(
+		$allTokens.reduce<TokenUi<CustomToken<Token>>[]>((acc, token) => {
+			if (isNullish(exchangesStaticData)) {
+				return acc;
+			}
+
+			acc.push(
+				mapTokenUi({
+					token,
+					$balances: $balancesStore,
+					$stakeBalances,
+					$exchanges: exchangesStaticData
+				})
+			);
+
+			return acc;
+		}, [])
+	);
+
+	let allTokensSorted: TokenUi<CustomToken<Token>>[] = $derived(
+		pinEnabledTokensAtTop(
+			sortTokens({
+				$tokens: allTokensUi,
+				$tokensToPin
+			})
+		)
 	);
 
 	let tokensInContext: Token[] = $state([]);

@@ -1,4 +1,4 @@
-import { sortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+import { sortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
 import { showZeroBalances } from '$lib/derived/settings.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -56,14 +56,16 @@ describe('TokensDisplayHandler', () => {
 	});
 
 	it('should call the utils functions with the correct arguments', async () => {
-		const initial = get(sortedFungibleNetworkTokensUi);
-		const expected: TokenUiOrGroupUi[] = initial.map((token) => ({ token }));
-
 		render(TokensDisplayHandlerTest, {
 			props
 		});
 
-		expect(groupTokens).toHaveBeenCalledExactlyOnceWith(initial);
+		await tick();
+
+		const initial = get(sortedFungibleNetworkTokensUi);
+		const expected: TokenUiOrGroupUi[] = initial.map((token) => ({ token }));
+
+		expect(groupTokensByTwin).toHaveBeenCalledExactlyOnceWith(initial);
 
 		expect(filterTokenGroups).toHaveBeenCalledExactlyOnceWith({
 			groupedTokens: expected,

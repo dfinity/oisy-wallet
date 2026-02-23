@@ -28,6 +28,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { usdValue } from '$lib/utils/exchange.utils';
+import { mapTokenUi } from '$lib/utils/token.utils';
 import {
 	assertExistingTokens,
 	defineEnabledTokens,
@@ -89,11 +90,17 @@ describe('tokens.utils', () => {
 		});
 
 		it('should sort by USD balance (descending)', () => {
+			const tokens = mockTokens.map((token) =>
+				mapTokenUi({
+					token,
+					$balances: mockBalances,
+					$stakeBalances: mockStakeBalances,
+					$exchanges: mockExchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: mockTokens,
-				$balances: mockBalances,
-				$stakeBalances: mockStakeBalances,
-				$exchanges: mockExchanges,
+				$tokens: tokens,
 				$tokensToPin: []
 			});
 
@@ -111,11 +118,17 @@ describe('tokens.utils', () => {
 				[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
 			};
 
+			const tokens = mockTokens.map((token) =>
+				mapTokenUi({
+					token,
+					$balances: zeroBalances,
+					$stakeBalances: mockStakeBalances,
+					$exchanges: mockExchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: mockTokens,
-				$balances: zeroBalances,
-				$stakeBalances: mockStakeBalances,
-				$exchanges: mockExchanges,
+				$tokens: tokens,
 				$tokensToPin: [ETHEREUM_TOKEN, BTC_MAINNET_TOKEN]
 			});
 
@@ -127,11 +140,17 @@ describe('tokens.utils', () => {
 		});
 
 		it('should not let pinning override a higher USD balance', () => {
+			const tokens = mockTokens.map((token) =>
+				mapTokenUi({
+					token,
+					$balances: mockBalances,
+					$stakeBalances: mockStakeBalances,
+					$exchanges: mockExchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: mockTokens,
-				$balances: mockBalances,
-				$stakeBalances: mockStakeBalances,
-				$exchanges: mockExchanges,
+				$tokens: tokens,
 				$tokensToPin: [ICP_TOKEN]
 			});
 
@@ -155,11 +174,17 @@ describe('tokens.utils', () => {
 				[mockDeprecatedToken.id]: { usd: mockOneUsd }
 			};
 
+			const tokens = [mockDeprecatedToken, ...mockTokens].map((token) =>
+				mapTokenUi({
+					token,
+					$balances: balancesWithDeprecated,
+					$stakeBalances: mockStakeBalances,
+					$exchanges: exchangesWithDeprecated
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [mockDeprecatedToken, ...mockTokens],
-				$balances: balancesWithDeprecated,
-				$stakeBalances: mockStakeBalances,
-				$exchanges: exchangesWithDeprecated,
+				$tokens: tokens,
 				$tokensToPin: [mockDeprecatedToken]
 			});
 
@@ -193,11 +218,17 @@ describe('tokens.utils', () => {
 				[tokenSymbolZ.id]: { usd_market_cap: 999, usd: 0 }
 			};
 
+			const tokens = [tokenSymbolZ, tokenSymbolA].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [tokenSymbolZ, tokenSymbolA],
-				$balances,
-				$stakeBalances: {},
-				$exchanges,
+				$tokens: tokens,
 				$tokensToPin: []
 			});
 
@@ -251,11 +282,17 @@ describe('tokens.utils', () => {
 				[tokenD.id]: { usd_market_cap: 999, usd: 0 }
 			};
 
+			const tokens = [tokenD, tokenB, tokenC, tokenA].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [tokenD, tokenB, tokenC, tokenA],
-				$balances,
-				$stakeBalances: {},
-				$exchanges,
+				$tokens: tokens,
 				$tokensToPin: []
 			});
 
@@ -288,11 +325,17 @@ describe('tokens.utils', () => {
 				[tokenB.id]: { usd_market_cap: 1, usd: 0 }
 			};
 
+			const tokens = [tokenB, tokenA].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [tokenB, tokenA],
-				$balances,
-				$stakeBalances: {},
-				$exchanges,
+				$tokens: tokens,
 				$tokensToPin: []
 			});
 
@@ -325,11 +368,17 @@ describe('tokens.utils', () => {
 				[tokenLowBalanceHighMcap.id]: { usd_market_cap: 999, usd: 0 }
 			};
 
+			const tokens = [tokenLowBalanceHighMcap, tokenHighBalanceLowMcap].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [tokenLowBalanceHighMcap, tokenHighBalanceLowMcap],
-				$balances,
-				$stakeBalances: {},
-				$exchanges,
+				$tokens: tokens,
 				$tokensToPin: []
 			});
 
@@ -366,11 +415,17 @@ describe('tokens.utils', () => {
 				[tokenPerfLow.id]: { usd: 1, usd_market_cap: 0, usd_24h_change: -3 }
 			};
 
+			const tokens = [tokenPerfLow, tokenPerfHigh].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [tokenPerfLow, tokenPerfHigh],
-				$balances,
-				$stakeBalances: {},
-				$exchanges,
+				$tokens: tokens,
 				$tokensToPin: [],
 				primarySortStrategy: 'performance'
 			});
@@ -405,11 +460,17 @@ describe('tokens.utils', () => {
 				[tokenZZZ.id]: { usd: 1, usd_market_cap: 0 }
 			};
 
+			const tokens = [tokenZZZ, tokenAAA].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [tokenZZZ, tokenAAA],
-				$balances,
-				$stakeBalances: {},
-				$exchanges,
+				$tokens: tokens,
 				$tokensToPin: [],
 				primarySortStrategy: 'symbol'
 			});
