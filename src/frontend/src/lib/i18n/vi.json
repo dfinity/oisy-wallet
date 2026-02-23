@@ -41,7 +41,8 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": "Sắp xếp"
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -1284,7 +1285,6 @@
 			"by_collection": "Nhóm theo bộ sưu tập",
 			"show_spam": "Hiển thị spam",
 			"show_hidden": "Hiển thị ẩn",
-			"sorting": "Sắp xếp",
 			"recents_first": "Gần đây trước",
 			"oldest_first": "Cũ nhất trước",
 			"collection_atoz": "Tên bộ sưu tập A-Z",

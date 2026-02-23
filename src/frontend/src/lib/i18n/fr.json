@@ -41,7 +41,8 @@
 			"more": "Plus",
 			"less": "Moins",
 			"ellipsis": "…",
-			"learn_more": "En savoir plus"
+			"learn_more": "En savoir plus",
+			"sorting": "Tri"
 		},
 		"info": {
 			"test_banner": "À des fins de test uniquement !",
@@ -1284,7 +1285,6 @@
 			"by_collection": "Grouper par collection",
 			"show_spam": "Afficher les spams",
 			"show_hidden": "Afficher les masqués",
-			"sorting": "Tri",
 			"recents_first": "Récents en premier",
 			"oldest_first": "Plus anciens en premier",
 			"collection_atoz": "Nom de collection A-Z",
