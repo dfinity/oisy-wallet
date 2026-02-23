@@ -130,7 +130,10 @@ export abstract class AppWorker {
 	 * This is notably useful for testing purposes to ensure that each test starts with a clean state.
 	 */
 	static resetForTesting() {
-		this.#singletonWorker = undefined;
+		if (nonNullish(this.#singletonWorker)) {
+			this.#singletonWorker.terminate();
+			this.#singletonWorker = undefined;
+		}
 		this.#singletonRefCount = 0;
 	}
 }
