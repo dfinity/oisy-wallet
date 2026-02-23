@@ -56,12 +56,14 @@ describe('TokensDisplayHandler', () => {
 	});
 
 	it('should call the utils functions with the correct arguments', async () => {
-		const initial = get(sortedFungibleNetworkTokensUi);
-		const expected: TokenUiOrGroupUi[] = initial.map((token) => ({ token }));
-
 		render(TokensDisplayHandlerTest, {
 			props
 		});
+
+		await tick();
+
+		const initial = get(sortedFungibleNetworkTokensUi);
+		const expected: TokenUiOrGroupUi[] = initial.map((token) => ({ token }));
 
 		expect(groupTokensByTwin).toHaveBeenCalledExactlyOnceWith(initial);
 
