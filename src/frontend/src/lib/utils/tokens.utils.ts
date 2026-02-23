@@ -27,6 +27,7 @@ import type { Token, TokenId, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
+import type { TokensSortType } from '$lib/types/tokens-sort';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual, getCaseSensitiveness } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -52,11 +53,14 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * 7. Token balance (descending).
  * 8. USD market cap (descending).
  *
+ * Additionally, if `primarySortStrategy` is set, it overrides the default sorting by value.
+ *
  * @param $tokens - The list of tokens to map and sort.
  * @param $balances - Certified balances data used to compute token balances.
  * @param $stakeBalances - Staked balances used in the UI mapping.
  * @param $exchanges - Exchange rate data used to compute USD balance and market cap.
  * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
+ * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
  * @returns A sorted array of mapped token UI objects.
  */
 export const sortTokens = <T extends Token>({
@@ -64,13 +68,15 @@ export const sortTokens = <T extends Token>({
 	$balances,
 	$stakeBalances,
 	$exchanges,
-	$tokensToPin
+	$tokensToPin,
+	primarySortStrategy = 'value'
 }: {
 	$tokens: T[];
 	$balances: CertifiedStoreData<BalancesData>;
 	$stakeBalances: StakeBalances;
 	$exchanges: ExchangesData;
 	$tokensToPin: TokenToPin[];
+	primarySortStrategy?: TokensSortType;
 }): TokenUi<T>[] => {
 	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
 
@@ -86,6 +92,24 @@ export const sortTokens = <T extends Token>({
 			return aDeprecated ? 1 : -1;
 		}
 
+		// If the choice is to prioritise performance sorting
+		if (primarySortStrategy === 'performance') {
+			const performanceDiff =
+				(b.usdPriceChangePercentage24h ?? 0) - (a.usdPriceChangePercentage24h ?? 0);
+			if (performanceDiff !== 0) {
+				return performanceDiff;
+			}
+		}
+
+		// If the choice is to prioritise symbol sorting
+		if (primarySortStrategy === 'symbol') {
+			const symbolDiff = a.symbol.localeCompare(b.symbol);
+			if (symbolDiff !== 0) {
+				return symbolDiff;
+			}
+		}
+
+		// Tie-breaker after primary strategy
 		// USD Balance descending
 		const usdBalanceDiff = (b.usdBalance ?? 0) - (a.usdBalance ?? 0);
 		if (usdBalanceDiff !== 0) {

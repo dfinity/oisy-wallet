@@ -338,6 +338,84 @@ describe('tokens.utils', () => {
 				tokenLowBalanceHighMcap.id
 			]);
 		});
+
+		it('should prioritise performance (24h %) when primarySortStrategy is performance, after deprecation', () => {
+			const tokenPerfHigh: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-PERF-HIGH'),
+				symbol: 'HIGH',
+				name: 'High Perf',
+				network: ICP_NETWORK
+			};
+
+			const tokenPerfLow: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-PERF-LOW'),
+				symbol: 'LOW',
+				name: 'Low Perf',
+				network: ICP_NETWORK
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenPerfHigh.id]: { data: 999n, certified },
+				[tokenPerfLow.id]: { data: 999n, certified }
+			};
+
+			const $exchanges: ExchangesData = {
+				[tokenPerfHigh.id]: { usd: 1, usd_market_cap: 0, usd_24h_change: 3 },
+				[tokenPerfLow.id]: { usd: 1, usd_market_cap: 0, usd_24h_change: -3 }
+			};
+
+			const result = sortTokens({
+				$tokens: [tokenPerfLow, tokenPerfHigh],
+				$balances,
+				$stakeBalances: {},
+				$exchanges,
+				$tokensToPin: [],
+				primarySortStrategy: 'performance'
+			});
+
+			expect(result.map((t) => t.id)).toEqual([tokenPerfHigh.id, tokenPerfLow.id]);
+		});
+
+		it('should prioritise symbol ordering when primarySortStrategy is symbol, after deprecation', () => {
+			const tokenAAA: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-SORT-AAA'),
+				symbol: 'AAA',
+				name: 'AAA Token',
+				network: ICP_NETWORK
+			};
+
+			const tokenZZZ: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-SORT-ZZZ'),
+				symbol: 'ZZZ',
+				name: 'ZZZ Token',
+				network: ICP_NETWORK
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenAAA.id]: { data: 1n, certified },
+				[tokenZZZ.id]: { data: 999n, certified }
+			};
+
+			const $exchanges: ExchangesData = {
+				[tokenAAA.id]: { usd: 1, usd_market_cap: 0 },
+				[tokenZZZ.id]: { usd: 1, usd_market_cap: 0 }
+			};
+
+			const result = sortTokens({
+				$tokens: [tokenZZZ, tokenAAA],
+				$balances,
+				$stakeBalances: {},
+				$exchanges,
+				$tokensToPin: [],
+				primarySortStrategy: 'symbol'
+			});
+
+			expect(result.map((t) => t.id)).toEqual([tokenAAA.id, tokenZZZ.id]);
+		});
 	});
 
 	describe('sumTokensUiUsdBalance', () => {
