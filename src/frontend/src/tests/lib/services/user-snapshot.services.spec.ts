@@ -384,7 +384,6 @@ describe('user-snapshot.services', () => {
 					...userSnapshot,
 					accounts: [
 						{ Any: { ...ethMainnetAccounts[0].Any, approx_usd_per_token: 0 } },
-						{ Any: { ...icrcAccounts[0].Any, approx_usd_per_token: 0 } },
 						{ Any: { ...solMainnetAccounts[0].Any, approx_usd_per_token: 0 } },
 						{ Any: { ...solMainnetAccounts[1].Any, approx_usd_per_token: 0 } }
 					]
