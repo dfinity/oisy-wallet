@@ -58,6 +58,7 @@ export interface TokenFinancialData {
 	balance?: Exclude<OptionBalance, undefined>;
 	usdBalance?: number;
 	usdPrice?: number;
+	usdMarketCap?: number;
 	usdPriceChangePercentage24h?: number;
 	stakeBalance?: bigint;
 	stakeUsdBalance?: number;

@@ -38,6 +38,7 @@ describe('modalTokensListStore', () => {
 			exchangeRate: ckBtcExchangeValue
 		}),
 		usdPrice: 1,
+		usdMarketCap: undefined,
 		usdPriceChangePercentage24h: undefined
 	};
 	const mockTokenUi2 = {
@@ -49,6 +50,7 @@ describe('modalTokensListStore', () => {
 			exchangeRate: icpExchangeValue
 		}),
 		usdPrice: 2,
+		usdMarketCap: undefined,
 		usdPriceChangePercentage24h: undefined
 	};
 
@@ -169,6 +171,7 @@ describe('modalTokensListStore', () => {
 				exchangeRate: ethExchangeValue
 			}),
 			usdPrice: 3,
+			usdMarketCap: undefined,
 			usdPriceChangePercentage24h: undefined
 		};
 		const mockTokenUi4 = {
@@ -180,6 +183,7 @@ describe('modalTokensListStore', () => {
 				exchangeRate: ethExchangeValue
 			}),
 			usdPrice: 3,
+			usdMarketCap: undefined,
 			usdPriceChangePercentage24h: undefined
 		};
 

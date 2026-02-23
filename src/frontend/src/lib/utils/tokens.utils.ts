@@ -133,7 +133,7 @@ export const sortTokens = <T extends Token>({
 			a.name.localeCompare(b.name) ||
 			a.network.name.localeCompare(b.network.name) ||
 			+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO)) ||
-			($exchanges[b.id]?.usd_market_cap ?? 0) - ($exchanges[a.id]?.usd_market_cap ?? 0)
+			(b.usdMarketCap ?? 0) - (a.usdMarketCap ?? 0)
 		);
 	});
 };
