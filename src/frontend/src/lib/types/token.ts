@@ -9,6 +9,7 @@ import type {
 	TokenStandardSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
+import type { TokenDeprecated } from '$lib/types/token-deprecated';
 import type { TokenGroup } from '$lib/types/token-group';
 import type { Option, RequiredExcept } from '$lib/types/utils';
 import type * as z from 'zod';
@@ -38,6 +39,7 @@ export type TokenWithLinkedData = Token & TokenLinkedData;
 export type NonRequiredProps = TokenAppearance &
 	TokenBuyable &
 	TokenGroup &
+	TokenDeprecated &
 	Pick<Token, 'description'>;
 
 export type RequiredToken<T extends Token = Token, M extends object = {}> = RequiredExcept<
