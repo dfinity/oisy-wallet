@@ -1142,7 +1142,10 @@
 			"hide_more_networks": "Weitere Netzwerke verbergen",
 			"on_network": " auf $network",
 			"delete_token": "Token löschen",
-			"edit_token": "Token bearbeiten"
+			"edit_token": "Token bearbeiten",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Token-Details",

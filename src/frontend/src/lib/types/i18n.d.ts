@@ -896,6 +896,9 @@ interface I18nTokens {
 		on_network: string;
 		delete_token: string;
 		edit_token: string;
+		sort_by_value: string;
+		sort_by_performance: string;
+		sort_by_symbol: string;
 	};
 	details: {
 		title: string;
