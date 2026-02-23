@@ -58,6 +58,96 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 	};
 };
 
+type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
+
+const createTokenComparator =
+	<T extends Token>({
+		pinIndexById,
+		primarySortStrategy
+	}: {
+		pinIndexById: ReadonlyMap<TokenId, number>;
+		primarySortStrategy: TokensSortType;
+	}) =>
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
+	(
+		a: { token: TokenUi<T>; unwrapped: TokenSortUnwrapped },
+		b: { token: TokenUi<T>; unwrapped: TokenSortUnwrapped }
+	): number => {
+		const {
+			unwrapped: {
+				deprecated: aDeprecated,
+				usdPriceChangePercentage24h: aPerf,
+				symbol: aSymbol,
+				usdBalance: aUsdBalance,
+				name: aName,
+				networkName: aNetworkName,
+				balance: aBalance,
+				usdMarketCap: aUsdMarketCap
+			}
+		} = a;
+
+		const {
+			unwrapped: {
+				deprecated: bDeprecated,
+				usdPriceChangePercentage24h: bPerf,
+				symbol: bSymbol,
+				usdBalance: bUsdBalance,
+				name: bName,
+				networkName: bNetworkName,
+				balance: bBalance,
+				usdMarketCap: bUsdMarketCap
+			}
+		} = b;
+
+		// Deprecated last
+		if (aDeprecated !== bDeprecated) {
+			return aDeprecated ? 1 : -1;
+		}
+
+		// If the choice is to prioritise performance sorting
+		if (primarySortStrategy === 'performance') {
+			const performanceDiff = (bPerf ?? 0) - (aPerf ?? 0);
+			if (performanceDiff !== 0) {
+				return performanceDiff;
+			}
+		}
+
+		// If the choice is to prioritise symbol sorting
+		if (primarySortStrategy === 'symbol') {
+			const symbolDiff = aSymbol.localeCompare(bSymbol);
+			if (symbolDiff !== 0) {
+				return symbolDiff;
+			}
+		}
+
+		// Tie-breaker after primary strategy
+		// USD Balance descending
+		const usdBalanceDiff = (bUsdBalance ?? 0) - (aUsdBalance ?? 0);
+		if (usdBalanceDiff !== 0) {
+			return usdBalanceDiff;
+		}
+
+		// Pinned tokens (pinned first; pinned order = order provided)
+		const aPin = pinIndexById.get(a.token.id);
+		const bPin = pinIndexById.get(b.token.id);
+		const aPinned = aPin !== undefined;
+		const bPinned = bPin !== undefined;
+		if (aPinned !== bPinned) {
+			return aPinned ? -1 : 1;
+		}
+		if (aPinned && bPinned) {
+			return aPin - bPin;
+		}
+
+		return (
+			aSymbol.localeCompare(bSymbol) ||
+			aName.localeCompare(bName) ||
+			aNetworkName.localeCompare(bNetworkName) ||
+			+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO)) ||
+			(bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0)
+		);
+	};
+
 /**
  * Sorts tokens using balance-aware and pin-aware prioritisation.
  *
@@ -90,87 +180,11 @@ export const sortTokens = <T extends Token>({
 }): TokenUi<T>[] => {
 	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
 
-	const tokens = $tokens.map((token) => ({
-		token,
-		unwrapped: unwrapTokenSortFields(token)
-	}));
+	const comparator = createTokenComparator<T>({ pinIndexById, primarySortStrategy });
 
-	return tokens
-		.sort((a, b) => {
-			const {
-				unwrapped: {
-					deprecated: aDeprecated,
-					usdPriceChangePercentage24h: aUsdPriceChangePercentage24h,
-					symbol: aSymbol,
-					usdBalance: aUsdBalance,
-					name: aName,
-					networkName: aNetworkName,
-					balance: aBalance,
-					usdMarketCap: aUsdMarketCap
-				}
-			} = a;
-			const {
-				unwrapped: {
-					deprecated: bDeprecated,
-					usdPriceChangePercentage24h: bUsdPriceChangePercentage24h,
-					symbol: bSymbol,
-					usdBalance: bUsdBalance,
-					name: bName,
-					networkName: bNetworkName,
-					balance: bBalance,
-					usdMarketCap: bUsdMarketCap
-				}
-			} = b;
-
-			// Deprecated last
-			if (aDeprecated !== bDeprecated) {
-				return aDeprecated ? 1 : -1;
-			}
-
-			// If the choice is to prioritise performance sorting
-			if (primarySortStrategy === 'performance') {
-				const performanceDiff =
-					(bUsdPriceChangePercentage24h ?? 0) - (aUsdPriceChangePercentage24h ?? 0);
-				if (performanceDiff !== 0) {
-					return performanceDiff;
-				}
-			}
-
-			// If the choice is to prioritise symbol sorting
-			if (primarySortStrategy === 'symbol') {
-				const symbolDiff = aSymbol.localeCompare(bSymbol);
-				if (symbolDiff !== 0) {
-					return symbolDiff;
-				}
-			}
-
-			// Tie-breaker after primary strategy
-			// USD Balance descending
-			const usdBalanceDiff = (bUsdBalance ?? 0) - (aUsdBalance ?? 0);
-			if (usdBalanceDiff !== 0) {
-				return usdBalanceDiff;
-			}
-
-			// Pinned tokens (pinned first; pinned order = order provided)
-			const aPin = pinIndexById.get(a.token.id);
-			const bPin = pinIndexById.get(b.token.id);
-			const aPinned = aPin !== undefined;
-			const bPinned = bPin !== undefined;
-			if (aPinned !== bPinned) {
-				return aPinned ? -1 : 1;
-			}
-			if (aPinned && bPinned) {
-				return aPin - bPin;
-			}
-
-			return (
-				aSymbol.localeCompare(bSymbol) ||
-				aName.localeCompare(bName) ||
-				aNetworkName.localeCompare(bNetworkName) ||
-				+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO)) ||
-				(bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0)
-			);
-		})
+	return $tokens
+		.map((token) => ({ token, unwrapped: unwrapTokenSortFields(token) }))
+		.sort(comparator)
 		.map(({ token }) => token);
 };
 
