@@ -11,14 +11,15 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
+import { distinctDerived } from '$lib/utils/derived.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { sortTokens } from '$lib/utils/tokens.utils';
-import { derived, type Readable } from 'svelte/store';
+import type { Readable } from 'svelte/store';
 
 /**
  * All user-enabled fungible tokens matching the selected network or chain fusion.
  */
-export const enabledFungibleNetworkTokens: Readable<Token[]> = derived(
+export const enabledFungibleNetworkTokens: Readable<Token[]> = distinctDerived(
 	[enabledFungibleTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
 );
@@ -26,21 +27,20 @@ export const enabledFungibleNetworkTokens: Readable<Token[]> = derived(
 /**
  * All user-enabled non-fungible tokens matching the selected network or chain fusion.
  */
-export const enabledNonFungibleNetworkTokens: Readable<NonFungibleToken[]> = derived(
+export const enabledNonFungibleNetworkTokens: Readable<NonFungibleToken[]> = distinctDerived(
 	[enabledNonFungibleTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
 );
 
-export const enabledNonFungibleNetworkTokensWithoutSpam: Readable<NonFungibleToken[]> = derived(
-	[enabledNonFungibleNetworkTokens],
-	([$enabledNonFungibleNetworkTokens]) =>
+export const enabledNonFungibleNetworkTokensWithoutSpam: Readable<NonFungibleToken[]> =
+	distinctDerived([enabledNonFungibleNetworkTokens], ([$enabledNonFungibleNetworkTokens]) =>
 		$enabledNonFungibleNetworkTokens.filter(({ section }) => section != CustomTokenSection.SPAM)
-);
+	);
 
 /**
  * All fungible tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
  */
-export const sortedFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
+export const sortedFungibleNetworkTokensUi: Readable<TokenUi[]> = distinctDerived(
 	[enabledFungibleNetworkTokens, tokensToPin, balancesStore, stakeBalances, exchanges],
 	([$enabledNetworkTokens, $tokensToPin, $balances, $stakeBalances, $exchanges]) =>
 		sortTokens({
