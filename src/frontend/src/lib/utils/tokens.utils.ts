@@ -16,13 +16,9 @@ import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
-import type { BalancesData } from '$lib/stores/balances.store';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
-import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { StakeBalances } from '$lib/types/stake-balance';
 import type { Token, TokenId, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -34,13 +30,13 @@ import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
-import { filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
+import { filterEnabledToken } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
- * Maps tokens to their UI representation and sorts them using balance-aware and pin-aware prioritisation.
+ * Sorts tokens using balance-aware and pin-aware prioritisation.
  *
  * Sorting priority (in order):
  *
@@ -56,35 +52,22 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * Additionally, if `primarySortStrategy` is set, it overrides the default sorting by value.
  *
  * @param $tokens - The list of tokens to map and sort.
- * @param $balances - Certified balances data used to compute token balances.
- * @param $stakeBalances - Staked balances used in the UI mapping.
- * @param $exchanges - Exchange rate data used to compute USD balance and market cap.
  * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
  * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
  * @returns A sorted array of mapped token UI objects.
  */
 export const sortTokens = <T extends Token>({
 	$tokens,
-	$balances,
-	$stakeBalances,
-	$exchanges,
 	$tokensToPin,
 	primarySortStrategy = 'value'
 }: {
-	$tokens: T[];
-	$balances: CertifiedStoreData<BalancesData>;
-	$stakeBalances: StakeBalances;
-	$exchanges: ExchangesData;
+	$tokens: TokenUi<T>[];
 	$tokensToPin: TokenToPin[];
 	primarySortStrategy?: TokensSortType;
 }): TokenUi<T>[] => {
 	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
 
-	const tokens = $tokens.map((token) =>
-		mapTokenUi({ token, $balances, $stakeBalances, $exchanges })
-	);
-
-	return tokens.sort((a, b) => {
+	return $tokens.sort((a, b) => {
 		// Deprecated last
 		const aDeprecated = isIcToken(a) && (a.deprecated ?? false);
 		const bDeprecated = isIcToken(b) && (b.deprecated ?? false);
