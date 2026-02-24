@@ -13,7 +13,7 @@ import { mapTokenUi } from '$lib/utils/token.utils';
 import { sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
-const enabledFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
+export const enabledFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[enabledFungibleNetworkTokens, balancesStore, stakeBalances, exchanges],
 	([$tokens, $balances, $stakeBalances, $exchanges]) =>
 		$tokens.map((token) =>

@@ -36,49 +36,61 @@ import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
- * Sorts tokens using balance-aware and pin-aware prioritisation.
- *
- * Sorting priority (in order):
+ * Creates a comparator function for sorting tokens based on multiple criteria:
  *
  * 1. Deprecation status (non-deprecated tokens first).
- * 2. USD balance (descending).
- * 3. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
- * 4. Token symbol (ascending, locale-aware).
- * 5. Token name (ascending, locale-aware).
- * 6. Network name (ascending, locale-aware).
- * 7. Token balance (descending).
- * 8. USD market cap (descending).
+ * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
+ * 3. USD balance (descending).
+ * 4. Explicitly pinned tokens (pinned first, preserving the order provided by `pinIndexById`).
+ * 5. Token symbol (ascending, locale-aware).
+ * 6. Token name (ascending, locale-aware).
+ * 7. Network name (ascending, locale-aware).
+ * 8. Token balance (descending).
+ * 9. USD market cap (descending).
  *
- * Additionally, if `primarySortStrategy` is set, it overrides the default sorting by value.
+ * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
  *
- * @param $tokens - The list of tokens to sort.
- * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
- * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
- * @returns A sorted array of token UI objects.
  */
-export const sortTokens = <T extends Token>({
-	$tokens,
-	$tokensToPin,
-	primarySortStrategy = 'value'
-}: {
-	$tokens: TokenUi<T>[];
-	$tokensToPin: TokenToPin[];
-	primarySortStrategy?: TokensSortType;
-}): TokenUi<T>[] => {
-	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
+const createTokenComparator =
+	<T extends Token>({
+		pinIndexById,
+		primarySortStrategy
+	}: {
+		pinIndexById: ReadonlyMap<TokenId, number>;
+		primarySortStrategy: TokensSortType;
+	}) =>
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
+	(a: TokenUi<T>, b: TokenUi<T>): number => {
+		const {
+			deprecated: aDeprecated,
+			usdPriceChangePercentage24h: aPerf,
+			symbol: aSymbol,
+			usdBalance: aUsdBalance,
+			name: aName,
+			network: { name: aNetworkName },
+			balance: aBalance,
+			usdMarketCap: aUsdMarketCap
+		} = a;
 
-	return $tokens.sort((a, b) => {
+		const {
+			deprecated: bDeprecated,
+			usdPriceChangePercentage24h: bPerf,
+			symbol: bSymbol,
+			usdBalance: bUsdBalance,
+			name: bName,
+			network: { name: bNetworkName },
+			balance: bBalance,
+			usdMarketCap: bUsdMarketCap
+		} = b;
+
 		// Deprecated last
-		const aDeprecated = a.deprecated ?? false;
-		const bDeprecated = b.deprecated ?? false;
-		if (aDeprecated !== bDeprecated) {
+		if ((aDeprecated ?? false) !== (bDeprecated ?? false)) {
 			return aDeprecated ? 1 : -1;
 		}
 
 		// If the choice is to prioritise performance sorting
 		if (primarySortStrategy === 'performance') {
-			const performanceDiff =
-				(b.usdPriceChangePercentage24h ?? 0) - (a.usdPriceChangePercentage24h ?? 0);
+			const performanceDiff = (bPerf ?? 0) - (aPerf ?? 0);
 			if (performanceDiff !== 0) {
 				return performanceDiff;
 			}
@@ -86,7 +98,7 @@ export const sortTokens = <T extends Token>({
 
 		// If the choice is to prioritise symbol sorting
 		if (primarySortStrategy === 'symbol') {
-			const symbolDiff = a.symbol.localeCompare(b.symbol);
+			const symbolDiff = aSymbol.localeCompare(bSymbol);
 			if (symbolDiff !== 0) {
 				return symbolDiff;
 			}
@@ -94,7 +106,7 @@ export const sortTokens = <T extends Token>({
 
 		// Tie-breaker after primary strategy
 		// USD Balance descending
-		const usdBalanceDiff = (b.usdBalance ?? 0) - (a.usdBalance ?? 0);
+		const usdBalanceDiff = (bUsdBalance ?? 0) - (aUsdBalance ?? 0);
 		if (usdBalanceDiff !== 0) {
 			return usdBalanceDiff;
 		}
@@ -112,13 +124,50 @@ export const sortTokens = <T extends Token>({
 		}
 
 		return (
-			a.symbol.localeCompare(b.symbol) ||
-			a.name.localeCompare(b.name) ||
-			a.network.name.localeCompare(b.network.name) ||
-			+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO)) ||
-			(b.usdMarketCap ?? 0) - (a.usdMarketCap ?? 0)
+			aSymbol.localeCompare(bSymbol) ||
+			aName.localeCompare(bName) ||
+			aNetworkName.localeCompare(bNetworkName) ||
+			+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO)) ||
+			(bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0)
 		);
-	});
+	};
+
+/**
+ * Sorts tokens using balance-aware and pin-aware prioritisation.
+ *
+ * Sorting priority (in order):
+ *
+ * 1. Deprecation status (non-deprecated tokens first).
+ * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
+ * 3. USD balance (descending).
+ * 4. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
+ * 5. Token symbol (ascending, locale-aware).
+ * 6. Token name (ascending, locale-aware).
+ * 7. Network name (ascending, locale-aware).
+ * 8. Token balance (descending).
+ * 9. USD market cap (descending).
+ *
+ * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
+ *
+ * @param $tokens - The list of tokens to sort.
+ * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
+ * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
+ * @returns A sorted array of token UI objects.
+ */
+export const sortTokens = <T extends Token>({
+	$tokens,
+	$tokensToPin,
+	primarySortStrategy = 'value'
+}: {
+	$tokens: TokenUi<T>[];
+	$tokensToPin: TokenToPin[];
+	primarySortStrategy?: TokensSortType;
+}): TokenUi<T>[] => {
+	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
+
+	const comparator = createTokenComparator<T>({ pinIndexById, primarySortStrategy });
+
+	return $tokens.sort(comparator);
 };
 
 /**
