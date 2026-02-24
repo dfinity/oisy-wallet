@@ -6,7 +6,8 @@ use crate::types::{Candid, StoredPrincipal, VMem};
 
 const MAX_TOKEN_LIST_LENGTH: usize = 1000;
 
-pub fn add_to_user_token<T>(
+#[allow(dead_code)]
+pub fn add_to_user_token_old<T>(
     stored_principal: StoredPrincipal,
     user_token: &mut StableBTreeMap<StoredPrincipal, Candid<Vec<T>>, VMem>,
     token: &T,
@@ -35,6 +36,46 @@ pub fn add_to_user_token<T>(
     }
 
     user_token.insert(stored_principal, Candid(tokens));
+}
+
+// pub fn upsert_many_user_tokens_by_id<T, Id, F>(
+pub fn add_to_user_token<T, Id, F>(
+    stored_principal: StoredPrincipal,
+    user_token: &mut StableBTreeMap<StoredPrincipal, Candid<Vec<T>>, VMem>,
+    incoming: &[T],
+    id_of: F,
+) where
+    T: for<'de> Deserialize<'de> + CandidType + Clone + TokenVersion,
+    Id: Eq,
+    F: Fn(&T) -> Id,
+{
+    let Candid(mut existing) = user_token.get(&stored_principal).unwrap_or_default();
+
+    // Pre-allocate for bulk additions
+    existing.reserve(incoming.len());
+
+    for token in incoming {
+        let id = id_of(token);
+
+        if let Some(slot) = existing.iter_mut().find(|t| id_of(*t) == id) {
+            if token.get_version() == slot.get_version() {
+                *slot = token.with_incremented_version();
+            } else {
+                ic_cdk::trap(&format!(
+                    "Version mismatch, token update not allowed. Existing token: {slot:?}, New token: {token:?}"
+                ));
+            }
+        } else {
+            if existing.len() == MAX_TOKEN_LIST_LENGTH {
+                ic_cdk::trap(&format!(
+                    "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
+                ));
+            }
+            existing.push(token.with_initial_version());
+        }
+    }
+
+    user_token.insert(stored_principal, Candid(existing));
 }
 
 pub fn remove_from_user_token<T>(

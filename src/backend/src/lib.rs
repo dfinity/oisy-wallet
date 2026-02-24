@@ -276,25 +276,28 @@ pub fn http_request(request: HttpRequest) -> HttpResponse {
 pub fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &CustomToken| -> bool {
-        CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-    };
-
-    mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
+    mutate_state(|s| {
+        add_to_user_token(
+            stored_principal,
+            &mut s.custom_token,
+            std::slice::from_ref(&token),
+            |t: &CustomToken| CustomTokenId::from(&t.token),
+        );
+    });
 }
 
 #[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        for token in tokens {
-            let find = |t: &CustomToken| -> bool {
-                CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-            };
-
-            add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
-        }
+        add_to_user_token(
+            stored_principal,
+            &mut s.custom_token,
+            &tokens,
+            |t: &CustomToken| CustomTokenId::from(&t.token),
+        );
     });
 }
 

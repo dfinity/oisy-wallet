@@ -66,7 +66,7 @@
 		"update:gix-cmp:next": "npm rm @dfinity/gix-components && npm i @dfinity/gix-components@next",
 		"update:oisy-eslint": "npm rm @dfinity/eslint-config-oisy-wallet && npm i @dfinity/eslint-config-oisy-wallet -D",
 		"update:oisy-eslint:next": "npm rm @dfinity/eslint-config-oisy-wallet && npm i @dfinity/eslint-config-oisy-wallet@next -D",
-		"benchmark": "canbench --persist --show-summary"
+		"benchmark": "canbench --persist --show-summary --csv"
 	},
 	"dependencies": {
 		"@dfinity/gix-components": "^9.0.0-next-2025-11-07.2",
