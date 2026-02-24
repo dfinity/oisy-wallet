@@ -88,6 +88,8 @@ mod token;
 mod types;
 mod user_profile;
 mod user_profile_model;
+mod benchmark;
+
 
 #[cfg(test)]
 mod tests;
@@ -1030,4 +1032,5 @@ pub fn get_contacts() -> GetContactsResult {
     let result = Ok(contacts::get_contacts());
     result.into()
 }
+
 export_candid!();
