@@ -6,13 +6,13 @@ use shared::types::{
         ChainId, CustomToken, Dip721Token, ErcToken, ErcTokenId, ExtV2Token, IcPunksToken,
         IcrcToken, SplToken, SplTokenId, Token,
     },
-    TokenVersion,
+    Stats, TokenVersion,
 };
 
 use crate::utils::{
     assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
     mock::CALLER,
-    pocketic::{setup, PicCanisterTrait},
+    pocketic::{controller, setup, PicCanisterTrait},
 };
 
 static ICRC_TOKEN: LazyLock<IcrcToken> = LazyLock::new(|| IcrcToken {
@@ -557,4 +557,80 @@ fn test_user_cannot_list_another_custom_tokens() {
     let results_tokens = results.unwrap();
 
     assert_eq!(results_tokens.len(), 0);
+}
+
+#[test]
+fn test_set_custom_token_tracks_activity() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let stats_before = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+
+    assert_eq!(stats_before.token_activity_count, 0);
+
+    pic_setup
+        .update::<()>(caller, "set_custom_token", USER_TOKEN.clone())
+        .expect("Failed to set custom token");
+
+    let stats_after = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+
+    assert_eq!(stats_after.token_activity_count, 1);
+}
+
+#[test]
+fn test_set_many_custom_tokens_tracks_activity() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let tokens: Vec<CustomToken> = vec![USER_TOKEN.clone(), ANOTHER_USER_TOKEN.clone()];
+
+    pic_setup
+        .update::<()>(caller, "set_many_custom_tokens", &tokens)
+        .expect("Failed to set many custom tokens");
+
+    let stats = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+
+    assert_eq!(stats.token_activity_count, 2);
+}
+
+#[test]
+fn test_set_custom_token_updates_activity_for_same_token() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    pic_setup
+        .update::<()>(caller, "set_custom_token", USER_TOKEN.clone())
+        .expect("Failed to set custom token");
+
+    let results = pic_setup
+        .query::<Vec<CustomToken>>(caller, "list_custom_tokens", ())
+        .expect("Failed to list custom tokens");
+
+    let update_token = CustomToken {
+        enabled: false,
+        version: results.first().unwrap().version,
+        ..USER_TOKEN.clone()
+    };
+
+    pic_setup
+        .update::<()>(caller, "set_custom_token", update_token)
+        .expect("Failed to update custom token");
+
+    let stats = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+
+    assert_eq!(
+        stats.token_activity_count, 1,
+        "Updating the same token should not create a new activity entry"
+    );
 }

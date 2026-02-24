@@ -47,6 +47,7 @@ impl From<&State> for Stats {
             user_timestamps_count: state.user_profile_updated.len(),
             user_token_count: state.user_token.len(),
             custom_token_count: state.custom_token.len(),
+            token_activity_count: state.token_activity.len(),
         }
     }
 }
