@@ -219,7 +219,7 @@ export function sortTokens<T extends Token>({
 
 	// We intentionally precompute sort keys once per element before sorting.
 	//
-	// Each token is first normalised via `unwrapTokenSortFields`, so the
+	// Each item is first normalised via `unwrapTokenSortFields`, so the
 	// comparator operates only on plain, precomputed values. This ensures that:
 	//   • expensive field normalisation runs exactly once per element (not per comparison),
 	//   • the comparator remains simple and fast (no repeated unwrapping or branching),
