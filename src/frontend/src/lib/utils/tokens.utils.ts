@@ -91,7 +91,7 @@ const createTokenComparator =
 		pinIndexById: ReadonlyMap<SortableId, number>;
 		primarySortStrategy: TokensSortType;
 	}) =>
-	// eslint-disable-next-line local-rules/prefer-object-params
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
 	(a: TokenSortUnwrapped, b: TokenSortUnwrapped): number => {
 		const {
 			id: aId,
