@@ -23,17 +23,42 @@ import type { Token, TokenId, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
+import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import type { TokensSortType } from '$lib/types/tokens-sort';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual, getCaseSensitiveness } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
+import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { filterEnabledToken } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | TokenUiOrGroupUi) => {
+	const t =
+		'group' in tokenOrGroup || 'token' in tokenOrGroup ? tokenOrGroup : { token: tokenOrGroup };
+
+	const isGroup = isTokenUiGroup(t);
+
+	const item = isGroup ? t.group : t.token;
+
+	return {
+		deprecated: isGroup ? false : (t.token.deprecated ?? false),
+		id: isGroup ? t.group.tokens[0].id : t.token.id,
+		symbol: isGroup ? t.group.groupData.symbol : t.token.symbol,
+		name: isGroup ? t.group.groupData.name : t.token.name,
+		networkName: isGroup ? '' : t.token.network.name,
+		usdBalance: item.usdBalance,
+		usdPriceChangePercentage24h: item.usdPriceChangePercentage24h,
+		usdMarketCap: item.usdMarketCap,
+		balance: item.balance
+	};
+};
+
+type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
 
 /**
  * Creates a comparator function for sorting tokens based on multiple criteria:
@@ -52,7 +77,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  *
  */
 const createTokenComparator =
-	<T extends Token>({
+	({
 		pinIndexById,
 		primarySortStrategy
 	}: {
@@ -60,31 +85,33 @@ const createTokenComparator =
 		primarySortStrategy: TokensSortType;
 	}) =>
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
-	(a: TokenUi<T>, b: TokenUi<T>): number => {
+	(a: TokenSortUnwrapped, b: TokenSortUnwrapped): number => {
 		const {
+			id: aId,
 			deprecated: aDeprecated,
 			usdPriceChangePercentage24h: aPerf,
 			symbol: aSymbol,
 			usdBalance: aUsdBalance,
 			name: aName,
-			network: { name: aNetworkName },
+			networkName: aNetworkName,
 			balance: aBalance,
 			usdMarketCap: aUsdMarketCap
 		} = a;
 
 		const {
+			id: bId,
 			deprecated: bDeprecated,
 			usdPriceChangePercentage24h: bPerf,
 			symbol: bSymbol,
 			usdBalance: bUsdBalance,
 			name: bName,
-			network: { name: bNetworkName },
+			networkName: bNetworkName,
 			balance: bBalance,
 			usdMarketCap: bUsdMarketCap
 		} = b;
 
 		// Deprecated last
-		if ((aDeprecated ?? false) !== (bDeprecated ?? false)) {
+		if (aDeprecated !== bDeprecated) {
 			return aDeprecated ? 1 : -1;
 		}
 
@@ -112,8 +139,8 @@ const createTokenComparator =
 		}
 
 		// Pinned tokens (pinned first; pinned order = order provided)
-		const aPin = pinIndexById.get(a.id);
-		const bPin = pinIndexById.get(b.id);
+		const aPin = pinIndexById.get(aId);
+		const bPin = pinIndexById.get(bId);
 		const aPinned = aPin !== undefined;
 		const bPinned = bPin !== undefined;
 		if (aPinned !== bPinned) {
@@ -165,9 +192,24 @@ export const sortTokens = <T extends Token>({
 }): TokenUi<T>[] => {
 	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
 
-	const comparator = createTokenComparator<T>({ pinIndexById, primarySortStrategy });
+	const comparator = createTokenComparator({ pinIndexById, primarySortStrategy });
 
-	return $tokens.sort(comparator);
+	// We intentionally use the “decorate → sort → undecorate” pattern here.
+	//
+	// Each item is first mapped to its precomputed sort fields (`unwrapTokenSortFields`)
+	// so the comparator works only with plain, normalised values. This ensures that:
+	//   • expensive field normalisation runs exactly once per element (not per comparison),
+	//   • the comparator remains simple and fast (no repeated unwrapping or branching),
+	//   • sorting logic is shared between tokens and groups in a uniform way.
+	//
+	// Although this introduces two linear passes (map before and after sort),
+	// the list size is small (~100–150 items) and sorting runs infrequently
+	// (~every 30s), so the additional allocations are negligible. This approach
+	// favours clarity and predictable performance over micro-optimisation.
+	return $tokens
+		.map((token) => ({ token, u: unwrapTokenSortFields(token) }))
+		.sort((a, b) => comparator(a.u, b.u))
+		.map(({ token }) => token);
 };
 
 /**
