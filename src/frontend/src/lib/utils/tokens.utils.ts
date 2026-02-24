@@ -222,8 +222,8 @@ export function sortTokens<T extends Token>({
 	// Each token is first normalised via `unwrapTokenSortFields`, so the
 	// comparator operates only on plain, precomputed values. This ensures that:
 	//   • expensive field normalisation runs exactly once per element (not per comparison),
-	//   • the comparator remains simple and predictable,
-	//   • sorting logic stays consistent between tokens and groups.
+	//   • the comparator remains simple and fast (no repeated unwrapping or branching),
+	//   • sorting logic is shared between tokens and groups in a uniform way.
 	//
 	// We then sort an array of indices instead of allocating wrapper objects
 	// ({ token, u }) per element. This avoids per-item object allocation while
