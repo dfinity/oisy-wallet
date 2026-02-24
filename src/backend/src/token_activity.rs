@@ -1,17 +1,11 @@
-use ic_cdk::api::{
-    time,
-};
+use ic_cdk::api::time;
 use ic_stable_structures::StableBTreeMap;
-use shared::types::{
-    custom_token::CustomTokenId,
-    Timestamp,
-};
+use shared::types::{custom_token::CustomTokenId, Timestamp};
 
 use crate::{
     mutate_state,
-    types::{ StoredTokenId, VMem},
+    types::{StoredTokenId, VMem},
 };
-
 
 fn add_to_token_activity(
     token_id: StoredTokenId,

@@ -65,18 +65,16 @@ use user_profile_model::UserProfileModel;
 
 use crate::{
     bitcoin_api::get_current_fee_percentiles,
-    exchange::{
-      refresh_exchange_rates, PRICE_REFRESH_INTERVAL_SEC,
-    },
+    exchange::{refresh_exchange_rates, PRICE_REFRESH_INTERVAL_SEC},
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
+    token_activity::{mark_token_active, mark_tokens_active},
     types::{ContactMap, PowChallengeMap, StoredTokenId},
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
         update_experimental_feature_settings, update_network_settings,
     },
 };
-use crate::token_activity::{mark_token_active, mark_tokens_active};
 
 mod bitcoin_api;
 mod bitcoin_utils;
@@ -91,10 +89,10 @@ pub mod random;
 pub mod signer;
 mod state;
 mod token;
+mod token_activity;
 mod types;
 mod user_profile;
 mod user_profile_model;
-mod token_activity;
 
 #[cfg(test)]
 mod tests;

@@ -17,8 +17,6 @@ use crate::{
 pub const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60; // 5 minutes
 pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60; // 1 hour
 
-
-
 pub async fn refresh_exchange_rates() {
     let now = time();
     let threshold = now - PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000;
