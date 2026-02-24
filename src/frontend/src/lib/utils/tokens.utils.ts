@@ -41,7 +41,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * Sorting priority (in order):
  *
  * 1. Deprecation status (non-deprecated tokens first).
- * 2. Primary sorting strategy (either performance or symbol, based on the provided parameter).
+ * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
  * 3. USD balance (descending).
  * 4. Explicitly pinned tokens (pinned first, preserving the order provided in `pinIndexById`).
  * 5. Token symbol (ascending, locale-aware).
