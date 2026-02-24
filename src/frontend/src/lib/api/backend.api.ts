@@ -37,12 +37,11 @@ import { Principal } from '@icp-sdk/core/principal';
 let canister: BackendCanister | undefined = undefined;
 
 export const listCustomTokens = async ({
-	identity,
-	certified
+	identity
 }: CanisterApiFunctionParams<QueryParams>): Promise<CustomToken[]> => {
 	const { listCustomTokens } = await backendCanister({ identity });
 
-	return listCustomTokens({ certified });
+	return listCustomTokens();
 };
 
 export const setManyCustomTokens = async ({
