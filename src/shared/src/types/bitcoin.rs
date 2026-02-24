@@ -78,10 +78,10 @@ pub enum BtcAddPendingTransactionError {
     InvalidUtxos,
     /// Intersects with caller's existing pending reservations
     UtxosAlreadyReserved,
-    /// The provided II delegation chain is missing or failed verification.
-    InvalidDelegationChain { msg: String },
     /// Server-side / unexpected
     InternalError { msg: String },
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain { msg: String },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

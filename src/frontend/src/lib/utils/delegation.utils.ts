@@ -12,9 +12,7 @@ import { DelegationIdentity } from '@icp-sdk/core/identity';
  * @returns The delegation chain in Candid-compatible format, or undefined if the identity
  *          is not a DelegationIdentity.
  */
-export const extractIIDelegationChain = (
-	identity: Identity
-): [] | [IIDelegationChain] => {
+export const extractIIDelegationChain = (identity: Identity): [] | [IIDelegationChain] => {
 	if (!(identity instanceof DelegationIdentity)) {
 		return [];
 	}
