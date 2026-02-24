@@ -24,9 +24,11 @@ pub mod token_standard;
 pub mod transaction;
 pub mod user_profile;
 pub mod verifiable_credential;
+pub mod exchange;
 
 #[cfg(test)]
 mod tests;
+
 
 pub type Version = u64;
 
