@@ -88,7 +88,7 @@ const createTokenComparator =
 		} = b;
 
 		// Deprecated last
-		if (aDeprecated !== bDeprecated) {
+		if ((aDeprecated ?? false) !== (bDeprecated?? false)) {
 			return aDeprecated ? 1 : -1;
 		}
 
