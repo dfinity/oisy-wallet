@@ -181,7 +181,7 @@ describe('custom-token.services', () => {
 
 					expect(result).toBe('loaded');
 
-					expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
+					expect(spyListCustomTokens).toHaveBeenCalledWith();
 
 					expect(spyMetadata).toHaveBeenCalledWith({ certified: true });
 
