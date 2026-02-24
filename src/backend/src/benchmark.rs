@@ -38,17 +38,18 @@ fn bench_stored_principal() -> StoredPrincipal {
     StoredPrincipal(*bench_principal())
 }
 
-fn ensure_profile() -> u64 {
+fn ensure_profile_version() -> Option<u64> {
     let sp = bench_stored_principal();
+
     mutate_state(|s| {
         let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+
         if m.find_by_principal(sp).is_none() {
-            let profile = StoredUserProfile::from_timestamp(TS0_NS);
-            m.store_new(sp, TS0_NS, &profile);
+            // Prefer the real creation path (it may set version).
+            user_profile::create_profile(sp, &mut m);
         }
-        m.find_by_principal(sp)
-            .and_then(|p| p.version)
-            .expect("bench profile must have version")
+
+        m.find_by_principal(sp).and_then(|p| p.version)
     })
 }
 
@@ -329,7 +330,7 @@ fn bench_create_user_profile() -> canbench_rs::BenchResult {
 
 #[bench(raw)]
 fn bench_get_user_profile() -> canbench_rs::BenchResult {
-    ensure_profile();
+    ensure_profile_version();
 
     canbench_rs::bench_fn(|| {
         let sp = bench_stored_principal();
@@ -342,7 +343,7 @@ fn bench_get_user_profile() -> canbench_rs::BenchResult {
 
 #[bench(raw)]
 fn bench_has_user_profile() -> canbench_rs::BenchResult {
-    ensure_profile();
+    ensure_profile_version();
 
     canbench_rs::bench_fn(|| {
         std::hint::black_box(user_profile::has_user_profile(bench_stored_principal()));
@@ -355,7 +356,7 @@ fn bench_has_user_profile() -> canbench_rs::BenchResult {
 
 #[bench(raw)]
 fn bench_update_user_network_settings() -> canbench_rs::BenchResult {
-    let version = ensure_profile();
+    let version = ensure_profile_version();
     let sp = bench_stored_principal();
     let mut networks = BTreeMap::new();
     networks.insert(
@@ -369,40 +370,40 @@ fn bench_update_user_network_settings() -> canbench_rs::BenchResult {
     canbench_rs::bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::update_network_settings(sp, Some(version), networks.clone(), &mut m)
+            user_profile::update_network_settings(sp, version, networks.clone(), &mut m)
         }));
     })
 }
 
 #[bench(raw)]
 fn bench_set_user_show_testnets() -> canbench_rs::BenchResult {
-    let version = ensure_profile();
+    let version = ensure_profile_version();
     let sp = bench_stored_principal();
 
     canbench_rs::bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::set_show_testnets(sp, Some(version), true, &mut m)
+            user_profile::set_show_testnets(sp, version, true, &mut m)
         }));
     })
 }
 
 #[bench(raw)]
 fn bench_add_user_hidden_dapp_id() -> canbench_rs::BenchResult {
-    let version = ensure_profile();
+    let version = ensure_profile_version();
     let sp = bench_stored_principal();
 
     canbench_rs::bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::add_hidden_dapp_id(sp, Some(version), "bench-dapp-id".to_string(), &mut m)
+            user_profile::add_hidden_dapp_id(sp, version, "bench-dapp-id".to_string(), &mut m)
         }));
     })
 }
 
 #[bench(raw)]
 fn bench_update_user_agreements() -> canbench_rs::BenchResult {
-    let version = ensure_profile();
+    let version = ensure_profile_version();
     let sp = bench_stored_principal();
     let agreements = UserAgreements {
         license_agreement: UserAgreement {
@@ -418,14 +419,14 @@ fn bench_update_user_agreements() -> canbench_rs::BenchResult {
     canbench_rs::bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::update_agreements(sp, Some(version), agreements.clone(), &mut m)
+            user_profile::update_agreements(sp, version, agreements.clone(), &mut m)
         }));
     })
 }
 
 #[bench(raw)]
 fn bench_update_user_experimental_features() -> canbench_rs::BenchResult {
-    let version = ensure_profile();
+    let version = ensure_profile_version();
     let sp = bench_stored_principal();
     let mut features = BTreeMap::new();
     features.insert(
@@ -438,7 +439,7 @@ fn bench_update_user_experimental_features() -> canbench_rs::BenchResult {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::update_experimental_feature_settings(
                 sp,
-                Some(version),
+                version,
                 features.clone(),
                 &mut m,
             )
