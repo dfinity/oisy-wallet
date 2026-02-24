@@ -19,8 +19,9 @@ import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Token, TokenId, TokenToPin } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import type { TokenGroupId } from '$lib/types/token-group';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -60,6 +61,12 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 
 type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
 
+type SortableId = TokenId | TokenGroupId;
+
+type Pin = Readonly<{ id: SortableId }>;
+
+type SortableItem<T extends Token> = TokenUi<T> | TokenUiOrGroupUi;
+
 /**
  * Creates a comparator function for sorting tokens based on multiple criteria:
  *
@@ -77,42 +84,37 @@ type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
  *
  */
 const createTokenComparator =
-	<T extends Token>({
+	({
 		pinIndexById,
 		primarySortStrategy
 	}: {
-		pinIndexById: ReadonlyMap<TokenId, number>;
+		pinIndexById: ReadonlyMap<SortableId, number>;
 		primarySortStrategy: TokensSortType;
 	}) =>
-	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
-	(
-		a: { token: TokenUi<T>; unwrapped: TokenSortUnwrapped },
-		b: { token: TokenUi<T>; unwrapped: TokenSortUnwrapped }
-	): number => {
+	// eslint-disable-next-line local-rules/prefer-object-params
+	(a: TokenSortUnwrapped, b: TokenSortUnwrapped): number => {
 		const {
-			unwrapped: {
-				deprecated: aDeprecated,
-				usdPriceChangePercentage24h: aPerf,
-				symbol: aSymbol,
-				usdBalance: aUsdBalance,
-				name: aName,
-				networkName: aNetworkName,
-				balance: aBalance,
-				usdMarketCap: aUsdMarketCap
-			}
+			id: aId,
+			deprecated: aDeprecated,
+			usdPriceChangePercentage24h: aPerf,
+			symbol: aSymbol,
+			usdBalance: aUsdBalance,
+			name: aName,
+			networkName: aNetworkName,
+			balance: aBalance,
+			usdMarketCap: aUsdMarketCap
 		} = a;
 
 		const {
-			unwrapped: {
-				deprecated: bDeprecated,
-				usdPriceChangePercentage24h: bPerf,
-				symbol: bSymbol,
-				usdBalance: bUsdBalance,
-				name: bName,
-				networkName: bNetworkName,
-				balance: bBalance,
-				usdMarketCap: bUsdMarketCap
-			}
+			id: bId,
+			deprecated: bDeprecated,
+			usdPriceChangePercentage24h: bPerf,
+			symbol: bSymbol,
+			usdBalance: bUsdBalance,
+			name: bName,
+			networkName: bNetworkName,
+			balance: bBalance,
+			usdMarketCap: bUsdMarketCap
 		} = b;
 
 		// Deprecated last
@@ -144,8 +146,8 @@ const createTokenComparator =
 		}
 
 		// Pinned tokens (pinned first; pinned order = order provided)
-		const aPin = pinIndexById.get(a.token.id);
-		const bPin = pinIndexById.get(b.token.id);
+		const aPin = pinIndexById.get(aId);
+		const bPin = pinIndexById.get(bId);
 		const aPinned = aPin !== undefined;
 		const bPinned = bPin !== undefined;
 		if (aPinned !== bPinned) {
@@ -164,6 +166,16 @@ const createTokenComparator =
 		);
 	};
 
+export function sortTokens<T extends Token>(args: {
+	$tokens: TokenUi<T>[];
+	$tokensToPin: ReadonlyArray<Pin>;
+	primarySortStrategy?: TokensSortType;
+}): TokenUi<T>[];
+export function sortTokens(args: {
+	$tokens: TokenUiOrGroupUi[];
+	$tokensToPin: ReadonlyArray<Pin>;
+	primarySortStrategy?: TokensSortType;
+}): TokenUiOrGroupUi[];
 /**
  * Sorts tokens using balance-aware and pin-aware prioritisation.
  *
@@ -186,24 +198,39 @@ const createTokenComparator =
  * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
  * @returns A sorted array of token UI objects.
  */
-export const sortTokens = <T extends Token>({
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+export function sortTokens<T extends Token>({
 	$tokens,
 	$tokensToPin,
 	primarySortStrategy = 'value'
 }: {
-	$tokens: TokenUi<T>[];
-	$tokensToPin: TokenToPin[];
+	$tokens: SortableItem<T>[];
+	$tokensToPin: ReadonlyArray<Pin>;
 	primarySortStrategy?: TokensSortType;
-}): TokenUi<T>[] => {
-	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
+}): SortableItem<T>[] {
+	const pinIndexById = new Map<SortableId, number>(
+		$tokensToPin.map(({ id }, index) => [id, index])
+	);
 
-	const comparator = createTokenComparator<T>({ pinIndexById, primarySortStrategy });
+	const comparator = createTokenComparator({ pinIndexById, primarySortStrategy });
 
+	// We intentionally use the “decorate → sort → undecorate” pattern here.
+	//
+	// Each item is first mapped to its precomputed sort fields (`unwrapTokenSortFields`)
+	// so the comparator works only with plain, normalised values. This ensures that:
+	//   • expensive field normalisation runs exactly once per element (not per comparison),
+	//   • the comparator remains simple and fast (no repeated unwrapping or branching),
+	//   • sorting logic is shared between tokens and groups in a uniform way.
+	//
+	// Although this introduces two linear passes (map before and after sort),
+	// the list size is small (~100–150 items) and sorting runs infrequently
+	// (~every 30s), so the additional allocations are negligible. This approach
+	// favours clarity and predictable performance over micro-optimisation.
 	return $tokens
-		.map((token) => ({ token, unwrapped: unwrapTokenSortFields(token) }))
-		.sort(comparator)
+		.map((token) => ({ token, u: unwrapTokenSortFields(token) }))
+		.sort((a, b) => comparator(a.u, b.u))
 		.map(({ token }) => token);
-};
+}
 
 /**
  * Calculates total USD balance of the provided UI tokens list.
