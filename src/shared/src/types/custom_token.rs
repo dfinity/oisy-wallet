@@ -37,7 +37,7 @@ pub struct IcPunksToken {
 }
 
 /// A network-specific unique Solana token identifier.
-#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
+#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug, PartialOrd, Ord)]
 #[serde(remote = "Self")]
 pub struct SplTokenId(pub String);
 impl From<SplTokenId> for String {
@@ -56,7 +56,7 @@ pub struct SplToken {
 }
 
 /// A network-specific unique ERC20 token identifier.
-#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
+#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug, PartialOrd, Ord)]
 #[serde(remote = "Self")]
 pub struct ErcTokenId(pub String);
 impl From<ErcTokenId> for String {
@@ -113,7 +113,7 @@ pub enum TokenSection {
 }
 
 /// A cross-chain token identifier.
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 #[serde(remote = "Self")]
 #[repr(u8)]
 pub enum CustomTokenId {

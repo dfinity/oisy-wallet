@@ -40,6 +40,9 @@ pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>
 pub type BtcUserPendingTransactionsMap =
     StableBTreeMap<StoredPrincipal, Candid<PendingTransactionsMap>, VMem>;
 
-pub type ExchangeRateMap = StableBTreeMap<Candid<CustomTokenId>, Candid<ExchangeRate>, VMem>;
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct StoredTokenId(pub CustomTokenId);
 
-pub type TokenActivityMap = StableBTreeMap<Candid<CustomTokenId>, Timestamp, VMem>;
+pub type ExchangeRateMap = StableBTreeMap<StoredTokenId, Candid<ExchangeRate>, VMem>;
+
+pub type TokenActivityMap = StableBTreeMap<StoredTokenId, Timestamp, VMem>;

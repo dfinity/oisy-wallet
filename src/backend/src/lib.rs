@@ -70,7 +70,7 @@ use crate::{
     },
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
-    types::{ContactMap, PowChallengeMap},
+    types::{ContactMap, PowChallengeMap, StoredTokenId},
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
         update_experimental_feature_settings, update_network_settings,
@@ -301,6 +301,11 @@ pub fn set_custom_token(token: CustomToken) {
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
+    let ids = tokens
+        .iter()
+        .map(|t| CustomTokenId::from(&t.token))
+        .collect::<Vec<_>>();
+
     mutate_state(|s| {
         for token in tokens {
             let find = |t: &CustomToken| -> bool {
@@ -311,12 +316,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
         }
     });
 
-    mark_tokens_active(
-        &tokens
-            .iter()
-            .map(|t| CustomTokenId::from(&t.token))
-            .collect::<Vec<_>>(),
-    );
+    mark_tokens_active(&ids);
 }
 
 /// Remove custom token for the user.
@@ -358,7 +358,10 @@ pub fn get_exchange_rates(
         token_ids
             .into_iter()
             .map(|id| {
-                let rate = s.exchange_rates.get(&Candid(id.clone())).map(|c| c.0);
+                let rate = s
+                    .exchange_rates
+                    .get(&StoredTokenId(id.clone()))
+                    .map(|c| c.0);
                 (id, rate)
             })
             .collect()
@@ -367,7 +370,7 @@ pub fn get_exchange_rates(
 
 #[query(guard = "caller_is_not_anonymous")]
 pub fn get_exchange_rate(token_id: CustomTokenId) -> Option<ExchangeRate> {
-    read_state(|s| s.exchange_rates.get(&Candid(token_id)).map(|c| c.0))
+    read_state(|s| s.exchange_rates.get(&StoredTokenId(token_id)).map(|c| c.0))
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;

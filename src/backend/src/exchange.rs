@@ -1,34 +1,48 @@
-use std::collections::HashSet;
-
-use candid::Principal;
 use ic_cdk::api::{
     management_canister::http_request::{
         http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse,
     },
     time,
 };
-use shared::types::{custom_token::CustomTokenId, Timestamp};
+use ic_stable_structures::StableBTreeMap;
+use shared::types::{
+    custom_token::CustomTokenId,
+    exchange::{ExchangeData, ExchangeRate},
+    Timestamp,
+};
 
 use crate::{
     mutate_state, read_state,
-    types::{Candid, ExchangeRate},
+    types::{Candid, StoredTokenId, VMem},
 };
 
 pub const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60; // 5 minutes
 pub const ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60; // 1 hour
 
+fn add_to_token_activity(
+    token_id: StoredTokenId,
+    token_activity: &mut StableBTreeMap<StoredTokenId, Timestamp, VMem>,
+    timestamp: Timestamp,
+) {
+    token_activity.insert(token_id, timestamp);
+}
+
 pub fn mark_token_active(token_id: &CustomTokenId) {
-    let now = time();
     mutate_state(|s| {
-        s.token_activity.insert(Candid(token_id.clone()), now);
+        add_to_token_activity(
+            StoredTokenId(token_id.clone()),
+            &mut s.token_activity,
+            time(),
+        )
     });
 }
 
 pub fn mark_tokens_active(token_ids: &[CustomTokenId]) {
     let now = time();
+
     mutate_state(|s| {
         for token_id in token_ids {
-            s.token_activity.insert(Candid(token_id.clone()), now);
+            add_to_token_activity(StoredTokenId(token_id.clone()), &mut s.token_activity, now);
         }
     });
 }
@@ -123,7 +137,7 @@ async fn fetch_and_update_prices(token_ids: Vec<CustomTokenId>) {
 async fn fetch_coingecko_token_prices(
     platform: &str,
     addresses: &[String],
-) -> Result<std::collections::HashMap<String, (f64, Option<f64>, f64)>, String> {
+) -> Result<std::collections::HashMap<String, (Option<f64>, Option<f64>, Option<f64>)>, String> {
     let addr_str = addresses.join(",");
     let url = format!(
         "https://api.coingecko.com/api/v3/simple/token_price/{}?contract_addresses={}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
@@ -137,9 +151,9 @@ async fn fetch_coingecko_token_prices(
     let mut result = std::collections::HashMap::new();
     for addr in addresses {
         if let Some(data) = json.get(addr.to_lowercase()) {
-            let price = data["usd"].as_f64().unwrap_or(0.0);
+            let price = data["usd"].as_f64();
             let change = data["usd_24h_change"].as_f64();
-            let market_cap = data["usd_market_cap"].as_f64().unwrap_or(0.0);
+            let market_cap = data["usd_market_cap"].as_f64();
             result.insert(addr.clone(), (price, change, market_cap));
         }
     }
@@ -163,7 +177,7 @@ async fn perform_http_get(url: &str, max_response_bytes: u64) -> Result<HttpResp
 
     match http_request(request, 10_000_000_000).await {
         Ok((response,)) => {
-            if response.status == 200 {
+            if response.status == candid::Nat::from(200u32) {
                 Ok(response)
             } else {
                 Err(format!(
@@ -176,16 +190,19 @@ async fn perform_http_get(url: &str, max_response_bytes: u64) -> Result<HttpResp
     }
 }
 
-fn update_price(token_id: &CustomTokenId, price_data: (f64, Option<f64>, f64)) {
+fn update_price(token_id: &CustomTokenId, price_data: (Option<f64>, Option<f64>, Option<f64>)) {
+    // TODO: use timestamp from price data when available, for now use current time
     let now = time();
+
     let (price, price_24h_change_pct, market_cap) = price_data;
+
     mutate_state(|s| {
         s.exchange_rates.insert(
-            Candid(token_id.clone()),
+            StoredTokenId(token_id.clone()),
             Candid(ExchangeRate {
                 usd: ExchangeData {
-                    price,
                     timestamp_ns: now,
+                                        price,
                     price_24h_change_pct,
                     market_cap,
                 },

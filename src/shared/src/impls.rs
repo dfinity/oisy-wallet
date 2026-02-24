@@ -16,7 +16,7 @@ use crate::{
             IcPunksToken, IcrcToken, SplToken, SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
-        exchange::ExchangeData,
+        exchange::{ExchangeData, ExchangeRate},
         experimental_feature::{
             ExperimentalFeatureSettingsMap, ExperimentalFeaturesSettings,
             UpdateExperimentalFeaturesSettingsError,
@@ -818,6 +818,12 @@ impl Validate for ExchangeData {
     }
 }
 
+impl Validate for ExchangeRate {
+    fn validate(&self) -> Result<(), Error> {
+        self.usd.validate()
+    }
+}
+
 // Apply the validation during deserialization for all types
 validate_on_deserialize!(Contact);
 validate_on_deserialize!(ContactAddressData);
@@ -836,3 +842,4 @@ validate_on_deserialize!(ErcToken);
 validate_on_deserialize!(ErcTokenId);
 validate_on_deserialize!(UserToken);
 validate_on_deserialize!(ExchangeData);
+validate_on_deserialize!(ExchangeRate);
