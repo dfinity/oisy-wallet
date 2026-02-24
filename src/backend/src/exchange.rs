@@ -202,7 +202,7 @@ fn update_price(token_id: &CustomTokenId, price_data: (Option<f64>, Option<f64>,
             Candid(ExchangeRate {
                 usd: ExchangeData {
                     timestamp_ns: now,
-                                        price,
+                    price,
                     price_24h_change_pct,
                     market_cap,
                 },
