@@ -19,7 +19,7 @@ import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Token, TokenId } from '$lib/types/token';
+import type { Token, TokenId, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -181,19 +181,16 @@ const createTokenComparator =
  * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
  * @returns A sorted array of token UI objects.
  */
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-export function sortTokens<T extends Token>({
+export const sortTokens = <T extends Token>({
 	$tokens,
 	$tokensToPin,
 	primarySortStrategy = 'value'
 }: {
-	$tokens: SortableItem<T>[];
-	$tokensToPin: ReadonlyArray<Pin>;
+	$tokens: TokenUi<T>[];
+	$tokensToPin: TokenToPin[];
 	primarySortStrategy?: TokensSortType;
-}): SortableItem<T>[] {
-	const pinIndexById = new Map<SortableId, number>(
-		$tokensToPin.map(({ id }, index) => [id, index])
-	);
+}): TokenUi<T>[] => {
+	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
 
 	const comparator = createTokenComparator({ pinIndexById, primarySortStrategy });
 
@@ -213,7 +210,7 @@ export function sortTokens<T extends Token>({
 		.map((token) => ({ token, u: unwrapTokenSortFields(token) }))
 		.sort((a, b) => comparator(a.u, b.u))
 		.map(({ token }) => token);
-}
+};
 
 /**
  * Calculates total USD balance of the provided UI tokens list.
