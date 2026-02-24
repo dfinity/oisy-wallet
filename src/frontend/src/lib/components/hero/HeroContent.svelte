@@ -122,6 +122,17 @@
 	let isGradientToRight = $derived($networkSolana && !isTrumpToken);
 
 	let isGradientToBottomRight = $derived(isGLDTToken || $networkBsc);
+
+	let rateChangeBackground = $derived(
+		$networkICP ||
+			$networkBase ||
+			$networkPolygon ||
+			$networkArbitrum ||
+			isTrumpToken ||
+			isVeurToken
+			? ('dark' as const)
+			: ('light' as const)
+	);
 </script>
 
 <div
@@ -192,7 +203,11 @@
 							</span>
 
 							<span>
-								<ExchangeRateChange timeFrame="24h" {usdPriceChangePercentage24h} withBackground />
+								<ExchangeRateChange
+									background={rateChangeBackground}
+									timeFrame="24h"
+									{usdPriceChangePercentage24h}
+								/>
 							</span>
 						</div>
 					{:else}

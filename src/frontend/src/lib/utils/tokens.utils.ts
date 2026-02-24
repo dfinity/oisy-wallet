@@ -23,17 +23,141 @@ import type { Token, TokenId, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
+import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import type { TokensSortType } from '$lib/types/tokens-sort';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual, getCaseSensitiveness } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
+import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { filterEnabledToken } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | TokenUiOrGroupUi) => {
+	const t =
+		'group' in tokenOrGroup || 'token' in tokenOrGroup ? tokenOrGroup : { token: tokenOrGroup };
+
+	const isGroup = isTokenUiGroup(t);
+
+	const item = isGroup ? t.group : t.token;
+
+	return {
+		deprecated: isGroup ? false : (t.token.deprecated ?? false),
+		id: isGroup ? t.group.tokens[0].id : t.token.id,
+		symbol: isGroup ? t.group.groupData.symbol : t.token.symbol,
+		name: isGroup ? t.group.groupData.name : t.token.name,
+		networkName: isGroup ? '' : t.token.network.name,
+		usdBalance: item.usdBalance,
+		usdPriceChangePercentage24h: item.usdPriceChangePercentage24h,
+		usdMarketCap: item.usdMarketCap,
+		balance: item.balance
+	};
+};
+
+type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
+
+/**
+ * Creates a comparator function for sorting tokens based on multiple criteria:
+ *
+ * 1. Deprecation status (non-deprecated tokens first).
+ * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
+ * 3. USD balance (descending).
+ * 4. Explicitly pinned tokens (pinned first, preserving the order provided by `pinIndexById`).
+ * 5. Token symbol (ascending, locale-aware).
+ * 6. Token name (ascending, locale-aware).
+ * 7. Network name (ascending, locale-aware).
+ * 8. Token balance (descending).
+ * 9. USD market cap (descending).
+ *
+ * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
+ *
+ */
+const createTokenComparator =
+	({
+		pinIndexById,
+		primarySortStrategy
+	}: {
+		pinIndexById: ReadonlyMap<TokenId, number>;
+		primarySortStrategy: TokensSortType;
+	}) =>
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
+	(a: TokenSortUnwrapped, b: TokenSortUnwrapped): number => {
+		const {
+			id: aId,
+			deprecated: aDeprecated,
+			usdPriceChangePercentage24h: aPerf,
+			symbol: aSymbol,
+			usdBalance: aUsdBalance,
+			name: aName,
+			networkName: aNetworkName,
+			balance: aBalance,
+			usdMarketCap: aUsdMarketCap
+		} = a;
+
+		const {
+			id: bId,
+			deprecated: bDeprecated,
+			usdPriceChangePercentage24h: bPerf,
+			symbol: bSymbol,
+			usdBalance: bUsdBalance,
+			name: bName,
+			networkName: bNetworkName,
+			balance: bBalance,
+			usdMarketCap: bUsdMarketCap
+		} = b;
+
+		// Deprecated last
+		if (aDeprecated !== bDeprecated) {
+			return aDeprecated ? 1 : -1;
+		}
+
+		// If the choice is to prioritise performance sorting
+		if (primarySortStrategy === 'performance') {
+			const performanceDiff = (bPerf ?? 0) - (aPerf ?? 0);
+			if (performanceDiff !== 0) {
+				return performanceDiff;
+			}
+		}
+
+		// If the choice is to prioritise symbol sorting
+		if (primarySortStrategy === 'symbol') {
+			const symbolDiff = aSymbol.localeCompare(bSymbol);
+			if (symbolDiff !== 0) {
+				return symbolDiff;
+			}
+		}
+
+		// Tie-breaker after primary strategy
+		// USD Balance descending
+		const usdBalanceDiff = (bUsdBalance ?? 0) - (aUsdBalance ?? 0);
+		if (usdBalanceDiff !== 0) {
+			return usdBalanceDiff;
+		}
+
+		// Pinned tokens (pinned first; pinned order = order provided)
+		const aPin = pinIndexById.get(aId);
+		const bPin = pinIndexById.get(bId);
+		const aPinned = aPin !== undefined;
+		const bPinned = bPin !== undefined;
+		if (aPinned !== bPinned) {
+			return aPinned ? -1 : 1;
+		}
+		if (aPinned && bPinned) {
+			return aPin - bPin;
+		}
+
+		return (
+			aSymbol.localeCompare(bSymbol) ||
+			aName.localeCompare(bName) ||
+			aNetworkName.localeCompare(bNetworkName) ||
+			+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO)) ||
+			(bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0)
+		);
+	};
 
 /**
  * Sorts tokens using balance-aware and pin-aware prioritisation.
@@ -41,15 +165,16 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * Sorting priority (in order):
  *
  * 1. Deprecation status (non-deprecated tokens first).
- * 2. USD balance (descending).
- * 3. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
- * 4. Token symbol (ascending, locale-aware).
- * 5. Token name (ascending, locale-aware).
- * 6. Network name (ascending, locale-aware).
- * 7. Token balance (descending).
- * 8. USD market cap (descending).
+ * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
+ * 3. USD balance (descending).
+ * 4. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
+ * 5. Token symbol (ascending, locale-aware).
+ * 6. Token name (ascending, locale-aware).
+ * 7. Network name (ascending, locale-aware).
+ * 8. Token balance (descending).
+ * 9. USD market cap (descending).
  *
- * Additionally, if `primarySortStrategy` is set, it overrides the default sorting by value.
+ * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
  *
  * @param $tokens - The list of tokens to sort.
  * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
@@ -67,58 +192,24 @@ export const sortTokens = <T extends Token>({
 }): TokenUi<T>[] => {
 	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
 
-	return $tokens.sort((a, b) => {
-		// Deprecated last
-		const aDeprecated = a.deprecated ?? false;
-		const bDeprecated = b.deprecated ?? false;
-		if (aDeprecated !== bDeprecated) {
-			return aDeprecated ? 1 : -1;
-		}
+	const comparator = createTokenComparator({ pinIndexById, primarySortStrategy });
 
-		// If the choice is to prioritise performance sorting
-		if (primarySortStrategy === 'performance') {
-			const performanceDiff =
-				(b.usdPriceChangePercentage24h ?? 0) - (a.usdPriceChangePercentage24h ?? 0);
-			if (performanceDiff !== 0) {
-				return performanceDiff;
-			}
-		}
-
-		// If the choice is to prioritise symbol sorting
-		if (primarySortStrategy === 'symbol') {
-			const symbolDiff = a.symbol.localeCompare(b.symbol);
-			if (symbolDiff !== 0) {
-				return symbolDiff;
-			}
-		}
-
-		// Tie-breaker after primary strategy
-		// USD Balance descending
-		const usdBalanceDiff = (b.usdBalance ?? 0) - (a.usdBalance ?? 0);
-		if (usdBalanceDiff !== 0) {
-			return usdBalanceDiff;
-		}
-
-		// Pinned tokens (pinned first; pinned order = order provided)
-		const aPin = pinIndexById.get(a.id);
-		const bPin = pinIndexById.get(b.id);
-		const aPinned = aPin !== undefined;
-		const bPinned = bPin !== undefined;
-		if (aPinned !== bPinned) {
-			return aPinned ? -1 : 1;
-		}
-		if (aPinned && bPinned) {
-			return aPin - bPin;
-		}
-
-		return (
-			a.symbol.localeCompare(b.symbol) ||
-			a.name.localeCompare(b.name) ||
-			a.network.name.localeCompare(b.network.name) ||
-			+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO)) ||
-			(b.usdMarketCap ?? 0) - (a.usdMarketCap ?? 0)
-		);
-	});
+	// We intentionally use the “decorate → sort → undecorate” pattern here.
+	//
+	// Each item is first mapped to its precomputed sort fields (`unwrapTokenSortFields`)
+	// so the comparator works only with plain, normalised values. This ensures that:
+	//   • expensive field normalisation runs exactly once per element (not per comparison),
+	//   • the comparator remains simple and fast (no repeated unwrapping or branching),
+	//   • sorting logic is shared between tokens and groups in a uniform way.
+	//
+	// Although this introduces two linear passes (map before and after sort),
+	// the list size is small (~100–150 items) and sorting runs infrequently
+	// (~every 30s), so the additional allocations are negligible. This approach
+	// favours clarity and predictable performance over micro-optimisation.
+	return $tokens
+		.map((token) => ({ token, u: unwrapTokenSortFields(token) }))
+		.sort((a, b) => comparator(a.u, b.u))
+		.map(({ token }) => token);
 };
 
 /**

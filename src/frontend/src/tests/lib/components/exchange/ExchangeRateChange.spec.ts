@@ -71,18 +71,19 @@ describe('ExchangeRateChange', () => {
 		const { getByText, rerender } = render(ExchangeRateChange, {
 			props: {
 				usdPriceChangePercentage24h: 1.23456,
-				withBackground: true
+				background: 'light'
 			}
 		});
 
-		expect(getByText('1.23%')).toHaveClass('bg-success-subtle-30');
+		expect(getByText('1.23%')).toHaveClass('bg-primary');
 
 		await rerender({
-			usdPriceChangePercentage24h: -123.456,
-			withBackground: true
+			usdPriceChangePercentage24h: 1.23456,
+			background: 'dark'
 		});
 
-		expect(getByText('123%')).toHaveClass('bg-error-subtle-30');
+		expect(getByText('1.23%')).toHaveClass('bg-primary-inverted');
+		expect(getByText('1.23%')).toHaveClass('bg-opacity-30');
 	});
 
 	it('should render the time-frame', () => {
