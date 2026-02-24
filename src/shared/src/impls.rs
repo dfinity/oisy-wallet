@@ -34,7 +34,7 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
-use crate::types::exchange::{ExchangeData};
+use crate::types::exchange::{ExchangeData, ExchangeRate};
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
@@ -844,3 +844,4 @@ validate_on_deserialize!(ErcToken);
 validate_on_deserialize!(ErcTokenId);
 validate_on_deserialize!(UserToken);
 validate_on_deserialize!(ExchangeData);
+validate_on_deserialize!(ExchangeRate);
