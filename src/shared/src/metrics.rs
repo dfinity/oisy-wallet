@@ -60,7 +60,7 @@ fn encode_metrics(w: &mut MetricsEncoder<Vec<u8>>) -> std::io::Result<()> {
     )?;
     #[allow(clippy::cast_precision_loss)]
     w.encode_gauge(
-        "ic_eth_wallet_wasm_heap_size_bytes",
+        "ic_eth_wallet_wasm_memory_size_bytes",
         wasm_memory_size_bytes() as f64,
         "Wasm heap size in bytes, useful for alerting on growth towards the 4 GiB limit",
     )?;
