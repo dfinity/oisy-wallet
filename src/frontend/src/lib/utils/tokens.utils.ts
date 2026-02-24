@@ -21,7 +21,6 @@ import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
-import type { TokenGroupId } from '$lib/types/token-group';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -48,7 +47,7 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 
 	return {
 		deprecated: isGroup ? false : (t.token.deprecated ?? false),
-		id: isGroup ? t.group.groupData.id : t.token.id,
+		id: isGroup ? t.group.tokens[0].id : t.token.id,
 		symbol: isGroup ? t.group.groupData.symbol : t.token.symbol,
 		name: isGroup ? t.group.groupData.name : t.token.name,
 		networkName: isGroup ? '' : t.token.network.name,
@@ -60,12 +59,6 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 };
 
 type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
-
-type SortableId = TokenId | TokenGroupId;
-
-type Pin = Readonly<{ id: SortableId }>;
-
-type SortableItem<T extends Token> = TokenUi<T> | TokenUiOrGroupUi;
 
 /**
  * Creates a comparator function for sorting tokens based on multiple criteria:
@@ -88,7 +81,7 @@ const createTokenComparator =
 		pinIndexById,
 		primarySortStrategy
 	}: {
-		pinIndexById: ReadonlyMap<SortableId, number>;
+		pinIndexById: ReadonlyMap<TokenId, number>;
 		primarySortStrategy: TokensSortType;
 	}) =>
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
@@ -166,16 +159,6 @@ const createTokenComparator =
 		);
 	};
 
-export function sortTokens<T extends Token>(args: {
-	$tokens: TokenUi<T>[];
-	$tokensToPin: ReadonlyArray<Pin>;
-	primarySortStrategy?: TokensSortType;
-}): TokenUi<T>[];
-export function sortTokens(args: {
-	$tokens: TokenUiOrGroupUi[];
-	$tokensToPin: ReadonlyArray<Pin>;
-	primarySortStrategy?: TokensSortType;
-}): TokenUiOrGroupUi[];
 /**
  * Sorts tokens using balance-aware and pin-aware prioritisation.
  *
