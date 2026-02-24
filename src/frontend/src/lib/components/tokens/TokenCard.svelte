@@ -92,9 +92,9 @@
 
 		{#snippet subtitle()}
 			<span
-				class="flex items-center gap-1 text-sm sm:gap-2"
-				class:ml-2={!asNetwork}
-				class:sm:ml-4={!asNetwork}
+			class="flex items-baseline gap-1 text-sm sm:gap-2"
+			class:ml-2={!asNetwork}
+			class:sm:ml-2.5={!asNetwork}
 			>
 				{#if !asNetwork}
 					{formattedExchangeRate}
