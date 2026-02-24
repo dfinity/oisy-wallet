@@ -15,7 +15,6 @@ fn add_to_token_activity(
     token_activity.insert(token_id, timestamp);
 }
 
-#[allow(dead_code)]
 pub fn mark_token_active(token_id: &CustomTokenId) {
     mutate_state(|s| {
         add_to_token_activity(
@@ -26,7 +25,6 @@ pub fn mark_token_active(token_id: &CustomTokenId) {
     });
 }
 
-#[allow(dead_code)]
 pub fn mark_tokens_active(token_ids: &[CustomTokenId]) {
     let now = time();
 

@@ -66,6 +66,7 @@ use crate::{
     bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
+    token_activity::{mark_token_active, mark_tokens_active},
     types::{ContactMap, PowChallengeMap, TokenActivityMap},
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
@@ -161,7 +162,6 @@ pub struct State {
     pow_challenge: PowChallengeMap,
     contact: ContactMap,
     btc_user_pending_transactions: BtcUserPendingTransactionsMap,
-    #[allow(dead_code)]
     token_activity: TokenActivityMap,
 }
 
@@ -282,12 +282,19 @@ pub fn set_custom_token(token: CustomToken) {
         CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
     };
 
+    mark_token_active(&CustomTokenId::from(&token.token));
+
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    let ids = tokens
+        .iter()
+        .map(|t| CustomTokenId::from(&t.token))
+        .collect::<Vec<_>>();
 
     mutate_state(|s| {
         for token in tokens {
@@ -298,6 +305,8 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
             add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
         }
     });
+
+    mark_tokens_active(&ids);
 }
 
 /// Remove custom token for the user.
@@ -319,7 +328,17 @@ pub fn remove_custom_token(token: CustomToken) {
 #[must_use]
 pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
+
+    let tokens = read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0);
+
+    mark_tokens_active(
+        &tokens
+            .iter()
+            .map(|t| CustomTokenId::from(&t.token))
+            .collect::<Vec<_>>(),
+    );
+
+    tokens
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
