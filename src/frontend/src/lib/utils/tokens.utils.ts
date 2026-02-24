@@ -21,7 +21,6 @@ import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
-import type { TokenGroupId } from '$lib/types/token-group';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
