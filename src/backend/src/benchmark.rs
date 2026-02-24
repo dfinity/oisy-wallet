@@ -245,6 +245,16 @@ fn bench_set_many_custom_tokens_200() -> BenchResult {
     bench_set_many_custom_tokens_with_count(200)
 }
 
+#[bench(raw)]
+fn bench_set_many_custom_tokens_200() -> BenchResult {
+    bench_set_many_custom_tokens_with_count(200)
+}
+
+#[bench(raw)]
+fn bench_set_many_custom_tokens_200() -> BenchResult {
+    bench_set_many_custom_tokens_with_count(200)
+}
+
 fn bench_list_custom_tokens_with_count(count: u8) -> BenchResult {
     let sp = bench_stored_principal();
 
