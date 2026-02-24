@@ -74,22 +74,9 @@ export type BtcAddPendingTransactionError =
 	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
+	ii_delegation_chain: [] | [IIDelegationChain];
 	network: BitcoinNetwork;
 	utxos: Array<Utxo>;
-	ii_delegation_chain: [] | [IIDelegationChain];
-}
-export interface Delegation {
-	pubkey: Uint8Array;
-	expiration: bigint;
-	targets: [] | [Array<Principal>];
-}
-export interface IIDelegationChain {
-	delegations: Array<SignedDelegation>;
-	public_key: Uint8Array;
-}
-export interface SignedDelegation {
-	delegation: Delegation;
-	signature: Uint8Array;
 }
 export type BtcAddPendingTransactionResult = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type BtcAddress =
@@ -227,6 +214,11 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
+export interface Delegation {
+	pubkey: Uint8Array;
+	targets: [] | [Array<Principal>];
+	expiration: bigint;
+}
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
 export interface ErcToken {
 	token_address: string;
@@ -267,6 +259,10 @@ export interface HttpResponse {
 	body: Uint8Array;
 	headers: Array<[string, string]>;
 	status_code: number;
+}
+export interface IIDelegationChain {
+	public_key: Uint8Array;
+	delegations: Array<SignedDelegation>;
 }
 export interface IcrcToken {
 	ledger_id: Principal;
@@ -350,6 +346,10 @@ export interface Settings {
 	networks: NetworksSettings;
 	dapp: DappSettings;
 	experimental_features: ExperimentalFeaturesSettings;
+}
+export interface SignedDelegation {
+	signature: Uint8Array;
+	delegation: Delegation;
 }
 export interface SplToken {
 	decimals: [] | [number];
@@ -488,6 +488,9 @@ export interface _SERVICE {
 	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
 	/**
 	 * Adds a pending Bitcoin transaction for the caller.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. This protects against unauthorized CLI callers.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `BtcAddPendingTransactionError`.
