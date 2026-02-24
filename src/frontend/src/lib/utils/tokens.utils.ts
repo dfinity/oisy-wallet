@@ -220,10 +220,24 @@ export function sortTokens<T extends Token>({
 		primarySortStrategy
 	});
 
-	// Precompute sort keys once per element.
+	// We intentionally precompute sort keys once per element before sorting.
+	//
+	// Each token is first normalised via `unwrapTokenSortFields`, so the
+	// comparator operates only on plain, precomputed values. This ensures that:
+	//   • expensive field normalisation runs exactly once per element (not per comparison),
+	//   • the comparator remains simple and predictable,
+	//   • sorting logic stays consistent between tokens and groups.
+	//
+	// We then sort an array of indices instead of allocating wrapper objects
+	// ({ token, u }) per element. This avoids per-item object allocation while
+	// keeping the same “decorate → sort → project” structure conceptually.
+	//
+	// Given the small list size (~100–150 items) and low frequency (~every 30s),
+	// the additional linear passes are negligible and favour clarity and
+	// controlled performance over micro-optimisation.
+
 	const unwrapped = $tokens.map(unwrapTokenSortFields);
 
-	// Sort indices instead of allocating wrapper objects per element.
 	const indices = Array.from({ length: $tokens.length }, (_, i) => i);
 
 	indices.sort((i, j) => comparator(unwrapped[i], unwrapped[j]));
