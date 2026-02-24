@@ -5,9 +5,14 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    backend_config::Config, bitcoin::StoredPendingTransaction, contact::StoredContacts,
-    custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
-    user_profile::StoredUserProfile, Timestamp,
+    backend_config::Config,
+    bitcoin::StoredPendingTransaction,
+    contact::StoredContacts,
+    custom_token::{CustomToken, CustomTokenId},
+    pow::StoredChallenge,
+    token::UserToken,
+    user_profile::StoredUserProfile,
+    Timestamp,
 };
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
@@ -33,3 +38,20 @@ pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VM
 pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>;
 pub type BtcUserPendingTransactionsMap =
     StableBTreeMap<StoredPrincipal, Candid<PendingTransactionsMap>, VMem>;
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct ExchangeData {
+    pub timestamp_ns: Timestamp,
+    pub price: f64,
+    pub price_24h_change_pct: Option<f64>,
+    pub market_cap: f64,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct ExchangeRate {
+    pub usd: ExchangeData,
+}
+
+pub type ExchangeRateMap = StableBTreeMap<Candid<CustomTokenId>, Candid<ExchangeRate>, VMem>;
+
+pub type TokenActivityMap = StableBTreeMap<Candid<CustomTokenId>, Timestamp, VMem>;

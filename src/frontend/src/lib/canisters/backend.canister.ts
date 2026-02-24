@@ -6,6 +6,8 @@ import type {
 	Contact,
 	CreateChallengeResponse,
 	CustomToken,
+	CustomTokenId,
+	ExchangeRate,
 	GetAllowedCyclesResponse,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -337,5 +339,27 @@ export class BackendCanister extends Canister<BackendService> {
 			experimental_features: mapUserExperimentalFeatures(experimentalFeatures),
 			current_user_version: toNullable(currentUserVersion)
 		});
+	};
+
+	getExchangeRate = ({
+		token_id,
+		certified
+	}: {
+		token_id: CustomTokenId;
+		certified: boolean;
+	}): Promise<[] | [ExchangeRate]> => {
+		const { get_exchange_rate } = this.caller({ certified });
+		return get_exchange_rate(token_id);
+	};
+
+	getExchangeRates = ({
+		token_ids,
+		certified
+	}: {
+		token_ids: CustomTokenId[];
+		certified: boolean;
+	}): Promise<Array<[CustomTokenId, [] | [ExchangeRate]]>> => {
+		const { get_exchange_rates } = this.caller({ certified });
+		return get_exchange_rates(token_ids);
 	};
 }

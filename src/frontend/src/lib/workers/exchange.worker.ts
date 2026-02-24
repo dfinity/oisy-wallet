@@ -5,16 +5,8 @@ import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
 import {
-	exchangeRateBNBToUsd,
-	exchangeRateBTCToUsd,
-	exchangeRateERC20ToUsd,
-	exchangeRateETHToUsd,
-	exchangeRateICPToUsd,
-	exchangeRateICRCToUsd,
-	exchangeRatePOLToUsd,
-	exchangeRateSOLToUsd,
-	exchangeRateSPLToUsd,
-	exchangeRateUsdToCurrency
+	exchangeRateUsdToCurrency,
+	fetchAllExchangeRatesFromBackend
 } from '$lib/services/exchange.services';
 import type { CoingeckoPlatformId } from '$lib/types/coingecko';
 import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
@@ -134,33 +126,20 @@ const syncExchange = async ({
 	);
 
 	try {
-		const erc20Prices = await Promise.all(
-			erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params))
-		);
-
-		const [
-			currentExchangeRate,
-			currentEthPrice,
-			currentBtcPrice,
-			currentErc20Prices,
-			currentIcpPrice,
-			currentIcrcPrices,
-			currentSolPrice,
-			currentSplPrices,
-			currentBnbPrice,
-			currentPolPrice
-		] = await Promise.all([
+		const [currentExchangeRate, backendPrices] = await Promise.all([
 			exchangeRateUsdToCurrency(currentCurrency),
-			exchangeRateETHToUsd(),
-			exchangeRateBTCToUsd(),
-			erc20Prices.reduce((acc, prices) => ({ ...acc, ...prices }), {}),
-			exchangeRateICPToUsd(),
-			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
-			exchangeRateSOLToUsd(),
-			exchangeRateSPLToUsd(splTokenAddresses),
-			exchangeRateBNBToUsd(),
-			exchangeRatePOLToUsd()
+			fetchAllExchangeRatesFromBackend({
+				erc20Addresses: erc20ContractAddresses,
+				icrcCanisterIds: icrcLedgerCanisterIds,
+				splTokenAddresses
+			})
 		]);
+
+		const {
+			currentErc20Prices,
+			currentIcrcPrices,
+			currentSplPrices
+		} = backendPrices;
 
 		const currentErc4626Prices = await calculateErc4626Prices({
 			erc20Prices: currentErc20Prices,
@@ -175,16 +154,16 @@ const syncExchange = async ({
 					exchangeRate24hChangeMultiplier: currentExchangeRate?.fx24hChangeMultiplier,
 					currency: currentCurrency
 				},
-				currentEthPrice,
-				currentBtcPrice,
+				currentEthPrice: undefined,
+				currentBtcPrice: undefined,
 				currentErc20Prices,
-				currentIcpPrice,
+				currentIcpPrice: undefined,
 				currentIcrcPrices,
-				currentSolPrice,
+				currentSolPrice: undefined,
 				currentSplPrices,
 				currentErc4626Prices,
-				currentBnbPrice,
-				currentPolPrice
+				currentBnbPrice: undefined,
+				currentPolPrice: undefined
 			}
 		} as PostMessage<PostMessageDataResponseExchange>);
 	} catch (err: unknown) {

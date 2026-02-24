@@ -56,14 +56,18 @@ use shared::{
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
-    BtcUserPendingTransactionsMap, Candid, ConfigCell, CustomTokenMap, StoredPrincipal,
-    UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
+    BtcUserPendingTransactionsMap, Candid, ConfigCell, CustomTokenId, CustomTokenMap, ExchangeRate,
+    ExchangeRateMap, StoredPrincipal, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap,
+    UserTokenMap,
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 use crate::{
     bitcoin_api::get_current_fee_percentiles,
+    exchange::{
+        mark_token_active, mark_tokens_active, refresh_exchange_rates, PRICE_REFRESH_INTERVAL_SEC,
+    },
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
     types::{ContactMap, PowChallengeMap},
@@ -78,6 +82,7 @@ mod bitcoin_utils;
 mod btc_user_pending_tx_model;
 mod config;
 mod contacts;
+mod exchange;
 mod guards;
 mod impls;
 mod pow;
@@ -100,6 +105,8 @@ const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 const BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(7);
+const EXCHANGE_RATE_MEMORY_ID: MemoryId = MemoryId::new(8);
+const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(9);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -119,6 +126,8 @@ thread_local! {
             btc_user_pending_transactions: BtcUserPendingTransactionsMap::init(
                 mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),
             ),
+            exchange_rates: ExchangeRateMap::init(mm.borrow().get(EXCHANGE_RATE_MEMORY_ID)),
+            token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
         })
     );
 }
@@ -158,6 +167,8 @@ pub struct State {
     pow_challenge: PowChallengeMap,
     contact: ContactMap,
     btc_user_pending_transactions: BtcUserPendingTransactionsMap,
+    exchange_rates: ExchangeRateMap,
+    token_activity: TokenActivityMap,
 }
 
 fn set_config(arg: InitArg) {
@@ -177,6 +188,10 @@ fn start_periodic_housekeeping_timers() {
     // Then periodically:
     let hour = Duration::from_secs(60 * 60);
     let _ = set_timer_interval(hour, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+
+    // Refresh exchange rates periodically
+    let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
+    let _ = set_timer_interval(refresh_interval, || ic_cdk::spawn(refresh_exchange_rates()));
 }
 
 /// Runs hourly housekeeping tasks:
@@ -277,6 +292,8 @@ pub fn set_custom_token(token: CustomToken) {
         CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
     };
 
+    mark_token_active(&CustomTokenId::from(&token.token));
+
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
 }
 
@@ -293,6 +310,13 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
             add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
         }
     });
+
+    mark_tokens_active(
+        &tokens
+            .iter()
+            .map(|t| CustomTokenId::from(&t.token))
+            .collect::<Vec<_>>(),
+    );
 }
 
 /// Remove custom token for the user.
@@ -314,7 +338,36 @@ pub fn remove_custom_token(token: CustomToken) {
 #[must_use]
 pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
+    let tokens = read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0);
+
+    mark_tokens_active(
+        &tokens
+            .iter()
+            .map(|t| CustomTokenId::from(&t.token))
+            .collect::<Vec<_>>(),
+    );
+
+    tokens
+}
+
+#[query(guard = "caller_is_not_anonymous")]
+pub fn get_exchange_rates(
+    token_ids: Vec<CustomTokenId>,
+) -> Vec<(CustomTokenId, Option<ExchangeRate>)> {
+    read_state(|s| {
+        token_ids
+            .into_iter()
+            .map(|id| {
+                let rate = s.exchange_rates.get(&Candid(id.clone())).map(|c| c.0);
+                (id, rate)
+            })
+            .collect()
+    })
+}
+
+#[query(guard = "caller_is_not_anonymous")]
+pub fn get_exchange_rate(token_id: CustomTokenId) -> Option<ExchangeRate> {
+    read_state(|s| s.exchange_rates.get(&Candid(token_id)).map(|c| c.0))
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;

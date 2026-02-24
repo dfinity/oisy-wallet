@@ -40,6 +40,11 @@ pub struct IcPunksToken {
 #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
 #[serde(remote = "Self")]
 pub struct SplTokenId(pub String);
+impl From<SplTokenId> for String {
+    fn from(value: SplTokenId) -> Self {
+        value.0
+    }
+}
 
 /// A Solana token
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -54,6 +59,11 @@ pub struct SplToken {
 #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
 #[serde(remote = "Self")]
 pub struct ErcTokenId(pub String);
+impl From<ErcTokenId> for String {
+    fn from(value: ErcTokenId) -> Self {
+        value.0
+    }
+}
 
 /// EVM chain ID
 ///

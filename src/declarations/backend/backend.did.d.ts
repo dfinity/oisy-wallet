@@ -52,8 +52,8 @@ export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSign
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export type ApproveError =
 	| {
-			GenericError: { message: string; error_code: bigint };
-	  }
+		GenericError: { message: string; error_code: bigint };
+	}
 	| { TemporarilyUnavailable: null }
 	| { Duplicate: { duplicate_of: bigint } }
 	| { BadFee: { expected_fee: bigint } }
@@ -91,8 +91,8 @@ export interface BtcGetFeePercentilesResponse {
 }
 export type BtcGetFeePercentilesResult =
 	| {
-			Ok: BtcGetFeePercentilesResponse;
-	  }
+		Ok: BtcGetFeePercentilesResponse;
+	}
 	| { Err: SelectedUtxosFeeError };
 export type BtcGetPendingTransactionsError = {
 	InternalError: { msg: string };
@@ -106,8 +106,8 @@ export interface BtcGetPendingTransactionsRequest {
 }
 export type BtcGetPendingTransactionsResult =
 	| {
-			Ok: BtcGetPendingTransactionsReponse;
-	  }
+		Ok: BtcGetPendingTransactionsReponse;
+	}
 	| { Err: BtcGetPendingTransactionsError };
 export type BtcSelectUserUtxosFeeResult =
 	| { Ok: SelectedUtxosFeeResponse }
@@ -199,6 +199,15 @@ export interface CustomToken {
 	version: [] | [bigint];
 	enabled: boolean;
 }
+export type CustomTokenId =
+	| { Icrc: Principal }
+	| { SolMainnet: string }
+	| { SolDevnet: string }
+	| { Ethereum: [string, bigint] }
+	| { ExtV2: Principal }
+	| { Dip721: Principal }
+	| { IcPunks: Principal }
+	| { IcPunks: Principal };
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
 }
@@ -235,6 +244,15 @@ export interface GetAllowedCyclesResponse {
 export type GetAllowedCyclesResult =
 	| { Ok: GetAllowedCyclesResponse }
 	| { Err: GetAllowedCyclesError };
+export interface ExchangeData {
+	price: number;
+	timestamp_ns: bigint;
+	price_24h_change_pct: [] | [number];
+	market_cap: number;
+}
+export interface ExchangeRate {
+	usd: ExchangeData;
+}
 export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
 export type GetUserProfileError = { NotFound: null };
@@ -260,8 +278,8 @@ export interface IcrcToken {
 export type Icrcv2AccountId =
 	| { Account: Uint8Array }
 	| {
-			WithPrincipal: { owner: Principal; subaccount: [] | [Uint8Array] };
-	  };
+		WithPrincipal: { owner: Principal; subaccount: [] | [Uint8Array] };
+	};
 export type ImageMimeType =
 	| { 'image/gif': null }
 	| { 'image/png': null }
@@ -376,19 +394,19 @@ export type TokenAccountId =
 export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
-			InvalidArgPercentageOutOfRange: {
-				max: number;
-				min: number;
-				percentage: number;
-			};
-	  }
+		InvalidArgPercentageOutOfRange: {
+			max: number;
+			min: number;
+			percentage: number;
+		};
+	}
 	| { CouldNotGetBalanceFromCyclesLedger: null }
 	| {
-			CouldNotTopUpCyclesLedger: {
-				tried_to_send: bigint;
-				available: bigint;
-			};
-	  };
+		CouldNotTopUpCyclesLedger: {
+			tried_to_send: bigint;
+			available: bigint;
+		};
+	};
 export interface TopUpCyclesLedgerRequest {
 	threshold: [] | [bigint];
 	percentage: [] | [number];
@@ -580,6 +598,11 @@ export interface _SERVICE {
 	 * - `Other`: If another error occurred during the operation
 	 */
 	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
+	get_exchange_rate: ActorMethod<[CustomTokenId], [] | [ExchangeRate]>;
+	get_exchange_rates: ActorMethod<
+		[Array<CustomTokenId>],
+		Array<[CustomTokenId, [] | [ExchangeRate]]>
+	>;
 	/**
 	 * API method to get cycle balance and burn rate.
 	 */

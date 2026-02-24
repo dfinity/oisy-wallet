@@ -1,40 +1,20 @@
+import type { CustomTokenId, ExchangeRate } from '$declarations/backend/backend.did';
+import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
+import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
+import { getExchangeRates } from '$lib/api/backend.api';
 import { Currency } from '$lib/enums/currency';
-import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
-import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
+import { simplePrice } from '$lib/rest/coingecko.rest';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
-import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
-import {
-	findMissingLedgerCanisterIds,
-	formatKongSwapToCoingeckoPrices
-} from '$lib/utils/exchange.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
-
-const fetchIcrcPricesFromCoingecko = (
-	ledgerCanisterIds: LedgerCanisterIdText[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
-	simpleTokenPrice({
-		id: 'internet-computer',
-		vs_currencies: Currency.USD,
-		contract_addresses: ledgerCanisterIds,
-		include_market_cap: true,
-		include_24hr_change: true
-	});
-
-const fetchIcrcPricesFromKongSwap = async (
-	missingIds: LedgerCanisterIdText[]
-): Promise<CoingeckoSimpleTokenPriceResponse> => {
-	const tokens = await fetchBatchKongSwapPrices(missingIds);
-
-	return formatKongSwapToCoingeckoPrices(tokens);
-};
 
 // To calculate an FX rate for a currency vs USD, we cross-reference a very liquid asset (BTC) with the currency and with the USD.
 // In this way, we can easily calculate the cross USDXXX rate as BTCUSD / BTCXXX.
@@ -77,118 +57,146 @@ export const exchangeRateUsdToCurrency = async (
 	return { rate, fx24hChangeMultiplier };
 };
 
-export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
-	simplePrice({
-		ids: 'ethereum',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
-
-export const exchangeRateBTCToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
-	simplePrice({
-		ids: 'bitcoin',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
-
-export const exchangeRateICPToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
-	simplePrice({
-		ids: 'internet-computer',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
-
-export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
-	simplePrice({
-		ids: 'solana',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
-
-export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
-	simplePrice({
-		ids: 'binancecoin',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
-
-export const exchangeRatePOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
-	simplePrice({
-		ids: 'polygon-ecosystem-token',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
-
-export const exchangeRateERC20ToUsd = async ({
-	coingeckoPlatformId: id,
-	contractAddresses
-}: CoingeckoErc20PriceParams): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
-	if (contractAddresses.length === 0) {
-		return null;
+export const toCustomTokenId = (token: {
+	address: string;
+	coingeckoId?: string;
+	standard?: string;
+	chain_id?: bigint;
+}): CustomTokenId | undefined => {
+	if (token.standard === 'icrc') {
+		return { Icrc: Principal.fromText(token.address) };
 	}
 
-	return await simpleTokenPrice({
-		id,
-		vs_currencies: Currency.USD,
-		contract_addresses: contractAddresses.map(({ address }) => address),
-		include_market_cap: true,
-		include_24hr_change: true
-	});
+	const chainId =
+		token.chain_id ??
+		(token.coingeckoId === 'ethereum'
+			? 1n
+			: token.coingeckoId === 'binance-smart-chain'
+				? 56n
+				: token.coingeckoId === 'polygon-pos'
+					? 137n
+					: token.coingeckoId === 'base'
+						? 8453n
+						: token.coingeckoId === 'arbitrum-one'
+							? 42161n
+							: undefined);
+
+	if (nonNullish(chainId)) {
+		return { Ethereum: [token.address, chainId] };
+	}
+
+	return undefined;
 };
 
-export const exchangeRateICRCToUsd = async (
-	ledgerCanisterIds: LedgerCanisterIdText[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
-	if (ledgerCanisterIds.length === 0) {
-		return null;
+const mapExchangeRateToCoingecko = (
+	rate: [] | [ExchangeRate]
+): { usd: number; usd_24h_change?: number; usd_market_cap: number } | undefined => {
+	const r = rate.length > 0 ? rate[0] : undefined;
+	if (isNullish(r)) {
+		return undefined;
 	}
-
-	const coingeckoPrices = await fetchIcrcPricesFromCoingecko(ledgerCanisterIds);
-	const missingIds = findMissingLedgerCanisterIds({
-		allLedgerCanisterIds: ledgerCanisterIds,
-		coingeckoResponse: coingeckoPrices
-	});
-	if (missingIds.length === 0) {
-		return coingeckoPrices;
-	}
-
-	const kongSwapPrices = await fetchIcrcPricesFromKongSwap(missingIds);
+	const change = r.usd.price_24h_change_pct.length > 0 ? r.usd.price_24h_change_pct[0] : undefined;
 	return {
-		...(coingeckoPrices ?? {}),
-		...(kongSwapPrices ?? {})
+		usd: r.usd.price,
+		usd_24h_change: change,
+		usd_market_cap: r.usd.market_cap
 	};
 };
 
-export const exchangeRateSPLToUsd = async (
-	tokenAddresses: SplTokenAddress[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
-	if (tokenAddresses.length === 0) {
-		return null;
-	}
+export const fetchAllExchangeRatesFromBackend = async ({
+	erc20Addresses,
+	icrcCanisterIds,
+	splTokenAddresses
+}: {
+	erc20Addresses: Erc20ContractAddressWithNetwork[];
+	icrcCanisterIds: LedgerCanisterIdText[];
+	splTokenAddresses: SplTokenAddress[];
+}): Promise<{
+	currentErc20Prices: CoingeckoSimpleTokenPriceResponse;
+	currentIcrcPrices: CoingeckoSimpleTokenPriceResponse;
+	currentSplPrices: CoingeckoSimpleTokenPriceResponse;
+}> => {
+	const tokenIds: CustomTokenId[] = [];
 
-	return await simpleTokenPrice({
-		id: 'solana',
-		vs_currencies: Currency.USD,
-		contract_addresses: tokenAddresses,
-		include_market_cap: true,
-		include_24hr_change: true
+	// Map ERC20
+	const erc20TokenIds = erc20Addresses
+		.map((t) => toCustomTokenId({ address: t.address, coingeckoId: t.coingeckoId }))
+		.filter(nonNullish);
+	tokenIds.push(...erc20TokenIds);
+
+	// Map ICRC
+	const icrcTokenIds = icrcCanisterIds.map((id) => ({ Icrc: Principal.fromText(id) }));
+	tokenIds.push(...icrcTokenIds);
+
+	// Map SPL
+	const splIds = splTokenAddresses.map((addr) => ({ SolMainnet: addr }) as CustomTokenId);
+	tokenIds.push(...splIds);
+
+	const response = await getExchangeRates({
+		token_ids: tokenIds,
+		certified: false,
+		identity: undefined // Anonymous
 	});
+
+	const findRate = (
+		id: CustomTokenId
+	): { usd: number; usd_24h_change?: number; usd_market_cap: number } | undefined => {
+		const match = response.find(([tokenId]) => JSON.stringify(tokenId) === JSON.stringify(id));
+		return match ? mapExchangeRateToCoingecko(match[1]) : undefined;
+	};
+
+
+
+	const erc20Prices: CoingeckoSimpleTokenPriceResponse = {};
+	erc20Addresses.forEach((t) => {
+		const id = toCustomTokenId({ address: t.address, coingeckoId: t.coingeckoId });
+		if (nonNullish(id)) {
+			const rate = findRate(id);
+			if (nonNullish(rate)) {
+				erc20Prices[t.address.toLowerCase()] = rate;
+			}
+		}
+	});
+
+	const icrcPrices: CoingeckoSimpleTokenPriceResponse = {};
+	icrcCanisterIds.forEach((id) => {
+		const rate = findRate({ Icrc: Principal.fromText(id) });
+		if (nonNullish(rate)) {
+			icrcPrices[id.toLowerCase()] = rate;
+		}
+	});
+
+	const splPrices: CoingeckoSimpleTokenPriceResponse = {};
+	splTokenAddresses.forEach((addr) => {
+		const rate = findRate({ SolMainnet: addr } as CustomTokenId);
+		if (nonNullish(rate)) {
+			splPrices[addr.toLowerCase()] = rate;
+		}
+	});
+
+	return {
+		currentErc20Prices: erc20Prices,
+		currentIcrcPrices: icrcPrices,
+		currentSplPrices: splPrices
+	};
 };
 
 export const syncExchange = (data: PostMessageDataResponseExchange | undefined) => {
 	if (nonNullish(data)) {
-		exchangeStore.set([
-			data.currentEthPrice,
-			data.currentBtcPrice,
-			data.currentIcpPrice,
-			data.currentSolPrice,
-			data.currentBnbPrice,
-			data.currentPolPrice,
-			data.currentErc20Prices,
-			data.currentIcrcPrices,
-			data.currentSplPrices,
-			data.currentErc4626Prices
-		]);
+		exchangeStore.set(
+			[
+				data.currentEthPrice,
+				data.currentBtcPrice,
+				data.currentIcpPrice,
+				data.currentSolPrice,
+				data.currentBnbPrice,
+				data.currentPolPrice,
+				data.currentErc20Prices,
+				data.currentIcrcPrices,
+				data.currentSplPrices,
+				data.currentErc4626Prices
+			].filter(nonNullish)
+		);
 
 		if (nonNullish(data.currentExchangeRate)) {
 			// We set the reference currency for the exchange rate to avoid possible race condition where the user changes the current currency while the value is being uploaded, leading to inconsistent data in the UI.

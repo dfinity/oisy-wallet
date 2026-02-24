@@ -138,6 +138,7 @@ dependencies = [
  "pretty_assertions",
  "serde",
  "serde_bytes",
+ "serde_json",
  "sha2 0.10.9",
  "shared",
 ]
