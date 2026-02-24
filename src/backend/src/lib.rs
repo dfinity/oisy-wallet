@@ -88,11 +88,12 @@ mod token;
 mod types;
 mod user_profile;
 mod user_profile_model;
-mod benchmark;
-
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(feature = "canbench-rs")]
+mod benchmark;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
