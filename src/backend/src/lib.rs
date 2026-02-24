@@ -281,7 +281,12 @@ pub fn set_custom_token(token: CustomToken) {
 }
 
 #[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
+    if tokens.len() > token::MAX_TOKEN_LIST_LENGTH {
+        ic_cdk::trap("Too many tokens in a single call");
+    }
+
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
