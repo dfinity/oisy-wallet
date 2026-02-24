@@ -34,7 +34,7 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
-use crate::types::exchange::{ExchangeData, ExchangeRate};
+use crate::types::exchange::{ExchangeData};
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
