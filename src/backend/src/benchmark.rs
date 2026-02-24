@@ -2,7 +2,7 @@
 
 use std::{collections::BTreeMap, sync::OnceLock};
 
-use canbench_rs::bench;
+use canbench_rs::{bench, bench_fn, BenchResult};
 use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
@@ -134,7 +134,7 @@ fn bench_stats() {
     std::hint::black_box(read_state(|s| Stats::from(s)));
 }
 
-fn bench_get_account_creation_timestamps_with_count(count: u64) -> canbench_rs::BenchResult {
+fn bench_get_account_creation_timestamps_with_count(count: u64) -> BenchResult {
     for i in 0..count {
         let sp = StoredPrincipal(Principal::from_slice(&i.to_be_bytes()));
 
@@ -148,7 +148,7 @@ fn bench_get_account_creation_timestamps_with_count(count: u64) -> canbench_rs::
         });
     }
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         std::hint::black_box(read_state(|s| {
             s.user_profile
                 .iter()
@@ -162,17 +162,17 @@ fn bench_get_account_creation_timestamps_with_count(count: u64) -> canbench_rs::
 }
 
 #[bench(raw)]
-fn bench_get_account_creation_timestamps_5() -> canbench_rs::BenchResult {
+fn bench_get_account_creation_timestamps_5() -> BenchResult {
     bench_get_account_creation_timestamps_with_count(5)
 }
 
 #[bench(raw)]
-fn bench_get_account_creation_timestamps_50() -> canbench_rs::BenchResult {
+fn bench_get_account_creation_timestamps_50() -> BenchResult {
     bench_get_account_creation_timestamps_with_count(50)
 }
 
 #[bench(raw)]
-fn bench_get_account_creation_timestamps_200() -> canbench_rs::BenchResult {
+fn bench_get_account_creation_timestamps_200() -> BenchResult {
     bench_get_account_creation_timestamps_with_count(200)
 }
 
@@ -207,11 +207,11 @@ fn bench_http_request_not_found() {
 // ---------------------------------------------------------------------------
 
 #[bench(raw)]
-fn bench_set_custom_token() -> canbench_rs::BenchResult {
+fn bench_set_custom_token() -> BenchResult {
     let sp = bench_stored_principal();
     let token = make_custom_token(1, 0xAA);
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         mutate_state(|s| {
             add_to_user_token(
                 sp,
@@ -223,7 +223,7 @@ fn bench_set_custom_token() -> canbench_rs::BenchResult {
     })
 }
 
-fn bench_set_many_custom_tokens_with_count(count: u8) -> canbench_rs::BenchResult {
+fn bench_set_many_custom_tokens_with_count(count: u8) -> BenchResult {
     let sp = bench_stored_principal();
 
     let tokens: Vec<CustomToken> = (0..count)
@@ -235,7 +235,7 @@ fn bench_set_many_custom_tokens_with_count(count: u8) -> canbench_rs::BenchResul
         })
         .collect();
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         mutate_state(|s| {
             for token in &tokens {
                 add_to_user_token(sp, &mut s.custom_token, token, &matches_custom_token(token));
@@ -245,16 +245,16 @@ fn bench_set_many_custom_tokens_with_count(count: u8) -> canbench_rs::BenchResul
 }
 
 #[bench(raw)]
-fn bench_set_many_custom_tokens_5() -> canbench_rs::BenchResult {
+fn bench_set_many_custom_tokens_5() -> BenchResult {
     bench_set_many_custom_tokens_with_count(5)
 }
 
 #[bench(raw)]
-fn bench_set_many_custom_tokens_200() -> canbench_rs::BenchResult {
+fn bench_set_many_custom_tokens_200() -> BenchResult {
     bench_set_many_custom_tokens_with_count(200)
 }
 
-fn bench_list_custom_tokens_with_count(count: u8) -> canbench_rs::BenchResult {
+fn bench_list_custom_tokens_with_count(count: u8) -> BenchResult {
     let sp = bench_stored_principal();
 
     for i in 0..count {
@@ -274,7 +274,7 @@ fn bench_list_custom_tokens_with_count(count: u8) -> canbench_rs::BenchResult {
         });
     }
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         std::hint::black_box(read_state(|s| {
             s.custom_token.get(&sp).unwrap_or_default().0
         }));
@@ -282,17 +282,17 @@ fn bench_list_custom_tokens_with_count(count: u8) -> canbench_rs::BenchResult {
 }
 
 #[bench(raw)]
-fn bench_list_custom_tokens_5() -> canbench_rs::BenchResult {
+fn bench_list_custom_tokens_5() -> BenchResult {
     bench_list_custom_tokens_with_count(5)
 }
 
 #[bench(raw)]
-fn bench_list_custom_tokens_200() -> canbench_rs::BenchResult {
+fn bench_list_custom_tokens_200() -> BenchResult {
     bench_list_custom_tokens_with_count(200)
 }
 
 #[bench(raw)]
-fn bench_remove_custom_token() -> canbench_rs::BenchResult {
+fn bench_remove_custom_token() -> BenchResult {
     let sp = bench_stored_principal();
     let token = make_custom_token(42, 0xDD);
     mutate_state(|s| {
@@ -304,7 +304,7 @@ fn bench_remove_custom_token() -> canbench_rs::BenchResult {
         );
     });
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         mutate_state(|s| {
             remove_from_user_token(sp, &mut s.custom_token, &matches_custom_token(&token));
         });
@@ -316,10 +316,10 @@ fn bench_remove_custom_token() -> canbench_rs::BenchResult {
 // ---------------------------------------------------------------------------
 
 #[bench(raw)]
-fn bench_create_user_profile() -> canbench_rs::BenchResult {
+fn bench_create_user_profile() -> BenchResult {
     let sp = StoredPrincipal(Principal::from_slice(&[0xBE; 10]));
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             let stored = user_profile::create_profile(sp, &mut m);
@@ -329,10 +329,10 @@ fn bench_create_user_profile() -> canbench_rs::BenchResult {
 }
 
 #[bench(raw)]
-fn bench_get_user_profile() -> canbench_rs::BenchResult {
+fn bench_get_user_profile() -> BenchResult {
     ensure_profile_version();
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         let sp = bench_stored_principal();
         std::hint::black_box(mutate_state(|s| {
             let m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
@@ -342,10 +342,10 @@ fn bench_get_user_profile() -> canbench_rs::BenchResult {
 }
 
 #[bench(raw)]
-fn bench_has_user_profile() -> canbench_rs::BenchResult {
+fn bench_has_user_profile() -> BenchResult {
     ensure_profile_version();
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         std::hint::black_box(user_profile::has_user_profile(bench_stored_principal()));
     })
 }
@@ -355,7 +355,7 @@ fn bench_has_user_profile() -> canbench_rs::BenchResult {
 // ---------------------------------------------------------------------------
 
 #[bench(raw)]
-fn bench_update_user_network_settings() -> canbench_rs::BenchResult {
+fn bench_update_user_network_settings() -> BenchResult {
     let version = ensure_profile_version();
     let sp = bench_stored_principal();
     let mut networks = BTreeMap::new();
@@ -367,7 +367,7 @@ fn bench_update_user_network_settings() -> canbench_rs::BenchResult {
         },
     );
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::update_network_settings(sp, version, networks.clone(), &mut m)
@@ -376,11 +376,11 @@ fn bench_update_user_network_settings() -> canbench_rs::BenchResult {
 }
 
 #[bench(raw)]
-fn bench_set_user_show_testnets() -> canbench_rs::BenchResult {
+fn bench_set_user_show_testnets() -> BenchResult {
     let version = ensure_profile_version();
     let sp = bench_stored_principal();
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::set_show_testnets(sp, version, true, &mut m)
@@ -389,11 +389,11 @@ fn bench_set_user_show_testnets() -> canbench_rs::BenchResult {
 }
 
 #[bench(raw)]
-fn bench_add_user_hidden_dapp_id() -> canbench_rs::BenchResult {
+fn bench_add_user_hidden_dapp_id() -> BenchResult {
     let version = ensure_profile_version();
     let sp = bench_stored_principal();
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::add_hidden_dapp_id(sp, version, "bench-dapp-id".to_string(), &mut m)
@@ -402,7 +402,7 @@ fn bench_add_user_hidden_dapp_id() -> canbench_rs::BenchResult {
 }
 
 #[bench(raw)]
-fn bench_update_user_agreements() -> canbench_rs::BenchResult {
+fn bench_update_user_agreements() -> BenchResult {
     let version = ensure_profile_version();
     let sp = bench_stored_principal();
     let agreements = UserAgreements {
@@ -416,7 +416,7 @@ fn bench_update_user_agreements() -> canbench_rs::BenchResult {
         privacy_policy: UserAgreement::default(),
     };
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::update_agreements(sp, version, agreements.clone(), &mut m)
@@ -425,7 +425,7 @@ fn bench_update_user_agreements() -> canbench_rs::BenchResult {
 }
 
 #[bench(raw)]
-fn bench_update_user_experimental_features() -> canbench_rs::BenchResult {
+fn bench_update_user_experimental_features() -> BenchResult {
     let version = ensure_profile_version();
     let sp = bench_stored_principal();
     let mut features = BTreeMap::new();
@@ -434,7 +434,7 @@ fn bench_update_user_experimental_features() -> canbench_rs::BenchResult {
         ExperimentalFeatureSettings { enabled: true },
     );
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::update_experimental_feature_settings(
@@ -451,14 +451,14 @@ fn bench_update_user_experimental_features() -> canbench_rs::BenchResult {
 // Contacts
 // ---------------------------------------------------------------------------
 
-fn bench_get_contacts_with_count(count: u64) -> canbench_rs::BenchResult {
+fn bench_get_contacts_with_count(count: u64) -> BenchResult {
     let sp = bench_stored_principal();
 
     for i in 0..count {
         setup_contact(100 + i);
     }
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         std::hint::black_box(read_state(|s| {
             s.contact
                 .get(&sp)
@@ -469,21 +469,21 @@ fn bench_get_contacts_with_count(count: u64) -> canbench_rs::BenchResult {
 }
 
 #[bench(raw)]
-fn bench_get_contacts_10() -> canbench_rs::BenchResult {
+fn bench_get_contacts_10() -> BenchResult {
     bench_get_contacts_with_count(10)
 }
 
 #[bench(raw)]
-fn bench_get_contacts_200() -> canbench_rs::BenchResult {
+fn bench_get_contacts_200() -> BenchResult {
     bench_get_contacts_with_count(200)
 }
 
 #[bench(raw)]
-fn bench_get_contact() -> canbench_rs::BenchResult {
+fn bench_get_contact() -> BenchResult {
     setup_contact(42);
     let sp = bench_stored_principal();
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         std::hint::black_box(read_state(|s| {
             s.contact
                 .get(&sp)
@@ -493,11 +493,11 @@ fn bench_get_contact() -> canbench_rs::BenchResult {
 }
 
 #[bench(raw)]
-fn bench_update_contact() -> canbench_rs::BenchResult {
+fn bench_update_contact() -> BenchResult {
     setup_contact(77);
     let sp = bench_stored_principal();
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         mutate_state(|s| {
             if let Some(mut stored) = s.contact.get(&sp).map(|c| c.0.clone()) {
                 if let Some(contact) = stored.contacts.get_mut(&77) {
@@ -512,11 +512,11 @@ fn bench_update_contact() -> canbench_rs::BenchResult {
 }
 
 #[bench(raw)]
-fn bench_delete_contact() -> canbench_rs::BenchResult {
+fn bench_delete_contact() -> BenchResult {
     setup_contact(99);
     let sp = bench_stored_principal();
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         mutate_state(|s| {
             if let Some(mut stored) = s.contact.get(&sp).map(|c| c.0.clone()) {
                 stored.contacts.remove(&99);
@@ -531,7 +531,7 @@ fn bench_delete_contact() -> canbench_rs::BenchResult {
 // BTC pending transactions
 // ---------------------------------------------------------------------------
 
-fn bench_btc_add_pending_transaction_with_count(existing_count: u8) -> canbench_rs::BenchResult {
+fn bench_btc_add_pending_transaction_with_count(existing_count: u8) -> BenchResult {
     let principal = *bench_principal();
     let address = "bc1qbench000000000000000000000000000000000".to_string();
 
@@ -568,7 +568,7 @@ fn bench_btc_add_pending_transaction_with_count(existing_count: u8) -> canbench_
     let now_ns = TS0_NS + 100;
     let txid = vec![0xFF; 32];
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         mutate_state(|state| {
             with_btc_pending_model(state, |model| {
                 model.prune_pending_transactions(principal, &current_utxos, now_ns);
@@ -593,16 +593,16 @@ fn bench_btc_add_pending_transaction_with_count(existing_count: u8) -> canbench_
 }
 
 #[bench(raw)]
-fn bench_btc_add_pending_transaction_5() -> canbench_rs::BenchResult {
+fn bench_btc_add_pending_transaction_5() -> BenchResult {
     bench_btc_add_pending_transaction_with_count(5)
 }
 
 #[bench(raw)]
-fn bench_btc_add_pending_transaction_200() -> canbench_rs::BenchResult {
+fn bench_btc_add_pending_transaction_200() -> BenchResult {
     bench_btc_add_pending_transaction_with_count(200)
 }
 
-fn bench_btc_get_pending_transactions_with_count(count: u8) -> canbench_rs::BenchResult {
+fn bench_btc_get_pending_transactions_with_count(count: u8) -> BenchResult {
     let principal = *bench_principal();
     let address = "bc1qbench_get_pending_0000000000000000".to_string();
 
@@ -626,7 +626,7 @@ fn bench_btc_get_pending_transactions_with_count(count: u8) -> canbench_rs::Benc
 
     let now_ns = TS0_NS + 100;
 
-    canbench_rs::bench_fn(|| {
+    bench_fn(|| {
         let stored = mutate_state(|state| {
             with_btc_pending_model(state, |model| {
                 model.prune_pending_transactions(principal, &utxos, now_ns);
@@ -647,11 +647,11 @@ fn bench_btc_get_pending_transactions_with_count(count: u8) -> canbench_rs::Benc
 }
 
 #[bench(raw)]
-fn bench_btc_get_pending_transactions_5() -> canbench_rs::BenchResult {
+fn bench_btc_get_pending_transactions_5() -> BenchResult {
     bench_btc_get_pending_transactions_with_count(5)
 }
 
 #[bench(raw)]
-fn bench_btc_get_pending_transactions_200() -> canbench_rs::BenchResult {
+fn bench_btc_get_pending_transactions_200() -> BenchResult {
     bench_btc_get_pending_transactions_with_count(200)
 }
