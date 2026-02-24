@@ -324,7 +324,7 @@ pub fn remove_custom_token(token: CustomToken) {
     });
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
