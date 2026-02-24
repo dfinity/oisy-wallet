@@ -187,13 +187,13 @@ type CustomToken = record {
 	enabled : bool
 };
 type CustomTokenId = variant {
-	Icrc : principal;
-	SolMainnet : text;
-	SolDevnet : text;
-	Ethereum : record { text; nat64 };
 	ExtV2 : principal;
+	Icrc : principal;
+	Ethereum : record { text; nat64 };
+	SolDevnet : text;
+	IcPunks : principal;
 	Dip721 : principal;
-	IcPunks : principal
+	SolMainnet : text
 };
 type DappCarouselSettings = record { hidden_dapp_ids : vec text };
 type DappSettings = record { dapp_carousel : DappCarouselSettings };
@@ -207,6 +207,13 @@ type DefiniteCanisterSettingsArgs = record {
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
+type ExchangeData = record {
+	price_24h_change_pct : opt float64;
+	market_cap : opt float64;
+	timestamp_ns : nat64;
+	price : opt float64
+};
+type ExchangeRate = record { usd : ExchangeData };
 type ExperimentalFeatureSettings = record { enabled : bool };
 type ExperimentalFeatureSettingsFor = variant { AiAssistantBeta };
 type ExperimentalFeaturesSettings = record {
@@ -224,15 +231,6 @@ type GetAllowedCyclesResponse = record { allowed_cycles : nat };
 type GetAllowedCyclesResult = variant {
 	Ok : GetAllowedCyclesResponse;
 	Err : GetAllowedCyclesError
-};
-type ExchangeData = record {
-	price : float64;
-	timestamp_ns : nat64;
-	price_24h_change_pct : opt float64;
-	market_cap : float64
-};
-type ExchangeRate = record {
-	usd : ExchangeData
 };
 type GetContactResult = variant { Ok : Contact; Err : ContactError };
 type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
@@ -539,8 +537,6 @@ service : (Arg) -> {
 	// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 	// - `Other`: If another error occurred during the operation
 	get_allowed_cycles : () -> (GetAllowedCyclesResult);
-	get_exchange_rate : (CustomTokenId) -> (opt ExchangeRate) query;
-	get_exchange_rates : (vec CustomTokenId) -> (vec record { CustomTokenId; opt ExchangeRate }) query;
 	// API method to get cycle balance and burn rate.
 	get_canister_status : () -> (CanisterStatusResultV2);
 	// Gets a contact by ID for the caller.
@@ -558,6 +554,10 @@ service : (Arg) -> {
 	// # Returns
 	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
+	get_exchange_rate : (CustomTokenId) -> (opt ExchangeRate) query;
+	get_exchange_rates : (vec CustomTokenId) -> (
+		vec record { CustomTokenId; opt ExchangeRate }
+	) query;
 	// Returns the caller's user profile.
 	//
 	// # Errors

@@ -200,14 +200,13 @@ export interface CustomToken {
 	enabled: boolean;
 }
 export type CustomTokenId =
-	| { Icrc: Principal }
-	| { SolMainnet: string }
-	| { SolDevnet: string }
-	| { Ethereum: [string, bigint] }
 	| { ExtV2: Principal }
-	| { Dip721: Principal }
+	| { Icrc: Principal }
+	| { Ethereum: [string, bigint] }
+	| { SolDevnet: string }
 	| { IcPunks: Principal }
-	| { IcPunks: Principal };
+	| { Dip721: Principal }
+	| { SolMainnet: string };
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
 }
@@ -227,6 +226,15 @@ export interface ErcToken {
 	chain_id: bigint;
 }
 export type EthAddress = { Public: string };
+export interface ExchangeData {
+	price_24h_change_pct: [] | [number];
+	market_cap: [] | [number];
+	timestamp_ns: bigint;
+	price: [] | [number];
+}
+export interface ExchangeRate {
+	usd: ExchangeData;
+}
 export interface ExperimentalFeatureSettings {
 	enabled: boolean;
 }
@@ -244,15 +252,6 @@ export interface GetAllowedCyclesResponse {
 export type GetAllowedCyclesResult =
 	| { Ok: GetAllowedCyclesResponse }
 	| { Err: GetAllowedCyclesError };
-export interface ExchangeData {
-	price: number;
-	timestamp_ns: bigint;
-	price_24h_change_pct: [] | [number];
-	market_cap: number;
-}
-export interface ExchangeRate {
-	usd: ExchangeData;
-}
 export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
 export type GetUserProfileError = { NotFound: null };
@@ -598,11 +597,6 @@ export interface _SERVICE {
 	 * - `Other`: If another error occurred during the operation
 	 */
 	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
-	get_exchange_rate: ActorMethod<[CustomTokenId], [] | [ExchangeRate]>;
-	get_exchange_rates: ActorMethod<
-		[Array<CustomTokenId>],
-		Array<[CustomTokenId, [] | [ExchangeRate]]>
-	>;
 	/**
 	 * API method to get cycle balance and burn rate.
 	 */
@@ -626,6 +620,11 @@ export interface _SERVICE {
 	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
+	get_exchange_rate: ActorMethod<[CustomTokenId], [] | [ExchangeRate]>;
+	get_exchange_rates: ActorMethod<
+		[Array<CustomTokenId>],
+		Array<[CustomTokenId, [] | [ExchangeRate]]>
+	>;
 	/**
 	 * Returns the caller's user profile.
 	 *

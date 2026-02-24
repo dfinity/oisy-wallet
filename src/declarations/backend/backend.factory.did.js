@@ -350,13 +350,6 @@ export const idlFactory = ({ IDL }) => {
 		Ok: GetAllowedCyclesResponse,
 		Err: GetAllowedCyclesError
 	});
-	const ExchangeData = IDL.Record({
-		price: IDL.Float64,
-		timestamp_ns: IDL.Nat64,
-		price_24h_change_pct: IDL.Opt(IDL.Float64),
-		market_cap: IDL.Float64
-	});
-	const ExchangeRate = IDL.Record({ usd: ExchangeData });
 	const CanisterStatusType = IDL.Variant({
 		stopped: IDL.Null,
 		stopping: IDL.Null,
@@ -388,6 +381,22 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Vec(Contact),
 		Err: ContactError
 	});
+	const CustomTokenId = IDL.Variant({
+		ExtV2: IDL.Principal,
+		Icrc: IDL.Principal,
+		Ethereum: IDL.Tuple(IDL.Text, IDL.Nat64),
+		SolDevnet: IDL.Text,
+		IcPunks: IDL.Principal,
+		Dip721: IDL.Principal,
+		SolMainnet: IDL.Text
+	});
+	const ExchangeData = IDL.Record({
+		price_24h_change_pct: IDL.Opt(IDL.Float64),
+		market_cap: IDL.Opt(IDL.Float64),
+		timestamp_ns: IDL.Nat64,
+		price: IDL.Opt(IDL.Float64)
+	});
+	const ExchangeRate = IDL.Record({ usd: ExchangeData });
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
 	const GetUserProfileResult = IDL.Variant({
 		Ok: UserProfile,
@@ -438,15 +447,6 @@ export const idlFactory = ({ IDL }) => {
 		section: IDL.Opt(TokenSection),
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
-	});
-	const CustomTokenId = IDL.Variant({
-		Icrc: IDL.Principal,
-		SolMainnet: IDL.Text,
-		SolDevnet: IDL.Text,
-		Ethereum: IDL.Tuple(IDL.Text, IDL.Nat64),
-		ExtV2: IDL.Principal,
-		Dip721: IDL.Principal,
-		IcPunks: IDL.Principal
 	});
 	const SetShowTestnetsRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
@@ -541,15 +541,15 @@ export const idlFactory = ({ IDL }) => {
 			['query']
 		),
 		get_allowed_cycles: IDL.Func([], [GetAllowedCyclesResult], []),
+		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
+		get_contact: IDL.Func([IDL.Nat64], [GetContactResult], ['query']),
+		get_contacts: IDL.Func([], [GetContactsResult], ['query']),
 		get_exchange_rate: IDL.Func([CustomTokenId], [IDL.Opt(ExchangeRate)], ['query']),
 		get_exchange_rates: IDL.Func(
 			[IDL.Vec(CustomTokenId)],
 			[IDL.Vec(IDL.Tuple(CustomTokenId, IDL.Opt(ExchangeRate)))],
 			['query']
 		),
-		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-		get_contact: IDL.Func([IDL.Nat64], [GetContactResult], ['query']),
-		get_contacts: IDL.Func([], [GetContactsResult], ['query']),
 		get_user_profile: IDL.Func([], [GetUserProfileResult], ['query']),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
