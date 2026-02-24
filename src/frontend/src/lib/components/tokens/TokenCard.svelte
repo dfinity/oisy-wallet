@@ -92,7 +92,7 @@
 
 		{#snippet subtitle()}
 			<span
-				class="flex items-center gap-1 sm:gap-2 text-sm"
+				class="flex items-center gap-1 sm:gap-2 text-[14px]"
 				class:ml-2={!asNetwork}
 				class:sm:ml-4={!asNetwork}
 				class:text-sm={asNetwork}
