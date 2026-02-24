@@ -59,6 +59,9 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 	};
 };
 
+// A single reused `Intl.Collator` for all string comparisons is faster/more consistent than repeated localeCompare
+const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+
 type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
 
 type SortableId = TokenId | TokenGroupId;
@@ -132,7 +135,7 @@ const createTokenComparator =
 
 		// If the choice is to prioritise symbol sorting
 		if (primarySortStrategy === 'symbol') {
-			const symbolDiff = aSymbol.localeCompare(bSymbol);
+			const symbolDiff = collator.compare(aSymbol, bSymbol);
 			if (symbolDiff !== 0) {
 				return symbolDiff;
 			}
@@ -158,9 +161,9 @@ const createTokenComparator =
 		}
 
 		return (
-			aSymbol.localeCompare(bSymbol) ||
-			aName.localeCompare(bName) ||
-			aNetworkName.localeCompare(bNetworkName) ||
+			collator.compare(aSymbol, bSymbol) ||
+			collator.compare(aName, bName) ||
+			collator.compare(aNetworkName, bNetworkName) ||
 			+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO)) ||
 			(bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0)
 		);
@@ -212,24 +215,20 @@ export function sortTokens<T extends Token>({
 		$tokensToPin.map(({ id }, index) => [id, index])
 	);
 
-	const comparator = createTokenComparator({ pinIndexById, primarySortStrategy });
+	const comparator = createTokenComparator({
+		pinIndexById,
+		primarySortStrategy
+	});
 
-	// We intentionally use the “decorate → sort → undecorate” pattern here.
-	//
-	// Each item is first mapped to its precomputed sort fields (`unwrapTokenSortFields`)
-	// so the comparator works only with plain, normalised values. This ensures that:
-	//   • expensive field normalisation runs exactly once per element (not per comparison),
-	//   • the comparator remains simple and fast (no repeated unwrapping or branching),
-	//   • sorting logic is shared between tokens and groups in a uniform way.
-	//
-	// Although this introduces two linear passes (map before and after sort),
-	// the list size is small (~100–150 items) and sorting runs infrequently
-	// (~every 30s), so the additional allocations are negligible. This approach
-	// favours clarity and predictable performance over micro-optimisation.
-	return $tokens
-		.map((token) => ({ token, u: unwrapTokenSortFields(token) }))
-		.sort((a, b) => comparator(a.u, b.u))
-		.map(({ token }) => token);
+	// Precompute sort keys once per element.
+	const unwrapped = $tokens.map(unwrapTokenSortFields);
+
+	// Sort indices instead of allocating wrapper objects per element.
+	const indices = Array.from({ length: $tokens.length }, (_, i) => i);
+
+	indices.sort((i, j) => comparator(unwrapped[i], unwrapped[j]));
+
+	return indices.map((i) => $tokens[i]);
 }
 
 /**
