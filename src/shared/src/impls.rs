@@ -514,26 +514,22 @@ impl Validate for SplTokenId {
     ///
     /// # References
     /// - <https://solana.com/docs/more/exchange#basic-verification>
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         if self.0.len() < 32 {
-            return Err(candid::Error::msg(
-                "Minimum valid Solana address length is 32",
-            ));
+            return Err(Error::msg("Minimum valid Solana address length is 32"));
         }
         if self.0.len() > 44 {
-            return Err(candid::Error::msg(
-                "Maximum valid Solana address length is 44",
-            ));
+            return Err(Error::msg("Maximum valid Solana address length is 44"));
         }
         let parsed_maybe = bs58::decode(&self.0).into_vec();
         if let Ok(bytes) = parsed_maybe {
             if bytes.len() != 32 {
-                return Err(candid::Error::msg(
+                return Err(Error::msg(
                     "Invalid Solana address: not 32 bytes when decoded",
                 ));
             }
         } else {
-            return Err(candid::Error::msg("Invalid Solana address: not base58"));
+            return Err(Error::msg("Invalid Solana address: not base58"));
         }
         Ok(())
     }
@@ -546,18 +542,16 @@ impl ErcTokenId {
 
 impl Validate for ErcTokenId {
     /// Verifies that an Ethereum/EVM address is valid.
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         if self.0.len() != 42 {
-            return Err(candid::Error::msg(
-                "Invalid Ethereum/EVM contract address length",
-            ));
+            return Err(Error::msg("Invalid Ethereum/EVM contract address length"));
         }
         Ok(())
     }
 }
 
 impl Validate for CustomTokenId {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         match self {
             CustomTokenId::Icrc(_)
             | CustomTokenId::ExtV2(_)
@@ -575,13 +569,13 @@ impl Validate for CustomTokenId {
 }
 
 impl Validate for CustomToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         self.token.validate()
     }
 }
 
 impl Validate for Token {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         match self {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
@@ -597,11 +591,11 @@ impl Validate for Token {
 }
 
 impl Validate for SplToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         use crate::types::MAX_SYMBOL_LENGTH;
         if let Some(symbol) = &self.symbol {
             if symbol.chars().count() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg(format!(
+                return Err(Error::msg(format!(
                     "Symbol too long: {} > {}",
                     symbol.len(),
                     MAX_SYMBOL_LENGTH
@@ -613,7 +607,7 @@ impl Validate for SplToken {
 }
 
 impl Validate for ErcToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         self.token_address.validate()
     }
 }
@@ -625,19 +619,19 @@ impl Validate for IcrcToken {
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
     /// - If an index principal is present, checks that it is also the type of principal used for a
     ///   canister.
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         let IcrcToken {
             ledger_id,
             index_id,
         } = self;
         // The ledger_id should be appropriate for a canister.
         if ledger_id.as_slice().last() != Some(&1) {
-            return Err(candid::Error::msg("Ledger ID is not a canister"));
+            return Err(Error::msg("Ledger ID is not a canister"));
         }
         // Likewise for the index ID, if present:
         if let Some(index_id) = index_id {
             if index_id.as_slice().last() != Some(&1) {
-                return Err(candid::Error::msg("Index ID is not a canister"));
+                return Err(Error::msg("Index ID is not a canister"));
             }
         }
         Ok(())
@@ -649,11 +643,11 @@ impl Validate for ExtV2Token {
     ///
     /// - Checks that the canister principal is the type of principal used for a canister.
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         let ExtV2Token { canister_id } = self;
         // The canister_id should be appropriate for a canister.
         if canister_id.as_slice().last() != Some(&1) {
-            return Err(candid::Error::msg("Canister ID is not a canister"));
+            return Err(Error::msg("Canister ID is not a canister"));
         }
         Ok(())
     }
@@ -664,11 +658,11 @@ impl Validate for Dip721Token {
     ///
     /// - Checks that the canister principal is the type of principal used for a canister.
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         let Dip721Token { canister_id } = self;
         // The canister_id should be appropriate for a canister.
         if canister_id.as_slice().last() != Some(&1) {
-            return Err(candid::Error::msg("Canister ID is not a canister"));
+            return Err(Error::msg("Canister ID is not a canister"));
         }
         Ok(())
     }
@@ -679,24 +673,24 @@ impl Validate for IcPunksToken {
     ///
     /// - Checks that the canister principal is the type of principal used for a canister.
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         let IcPunksToken { canister_id } = self;
         // The canister_id should be appropriate for a canister.
         if canister_id.as_slice().last() != Some(&1) {
-            return Err(candid::Error::msg("Canister ID is not a canister"));
+            return Err(Error::msg("Canister ID is not a canister"));
         }
         Ok(())
     }
 }
 
 impl Validate for UserToken {
-    fn validate(&self) -> Result<(), candid::Error> {
+    fn validate(&self) -> Result<(), Error> {
         if self.contract_address.len() != EVM_CONTRACT_ADDRESS_LENGTH {
-            return Err(candid::Error::msg("Invalid EVM contract address length"));
+            return Err(Error::msg("Invalid EVM contract address length"));
         }
         if let Some(symbol) = &self.symbol {
             if symbol.len() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg(format!(
+                return Err(Error::msg(format!(
                     "Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes",
                 )));
             }
