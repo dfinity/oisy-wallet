@@ -53,14 +53,10 @@ fn ensure_profile_version() -> Option<u64> {
     })
 }
 
-fn make_eth_addr(suffix: u8) -> String {
-    format!("0x{:0>40}", format!("{suffix:x}"))
-}
-
-fn make_custom_token(chain_id: u64, suffix: u8) -> CustomToken {
+fn make_custom_token(chain_id: u64, suffix: u64) -> CustomToken {
     CustomToken {
         token: Token::Erc20(ErcToken {
-            token_address: ErcTokenId(make_eth_addr(suffix)),
+            token_address: ErcTokenId(format!("0x{suffix:040x}")),
             chain_id,
         }),
         enabled: true,
@@ -227,12 +223,7 @@ fn bench_set_many_custom_tokens_with_count(count: u8) -> BenchResult {
     let sp = bench_stored_principal();
 
     let tokens: Vec<CustomToken> = (0..count)
-        .map(|i| {
-            let byte = 0xB0u8
-                .checked_add(i)
-                .expect("token byte overflow (increase base or reduce range)");
-            make_custom_token(1, byte)
-        })
+        .map(|i| make_custom_token(1, u64::from(i)))
         .collect();
 
     bench_fn(|| {
@@ -258,11 +249,7 @@ fn bench_list_custom_tokens_with_count(count: u8) -> BenchResult {
     let sp = bench_stored_principal();
 
     for i in 0..count {
-        let byte = 0xC0u8
-            .checked_add(i)
-            .expect("token byte overflow (increase base or reduce range)");
-
-        let token = make_custom_token(1, byte);
+        let token = make_custom_token(1, u64::from(i));
 
         mutate_state(|s| {
             add_to_user_token(
