@@ -9,12 +9,12 @@ use shared::types::{
     bitcoin::StoredPendingTransaction,
     contact::StoredContacts,
     custom_token::{CustomToken, CustomTokenId},
+    exchange::ExchangeRate,
     pow::StoredChallenge,
     token::UserToken,
     user_profile::StoredUserProfile,
     Timestamp,
 };
-use shared::types::exchange::ExchangeRate;
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 pub type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
@@ -39,7 +39,6 @@ pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VM
 pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>;
 pub type BtcUserPendingTransactionsMap =
     StableBTreeMap<StoredPrincipal, Candid<PendingTransactionsMap>, VMem>;
-
 
 pub type ExchangeRateMap = StableBTreeMap<Candid<CustomTokenId>, Candid<ExchangeRate>, VMem>;
 

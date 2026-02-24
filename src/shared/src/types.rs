@@ -11,6 +11,7 @@ pub mod bitcoin;
 pub mod contact;
 pub mod custom_token;
 pub mod dapp;
+pub mod exchange;
 pub mod experimental_feature;
 pub mod network;
 pub mod number;
@@ -24,11 +25,9 @@ pub mod token_standard;
 pub mod transaction;
 pub mod user_profile;
 pub mod verifiable_credential;
-pub mod exchange;
 
 #[cfg(test)]
 mod tests;
-
 
 pub type Version = u64;
 

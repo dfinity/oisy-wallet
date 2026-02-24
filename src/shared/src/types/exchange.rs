@@ -1,10 +1,6 @@
-
-
 use candid::{CandidType, Deserialize};
-use crate::types::{
-    Timestamp,
-};
 
+use crate::types::Timestamp;
 
 #[derive(CandidType, Deserialize, Clone, PartialEq, Debug)]
 #[serde(remote = "Self")]

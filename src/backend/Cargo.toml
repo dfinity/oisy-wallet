@@ -21,8 +21,8 @@ ic-verifiable-credentials = { workspace = true }
 lazy_static = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
-serde_json = { workspace = true }
 serde_bytes = { workspace = true }
+serde_json = { workspace = true }
 sha2 = { workspace = true }
 shared = { path = "../shared" }
 

@@ -16,6 +16,7 @@ use crate::{
             IcPunksToken, IcrcToken, SplToken, SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
+        exchange::ExchangeData,
         experimental_feature::{
             ExperimentalFeatureSettingsMap, ExperimentalFeaturesSettings,
             UpdateExperimentalFeaturesSettingsError,
@@ -34,7 +35,6 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
-use crate::types::exchange::{ExchangeData};
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
@@ -532,14 +532,10 @@ impl Validate for SplTokenId {
     /// - <https://solana.com/docs/more/exchange#basic-verification>
     fn validate(&self) -> Result<(), Error> {
         if self.0.len() < 32 {
-            return Err(Error::msg(
-                "Minimum valid Solana address length is 32",
-            ));
+            return Err(Error::msg("Minimum valid Solana address length is 32"));
         }
         if self.0.len() > 44 {
-            return Err(Error::msg(
-                "Maximum valid Solana address length is 44",
-            ));
+            return Err(Error::msg("Maximum valid Solana address length is 44"));
         }
         let parsed_maybe = bs58::decode(&self.0).into_vec();
         if let Ok(bytes) = parsed_maybe {
@@ -564,9 +560,7 @@ impl Validate for ErcTokenId {
     /// Verifies that an Ethereum/EVM address is valid.
     fn validate(&self) -> Result<(), Error> {
         if self.0.len() != 42 {
-            return Err(Error::msg(
-                "Invalid Ethereum/EVM contract address length",
-            ));
+            return Err(Error::msg("Invalid Ethereum/EVM contract address length"));
         }
         Ok(())
     }
@@ -809,14 +803,12 @@ impl Validate for ExchangeData {
             return Err(Error::msg("timestamp_ns cannot be zero"));
         }
         if let Some(price) = self.price {
-             validate_non_negative_float(price, "price")?;
+            validate_non_negative_float(price, "price")?;
         }
         if let Some(change) = self.price_24h_change_pct {
-           validate_finite_float(change, "price_24h_change_pct")?;
+            validate_finite_float(change, "price_24h_change_pct")?;
             if change < -100.0 {
-                return Err(Error::msg(
-                    "price_24h_change_pct cannot be less than -100%",
-                ));
+                return Err(Error::msg("price_24h_change_pct cannot be less than -100%"));
             }
         }
         if let Some(market_cap) = self.market_cap {
