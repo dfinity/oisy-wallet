@@ -4,7 +4,6 @@ use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::bench;
 use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
-use pretty_assertions::assert_eq;
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
     contact::{Contact, StoredContacts},
@@ -16,9 +15,9 @@ use shared::types::{
 
 use super::{
     add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
-    user_profile, BtcUserPendingTransactionsModel, ByteBuf, Candid, CustomTokenId, HashSet,
-    HttpRequest, PendingTransaction, Principal, State, Stats, StoredPendingTransaction,
-    StoredPrincipal, UserProfileModel,
+    user_profile, BtcUserPendingTransactionsModel, ByteBuf, Candid, CustomTokenId, HttpRequest,
+    PendingTransaction, Principal, State, Stats, StoredPendingTransaction, StoredPrincipal,
+    UserProfileModel,
 };
 
 const BENCH_PRINCIPAL_TEXT: &str =
@@ -199,7 +198,7 @@ fn bench_get_account_creation_timestamps_with_count(count: u64) -> canbench_rs::
     })
 }
 
-fn bench_get_contacts_with_count(count: u32) -> canbench_rs::BenchResult {
+fn bench_get_contacts_with_count(count: u64) -> canbench_rs::BenchResult {
     let sp = bench_stored_principal();
 
     for i in 0..count {
