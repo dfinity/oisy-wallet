@@ -4,52 +4,24 @@ use ic_cdk::api::{
     },
     time,
 };
-use ic_stable_structures::StableBTreeMap;
 use shared::types::{
     custom_token::CustomTokenId,
     exchange::{ExchangeData, ExchangeRate},
-    Timestamp,
 };
 
 use crate::{
     mutate_state, read_state,
-    types::{Candid, StoredTokenId, VMem},
+    types::{Candid, StoredTokenId},
 };
 
 pub const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60; // 5 minutes
-pub const ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60; // 1 hour
+pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60; // 1 hour
 
-fn add_to_token_activity(
-    token_id: StoredTokenId,
-    token_activity: &mut StableBTreeMap<StoredTokenId, Timestamp, VMem>,
-    timestamp: Timestamp,
-) {
-    token_activity.insert(token_id, timestamp);
-}
 
-pub fn mark_token_active(token_id: &CustomTokenId) {
-    mutate_state(|s| {
-        add_to_token_activity(
-            StoredTokenId(token_id.clone()),
-            &mut s.token_activity,
-            time(),
-        );
-    });
-}
-
-pub fn mark_tokens_active(token_ids: &[CustomTokenId]) {
-    let now = time();
-
-    mutate_state(|s| {
-        for token_id in token_ids {
-            add_to_token_activity(StoredTokenId(token_id.clone()), &mut s.token_activity, now);
-        }
-    });
-}
 
 pub async fn refresh_exchange_rates() {
     let now = time();
-    let threshold = now - ACTIVITY_THRESHOLD_SEC * 1_000_000_000;
+    let threshold = now - PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000;
 
     let active_tokens: Vec<StoredTokenId> = read_state(|s| {
         s.token_activity

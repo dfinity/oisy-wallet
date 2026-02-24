@@ -66,7 +66,7 @@ use user_profile_model::UserProfileModel;
 use crate::{
     bitcoin_api::get_current_fee_percentiles,
     exchange::{
-        mark_token_active, mark_tokens_active, refresh_exchange_rates, PRICE_REFRESH_INTERVAL_SEC,
+      refresh_exchange_rates, PRICE_REFRESH_INTERVAL_SEC,
     },
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
@@ -76,6 +76,7 @@ use crate::{
         update_experimental_feature_settings, update_network_settings,
     },
 };
+use crate::token_activity::{mark_token_active, mark_tokens_active};
 
 mod bitcoin_api;
 mod bitcoin_utils;
@@ -93,6 +94,7 @@ mod token;
 mod types;
 mod user_profile;
 mod user_profile_model;
+mod token_activity;
 
 #[cfg(test)]
 mod tests;
