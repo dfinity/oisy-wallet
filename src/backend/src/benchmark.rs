@@ -246,12 +246,12 @@ fn bench_set_many_custom_tokens_200() -> BenchResult {
 }
 
 #[bench(raw)]
-fn bench_set_many_custom_tokens_200() -> BenchResult {
+fn bench_set_many_custom_tokens_200_2() -> BenchResult {
     bench_set_many_custom_tokens_with_count(200)
 }
 
 #[bench(raw)]
-fn bench_set_many_custom_tokens_200() -> BenchResult {
+fn bench_set_many_custom_tokens_200_3() -> BenchResult {
     bench_set_many_custom_tokens_with_count(200)
 }
 
