@@ -120,55 +120,17 @@ fn with_btc_pending_model<R>(
 }
 
 // ---------------------------------------------------------------------------
-// Utils for benchmarks
+// Config & Stats
 // ---------------------------------------------------------------------------
 
-fn bench_set_many_custom_tokens_with_count(count: u8) -> canbench_rs::BenchResult {
-    let sp = bench_stored_principal();
-
-    let tokens: Vec<CustomToken> = (0..count)
-        .map(|i| {
-            let byte = 0xB0u8
-                .checked_add(i)
-                .expect("token byte overflow (increase base or reduce range)");
-            make_custom_token(1, byte)
-        })
-        .collect();
-
-    canbench_rs::bench_fn(|| {
-        mutate_state(|s| {
-            for token in &tokens {
-                add_to_user_token(sp, &mut s.custom_token, token, &matches_custom_token(token));
-            }
-        });
-    })
+#[bench]
+fn bench_config() {
+    std::hint::black_box(read_config(Clone::clone));
 }
 
-fn bench_list_custom_tokens_with_count(count: u8) -> canbench_rs::BenchResult {
-    let sp = bench_stored_principal();
-
-    for i in 0..count {
-        let byte = 0xC0u8
-            .checked_add(i)
-            .expect("token byte overflow (increase base or reduce range)");
-
-        let token = make_custom_token(1, byte);
-
-        mutate_state(|s| {
-            add_to_user_token(
-                sp,
-                &mut s.custom_token,
-                &token,
-                &matches_custom_token(&token),
-            );
-        });
-    }
-
-    canbench_rs::bench_fn(|| {
-        std::hint::black_box(read_state(|s| {
-            s.custom_token.get(&sp).unwrap_or_default().0
-        }));
-    })
+#[bench]
+fn bench_stats() {
+    std::hint::black_box(read_state(|s| Stats::from(s)));
 }
 
 fn bench_get_account_creation_timestamps_with_count(count: u64) -> canbench_rs::BenchResult {
@@ -196,142 +158,6 @@ fn bench_get_account_creation_timestamps_with_count(count: u64) -> canbench_rs::
                 .collect::<Vec<_>>()
         }));
     })
-}
-
-fn bench_get_contacts_with_count(count: u64) -> canbench_rs::BenchResult {
-    let sp = bench_stored_principal();
-
-    for i in 0..count {
-        setup_contact(100 + i);
-    }
-
-    canbench_rs::bench_fn(|| {
-        std::hint::black_box(read_state(|s| {
-            s.contact
-                .get(&sp)
-                .map(|c| c.contacts.values().cloned().collect::<Vec<_>>())
-                .unwrap_or_default()
-        }));
-    })
-}
-
-fn bench_btc_add_pending_transaction_with_count(existing_count: u8) -> canbench_rs::BenchResult {
-    let principal = *bench_principal();
-    let address = "bc1qbench000000000000000000000000000000000".to_string();
-
-    let existing_utxos: Vec<Utxo> = (0..existing_count)
-        .map(|i| make_utxo(i, 0, 10_000))
-        .collect();
-
-    mutate_state(|state| {
-        with_btc_pending_model(state, |model| {
-            for (i, utxo) in (0..existing_count).zip(existing_utxos.iter()) {
-                let tx = StoredPendingTransaction {
-                    txid: vec![i; 32],
-                    utxos: vec![utxo.clone()],
-                    created_at_timestamp_ns: 1_000_000_000,
-                };
-                model
-                    .add_pending_transaction(principal, address.clone(), tx)
-                    .unwrap();
-            }
-        });
-    });
-
-    let new_utxos = vec![
-        make_utxo(existing_count + 10, 0, 50_000),
-        make_utxo(existing_count + 11, 0, 30_000),
-    ];
-
-    let current_utxos: Vec<Utxo> = existing_utxos
-        .iter()
-        .chain(new_utxos.iter())
-        .cloned()
-        .collect();
-
-    let now_ns = TS0_NS + 100;
-    let txid = vec![0xFF; 32];
-
-    canbench_rs::bench_fn(|| {
-        mutate_state(|state| {
-            with_btc_pending_model(state, |model| {
-                model.prune_pending_transactions(principal, &current_utxos, now_ns);
-
-                assert!(
-                    !model.has_intersecting_pending_utxos(principal, &new_utxos),
-                    "unexpected intersection"
-                );
-
-                let pending = StoredPendingTransaction {
-                    txid: txid.clone(),
-                    utxos: new_utxos.clone(),
-                    created_at_timestamp_ns: now_ns,
-                };
-
-                model
-                    .add_pending_transaction(principal, address.clone(), pending)
-                    .unwrap();
-            });
-        });
-    })
-}
-
-fn bench_btc_get_pending_transactions_with_count(count: u8) -> canbench_rs::BenchResult {
-    let principal = *bench_principal();
-    let address = "bc1qbench_get_pending_0000000000000000".to_string();
-
-    let utxos: Vec<Utxo> = (0..count).map(|i| make_utxo(i + 50, 0, 5_000)).collect();
-
-    mutate_state(|state| {
-        with_btc_pending_model(state, |model| {
-            for (i, utxo) in (50..).zip(utxos.iter()) {
-                let tx = StoredPendingTransaction {
-                    txid: vec![i; 32],
-                    utxos: vec![utxo.clone()],
-                    created_at_timestamp_ns: 1_000_000_000,
-                };
-
-                model
-                    .add_pending_transaction(principal, address.clone(), tx)
-                    .unwrap();
-            }
-        });
-    });
-
-    let now_ns = TS0_NS + 100;
-
-    canbench_rs::bench_fn(|| {
-        let stored = mutate_state(|state| {
-            with_btc_pending_model(state, |model| {
-                model.prune_pending_transactions(principal, &utxos, now_ns);
-                model.get_pending_transactions(&principal, &address)
-            })
-        });
-
-        let pending: Vec<PendingTransaction> = stored
-            .iter()
-            .map(|tx| PendingTransaction {
-                txid: tx.txid.clone(),
-                utxos: tx.utxos.clone(),
-            })
-            .collect();
-
-        std::hint::black_box(pending);
-    })
-}
-
-// ---------------------------------------------------------------------------
-// Config & Stats
-// ---------------------------------------------------------------------------
-
-#[bench]
-fn bench_config() {
-    std::hint::black_box(read_config(Clone::clone));
-}
-
-#[bench]
-fn bench_stats() {
-    std::hint::black_box(read_state(|s| Stats::from(s)));
 }
 
 #[bench(raw)]
@@ -396,6 +222,27 @@ fn bench_set_custom_token() -> canbench_rs::BenchResult {
     })
 }
 
+fn bench_set_many_custom_tokens_with_count(count: u8) -> canbench_rs::BenchResult {
+    let sp = bench_stored_principal();
+
+    let tokens: Vec<CustomToken> = (0..count)
+        .map(|i| {
+            let byte = 0xB0u8
+                .checked_add(i)
+                .expect("token byte overflow (increase base or reduce range)");
+            make_custom_token(1, byte)
+        })
+        .collect();
+
+    canbench_rs::bench_fn(|| {
+        mutate_state(|s| {
+            for token in &tokens {
+                add_to_user_token(sp, &mut s.custom_token, token, &matches_custom_token(token));
+            }
+        });
+    })
+}
+
 #[bench(raw)]
 fn bench_set_many_custom_tokens_5() -> canbench_rs::BenchResult {
     bench_set_many_custom_tokens_with_count(5)
@@ -404,6 +251,33 @@ fn bench_set_many_custom_tokens_5() -> canbench_rs::BenchResult {
 #[bench(raw)]
 fn bench_set_many_custom_tokens_200() -> canbench_rs::BenchResult {
     bench_set_many_custom_tokens_with_count(200)
+}
+
+fn bench_list_custom_tokens_with_count(count: u8) -> canbench_rs::BenchResult {
+    let sp = bench_stored_principal();
+
+    for i in 0..count {
+        let byte = 0xC0u8
+            .checked_add(i)
+            .expect("token byte overflow (increase base or reduce range)");
+
+        let token = make_custom_token(1, byte);
+
+        mutate_state(|s| {
+            add_to_user_token(
+                sp,
+                &mut s.custom_token,
+                &token,
+                &matches_custom_token(&token),
+            );
+        });
+    }
+
+    canbench_rs::bench_fn(|| {
+        std::hint::black_box(read_state(|s| {
+            s.custom_token.get(&sp).unwrap_or_default().0
+        }));
+    })
 }
 
 #[bench(raw)]
@@ -576,6 +450,23 @@ fn bench_update_user_experimental_features() -> canbench_rs::BenchResult {
 // Contacts
 // ---------------------------------------------------------------------------
 
+fn bench_get_contacts_with_count(count: u64) -> canbench_rs::BenchResult {
+    let sp = bench_stored_principal();
+
+    for i in 0..count {
+        setup_contact(100 + i);
+    }
+
+    canbench_rs::bench_fn(|| {
+        std::hint::black_box(read_state(|s| {
+            s.contact
+                .get(&sp)
+                .map(|c| c.contacts.values().cloned().collect::<Vec<_>>())
+                .unwrap_or_default()
+        }));
+    })
+}
+
 #[bench(raw)]
 fn bench_get_contacts_10() -> canbench_rs::BenchResult {
     bench_get_contacts_with_count(10)
@@ -639,6 +530,67 @@ fn bench_delete_contact() -> canbench_rs::BenchResult {
 // BTC pending transactions
 // ---------------------------------------------------------------------------
 
+fn bench_btc_add_pending_transaction_with_count(existing_count: u8) -> canbench_rs::BenchResult {
+    let principal = *bench_principal();
+    let address = "bc1qbench000000000000000000000000000000000".to_string();
+
+    let existing_utxos: Vec<Utxo> = (0..existing_count)
+        .map(|i| make_utxo(i, 0, 10_000))
+        .collect();
+
+    mutate_state(|state| {
+        with_btc_pending_model(state, |model| {
+            for (i, utxo) in (0..existing_count).zip(existing_utxos.iter()) {
+                let tx = StoredPendingTransaction {
+                    txid: vec![i; 32],
+                    utxos: vec![utxo.clone()],
+                    created_at_timestamp_ns: 1_000_000_000,
+                };
+                model
+                    .add_pending_transaction(principal, address.clone(), tx)
+                    .unwrap();
+            }
+        });
+    });
+
+    let new_utxos = vec![
+        make_utxo(existing_count + 10, 0, 50_000),
+        make_utxo(existing_count + 11, 0, 30_000),
+    ];
+
+    let current_utxos: Vec<Utxo> = existing_utxos
+        .iter()
+        .chain(new_utxos.iter())
+        .cloned()
+        .collect();
+
+    let now_ns = TS0_NS + 100;
+    let txid = vec![0xFF; 32];
+
+    canbench_rs::bench_fn(|| {
+        mutate_state(|state| {
+            with_btc_pending_model(state, |model| {
+                model.prune_pending_transactions(principal, &current_utxos, now_ns);
+
+                assert!(
+                    !model.has_intersecting_pending_utxos(principal, &new_utxos),
+                    "unexpected intersection"
+                );
+
+                let pending = StoredPendingTransaction {
+                    txid: txid.clone(),
+                    utxos: new_utxos.clone(),
+                    created_at_timestamp_ns: now_ns,
+                };
+
+                model
+                    .add_pending_transaction(principal, address.clone(), pending)
+                    .unwrap();
+            });
+        });
+    })
+}
+
 #[bench(raw)]
 fn bench_btc_add_pending_transaction_5() -> canbench_rs::BenchResult {
     bench_btc_add_pending_transaction_with_count(5)
@@ -647,6 +599,50 @@ fn bench_btc_add_pending_transaction_5() -> canbench_rs::BenchResult {
 #[bench(raw)]
 fn bench_btc_add_pending_transaction_200() -> canbench_rs::BenchResult {
     bench_btc_add_pending_transaction_with_count(200)
+}
+
+fn bench_btc_get_pending_transactions_with_count(count: u8) -> canbench_rs::BenchResult {
+    let principal = *bench_principal();
+    let address = "bc1qbench_get_pending_0000000000000000".to_string();
+
+    let utxos: Vec<Utxo> = (0..count).map(|i| make_utxo(i + 50, 0, 5_000)).collect();
+
+    mutate_state(|state| {
+        with_btc_pending_model(state, |model| {
+            for (i, utxo) in (50..).zip(utxos.iter()) {
+                let tx = StoredPendingTransaction {
+                    txid: vec![i; 32],
+                    utxos: vec![utxo.clone()],
+                    created_at_timestamp_ns: 1_000_000_000,
+                };
+
+                model
+                    .add_pending_transaction(principal, address.clone(), tx)
+                    .unwrap();
+            }
+        });
+    });
+
+    let now_ns = TS0_NS + 100;
+
+    canbench_rs::bench_fn(|| {
+        let stored = mutate_state(|state| {
+            with_btc_pending_model(state, |model| {
+                model.prune_pending_transactions(principal, &utxos, now_ns);
+                model.get_pending_transactions(&principal, &address)
+            })
+        });
+
+        let pending: Vec<PendingTransaction> = stored
+            .iter()
+            .map(|tx| PendingTransaction {
+                txid: tx.txid.clone(),
+                utxos: tx.utxos.clone(),
+            })
+            .collect();
+
+        std::hint::black_box(pending);
+    })
 }
 
 #[bench(raw)]
