@@ -48,17 +48,14 @@
 
 {#if nonNullish(parsedExchangeRateChange)}
 	<span
-		class="px-1"
+		class="px-1 text-xs"
 		class:bg-error-subtle-30={withBackground && exchangeRateChangeSign === 'negative'}
 		class:bg-success-subtle-30={withBackground && exchangeRateChangeSign === 'positive'}
 		class:rounded={withBackground}
 		class:sm:text-sm={fontSize === 'sm'}
-		class:sm:text-xs={fontSize === 'xs'}
 		class:text-error-primary={exchangeRateChangeSign === 'negative'}
 		class:text-success-primary={exchangeRateChangeSign === 'positive'}
 		class:text-tertiary={exchangeRateChangeSign === 'zero'}
-		class:text-xs={fontSize === 'sm'}
-		class:text-xxs={fontSize === 'xs'}
 	>
 		<span class="inline-block transform" class:rotate-180={exchangeRateChangeSign === 'positive'}>
 			{exchangeRateChangeSymbol}

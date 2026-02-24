@@ -92,14 +92,13 @@
 
 		{#snippet subtitle()}
 			<span
-				class="flex items-center gap-1 sm:gap-2 text-[14px]"
+				class="flex items-center text-sm gap-1 sm:gap-2"
 				class:ml-2={!asNetwork}
 				class:sm:ml-4={!asNetwork}
-				class:text-sm={asNetwork}
 			>
 				{#if !asNetwork}
 					{formattedExchangeRate}
-					<ExchangeRateChange {usdPriceChangePercentage24h} fontSize="xs" />
+					<ExchangeRateChange fontSize="xs" {usdPriceChangePercentage24h} />
 				{/if}
 			</span>
 		{/snippet}
