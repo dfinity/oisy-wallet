@@ -8,8 +8,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 bitcoin = { workspace = true }
-candid = { workspace = true }
 canbench-rs = { workspace = true, optional = true }
+candid = { workspace = true }
 futures = { workspace = true }
 getrandom = { workspace = true }
 hex = { workspace = true }
