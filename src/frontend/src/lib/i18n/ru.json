@@ -41,7 +41,8 @@
 			"more": "Больше",
 			"less": "Меньше",
 			"ellipsis": "…",
-			"learn_more": "Узнать больше"
+			"learn_more": "Узнать больше",
+			"sorting": "Сортировка"
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
@@ -1142,7 +1143,10 @@
 			"hide_more_networks": "Скрыть больше сетей",
 			"on_network": " в сети $network",
 			"delete_token": "Удалить токен",
-			"edit_token": "Редактировать токен"
+			"edit_token": "Редактировать токен",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Сведения о токене",
@@ -1281,7 +1285,6 @@
 			"by_collection": "По коллекции",
 			"show_spam": "Показывать спам",
 			"show_hidden": "Показать скрытое",
-			"sorting": "Сортировка",
 			"recents_first": "Сначала недавние",
 			"oldest_first": "Сначала последние",
 			"collection_atoz": "Коллекции от A до Z",

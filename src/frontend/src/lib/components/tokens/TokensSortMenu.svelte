@@ -5,7 +5,7 @@
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { nftSortType, nftSortOrder } from '$lib/derived/settings.derived';
+	import { tokensSortType } from '$lib/derived/settings.derived';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_EVENTS_KEYS,
@@ -13,25 +13,23 @@
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { type NftSortingType, nftSortStore } from '$lib/stores/settings.store';
+	import { tokensSortStore } from '$lib/stores/settings.store';
+	import type { TokensSortingType } from '$lib/types/tokens-sort';
 
 	let visible = $state(false);
 
 	let button = $state<HTMLButtonElement | undefined>();
 
-	const setSorting = (sort: NftSortingType) => {
-		nftSortStore.set({ key: 'nft-sort', value: sort });
+	const setSorting = (sort: TokensSortingType) => {
+		tokensSortStore.set({ key: 'tokens-sort', value: sort });
 	};
 
-	const trackSortingEvent = ({ type, order }: { type: string; order: string }) => {
+	const trackSortingEvent = ({ type }: { type: string }) => {
 		trackEvent({
 			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
 			metadata: {
-				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
-				event_key:
-					order === 'asc'
-						? PLAUSIBLE_EVENT_EVENTS_KEYS.SORT_ASC
-						: PLAUSIBLE_EVENT_EVENTS_KEYS.SORT_DESC,
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.SORT,
 				event_value: type
 			}
 		});
@@ -59,49 +57,37 @@
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackSortingEvent({ order: 'desc', type: 'date' });
-						setSorting({ order: 'desc', type: 'date' });
+						trackSortingEvent({ type: 'value' });
+						setSorting({ type: 'value' });
 					}}
 					selectable
-					selected={$nftSortType === 'date' && $nftSortOrder === 'desc'}
+					selected={$tokensSortType === 'value'}
 				>
-					{$i18n.nfts.text.recents_first}
+					{$i18n.tokens.text.sort_by_value}
 				</ListItemButton>
 			</ListItem>
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackSortingEvent({ order: 'asc', type: 'date' });
-						setSorting({ order: 'asc', type: 'date' });
+						trackSortingEvent({ type: 'performance' });
+						setSorting({ type: 'performance' });
 					}}
 					selectable
-					selected={$nftSortType === 'date' && $nftSortOrder === 'asc'}
+					selected={$tokensSortType === 'performance'}
 				>
-					{$i18n.nfts.text.oldest_first}
+					{$i18n.tokens.text.sort_by_performance}
 				</ListItemButton>
 			</ListItem>
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackSortingEvent({ order: 'asc', type: 'collection-name' });
-						setSorting({ order: 'asc', type: 'collection-name' });
+						trackSortingEvent({ type: 'symbol' });
+						setSorting({ type: 'symbol' });
 					}}
 					selectable
-					selected={$nftSortType === 'collection-name' && $nftSortOrder === 'asc'}
+					selected={$tokensSortType === 'symbol'}
 				>
-					{$i18n.nfts.text.collection_atoz}
-				</ListItemButton>
-			</ListItem>
-			<ListItem>
-				<ListItemButton
-					onclick={() => {
-						trackSortingEvent({ order: 'desc', type: 'collection-name' });
-						setSorting({ order: 'desc', type: 'collection-name' });
-					}}
-					selectable
-					selected={$nftSortType === 'collection-name' && $nftSortOrder === 'desc'}
-				>
-					{$i18n.nfts.text.collection_ztoa}
+					{$i18n.tokens.text.sort_by_symbol}
 				</ListItemButton>
 			</ListItem>
 		</List>

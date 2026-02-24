@@ -41,7 +41,8 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": ""
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
@@ -1142,7 +1143,10 @@
 			"hide_more_networks": "إخفاء المزيد من الشبكات",
 			"on_network": " على $network",
 			"delete_token": "حذف التوكن",
-			"edit_token": "تعديل التوكن"
+			"edit_token": "تعديل التوكن",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "تفاصيل التوكن",
@@ -1281,7 +1285,6 @@
 			"by_collection": "",
 			"show_spam": "",
 			"show_hidden": "",
-			"sorting": "",
 			"recents_first": "",
 			"oldest_first": "",
 			"collection_atoz": "",

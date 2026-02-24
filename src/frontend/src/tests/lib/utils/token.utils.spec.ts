@@ -251,6 +251,7 @@ describe('token.utils', () => {
 			balance: bn3Bi,
 			usdBalance: Number(bn3Bi),
 			usdPrice: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd,
+			usdMarketCap: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd_market_cap,
 			usdPriceChangePercentage24h: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd_24h_change,
 			stakeBalance: 123n,
 			stakeUsdBalance: Number(123n),
@@ -282,6 +283,7 @@ describe('token.utils', () => {
 				...expected,
 				usdBalance: undefined,
 				usdPrice: undefined,
+				usdMarketCap: undefined,
 				usdPriceChangePercentage24h: undefined,
 				stakeUsdBalance: undefined,
 				claimableStakeBalanceUsd: undefined

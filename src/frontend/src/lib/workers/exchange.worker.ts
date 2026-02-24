@@ -8,7 +8,7 @@ import {
 	exchangeRateUsdToCurrency,
 	fetchAllExchangeRatesFromBackend
 } from '$lib/services/exchange.services';
-import type { CoingeckoPlatformId } from '$lib/types/coingecko';
+import type { CoingeckoPlatformId, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
 import type {
 	PostMessage,
@@ -168,7 +168,6 @@ const syncExchange = async ({
 		} as PostMessage<PostMessageDataResponseExchange>);
 	} catch (err: unknown) {
 		console.error('Unexpected error while fetching symbol average price:', err);
-		stopTimer();
 
 		postMessage({
 			msg: 'syncExchangeError',

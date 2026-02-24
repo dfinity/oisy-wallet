@@ -5,9 +5,11 @@ import {
 	privacyModeStore,
 	showHiddenStore,
 	showSpamStore,
+	tokensSortStore,
 	type NftSortOrder,
 	type NftSortType
 } from '$lib/stores/settings.store';
+import type { TokensSortType } from '$lib/types/tokens-sort';
 import { derived, type Readable } from 'svelte/store';
 
 export const hideZeroBalances: Readable<boolean> = derived(
@@ -33,6 +35,11 @@ export const showHidden: Readable<boolean> = derived(
 export const showSpam: Readable<boolean> = derived(
 	[showSpamStore],
 	([$showSpamStore]) => $showSpamStore.enabled
+);
+
+export const tokensSortType: Readable<TokensSortType> = derived(
+	[tokensSortStore],
+	([$tokensSortStore]) => $tokensSortStore.type
 );
 
 export const nftSortOrder: Readable<NftSortOrder> = derived(

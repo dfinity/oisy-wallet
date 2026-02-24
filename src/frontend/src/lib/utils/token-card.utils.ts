@@ -16,6 +16,7 @@ export const mapHeaderData = ({
 	balance,
 	usdBalance,
 	usdPrice,
+	usdMarketCap,
 	usdPriceChangePercentage24h
 }: TokenUiGroup): CardData => ({
 	name,
@@ -27,6 +28,7 @@ export const mapHeaderData = ({
 	balance,
 	usdBalance,
 	usdPrice,
+	usdMarketCap,
 	usdPriceChangePercentage24h,
 	tokenCount: tokens.length
 });

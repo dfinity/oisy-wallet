@@ -45,6 +45,7 @@ interface I18nCore {
 		less: string;
 		ellipsis: string;
 		learn_more: string;
+		sorting: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -896,6 +897,9 @@ interface I18nTokens {
 		on_network: string;
 		delete_token: string;
 		edit_token: string;
+		sort_by_value: string;
+		sort_by_performance: string;
+		sort_by_symbol: string;
 	};
 	details: {
 		title: string;
@@ -1014,7 +1018,6 @@ interface I18nNfts {
 		by_collection: string;
 		show_spam: string;
 		show_hidden: string;
-		sorting: string;
 		recents_first: string;
 		oldest_first: string;
 		collection_atoz: string;
