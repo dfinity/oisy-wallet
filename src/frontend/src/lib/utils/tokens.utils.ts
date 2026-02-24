@@ -215,10 +215,7 @@ export function sortTokens<T extends Token>({
 		$tokensToPin.map(({ id }, index) => [id, index])
 	);
 
-	const comparator = createTokenComparator({
-		pinIndexById,
-		primarySortStrategy
-	});
+	const comparator = createTokenComparator({ pinIndexById, primarySortStrategy });
 
 	// We intentionally precompute sort keys once per element before sorting.
 	//
