@@ -19,8 +19,9 @@ import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Token, TokenId, TokenToPin } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import type { TokenGroupId } from '$lib/types/token-group';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -60,6 +61,12 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 
 type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
 
+type SortableId = TokenId | TokenGroupId;
+
+type Pin = Readonly<{ id: SortableId }>;
+
+type SortableItem<T extends Token> = TokenUi<T> | TokenUiOrGroupUi;
+
 /**
  * Creates a comparator function for sorting tokens based on multiple criteria:
  *
@@ -81,7 +88,7 @@ const createTokenComparator =
 		pinIndexById,
 		primarySortStrategy
 	}: {
-		pinIndexById: ReadonlyMap<TokenId, number>;
+		pinIndexById: ReadonlyMap<SortableId, number>;
 		primarySortStrategy: TokensSortType;
 	}) =>
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
@@ -159,6 +166,16 @@ const createTokenComparator =
 		);
 	};
 
+export function sortTokens<T extends Token>(args: {
+	$tokens: TokenUi<T>[];
+	$tokensToPin: ReadonlyArray<Pin>;
+	primarySortStrategy?: TokensSortType;
+}): TokenUi<T>[];
+export function sortTokens(args: {
+	$tokens: TokenUiOrGroupUi[];
+	$tokensToPin: ReadonlyArray<Pin>;
+	primarySortStrategy?: TokensSortType;
+}): TokenUiOrGroupUi[];
 /**
  * Sorts tokens using balance-aware and pin-aware prioritisation.
  *
@@ -181,16 +198,19 @@ const createTokenComparator =
  * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
  * @returns A sorted array of token UI objects.
  */
-export const sortTokens = <T extends Token>({
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+export function sortTokens<T extends Token>({
 	$tokens,
 	$tokensToPin,
 	primarySortStrategy = 'value'
 }: {
-	$tokens: TokenUi<T>[];
-	$tokensToPin: TokenToPin[];
+	$tokens: SortableItem<T>[];
+	$tokensToPin: ReadonlyArray<Pin>;
 	primarySortStrategy?: TokensSortType;
-}): TokenUi<T>[] => {
-	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
+}): SortableItem<T>[] {
+	const pinIndexById = new Map<SortableId, number>(
+		$tokensToPin.map(({ id }, index) => [id, index])
+	);
 
 	const comparator = createTokenComparator({ pinIndexById, primarySortStrategy });
 
@@ -210,7 +230,7 @@ export const sortTokens = <T extends Token>({
 		.map((token) => ({ token, u: unwrapTokenSortFields(token) }))
 		.sort((a, b) => comparator(a.u, b.u))
 		.map(({ token }) => token);
-};
+}
 
 /**
  * Calculates total USD balance of the provided UI tokens list.
