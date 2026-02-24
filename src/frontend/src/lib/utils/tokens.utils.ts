@@ -43,7 +43,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * 1. Deprecation status (non-deprecated tokens first).
  * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
  * 3. USD balance (descending).
- * 4. Explicitly pinned tokens (pinned first, preserving the order provided in `pinIndexById`).
+ * 4. Explicitly pinned tokens (pinned first, preserving the order provided by `$tokensToPin`).
  * 5. Token symbol (ascending, locale-aware).
  * 6. Token name (ascending, locale-aware).
  * 7. Network name (ascending, locale-aware).
