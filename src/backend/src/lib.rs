@@ -29,6 +29,7 @@ use shared::{
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
+        exchange::ExchangeRate,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         pow::{
@@ -56,9 +57,8 @@ use shared::{
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
-    BtcUserPendingTransactionsMap, Candid, ConfigCell, CustomTokenId, CustomTokenMap, ExchangeRate,
-    ExchangeRateMap, StoredPrincipal, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap,
-    UserTokenMap,
+    BtcUserPendingTransactionsMap, Candid, ConfigCell, CustomTokenMap, ExchangeRateMap,
+    StoredPrincipal, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
