@@ -120,6 +120,33 @@ fn with_btc_pending_model<R>(
     f(&mut model)
 }
 
+fn bench_list_custom_tokens_with_count(count: u8) -> canbench_rs::BenchResult {
+    let sp = bench_stored_principal();
+
+    for i in 0..count {
+        let byte = 0xC0u8
+            .checked_add(i)
+            .expect("token byte overflow (increase base or reduce range)");
+
+        let token = make_custom_token(1, byte);
+
+        mutate_state(|s| {
+            add_to_user_token(
+                sp,
+                &mut s.custom_token,
+                &token,
+                &matches_custom_token(&token),
+            );
+        });
+    }
+
+    canbench_rs::bench_fn(|| {
+        std::hint::black_box(read_state(|s| {
+            s.custom_token.get(&sp).unwrap_or_default().0
+        }));
+    })
+}
+
 // ---------------------------------------------------------------------------
 // Config & Stats
 // ---------------------------------------------------------------------------
@@ -222,30 +249,13 @@ fn bench_set_many_custom_tokens() -> canbench_rs::BenchResult {
 }
 
 #[bench(raw)]
-fn bench_list_custom_tokens() -> canbench_rs::BenchResult {
-    let sp = bench_stored_principal();
-    for i in 0..100 {
-        let byte = 0xC0u8
-            .checked_add(u8::try_from(i).expect("i fits in u8 for bench_list_custom_tokens"))
-            .expect("token byte overflow (increase base or reduce range)");
+fn bench_list_custom_tokens_5() -> canbench_rs::BenchResult {
+    bench_list_custom_tokens_with_count(5)
+}
 
-        let token = make_custom_token(1, byte);
-
-        mutate_state(|s| {
-            add_to_user_token(
-                sp,
-                &mut s.custom_token,
-                &token,
-                &matches_custom_token(&token),
-            );
-        });
-    }
-
-    canbench_rs::bench_fn(|| {
-        std::hint::black_box(read_state(|s| {
-            s.custom_token.get(&sp).unwrap_or_default().0
-        }));
-    })
+#[bench(raw)]
+fn bench_list_custom_tokens_200() -> canbench_rs::BenchResult {
+    bench_list_custom_tokens_with_count(200)
 }
 
 #[bench(raw)]
