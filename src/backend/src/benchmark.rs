@@ -1,6 +1,6 @@
 #![allow(unused_must_use)]
 
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::bench;
 use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
@@ -17,8 +17,8 @@ use shared::types::{
 use super::{
     add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
     user_profile, BtcUserPendingTransactionsModel, ByteBuf, Candid, CustomTokenId, HashSet,
-    HttpRequest, PendingTransaction, Principal, Stats, StoredPendingTransaction, StoredPrincipal,
-    Timestamp, UserProfileModel,
+    HttpRequest, PendingTransaction, Principal, State, Stats, StoredPendingTransaction,
+    StoredPrincipal, UserProfileModel,
 };
 
 const BENCH_PRINCIPAL_TEXT: &str =
@@ -36,7 +36,7 @@ fn bench_principal() -> &'static Principal {
 }
 
 fn bench_stored_principal() -> StoredPrincipal {
-    StoredPrincipal(bench_principal().clone())
+    StoredPrincipal(*bench_principal())
 }
 
 fn ensure_profile() -> u64 {
@@ -112,7 +112,7 @@ fn setup_contact(id: u64) {
 }
 
 fn with_btc_pending_model<R>(
-    state: &mut super::StateType, // replace with your actual state type
+    state: &mut State,
     f: impl FnOnce(&mut BtcUserPendingTransactionsModel<'_>) -> R,
 ) -> R {
     let mut model =
@@ -327,7 +327,7 @@ fn bench_update_user_network_settings() -> canbench_rs::BenchResult {
     canbench_rs::bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::update_network_settings(sp, version, networks.clone(), &mut m)
+            user_profile::update_network_settings(sp, Some(version), networks.clone(), &mut m)
         }));
     })
 }
@@ -340,7 +340,7 @@ fn bench_set_user_show_testnets() -> canbench_rs::BenchResult {
     canbench_rs::bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::set_show_testnets(sp, version, true, &mut m)
+            user_profile::set_show_testnets(sp, Some(version), true, &mut m)
         }));
     })
 }
@@ -353,7 +353,7 @@ fn bench_add_user_hidden_dapp_id() -> canbench_rs::BenchResult {
     canbench_rs::bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::add_hidden_dapp_id(sp, version, "bench-dapp-id".to_string(), &mut m)
+            user_profile::add_hidden_dapp_id(sp, Some(version), "bench-dapp-id".to_string(), &mut m)
         }));
     })
 }
@@ -376,7 +376,7 @@ fn bench_update_user_agreements() -> canbench_rs::BenchResult {
     canbench_rs::bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::update_agreements(sp, version, agreements.clone(), &mut m)
+            user_profile::update_agreements(sp, Some(version), agreements.clone(), &mut m)
         }));
     })
 }
@@ -396,7 +396,7 @@ fn bench_update_user_experimental_features() -> canbench_rs::BenchResult {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::update_experimental_feature_settings(
                 sp,
-                version,
+                Some(version),
                 features.clone(),
                 &mut m,
             )
@@ -480,7 +480,7 @@ fn bench_delete_contact() -> canbench_rs::BenchResult {
 
 #[bench(raw)]
 fn bench_btc_add_pending_transaction() -> canbench_rs::BenchResult {
-    let principal = bench_principal().clone();
+    let principal = *bench_principal();
     let address = "bc1qbench000000000000000000000000000000000".to_string();
 
     let existing_utxos: Vec<Utxo> = (0u8..5).map(|i| make_utxo(i, 0, 10_000)).collect();
@@ -497,7 +497,7 @@ fn bench_btc_add_pending_transaction() -> canbench_rs::BenchResult {
                     .add_pending_transaction(principal, address.clone(), tx)
                     .unwrap();
             }
-        })
+        });
     });
 
     let new_utxos = vec![make_utxo(10, 0, 50_000), make_utxo(11, 0, 30_000)];
@@ -533,14 +533,14 @@ fn bench_btc_add_pending_transaction() -> canbench_rs::BenchResult {
                 model
                     .add_pending_transaction(principal, address.clone(), pending)
                     .unwrap();
-            })
+            });
         });
     })
 }
 
 #[bench(raw)]
 fn bench_btc_get_pending_transactions() -> canbench_rs::BenchResult {
-    let principal = bench_principal().clone();
+    let principal = *bench_principal();
     let address = "bc1qbench_get_pending_0000000000000000".to_string();
 
     let utxos: Vec<Utxo> = (0u8..3).map(|i| make_utxo(i + 50, 0, 5_000)).collect();
@@ -558,7 +558,7 @@ fn bench_btc_get_pending_transactions() -> canbench_rs::BenchResult {
                     .add_pending_transaction(principal, address.clone(), tx)
                     .unwrap();
             }
-        })
+        });
     });
 
     let now_ns: u64 = TS0_NS + 100;
