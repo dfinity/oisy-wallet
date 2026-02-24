@@ -106,6 +106,8 @@ thread_local! {
         MemoryManager::init(DefaultMemoryImpl::default())
     );
 
+    static HOUSEKEEPING_IN_PROGRESS: RefCell<bool> = const { RefCell::new(false) };
+
     static STATE: RefCell<State> = RefCell::new(
         MEMORY_MANAGER.with(|mm| State {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None),
@@ -167,16 +169,30 @@ fn set_config(arg: InitArg) {
     });
 }
 
+/// Spawns housekeeping only if the previous run has finished.
+/// Prevents future accumulation when inter-canister calls are slow.
+fn spawn_housekeeping_if_idle() {
+    let already_running = HOUSEKEEPING_IN_PROGRESS.with(|f| *f.borrow());
+    if already_running {
+        return;
+    }
+    HOUSEKEEPING_IN_PROGRESS.with(|f| *f.borrow_mut() = true);
+    ic_cdk::spawn(async {
+        hourly_housekeeping_tasks().await;
+        HOUSEKEEPING_IN_PROGRESS.with(|f| *f.borrow_mut() = false);
+    });
+}
+
 /// Runs housekeeping tasks immediately, then periodically:
 /// - `hourly_housekeeping_tasks`
 fn start_periodic_housekeeping_timers() {
     // Run housekeeping tasks once, immediately but asynchronously.
     let immediate = Duration::ZERO;
-    set_timer(immediate, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+    set_timer(immediate, spawn_housekeeping_if_idle);
 
     // Then periodically:
     let hour = Duration::from_secs(60 * 60);
-    let _ = set_timer_interval(hour, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+    let _ = set_timer_interval(hour, spawn_housekeeping_if_idle);
 }
 
 /// Runs hourly housekeeping tasks:
