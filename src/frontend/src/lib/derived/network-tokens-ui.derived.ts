@@ -8,8 +8,6 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { groupTokens } from '$lib/utils/token-group.utils';
 import { mapTokenUi } from '$lib/utils/token.utils';
-import { sortTokensUi } from '$lib/utils/tokens-ui.utils';
-import { mapTokenUi } from '$lib/utils/token.utils';
 import { sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -34,7 +32,7 @@ export const enabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = deri
 export const sortedEnabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
 	[enabledNetworkTokenUiOrGroupUi, tokensToPin, tokensSortType],
 	([$tokens, $tokensToPin, $tokensSortType]) =>
-		sortTokensUi({
+		sortTokens({
 			$tokens,
 			$tokensToPin,
 			primarySortStrategy: $tokensSortType
