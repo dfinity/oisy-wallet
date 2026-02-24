@@ -24,19 +24,32 @@ use super::{
 const BENCH_PRINCIPAL_TEXT: &str =
     "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
 
-fn bench_stored_principal() -> StoredPrincipal {
-    StoredPrincipal(Principal::from_text(BENCH_PRINCIPAL_TEXT).unwrap())
+const TS0_NS: u64 = 1_000_000_000;
+const TS1_NS: u64 = 2_000_000_000;
+const HEIGHT: u32 = 100;
+
+fn bench_principal() -> &'static Principal {
+    static P: OnceLock<Principal> = OnceLock::new();
+    P.get_or_init(|| {
+        Principal::from_text(BENCH_PRINCIPAL_TEXT).expect("valid bench principal text")
+    })
 }
 
-fn ensure_profile() -> Option<u64> {
+fn bench_stored_principal() -> StoredPrincipal {
+    StoredPrincipal(bench_principal().clone())
+}
+
+fn ensure_profile() -> u64 {
     let sp = bench_stored_principal();
     mutate_state(|s| {
         let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
         if m.find_by_principal(sp).is_none() {
-            let profile = StoredUserProfile::from_timestamp(1_000_000_000);
-            m.store_new(sp, 1_000_000_000, &profile);
+            let profile = StoredUserProfile::from_timestamp(TS0_NS);
+            m.store_new(sp, TS0_NS, &profile);
         }
-        m.find_by_principal(sp).and_then(|p| p.version)
+        m.find_by_principal(sp)
+            .and_then(|p| p.version)
+            .expect("bench profile must have version")
     })
 }
 
@@ -57,6 +70,11 @@ fn make_custom_token(chain_id: u64, suffix: u8) -> CustomToken {
     }
 }
 
+fn matches_custom_token(token: &CustomToken) -> impl Fn(&CustomToken) -> bool + '_ {
+    let id = CustomTokenId::from(&token.token);
+    move |t: &CustomToken| CustomTokenId::from(&t.token) == id
+}
+
 fn make_utxo(txid_byte: u8, vout: u32, value: u64) -> Utxo {
     Utxo {
         outpoint: Outpoint {
@@ -64,7 +82,7 @@ fn make_utxo(txid_byte: u8, vout: u32, value: u64) -> Utxo {
             vout,
         },
         value,
-        height: 100,
+        height: HEIGHT,
     }
 }
 
@@ -84,13 +102,22 @@ fn setup_contact(id: u64) {
                 id,
                 name: format!("Contact {id}"),
                 addresses: vec![],
-                update_timestamp_ns: 1_000_000_000,
+                update_timestamp_ns: TS0_NS,
                 image: None,
             },
         );
-        stored.update_timestamp_ns = 1_000_000_000;
+        stored.update_timestamp_ns = TS0_NS;
         s.contact.insert(sp, Candid(stored));
     });
+}
+
+fn with_btc_pending_model<R>(
+    state: &mut super::StateType, // replace with your actual state type
+    f: impl FnOnce(&mut BtcUserPendingTransactionsModel<'_>) -> R,
+) -> R {
+    let mut model =
+        BtcUserPendingTransactionsModel::new(&mut state.btc_user_pending_transactions, None, None);
+    f(&mut model)
 }
 
 // ---------------------------------------------------------------------------
@@ -114,24 +141,21 @@ fn bench_get_account_creation_timestamps() -> canbench_rs::BenchResult {
         mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             if m.find_by_principal(sp).is_none() {
-                let profile = StoredUserProfile::from_timestamp(1_000_000_000 + i);
-                m.store_new(sp, 1_000_000_000 + i, &profile);
+                let profile = StoredUserProfile::from_timestamp(TS0_NS + i);
+                m.store_new(sp, TS0_NS + i, &profile);
             }
         });
     }
 
     canbench_rs::bench_fn(|| {
         std::hint::black_box(read_state(|s| {
-            let timestamps: Vec<(Principal, Timestamp)> = s
-                .user_profile
+            s.user_profile
                 .iter()
                 .map(|entry| {
                     let (_updated, StoredPrincipal(principal)) = *entry.key();
-                    let user = entry.value();
-                    (principal, user.created_timestamp)
+                    (principal, entry.value().created_timestamp)
                 })
-                .collect();
-            timestamps
+                .collect::<Vec<_>>()
         }));
     })
 }
@@ -173,10 +197,12 @@ fn bench_set_custom_token() -> canbench_rs::BenchResult {
 
     canbench_rs::bench_fn(|| {
         mutate_state(|s| {
-            let find = |t: &CustomToken| -> bool {
-                CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-            };
-            add_to_user_token(sp, &mut s.custom_token, &token, &find);
+            add_to_user_token(
+                sp,
+                &mut s.custom_token,
+                &token,
+                &matches_custom_token(&token),
+            );
         });
     })
 }
@@ -189,10 +215,7 @@ fn bench_set_many_custom_tokens() -> canbench_rs::BenchResult {
     canbench_rs::bench_fn(|| {
         mutate_state(|s| {
             for token in &tokens {
-                let find = |t: &CustomToken| -> bool {
-                    CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-                };
-                add_to_user_token(sp, &mut s.custom_token, token, &find);
+                add_to_user_token(sp, &mut s.custom_token, token, &matches_custom_token(token));
             }
         });
     })
@@ -203,16 +226,18 @@ fn bench_list_custom_tokens() -> canbench_rs::BenchResult {
     let sp = bench_stored_principal();
     for i in 0..100 {
         let byte = 0xC0u8
-            .checked_add(u8::try_from(i).unwrap())
+            .checked_add(u8::try_from(i).expect("i fits in u8 for bench_list_custom_tokens"))
             .expect("token byte overflow (increase base or reduce range)");
 
         let token = make_custom_token(1, byte);
 
         mutate_state(|s| {
-            let find = |t: &CustomToken| -> bool {
-                CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-            };
-            add_to_user_token(sp, &mut s.custom_token, &token, &find);
+            add_to_user_token(
+                sp,
+                &mut s.custom_token,
+                &token,
+                &matches_custom_token(&token),
+            );
         });
     }
 
@@ -228,18 +253,17 @@ fn bench_remove_custom_token() -> canbench_rs::BenchResult {
     let sp = bench_stored_principal();
     let token = make_custom_token(42, 0xDD);
     mutate_state(|s| {
-        let find = |t: &CustomToken| -> bool {
-            CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-        };
-        add_to_user_token(sp, &mut s.custom_token, &token, &find);
+        add_to_user_token(
+            sp,
+            &mut s.custom_token,
+            &token,
+            &matches_custom_token(&token),
+        );
     });
 
     canbench_rs::bench_fn(|| {
         mutate_state(|s| {
-            let find = |t: &CustomToken| -> bool {
-                CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-            };
-            remove_from_user_token(sp, &mut s.custom_token, &find);
+            remove_from_user_token(sp, &mut s.custom_token, &matches_custom_token(&token));
         });
     })
 }
@@ -341,7 +365,7 @@ fn bench_update_user_agreements() -> canbench_rs::BenchResult {
     let agreements = UserAgreements {
         license_agreement: UserAgreement {
             accepted: Some(true),
-            last_accepted_at_ns: Some(1_000_000_000),
+            last_accepted_at_ns: Some(TS0_NS),
             last_updated_at_ms: None,
             text_sha256: None,
         },
@@ -425,9 +449,9 @@ fn bench_update_contact() -> canbench_rs::BenchResult {
             if let Some(mut stored) = s.contact.get(&sp).map(|c| c.0.clone()) {
                 if let Some(contact) = stored.contacts.get_mut(&77) {
                     contact.name = "Updated Name".to_string();
-                    contact.update_timestamp_ns = 2_000_000_000;
+                    contact.update_timestamp_ns = TS1_NS;
                 }
-                stored.update_timestamp_ns = 2_000_000_000;
+                stored.update_timestamp_ns = TS1_NS;
                 s.contact.insert(sp, Candid(stored));
             }
         });
@@ -443,7 +467,7 @@ fn bench_delete_contact() -> canbench_rs::BenchResult {
         mutate_state(|s| {
             if let Some(mut stored) = s.contact.get(&sp).map(|c| c.0.clone()) {
                 stored.contacts.remove(&99);
-                stored.update_timestamp_ns = 2_000_000_000;
+                stored.update_timestamp_ns = TS1_NS;
                 s.contact.insert(sp, Candid(stored));
             }
         });
@@ -456,27 +480,24 @@ fn bench_delete_contact() -> canbench_rs::BenchResult {
 
 #[bench(raw)]
 fn bench_btc_add_pending_transaction() -> canbench_rs::BenchResult {
-    let principal = Principal::from_text(BENCH_PRINCIPAL_TEXT).unwrap();
+    let principal = bench_principal().clone();
     let address = "bc1qbench000000000000000000000000000000000".to_string();
 
     let existing_utxos: Vec<Utxo> = (0u8..5).map(|i| make_utxo(i, 0, 10_000)).collect();
 
     mutate_state(|state| {
-        let mut model = BtcUserPendingTransactionsModel::new(
-            &mut state.btc_user_pending_transactions,
-            None,
-            None,
-        );
-        for (i, utxo) in (0u8..3).zip(existing_utxos.iter()) {
-            let tx = StoredPendingTransaction {
-                txid: vec![i; 32],
-                utxos: vec![utxo.clone()],
-                created_at_timestamp_ns: 1_000_000_000,
-            };
-            model
-                .add_pending_transaction(principal, address.clone(), tx)
-                .unwrap();
-        }
+        with_btc_pending_model(state, |model| {
+            for (i, utxo) in (0u8..3).zip(existing_utxos.iter()) {
+                let tx = StoredPendingTransaction {
+                    txid: vec![i; 32],
+                    utxos: vec![utxo.clone()],
+                    created_at_timestamp_ns: 1_000_000_000,
+                };
+                model
+                    .add_pending_transaction(principal, address.clone(), tx)
+                    .unwrap();
+            }
+        })
     });
 
     let new_utxos = vec![make_utxo(10, 0, 50_000), make_utxo(11, 0, 30_000)];
@@ -485,78 +506,69 @@ fn bench_btc_add_pending_transaction() -> canbench_rs::BenchResult {
         .chain(new_utxos.iter())
         .cloned()
         .collect();
-    let now_ns: u64 = 1_000_000_000 + 100;
+    let now_ns: u64 = TS0_NS + 100;
     let txid = vec![0xFF; 32];
 
+    let unique_keys: HashSet<(&[u8], u32)> = new_utxos
+        .iter()
+        .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+        .collect();
+    assert_eq!(unique_keys.len(), new_utxos.len(), "duplicate utxos");
+
     canbench_rs::bench_fn(|| {
-        let unique_keys: HashSet<(&[u8], u32)> = new_utxos
-            .iter()
-            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
-            .collect();
-        assert_eq!(unique_keys.len(), new_utxos.len(), "duplicate utxos");
-
         mutate_state(|state| {
-            let mut model = BtcUserPendingTransactionsModel::new(
-                &mut state.btc_user_pending_transactions,
-                None,
-                None,
-            );
-            model.prune_pending_transactions(principal, &current_utxos, now_ns);
+            with_btc_pending_model(state, |model| {
+                model.prune_pending_transactions(principal, &current_utxos, now_ns);
 
-            assert!(
-                !model.has_intersecting_pending_utxos(principal, &new_utxos),
-                "unexpected intersection"
-            );
+                assert!(
+                    !model.has_intersecting_pending_utxos(principal, &new_utxos),
+                    "unexpected intersection"
+                );
 
-            let pending = StoredPendingTransaction {
-                txid: txid.clone(),
-                utxos: new_utxos.clone(),
-                created_at_timestamp_ns: now_ns,
-            };
-            model
-                .add_pending_transaction(principal, address.clone(), pending)
-                .unwrap();
+                let pending = StoredPendingTransaction {
+                    txid: txid.clone(),
+                    utxos: new_utxos.clone(),
+                    created_at_timestamp_ns: now_ns,
+                };
+                model
+                    .add_pending_transaction(principal, address.clone(), pending)
+                    .unwrap();
+            })
         });
     })
 }
 
 #[bench(raw)]
 fn bench_btc_get_pending_transactions() -> canbench_rs::BenchResult {
-    let principal = Principal::from_text(BENCH_PRINCIPAL_TEXT).unwrap();
+    let principal = bench_principal().clone();
     let address = "bc1qbench_get_pending_0000000000000000".to_string();
 
     let utxos: Vec<Utxo> = (0u8..3).map(|i| make_utxo(i + 50, 0, 5_000)).collect();
 
     mutate_state(|state| {
-        let mut model = BtcUserPendingTransactionsModel::new(
-            &mut state.btc_user_pending_transactions,
-            None,
-            None,
-        );
-        for (i, utxo) in (50u8..).zip(utxos.iter()) {
-            let tx = StoredPendingTransaction {
-                txid: vec![i; 32],
-                utxos: vec![utxo.clone()],
-                created_at_timestamp_ns: 1_000_000_000,
-            };
+        with_btc_pending_model(state, |model| {
+            for (i, utxo) in (50u8..).zip(utxos.iter()) {
+                let tx = StoredPendingTransaction {
+                    txid: vec![i; 32],
+                    utxos: vec![utxo.clone()],
+                    created_at_timestamp_ns: 1_000_000_000,
+                };
 
-            model
-                .add_pending_transaction(principal, address.clone(), tx)
-                .unwrap();
-        }
+                model
+                    .add_pending_transaction(principal, address.clone(), tx)
+                    .unwrap();
+            }
+        })
     });
 
-    let now_ns: u64 = 1_000_000_000 + 100;
+    let now_ns: u64 = TS0_NS + 100;
 
     canbench_rs::bench_fn(|| {
         let stored = mutate_state(|state| {
-            let mut model = BtcUserPendingTransactionsModel::new(
-                &mut state.btc_user_pending_transactions,
-                None,
-                None,
-            );
-            model.prune_pending_transactions(principal, &utxos, now_ns);
-            model.get_pending_transactions(&principal, &address)
+            with_btc_pending_model(state, |model| {
+                model.prune_pending_transactions(principal, &utxos, now_ns);
+                model.get_pending_transactions(&principal, &address)
+            })
         });
 
         let pending: Vec<PendingTransaction> = stored
