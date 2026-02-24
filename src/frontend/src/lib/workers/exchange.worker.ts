@@ -8,7 +8,7 @@ import {
 	exchangeRateUsdToCurrency,
 	fetchAllExchangeRatesFromBackend
 } from '$lib/services/exchange.services';
-import type { CoingeckoPlatformId, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
+import type { CoingeckoPlatformId } from '$lib/types/coingecko';
 import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
 import type {
 	PostMessage,
@@ -135,11 +135,7 @@ const syncExchange = async ({
 			})
 		]);
 
-		const {
-			currentErc20Prices,
-			currentIcrcPrices,
-			currentSplPrices
-		} = backendPrices;
+		const { currentErc20Prices, currentIcrcPrices, currentSplPrices } = backendPrices;
 
 		const currentErc4626Prices = await calculateErc4626Prices({
 			erc20Prices: currentErc20Prices,

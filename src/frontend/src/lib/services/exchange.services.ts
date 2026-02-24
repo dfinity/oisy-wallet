@@ -1,5 +1,4 @@
 import type { CustomTokenId, ExchangeRate } from '$declarations/backend/backend.did';
-import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
@@ -7,10 +6,7 @@ import { Currency } from '$lib/enums/currency';
 import { simplePrice } from '$lib/rest/coingecko.rest';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
-import type {
-	CoingeckoSimplePriceResponse,
-	CoingeckoSimpleTokenPriceResponse
-} from '$lib/types/coingecko';
+import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { Principal } from '@dfinity/principal';
@@ -144,8 +140,6 @@ export const fetchAllExchangeRatesFromBackend = async ({
 		const match = response.find(([tokenId]) => JSON.stringify(tokenId) === JSON.stringify(id));
 		return match ? mapExchangeRateToCoingecko(match[1]) : undefined;
 	};
-
-
 
 	const erc20Prices: CoingeckoSimpleTokenPriceResponse = {};
 	erc20Addresses.forEach((t) => {

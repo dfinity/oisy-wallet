@@ -52,8 +52,8 @@ export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSign
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export type ApproveError =
 	| {
-		GenericError: { message: string; error_code: bigint };
-	}
+			GenericError: { message: string; error_code: bigint };
+	  }
 	| { TemporarilyUnavailable: null }
 	| { Duplicate: { duplicate_of: bigint } }
 	| { BadFee: { expected_fee: bigint } }
@@ -91,8 +91,8 @@ export interface BtcGetFeePercentilesResponse {
 }
 export type BtcGetFeePercentilesResult =
 	| {
-		Ok: BtcGetFeePercentilesResponse;
-	}
+			Ok: BtcGetFeePercentilesResponse;
+	  }
 	| { Err: SelectedUtxosFeeError };
 export type BtcGetPendingTransactionsError = {
 	InternalError: { msg: string };
@@ -106,8 +106,8 @@ export interface BtcGetPendingTransactionsRequest {
 }
 export type BtcGetPendingTransactionsResult =
 	| {
-		Ok: BtcGetPendingTransactionsReponse;
-	}
+			Ok: BtcGetPendingTransactionsReponse;
+	  }
 	| { Err: BtcGetPendingTransactionsError };
 export type BtcSelectUserUtxosFeeResult =
 	| { Ok: SelectedUtxosFeeResponse }
@@ -278,8 +278,8 @@ export interface IcrcToken {
 export type Icrcv2AccountId =
 	| { Account: Uint8Array }
 	| {
-		WithPrincipal: { owner: Principal; subaccount: [] | [Uint8Array] };
-	};
+			WithPrincipal: { owner: Principal; subaccount: [] | [Uint8Array] };
+	  };
 export type ImageMimeType =
 	| { 'image/gif': null }
 	| { 'image/png': null }
@@ -394,19 +394,19 @@ export type TokenAccountId =
 export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
-		InvalidArgPercentageOutOfRange: {
-			max: number;
-			min: number;
-			percentage: number;
-		};
-	}
+			InvalidArgPercentageOutOfRange: {
+				max: number;
+				min: number;
+				percentage: number;
+			};
+	  }
 	| { CouldNotGetBalanceFromCyclesLedger: null }
 	| {
-		CouldNotTopUpCyclesLedger: {
-			tried_to_send: bigint;
-			available: bigint;
-		};
-	};
+			CouldNotTopUpCyclesLedger: {
+				tried_to_send: bigint;
+				available: bigint;
+			};
+	  };
 export interface TopUpCyclesLedgerRequest {
 	threshold: [] | [bigint];
 	percentage: [] | [number];
