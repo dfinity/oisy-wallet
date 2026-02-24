@@ -516,14 +516,10 @@ impl Validate for SplTokenId {
     /// - <https://solana.com/docs/more/exchange#basic-verification>
     fn validate(&self) -> Result<(), Error> {
         if self.0.len() < 32 {
-            return Err(Error::msg(
-                "Minimum valid Solana address length is 32",
-            ));
+            return Err(Error::msg("Minimum valid Solana address length is 32"));
         }
         if self.0.len() > 44 {
-            return Err(Error::msg(
-                "Maximum valid Solana address length is 44",
-            ));
+            return Err(Error::msg("Maximum valid Solana address length is 44"));
         }
         let parsed_maybe = bs58::decode(&self.0).into_vec();
         if let Ok(bytes) = parsed_maybe {
@@ -548,9 +544,7 @@ impl Validate for ErcTokenId {
     /// Verifies that an Ethereum/EVM address is valid.
     fn validate(&self) -> Result<(), Error> {
         if self.0.len() != 42 {
-            return Err(Error::msg(
-                "Invalid Ethereum/EVM contract address length",
-            ));
+            return Err(Error::msg("Invalid Ethereum/EVM contract address length"));
         }
         Ok(())
     }
