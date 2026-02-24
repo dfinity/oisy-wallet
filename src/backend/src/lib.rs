@@ -456,12 +456,7 @@ pub async fn btc_add_pending_transaction(
             config
                 .supported_credentials
                 .as_ref()
-                .map(|creds| {
-                    creds
-                        .iter()
-                        .map(|c| c.ii_canister_id)
-                        .collect::<Vec<_>>()
-                })
+                .map(|creds| creds.iter().map(|c| c.ii_canister_id).collect::<Vec<_>>())
                 .unwrap_or_default()
         });
 

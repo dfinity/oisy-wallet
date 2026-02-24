@@ -75,8 +75,12 @@ pub enum BtcAddPendingTransactionError {
     InvalidUtxos,
     UtxosAlreadyReserved,
     /// The provided II delegation chain is missing or failed verification.
-    InvalidDelegationChain { msg: String },
-    InternalError { msg: String },
+    InvalidDelegationChain {
+        msg: String,
+    },
+    InternalError {
+        msg: String,
+    },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

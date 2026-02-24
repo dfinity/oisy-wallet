@@ -6,10 +6,11 @@ use shared::types::delegation::IIDelegationChain;
 ///
 /// Checks performed:
 /// 1. The delegation chain is non-empty.
-/// 2. The self-authenticating principal derived from the chain's root public key matches the caller.
+/// 2. The self-authenticating principal derived from the chain's root public key matches the
+///    caller.
 /// 3. None of the delegations in the chain have expired.
-/// 4. The root public key is a valid IC canister signature key (proving the caller
-///    authenticated through a canister, not a raw key pair).
+/// 4. The root public key is a valid IC canister signature key (proving the caller authenticated
+///    through a canister, not a raw key pair).
 /// 5. The canister ID embedded in the public key matches a known II canister ID.
 /// 6. If targets are specified in any delegation, the current canister is included.
 pub fn verify_ii_delegation_chain(
