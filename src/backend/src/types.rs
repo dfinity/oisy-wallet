@@ -14,6 +14,7 @@ use shared::types::{
     user_profile::StoredUserProfile,
     Timestamp,
 };
+use shared::types::exchange::ExchangeRate;
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 pub type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
@@ -39,18 +40,6 @@ pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>
 pub type BtcUserPendingTransactionsMap =
     StableBTreeMap<StoredPrincipal, Candid<PendingTransactionsMap>, VMem>;
 
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct ExchangeData {
-    pub timestamp_ns: Timestamp,
-    pub price: f64,
-    pub price_24h_change_pct: Option<f64>,
-    pub market_cap: f64,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct ExchangeRate {
-    pub usd: ExchangeData,
-}
 
 pub type ExchangeRateMap = StableBTreeMap<Candid<CustomTokenId>, Candid<ExchangeRate>, VMem>;
 

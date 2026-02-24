@@ -34,6 +34,7 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
+use crate::types::exchange::{ExchangeData};
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
@@ -77,6 +78,21 @@ fn validate_collection_size<T>(
         return Err(Error::msg(format!(
             "Too many {collection_name}, max allowed is {max_size}"
         )));
+    }
+    Ok(())
+}
+
+fn validate_finite_float(value: f64, field_name: &str) -> Result<(), Error> {
+    if !value.is_finite() {
+        return Err(Error::msg(format!("{field_name} must be a finite number")));
+    }
+    Ok(())
+}
+
+fn validate_non_negative_float(value: f64, field_name: &str) -> Result<(), Error> {
+    validate_finite_float(value, field_name)?;
+    if value < 0.0 {
+        return Err(Error::msg(format!("{field_name} cannot be negative")));
     }
     Ok(())
 }
@@ -787,6 +803,29 @@ impl Validate for UpdateContactRequest {
     }
 }
 
+impl Validate for ExchangeData {
+    fn validate(&self) -> Result<(), Error> {
+        if self.timestamp_ns == 0 {
+            return Err(Error::msg("timestamp_ns cannot be zero"));
+        }
+        if let Some(price) = self.price {
+             validate_non_negative_float(price, "price")?;
+        }
+        if let Some(change) = self.price_24h_change_pct {
+           validate_finite_float(change, "price_24h_change_pct")?;
+            if change < -100.0 {
+                return Err(Error::msg(
+                    "price_24h_change_pct cannot be less than -100%",
+                ));
+            }
+        }
+        if let Some(market_cap) = self.market_cap {
+            validate_non_negative_float(market_cap, "market_cap")?;
+        }
+        Ok(())
+    }
+}
+
 // Apply the validation during deserialization for all types
 validate_on_deserialize!(Contact);
 validate_on_deserialize!(ContactAddressData);
@@ -804,3 +843,4 @@ validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(ErcToken);
 validate_on_deserialize!(ErcTokenId);
 validate_on_deserialize!(UserToken);
+validate_on_deserialize!(ExchangeData);
