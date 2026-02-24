@@ -60,6 +60,22 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 
 type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
 
+/**
+ * Creates a comparator function for sorting tokens based on multiple criteria:
+ *
+ * 1. Deprecation status (non-deprecated tokens first).
+ * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
+ * 3. USD balance (descending).
+ * 4. Explicitly pinned tokens (pinned first, preserving the order provided by `pinIndexById`).
+ * 5. Token symbol (ascending, locale-aware).
+ * 6. Token name (ascending, locale-aware).
+ * 7. Network name (ascending, locale-aware).
+ * 8. Token balance (descending).
+ * 9. USD market cap (descending).
+ *
+ * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
+ *
+ */
 const createTokenComparator =
 	<T extends Token>({
 		pinIndexById,
@@ -154,15 +170,16 @@ const createTokenComparator =
  * Sorting priority (in order):
  *
  * 1. Deprecation status (non-deprecated tokens first).
- * 2. USD balance (descending).
- * 3. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
- * 4. Token symbol (ascending, locale-aware).
- * 5. Token name (ascending, locale-aware).
- * 6. Network name (ascending, locale-aware).
- * 7. Token balance (descending).
- * 8. USD market cap (descending).
+ * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
+ * 3. USD balance (descending).
+ * 4. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
+ * 5. Token symbol (ascending, locale-aware).
+ * 6. Token name (ascending, locale-aware).
+ * 7. Network name (ascending, locale-aware).
+ * 8. Token balance (descending).
+ * 9. USD market cap (descending).
  *
- * Additionally, if `primarySortStrategy` is set, it overrides the default sorting by value.
+ * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
  *
  * @param $tokens - The list of tokens to sort.
  * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
