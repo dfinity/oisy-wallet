@@ -48,7 +48,7 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 
 	return {
 		deprecated: isGroup ? false : (t.token.deprecated ?? false),
-		id: isGroup ? t.group.groupData.id : t.token.id,
+		id: isGroup ? t.group.tokens[0].id : t.token.id,
 		symbol: isGroup ? t.group.groupData.symbol : t.token.symbol,
 		name: isGroup ? t.group.groupData.name : t.token.name,
 		networkName: isGroup ? '' : t.token.network.name,
