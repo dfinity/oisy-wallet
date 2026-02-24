@@ -5,6 +5,7 @@ import type {
 	Contact,
 	CredentialSpec,
 	GetUserProfileError,
+	IIDelegationChain,
 	UserProfile,
 	Utxo
 } from '$declarations/backend/backend.did';
@@ -51,6 +52,7 @@ export interface BtcGetPendingTransactionParams {
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
 	txId: Uint8Array;
 	utxos: Utxo[];
+	iiDelegationChain: [] | [IIDelegationChain];
 }
 
 export interface SendBtcParams {

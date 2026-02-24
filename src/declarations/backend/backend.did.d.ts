@@ -69,12 +69,27 @@ export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
 	| { EmptyUtxos: null }
 	| { DuplicateUtxos: null }
+	| { InvalidDelegationChain: { msg: string } }
 	| { InternalError: { msg: string } }
 	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
 	network: BitcoinNetwork;
 	utxos: Array<Utxo>;
+	ii_delegation_chain: [] | [IIDelegationChain];
+}
+export interface Delegation {
+	pubkey: Uint8Array;
+	expiration: bigint;
+	targets: [] | [Array<Principal>];
+}
+export interface IIDelegationChain {
+	delegations: Array<SignedDelegation>;
+	public_key: Uint8Array;
+}
+export interface SignedDelegation {
+	delegation: Delegation;
+	signature: Uint8Array;
 }
 export type BtcAddPendingTransactionResult = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type BtcAddress =

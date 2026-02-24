@@ -58,13 +58,28 @@ type BtcAddPendingTransactionError = variant {
 	InvalidUtxos;
 	EmptyUtxos;
 	DuplicateUtxos;
+	InvalidDelegationChain : record { msg : text };
 	InternalError : record { msg : text };
 	UtxosAlreadyReserved
 };
 type BtcAddPendingTransactionRequest = record {
 	txid : blob;
 	network : BitcoinNetwork;
-	utxos : vec Utxo
+	utxos : vec Utxo;
+	ii_delegation_chain : opt IIDelegationChain
+};
+type Delegation = record {
+	pubkey : blob;
+	expiration : nat64;
+	targets : opt vec principal
+};
+type IIDelegationChain = record {
+	delegations : vec SignedDelegation;
+	public_key : blob
+};
+type SignedDelegation = record {
+	delegation : Delegation;
+	signature : blob
 };
 type BtcAddPendingTransactionResult = variant {
 	Ok;
