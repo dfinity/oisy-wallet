@@ -316,6 +316,7 @@ type SplToken = record {
 type Stats = record {
 	user_profile_count : nat64;
 	custom_token_count : nat64;
+	token_activity_count : nat64;
 	user_timestamps_count : nat64;
 	user_token_count : nat64
 };
@@ -556,7 +557,7 @@ service : (Arg) -> {
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	// Processes external HTTP requests.
 	http_request : (HttpRequest) -> (HttpResponse) query;
-	list_custom_tokens : () -> (vec CustomToken) query;
+	list_custom_tokens : () -> (vec CustomToken);
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
 	// Add or update custom token for the user.
