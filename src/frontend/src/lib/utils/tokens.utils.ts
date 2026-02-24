@@ -60,31 +60,27 @@ const createTokenComparator =
 		primarySortStrategy: TokensSortType;
 	}) =>
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
-	(a: { token: TokenUi<T> }, b: { token: TokenUi<T> }): number => {
+	(a: TokenUi<T>, b: TokenUi<T>): number => {
 		const {
-			token: {
-				deprecated: aDeprecated,
-				usdPriceChangePercentage24h: aPerf,
-				symbol: aSymbol,
-				usdBalance: aUsdBalance,
-				name: aName,
-				network: { name: aNetworkName },
-				balance: aBalance,
-				usdMarketCap: aUsdMarketCap
-			}
+			deprecated: aDeprecated,
+			usdPriceChangePercentage24h: aPerf,
+			symbol: aSymbol,
+			usdBalance: aUsdBalance,
+			name: aName,
+			network: { name: aNetworkName },
+			balance: aBalance,
+			usdMarketCap: aUsdMarketCap
 		} = a;
 
 		const {
-			token: {
-				deprecated: bDeprecated,
-				usdPriceChangePercentage24h: bPerf,
-				symbol: bSymbol,
-				usdBalance: bUsdBalance,
-				name: bName,
-				network: { name: bNetworkName },
-				balance: bBalance,
-				usdMarketCap: bUsdMarketCap
-			}
+			deprecated: bDeprecated,
+			usdPriceChangePercentage24h: bPerf,
+			symbol: bSymbol,
+			usdBalance: bUsdBalance,
+			name: bName,
+			network: { name: bNetworkName },
+			balance: bBalance,
+			usdMarketCap: bUsdMarketCap
 		} = b;
 
 		// Deprecated last
@@ -116,8 +112,8 @@ const createTokenComparator =
 		}
 
 		// Pinned tokens (pinned first; pinned order = order provided)
-		const aPin = pinIndexById.get(a.token.id);
-		const bPin = pinIndexById.get(b.token.id);
+		const aPin = pinIndexById.get(a.id);
+		const bPin = pinIndexById.get(b.id);
 		const aPinned = aPin !== undefined;
 		const bPinned = bPin !== undefined;
 		if (aPinned !== bPinned) {
@@ -171,10 +167,7 @@ export const sortTokens = <T extends Token>({
 
 	const comparator = createTokenComparator<T>({ pinIndexById, primarySortStrategy });
 
-	return $tokens
-		.map((token) => ({ token }))
-		.sort(comparator)
-		.map(({ token }) => token);
+	return $tokens.sort(comparator);
 };
 
 /**
