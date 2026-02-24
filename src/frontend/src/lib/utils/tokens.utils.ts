@@ -39,9 +39,9 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * Creates a comparator function for sorting tokens based on multiple criteria:
  *
  * 1. Deprecation status (non-deprecated tokens first).
- * 2. Primary sorting strategy (either performance or symbol, based on the provided parameter).
+ * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
  * 3. USD balance (descending).
- * 4. Explicitly pinned tokens (pinned first, preserving the order provided in `pinIndexById`).
+ * 4. Explicitly pinned tokens (pinned first, preserving the order provided by `pinIndexById`).
  * 5. Token symbol (ascending, locale-aware).
  * 6. Token name (ascending, locale-aware).
  * 7. Network name (ascending, locale-aware).
@@ -142,7 +142,7 @@ const createTokenComparator =
  * Sorting priority (in order):
  *
  * 1. Deprecation status (non-deprecated tokens first).
- * 2. Primary sorting strategy (either performance or symbol, based on the provided parameter).
+ * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
  * 3. USD balance (descending).
  * 4. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
  * 5. Token symbol (ascending, locale-aware).
