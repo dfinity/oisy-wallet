@@ -351,6 +351,7 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 }
 
 #[query(guard = "caller_is_not_anonymous")]
+#[must_use]
 pub fn get_exchange_rates(
     token_ids: Vec<CustomTokenId>,
 ) -> Vec<(CustomTokenId, Option<ExchangeRate>)> {
@@ -369,6 +370,7 @@ pub fn get_exchange_rates(
 }
 
 #[query(guard = "caller_is_not_anonymous")]
+#[must_use]
 pub fn get_exchange_rate(token_id: CustomTokenId) -> Option<ExchangeRate> {
     read_state(|s| s.exchange_rates.get(&StoredTokenId(token_id)).map(|c| c.0))
 }

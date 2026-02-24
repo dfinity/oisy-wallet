@@ -33,7 +33,7 @@ pub fn mark_token_active(token_id: &CustomTokenId) {
             StoredTokenId(token_id.clone()),
             &mut s.token_activity,
             time(),
-        )
+        );
     });
 }
 
@@ -51,11 +51,11 @@ pub async fn refresh_exchange_rates() {
     let now = time();
     let threshold = now - ACTIVITY_THRESHOLD_SEC * 1_000_000_000;
 
-    let active_tokens: Vec<CustomTokenId> = read_state(|s| {
+    let active_tokens: Vec<StoredTokenId> = read_state(|s| {
         s.token_activity
             .iter()
-            .filter(|(_, ts)| *ts > threshold)
-            .map(|(id, _)| id.0)
+            .filter(|entry| entry.value() > threshold)
+            .map(|entry| entry.key().clone())
             .collect()
     });
 
@@ -63,20 +63,20 @@ pub async fn refresh_exchange_rates() {
         return;
     }
 
-    // Fetch prices for active tokens
-    // For now, let's implement a simplified version that fetches ICP and some known tokens
     fetch_and_update_prices(active_tokens).await;
 }
 
-async fn fetch_and_update_prices(token_ids: Vec<CustomTokenId>) {
+async fn fetch_and_update_prices(token_ids: Vec<StoredTokenId>) {
     let mut platforms: std::collections::HashMap<String, Vec<String>> =
         std::collections::HashMap::new();
 
-    let mut address_to_token_id: std::collections::HashMap<(String, String), CustomTokenId> =
+    let mut address_to_token_id: std::collections::HashMap<(String, String), StoredTokenId> =
         std::collections::HashMap::new();
 
     for token_id in token_ids {
-        match token_id.clone() {
+        let StoredTokenId(inner) = &token_id;
+
+        match inner {
             CustomTokenId::Icrc(ledger_id) => {
                 let ledger_str = ledger_id.to_text();
                 platforms
@@ -97,7 +97,7 @@ async fn fetch_and_update_prices(token_ids: Vec<CustomTokenId>) {
                     42161 => "arbitrum-one",
                     _ => continue,
                 };
-                let addr_str: String = address.into();
+                let addr_str = address.as_str().to_owned();
                 platforms
                     .entry(platform.to_string())
                     .or_default()
@@ -106,7 +106,7 @@ async fn fetch_and_update_prices(token_ids: Vec<CustomTokenId>) {
                     .insert((platform.to_string(), addr_str.to_lowercase()), token_id);
             }
             CustomTokenId::SolMainnet(address) => {
-                let addr_str: String = address.into();
+                let addr_str = address.as_str().to_owned();
                 platforms
                     .entry("solana".to_string())
                     .or_default()
@@ -118,7 +118,6 @@ async fn fetch_and_update_prices(token_ids: Vec<CustomTokenId>) {
         }
     }
 
-    // Fetch by platforms
     for (platform, addresses) in platforms {
         for chunk in addresses.chunks(50) {
             if let Ok(prices) = fetch_coingecko_token_prices(&platform, chunk).await {
@@ -140,13 +139,12 @@ async fn fetch_coingecko_token_prices(
 ) -> Result<std::collections::HashMap<String, (Option<f64>, Option<f64>, Option<f64>)>, String> {
     let addr_str = addresses.join(",");
     let url = format!(
-        "https://api.coingecko.com/api/v3/simple/token_price/{}?contract_addresses={}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
-        platform, addr_str
-    );
+    "https://api.coingecko.com/api/v3/simple/token_price/{platform}?contract_addresses={addr_str}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true"
+);
 
     let response = perform_http_get(&url, 8192).await?;
-    let json: serde_json::Value = serde_json::from_slice(&response.body)
-        .map_err(|e| format!("Failed to parse JSON: {}", e))?;
+    let json: serde_json::Value =
+        serde_json::from_slice(&response.body).map_err(|e| format!("Failed to parse JSON: {e}"))?;
 
     let mut result = std::collections::HashMap::new();
     for addr in addresses {
@@ -177,7 +175,7 @@ async fn perform_http_get(url: &str, max_response_bytes: u64) -> Result<HttpResp
 
     match http_request(request, 10_000_000_000).await {
         Ok((response,)) => {
-            if response.status == candid::Nat::from(200u32) {
+            if response.status == 200u32 {
                 Ok(response)
             } else {
                 Err(format!(
@@ -186,11 +184,11 @@ async fn perform_http_get(url: &str, max_response_bytes: u64) -> Result<HttpResp
                 ))
             }
         }
-        Err((code, msg)) => Err(format!("HTTP request failed: {:?} {}", code, msg)),
+        Err((code, msg)) => Err(format!("HTTP request failed: {code:?} {msg}")),
     }
 }
 
-fn update_price(token_id: &CustomTokenId, price_data: (Option<f64>, Option<f64>, Option<f64>)) {
+fn update_price(token_id: &StoredTokenId, price_data: (Option<f64>, Option<f64>, Option<f64>)) {
     // TODO: use timestamp from price data when available, for now use current time
     let now = time();
 
@@ -198,7 +196,7 @@ fn update_price(token_id: &CustomTokenId, price_data: (Option<f64>, Option<f64>,
 
     mutate_state(|s| {
         s.exchange_rates.insert(
-            StoredTokenId(token_id.clone()),
+            token_id.clone(),
             Candid(ExchangeRate {
                 usd: ExchangeData {
                     timestamp_ns: now,

@@ -40,9 +40,10 @@ pub struct IcPunksToken {
 #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug, PartialOrd, Ord)]
 #[serde(remote = "Self")]
 pub struct SplTokenId(pub String);
-impl From<SplTokenId> for String {
-    fn from(value: SplTokenId) -> Self {
-        value.0
+impl SplTokenId {
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
     }
 }
 
@@ -59,9 +60,10 @@ pub struct SplToken {
 #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug, PartialOrd, Ord)]
 #[serde(remote = "Self")]
 pub struct ErcTokenId(pub String);
-impl From<ErcTokenId> for String {
-    fn from(value: ErcTokenId) -> Self {
-        value.0
+impl ErcTokenId {
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
     }
 }
 
