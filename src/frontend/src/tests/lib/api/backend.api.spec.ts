@@ -29,6 +29,7 @@ import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIIDelegationChain } from '$tests/mocks/ii-delegation.mock';
 import { mockUserExperimentalFeatures } from '$tests/mocks/user-experimental-features.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import type { QueryParams } from '@dfinity/utils';
@@ -323,7 +324,8 @@ describe('backend.api', () => {
 			txId: new Uint8Array([1, 2, 3]),
 			utxos: [mockUtxo],
 			network: { mainnet: null },
-			address: 'address'
+			address: 'address',
+			iiDelegationChain: mockIIDelegationChain
 		};
 
 		const mockResponse = true;
