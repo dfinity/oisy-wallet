@@ -81,8 +81,8 @@ const createNetworkComparator =
 		const aPin = networkPinIndexById.get(a);
 		const bPin = networkPinIndexById.get(b);
 
-		const aPinnedNet = aPin !== undefined;
-		const bPinnedNet = bPin !== undefined;
+		const aPinnedNet = nonNullish(aPin);
+		const bPinnedNet = nonNullish(bPin);
 
 		if (aPinnedNet !== bPinnedNet) {
 			return aPinnedNet ? -1 : 1;
