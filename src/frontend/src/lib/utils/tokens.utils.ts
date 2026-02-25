@@ -182,12 +182,14 @@ export function sortTokens(params: {
 	primarySortStrategy?: TokensSortType;
 }): TokenUiOrGroupUi[];
 /**
- * Creates a comparator function for sorting tokens based on multiple criteria:
+ * Sorts tokens using balance-aware and pin-aware prioritisation.
+ *
+ * Sorting priority (in order):
  *
  * 1. Deprecation status (non-deprecated tokens first).
  * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
  * 3. USD balance (descending).
- * 4. Explicitly pinned tokens (pinned first, preserving the order provided by `pinIndexById`).
+ * 4. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
  * 5. Token symbol (ascending, locale-aware).
  * 6. Token name (ascending, locale-aware).
  * 7. Network name (ascending, locale-aware).
@@ -196,6 +198,10 @@ export function sortTokens(params: {
  *
  * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
  *
+ * @param $tokens - The list of tokens to sort.
+ * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
+ * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
+ * @returns A sorted array of token UI objects.
  */
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function sortTokens<T extends Token>({
