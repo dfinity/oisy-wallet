@@ -765,11 +765,9 @@ mod user_profile {
         AddUserCredentialRequest,
         vec![
             TestVector {
-                description:
-                    "AddUserCredentialRequest with credential_jwt at max length is valid",
+                description: "AddUserCredentialRequest with credential_jwt at max length is valid",
                 input: AddUserCredentialRequest {
-                    credential_jwt: "1"
-                        .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH),
+                    credential_jwt: "1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH),
                     credential_spec: CredentialSpec {
                         credential_type: "test".to_string(),
                         arguments: None,
