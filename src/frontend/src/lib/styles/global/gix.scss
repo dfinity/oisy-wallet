@@ -78,7 +78,7 @@
 	--dialog-max-width: var(--alert-max-width);
 	--dialog-max-height: var(--alert-max-height);
 	--dialog-min-height: var(--alert-max-height);
-	--dialog-height: initial;
+	--dialog-height: 100dvh;
 	--dialog-border-radius: 0px;
 	--dialog-padding-y: 0;
 	--dialog-padding-x: 0;
@@ -97,6 +97,7 @@
 		--alert-max-height: initial;
 		--alert-border-radius: calc(var(--border-radius-sm) * 3);
 		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
+		--dialog-height: initial;
 	}
 
 	@supports (-webkit-touch-callout: none) {
