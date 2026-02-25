@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { networks } from '$lib/derived/networks.derived';
 import { stakeBalances } from '$lib/derived/stake.derived';
 import { tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -50,6 +51,7 @@ export const initModalTokensListContext = (
 			balancesStore,
 			stakeBalances,
 			tokensToPin,
+			networks,
 			filterNetworksIds,
 			filterNfts
 		],
@@ -63,6 +65,7 @@ export const initModalTokensListContext = (
 			$balances,
 			$stakeBalances,
 			$tokensToPin,
+			$networksToPin,
 			$filterNetworksIds,
 			$filterNfts
 		]) => {
@@ -103,7 +106,8 @@ export const initModalTokensListContext = (
 
 			const pinnedWithBalance = sortTokens({
 				$tokens: tokensUi,
-				$tokensToPin
+				$tokensToPin,
+				$networksToPin
 			});
 
 			return $filterZeroBalance
