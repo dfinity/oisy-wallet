@@ -534,7 +534,7 @@ fn test_anonymous_cannot_list_custom_tokens() {
     assert!(result.is_err());
     assert_eq!(
         &result.unwrap_err(),
-        "Query call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
+        "Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
     );
 }
 
