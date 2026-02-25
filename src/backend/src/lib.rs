@@ -106,6 +106,10 @@ thread_local! {
         MemoryManager::init(DefaultMemoryImpl::default())
     );
 
+    /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
+    static HOUSEKEEPING_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
+    static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
+
     static STATE: RefCell<State> = RefCell::new(
         MEMORY_MANAGER.with(|mm| State {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None),
@@ -167,16 +171,109 @@ fn set_config(arg: InitArg) {
     });
 }
 
+/// 2 hours in nanoseconds — if a housekeeping run has been in progress for
+/// longer than this, we consider it stuck and force-unlock so the next timer
+/// tick can proceed.
+const HOUSEKEEPING_TIMEOUT_NS: u64 = 2 * 60 * 60 * 1_000_000_000;
+
+pub(crate) const MAX_CONCURRENT_ALLOW_SIGNING: u32 = 50;
+
+/// Returns `true` if a housekeeping run is currently in flight and has not
+/// timed out.  If the lock has been held longer than `HOUSEKEEPING_TIMEOUT_NS`,
+/// logs a warning and returns `false` so the caller can force a new run.
+pub(crate) fn is_housekeeping_in_progress(now_ns: u64) -> bool {
+    HOUSEKEEPING_STARTED_AT.with(|cell| {
+        if let Some(started) = *cell.borrow() {
+            let elapsed = now_ns.saturating_sub(started);
+            if elapsed > HOUSEKEEPING_TIMEOUT_NS {
+                eprintln!(
+                    "Housekeeping appears stuck (started {}s ago), forcing unlock",
+                    elapsed / 1_000_000_000
+                );
+                false
+            } else {
+                true
+            }
+        } else {
+            false
+        }
+    })
+}
+
+/// Spawns housekeeping only if no previous run is still in flight.
+/// If a previous run appears stuck (older than `HOUSEKEEPING_TIMEOUT_NS`),
+/// the stale lock is cleared and a new run is allowed to proceed.
+fn spawn_housekeeping_if_idle() {
+    let now = time();
+
+    if is_housekeeping_in_progress(now) {
+        return;
+    }
+
+    HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = Some(now));
+
+    ic_cdk::spawn(async {
+        hourly_housekeeping_tasks().await;
+        HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = None);
+    });
+}
+
+/// Atomically increments the in-flight `allow_signing` counter if below
+/// `MAX_CONCURRENT_ALLOW_SIGNING`.  Returns `true` on success.
+///
+/// The caller is responsible for decrementing after the task finishes.
+/// On IC traps the counter stays elevated, but the cap prevents unbounded
+/// accumulation.  In practice the `allow_signing` code path contains no
+/// panic sites, so leaked slots are unlikely.
+pub(crate) fn try_acquire_allow_signing_slot() -> bool {
+    ALLOW_SIGNING_IN_PROGRESS.with(|cell| {
+        let mut count = cell.borrow_mut();
+        if *count >= MAX_CONCURRENT_ALLOW_SIGNING {
+            return false;
+        }
+        *count += 1;
+        true
+    })
+}
+
+/// Decrements the in-flight `allow_signing` counter.
+pub(crate) fn release_allow_signing_slot() {
+    ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow_mut() -= 1);
+}
+
+/// Spawns an `allow_signing` task only if the number of in-flight tasks is
+/// below `MAX_CONCURRENT_ALLOW_SIGNING`.
+fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
+    if !try_acquire_allow_signing_slot() {
+        eprintln!(
+            "Skipped allow_signing for user {}: too many concurrent tasks",
+            stored_principal.0,
+        );
+        return;
+    }
+
+    ic_cdk::spawn(async move {
+        if let Err(e) = signer::allow_signing(None).await {
+            ic_cdk::println!(
+                "Error enabling signing for user {}: {:?}",
+                stored_principal.0,
+                e
+            );
+        }
+        release_allow_signing_slot();
+    });
+}
+
 /// Runs housekeeping tasks immediately, then periodically:
 /// - `hourly_housekeeping_tasks`
 fn start_periodic_housekeeping_timers() {
     // Run housekeeping tasks once, immediately but asynchronously.
     let immediate = Duration::ZERO;
-    set_timer(immediate, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+    set_timer(immediate, spawn_housekeeping_if_idle);
 
     // Then periodically:
     let hour = Duration::from_secs(60 * 60);
-    let _ = set_timer_interval(hour, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+    let _ = set_timer_interval(hour, spawn_housekeeping_if_idle);
 }
 
 /// Runs hourly housekeeping tasks:
@@ -763,25 +860,10 @@ pub fn create_user_profile() -> UserProfile {
     });
 
     // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
-    // Spawn the async task for allow_signing after returning UserProfile synchronously
-    ic_cdk::spawn(async move {
-        // Upon initial user login, we have to that ensure allow_signing is called to handle
-        // cases where users lack the cycles required for signer operations. To
-        // guarantee correct functionality, create_user_profile(..) must be invoked
-        // before any signer-related calls (e.g., get_eth_address). Spawns the async
-        // task separately after returning UserProfile synchronously
-        if let Err(e) = signer::allow_signing(None).await {
-            // We don't return errors or panic here because:
-            // 1. The user profile was already created successfully
-            // 2. This is running in a spawned task, so we can't return errors to the original
-            //    caller
-            ic_cdk::println!(
-                "Error enabling signing for user {}: {:?}",
-                stored_principal.0,
-                e
-            );
-        }
-    });
+    // async task. Upon initial user login, we ensure allow_signing is called to handle cases
+    // where users lack the cycles required for signer operations. create_user_profile(..) must
+    // be invoked before any signer-related calls (e.g., get_eth_address).
+    spawn_allow_signing_if_below_limit(stored_principal);
 
     user_profile
 }
