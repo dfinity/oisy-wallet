@@ -13,6 +13,7 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkICPTestnet, selectedNetwork } from '$lib/derived/network.derived';
+	import { networks } from '$lib/derived/networks.derived';
 	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -30,7 +31,6 @@
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-	import {networks} from "$lib/derived/networks.derived";
 
 	interface Props {
 		network?: Network;
@@ -89,7 +89,7 @@
 			sortTokens({
 				$tokens: allTokensUi,
 				$tokensToPin,
-				$networksToPin: $networks,
+				$networksToPin: $networks
 			})
 		)
 	);
