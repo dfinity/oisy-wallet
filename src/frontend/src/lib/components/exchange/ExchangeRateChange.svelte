@@ -43,7 +43,7 @@
 
 {#if nonNullish(parsedExchangeRateChange)}
 	<span
-		class={`px-1 text-xs${  background === 'dark' ? ' bg-black/30' : ''}`}
+		class={`px-1 text-xs${background === 'dark' ? ' bg-black/30' : ''}`}
 		class:bg-white={background === 'light'}
 		class:rounded={nonNullish(background)}
 		class:sm:text-sm={fontSize === 'sm'}
