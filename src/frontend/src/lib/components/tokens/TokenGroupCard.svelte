@@ -55,13 +55,12 @@
 
 	// list of tokens that should display with a "show more" button for not displayed ones
 	const truncatedTokens: TokenUi[] = $derived(
-		filteredTokens.filter((token) => 
-			// Only include tokens with a balance
-			 (
+		filteredTokens.filter(
+			(token) =>
+				// Only include tokens with a balance
 				(token.usdBalance ?? 0) > 0 ||
 				// If the total balance is 0, show all
 				totalUsdBalance === 0
-			)
 		)
 	);
 
