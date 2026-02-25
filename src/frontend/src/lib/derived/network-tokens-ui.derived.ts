@@ -24,12 +24,12 @@ export const enabledFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
 		)
 );
 
-export const enabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
+const enabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
 	[enabledFungibleNetworkTokensUi],
 	([$tokens]) => groupTokens($tokens)
 );
 
-export const sortedFungibleNetworkTokensUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
+export const sortedEnabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
 	[enabledNetworkTokenUiOrGroupUi, tokensToPin, tokensSortType],
 	([$tokens, $tokensToPin, $tokensSortType]) =>
 		sortTokens({
