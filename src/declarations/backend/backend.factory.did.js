@@ -257,6 +257,7 @@ export const idlFactory = ({ IDL }) => {
 		InvalidImageFormat: IDL.Null,
 		ContactNotFound: IDL.Null,
 		ImageTooLarge: IDL.Null,
+		TooManyContacts: IDL.Null,
 		RandomnessError: IDL.Null,
 		ImageExceedsMaxSize: IDL.Null,
 		CanisterStatusError: IDL.Null,

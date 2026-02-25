@@ -163,6 +163,7 @@ export type ContactError =
 	| { InvalidImageFormat: null }
 	| { ContactNotFound: null }
 	| { ImageTooLarge: null }
+	| { TooManyContacts: null }
 	| { RandomnessError: null }
 	| { ImageExceedsMaxSize: null }
 	| { CanisterStatusError: null }

@@ -153,6 +153,7 @@ type ContactError = variant {
 	InvalidImageFormat;
 	ContactNotFound;
 	ImageTooLarge;
+	TooManyContacts;
 	RandomnessError;
 	ImageExceedsMaxSize;
 	CanisterStatusError;
