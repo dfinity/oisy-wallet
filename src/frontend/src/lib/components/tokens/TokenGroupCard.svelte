@@ -60,7 +60,7 @@
 			return usdBalanceDiff;
 		}
 
-		// If same balance order by Native > CK > others
+		// If same balance, order by showTokenInGroup (neverCollapseInTokenGroup) > CK > others
 		if (showTokenInGroup(a) !== showTokenInGroup(b)) {
 			return showTokenInGroup(a) ? -1 : 1;
 		}
