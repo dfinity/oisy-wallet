@@ -32,11 +32,11 @@ const enabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
 
 export const sortedEnabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
 	[enabledNetworkTokenUiOrGroupUi, tokensToPin, tokensSortType, networks],
-	([$tokens, $tokensToPin, $tokensSortType, $networksToPin]) =>
+	([$tokens, $tokensToPin, $tokensSortType, $networks]) =>
 		sortTokens({
 			$tokens,
 			$tokensToPin,
-			$networksToPin,
+			$networksToPin: $networks,
 			primarySortStrategy: $tokensSortType
 		})
 );
