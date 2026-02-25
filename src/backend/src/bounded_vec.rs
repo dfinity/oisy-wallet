@@ -1,8 +1,10 @@
 use std::marker::PhantomData;
 
 use candid::CandidType;
-use serde::de::{self, Deserializer, SeqAccess, Visitor};
-use serde::Deserialize;
+use serde::{
+    de::{self, Deserializer, SeqAccess, Visitor},
+    Deserialize,
+};
 
 /// A `Vec<T>` wrapper that rejects sequences longer than `MAX_LEN` during
 /// Candid/serde deserialization, preventing large allocations from untrusted input.
@@ -19,14 +21,16 @@ impl<const MAX_LEN: usize, T> BoundedVec<MAX_LEN, T> {
 
 impl<const MAX_LEN: usize, T> std::ops::Deref for BoundedVec<MAX_LEN, T> {
     type Target = [T];
+
     fn deref(&self) -> &[T] {
         &self.0
     }
 }
 
 impl<const MAX_LEN: usize, T> IntoIterator for BoundedVec<MAX_LEN, T> {
-    type Item = T;
     type IntoIter = std::vec::IntoIter<T>;
+    type Item = T;
+
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
     }
@@ -93,8 +97,9 @@ impl<'de, const MAX_LEN: usize, T: Deserialize<'de>> Visitor<'de>
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use candid::{Decode, Encode};
+
+    use super::*;
 
     #[test]
     fn accepts_vec_within_limit() {
