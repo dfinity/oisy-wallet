@@ -412,6 +412,31 @@ fn test_contacts_are_isolated_between_users() {
         );
     }
 }
+
+#[test]
+fn test_create_contact_should_fail_when_limit_reached() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    for i in 1..=500 {
+        let result = call_create_contact(&pic_setup, caller, format!("Contact {i}"));
+        assert!(result.is_ok(), "Contact {i} should be created successfully");
+    }
+
+    let contacts = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts.len(), 500);
+
+    let result = call_create_contact(&pic_setup, caller, "One too many".to_string());
+    assert_eq!(
+        result.unwrap_err(),
+        ContactError::TooManyContacts,
+        "Creating contact beyond the limit should return TooManyContacts"
+    );
+
+    let contacts = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts.len(), 500, "Count should remain at 500 after rejected creation");
+}
+
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for the update contact functionality
 // -------------------------------------------------------------------------------------------------
