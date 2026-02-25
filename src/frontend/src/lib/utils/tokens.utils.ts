@@ -160,13 +160,28 @@ const createTokenComparator =
 			return aPin - bPin;
 		}
 
-		return (
-			collator.compare(aSymbol, bSymbol) ||
-			collator.compare(aName, bName) ||
-			collator.compare(aNetworkName, bNetworkName) ||
-			+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO)) ||
-			(bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0)
-		);
+		const symbolDiff = collator.compare(aSymbol, bSymbol);
+		if (symbolDiff !== 0) {
+			return symbolDiff;
+		}
+
+		const nameDiff = collator.compare(aName, bName);
+		if (nameDiff !== 0) {
+			return nameDiff;
+		}
+
+		const networkDiff = collator.compare(aNetworkName, bNetworkName);
+		if (networkDiff !== 0) {
+			return networkDiff;
+		}
+
+		const balanceDiff =
+			+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO));
+		if (balanceDiff !== 0) {
+			return balanceDiff;
+		}
+
+		return (bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0);
 	};
 
 export function sortTokens<T extends Token>(args: {
