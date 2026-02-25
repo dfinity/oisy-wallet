@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/order
 import { toNullable } from '@dfinity/utils';
 
 // Hoisted holder for values used/assigned inside the vi.mock factory

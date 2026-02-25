@@ -20,7 +20,6 @@ import {
 	filterTokenGroups,
 	groupSecondaryToken,
 	groupTokens,
-	groupTokensByTwin,
 	sortTokenOrGroupUi,
 	updateTokenGroup
 } from '$lib/utils/token-group.utils';
@@ -85,154 +84,7 @@ const tokens: TokenUi[] = [
 	}
 ];
 
-const reorderedTokens = [
-	tokens[1], // ckBTC
-	tokens[0], // BTC
-	tokens[3], // ckETH
-	tokens[2], // ETH
-	tokens[4] // ICP
-];
-
 describe('token-group.utils', () => {
-	describe('groupTokensByTwin', () => {
-		it('should group tokens with matching group ID', () => {
-			const groupedTokens = groupTokensByTwin(tokens);
-
-			expect(groupedTokens).toHaveLength(3);
-
-			const [btcGroup, _, icpToken] = groupedTokens;
-
-			expect(btcGroup).toHaveProperty('group');
-
-			assert('group' in btcGroup);
-
-			expect(btcGroup.group.tokens).toHaveLength(2);
-			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
-			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
-
-			expect(icpToken).toHaveProperty('token.symbol', 'ICP');
-		});
-
-		it('should handle tokens without twinTokenSymbol', () => {
-			const tokensWithoutTwins = [ICP_TOKEN];
-			const groupedTokens = groupTokensByTwin(tokensWithoutTwins);
-
-			expect(groupedTokens).toHaveLength(1);
-
-			const [firstGroup] = groupedTokens;
-
-			expect(firstGroup).toHaveProperty('token.symbol', 'ICP');
-		});
-
-		it('should place the group in the position of the first token', () => {
-			const groupedTokens = groupTokensByTwin(tokens);
-			const [firstGroup] = groupedTokens;
-
-			expect(firstGroup).toHaveProperty('group');
-
-			assert('group' in firstGroup);
-
-			expect(firstGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
-			expect(firstGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
-		});
-
-		it('should not duplicate tokens in the result', () => {
-			const groupedTokens = groupTokensByTwin(tokens);
-
-			const tokenSymbols = groupedTokens.flatMap((groupOrToken) =>
-				'group' in groupOrToken
-					? groupOrToken.group.tokens.map((t) => t.symbol)
-					: [groupOrToken.token.symbol]
-			);
-			const uniqueSymbols = new Set(tokenSymbols);
-
-			expect(uniqueSymbols.size).toBe(tokenSymbols.length);
-		});
-
-		it('should correctly group tokens even when the ckToken is declared before the native token', () => {
-			const groupedTokens = groupTokensByTwin(reorderedTokens);
-
-			expect(groupedTokens).toHaveLength(3);
-
-			const btcGroup = groupedTokens.find(
-				(groupOrToken) =>
-					'group' in groupOrToken && groupOrToken.group.tokens.some((t) => t.symbol === 'BTC')
-			);
-
-			expect(btcGroup).toBeDefined();
-
-			assertNonNullish(btcGroup);
-			assert('group' in btcGroup);
-
-			expect(btcGroup.group.tokens).toHaveLength(2);
-			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
-			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
-
-			const ethGroup = groupedTokens.find(
-				(groupOrToken) =>
-					'group' in groupOrToken && groupOrToken.group.tokens.some((t) => t.symbol === 'ETH')
-			);
-
-			expect(ethGroup).toBeDefined();
-
-			assertNonNullish(ethGroup);
-			assert('group' in ethGroup);
-
-			expect(ethGroup.group.tokens).toHaveLength(2);
-			expect(ethGroup.group.tokens.map((t) => t.symbol)).toContain('ETH');
-			expect(ethGroup.group.tokens.map((t) => t.symbol)).toContain('ckETH');
-
-			const icpToken = groupedTokens.find((t) => 'token' in t && t.token.symbol === 'ICP');
-
-			expect(icpToken).toBeDefined();
-		});
-
-		it('should re-sort groups if their total USD balance made them out of order', () => {
-			const reorderedTokens = [
-				{ ...tokens[0], usdBalance: 5 }, // BTC
-				{ ...tokens[2], usdBalance: 4 }, // ETH
-				{ ...tokens[3], usdBalance: 3 }, // ckETH
-				{ ...tokens[4], usdBalance: 0 }, // ICP
-				{ ...tokens[1], usdBalance: 0 } // ckBTC
-			];
-
-			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
-
-			expect(groupedTokens).toHaveLength(3);
-
-			expect(groupedTokens[0]).toHaveProperty('group.tokens', [
-				reorderedTokens[1],
-				reorderedTokens[2]
-			]);
-			expect(groupedTokens[1]).toHaveProperty('group.tokens', [
-				reorderedTokens[0],
-				reorderedTokens[4]
-			]);
-		});
-
-		it('should re-sort groups if their total balance made them out of order', () => {
-			const reorderedTokens = [
-				{ ...tokens[0], balance: bn2Bi, usdBalance: 0 }, // BTC
-				{ ...tokens[2], balance: bn2Bi, usdBalance: 0 }, // ETH
-				{ ...tokens[3], balance: bn1Bi, usdBalance: 0 }, // ckETH
-				{ ...tokens[1], balance: ZERO, usdBalance: 0 } // ckBTC
-			];
-
-			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
-
-			expect(groupedTokens).toHaveLength(2);
-
-			expect(groupedTokens[0]).toHaveProperty('group.tokens', [
-				reorderedTokens[1],
-				reorderedTokens[2]
-			]);
-			expect(groupedTokens[1]).toHaveProperty('group.tokens', [
-				reorderedTokens[0],
-				reorderedTokens[3]
-			]);
-		});
-	});
-
 	describe('filterTokenGroups', () => {
 		const reorderedTokens = [
 			{ ...tokens[0], balance: ZERO, usdBalance: 0 }, // BTC
@@ -241,7 +93,7 @@ describe('token-group.utils', () => {
 		];
 
 		it('should give me all token groups', () => {
-			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
+			const groupedTokens = groupTokens(reorderedTokens as TokenUi[]);
 
 			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: true });
 
@@ -254,7 +106,7 @@ describe('token-group.utils', () => {
 				{ ...tokens[2], balance: bn2Bi, usdBalance: 0 }, // ETH
 				{ ...tokens[3], balance: ZERO, usdBalance: 0 } // ckETH
 			];
-			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
+			const groupedTokens = groupTokens(customReorderedTokens as TokenUi[]);
 
 			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
 
@@ -272,7 +124,7 @@ describe('token-group.utils', () => {
 				{ ...tokens[2], balance: ZERO, usdBalance: 0 }, // ETH
 				{ ...tokens[3], balance: ZERO, usdBalance: 1 } // ckETH
 			];
-			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
+			const groupedTokens = groupTokens(customReorderedTokens as TokenUi[]);
 
 			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
 

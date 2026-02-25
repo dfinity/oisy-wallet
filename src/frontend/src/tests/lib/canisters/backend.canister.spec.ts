@@ -5,7 +5,6 @@ import type {
 	IcrcToken,
 	UserProfile
 } from '$declarations/backend/backend.did';
-
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import {
 	ChallengeCompletionErrorEnum,
