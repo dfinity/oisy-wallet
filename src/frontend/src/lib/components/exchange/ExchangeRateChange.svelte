@@ -45,8 +45,8 @@
 	<span
 		class="px-1 text-xs"
 		class:bg-opacity-30={background === 'dark'}
-		class:bg-primary={background === 'light'}
-		class:bg-primary-inverted={background === 'dark'}
+		class:bg-white={background === 'light'}
+		class:bg-black={background === 'dark'}
 		class:rounded={nonNullish(background)}
 		class:sm:text-sm={fontSize === 'sm'}
 		class:text-error-primary={exchangeRateChangeSign === 'negative'}
