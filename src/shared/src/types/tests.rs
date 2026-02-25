@@ -765,6 +765,36 @@ mod user_profile {
         AddUserCredentialRequest,
         vec![
             TestVector {
+                description:
+                    "AddUserCredentialRequest with credential_jwt at max length is valid",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1"
+                        .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH),
+                    credential_spec: CredentialSpec {
+                        credential_type: "test".to_string(),
+                        arguments: None,
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: true,
+            },
+            TestVector {
+                description:
+                    "AddUserCredentialRequest with credential_jwt exceeding max length is invalid",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1"
+                        .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH + 1),
+                    credential_spec: CredentialSpec {
+                        credential_type: "test".to_string(),
+                        arguments: None,
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+            TestVector {
                 description: "AddUserCredentialRequest with credential_type too long",
                 input: AddUserCredentialRequest {
                     credential_jwt: "1".repeat(10),
