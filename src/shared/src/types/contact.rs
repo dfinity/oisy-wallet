@@ -7,6 +7,9 @@ use super::account::TokenAccountId;
 // Re-export image size limit used by validation so tests and external modules can reference it
 pub use crate::impls::MAX_IMAGE_SIZE_BYTES;
 
+/// Maximum number of contacts per principal
+pub const MAX_CONTACTS_PER_USER: usize = 500;
+
 /// Maximum number of images per principal (100)
 pub const MAX_IMAGES_PER_PRINCIPAL: usize = 100;
 
@@ -100,6 +103,7 @@ pub enum ContactError {
     InvalidContactData,
     RandomnessError,
     ImageTooLarge,
+    TooManyContacts,
     TooManyContactsWithImages,
     CanisterMemoryNearCapacity,
     CanisterStatusError,
