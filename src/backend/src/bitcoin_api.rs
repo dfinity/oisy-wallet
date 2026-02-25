@@ -6,16 +6,12 @@ use ic_cdk::api::management_canister::bitcoin::{
     UtxoFilter,
 };
 use ic_cdk_timers::{set_timer, set_timer_interval};
-use shared::types::bitcoin::FEE_PERCENTILES_UPDATE_INTERVAL;
+use shared::types::bitcoin::{FEE_PERCENTILES_UPDATE_INTERVAL, FEE_UPDATE_TIMEOUT_NS};
 
 // Default fee values for different networks when API fails
 const DEFAULT_MAINNET_FEE: u64 = 10_000; // 10 sat/byte (10,000 msat/byte)
 const DEFAULT_TESTNET_FEE: u64 = 5_000; // 5 sat/byte (5,000 msat/byte)
 const DEFAULT_REGTEST_FEE: u64 = 2_000; // 2 sat/byte (2,000 msat/byte)
-
-/// Safety timeout: if an update has been "in progress" for longer than this,
-/// assume it was lost to a trap and allow a new one. Set to 5× the update interval.
-const FEE_UPDATE_TIMEOUT_NS: u64 = 5 * 60 * 1_000_000_000;
 
 thread_local! {
     // We use thread_local! + RefCell for fee percentiles cache since the data is refreshed
