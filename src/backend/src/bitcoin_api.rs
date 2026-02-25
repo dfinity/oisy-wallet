@@ -13,12 +13,17 @@ const DEFAULT_MAINNET_FEE: u64 = 10_000; // 10 sat/byte (10,000 msat/byte)
 const DEFAULT_TESTNET_FEE: u64 = 5_000; // 5 sat/byte (5,000 msat/byte)
 const DEFAULT_REGTEST_FEE: u64 = 2_000; // 2 sat/byte (2,000 msat/byte)
 
+/// Safety timeout: if an update has been "in progress" for longer than this,
+/// assume it was lost to a trap and allow a new one. Set to 5× the update interval.
+const FEE_UPDATE_TIMEOUT_NS: u64 = 5 * 60 * 1_000_000_000;
+
 thread_local! {
     // We use thread_local! + RefCell for fee percentiles cache since the data is refreshed
     // regularly via timer. Heap memory provides faster access for frequent fee calculations,
     // and there's no need to persist these quickly-stale values across canister upgrades.
     static FEE_PERCENTILES_CACHE: RefCell<HashMap<BitcoinNetwork, Vec<MillisatoshiPerByte>>> = RefCell::new(HashMap::new());
-    static FEE_UPDATE_IN_PROGRESS: RefCell<bool> = const { RefCell::new(false) };
+    /// `None` = idle; `Some(timestamp_ns)` = update started at that IC time.
+    static FEE_UPDATE_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
 }
 
 /// Returns the UTXOs of the given bitcoin address.
@@ -69,16 +74,36 @@ pub async fn get_all_utxos(
 }
 
 /// Spawns a fee-cache update only if no previous update is still in flight.
-/// Prevents unbounded future accumulation when Bitcoin API calls are slow.
+/// If a previous update appears stuck (older than `FEE_UPDATE_TIMEOUT_NS`),
+/// the stale lock is cleared and a new update is allowed to proceed.
 fn spawn_fee_update_if_idle() {
-    let already_running = FEE_UPDATE_IN_PROGRESS.with(|f| *f.borrow());
-    if already_running {
+    let dominated = FEE_UPDATE_STARTED_AT.with(|cell| {
+        let started = *cell.borrow();
+        match started {
+            None => false,
+            Some(ts) => {
+                let now = ic_cdk::api::time();
+                if now.saturating_sub(ts) > FEE_UPDATE_TIMEOUT_NS {
+                    ic_cdk::eprintln!(
+                        "Fee update appears stuck (started {}s ago), forcing unlock",
+                        now.saturating_sub(ts) / 1_000_000_000
+                    );
+                    false
+                } else {
+                    true
+                }
+            }
+        }
+    });
+
+    if dominated {
         return;
     }
-    FEE_UPDATE_IN_PROGRESS.with(|f| *f.borrow_mut() = true);
+
+    FEE_UPDATE_STARTED_AT.with(|cell| *cell.borrow_mut() = Some(ic_cdk::api::time()));
     ic_cdk::spawn(async {
         let _ = update_fee_percentiles_cache().await;
-        FEE_UPDATE_IN_PROGRESS.with(|f| *f.borrow_mut() = false);
+        FEE_UPDATE_STARTED_AT.with(|cell| *cell.borrow_mut() = None);
     });
 }
 
