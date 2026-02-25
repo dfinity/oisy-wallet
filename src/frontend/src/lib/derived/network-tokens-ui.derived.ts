@@ -24,7 +24,7 @@ export const enabledFungibleNetworkTokensUi: Readable<TokenUi[]> = derived(
 		)
 );
 
-export const enabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
+const enabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
 	[enabledFungibleNetworkTokensUi],
 	([$tokens]) => groupTokens($tokens)
 );
