@@ -156,9 +156,11 @@ const createTokenComparator =
 		}
 
 		// If the choice is to prioritise performance sorting
+		// Tokens with no performance are treated as worst performers (sorted last among performance-sorted tokens)
 		if (primarySortStrategy === 'performance') {
-			const performanceDiff = (bPerf ?? 0) - (aPerf ?? 0);
-			if (performanceDiff !== 0) {
+			const performanceDiff =
+				(bPerf ?? Number.NEGATIVE_INFINITY) - (aPerf ?? Number.NEGATIVE_INFINITY);
+			if (!Number.isNaN(performanceDiff) && performanceDiff !== 0) {
 				return performanceDiff;
 			}
 		}

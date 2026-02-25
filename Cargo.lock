@@ -124,7 +124,6 @@ dependencies = [
  "bitcoin",
  "candid",
  "candid_parser",
- "futures",
  "getrandom 0.2.17",
  "hex",
  "ic-canister-sig-creation",
