@@ -21,6 +21,7 @@ import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import type { TokenGroupId } from '$lib/types/token-group';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -47,7 +48,7 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 
 	return {
 		deprecated: isGroup ? false : (t.token.deprecated ?? false),
-		id: isGroup ? t.group.groupData.id : t.token.id,
+		id: isGroup ? t.group.tokens[0].id : t.token.id,
 		symbol: isGroup ? t.group.groupData.symbol : t.token.symbol,
 		name: isGroup ? t.group.groupData.name : t.token.name,
 		networkName: isGroup ? '' : t.token.network.name,
@@ -171,13 +172,13 @@ const createTokenComparator =
 // Overload 1: TokenUi<T>[]
 export function sortTokens<T extends Token>(params: {
 	$tokens: TokenUi<T>[];
-	$tokensToPin: TokenToPin[];
+	$tokensToPin: ReadonlyArray<Pin>;
 	primarySortStrategy?: TokensSortType;
 }): TokenUi<T>[];
 // Overload 2: TokenUiOrGroupUi[]
 export function sortTokens(params: {
 	$tokens: TokenUiOrGroupUi[];
-	$tokensToPin: TokenToPin[];
+	$tokensToPin: ReadonlyArray<Pin>;
 	primarySortStrategy?: TokensSortType;
 }): TokenUiOrGroupUi[];
 /**
@@ -202,110 +203,13 @@ export function sortTokens<T extends Token>({
 	$tokensToPin,
 	primarySortStrategy = 'value'
 }: {
-	$tokens: TokenUi<T>[] | TokenUiOrGroupUi[];
-	$tokensToPin: TokenToPin[];
+	$tokens: SortableItem<T>[];
+	$tokensToPin: ReadonlyArray<Pin>;
 	primarySortStrategy?: TokensSortType;
-}): TokenUi<T>[] | TokenUiOrGroupUi[] {
-	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
-
-	const getPinIndex = (tokenOrGroup: TokenUi<T> | TokenUiOrGroupUi) => {
-		const t =
-			'group' in tokenOrGroup || 'token' in tokenOrGroup ? tokenOrGroup : { token: tokenOrGroup };
-
-		const isGroup = isTokenUiGroup(t);
-
-		if (!isGroup) {
-			return pinIndexById.get(t.token.id);
-		}
-
-		// If a group contains pinned tokens, treat the group as pinned.
-		// Pick the earliest pin index (so group pin order matches $tokensToPin order).
-		const indices: number[] = [];
-
-		// Adjust this to whatever your group's token collection actually is.
-		// Common possibilities: t.group.tokens, t.group.items, t.group.groupData.tokens, etc.
-		for (const tok of t.group.tokens) {
-			const idx = pinIndexById.get(tok.id);
-			if (idx !== undefined) {
-				indices.push(idx);
-			}
-		}
-
-		return indices.length ? Math.min(...indices) : undefined;
-	};
-
-	const tokens = $tokens.map((token) => ({
-		token,
-		unwrapped: unwrapTokenSortFields(token)
-	}));
-
-	return tokens
-		.sort((a, b) => {
-			const {
-				unwrapped: {
-					deprecated: aDeprecated,
-					usdPriceChangePercentage24h: aUsdPriceChangePercentage24h,
-					symbol: aSymbol,
-					usdBalance: aUsdBalance,
-					name: aName,
-					networkName: aNetworkName,
-					balance: aBalance,
-					usdMarketCap: aUsdMarketCap
-				}
-			} = a;
-			const {
-				unwrapped: {
-					deprecated: bDeprecated,
-					usdPriceChangePercentage24h: bUsdPriceChangePercentage24h,
-					symbol: bSymbol,
-					usdBalance: bUsdBalance,
-					name: bName,
-					networkName: bNetworkName,
-					balance: bBalance,
-					usdMarketCap: bUsdMarketCap
-				}
-			} = b;
-
-			// Deprecated last
-			if ((aDeprecated ?? false) !== (bDeprecated ?? false)) {
-				return aDeprecated ? 1 : -1;
-			}
-
-			// If the choice is to prioritise performance sorting
-			if (primarySortStrategy === 'performance') {
-				const performanceDiff =
-					(bUsdPriceChangePercentage24h ?? 0) - (aUsdPriceChangePercentage24h ?? 0);
-				if (performanceDiff !== 0) {
-					return performanceDiff;
-				}
-			}
-
-			// If the choice is to prioritise symbol sorting
-			if (primarySortStrategy === 'symbol') {
-				const symbolDiff = aSymbol.localeCompare(bSymbol);
-				if (symbolDiff !== 0) {
-					return symbolDiff;
-				}
-			}
-
-			// Tie-breaker after primary strategy
-			// USD Balance descending
-			const usdBalanceDiff = (bUsdBalance ?? 0) - (aUsdBalance ?? 0);
-			if (usdBalanceDiff !== 0) {
-				return usdBalanceDiff;
-			}
-
-			// Pinned tokens (pinned first; pinned order = order provided)
-			const aPin = getPinIndex(a.token);
-			const bPin = getPinIndex(b.token);
-			const aPinned = aPin !== undefined;
-			const bPinned = bPin !== undefined;
-			if (aPinned !== bPinned) {
-				return aPinned ? -1 : 1;
-			}
-			if (aPinned && bPinned) {
-				return aPin - bPin;
-			}
+}): SortableItem<T>[] {
+	const pinIndexById = new Map<SortableId, number>(
+		$tokensToPin.map(({ id }, index) => [id, index])
+	);
 
 	const comparator = createTokenComparator({ pinIndexById, primarySortStrategy });
 
