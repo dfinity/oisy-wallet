@@ -4,8 +4,9 @@ use std::path::{Path, PathBuf};
 use candid_parser::utils::{service_compatible, CandidSource};
 
 use crate::{
-    __export_service, ALLOW_SIGNING_IN_PROGRESS, HOUSEKEEPING_STARTED_AT,
-    MAX_CONCURRENT_ALLOW_SIGNING,
+    __export_service, is_housekeeping_in_progress, release_allow_signing_slot,
+    try_acquire_allow_signing_slot, ALLOW_SIGNING_IN_PROGRESS, HOUSEKEEPING_STARTED_AT,
+    HOUSEKEEPING_TIMEOUT_NS, MAX_CONCURRENT_ALLOW_SIGNING,
 };
 
 /// Checks candid interface type compatibility with production.
@@ -34,86 +35,121 @@ fn workspace_dir() -> PathBuf {
     cargo_path.parent().unwrap().to_path_buf()
 }
 
-fn reset_housekeeping_started_at() {
+fn reset_housekeeping() {
     HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = None);
 }
 
-fn set_housekeeping_started_at(ns: u64) {
+fn lock_housekeeping_at(ns: u64) {
     HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = Some(ns));
 }
 
-fn get_housekeeping_started_at() -> Option<u64> {
-    HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow())
-}
-
-fn reset_allow_signing_counter() {
+fn reset_allow_signing() {
     ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow_mut() = 0);
 }
 
-fn get_allow_signing_count() -> u32 {
-    ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow())
-}
-
 // ---------------------------------------------------------------------------
-// Housekeeping timestamp lock tests
+// Housekeeping timestamp-lock tests
 // ---------------------------------------------------------------------------
 
 #[test]
-fn test_housekeeping_lock_starts_idle() {
-    reset_housekeeping_started_at();
-    assert_eq!(get_housekeeping_started_at(), None);
-}
-
-#[test]
-fn test_housekeeping_lock_and_unlock() {
-    reset_housekeeping_started_at();
-
-    set_housekeeping_started_at(1_000_000_000);
-    assert_eq!(get_housekeeping_started_at(), Some(1_000_000_000));
-
-    reset_housekeeping_started_at();
-    assert_eq!(get_housekeeping_started_at(), None);
-}
-
-// ---------------------------------------------------------------------------
-// AllowSigning counter tests
-// ---------------------------------------------------------------------------
-
-#[test]
-fn test_allow_signing_counter_increment_and_decrement() {
-    reset_allow_signing_counter();
-    assert_eq!(get_allow_signing_count(), 0);
-
-    ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow_mut() += 1);
-    assert_eq!(get_allow_signing_count(), 1);
-
-    ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow_mut() -= 1);
-    assert_eq!(get_allow_signing_count(), 0);
-}
-
-#[test]
-fn test_allow_signing_counter_respects_limit() {
-    reset_allow_signing_counter();
-
-    ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow_mut() = MAX_CONCURRENT_ALLOW_SIGNING);
-    assert_eq!(get_allow_signing_count(), MAX_CONCURRENT_ALLOW_SIGNING);
-
-    let can_acquire = ALLOW_SIGNING_IN_PROGRESS.with(|cell| {
-        let count = cell.borrow();
-        *count < MAX_CONCURRENT_ALLOW_SIGNING
-    });
-    assert!(!can_acquire, "should not be able to acquire beyond limit");
-
-    ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow_mut() -= 1);
-
-    let can_acquire = ALLOW_SIGNING_IN_PROGRESS.with(|cell| {
-        let count = cell.borrow();
-        *count < MAX_CONCURRENT_ALLOW_SIGNING
-    });
+fn test_housekeeping_idle_when_no_lock() {
+    reset_housekeeping();
     assert!(
-        can_acquire,
-        "should be able to acquire after one slot freed"
+        !is_housekeeping_in_progress(1_000_000_000),
+        "should report idle when no lock is held"
+    );
+}
+
+#[test]
+fn test_housekeeping_in_progress_within_timeout() {
+    reset_housekeeping();
+    let start = 1_000_000_000u64;
+    lock_housekeeping_at(start);
+
+    let within_timeout = start + HOUSEKEEPING_TIMEOUT_NS - 1;
+    assert!(
+        is_housekeeping_in_progress(within_timeout),
+        "should report in-progress when elapsed < timeout"
+    );
+}
+
+#[test]
+fn test_housekeeping_force_unlocks_after_timeout() {
+    reset_housekeeping();
+    let start = 1_000_000_000u64;
+    lock_housekeeping_at(start);
+
+    let past_timeout = start + HOUSEKEEPING_TIMEOUT_NS + 1;
+    assert!(
+        !is_housekeeping_in_progress(past_timeout),
+        "should force-unlock when elapsed > timeout"
+    );
+}
+
+#[test]
+fn test_housekeeping_handles_time_at_exact_boundary() {
+    reset_housekeeping();
+    let start = 1_000_000_000u64;
+    lock_housekeeping_at(start);
+
+    let at_boundary = start + HOUSEKEEPING_TIMEOUT_NS;
+    assert!(
+        is_housekeeping_in_progress(at_boundary),
+        "should still be in-progress at exactly the timeout (> not >=)"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// AllowSigning slot tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_allow_signing_acquire_and_release() {
+    reset_allow_signing();
+
+    assert!(try_acquire_allow_signing_slot());
+    assert_eq!(ALLOW_SIGNING_IN_PROGRESS.with(|c| *c.borrow()), 1);
+
+    release_allow_signing_slot();
+    assert_eq!(ALLOW_SIGNING_IN_PROGRESS.with(|c| *c.borrow()), 0);
+}
+
+#[test]
+fn test_allow_signing_rejects_beyond_limit() {
+    reset_allow_signing();
+
+    for _ in 0..MAX_CONCURRENT_ALLOW_SIGNING {
+        assert!(try_acquire_allow_signing_slot());
+    }
+
+    assert!(
+        !try_acquire_allow_signing_slot(),
+        "should reject when all slots are taken"
     );
 
-    reset_allow_signing_counter();
+    release_allow_signing_slot();
+
+    assert!(
+        try_acquire_allow_signing_slot(),
+        "should succeed after one slot is freed"
+    );
+
+    reset_allow_signing();
+}
+
+#[test]
+fn test_allow_signing_multiple_concurrent() {
+    reset_allow_signing();
+
+    assert!(try_acquire_allow_signing_slot());
+    assert!(try_acquire_allow_signing_slot());
+    assert!(try_acquire_allow_signing_slot());
+    assert_eq!(ALLOW_SIGNING_IN_PROGRESS.with(|c| *c.borrow()), 3);
+
+    release_allow_signing_slot();
+    release_allow_signing_slot();
+    assert_eq!(ALLOW_SIGNING_IN_PROGRESS.with(|c| *c.borrow()), 1);
+
+    release_allow_signing_slot();
+    assert_eq!(ALLOW_SIGNING_IN_PROGRESS.with(|c| *c.borrow()), 0);
 }

@@ -178,15 +178,13 @@ const HOUSEKEEPING_TIMEOUT_NS: u64 = 2 * 60 * 60 * 1_000_000_000;
 
 pub(crate) const MAX_CONCURRENT_ALLOW_SIGNING: u32 = 50;
 
-/// Spawns housekeeping only if no previous run is still in flight.
-/// If a previous run appears stuck (older than `HOUSEKEEPING_TIMEOUT_NS`),
-/// the stale lock is cleared and a new run is allowed to proceed.
-fn spawn_housekeeping_if_idle() {
-    let now = time();
-
-    let in_progress = HOUSEKEEPING_STARTED_AT.with(|cell| {
+/// Returns `true` if a housekeeping run is currently in flight and has not
+/// timed out.  If the lock has been held longer than `HOUSEKEEPING_TIMEOUT_NS`,
+/// logs a warning and returns `false` so the caller can force a new run.
+pub(crate) fn is_housekeeping_in_progress(now_ns: u64) -> bool {
+    HOUSEKEEPING_STARTED_AT.with(|cell| {
         if let Some(started) = *cell.borrow() {
-            let elapsed = now.saturating_sub(started);
+            let elapsed = now_ns.saturating_sub(started);
             if elapsed > HOUSEKEEPING_TIMEOUT_NS {
                 eprintln!(
                     "Housekeeping appears stuck (started {}s ago), forcing unlock",
@@ -199,9 +197,16 @@ fn spawn_housekeeping_if_idle() {
         } else {
             false
         }
-    });
+    })
+}
 
-    if in_progress {
+/// Spawns housekeeping only if no previous run is still in flight.
+/// If a previous run appears stuck (older than `HOUSEKEEPING_TIMEOUT_NS`),
+/// the stale lock is cleared and a new run is allowed to proceed.
+fn spawn_housekeeping_if_idle() {
+    let now = time();
+
+    if is_housekeeping_in_progress(now) {
         return;
     }
 
@@ -213,22 +218,33 @@ fn spawn_housekeeping_if_idle() {
     });
 }
 
-/// Spawns an `allow_signing` task only if the number of in-flight tasks is
-/// below `MAX_CONCURRENT_ALLOW_SIGNING`.  The counter is decremented when the
-/// task finishes normally; on IC traps the counter stays elevated, but the
-/// cap prevents unbounded accumulation and slots are reclaimed as other tasks
-/// complete.
-fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
-    let acquired = ALLOW_SIGNING_IN_PROGRESS.with(|cell| {
+/// Atomically increments the in-flight `allow_signing` counter if below
+/// `MAX_CONCURRENT_ALLOW_SIGNING`.  Returns `true` on success.
+///
+/// The caller is responsible for decrementing after the task finishes.
+/// On IC traps the counter stays elevated, but the cap prevents unbounded
+/// accumulation.  In practice the `allow_signing` code path contains no
+/// panic sites, so leaked slots are unlikely.
+pub(crate) fn try_acquire_allow_signing_slot() -> bool {
+    ALLOW_SIGNING_IN_PROGRESS.with(|cell| {
         let mut count = cell.borrow_mut();
         if *count >= MAX_CONCURRENT_ALLOW_SIGNING {
             return false;
         }
         *count += 1;
         true
-    });
+    })
+}
 
-    if !acquired {
+/// Decrements the in-flight `allow_signing` counter.
+pub(crate) fn release_allow_signing_slot() {
+    ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow_mut() -= 1);
+}
+
+/// Spawns an `allow_signing` task only if the number of in-flight tasks is
+/// below `MAX_CONCURRENT_ALLOW_SIGNING`.
+fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
+    if !try_acquire_allow_signing_slot() {
         eprintln!(
             "Skipped allow_signing for user {}: too many concurrent tasks",
             stored_principal.0,
@@ -244,7 +260,7 @@ fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
                 e
             );
         }
-        ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow_mut() -= 1);
+        release_allow_signing_slot();
     });
 }
 

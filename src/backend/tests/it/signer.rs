@@ -157,15 +157,15 @@ fn test_get_allowed_cycles_returns_correct_error_when_cycles_ledger_unavailable(
 }
 
 // -------------------------------------------------------------------------------------------------
-// - Housekeeping guard integration tests
+// - Housekeeping / allow_signing concurrency integration tests
 // -------------------------------------------------------------------------------------------------
 
 /// Verify the canister remains responsive after multiple housekeeping timer
 /// ticks, even when the cycles ledger is unavailable (every top-up attempt
-/// fails). If the guard were not properly released on error, housekeeping
-/// would be permanently stuck and subsequent ticks would silently pile up.
+/// fails). If the timestamp lock were not properly released on error,
+/// housekeeping would be permanently stuck until the timeout expires.
 #[test]
-fn test_housekeeping_guard_resets_after_failed_topup() {
+fn test_housekeeping_lock_resets_after_failed_topup() {
     let pic_setup = setup();
     let caller = controller();
 
@@ -225,7 +225,7 @@ fn test_allow_signing_backpressure_under_burst() {
 }
 
 /// After the cycles ledger becomes available, housekeeping should resume
-/// successfully (guard was not permanently stuck from prior failures).
+/// successfully (lock was not permanently stuck from prior failures).
 #[test]
 fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
     let pic_setup = BackendBuilder::default().with_cycles_ledger(true).deploy();
