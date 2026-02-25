@@ -151,6 +151,7 @@ pub fn init_fee_percentiles_cache() {
 /// call traps (e.g. Regtest on staging), sequential execution prevents it from corrupting
 /// the shared Wasm future state that `join_all` would use.
 async fn update_fee_percentiles_cache() -> Result<(), String> {
+    // Create an array of network types to fetch
     let networks = [
         BitcoinNetwork::Mainnet,
         BitcoinNetwork::Testnet,
@@ -170,6 +171,7 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
                     network,
                     err
                 );
+                // We don't return error here to allow the function to continue for other networks
             }
         }
     }
