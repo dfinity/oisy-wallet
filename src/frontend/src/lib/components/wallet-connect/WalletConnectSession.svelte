@@ -104,6 +104,9 @@
 
 		await connectListener({ uri: $walletConnectUri, onSessionDeleteCallback: goToFirstStep });
 
+		// Remove the URI query parameter after a successful deep-link connection
+		// to prevent stale URIs from forcing a cleanSlate reconnect on refresh,
+		// which would otherwise wipe persisted WalletConnect sessions.
 		removeSearchParam({ url: page.url, searchParam: URI_PARAM });
 	};
 
