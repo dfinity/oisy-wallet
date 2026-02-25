@@ -26,7 +26,7 @@ pub const MAX_UTXOS_LEN: usize = 128;
 
 /// Delay before the first async fee update, giving the canister time to settle after
 /// `init` or `post_upgrade` (stable memory deserialization uses heap).
-pub const FEE_PERCENTILES_INITIAL_DELAY_SECS: u64 = 10;
+pub const FEE_PERCENTILES_INITIAL_DELAY: Duration = Duration::from_secs(10);
 
 /// Timer interval for updating fee percentiles cache (1 minute)
 pub const FEE_PERCENTILES_UPDATE_INTERVAL: Duration = Duration::from_secs(60);
