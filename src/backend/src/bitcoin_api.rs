@@ -123,7 +123,6 @@ pub fn init_fee_percentiles_cache() {
     for network in [
         BitcoinNetwork::Mainnet,
         BitcoinNetwork::Testnet,
-        BitcoinNetwork::Regtest,
     ] {
         initialize_default_fee_percentiles(network);
     }
@@ -155,7 +154,6 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
     let networks = [
         BitcoinNetwork::Mainnet,
         BitcoinNetwork::Testnet,
-        BitcoinNetwork::Regtest,
     ];
 
     for network in networks {
