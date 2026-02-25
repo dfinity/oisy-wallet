@@ -49,17 +49,20 @@
 		})
 	);
 
+	const totalUsdBalance: number = $derived(
+		filteredTokens.reduce((p, c) => p + (c.usdBalance ?? 0), 0)
+	);
+
 	// list of tokens that should display with a "show more" button for not displayed ones
 	const truncatedTokens: TokenUi[] = $derived(
-		filteredTokens.filter((token) => {
-			const totalBalance = filteredTokens.reduce((p, c) => p + (c.usdBalance ?? 0), 0);
+		filteredTokens.filter((token) => 
 			// Only include tokens with a balance
-			return (
+			 (
 				(token.usdBalance ?? 0) > 0 ||
 				// If the total balance is 0, show all
-				totalBalance === 0
-			);
-		})
+				totalUsdBalance === 0
+			)
+		)
 	);
 
 	// Show all if hideZeros = false and sort
