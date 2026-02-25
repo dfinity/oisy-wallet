@@ -77,33 +77,39 @@ pub async fn get_all_utxos(
 /// If a previous update appears stuck (older than `FEE_UPDATE_TIMEOUT_NS`),
 /// the stale lock is cleared and a new update is allowed to proceed.
 fn spawn_fee_update_if_idle() {
-    let dominated = FEE_UPDATE_STARTED_AT.with(|cell| {
-        let started = *cell.borrow();
-        match started {
-            None => false,
-            Some(ts) => {
-                let now = ic_cdk::api::time();
-                if now.saturating_sub(ts) > FEE_UPDATE_TIMEOUT_NS {
-                    ic_cdk::eprintln!(
-                        "Fee update appears stuck (started {}s ago), forcing unlock",
-                        now.saturating_sub(ts) / 1_000_000_000
-                    );
-                    false
-                } else {
-                    true
-                }
+    let now = ic_cdk::api::time();
+
+    let update_in_progress = FEE_UPDATE_STARTED_AT.with(|cell| {
+        if let Some(started) = *cell.borrow() {
+            let elapsed = now.saturating_sub(started);
+
+            if elapsed > FEE_UPDATE_TIMEOUT_NS {
+                ic_cdk::eprintln!(
+                    "Fee update appears stuck (started {}s ago), forcing unlock",
+                    elapsed / 1_000_000_000
+                );
+                false
+            } else {
+                true
             }
+        } else {
+            false
         }
     });
 
-    if dominated {
+    if update_in_progress {
         return;
     }
 
-    FEE_UPDATE_STARTED_AT.with(|cell| *cell.borrow_mut() = Some(ic_cdk::api::time()));
+    FEE_UPDATE_STARTED_AT.with(|cell| {
+        *cell.borrow_mut() = Some(now);
+    });
+
     ic_cdk::spawn(async {
         let _ = update_fee_percentiles_cache().await;
-        FEE_UPDATE_STARTED_AT.with(|cell| *cell.borrow_mut() = None);
+        FEE_UPDATE_STARTED_AT.with(|cell| {
+            *cell.borrow_mut() = None;
+        });
     });
 }
 
