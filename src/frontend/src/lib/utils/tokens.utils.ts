@@ -160,7 +160,7 @@ const createTokenComparator =
 		if (primarySortStrategy === 'performance') {
 			const performanceDiff =
 				(bPerf ?? Number.NEGATIVE_INFINITY) - (aPerf ?? Number.NEGATIVE_INFINITY);
-			if (performanceDiff !== 0) {
+			if (!Number.isNaN(performanceDiff) && performanceDiff !== 0) {
 				return performanceDiff;
 			}
 		}
