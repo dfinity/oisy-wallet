@@ -183,12 +183,14 @@ const createTokenComparator =
 		return (bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0);
 	};
 
-export function sortTokens<T extends Token>(args: {
+// Overload 1: TokenUi<T>[]
+export function sortTokens<T extends Token>(params: {
 	$tokens: TokenUi<T>[];
 	$tokensToPin: ReadonlyArray<TokenPin>;
 	primarySortStrategy?: TokensSortType;
 }): TokenUi<T>[];
-export function sortTokens(args: {
+// Overload 2: TokenUiOrGroupUi[]
+export function sortTokens(params: {
 	$tokens: TokenUiOrGroupUi[];
 	$tokensToPin: ReadonlyArray<TokenPin>;
 	primarySortStrategy?: TokensSortType;
