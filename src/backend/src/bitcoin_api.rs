@@ -137,6 +137,7 @@ pub fn init_fee_percentiles_cache() {
                 spawn_fee_update_if_idle();
             });
 
+            // Initialize the cache immediately (after init)
             spawn_fee_update_if_idle();
         },
     );
