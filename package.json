@@ -86,7 +86,7 @@
 		"@solana-program/token": "^0.9.0",
 		"@solana-program/token-2022": "^0.6.1",
 		"@solana/kit": "^5.4.0",
-		"@velora-dex/sdk": "^9.3.0",
+		"@velora-dex/sdk": "^9.3.1",
 		"alchemy-sdk": "^3.6.5",
 		"bech32": "^1.1.4",
 		"bitcoinjs-lib": "^6.1.7",
@@ -100,7 +100,7 @@
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
-		"@dfinity/eslint-config-oisy-wallet": "^0.2.3",
+		"@dfinity/eslint-config-oisy-wallet": "^0.2.4",
 		"@dfinity/internet-identity-playwright": "^0.0.5",
 		"@icp-sdk/bindgen": "^0.2.0",
 		"@playwright/test": "^1.58.0",
