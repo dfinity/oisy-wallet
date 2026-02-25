@@ -21,7 +21,6 @@ import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
-import type { TokenGroupId } from '$lib/types/token-group';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -64,9 +63,9 @@ const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'bas
 
 type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
 
-type SortableId = TokenId | TokenGroupId;
+type SortableTokenId = TokenId;
 
-type Pin = Readonly<{ id: SortableId }>;
+type TokenPin = Readonly<{ id: SortableTokenId }>;
 
 type SortableItem<T extends Token> = TokenUi<T> | TokenUiOrGroupUi;
 
@@ -88,10 +87,10 @@ type SortableItem<T extends Token> = TokenUi<T> | TokenUiOrGroupUi;
  */
 const createTokenComparator =
 	({
-		pinIndexById,
+		tokenPinIndexById,
 		primarySortStrategy
 	}: {
-		pinIndexById: ReadonlyMap<SortableId, number>;
+		tokenPinIndexById: ReadonlyMap<SortableTokenId, number>;
 		primarySortStrategy: TokensSortType;
 	}) =>
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
@@ -149,8 +148,8 @@ const createTokenComparator =
 		}
 
 		// Pinned tokens (pinned first; pinned order = order provided)
-		const aPin = pinIndexById.get(aId);
-		const bPin = pinIndexById.get(bId);
+		const aPin = tokenPinIndexById.get(aId);
+		const bPin = tokenPinIndexById.get(bId);
 		const aPinned = aPin !== undefined;
 		const bPinned = bPin !== undefined;
 		if (aPinned !== bPinned) {
@@ -160,23 +159,40 @@ const createTokenComparator =
 			return aPin - bPin;
 		}
 
-		return (
-			collator.compare(aSymbol, bSymbol) ||
-			collator.compare(aName, bName) ||
-			collator.compare(aNetworkName, bNetworkName) ||
-			+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO)) ||
-			(bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0)
-		);
+		const symbolDiff = collator.compare(aSymbol, bSymbol);
+		if (symbolDiff !== 0) {
+			return symbolDiff;
+		}
+
+		const nameDiff = collator.compare(aName, bName);
+		if (nameDiff !== 0) {
+			return nameDiff;
+		}
+
+		const networkDiff = collator.compare(aNetworkName, bNetworkName);
+		if (networkDiff !== 0) {
+			return networkDiff;
+		}
+
+		const balanceDiff =
+			+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO));
+		if (balanceDiff !== 0) {
+			return balanceDiff;
+		}
+
+		return (bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0);
 	};
 
-export function sortTokens<T extends Token>(args: {
+// Overload 1: TokenUi<T>[]
+export function sortTokens<T extends Token>(params: {
 	$tokens: TokenUi<T>[];
-	$tokensToPin: ReadonlyArray<Pin>;
+	$tokensToPin: ReadonlyArray<TokenPin>;
 	primarySortStrategy?: TokensSortType;
 }): TokenUi<T>[];
-export function sortTokens(args: {
+// Overload 2: TokenUiOrGroupUi[]
+export function sortTokens(params: {
 	$tokens: TokenUiOrGroupUi[];
-	$tokensToPin: ReadonlyArray<Pin>;
+	$tokensToPin: ReadonlyArray<TokenPin>;
 	primarySortStrategy?: TokensSortType;
 }): TokenUiOrGroupUi[];
 /**
@@ -208,14 +224,14 @@ export function sortTokens<T extends Token>({
 	primarySortStrategy = 'value'
 }: {
 	$tokens: SortableItem<T>[];
-	$tokensToPin: ReadonlyArray<Pin>;
+	$tokensToPin: ReadonlyArray<TokenPin>;
 	primarySortStrategy?: TokensSortType;
 }): SortableItem<T>[] {
-	const pinIndexById = new Map<SortableId, number>(
+	const tokenPinIndexById = new Map<SortableTokenId, number>(
 		$tokensToPin.map(({ id }, index) => [id, index])
 	);
 
-	const comparator = createTokenComparator({ pinIndexById, primarySortStrategy });
+	const comparator = createTokenComparator({ tokenPinIndexById, primarySortStrategy });
 
 	// We intentionally precompute sort keys once per element before sorting.
 	//
