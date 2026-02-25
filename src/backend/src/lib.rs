@@ -284,7 +284,10 @@ pub fn set_custom_token(token: CustomToken) {
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     if tokens.len() > token::MAX_TOKEN_LIST_LENGTH {
-        ic_cdk::trap("Too many tokens in a single call");
+        ic_cdk::trap(&format!(
+            "Token list length should not exceed {}",
+            token::MAX_TOKEN_LIST_LENGTH
+        ));
     }
 
     let stored_principal = StoredPrincipal(ic_cdk::caller());
