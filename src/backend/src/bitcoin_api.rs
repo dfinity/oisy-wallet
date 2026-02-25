@@ -130,33 +130,24 @@ pub fn init_fee_percentiles_cache() {
 }
 
 /// Updates the Bitcoin transaction fee percentiles cache for all networks (Mainnet, Testnet,
-/// Regtest) in parallel. in the thread-local cache. Fetches current fee data from the bitcoin
-/// canister and stores it for quick access by other functions.
+/// Regtest) sequentially. Fetches current fee data from the bitcoin canister and stores it
+/// in the thread-local cache for quick access by other functions.
+///
+/// Networks are fetched one at a time to avoid concurrent inter-canister callbacks: if one
+/// call traps (e.g. Regtest on staging), sequential execution prevents it from corrupting
+/// the shared Wasm future state that `join_all` would use.
 async fn update_fee_percentiles_cache() -> Result<(), String> {
-    use futures::future::join_all;
-
-    // Create an array of network types to fetch
     let networks = [
         BitcoinNetwork::Mainnet,
         BitcoinNetwork::Testnet,
         BitcoinNetwork::Regtest,
     ];
 
-    // Create a vector of futures, each fetching percentiles for a network
-    let futures = networks
-        .iter()
-        .map(|&network| async move { (network, fetch_current_fee_percentiles(network).await) })
-        .collect::<Vec<_>>();
-
-    // Execute all futures concurrently
-    let results = join_all(futures).await;
-
-    // Process the results
-    for (network, result) in results {
-        match result {
+    for network in networks {
+        match fetch_current_fee_percentiles(network).await {
             Ok(percentiles) => {
                 FEE_PERCENTILES_CACHE.with(|cache| {
-                    cache.borrow_mut().insert(network, percentiles.clone());
+                    cache.borrow_mut().insert(network, percentiles);
                 });
             }
             Err(err) => {
@@ -165,7 +156,6 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
                     network,
                     err
                 );
-                // We don't return error here to allow the function to continue for other networks
             }
         }
     }
