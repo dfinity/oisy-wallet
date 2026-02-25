@@ -21,7 +21,6 @@ import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
-import type { TokenGroupId } from '$lib/types/token-group';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -51,6 +50,7 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 		id: isGroup ? t.group.tokens[0].id : t.token.id,
 		symbol: isGroup ? t.group.groupData.symbol : t.token.symbol,
 		name: isGroup ? t.group.groupData.name : t.token.name,
+		networkId: isGroup ? t.group.tokens[0].network.id : t.token.network.id,
 		networkName: isGroup ? '' : t.token.network.name,
 		usdBalance: item.usdBalance,
 		usdPriceChangePercentage24h: item.usdPriceChangePercentage24h,
@@ -64,11 +64,36 @@ const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'bas
 
 type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
 
-type SortableId = TokenId | TokenGroupId;
+type SortableTokenId = TokenId;
 
-type Pin = Readonly<{ id: SortableId }>;
+type TokenPin = Readonly<{ id: SortableTokenId }>;
+
+type SortableNetworkId = Token['network']['id'];
+
+type NetworkPin = Readonly<{ id: SortableNetworkId }>;
 
 type SortableItem<T extends Token> = TokenUi<T> | TokenUiOrGroupUi;
+
+const createNetworkComparator =
+	({ networkPinIndexById }: { networkPinIndexById: ReadonlyMap<SortableNetworkId, number> }) =>
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
+	(a: SortableNetworkId, b: SortableNetworkId): number => {
+		const aPin = networkPinIndexById.get(a);
+		const bPin = networkPinIndexById.get(b);
+
+		const aPinnedNet = aPin !== undefined;
+		const bPinnedNet = bPin !== undefined;
+
+		if (aPinnedNet !== bPinnedNet) {
+			return aPinnedNet ? -1 : 1;
+		}
+
+		if (aPinnedNet && bPinnedNet) {
+			return aPin - bPin;
+		}
+
+		return 0;
+	};
 
 /**
  * Creates a comparator function for sorting tokens based on multiple criteria:
@@ -79,19 +104,22 @@ type SortableItem<T extends Token> = TokenUi<T> | TokenUiOrGroupUi;
  * 4. Explicitly pinned tokens (pinned first, preserving the order provided by `pinIndexById`).
  * 5. Token symbol (ascending, locale-aware).
  * 6. Token name (ascending, locale-aware).
- * 7. Network name (ascending, locale-aware).
- * 8. Token balance (descending).
- * 9. USD market cap (descending).
+ * 7. Networks according to the provided `networkComparator` (which can implement pinning or any other network prioritisation logic).
+ * 8. Network name (ascending, locale-aware).
+ * 9. Token balance (descending).
+ * 10. USD market cap (descending).
  *
  * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
  *
  */
 const createTokenComparator =
 	({
-		pinIndexById,
+		tokenPinIndexById,
+		networkComparator,
 		primarySortStrategy
 	}: {
-		pinIndexById: ReadonlyMap<SortableId, number>;
+		tokenPinIndexById: ReadonlyMap<SortableTokenId, number>;
+		networkComparator: (a: SortableNetworkId, b: SortableNetworkId) => number;
 		primarySortStrategy: TokensSortType;
 	}) =>
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
@@ -103,6 +131,7 @@ const createTokenComparator =
 			symbol: aSymbol,
 			usdBalance: aUsdBalance,
 			name: aName,
+			networkId: aNetworkId,
 			networkName: aNetworkName,
 			balance: aBalance,
 			usdMarketCap: aUsdMarketCap
@@ -115,6 +144,7 @@ const createTokenComparator =
 			symbol: bSymbol,
 			usdBalance: bUsdBalance,
 			name: bName,
+			networkId: bNetworkId,
 			networkName: bNetworkName,
 			balance: bBalance,
 			usdMarketCap: bUsdMarketCap
@@ -149,8 +179,8 @@ const createTokenComparator =
 		}
 
 		// Pinned tokens (pinned first; pinned order = order provided)
-		const aPin = pinIndexById.get(aId);
-		const bPin = pinIndexById.get(bId);
+		const aPin = tokenPinIndexById.get(aId);
+		const bPin = tokenPinIndexById.get(bId);
 		const aPinned = aPin !== undefined;
 		const bPinned = bPin !== undefined;
 		if (aPinned !== bPinned) {
@@ -160,23 +190,45 @@ const createTokenComparator =
 			return aPin - bPin;
 		}
 
-		return (
-			collator.compare(aSymbol, bSymbol) ||
-			collator.compare(aName, bName) ||
-			collator.compare(aNetworkName, bNetworkName) ||
-			+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO)) ||
-			(bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0)
-		);
+		const symbolDiff = collator.compare(aSymbol, bSymbol);
+		if (symbolDiff !== 0) {
+			return symbolDiff;
+		}
+
+		const nameDiff = collator.compare(aName, bName);
+		if (nameDiff !== 0) {
+			return nameDiff;
+		}
+
+		const networkDiff = networkComparator(aNetworkId, bNetworkId);
+		if (networkDiff !== 0) {
+			return networkDiff;
+		}
+
+		const networkNameDiff = collator.compare(aNetworkName, bNetworkName);
+		if (networkNameDiff !== 0) {
+			return networkNameDiff;
+		}
+
+		const balanceDiff =
+			+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO));
+		if (balanceDiff !== 0) {
+			return balanceDiff;
+		}
+
+		return (bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0);
 	};
 
 export function sortTokens<T extends Token>(args: {
 	$tokens: TokenUi<T>[];
-	$tokensToPin: ReadonlyArray<Pin>;
+	$tokensToPin: ReadonlyArray<TokenPin>;
+	$networksToPin: ReadonlyArray<NetworkPin>;
 	primarySortStrategy?: TokensSortType;
 }): TokenUi<T>[];
 export function sortTokens(args: {
 	$tokens: TokenUiOrGroupUi[];
-	$tokensToPin: ReadonlyArray<Pin>;
+	$tokensToPin: ReadonlyArray<TokenPin>;
+	$networksToPin: ReadonlyArray<NetworkPin>;
 	primarySortStrategy?: TokensSortType;
 }): TokenUiOrGroupUi[];
 /**
@@ -190,14 +242,16 @@ export function sortTokens(args: {
  * 4. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
  * 5. Token symbol (ascending, locale-aware).
  * 6. Token name (ascending, locale-aware).
- * 7. Network name (ascending, locale-aware).
- * 8. Token balance (descending).
- * 9. USD market cap (descending).
+ * 7. Networks according to pinning (pinned networks first, preserving the order provided in `$networksToPin`).
+ * 8. Network name (ascending, locale-aware).
+ * 9. Token balance (descending).
+ * 10. USD market cap (descending).
  *
  * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
  *
  * @param $tokens - The list of tokens to sort.
  * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
+ * @param $networksToPin - Networks whose tokens should be prioritised after balance and deprecation rules, but before explicitly pinned tokens.
  * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
  * @returns A sorted array of token UI objects.
  */
@@ -205,17 +259,29 @@ export function sortTokens(args: {
 export function sortTokens<T extends Token>({
 	$tokens,
 	$tokensToPin,
+	$networksToPin,
 	primarySortStrategy = 'value'
 }: {
 	$tokens: SortableItem<T>[];
-	$tokensToPin: ReadonlyArray<Pin>;
+	$tokensToPin: ReadonlyArray<TokenPin>;
+	$networksToPin: ReadonlyArray<NetworkPin>;
 	primarySortStrategy?: TokensSortType;
 }): SortableItem<T>[] {
-	const pinIndexById = new Map<SortableId, number>(
+	const tokenPinIndexById = new Map<SortableTokenId, number>(
 		$tokensToPin.map(({ id }, index) => [id, index])
 	);
 
-	const comparator = createTokenComparator({ pinIndexById, primarySortStrategy });
+	const networkPinIndexById = new Map<SortableNetworkId, number>(
+		$networksToPin.map(({ id }, index) => [id, index])
+	);
+
+	const networkComparator = createNetworkComparator({ networkPinIndexById });
+
+	const comparator = createTokenComparator({
+		tokenPinIndexById,
+		networkComparator,
+		primarySortStrategy
+	});
 
 	// We intentionally precompute sort keys once per element before sorting.
 	//

@@ -1,5 +1,6 @@
 import { exchanges } from '$lib/derived/exchange.derived';
 import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+import { networks } from '$lib/derived/networks.derived';
 import { tokensSortType } from '$lib/derived/settings.derived';
 import { stakeBalances } from '$lib/derived/stake.derived';
 import { tokensToPin } from '$lib/derived/tokens.derived';
@@ -30,11 +31,12 @@ const enabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
 );
 
 export const sortedEnabledNetworkTokenUiOrGroupUi: Readable<TokenUiOrGroupUi[]> = derived(
-	[enabledNetworkTokenUiOrGroupUi, tokensToPin, tokensSortType],
-	([$tokens, $tokensToPin, $tokensSortType]) =>
+	[enabledNetworkTokenUiOrGroupUi, tokensToPin, tokensSortType, networks],
+	([$tokens, $tokensToPin, $tokensSortType, $networksToPin]) =>
 		sortTokens({
 			$tokens,
 			$tokensToPin,
+			$networksToPin,
 			primarySortStrategy: $tokensSortType
 		})
 );

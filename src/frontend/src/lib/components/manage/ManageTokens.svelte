@@ -30,6 +30,7 @@
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import {networks} from "$lib/derived/networks.derived";
 
 	interface Props {
 		network?: Network;
@@ -87,7 +88,8 @@
 		pinEnabledTokensAtTop(
 			sortTokens({
 				$tokens: allTokensUi,
-				$tokensToPin
+				$tokensToPin,
+				$networksToPin: $networks,
 			})
 		)
 	);

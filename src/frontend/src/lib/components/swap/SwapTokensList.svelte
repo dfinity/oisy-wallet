@@ -20,6 +20,7 @@
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { sortTokens } from '$lib/utils/tokens.utils';
+	import {networks} from "$lib/derived/networks.derived";
 
 	interface Props {
 		onSelectToken: (token: Token) => void;
@@ -53,7 +54,8 @@
 	let tokens: TokenUi[] = $derived(
 		sortTokens({
 			$tokens: tokensUi,
-			$tokensToPin
+			$tokensToPin,
+				$networksToPin: $networks,
 		})
 	);
 

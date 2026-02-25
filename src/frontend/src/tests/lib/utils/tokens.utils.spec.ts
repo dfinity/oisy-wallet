@@ -101,7 +101,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: []
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
@@ -129,7 +130,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: [ETHEREUM_TOKEN, BTC_MAINNET_TOKEN]
+				$tokensToPin: [ETHEREUM_TOKEN, BTC_MAINNET_TOKEN],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
@@ -151,7 +153,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: [ICP_TOKEN]
+				$tokensToPin: [ICP_TOKEN],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
@@ -185,7 +188,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: [mockDeprecatedToken]
+				$tokensToPin: [mockDeprecatedToken],
+				$networksToPin: []
 			});
 
 			expect(result.at(-1)?.id).toBe(mockDeprecatedToken.id);
@@ -229,7 +233,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: []
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([tokenSymbolA.id, tokenSymbolZ.id]);
@@ -293,7 +298,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: []
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([tokenA.id, tokenB.id, tokenC.id, tokenD.id]);
@@ -336,7 +342,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: []
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([tokenA.id, tokenB.id]);
@@ -379,7 +386,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: []
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
@@ -427,6 +435,7 @@ describe('tokens.utils', () => {
 			const result = sortTokens({
 				$tokens: tokens,
 				$tokensToPin: [],
+				$networksToPin: [],
 				primarySortStrategy: 'performance'
 			});
 
@@ -472,6 +481,7 @@ describe('tokens.utils', () => {
 			const result = sortTokens({
 				$tokens: tokens,
 				$tokensToPin: [],
+				$networksToPin: [],
 				primarySortStrategy: 'symbol'
 			});
 
