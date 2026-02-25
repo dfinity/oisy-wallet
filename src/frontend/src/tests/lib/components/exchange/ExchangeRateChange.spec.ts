@@ -75,14 +75,14 @@ describe('ExchangeRateChange', () => {
 			}
 		});
 
-		expect(getByText('1.23%')).toHaveClass('bg-primary');
+		expect(getByText('1.23%')).toHaveClass('bg-white');
 
 		await rerender({
 			usdPriceChangePercentage24h: 1.23456,
 			background: 'dark'
 		});
 
-		expect(getByText('1.23%')).toHaveClass('bg-primary-inverted');
+		expect(getByText('1.23%')).toHaveClass('bg-black');
 		expect(getByText('1.23%')).toHaveClass('bg-opacity-30');
 	});
 
