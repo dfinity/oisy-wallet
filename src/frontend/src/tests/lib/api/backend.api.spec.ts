@@ -342,7 +342,8 @@ describe('backend.api', () => {
 				txId: new Uint8Array([1, 2, 3]),
 				utxos: [mockUtxo],
 				network: { mainnet: null },
-				address: 'address'
+				address: 'address',
+				iiDelegationChain: mockIIDelegationChain
 			});
 		});
 

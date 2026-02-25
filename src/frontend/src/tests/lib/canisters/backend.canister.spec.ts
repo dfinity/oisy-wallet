@@ -97,7 +97,8 @@ describe('backend.canister', () => {
 		txid: btcAddPendingTransactionParams.txId,
 		network: btcAddPendingTransactionParams.network,
 		address: btcAddPendingTransactionParams.address,
-		utxos: btcAddPendingTransactionParams.utxos
+		utxos: btcAddPendingTransactionParams.utxos,
+		ii_delegation_chain: btcAddPendingTransactionParams.iiDelegationChain
 	};
 
 	const btcGetPendingTransactionParams = {
