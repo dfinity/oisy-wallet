@@ -253,7 +253,7 @@ export function sortTokens(params: {
  *
  * @param $tokens - The list of tokens to sort.
  * @param $tokensToPin - Tokens that should be prioritised after balance and deprecation rules.
- * @param $networksToPin - Networks whose tokens should be prioritised after balance and deprecation rules, but before explicitly pinned tokens.
+ * @param $networksToPin - Networks whose tokens should be prioritised after balance, deprecation and explicit token pinning rules, preserving the order provided.
  * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
  * @returns A sorted array of token UI objects.
  */
