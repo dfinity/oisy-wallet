@@ -1,19 +1,19 @@
-import { render, screen } from '@testing-library/svelte';
-import { readable, writable } from 'svelte/store';
-import AllEarningOpportunityCardList from '$lib/components/earning/AllEarningOpportunityCardList.svelte';
 import * as navModule from '$app/navigation';
-import * as tokenFilter from '$icp-eth/utils/token.utils';
-import * as exchangeDerived from '$lib/derived/exchange.derived';
-import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
-import * as formatUtils from '$lib/utils/format.utils';
-import * as tokenUtils from '$lib/utils/token.utils';
 import * as earningCardsEnv from '$env/earning-cards.env';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
+import * as tokenFilter from '$icp-eth/utils/token.utils';
 import { GLDT_STAKE_CONTEXT_KEY } from '$icp/stores/gldt-stake.store';
+import AllEarningOpportunityCardList from '$lib/components/earning/AllEarningOpportunityCardList.svelte';
+import * as exchangeDerived from '$lib/derived/exchange.derived';
+import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
 import { REWARD_ELIGIBILITY_CONTEXT_KEY } from '$lib/stores/reward.store';
 import type { Token } from '$lib/types/token';
+import * as formatUtils from '$lib/utils/format.utils';
+import * as tokenUtils from '$lib/utils/token.utils';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
+import { render, screen } from '@testing-library/svelte';
+import { readable, writable } from 'svelte/store';
 
 // mock contexts
 const mockGldtStakeStore = {

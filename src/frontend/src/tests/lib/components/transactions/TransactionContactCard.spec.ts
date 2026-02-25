@@ -1,5 +1,3 @@
-import { fireEvent, render } from '@testing-library/svelte';
-import { get } from 'svelte/store';
 import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 import { TOKEN_SKELETON_TEXT } from '$lib/constants/test-ids.constants';
 import { contacts as contactsDerived } from '$lib/derived/contacts.derived';
@@ -7,6 +5,8 @@ import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ContactUi } from '$lib/types/contact';
 import { getMockContactsUi } from '$tests/mocks/contacts.mock';
+import { fireEvent, render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 vi.spyOn(modalStore, 'openAddressBook').mockImplementation(vi.fn());
 

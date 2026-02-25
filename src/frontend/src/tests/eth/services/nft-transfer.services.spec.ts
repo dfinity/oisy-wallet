@@ -1,15 +1,15 @@
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
+import { ERC721_ABI } from '$eth/constants/erc721.constants';
+import type { InfuraProvider } from '$eth/providers/infura.providers';
+import * as providersMod from '$eth/providers/infura.providers';
 import {
 	encodeErc1155SafeTransfer,
 	encodeErc721SafeTransfer,
 	transferErc1155,
 	transferErc721
 } from '$eth/services/nft-transfer.services';
-import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
-import { ERC721_ABI } from '$eth/constants/erc721.constants';
-import * as providersMod from '$eth/providers/infura.providers';
 import * as signerApi from '$lib/api/signer.api';
-import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
-import type { InfuraProvider } from '$eth/providers/infura.providers';
 import { ProgressStepsSend as Steps } from '$lib/enums/progress-steps';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';

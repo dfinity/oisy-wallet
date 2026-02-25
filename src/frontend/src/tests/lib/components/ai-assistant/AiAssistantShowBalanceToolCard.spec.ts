@@ -1,6 +1,6 @@
-import AiAssistantShowBalanceToolCard from '$lib/components/ai-assistant/AiAssistantShowBalanceToolCard.svelte';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import AiAssistantShowBalanceToolCard from '$lib/components/ai-assistant/AiAssistantShowBalanceToolCard.svelte';
 import { formatToken } from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
