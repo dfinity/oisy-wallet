@@ -109,24 +109,37 @@ fn spawn_fee_update_if_idle() {
     });
 }
 
+/// Delay before the first async fee update, giving the canister time to settle after
+/// init/post_upgrade (stable memory deserialization uses heap).
+const INITIAL_FEE_UPDATE_DELAY_SECS: u64 = 5;
+
 /// Sets up periodic refreshing of Bitcoin transaction fee data.
-/// Initializes the cache immediately and configures automatic updates at regular intervals.
+/// Pre-populates the cache synchronously with defaults so callers never see an empty cache,
+/// then schedules async updates to replace them with live data.
 pub fn init_fee_percentiles_cache() {
     ic_cdk::println!(
         "Initializing fee percentiles cache with {}-second update interval",
         FEE_PERCENTILES_UPDATE_INTERVAL.as_secs()
     );
 
-    // Schedule the initial cache population and timer setup to run after init completes
-    set_timer(std::time::Duration::from_secs(0), || {
-        // Set up the recurring timer to update the data
-        set_timer_interval(FEE_PERCENTILES_UPDATE_INTERVAL, || {
-            spawn_fee_update_if_idle();
-        });
+    for network in [
+        BitcoinNetwork::Mainnet,
+        BitcoinNetwork::Testnet,
+        BitcoinNetwork::Regtest,
+    ] {
+        initialize_default_fee_percentiles(network);
+    }
 
-        // Initialize the cache immediately (after init)
-        spawn_fee_update_if_idle();
-    });
+    set_timer(
+        std::time::Duration::from_secs(INITIAL_FEE_UPDATE_DELAY_SECS),
+        || {
+            set_timer_interval(FEE_PERCENTILES_UPDATE_INTERVAL, || {
+                spawn_fee_update_if_idle();
+            });
+
+            spawn_fee_update_if_idle();
+        },
+    );
 }
 
 /// Updates the Bitcoin transaction fee percentiles cache for all networks (Mainnet, Testnet,
