@@ -99,7 +99,7 @@
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
-		"@dfinity/eslint-config-oisy-wallet": "^0.2.3",
+		"@dfinity/eslint-config-oisy-wallet": "^0.2.4",
 		"@dfinity/internet-identity-playwright": "^0.0.5",
 		"@icp-sdk/bindgen": "^0.2.0",
 		"@playwright/test": "^1.58.0",
