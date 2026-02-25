@@ -12,6 +12,14 @@ runs:
         registry-url: 'https://registry.npmjs.org'
         cache: 'npm'
 
+    # Keep npm within compatible major to align with package.json engines.
+    # We intentionally float within the major so new MAJOR.x releases are picked up.
+    # If engines.npm is stricter, CI will fail, forcing us to update package.json
+    # and stay aligned with the latest npm.
+    - name: Use latest compatible npm
+      shell: bash
+      run: npm i -g npm@^11
+
     - name: Install dependencies
       shell: bash
       run: npm ci
