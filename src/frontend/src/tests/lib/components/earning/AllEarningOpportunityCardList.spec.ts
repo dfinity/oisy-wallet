@@ -1,15 +1,12 @@
 import { render, screen } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
-
 import AllEarningOpportunityCardList from '$lib/components/earning/AllEarningOpportunityCardList.svelte';
-
 import * as navModule from '$app/navigation';
 import * as tokenFilter from '$icp-eth/utils/token.utils';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
 import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as tokenUtils from '$lib/utils/token.utils';
-
 import * as earningCardsEnv from '$env/earning-cards.env';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';

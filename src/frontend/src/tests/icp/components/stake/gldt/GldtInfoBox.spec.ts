@@ -1,7 +1,6 @@
 import GldtInfoBox from '$icp/components/stake/gldt/GldtInfoBox.svelte';
 import { render, screen } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
-
 import { GLDT_STAKE_CONTEXT_KEY } from '$icp/stores/gldt-stake.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';

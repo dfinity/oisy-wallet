@@ -1,9 +1,7 @@
 import EarningOpportunitiesPage from '$lib/components/earning/Earning.svelte';
 import { render, screen } from '@testing-library/svelte';
-
 import * as earningCardsEnv from '$env/earning-cards.env';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
-
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import { GLDT_STAKE_CONTEXT_KEY } from '$icp/stores/gldt-stake.store';
 import { i18n } from '$lib/stores/i18n.store';

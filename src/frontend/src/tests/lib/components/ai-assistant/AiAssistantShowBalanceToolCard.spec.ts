@@ -1,5 +1,4 @@
 import AiAssistantShowBalanceToolCard from '$lib/components/ai-assistant/AiAssistantShowBalanceToolCard.svelte';
-
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { formatToken } from '$lib/utils/format.utils';

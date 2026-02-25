@@ -1,6 +1,5 @@
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-
 import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 import { TOKEN_SKELETON_TEXT } from '$lib/constants/test-ids.constants';
 import { contacts as contactsDerived } from '$lib/derived/contacts.derived';

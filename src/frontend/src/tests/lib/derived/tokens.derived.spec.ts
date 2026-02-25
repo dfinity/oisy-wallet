@@ -18,7 +18,6 @@ import {
 	BTC_REGTEST_TOKEN,
 	BTC_TESTNET_TOKEN
 } from '$env/tokens/tokens.btc.env';
-
 import {
 	ARBITRUM_ETH_TOKEN,
 	ARBITRUM_SEPOLIA_ETH_TOKEN
