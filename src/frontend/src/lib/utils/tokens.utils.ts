@@ -55,15 +55,16 @@ const unwrapTokenSortFields = <T extends Token>({
 
 	const item = isGroup ? t.group : t.token;
 
+	// For a group we take the minimum pin index of the underlying tokens, so the group is sorted as high as its highest pinned token
 	const tokenPinIndex = isGroup
-		? t.group.tokens.reduce<number | undefined>((maxPin, { id }) => {
+		? t.group.tokens.reduce<number | undefined>((minPin, { id }) => {
 				const pin = tokenPinIndexById.get(id);
 
 				if (isNullish(pin)) {
-					return maxPin;
+					return minPin;
 				}
 
-				return isNullish(maxPin) || pin > maxPin ? pin : maxPin;
+				return isNullish(minPin) || pin < minPin ? pin : minPin;
 			}, undefined)
 		: tokenPinIndexById.get(t.token.id);
 
