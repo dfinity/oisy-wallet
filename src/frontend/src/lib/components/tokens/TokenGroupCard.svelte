@@ -82,8 +82,10 @@
 				totalUsdBalance === 0)
 	);
 
+	// Show all if hideZeros = false
 	const tokensToShow: TokenUi[] = $derived(hideZeros ? truncatedTokens : sortedFilteredTokens);
 
+	// Count tokens that are not displayed
 	const notDisplayedCount: number = $derived(sortedFilteredTokens.length - tokensToShow.length);
 </script>
 
