@@ -17,6 +17,7 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
+	import {sumTokensUiUsdBalance} from "$lib/utils/tokens.utils";
 
 	interface Props {
 		tokenGroup: TokenUiGroup;
@@ -49,9 +50,7 @@
 		})
 	);
 
-	const totalUsdBalance: number = $derived(
-		filteredTokens.reduce((p, c) => p + (c.usdBalance ?? 0), 0)
-	);
+	const totalUsdBalance: number = $derived(sumTokensUiUsdBalance(filteredTokens),);
 
 	// list of tokens that should display with a "show more" button for not displayed ones
 	const truncatedTokens: TokenUi[] = $derived(
