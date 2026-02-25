@@ -57,8 +57,6 @@ export const BACKEND_CANISTER_ID = LOCAL
 				? import.meta.env.VITE_BETA_BACKEND_CANISTER_ID
 				: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
 
-console.log('BACKEND_CANISTER_ID', BACKEND_CANISTER_ID);
-
 export const BACKEND_CANISTER_PRINCIPAL = Principal.fromText(BACKEND_CANISTER_ID);
 
 export const REWARDS_CANISTER_ID = LOCAL
