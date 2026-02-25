@@ -75,7 +75,11 @@
 
 	// list of tokens that should display with a "show more" button for not displayed ones
 	const truncatedTokens: TokenUi[] = $derived(
-		sortedFilteredTokens.filter((token) => (token.usdBalance ?? 0) > 0 || totalUsdBalance === 0)
+		sortedFilteredTokens.filter((token) =>
+				// Only include tokens with a balance
+				(token.usdBalance ?? 0) > 0 ||
+				// If the total balance is 0, show all
+				totalUsdBalance === 0)
 	);
 
 	const tokensToShow: TokenUi[] = $derived(hideZeros ? truncatedTokens : sortedFilteredTokens);
