@@ -120,10 +120,7 @@ pub fn init_fee_percentiles_cache() {
         FEE_PERCENTILES_UPDATE_INTERVAL.as_secs()
     );
 
-    for network in [
-        BitcoinNetwork::Mainnet,
-        BitcoinNetwork::Testnet,
-    ] {
+    for network in [BitcoinNetwork::Mainnet, BitcoinNetwork::Testnet] {
         initialize_default_fee_percentiles(network);
     }
 
@@ -151,10 +148,7 @@ pub fn init_fee_percentiles_cache() {
 /// the shared Wasm future state that `join_all` would use.
 async fn update_fee_percentiles_cache() -> Result<(), String> {
     // Create an array of network types to fetch
-    let networks = [
-        BitcoinNetwork::Mainnet,
-        BitcoinNetwork::Testnet,
-    ];
+    let networks = [BitcoinNetwork::Mainnet, BitcoinNetwork::Testnet];
 
     for network in networks {
         match fetch_current_fee_percentiles(network).await {
