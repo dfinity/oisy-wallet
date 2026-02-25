@@ -6,7 +6,7 @@ use ic_cdk::api::management_canister::bitcoin::{
     UtxoFilter,
 };
 use ic_cdk_timers::{set_timer, set_timer_interval};
-use shared::types::bitcoin::{FEE_PERCENTILES_UPDATE_INTERVAL, FEE_UPDATE_TIMEOUT_NS};
+use shared::types::bitcoin::{FEE_PERCENTILES_UPDATE_INTERVAL, FEE_UPDATE_TIMEOUT_NS, FEE_PERCENTILES_INITIAL_DELAY_SECS};
 
 // Default fee values for different networks when API fails
 const DEFAULT_MAINNET_FEE: u64 = 10_000; // 10 sat/byte (10,000 msat/byte)
@@ -109,9 +109,7 @@ fn spawn_fee_update_if_idle() {
     });
 }
 
-/// Delay before the first async fee update, giving the canister time to settle after
-/// init/post_upgrade (stable memory deserialization uses heap).
-const INITIAL_FEE_UPDATE_DELAY_SECS: u64 = 5;
+
 
 /// Sets up periodic refreshing of Bitcoin transaction fee data.
 /// Pre-populates the cache synchronously with defaults so callers never see an empty cache,
@@ -131,7 +129,7 @@ pub fn init_fee_percentiles_cache() {
     }
 
     set_timer(
-        std::time::Duration::from_secs(INITIAL_FEE_UPDATE_DELAY_SECS),
+        std::time::Duration::from_secs(FEE_PERCENTILES_INITIAL_DELAY_SECS),
         || {
             set_timer_interval(FEE_PERCENTILES_UPDATE_INTERVAL, || {
                 spawn_fee_update_if_idle();
