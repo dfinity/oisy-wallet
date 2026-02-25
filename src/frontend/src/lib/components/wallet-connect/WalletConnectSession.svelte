@@ -3,6 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, untrack } from 'svelte';
+	import { page } from '$app/state';
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
@@ -12,6 +13,7 @@
 		walletConnectWizardSteps
 	} from '$lib/config/wallet-connect.config';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.constants';
+	import { URI_PARAM } from '$lib/constants/routes.constants';
 	import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnectAuth } from '$lib/derived/modal.derived';
@@ -33,6 +35,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
+	import { removeSearchParam } from '$lib/utils/nav.utils';
 
 	let listener = $derived($listenerStore);
 
@@ -100,6 +103,11 @@
 		modalStore.openWalletConnectAuth(modalId);
 
 		await connectListener({ uri: $walletConnectUri, onSessionDeleteCallback: goToFirstStep });
+
+		// Remove the URI query parameter after a successful deep-link connection
+		// to prevent stale URIs from forcing a cleanSlate reconnect on refresh,
+		// which would otherwise wipe persisted WalletConnect sessions.
+		removeSearchParam({ url: page.url, searchParam: URI_PARAM });
 	};
 
 	$effect(() => {
@@ -119,6 +127,14 @@
 
 		// If the listener is already initialised, we don't need to do anything.
 		if (nonNullish(listener)) {
+			reconnecting = false;
+
+			return;
+		}
+
+		// When a WalletConnect URI is present (deep link), uriConnect() handles the connection.
+		// Running reconnect() concurrently would race and potentially disconnect the session.
+		if (nonNullish($walletConnectUri)) {
 			reconnecting = false;
 
 			return;
