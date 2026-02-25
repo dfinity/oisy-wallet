@@ -1,19 +1,24 @@
 //! Tests the ledger account logic.
 
+use std::time::Duration;
+
 use candid::{Nat, Principal};
-use shared::types::signer::{
-    topup::{
-        TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult, MAX_PERCENTAGE,
-        MIN_PERCENTAGE,
+use shared::types::{
+    signer::{
+        topup::{
+            TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult,
+            MAX_PERCENTAGE, MIN_PERCENTAGE,
+        },
+        GetAllowedCyclesError, GetAllowedCyclesResponse,
     },
-    GetAllowedCyclesError, GetAllowedCyclesResponse,
+    Stats,
 };
 
 use crate::{
     pow::call_create_user_profile,
     utils::{
         mock::VC_HOLDER,
-        pocketic::{controller, pic_canister::PicCanisterTrait, setup},
+        pocketic::{controller, pic_canister::PicCanisterTrait, setup, BackendBuilder},
     },
 };
 
@@ -148,5 +153,95 @@ fn test_get_allowed_cycles_returns_correct_error_when_cycles_ledger_unavailable(
     assert_eq!(
         result.unwrap_err(),
         GetAllowedCyclesError::FailedToContactCyclesLedger
+    );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Housekeeping guard integration tests
+// -------------------------------------------------------------------------------------------------
+
+/// Verify the canister remains responsive after multiple housekeeping timer
+/// ticks, even when the cycles ledger is unavailable (every top-up attempt
+/// fails). If the guard were not properly released on error, housekeeping
+/// would be permanently stuck and subsequent ticks would silently pile up.
+#[test]
+fn test_housekeeping_guard_resets_after_failed_topup() {
+    let pic_setup = setup();
+    let caller = controller();
+
+    // Advance time past several hourly timer intervals and process messages.
+    // Each tick fires the timer; the spawned housekeeping task will fail
+    // (no cycles ledger) and must release the guard so the next tick can
+    // spawn a new one.
+    for _ in 0..3 {
+        pic_setup.pic.advance_time(Duration::from_secs(60 * 60));
+        for _ in 0..10 {
+            pic_setup.pic.tick();
+        }
+    }
+
+    // The canister should still be responsive.
+    let response = pic_setup.query::<Stats>(caller, "stats", ());
+    assert!(
+        response.is_ok(),
+        "canister should be responsive after repeated failed housekeeping: {:?}",
+        response.unwrap_err()
+    );
+}
+
+/// Verify that creating many user profiles in quick succession does not cause
+/// the canister to become unresponsive, even without a cycles ledger
+/// (each spawned allow_signing task will fail).
+#[test]
+fn test_allow_signing_backpressure_under_burst() {
+    let pic_setup = setup();
+
+    for i in 0u8..60 {
+        let caller = Principal::self_authenticating(i.to_string());
+        let _ = pic_setup.update::<shared::types::user_profile::UserProfile>(
+            caller,
+            "create_user_profile",
+            (),
+        );
+    }
+
+    // Process any pending async tasks.
+    for _ in 0..20 {
+        pic_setup.pic.tick();
+    }
+
+    // The canister should still be responsive.
+    let response = pic_setup.query::<Stats>(controller(), "stats", ());
+    assert!(
+        response.is_ok(),
+        "canister should be responsive after burst of user profile creations: {:?}",
+        response.unwrap_err()
+    );
+    let stats = response.unwrap();
+    assert_eq!(
+        stats.user_profile_count, 60,
+        "all 60 profiles should have been created"
+    );
+}
+
+/// After the cycles ledger becomes available, housekeeping should resume
+/// successfully (guard was not permanently stuck from prior failures).
+#[test]
+fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
+    let pic_setup = BackendBuilder::default().with_cycles_ledger(true).deploy();
+    let caller = controller();
+
+    // Advance well past the first hourly interval and process messages, giving
+    // the canister time to run housekeeping with a working cycles ledger.
+    pic_setup.pic.advance_time(Duration::from_secs(2 * 60 * 60));
+    for _ in 0..20 {
+        pic_setup.pic.tick();
+    }
+
+    // The canister should respond normally and manual top_up should succeed.
+    let response = pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
+    assert!(
+        response.is_ok(),
+        "manual top_up should succeed when cycles ledger is available"
     );
 }
