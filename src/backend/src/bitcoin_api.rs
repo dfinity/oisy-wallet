@@ -6,9 +6,7 @@ use ic_cdk::api::management_canister::bitcoin::{
     UtxoFilter,
 };
 use ic_cdk_timers::{set_timer, set_timer_interval};
-use shared::types::bitcoin::{
-    FEE_PERCENTILES_INITIAL_DELAY_SECS, FEE_PERCENTILES_UPDATE_INTERVAL, FEE_UPDATE_TIMEOUT_NS,
-};
+use shared::types::bitcoin::{FEE_PERCENTILES_INITIAL_DELAY, FEE_PERCENTILES_UPDATE_INTERVAL, FEE_UPDATE_TIMEOUT_NS};
 
 // Default fee values for different networks when API fails
 const DEFAULT_MAINNET_FEE: u64 = 10_000; // 10 sat/byte (10,000 msat/byte)
@@ -126,7 +124,7 @@ pub fn init_fee_percentiles_cache() {
 
     // Schedule the initial cache population and timer setup to run after init completes
     set_timer(
-        std::time::Duration::from_secs(FEE_PERCENTILES_INITIAL_DELAY_SECS),
+       FEE_PERCENTILES_INITIAL_DELAY,
         || {
             // Set up the recurring timer to update the data
             set_timer_interval(FEE_PERCENTILES_UPDATE_INTERVAL, || {
