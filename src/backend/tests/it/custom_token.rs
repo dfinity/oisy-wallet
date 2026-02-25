@@ -525,7 +525,7 @@ fn test_anonymous_cannot_add_custom_token() {
 fn test_anonymous_cannot_list_custom_tokens() {
     let pic_setup = setup();
 
-    let result = pic_setup.query::<()>(
+    let result = pic_setup.update::<()>(
         Principal::anonymous(),
         "list_custom_tokens",
         USER_TOKEN.clone(),
@@ -550,7 +550,7 @@ fn test_user_cannot_list_another_custom_tokens() {
         Principal::from_text("yaa3n-twfur-6xz6e-3z7ep-xln56-222kz-w2b2m-y5wqz-vu6kk-s3fdg-lqe")
             .unwrap();
 
-    let results = pic_setup.query::<Vec<CustomToken>>(another_caller, "list_custom_tokens", ());
+    let results = pic_setup.update::<Vec<CustomToken>>(another_caller, "list_custom_tokens", ());
 
     assert!(results.is_ok());
 
@@ -612,7 +612,7 @@ fn test_set_custom_token_updates_activity_for_same_token() {
         .expect("Failed to set custom token");
 
     let results = pic_setup
-        .query::<Vec<CustomToken>>(caller, "list_custom_tokens", ())
+        .update::<Vec<CustomToken>>(caller, "list_custom_tokens", ())
         .expect("Failed to list custom tokens");
 
     let update_token = CustomToken {
