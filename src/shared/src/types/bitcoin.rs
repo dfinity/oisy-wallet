@@ -29,6 +29,11 @@ pub const MAX_UTXOS_LEN: usize = 128;
 /// Timer interval for updating fee percentiles cache (1 minute)
 pub const FEE_PERCENTILES_UPDATE_INTERVAL: Duration = Duration::from_secs(60);
 
+/// Safety timeout: if an update has been "in progress" for longer than this,
+/// assume it was lost to a trap and allow a new one. Set to 5× the update interval.
+pub const FEE_UPDATE_TIMEOUT_NS: u64 =
+    5 * FEE_PERCENTILES_UPDATE_INTERVAL.as_secs() * 1_000_000_000;
+
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct BtcGetFeePercentilesRequest {
     pub network: BitcoinNetwork,
