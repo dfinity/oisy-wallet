@@ -17,7 +17,6 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
-	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		tokenGroup: TokenUiGroup;
