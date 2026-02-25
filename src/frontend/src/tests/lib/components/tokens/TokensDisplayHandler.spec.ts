@@ -1,4 +1,3 @@
-import { sortedFungibleNetworkTokensUiOrGroupUi } from '$lib/derived/network-tokens-ui.derived';
 import { sortedEnabledNetworkTokenUiOrGroupUi } from '$lib/derived/network-tokens-ui.derived';
 import { showZeroBalances } from '$lib/derived/settings.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
