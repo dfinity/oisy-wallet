@@ -230,7 +230,11 @@ div.modal {
 				--dialog-padding-y: 24px;
 			}
 
-			@apply px-[var(--dialog-padding-x)] py-[var(--dialog-padding-y)] flex-1;
+			@apply px-[var(--dialog-padding-x)] py-[var(--dialog-padding-y)] flex-1 overflow-y-auto;
+
+			-webkit-overflow-scrolling: touch !important;
+			touch-action: pan-y !important;
+			overscroll-behavior: contain !important;
 		}
 
 		// If not using ContentWithToolbar, we need to set some decent padding via modal variables
