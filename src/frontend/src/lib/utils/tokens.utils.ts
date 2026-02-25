@@ -19,8 +19,9 @@ import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Token, TokenId, TokenToPin } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import type { TokenGroupId } from '$lib/types/token-group';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -58,7 +59,16 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 	};
 };
 
+// A single reused `Intl.Collator` for all string comparisons is faster/more consistent than repeated localeCompare
+const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+
 type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
+
+type SortableId = TokenId | TokenGroupId;
+
+type Pin = Readonly<{ id: SortableId }>;
+
+type SortableItem<T extends Token> = TokenUi<T> | TokenUiOrGroupUi;
 
 /**
  * Creates a comparator function for sorting tokens based on multiple criteria:
@@ -81,7 +91,7 @@ const createTokenComparator =
 		pinIndexById,
 		primarySortStrategy
 	}: {
-		pinIndexById: ReadonlyMap<TokenId, number>;
+		pinIndexById: ReadonlyMap<SortableId, number>;
 		primarySortStrategy: TokensSortType;
 	}) =>
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
@@ -125,7 +135,7 @@ const createTokenComparator =
 
 		// If the choice is to prioritise symbol sorting
 		if (primarySortStrategy === 'symbol') {
-			const symbolDiff = aSymbol.localeCompare(bSymbol);
+			const symbolDiff = collator.compare(aSymbol, bSymbol);
 			if (symbolDiff !== 0) {
 				return symbolDiff;
 			}
@@ -151,14 +161,24 @@ const createTokenComparator =
 		}
 
 		return (
-			aSymbol.localeCompare(bSymbol) ||
-			aName.localeCompare(bName) ||
-			aNetworkName.localeCompare(bNetworkName) ||
+			collator.compare(aSymbol, bSymbol) ||
+			collator.compare(aName, bName) ||
+			collator.compare(aNetworkName, bNetworkName) ||
 			+((bBalance ?? ZERO) > (aBalance ?? ZERO)) - +((bBalance ?? ZERO) < (aBalance ?? ZERO)) ||
 			(bUsdMarketCap ?? 0) - (aUsdMarketCap ?? 0)
 		);
 	};
 
+export function sortTokens<T extends Token>(args: {
+	$tokens: TokenUi<T>[];
+	$tokensToPin: ReadonlyArray<Pin>;
+	primarySortStrategy?: TokensSortType;
+}): TokenUi<T>[];
+export function sortTokens(args: {
+	$tokens: TokenUiOrGroupUi[];
+	$tokensToPin: ReadonlyArray<Pin>;
+	primarySortStrategy?: TokensSortType;
+}): TokenUiOrGroupUi[];
 /**
  * Sorts tokens using balance-aware and pin-aware prioritisation.
  *
@@ -181,36 +201,46 @@ const createTokenComparator =
  * @param primarySortStrategy - Optional parameter to prioritise by performance, symbol or value (default).
  * @returns A sorted array of token UI objects.
  */
-export const sortTokens = <T extends Token>({
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+export function sortTokens<T extends Token>({
 	$tokens,
 	$tokensToPin,
 	primarySortStrategy = 'value'
 }: {
-	$tokens: TokenUi<T>[];
-	$tokensToPin: TokenToPin[];
+	$tokens: SortableItem<T>[];
+	$tokensToPin: ReadonlyArray<Pin>;
 	primarySortStrategy?: TokensSortType;
-}): TokenUi<T>[] => {
-	const pinIndexById = new Map<TokenId, number>($tokensToPin.map(({ id }, index) => [id, index]));
+}): SortableItem<T>[] {
+	const pinIndexById = new Map<SortableId, number>(
+		$tokensToPin.map(({ id }, index) => [id, index])
+	);
 
 	const comparator = createTokenComparator({ pinIndexById, primarySortStrategy });
 
-	// We intentionally use the “decorate → sort → undecorate” pattern here.
+	// We intentionally precompute sort keys once per element before sorting.
 	//
-	// Each item is first mapped to its precomputed sort fields (`unwrapTokenSortFields`)
-	// so the comparator works only with plain, normalised values. This ensures that:
+	// Each item is first normalised via `unwrapTokenSortFields`, so the
+	// comparator operates only on plain, precomputed values. This ensures that:
 	//   • expensive field normalisation runs exactly once per element (not per comparison),
 	//   • the comparator remains simple and fast (no repeated unwrapping or branching),
 	//   • sorting logic is shared between tokens and groups in a uniform way.
 	//
-	// Although this introduces two linear passes (map before and after sort),
-	// the list size is small (~100–150 items) and sorting runs infrequently
-	// (~every 30s), so the additional allocations are negligible. This approach
-	// favours clarity and predictable performance over micro-optimisation.
-	return $tokens
-		.map((token) => ({ token, u: unwrapTokenSortFields(token) }))
-		.sort((a, b) => comparator(a.u, b.u))
-		.map(({ token }) => token);
-};
+	// We then sort an array of indices instead of allocating wrapper objects
+	// ({ token, u }) per element. This avoids per-item object allocation while
+	// keeping the same “decorate → sort → project” structure conceptually.
+	//
+	// Given the small list size (~100–150 items) and low frequency (~every 30s),
+	// the additional linear passes are negligible and favour clarity and
+	// controlled performance over micro-optimisation.
+
+	const unwrapped = $tokens.map(unwrapTokenSortFields);
+
+	const indices = Array.from({ length: $tokens.length }, (_, i) => i);
+
+	indices.sort((i, j) => comparator(unwrapped[i], unwrapped[j]));
+
+	return indices.map((i) => $tokens[i]);
+}
 
 /**
  * Calculates total USD balance of the provided UI tokens list.
