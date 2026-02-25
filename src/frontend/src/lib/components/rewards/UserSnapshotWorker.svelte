@@ -86,9 +86,6 @@
 		if (
 			$authNotSignedIn ||
 			$isBusy ||
-			isNullish($btcAddressMainnet) ||
-			isNullish($ethAddress) ||
-			isNullish($solAddressMainnet) ||
 			isNullish($tokens) ||
 			$exchangeNotInitialized ||
 			$noPositiveBalanceAndNotAllBalancesZero
