@@ -37,7 +37,6 @@ impl<'a> UserProfileModel<'a> {
         new_user: &StoredUserProfile,
     ) {
         if let Some(old_updated) = self.user_profile_updated_map.get(&user_principal) {
-            // Clean up old entries
             self.user_profile_map.remove(&(old_updated, user_principal));
         }
         self.user_profile_updated_map
@@ -176,7 +175,6 @@ mod tests {
             user_profile_2
         );
 
-        // Check that first user is still there untouched
         assert_eq!(
             user_profile_model
                 .find_by_principal(user_principal)

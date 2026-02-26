@@ -14,7 +14,7 @@ use ic_cycles_ledger_client::{
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
 use shared::types::signer::GetAllowedCyclesError;
-pub(crate) use shared::types::signer::{
+pub use shared::types::signer::{
     topup::{
         TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
         TopUpCyclesLedgerResult,
@@ -22,10 +22,8 @@ pub(crate) use shared::types::signer::{
     AllowSigningError,
 };
 
-use crate::{
-    read_config,
-    state::{CYCLES_LEDGER, SIGNER},
-};
+use super::canister_ids::{CYCLES_LEDGER, SIGNER};
+use crate::read_config;
 
 /// Current ledger fee in cycles.  Historically stable.
 ///
@@ -50,18 +48,11 @@ const SIGNER_FEE: u64 = 80_000_000_000;
 /// weeks)
 const SIGNING_OPS_PER_LOGIN: u64 = 36;
 const fn per_user_cycles_allowance() -> u64 {
-    // Creating the allowance costs 1 ledger fee.
-    // Every usage costs 1 ledger fee + 1 signer fee.
     LEDGER_FEE + (LEDGER_FEE + SIGNER_FEE) * SIGNING_OPS_PER_LOGIN
 }
 
 /// Retrieves the amount of cycles that the signer canister is allowed to spend
 /// on behalf of the current canister.
-///
-/// This function calls `icrc_2_allowance` on the cycles ledger to get the
-/// current allowance. The allowance is queried using the current canister
-/// identity as the account owner, and the signer canister as the spender,
-/// with the caller's principal encoded as the subaccount.
 ///
 /// # Returns
 /// - On success: `Ok(Nat)` containing the number of cycles that are allowed to be spent
@@ -74,7 +65,6 @@ pub async fn get_allowed_cycles() -> Result<Nat, GetAllowedCyclesError> {
     let signer: Principal = *SIGNER;
     let caller = ic_cdk::caller();
 
-    // Create the AllowanceArgs structure as specified in the JSON
     let allowance_args = AllowanceArgs {
         account: Account {
             owner: ic_cdk::id(),
@@ -86,7 +76,6 @@ pub async fn get_allowed_cycles() -> Result<Nat, GetAllowedCyclesError> {
         },
     };
 
-    // Call icrc_2_allowance on the CyclesLedgerService
     let (allowance,) = CyclesLedgerService(cycles_ledger)
         .icrc_2_allowance(&allowance_args)
         .await
@@ -200,25 +189,6 @@ pub async fn btc_principal_to_p2wpkh_address(
 
 /// Tops up the backend canister account on the cycles ledger.
 ///
-/// # Context
-/// The backend canister owns two sets of cycles:
-///
-/// - Cycles in the backend's cycle ledger account.
-///   - Cycles in the ledger are like money held in a bank.  You can perform fancy protocols with
-///     these funds.
-///   - These cycles are used to pay external running costs.  Specifically, the chain fusion signer
-///     is paid from the backend cycles ledger account via ICRC approvals.
-/// - Cycles attached to the canister itself.
-///   - Cycles attached to the canister itself are like cash in your pocket.  You can use it to pay
-///     for a coffee but a typical canister cannot do anything complicated with it.
-///   - Canister cycles are topped up by a service such as cycleops.
-///   - Canister cycles are consumed to pay for operations:
-///     - Storage and execution costs for the canister, paid to the Internet Computer.
-///     - Funds sent to the cycles ledger account to pay for external costs.
-///
-/// This function checks the backend account balance on the cycles ledger and, if low, tops it up
-/// with cycles taken from the backend canister itself.
-///
 /// # Errors
 /// Errors are enumerated by: `TopUpCyclesLedgerError`
 pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyclesLedgerResult {
@@ -227,14 +197,12 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
         Err(err) => return TopUpCyclesLedgerResult::Err(err),
     }
 
-    // Cycles ledger account details:
     let cycles_ledger = CyclesLedgerService(*CYCLES_LEDGER);
     let account = Account {
         owner: ic_cdk::id(),
         subaccount: None,
     };
 
-    // Backend balance on the cycles ledger:
     let (ledger_balance,): (Nat,) = match cycles_ledger
         .icrc_1_balance_of(&account)
         .await
@@ -244,16 +212,12 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
         Err(err) => return TopUpCyclesLedgerResult::Err(err),
     };
 
-    // Cycles directly attached to the backend:
     let backend_cycles = Nat::from(ic_cdk::api::canister_balance128());
 
-    // If the ledger balance is low, send cycles:
     if ledger_balance < request.threshold() {
-        // Decide how many cycles to keep and how many to send to the cycles ledger.
         let to_send = backend_cycles.clone() / Nat::from(100u32) * Nat::from(request.percentage());
         let to_retain = backend_cycles.clone() - to_send.clone();
 
-        // Top up the cycles ledger.
         let arg = DepositArgs {
             to: account,
             memo: None,

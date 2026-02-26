@@ -1,40 +1,27 @@
-use std::{cell::RefCell, collections::HashSet, time::Duration};
+use std::{cell::RefCell, time::Duration};
 
-use bitcoin_utils::estimate_fee;
-use btc_user_pending_tx_model::BtcUserPendingTransactionsModel;
-use candid::{candid_method, Principal};
-use config::find_credential_config;
-use ic_cdk::{api::time, eprintln, export_candid, init, post_upgrade, query, update};
+use candid::Principal;
+use ic_cdk::{api::time, eprintln, export_candid, init, post_upgrade};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
 };
-use ic_verifiable_credentials::validate_ii_presentation_and_claims;
-use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
-    metrics::get_metrics,
     std_canister_status,
     types::{
         agreement::UpdateUserAgreementsRequest,
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
-            BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
-            BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
-            BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
-            BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
-            SelectedUtxosFeeRequest, SelectedUtxosFeeResponse, StoredPendingTransaction,
+            BtcAddPendingTransactionRequest, BtcGetFeePercentilesRequest,
+            BtcGetPendingTransactionsRequest, SelectedUtxosFeeRequest,
         },
         contact::{CreateContactRequest, UpdateContactRequest},
-        custom_token::{CustomToken, CustomTokenId},
-        dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
+        custom_token::CustomToken,
+        dapp::AddHiddenDappIdRequest,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
-        pow::{
-            AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,
-            CYCLES_PER_DIFFICULTY, POW_ENABLED,
-        },
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
@@ -46,56 +33,43 @@ use shared::{
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
+            AllowSigningRequest,
         },
-        user_profile::{
-            AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
-        },
+        user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
         Stats, Timestamp,
     },
 };
-use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
+use signer::top_up_cycles_ledger;
 use types::{
-    BtcUserPendingTransactionsMap, Candid, ConfigCell, CustomTokenMap, StoredPrincipal,
-    UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-};
-use user_profile::{add_credential, create_profile, find_profile};
-use user_profile_model::UserProfileModel;
-
-use crate::{
-    bitcoin_api::get_current_fee_percentiles,
-    guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
-    token::{add_to_user_token, remove_from_user_token},
-    token_activity::{mark_token_active, mark_tokens_active},
-    types::{ContactMap, PowChallengeMap, TokenActivityMap},
-    user_profile::{
-        add_hidden_dapp_id, set_show_testnets, update_agreements,
-        update_experimental_feature_settings, update_network_settings,
-    },
+    BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap, PowChallengeMap,
+    StoredPrincipal, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
 };
 
-mod bitcoin_api;
-mod bitcoin_utils;
-mod btc_user_pending_tx_model;
-mod config;
+// ---------------------------------------------------------------------------
+// Module declarations
+// ---------------------------------------------------------------------------
+
+mod api;
+mod bitcoin;
 mod contacts;
 mod guards;
 mod impls;
 mod pow;
 pub mod random;
 pub mod signer;
-mod state;
 mod token;
 mod types;
 mod user_profile;
-mod user_profile_model;
 
 #[cfg(test)]
 mod tests;
-mod token_activity;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
+
+// ---------------------------------------------------------------------------
+// Stable memory layout
+// ---------------------------------------------------------------------------
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -106,6 +80,10 @@ const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 const BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(7);
 const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(8);
+
+// ---------------------------------------------------------------------------
+// Canister state
+// ---------------------------------------------------------------------------
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -121,7 +99,6 @@ thread_local! {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
-            // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
@@ -132,6 +109,24 @@ thread_local! {
             token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
         })
     );
+}
+
+pub struct State {
+    config: ConfigCell,
+    /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the
+    /// users.
+    user_token: UserTokenMap,
+    /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
+    /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
+    custom_token: CustomTokenMap,
+    user_profile: UserProfileMap,
+    user_profile_updated: UserProfileUpdatedMap,
+    pow_challenge: PowChallengeMap,
+    contact: ContactMap,
+    btc_user_pending_transactions: BtcUserPendingTransactionsMap,
+    // TODO: implement a periodic cleanup of old entries
+    // TODO: limit the map size with an eviction policy
+    token_activity: TokenActivityMap,
 }
 
 fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
@@ -156,30 +151,16 @@ fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     })
 }
 
-pub struct State {
-    config: ConfigCell,
-    /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the
-    /// users.
-    user_token: UserTokenMap,
-    /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
-    /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
-    custom_token: CustomTokenMap,
-    user_profile: UserProfileMap,
-    user_profile_updated: UserProfileUpdatedMap,
-    pow_challenge: PowChallengeMap,
-    contact: ContactMap,
-    btc_user_pending_transactions: BtcUserPendingTransactionsMap,
-    // TODO: implement a periodic cleanup of old entries
-    // TODO: limit the map size with an eviction policy
-    token_activity: TokenActivityMap,
-}
-
 fn set_config(arg: InitArg) {
     let config = Config::from(arg);
     mutate_state(|state| {
         state.config.set(Some(Candid(config)));
     });
 }
+
+// ---------------------------------------------------------------------------
+// Housekeeping
+// ---------------------------------------------------------------------------
 
 /// 2 hours in nanoseconds — if a housekeeping run has been in progress for
 /// longer than this, we consider it stuck and force-unlock so the next timer
@@ -189,8 +170,7 @@ const HOUSEKEEPING_TIMEOUT_NS: u64 = 2 * 60 * 60 * 1_000_000_000;
 pub(crate) const MAX_CONCURRENT_ALLOW_SIGNING: u32 = 50;
 
 /// Returns `true` if a housekeeping run is currently in flight and has not
-/// timed out.  If the lock has been held longer than `HOUSEKEEPING_TIMEOUT_NS`,
-/// logs a warning and returns `false` so the caller can force a new run.
+/// timed out.
 pub(crate) fn is_housekeeping_in_progress(now_ns: u64) -> bool {
     HOUSEKEEPING_STARTED_AT.with(|cell| {
         if let Some(started) = *cell.borrow() {
@@ -210,9 +190,6 @@ pub(crate) fn is_housekeeping_in_progress(now_ns: u64) -> bool {
     })
 }
 
-/// Spawns housekeeping only if no previous run is still in flight.
-/// If a previous run appears stuck (older than `HOUSEKEEPING_TIMEOUT_NS`),
-/// the stale lock is cleared and a new run is allowed to proceed.
 fn spawn_housekeeping_if_idle() {
     let now = time();
 
@@ -228,13 +205,6 @@ fn spawn_housekeeping_if_idle() {
     });
 }
 
-/// Atomically increments the in-flight `allow_signing` counter if below
-/// `MAX_CONCURRENT_ALLOW_SIGNING`.  Returns `true` on success.
-///
-/// The caller is responsible for decrementing after the task finishes.
-/// On IC traps the counter stays elevated, but the cap prevents unbounded
-/// accumulation.  In practice the `allow_signing` code path contains no
-/// panic sites, so leaked slots are unlikely.
 pub(crate) fn try_acquire_allow_signing_slot() -> bool {
     ALLOW_SIGNING_IN_PROGRESS.with(|cell| {
         let mut count = cell.borrow_mut();
@@ -246,13 +216,10 @@ pub(crate) fn try_acquire_allow_signing_slot() -> bool {
     })
 }
 
-/// Decrements the in-flight `allow_signing` counter.
 pub(crate) fn release_allow_signing_slot() {
     ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow_mut() -= 1);
 }
 
-/// Spawns an `allow_signing` task only if the number of in-flight tasks is
-/// below `MAX_CONCURRENT_ALLOW_SIGNING`.
 fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
     if !try_acquire_allow_signing_slot() {
         eprintln!(
@@ -274,31 +241,26 @@ fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
     });
 }
 
-/// Runs housekeeping tasks immediately, then periodically:
-/// - `hourly_housekeeping_tasks`
 fn start_periodic_housekeeping_timers() {
-    // Run housekeeping tasks once, immediately but asynchronously.
     let immediate = Duration::ZERO;
     set_timer(immediate, spawn_housekeeping_if_idle);
 
-    // Then periodically:
     let hour = Duration::from_secs(60 * 60);
     let _ = set_timer_interval(hour, spawn_housekeeping_if_idle);
 }
 
-/// Runs hourly housekeeping tasks:
-/// - Top up the cycles ledger.
 async fn hourly_housekeeping_tasks() {
-    // Tops up the account on the cycles ledger
     {
-        let result = top_up_cycles_ledger(None).await;
+        let result = top_up_cycles_ledger(TopUpCyclesLedgerRequest::default()).await;
         if let TopUpCyclesLedgerResult::Err(err) = result {
             eprintln!("Failed to top up cycles ledger: {err:?}");
         }
-        // TODO: Add monitoring for how many cycles have been topped up and whether topping up is
-        // failing.
     }
 }
+
+// ---------------------------------------------------------------------------
+// Canister lifecycle
+// ---------------------------------------------------------------------------
 
 #[init]
 pub fn init(arg: Arg) {
@@ -307,17 +269,14 @@ pub fn init(arg: Arg) {
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
 
-    // Initialize the Bitcoin fee percentiles cache
-    bitcoin_api::init_fee_percentiles_cache();
-
+    bitcoin::api::init_fee_percentiles_cache();
     start_periodic_housekeeping_timers();
 }
 
 /// Post-upgrade handler.
 ///
 /// # Panics
-/// - If the config is not initialized, which should not happen during an upgrade.  Maybe this is a
-///   new installation?
+/// - If the config is not initialized, which should not happen during an upgrade.
 #[post_upgrade]
 pub fn post_upgrade(arg: Option<Arg>) {
     match arg {
@@ -330,839 +289,8 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
-    // Initialize the Bitcoin fee percentiles cache
-    bitcoin_api::init_fee_percentiles_cache();
-
+    bitcoin::api::init_fee_percentiles_cache();
     start_periodic_housekeeping_timers();
-}
-
-/// Gets the canister configuration.
-#[query(guard = "caller_is_allowed")]
-#[must_use]
-pub fn config() -> Config {
-    read_config(Clone::clone)
-}
-
-/// Adds cycles to the cycles ledger, if it is below a certain threshold.
-///
-/// # Errors
-/// Error conditions are enumerated by: `TopUpCyclesLedgerError`
-#[update(guard = "caller_is_controller")]
-pub async fn top_up_cycles_ledger(
-    request: Option<TopUpCyclesLedgerRequest>,
-) -> TopUpCyclesLedgerResult {
-    signer::top_up_cycles_ledger(request.unwrap_or_default()).await
-}
-
-/// Processes external HTTP requests.
-#[query]
-#[allow(clippy::needless_pass_by_value)]
-#[must_use]
-pub fn http_request(request: HttpRequest) -> HttpResponse {
-    let path = request
-        .url
-        .split('?')
-        .next()
-        .unwrap_or_else(|| unreachable!("Even splitting an empty string yields one entry"));
-    match path {
-        "/metrics" => get_metrics(),
-        _ => HttpResponse {
-            status_code: 404,
-            headers: vec![],
-            body: ByteBuf::from(String::from("Not found.")),
-        },
-    }
-}
-
-/// Add or update custom token for the user.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-pub fn set_custom_token(token: CustomToken) {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    let find = |t: &CustomToken| -> bool {
-        CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-    };
-
-    mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
-
-    mark_token_active(&CustomTokenId::from(&token.token));
-}
-
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
-    if tokens.len() > token::MAX_TOKEN_LIST_LENGTH {
-        ic_cdk::trap(&format!(
-            "Token list length should not exceed {}",
-            token::MAX_TOKEN_LIST_LENGTH
-        ));
-    }
-
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    let ids = tokens
-        .iter()
-        .map(|t| CustomTokenId::from(&t.token))
-        .collect::<Vec<_>>();
-
-    mutate_state(|s| {
-        for token in tokens {
-            let find = |t: &CustomToken| -> bool {
-                CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-            };
-
-            add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
-        }
-    });
-
-    mark_tokens_active(&ids);
-}
-
-/// Remove custom token for the user.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-pub fn remove_custom_token(token: CustomToken) {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    mutate_state(|s| {
-        let find = |t: &CustomToken| -> bool {
-            CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-        };
-
-        remove_from_user_token(stored_principal, &mut s.custom_token, &find);
-    });
-}
-
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-/// List the custom tokens for the calling user.
-///
-/// Note: This method was previously exposed as a *query* but is now an *update*
-/// call. The change is intentional and breaking: `list_custom_tokens` now tracks
-/// token activity by calling `mark_tokens_active`, which mutates canister state.
-/// Because queries must not modify state on the IC, this function must be an
-/// update, not a query.
-///
-/// Implications for callers:
-/// - This call now participates in consensus and may have higher latency than a query.
-/// - It consumes cycles as an update call.
-/// - Integrations that previously relied on query semantics must be updated to invoke this as an
-///   update method.
-pub fn list_custom_tokens() -> Vec<CustomToken> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    let tokens = read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0);
-
-    if !tokens.is_empty() {
-        let ids: Vec<CustomTokenId> = tokens
-            .iter()
-            .map(|t| CustomTokenId::from(&t.token))
-            .collect();
-
-        mark_tokens_active(&ids);
-    }
-
-    tokens
-}
-
-const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
-
-/// Retrieves the current fee percentiles for Bitcoin transactions from the cache
-/// for the specified network. Fee percentiles are measured in millisatoshi per byte
-/// and are periodically updated in the background.
-///
-/// # Returns
-/// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
-/// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
-///
-/// # Errors
-/// - `InternalError`: If fee percentiles are not available in the cache for the requested network
-///
-/// # Note
-/// This function only returns data from the in-memory cache and doesn't make any calls
-/// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
-/// an error is returned rather than fetching fresh data.
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub async fn btc_get_current_fee_percentiles(
-    params: BtcGetFeePercentilesRequest,
-) -> BtcGetFeePercentilesResult {
-    match get_current_fee_percentiles(params.network).await {
-        Ok(fee_percentiles) => Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into(),
-        Err(err) => {
-            BtcGetFeePercentilesResult::Err(SelectedUtxosFeeError::InternalError { msg: err })
-        }
-    }
-}
-
-/// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
-///
-/// # Errors
-/// Errors are enumerated by: `SelectedUtxosFeeError`.
-#[update(guard = "caller_is_not_anonymous")]
-pub async fn btc_select_user_utxos_fee(
-    params: SelectedUtxosFeeRequest,
-) -> BtcSelectUserUtxosFeeResult {
-    async fn inner(
-        params: SelectedUtxosFeeRequest,
-    ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
-        let principal = ic_cdk::caller();
-        let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
-            .await
-            .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
-        let all_utxos = bitcoin_api::get_all_utxos(
-            params.network,
-            source_address.clone(),
-            Some(
-                params
-                    .min_confirmations
-                    .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
-            ),
-        )
-        .await
-        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
-        let now_ns = time();
-
-        let has_pending_transactions = mutate_state(|state| {
-            let mut model = BtcUserPendingTransactionsModel::new(
-                &mut state.btc_user_pending_transactions,
-                None,
-                None,
-            );
-            model.prune_pending_transactions(principal, &all_utxos, now_ns);
-            !model
-                .get_pending_transactions(&principal, &source_address)
-                .is_empty()
-        });
-
-        if has_pending_transactions {
-            return Err(SelectedUtxosFeeError::PendingTransactions);
-        }
-
-        let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
-            .await
-            .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
-        // We support sending to one destination only.
-        // Therefore, the outputs are the destination and the source address for the change.
-        let output_count = 2;
-        let mut available_utxos = all_utxos.clone();
-        let selected_utxos = bitcoin_utils::utxos_selection(
-            params.amount_satoshis,
-            &mut available_utxos,
-            output_count,
-        );
-
-        // Fee calculation might still take into account default tx size and expected output.
-        // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be
-        // present.
-        if selected_utxos.is_empty() {
-            return Ok(SelectedUtxosFeeResponse {
-                utxos: selected_utxos,
-                fee_satoshis: 0,
-            });
-        }
-
-        let fee_satoshis = estimate_fee(
-            selected_utxos.len() as u64,
-            median_fee_millisatoshi_per_vbyte,
-            output_count as u64,
-        );
-
-        Ok(SelectedUtxosFeeResponse {
-            utxos: selected_utxos,
-            fee_satoshis,
-        })
-    }
-    inner(params).await.into()
-}
-
-/// Adds a pending Bitcoin transaction for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `BtcAddPendingTransactionError`.
-#[update(guard = "caller_is_not_anonymous")]
-pub async fn btc_add_pending_transaction(
-    params: BtcAddPendingTransactionRequest,
-) -> BtcAddPendingTransactionResult {
-    async fn inner(
-        params: BtcAddPendingTransactionRequest,
-    ) -> Result<(), BtcAddPendingTransactionError> {
-        if params.utxos.is_empty() {
-            return Err(BtcAddPendingTransactionError::EmptyUtxos);
-        }
-
-        let unique_keys: HashSet<(&[u8], u32)> = params
-            .utxos
-            .iter()
-            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
-            .collect();
-
-        if unique_keys.len() != params.utxos.len() {
-            return Err(BtcAddPendingTransactionError::DuplicateUtxos);
-        }
-
-        let principal = ic_cdk::caller();
-
-        let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
-            .await
-            .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
-
-        let current_utxos = bitcoin_api::get_all_utxos(
-            params.network,
-            source_address.clone(),
-            Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
-        )
-        .await
-        .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
-
-        let now_ns = time();
-
-        let current_keys: HashSet<(&[u8], u32)> = current_utxos
-            .iter()
-            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
-            .collect();
-
-        let all_param_utxos_are_current = params
-            .utxos
-            .iter()
-            .all(|u| current_keys.contains(&(u.outpoint.txid.as_slice(), u.outpoint.vout)));
-
-        if !all_param_utxos_are_current {
-            return Err(BtcAddPendingTransactionError::InvalidUtxos);
-        }
-
-        mutate_state(|state| {
-            let mut model = BtcUserPendingTransactionsModel::new(
-                &mut state.btc_user_pending_transactions,
-                None,
-                None,
-            );
-            model.prune_pending_transactions(principal, &current_utxos, now_ns);
-
-            if model.has_intersecting_pending_utxos(principal, &params.utxos) {
-                return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
-            }
-
-            let current_pending_transaction = StoredPendingTransaction {
-                txid: params.txid,
-                utxos: params.utxos,
-                created_at_timestamp_ns: now_ns,
-            };
-            model
-                .add_pending_transaction(principal, source_address, current_pending_transaction)
-                .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
-        })
-    }
-    inner(params).await.into()
-}
-
-/// Returns the pending Bitcoin transactions for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `BtcGetPendingTransactionsError`.
-#[update(guard = "caller_is_not_anonymous")]
-pub async fn btc_get_pending_transactions(
-    params: BtcGetPendingTransactionsRequest,
-) -> BtcGetPendingTransactionsResult {
-    async fn inner(
-        params: BtcGetPendingTransactionsRequest,
-    ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
-        let principal = ic_cdk::caller();
-        let now_ns = time();
-
-        let current_utxos = bitcoin_api::get_all_utxos(
-            params.network,
-            params.address.clone(),
-            Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
-        )
-        .await
-        .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
-
-        let stored_transactions = mutate_state(|state| {
-            let mut model = BtcUserPendingTransactionsModel::new(
-                &mut state.btc_user_pending_transactions,
-                None,
-                None,
-            );
-            model.prune_pending_transactions(principal, &current_utxos, now_ns);
-            model.get_pending_transactions(&principal, &params.address)
-        });
-
-        let pending_transactions = stored_transactions
-            .iter()
-            .map(|tx| PendingTransaction {
-                txid: tx.txid.clone(),
-                utxos: tx.utxos.clone(),
-            })
-            .collect();
-
-        Ok(BtcGetPendingTransactionsReponse {
-            transactions: pending_transactions,
-        })
-    }
-    inner(params).await.into()
-}
-
-/// Adds a verifiable credential to the user profile.
-///
-/// # Errors
-/// Errors are enumerated by: `AddUserCredentialError`.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-#[must_use]
-pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredentialResult {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-    let current_time_ns = u128::from(time());
-
-    let Some((vc_flow_signers, root_pk_raw, credential_type, derivation_origin)) =
-        read_config(|config| find_credential_config(&request, config))
-    else {
-        return AddUserCredentialResult::Err(AddUserCredentialError::ConfigurationError);
-    };
-
-    match validate_ii_presentation_and_claims(
-        &request.credential_jwt,
-        user_principal,
-        derivation_origin,
-        &vc_flow_signers,
-        &request.credential_spec,
-        &root_pk_raw,
-        current_time_ns,
-    ) {
-        Ok(()) => mutate_state(|s| {
-            let mut user_profile_model =
-                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            add_credential(
-                stored_principal,
-                request.current_user_version,
-                &credential_type,
-                vc_flow_signers.issuer_origin,
-                &mut user_profile_model,
-            )
-            .into()
-        }),
-        Err(_) => AddUserCredentialResult::Err(AddUserCredentialError::InvalidCredential),
-    }
-}
-
-/// Updates the user's preference to enable (or disable) networks in the interface, merging with any
-/// existing settings.
-///
-/// # Returns
-/// - Returns `Ok(())` if the network settings were updated successfully, or if they were already
-///   set to the same value.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn update_user_network_settings(
-    request: SaveNetworksSettingsRequest,
-) -> UpdateUserNetworkSettingsResult {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        update_network_settings(
-            stored_principal,
-            request.current_user_version,
-            request.networks,
-            &mut user_profile_model,
-        )
-    })
-    .into()
-}
-
-/// Sets the user's preference to show (or hide) testnets in the interface.
-///
-/// # Returns
-/// - Returns `Ok(())` if the testnets setting was saved successfully, or if it was already set to
-///   the same value.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)] // canister methods are necessary
-#[must_use]
-pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTestnetsResult {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        set_show_testnets(
-            stored_principal,
-            request.current_user_version,
-            request.show_testnets,
-            &mut user_profile_model,
-        )
-    })
-    .into()
-}
-
-/// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
-///
-/// # Arguments
-/// * `request` - The request to add a hidden dApp ID.
-///
-/// # Returns
-/// - Returns `Ok(())` if the dApp ID was added successfully, or if it was already in the list.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHiddenDappIdResult {
-    fn inner(request: AddHiddenDappIdRequest) -> Result<(), AddDappSettingsError> {
-        request.check()?;
-        let user_principal = ic_cdk::caller();
-        let stored_principal = StoredPrincipal(user_principal);
-
-        mutate_state(|s| {
-            let mut user_profile_model =
-                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            add_hidden_dapp_id(
-                stored_principal,
-                request.current_user_version,
-                request.dapp_id,
-                &mut user_profile_model,
-            )
-        })
-    }
-    inner(request).into()
-}
-
-/// Updates the user's agreements, merging with any existing ones.
-/// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
-/// set to `now`.
-///
-/// # Returns
-/// - Returns `Ok(())` if the agreements were saved successfully, or if they were already set to the
-///   same value.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUserAgreementsResult {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        update_agreements(
-            stored_principal,
-            request.current_user_version,
-            request.agreements,
-            &mut user_profile_model,
-        )
-    })
-    .into()
-}
-
-/// Updates the user's preference to enable (or disable) experimental features in the interface,
-/// merging with any existing entries.
-///
-/// # Returns
-/// - Returns `Ok(())` if the experimental features were updated successfully, or if they were
-///   already set to the same value.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn update_user_experimental_feature_settings(
-    request: UpdateExperimentalFeaturesSettingsRequest,
-) -> UpdateExperimentalFeaturesSettingsResult {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        update_experimental_feature_settings(
-            stored_principal,
-            request.current_user_version,
-            request.experimental_features,
-            &mut user_profile_model,
-        )
-    })
-    .into()
-}
-
-/// It creates a new user profile for the caller.
-/// If the user has already a profile, it will return that profile.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn create_user_profile() -> UserProfile {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    let user_profile: UserProfile = mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        let stored_user = create_profile(stored_principal, &mut user_profile_model);
-
-        UserProfile::from(&stored_user)
-    });
-
-    // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
-    // async task. Upon initial user login, we ensure allow_signing is called to handle cases
-    // where users lack the cycles required for signer operations. create_user_profile(..) must
-    // be invoked before any signer-related calls (e.g., get_eth_address).
-    spawn_allow_signing_if_below_limit(stored_principal);
-
-    user_profile
-}
-
-/// Returns the caller's user profile.
-///
-/// # Errors
-/// Errors are enumerated by: `GetUserProfileError`.
-///
-/// # Panics
-/// - If the caller is anonymous.  See: `may_read_user_data`.
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_user_profile() -> GetUserProfileResult {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    mutate_state(|s| {
-        let user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        match find_profile(stored_principal, &user_profile_model) {
-            Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
-            Err(err) => Err(err),
-        }
-    })
-    .into()
-}
-
-/// Creates a new proof-of-work challenge for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `CreateChallengeError`.
-///
-/// # Returns
-///
-/// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-/// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-///   internal errors.
-#[update(guard = "caller_is_not_anonymous")]
-#[candid_method(update)]
-pub async fn create_pow_challenge() -> CreatePowChallengeResult {
-    let challenge = pow::create_pow_challenge().await;
-
-    match challenge {
-        Ok(challenge) => CreatePowChallengeResult::Ok(CreateChallengeResponse {
-            difficulty: challenge.difficulty,
-            start_timestamp_ms: challenge.start_timestamp_ms,
-            expiry_timestamp_ms: challenge.expiry_timestamp_ms,
-        }),
-        Err(err) => CreatePowChallengeResult::Err(err),
-    }
-}
-/// Checks if the caller has an associated user profile.
-///
-/// # Returns
-/// - `Ok(true)` if a user profile exists for the caller.
-/// - `Ok(false)` if no user profile exists for the caller.
-/// # Errors
-/// Does not return any error
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn has_user_profile() -> HasUserProfileResponse {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    // candid does not support to directly return a bool
-    HasUserProfileResponse {
-        has_user_profile: user_profile::has_user_profile(stored_principal),
-    }
-}
-
-/// Retrieves the amount of cycles that the signer canister is allowed to spend
-/// on behalf of the current user
-/// # Returns
-/// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
-/// - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong
-///
-/// # Errors
-/// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
-/// - `Other`: If another error occurred during the operation
-#[update(guard = "caller_is_not_anonymous")]
-pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
-    let allowed_cycles = signer::get_allowed_cycles().await;
-    match allowed_cycles {
-        Ok(allowed_cycles) => Ok(GetAllowedCyclesResponse { allowed_cycles }).into(),
-        Err(err) => GetAllowedCyclesResult::Err(err),
-    }
-}
-
-/// This function authorizes the caller to spend a specific
-//  amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
-// providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
-// cycles ledger.
-///
-/// Note:
-/// - The chain fusion signer performs threshold key operations including providing public keys,
-///   creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
-///
-/// # Errors
-/// Errors are enumerated by: `AllowSigningError`.
-#[update(guard = "caller_is_not_anonymous")]
-pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigningResult {
-    async fn inner(
-        request: Option<AllowSigningRequest>,
-    ) -> Result<AllowSigningResponse, AllowSigningError> {
-        let principal = ic_cdk::caller();
-
-        // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED
-        // is disabled
-        if !POW_ENABLED {
-            // Passing None to apply the old cycle calculation logic
-            signer::allow_signing(None).await?;
-            // Returning a placeholder response that can be ignored by the frontend.
-            return Ok(AllowSigningResponse {
-                status: AllowSigningStatus::Skipped,
-                allowed_cycles: 0u64,
-                challenge_completion: None,
-            });
-        }
-
-        // we atill need to make a valid request has been sent request
-        let request = request.ok_or(AllowSigningError::Other("Invalid request".to_string()))?;
-
-        // The Proof-of-Work (PoW) protection is explicitly enforced at the HTTP entry-point level.
-        // This ensures internal calls to the business service remains unrestricted and does not
-        // require PoW protection.
-        let challenge_completion: ChallengeCompletion =
-            pow::complete_challenge(request.nonce).map_err(AllowSigningError::PowChallenge)?;
-
-        // Grant cycles proportional to difficulty
-        let allowed_cycles =
-            u64::from(challenge_completion.current_difficulty) * CYCLES_PER_DIFFICULTY;
-
-        ic_cdk::println!(
-            "Allowing principle {} to spend {} cycles on signer operations",
-            principal.to_string(),
-            allowed_cycles,
-        );
-
-        // Allow the caller to pay for cycles consumed by signer operations
-        signer::allow_signing(Some(allowed_cycles)).await?;
-
-        Ok(AllowSigningResponse {
-            status: AllowSigningStatus::Executed,
-            allowed_cycles,
-            challenge_completion: Some(challenge_completion),
-        })
-    }
-    inner(request).await.into()
-}
-
-/// API method to get cycle balance and burn rate.
-#[update]
-pub async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
-    std_canister_status::get_canister_status_v2().await
-}
-
-/// Gets statistics about the canister.
-///
-/// Note: This is a private method, restricted to authorized users, as some stats may not be
-/// suitable for public consumption.
-#[query(guard = "caller_is_allowed")]
-#[must_use]
-pub fn stats() -> Stats {
-    read_state(|s| Stats::from(s))
-}
-
-/// Gets account creation timestamps.
-#[query(guard = "caller_is_allowed")]
-#[must_use]
-pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
-    read_state(|s| {
-        s.user_profile
-            .iter()
-            .map(|entry| {
-                let (_updated, StoredPrincipal(principal)) = *entry.key();
-                let user = entry.value();
-                (principal, user.created_timestamp)
-            })
-            .collect()
-    })
-}
-
-/// Creates a new contact for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
-///
-/// # Returns
-/// The created contact on success.
-///
-/// # Test
-/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub async fn create_contact(request: CreateContactRequest) -> CreateContactResult {
-    let result = contacts::create_contact(request).await;
-    result.into()
-}
-
-/// Updates an existing contact for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    let result = contacts::update_contact(request);
-    result.into()
-}
-
-/// Deletes a contact for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
-///
-/// # Notes
-/// This operation is idempotent - it will return OK if the contact has already been deleted.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
-    let result = contacts::delete_contact(contact_id);
-    result.into()
-}
-
-/// Gets a contact by ID for the caller.
-///
-/// # Arguments
-/// * `contact_id` - The unique identifier of the contact to retrieve
-/// # Returns
-/// * `Ok(GetContactResult)` - The requested contact if found
-/// # Errors
-/// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_contact(contact_id: u64) -> GetContactResult {
-    contacts::get_contact(contact_id).into()
-}
-
-/// Returns all contacts for the caller
-///
-/// This query function returns a list of the user's contacts.
-/// # Returns
-/// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_contacts() -> GetContactsResult {
-    let result = Ok(contacts::get_contacts());
-    result.into()
 }
 
 export_candid!();

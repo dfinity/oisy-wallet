@@ -3,21 +3,29 @@
 use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::{bench, bench_fn, BenchResult};
+use candid::Principal;
 use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
+use serde_bytes::ByteBuf;
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
+    bitcoin::{PendingTransaction, StoredPendingTransaction},
     contact::{Contact, StoredContacts},
-    custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
+    custom_token::{CustomToken, CustomTokenId, ErcToken, ErcTokenId, Token},
     experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
+    http::{HttpRequest, HttpResponse},
     network::{NetworkSettings, NetworkSettingsFor},
     user_profile::{StoredUserProfile, UserProfile},
+    Stats,
 };
 
-use super::{
-    add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
-    user_profile, BtcUserPendingTransactionsModel, ByteBuf, Candid, CustomTokenId, HttpRequest,
-    PendingTransaction, Principal, State, Stats, StoredPendingTransaction, StoredPrincipal,
-    UserProfileModel,
+use crate::{
+    api::admin::http_request,
+    bitcoin::pending_tx_model::BtcUserPendingTransactionsModel,
+    mutate_state, read_config, read_state,
+    token::{add_to_user_token, remove_from_user_token},
+    types::{Candid, StoredPrincipal},
+    user_profile::{self, UserProfileModel},
+    State,
 };
 
 const BENCH_PRINCIPAL_TEXT: &str =
@@ -45,7 +53,6 @@ fn ensure_profile_version() -> Option<u64> {
         let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
 
         if m.find_by_principal(sp).is_none() {
-            // Prefer the real creation path (it may set version).
             user_profile::create_profile(sp, &mut m);
         }
 

@@ -13,7 +13,8 @@ use shared::types::{
     Version,
 };
 
-use crate::{read_state, user_profile_model::UserProfileModel, State, StoredPrincipal};
+use super::model::UserProfileModel;
+use crate::{read_state, types::StoredPrincipal, State};
 
 pub fn find_profile(
     principal: StoredPrincipal,
@@ -68,12 +69,6 @@ pub fn add_credential(
 
 /// Updates the user's network settings, merging with any existing settings.
 ///
-/// # Arguments
-/// * `principal` - The principal of the user.
-/// * `profile_version` - The version of the user's profile.
-/// * `networks` - The new network settings to save.
-/// * `user_profile_model` - The user profile model.
-///
 /// # Returns
 /// - Returns `Ok(())` if the settings were successfully updated.
 ///
@@ -94,12 +89,6 @@ pub fn update_network_settings(
 }
 
 /// Sets the user's preference to show (or hide) testnets in the interface.
-///
-/// # Arguments
-/// * `principal` - The principal of the user.
-/// * `profile_version` - The version of the user's profile.
-/// * `show_testnets` - `true` to show testnets, `false` to hide them.
-/// * `user_profile_model` - The user profile model.
 ///
 /// # Returns
 /// - Returns `Ok(())` if the testnets setting was saved successfully, or if it was already set to
@@ -123,12 +112,6 @@ pub fn set_show_testnets(
 
 /// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 ///
-/// # Arguments
-/// * `principal` - The principal of the user.
-/// * `profile_version` - The version of the user's profile.
-/// * `dapp_id` - The ID of the dApp to hide
-/// * `user_profile_model` - The user profile model.
-///
 /// # Returns
 /// - Returns `Ok(())` if the dApp ID was added successfully, or if it was already in the list.
 ///
@@ -149,14 +132,6 @@ pub fn add_hidden_dapp_id(
 }
 
 /// Updates the user's agreements, merging with any existing agreements.
-/// Only fields provided in `agreements` (i.e., where `accepted` is `Some(_)`) will be updated.
-/// If an agreement is newly accepted (`Some(true)`), `last_accepted_at_ns` is set to `now`.
-///
-/// # Arguments
-/// * `principal` - The principal of the user.
-/// * `profile_version` - The version of the user's profile.
-/// * `agreements` - The (partial) agreements to merge.
-/// * `user_profile_model` - The user profile model.
 ///
 /// # Returns
 /// - Returns `Ok(())` if the agreements were successfully updated or no change was needed.
@@ -178,12 +153,6 @@ pub fn update_agreements(
 }
 
 /// Updates the user's experimental feature settings, merging with any existing settings.
-///
-/// # Arguments
-/// * `principal` - The principal of the user.
-/// * `profile_version` - The version of the user's profile.
-/// * `experimental_features` - The new experimental feature settings to save.
-/// * `user_profile_model` - The user profile model.
 ///
 /// # Returns
 /// - Returns `Ok(())` if the settings were successfully updated.

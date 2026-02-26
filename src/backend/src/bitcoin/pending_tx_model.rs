@@ -12,10 +12,6 @@ const HOUR_IN_NS: u64 = 60 * 60 * 1_000_000_000;
 
 use shared::types::bitcoin::StoredPendingTransaction;
 
-// With this structure, if multiple users share the same address
-// they wouldn't share the pending transactions.
-// This is not possible with the current implementation of the addresses in CFS.
-// But something to have in mind for the future.
 use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
 
 #[allow(dead_code)]
@@ -157,17 +153,6 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
 
     /// Checks whether the provided UTXOs intersect with any existing pending
     /// transactions for a specific principal.
-    ///
-    /// This method is used to prevent double reservation of the same UTXOs.
-    /// A conflict occurs if at least one UTXO in `new_utxos` is already present
-    /// in the UTXO set of any stored pending transaction for the given principal.
-    ///
-    /// The check is performed across all addresses associated with the principal.
-    /// If the principal has no pending transactions stored, the method returns `false`.
-    ///
-    /// Returns:
-    /// - `true` if there is at least one overlapping UTXO.
-    /// - `false` if no overlap is found.
     pub fn has_intersecting_pending_utxos(&self, principal: Principal, new_utxos: &[Utxo]) -> bool {
         let new_keys: HashSet<(&[u8], u32)> = new_utxos
             .iter()
@@ -285,16 +270,13 @@ mod tests {
             created_at_timestamp_ns: 1_000_000,
         };
 
-        // Add the pending transaction
         let result = model.add_pending_transaction(principal, ADDRESS_1.to_string(), tx.clone());
         assert!(result.is_ok());
 
-        // Check that the transaction was added
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 1);
         assert_eq!(pending_txs[0], tx);
 
-        // Check that the transaction was added to the proper address
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_2);
         assert!(pending_txs.is_empty());
     }
@@ -318,7 +300,6 @@ mod tests {
         assert!(pending_txs.is_empty());
     }
 
-    // Test for add_pending_transaction when max_pending_transactions is reached
     #[test]
     fn test_add_pending_transaction_max_limit() {
         let (mut map, _mm) = setup();
@@ -346,7 +327,6 @@ mod tests {
             created_at_timestamp_ns: 4_000_000,
         };
 
-        // Add 3 transactions (max_pending_transactions = 3)
         model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), tx1)
             .unwrap();
@@ -357,13 +337,11 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_1.to_string(), tx3)
             .unwrap();
 
-        // Try adding a 4th transaction and expect an error
         let result = model.add_pending_transaction(principal, ADDRESS_1.to_string(), tx4);
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), "Maximum pending transactions reached");
     }
 
-    // Test for add_pending_transaction when max_addresses_per_user is reached
     #[test]
     fn test_add_pending_transaction_max_address_limit() {
         let (mut map, _mm) = setup();
@@ -391,7 +369,6 @@ mod tests {
             created_at_timestamp_ns: 4_000_000,
         };
 
-        // Add 3 transactions (max_addresses_per_user = 3)
         model
             .add_pending_transaction(principal, ADDRESS_1.to_string(), tx1)
             .unwrap();
@@ -402,7 +379,6 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_3.to_string(), tx3)
             .unwrap();
 
-        // Try adding a 4th address and expect an error
         let result = model.add_pending_transaction(principal, ADDRESS_4.to_string(), tx4);
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), "Maximum address per user reached");
@@ -603,7 +579,6 @@ mod tests {
         let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
-        // First call reserves UTXO_1 and UTXO_2
         let first = StoredPendingTransaction {
             txid: vec![1],
             utxos: vec![(*UTXO_1).clone(), (*UTXO_2).clone()],
@@ -613,7 +588,6 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_1.to_string(), first)
             .unwrap();
 
-        // Second call attempts to reuse the exact same set => must intersect
         assert!(model
             .has_intersecting_pending_utxos(principal, &[(*UTXO_1).clone(), (*UTXO_2).clone()]));
     }
@@ -624,7 +598,6 @@ mod tests {
         let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
-        // First call reserves UTXO_1 and UTXO_2
         let first = StoredPendingTransaction {
             txid: vec![1],
             utxos: vec![(*UTXO_1).clone(), (*UTXO_2).clone()],
@@ -634,7 +607,6 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_1.to_string(), first)
             .unwrap();
 
-        // Second call overlaps on UTXO_2 only => still must intersect
         assert!(model
             .has_intersecting_pending_utxos(principal, &[(*UTXO_2).clone(), (*UTXO_5).clone()]));
     }
@@ -646,8 +618,6 @@ mod tests {
         let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
-        // UTXO_3 and UTXO_4 share the same outpoint (txid=[], vout=2) but differ in value/height.
-        // If your overlap logic is correct (outpoint-based), this should count as intersection.
         let first = StoredPendingTransaction {
             txid: vec![1],
             utxos: vec![(*UTXO_3).clone()],
@@ -666,7 +636,6 @@ mod tests {
         let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
-        // Existing pending uses TXID_A, vout=7
         let pending = StoredPendingTransaction {
             txid: vec![1],
             utxos: vec![Utxo {
@@ -684,7 +653,6 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_1.to_string(), pending)
             .unwrap();
 
-        // New utxo has same vout=7 but different txid => must NOT intersect
         let candidate = Utxo {
             outpoint: Outpoint {
                 txid: TXID_B.to_vec(),
@@ -722,7 +690,6 @@ mod tests {
                 .unwrap();
         }
 
-        // Re-init with same memory
         {
             let memory = memory_manager.borrow().get(MemoryId::new(0));
             let mut map = BtcUserPendingTransactionsMap::init(memory);
