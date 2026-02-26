@@ -69,8 +69,7 @@ use crate::{
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
     token_activity::{mark_token_active, mark_tokens_active},
-    types::{ContactMap, PowChallengeMap, StoredTokenId},
-    types::{ContactMap, PowChallengeMap, TokenActivityMap},
+    types::{ContactMap, PowChallengeMap, StoredTokenId, TokenActivityMap},
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
         update_experimental_feature_settings, update_network_settings,
@@ -291,7 +290,7 @@ fn start_periodic_housekeeping_timers() {
 
     // Then periodically:
     let hour = Duration::from_secs(60 * 60);
-     let _ = set_timer_interval(hour, spawn_housekeeping_if_idle);
+    let _ = set_timer_interval(hour, spawn_housekeeping_if_idle);
 
     // Refresh exchange rates periodically
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
@@ -476,7 +475,7 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 
         mark_tokens_active(&ids);
     }
-  
+
     tokens
 }
 

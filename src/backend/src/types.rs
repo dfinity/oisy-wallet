@@ -46,5 +46,3 @@ pub struct StoredTokenId(pub CustomTokenId);
 pub type TokenActivityMap = StableBTreeMap<StoredTokenId, Timestamp, VMem>;
 
 pub type ExchangeRateMap = StableBTreeMap<StoredTokenId, Candid<ExchangeRate>, VMem>;
-
-
