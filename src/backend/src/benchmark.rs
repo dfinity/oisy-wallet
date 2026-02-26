@@ -69,13 +69,6 @@ fn with_btc_pending_model<R>(
     f(&mut model)
 }
 
-fn bench_principal() -> &'static Principal {
-    static P: OnceLock<Principal> = OnceLock::new();
-    P.get_or_init(|| {
-        Principal::from_text(BENCH_PRINCIPAL_TEXT).expect("valid bench principal text")
-    })
-}
-
 // ---------------------------------------------------------------------------
 // Config & Stats
 // ---------------------------------------------------------------------------
