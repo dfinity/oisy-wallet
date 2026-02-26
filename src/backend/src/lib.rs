@@ -55,10 +55,6 @@ use shared::{
     },
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
-use types::{
-    BtcUserPendingTransactionsMap, Candid, ConfigCell, CustomTokenMap, StoredPrincipal,
-    UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-};
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
@@ -67,7 +63,13 @@ use crate::{
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
     token_activity::{mark_token_active, mark_tokens_active},
-    types::{ContactMap, PowChallengeMap, TokenActivityMap},
+    types::{
+        maps::{
+            BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, PowChallengeMap,
+            TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
+        },
+        storable::{Candid, StoredPrincipal},
+    },
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
         update_experimental_feature_settings, update_network_settings,
@@ -86,7 +88,6 @@ pub mod random;
 pub mod signer;
 mod state;
 mod token;
-mod types;
 mod user_profile;
 mod user_profile_model;
 
@@ -96,6 +97,7 @@ mod token_activity;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
+mod types;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
