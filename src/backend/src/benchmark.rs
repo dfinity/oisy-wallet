@@ -1,18 +1,9 @@
 #![allow(unused_must_use)]
 
-use std::sync::OnceLock;
-
-use canbench_rs::{bench, bench_fn, BenchResult};
-use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
-use shared::types::user_profile::StoredUserProfile;
-
-use super::{
-    mutate_state, read_config, read_state, BtcUserPendingTransactionsModel, PendingTransaction,
-    Principal, State, Stats, StoredPendingTransaction, StoredPrincipal, UserProfileModel,
-  };
 use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::{bench, bench_fn, BenchResult};
+use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
     experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
@@ -21,10 +12,10 @@ use shared::types::{
 };
 
 use super::{
-    mutate_state, read_config, read_state, user_profile, Principal, Stats, StoredPrincipal,
+    mutate_state, read_config, read_state, user_profile, BtcUserPendingTransactionsModel,
+    PendingTransaction, Principal, State, Stats, StoredPendingTransaction, StoredPrincipal,
     UserProfileModel,
-  };
-
+};
 
 const BENCH_PRINCIPAL_TEXT: &str =
     "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
@@ -58,7 +49,6 @@ fn ensure_profile_version() -> Option<u64> {
     })
 }
 
-
 fn make_utxo(txid_byte: u8, vout: u32, value: u64) -> Utxo {
     Utxo {
         outpoint: Outpoint {
@@ -85,7 +75,6 @@ fn bench_principal() -> &'static Principal {
         Principal::from_text(BENCH_PRINCIPAL_TEXT).expect("valid bench principal text")
     })
 }
-
 
 // ---------------------------------------------------------------------------
 // Config & Stats
@@ -143,9 +132,7 @@ fn bench_get_account_creation_timestamps_200() -> BenchResult {
     bench_get_account_creation_timestamps_with_count(200)
 }
 
-
-
-      // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // User profile
 // ---------------------------------------------------------------------------
 
@@ -159,9 +146,8 @@ fn bench_create_user_profile() -> BenchResult {
             let stored = user_profile::create_profile(sp, &mut m);
             UserProfile::from(&stored)
         }));
-          })
+    })
 }
-
 
 #[bench(raw)]
 fn bench_get_user_profile() -> BenchResult {
@@ -233,7 +219,7 @@ fn bench_add_user_hidden_dapp_id() -> BenchResult {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::add_hidden_dapp_id(sp, version, "bench-dapp-id".to_string(), &mut m)
         }));
-          })
+    })
 }
 
 #[bench(raw)]
@@ -280,8 +266,7 @@ fn bench_update_user_experimental_features() -> BenchResult {
             )
         }));
     })
-  }
-
+}
 
 // ---------------------------------------------------------------------------
 // BTC pending transactions
@@ -345,10 +330,8 @@ fn bench_btc_add_pending_transaction_with_count(existing_count: u8) -> BenchResu
                     .unwrap();
             });
         });
-          })
+    })
 }
-
-
 
 #[bench(raw)]
 fn bench_btc_add_pending_transaction_5() -> BenchResult {
@@ -401,10 +384,8 @@ fn bench_btc_get_pending_transactions_with_count(count: u8) -> BenchResult {
             .collect();
 
         std::hint::black_box(pending);
-          })
+    })
 }
-
-
 
 #[bench(raw)]
 fn bench_btc_get_pending_transactions_5() -> BenchResult {
@@ -414,5 +395,4 @@ fn bench_btc_get_pending_transactions_5() -> BenchResult {
 #[bench(raw)]
 fn bench_btc_get_pending_transactions_200() -> BenchResult {
     bench_btc_get_pending_transactions_with_count(200)
-  }
-
+}
