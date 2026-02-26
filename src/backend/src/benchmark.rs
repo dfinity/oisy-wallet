@@ -3,28 +3,18 @@
 use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::{bench, bench_fn, BenchResult};
-
-use shared::types::{
-    contact::{Contact, StoredContacts},
-    user_profile::StoredUserProfile,
-};
-
-use super::{
-    mutate_state, read_config, read_state, Candid, Principal, Stats, StoredPrincipal,
-      UserProfileModel,
-};
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
+    contact::{Contact, StoredContacts},
     experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
     network::{NetworkSettings, NetworkSettingsFor},
     user_profile::{StoredUserProfile, UserProfile},
 };
 
 use super::{
-    mutate_state, read_config, read_state, user_profile, Principal, Stats, StoredPrincipal,
-      UserProfileModel,
+    mutate_state, read_config, read_state, user_profile, Candid, Principal, Stats, StoredPrincipal,
+    UserProfileModel,
 };
-
 
 const BENCH_PRINCIPAL_TEXT: &str =
     "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
@@ -176,11 +166,11 @@ fn bench_get_user_profile() -> BenchResult {
         std::hint::black_box(mutate_state(|s| {
             let m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::find_profile(sp, &m).map(|stored| UserProfile::from(&stored))
-                  }));
+        }));
     })
 }
 
-  #[bench(raw)]
+#[bench(raw)]
 fn bench_has_user_profile() -> BenchResult {
     ensure_profile_version();
 
@@ -236,7 +226,7 @@ fn bench_add_user_hidden_dapp_id() -> BenchResult {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::add_hidden_dapp_id(sp, version, "bench-dapp-id".to_string(), &mut m)
-                  }));
+        }));
     })
 }
 
@@ -260,10 +250,10 @@ fn bench_update_user_agreements() -> BenchResult {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::update_agreements(sp, version, agreements.clone(), &mut m)
         }));
-          })
+    })
 }
 
- #[bench(raw)]
+#[bench(raw)]
 fn bench_update_user_experimental_features() -> BenchResult {
     let version = ensure_profile_version();
     let sp = bench_stored_principal();
@@ -283,9 +273,8 @@ fn bench_update_user_experimental_features() -> BenchResult {
                 &mut m,
             )
         }));
-          })
+    })
 }
-
 
 // ---------------------------------------------------------------------------
 // Contacts
@@ -304,11 +293,9 @@ fn bench_get_contacts_with_count(count: u64) -> BenchResult {
                 .get(&sp)
                 .map(|c| c.contacts.values().cloned().collect::<Vec<_>>())
                 .unwrap_or_default()
-                  }));
+        }));
     })
 }
-
-
 
 #[bench(raw)]
 fn bench_get_contacts_10() -> BenchResult {
@@ -330,11 +317,9 @@ fn bench_get_contact() -> BenchResult {
             s.contact
                 .get(&sp)
                 .and_then(|c| c.contacts.get(&42).cloned())
-                  }));
+        }));
     })
 }
-
-
 
 #[bench(raw)]
 fn bench_update_contact() -> BenchResult {
@@ -352,10 +337,8 @@ fn bench_update_contact() -> BenchResult {
                 s.contact.insert(sp, Candid(stored));
             }
         });
-          })
+    })
 }
-
-
 
 #[bench(raw)]
 fn bench_delete_contact() -> BenchResult {
@@ -370,6 +353,5 @@ fn bench_delete_contact() -> BenchResult {
                 s.contact.insert(sp, Candid(stored));
             }
         });
-          })
+    })
 }
-
