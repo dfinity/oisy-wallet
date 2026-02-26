@@ -32,7 +32,8 @@ describe('IcTransactionModal', () => {
 		const formattedAmount = `${formatToken({
 			value: mockIcTransactionUi.value ?? ZERO,
 			unitName: ICP_TOKEN.decimals,
-			displayDecimals: ICP_TOKEN.decimals
+			displayDecimals: ICP_TOKEN.decimals,
+			showPlusSign: mockIcTransactionUi.type === 'receive'
 		})} ${ICP_TOKEN.symbol}`;
 
 		expect(getByText(formattedAmount)).toBeInTheDocument();
