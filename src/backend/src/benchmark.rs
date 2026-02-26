@@ -5,6 +5,7 @@ use std::{collections::BTreeMap, sync::OnceLock};
 use canbench_rs::{bench, bench_fn, BenchResult};
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
+    contact::{Contact, StoredContacts},
     custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
     experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
     network::{NetworkSettings, NetworkSettingsFor},
@@ -13,7 +14,7 @@ use shared::types::{
 
 use super::{
     add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
-    user_profile, ByteBuf, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
+    user_profile, ByteBuf, Candid, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
     UserProfileModel,
 };
 
@@ -21,6 +22,7 @@ const BENCH_PRINCIPAL_TEXT: &str =
     "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
 
 const TS0_NS: u64 = 1_000_000_000;
+const TS1_NS: u64 = 2_000_000_000;
 
 fn bench_principal() -> &'static Principal {
     static P: OnceLock<Principal> = OnceLock::new();
@@ -64,6 +66,31 @@ fn make_custom_token(chain_id: u64, suffix: u64) -> CustomToken {
 fn matches_custom_token(token: &CustomToken) -> impl Fn(&CustomToken) -> bool + '_ {
     let id = CustomTokenId::from(&token.token);
     move |t: &CustomToken| CustomTokenId::from(&t.token) == id
+}
+
+fn setup_contact(id: u64) {
+    let sp = bench_stored_principal();
+    mutate_state(|s| {
+        let mut stored = s.contact.get(&sp).map_or(
+            StoredContacts {
+                contacts: BTreeMap::new(),
+                update_timestamp_ns: 0,
+            },
+            |c| c.0.clone(),
+        );
+        stored.contacts.insert(
+            id,
+            Contact {
+                id,
+                name: format!("Contact {id}"),
+                addresses: vec![],
+                update_timestamp_ns: TS0_NS,
+                image: None,
+            },
+        );
+        stored.update_timestamp_ns = TS0_NS;
+        s.contact.insert(sp, Candid(stored));
+    });
 }
 
 // ---------------------------------------------------------------------------
@@ -381,5 +408,85 @@ fn bench_update_user_experimental_features() -> BenchResult {
                 &mut m,
             )
         }));
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Contacts
+// ---------------------------------------------------------------------------
+
+fn bench_get_contacts_with_count(count: u64) -> BenchResult {
+    let sp = bench_stored_principal();
+
+    for i in 0..count {
+        setup_contact(100 + i);
+    }
+
+    bench_fn(|| {
+        std::hint::black_box(read_state(|s| {
+            s.contact
+                .get(&sp)
+                .map(|c| c.contacts.values().cloned().collect::<Vec<_>>())
+                .unwrap_or_default()
+        }));
+    })
+}
+
+#[bench(raw)]
+fn bench_get_contacts_10() -> BenchResult {
+    bench_get_contacts_with_count(10)
+}
+
+#[bench(raw)]
+fn bench_get_contacts_200() -> BenchResult {
+    bench_get_contacts_with_count(200)
+}
+
+#[bench(raw)]
+fn bench_get_contact() -> BenchResult {
+    setup_contact(42);
+    let sp = bench_stored_principal();
+
+    bench_fn(|| {
+        std::hint::black_box(read_state(|s| {
+            s.contact
+                .get(&sp)
+                .and_then(|c| c.contacts.get(&42).cloned())
+        }));
+    })
+}
+
+#[bench(raw)]
+fn bench_update_contact() -> BenchResult {
+    setup_contact(77);
+    let sp = bench_stored_principal();
+
+    bench_fn(|| {
+        mutate_state(|s| {
+            if let Some(mut stored) = s.contact.get(&sp).map(|c| c.0.clone()) {
+                if let Some(contact) = stored.contacts.get_mut(&77) {
+                    contact.name = "Updated Name".to_string();
+                    contact.update_timestamp_ns = TS1_NS;
+                }
+                stored.update_timestamp_ns = TS1_NS;
+                s.contact.insert(sp, Candid(stored));
+            }
+        });
+    })
+}
+
+#[bench(raw)]
+fn bench_delete_contact() -> BenchResult {
+    setup_contact(99);
+    let sp = bench_stored_principal();
+
+    bench_fn(|| {
+        mutate_state(|s| {
+            if let Some(mut stored) = s.contact.get(&sp).map(|c| c.0.clone()) {
+                stored.contacts.remove(&99);
+                stored.update_timestamp_ns = TS1_NS;
+                s.contact.insert(sp, Candid(stored));
+            }
+        });
     })
 }
