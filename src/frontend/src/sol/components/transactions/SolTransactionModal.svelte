@@ -228,21 +228,6 @@
 					>
 				</ListItem>
 			{/if}
-
-			{#if nonNullish(value) && nonNullish(token)}
-				<ListItem>
-					<span>{$i18n.core.text.amount}</span>
-
-					<output>
-						{formatToken({
-							value,
-							unitName: token.decimals,
-							displayDecimals: token.decimals
-						})}
-						{token.symbol}
-					</output>
-				</ListItem>
-			{/if}
 		</List>
 
 		{#snippet toolbar()}
