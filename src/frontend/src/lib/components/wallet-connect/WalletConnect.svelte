@@ -26,12 +26,6 @@
 		});
 	};
 
-	$effect(() => {
-		if ($authNotSignedIn) {
-			untrack(() => disconnectListener());
-		}
-	});
-
 	const openWalletConnectAuth = () => {
 		modalStore.openWalletConnectAuth(modalId);
 
