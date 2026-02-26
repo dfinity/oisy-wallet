@@ -4,7 +4,6 @@
 	import { walletConnectReconnecting } from '$eth/stores/wallet-connect.store';
 	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.constants';
-	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { disconnectListener } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
