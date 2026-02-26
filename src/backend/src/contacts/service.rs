@@ -7,7 +7,9 @@ use shared::types::contact::{
 };
 
 use crate::{
-    mutate_state, random::generate_random_u64, read_state,
+    mutate_state,
+    random::generate_random_u64,
+    read_state,
     types::{Candid, StoredPrincipal},
 };
 

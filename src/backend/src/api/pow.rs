@@ -1,9 +1,6 @@
 use candid::candid_method;
 use ic_cdk::update;
-use shared::types::{
-    pow::CreateChallengeResponse,
-    result_types::CreatePowChallengeResult,
-};
+use shared::types::{pow::CreateChallengeResponse, result_types::CreatePowChallengeResult};
 
 use crate::{guards::caller_is_not_anonymous, pow};
 

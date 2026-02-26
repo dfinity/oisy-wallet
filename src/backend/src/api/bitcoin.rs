@@ -4,10 +4,10 @@ use ic_cdk::{api::time, query, update};
 use shared::types::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
-        BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
-        BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
-        BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
-        SelectedUtxosFeeRequest, SelectedUtxosFeeResponse, StoredPendingTransaction,
+        BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse, BtcGetPendingTransactionsError,
+        BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsRequest, PendingTransaction,
+        SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
+        StoredPendingTransaction,
     },
     result_types::{
         BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
@@ -17,8 +17,7 @@ use shared::types::{
 
 use crate::{
     bitcoin::{
-        api as bitcoin_api,
-        pending_tx_model::BtcUserPendingTransactionsModel,
+        api as bitcoin_api, pending_tx_model::BtcUserPendingTransactionsModel,
         utils as bitcoin_utils,
     },
     guards::caller_is_not_anonymous,

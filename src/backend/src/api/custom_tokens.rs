@@ -4,7 +4,10 @@ use shared::types::custom_token::{CustomToken, CustomTokenId};
 use crate::{
     guards::caller_is_not_anonymous,
     mutate_state, read_state,
-    token::{add_to_user_token, mark_token_active, mark_tokens_active, remove_from_user_token, MAX_TOKEN_LIST_LENGTH},
+    token::{
+        add_to_user_token, mark_token_active, mark_tokens_active, remove_from_user_token,
+        MAX_TOKEN_LIST_LENGTH,
+    },
     types::StoredPrincipal,
 };
 

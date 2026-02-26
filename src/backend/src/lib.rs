@@ -3,6 +3,7 @@ use std::{cell::RefCell, time::Duration};
 use candid::Principal;
 use ic_cdk::{api::time, eprintln, export_candid, init, post_upgrade};
 use ic_cdk_timers::{set_timer, set_timer_interval};
+pub(crate) use memory::{mutate_state, read_config, read_state, set_config, State};
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
@@ -35,8 +36,6 @@ use shared::{
         Stats, Timestamp,
     },
 };
-
-pub(crate) use memory::{mutate_state, read_config, read_state, set_config, State};
 use signer::top_up_cycles_ledger;
 use types::StoredPrincipal;
 
@@ -231,9 +230,7 @@ mod tests {
             CandidSource::Text(&canister_interface),
             CandidSource::File(&prod_interface_file.as_path()),
         )
-        .expect(
-            "The proposed canister interface is not compatible with the production interface",
-        );
+        .expect("The proposed canister interface is not compatible with the production interface");
     }
 
     fn reset_housekeeping() {
