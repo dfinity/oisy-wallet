@@ -27,7 +27,8 @@ describe('BtcTransactionModal', () => {
 		const formattedAmount = `${formatToken({
 			value: mockBtcTransactionUi.value ?? ZERO,
 			unitName: BTC_MAINNET_TOKEN.decimals,
-			displayDecimals: BTC_MAINNET_TOKEN.decimals
+			displayDecimals: BTC_MAINNET_TOKEN.decimals,
+			showPlusSign: mockBtcTransactionUi.type === 'receive'
 		})} ${BTC_MAINNET_TOKEN.symbol}`;
 
 		expect(getByText(formattedAmount)).toBeInTheDocument();
