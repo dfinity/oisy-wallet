@@ -12,10 +12,9 @@ use shared::types::{
 };
 
 use super::{
-    add_to_user_token, mutate_state, read_config, read_state, remove_from_user_token, user_profile,
-    CustomTokenId, Principal, Stats, StoredPrincipal, UserProfileModel,
-    http_request, mutate_state, read_config, read_state, user_profile, ByteBuf, HttpRequest,
-    Principal, Stats, StoredPrincipal, UserProfileModel,
+    add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
+    user_profile, ByteBuf, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
+    UserProfileModel,
 };
 
 const BENCH_PRINCIPAL_TEXT: &str =
@@ -149,9 +148,6 @@ fn bench_http_request_not_found() {
     std::hint::black_box(http_request(req));
 }
 
-
-
-
 // ---------------------------------------------------------------------------
 // Custom tokens
 // ---------------------------------------------------------------------------
@@ -251,7 +247,6 @@ fn bench_remove_custom_token() -> BenchResult {
         });
     })
 }
-
 
 // ---------------------------------------------------------------------------
 // User profile
