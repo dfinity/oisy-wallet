@@ -97,8 +97,8 @@ mod token_activity;
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
 
-#[cfg(feature = "canbench-rs")]
-mod benchmark;
+
+
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
