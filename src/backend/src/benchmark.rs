@@ -1,30 +1,19 @@
 #![allow(unused_must_use)]
 
-use std::sync::OnceLock;
-
-use canbench_rs::{bench, bench_fn, BenchResult};
-use shared::types::{
-    custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
-    user_profile::StoredUserProfile,
-};
-
-use super::{
-    add_to_user_token, mutate_state, read_config, read_state, remove_from_user_token,
-    CustomTokenId, Principal, Stats, StoredPrincipal, UserProfileModel,
-  };
 use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::{bench, bench_fn, BenchResult};
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
+    custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
     experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
     network::{NetworkSettings, NetworkSettingsFor},
     user_profile::{StoredUserProfile, UserProfile},
 };
 
 use super::{
-    mutate_state, read_config, read_state, user_profile, Principal, Stats, StoredPrincipal,
-    UserProfileModel,
+    add_to_user_token, mutate_state, read_config, read_state, remove_from_user_token, user_profile,
+    CustomTokenId, Principal, Stats, StoredPrincipal, UserProfileModel,
 };
 
 const BENCH_PRINCIPAL_TEXT: &str =
@@ -43,7 +32,6 @@ fn bench_stored_principal() -> StoredPrincipal {
     StoredPrincipal(*bench_principal())
 }
 
-
 fn ensure_profile_version() -> Option<u64> {
     let sp = bench_stored_principal();
 
@@ -57,7 +45,7 @@ fn ensure_profile_version() -> Option<u64> {
 
         m.find_by_principal(sp).and_then(|p| p.version)
     })
-  }
+}
 
 fn make_custom_token(chain_id: u64, suffix: u64) -> CustomToken {
     CustomToken {
@@ -133,8 +121,7 @@ fn bench_get_account_creation_timestamps_200() -> BenchResult {
     bench_get_account_creation_timestamps_with_count(200)
 }
 
-
-// ---------------------------------------------------------------------------      
+// ---------------------------------------------------------------------------
 // User profile
 // ---------------------------------------------------------------------------
 
@@ -207,11 +194,11 @@ fn bench_set_user_show_testnets() -> BenchResult {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             user_profile::set_show_testnets(sp, version, true, &mut m)
-                  }));
+        }));
     })
 }
 
-  #[bench(raw)]
+#[bench(raw)]
 fn bench_add_user_hidden_dapp_id() -> BenchResult {
     let version = ensure_profile_version();
     let sp = bench_stored_principal();
@@ -267,9 +254,8 @@ fn bench_update_user_experimental_features() -> BenchResult {
                 &mut m,
             )
         }));
-          })
+    })
 }
-
 
 // ---------------------------------------------------------------------------
 // Custom tokens
@@ -305,11 +291,10 @@ fn bench_set_many_custom_tokens_with_count(count: u8) -> BenchResult {
                 add_to_user_token(sp, &mut s.custom_token, token, &matches_custom_token(token));
             }
         });
-          })
+    })
 }
 
-
-          #[bench(raw)]
+#[bench(raw)]
 fn bench_set_many_custom_tokens_5() -> BenchResult {
     bench_set_many_custom_tokens_with_count(5)
 }
@@ -338,11 +323,9 @@ fn bench_list_custom_tokens_with_count(count: u8) -> BenchResult {
     bench_fn(|| {
         std::hint::black_box(read_state(|s| {
             s.custom_token.get(&sp).unwrap_or_default().0
-                  }));
+        }));
     })
 }
-
-
 
 #[bench(raw)]
 fn bench_list_custom_tokens_5() -> BenchResult {
@@ -371,6 +354,5 @@ fn bench_remove_custom_token() -> BenchResult {
         mutate_state(|s| {
             remove_from_user_token(sp, &mut s.custom_token, &matches_custom_token(&token));
         });
-          })
+    })
 }
-
