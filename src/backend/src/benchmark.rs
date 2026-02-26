@@ -71,16 +71,7 @@ fn matches_custom_token(token: &CustomToken) -> impl Fn(&CustomToken) -> bool + 
     move |t: &CustomToken| CustomTokenId::from(&t.token) == id
 }
 
-fn make_utxo(txid_byte: u8, vout: u32, value: u64) -> Utxo {
-    Utxo {
-        outpoint: Outpoint {
-            txid: vec![txid_byte; 32],
-            vout,
-        },
-        value,
-        height: HEIGHT,
-    }
-}
+
 
 fn setup_contact(id: u64) {
     let sp = bench_stored_principal();
@@ -105,6 +96,17 @@ fn setup_contact(id: u64) {
         stored.update_timestamp_ns = TS0_NS;
         s.contact.insert(sp, Candid(stored));
     });
+}
+
+fn make_utxo(txid_byte: u8, vout: u32, value: u64) -> Utxo {
+    Utxo {
+        outpoint: Outpoint {
+            txid: vec![txid_byte; 32],
+            vout,
+        },
+        value,
+        height: HEIGHT,
+    }
 }
 
 fn with_btc_pending_model<R>(
