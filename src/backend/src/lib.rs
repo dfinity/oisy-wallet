@@ -69,7 +69,7 @@ use crate::{
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
     token_activity::{mark_token_active, mark_tokens_active},
-    types::{ContactMap, PowChallengeMap, StoredTokenId, TokenActivityMap},
+    types::{ContactMap, PowChallengeMap, StoredTokenId},
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
         update_experimental_feature_settings, update_network_settings,
@@ -96,7 +96,6 @@ mod user_profile_model;
 
 #[cfg(test)]
 mod tests;
-mod token_activity;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
