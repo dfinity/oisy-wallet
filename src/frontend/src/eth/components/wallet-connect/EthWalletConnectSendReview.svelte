@@ -56,6 +56,7 @@
 		{destination}
 		source={$ethAddress ?? ''}
 		token={$sendToken}
+		showUnlimitedAmountLabel={erc20Approve}
 	>
 		{#snippet sourceNetwork()}
 			<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">

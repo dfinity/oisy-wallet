@@ -17,6 +17,7 @@
 		source: string;
 		application: string;
 		showNullishAmountLabel?: boolean;
+		showUnlimitedAmountLabel?: boolean;
 		sourceNetwork: Snippet;
 		destinationNetwork?: Snippet;
 		children?: Snippet;
@@ -31,6 +32,7 @@
 		source,
 		application,
 		showNullishAmountLabel = false,
+		showUnlimitedAmountLabel=false,
 		sourceNetwork,
 		destinationNetwork,
 		children
@@ -43,7 +45,7 @@
 
 {@render destinationNetwork?.()}
 
-<SendDataAmount {amount} {exchangeRate} showNullishLabel={showNullishAmountLabel} {token} />
+<SendDataAmount {amount} {exchangeRate} showNullishLabel={showNullishAmountLabel} showUnlimitedLabel={showUnlimitedAmountLabel} {token} />
 
 <SendSource {balance} {exchangeRate} {source} {token} />
 
