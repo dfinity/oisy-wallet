@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import { getContext, setContext } from 'svelte';
+	import { getContext, onDestroy, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
@@ -128,6 +128,8 @@
 
 	const close = () => modalStore.close();
 
+	let closeTimeout: NodeJS.Timeout | undefined;
+
 	/**
 	 * Reject a transaction
 	 */
@@ -166,17 +168,19 @@
 			targetNetwork
 		});
 
-		setTimeout(() => close(), success ? 750 : 0);
+		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
 	};
+
+	onDestroy(() => clearTimeout(closeTimeout));
 </script>
 
 <WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{@const { data } = firstTransaction}
 
 	{#snippet title()}
-		<WalletConnectModalTitle
-			>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
-		>
+		<WalletConnectModalTitle>
+			{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}
+		</WalletConnectModalTitle>
 	{/snippet}
 
 	<EthFeeContext

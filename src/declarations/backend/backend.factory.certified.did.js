@@ -448,6 +448,7 @@ export const idlFactory = ({ IDL }) => {
 	const Stats = IDL.Record({
 		user_profile_count: IDL.Nat64,
 		custom_token_count: IDL.Nat64,
+		token_activity_count: IDL.Nat64,
 		user_timestamps_count: IDL.Nat64,
 		user_token_count: IDL.Nat64
 	});
@@ -527,7 +528,7 @@ export const idlFactory = ({ IDL }) => {
 		get_user_profile: IDL.Func([], [GetUserProfileResult]),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
-		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)]),
+		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),

@@ -7,6 +7,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import { allCrossChainSwapTokens, allSortedIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { networks } from '$lib/derived/networks.derived';
 	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -53,7 +54,8 @@
 	let tokens: TokenUi[] = $derived(
 		sortTokens({
 			$tokens: tokensUi,
-			$tokensToPin
+			$tokensToPin,
+			$networksToPin: $networks
 		})
 	);
 

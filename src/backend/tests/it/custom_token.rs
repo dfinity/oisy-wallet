@@ -6,13 +6,13 @@ use shared::types::{
         ChainId, CustomToken, Dip721Token, ErcToken, ErcTokenId, ExtV2Token, IcPunksToken,
         IcrcToken, SplToken, SplTokenId, Token,
     },
-    TokenVersion,
+    Stats, TokenVersion,
 };
 
 use crate::utils::{
     assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
     mock::CALLER,
-    pocketic::{setup, PicCanisterTrait},
+    pocketic::{controller, setup, PicCanisterTrait},
 };
 
 static ICRC_TOKEN: LazyLock<IcrcToken> = LazyLock::new(|| IcrcToken {
@@ -165,7 +165,7 @@ fn test_add_custom_token(user_token: &CustomToken) {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let before_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let before_set = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     assert_eq!(before_set, Ok(Vec::new()));
 
@@ -173,7 +173,7 @@ fn test_add_custom_token(user_token: &CustomToken) {
 
     assert_eq!(result, Ok(()));
 
-    let after_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let after_set = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![user_token.with_incremented_version()];
     assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
@@ -234,7 +234,7 @@ fn test_remove_custom_token(token: &CustomToken) {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let before_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let before_set = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     assert_eq!(before_set, Ok(Vec::new()));
 
@@ -242,7 +242,7 @@ fn test_remove_custom_token(token: &CustomToken) {
 
     assert_eq!(result, Ok(()));
 
-    let before_remove = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let before_remove = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![token.with_incremented_version()];
     assert_tokens_data_eq(&before_remove.unwrap(), &expected_tokens);
@@ -251,7 +251,7 @@ fn test_remove_custom_token(token: &CustomToken) {
 
     assert_eq!(result, Ok(()));
 
-    let after_remove = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let after_remove = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     assert_eq!(after_remove, Ok(Vec::new()));
 }
@@ -275,7 +275,7 @@ fn test_update_custom_token(user_token: &CustomToken) {
 
     assert!(result.is_ok());
 
-    let results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let results = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![user_token.with_incremented_version()];
 
@@ -295,7 +295,7 @@ fn test_update_custom_token(user_token: &CustomToken) {
 
     assert!(update_result.is_ok());
 
-    let updated_results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let updated_results = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_updated_tokens: Vec<CustomToken> = vec![update_token.with_incremented_version()];
 
@@ -321,7 +321,7 @@ fn test_add_many_custom_tokens(user_token: &CustomToken) {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let before_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let before_set = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     assert!(before_set.is_ok());
     assert_eq!(before_set.unwrap().len(), 0);
@@ -332,7 +332,7 @@ fn test_add_many_custom_tokens(user_token: &CustomToken) {
 
     assert!(result.is_ok());
 
-    let after_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let after_set = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![
         user_token.with_incremented_version(),
@@ -362,7 +362,7 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
 
     assert!(result.is_ok());
 
-    let results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let results = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     assert!(results.is_ok());
 
@@ -396,7 +396,7 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
 
     assert!(update_result.is_ok());
 
-    let updated_results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let updated_results = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     assert!(updated_results.is_ok());
 
@@ -420,7 +420,7 @@ fn test_list_custom_tokens() {
 
     let _ = pic_setup.update::<()>(caller, "set_custom_token", ANOTHER_USER_TOKEN.clone());
 
-    let results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+    let results = pic_setup.update::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![
         USER_TOKEN.with_incremented_version(),
@@ -525,7 +525,7 @@ fn test_anonymous_cannot_add_custom_token() {
 fn test_anonymous_cannot_list_custom_tokens() {
     let pic_setup = setup();
 
-    let result = pic_setup.query::<()>(
+    let result = pic_setup.update::<()>(
         Principal::anonymous(),
         "list_custom_tokens",
         USER_TOKEN.clone(),
@@ -534,7 +534,7 @@ fn test_anonymous_cannot_list_custom_tokens() {
     assert!(result.is_err());
     assert_eq!(
         &result.unwrap_err(),
-        "Query call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
+        "Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
     );
 }
 
@@ -550,11 +550,87 @@ fn test_user_cannot_list_another_custom_tokens() {
         Principal::from_text("yaa3n-twfur-6xz6e-3z7ep-xln56-222kz-w2b2m-y5wqz-vu6kk-s3fdg-lqe")
             .unwrap();
 
-    let results = pic_setup.query::<Vec<CustomToken>>(another_caller, "list_custom_tokens", ());
+    let results = pic_setup.update::<Vec<CustomToken>>(another_caller, "list_custom_tokens", ());
 
     assert!(results.is_ok());
 
     let results_tokens = results.unwrap();
 
     assert_eq!(results_tokens.len(), 0);
+}
+
+#[test]
+fn test_set_custom_token_tracks_activity() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let stats_before = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+
+    assert_eq!(stats_before.token_activity_count, 0);
+
+    pic_setup
+        .update::<()>(caller, "set_custom_token", USER_TOKEN.clone())
+        .expect("Failed to set custom token");
+
+    let stats_after = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+
+    assert_eq!(stats_after.token_activity_count, 1);
+}
+
+#[test]
+fn test_set_many_custom_tokens_tracks_activity() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let tokens: Vec<CustomToken> = vec![USER_TOKEN.clone(), ANOTHER_USER_TOKEN.clone()];
+
+    pic_setup
+        .update::<()>(caller, "set_many_custom_tokens", &tokens)
+        .expect("Failed to set many custom tokens");
+
+    let stats = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+
+    assert_eq!(stats.token_activity_count, 2);
+}
+
+#[test]
+fn test_set_custom_token_updates_activity_for_same_token() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    pic_setup
+        .update::<()>(caller, "set_custom_token", USER_TOKEN.clone())
+        .expect("Failed to set custom token");
+
+    let results = pic_setup
+        .update::<Vec<CustomToken>>(caller, "list_custom_tokens", ())
+        .expect("Failed to list custom tokens");
+
+    let update_token = CustomToken {
+        enabled: false,
+        version: results.first().unwrap().version,
+        ..USER_TOKEN.clone()
+    };
+
+    pic_setup
+        .update::<()>(caller, "set_custom_token", update_token)
+        .expect("Failed to update custom token");
+
+    let stats = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+
+    assert_eq!(
+        stats.token_activity_count, 1,
+        "Updating the same token should not create a new activity entry"
+    );
 }
