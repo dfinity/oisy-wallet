@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use shared::types::contact::{Contact, ContactError, StoredContacts};
+use shared::types::contact::{Contact, ContactError, StoredContacts, MAX_CONTACTS_PER_USER};
 
 use crate::{
     mutate_state, random::generate_random_u64, read_state, time, types::StoredPrincipal, Candid,
@@ -35,6 +35,10 @@ pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, Co
         } else {
             create_empty_contacts()
         };
+
+        if stored_contacts.contacts.len() >= MAX_CONTACTS_PER_USER {
+            return Err(ContactError::TooManyContacts);
+        }
 
         // Check if a contact with this ID already exists
         if stored_contacts.contacts.contains_key(&new_id) {

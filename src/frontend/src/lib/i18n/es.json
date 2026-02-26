@@ -41,7 +41,9 @@
 			"more": "Más",
 			"less": "Menos",
 			"ellipsis": "",
-			"learn_more": "Aprender mas"
+			"learn_more": "Aprender mas",
+			"sorting": "Ordenar",
+			"unlimited": ""
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
@@ -1142,7 +1144,10 @@
 			"hide_more_networks": "Ocultar más redes",
 			"on_network": "en red ",
 			"delete_token": "Eliminar token",
-			"edit_token": "Editar token"
+			"edit_token": "Editar token",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Detalles del token",
@@ -1281,7 +1286,6 @@
 			"by_collection": "Agrupar por colección",
 			"show_spam": "Mostrar spam",
 			"show_hidden": "Mostrar ocultos",
-			"sorting": "Ordenar",
 			"recents_first": "Más recientes primero",
 			"oldest_first": "Más antiguos primero",
 			"collection_atoz": "Nombre de la colección A-Z",

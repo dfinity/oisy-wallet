@@ -1,8 +1,8 @@
-import { sortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+import { sortedEnabledNetworkTokenUiOrGroupUi } from '$lib/derived/network-tokens-ui.derived';
 import { showZeroBalances } from '$lib/derived/settings.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
-import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
+import { filterTokenGroups } from '$lib/utils/token-group.utils';
 import TokensDisplayHandlerTest from '$tests/lib/components/tokens/TokensDisplayHandlerTest.svelte';
 import {
 	mockNetworksSettings,
@@ -19,9 +19,6 @@ vi.mock(import('$lib/utils/token-group.utils'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
-		groupTokensByTwin: vi
-			.fn<typeof groupTokensByTwin>()
-			.mockImplementation((tokens) => tokens.map((token) => ({ token }))),
 		filterTokenGroups: vi
 			.fn<typeof filterTokenGroups>()
 			.mockImplementation(({ groupedTokens }) => groupedTokens)
@@ -42,7 +39,7 @@ describe('TokensDisplayHandler', () => {
 	});
 
 	it('should apply tokens immediately', async () => {
-		const initial = get(sortedFungibleNetworkTokensUi);
+		const initial = get(sortedEnabledNetworkTokenUiOrGroupUi);
 
 		const { getByTestId } = render(TokensDisplayHandlerTest, {
 			props
@@ -56,14 +53,13 @@ describe('TokensDisplayHandler', () => {
 	});
 
 	it('should call the utils functions with the correct arguments', async () => {
-		const initial = get(sortedFungibleNetworkTokensUi);
-		const expected: TokenUiOrGroupUi[] = initial.map((token) => ({ token }));
-
 		render(TokensDisplayHandlerTest, {
 			props
 		});
 
-		expect(groupTokensByTwin).toHaveBeenCalledExactlyOnceWith(initial);
+		await tick();
+
+		const expected: TokenUiOrGroupUi[] = get(sortedEnabledNetworkTokenUiOrGroupUi);
 
 		expect(filterTokenGroups).toHaveBeenCalledExactlyOnceWith({
 			groupedTokens: expected,
@@ -95,14 +91,9 @@ describe('TokensDisplayHandler', () => {
 
 		await tick();
 
-		const newTokens = get(sortedFungibleNetworkTokensUi);
-		const newExpected: TokenUiOrGroupUi[] = newTokens.map((token) => ({ token }));
+		const newExpected: TokenUiOrGroupUi[] = get(sortedEnabledNetworkTokenUiOrGroupUi);
 
-		expect(newTokens).not.toHaveLength(initial.length);
-
-		expect(groupTokensByTwin).toHaveBeenCalledTimes(2);
-		expect(groupTokensByTwin).toHaveBeenNthCalledWith(1, initial);
-		expect(groupTokensByTwin).toHaveBeenNthCalledWith(2, newTokens);
+		expect(newExpected).not.toHaveLength(expected.length);
 
 		expect(filterTokenGroups).toHaveBeenCalledTimes(2);
 		expect(filterTokenGroups).toHaveBeenNthCalledWith(1, {

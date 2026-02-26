@@ -28,6 +28,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { usdValue } from '$lib/utils/exchange.utils';
+import { mapTokenUi } from '$lib/utils/token.utils';
 import {
 	assertExistingTokens,
 	defineEnabledTokens,
@@ -89,12 +90,19 @@ describe('tokens.utils', () => {
 		});
 
 		it('should sort by USD balance (descending)', () => {
+			const tokens = mockTokens.map((token) =>
+				mapTokenUi({
+					token,
+					$balances: mockBalances,
+					$stakeBalances: mockStakeBalances,
+					$exchanges: mockExchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: mockTokens,
-				$balances: mockBalances,
-				$stakeBalances: mockStakeBalances,
-				$exchanges: mockExchanges,
-				$tokensToPin: []
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
@@ -111,12 +119,19 @@ describe('tokens.utils', () => {
 				[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
 			};
 
+			const tokens = mockTokens.map((token) =>
+				mapTokenUi({
+					token,
+					$balances: zeroBalances,
+					$stakeBalances: mockStakeBalances,
+					$exchanges: mockExchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: mockTokens,
-				$balances: zeroBalances,
-				$stakeBalances: mockStakeBalances,
-				$exchanges: mockExchanges,
-				$tokensToPin: [ETHEREUM_TOKEN, BTC_MAINNET_TOKEN]
+				$tokens: tokens,
+				$tokensToPin: [ETHEREUM_TOKEN, BTC_MAINNET_TOKEN],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
@@ -127,12 +142,19 @@ describe('tokens.utils', () => {
 		});
 
 		it('should not let pinning override a higher USD balance', () => {
+			const tokens = mockTokens.map((token) =>
+				mapTokenUi({
+					token,
+					$balances: mockBalances,
+					$stakeBalances: mockStakeBalances,
+					$exchanges: mockExchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: mockTokens,
-				$balances: mockBalances,
-				$stakeBalances: mockStakeBalances,
-				$exchanges: mockExchanges,
-				$tokensToPin: [ICP_TOKEN]
+				$tokens: tokens,
+				$tokensToPin: [ICP_TOKEN],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
@@ -155,12 +177,19 @@ describe('tokens.utils', () => {
 				[mockDeprecatedToken.id]: { usd: mockOneUsd }
 			};
 
+			const tokens = [mockDeprecatedToken, ...mockTokens].map((token) =>
+				mapTokenUi({
+					token,
+					$balances: balancesWithDeprecated,
+					$stakeBalances: mockStakeBalances,
+					$exchanges: exchangesWithDeprecated
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [mockDeprecatedToken, ...mockTokens],
-				$balances: balancesWithDeprecated,
-				$stakeBalances: mockStakeBalances,
-				$exchanges: exchangesWithDeprecated,
-				$tokensToPin: [mockDeprecatedToken]
+				$tokens: tokens,
+				$tokensToPin: [mockDeprecatedToken],
+				$networksToPin: []
 			});
 
 			expect(result.at(-1)?.id).toBe(mockDeprecatedToken.id);
@@ -193,12 +222,19 @@ describe('tokens.utils', () => {
 				[tokenSymbolZ.id]: { usd_market_cap: 999, usd: 0 }
 			};
 
+			const tokens = [tokenSymbolZ, tokenSymbolA].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [tokenSymbolZ, tokenSymbolA],
-				$balances,
-				$stakeBalances: {},
-				$exchanges,
-				$tokensToPin: []
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([tokenSymbolA.id, tokenSymbolZ.id]);
@@ -251,12 +287,19 @@ describe('tokens.utils', () => {
 				[tokenD.id]: { usd_market_cap: 999, usd: 0 }
 			};
 
+			const tokens = [tokenD, tokenB, tokenC, tokenA].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [tokenD, tokenB, tokenC, tokenA],
-				$balances,
-				$stakeBalances: {},
-				$exchanges,
-				$tokensToPin: []
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([tokenA.id, tokenB.id, tokenC.id, tokenD.id]);
@@ -288,12 +331,19 @@ describe('tokens.utils', () => {
 				[tokenB.id]: { usd_market_cap: 1, usd: 0 }
 			};
 
+			const tokens = [tokenB, tokenA].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [tokenB, tokenA],
-				$balances,
-				$stakeBalances: {},
-				$exchanges,
-				$tokensToPin: []
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([tokenA.id, tokenB.id]);
@@ -325,18 +375,177 @@ describe('tokens.utils', () => {
 				[tokenLowBalanceHighMcap.id]: { usd_market_cap: 999, usd: 0 }
 			};
 
+			const tokens = [tokenLowBalanceHighMcap, tokenHighBalanceLowMcap].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
 			const result = sortTokens({
-				$tokens: [tokenLowBalanceHighMcap, tokenHighBalanceLowMcap],
-				$balances,
-				$stakeBalances: {},
-				$exchanges,
-				$tokensToPin: []
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
 				tokenHighBalanceLowMcap.id,
 				tokenLowBalanceHighMcap.id
 			]);
+		});
+
+		it('should prioritise performance (24h %) when primarySortStrategy is performance, after deprecation', () => {
+			const tokenPerfHigh: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-PERF-HIGH'),
+				symbol: 'HIGH',
+				name: 'High Perf',
+				network: ICP_NETWORK
+			};
+
+			const tokenPerfLow: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-PERF-LOW'),
+				symbol: 'LOW',
+				name: 'Low Perf',
+				network: ICP_NETWORK
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenPerfHigh.id]: { data: 999n, certified },
+				[tokenPerfLow.id]: { data: 999n, certified }
+			};
+
+			const $exchanges: ExchangesData = {
+				[tokenPerfHigh.id]: { usd: 1, usd_market_cap: 0, usd_24h_change: 3 },
+				[tokenPerfLow.id]: { usd: 1, usd_market_cap: 0, usd_24h_change: -3 }
+			};
+
+			const tokens = [tokenPerfLow, tokenPerfHigh].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
+			const result = sortTokens({
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: [],
+				primarySortStrategy: 'performance'
+			});
+
+			expect(result.map((t) => t.id)).toEqual([tokenPerfHigh.id, tokenPerfLow.id]);
+		});
+
+		it('should sort tokens with performance data before tokens without when primarySortStrategy is performance, and fall back correctly for missing performance', () => {
+			const tokenWithPerf: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-PERF-PRESENT'),
+				symbol: 'PERF',
+				name: 'Has perf',
+				network: ICP_NETWORK
+			};
+
+			const tokenNoPerfHighUsd: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-PERF-MISSING-HIGH'),
+				symbol: 'NOPERF-HIGH',
+				name: 'No perf (high USD)',
+				network: ICP_NETWORK
+			};
+
+			const tokenNoPerfLowUsd: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-PERF-MISSING-LOW'),
+				symbol: 'NOPERF-LOW',
+				name: 'No perf (low USD)',
+				network: ICP_NETWORK
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenWithPerf.id]: { data: 1n, certified },
+				[tokenNoPerfHighUsd.id]: { data: 100n, certified },
+				[tokenNoPerfLowUsd.id]: { data: 10n, certified }
+			};
+
+			const $exchanges: ExchangesData = {
+				[tokenWithPerf.id]: { usd: 1, usd_market_cap: 0, usd_24h_change: 1 },
+				[tokenNoPerfHighUsd.id]: { usd: 1, usd_market_cap: 0 },
+				[tokenNoPerfLowUsd.id]: { usd: 1, usd_market_cap: 0 }
+			};
+
+			const tokens = [tokenNoPerfLowUsd, tokenWithPerf, tokenNoPerfHighUsd].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
+			const result = sortTokens({
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: [],
+				primarySortStrategy: 'performance'
+			});
+
+			expect(result.map((t) => t.id)).toEqual([
+				tokenWithPerf.id,
+				tokenNoPerfHighUsd.id,
+				tokenNoPerfLowUsd.id
+			]);
+		});
+
+		it('should prioritise symbol ordering when primarySortStrategy is symbol, after deprecation', () => {
+			const tokenAAA: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-SORT-AAA'),
+				symbol: 'AAA',
+				name: 'AAA Token',
+				network: ICP_NETWORK
+			};
+
+			const tokenZZZ: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-SORT-ZZZ'),
+				symbol: 'ZZZ',
+				name: 'ZZZ Token',
+				network: ICP_NETWORK
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenAAA.id]: { data: 1n, certified },
+				[tokenZZZ.id]: { data: 999n, certified }
+			};
+
+			const $exchanges: ExchangesData = {
+				[tokenAAA.id]: { usd: 1, usd_market_cap: 0 },
+				[tokenZZZ.id]: { usd: 1, usd_market_cap: 0 }
+			};
+
+			const tokens = [tokenZZZ, tokenAAA].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
+			const result = sortTokens({
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: [],
+				primarySortStrategy: 'symbol'
+			});
+
+			expect(result.map((t) => t.id)).toEqual([tokenAAA.id, tokenZZZ.id]);
 		});
 	});
 

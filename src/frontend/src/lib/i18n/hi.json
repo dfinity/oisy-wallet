@@ -41,7 +41,9 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": "छँटाई",
+			"unlimited": ""
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -1142,7 +1144,10 @@
 			"hide_more_networks": "अधिक नेटवर्क छुपाएं",
 			"on_network": " $network पर",
 			"delete_token": "टोकन मिटाएँ",
-			"edit_token": "टोकन संपादित करें"
+			"edit_token": "टोकन संपादित करें",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "टोकन विवरण",
@@ -1281,7 +1286,6 @@
 			"by_collection": "संग्रह के अनुसार समूहित करें",
 			"show_spam": "स्पैम दिखाएँ",
 			"show_hidden": "छिपा हुआ दिखाएँ",
-			"sorting": "छँटाई",
 			"recents_first": "नवीनतम पहले",
 			"oldest_first": "सबसे पुराना पहले",
 			"collection_atoz": "संग्रह का नाम A-Z",

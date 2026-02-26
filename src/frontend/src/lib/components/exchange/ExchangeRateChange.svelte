@@ -8,11 +8,12 @@
 
 	interface Props {
 		usdPriceChangePercentage24h: number | undefined;
-		withBackground?: boolean;
+		background?: 'light' | 'dark';
 		timeFrame?: '24h';
+		fontSize?: 'sm' | 'xs';
 	}
 
-	let { usdPriceChangePercentage24h, withBackground = false, timeFrame }: Props = $props();
+	let { usdPriceChangePercentage24h, background, timeFrame, fontSize = 'sm' }: Props = $props();
 
 	let parsedExchangeRateChange = $derived(
 		nonNullish(usdPriceChangePercentage24h)
@@ -42,10 +43,10 @@
 
 {#if nonNullish(parsedExchangeRateChange)}
 	<span
-		class="px-1 text-xs sm:text-sm"
-		class:bg-error-subtle-30={withBackground && exchangeRateChangeSign === 'negative'}
-		class:bg-success-subtle-30={withBackground && exchangeRateChangeSign === 'positive'}
-		class:rounded={withBackground}
+		class={`px-1 text-xs${background === 'dark' ? ' bg-black/30' : ''}`}
+		class:bg-white={background === 'light'}
+		class:rounded={nonNullish(background)}
+		class:sm:text-sm={fontSize === 'sm'}
 		class:text-error-primary={exchangeRateChangeSign === 'negative'}
 		class:text-success-primary={exchangeRateChangeSign === 'positive'}
 		class:text-tertiary={exchangeRateChangeSign === 'zero'}

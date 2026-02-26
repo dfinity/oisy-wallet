@@ -41,7 +41,9 @@
 			"more": "More",
 			"less": "Less",
 			"ellipsis": "…",
-			"learn_more": "Learn more"
+			"learn_more": "Learn more",
+			"sorting": "Sorting",
+			"unlimited": "Unlimited $items"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -1142,7 +1144,10 @@
 			"hide_more_networks": "Hide more networks",
 			"on_network": " on $network",
 			"delete_token": "Delete token",
-			"edit_token": "Edit token"
+			"edit_token": "Edit token",
+			"sort_by_value": "Value",
+			"sort_by_performance": "Token performance",
+			"sort_by_symbol": "Symbol"
 		},
 		"details": {
 			"title": "Token details",
@@ -1281,7 +1286,6 @@
 			"by_collection": "Group by collection",
 			"show_spam": "Show spam",
 			"show_hidden": "Show hidden",
-			"sorting": "Sorting",
 			"recents_first": "Recents first",
 			"oldest_first": "Oldest first",
 			"collection_atoz": "Collection name A-Z",
