@@ -11,7 +11,7 @@
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import Pay from '$lib/components/pay/Pay.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
-	import WalletConnectListener from '$lib/components/wallet-connect/WalletConnectListener.svelte';
+	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import {
@@ -58,7 +58,7 @@
 		{/if}
 
 		{#if $authSignedIn}
-			<WalletConnectListener />
+			<WalletConnect />
 
 			{#if UNIVERSAL_SCANNER_ENABLED}
 				<!-- TODO: Re-enable the scanner button when it includes WalletConnect and remove the modal from pay button -->
