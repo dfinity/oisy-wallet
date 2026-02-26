@@ -183,7 +183,10 @@
 		untrack(() => reconnect());
 	});
 
-	onDestroy(() => walletConnectPaired.set(false));
+	onDestroy(() => {
+		walletConnectPaired.set(false);
+		walletConnectReconnecting.set(false);
+	});
 </script>
 
 <svelte:window onoisyDisconnectWalletConnect={disconnectListener} />
