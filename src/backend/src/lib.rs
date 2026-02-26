@@ -92,6 +92,9 @@ mod user_profile_model;
 #[cfg(test)]
 mod tests;
 
+#[cfg(feature = "canbench-rs")]
+mod benchmark;
+
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
 const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
@@ -1120,4 +1123,5 @@ pub fn get_contacts() -> GetContactsResult {
     let result = Ok(contacts::get_contacts());
     result.into()
 }
+
 export_candid!();
