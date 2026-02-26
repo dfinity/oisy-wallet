@@ -108,4 +108,16 @@ describe('SendDataAmount', () => {
 			});
 		});
 	});
+
+	it('should handle a nullish token gracefully', () => {
+		const amount = 10n;
+		const { container } = render(SendDataAmount, {
+			props: { amount, token: undefined }
+		});
+
+		const renderedElement = container.querySelector(`#amount`);
+		assertNonNullish(renderedElement, 'Element not found');
+
+		expect(renderedElement.textContent).toContain(`${amount}`);
+	});
 });
