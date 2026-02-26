@@ -169,6 +169,8 @@ pub struct State {
     pow_challenge: PowChallengeMap,
     contact: ContactMap,
     btc_user_pending_transactions: BtcUserPendingTransactionsMap,
+    // TODO: implement a periodic cleanup of old entries
+    // TODO: limit the map size with an eviction policy
     token_activity: TokenActivityMap,
 }
 
