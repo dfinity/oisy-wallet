@@ -121,9 +121,7 @@
 		{#snippet description()}
 			<span class:text-sm={asNetwork}>
 				{#if data?.networks}
-					{@const networks = [...new Set(data.networks.map((n) => n.name))].sort((a, b) =>
-						a.localeCompare(b)
-					)}
+					{@const networks = [...new Set(data.networks.map((n) => n.name))]}
 
 					<span class="text-primary">{data.name}</span>
 					{replacePlaceholders($i18n.tokens.text.on_network, { $network: '' })}

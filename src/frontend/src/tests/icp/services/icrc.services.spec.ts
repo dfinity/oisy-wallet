@@ -285,12 +285,8 @@ describe('icrc.services', () => {
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
 				expect(spyListCustomTokens).toHaveBeenCalledTimes(2);
-				expect(spyListCustomTokens).toHaveBeenNthCalledWith(1, {
-					certified: false
-				});
-				expect(spyListCustomTokens).toHaveBeenNthCalledWith(2, {
-					certified: true
-				});
+				expect(spyListCustomTokens).toHaveBeenNthCalledWith(1);
+				expect(spyListCustomTokens).toHaveBeenNthCalledWith(2);
 			});
 
 			it('should cache the custom tokens in IDB on update call', async () => {

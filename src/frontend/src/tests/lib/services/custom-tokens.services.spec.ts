@@ -42,7 +42,6 @@ describe('custom-tokens.services', () => {
 			expect(result).toStrictEqual(mockCustomTokens);
 
 			expect(listCustomTokens).toHaveBeenCalledExactlyOnceWith({
-				certified: true,
 				identity: mockIdentity,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
@@ -132,7 +131,6 @@ describe('custom-tokens.services', () => {
 			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 
 			expect(listCustomTokens).toHaveBeenCalledExactlyOnceWith({
-				certified: false,
 				identity: mockIdentity,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});

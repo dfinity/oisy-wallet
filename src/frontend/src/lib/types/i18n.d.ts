@@ -46,6 +46,7 @@ interface I18nCore {
 		ellipsis: string;
 		learn_more: string;
 		sorting: string;
+		unlimited: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {

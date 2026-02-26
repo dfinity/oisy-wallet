@@ -4,7 +4,7 @@ use shared::types::TokenVersion;
 
 use crate::types::{Candid, StoredPrincipal, VMem};
 
-const MAX_TOKEN_LIST_LENGTH: usize = 1000;
+pub const MAX_TOKEN_LIST_LENGTH: usize = 1000;
 
 #[allow(dead_code)]
 pub fn add_to_user_token_old<T>(

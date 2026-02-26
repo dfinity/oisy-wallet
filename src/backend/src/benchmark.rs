@@ -71,17 +71,6 @@ fn matches_custom_token(token: &CustomToken) -> impl Fn(&CustomToken) -> bool + 
     move |t: &CustomToken| CustomTokenId::from(&t.token) == id
 }
 
-fn make_utxo(txid_byte: u8, vout: u32, value: u64) -> Utxo {
-    Utxo {
-        outpoint: Outpoint {
-            txid: vec![txid_byte; 32],
-            vout,
-        },
-        value,
-        height: HEIGHT,
-    }
-}
-
 fn setup_contact(id: u64) {
     let sp = bench_stored_principal();
     mutate_state(|s| {
@@ -105,6 +94,17 @@ fn setup_contact(id: u64) {
         stored.update_timestamp_ns = TS0_NS;
         s.contact.insert(sp, Candid(stored));
     });
+}
+
+fn make_utxo(txid_byte: u8, vout: u32, value: u64) -> Utxo {
+    Utxo {
+        outpoint: Outpoint {
+            txid: vec![txid_byte; 32],
+            vout,
+        },
+        value,
+        height: HEIGHT,
+    }
 }
 
 fn with_btc_pending_model<R>(
@@ -212,8 +212,8 @@ fn bench_set_custom_token() -> BenchResult {
             add_to_user_token(
                 sp,
                 &mut s.custom_token,
-                std::slice::from_ref(&token),
-                |t: &CustomToken| CustomTokenId::from(&t.token),
+                &token,
+                &matches_custom_token(&token),
             );
         });
     })
@@ -228,9 +228,9 @@ fn bench_set_many_custom_tokens_with_count(count: u8) -> BenchResult {
 
     bench_fn(|| {
         mutate_state(|s| {
-            add_to_user_token(sp, &mut s.custom_token, &tokens, |t: &CustomToken| {
-                CustomTokenId::from(&t.token)
-            });
+            for token in &tokens {
+                add_to_user_token(sp, &mut s.custom_token, token, &matches_custom_token(token));
+            }
         });
     })
 }
@@ -248,15 +248,18 @@ fn bench_set_many_custom_tokens_200() -> BenchResult {
 fn bench_list_custom_tokens_with_count(count: u8) -> BenchResult {
     let sp = bench_stored_principal();
 
-    let tokens: Vec<CustomToken> = (0..count)
-        .map(|i| make_custom_token(1, u64::from(i)))
-        .collect();
+    for i in 0..count {
+        let token = make_custom_token(1, u64::from(i));
 
-    mutate_state(|s| {
-        add_to_user_token(sp, &mut s.custom_token, &tokens, |t: &CustomToken| {
-            CustomTokenId::from(&t.token)
+        mutate_state(|s| {
+            add_to_user_token(
+                sp,
+                &mut s.custom_token,
+                &token,
+                &matches_custom_token(&token),
+            );
         });
-    });
+    }
 
     bench_fn(|| {
         std::hint::black_box(read_state(|s| {
@@ -279,16 +282,17 @@ fn bench_list_custom_tokens_200() -> BenchResult {
 fn bench_remove_custom_token() -> BenchResult {
     let sp = bench_stored_principal();
     let token = make_custom_token(42, 0xDD);
+    mutate_state(|s| {
+        add_to_user_token(
+            sp,
+            &mut s.custom_token,
+            &token,
+            &matches_custom_token(&token),
+        );
+    });
 
     bench_fn(|| {
         mutate_state(|s| {
-            add_to_user_token(
-                sp,
-                &mut s.custom_token,
-                std::slice::from_ref(&token),
-                |t: &CustomToken| CustomTokenId::from(&t.token),
-            );
-
             remove_from_user_token(sp, &mut s.custom_token, &matches_custom_token(&token));
         });
     })
