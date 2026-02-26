@@ -17,6 +17,7 @@ use super::{
     add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
     user_profile, BtcUserPendingTransactionsModel, ByteBuf, Candid, CustomTokenId, HttpRequest,
     PendingTransaction, Principal, State, Stats, StoredPendingTransaction, StoredPrincipal,
+    user_profile, ByteBuf, Candid, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
     UserProfileModel,
 };
 
