@@ -64,7 +64,7 @@ describe('backend.api', () => {
 			const result = await listCustomTokens(mockParams);
 
 			expect(result).toEqual(mockCustomTokens);
-			expect(backendCanisterMock.listCustomTokens).toHaveBeenCalledExactlyOnceWith({ certified });
+			expect(backendCanisterMock.listCustomTokens).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should throw an error if identity is undefined', async () => {

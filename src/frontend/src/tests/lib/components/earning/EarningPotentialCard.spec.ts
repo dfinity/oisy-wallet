@@ -1,16 +1,14 @@
 import EarningPotentialCard from '$lib/components/earning/EarningPotentialCard.svelte';
-import { render, screen } from '@testing-library/svelte';
-
 import * as currencyDerived from '$lib/derived/currency.derived';
 import * as earningDerived from '$lib/derived/earning.derived';
 import * as i18nDerived from '$lib/derived/i18n.derived';
 import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
-import * as currencyStore from '$lib/stores/currency-exchange.store';
-import * as formatUtils from '$lib/utils/format.utils';
-
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
+import * as currencyStore from '$lib/stores/currency-exchange.store';
+import * as formatUtils from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
+import { render, screen } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 const staticStore = <T>(v: T) => readable<T>(v);
@@ -27,10 +25,12 @@ describe('EarningPotentialCard', () => {
 		vi.spyOn(currencyStore, 'currencyExchangeStore', 'get').mockReturnValue({
 			...staticStore({
 				currency: Currency.USD,
-				exchangeRateToUsd: 1
+				exchangeRateToUsd: 1,
+				exchangeRate24hChangeMultiplier: 1
 			}),
 			setExchangeRate: vi.fn(),
-			setExchangeRateCurrency: vi.fn()
+			setExchangeRateCurrency: vi.fn(),
+			setExchangeRate24hChangeMultiplier: vi.fn()
 		});
 
 		// Mock formatCurrency

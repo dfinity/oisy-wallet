@@ -12,6 +12,7 @@ import { AZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.aznx.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-spl/tokens.babaon.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-spl/tokens.biduon.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { CBBTC_TOKEN } from '$env/tokens/tokens-spl/tokens.cbbtc.env';
 import { CMCSAX_TOKEN } from '$env/tokens/tokens-spl/tokens.cmcsax.env';
 import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
 import { COPXON_TOKEN } from '$env/tokens/tokens-spl/tokens.copxon.env';
@@ -60,6 +61,7 @@ import { UNHX_TOKEN } from '$env/tokens/tokens-spl/tokens.unhx.env';
 import { DEVNET_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
 import { VTIX_TOKEN } from '$env/tokens/tokens-spl/tokens.vtix.env';
+import { WBTC_TOKEN } from '$env/tokens/tokens-spl/tokens.wbtc.env';
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import type { RequiredSplToken } from '$sol/types/spl';
@@ -78,6 +80,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	BABAON_TOKEN,
 	BIDUON_TOKEN,
 	BONK_TOKEN,
+	CBBTC_TOKEN,
 	CMCSAX_TOKEN,
 	COINX_TOKEN,
 	COPXON_TOKEN,
@@ -126,7 +129,8 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	USDC_TOKEN,
 	USDT_TOKEN,
 	VTIX_TOKEN,
-	WSOL_TOKEN
+	WSOL_TOKEN,
+	WBTC_TOKEN
 ];
 
 const SPL_TOKENS_DEVNET: RequiredSplToken[] = [DEVNET_USDC_TOKEN, DEVNET_EURC_TOKEN];

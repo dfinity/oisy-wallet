@@ -10,6 +10,7 @@
 	import Guards from '$lib/components/guard/Guards.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
+	import LoaderHarvest from '$lib/components/loaders/LoaderHarvest.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
@@ -30,31 +31,33 @@
 <LoaderUserProfile>
 	<PowProtector>
 		<Loader>
-			<LoaderTokens>
-				<LoaderEthBalances>
-					<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
-						<LoaderEthTransactions>
-							<LoaderWallets>
-								<ExchangeWorker>
-									<LoaderMetamask>
-										<UserSnapshotWorker>
-											<LoaderContacts>
-												<TransactionsIdbSetter>
-													<BalancesIdbSetter>
-														<StakeContext>
-															{@render children()}
-														</StakeContext>
-													</BalancesIdbSetter>
-												</TransactionsIdbSetter>
-											</LoaderContacts>
-										</UserSnapshotWorker>
-									</LoaderMetamask>
-								</ExchangeWorker>
-							</LoaderWallets>
-						</LoaderEthTransactions>
-					</MultipleListeners>
-				</LoaderEthBalances>
-			</LoaderTokens>
+			<LoaderTokens />
+
+			<LoaderEthBalances />
+
+			<MultipleListeners tokens={$enabledFungibleNetworkTokens} />
+
+			<LoaderEthTransactions />
+
+			<LoaderWallets />
+
+			<ExchangeWorker />
+
+			<LoaderMetamask />
+
+			<UserSnapshotWorker />
+
+			<LoaderContacts />
+
+			<TransactionsIdbSetter />
+
+			<BalancesIdbSetter />
+
+			<LoaderHarvest />
+
+			<StakeContext>
+				{@render children()}
+			</StakeContext>
 		</Loader>
 	</PowProtector>
 </LoaderUserProfile>

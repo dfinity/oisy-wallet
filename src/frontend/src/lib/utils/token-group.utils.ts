@@ -20,32 +20,6 @@ export const isTokenUiGroup = (
 	'group' in tokenUiOrGroupUi &&
 	'tokens' in tokenUiOrGroupUi.group;
 
-/**
- * Function to create a list of `TokenUiOrGroupUi` by grouping tokens with matching `groupData`.
- * A group is placed in the position where its first token was found.
- * Tokens with no groups remain as individual tokens in their original position.
- *
- * @param tokens - The list of TokenUi objects to group. Each token may or may not have a `groupData` field.
- *                 Tokens with `groupData` are grouped together.
- *
- * @returns A new list where tokens with `groupData` are grouped into a `TokenUiGroup`,
- *          and tokens without twins remain in their original place.
- *          A group replaces its first token in the list.
- */
-export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
-	const tokenOrGroups = groupTokens(tokens);
-
-	return tokenOrGroups.sort((aa, bb) => {
-		const a = isTokenUiGroup(aa) ? aa.group : aa.token;
-		const b = isTokenUiGroup(bb) ? bb.group : bb.token;
-
-		return (
-			(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-			+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO))
-		);
-	});
-};
-
 const hasBalance = ({ balance, usdBalance }: TokenUi) =>
 	Number(balance ?? ZERO) || Number(usdBalance ?? ZERO);
 
@@ -79,7 +53,10 @@ const mapNewTokenGroup = (token: TokenUiGroupable): TokenUiGroup => ({
 	groupData: token.groupData,
 	tokens: [token],
 	balance: token.balance,
-	usdBalance: token.usdBalance
+	usdBalance: token.usdBalance,
+	usdPrice: token.usdPrice,
+	usdMarketCap: token.usdMarketCap,
+	usdPriceChangePercentage24h: token.usdPriceChangePercentage24h
 });
 
 interface GroupTokenParams {

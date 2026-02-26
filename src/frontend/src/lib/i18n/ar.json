@@ -41,7 +41,8 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": ""
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
@@ -176,7 +177,6 @@
 			"title_part_1": "",
 			"title_part_2": "",
 			"unlock": "",
-			"unlock_with_legacy_login": "",
 			"logout": "",
 			"logout_clear_cash_message": "",
 			"learn_more": ""
@@ -417,22 +417,12 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"ostrich": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"binaryx": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"realt": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1153,7 +1143,10 @@
 			"hide_more_networks": "إخفاء المزيد من الشبكات",
 			"on_network": " على $network",
 			"delete_token": "حذف التوكن",
-			"edit_token": "تعديل التوكن"
+			"edit_token": "تعديل التوكن",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "تفاصيل التوكن",
@@ -1292,7 +1285,6 @@
 			"by_collection": "",
 			"show_spam": "",
 			"show_hidden": "",
-			"sorting": "",
 			"recents_first": "",
 			"oldest_first": "",
 			"collection_atoz": "",
@@ -2033,6 +2025,9 @@
 			"minute_plural": "دقائق",
 			"second": "ثانية",
 			"second_plural": "ثواني"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

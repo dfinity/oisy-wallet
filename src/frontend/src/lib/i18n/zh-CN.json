@@ -41,7 +41,8 @@
 			"more": "更多",
 			"less": "更少",
 			"ellipsis": "…",
-			"learn_more": "了解更多"
+			"learn_more": "了解更多",
+			"sorting": "排序方式"
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
@@ -176,7 +177,6 @@
 			"title_part_1": "解锁以继续",
 			"title_part_2": "您之前已锁定钱包以确保其安全。请从上次中断的地方继续操作或退出。",
 			"unlock": "开锁",
-			"unlock_with_legacy_login": "",
 			"logout": "退出登录",
 			"logout_clear_cash_message": "注销将清除所有缓存数据",
 			"learn_more": "了解更多"
@@ -417,22 +417,12 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"ostrich": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"binaryx": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"realt": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1153,7 +1143,10 @@
 			"hide_more_networks": "隐藏更多网络",
 			"on_network": " 于 $network",
 			"delete_token": "删除代币",
-			"edit_token": "编辑代币"
+			"edit_token": "编辑代币",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "代币详情",
@@ -1292,7 +1285,6 @@
 			"by_collection": "按集合分组",
 			"show_spam": "显示垃圾内容",
 			"show_hidden": "显示已隐藏",
-			"sorting": "排序方式",
 			"recents_first": "最新优先",
 			"oldest_first": "最早优先",
 			"collection_atoz": "集合名称 A-Z",
@@ -2033,6 +2025,9 @@
 			"minute_plural": "分钟（复数）",
 			"second": "秒（单数）",
 			"second_plural": "秒（复数）"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

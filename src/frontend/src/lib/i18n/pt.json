@@ -41,7 +41,8 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": ""
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
@@ -176,7 +177,6 @@
 			"title_part_1": "Desbloqueie para continuar",
 			"title_part_2": "Você bloqueou sua carteira anteriormente para mantê-la segura. Continue de onde parou ou saia.",
 			"unlock": "Desbloquear",
-			"unlock_with_legacy_login": "",
 			"logout": "Sair",
 			"logout_clear_cash_message": "Saída limpa, mensagem de cache",
 			"learn_more": "Saber mais"
@@ -417,22 +417,12 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"ostrich": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"binaryx": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"realt": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1153,7 +1143,10 @@
 			"hide_more_networks": "Ocultar mais redes",
 			"on_network": " na rede $network",
 			"delete_token": "Excluir token",
-			"edit_token": "Editar token"
+			"edit_token": "Editar token",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Detalhes do token",
@@ -1292,7 +1285,6 @@
 			"by_collection": "",
 			"show_spam": "",
 			"show_hidden": "",
-			"sorting": "",
 			"recents_first": "",
 			"oldest_first": "",
 			"collection_atoz": "",
@@ -2033,6 +2025,9 @@
 			"minute_plural": "minutos",
 			"second": "segundo",
 			"second_plural": "segundos"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

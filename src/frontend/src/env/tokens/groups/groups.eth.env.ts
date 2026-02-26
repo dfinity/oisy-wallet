@@ -9,6 +9,6 @@ export const ETH_TOKEN_GROUP_ID: TokenGroupId = parseTokenGroupId(ETH_TOKEN_GROU
 export const ETH_TOKEN_GROUP: TokenGroupData = {
 	id: ETH_TOKEN_GROUP_ID,
 	icon: eth,
-	name: 'Ethereum',
+	name: 'Ether',
 	symbol: ETH_TOKEN_GROUP_SYMBOL
 };

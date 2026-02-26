@@ -41,7 +41,8 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": ""
 		},
 		"info": {
 			"test_banner": "Solo a scopo di test!",
@@ -176,7 +177,6 @@
 			"title_part_1": "Sblocca per continuare",
 			"title_part_2": "In precedenza hai bloccato il tuo wallet per tenerlo al sicuro. Riprendi da dove eri rimasto o esci.",
 			"unlock": "Sblocca",
-			"unlock_with_legacy_login": "",
 			"logout": "Esci",
 			"logout_clear_cash_message": "La disconnessione cancellerà tutti i dati memorizzati nella cache",
 			"learn_more": "Saperne di più"
@@ -417,22 +417,12 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"ostrich": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"binaryx": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"realt": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1153,7 +1143,10 @@
 			"hide_more_networks": "Nascondi altre reti",
 			"on_network": " su $network",
 			"delete_token": "Elimina token",
-			"edit_token": "Modifica token"
+			"edit_token": "Modifica token",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Dettagli del token",
@@ -1292,7 +1285,6 @@
 			"by_collection": "",
 			"show_spam": "",
 			"show_hidden": "",
-			"sorting": "",
 			"recents_first": "",
 			"oldest_first": "",
 			"collection_atoz": "",
@@ -2033,6 +2025,9 @@
 			"minute_plural": "minuti",
 			"second": "secondo",
 			"second_plural": "secondi"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

@@ -21,7 +21,6 @@ mod bitcoin {
                 input: BtcAddPendingTransactionRequest {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![],
-                    address: "".to_string(),
                     network: BitcoinNetwork::Mainnet,
                 },
                 valid: true,
@@ -31,7 +30,6 @@ mod bitcoin {
                 input: BtcAddPendingTransactionRequest {
                     txid: vec![0; MAX_TXID_BYTES + 1],
                     utxos: vec![],
-                    address: "".to_string(),
                     network: BitcoinNetwork::Mainnet,
                 },
                 valid: false,
@@ -48,7 +46,6 @@ mod bitcoin {
                         value: 0,
                         height: 0,
                     }],
-                    address: "".to_string(),
                     network: BitcoinNetwork::Mainnet,
                 },
                 valid: true,
@@ -65,7 +62,6 @@ mod bitcoin {
                         value: 0,
                         height: 0,
                     }],
-                    address: "".to_string(),
                     network: BitcoinNetwork::Mainnet,
                 },
                 valid: false,
@@ -85,7 +81,6 @@ mod bitcoin {
                         };
                         MAX_UTXOS_LEN + 1
                     ],
-                    address: "".to_string(),
                     network: BitcoinNetwork::Mainnet,
                 },
                 valid: false,
@@ -769,6 +764,34 @@ mod user_profile {
     test_validate_on_deserialize!(
         AddUserCredentialRequest,
         vec![
+            TestVector {
+                description: "AddUserCredentialRequest with credential_jwt at max length is valid",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH),
+                    credential_spec: CredentialSpec {
+                        credential_type: "test".to_string(),
+                        arguments: None,
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: true,
+            },
+            TestVector {
+                description:
+                    "AddUserCredentialRequest with credential_jwt exceeding max length is invalid",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1"
+                        .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH + 1),
+                    credential_spec: CredentialSpec {
+                        credential_type: "test".to_string(),
+                        arguments: None,
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
             TestVector {
                 description: "AddUserCredentialRequest with credential_type too long",
                 input: AddUserCredentialRequest {

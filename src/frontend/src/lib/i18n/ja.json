@@ -41,7 +41,8 @@
 			"more": "さらに",
 			"less": "少なく",
 			"ellipsis": "…",
-			"learn_more": "詳細を見る"
+			"learn_more": "詳細を見る",
+			"sorting": "並べ替え"
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -176,7 +177,6 @@
 			"title_part_1": "ロックを解除して続行",
 			"title_part_2": "ウォレットは安全のためロックされています。中断したところから再開するか、ログアウトしてください。",
 			"unlock": "ロック解除",
-			"unlock_with_legacy_login": "",
 			"logout": "ログアウト",
 			"logout_clear_cash_message": "ログアウトすると、キャッシュされたデータがすべて消去されます。",
 			"learn_more": "詳細を見る"
@@ -417,22 +417,12 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"ostrich": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"binaryx": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"realt": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1153,7 +1143,10 @@
 			"hide_more_networks": "ネットワークを非表示",
 			"on_network": "$network上",
 			"delete_token": "トークンを削除",
-			"edit_token": "トークンを編集"
+			"edit_token": "トークンを編集",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "トークンの詳細",
@@ -1292,7 +1285,6 @@
 			"by_collection": "コレクションでグループ化",
 			"show_spam": "スパムを表示",
 			"show_hidden": "非表示を表示",
-			"sorting": "並べ替え",
 			"recents_first": "新しい順",
 			"oldest_first": "古い順",
 			"collection_atoz": "コレクション名 A-Z",
@@ -2033,6 +2025,9 @@
 			"minute_plural": "分",
 			"second": "秒",
 			"second_plural": "秒"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

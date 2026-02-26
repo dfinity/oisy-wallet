@@ -41,7 +41,8 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": "Sắp xếp"
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -176,7 +177,6 @@
 			"title_part_1": "Mở khóa để tiếp tục",
 			"title_part_2": "Trước đó, bạn đã khóa ví để giữ an toàn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
 			"unlock": "Mở khóa",
-			"unlock_with_legacy_login": "",
 			"logout": "Đăng xuất",
 			"logout_clear_cash_message": "Đăng xuất sẽ xóa tất cả dữ liệu được lưu trong bộ nhớ đệm",
 			"learn_more": "Tìm hiểu thêm"
@@ -417,22 +417,12 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"ostrich": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"binaryx": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"realt": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1153,7 +1143,10 @@
 			"hide_more_networks": "Ẩn thêm mạng",
 			"on_network": " trên mạng $network",
 			"delete_token": "Xóa token",
-			"edit_token": "Chỉnh sửa token"
+			"edit_token": "Chỉnh sửa token",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Chi tiết token",
@@ -1292,7 +1285,6 @@
 			"by_collection": "Nhóm theo bộ sưu tập",
 			"show_spam": "Hiển thị spam",
 			"show_hidden": "Hiển thị ẩn",
-			"sorting": "Sắp xếp",
 			"recents_first": "Gần đây trước",
 			"oldest_first": "Cũ nhất trước",
 			"collection_atoz": "Tên bộ sưu tập A-Z",
@@ -2033,6 +2025,9 @@
 			"minute_plural": "phút",
 			"second": "giây",
 			"second_plural": "giây"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

@@ -7,6 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Token } from '$lib/types/token';
+	import { getTokenDisplayName } from '$lib/utils/token.utils';
 
 	interface Props {
 		token: Token;
@@ -17,7 +18,7 @@
 
 	let { token, logoSize = 'lg', onClick, showDividers = true }: Props = $props();
 
-	const { oisyName, oisySymbol, symbol, name, network } = $derived(token);
+	const { oisyName, oisySymbol, symbol, network } = $derived(token);
 </script>
 
 <LogoButton dividers={showDividers} fullWidth {onClick}>
@@ -30,7 +31,7 @@
 			{$i18n.tokens.text.chain_key}
 		{/if}
 
-		{oisyName?.oisyName ?? name}
+		{getTokenDisplayName(token)}
 	{/snippet}
 
 	{#snippet description()}

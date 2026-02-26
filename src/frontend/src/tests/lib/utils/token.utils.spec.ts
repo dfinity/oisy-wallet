@@ -19,6 +19,7 @@ import {
 	filterEnabledToken,
 	findTwinToken,
 	getMaxTransactionAmount,
+	getTokenDisplayName,
 	getTokenDisplaySymbol,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
@@ -249,6 +250,9 @@ describe('token.utils', () => {
 			...ETHEREUM_TOKEN,
 			balance: bn3Bi,
 			usdBalance: Number(bn3Bi),
+			usdPrice: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd,
+			usdMarketCap: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd_market_cap,
+			usdPriceChangePercentage24h: mockExchanges?.[ETHEREUM_TOKEN.id]?.usd_24h_change,
 			stakeBalance: 123n,
 			stakeUsdBalance: Number(123n),
 			claimableStakeBalance: 456n,
@@ -278,6 +282,9 @@ describe('token.utils', () => {
 			expect(result).toEqual({
 				...expected,
 				usdBalance: undefined,
+				usdPrice: undefined,
+				usdMarketCap: undefined,
+				usdPriceChangePercentage24h: undefined,
 				stakeUsdBalance: undefined,
 				claimableStakeBalanceUsd: undefined
 			});
@@ -589,6 +596,25 @@ describe('token.utils', () => {
 			const result = getTokenDisplaySymbol(mockIcrcCustomToken);
 
 			expect(result).toBe(mockIcrcCustomToken.symbol);
+		});
+	});
+
+	describe('getTokenDisplayName', () => {
+		it('should return oisy name if exists', () => {
+			const oisyName = 'OISY Name';
+
+			const result = getTokenDisplayName({
+				...mockIcrcCustomToken,
+				oisyName: { oisyName }
+			});
+
+			expect(result).toBe(oisyName);
+		});
+
+		it('should return token name if oisy name does not exist', () => {
+			const result = getTokenDisplayName(mockIcrcCustomToken);
+
+			expect(result).toBe(mockIcrcCustomToken.name);
 		});
 	});
 

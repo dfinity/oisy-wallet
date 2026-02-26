@@ -1,10 +1,18 @@
+use std::collections::HashMap;
+
 use candid::{CandidType, Deserialize, Principal};
 use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    backend_config::Config, contact::StoredContacts, custom_token::CustomToken,
-    pow::StoredChallenge, token::UserToken, user_profile::StoredUserProfile, Timestamp,
+    backend_config::Config,
+    bitcoin::StoredPendingTransaction,
+    contact::StoredContacts,
+    custom_token::{CustomToken, CustomTokenId},
+    pow::StoredChallenge,
+    token::UserToken,
+    user_profile::StoredUserProfile,
+    Timestamp,
 };
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
@@ -26,3 +34,12 @@ where
 pub struct StoredPrincipal(pub Principal);
 // Define a new type for the contact storage
 pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VMem>;
+
+pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>;
+pub type BtcUserPendingTransactionsMap =
+    StableBTreeMap<StoredPrincipal, Candid<PendingTransactionsMap>, VMem>;
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct StoredTokenId(pub CustomTokenId);
+
+pub type TokenActivityMap = StableBTreeMap<StoredTokenId, Timestamp, VMem>;

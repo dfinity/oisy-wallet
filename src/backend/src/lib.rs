@@ -1,11 +1,9 @@
-use std::{cell::RefCell, time::Duration};
+use std::{cell::RefCell, collections::HashSet, time::Duration};
 
 use bitcoin_utils::estimate_fee;
+use btc_user_pending_tx_model::BtcUserPendingTransactionsModel;
 use candid::{candid_method, Principal};
 use config::find_credential_config;
-use heap_state::{
-    btc_user_pending_tx_state::StoredPendingTransaction, state::with_btc_pending_transactions,
-};
 use ic_cdk::{api::time, eprintln, export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use ic_stable_structures::{
@@ -26,7 +24,7 @@ use shared::{
             BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
-            SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
+            SelectedUtxosFeeRequest, SelectedUtxosFeeResponse, StoredPendingTransaction,
         },
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
@@ -58,8 +56,8 @@ use shared::{
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
-    Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
-    UserTokenMap,
+    BtcUserPendingTransactionsMap, Candid, ConfigCell, CustomTokenMap, StoredPrincipal,
+    UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
@@ -68,7 +66,8 @@ use crate::{
     bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
-    types::{ContactMap, PowChallengeMap},
+    token_activity::{mark_token_active, mark_tokens_active},
+    types::{ContactMap, PowChallengeMap, TokenActivityMap},
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
         update_experimental_feature_settings, update_network_settings,
@@ -77,10 +76,10 @@ use crate::{
 
 mod bitcoin_api;
 mod bitcoin_utils;
+mod btc_user_pending_tx_model;
 mod config;
 mod contacts;
 mod guards;
-mod heap_state;
 mod impls;
 mod pow;
 pub mod random;
@@ -93,6 +92,10 @@ mod user_profile_model;
 
 #[cfg(test)]
 mod tests;
+mod token_activity;
+
+#[cfg(feature = "canbench-rs")]
+mod benchmark;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -101,11 +104,17 @@ const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
+const BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(7);
+const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(8);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
         MemoryManager::init(DefaultMemoryImpl::default())
     );
+
+    /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
+    static HOUSEKEEPING_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
+    static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
 
     static STATE: RefCell<State> = RefCell::new(
         MEMORY_MANAGER.with(|mm| State {
@@ -117,6 +126,10 @@ thread_local! {
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
+            btc_user_pending_transactions: BtcUserPendingTransactionsMap::init(
+                mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),
+            ),
+            token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
         })
     );
 }
@@ -155,6 +168,10 @@ pub struct State {
     user_profile_updated: UserProfileUpdatedMap,
     pow_challenge: PowChallengeMap,
     contact: ContactMap,
+    btc_user_pending_transactions: BtcUserPendingTransactionsMap,
+    // TODO: implement a periodic cleanup of old entries
+    // TODO: limit the map size with an eviction policy
+    token_activity: TokenActivityMap,
 }
 
 fn set_config(arg: InitArg) {
@@ -164,16 +181,109 @@ fn set_config(arg: InitArg) {
     });
 }
 
+/// 2 hours in nanoseconds — if a housekeeping run has been in progress for
+/// longer than this, we consider it stuck and force-unlock so the next timer
+/// tick can proceed.
+const HOUSEKEEPING_TIMEOUT_NS: u64 = 2 * 60 * 60 * 1_000_000_000;
+
+pub(crate) const MAX_CONCURRENT_ALLOW_SIGNING: u32 = 50;
+
+/// Returns `true` if a housekeeping run is currently in flight and has not
+/// timed out.  If the lock has been held longer than `HOUSEKEEPING_TIMEOUT_NS`,
+/// logs a warning and returns `false` so the caller can force a new run.
+pub(crate) fn is_housekeeping_in_progress(now_ns: u64) -> bool {
+    HOUSEKEEPING_STARTED_AT.with(|cell| {
+        if let Some(started) = *cell.borrow() {
+            let elapsed = now_ns.saturating_sub(started);
+            if elapsed > HOUSEKEEPING_TIMEOUT_NS {
+                eprintln!(
+                    "Housekeeping appears stuck (started {}s ago), forcing unlock",
+                    elapsed / 1_000_000_000
+                );
+                false
+            } else {
+                true
+            }
+        } else {
+            false
+        }
+    })
+}
+
+/// Spawns housekeeping only if no previous run is still in flight.
+/// If a previous run appears stuck (older than `HOUSEKEEPING_TIMEOUT_NS`),
+/// the stale lock is cleared and a new run is allowed to proceed.
+fn spawn_housekeeping_if_idle() {
+    let now = time();
+
+    if is_housekeeping_in_progress(now) {
+        return;
+    }
+
+    HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = Some(now));
+
+    ic_cdk::spawn(async {
+        hourly_housekeeping_tasks().await;
+        HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = None);
+    });
+}
+
+/// Atomically increments the in-flight `allow_signing` counter if below
+/// `MAX_CONCURRENT_ALLOW_SIGNING`.  Returns `true` on success.
+///
+/// The caller is responsible for decrementing after the task finishes.
+/// On IC traps the counter stays elevated, but the cap prevents unbounded
+/// accumulation.  In practice the `allow_signing` code path contains no
+/// panic sites, so leaked slots are unlikely.
+pub(crate) fn try_acquire_allow_signing_slot() -> bool {
+    ALLOW_SIGNING_IN_PROGRESS.with(|cell| {
+        let mut count = cell.borrow_mut();
+        if *count >= MAX_CONCURRENT_ALLOW_SIGNING {
+            return false;
+        }
+        *count += 1;
+        true
+    })
+}
+
+/// Decrements the in-flight `allow_signing` counter.
+pub(crate) fn release_allow_signing_slot() {
+    ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow_mut() -= 1);
+}
+
+/// Spawns an `allow_signing` task only if the number of in-flight tasks is
+/// below `MAX_CONCURRENT_ALLOW_SIGNING`.
+fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
+    if !try_acquire_allow_signing_slot() {
+        eprintln!(
+            "Skipped allow_signing for user {}: too many concurrent tasks",
+            stored_principal.0,
+        );
+        return;
+    }
+
+    ic_cdk::spawn(async move {
+        if let Err(e) = signer::allow_signing(None).await {
+            ic_cdk::println!(
+                "Error enabling signing for user {}: {:?}",
+                stored_principal.0,
+                e
+            );
+        }
+        release_allow_signing_slot();
+    });
+}
+
 /// Runs housekeeping tasks immediately, then periodically:
 /// - `hourly_housekeeping_tasks`
 fn start_periodic_housekeeping_timers() {
     // Run housekeeping tasks once, immediately but asynchronously.
     let immediate = Duration::ZERO;
-    set_timer(immediate, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+    set_timer(immediate, spawn_housekeeping_if_idle);
 
     // Then periodically:
     let hour = Duration::from_secs(60 * 60);
-    let _ = set_timer_interval(hour, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+    let _ = set_timer_interval(hour, spawn_housekeeping_if_idle);
 }
 
 /// Runs hourly housekeeping tasks:
@@ -275,11 +385,26 @@ pub fn set_custom_token(token: CustomToken) {
     };
 
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
+
+    mark_token_active(&CustomTokenId::from(&token.token));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
+    if tokens.len() > token::MAX_TOKEN_LIST_LENGTH {
+        ic_cdk::trap(&format!(
+            "Token list length should not exceed {}",
+            token::MAX_TOKEN_LIST_LENGTH
+        ));
+    }
+
     let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    let ids = tokens
+        .iter()
+        .map(|t| CustomTokenId::from(&t.token))
+        .collect::<Vec<_>>();
 
     mutate_state(|s| {
         for token in tokens {
@@ -290,6 +415,8 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
             add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
         }
     });
+
+    mark_tokens_active(&ids);
 }
 
 /// Remove custom token for the user.
@@ -307,11 +434,36 @@ pub fn remove_custom_token(token: CustomToken) {
     });
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
+/// List the custom tokens for the calling user.
+///
+/// Note: This method was previously exposed as a *query* but is now an *update*
+/// call. The change is intentional and breaking: `list_custom_tokens` now tracks
+/// token activity by calling `mark_tokens_active`, which mutates canister state.
+/// Because queries must not modify state on the IC, this function must be an
+/// update, not a query.
+///
+/// Implications for callers:
+/// - This call now participates in consensus and may have higher latency than a query.
+/// - It consumes cycles as an update call.
+/// - Integrations that previously relied on query semantics must be updated to invoke this as an
+///   update method.
 pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
+
+    let tokens = read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0);
+
+    if !tokens.is_empty() {
+        let ids: Vec<CustomTokenId> = tokens
+            .iter()
+            .map(|t| CustomTokenId::from(&t.token))
+            .collect();
+
+        mark_tokens_active(&ids);
+    }
+
+    tokens
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
@@ -372,9 +524,14 @@ pub async fn btc_select_user_utxos_fee(
         .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
         let now_ns = time();
 
-        let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
-            pending_transactions.prune_pending_transactions(principal, &all_utxos, now_ns);
-            !pending_transactions
+        let has_pending_transactions = mutate_state(|state| {
+            let mut model = BtcUserPendingTransactionsModel::new(
+                &mut state.btc_user_pending_transactions,
+                None,
+                None,
+            );
+            model.prune_pending_transactions(principal, &all_utxos, now_ns);
+            !model
                 .get_pending_transactions(&principal, &source_address)
                 .is_empty()
         });
@@ -431,10 +588,26 @@ pub async fn btc_add_pending_transaction(
     async fn inner(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
+        if params.utxos.is_empty() {
+            return Err(BtcAddPendingTransactionError::EmptyUtxos);
+        }
+
+        let unique_keys: HashSet<(&[u8], u32)> = params
+            .utxos
+            .iter()
+            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .collect();
+
+        if unique_keys.len() != params.utxos.len() {
+            return Err(BtcAddPendingTransactionError::DuplicateUtxos);
+        }
+
         let principal = ic_cdk::caller();
+
         let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+
         let current_utxos = bitcoin_api::get_all_utxos(
             params.network,
             source_address.clone(),
@@ -442,16 +615,41 @@ pub async fn btc_add_pending_transaction(
         )
         .await
         .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+
         let now_ns = time();
 
-        with_btc_pending_transactions(|pending_transactions| {
-            pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+        let current_keys: HashSet<(&[u8], u32)> = current_utxos
+            .iter()
+            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .collect();
+
+        let all_param_utxos_are_current = params
+            .utxos
+            .iter()
+            .all(|u| current_keys.contains(&(u.outpoint.txid.as_slice(), u.outpoint.vout)));
+
+        if !all_param_utxos_are_current {
+            return Err(BtcAddPendingTransactionError::InvalidUtxos);
+        }
+
+        mutate_state(|state| {
+            let mut model = BtcUserPendingTransactionsModel::new(
+                &mut state.btc_user_pending_transactions,
+                None,
+                None,
+            );
+            model.prune_pending_transactions(principal, &current_utxos, now_ns);
+
+            if model.has_intersecting_pending_utxos(principal, &params.utxos) {
+                return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
+            }
+
             let current_pending_transaction = StoredPendingTransaction {
                 txid: params.txid,
                 utxos: params.utxos,
                 created_at_timestamp_ns: now_ns,
             };
-            pending_transactions
+            model
                 .add_pending_transaction(principal, source_address, current_pending_transaction)
                 .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
         })
@@ -481,11 +679,14 @@ pub async fn btc_get_pending_transactions(
         .await
         .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
 
-        let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
-            pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
-            pending_transactions
-                .get_pending_transactions(&principal, &params.address)
-                .clone()
+        let stored_transactions = mutate_state(|state| {
+            let mut model = BtcUserPendingTransactionsModel::new(
+                &mut state.btc_user_pending_transactions,
+                None,
+                None,
+            );
+            model.prune_pending_transactions(principal, &current_utxos, now_ns);
+            model.get_pending_transactions(&principal, &params.address)
         });
 
         let pending_transactions = stored_transactions
@@ -711,25 +912,10 @@ pub fn create_user_profile() -> UserProfile {
     });
 
     // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
-    // Spawn the async task for allow_signing after returning UserProfile synchronously
-    ic_cdk::spawn(async move {
-        // Upon initial user login, we have to that ensure allow_signing is called to handle
-        // cases where users lack the cycles required for signer operations. To
-        // guarantee correct functionality, create_user_profile(..) must be invoked
-        // before any signer-related calls (e.g., get_eth_address). Spawns the async
-        // task separately after returning UserProfile synchronously
-        if let Err(e) = signer::allow_signing(None).await {
-            // We don't return errors or panic here because:
-            // 1. The user profile was already created successfully
-            // 2. This is running in a spawned task, so we can't return errors to the original
-            //    caller
-            ic_cdk::println!(
-                "Error enabling signing for user {}: {:?}",
-                stored_principal.0,
-                e
-            );
-        }
-    });
+    // async task. Upon initial user login, we ensure allow_signing is called to handle cases
+    // where users lack the cycles required for signer operations. create_user_profile(..) must
+    // be invoked before any signer-related calls (e.g., get_eth_address).
+    spawn_allow_signing_if_below_limit(stored_principal);
 
     user_profile
 }
@@ -978,4 +1164,5 @@ pub fn get_contacts() -> GetContactsResult {
     let result = Ok(contacts::get_contacts());
     result.into()
 }
+
 export_candid!();

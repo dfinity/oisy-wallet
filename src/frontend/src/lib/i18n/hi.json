@@ -41,7 +41,8 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": "छँटाई"
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -176,7 +177,6 @@
 			"title_part_1": "जारी रखने के लिए अनलॉक करें",
 			"title_part_2": "आपने पहले अपने वॉलेट को सुरक्षित रखने के लिए लॉक किया था। जहाँ से छोड़ा था वहीं से शुरू करें या लॉग आउट करें।",
 			"unlock": "अनलॉक करें",
-			"unlock_with_legacy_login": "",
 			"logout": "लॉगआउट करें",
 			"logout_clear_cash_message": "लॉग आउट करने से सभी कैश्ड डेटा साफ़ हो जाएगा",
 			"learn_more": "और जानें"
@@ -417,22 +417,12 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"ostrich": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"binaryx": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"realt": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1153,7 +1143,10 @@
 			"hide_more_networks": "अधिक नेटवर्क छुपाएं",
 			"on_network": " $network पर",
 			"delete_token": "टोकन मिटाएँ",
-			"edit_token": "टोकन संपादित करें"
+			"edit_token": "टोकन संपादित करें",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "टोकन विवरण",
@@ -1292,7 +1285,6 @@
 			"by_collection": "संग्रह के अनुसार समूहित करें",
 			"show_spam": "स्पैम दिखाएँ",
 			"show_hidden": "छिपा हुआ दिखाएँ",
-			"sorting": "छँटाई",
 			"recents_first": "नवीनतम पहले",
 			"oldest_first": "सबसे पुराना पहले",
 			"collection_atoz": "संग्रह का नाम A-Z",
@@ -2033,6 +2025,9 @@
 			"minute_plural": "मिनट",
 			"second": "सेकंड",
 			"second_plural": "सेकंड"
+		},
+		"time_frame": {
+			"t_24h": ""
 		}
 	},
 	"ai_assistant": {

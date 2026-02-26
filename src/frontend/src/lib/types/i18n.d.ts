@@ -45,6 +45,7 @@ interface I18nCore {
 		less: string;
 		ellipsis: string;
 		learn_more: string;
+		sorting: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -163,7 +164,6 @@ interface I18nLock {
 		title_part_1: string;
 		title_part_2: string;
 		unlock: string;
-		unlock_with_legacy_login: string;
 		logout: string;
 		logout_clear_cash_message: string;
 		learn_more: string;
@@ -275,10 +275,8 @@ interface I18nDapps {
 		kamino: { name: string; one_liner: string; description: string };
 		helium: { name: string; one_liner: string; description: string };
 		sanctum: { name: string; one_liner: string; description: string };
-		ostrich: { name: string; one_liner: string; description: string };
 		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
-		realt: { name: string; one_liner: string; description: string };
 		parcl: { name: string; one_liner: string; description: string };
 	};
 }
@@ -899,6 +897,9 @@ interface I18nTokens {
 		on_network: string;
 		delete_token: string;
 		edit_token: string;
+		sort_by_value: string;
+		sort_by_performance: string;
+		sort_by_symbol: string;
 	};
 	details: {
 		title: string;
@@ -1017,7 +1018,6 @@ interface I18nNfts {
 		by_collection: string;
 		show_spam: string;
 		show_hidden: string;
-		sorting: string;
 		recents_first: string;
 		oldest_first: string;
 		collection_atoz: string;
@@ -1615,6 +1615,7 @@ interface I18nTemporal {
 		second: string;
 		second_plural: string;
 	};
+	time_frame: { t_24h: string };
 }
 
 interface I18nAi_assistant {

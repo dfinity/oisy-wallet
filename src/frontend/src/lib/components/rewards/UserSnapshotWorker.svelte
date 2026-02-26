@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy, type Snippet } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
@@ -23,12 +23,6 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	let timer: NodeJS.Timeout | undefined = undefined;
 	let syncInProgress = false;
@@ -92,9 +86,6 @@
 		if (
 			$authNotSignedIn ||
 			$isBusy ||
-			isNullish($btcAddressMainnet) ||
-			isNullish($ethAddress) ||
-			isNullish($solAddressMainnet) ||
 			isNullish($tokens) ||
 			$exchangeNotInitialized ||
 			$noPositiveBalanceAndNotAllBalancesZero
@@ -141,5 +132,3 @@
 		triggerTimer();
 	});
 </script>
-
-{@render children()}

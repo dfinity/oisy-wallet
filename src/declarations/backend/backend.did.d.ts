@@ -65,9 +65,12 @@ export type ApproveError =
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
 export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
-export type BtcAddPendingTransactionError = {
-	InternalError: { msg: string };
-};
+export type BtcAddPendingTransactionError =
+	| { InvalidUtxos: null }
+	| { EmptyUtxos: null }
+	| { DuplicateUtxos: null }
+	| { InternalError: { msg: string } }
+	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
 	network: BitcoinNetwork;
@@ -91,6 +94,9 @@ export type BtcGetFeePercentilesResult =
 			Ok: BtcGetFeePercentilesResponse;
 	  }
 	| { Err: SelectedUtxosFeeError };
+export type BtcGetPendingTransactionsError = {
+	InternalError: { msg: string };
+};
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
@@ -102,7 +108,7 @@ export type BtcGetPendingTransactionsResult =
 	| {
 			Ok: BtcGetPendingTransactionsReponse;
 	  }
-	| { Err: BtcAddPendingTransactionError };
+	| { Err: BtcGetPendingTransactionsError };
 export type BtcSelectUserUtxosFeeResult =
 	| { Ok: SelectedUtxosFeeResponse }
 	| { Err: SelectedUtxosFeeError };
@@ -155,6 +161,7 @@ export type ContactError =
 	| { InvalidImageFormat: null }
 	| { ContactNotFound: null }
 	| { ImageTooLarge: null }
+	| { TooManyContacts: null }
 	| { RandomnessError: null }
 	| { ImageExceedsMaxSize: null }
 	| { CanisterStatusError: null }
@@ -338,6 +345,7 @@ export interface SplToken {
 export interface Stats {
 	user_profile_count: bigint;
 	custom_token_count: bigint;
+	token_activity_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
 }
@@ -621,6 +629,21 @@ export interface _SERVICE {
 	 * Processes external HTTP requests.
 	 */
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
+	/**
+	 * List the custom tokens for the calling user.
+	 *
+	 * Note: This method was previously exposed as a *query* but is now an *update*
+	 * call. The change is intentional and breaking: `list_custom_tokens` now tracks
+	 * token activity by calling `mark_tokens_active`, which mutates canister state.
+	 * Because queries must not modify state on the IC, this function must be an
+	 * update, not a query.
+	 *
+	 * Implications for callers:
+	 * - This call now participates in consensus and may have higher latency than a query.
+	 * - It consumes cycles as an update call.
+	 * - Integrations that previously relied on query semantics must be updated to invoke this as an
+	 * update method.
+	 */
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	/**
 	 * Remove custom token for the user.

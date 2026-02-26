@@ -115,39 +115,45 @@ describe('exchange.worker', () => {
 				expect(simplePrice).toHaveBeenCalledTimes(6);
 				expect(simplePrice).toHaveBeenNthCalledWith(1, {
 					ids: 'ethereum',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(2, {
 					ids: 'bitcoin',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(3, {
 					ids: 'internet-computer',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(4, {
 					ids: 'solana',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(5, {
 					ids: 'binancecoin',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(6, {
 					ids: 'polygon-ecosystem-token',
-					vs_currencies: Currency.USD
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
 				});
 			});
 
 			it('should post a message with synced prices', async () => {
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
-				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 					msg: 'syncExchange',
 					data: {
 						currentExchangeRate: {
 							exchangeRateToUsd: 1,
+							exchangeRate24hChangeMultiplier: 1,
 							currency: Currency.USD
 						},
 						currentBnbPrice: { binancecoin: { usd: 1 } },
@@ -184,31 +190,31 @@ describe('exchange.worker', () => {
 				expect(postMessageMock).toHaveBeenCalledTimes(11);
 			});
 
-			it('should post an error message if the sync fails', async () => {
+			it('should post a sync success message even if some price fetches fail', async () => {
 				const mockErrorMessage = 'Sync failed';
 				const mockError = new Error(mockErrorMessage);
 				vi.mocked(simplePrice).mockRejectedValueOnce(mockError);
 
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
-				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
-					msg: 'syncExchangeError',
-					data: { err: mockErrorMessage }
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: expect.any(Object)
 				});
 
-				expect(console.error).toHaveBeenCalledOnce();
-				expect(console.error).toHaveBeenNthCalledWith(
-					1,
-					'Unexpected error while fetching symbol average price:',
+				expect(console.error).toHaveBeenCalledExactlyOnceWith(
+					'Error while fetching exchange rate:',
 					mockError
 				);
 			});
 
-			it('should stop the timer if the sync fails', async () => {
+			it('should not stop the timer if the sync fails', async () => {
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: expect.any(Object)
+				});
 
 				vi.clearAllMocks();
 
@@ -218,10 +224,7 @@ describe('exchange.worker', () => {
 
 				await vi.advanceTimersByTimeAsync(SYNC_EXCHANGE_TIMER_INTERVAL * 10);
 
-				expect(postMessageMock).not.toHaveBeenCalledWith({
-					msg: 'syncExchange',
-					data: expect.any(Object)
-				});
+				expect(postMessageMock).toHaveBeenCalledTimes(10);
 			});
 
 			it('should handle empty payload', async () => {
@@ -256,31 +259,36 @@ describe('exchange.worker', () => {
 						id: 'ethereum',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x123', '0xabc'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
 						id: 'base',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x456'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
 						id: 'binance-smart-chain',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x789'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(4, {
 						id: 'polygon-pos',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xdef'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(5, {
 						id: 'arbitrum-one',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xghi'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
@@ -302,12 +310,12 @@ describe('exchange.worker', () => {
 
 					await onExchangeMessage(mockEvent);
 
-					expect(simpleTokenPrice).toHaveBeenCalledOnce();
-					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
+					expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
 						id: 'internet-computer',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockIcrcLedgerCanisterIds,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
@@ -331,12 +339,12 @@ describe('exchange.worker', () => {
 
 					await onExchangeMessage(mockEvent);
 
-					expect(simpleTokenPrice).toHaveBeenCalledOnce();
-					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
+					expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
 						id: 'solana',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockSplTokenAddresses,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
@@ -363,7 +371,8 @@ describe('exchange.worker', () => {
 
 					expect(simplePrice).toHaveBeenNthCalledWith(1, {
 						ids: 'bitcoin',
-						vs_currencies: `${Currency.USD},${Currency.JPY}`
+						vs_currencies: `${Currency.USD},${Currency.JPY}`,
+						include_24hr_change: true
 					});
 				});
 
@@ -401,45 +410,52 @@ describe('exchange.worker', () => {
 						id: 'ethereum',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x123', '0xabc'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
 						id: 'base',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x456'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
 						id: 'binance-smart-chain',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0x789'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(4, {
 						id: 'polygon-pos',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xdef'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(5, {
 						id: 'arbitrum-one',
 						vs_currencies: Currency.USD,
 						contract_addresses: ['0xghi'],
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(6, {
 						id: 'internet-computer',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockIcrcLedgerCanisterIds,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(7, {
 						id: 'solana',
 						vs_currencies: Currency.USD,
 						contract_addresses: mockSplTokenAddresses,
-						include_market_cap: true
+						include_market_cap: true,
+						include_24hr_change: true
 					});
 				});
 
@@ -453,6 +469,7 @@ describe('exchange.worker', () => {
 						data: {
 							currentExchangeRate: {
 								exchangeRateToUsd: 1,
+								exchangeRate24hChangeMultiplier: 1,
 								currency: Currency.USD
 							},
 							currentBnbPrice: { binancecoin: { usd: 1 } },
@@ -486,7 +503,11 @@ describe('exchange.worker', () => {
 								(Array.isArray(ids) ? ids : ids.split(',')).reduce(
 									(acc, id) => ({
 										...acc,
-										[id]: { usd: 1, ...(vs_currencies.includes(',') ? { jpy: 3 } : {}) }
+										[id]: {
+											usd: 1,
+											usd_24h_change: 3,
+											...(vs_currencies.includes(',') ? { jpy: 3, jpy_24h_change: 5 } : {})
+										}
 									}),
 									{}
 								)
@@ -509,10 +530,11 @@ describe('exchange.worker', () => {
 						data: {
 							currentExchangeRate: {
 								exchangeRateToUsd: 1 / 3,
+								exchangeRate24hChangeMultiplier: 1.03 / 1.05,
 								currency: Currency.JPY
 							},
-							currentBnbPrice: { binancecoin: { usd: 1 } },
-							currentBtcPrice: { bitcoin: { usd: 1 } },
+							currentBnbPrice: { binancecoin: { usd: 1, usd_24h_change: 3 } },
+							currentBtcPrice: { bitcoin: { usd: 1, usd_24h_change: 3 } },
 							currentErc20Prices: {
 								'0x123': { usd: 1 },
 								'0x456': { usd: 1 },
@@ -522,11 +544,11 @@ describe('exchange.worker', () => {
 								'0xghi': { usd: 1 }
 							},
 							currentErc4626Prices: {},
-							currentEthPrice: { ethereum: { usd: 1 } },
-							currentIcpPrice: { 'internet-computer': { usd: 1 } },
+							currentEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } },
+							currentIcpPrice: { 'internet-computer': { usd: 1, usd_24h_change: 3 } },
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
-							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
-							currentSolPrice: { solana: { usd: 1 } },
+							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1, usd_24h_change: 3 } },
+							currentSolPrice: { solana: { usd: 1, usd_24h_change: 3 } },
 							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } }
 						}
 					});
