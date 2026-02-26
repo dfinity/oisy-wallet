@@ -99,6 +99,7 @@ mod tests;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
+mod utils;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
