@@ -22,16 +22,6 @@ const BENCH_PRINCIPAL_TEXT: &str =
 const TS0_NS: u64 = 1_000_000_000;
 const TS1_NS: u64 = 2_000_000_000;
 
-fn bench_principal() -> &'static Principal {
-    static P: OnceLock<Principal> = OnceLock::new();
-    P.get_or_init(|| {
-        Principal::from_text(BENCH_PRINCIPAL_TEXT).expect("valid bench principal text")
-    })
-}
-
-fn bench_stored_principal() -> StoredPrincipal {
-    StoredPrincipal(*bench_principal())
-}
 
 
 
