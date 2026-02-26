@@ -15,6 +15,7 @@ export abstract class AppWorker {
 	readonly #queue: WorkerQueue;
 	// TODO: use generics directly in the class so that we can use type WorkerListener
 	#listener: ((ev: MessageEvent) => void) | undefined;
+	#isTerminated = false;
 
 	static #singletonWorker?: Worker;
 	static #singletonRefCount = 0;
@@ -88,6 +89,13 @@ export abstract class AppWorker {
 	};
 
 	terminate = () => {
+		// Guard against double-terminate on the same instance
+		if (this.#isTerminated) {
+			return;
+		}
+
+		this.#isTerminated = true;
+
 		if (!this.#isSingleton) {
 			this.#worker.terminate();
 
@@ -96,8 +104,8 @@ export abstract class AppWorker {
 			return;
 		}
 
-		// If it's a singleton, we can have several listeners on the same instance of the worker.
-		// We track references across all `AppWorker` instances and terminate the worker when there are no more listeners.
+		// If it's a singleton, multiple `AppWorker` wrappers share the same underlying Worker.
+		// We track wrapper instances (ref count) and terminate the singleton Worker when the last one is destroyed.
 		this.#removeListener();
 
 		AppWorker.#singletonRefCount--;
