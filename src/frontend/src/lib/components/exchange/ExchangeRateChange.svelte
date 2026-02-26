@@ -43,10 +43,8 @@
 
 {#if nonNullish(parsedExchangeRateChange)}
 	<span
-		class="px-1 text-xs"
-		class:bg-opacity-30={background === 'dark'}
-		class:bg-primary={background === 'light'}
-		class:bg-primary-inverted={background === 'dark'}
+		class={`px-1 text-xs${background === 'dark' ? ' bg-black/30' : ''}`}
+		class:bg-white={background === 'light'}
 		class:rounded={nonNullish(background)}
 		class:sm:text-sm={fontSize === 'sm'}
 		class:text-error-primary={exchangeRateChangeSign === 'negative'}

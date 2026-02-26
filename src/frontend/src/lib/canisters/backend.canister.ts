@@ -62,8 +62,8 @@ export class BackendCanister extends Canister<BackendService> {
 		return new BackendCanister(canisterId, service, certifiedService);
 	}
 
-	listCustomTokens = ({ certified }: QueryParams): Promise<CustomToken[]> => {
-		const { list_custom_tokens } = this.caller({ certified });
+	listCustomTokens = (): Promise<CustomToken[]> => {
+		const { list_custom_tokens } = this.caller({ certified: true });
 
 		return list_custom_tokens();
 	};

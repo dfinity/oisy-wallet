@@ -6,7 +6,9 @@ use ic_cdk::api::management_canister::bitcoin::{
     UtxoFilter,
 };
 use ic_cdk_timers::{set_timer, set_timer_interval};
-use shared::types::bitcoin::FEE_PERCENTILES_UPDATE_INTERVAL;
+use shared::types::bitcoin::{
+    FEE_PERCENTILES_INITIAL_DELAY, FEE_PERCENTILES_UPDATE_INTERVAL, FEE_UPDATE_TIMEOUT_NS,
+};
 
 // Default fee values for different networks when API fails
 const DEFAULT_MAINNET_FEE: u64 = 10_000; // 10 sat/byte (10,000 msat/byte)
@@ -18,6 +20,8 @@ thread_local! {
     // regularly via timer. Heap memory provides faster access for frequent fee calculations,
     // and there's no need to persist these quickly-stale values across canister upgrades.
     static FEE_PERCENTILES_CACHE: RefCell<HashMap<BitcoinNetwork, Vec<MillisatoshiPerByte>>> = RefCell::new(HashMap::new());
+    /// `None` = idle; `Some(timestamp_ns)` = update started at that IC time.
+    static FEE_UPDATE_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
 }
 
 /// Returns the UTXOs of the given bitcoin address.
@@ -67,58 +71,87 @@ pub async fn get_all_utxos(
     Ok(all_utxos)
 }
 
+/// Spawns a fee-cache update only if no previous update is still in flight.
+/// If a previous update appears stuck (older than `FEE_UPDATE_TIMEOUT_NS`),
+/// the stale lock is cleared and a new update is allowed to proceed.
+fn spawn_fee_update_if_idle() {
+    let now = ic_cdk::api::time();
+
+    let update_in_progress = FEE_UPDATE_STARTED_AT.with(|cell| {
+        if let Some(started) = *cell.borrow() {
+            let elapsed = now.saturating_sub(started);
+
+            if elapsed > FEE_UPDATE_TIMEOUT_NS {
+                ic_cdk::eprintln!(
+                    "Fee update appears stuck (started {}s ago), forcing unlock",
+                    elapsed / 1_000_000_000
+                );
+                false
+            } else {
+                true
+            }
+        } else {
+            false
+        }
+    });
+
+    if update_in_progress {
+        return;
+    }
+
+    FEE_UPDATE_STARTED_AT.with(|cell| {
+        *cell.borrow_mut() = Some(now);
+    });
+
+    ic_cdk::spawn(async {
+        let _ = update_fee_percentiles_cache().await;
+        FEE_UPDATE_STARTED_AT.with(|cell| {
+            *cell.borrow_mut() = None;
+        });
+    });
+}
+
 /// Sets up periodic refreshing of Bitcoin transaction fee data.
-/// Initializes the cache immediately and configures automatic updates at regular intervals
+/// Pre-populates the cache synchronously with defaults so callers never see an empty cache,
+/// then schedules async updates to replace them with live data.
 pub fn init_fee_percentiles_cache() {
     ic_cdk::println!(
         "Initializing fee percentiles cache with {}-second update interval",
         FEE_PERCENTILES_UPDATE_INTERVAL.as_secs()
     );
 
+    for network in [BitcoinNetwork::Mainnet, BitcoinNetwork::Testnet] {
+        initialize_default_fee_percentiles(network);
+    }
+
     // Schedule the initial cache population and timer setup to run after init completes
-    set_timer(std::time::Duration::from_secs(0), || {
+    set_timer(FEE_PERCENTILES_INITIAL_DELAY, || {
         // Set up the recurring timer to update the data
         set_timer_interval(FEE_PERCENTILES_UPDATE_INTERVAL, || {
-            ic_cdk::spawn(async {
-                let _ = update_fee_percentiles_cache().await;
-            });
+            spawn_fee_update_if_idle();
         });
 
         // Initialize the cache immediately (after init)
-        ic_cdk::spawn(async {
-            let _ = update_fee_percentiles_cache().await;
-        });
+        spawn_fee_update_if_idle();
     });
 }
 
 /// Updates the Bitcoin transaction fee percentiles cache for all networks (Mainnet, Testnet,
-/// Regtest) in parallel. in the thread-local cache. Fetches current fee data from the bitcoin
-/// canister and stores it for quick access by other functions.
+/// Regtest) sequentially. Fetches current fee data from the bitcoin canister and stores it
+/// in the thread-local cache for quick access by other functions.
+///
+/// Networks are fetched one at a time to avoid concurrent inter-canister callbacks: if one
+/// call traps (e.g. Regtest on staging), sequential execution prevents it from corrupting
+/// the shared Wasm future state that `join_all` would use.
 async fn update_fee_percentiles_cache() -> Result<(), String> {
-    use futures::future::join_all;
-
     // Create an array of network types to fetch
-    let networks = [
-        BitcoinNetwork::Mainnet,
-        BitcoinNetwork::Testnet,
-        BitcoinNetwork::Regtest,
-    ];
+    let networks = [BitcoinNetwork::Mainnet, BitcoinNetwork::Testnet];
 
-    // Create a vector of futures, each fetching percentiles for a network
-    let futures = networks
-        .iter()
-        .map(|&network| async move { (network, fetch_current_fee_percentiles(network).await) })
-        .collect::<Vec<_>>();
-
-    // Execute all futures concurrently
-    let results = join_all(futures).await;
-
-    // Process the results
-    for (network, result) in results {
-        match result {
+    for network in networks {
+        match fetch_current_fee_percentiles(network).await {
             Ok(percentiles) => {
                 FEE_PERCENTILES_CACHE.with(|cache| {
-                    cache.borrow_mut().insert(network, percentiles.clone());
+                    cache.borrow_mut().insert(network, percentiles);
                 });
             }
             Err(err) => {

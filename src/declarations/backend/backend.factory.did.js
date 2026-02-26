@@ -242,6 +242,7 @@ export const idlFactory = ({ IDL }) => {
 		InvalidImageFormat: IDL.Null,
 		ContactNotFound: IDL.Null,
 		ImageTooLarge: IDL.Null,
+		TooManyContacts: IDL.Null,
 		RandomnessError: IDL.Null,
 		ImageExceedsMaxSize: IDL.Null,
 		CanisterStatusError: IDL.Null,
@@ -463,6 +464,7 @@ export const idlFactory = ({ IDL }) => {
 	const Stats = IDL.Record({
 		user_profile_count: IDL.Nat64,
 		custom_token_count: IDL.Nat64,
+		token_activity_count: IDL.Nat64,
 		user_timestamps_count: IDL.Nat64,
 		user_token_count: IDL.Nat64
 	});
@@ -553,7 +555,7 @@ export const idlFactory = ({ IDL }) => {
 		get_user_profile: IDL.Func([], [GetUserProfileResult], ['query']),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
-		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
+		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),

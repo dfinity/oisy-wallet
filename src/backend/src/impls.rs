@@ -47,6 +47,7 @@ impl From<&State> for Stats {
             user_timestamps_count: state.user_profile_updated.len(),
             user_token_count: state.user_token.len(),
             custom_token_count: state.custom_token.len(),
+            token_activity_count: state.token_activity.len(),
         }
     }
 }
@@ -77,6 +78,7 @@ impl Storable for StoredPrincipal {
 impl Storable for StoredTokenId {
     // CustomTokenId includes String, so treat it as unbounded.
     // The bounding is applied when a user saves a custom token.
+    // TODO: add maximum size expectations or validation to ensure token IDs limits
     const BOUND: Bound = Bound::Unbounded;
 
     fn to_bytes(&self) -> Cow<'_, [u8]> {

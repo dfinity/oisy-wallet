@@ -70,6 +70,7 @@ use crate::{
     token::{add_to_user_token, remove_from_user_token},
     token_activity::{mark_token_active, mark_tokens_active},
     types::{ContactMap, PowChallengeMap, StoredTokenId},
+    types::{ContactMap, PowChallengeMap, TokenActivityMap},
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
         update_experimental_feature_settings, update_network_settings,
@@ -96,6 +97,10 @@ mod user_profile_model;
 
 #[cfg(test)]
 mod tests;
+mod token_activity;
+
+#[cfg(feature = "canbench-rs")]
+mod benchmark;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -105,13 +110,17 @@ const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 const BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(7);
-const EXCHANGE_RATE_MEMORY_ID: MemoryId = MemoryId::new(8);
-const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(9);
+const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(8);
+const EXCHANGE_RATE_MEMORY_ID: MemoryId = MemoryId::new(9);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
         MemoryManager::init(DefaultMemoryImpl::default())
     );
+
+    /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
+    static HOUSEKEEPING_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
+    static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
 
     static STATE: RefCell<State> = RefCell::new(
         MEMORY_MANAGER.with(|mm| State {
@@ -126,8 +135,8 @@ thread_local! {
             btc_user_pending_transactions: BtcUserPendingTransactionsMap::init(
                 mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),
             ),
-            exchange_rates: ExchangeRateMap::init(mm.borrow().get(EXCHANGE_RATE_MEMORY_ID)),
             token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
+           exchange_rates: ExchangeRateMap::init(mm.borrow().get(EXCHANGE_RATE_MEMORY_ID)),
         })
     );
 }
@@ -167,8 +176,10 @@ pub struct State {
     pow_challenge: PowChallengeMap,
     contact: ContactMap,
     btc_user_pending_transactions: BtcUserPendingTransactionsMap,
-    exchange_rates: ExchangeRateMap,
+    // TODO: implement a periodic cleanup of old entries
+    // TODO: limit the map size with an eviction policy
     token_activity: TokenActivityMap,
+    exchange_rates: ExchangeRateMap,
 }
 
 fn set_config(arg: InitArg) {
@@ -178,16 +189,109 @@ fn set_config(arg: InitArg) {
     });
 }
 
+/// 2 hours in nanoseconds — if a housekeeping run has been in progress for
+/// longer than this, we consider it stuck and force-unlock so the next timer
+/// tick can proceed.
+const HOUSEKEEPING_TIMEOUT_NS: u64 = 2 * 60 * 60 * 1_000_000_000;
+
+pub(crate) const MAX_CONCURRENT_ALLOW_SIGNING: u32 = 50;
+
+/// Returns `true` if a housekeeping run is currently in flight and has not
+/// timed out.  If the lock has been held longer than `HOUSEKEEPING_TIMEOUT_NS`,
+/// logs a warning and returns `false` so the caller can force a new run.
+pub(crate) fn is_housekeeping_in_progress(now_ns: u64) -> bool {
+    HOUSEKEEPING_STARTED_AT.with(|cell| {
+        if let Some(started) = *cell.borrow() {
+            let elapsed = now_ns.saturating_sub(started);
+            if elapsed > HOUSEKEEPING_TIMEOUT_NS {
+                eprintln!(
+                    "Housekeeping appears stuck (started {}s ago), forcing unlock",
+                    elapsed / 1_000_000_000
+                );
+                false
+            } else {
+                true
+            }
+        } else {
+            false
+        }
+    })
+}
+
+/// Spawns housekeeping only if no previous run is still in flight.
+/// If a previous run appears stuck (older than `HOUSEKEEPING_TIMEOUT_NS`),
+/// the stale lock is cleared and a new run is allowed to proceed.
+fn spawn_housekeeping_if_idle() {
+    let now = time();
+
+    if is_housekeeping_in_progress(now) {
+        return;
+    }
+
+    HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = Some(now));
+
+    ic_cdk::spawn(async {
+        hourly_housekeeping_tasks().await;
+        HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = None);
+    });
+}
+
+/// Atomically increments the in-flight `allow_signing` counter if below
+/// `MAX_CONCURRENT_ALLOW_SIGNING`.  Returns `true` on success.
+///
+/// The caller is responsible for decrementing after the task finishes.
+/// On IC traps the counter stays elevated, but the cap prevents unbounded
+/// accumulation.  In practice the `allow_signing` code path contains no
+/// panic sites, so leaked slots are unlikely.
+pub(crate) fn try_acquire_allow_signing_slot() -> bool {
+    ALLOW_SIGNING_IN_PROGRESS.with(|cell| {
+        let mut count = cell.borrow_mut();
+        if *count >= MAX_CONCURRENT_ALLOW_SIGNING {
+            return false;
+        }
+        *count += 1;
+        true
+    })
+}
+
+/// Decrements the in-flight `allow_signing` counter.
+pub(crate) fn release_allow_signing_slot() {
+    ALLOW_SIGNING_IN_PROGRESS.with(|cell| *cell.borrow_mut() -= 1);
+}
+
+/// Spawns an `allow_signing` task only if the number of in-flight tasks is
+/// below `MAX_CONCURRENT_ALLOW_SIGNING`.
+fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
+    if !try_acquire_allow_signing_slot() {
+        eprintln!(
+            "Skipped allow_signing for user {}: too many concurrent tasks",
+            stored_principal.0,
+        );
+        return;
+    }
+
+    ic_cdk::spawn(async move {
+        if let Err(e) = signer::allow_signing(None).await {
+            ic_cdk::println!(
+                "Error enabling signing for user {}: {:?}",
+                stored_principal.0,
+                e
+            );
+        }
+        release_allow_signing_slot();
+    });
+}
+
 /// Runs housekeeping tasks immediately, then periodically:
 /// - `hourly_housekeeping_tasks`
 fn start_periodic_housekeeping_timers() {
     // Run housekeeping tasks once, immediately but asynchronously.
     let immediate = Duration::ZERO;
-    set_timer(immediate, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+    set_timer(immediate, spawn_housekeeping_if_idle);
 
     // Then periodically:
     let hour = Duration::from_secs(60 * 60);
-    let _ = set_timer_interval(hour, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+     let _ = set_timer_interval(hour, spawn_housekeeping_if_idle);
 
     // Refresh exchange rates periodically
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
@@ -295,10 +399,20 @@ pub fn set_custom_token(token: CustomToken) {
     mark_token_active(&CustomTokenId::from(&token.token));
 
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
+
+    mark_token_active(&CustomTokenId::from(&token.token));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
+    if tokens.len() > token::MAX_TOKEN_LIST_LENGTH {
+        ic_cdk::trap(&format!(
+            "Token list length should not exceed {}",
+            token::MAX_TOKEN_LIST_LENGTH
+        ));
+    }
+
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let ids = tokens
@@ -334,19 +448,35 @@ pub fn remove_custom_token(token: CustomToken) {
     });
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
+/// List the custom tokens for the calling user.
+///
+/// Note: This method was previously exposed as a *query* but is now an *update*
+/// call. The change is intentional and breaking: `list_custom_tokens` now tracks
+/// token activity by calling `mark_tokens_active`, which mutates canister state.
+/// Because queries must not modify state on the IC, this function must be an
+/// update, not a query.
+///
+/// Implications for callers:
+/// - This call now participates in consensus and may have higher latency than a query.
+/// - It consumes cycles as an update call.
+/// - Integrations that previously relied on query semantics must be updated to invoke this as an
+///   update method.
 pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
+
     let tokens = read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0);
 
-    mark_tokens_active(
-        &tokens
+    if !tokens.is_empty() {
+        let ids: Vec<CustomTokenId> = tokens
             .iter()
             .map(|t| CustomTokenId::from(&t.token))
-            .collect::<Vec<_>>(),
-    );
+            .collect();
 
+        mark_tokens_active(&ids);
+    }
+  
     tokens
 }
 
@@ -821,25 +951,10 @@ pub fn create_user_profile() -> UserProfile {
     });
 
     // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
-    // Spawn the async task for allow_signing after returning UserProfile synchronously
-    ic_cdk::spawn(async move {
-        // Upon initial user login, we have to that ensure allow_signing is called to handle
-        // cases where users lack the cycles required for signer operations. To
-        // guarantee correct functionality, create_user_profile(..) must be invoked
-        // before any signer-related calls (e.g., get_eth_address). Spawns the async
-        // task separately after returning UserProfile synchronously
-        if let Err(e) = signer::allow_signing(None).await {
-            // We don't return errors or panic here because:
-            // 1. The user profile was already created successfully
-            // 2. This is running in a spawned task, so we can't return errors to the original
-            //    caller
-            ic_cdk::println!(
-                "Error enabling signing for user {}: {:?}",
-                stored_principal.0,
-                e
-            );
-        }
-    });
+    // async task. Upon initial user login, we ensure allow_signing is called to handle cases
+    // where users lack the cycles required for signer operations. create_user_profile(..) must
+    // be invoked before any signer-related calls (e.g., get_eth_address).
+    spawn_allow_signing_if_below_limit(stored_principal);
 
     user_profile
 }
@@ -1088,4 +1203,5 @@ pub fn get_contacts() -> GetContactsResult {
     let result = Ok(contacts::get_contacts());
     result.into()
 }
+
 export_candid!();

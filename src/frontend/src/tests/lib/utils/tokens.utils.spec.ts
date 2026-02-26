@@ -101,7 +101,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: []
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
@@ -129,7 +130,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: [ETHEREUM_TOKEN, BTC_MAINNET_TOKEN]
+				$tokensToPin: [ETHEREUM_TOKEN, BTC_MAINNET_TOKEN],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
@@ -151,7 +153,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: [ICP_TOKEN]
+				$tokensToPin: [ICP_TOKEN],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
@@ -185,7 +188,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: [mockDeprecatedToken]
+				$tokensToPin: [mockDeprecatedToken],
+				$networksToPin: []
 			});
 
 			expect(result.at(-1)?.id).toBe(mockDeprecatedToken.id);
@@ -229,7 +233,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: []
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([tokenSymbolA.id, tokenSymbolZ.id]);
@@ -293,7 +298,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: []
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([tokenA.id, tokenB.id, tokenC.id, tokenD.id]);
@@ -336,7 +342,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: []
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([tokenA.id, tokenB.id]);
@@ -379,7 +386,8 @@ describe('tokens.utils', () => {
 
 			const result = sortTokens({
 				$tokens: tokens,
-				$tokensToPin: []
+				$tokensToPin: [],
+				$networksToPin: []
 			});
 
 			expect(result.map((t) => t.id)).toEqual([
@@ -427,10 +435,71 @@ describe('tokens.utils', () => {
 			const result = sortTokens({
 				$tokens: tokens,
 				$tokensToPin: [],
+				$networksToPin: [],
 				primarySortStrategy: 'performance'
 			});
 
 			expect(result.map((t) => t.id)).toEqual([tokenPerfHigh.id, tokenPerfLow.id]);
+		});
+
+		it('should sort tokens with performance data before tokens without when primarySortStrategy is performance, and fall back correctly for missing performance', () => {
+			const tokenWithPerf: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-PERF-PRESENT'),
+				symbol: 'PERF',
+				name: 'Has perf',
+				network: ICP_NETWORK
+			};
+
+			const tokenNoPerfHighUsd: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-PERF-MISSING-HIGH'),
+				symbol: 'NOPERF-HIGH',
+				name: 'No perf (high USD)',
+				network: ICP_NETWORK
+			};
+
+			const tokenNoPerfLowUsd: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-PERF-MISSING-LOW'),
+				symbol: 'NOPERF-LOW',
+				name: 'No perf (low USD)',
+				network: ICP_NETWORK
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenWithPerf.id]: { data: 1n, certified },
+				[tokenNoPerfHighUsd.id]: { data: 100n, certified },
+				[tokenNoPerfLowUsd.id]: { data: 10n, certified }
+			};
+
+			const $exchanges: ExchangesData = {
+				[tokenWithPerf.id]: { usd: 1, usd_market_cap: 0, usd_24h_change: 1 },
+				[tokenNoPerfHighUsd.id]: { usd: 1, usd_market_cap: 0 },
+				[tokenNoPerfLowUsd.id]: { usd: 1, usd_market_cap: 0 }
+			};
+
+			const tokens = [tokenNoPerfLowUsd, tokenWithPerf, tokenNoPerfHighUsd].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
+			const result = sortTokens({
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: [],
+				primarySortStrategy: 'performance'
+			});
+
+			expect(result.map((t) => t.id)).toEqual([
+				tokenWithPerf.id,
+				tokenNoPerfHighUsd.id,
+				tokenNoPerfLowUsd.id
+			]);
 		});
 
 		it('should prioritise symbol ordering when primarySortStrategy is symbol, after deprecation', () => {
@@ -472,6 +541,7 @@ describe('tokens.utils', () => {
 			const result = sortTokens({
 				$tokens: tokens,
 				$tokensToPin: [],
+				$networksToPin: [],
 				primarySortStrategy: 'symbol'
 			});
 

@@ -43,6 +43,8 @@ pub type BtcUserPendingTransactionsMap =
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct StoredTokenId(pub CustomTokenId);
 
+pub type TokenActivityMap = StableBTreeMap<StoredTokenId, Timestamp, VMem>;
+
 pub type ExchangeRateMap = StableBTreeMap<StoredTokenId, Candid<ExchangeRate>, VMem>;
 
-pub type TokenActivityMap = StableBTreeMap<StoredTokenId, Timestamp, VMem>;
+
