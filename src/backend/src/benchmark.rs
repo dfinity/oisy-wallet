@@ -13,9 +13,8 @@ use shared::types::{
 };
 
 use super::{
-    mutate_state, read_config, read_state, user_profile, Candid, Principal, Stats, StoredPrincipal,
     add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
-    user_profile, ByteBuf, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
+    user_profile, ByteBuf, Candid, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
     UserProfileModel,
 };
 
@@ -67,8 +66,7 @@ fn make_custom_token(chain_id: u64, suffix: u64) -> CustomToken {
 fn matches_custom_token(token: &CustomToken) -> impl Fn(&CustomToken) -> bool + '_ {
     let id = CustomTokenId::from(&token.token);
     move |t: &CustomToken| CustomTokenId::from(&t.token) == id
-  }
-
+}
 
 fn setup_contact(id: u64) {
     let sp = bench_stored_principal();
@@ -93,8 +91,7 @@ fn setup_contact(id: u64) {
         stored.update_timestamp_ns = TS0_NS;
         s.contact.insert(sp, Candid(stored));
     });
-  }
-
+}
 
 // ---------------------------------------------------------------------------
 // Config & Stats
