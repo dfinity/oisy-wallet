@@ -178,9 +178,9 @@
 	{@const { data } = firstTransaction}
 
 	{#snippet title()}
-		<WalletConnectModalTitle
-			>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
-		>
+		<WalletConnectModalTitle>
+			{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}
+		</WalletConnectModalTitle>
 	{/snippet}
 
 	<EthFeeContext
