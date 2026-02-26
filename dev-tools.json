@@ -56,6 +56,10 @@
 		"method": "cargo-binstall",
 		"version": "0.1.4"
 	},
+	"canbench": {
+		"method": "cargo-binstall",
+		"version": "0.1.18"
+	},
 	"zizmor": {
 		"method": "cargo-binstall",
 		"version": "1.5.2"
