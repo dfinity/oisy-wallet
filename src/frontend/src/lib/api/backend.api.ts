@@ -38,7 +38,7 @@ let canister: BackendCanister | undefined = undefined;
 
 export const listCustomTokens = async ({
 	identity
-}: CanisterApiFunctionParams<QueryParams>): Promise<CustomToken[]> => {
+}: CanisterApiFunctionParams): Promise<CustomToken[]> => {
 	const { listCustomTokens } = await backendCanister({ identity });
 
 	return listCustomTokens();

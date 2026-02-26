@@ -382,9 +382,9 @@ pub fn set_custom_token(token: CustomToken) {
         CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
     };
 
-    mark_token_active(&CustomTokenId::from(&token.token));
-
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
+
+    mark_token_active(&CustomTokenId::from(&token.token));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
@@ -434,17 +434,32 @@ pub fn remove_custom_token(token: CustomToken) {
 
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
+/// List the custom tokens for the calling user.
+///
+/// Note: This method was previously exposed as a *query* but is now an *update*
+/// call. The change is intentional and breaking: `list_custom_tokens` now tracks
+/// token activity by calling `mark_tokens_active`, which mutates canister state.
+/// Because queries must not modify state on the IC, this function must be an
+/// update, not a query.
+///
+/// Implications for callers:
+/// - This call now participates in consensus and may have higher latency than a query.
+/// - It consumes cycles as an update call.
+/// - Integrations that previously relied on query semantics must be updated to invoke this as an
+///   update method.
 pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let tokens = read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0);
 
-    mark_tokens_active(
-        &tokens
+    if !tokens.is_empty() {
+        let ids: Vec<CustomTokenId> = tokens
             .iter()
             .map(|t| CustomTokenId::from(&t.token))
-            .collect::<Vec<_>>(),
-    );
+            .collect();
+
+        mark_tokens_active(&ids);
+    }
 
     tokens
 }
