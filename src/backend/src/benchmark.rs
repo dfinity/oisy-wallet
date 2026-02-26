@@ -71,8 +71,6 @@ fn matches_custom_token(token: &CustomToken) -> impl Fn(&CustomToken) -> bool + 
     move |t: &CustomToken| CustomTokenId::from(&t.token) == id
 }
 
-
-
 fn setup_contact(id: u64) {
     let sp = bench_stored_principal();
     mutate_state(|s| {
