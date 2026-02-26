@@ -42,7 +42,8 @@
 			"less": "Less",
 			"ellipsis": "…",
 			"learn_more": "Learn more",
-			"sorting": "Sorting"
+			"sorting": "Sorting",
+			"unlimited": "Unlimited $items"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",

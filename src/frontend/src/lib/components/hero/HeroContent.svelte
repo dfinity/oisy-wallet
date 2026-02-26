@@ -180,15 +180,15 @@
 					class="my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-xs text-nowrap sm:text-base"
 				>
 					{#if nonNullish(pageTokenUi)}
-						<div class="flex min-w-0 items-center justify-center gap-1 sm:gap-2" in:fade>
+						<div class="flex min-w-0 items-center justify-start gap-1 sm:gap-2" in:fade>
 							<TokenLogo data={pageTokenUi} logoSize="sm" ring />
 
-							<div class="flex flex-col text-left">
+							<div class="flex flex-col truncate text-left">
 								<span class="truncate font-semibold">
 									{getTokenDisplayName(pageTokenUi)}
 								</span>
 
-								<div class="flex items-center justify-center gap-1">
+								<div class="flex items-center justify-start gap-1">
 									<NetworkLogo network={pageTokenUi.network} size="xxs" transparent />
 									<span class="truncate">
 										{pageTokenUi.network.name}
