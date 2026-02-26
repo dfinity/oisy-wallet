@@ -35,7 +35,7 @@
 			{$i18n.send.error.unable_to_retrieve_amount}
 		{:else if isUnlimited}
 			{replacePlaceholders($i18n.core.text.unlimited, {
-				$items: token.symbol
+				$items: token?.symbol ?? ''
 			})}
 		{:else}
 			<ExchangeAmountDisplay
