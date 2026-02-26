@@ -82,8 +82,7 @@ describe('ExchangeRateChange', () => {
 			background: 'dark'
 		});
 
-		expect(getByText('1.23%')).toHaveClass('bg-black');
-		expect(getByText('1.23%')).toHaveClass('bg-opacity-30');
+		expect(getByText('1.23%')).toHaveClass('bg-black/30');
 	});
 
 	it('should render the time-frame', () => {
