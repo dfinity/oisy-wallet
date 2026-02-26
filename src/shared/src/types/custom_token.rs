@@ -37,9 +37,15 @@ pub struct IcPunksToken {
 }
 
 /// A network-specific unique Solana token identifier.
-#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
+#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug, PartialOrd, Ord)]
 #[serde(remote = "Self")]
 pub struct SplTokenId(pub String);
+impl SplTokenId {
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
 
 /// A Solana token
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -51,9 +57,15 @@ pub struct SplToken {
 }
 
 /// A network-specific unique ERC20 token identifier.
-#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
+#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug, PartialOrd, Ord)]
 #[serde(remote = "Self")]
 pub struct ErcTokenId(pub String);
+impl ErcTokenId {
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
 
 /// EVM chain ID
 ///
@@ -103,7 +115,7 @@ pub enum TokenSection {
 }
 
 /// A cross-chain token identifier.
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 #[serde(remote = "Self")]
 #[repr(u8)]
 pub enum CustomTokenId {
