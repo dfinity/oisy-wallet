@@ -13,6 +13,7 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkICPTestnet, selectedNetwork } from '$lib/derived/network.derived';
+	import { networks } from '$lib/derived/networks.derived';
 	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -87,7 +88,8 @@
 		pinEnabledTokensAtTop(
 			sortTokens({
 				$tokens: allTokensUi,
-				$tokensToPin
+				$tokensToPin,
+				$networksToPin: $networks
 			})
 		)
 	);

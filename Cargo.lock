@@ -125,7 +125,6 @@ dependencies = [
  "canbench-rs",
  "candid",
  "candid_parser",
- "futures",
  "getrandom 0.2.17",
  "hex",
  "ic-cdk 0.17.2",
