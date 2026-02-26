@@ -19,10 +19,6 @@ const NetworkPaySchema = z.object({
 	openCryptoPay: z.string()
 });
 
-export const NetworkAppMetadataSchema = z.object({
-	explorerUrl: UrlSchema
-});
-
 const IconSchema = z
 	.string()
 	.refine((value) => value.endsWith('.svg') || value.startsWith('data:image/svg+xml'), {
