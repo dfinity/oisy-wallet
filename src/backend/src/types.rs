@@ -5,9 +5,14 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    backend_config::Config, bitcoin::StoredPendingTransaction, contact::StoredContacts,
-    custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
-    user_profile::StoredUserProfile, Timestamp,
+    backend_config::Config,
+    bitcoin::StoredPendingTransaction,
+    contact::StoredContacts,
+    custom_token::{CustomToken, CustomTokenId},
+    pow::StoredChallenge,
+    token::UserToken,
+    user_profile::StoredUserProfile,
+    Timestamp,
 };
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
@@ -33,3 +38,8 @@ pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VM
 pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>;
 pub type BtcUserPendingTransactionsMap =
     StableBTreeMap<StoredPrincipal, Candid<PendingTransactionsMap>, VMem>;
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct StoredTokenId(pub CustomTokenId);
+
+pub type TokenActivityMap = StableBTreeMap<StoredTokenId, Timestamp, VMem>;

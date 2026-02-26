@@ -1,12 +1,12 @@
 use core::ops::Deref;
 use std::borrow::Cow;
 
-use candid::{CandidType, Deserialize, Principal};
+use candid::{decode_one, encode_one, CandidType, Deserialize, Principal};
 use ic_stable_structures::storable::{Blob, Bound, Storable};
 use shared::types::Stats;
 
 use crate::{
-    types::{Candid, StoredPrincipal},
+    types::{Candid, StoredPrincipal, StoredTokenId},
     State,
 };
 
@@ -47,6 +47,7 @@ impl From<&State> for Stats {
             user_timestamps_count: state.user_profile_updated.len(),
             user_token_count: state.user_token.len(),
             custom_token_count: state.custom_token.len(),
+            token_activity_count: state.token_activity.len(),
         }
     }
 }
@@ -71,5 +72,24 @@ impl Storable for StoredPrincipal {
         Self(Principal::from_slice(
             Blob::<29>::from_bytes(bytes).as_slice(),
         ))
+    }
+}
+
+impl Storable for StoredTokenId {
+    // CustomTokenId includes String, so treat it as unbounded.
+    // The bounding is applied when a user saves a custom token.
+    // TODO: add maximum size expectations or validation to ensure token IDs limits
+    const BOUND: Bound = Bound::Unbounded;
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        Cow::Owned(encode_one(&self.0).expect("failed to candid-encode CustomTokenId"))
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        encode_one(&self.0).expect("failed to candid-encode CustomTokenId")
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        Self(decode_one(bytes.as_ref()).expect("failed to candid-decode CustomTokenId"))
     }
 }
