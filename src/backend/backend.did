@@ -151,6 +151,7 @@ type ContactError = variant {
 	InvalidImageFormat;
 	ContactNotFound;
 	ImageTooLarge;
+	TooManyContacts;
 	RandomnessError;
 	ImageExceedsMaxSize;
 	CanisterStatusError;
@@ -316,6 +317,7 @@ type SplToken = record {
 type Stats = record {
 	user_profile_count : nat64;
 	custom_token_count : nat64;
+	token_activity_count : nat64;
 	user_timestamps_count : nat64;
 	user_token_count : nat64
 };
@@ -556,7 +558,20 @@ service : (Arg) -> {
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	// Processes external HTTP requests.
 	http_request : (HttpRequest) -> (HttpResponse) query;
-	list_custom_tokens : () -> (vec CustomToken) query;
+	// List the custom tokens for the calling user.
+	//
+	// Note: This method was previously exposed as a *query* but is now an *update*
+	// call. The change is intentional and breaking: `list_custom_tokens` now tracks
+	// token activity by calling `mark_tokens_active`, which mutates canister state.
+	// Because queries must not modify state on the IC, this function must be an
+	// update, not a query.
+	//
+	// Implications for callers:
+	// - This call now participates in consensus and may have higher latency than a query.
+	// - It consumes cycles as an update call.
+	// - Integrations that previously relied on query semantics must be updated to invoke this as an
+	// update method.
+	list_custom_tokens : () -> (vec CustomToken);
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
 	// Add or update custom token for the user.

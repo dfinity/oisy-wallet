@@ -1,7 +1,6 @@
-import AiAssistantShowBalanceTool from '$lib/components/ai-assistant/AiAssistantShowBalanceTool.svelte';
-
 import { USDC_TOKEN as USDC_TOKEN_ERC20 } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import AiAssistantShowBalanceTool from '$lib/components/ai-assistant/AiAssistantShowBalanceTool.svelte';
 import { formatToken } from '$lib/utils/format.utils';
 import { render } from '@testing-library/svelte';
 

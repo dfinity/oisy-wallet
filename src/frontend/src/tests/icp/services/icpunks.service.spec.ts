@@ -118,12 +118,10 @@ describe('icpunks.services', () => {
 			expect(listCustomTokens).toHaveBeenCalledTimes(2);
 			expect(listCustomTokens).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
-				certified: false,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
 			expect(listCustomTokens).toHaveBeenNthCalledWith(2, {
 				identity: mockIdentity,
-				certified: true,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
 		});

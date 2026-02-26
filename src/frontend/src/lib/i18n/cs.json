@@ -41,7 +41,9 @@
 			"more": "Více",
 			"less": "Méně",
 			"ellipsis": "…",
-			"learn_more": "Zjistit více"
+			"learn_more": "Zjistit více",
+			"sorting": "Řazení",
+			"unlimited": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -1142,7 +1144,10 @@
 			"hide_more_networks": "Skrýt další sítě",
 			"on_network": " na $network",
 			"delete_token": "Smazat token",
-			"edit_token": "Upravit token"
+			"edit_token": "Upravit token",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Podrobnosti o tokenu",
@@ -1281,7 +1286,6 @@
 			"by_collection": "Seskupit podle kolekce",
 			"show_spam": "Zobrazit spam",
 			"show_hidden": "Zobrazit skryté",
-			"sorting": "Řazení",
 			"recents_first": "Od nejnovějších",
 			"oldest_first": "Od nejstarších",
 			"collection_atoz": "Název kolekce A-Z",

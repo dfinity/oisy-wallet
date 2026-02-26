@@ -41,7 +41,9 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": ""
+			"learn_more": "",
+			"sorting": "",
+			"unlimited": ""
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
@@ -1142,7 +1144,10 @@
 			"hide_more_networks": "Ocultar mais redes",
 			"on_network": " na rede $network",
 			"delete_token": "Excluir token",
-			"edit_token": "Editar token"
+			"edit_token": "Editar token",
+			"sort_by_value": "",
+			"sort_by_performance": "",
+			"sort_by_symbol": ""
 		},
 		"details": {
 			"title": "Detalhes do token",
@@ -1281,7 +1286,6 @@
 			"by_collection": "",
 			"show_spam": "",
 			"show_hidden": "",
-			"sorting": "",
 			"recents_first": "",
 			"oldest_first": "",
 			"collection_atoz": "",

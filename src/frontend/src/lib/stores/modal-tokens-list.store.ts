@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { networks } from '$lib/derived/networks.derived';
 import { stakeBalances } from '$lib/derived/stake.derived';
 import { tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -10,6 +11,7 @@ import {
 	filterTokensForSelectedNetwork,
 	filterTokensForSelectedNetworks
 } from '$lib/utils/network.utils';
+import { mapTokenUi } from '$lib/utils/token.utils';
 import { filterTokens, filterTokensByNft, sortTokens } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
@@ -49,6 +51,7 @@ export const initModalTokensListContext = (
 			balancesStore,
 			stakeBalances,
 			tokensToPin,
+			networks,
 			filterNetworksIds,
 			filterNfts
 		],
@@ -62,6 +65,7 @@ export const initModalTokensListContext = (
 			$balances,
 			$stakeBalances,
 			$tokensToPin,
+			$networksToPin,
 			$filterNetworksIds,
 			$filterNfts
 		]) => {
@@ -91,12 +95,19 @@ export const initModalTokensListContext = (
 				return filteredByNft;
 			}
 
+			const tokensUi = filteredByNft.map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances,
+					$exchanges
+				})
+			);
+
 			const pinnedWithBalance = sortTokens({
-				$tokens: filteredByNft,
-				$balances,
-				$stakeBalances,
-				$exchanges,
-				$tokensToPin
+				$tokens: tokensUi,
+				$tokensToPin,
+				$networksToPin
 			});
 
 			return $filterZeroBalance
