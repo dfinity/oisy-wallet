@@ -1,13 +1,48 @@
 #![allow(unused_must_use)]
 
+use std::sync::OnceLock;
+
 use canbench_rs::{bench, bench_fn, BenchResult};
+use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
 use shared::types::user_profile::StoredUserProfile;
 
 use super::{
-    mutate_state, read_config, read_state, Principal, Stats, StoredPrincipal, UserProfileModel,
+    mutate_state, read_config, read_state, BtcUserPendingTransactionsModel, PendingTransaction,
+    Principal, State, Stats, StoredPendingTransaction, StoredPrincipal, UserProfileModel,
 };
 
+const BENCH_PRINCIPAL_TEXT: &str =
+    "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
+
 const TS0_NS: u64 = 1_000_000_000;
+const HEIGHT: u32 = 100;
+
+fn bench_principal() -> &'static Principal {
+    static P: OnceLock<Principal> = OnceLock::new();
+    P.get_or_init(|| {
+        Principal::from_text(BENCH_PRINCIPAL_TEXT).expect("valid bench principal text")
+    })
+}
+
+fn make_utxo(txid_byte: u8, vout: u32, value: u64) -> Utxo {
+    Utxo {
+        outpoint: Outpoint {
+            txid: vec![txid_byte; 32],
+            vout,
+        },
+        value,
+        height: HEIGHT,
+    }
+}
+
+fn with_btc_pending_model<R>(
+    state: &mut State,
+    f: impl FnOnce(&mut BtcUserPendingTransactionsModel<'_>) -> R,
+) -> R {
+    let mut model =
+        BtcUserPendingTransactionsModel::new(&mut state.btc_user_pending_transactions, None, None);
+    f(&mut model)
+}
 
 // ---------------------------------------------------------------------------
 // Config & Stats
@@ -63,4 +98,133 @@ fn bench_get_account_creation_timestamps_50() -> BenchResult {
 #[bench(raw)]
 fn bench_get_account_creation_timestamps_200() -> BenchResult {
     bench_get_account_creation_timestamps_with_count(200)
+}
+
+// ---------------------------------------------------------------------------
+// BTC pending transactions
+// ---------------------------------------------------------------------------
+
+fn bench_btc_add_pending_transaction_with_count(existing_count: u8) -> BenchResult {
+    let principal = *bench_principal();
+    let address = "bc1qbench000000000000000000000000000000000".to_string();
+
+    let existing_utxos: Vec<Utxo> = (0..existing_count)
+        .map(|i| make_utxo(i, 0, 10_000))
+        .collect();
+
+    mutate_state(|state| {
+        with_btc_pending_model(state, |model| {
+            for (i, utxo) in (0..existing_count).zip(existing_utxos.iter()) {
+                let tx = StoredPendingTransaction {
+                    txid: vec![i; 32],
+                    utxos: vec![utxo.clone()],
+                    created_at_timestamp_ns: 1_000_000_000,
+                };
+                model
+                    .add_pending_transaction(principal, address.clone(), tx)
+                    .unwrap();
+            }
+        });
+    });
+
+    let new_utxos = vec![
+        make_utxo(existing_count + 10, 0, 50_000),
+        make_utxo(existing_count + 11, 0, 30_000),
+    ];
+
+    let current_utxos: Vec<Utxo> = existing_utxos
+        .iter()
+        .chain(new_utxos.iter())
+        .cloned()
+        .collect();
+
+    let now_ns = TS0_NS + 100;
+    let txid = vec![0xFF; 32];
+
+    bench_fn(|| {
+        mutate_state(|state| {
+            with_btc_pending_model(state, |model| {
+                model.prune_pending_transactions(principal, &current_utxos, now_ns);
+
+                assert!(
+                    !model.has_intersecting_pending_utxos(principal, &new_utxos),
+                    "unexpected intersection"
+                );
+
+                let pending = StoredPendingTransaction {
+                    txid: txid.clone(),
+                    utxos: new_utxos.clone(),
+                    created_at_timestamp_ns: now_ns,
+                };
+
+                model
+                    .add_pending_transaction(principal, address.clone(), pending)
+                    .unwrap();
+            });
+        });
+    })
+}
+
+#[bench(raw)]
+fn bench_btc_add_pending_transaction_5() -> BenchResult {
+    bench_btc_add_pending_transaction_with_count(5)
+}
+
+#[bench(raw)]
+fn bench_btc_add_pending_transaction_200() -> BenchResult {
+    bench_btc_add_pending_transaction_with_count(200)
+}
+
+fn bench_btc_get_pending_transactions_with_count(count: u8) -> BenchResult {
+    let principal = *bench_principal();
+    let address = "bc1qbench_get_pending_0000000000000000".to_string();
+
+    let utxos: Vec<Utxo> = (0..count).map(|i| make_utxo(i + 50, 0, 5_000)).collect();
+
+    mutate_state(|state| {
+        with_btc_pending_model(state, |model| {
+            for (i, utxo) in (50..).zip(utxos.iter()) {
+                let tx = StoredPendingTransaction {
+                    txid: vec![i; 32],
+                    utxos: vec![utxo.clone()],
+                    created_at_timestamp_ns: 1_000_000_000,
+                };
+
+                model
+                    .add_pending_transaction(principal, address.clone(), tx)
+                    .unwrap();
+            }
+        });
+    });
+
+    let now_ns = TS0_NS + 100;
+
+    bench_fn(|| {
+        let stored = mutate_state(|state| {
+            with_btc_pending_model(state, |model| {
+                model.prune_pending_transactions(principal, &utxos, now_ns);
+                model.get_pending_transactions(&principal, &address)
+            })
+        });
+
+        let pending: Vec<PendingTransaction> = stored
+            .iter()
+            .map(|tx| PendingTransaction {
+                txid: tx.txid.clone(),
+                utxos: tx.utxos.clone(),
+            })
+            .collect();
+
+        std::hint::black_box(pending);
+    })
+}
+
+#[bench(raw)]
+fn bench_btc_get_pending_transactions_5() -> BenchResult {
+    bench_btc_get_pending_transactions_with_count(5)
+}
+
+#[bench(raw)]
+fn bench_btc_get_pending_transactions_200() -> BenchResult {
+    bench_btc_get_pending_transactions_with_count(200)
 }
