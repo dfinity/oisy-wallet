@@ -17,7 +17,6 @@ use super::{
     add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
     user_profile, BtcUserPendingTransactionsModel, ByteBuf, Candid, CustomTokenId, HttpRequest,
     PendingTransaction, Principal, State, Stats, StoredPendingTransaction, StoredPrincipal,
-    user_profile, ByteBuf, Candid, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
     UserProfileModel,
 };
 
@@ -72,7 +71,6 @@ fn matches_custom_token(token: &CustomToken) -> impl Fn(&CustomToken) -> bool + 
     move |t: &CustomToken| CustomTokenId::from(&t.token) == id
 }
 
-
 fn setup_contact(id: u64) {
     let sp = bench_stored_principal();
     mutate_state(|s| {
@@ -108,8 +106,6 @@ fn make_utxo(txid_byte: u8, vout: u32, value: u64) -> Utxo {
         height: HEIGHT,
     }
 }
-
-
 
 fn with_btc_pending_model<R>(
     state: &mut State,
