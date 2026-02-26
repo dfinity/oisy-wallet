@@ -3,6 +3,7 @@ pub mod impls;
 use std::time::Duration;
 
 use candid::CandidType;
+use candid::types::bounded_vec::BoundedVec;
 use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
 use serde::Deserialize;
 
@@ -69,8 +70,8 @@ pub enum SelectedUtxosFeeError {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[serde(remote = "Self")]
 pub struct BtcAddPendingTransactionRequest {
-    pub txid: Vec<u8>,
-    pub utxos: Vec<Utxo>,
+    pub txid: BoundedVec<u8>,
+    pub utxos: BoundedVec<Utxo>,
     pub network: BitcoinNetwork,
 }
 
