@@ -3,11 +3,11 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Token } from '$lib/types/token';
+	import type { OptionToken } from '$lib/types/token';
 
 	interface Props {
 		amount?: bigint;
-		token: Token;
+		token: OptionToken;
 		exchangeRate?: number;
 		showNullishLabel?: boolean;
 	}
@@ -26,9 +26,9 @@
 		{:else}
 			<ExchangeAmountDisplay
 				{amount}
-				decimals={token.decimals}
+				decimals={token?.decimals ?? 0}
 				{exchangeRate}
-				symbol={token.symbol}
+				symbol={token?.symbol ?? ''}
 			/>
 		{/if}
 	{/snippet}
