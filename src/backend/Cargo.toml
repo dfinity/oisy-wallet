@@ -8,8 +8,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 bitcoin = { workspace = true }
+canbench-rs = { workspace = true, optional = true }
 candid = { workspace = true }
-futures = { workspace = true }
 getrandom = { workspace = true }
 hex = { workspace = true }
 ic-cdk = { workspace = true }
@@ -29,6 +29,9 @@ shared = { path = "../shared" }
 candid_parser = { workspace = true }
 lazy_static = { workspace = true }
 pocket-ic = { workspace = true }
+
+[features]
+canbench-rs = ["dep:canbench-rs"]
 
 [lints]
 workspace = true

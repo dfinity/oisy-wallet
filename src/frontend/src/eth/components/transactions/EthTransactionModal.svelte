@@ -234,20 +234,6 @@
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(token) && !isTokenErc721(token)}
-				<ListItem>
-					<span>{$i18n.core.text.amount}</span>
-					<output>
-						{formatToken({
-							value,
-							unitName: token.decimals,
-							displayDecimals: token.decimals
-						})}
-						{token.symbol}
-					</output>
-				</ListItem>
-			{/if}
-
 			{#if nonNullish(token) && isTokenNonFungible(token) && nonNullish(transaction.tokenId)}
 				<ListItem>
 					<span>{$i18n.core.text.tokenId}</span>

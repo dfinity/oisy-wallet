@@ -20,7 +20,7 @@
 
 	let token = $derived(
 		[...$enabledEthereumTokens, ...$enabledEvmTokens].find(
-			({ network: { id: networkId } }) => networkId === sourceNetwork.id
+			({ network: { id: networkId } }) => networkId === sourceNetwork?.id
 		)
 	);
 </script>

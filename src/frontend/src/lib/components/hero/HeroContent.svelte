@@ -136,7 +136,7 @@
 </script>
 
 <div
-	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center text-primary-inverted transition-all duration-500 ease-in-out md:rounded-[28px] md:p-5"
+	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center text-primary-inverted transition-[background-position,background-size] duration-500 ease-in-out md:rounded-[28px] md:p-5"
 	class:bg-center={isVeurToken}
 	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken}
 	class:bg-gradient-to-r={isGradientToRight}
@@ -180,15 +180,15 @@
 					class="my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-xs text-nowrap sm:text-base"
 				>
 					{#if nonNullish(pageTokenUi)}
-						<div class="flex min-w-0 items-center justify-center gap-1 sm:gap-2" in:fade>
+						<div class="flex min-w-0 items-center justify-start gap-1 sm:gap-2" in:fade>
 							<TokenLogo data={pageTokenUi} logoSize="sm" ring />
 
-							<div class="flex flex-col text-left">
+							<div class="flex flex-col truncate text-left">
 								<span class="truncate font-semibold">
 									{getTokenDisplayName(pageTokenUi)}
 								</span>
 
-								<div class="flex items-center justify-center gap-1">
+								<div class="flex items-center justify-start gap-1">
 									<NetworkLogo network={pageTokenUi.network} size="xxs" transparent />
 									<span class="truncate">
 										{pageTokenUi.network.name}
