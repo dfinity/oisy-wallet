@@ -14,10 +14,9 @@ use shared::types::{
 };
 
 use super::{
-    mutate_state, read_config, read_state, user_profile, BtcUserPendingTransactionsModel,
-    PendingTransaction, Principal, State, Stats, StoredPendingTransaction, StoredPrincipal,
     add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
-    user_profile, ByteBuf, Candid, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
+    user_profile, BtcUserPendingTransactionsModel, ByteBuf, Candid, CustomTokenId, HttpRequest,
+    PendingTransaction, Principal, State, Stats, StoredPendingTransaction, StoredPrincipal,
     UserProfileModel,
 };
 
@@ -106,8 +105,7 @@ fn setup_contact(id: u64) {
         stored.update_timestamp_ns = TS0_NS;
         s.contact.insert(sp, Candid(stored));
     });
-  }
-
+}
 
 fn with_btc_pending_model<R>(
     state: &mut State,
@@ -116,8 +114,7 @@ fn with_btc_pending_model<R>(
     let mut model =
         BtcUserPendingTransactionsModel::new(&mut state.btc_user_pending_transactions, None, None);
     f(&mut model)
-  }
-
+}
 
 // ---------------------------------------------------------------------------
 // Config & Stats
@@ -437,8 +434,7 @@ fn bench_update_user_experimental_features() -> BenchResult {
     })
 }
 
-
-  // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // Contacts
 // ---------------------------------------------------------------------------
 
@@ -456,9 +452,8 @@ fn bench_get_contacts_with_count(count: u64) -> BenchResult {
                 .map(|c| c.contacts.values().cloned().collect::<Vec<_>>())
                 .unwrap_or_default()
         }));
-          })
+    })
 }
-
 
 fn bench_get_contacts_10() -> BenchResult {
     bench_get_contacts_with_count(10)
@@ -499,9 +494,8 @@ fn bench_update_contact() -> BenchResult {
                 s.contact.insert(sp, Candid(stored));
             }
         });
-          })
+    })
 }
-
 
 fn bench_delete_contact() -> BenchResult {
     setup_contact(99);
@@ -516,8 +510,7 @@ fn bench_delete_contact() -> BenchResult {
             }
         });
     })
-  }
-
+}
 
 // ---------------------------------------------------------------------------
 // BTC pending transactions
@@ -581,9 +574,8 @@ fn bench_btc_add_pending_transaction_with_count(existing_count: u8) -> BenchResu
                     .unwrap();
             });
         });
-          })
+    })
 }
-
 
 #[bench(raw)]
 fn bench_btc_add_pending_transaction_5() -> BenchResult {
@@ -636,9 +628,8 @@ fn bench_btc_get_pending_transactions_with_count(count: u8) -> BenchResult {
             .collect();
 
         std::hint::black_box(pending);
-          })
+    })
 }
-
 
 #[bench(raw)]
 fn bench_btc_get_pending_transactions_5() -> BenchResult {
@@ -648,5 +639,4 @@ fn bench_btc_get_pending_transactions_5() -> BenchResult {
 #[bench(raw)]
 fn bench_btc_get_pending_transactions_200() -> BenchResult {
     bench_btc_get_pending_transactions_with_count(200)
-  }
-
+}
