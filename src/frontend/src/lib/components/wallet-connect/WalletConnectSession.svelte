@@ -120,7 +120,7 @@
 		// When a WalletConnect URI is present (deep link), uriConnect() handles the connection.
 		// Running reconnect() concurrently would race and potentially disconnect the session.
 		if (nonNullish($walletConnectUri)) {
-			reconnecting = false;
+			walletConnectReconnecting.set(false);
 
 			return;
 		}
