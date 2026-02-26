@@ -67,6 +67,7 @@
 		{application}
 		{balance}
 		{destination}
+		showUnlimitedAmountLabel={erc20Approve}
 		source={$ethAddress ?? ''}
 		{token}
 	>
