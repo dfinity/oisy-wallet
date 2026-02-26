@@ -181,6 +181,7 @@ export const EIGHT_DECIMALS = 8;
 
 // eslint-disable-next-line no-restricted-syntax -- This is the definition
 export const ZERO = 0n;
+export const MAX_UINT_256 = (1n << 256n) - 1n;
 
 // NFTs
 export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 seconds in milliseconds

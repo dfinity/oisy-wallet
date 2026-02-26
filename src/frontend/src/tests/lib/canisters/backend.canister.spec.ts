@@ -155,7 +155,7 @@ describe('backend.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = await listCustomTokens(queryParams);
+		const res = await listCustomTokens();
 
 		expect(res).toEqual(customTokens);
 	});
@@ -170,7 +170,7 @@ describe('backend.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = listCustomTokens(queryParams);
+		const res = listCustomTokens();
 
 		await expect(res).rejects.toThrowError(mockResponseError);
 	});

@@ -37,7 +37,17 @@ import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | TokenUiOrGroupUi) => {
+type SortableTokenId = TokenId;
+
+type TokenPin = Readonly<{ id: SortableTokenId }>;
+
+const unwrapTokenSortFields = <T extends Token>({
+	tokenOrGroup,
+	tokenPinIndexById
+}: {
+	tokenOrGroup: TokenUi<T> | TokenUiOrGroupUi;
+	tokenPinIndexById: ReadonlyMap<SortableTokenId, number>;
+}) => {
 	const t =
 		'group' in tokenOrGroup || 'token' in tokenOrGroup ? tokenOrGroup : { token: tokenOrGroup };
 
@@ -45,9 +55,22 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 
 	const item = isGroup ? t.group : t.token;
 
+	// For a group we take the minimum pin index of the underlying tokens, so the group is sorted as high as its highest pinned token
+	const tokenPinIndex = isGroup
+		? t.group.tokens.reduce<number | undefined>((minPin, { id }) => {
+				const pin = tokenPinIndexById.get(id);
+
+				if (isNullish(pin)) {
+					return minPin;
+				}
+
+				return isNullish(minPin) || pin < minPin ? pin : minPin;
+			}, undefined)
+		: tokenPinIndexById.get(t.token.id);
+
 	return {
+		tokenPinIndex,
 		deprecated: isGroup ? false : (t.token.deprecated ?? false),
-		id: isGroup ? t.group.tokens[0].id : t.token.id,
 		symbol: isGroup ? t.group.groupData.symbol : t.token.symbol,
 		name: isGroup ? t.group.groupData.name : t.token.name,
 		networkId: isGroup ? t.group.tokens[0].network.id : t.token.network.id,
@@ -63,10 +86,6 @@ const unwrapTokenSortFields = <T extends Token>(tokenOrGroup: TokenUi<T> | Token
 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
 
 type TokenSortUnwrapped = ReturnType<typeof unwrapTokenSortFields>;
-
-type SortableTokenId = TokenId;
-
-type TokenPin = Readonly<{ id: SortableTokenId }>;
 
 type SortableNetworkId = Token['network']['id'];
 
@@ -114,22 +133,20 @@ const createNetworkComparator =
  */
 const createTokenComparator =
 	({
-		tokenPinIndexById,
 		networkComparator,
 		primarySortStrategy
 	}: {
-		tokenPinIndexById: ReadonlyMap<SortableTokenId, number>;
 		networkComparator: (a: SortableNetworkId, b: SortableNetworkId) => number;
 		primarySortStrategy: TokensSortType;
 	}) =>
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
 	(a: TokenSortUnwrapped, b: TokenSortUnwrapped): number => {
 		const {
-			id: aId,
 			deprecated: aDeprecated,
 			usdPriceChangePercentage24h: aPerf,
 			symbol: aSymbol,
 			usdBalance: aUsdBalance,
+			tokenPinIndex: aPin,
 			name: aName,
 			networkId: aNetworkId,
 			networkName: aNetworkName,
@@ -138,11 +155,11 @@ const createTokenComparator =
 		} = a;
 
 		const {
-			id: bId,
 			deprecated: bDeprecated,
 			usdPriceChangePercentage24h: bPerf,
 			symbol: bSymbol,
 			usdBalance: bUsdBalance,
+			tokenPinIndex: bPin,
 			name: bName,
 			networkId: bNetworkId,
 			networkName: bNetworkName,
@@ -181,10 +198,8 @@ const createTokenComparator =
 		}
 
 		// Pinned tokens (pinned first; pinned order = order provided)
-		const aPin = tokenPinIndexById.get(aId);
-		const bPin = tokenPinIndexById.get(bId);
-		const aPinned = aPin !== undefined;
-		const bPinned = bPin !== undefined;
+		const aPinned = nonNullish(aPin);
+		const bPinned = nonNullish(bPin);
 		if (aPinned !== bPinned) {
 			return aPinned ? -1 : 1;
 		}
@@ -282,7 +297,6 @@ export function sortTokens<T extends Token>({
 	const networkComparator = createNetworkComparator({ networkPinIndexById });
 
 	const comparator = createTokenComparator({
-		tokenPinIndexById,
 		networkComparator,
 		primarySortStrategy
 	});
@@ -303,7 +317,9 @@ export function sortTokens<T extends Token>({
 	// the additional linear passes are negligible and favour clarity and
 	// controlled performance over micro-optimisation.
 
-	const unwrapped = $tokens.map(unwrapTokenSortFields);
+	const unwrapped = $tokens.map((tokenOrGroup) =>
+		unwrapTokenSortFields({ tokenOrGroup, tokenPinIndexById })
+	);
 
 	const indices = Array.from({ length: $tokens.length }, (_, i) => i);
 

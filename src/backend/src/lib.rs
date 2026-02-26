@@ -66,7 +66,8 @@ use crate::{
     bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
-    types::{ContactMap, PowChallengeMap},
+    token_activity::{mark_token_active, mark_tokens_active},
+    types::{ContactMap, PowChallengeMap, TokenActivityMap},
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
         update_experimental_feature_settings, update_network_settings,
@@ -92,6 +93,10 @@ mod user_profile_model;
 
 #[cfg(test)]
 mod tests;
+mod token_activity;
+
+#[cfg(feature = "canbench-rs")]
+mod benchmark;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -101,6 +106,7 @@ const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 const BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(7);
+const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(8);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -124,6 +130,7 @@ thread_local! {
             btc_user_pending_transactions: BtcUserPendingTransactionsMap::init(
                 mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),
             ),
+            token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
         })
     );
 }
@@ -163,6 +170,9 @@ pub struct State {
     pow_challenge: PowChallengeMap,
     contact: ContactMap,
     btc_user_pending_transactions: BtcUserPendingTransactionsMap,
+    // TODO: implement a periodic cleanup of old entries
+    // TODO: limit the map size with an eviction policy
+    token_activity: TokenActivityMap,
 }
 
 fn set_config(arg: InitArg) {
@@ -376,6 +386,8 @@ pub fn set_custom_token(token: CustomToken) {
     };
 
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
+
+    mark_token_active(&CustomTokenId::from(&token.token));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
@@ -390,6 +402,11 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
+    let ids = tokens
+        .iter()
+        .map(|t| CustomTokenId::from(&t.token))
+        .collect::<Vec<_>>();
+
     mutate_state(|s| {
         for token in tokens {
             let find = |t: &CustomToken| -> bool {
@@ -399,6 +416,8 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
             add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
         }
     });
+
+    mark_tokens_active(&ids);
 }
 
 /// Remove custom token for the user.
@@ -416,11 +435,36 @@ pub fn remove_custom_token(token: CustomToken) {
     });
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
+/// List the custom tokens for the calling user.
+///
+/// Note: This method was previously exposed as a *query* but is now an *update*
+/// call. The change is intentional and breaking: `list_custom_tokens` now tracks
+/// token activity by calling `mark_tokens_active`, which mutates canister state.
+/// Because queries must not modify state on the IC, this function must be an
+/// update, not a query.
+///
+/// Implications for callers:
+/// - This call now participates in consensus and may have higher latency than a query.
+/// - It consumes cycles as an update call.
+/// - Integrations that previously relied on query semantics must be updated to invoke this as an
+///   update method.
 pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
+
+    let tokens = read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0);
+
+    if !tokens.is_empty() {
+        let ids: Vec<CustomTokenId> = tokens
+            .iter()
+            .map(|t| CustomTokenId::from(&t.token))
+            .collect();
+
+        mark_tokens_active(&ids);
+    }
+
+    tokens
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
@@ -1140,4 +1184,5 @@ pub fn get_contacts() -> GetContactsResult {
     let result = Ok(contacts::get_contacts());
     result.into()
 }
+
 export_candid!();
