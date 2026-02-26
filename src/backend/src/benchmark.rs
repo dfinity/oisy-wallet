@@ -33,30 +33,8 @@ fn bench_stored_principal() -> StoredPrincipal {
     StoredPrincipal(*bench_principal())
 }
 
-fn setup_contact(id: u64) {
-    let sp = bench_stored_principal();
-    mutate_state(|s| {
-        let mut stored = s.contact.get(&sp).map_or(
-            StoredContacts {
-                contacts: BTreeMap::new(),
-                update_timestamp_ns: 0,
-            },
-            |c| c.0.clone(),
-        );
-        stored.contacts.insert(
-            id,
-            Contact {
-                id,
-                name: format!("Contact {id}"),
-                addresses: vec![],
-                update_timestamp_ns: TS0_NS,
-                image: None,
-            },
-        );
-        stored.update_timestamp_ns = TS0_NS;
-        s.contact.insert(sp, Candid(stored));
-    });
-}
+
+
 
 fn bench_principal() -> &'static Principal {
     static P: OnceLock<Principal> = OnceLock::new();
