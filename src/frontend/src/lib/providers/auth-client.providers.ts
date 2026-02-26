@@ -23,13 +23,17 @@ export class AuthClientProvider {
 	}
 
 	createAuthClient = async (
-		{ hideConsoleWarn }: { hideConsoleWarn: boolean } = { hideConsoleWarn: true }
+		{ hideConsoleWarn, forceRecreate }: { hideConsoleWarn: boolean; forceRecreate?: boolean } = {
+			hideConsoleWarn: true
+		}
 	): Promise<AuthClient> => {
 		const authClient = this.#authClient;
 
-		if (nonNullish(authClient)) {
+		if (!forceRecreate && nonNullish(authClient)) {
 			return authClient;
 		}
+
+		this.#authClient = undefined;
 
 		const hideWarn = (): (() => void) => {
 			// TODO: Workaround for agent-js. Disable the console.warn "You are using a custom storage provider..."
@@ -70,7 +74,8 @@ export class AuthClientProvider {
 		args: { hideConsoleWarn: boolean } = { hideConsoleWarn: true }
 	): Promise<AuthClient> => {
 		await this.#storage.remove(KEY_STORAGE_KEY);
-		return await this.createAuthClient(args);
+
+		return await this.createAuthClient({ ...args, forceRecreate: true });
 	};
 
 	/**
