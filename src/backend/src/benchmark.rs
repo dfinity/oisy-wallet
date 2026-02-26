@@ -7,25 +7,16 @@ use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
     contact::{Contact, StoredContacts},
-        custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
+    custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
     experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
     network::{NetworkSettings, NetworkSettingsFor},
     user_profile::{StoredUserProfile, UserProfile},
 };
-use shared::types::{
-    agreement::{UserAgreement, UserAgreements},
-            custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
-    experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
-    network::{NetworkSettings, NetworkSettingsFor},
-    user_profile::{StoredUserProfile, UserProfile},
-};
-
 
 use super::{
     add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
     user_profile, BtcUserPendingTransactionsModel, ByteBuf, Candid, CustomTokenId, HttpRequest,
     PendingTransaction, Principal, State, Stats, StoredPendingTransaction, StoredPrincipal,
-    user_profile, ByteBuf, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
     UserProfileModel,
 };
 
@@ -123,50 +114,6 @@ fn with_btc_pending_model<R>(
     let mut model =
         BtcUserPendingTransactionsModel::new(&mut state.btc_user_pending_transactions, None, None);
     f(&mut model)
-}
-
-fn bench_principal() -> &'static Principal {
-    static P: OnceLock<Principal> = OnceLock::new();
-    P.get_or_init(|| {
-        Principal::from_text(BENCH_PRINCIPAL_TEXT).expect("valid bench principal text")
-    })
-}
-
-fn bench_stored_principal() -> StoredPrincipal {
-    StoredPrincipal(*bench_principal())
-}
-
-fn ensure_profile_version() -> Option<u64> {
-    let sp = bench_stored_principal();
-
-    mutate_state(|s| {
-        let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-
-        if m.find_by_principal(sp).is_none() {
-            // Prefer the real creation path (it may set version).
-            user_profile::create_profile(sp, &mut m);
-        }
-
-        m.find_by_principal(sp).and_then(|p| p.version)
-    })
-}
-
-fn make_custom_token(chain_id: u64, suffix: u64) -> CustomToken {
-    CustomToken {
-        token: Token::Erc20(ErcToken {
-            token_address: ErcTokenId(format!("0x{suffix:040x}")),
-            chain_id,
-        }),
-        enabled: true,
-        version: None,
-        section: None,
-        allow_external_content_source: None,
-    }
-}
-
-fn matches_custom_token(token: &CustomToken) -> impl Fn(&CustomToken) -> bool + '_ {
-    let id = CustomTokenId::from(&token.token);
-    move |t: &CustomToken| CustomTokenId::from(&t.token) == id
 }
 
 // ---------------------------------------------------------------------------
@@ -487,8 +434,6 @@ fn bench_update_user_experimental_features() -> BenchResult {
     })
 }
 
-
-
 // ---------------------------------------------------------------------------
 // Contacts
 // ---------------------------------------------------------------------------
@@ -697,4 +642,3 @@ fn bench_btc_get_pending_transactions_5() -> BenchResult {
 fn bench_btc_get_pending_transactions_200() -> BenchResult {
     bench_btc_get_pending_transactions_with_count(200)
 }
-
