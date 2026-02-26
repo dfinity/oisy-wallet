@@ -122,6 +122,7 @@ name = "backend"
 version = "0.0.3"
 dependencies = [
  "bitcoin",
+ "canbench-rs",
  "candid",
  "candid_parser",
  "getrandom 0.2.17",
@@ -409,6 +410,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e629a66d692cb9ff1a1c664e41771b3dcaf961985a9774c0eb0bd1b51cf60a48"
 dependencies = [
  "serde_core",
+]
+
+[[package]]
+name = "canbench-rs"
+version = "0.1.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62815ee6d8c5e325e830e94d15e8c64e9ba97a0700aed5e0fd39171bffb54f9a"
+dependencies = [
+ "canbench-rs-macros",
+ "candid",
+ "ic-cdk 0.17.2",
+ "serde",
+]
+
+[[package]]
+name = "canbench-rs-macros"
+version = "0.1.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6dace60cd7d2c0e04165545afc2bce3aa2538158ed0e96154da080e0bf53f562"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
