@@ -1,18 +1,28 @@
 <script lang="ts">
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		amount?: bigint;
 		token: Token;
 		exchangeRate?: number;
 		showNullishLabel?: boolean;
+		showUnlimitedLabel?: boolean;
 	}
 
-	let { amount = ZERO, token, exchangeRate, showNullishLabel = false }: Props = $props();
+	let {
+		amount = ZERO,
+		token,
+		exchangeRate,
+		showNullishLabel = false,
+		showUnlimitedLabel = false
+	}: Props = $props();
+
+	let isUnlimited = $derived(showUnlimitedLabel && amount === MAX_UINT_256);
 </script>
 
 <Value element="div" ref="amount">
@@ -23,6 +33,10 @@
 	{#snippet content()}
 		{#if showNullishLabel}
 			{$i18n.send.error.unable_to_retrieve_amount}
+		{:else if isUnlimited}
+			{replacePlaceholders($i18n.core.text.unlimited, {
+				$items: token.symbol
+			})}
 		{:else}
 			<ExchangeAmountDisplay
 				{amount}

@@ -42,7 +42,8 @@
 			"less": "Меньше",
 			"ellipsis": "…",
 			"learn_more": "Узнать больше",
-			"sorting": "Сортировка"
+			"sorting": "Сортировка",
+			"unlimited": ""
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
