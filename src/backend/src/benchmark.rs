@@ -4,7 +4,8 @@ use canbench_rs::{bench, bench_fn, BenchResult};
 use shared::types::user_profile::StoredUserProfile;
 
 use super::{
-    mutate_state, read_config, read_state, Principal, Stats, StoredPrincipal, UserProfileModel,
+    http_request, mutate_state, read_config, read_state, ByteBuf, HttpRequest, Principal, Stats,
+    StoredPrincipal, UserProfileModel,
 };
 
 const TS0_NS: u64 = 1_000_000_000;
@@ -63,4 +64,30 @@ fn bench_get_account_creation_timestamps_50() -> BenchResult {
 #[bench(raw)]
 fn bench_get_account_creation_timestamps_200() -> BenchResult {
     bench_get_account_creation_timestamps_with_count(200)
+}
+
+// ---------------------------------------------------------------------------
+// HTTP
+// ---------------------------------------------------------------------------
+
+#[bench]
+fn bench_http_request_metrics() {
+    let req = HttpRequest {
+        url: "/metrics".to_string(),
+        method: "GET".to_string(),
+        headers: vec![],
+        body: ByteBuf::new(),
+    };
+    std::hint::black_box(http_request(req));
+}
+
+#[bench]
+fn bench_http_request_not_found() {
+    let req = HttpRequest {
+        url: "/nonexistent".to_string(),
+        method: "GET".to_string(),
+        headers: vec![],
+        body: ByteBuf::new(),
+    };
+    std::hint::black_box(http_request(req));
 }
