@@ -5,21 +5,18 @@
 	import { onDestroy, untrack } from 'svelte';
 	import { page } from '$app/state';
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
-	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
-	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
+	import { walletConnectPaired, walletConnectReconnecting } from '$eth/stores/wallet-connect.store';
 	import WalletConnectSessionModal from '$lib/components/wallet-connect/WalletConnectSessionModal.svelte';
 	import {
 		walletConnectReviewWizardSteps,
 		walletConnectWizardSteps
 	} from '$lib/config/wallet-connect.config';
-	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.constants';
 	import { URI_PARAM } from '$lib/constants/routes.constants';
 	import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import type { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import {
 		onSessionDelete,
 		onSessionProposal,
@@ -33,7 +30,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import { walletConnectListenerStore as listenerStore } from '$lib/stores/wallet-connect.store';
 	import { removeSearchParam } from '$lib/utils/nav.utils';
 
@@ -50,16 +47,6 @@
 	);
 
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
-
-	const disconnect = async () => {
-		await disconnectListener();
-
-		toastsShow({
-			text: $i18n.wallet_connect.info.disconnected,
-			level: 'info',
-			duration: 2000
-		});
-	};
 
 	$effect(() => {
 		if ($authNotSignedIn) {
@@ -120,14 +107,12 @@
 		walletConnectPaired.set(nonNullish(listener));
 	});
 
-	let reconnecting = $state(true);
-
 	const reconnect = async () => {
-		reconnecting = true;
+		walletConnectReconnecting.set(true);
 
 		// If the listener is already initialised, we don't need to do anything.
 		if (nonNullish(listener)) {
-			reconnecting = false;
+			walletConnectReconnecting.set(false);
 
 			return;
 		}
@@ -135,13 +120,13 @@
 		// When a WalletConnect URI is present (deep link), uriConnect() handles the connection.
 		// Running reconnect() concurrently would race and potentially disconnect the session.
 		if (nonNullish($walletConnectUri)) {
-			reconnecting = false;
+			walletConnectReconnecting.set(false);
 
 			return;
 		}
 
 		if ($initialLoading || (isNullish($ethAddress) && isNullish($solAddressMainnet))) {
-			reconnecting = false;
+			walletConnectReconnecting.set(false);
 
 			return;
 		}
@@ -188,7 +173,7 @@
 
 			resetListener();
 		} finally {
-			reconnecting = false;
+			walletConnectReconnecting.set(false);
 		}
 	};
 
@@ -198,30 +183,13 @@
 		untrack(() => reconnect());
 	});
 
-	onDestroy(() => walletConnectPaired.set(false));
-
-	const openWalletConnectAuth = () => {
-		modalStore.openWalletConnectAuth(modalId);
-
-		trackEvent({
-			name: TRACK_COUNT_WALLET_CONNECT_MENU_OPEN
-		});
-	};
+	onDestroy(() => {
+		walletConnectPaired.set(false);
+		walletConnectReconnecting.set(false);
+	});
 </script>
 
 <svelte:window onoisyDisconnectWalletConnect={disconnectListener} />
-
-{#if nonNullish(listener)}
-	<WalletConnectButton onclick={disconnect}>
-		{$i18n.wallet_connect.text.disconnect}
-	</WalletConnectButton>
-{:else}
-	<WalletConnectButton
-		ariaLabel={$i18n.wallet_connect.text.name}
-		loading={reconnecting}
-		onclick={openWalletConnectAuth}
-	/>
-{/if}
 
 {#if $modalWalletConnectAuth}
 	<WalletConnectSessionModal {steps} bind:modal />

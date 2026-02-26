@@ -1,3 +1,6 @@
 build_cmd: cargo build -p backend --release --target wasm32-unknown-unknown --features canbench-rs
 
 wasm_path: ./target/wasm32-unknown-unknown/release/backend.wasm
+
+init_args:
+  hex: 4449444c036b01b0ced18403016c06eef4a92e7fb6a9f6dc0271a4e1b1c1037fb1b0e1e60302eba784ce047fd9a8ddde047f6d6f01000008746573745f6b657900
