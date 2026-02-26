@@ -11,10 +11,8 @@ use shared::types::{
 };
 
 use super::{
-    http_request, mutate_state, read_config, read_state, ByteBuf, HttpRequest, Principal, Stats,
-    StoredPrincipal, UserProfileModel,
-    mutate_state, read_config, read_state, user_profile, Principal, Stats, StoredPrincipal,
-    UserProfileModel,
+    http_request, mutate_state, read_config, read_state, user_profile, ByteBuf, HttpRequest,
+    Principal, Stats, StoredPrincipal, UserProfileModel,
 };
 
 const BENCH_PRINCIPAL_TEXT: &str =
@@ -104,7 +102,6 @@ fn bench_get_account_creation_timestamps_200() -> BenchResult {
     bench_get_account_creation_timestamps_with_count(200)
 }
 
-
 // ---------------------------------------------------------------------------
 // HTTP
 // ---------------------------------------------------------------------------
@@ -129,9 +126,7 @@ fn bench_http_request_not_found() {
         body: ByteBuf::new(),
     };
     std::hint::black_box(http_request(req));
-  }
-
-
+}
 
 // ---------------------------------------------------------------------------
 // User profile
