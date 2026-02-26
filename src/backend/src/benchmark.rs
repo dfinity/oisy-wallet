@@ -3,29 +3,29 @@
 use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::{bench, bench_fn, BenchResult};
-<<<<<<< feat-backend/Add-benchmark-study
 use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
     contact::{Contact, StoredContacts},
-=======
+        custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
+    experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
+    network::{NetworkSettings, NetworkSettingsFor},
+    user_profile::{StoredUserProfile, UserProfile},
+};
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
->>>>>>> main
-    custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
+            custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
     experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
     network::{NetworkSettings, NetworkSettingsFor},
     user_profile::{StoredUserProfile, UserProfile},
 };
 
+
 use super::{
     add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
-<<<<<<< feat-backend/Add-benchmark-study
     user_profile, BtcUserPendingTransactionsModel, ByteBuf, Candid, CustomTokenId, HttpRequest,
     PendingTransaction, Principal, State, Stats, StoredPendingTransaction, StoredPrincipal,
-=======
     user_profile, ByteBuf, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
->>>>>>> main
     UserProfileModel,
 };
 
