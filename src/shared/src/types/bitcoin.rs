@@ -2,8 +2,7 @@ pub mod impls;
 
 use std::time::Duration;
 
-use candid::CandidType;
-use candid::types::bounded_vec::BoundedVec;
+use candid::{types::bounded_vec::BoundedVec, CandidType};
 use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
 use serde::Deserialize;
 

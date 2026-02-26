@@ -185,10 +185,8 @@ impl TokenVersion for CustomToken {
     }
 }
 
-
 impl DataSize for CustomToken {
-    fn data_size(&self) -> usize {
-    }
+    fn data_size(&self) -> usize {}
 }
 
 impl fmt::Display for CredentialType {

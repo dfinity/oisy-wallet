@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 
-use candid::{CandidType, Deserialize};
-use candid::types::bounded_vec::BoundedVec;
+use candid::{types::bounded_vec::BoundedVec, CandidType, Deserialize};
 use serde_bytes::ByteBuf;
 
 use super::account::TokenAccountId;
