@@ -486,7 +486,8 @@ fn bench_update_user_experimental_features() -> BenchResult {
         }));
     })
 }
-<<<<<<< feat-backend/Add-benchmark-study
+
+
 
 // ---------------------------------------------------------------------------
 // Contacts
@@ -696,5 +697,4 @@ fn bench_btc_get_pending_transactions_5() -> BenchResult {
 fn bench_btc_get_pending_transactions_200() -> BenchResult {
     bench_btc_get_pending_transactions_with_count(200)
 }
-=======
->>>>>>> main
+
