@@ -455,6 +455,7 @@ fn bench_get_contacts_with_count(count: u64) -> BenchResult {
     })
 }
 
+#[bench(raw)]
 fn bench_get_contacts_10() -> BenchResult {
     bench_get_contacts_with_count(10)
 }
@@ -497,6 +498,7 @@ fn bench_update_contact() -> BenchResult {
     })
 }
 
+#[bench(raw)]
 fn bench_delete_contact() -> BenchResult {
     setup_contact(99);
     let sp = bench_stored_principal();
