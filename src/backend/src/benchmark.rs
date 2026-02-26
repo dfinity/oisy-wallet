@@ -22,10 +22,6 @@ const BENCH_PRINCIPAL_TEXT: &str =
 const TS0_NS: u64 = 1_000_000_000;
 const TS1_NS: u64 = 2_000_000_000;
 
-
-
-
-
 fn bench_principal() -> &'static Principal {
     static P: OnceLock<Principal> = OnceLock::new();
     P.get_or_init(|| {
@@ -51,7 +47,6 @@ fn ensure_profile_version() -> Option<u64> {
         m.find_by_principal(sp).and_then(|p| p.version)
     })
 }
-
 
 fn setup_contact(id: u64) {
     let sp = bench_stored_principal();
