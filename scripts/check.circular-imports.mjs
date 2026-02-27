@@ -43,7 +43,7 @@ const resolveFile = (base) => {
 	}
 
 	for (const ext of EXTENSIONS) {
-		const index = join(base, 'index' + ext);
+		const index = join(base, `index${  ext}`);
 		if (existsSync(index)) {
 			return index;
 		}
@@ -61,7 +61,7 @@ const resolveImportPath = (importSpec, fromFile) => {
 		if (importSpec === alias) {
 			return resolveFile(target);
 		}
-		if (importSpec.startsWith(alias + '/')) {
+		if (importSpec.startsWith(`${alias  }/`)) {
 			return resolveFile(join(target, importSpec.slice(alias.length + 1)));
 		}
 	}
@@ -205,9 +205,7 @@ const main = () => {
 	for (let i = 0; i < cycles.length; i++) {
 		const cycle = cycles[i];
 		const label =
-			cycle.length === 1
-				? `${YELLOW}self-import${NC}`
-				: `${YELLOW}length ${cycle.length}${NC}`;
+			cycle.length === 1 ? `${YELLOW}self-import${NC}` : `${YELLOW}length ${cycle.length}${NC}`;
 		console.log(`${RED}Cycle ${i + 1}${NC} (${label})`);
 		for (let j = 0; j < cycle.length; j++) {
 			const arrow = j < cycle.length - 1 ? ' ->' : ` -> ${DIM}(back to start)${NC}`;

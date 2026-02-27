@@ -400,12 +400,12 @@ eth/providers/alchemy.providers.ts
 
 To eliminate all 29 cycles, only 5 core circular edges need to be broken:
 
-| # | Edge to break | Resolves cycles |
-|---|---|---|
-| 1 | `lib/services/manage-tokens.services.ts` <-> `lib/services/save-custom-tokens.services.ts` | 2, 10, 11, 12, 17, 21–29 |
-| 2 | `env/schema/env-earning-cards.schema.ts` <-> `env/types/env.earning-cards.ts` | 3 |
-| 3 | `sol/services/sol-signatures.services.ts` <-> `sol/services/sol-transactions.services.ts` | 4 |
-| 4 | `sol/types/address.ts` <-> `sol/schema/address.schema.ts` (or `address.schema.ts` <-> `sol-address.utils.ts`) | 6, 8, 13, 14, 20 |
-| 5 | `lib/types/listener.ts` <-> `icp/components/transactions/IcTransactionsCkEthereumListeners.svelte` (or the other edge in that triangle) | 7, 9, 15, 16, 18, 19, 21–29 |
+| #   | Edge to break                                                                                                                           | Resolves cycles             |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| 1   | `lib/services/manage-tokens.services.ts` <-> `lib/services/save-custom-tokens.services.ts`                                              | 2, 10, 11, 12, 17, 21–29    |
+| 2   | `env/schema/env-earning-cards.schema.ts` <-> `env/types/env.earning-cards.ts`                                                           | 3                           |
+| 3   | `sol/services/sol-signatures.services.ts` <-> `sol/services/sol-transactions.services.ts`                                               | 4                           |
+| 4   | `sol/types/address.ts` <-> `sol/schema/address.schema.ts` (or `address.schema.ts` <-> `sol-address.utils.ts`)                           | 6, 8, 13, 14, 20            |
+| 5   | `lib/types/listener.ts` <-> `icp/components/transactions/IcTransactionsCkEthereumListeners.svelte` (or the other edge in that triangle) | 7, 9, 15, 16, 18, 19, 21–29 |
 
 All paths shown are relative to `src/frontend/src/`.
