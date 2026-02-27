@@ -26,6 +26,7 @@ type Agreements = record { agreements : UserAgreements };
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
 	PowChallenge : ChallengeCompletionError;
+	RateLimited : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
 };
@@ -281,6 +282,11 @@ type NetworksSettings = record {
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
+type RateLimitError = record {
+	max_calls : nat32;
+	window_ns : nat64;
+	caller : principal
+};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
