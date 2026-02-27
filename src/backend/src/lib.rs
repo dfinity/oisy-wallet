@@ -54,7 +54,7 @@ use shared::{
         Stats, Timestamp,
     },
 };
-use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
+use signer::service::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
@@ -85,16 +85,15 @@ mod guards;
 mod impls;
 mod pow;
 pub mod random;
-pub mod signer;
-mod state;
+mod signer;
 mod token;
+mod token_activity;
 mod types;
 mod user_profile;
 mod user_profile_model;
 
 #[cfg(test)]
 mod tests;
-mod token_activity;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
@@ -265,7 +264,7 @@ fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
     }
 
     ic_cdk::spawn(async move {
-        if let Err(e) = signer::allow_signing(None).await {
+        if let Err(e) = signer::service::allow_signing(None).await {
             ic_cdk::println!(
                 "Error enabling signing for user {}: {:?}",
                 stored_principal.0,
@@ -353,7 +352,7 @@ pub fn config() -> Config {
 pub async fn top_up_cycles_ledger(
     request: Option<TopUpCyclesLedgerRequest>,
 ) -> TopUpCyclesLedgerResult {
-    signer::top_up_cycles_ledger(request.unwrap_or_default()).await
+    signer::service::top_up_cycles_ledger(request.unwrap_or_default()).await
 }
 
 /// Processes external HTTP requests.
@@ -998,7 +997,7 @@ pub fn has_user_profile() -> HasUserProfileResponse {
 /// - `Other`: If another error occurred during the operation
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
-    let allowed_cycles = signer::get_allowed_cycles().await;
+    let allowed_cycles = signer::service::get_allowed_cycles().await;
     match allowed_cycles {
         Ok(allowed_cycles) => Ok(GetAllowedCyclesResponse { allowed_cycles }).into(),
         Err(err) => GetAllowedCyclesResult::Err(err),
@@ -1027,7 +1026,7 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
         // is disabled
         if !POW_ENABLED {
             // Passing None to apply the old cycle calculation logic
-            signer::allow_signing(None).await?;
+            signer::service::allow_signing(None).await?;
             // Returning a placeholder response that can be ignored by the frontend.
             return Ok(AllowSigningResponse {
                 status: AllowSigningStatus::Skipped,
@@ -1056,7 +1055,7 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
         );
 
         // Allow the caller to pay for cycles consumed by signer operations
-        signer::allow_signing(Some(allowed_cycles)).await?;
+        signer::service::allow_signing(Some(allowed_cycles)).await?;
 
         Ok(AllowSigningResponse {
             status: AllowSigningStatus::Executed,
