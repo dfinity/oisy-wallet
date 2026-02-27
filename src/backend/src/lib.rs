@@ -85,6 +85,7 @@ mod guards;
 mod impls;
 mod pow;
 pub mod random;
+mod rate_limiter;
 pub mod signer;
 mod state;
 mod token;
@@ -92,9 +93,10 @@ mod types;
 mod user_profile;
 mod user_profile_model;
 
+mod token_activity;
+
 #[cfg(test)]
 mod tests;
-mod token_activity;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
@@ -117,6 +119,10 @@ thread_local! {
     /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
     static HOUSEKEEPING_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
     static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
+
+    /// Rate-limits `allow_signing`: max 10 calls per caller per 60 seconds.
+    static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
+        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
 
     static STATE: RefCell<State> = RefCell::new(
         MEMORY_MANAGER.with(|mm| State {
@@ -254,8 +260,17 @@ pub(crate) fn release_allow_signing_slot() {
 }
 
 /// Spawns an `allow_signing` task only if the number of in-flight tasks is
-/// below `MAX_CONCURRENT_ALLOW_SIGNING`.
+/// below `MAX_CONCURRENT_ALLOW_SIGNING` and the principal hasn't exceeded
+/// its per-caller rate limit.
 fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
+    if let Err(e) = ALLOW_SIGNING_RATE_LIMITER.with(|rl| rl.check_principal(stored_principal.0)) {
+        eprintln!(
+            "Skipped allow_signing for user {}: max_calls={}, window_ns={}",
+            stored_principal.0, e.max_calls, e.window_ns,
+        );
+        return;
+    }
+
     if !try_acquire_allow_signing_slot() {
         eprintln!(
             "Skipped allow_signing for user {}: too many concurrent tasks",
@@ -1021,6 +1036,10 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
     async fn inner(
         request: Option<AllowSigningRequest>,
     ) -> Result<AllowSigningResponse, AllowSigningError> {
+        ALLOW_SIGNING_RATE_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(AllowSigningError::RateLimited)?;
+
         let principal = ic_cdk::caller();
 
         // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED
