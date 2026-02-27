@@ -24,6 +24,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { WizardStepsGetTokenType } from '$lib/types/get-token';
+	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
@@ -69,54 +70,78 @@
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	const showDestinationTokenList = () => {
-		if (nonNullish($sourceToken) && isDefaultEthereumToken($sourceToken)) {
-			allNetworksEnabled = false;
-			setAllowedNetworkIds([$sourceToken.network.id]);
+	type TokenSide = 'source' | 'destination';
+
+	const setNetworksMode = ({
+		enabled,
+		allowedIds
+	}: {
+		enabled: boolean;
+		allowedIds?: NetworkId[];
+	}) => {
+		allNetworksEnabled = enabled;
+
+		if (enabled) {
+			resetAllowedNetworkIds();
+
 			return;
 		}
 
-		if (isNullish($destinationToken) && nonNullish($sourceToken)) {
-			allNetworksEnabled = false;
-			setFilterNetwork($sourceToken.network);
+		if (nonNullish(allowedIds)) {
+			setAllowedNetworkIds(allowedIds);
 
-			setAllowedNetworkIds(SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id]);
-			return;
-		}
-
-		if (nonNullish($destinationToken) && nonNullish($sourceToken)) {
-			allNetworksEnabled = false;
-			setFilterNetwork($destinationToken.network);
-			setAllowedNetworkIds(SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id]);
+			return
 		}
 	};
 
-	const showSourceTokenList = () => {
-		allNetworksEnabled = true;
-		resetAllowedNetworkIds();
+	const applyListConstraints = (side: TokenSide) => {
+		// SOURCE list: user can browse all networks (but keep current network preselected if any)
+		if (side === 'source') {
+			setNetworksMode({ enabled: true });
 
-		if (nonNullish($sourceToken)) {
-			setFilterNetwork($sourceToken.network);
+			const network = $sourceToken?.network ?? $destinationToken?.network;
+
+			if (nonNullish(network)) {
+				setFilterNetwork(network);
+			}
+
 			return;
 		}
 
-		if (nonNullish($destinationToken) && isNullish($sourceToken)) {
+		// DESTINATION list: constrain based on source/destination
+		if (isNullish($sourceToken)) {
+			// no source yet: fall back to destination network if already selected
+			setNetworksMode({ enabled: false });
+
+			if (nonNullish($destinationToken)) {
+				setFilterNetwork($destinationToken.network);
+			}
+
+			return;
+		}
+
+		// source selected
+		const allowedIds = isDefaultEthereumToken($sourceToken)
+			? [$sourceToken.network.id]
+			: SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id];
+		setNetworksMode({ enabled: false, allowedIds });
+
+		// choose which network to show in the filter UI
+		if (nonNullish($destinationToken)) {
 			setFilterNetwork($destinationToken.network);
+		} else {
+			setFilterNetwork($sourceToken.network);
 		}
 	};
 
-	const showTokensList = (tokenSource: 'source' | 'destination') => {
+	const enterTokenList = (side: TokenSide) => {
 		swapAmountsStore.reset();
+		selectTokenType = side;
 		goToStep(WizardStepsSwap.TOKENS_LIST);
-
-		if (tokenSource === 'destination') {
-			showDestinationTokenList();
-		} else if (tokenSource === 'source') {
-			showSourceTokenList();
-		}
-
-		selectTokenType = tokenSource;
+		applyListConstraints(side);
 	};
+
+	const showTokensList = (tokenSource: TokenSide) => enterTokenList(tokenSource);
 
 	const closeTokenList = () => {
 		goToStep(WizardStepsSwap.SWAP);
