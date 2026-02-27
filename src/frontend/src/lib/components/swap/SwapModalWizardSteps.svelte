@@ -63,7 +63,9 @@
 	const { setSourceToken, setDestinationToken, sourceToken, destinationToken } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { setFilterNetwork } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+	const { setFilterNetwork, setFilterQuery } = getContext<ModalTokensListContext>(
+		MODAL_TOKENS_LIST_CONTEXT_KEY
+	);
 
 	const { filteredNetworks, setAllowedNetworkIds, resetAllowedNetworkIds } =
 		getContext<ModalNetworksListContext>(MODAL_NETWORKS_LIST_CONTEXT_KEY);
@@ -90,7 +92,7 @@
 		if (nonNullish(allowedIds)) {
 			setAllowedNetworkIds(allowedIds);
 
-			return;
+			
 		}
 	};
 
@@ -136,8 +138,13 @@
 
 	const enterTokenList = (side: TokenSide) => {
 		swapAmountsStore.reset();
+
+		setFilterQuery('');
+
 		selectTokenType = side;
+
 		goToStep(WizardStepsSwap.TOKENS_LIST);
+
 		applyListConstraints(side);
 	};
 
@@ -147,6 +154,8 @@
 		goToStep(WizardStepsSwap.SWAP);
 
 		setNetworksMode({ enabled: true });
+
+		setFilterQuery('');
 
 		selectTokenType = undefined;
 	};
