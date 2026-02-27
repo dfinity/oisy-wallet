@@ -1,9 +1,8 @@
 //! Tests the ledger account logic.
 
-use candid::Nat;
 use std::time::Duration;
 
-use candid::Principal;
+use candid::{Nat, Principal};
 use ic_cdk::api::management_canister::{main::canister_status, provisional::CanisterIdRecord};
 use ic_cycles_ledger_client::{Account, Allowance, AllowanceArgs};
 use ic_ledger_types::Subaccount;
