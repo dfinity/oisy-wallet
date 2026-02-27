@@ -77,11 +77,17 @@
 			selectTokenType = undefined;
 			showSelectProviderModal = false;
 		});
+
+	let disablePointerEvents = $derived(
+		currentStep?.name === WizardStepsSwap.SWAPPING ||
+			currentStep?.name === WizardStepsSwap.TOKENS_LIST ||
+			showSelectProviderModal
+	);
 </script>
 
 <WizardModal
 	bind:this={modal}
-	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING || showSelectProviderModal}
+	{disablePointerEvents}
 	onClose={close}
 	{steps}
 	testId={SWAP_TOKENS_MODAL}
