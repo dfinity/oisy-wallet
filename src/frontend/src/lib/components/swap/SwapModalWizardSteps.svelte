@@ -90,7 +90,7 @@
 		if (nonNullish(allowedIds)) {
 			setAllowedNetworkIds(allowedIds);
 
-			return;
+			
 		}
 	};
 
