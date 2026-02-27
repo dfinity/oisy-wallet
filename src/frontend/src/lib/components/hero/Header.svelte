@@ -60,10 +60,11 @@
 	</div>
 
 	<div
-		class="pointer-events-auto flex justify-end gap-2 md:gap-3"
+		class="pointer-events-auto flex justify-end"
 		class:gap-1={isCompact}
+		class:gap-2={!isCompact}
 		class:md:gap-2={isCompact}
-		class:scale-90={isCompact}
+		class:md:gap-3={!isCompact}
 	>
 		{#if $authSignedIn && !isRouteTransactions(page) && !nftsCollectionRoute}
 			<NetworksSwitcher bind:visible={networkSwitcherOpen} />
