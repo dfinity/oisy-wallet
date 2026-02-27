@@ -72,11 +72,11 @@ thread_local! {
     );
 }
 
-pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
+pub(crate) fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
     STATE.with(|cell| f(&cell.borrow()))
 }
 
-pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
+pub(crate) fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
     STATE.with(|cell| f(&mut cell.borrow_mut()))
 }
 
@@ -84,7 +84,7 @@ pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
 ///
 /// # Panics
 /// - If the `STATE.config` is not initialized.
-pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
+pub(crate) fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     read_state(|state| {
         f(state
             .config
@@ -94,7 +94,7 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     })
 }
 
-pub fn set_config(arg: InitArg) {
+pub(crate) fn set_config(arg: InitArg) {
     let config = Config::from(arg);
     mutate_state(|state| {
         state.config.set(Some(Candid(config)));
