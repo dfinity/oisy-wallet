@@ -4,7 +4,7 @@ use shared::types::{custom_token::CustomTokenId, Timestamp};
 
 use crate::{
     mutate_state,
-    types::{StoredTokenId, VMem},
+    types::{maps::VMem, storable::StoredTokenId},
 };
 
 fn add_to_token_activity(

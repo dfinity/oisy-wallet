@@ -6,7 +6,7 @@ use ic_stable_structures::storable::{Blob, Bound, Storable};
 use shared::types::Stats;
 
 use crate::{
-    types::{Candid, StoredPrincipal, StoredTokenId},
+    types::storable::{Candid, StoredPrincipal, StoredTokenId},
     State,
 };
 

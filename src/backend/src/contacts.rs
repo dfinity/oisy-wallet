@@ -3,8 +3,8 @@ use std::collections::BTreeMap;
 use shared::types::contact::{Contact, ContactError, StoredContacts, MAX_CONTACTS_PER_USER};
 
 use crate::{
-    mutate_state, random::generate_random_u64, read_state, time, types::StoredPrincipal, Candid,
-    CreateContactRequest, UpdateContactRequest,
+    mutate_state, random::generate_random_u64, read_state, time, types::storable::StoredPrincipal,
+    Candid, CreateContactRequest, UpdateContactRequest,
 };
 
 pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
