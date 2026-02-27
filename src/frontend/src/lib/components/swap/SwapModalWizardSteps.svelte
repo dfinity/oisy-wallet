@@ -126,17 +126,29 @@
 		selectTokenType = undefined;
 	};
 
+	const isDestinationCompatibleWithSource = ({
+		source,
+		destination
+	}: {
+		source: Token;
+		destination: Token;
+	}): boolean => {
+		if (isDefaultEthereumToken(source)) {
+			return source.network.id === destination.network.id;
+		}
+
+		const allowed = SUPPORTED_CROSS_SWAP_NETWORKS[source.network.id];
+
+		return isNullish(allowed) ? true : allowed.includes(destination.network.id);
+	};
+
 	const selectToken = (token: Token) => {
 		if (selectTokenType === 'source') {
 			setSourceToken(token);
 			setFilterNetwork(token.network);
 			if (
-				(nonNullish($destinationToken) &&
-					SUPPORTED_CROSS_SWAP_NETWORKS[token.network.id] &&
-					!SUPPORTED_CROSS_SWAP_NETWORKS[token.network.id].includes(
-						$destinationToken?.network.id
-					)) ||
-				(isDefaultEthereumToken(token) && token.network.id !== $destinationToken?.network.id)
+				nonNullish($destinationToken) &&
+				!isDestinationCompatibleWithSource({ source: token, destination: $destinationToken })
 			) {
 				setDestinationToken(undefined);
 			}
