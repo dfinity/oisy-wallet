@@ -120,9 +120,9 @@ thread_local! {
     static HOUSEKEEPING_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
     static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
 
-    /// Rate-limits `allow_signing`: max 10 calls per caller per 60 seconds.
+    /// Rate-limits `allow_signing`: max 3 calls per caller per 60 seconds.
     static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
+        rate_limiter::RateLimiter::new(3, 60 * 1_000_000_000);
 
     static STATE: RefCell<State> = RefCell::new(
         MEMORY_MANAGER.with(|mm| State {
