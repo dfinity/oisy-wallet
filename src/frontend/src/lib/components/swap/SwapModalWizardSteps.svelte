@@ -91,8 +91,6 @@
 
 		if (nonNullish(allowedIds)) {
 			setAllowedNetworkIds(allowedIds);
-
-			
 		}
 	};
 
