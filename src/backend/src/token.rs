@@ -1,13 +1,34 @@
-use candid::{CandidType, Deserialize};
+use candid::{types::bounded_vec::BoundedVec, CandidType, Deserialize};
 use ic_stable_structures::StableBTreeMap;
-use shared::types::TokenVersion;
+use shared::types::{custom_token::CustomToken, TokenVersion};
 
 use crate::types::{
     maps::VMem,
     storable::{Candid, StoredPrincipal},
 };
 
-pub const MAX_TOKEN_LIST_LENGTH: usize = 1000;
+pub const MAX_TOKEN_LIST_LENGTH: usize = 1_000;
+pub const MAX_TOKEN_LIST_TOTAL_DATA_SIZE: usize = 1_000_000; // ~1MB
+pub const MAX_TOKEN_DATA_SIZE: usize = 2_048; // ~2KB
+
+pub type TokenVecInner = BoundedVec<
+    { MAX_TOKEN_LIST_LENGTH },
+    { MAX_TOKEN_LIST_TOTAL_DATA_SIZE },
+    { MAX_TOKEN_DATA_SIZE },
+    CustomToken,
+>;
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct TokenVec(pub TokenVecInner);
+impl TokenVec {
+    pub fn len(&self) -> usize {
+        self.0.get().len()
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<'_, CustomToken> {
+        self.0.get().iter()
+    }
+}
 
 pub fn add_to_user_token<T>(
     stored_principal: StoredPrincipal,

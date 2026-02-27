@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use candid::{CandidType, Deserialize};
+use candid::{types::bounded_vec::BoundedVec, CandidType, Deserialize};
 use serde_bytes::ByteBuf;
 
 use super::account::TokenAccountId;
@@ -92,7 +92,7 @@ pub struct CreateContactRequest {
 pub struct UpdateContactRequest {
     pub id: u64,
     pub name: String,
-    pub addresses: Vec<ContactAddressData>,
+    pub addresses: BoundedVec<ContactAddressData>,
     pub update_timestamp_ns: u64,
     pub image: Option<ContactImage>,
 }

@@ -61,7 +61,7 @@ use user_profile_model::UserProfileModel;
 use crate::{
     bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
-    token::{add_to_user_token, remove_from_user_token},
+    token::{add_to_user_token, remove_from_user_token, TokenVec},
     token_activity::{mark_token_active, mark_tokens_active},
     types::{
         maps::{
@@ -393,7 +393,7 @@ pub fn set_custom_token(token: CustomToken) {
 
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
-pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
+pub fn set_many_custom_tokens(tokens: TokenVec) {
     if tokens.len() > token::MAX_TOKEN_LIST_LENGTH {
         ic_cdk::trap(&format!(
             "Token list length should not exceed {}",
