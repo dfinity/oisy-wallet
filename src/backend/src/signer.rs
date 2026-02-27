@@ -60,8 +60,8 @@ const fn per_user_cycles_allowance() -> u64 {
 /// If the caller already has at least this many cycles, `allow_signing`
 /// skips the `icrc_2_approve` call.  This avoids:
 /// - Unnecessary inter-canister calls when the user still has plenty of cycles.
-/// - Accidentally **reducing** an existing higher allowance, since `icrc_2_approve`
-///   *sets* (not adds) the value.
+/// - Accidentally **reducing** an existing higher allowance, since `icrc_2_approve` *sets* (not
+///   adds) the value.
 ///
 /// Set to roughly 18 signing operations worth of cycles.
 const SUFFICIENT_CYCLES_THRESHOLD: u64 = (LEDGER_FEE + SIGNER_FEE) * 18;
@@ -120,7 +120,7 @@ pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigni
     let caller = ic_cdk::caller();
 
     if let Ok(current) = get_allowed_cycles().await {
-        if current >= Nat::from(SUFFICIENT_CYCLES_THRESHOLD) {
+        if current >= SUFFICIENT_CYCLES_THRESHOLD {
             return Ok(());
         }
     }
