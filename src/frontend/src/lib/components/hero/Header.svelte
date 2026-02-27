@@ -65,9 +65,9 @@
 		class:gap-2={!isCompact}
 		class:max-w-full={isCompact}
 		class:md:gap-2={isCompact}
-				class:xs:scale-none={isCompact}
 		class:md:gap-3={!isCompact}
 		class:scale-70={isCompact}
+		class:xs:scale-none={isCompact}
 	>
 		{#if $authSignedIn && !isRouteTransactions(page) && !nftsCollectionRoute}
 			<NetworksSwitcher bind:visible={networkSwitcherOpen} />
