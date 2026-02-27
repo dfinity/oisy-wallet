@@ -1,7 +1,7 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import usdc from '$eth/assets/usdc.svg';
-import type { Erc1155Token, RequiredErc1155Token } from '$eth/types/erc1155';
+import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { NetworkEnvironment } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
@@ -13,7 +13,7 @@ const NYAN_CAT_SYMBOL = 'NYAN';
 
 const NYAN_CAT_TOKEN_ID: TokenId = parseTokenId(NYAN_CAT_SYMBOL);
 
-export const NYAN_CAT_TOKEN: RequiredErc1155Token = {
+export const NYAN_CAT_TOKEN: Erc1155Token = {
 	id: NYAN_CAT_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc1155' },
@@ -29,7 +29,7 @@ const BUILD_AN_APE_SYMBOL = 'BAPES';
 
 const BUILD_AN_APE_TOKEN_ID: TokenId = parseTokenId(BUILD_AN_APE_SYMBOL);
 
-export const BUILD_AN_APE_TOKEN: RequiredErc1155Token = {
+export const BUILD_AN_APE_TOKEN: Erc1155Token = {
 	id: BUILD_AN_APE_TOKEN_ID,
 	network: POLYGON_AMOY_NETWORK,
 	standard: { code: 'erc1155' },
