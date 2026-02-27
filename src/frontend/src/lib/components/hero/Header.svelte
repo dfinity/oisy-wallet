@@ -67,6 +67,7 @@
 		class:md:gap-2={isCompact}
 		class:md:gap-3={!isCompact}
 		class:scale-70={isCompact}
+		class:xs:max-w-none={isCompact}
 		class:xs:scale-none={isCompact}
 	>
 		{#if $authSignedIn && !isRouteTransactions(page) && !nftsCollectionRoute}
