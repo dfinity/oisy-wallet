@@ -10,8 +10,8 @@ use crate::{
     mutate_state, read_state,
     state::State,
     types::storable::{Candid, StoredPrincipal},
+    user_profile::service::has_user_profile,
 };
-use crate::user_profile::service::has_user_profile;
 // -------------------------------------------------------------------------------------------------
 // - General Utility methods
 // -------------------------------------------------------------------------------------------------
