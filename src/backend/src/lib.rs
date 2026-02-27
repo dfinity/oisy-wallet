@@ -6,10 +6,6 @@ use candid::{candid_method, Principal};
 use config::find_credential_config;
 use ic_cdk::{api::time, eprintln, export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{set_timer, set_timer_interval};
-use ic_stable_structures::{
-    memory_manager::{MemoryId, MemoryManager},
-    DefaultMemoryImpl,
-};
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use serde_bytes::ByteBuf;
 use shared::{
@@ -18,7 +14,7 @@ use shared::{
     std_canister_status,
     types::{
         agreement::UpdateUserAgreementsRequest,
-        backend_config::{Arg, Config, InitArg},
+        backend_config::{Arg, Config},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
             BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
@@ -61,15 +57,10 @@ use user_profile_model::UserProfileModel;
 use crate::{
     bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
+    state::{mutate_state, read_config, read_state, set_config},
     token::{add_to_user_token, remove_from_user_token},
     token_activity::{mark_token_active, mark_tokens_active},
-    types::{
-        maps::{
-            BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, PowChallengeMap,
-            TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-        },
-        storable::{Candid, StoredPrincipal},
-    },
+    types::storable::{Candid, StoredPrincipal},
     user_profile::{
         add_hidden_dapp_id, set_show_testnets, update_agreements,
         update_experimental_feature_settings, update_network_settings,
@@ -86,6 +77,7 @@ mod impls;
 mod pow;
 pub mod random;
 mod signer;
+mod state;
 mod token;
 mod token_activity;
 mod types;
@@ -98,88 +90,10 @@ mod tests;
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
 
-const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
-const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
-const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
-const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
-const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
-const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
-const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
-const BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(7);
-const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(8);
-
 thread_local! {
-    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
-        MemoryManager::init(DefaultMemoryImpl::default())
-    );
-
     /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
     static HOUSEKEEPING_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
     static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
-
-    static STATE: RefCell<State> = RefCell::new(
-        MEMORY_MANAGER.with(|mm| State {
-            config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None),
-            user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
-            custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
-            // Use `UserProfileModel` to access and manage access to these states
-            user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
-            user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
-            pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
-            contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
-            btc_user_pending_transactions: BtcUserPendingTransactionsMap::init(
-                mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),
-            ),
-            token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
-        })
-    );
-}
-
-fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
-    STATE.with(|cell| f(&cell.borrow()))
-}
-
-fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
-    STATE.with(|cell| f(&mut cell.borrow_mut()))
-}
-
-/// Reads the internal canister configuration, normally set at canister install or upgrade.
-///
-/// # Panics
-/// - If the `STATE.config` is not initialized.
-fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
-    read_state(|state| {
-        f(state
-            .config
-            .get()
-            .as_ref()
-            .expect("config is not initialized"))
-    })
-}
-
-pub struct State {
-    config: ConfigCell,
-    /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the
-    /// users.
-    user_token: UserTokenMap,
-    /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
-    /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
-    custom_token: CustomTokenMap,
-    user_profile: UserProfileMap,
-    user_profile_updated: UserProfileUpdatedMap,
-    pow_challenge: PowChallengeMap,
-    contact: ContactMap,
-    btc_user_pending_transactions: BtcUserPendingTransactionsMap,
-    // TODO: implement a periodic cleanup of old entries
-    // TODO: limit the map size with an eviction policy
-    token_activity: TokenActivityMap,
-}
-
-fn set_config(arg: InitArg) {
-    let config = Config::from(arg);
-    mutate_state(|state| {
-        state.config.set(Some(Candid(config)));
-    });
 }
 
 /// 2 hours in nanoseconds — if a housekeeping run has been in progress for
