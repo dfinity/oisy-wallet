@@ -189,7 +189,12 @@
 								</span>
 
 								<div class="flex items-center justify-start gap-1">
-									<NetworkLogo network={pageTokenUi.network} size="xxs" transparent alwaysInverted/>
+									<NetworkLogo
+										alwaysInverted
+										network={pageTokenUi.network}
+										size="xxs"
+										transparent
+									/>
 									<span class="truncate">
 										{pageTokenUi.network.name}
 									</span>
