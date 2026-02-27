@@ -90,7 +90,7 @@
 		if (nonNullish(allowedIds)) {
 			setAllowedNetworkIds(allowedIds);
 
-			return
+			return;
 		}
 	};
 
@@ -145,8 +145,8 @@
 
 	const closeTokenList = () => {
 		goToStep(WizardStepsSwap.SWAP);
-		allNetworksEnabled = true;
-		resetAllowedNetworkIds();
+
+		setNetworksMode({ enabled: true });
 
 		selectTokenType = undefined;
 	};
@@ -170,7 +170,9 @@
 	const selectToken = (token: Token) => {
 		if (selectTokenType === 'source') {
 			setSourceToken(token);
+
 			setFilterNetwork(token.network);
+
 			if (
 				nonNullish($destinationToken) &&
 				!isDestinationCompatibleWithSource({ source: token, destination: $destinationToken })
@@ -179,8 +181,10 @@
 			}
 		} else if (selectTokenType === 'destination') {
 			setDestinationToken(token);
+
 			setFilterNetwork(token.network);
 		}
+
 		closeTokenList();
 	};
 
