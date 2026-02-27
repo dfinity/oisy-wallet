@@ -13,7 +13,8 @@ use shared::types::{
     Version,
 };
 
-use crate::{read_state, state::State, user_profile_model::UserProfileModel, StoredPrincipal};
+use crate::{ read_state, state::State, StoredPrincipal};
+use crate::user_profile::model::UserProfileModel;
 
 pub fn find_profile(
     principal: StoredPrincipal,
