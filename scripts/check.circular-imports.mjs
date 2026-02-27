@@ -43,7 +43,7 @@ const resolveFile = (base) => {
 	}
 
 	for (const ext of EXTENSIONS) {
-		const index = join(base, `index${  ext}`);
+		const index = join(base, `index${ext}`);
 		if (existsSync(index)) {
 			return index;
 		}
@@ -61,7 +61,7 @@ const resolveImportPath = (importSpec, fromFile) => {
 		if (importSpec === alias) {
 			return resolveFile(target);
 		}
-		if (importSpec.startsWith(`${alias  }/`)) {
+		if (importSpec.startsWith(`${alias}/`)) {
 			return resolveFile(join(target, importSpec.slice(alias.length + 1)));
 		}
 	}
