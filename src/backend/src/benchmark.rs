@@ -16,9 +16,10 @@ use shared::types::{
 use super::{
     add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
     user_profile, BtcUserPendingTransactionsModel, ByteBuf, Candid, CustomTokenId, HttpRequest,
-    PendingTransaction, Principal, State, Stats, StoredPendingTransaction, StoredPrincipal,
+    PendingTransaction, Principal, Stats, StoredPendingTransaction, StoredPrincipal,
     UserProfileModel,
 };
+use crate::state::State;
 
 const BENCH_PRINCIPAL_TEXT: &str =
     "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
