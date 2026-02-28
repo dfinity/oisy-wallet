@@ -40,7 +40,7 @@
 	// When WalletConnect tries to connect, it adds the "Disconnect" label, increasing the width of the header.
 	// That causes the screen to expand, without auto-zooming, and the modals overflow outside of the screen.
 	// For now, we apply a scale to the header when WalletConnect is trying to connect, to avoid that issue.
-	// TODO: remove this condition when we refacto the WalletConnect button to fit
+	// TODO: remove this condition when we refactor the WalletConnect button to fit
 	let isCompact = $derived(nonNullish($walletConnectListenerStore));
 </script>
 
