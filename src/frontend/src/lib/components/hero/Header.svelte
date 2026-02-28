@@ -41,7 +41,7 @@
 	// That causes the screen to expand, without auto-zooming, and the modals overflow outside of the screen.
 	// For now, we apply a scale to the header when WalletConnect is trying to connect, to avoid that issue.
 	// TODO: remove this condition when we refacto the WalletConnect button to fit
-	let isCompact = $derived($walletConnectListenerStore);
+	let isCompact = $derived(nonNullish($walletConnectListenerStore));
 </script>
 
 <header
