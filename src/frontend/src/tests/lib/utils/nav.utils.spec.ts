@@ -44,6 +44,7 @@ import {
 	removeSearchParam,
 	resetRouteParams,
 	switchNetwork,
+	transactionsUrl,
 	type RouteParams
 } from '$lib/utils/nav.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
@@ -740,6 +741,14 @@ describe('nav.utils', () => {
 			expect(goto).toHaveBeenCalledExactlyOnceWith(baseUrl, { replaceState: true, noScroll: true });
 		});
 
+		it('should handle a network ID with nullish description', async () => {
+			const networkIdNoDesc = Symbol() as unknown as typeof ICP_NETWORK_ID;
+
+			await switchNetwork({ networkId: networkIdNoDesc });
+
+			expect(get(userSelectedNetworkStore)).toBeUndefined();
+		});
+
 		it('should go to the URL with the set network ID', async () => {
 			await switchNetwork({ networkId: ICP_NETWORK_ID });
 
@@ -748,6 +757,31 @@ describe('nav.utils', () => {
 			const newUrl = new URL(`${baseUrl}?${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`);
 
 			expect(goto).toHaveBeenCalledExactlyOnceWith(newUrl, { replaceState: true, noScroll: true });
+		});
+	});
+
+	describe('transactionsUrl', () => {
+		it('should generate a URL with token and network params', () => {
+			const result = transactionsUrl({ token: mockValidErc1155Token });
+
+			expect(result).toContain(AppPath.Transactions);
+			expect(result).toContain(`${TOKEN_PARAM}=`);
+			expect(result).toContain(`${NETWORK_PARAM}=`);
+		});
+
+		it('should omit network param when token network has no description', () => {
+			const tokenNoDescription = {
+				...mockValidErc1155Token,
+				network: {
+					...mockValidErc1155Token.network,
+					id: Symbol() as unknown as typeof mockValidErc1155Token.network.id
+				}
+			};
+
+			const result = transactionsUrl({ token: tokenNoDescription });
+
+			expect(result).toContain(`${TOKEN_PARAM}=`);
+			expect(result).not.toContain(`${NETWORK_PARAM}=`);
 		});
 	});
 
@@ -807,6 +841,55 @@ describe('nav.utils', () => {
 			expect(url.searchParams.get(NETWORK_PARAM)).toBe(ETHEREUM_NETWORK.id.description);
 			expect(url.searchParams.get(COLLECTION_PARAM)).toBeNull();
 			expect(url.searchParams.get(NFT_PARAM)).toBeNull();
+		});
+
+		it('should omit network param when collection network has no description', () => {
+			const collectionNoDesc = {
+				...mockCollection,
+				network: {
+					...mockCollection.network,
+					id: Symbol() as unknown as typeof mockCollection.network.id
+				}
+			};
+
+			const result = nftsUrl({ collection: collectionNoDesc });
+			assertNonNullish(result);
+			const url = new URL(getValidUrl(result));
+
+			expect(url.searchParams.get(NETWORK_PARAM)).toBeNull();
+			expect(url.searchParams.get(COLLECTION_PARAM)).toBe(collectionNoDesc.address);
+		});
+
+		it('should omit network param when nft collection network has no description', () => {
+			const nftNoDesc = {
+				...mockNft,
+				collection: {
+					...mockNft.collection,
+					network: {
+						...mockNft.collection.network,
+						id: Symbol() as unknown as typeof mockNft.collection.network.id
+					}
+				}
+			};
+
+			const result = nftsUrl({ nft: nftNoDesc });
+			assertNonNullish(result);
+			const url = new URL(getValidUrl(result));
+
+			expect(url.searchParams.get(NETWORK_PARAM)).toBeNull();
+			expect(url.searchParams.get(COLLECTION_PARAM)).toBe(nftNoDesc.collection.address);
+			expect(url.searchParams.get(NFT_PARAM)).toBe(nftNoDesc.id);
+		});
+
+		it('should not include network when originSelectedNetwork has no description', () => {
+			const result = nftsUrl({
+				originSelectedNetwork: Symbol() as unknown as typeof ETHEREUM_NETWORK.id
+			});
+			assertNonNullish(result);
+			const url = new URL(getValidUrl(result));
+
+			expect(url.pathname).toBe(AppPath.Nfts);
+			expect(url.searchParams.get(NETWORK_PARAM)).toBeNull();
 		});
 	});
 });
