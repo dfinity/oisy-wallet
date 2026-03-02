@@ -16,7 +16,6 @@ use crate::{contacts, guards::caller_is_not_anonymous};
 ///
 /// # Returns
 /// The created contact on success.
-///
 
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
