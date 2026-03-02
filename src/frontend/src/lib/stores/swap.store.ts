@@ -1,11 +1,12 @@
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { swappableTokens } from '$lib/derived/swap.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { derived, writable, type Readable, type Writable } from 'svelte/store';
+import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface SwapError {
 	variant: 'error' | 'warning' | 'info';
@@ -28,8 +29,15 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
 	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
 
-	const sourceToken = derived([data], ([{ sourceToken }]) => sourceToken);
-	const destinationToken = derived([data], ([{ destinationToken }]) => destinationToken);
+	const sourceToken = derived(
+		[data, swappableTokens],
+		([{ sourceToken }, $swappableTokens]) => sourceToken ?? $swappableTokens.sourceToken
+	);
+	const destinationToken = derived(
+		[data, swappableTokens],
+		([{ destinationToken }, $swappableTokens]) =>
+			destinationToken ?? $swappableTokens.destinationToken
+	);
 
 	const sourceTokenBalance = derived(
 		[balancesStore, sourceToken],
@@ -96,10 +104,10 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				destinationToken: token
 			})),
 		switchTokens: () =>
-			update((state) => ({
-				sourceToken: state.destinationToken,
-				destinationToken: state.sourceToken
-			})),
+			set({
+				sourceToken: get(destinationToken),
+				destinationToken: get(sourceToken)
+			}),
 		setIsTokensIcrc2: ({
 			ledgerCanisterId,
 			isIcrc2Supported

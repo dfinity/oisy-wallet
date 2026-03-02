@@ -1,18 +1,4 @@
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
-import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
 import type { SwappableTokens } from '$lib/derived/swap.derived';
-import { MODAL_NETWORKS_LIST_CONTEXT_KEY } from '$lib/stores/modal-networks-list.store';
-import { MODAL_TOKENS_LIST_CONTEXT_KEY } from '$lib/stores/modal-tokens-list.store';
-import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
-import * as swapStoreModule from '$lib/stores/swap.store';
-import { initSwapContext, SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
-import * as sveltePackage from 'svelte';
-import { setContext, tick } from 'svelte';
-import { get } from 'svelte/store';
 
 const mockSwappableTokens = vi.hoisted(() => ({
 	set: (_v: SwappableTokens) => {}
@@ -24,6 +10,25 @@ vi.mock('$lib/derived/swap.derived', async () => {
 	mockSwappableTokens.set = (v) => store.set(v);
 	return { swappableTokens: store };
 });
+
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
+import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
+import { MODAL_NETWORKS_LIST_CONTEXT_KEY } from '$lib/stores/modal-networks-list.store';
+import { MODAL_TOKENS_LIST_CONTEXT_KEY } from '$lib/stores/modal-tokens-list.store';
+import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
+import {
+	initSwapContext,
+	SWAP_CONTEXT_KEY,
+	type SwapContext
+} from '$lib/stores/swap.store';
+import * as swapStoreModule from '$lib/stores/swap.store';
+import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
+import { render } from '@testing-library/svelte';
+import { setContext, tick } from 'svelte';
+import * as sveltePackage from 'svelte';
+import { get } from 'svelte/store';
 
 describe('SwapContexts', () => {
 	let swapContext: SwapContext;
@@ -65,7 +70,7 @@ describe('SwapContexts', () => {
 			expect(setContext).toHaveBeenCalledWith(SWAP_CONTEXT_KEY, swapContext);
 		});
 
-		it('should initialize swap context with undefined tokens', () => {
+		it('should initialize swap context with undefined tokens when swappableTokens is empty', () => {
 			render(SwapContexts, { children: mockSnippet });
 
 			expect(get(swapContext.sourceToken)).toBeUndefined();
@@ -122,23 +127,14 @@ describe('SwapContexts', () => {
 		});
 	});
 
-	describe('when swap tokens initialization changes', () => {
-		it('should not set tokens when swappableTokens has no tokens', async () => {
-			render(SwapContexts, { children: mockSnippet });
-
-			await tick();
-
-			expect(get(swapContext.sourceToken)).toBeUndefined();
-			expect(get(swapContext.destinationToken)).toBeUndefined();
-		});
-
-		it('should set source token when swappableTokens provides one', async () => {
-			render(SwapContexts, { children: mockSnippet });
-
+	describe('swappableTokens fallback', () => {
+		it('should use swappableTokens source token as fallback when no explicit token is set', async () => {
 			mockSwappableTokens.set({
 				sourceToken: ICP_TOKEN,
 				destinationToken: undefined
 			});
+
+			render(SwapContexts, { children: mockSnippet });
 
 			await tick();
 
@@ -146,36 +142,39 @@ describe('SwapContexts', () => {
 			expect(get(swapContext.destinationToken)).toBeUndefined();
 		});
 
-		it('should set destination token when swappableTokens provides one', async () => {
-			render(SwapContexts, { children: mockSnippet });
-
+		it('should use swappableTokens destination token as fallback when no explicit token is set', async () => {
 			mockSwappableTokens.set({
 				sourceToken: undefined,
 				destinationToken: ETHEREUM_TOKEN
 			});
 
+			render(SwapContexts, { children: mockSnippet });
+
 			await tick();
 
 			expect(get(swapContext.sourceToken)).toBeUndefined();
 			expect(get(swapContext.destinationToken)).toEqual(ETHEREUM_TOKEN);
 		});
 
-		it('should set both tokens when swappableTokens provides both', async () => {
-			render(SwapContexts, { children: mockSnippet });
-
+		it('should prefer explicit token over swappableTokens fallback', async () => {
 			mockSwappableTokens.set({
 				sourceToken: ICP_TOKEN,
-				destinationToken: ETHEREUM_TOKEN
+				destinationToken: undefined
 			});
+
+			render(SwapContexts, { children: mockSnippet });
 
 			await tick();
 
-			expect(get(swapContext.sourceToken)).toEqual(ICP_TOKEN);
-			expect(get(swapContext.destinationToken)).toEqual(ETHEREUM_TOKEN);
+			swapContext.setSourceToken(ETHEREUM_TOKEN);
+
+			expect(get(swapContext.sourceToken)).toEqual(ETHEREUM_TOKEN);
 		});
 
-		it('should only initialize tokens once even if swappableTokens changes again', async () => {
+		it('should reactively update when swappableTokens changes and no explicit token is set', async () => {
 			render(SwapContexts, { children: mockSnippet });
+
+			expect(get(swapContext.sourceToken)).toBeUndefined();
 
 			mockSwappableTokens.set({
 				sourceToken: ICP_TOKEN,
@@ -185,6 +184,40 @@ describe('SwapContexts', () => {
 			await tick();
 
 			expect(get(swapContext.sourceToken)).toEqual(ICP_TOKEN);
+		});
+
+		it('should fall back to swappableTokens after reset', async () => {
+			mockSwappableTokens.set({
+				sourceToken: ICP_TOKEN,
+				destinationToken: undefined
+			});
+
+			render(SwapContexts, { children: mockSnippet });
+
+			await tick();
+
+			swapContext.setSourceToken(ETHEREUM_TOKEN);
+
+			expect(get(swapContext.sourceToken)).toEqual(ETHEREUM_TOKEN);
+
+			swapContext.reset();
+
+			expect(get(swapContext.sourceToken)).toEqual(ICP_TOKEN);
+		});
+
+		it('should reflect new swappableTokens after navigation and reset', async () => {
+			mockSwappableTokens.set({
+				sourceToken: ICP_TOKEN,
+				destinationToken: undefined
+			});
+
+			render(SwapContexts, { children: mockSnippet });
+
+			await tick();
+
+			expect(get(swapContext.sourceToken)).toEqual(ICP_TOKEN);
+
+			swapContext.reset();
 
 			mockSwappableTokens.set({
 				sourceToken: ETHEREUM_TOKEN,
@@ -193,69 +226,7 @@ describe('SwapContexts', () => {
 
 			await tick();
 
-			expect(get(swapContext.sourceToken)).toEqual(ICP_TOKEN);
-		});
-
-		it('should not reinitialize after user changes tokens via context', async () => {
-			render(SwapContexts, { children: mockSnippet });
-
-			mockSwappableTokens.set({
-				sourceToken: ICP_TOKEN,
-				destinationToken: undefined
-			});
-
-			await tick();
-
-			expect(get(swapContext.sourceToken)).toEqual(ICP_TOKEN);
-
-			swapContext.setSourceToken(ETHEREUM_TOKEN);
-
-			await tick();
-
 			expect(get(swapContext.sourceToken)).toEqual(ETHEREUM_TOKEN);
-
-			mockSwappableTokens.set({
-				sourceToken: ICP_TOKEN,
-				destinationToken: undefined
-			});
-
-			await tick();
-
-			expect(get(swapContext.sourceToken)).toEqual(ETHEREUM_TOKEN);
-		});
-
-		it('should initialize tokens when swappableTokens resolves after mount', async () => {
-			mockSwappableTokens.set({ sourceToken: undefined, destinationToken: undefined });
-
-			render(SwapContexts, { children: mockSnippet });
-
-			await tick();
-
-			expect(get(swapContext.sourceToken)).toBeUndefined();
-
-			mockSwappableTokens.set({
-				sourceToken: ICP_TOKEN,
-				destinationToken: undefined
-			});
-
-			await tick();
-
-			expect(get(swapContext.sourceToken)).toEqual(ICP_TOKEN);
-		});
-
-		it('should skip initialization if swappableTokens remains undefined', async () => {
-			render(SwapContexts, { children: mockSnippet });
-
-			mockSwappableTokens.set({ sourceToken: undefined, destinationToken: undefined });
-
-			await tick();
-
-			mockSwappableTokens.set({ sourceToken: undefined, destinationToken: undefined });
-
-			await tick();
-
-			expect(get(swapContext.sourceToken)).toBeUndefined();
-			expect(get(swapContext.destinationToken)).toBeUndefined();
 		});
 	});
 });
