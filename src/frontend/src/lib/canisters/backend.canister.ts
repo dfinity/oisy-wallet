@@ -1,10 +1,8 @@
 import type {
 	AddUserCredentialResult,
-	AllowSigningResponse,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
-	CreateChallengeResponse,
 	CustomToken,
 	GetAllowedCyclesResponse,
 	PendingTransaction,
@@ -15,16 +13,13 @@ import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import {
-	mapAllowSigningError,
 	mapBtcPendingTransactionError,
 	mapBtcSelectUserUtxosFeeError,
-	mapCreateChallengeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
-	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
@@ -202,31 +197,6 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapGetAllowedCyclesError(response.Err);
-	};
-
-	allowSigning = async ({ request }: AllowSigningParams = {}): Promise<AllowSigningResponse> => {
-		const { allow_signing } = this.caller({ certified: true });
-
-		const response = await allow_signing(toNullable(request));
-
-		if ('Ok' in response) {
-			const { Ok } = response;
-			return Ok;
-		}
-
-		throw mapAllowSigningError(response.Err);
-	};
-
-	createPowChallenge = async (): Promise<CreateChallengeResponse> => {
-		const { create_pow_challenge } = this.caller({ certified: true });
-
-		const result = await create_pow_challenge();
-		if ('Ok' in result) {
-			const { Ok } = result;
-			return Ok;
-		}
-
-		throw mapCreateChallengeError(result.Err);
 	};
 
 	addUserHiddenDappId = async ({
