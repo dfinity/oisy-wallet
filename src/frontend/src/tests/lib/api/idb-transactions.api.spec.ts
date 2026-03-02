@@ -2,7 +2,10 @@ import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import {
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,
@@ -12,11 +15,18 @@ import {
 	getIdbEthTransactions,
 	getIdbIcTransactions,
 	getIdbSolTransactions,
+	setIdbBtcTransactions,
+	setIdbEthTransactions,
+	setIdbIcTransactions,
+	setIdbSolTransactions,
 	setIdbTransactionsStore
 } from '$lib/api/idb-transactions.api';
+import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
+import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 import { get } from 'svelte/store';
@@ -296,6 +306,102 @@ describe('idb-transactions.api', () => {
 			await clearIdbSolTransactions();
 
 			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('setIdbBtcTransactions', () => {
+		it('should delegate to setIdbTransactionsStore with btc store', async () => {
+			await setIdbBtcTransactions({
+				identity: mockIdentity,
+				tokens: [mockToken2],
+				transactionsStoreData: get(btcTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken2.id.description,
+					mockToken2.network.id.description
+				],
+				mockTransactions2,
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('setIdbEthTransactions', () => {
+		it('should delegate to setIdbTransactionsStore with eth store', async () => {
+			await setIdbEthTransactions({
+				identity: mockIdentity,
+				tokens: [mockToken1],
+				transactionsStoreData: get(ethTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockToken1.id.description,
+					mockToken1.network.id.description
+				],
+				mockTransactions1,
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('setIdbIcTransactions', () => {
+		const mockIcToken = ICP_TOKEN;
+		const mockIcTransactions = createMockIcTransactionsUi(4);
+
+		it('should delegate to setIdbTransactionsStore with ic store', async () => {
+			icTransactionsStore.set({
+				tokenId: mockIcToken.id,
+				transactions: mockIcTransactions.map((data) => ({ data, certified: true }))
+			});
+
+			await setIdbIcTransactions({
+				identity: mockIdentity,
+				tokens: [mockIcToken],
+				transactionsStoreData: get(icTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockIcToken.id.description,
+					mockIcToken.network.id.description
+				],
+				mockIcTransactions,
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('setIdbSolTransactions', () => {
+		const mockSolToken = SOLANA_TOKEN;
+		const mockSolTransactions = createMockSolTransactionsUi(3);
+
+		it('should delegate to setIdbTransactionsStore with sol store', async () => {
+			solTransactionsStore.set({
+				tokenId: mockSolToken.id,
+				transactions: mockSolTransactions.map((data) => ({ data, certified: false }))
+			});
+
+			await setIdbSolTransactions({
+				identity: mockIdentity,
+				tokens: [mockSolToken],
+				transactionsStoreData: get(solTransactionsStore)
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+				[
+					mockIdentity.getPrincipal().toText(),
+					mockSolToken.id.description,
+					mockSolToken.network.id.description
+				],
+				mockSolTransactions,
+				expect.any(Object)
+			);
 		});
 	});
 });
