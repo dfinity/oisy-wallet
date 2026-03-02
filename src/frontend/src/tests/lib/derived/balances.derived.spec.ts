@@ -1,12 +1,16 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	allBalancesZero,
 	anyBalanceNonZero,
+	balance,
+	balanceZero,
 	noPositiveBalanceAndNotAllBalancesZero
 } from '$lib/derived/balances.derived';
 import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import { token } from '$lib/stores/token.store';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
@@ -16,6 +20,73 @@ import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('balances.derived', () => {
+	describe('balance', () => {
+		beforeEach(() => {
+			balancesStore.reinitialize();
+
+			token.set(null);
+		});
+
+		it('should return undefined when token is nullish', () => {
+			expect(get(balance)).toBeUndefined();
+		});
+
+		it('should return the balance data for the current token', () => {
+			token.set(ICP_TOKEN);
+
+			balancesStore.set({
+				id: ICP_TOKEN.id,
+				data: { data: bn1Bi, certified: false }
+			});
+
+			expect(get(balance)).toBe(bn1Bi);
+		});
+
+		it('should return undefined when balance for token is not loaded', () => {
+			token.set(ICP_TOKEN);
+
+			expect(get(balance)).toBeUndefined();
+		});
+	});
+
+	describe('balanceZero', () => {
+		beforeEach(() => {
+			balancesStore.reinitialize();
+
+			token.set(null);
+		});
+
+		it('should return false when token is nullish', () => {
+			expect(get(balanceZero)).toBeFalsy();
+		});
+
+		it('should return true when balance is zero', () => {
+			token.set(ICP_TOKEN);
+			balancesStore.set({
+				id: ICP_TOKEN.id,
+				data: { data: ZERO, certified: false }
+			});
+
+			expect(get(balanceZero)).toBeTruthy();
+		});
+
+		it('should return false when balance is non-zero', () => {
+			token.set(ICP_TOKEN);
+			balancesStore.set({
+				id: ICP_TOKEN.id,
+				data: { data: bn1Bi, certified: false }
+			});
+
+			expect(get(balanceZero)).toBeFalsy();
+		});
+
+		it('should return false when balance is not yet loaded', () => {
+			token.set(ICP_TOKEN);
+
+			expect(get(balanceZero)).toBeFalsy();
+		});
+	});
+
 	describe('anyBalanceNonZero', () => {
 		const mockTokenId1 = parseTokenId('mock-token-1');
 		const mockTokenId2 = parseTokenId('mock-token-2');
