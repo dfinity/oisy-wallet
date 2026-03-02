@@ -483,7 +483,8 @@ describe('exchange.derived', () => {
 			const mockSolToken: IcCkToken = {
 				...mockValidIcCkToken,
 				id: parseTokenId('CkSolTokenId'),
-				exchangeCoinId: 'solana' as const
+				exchangeCoinId: 'solana' as const,
+				ledgerCanisterId: 'mock-sol-ledger'
 			};
 
 			icrcDefaultTokensStore.set({ data: mockSolToken, certified: false });
@@ -500,7 +501,8 @@ describe('exchange.derived', () => {
 			const mockIcpCkToken: IcCkToken = {
 				...mockValidIcCkToken,
 				id: parseTokenId('CkIcpTokenId'),
-				exchangeCoinId: 'internet-computer' as const
+				exchangeCoinId: 'internet-computer' as const,
+				ledgerCanisterId: 'mock-icp-ledger'
 			};
 
 			icrcDefaultTokensStore.set({ data: mockIcpCkToken, certified: false });
@@ -518,7 +520,8 @@ describe('exchange.derived', () => {
 				...mockValidIcCkToken,
 				id: parseTokenId('UnknownCoinId'),
 				// @ts-expect-error we test this on purpose
-				exchangeCoinId: 'unknown-coin'
+				exchangeCoinId: 'unknown-coin',
+				ledgerCanisterId: 'mock-unknown-ledger'
 			};
 
 			icrcDefaultTokensStore.set({ data: mockUnknownToken, certified: false });
@@ -536,6 +539,7 @@ describe('exchange.derived', () => {
 				...mockValidIcCkToken,
 				id: parseTokenId('CkEthNoTwinTokenId'),
 				exchangeCoinId: 'ethereum' as const,
+				ledgerCanisterId: 'mock-no-twin-ledger',
 				twinToken: undefined
 			};
 
