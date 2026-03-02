@@ -579,7 +579,7 @@ describe('format.utils', () => {
 			expect(result).toBe('01:15:32');
 		});
 
-		it('should display time when timeOnly is passed without formatOptions', () => {
+		it('should display date and time when timeOnly is passed without formatOptions', () => {
 			const result = formatSecondsToDate({
 				seconds: 1672535700,
 				timeOnly: true
