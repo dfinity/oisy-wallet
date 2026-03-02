@@ -736,7 +736,7 @@ describe('tokens.utils', () => {
 
 			const [firstItem] = result;
 
-			expect('group' in firstItem).toBeTruthy();
+			expect(firstItem).toStrictEqual(groupItem);
 		});
 
 		it('should handle group items where no group token is pinned', () => {
