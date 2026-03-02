@@ -479,6 +479,76 @@ describe('exchange.derived', () => {
 			});
 		});
 
+		it('should fallback to solana price for ICRC tokens with solana exchangeCoinId', () => {
+			const mockSolToken: IcCkToken = {
+				...mockValidIcCkToken,
+				id: parseTokenId('CkSolTokenId'),
+				exchangeCoinId: 'solana' as const
+			};
+
+			icrcDefaultTokensStore.set({ data: mockSolToken, certified: false });
+			icrcCustomTokensStore.setAll([
+				{ data: { ...mockSolToken, enabled: true }, certified: false }
+			]);
+
+			exchangeStore.set([{ solana: solPrice }]);
+
+			expect(get(exchanges)?.[mockSolToken.id]).toEqual(solPrice);
+		});
+
+		it('should fallback to icp price for ICRC tokens with internet-computer exchangeCoinId', () => {
+			const mockIcpCkToken: IcCkToken = {
+				...mockValidIcCkToken,
+				id: parseTokenId('CkIcpTokenId'),
+				exchangeCoinId: 'internet-computer' as const
+			};
+
+			icrcDefaultTokensStore.set({ data: mockIcpCkToken, certified: false });
+			icrcCustomTokensStore.setAll([
+				{ data: { ...mockIcpCkToken, enabled: true }, certified: false }
+			]);
+
+			exchangeStore.set([{ 'internet-computer': icpPrice }]);
+
+			expect(get(exchanges)?.[mockIcpCkToken.id]).toEqual(icpPrice);
+		});
+
+		it('should return undefined for ICRC tokens with unknown exchangeCoinId', () => {
+			const mockUnknownToken: IcCkToken = {
+				...mockValidIcCkToken,
+				id: parseTokenId('UnknownCoinId'),
+				// @ts-expect-error we test this on purpose
+				exchangeCoinId: 'unknown-coin'
+			};
+
+			icrcDefaultTokensStore.set({ data: mockUnknownToken, certified: false });
+			icrcCustomTokensStore.setAll([
+				{ data: { ...mockUnknownToken, enabled: true }, certified: false }
+			]);
+
+			exchangeStore.set([{ ethereum: ethPrice }]);
+
+			expect(get(exchanges)?.[mockUnknownToken.id]).toBeUndefined();
+		});
+
+		it('should use ethPrice for ICRC token with ethereum exchangeCoinId and no twin token address', () => {
+			const mockCkEthNoTwin: IcCkToken = {
+				...mockValidIcCkToken,
+				id: parseTokenId('CkEthNoTwinTokenId'),
+				exchangeCoinId: 'ethereum' as const,
+				twinToken: undefined
+			};
+
+			icrcDefaultTokensStore.set({ data: mockCkEthNoTwin, certified: false });
+			icrcCustomTokensStore.setAll([
+				{ data: { ...mockCkEthNoTwin, enabled: true }, certified: false }
+			]);
+
+			exchangeStore.set([{ ethereum: ethPrice }]);
+
+			expect(get(exchanges)?.[mockCkEthNoTwin.id]).toEqual(ethPrice);
+		});
+
 		it('should fallback to twin tokens for ICRC tokens when possible', () => {
 			icrcDefaultTokensStore.set({
 				data: { ...mockCkBtcToken, exchangeCoinId: 'bitcoin' },
