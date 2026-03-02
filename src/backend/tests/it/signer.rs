@@ -15,7 +15,6 @@ use shared::types::{
 };
 
 use crate::{
-    pow::call_create_user_profile,
     utils::{
         mock::VC_HOLDER,
         pocketic::{controller, pic_canister::PicCanisterTrait, setup, BackendBuilder},

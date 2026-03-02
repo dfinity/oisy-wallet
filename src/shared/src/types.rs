@@ -14,7 +14,6 @@ pub mod dapp;
 pub mod experimental_feature;
 pub mod network;
 pub mod number;
-pub mod pow;
 pub mod result_types;
 pub mod settings;
 pub mod signer;

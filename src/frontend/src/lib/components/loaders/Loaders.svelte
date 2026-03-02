@@ -15,7 +15,6 @@
 	import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
-	import PowProtector from '$lib/components/pow/PowProtector.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
 	import WalletConnectListener from '$lib/components/wallet-connect/WalletConnectListener.svelte';
@@ -29,7 +28,6 @@
 </script>
 
 <LoaderUserProfile>
-	<PowProtector>
 		<Loader>
 			<LoaderTokens />
 
@@ -59,7 +57,6 @@
 				{@render children()}
 			</StakeContext>
 		</Loader>
-	</PowProtector>
 </LoaderUserProfile>
 
 <Guards />

@@ -5,8 +5,7 @@ use ic_stable_structures::{
 };
 use shared::types::{
     backend_config::Config, bitcoin::StoredPendingTransaction, contact::StoredContacts,
-    custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
-    user_profile::StoredUserProfile, Timestamp,
+    custom_token::CustomToken, token::UserToken, user_profile::StoredUserProfile, Timestamp,
 };
 
 use crate::types::storable::{Candid, StoredPrincipal, StoredTokenId};
@@ -25,8 +24,6 @@ pub type UserProfileMap =
 
 /// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
 pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
-
-pub type PowChallengeMap = StableBTreeMap<StoredPrincipal, Candid<StoredChallenge>, VMem>;
 
 // Define a new type for the contact storage
 pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VMem>;

@@ -2,7 +2,7 @@ use std::{cell::RefCell, collections::HashSet, time::Duration};
 
 use bitcoin_utils::estimate_fee;
 use btc_user_pending_tx_model::BtcUserPendingTransactionsModel;
-use candid::{candid_method, Principal};
+use candid::Principal;
 use ic_cdk::{api::time, eprintln, export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use serde_bytes::ByteBuf;
@@ -25,28 +25,24 @@ use shared::{
         dapp::AddHiddenDappIdRequest,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
-        pow::{
-            AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,
-            CYCLES_PER_DIFFICULTY, POW_ENABLED,
-        },
         result_types::{
-            AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
-            BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
-            BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
-            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
-            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
-            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+            AddUserCredentialResult, AddUserHiddenDappIdResult, BtcAddPendingTransactionResult,
+            BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult,
+            BtcSelectUserUtxosFeeResult, CreateContactResult, DeleteContactResult,
+            GetAllowedCyclesResult, GetContactResult, GetContactsResult, GetUserProfileResult,
+            SetUserShowTestnetsResult, UpdateContactResult,
+            UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
+            UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
+            GetAllowedCyclesResponse,
         },
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
         Stats, Timestamp,
     },
 };
-use signer::service::{btc_principal_to_p2wpkh_address, AllowSigningError};
+use signer::service::btc_principal_to_p2wpkh_address;
 
 use crate::{
     bitcoin_api::get_current_fee_percentiles,
@@ -64,7 +60,6 @@ mod btc_user_pending_tx_model;
 mod contacts;
 mod guards;
 mod impls;
-mod pow;
 pub mod random;
 mod signer;
 mod state;
@@ -608,31 +603,6 @@ pub async fn btc_get_pending_transactions(
     inner(params).await.into()
 }
 
-/// Creates a new proof-of-work challenge for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `CreateChallengeError`.
-///
-/// # Returns
-///
-/// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-/// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-///   internal errors.
-#[update(guard = "caller_is_not_anonymous")]
-#[candid_method(update)]
-pub async fn create_pow_challenge() -> CreatePowChallengeResult {
-    let challenge = pow::create_pow_challenge().await;
-
-    match challenge {
-        Ok(challenge) => CreatePowChallengeResult::Ok(CreateChallengeResponse {
-            difficulty: challenge.difficulty,
-            start_timestamp_ms: challenge.start_timestamp_ms,
-            expiry_timestamp_ms: challenge.expiry_timestamp_ms,
-        }),
-        Err(err) => CreatePowChallengeResult::Err(err),
-    }
-}
-
 /// Retrieves the amount of cycles that the signer canister is allowed to spend
 /// on behalf of the current user
 /// # Returns
@@ -649,68 +619,6 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
         Ok(allowed_cycles) => Ok(GetAllowedCyclesResponse { allowed_cycles }).into(),
         Err(err) => GetAllowedCyclesResult::Err(err),
     }
-}
-
-/// This function authorizes the caller to spend a specific
-//  amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
-// providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
-// cycles ledger.
-///
-/// Note:
-/// - The chain fusion signer performs threshold key operations including providing public keys,
-///   creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
-///
-/// # Errors
-/// Errors are enumerated by: `AllowSigningError`.
-#[update(guard = "caller_is_not_anonymous")]
-pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigningResult {
-    async fn inner(
-        request: Option<AllowSigningRequest>,
-    ) -> Result<AllowSigningResponse, AllowSigningError> {
-        let principal = ic_cdk::caller();
-
-        // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED
-        // is disabled
-        if !POW_ENABLED {
-            // Passing None to apply the old cycle calculation logic
-            signer::service::allow_signing(None).await?;
-            // Returning a placeholder response that can be ignored by the frontend.
-            return Ok(AllowSigningResponse {
-                status: AllowSigningStatus::Skipped,
-                allowed_cycles: 0u64,
-                challenge_completion: None,
-            });
-        }
-
-        // we atill need to make a valid request has been sent request
-        let request = request.ok_or(AllowSigningError::Other("Invalid request".to_string()))?;
-
-        // The Proof-of-Work (PoW) protection is explicitly enforced at the HTTP entry-point level.
-        // This ensures internal calls to the business service remains unrestricted and does not
-        // require PoW protection.
-        let challenge_completion: ChallengeCompletion =
-            pow::complete_challenge(request.nonce).map_err(AllowSigningError::PowChallenge)?;
-
-        // Grant cycles proportional to difficulty
-        let allowed_cycles =
-            u64::from(challenge_completion.current_difficulty) * CYCLES_PER_DIFFICULTY;
-
-        ic_cdk::println!(
-            "Allowing principle {} to spend {} cycles on signer operations",
-            principal.to_string(),
-            allowed_cycles,
-        );
-
-        // Allow the caller to pay for cycles consumed by signer operations
-        signer::service::allow_signing(Some(allowed_cycles)).await?;
-
-        Ok(AllowSigningResponse {
-            status: AllowSigningStatus::Executed,
-            allowed_cycles,
-            challenge_completion: Some(challenge_completion),
-        })
-    }
-    inner(request).await.into()
 }
 
 /// API method to get cycle balance and burn rate.
