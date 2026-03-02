@@ -28,9 +28,6 @@ export const POST_MESSAGE_REQUESTS = [
 	'stopIdleTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
-	'startPowProtectionTimer',
-	'triggerPowProtectionTimer',
-	'stopPowProtectionTimer',
 	'stopIcpWalletTimer',
 	'startIcpWalletTimer',
 	'triggerIcpWalletTimer',
@@ -126,8 +123,7 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncSolWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
-	'syncCkBTCUpdateBalanceStatus',
-	'syncPowProtectionStatus'
+	'syncCkBTCUpdateBalanceStatus'
 ]);
 
 export const PostMessageErrorResponseSchema = z.enum([
@@ -138,8 +134,7 @@ export const PostMessageErrorResponseSchema = z.enum([
 	'syncBtcWalletError',
 	'syncSolWalletError',
 	'syncBtcStatusesError',
-	'syncCkMinterInfoError',
-	'syncPowProtectionError'
+	'syncCkMinterInfoError'
 ]);
 
 export const PostMessageResponseSchema = z.enum([
@@ -159,8 +154,6 @@ export const PostMessageResponseSchema = z.enum([
 	'syncBtcPendingUtxos',
 	'syncCkBTCUpdateOk',
 	'syncBtcAddress',
-	'syncPowProgress',
-	'syncPowNextAllowance',
 	...PostMessageResponseStatusSchema.options
 ]);
 
@@ -224,16 +217,6 @@ export const PostMessageDataResponseBTCAddressSchema = PostMessageDataResponseSc
 	// TODO: generate zod schema for BtcAddressData
 	address: z.custom<BtcAddressData>()
 }).strict();
-
-export const PostMessageDataResponsePowProtectorProgressSchema =
-	PostMessageDataResponseSchema.extend({
-		progress: z.enum(['REQUEST_CHALLENGE', 'SOLVE_CHALLENGE', 'GRANT_CYCLES'])
-	});
-
-export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
-	PostMessageDataResponseSchema.extend({
-		nextAllowanceMs: z.custom<bigint>().optional()
-	});
 
 export const PostMessageCommonSchema = z.object({
 	ref: z.string().optional()
