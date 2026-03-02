@@ -103,6 +103,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				...state,
 				destinationToken: token
 			})),
+		// TODO: Ideally, this function should be used with reactive statements, exported outside the store.
 		switchTokens: () =>
 			update((state) => {
 				const $swappableTokens = get(swappableTokens);
