@@ -17,8 +17,7 @@ use crate::{contacts, guards::caller_is_not_anonymous};
 /// # Returns
 /// The created contact on success.
 ///
-/// # Test
-/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
+
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub async fn create_contact(request: CreateContactRequest) -> CreateContactResult {
