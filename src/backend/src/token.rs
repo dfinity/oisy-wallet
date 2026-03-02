@@ -19,15 +19,15 @@ pub fn add_to_user_token<T, Id, F>(
     Id: Eq,
     F: Fn(&T) -> Id,
 {
-    let Candid(mut existing) = user_token.get(&stored_principal).unwrap_or_default();
+    let Candid(mut tokens) = user_token.get(&stored_principal).unwrap_or_default();
 
     // Pre-allocate for bulk additions
-    existing.reserve(incoming.len());
+    tokens.reserve(incoming.len());
 
     for token in incoming {
         let id = id_of(token);
 
-        if let Some(slot) = existing.iter_mut().find(|t| id_of(*t) == id) {
+        if let Some(slot) = tokens.iter_mut().find(|t| id_of(*t) == id) {
             if token.get_version() == slot.get_version() {
                 *slot = token.with_incremented_version();
             } else {
@@ -36,16 +36,16 @@ pub fn add_to_user_token<T, Id, F>(
                 ));
             }
         } else {
-            if existing.len() == MAX_TOKEN_LIST_LENGTH {
+            if tokens.len() == MAX_TOKEN_LIST_LENGTH {
                 ic_cdk::trap(&format!(
                     "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
                 ));
             }
-            existing.push(token.with_initial_version());
+            tokens.push(token.with_initial_version());
         }
     }
 
-    user_token.insert(stored_principal, Candid(existing));
+    user_token.insert(stored_principal, Candid(tokens));
 }
 
 pub fn remove_from_user_token<T>(
