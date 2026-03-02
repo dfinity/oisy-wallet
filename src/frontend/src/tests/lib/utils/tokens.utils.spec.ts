@@ -1,7 +1,7 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import {
@@ -13,7 +13,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { IcToken } from '$icp/types/ic-token';
+import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import * as appConstants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
@@ -26,6 +26,7 @@ import type { StakeBalances } from '$lib/types/stake-balance';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
+import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { mapTokenUi } from '$lib/utils/token.utils';
@@ -45,6 +46,7 @@ import {
 	sumTokensUiUsdBalance,
 	sumTokensUiUsdStakeBalance
 } from '$lib/utils/tokens.utils';
+import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
@@ -547,6 +549,281 @@ describe('tokens.utils', () => {
 
 			expect(result.map((t) => t.id)).toEqual([tokenAAA.id, tokenZZZ.id]);
 		});
+
+		it('should sort pinned networks before unpinned networks when other criteria are equal', () => {
+			const tokenOnPinnedNet: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-PNET-A'),
+				symbol: 'SAME',
+				name: 'SameName',
+				network: ICP_NETWORK
+			};
+			const tokenOnUnpinnedNet: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-UNPNET-B'),
+				symbol: 'SAME',
+				name: 'SameName',
+				network: { ...ICP_NETWORK, id: ETHEREUM_NETWORK_ID, name: ICP_NETWORK.name }
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenOnPinnedNet.id]: { data: ZERO, certified },
+				[tokenOnUnpinnedNet.id]: { data: ZERO, certified }
+			};
+
+			const $exchanges: ExchangesData = {
+				[tokenOnPinnedNet.id]: { usd: 0, usd_market_cap: 0 },
+				[tokenOnUnpinnedNet.id]: { usd: 0, usd_market_cap: 0 }
+			};
+
+			const tokens = [tokenOnUnpinnedNet, tokenOnPinnedNet].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
+			const result = sortTokens({
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: [{ id: ICP_NETWORK_ID }]
+			});
+
+			expect(result.map((t) => t.id)).toEqual([tokenOnPinnedNet.id, tokenOnUnpinnedNet.id]);
+		});
+
+		it('should sort by pinned network order when both networks are pinned', () => {
+			const tokenNetA: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-NETA'),
+				symbol: 'SAME',
+				name: 'SameName',
+				network: { ...ICP_NETWORK, id: BTC_MAINNET_NETWORK_ID, name: ICP_NETWORK.name }
+			};
+			const tokenNetB: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-NETB'),
+				symbol: 'SAME',
+				name: 'SameName',
+				network: ICP_NETWORK
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenNetA.id]: { data: ZERO, certified },
+				[tokenNetB.id]: { data: ZERO, certified }
+			};
+
+			const $exchanges: ExchangesData = {
+				[tokenNetA.id]: { usd: 0, usd_market_cap: 0 },
+				[tokenNetB.id]: { usd: 0, usd_market_cap: 0 }
+			};
+
+			const tokens = [tokenNetA, tokenNetB].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
+			const result = sortTokens({
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: [{ id: ICP_NETWORK_ID }, { id: BTC_MAINNET_NETWORK_ID }]
+			});
+
+			expect(result.map((t) => t.id)).toEqual([tokenNetB.id, tokenNetA.id]);
+		});
+
+		it('should sort by name when symbols are the same', () => {
+			const tokenNameA: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-NAME-A'),
+				symbol: 'SAME',
+				name: 'Alpha',
+				network: ICP_NETWORK
+			};
+			const tokenNameZ: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-NAME-Z'),
+				symbol: 'SAME',
+				name: 'Zulu',
+				network: ICP_NETWORK
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenNameA.id]: { data: ZERO, certified },
+				[tokenNameZ.id]: { data: ZERO, certified }
+			};
+
+			const $exchanges: ExchangesData = {
+				[tokenNameA.id]: { usd: 0, usd_market_cap: 0 },
+				[tokenNameZ.id]: { usd: 0, usd_market_cap: 0 }
+			};
+
+			const tokens = [tokenNameZ, tokenNameA].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
+			const result = sortTokens({
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: []
+			});
+
+			expect(result.map((t) => t.id)).toEqual([tokenNameA.id, tokenNameZ.id]);
+		});
+
+		it('should handle group items in sortTokens', () => {
+			const tokenA: TokenUi = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-GRP-A'),
+				symbol: 'AAA',
+				name: 'Alpha',
+				network: ICP_NETWORK,
+				balance: ZERO,
+				usdBalance: 0
+			};
+			const tokenB: TokenUi = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-GRP-B'),
+				symbol: 'BBB',
+				name: 'Beta',
+				network: ICP_NETWORK,
+				balance: ZERO,
+				usdBalance: 0
+			};
+
+			const groupItem: TokenUiOrGroupUi = {
+				group: {
+					id: parseTokenGroupId('GroupId-GRP'),
+					decimals: 8,
+					groupData: { id: parseTokenGroupId('GroupId-GRP'), symbol: 'GRP', name: 'Group' },
+					tokens: [tokenA, tokenB],
+					balance: ZERO,
+					usdBalance: 0
+				}
+			};
+
+			const singleItem: TokenUiOrGroupUi = {
+				token: {
+					...mockValidToken,
+					id: parseTokenId('TokenId-SINGLE'),
+					symbol: 'ZZZ',
+					name: 'Zulu',
+					network: ICP_NETWORK,
+					balance: ZERO,
+					usdBalance: 0
+				}
+			};
+
+			const result = sortTokens({
+				$tokens: [singleItem, groupItem],
+				$tokensToPin: [{ id: tokenA.id }],
+				$networksToPin: []
+			});
+
+			expect(result).toHaveLength(2);
+
+			const [firstItem] = result;
+
+			expect('group' in firstItem).toBeTruthy();
+		});
+
+		it('should handle group items where no group token is pinned', () => {
+			const tokenA: TokenUi = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-GRP-X'),
+				symbol: 'AAA',
+				name: 'Alpha',
+				network: ICP_NETWORK,
+				balance: ZERO,
+				usdBalance: 0
+			};
+
+			const groupItem: TokenUiOrGroupUi = {
+				group: {
+					id: parseTokenGroupId('GroupId-GRP2'),
+					decimals: 8,
+					groupData: { id: parseTokenGroupId('GroupId-GRP2'), symbol: 'GRP', name: 'Group' },
+					tokens: [tokenA],
+					balance: ZERO,
+					usdBalance: 0
+				}
+			};
+
+			const singleItem: TokenUiOrGroupUi = {
+				token: {
+					...mockValidToken,
+					id: parseTokenId('TokenId-SINGLE2'),
+					symbol: 'ZZZ',
+					name: 'Zulu',
+					network: ICP_NETWORK,
+					balance: ZERO,
+					usdBalance: 0
+				}
+			};
+
+			const result = sortTokens({
+				$tokens: [singleItem, groupItem],
+				$tokensToPin: [],
+				$networksToPin: []
+			});
+
+			expect(result).toHaveLength(2);
+		});
+
+		it('should fall back to market cap when all other criteria are equal', () => {
+			const tokenLowMcap: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-MCAP-LOW'),
+				symbol: 'SAME',
+				name: 'SameName',
+				network: ICP_NETWORK
+			};
+			const tokenHighMcap: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-MCAP-HIGH'),
+				symbol: 'SAME',
+				name: 'SameName',
+				network: ICP_NETWORK
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenLowMcap.id]: { data: ZERO, certified },
+				[tokenHighMcap.id]: { data: ZERO, certified }
+			};
+
+			const $exchanges: ExchangesData = {
+				[tokenLowMcap.id]: { usd: 0, usd_market_cap: 1 },
+				[tokenHighMcap.id]: { usd: 0, usd_market_cap: 999 }
+			};
+
+			const tokens = [tokenLowMcap, tokenHighMcap].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
+			const result = sortTokens({
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: []
+			});
+
+			expect(result.map((t) => t.id)).toEqual([tokenHighMcap.id, tokenLowMcap.id]);
+		});
 	});
 
 	describe('sumTokensUiUsdBalance', () => {
@@ -855,6 +1132,38 @@ describe('tokens.utils', () => {
 			expect(
 				filterTokens({ tokens: [...mockTokens, mockValidIcCkToken], filter: 'STK' })
 			).toStrictEqual([mockValidIcCkToken]);
+		});
+
+		it('should filter ICRC custom tokens by alternativeName', () => {
+			const icrcCustomToken = {
+				...mockValidIcrcToken,
+				enabled: true,
+				alternativeName: 'MyAltName'
+			};
+
+			const result = filterTokens({ tokens: [icrcCustomToken], filter: 'MyAlt' });
+
+			expect(result).toStrictEqual([icrcCustomToken]);
+		});
+
+		it('should match via twin token when main token does not match filter', () => {
+			const ckToken: IcCkToken = {
+				...mockValidIcCkToken,
+				id: parseTokenId('ckUniqueId'),
+				symbol: 'ckXYZ',
+				name: 'ckXYZ Token',
+				twinToken: {
+					...mockValidToken,
+					id: parseTokenId('twinXYZ'),
+					symbol: 'XYZ',
+					name: 'XYZ Native',
+					standard: { code: 'erc20' }
+				}
+			};
+
+			const result = filterTokens({ tokens: [ckToken], filter: 'XYZ Native' });
+
+			expect(result).toStrictEqual([ckToken]);
 		});
 
 		it('should filter tokens correctly when filter is not provided', () => {
@@ -1335,6 +1644,44 @@ describe('tokens.utils', () => {
 			);
 		});
 
+		it('should call saveCustomTokensWithKey when ERC721 tokens are present', async () => {
+			const token = { ...mockValidErc721Token, enabled: true } as unknown as TokenUi;
+
+			await saveAllCustomTokens({
+				tokens: [token],
+				$authIdentity: mockIdentity,
+				$i18n: i18nMock
+			});
+
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tokens: expect.arrayContaining([
+						expect.objectContaining({ ...token, networkKey: 'Erc721' })
+					]),
+					identity: mockIdentity
+				})
+			);
+		});
+
+		it('should call saveCustomTokensWithKey when ERC1155 tokens are present', async () => {
+			const token = { ...mockValidErc1155Token, enabled: true } as unknown as TokenUi;
+
+			await saveAllCustomTokens({
+				tokens: [token],
+				$authIdentity: mockIdentity,
+				$i18n: i18nMock
+			});
+
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tokens: expect.arrayContaining([
+						expect.objectContaining({ ...token, networkKey: 'Erc1155' })
+					]),
+					identity: mockIdentity
+				})
+			);
+		});
+
 		it('should call saveCustomTokensWithKey when SPL tokens are present', async () => {
 			const token = { ...BONK_TOKEN, enabled: true } as unknown as TokenUi;
 
@@ -1347,6 +1694,29 @@ describe('tokens.utils', () => {
 			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([expect.objectContaining(token)]),
+					identity: mockIdentity
+				})
+			);
+		});
+
+		it('should call saveCustomTokensWithKey with SplDevnet key for devnet SPL tokens', async () => {
+			const token = {
+				...mockValidSplToken,
+				network: SOLANA_DEVNET_NETWORK,
+				enabled: true
+			} as unknown as TokenUi;
+
+			await saveAllCustomTokens({
+				tokens: [token],
+				$authIdentity: mockIdentity,
+				$i18n: i18nMock
+			});
+
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tokens: expect.arrayContaining([
+						expect.objectContaining({ ...token, networkKey: 'SplDevnet' })
+					]),
 					identity: mockIdentity
 				})
 			);
