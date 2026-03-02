@@ -39,13 +39,28 @@
 		store: initSwapAmountsStore()
 	});
 
-	setContext<SwapContext>(
-		SWAP_CONTEXT_KEY,
-		initSwapContext({
-			sourceToken: $swappableTokens.sourceToken,
-			destinationToken: $swappableTokens.destinationToken
-		})
-	);
+	const swapContext = initSwapContext();
+	setContext<SwapContext>(SWAP_CONTEXT_KEY, swapContext);
+	let swapTokensInitialized = false;
+	$effect(() => {
+		const { sourceToken, destinationToken } = $swappableTokens;
+
+		if (swapTokensInitialized) {
+			return;
+		}
+
+		if (nonNullish(sourceToken) || nonNullish(destinationToken)) {
+			swapTokensInitialized = true;
+
+			if (nonNullish(sourceToken)) {
+				swapContext.setSourceToken(sourceToken);
+			}
+
+			if (nonNullish(destinationToken)) {
+				swapContext.setDestinationToken(destinationToken);
+			}
+		}
+	});
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
