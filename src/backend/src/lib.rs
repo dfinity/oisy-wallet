@@ -40,13 +40,12 @@ use shared::{
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
+            AllowSigningError, AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
         },
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
         Stats, Timestamp,
     },
 };
-use signer::service::{btc_principal_to_p2wpkh_address, AllowSigningError};
 
 use crate::{
     bitcoin_api::get_current_fee_percentiles,
@@ -167,7 +166,7 @@ fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
     }
 
     ic_cdk::spawn(async move {
-        if let Err(e) = signer::service::allow_signing(None).await {
+        if let Err(e) = signer::allow_signing(None).await {
             ic_cdk::println!(
                 "Error enabling signing for user {}: {:?}",
                 stored_principal.0,
@@ -255,7 +254,7 @@ pub fn config() -> Config {
 pub async fn top_up_cycles_ledger(
     request: Option<TopUpCyclesLedgerRequest>,
 ) -> TopUpCyclesLedgerResult {
-    signer::service::top_up_cycles_ledger(request.unwrap_or_default()).await
+    signer::top_up_cycles_ledger(request.unwrap_or_default()).await
 }
 
 /// Processes external HTTP requests.
@@ -412,7 +411,7 @@ pub async fn btc_select_user_utxos_fee(
         params: SelectedUtxosFeeRequest,
     ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
         let principal = ic_cdk::caller();
-        let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+        let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
         let all_utxos = bitcoin_api::get_all_utxos(
@@ -508,7 +507,7 @@ pub async fn btc_add_pending_transaction(
 
         let principal = ic_cdk::caller();
 
-        let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+        let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
 
@@ -644,7 +643,7 @@ pub async fn create_pow_challenge() -> CreatePowChallengeResult {
 /// - `Other`: If another error occurred during the operation
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
-    let allowed_cycles = signer::service::get_allowed_cycles().await;
+    let allowed_cycles = signer::get_allowed_cycles().await;
     match allowed_cycles {
         Ok(allowed_cycles) => Ok(GetAllowedCyclesResponse { allowed_cycles }).into(),
         Err(err) => GetAllowedCyclesResult::Err(err),
@@ -673,7 +672,7 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
         // is disabled
         if !POW_ENABLED {
             // Passing None to apply the old cycle calculation logic
-            signer::service::allow_signing(None).await?;
+            signer::allow_signing(None).await?;
             // Returning a placeholder response that can be ignored by the frontend.
             return Ok(AllowSigningResponse {
                 status: AllowSigningStatus::Skipped,
@@ -702,7 +701,7 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
         );
 
         // Allow the caller to pay for cycles consumed by signer operations
-        signer::service::allow_signing(Some(allowed_cycles)).await?;
+        signer::allow_signing(Some(allowed_cycles)).await?;
 
         Ok(AllowSigningResponse {
             status: AllowSigningStatus::Executed,
@@ -743,74 +742,6 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
             })
             .collect()
     })
-}
-
-/// Creates a new contact for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
-///
-/// # Returns
-/// The created contact on success.
-///
-/// # Test
-/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub async fn create_contact(request: CreateContactRequest) -> CreateContactResult {
-    let result = contacts::create_contact(request).await;
-    result.into()
-}
-
-/// Updates an existing contact for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    let result = contacts::update_contact(request);
-    result.into()
-}
-
-/// Deletes a contact for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
-///
-/// # Notes
-/// This operation is idempotent - it will return OK if the contact has already been deleted.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
-    let result = contacts::delete_contact(contact_id);
-    result.into()
-}
-
-/// Gets a contact by ID for the caller.
-///
-/// # Arguments
-/// * `contact_id` - The unique identifier of the contact to retrieve
-/// # Returns
-/// * `Ok(GetContactResult)` - The requested contact if found
-/// # Errors
-/// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_contact(contact_id: u64) -> GetContactResult {
-    contacts::get_contact(contact_id).into()
-}
-
-/// Returns all contacts for the caller
-///
-/// This query function returns a list of the user's contacts.
-/// # Returns
-/// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_contacts() -> GetContactsResult {
-    let result = Ok(contacts::get_contacts());
-    result.into()
 }
 
 export_candid!();
