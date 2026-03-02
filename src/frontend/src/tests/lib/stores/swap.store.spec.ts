@@ -1,8 +1,10 @@
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import * as exchanges from '$lib/derived/exchange.derived';
+import type { SwappableTokens } from '$lib/derived/swap.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initSwapContext } from '$lib/stores/swap.store';
 import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
@@ -19,12 +21,25 @@ const ckBtcToken = {
 	symbol: BTC_MAINNET_TOKEN.twinTokenSymbol
 } as IcToken;
 
+const mockSwappableTokens = vi.hoisted(() => ({
+	set: (_v: SwappableTokens) => {}
+}));
+
+vi.mock('$lib/derived/swap.derived', async () => {
+	const { writable } = await import('svelte/store');
+	const store = writable<SwappableTokens>({ sourceToken: undefined, destinationToken: undefined });
+	mockSwappableTokens.set = (v) => store.set(v);
+	return { swappableTokens: store };
+});
+
 describe('swapStore', () => {
 	const mockToken1 = { ...ckBtcToken, enabled: true };
 	const mockToken2 = { ...ICP_TOKEN, enabled: false };
 
 	beforeEach(() => {
 		mockPage.reset();
+
+		mockSwappableTokens.set({ sourceToken: undefined, destinationToken: undefined });
 
 		vi.spyOn(exchanges, 'exchanges', 'get').mockImplementation(() =>
 			readable({
@@ -233,6 +248,93 @@ describe('swapStore', () => {
 			switchTokens();
 
 			expect(get(isSourceTokenIcrc2)).toBeTruthy();
+		});
+	});
+
+	describe('when swappableTokens as fallback', () => {
+		it('should fall back to swappableTokens when no explicit source token is set', () => {
+			mockSwappableTokens.set({ sourceToken: ICP_TOKEN, destinationToken: undefined });
+
+			const { sourceToken } = initSwapContext();
+
+			expect(get(sourceToken)).toEqual(ICP_TOKEN);
+		});
+
+		it('should fall back to swappableTokens when no explicit destination token is set', () => {
+			mockSwappableTokens.set({ sourceToken: undefined, destinationToken: ETHEREUM_TOKEN });
+
+			const { destinationToken } = initSwapContext();
+
+			expect(get(destinationToken)).toEqual(ETHEREUM_TOKEN);
+		});
+
+		it('should prefer explicit token over swappableTokens fallback', () => {
+			mockSwappableTokens.set({ sourceToken: ICP_TOKEN, destinationToken: undefined });
+
+			const { sourceToken } = initSwapContext({ sourceToken: ETHEREUM_TOKEN });
+
+			expect(get(sourceToken)).toEqual(ETHEREUM_TOKEN);
+		});
+
+		it('should fall back to swappableTokens after reset', () => {
+			mockSwappableTokens.set({ sourceToken: ICP_TOKEN, destinationToken: undefined });
+
+			const { sourceToken, destinationToken, reset } = initSwapContext({
+				sourceToken: ETHEREUM_TOKEN,
+				destinationToken: mockToken1
+			});
+
+			expect(get(sourceToken)).toEqual(ETHEREUM_TOKEN);
+			expect(get(destinationToken)).toEqual(mockToken1);
+
+			reset();
+
+			expect(get(sourceToken)).toEqual(ICP_TOKEN);
+			expect(get(destinationToken)).toBeUndefined();
+		});
+
+		it('should switch tokens correctly when one comes from swappableTokens fallback', () => {
+			mockSwappableTokens.set({ sourceToken: ICP_TOKEN, destinationToken: undefined });
+
+			const { sourceToken, destinationToken, setDestinationToken, switchTokens } =
+				initSwapContext();
+
+			setDestinationToken(ETHEREUM_TOKEN);
+
+			expect(get(sourceToken)).toEqual(ICP_TOKEN);
+			expect(get(destinationToken)).toEqual(ETHEREUM_TOKEN);
+
+			switchTokens();
+
+			expect(get(sourceToken)).toEqual(ETHEREUM_TOKEN);
+			expect(get(destinationToken)).toEqual(ICP_TOKEN);
+		});
+
+		it('should switch tokens correctly when both come from swappableTokens fallback', () => {
+			mockSwappableTokens.set({
+				sourceToken: ICP_TOKEN,
+				destinationToken: ETHEREUM_TOKEN
+			});
+
+			const { sourceToken, destinationToken, switchTokens } = initSwapContext();
+
+			expect(get(sourceToken)).toEqual(ICP_TOKEN);
+			expect(get(destinationToken)).toEqual(ETHEREUM_TOKEN);
+
+			switchTokens();
+
+			expect(get(sourceToken)).toEqual(ETHEREUM_TOKEN);
+			expect(get(destinationToken)).toEqual(ICP_TOKEN);
+		});
+
+		it('should update when swappableTokens changes and no explicit token is set', () => {
+			const { sourceToken } = initSwapContext();
+
+			expect(get(sourceToken)).toBeUndefined();
+
+			mockSwappableTokens.set({ sourceToken: ICP_TOKEN, destinationToken: undefined });
+
+			expect(get(sourceToken)).toEqual(ICP_TOKEN);
 		});
 	});
 
