@@ -7,12 +7,10 @@ import { checkAllBalancesZero, checkAnyNonZeroBalance } from '$lib/utils/balance
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-
 export const balance: Readable<OptionBalance> = derived(
 	[balancesStore, token],
 	([$balanceStore, $token]) => (nonNullish($token) ? $balanceStore?.[$token.id]?.data : undefined)
 );
-
 
 export const balanceZero: Readable<boolean> = derived(
 	[balancesStore, token],
