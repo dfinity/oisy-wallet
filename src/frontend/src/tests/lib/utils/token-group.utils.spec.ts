@@ -118,6 +118,21 @@ describe('token-group.utils', () => {
 			]);
 		});
 
+		it('should keep individual tokens with non-zero balance when showZeroBalances is false', () => {
+			const tokenWithBalance = { ...tokens[2], balance: bn2Bi, usdBalance: 200 }; // ETH
+			const tokenWithoutBalance = { ...tokens[4], balance: ZERO, usdBalance: 0 }; // ICP
+
+			const groupedTokens: TokenUiOrGroupUi[] = [
+				{ token: tokenWithBalance },
+				{ token: tokenWithoutBalance }
+			];
+
+			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
+
+			expect(filteredTokenGroups).toHaveLength(1);
+			expect(filteredTokenGroups[0]).toHaveProperty('token', tokenWithBalance);
+		});
+
 		it('should give me only token groups where at least one token has a usd balance', () => {
 			const customReorderedTokens = [
 				...reorderedTokens,
@@ -628,6 +643,17 @@ describe('token-group.utils', () => {
 			const result = sortTokenOrGroupUi(tokenList);
 
 			expect(result).toEqual([mockToken, mockSecondToken, mockThirdToken, mockFourthToken]);
+		});
+
+		it('should sort two non-alphanumeric names using localeCompare', () => {
+			const toTokenUiOrGroupUi = (token: Token): TokenUiOrGroupUi => ({ token });
+
+			const nonAlpha1 = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- BBB' });
+			const nonAlpha2 = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- AAA' });
+
+			const result = sortTokenOrGroupUi([nonAlpha1, nonAlpha2]);
+
+			expect(result).toEqual([nonAlpha2, nonAlpha1]);
 		});
 
 		it('should keep order the same if groups passed', () => {
