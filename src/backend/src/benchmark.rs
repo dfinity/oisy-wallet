@@ -212,8 +212,8 @@ fn bench_set_custom_token() -> BenchResult {
             add_to_user_token(
                 sp,
                 &mut s.custom_token,
-                &token,
-                &matches_custom_token(&token),
+                std::slice::from_ref(&token),
+                matches_custom_token(&token),
             );
         });
     })
@@ -229,7 +229,12 @@ fn bench_set_many_custom_tokens_with_count(count: u8) -> BenchResult {
     bench_fn(|| {
         mutate_state(|s| {
             for token in &tokens {
-                add_to_user_token(sp, &mut s.custom_token, token, &matches_custom_token(token));
+                add_to_user_token(
+                    sp,
+                    &mut s.custom_token,
+                    std::slice::from_ref(token),
+                    matches_custom_token(token),
+                );
             }
         });
     })
@@ -255,8 +260,8 @@ fn bench_list_custom_tokens_with_count(count: u8) -> BenchResult {
             add_to_user_token(
                 sp,
                 &mut s.custom_token,
-                &token,
-                &matches_custom_token(&token),
+                std::slice::from_ref(&token),
+                matches_custom_token(&token),
             );
         });
     }
@@ -286,8 +291,8 @@ fn bench_remove_custom_token() -> BenchResult {
         add_to_user_token(
             sp,
             &mut s.custom_token,
-            &token,
-            &matches_custom_token(&token),
+            std::slice::from_ref(&token),
+            matches_custom_token(&token),
         );
     });
 
