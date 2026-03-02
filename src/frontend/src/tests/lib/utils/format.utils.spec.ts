@@ -1636,6 +1636,8 @@ describe('format.utils', () => {
 
 			expect(result).toBeDefined();
 			expect(result?.sign).toBe('positive');
+			expect(result?.formattedAbs).toBeDefined();
+			expect(result?.formattedAbs).toMatch(/^\d+(\.\d+)?%$/);
 		});
 	});
 });
