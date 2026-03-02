@@ -1,4 +1,5 @@
 import {
+	errorDetailToString,
 	mapIcErrorMetadata,
 	parseIcErrorMessage,
 	replaceErrorFields,
@@ -6,6 +7,28 @@ import {
 } from '$lib/utils/error.utils';
 
 describe('error.utils', () => {
+	describe('errorDetailToString', () => {
+		it('should return the string as-is if err is a string', () => {
+			expect(errorDetailToString('some error')).toBe('some error');
+		});
+
+		it('should return the message if err is an Error', () => {
+			expect(errorDetailToString(new Error('fail'))).toBe('fail');
+		});
+
+		it('should return the message if err is an object with a message property', () => {
+			expect(errorDetailToString({ message: 'object error' })).toBe('object error');
+		});
+
+		it('should return undefined if err has no message property', () => {
+			expect(errorDetailToString({ code: 500 })).toBeUndefined();
+		});
+
+		it('should return undefined for an object without message', () => {
+			expect(errorDetailToString({ code: 500, detail: 'not found' })).toBeUndefined();
+		});
+	});
+
 	describe('replaceErrorFields', () => {
 		const errorObj = {
 			message: 'fail',
@@ -421,6 +444,27 @@ Call context:
 
 			expect(result).toBeUndefined();
 		});
+
+		it('should handle Error with message containing only stack traces', () => {
+			const errorMsg = `Call failed:\n  at Function.from (test.js:1:1)\n  at Object.<anonymous> (test.js:2:2)`;
+			const error = new Error(JSON.stringify(errorMsg));
+
+			expect(parseIcErrorMessage(error)).toBeUndefined();
+		});
+
+		it('should handle Error with message containing only URLs', () => {
+			const errorMsg = `Call failed:\nhttps://example.com/error`;
+			const error = new Error(JSON.stringify(errorMsg));
+
+			expect(parseIcErrorMessage(error)).toBeUndefined();
+		});
+
+		it('should handle Error with message containing lines that do not match kv pattern', () => {
+			const errorMsg = `Call failed:\nsome random text without colons`;
+			const error = new Error(JSON.stringify(errorMsg));
+
+			expect(parseIcErrorMessage(error)).toBeUndefined();
+		});
 	});
 
 	describe('mapIcErrorMetadata', () => {
@@ -454,6 +498,38 @@ Call context:
 			});
 
 			expect(result).toBe(JSON.stringify({ message: 'fail', token: 'secret', code: 500 }));
+		});
+
+		it('should fall back to replaceIcErrorFields when parseIcErrorMessage returns undefined', () => {
+			const result = mapIcErrorMetadata('simple string error');
+
+			expect(result).toEqual({ error: 'simple string error' });
+		});
+
+		it('should fall back to String(err) when replaceIcErrorFields returns undefined', () => {
+			const result = mapIcErrorMetadata(42);
+
+			expect(result).toEqual({ error: '42' });
+		});
+
+		it('should use parsed IC error when parseIcErrorMessage succeeds', () => {
+			const errorMsg = `Call failed: \n message: fail\n code: 500`;
+			const error = new Error(JSON.stringify(errorMsg));
+
+			const result = mapIcErrorMetadata(error);
+
+			expect(result).toStrictEqual({
+				message: 'fail',
+				code: '500'
+			});
+		});
+
+		it('should fall back to replaceIcErrorFields for Error without parseable IC format', () => {
+			const error = new Error('Simple error message');
+
+			const result = mapIcErrorMetadata(error);
+
+			expect(result).toEqual({ error: 'Simple error message' });
 		});
 	});
 });
