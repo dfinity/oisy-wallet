@@ -533,9 +533,6 @@ export interface _SERVICE {
 	 *
 	 * # Returns
 	 * The created contact on success.
-	 *
-	 * # Test
-	 * This endpoint is currently a placeholder and will be fully implemented in a future PR.
 	 */
 	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
 	/**
