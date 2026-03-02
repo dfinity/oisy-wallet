@@ -123,15 +123,3 @@ export const btcWalletBalanceEquals = ({
 		a.total === b.total
 	);
 };
-
-/**
- * Type alias for BTC wallet balance data that can be null
- * Used in stores and components where balance might not be loaded yet
- */
-export type BtcWalletBalanceData = BtcWalletBalance | null;
-
-/**
- * Legacy type for backward compatibility
- * @deprecated Use BtcBalance instead for new implementations
- */
-export type LegacyBtcBalance = bigint | null;

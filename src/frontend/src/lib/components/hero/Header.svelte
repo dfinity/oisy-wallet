@@ -11,7 +11,7 @@
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import Pay from '$lib/components/pay/Pay.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
-	import WalletConnectListener from '$lib/components/wallet-connect/WalletConnectListener.svelte';
+	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import {
@@ -21,6 +21,7 @@
 		modalWalletConnect
 	} from '$lib/derived/modal.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
+	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
@@ -35,6 +36,12 @@
 	);
 
 	let biggerOverlay = $derived(menuOpen || networkSwitcherOpen || helpMenuOpen || modalsOpen);
+
+	// When WalletConnect tries to connect, it adds the "Disconnect" label, increasing the width of the header.
+	// That causes the screen to expand, without auto-zooming, and the modals overflow outside of the screen.
+	// For now, we apply a scale to the header when WalletConnect is trying to connect, to avoid that issue.
+	// TODO: remove this condition when we refactor the WalletConnect button to fit
+	let isCompact = $derived(nonNullish($walletConnectListenerStore));
 </script>
 
 <header
@@ -52,13 +59,23 @@
 		<OisyWalletLogoLink />
 	</div>
 
-	<div class="pointer-events-auto flex justify-end gap-2 md:gap-3">
+	<div
+		class="pointer-events-auto flex justify-end"
+		class:gap-1={isCompact}
+		class:gap-2={!isCompact}
+		class:max-w-full={isCompact}
+		class:md:gap-2={isCompact}
+		class:md:gap-3={!isCompact}
+		class:scale-70={isCompact}
+		class:xs:max-w-none={isCompact}
+		class:xs:scale-none={isCompact}
+	>
 		{#if $authSignedIn && !isRouteTransactions(page) && !nftsCollectionRoute}
 			<NetworksSwitcher bind:visible={networkSwitcherOpen} />
 		{/if}
 
 		{#if $authSignedIn}
-			<WalletConnectListener />
+			<WalletConnect />
 
 			{#if UNIVERSAL_SCANNER_ENABLED}
 				<!-- TODO: Re-enable the scanner button when it includes WalletConnect and remove the modal from pay button -->
