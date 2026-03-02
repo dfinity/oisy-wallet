@@ -6,7 +6,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
+import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface SwapError {
 	variant: 'error' | 'warning' | 'info';
@@ -104,10 +104,10 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				destinationToken: token
 			})),
 		switchTokens: () =>
-			set({
-				sourceToken: get(destinationToken),
-				destinationToken: get(sourceToken)
-			}),
+			update((state) => ({
+				sourceToken: state.destinationToken,
+				destinationToken: state.sourceToken
+			})),
 		setIsTokensIcrc2: ({
 			ledgerCanisterId,
 			isIcrc2Supported
