@@ -42,9 +42,5 @@ export const KongSwapTokenSchema = z.object({
 	metrics: KongSwapTokenMetricsSchema
 });
 
-export const KongSwapTokenWithMetricsSchema = KongSwapTokenBaseSchema.extend({
-	metrics: KongSwapTokenMetricsSchema
-});
-
 export type KongSwapTokenMetrics = z.infer<typeof KongSwapTokenMetricsSchema>;
 export type KongSwapToken = z.infer<typeof KongSwapTokenSchema>;

@@ -14,6 +14,8 @@ describe('auth-client.providers', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		AuthClientProvider.getInstance().reset();
+
 		vi.spyOn(AuthClient, 'create');
 
 		vi.spyOn(authClientStorage, 'get');
