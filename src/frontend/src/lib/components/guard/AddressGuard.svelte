@@ -18,14 +18,12 @@
 	let signerAllowanceLoaded = false;
 
 	const loadSignerAllowanceAndValidateAddresses = async () => {
+		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
-			const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
-
-			if (!initSignerAllowanceSuccess) {
-				// Sign-out is handled within the service.
-				return;
-			}
-
+		if (!initSignerAllowanceSuccess) {
+			// Sign-out is handled within the service.
+			return;
+		}
 
 		signerAllowanceLoaded = true;
 

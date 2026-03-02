@@ -28,35 +28,35 @@
 </script>
 
 <LoaderUserProfile>
-		<Loader>
-			<LoaderTokens />
+	<Loader>
+		<LoaderTokens />
 
-			<LoaderEthBalances />
+		<LoaderEthBalances />
 
-			<MultipleListeners tokens={$enabledFungibleNetworkTokens} />
+		<MultipleListeners tokens={$enabledFungibleNetworkTokens} />
 
-			<LoaderEthTransactions />
+		<LoaderEthTransactions />
 
-			<LoaderWallets />
+		<LoaderWallets />
 
-			<ExchangeWorker />
+		<ExchangeWorker />
 
-			<LoaderMetamask />
+		<LoaderMetamask />
 
-			<UserSnapshotWorker />
+		<UserSnapshotWorker />
 
-			<LoaderContacts />
+		<LoaderContacts />
 
-			<TransactionsIdbSetter />
+		<TransactionsIdbSetter />
 
-			<BalancesIdbSetter />
+		<BalancesIdbSetter />
 
-			<LoaderHarvest />
+		<LoaderHarvest />
 
-			<StakeContext>
-				{@render children()}
-			</StakeContext>
-		</Loader>
+		<StakeContext>
+			{@render children()}
+		</StakeContext>
+	</Loader>
 </LoaderUserProfile>
 
 <Guards />
