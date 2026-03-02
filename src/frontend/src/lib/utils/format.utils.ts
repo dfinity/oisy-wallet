@@ -321,19 +321,22 @@ export const formatCurrency = ({
 };
 
 export const formatStakeApyNumber = (apy: number): string => {
-	if (apy >= 100) {
-		return `${Math.round(apy)}`;
+	if (apy === 0) {
+		return '0';
 	}
 
-	if (apy >= 10) {
-		return (Math.round(apy * 10) / 10).toFixed(1);
+	const sign = apy < 0 ? '-' : '';
+	const abs = Math.abs(apy);
+
+	if (abs >= 100) {
+		return `${sign}${Math.round(abs)}`;
 	}
 
-	if (apy > 0) {
-		return (Math.round(apy * 100) / 100).toFixed(2);
+	if (abs >= 10) {
+		return `${sign}${(Math.round(abs * 10) / 10).toFixed(1)}`;
 	}
 
-	return '0';
+	return `${sign}${(Math.round(abs * 100) / 100).toFixed(2)}`;
 };
 
 export const format24hChangeInCurrency = ({
