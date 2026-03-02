@@ -37,3 +37,12 @@ export const routeNft: Readable<OptionString> = derived(
 		}
 	]) => nft
 );
+
+export const routeAutopilotVault: Readable<OptionString> = derived(
+	[page],
+	([
+		{
+			data: { vault }
+		}
+	]) => vault
+);
