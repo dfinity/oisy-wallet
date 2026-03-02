@@ -1720,15 +1720,6 @@
 			"title": "Escanear código QR"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Preparando Firmante",
-			"description": "Verificando que no eres un robot",
-			"request_challenge": "Esperando nuevo desafío",
-			"solve_challenge": "Resolviendo desafío",
-			"grant_cycles": "Habilitando firma"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
