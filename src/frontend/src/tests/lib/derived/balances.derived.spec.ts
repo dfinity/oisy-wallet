@@ -57,6 +57,11 @@ describe('balances.derived', () => {
 		});
 
 		it('should return false when token is nullish', () => {
+			// Make the balances store non-nullish so that the token-nullish branch is exercised.
+			balancesStore.set({
+				id: ICP_TOKEN.id,
+				data: { data: ZERO, certified: false }
+			});
 			expect(get(balanceZero)).toBeFalsy();
 		});
 
