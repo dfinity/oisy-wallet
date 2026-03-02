@@ -91,16 +91,6 @@ export type SwapMappedResult =
 			type: string;
 	  };
 
-export interface KongQuoteResult {
-	swap: SwapAmountsReply;
-	tokens: IcToken[];
-}
-
-export interface IcpQuoteResult {
-	swap: ICPSwapResult;
-	slippage: Slippage;
-}
-
 interface KongQuoteParams {
 	swap: SwapAmountsReply;
 	tokens: Token[];
@@ -128,8 +118,6 @@ interface BaseSwapProvider<T extends SwapProvider, QuoteResult, QuoteMapParams> 
 type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsReply, KongQuoteParams>;
 
 type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, IcpQuoteParams>;
-
-export type SwapErrorKey = keyof I18n['swap']['error'];
 
 export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
 

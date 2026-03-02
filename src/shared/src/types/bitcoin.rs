@@ -76,15 +76,15 @@ pub struct BtcAddPendingTransactionRequest {
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcAddPendingTransactionError {
-    // The provided list of UTXOs is empty
+    /// The provided list of UTXOs is empty
     EmptyUtxos,
-    // One or more provided UTXOs are duplicates among themselves
+    /// One or more provided UTXOs are duplicates among themselves
     DuplicateUtxos,
-    // One or more provided UTXOs not in current UTXO list for the address
+    /// One or more provided UTXOs not in current UTXO list for the address
     InvalidUtxos,
-    // Intersects with caller's existing pending reservations
+    /// Intersects with caller's existing pending reservations
     UtxosAlreadyReserved,
-    // Server-side / unexpected
+    /// Server-side / unexpected
     InternalError { msg: String },
 }
 

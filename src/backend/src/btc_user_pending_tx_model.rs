@@ -2,6 +2,12 @@ use std::collections::HashSet;
 
 use candid::Principal;
 use ic_cdk::api::management_canister::bitcoin::Utxo;
+use shared::types::bitcoin::StoredPendingTransaction;
+
+use crate::types::{
+    maps::BtcUserPendingTransactionsMap,
+    storable::{Candid, StoredPrincipal},
+};
 
 #[allow(dead_code)]
 const MAX_PENDING_TRANSACTIONS: usize = 1000;
@@ -10,14 +16,10 @@ const MAX_ADDRESS_COUNT_PER_USER: usize = 20;
 #[allow(dead_code)]
 const HOUR_IN_NS: u64 = 60 * 60 * 1_000_000_000;
 
-use shared::types::bitcoin::StoredPendingTransaction;
-
 // With this structure, if multiple users share the same address
 // they wouldn't share the pending transactions.
 // This is not possible with the current implementation of the addresses in CFS.
 // But something to have in mind for the future.
-use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
-
 #[allow(dead_code)]
 pub struct BtcUserPendingTransactionsModel<'a> {
     /// Map of `user_principal` to `PendingTransactionsMap`;

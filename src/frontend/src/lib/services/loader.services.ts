@@ -5,7 +5,7 @@ import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { POW_FEATURE_ENABLED } from '$env/pow.env';
 import { hasRequiredCycles } from '$icp/services/pow-protector.services';
 import { allowSigning } from '$lib/api/backend.api';
-import { POW_MIN_CYCLES_THRESHOLD, POW_ZERO_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
+import { POW_ZERO_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
@@ -22,16 +22,6 @@ import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-
-export const isCyclesAllowanceLow = async (): Promise<boolean> => {
-	try {
-		const { identity } = get(authStore);
-		assertNonNullish(identity, 'Cannot continue without an identity.');
-		return !(await hasRequiredCycles({ identity, requiredCycles: POW_MIN_CYCLES_THRESHOLD }));
-	} catch (_err: unknown) {
-		return false;
-	}
-};
 
 export const isCyclesAllowanceSpent = async (): Promise<boolean> => {
 	try {
