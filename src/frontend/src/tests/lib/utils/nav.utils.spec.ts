@@ -11,7 +11,8 @@ import {
 	PARAM_DELETE_IDB_CACHE,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
-	URI_PARAM
+	URI_PARAM,
+	VAULT_PARAM
 } from '$lib/constants/routes.constants';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import {
@@ -228,7 +229,10 @@ describe('nav.utils', () => {
 			expect(result).toEqual({
 				[TOKEN_PARAM]: undefined,
 				[NETWORK_PARAM]: undefined,
-				[URI_PARAM]: undefined
+				[URI_PARAM]: undefined,
+				[NFT_PARAM]: undefined,
+				[COLLECTION_PARAM]: undefined,
+				[VAULT_PARAM]: undefined
 			});
 		});
 
@@ -246,7 +250,8 @@ describe('nav.utils', () => {
 				[NFT_PARAM]: null,
 				[TOKEN_PARAM]: 'testToken',
 				[NETWORK_PARAM]: null,
-				[URI_PARAM]: null
+				[URI_PARAM]: null,
+				[VAULT_PARAM]: null
 			});
 
 			expect(
@@ -262,7 +267,8 @@ describe('nav.utils', () => {
 				[NFT_PARAM]: null,
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: 'testNetwork',
-				[URI_PARAM]: null
+				[URI_PARAM]: null,
+				[VAULT_PARAM]: null
 			});
 
 			expect(
@@ -278,7 +284,8 @@ describe('nav.utils', () => {
 				[NFT_PARAM]: null,
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: null,
-				[URI_PARAM]: 'testURI'
+				[URI_PARAM]: 'testURI',
+				[VAULT_PARAM]: null
 			});
 		});
 
@@ -296,7 +303,8 @@ describe('nav.utils', () => {
 				[NETWORK_PARAM]: null,
 				[URI_PARAM]: null,
 				[COLLECTION_PARAM]: null,
-				[NFT_PARAM]: null
+				[NFT_PARAM]: null,
+				[VAULT_PARAM]: null
 			});
 		});
 
@@ -314,7 +322,8 @@ describe('nav.utils', () => {
 				[NETWORK_PARAM]: 'mock-params',
 				[URI_PARAM]: 'mock-params',
 				[COLLECTION_PARAM]: 'mock-params',
-				[NFT_PARAM]: 'mock-params'
+				[NFT_PARAM]: 'mock-params',
+				[VAULT_PARAM]: 'mock-params'
 			});
 		});
 
@@ -332,7 +341,8 @@ describe('nav.utils', () => {
 				[NETWORK_PARAM]: null,
 				[URI_PARAM]: null,
 				[COLLECTION_PARAM]: null,
-				[NFT_PARAM]: null
+				[NFT_PARAM]: null,
+				[VAULT_PARAM]: null
 			});
 		});
 
@@ -360,7 +370,8 @@ describe('nav.utils', () => {
 				[NETWORK_PARAM]: 'testNetwork',
 				[URI_PARAM]: null,
 				[COLLECTION_PARAM]: null,
-				[NFT_PARAM]: null
+				[NFT_PARAM]: null,
+				[VAULT_PARAM]: null
 			});
 
 			vi.unstubAllGlobals();
@@ -389,7 +400,34 @@ describe('nav.utils', () => {
 				[NETWORK_PARAM]: null,
 				[URI_PARAM]: null,
 				[COLLECTION_PARAM]: '0x123abc',
-				[NFT_PARAM]: '42'
+				[NFT_PARAM]: '42',
+				[VAULT_PARAM]: null
+			});
+		});
+
+		it('should correctly parse vault param when present', () => {
+			const result = loadRouteParams({
+				url: {
+					searchParams: {
+						get: vi.fn((key) => {
+							switch (key) {
+								case VAULT_PARAM:
+									return 'test-vault';
+								default:
+									return null;
+							}
+						})
+					}
+				}
+			} as unknown as LoadEvent);
+
+			expect(result).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: null,
+				[URI_PARAM]: null,
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null,
+				[VAULT_PARAM]: 'test-vault'
 			});
 		});
 
