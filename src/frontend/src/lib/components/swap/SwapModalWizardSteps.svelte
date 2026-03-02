@@ -8,6 +8,7 @@
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import {
@@ -24,7 +25,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { WizardStepsGetTokenType } from '$lib/types/get-token';
-	import type { NetworkId } from '$lib/types/network';
+	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
@@ -94,44 +95,66 @@
 		}
 	};
 
+	// Returns the preferred network for a given side.
+	// Priority order:
+	// 1) Primary token network
+	// 2) Selected page network
+	// 3) Secondary token network
+	// If allowedIds is provided, returns the first candidate whose id is allowed.
+	// If none match (or none exist), returns undefined.
+	const getPreferredNetworkForSide = (
+		side: TokenSide,
+		allowedIds?: readonly NetworkId[]
+	): Network | undefined => {
+		const primary = side === 'source' ? $sourceToken?.network : $destinationToken?.network;
+
+		const secondary = side === 'source' ? $destinationToken?.network : $sourceToken?.network;
+
+		return [primary, $selectedNetwork, secondary].reduce<Network | undefined>((acc, current) => {
+			if (nonNullish(acc)) {
+				return acc;
+			}
+
+			if (isNullish(current)) {
+				return ;
+			}
+
+			if (nonNullish(allowedIds) && !allowedIds.includes(current.id)) {
+				return ;
+			}
+
+			return current;
+		}, undefined);
+	};
+
 	const applyListConstraints = (side: TokenSide) => {
 		// SOURCE list: user can browse all networks (but keep current network preselected if any)
 		if (side === 'source') {
 			setNetworksMode({ enabled: true });
 
-			const network = $sourceToken?.network ?? $destinationToken?.network;
-
-			if (nonNullish(network)) {
-				setFilterNetwork(network);
-			}
+			setFilterNetwork(getPreferredNetworkForSide(side));
 
 			return;
 		}
 
 		// DESTINATION list: constrain based on source/destination
 		if (isNullish($sourceToken)) {
-			// no source yet: fall back to destination network if already selected
+			// no source yet: no constraints
 			setNetworksMode({ enabled: false });
 
-			if (nonNullish($destinationToken)) {
-				setFilterNetwork($destinationToken.network);
-			}
+			setFilterNetwork(getPreferredNetworkForSide(side));
 
 			return;
 		}
 
-		// source selected
+		// source selected (constraints apply)
 		const allowedIds = isDefaultEthereumToken($sourceToken)
 			? [$sourceToken.network.id]
 			: SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id];
+
 		setNetworksMode({ enabled: false, allowedIds });
 
-		// choose which network to show in the filter UI
-		if (nonNullish($destinationToken)) {
-			setFilterNetwork($destinationToken.network);
-		} else {
-			setFilterNetwork($sourceToken.network);
-		}
+		setFilterNetwork(getPreferredNetworkForSide(side, allowedIds));
 	};
 
 	const enterTokenList = (side: TokenSide) => {
