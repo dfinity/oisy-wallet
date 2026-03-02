@@ -292,8 +292,8 @@ pub fn set_custom_token(token: CustomToken) {
             |t: &CustomToken| CustomTokenId::from(&t.token),
         );
     });
-  
-   mark_token_active(&CustomTokenId::from(&token.token));
+
+    mark_token_active(&CustomTokenId::from(&token.token));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
