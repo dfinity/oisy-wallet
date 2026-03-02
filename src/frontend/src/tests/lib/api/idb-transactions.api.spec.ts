@@ -84,6 +84,10 @@ describe('idb-transactions.api', () => {
 			tokenId: mockToken2.id,
 			transactions: mockCertifiedTransactions2
 		});
+
+		icTransactionsStore.reset(ICP_TOKEN.id);
+
+		solTransactionsStore.reset(SOLANA_TOKEN.id);
 	});
 
 	describe('setIdbTransactionsStore', () => {
