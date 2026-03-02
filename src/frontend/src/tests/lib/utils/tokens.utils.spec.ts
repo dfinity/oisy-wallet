@@ -732,11 +732,7 @@ describe('tokens.utils', () => {
 				$networksToPin: []
 			});
 
-			expect(result).toHaveLength(2);
-
-			const [firstItem] = result;
-
-			expect(firstItem).toStrictEqual(groupItem);
+			expect(result).toStrictEqual([groupItem, singleItem]);
 		});
 
 		it('should handle group items where no group token is pinned', () => {
@@ -750,11 +746,12 @@ describe('tokens.utils', () => {
 				usdBalance: 0
 			};
 
+			const groupId = parseTokenGroupId('GroupId-GRP2');
 			const groupItem: TokenUiOrGroupUi = {
 				group: {
-					id: parseTokenGroupId('GroupId-GRP2'),
+					id: groupId,
 					decimals: 8,
-					groupData: { id: parseTokenGroupId('GroupId-GRP2'), symbol: 'GRP', name: 'Group' },
+					groupData: { id: groupId, symbol: 'GRP', name: 'Group' },
 					tokens: [tokenA],
 					balance: ZERO,
 					usdBalance: 0
@@ -779,7 +776,7 @@ describe('tokens.utils', () => {
 				$networksToPin: []
 			});
 
-			expect(result).toHaveLength(2);
+			expect(result).toStrictEqual([groupItem, singleItem]);
 		});
 
 		it('should fall back to market cap when all other criteria are equal', () => {
