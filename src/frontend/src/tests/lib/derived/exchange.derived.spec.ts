@@ -531,7 +531,10 @@ describe('exchange.derived', () => {
 
 			exchangeStore.set([{ ethereum: ethPrice }]);
 
-			expect(get(exchanges)?.[mockUnknownToken.id]).toBeUndefined();
+			const result = get(exchanges);
+
+			expect(result).toBeDefined();
+			expect(result[mockUnknownToken.id]).toBeUndefined();
 		});
 
 		it('should use ethPrice for ICRC token with ethereum exchangeCoinId and no twin token address', () => {
