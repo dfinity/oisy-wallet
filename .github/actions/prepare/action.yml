@@ -9,15 +9,8 @@ runs:
       uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
       with:
         node-version-file: '.node-version'
+        registry-url: 'https://registry.npmjs.org'
         cache: 'npm'
-
-    # Keep npm within compatible major to align with package.json engines.
-    # We intentionally float within the major so new MAJOR.x releases are picked up.
-    # If engines.npm is stricter, CI will fail, forcing us to update package.json
-    # and stay aligned with the latest npm.
-    - name: Use latest compatible npm
-      shell: bash
-      run: npm i -g npm@^11
 
     - name: Install dependencies
       shell: bash
