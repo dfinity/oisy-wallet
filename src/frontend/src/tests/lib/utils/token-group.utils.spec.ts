@@ -646,8 +646,6 @@ describe('token-group.utils', () => {
 		});
 
 		it('should sort two non-alphanumeric names using localeCompare', () => {
-			const toTokenUiOrGroupUi = (token: Token): TokenUiOrGroupUi => ({ token });
-
 			const nonAlpha1 = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- BBB' });
 			const nonAlpha2 = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- AAA' });
 
