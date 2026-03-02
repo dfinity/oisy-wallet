@@ -41,7 +41,9 @@ describe('idb-transactions.api', () => {
 	const mockToken1 = ETHEREUM_TOKEN;
 	const mockToken2 = BTC_MAINNET_TOKEN;
 	const mockToken3 = USDC_TOKEN;
-	const mockTokens = [mockToken1, mockToken2, mockToken3];
+	const mockToken4 = ICP_TOKEN;
+	const mockToken5 = SOLANA_TOKEN;
+	const mockTokens = [mockToken1, mockToken2, mockToken3, mockToken4, mockToken5];
 
 	const mockTransactions1 = createMockEthTransactions(3);
 	const mockTransactions2 = createMockBtcTransactionsUi(7);
@@ -85,9 +87,9 @@ describe('idb-transactions.api', () => {
 			transactions: mockCertifiedTransactions2
 		});
 
-		icTransactionsStore.reset(ICP_TOKEN.id);
+		icTransactionsStore.reset(mockToken4.id);
 
-		solTransactionsStore.reset(SOLANA_TOKEN.id);
+		solTransactionsStore.reset(mockToken5.id);
 	});
 
 	describe('setIdbTransactionsStore', () => {
@@ -354,26 +356,25 @@ describe('idb-transactions.api', () => {
 	});
 
 	describe('setIdbIcTransactions', () => {
-		const mockIcToken = ICP_TOKEN;
 		const mockIcTransactions = createMockIcTransactionsUi(4);
 
 		it('should delegate to setIdbTransactionsStore with ic store', async () => {
 			icTransactionsStore.set({
-				tokenId: mockIcToken.id,
+				tokenId: mockToken4.id,
 				transactions: mockIcTransactions.map((data) => ({ data, certified: true }))
 			});
 
 			await setIdbIcTransactions({
 				identity: mockIdentity,
-				tokens: [mockIcToken],
+				tokens: [mockToken4],
 				transactionsStoreData: get(icTransactionsStore)
 			});
 
 			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
 				[
 					mockIdentity.getPrincipal().toText(),
-					mockIcToken.id.description,
-					mockIcToken.network.id.description
+					mockToken4.id.description,
+					mockToken4.network.id.description
 				],
 				mockIcTransactions,
 				expect.any(Object)
@@ -382,26 +383,25 @@ describe('idb-transactions.api', () => {
 	});
 
 	describe('setIdbSolTransactions', () => {
-		const mockSolToken = SOLANA_TOKEN;
 		const mockSolTransactions = createMockSolTransactionsUi(3);
 
 		it('should delegate to setIdbTransactionsStore with sol store', async () => {
 			solTransactionsStore.set({
-				tokenId: mockSolToken.id,
+				tokenId: mockToken5.id,
 				transactions: mockSolTransactions.map((data) => ({ data, certified: false }))
 			});
 
 			await setIdbSolTransactions({
 				identity: mockIdentity,
-				tokens: [mockSolToken],
+				tokens: [mockToken5],
 				transactionsStoreData: get(solTransactionsStore)
 			});
 
 			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
 				[
 					mockIdentity.getPrincipal().toText(),
-					mockSolToken.id.description,
-					mockSolToken.network.id.description
+					mockToken5.id.description,
+					mockToken5.network.id.description
 				],
 				mockSolTransactions,
 				expect.any(Object)
