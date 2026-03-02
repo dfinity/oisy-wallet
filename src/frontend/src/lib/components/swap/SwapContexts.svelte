@@ -38,10 +38,7 @@
 		store: initSwapAmountsStore()
 	});
 
-	setContext<SwapContext>(
-		SWAP_CONTEXT_KEY,
-		initSwapContext()
-	);
+	setContext<SwapContext>(SWAP_CONTEXT_KEY, initSwapContext());
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
