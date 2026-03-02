@@ -9,39 +9,6 @@ use crate::types::{
 
 pub const MAX_TOKEN_LIST_LENGTH: usize = 1000;
 
-#[allow(dead_code)]
-pub fn add_to_user_token_old<T>(
-    stored_principal: StoredPrincipal,
-    user_token: &mut StableBTreeMap<StoredPrincipal, Candid<Vec<T>>, VMem>,
-    token: &T,
-    find: &dyn Fn(&T) -> bool,
-) where
-    T: for<'a> Deserialize<'a> + CandidType + Clone + TokenVersion,
-{
-    let Candid(mut tokens) = user_token.get(&stored_principal).unwrap_or_default();
-
-    if let Some(existing_token) = tokens.iter_mut().find(|token| find(*token)) {
-        if token.get_version() == existing_token.get_version() {
-            *existing_token = token.with_incremented_version();
-        } else {
-            ic_cdk::trap(&format!(
-                "Version mismatch, token update not allowed. Existing token: {existing_token:?}, New token: {token:?}"
-            ));
-        }
-    } else {
-        if tokens.len() == MAX_TOKEN_LIST_LENGTH {
-            ic_cdk::trap(&format!(
-                "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
-            ));
-        }
-
-        tokens.push(token.with_initial_version());
-    }
-
-    user_token.insert(stored_principal, Candid(tokens));
-}
-
-// pub fn upsert_many_user_tokens_by_id<T, Id, F>(
 pub fn add_to_user_token<T, Id, F>(
     stored_principal: StoredPrincipal,
     user_token: &mut StableBTreeMap<StoredPrincipal, Candid<Vec<T>>, VMem>,
