@@ -1,4 +1,8 @@
-import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
 import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 
@@ -13,6 +17,24 @@ describe('send.utils', () => {
 		it('should return false if network and destination do not match', () => {
 			expect(
 				isInvalidDestinationBtc({ destination: mockBtcAddress, networkId: BTC_MAINNET_NETWORK_ID })
+			).toBeFalsy();
+		});
+
+		it('should return false if destination is empty', () => {
+			expect(
+				isInvalidDestinationBtc({ destination: '', networkId: BTC_MAINNET_NETWORK_ID })
+			).toBeFalsy();
+		});
+
+		it('should use Regtest network when networkId is BTC_REGTEST_NETWORK_ID', () => {
+			expect(
+				isInvalidDestinationBtc({ destination: mockBtcAddress, networkId: BTC_REGTEST_NETWORK_ID })
+			).toBeTruthy();
+		});
+
+		it('should use Mainnet when networkId is undefined', () => {
+			expect(
+				isInvalidDestinationBtc({ destination: mockBtcAddress, networkId: undefined })
 			).toBeFalsy();
 		});
 	});
