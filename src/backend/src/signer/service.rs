@@ -24,7 +24,7 @@ pub(crate) use shared::types::signer::{
 
 use crate::{
     read_config,
-    state::{CYCLES_LEDGER, SIGNER},
+    signer::canister_ids::{CYCLES_LEDGER, SIGNER},
 };
 
 /// Current ledger fee in cycles.  Historically stable.
