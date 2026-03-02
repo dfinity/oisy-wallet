@@ -116,11 +116,11 @@
 			}
 
 			if (isNullish(current)) {
-				return ;
+				return;
 			}
 
 			if (nonNullish(allowedIds) && !allowedIds.includes(current.id)) {
-				return ;
+				return;
 			}
 
 			return current;
