@@ -702,11 +702,12 @@ describe('tokens.utils', () => {
 				usdBalance: 0
 			};
 
+			const groupId = parseTokenGroupId('GroupId-GRP');
 			const groupItem: TokenUiOrGroupUi = {
 				group: {
-					id: parseTokenGroupId('GroupId-GRP'),
+					id: groupId,
 					decimals: 8,
-					groupData: { id: parseTokenGroupId('GroupId-GRP'), symbol: 'GRP', name: 'Group' },
+					groupData: { id: groupId, symbol: 'GRP', name: 'Group' },
 					tokens: [tokenA, tokenB],
 					balance: ZERO,
 					usdBalance: 0
