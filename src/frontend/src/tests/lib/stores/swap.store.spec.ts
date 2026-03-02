@@ -37,6 +37,8 @@ describe('swapStore', () => {
 	const mockToken2 = { ...ICP_TOKEN, enabled: false };
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		mockPage.reset();
 
 		mockSwappableTokens.set({ sourceToken: undefined, destinationToken: undefined });
