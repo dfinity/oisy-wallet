@@ -23,34 +23,6 @@ type AddUserCredentialRequest = record {
 type AddUserCredentialResult = variant { Ok; Err : AddUserCredentialError };
 type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type Agreements = record { agreements : UserAgreements };
-type AllowSigningError = variant {
-	ApproveError : ApproveError;
-	PowChallenge : ChallengeCompletionError;
-	Other : text;
-	FailedToContactCyclesLedger
-};
-type AllowSigningRequest = record { nonce : nat64 };
-type AllowSigningResponse = record {
-	status : AllowSigningStatus;
-	challenge_completion : opt ChallengeCompletion;
-	allowed_cycles : nat64
-};
-type AllowSigningResult = variant {
-	Ok : AllowSigningResponse;
-	Err : AllowSigningError
-};
-type AllowSigningStatus = variant { Skipped; Failed; Executed };
-type ApproveError = variant {
-	GenericError : record { message : text; error_code : nat };
-	TemporarilyUnavailable;
-	Duplicate : record { duplicate_of : nat };
-	BadFee : record { expected_fee : nat };
-	AllowanceChanged : record { current_allowance : nat };
-	CreatedInFuture : record { ledger_time : nat64 };
-	TooOld;
-	Expired : record { ledger_time : nat64 };
-	InsufficientFunds : record { balance : nat }
-};
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
 type BitcoinNetwork = variant { mainnet; regtest; testnet };
@@ -113,19 +85,6 @@ type CanisterStatusResultV2 = record {
 	module_hash : opt blob
 };
 type CanisterStatusType = variant { stopped; stopping; running };
-type ChallengeCompletion = record {
-	solved_duration_ms : nat64;
-	next_allowance_ms : nat64;
-	next_difficulty : nat32;
-	current_difficulty : nat32
-};
-type ChallengeCompletionError = variant {
-	InvalidNonce;
-	MissingChallenge;
-	ExpiredChallenge;
-	MissingUserProfile;
-	ChallengeAlreadySolved
-};
 type Config = record {
 	derivation_origin : opt text;
 	ecdsa_key_name : text;
@@ -158,23 +117,8 @@ type ContactError = variant {
 	TooManyContactsWithImages
 };
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
-type CreateChallengeError = variant {
-	ChallengeInProgress;
-	MissingUserProfile;
-	RandomnessError : text;
-	Other : text
-};
-type CreateChallengeResponse = record {
-	difficulty : nat32;
-	start_timestamp_ms : nat64;
-	expiry_timestamp_ms : nat64
-};
 type CreateContactRequest = record { name : text; image : opt ContactImage };
 type CreateContactResult = variant { Ok : Contact; Err : ContactError };
-type CreatePowChallengeResult = variant {
-	Ok : CreateChallengeResponse;
-	Err : CreateChallengeError
-};
 type CredentialSpec = record {
 	arguments : opt vec record { text; ArgumentValue };
 	credential_type : text
@@ -426,15 +370,6 @@ service : (Arg) -> {
 	add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (
 		AddUserHiddenDappIdResult
 	);
-	// This function authorizes the caller to spend a specific
-	//
-	// Note:
-	// - The chain fusion signer performs threshold key operations including providing public keys,
-	// creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
-	//
-	// # Errors
-	// Errors are enumerated by: `AllowSigningError`.
-	allow_signing : (opt AllowSigningRequest) -> (AllowSigningResult);
 	// Adds a pending Bitcoin transaction for the caller.
 	//
 	// # Errors
@@ -487,17 +422,6 @@ service : (Arg) -> {
 	// # Test
 	// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 	create_contact : (CreateContactRequest) -> (CreateContactResult);
-	// Creates a new proof-of-work challenge for the caller.
-	//
-	// # Errors
-	// Errors are enumerated by: `CreateChallengeError`.
-	//
-	// # Returns
-	//
-	// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-	// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-	// internal errors.
-	create_pow_challenge : () -> (CreatePowChallengeResult);
 	// It creates a new user profile for the caller.
 	// If the user has already a profile, it will return that profile.
 	create_user_profile : () -> (UserProfile);

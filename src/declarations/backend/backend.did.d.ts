@@ -35,33 +35,6 @@ export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsErr
 export interface Agreements {
 	agreements: UserAgreements;
 }
-export type AllowSigningError =
-	| { ApproveError: ApproveError }
-	| { PowChallenge: ChallengeCompletionError }
-	| { Other: string }
-	| { FailedToContactCyclesLedger: null };
-export interface AllowSigningRequest {
-	nonce: bigint;
-}
-export interface AllowSigningResponse {
-	status: AllowSigningStatus;
-	challenge_completion: [] | [ChallengeCompletion];
-	allowed_cycles: bigint;
-}
-export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
-export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
-export type ApproveError =
-	| {
-			GenericError: { message: string; error_code: bigint };
-	  }
-	| { TemporarilyUnavailable: null }
-	| { Duplicate: { duplicate_of: bigint } }
-	| { BadFee: { expected_fee: bigint } }
-	| { AllowanceChanged: { current_allowance: bigint } }
-	| { CreatedInFuture: { ledger_time: bigint } }
-	| { TooOld: null }
-	| { Expired: { ledger_time: bigint } }
-	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
 export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
@@ -124,18 +97,6 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
-export interface ChallengeCompletion {
-	solved_duration_ms: bigint;
-	next_allowance_ms: bigint;
-	next_difficulty: number;
-	current_difficulty: number;
-}
-export type ChallengeCompletionError =
-	| { InvalidNonce: null }
-	| { MissingChallenge: null }
-	| { ExpiredChallenge: null }
-	| { MissingUserProfile: null }
-	| { ChallengeAlreadySolved: null };
 export interface Config {
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
@@ -170,24 +131,11 @@ export interface ContactImage {
 	data: Uint8Array;
 	mime_type: ImageMimeType;
 }
-export type CreateChallengeError =
-	| { ChallengeInProgress: null }
-	| { MissingUserProfile: null }
-	| { RandomnessError: string }
-	| { Other: string };
-export interface CreateChallengeResponse {
-	difficulty: number;
-	start_timestamp_ms: bigint;
-	expiry_timestamp_ms: bigint;
-}
 export interface CreateContactRequest {
 	name: string;
 	image: [] | [ContactImage];
 }
 export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
-export type CreatePowChallengeResult =
-	| { Ok: CreateChallengeResponse }
-	| { Err: CreateChallengeError };
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];
 	credential_type: string;
@@ -463,17 +411,6 @@ export interface _SERVICE {
 	 */
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], AddUserHiddenDappIdResult>;
 	/**
-	 * This function authorizes the caller to spend a specific
-	 *
-	 * Note:
-	 * - The chain fusion signer performs threshold key operations including providing public keys,
-	 * creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
-	 *
-	 * # Errors
-	 * Errors are enumerated by: `AllowSigningError`.
-	 */
-	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
-	/**
 	 * Adds a pending Bitcoin transaction for the caller.
 	 *
 	 * # Errors
@@ -538,19 +475,6 @@ export interface _SERVICE {
 	 * This endpoint is currently a placeholder and will be fully implemented in a future PR.
 	 */
 	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
-	/**
-	 * Creates a new proof-of-work challenge for the caller.
-	 *
-	 * # Errors
-	 * Errors are enumerated by: `CreateChallengeError`.
-	 *
-	 * # Returns
-	 *
-	 * * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-	 * * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-	 * internal errors.
-	 */
-	create_pow_challenge: ActorMethod<[], CreatePowChallengeResult>;
 	/**
 	 * It creates a new user profile for the caller.
 	 * If the user has already a profile, it will return that profile.
