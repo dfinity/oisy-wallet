@@ -38,6 +38,7 @@ export interface Agreements {
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
 	| { PowChallenge: ChallengeCompletionError }
+	| { RateLimited: RateLimitError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
 export interface AllowSigningRequest {
@@ -309,6 +310,11 @@ export interface Outpoint {
 export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
+}
+export interface RateLimitError {
+	max_calls: number;
+	window_ns: bigint;
+	caller: Principal;
 }
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;

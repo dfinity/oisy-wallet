@@ -97,9 +97,15 @@ export const idlFactory = ({ IDL }) => {
 		MissingUserProfile: IDL.Null,
 		ChallengeAlreadySolved: IDL.Null
 	});
+	const RateLimitError = IDL.Record({
+		max_calls: IDL.Nat32,
+		window_ns: IDL.Nat64,
+		caller: IDL.Principal
+	});
 	const AllowSigningError = IDL.Variant({
 		ApproveError: ApproveError,
 		PowChallenge: ChallengeCompletionError,
+		RateLimited: RateLimitError,
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});

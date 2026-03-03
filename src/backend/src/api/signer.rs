@@ -10,7 +10,8 @@ use shared::types::{
 
 use crate::{
     guards::{caller_is_controller, caller_is_not_anonymous},
-    pow, signer,
+    housekeeping::ALLOW_SIGNING_RATE_LIMITER,
+    pow, rate_limiter, signer,
 };
 
 /// Adds cycles to the cycles ledger, if it is below a certain threshold.
@@ -58,6 +59,10 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
     async fn inner(
         request: Option<AllowSigningRequest>,
     ) -> Result<AllowSigningResponse, AllowSigningError> {
+        ALLOW_SIGNING_RATE_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(AllowSigningError::RateLimited)?;
+
         let principal = ic_cdk::caller();
 
         // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED
