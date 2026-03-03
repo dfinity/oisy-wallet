@@ -11,7 +11,6 @@
 		crossChainSwapNetworksMainnetsIds
 	} from '$lib/derived/cross-chain-networks.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { swappableTokens } from '$lib/derived/swap.derived';
 	import {
 		initModalNetworksListContext,
 		MODAL_NETWORKS_LIST_CONTEXT_KEY,
@@ -39,13 +38,7 @@
 		store: initSwapAmountsStore()
 	});
 
-	setContext<SwapContext>(
-		SWAP_CONTEXT_KEY,
-		initSwapContext({
-			sourceToken: $swappableTokens.sourceToken,
-			destinationToken: $swappableTokens.destinationToken
-		})
-	);
+	setContext<SwapContext>(SWAP_CONTEXT_KEY, initSwapContext());
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,

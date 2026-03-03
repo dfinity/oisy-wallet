@@ -1,16 +1,9 @@
-use std::{cell::RefCell, collections::HashSet, time::Duration};
+use std::collections::HashSet;
 
 use bitcoin_utils::estimate_fee;
 use btc_user_pending_tx_model::BtcUserPendingTransactionsModel;
 use candid::{candid_method, Principal};
-use config::find_credential_config;
-use ic_cdk::{api::time, eprintln, export_candid, init, post_upgrade, query, update};
-use ic_cdk_timers::{set_timer, set_timer_interval};
-use ic_stable_structures::{
-    memory_manager::{MemoryId, MemoryManager},
-    DefaultMemoryImpl,
-};
-use ic_verifiable_credentials::validate_ii_presentation_and_claims;
+use ic_cdk::{api::time, export_candid, init, post_upgrade, query, update};
 use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
@@ -18,7 +11,7 @@ use shared::{
     std_canister_status,
     types::{
         agreement::UpdateUserAgreementsRequest,
-        backend_config::{Arg, Config, InitArg},
+        backend_config::{Arg, Config},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
             BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
@@ -28,13 +21,10 @@ use shared::{
         },
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
-        dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
+        dapp::AddHiddenDappIdRequest,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
-        pow::{
-            AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,
-            CYCLES_PER_DIFFICULTY, POW_ENABLED,
-        },
+        pow::CreateChallengeResponse,
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
@@ -46,52 +36,40 @@ use shared::{
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
+            AllowSigningRequest,
         },
-        user_profile::{
-            AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
-        },
+        user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
         Stats, Timestamp,
     },
 };
-use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
-use user_profile::{add_credential, create_profile, find_profile};
-use user_profile_model::UserProfileModel;
 
 use crate::{
     bitcoin_api::get_current_fee_percentiles,
-    guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
+    guards::{caller_is_allowed, caller_is_not_anonymous},
+    state::{mutate_state, read_config, read_state, set_config},
     token::{add_to_user_token, remove_from_user_token},
     token_activity::{mark_token_active, mark_tokens_active},
-    types::{
-        maps::{
-            BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, PowChallengeMap,
-            TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-        },
-        storable::{Candid, StoredPrincipal},
-    },
-    user_profile::{
-        add_hidden_dapp_id, set_show_testnets, update_agreements,
-        update_experimental_feature_settings, update_network_settings,
-    },
+    types::storable::{Candid, StoredPrincipal},
 };
 
+mod api;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod btc_user_pending_tx_model;
-mod config;
 mod contacts;
 mod guards;
+mod housekeeping;
 mod impls;
 mod pow;
 pub mod random;
 mod rate_limiter;
 pub mod signer;
+mod signer;
 mod state;
 mod token;
+mod token_activity;
 mod types;
 mod user_profile;
-mod user_profile_model;
 
 mod token_activity;
 
@@ -327,7 +305,7 @@ pub fn init(arg: Arg) {
     // Initialize the Bitcoin fee percentiles cache
     bitcoin_api::init_fee_percentiles_cache();
 
-    start_periodic_housekeeping_timers();
+    housekeeping::start_periodic_housekeeping_timers();
 }
 
 /// Post-upgrade handler.
@@ -350,7 +328,7 @@ pub fn post_upgrade(arg: Option<Arg>) {
     // Initialize the Bitcoin fee percentiles cache
     bitcoin_api::init_fee_percentiles_cache();
 
-    start_periodic_housekeeping_timers();
+    housekeeping::start_periodic_housekeeping_timers();
 }
 
 /// Gets the canister configuration.
@@ -358,17 +336,6 @@ pub fn post_upgrade(arg: Option<Arg>) {
 #[must_use]
 pub fn config() -> Config {
     read_config(Clone::clone)
-}
-
-/// Adds cycles to the cycles ledger, if it is below a certain threshold.
-///
-/// # Errors
-/// Error conditions are enumerated by: `TopUpCyclesLedgerError`
-#[update(guard = "caller_is_controller")]
-pub async fn top_up_cycles_ledger(
-    request: Option<TopUpCyclesLedgerRequest>,
-) -> TopUpCyclesLedgerResult {
-    signer::top_up_cycles_ledger(request.unwrap_or_default()).await
 }
 
 /// Processes external HTTP requests.
@@ -397,11 +364,14 @@ pub fn http_request(request: HttpRequest) -> HttpResponse {
 pub fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &CustomToken| -> bool {
-        CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-    };
-
-    mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
+    mutate_state(|s| {
+        add_to_user_token(
+            stored_principal,
+            &mut s.custom_token,
+            std::slice::from_ref(&token),
+            |t: &CustomToken| CustomTokenId::from(&t.token),
+        );
+    });
 
     mark_token_active(&CustomTokenId::from(&token.token));
 }
@@ -424,13 +394,12 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
         .collect::<Vec<_>>();
 
     mutate_state(|s| {
-        for token in tokens {
-            let find = |t: &CustomToken| -> bool {
-                CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-            };
-
-            add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
-        }
+        add_to_user_token(
+            stored_principal,
+            &mut s.custom_token,
+            &tokens,
+            |t: &CustomToken| CustomTokenId::from(&t.token),
+        );
     });
 
     mark_tokens_active(&ids);
@@ -525,7 +494,7 @@ pub async fn btc_select_user_utxos_fee(
         params: SelectedUtxosFeeRequest,
     ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
         let principal = ic_cdk::caller();
-        let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+        let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
         let all_utxos = bitcoin_api::get_all_utxos(
@@ -621,7 +590,7 @@ pub async fn btc_add_pending_transaction(
 
         let principal = ic_cdk::caller();
 
-        let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+        let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
 
@@ -719,245 +688,6 @@ pub async fn btc_get_pending_transactions(
         })
     }
     inner(params).await.into()
-}
-
-/// Adds a verifiable credential to the user profile.
-///
-/// # Errors
-/// Errors are enumerated by: `AddUserCredentialError`.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-#[must_use]
-pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredentialResult {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-    let current_time_ns = u128::from(time());
-
-    let Some((vc_flow_signers, root_pk_raw, credential_type, derivation_origin)) =
-        read_config(|config| find_credential_config(&request, config))
-    else {
-        return AddUserCredentialResult::Err(AddUserCredentialError::ConfigurationError);
-    };
-
-    match validate_ii_presentation_and_claims(
-        &request.credential_jwt,
-        user_principal,
-        derivation_origin,
-        &vc_flow_signers,
-        &request.credential_spec,
-        &root_pk_raw,
-        current_time_ns,
-    ) {
-        Ok(()) => mutate_state(|s| {
-            let mut user_profile_model =
-                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            add_credential(
-                stored_principal,
-                request.current_user_version,
-                &credential_type,
-                vc_flow_signers.issuer_origin,
-                &mut user_profile_model,
-            )
-            .into()
-        }),
-        Err(_) => AddUserCredentialResult::Err(AddUserCredentialError::InvalidCredential),
-    }
-}
-
-/// Updates the user's preference to enable (or disable) networks in the interface, merging with any
-/// existing settings.
-///
-/// # Returns
-/// - Returns `Ok(())` if the network settings were updated successfully, or if they were already
-///   set to the same value.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn update_user_network_settings(
-    request: SaveNetworksSettingsRequest,
-) -> UpdateUserNetworkSettingsResult {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        update_network_settings(
-            stored_principal,
-            request.current_user_version,
-            request.networks,
-            &mut user_profile_model,
-        )
-    })
-    .into()
-}
-
-/// Sets the user's preference to show (or hide) testnets in the interface.
-///
-/// # Returns
-/// - Returns `Ok(())` if the testnets setting was saved successfully, or if it was already set to
-///   the same value.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)] // canister methods are necessary
-#[must_use]
-pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTestnetsResult {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        set_show_testnets(
-            stored_principal,
-            request.current_user_version,
-            request.show_testnets,
-            &mut user_profile_model,
-        )
-    })
-    .into()
-}
-
-/// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
-///
-/// # Arguments
-/// * `request` - The request to add a hidden dApp ID.
-///
-/// # Returns
-/// - Returns `Ok(())` if the dApp ID was added successfully, or if it was already in the list.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHiddenDappIdResult {
-    fn inner(request: AddHiddenDappIdRequest) -> Result<(), AddDappSettingsError> {
-        request.check()?;
-        let user_principal = ic_cdk::caller();
-        let stored_principal = StoredPrincipal(user_principal);
-
-        mutate_state(|s| {
-            let mut user_profile_model =
-                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            add_hidden_dapp_id(
-                stored_principal,
-                request.current_user_version,
-                request.dapp_id,
-                &mut user_profile_model,
-            )
-        })
-    }
-    inner(request).into()
-}
-
-/// Updates the user's agreements, merging with any existing ones.
-/// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
-/// set to `now`.
-///
-/// # Returns
-/// - Returns `Ok(())` if the agreements were saved successfully, or if they were already set to the
-///   same value.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUserAgreementsResult {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        update_agreements(
-            stored_principal,
-            request.current_user_version,
-            request.agreements,
-            &mut user_profile_model,
-        )
-    })
-    .into()
-}
-
-/// Updates the user's preference to enable (or disable) experimental features in the interface,
-/// merging with any existing entries.
-///
-/// # Returns
-/// - Returns `Ok(())` if the experimental features were updated successfully, or if they were
-///   already set to the same value.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn update_user_experimental_feature_settings(
-    request: UpdateExperimentalFeaturesSettingsRequest,
-) -> UpdateExperimentalFeaturesSettingsResult {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        update_experimental_feature_settings(
-            stored_principal,
-            request.current_user_version,
-            request.experimental_features,
-            &mut user_profile_model,
-        )
-    })
-    .into()
-}
-
-/// It creates a new user profile for the caller.
-/// If the user has already a profile, it will return that profile.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn create_user_profile() -> UserProfile {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    let user_profile: UserProfile = mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        let stored_user = create_profile(stored_principal, &mut user_profile_model);
-
-        UserProfile::from(&stored_user)
-    });
-
-    // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
-    // async task. Upon initial user login, we ensure allow_signing is called to handle cases
-    // where users lack the cycles required for signer operations. create_user_profile(..) must
-    // be invoked before any signer-related calls (e.g., get_eth_address).
-    spawn_allow_signing_if_below_limit(stored_principal);
-
-    user_profile
-}
-
-/// Returns the caller's user profile.
-///
-/// # Errors
-/// Errors are enumerated by: `GetUserProfileError`.
-///
-/// # Panics
-/// - If the caller is anonymous.  See: `may_read_user_data`.
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_user_profile() -> GetUserProfileResult {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    mutate_state(|s| {
-        let user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        match find_profile(stored_principal, &user_profile_model) {
-            Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
-            Err(err) => Err(err),
-        }
-    })
-    .into()
 }
 
 /// Creates a new proof-of-work challenge for the caller.
@@ -1116,74 +846,6 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
             })
             .collect()
     })
-}
-
-/// Creates a new contact for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
-///
-/// # Returns
-/// The created contact on success.
-///
-/// # Test
-/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub async fn create_contact(request: CreateContactRequest) -> CreateContactResult {
-    let result = contacts::create_contact(request).await;
-    result.into()
-}
-
-/// Updates an existing contact for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    let result = contacts::update_contact(request);
-    result.into()
-}
-
-/// Deletes a contact for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
-///
-/// # Notes
-/// This operation is idempotent - it will return OK if the contact has already been deleted.
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
-    let result = contacts::delete_contact(contact_id);
-    result.into()
-}
-
-/// Gets a contact by ID for the caller.
-///
-/// # Arguments
-/// * `contact_id` - The unique identifier of the contact to retrieve
-/// # Returns
-/// * `Ok(GetContactResult)` - The requested contact if found
-/// # Errors
-/// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_contact(contact_id: u64) -> GetContactResult {
-    contacts::get_contact(contact_id).into()
-}
-
-/// Returns all contacts for the caller
-///
-/// This query function returns a list of the user's contacts.
-/// # Returns
-/// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_contacts() -> GetContactsResult {
-    let result = Ok(contacts::get_contacts());
-    result.into()
 }
 
 export_candid!();

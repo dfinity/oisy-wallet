@@ -8,9 +8,9 @@ use shared::types::pow::{
 
 use crate::{
     mutate_state, read_state,
+    state::State,
     types::storable::{Candid, StoredPrincipal},
-    user_profile::has_user_profile,
-    State,
+    user_profile::service::has_user_profile,
 };
 // -------------------------------------------------------------------------------------------------
 // - General Utility methods
