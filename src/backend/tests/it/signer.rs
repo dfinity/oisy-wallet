@@ -257,7 +257,7 @@ fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
 // - Rate-limit integration tests for allow_signing
 // -------------------------------------------------------------------------------------------------
 
-/// Calling `allow_signing` more than 3 times within 60 seconds must return
+/// Calling `allow_signing` more than 3 times within an hour must return
 /// `AllowSigningError::RateLimited` with the expected payload fields.
 ///
 /// Note: `create_user_profile` internally calls `spawn_allow_signing_if_below_limit`,
@@ -295,8 +295,8 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
             assert_eq!(max_calls, 3, "rate limit should allow 3 calls");
             assert_eq!(
                 window_ns,
-                60 * 1_000_000_000,
-                "rate limit window should be 60 seconds"
+                60 * 60 * 1_000_000_000,
+                "rate limit window should be one hour"
             );
             assert_eq!(err_caller, caller, "error should reference the caller");
         }
