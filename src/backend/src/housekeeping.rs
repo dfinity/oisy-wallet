@@ -4,12 +4,16 @@ use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::signer::topup::TopUpCyclesLedgerResult;
 
-use crate::{api, signer, types::storable::StoredPrincipal};
+use crate::{api, rate_limiter, signer, types::storable::StoredPrincipal};
 
 thread_local! {
     /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
     static HOUSEKEEPING_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
     static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
+
+    /// Rate-limits `allow_signing`: max 3 calls per caller per 60 seconds.
+    pub static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
+        rate_limiter::RateLimiter::new(3, 60 * 1_000_000_000);
 }
 
 /// 2 hours in nanoseconds — if a housekeeping run has been in progress for
@@ -83,8 +87,19 @@ pub(crate) fn release_allow_signing_slot() {
 }
 
 /// Spawns an `allow_signing` task only if the number of in-flight tasks is
-/// below `MAX_CONCURRENT_ALLOW_SIGNING`.
+/// below `MAX_CONCURRENT_ALLOW_SIGNING` and the principal hasn't exceeded
+/// its per-caller rate limit.
 pub(crate) fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
+    if let Err(e) = ALLOW_SIGNING_RATE_LIMITER.with(|rl| rl.check_principal(stored_principal.0)) {
+        ic_cdk::eprintln!(
+            "Skipped allow_signing for user {}: max_calls={}, window_ns={}",
+            stored_principal.0,
+            e.max_calls,
+            e.window_ns,
+        );
+        return;
+    }
+
     if !try_acquire_allow_signing_slot() {
         ic_cdk::eprintln!(
             "Skipped allow_signing for user {}: too many concurrent tasks",
