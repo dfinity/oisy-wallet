@@ -62,6 +62,7 @@ mod housekeeping;
 mod impls;
 mod pow;
 pub mod random;
+mod rate_limiter;
 mod signer;
 mod state;
 mod token;
