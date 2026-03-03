@@ -17,9 +17,10 @@ use shared::types::{
 
 use crate::{
     bitcoin::{api, pending_tx_model::BtcUserPendingTransactionsModel, utils},
+    delegation,
     guards::caller_is_not_anonymous,
     signer,
-    state::mutate_state,
+    state::{mutate_state, read_config},
 };
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
@@ -136,6 +137,26 @@ pub async fn btc_add_pending_transaction(
     async fn inner(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
+        let principal = ic_cdk::caller();
+        let now_ns = time();
+
+        let chain = params.ii_delegation_chain.as_ref().ok_or_else(|| {
+            BtcAddPendingTransactionError::InvalidDelegationChain {
+                msg: "II delegation chain is required".to_string(),
+            }
+        })?;
+
+        let known_ii_canister_ids = read_config(|config| {
+            config
+                .supported_credentials
+                .as_ref()
+                .map(|creds| creds.iter().map(|c| c.ii_canister_id).collect::<Vec<_>>())
+                .unwrap_or_default()
+        });
+
+        delegation::verify_ii_delegation_chain(chain, principal, &known_ii_canister_ids, now_ns)
+            .map_err(|msg| BtcAddPendingTransactionError::InvalidDelegationChain { msg })?;
+
         if params.utxos.is_empty() {
             return Err(BtcAddPendingTransactionError::EmptyUtxos);
         }
@@ -150,8 +171,6 @@ pub async fn btc_add_pending_transaction(
             return Err(BtcAddPendingTransactionError::DuplicateUtxos);
         }
 
-        let principal = ic_cdk::caller();
-
         let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
@@ -163,8 +182,6 @@ pub async fn btc_add_pending_transaction(
         )
         .await
         .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
-
-        let now_ns = time();
 
         let current_keys: HashSet<(&[u8], u32)> = current_utxos
             .iter()
