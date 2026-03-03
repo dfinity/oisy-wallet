@@ -32,6 +32,10 @@ Additionally, we need to explicitly set the base path in order to avoid issues w
 		}
 	}
 
+	.always-inverted {
+		filter: invert(1);
+	}
+
 	@include meta.load-css('global/font-faces');
 	@include meta.load-css('global/fonts');
 	@include meta.load-css('global/theme');

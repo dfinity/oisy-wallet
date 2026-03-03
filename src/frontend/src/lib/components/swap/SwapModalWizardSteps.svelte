@@ -8,6 +8,7 @@
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import {
@@ -24,6 +25,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { WizardStepsGetTokenType } from '$lib/types/get-token';
+	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
@@ -62,88 +64,160 @@
 	const { setSourceToken, setDestinationToken, sourceToken, destinationToken } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { setFilterNetwork } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+	const { setFilterNetwork, setFilterQuery } = getContext<ModalTokensListContext>(
+		MODAL_TOKENS_LIST_CONTEXT_KEY
+	);
 
 	const { filteredNetworks, setAllowedNetworkIds, resetAllowedNetworkIds } =
 		getContext<ModalNetworksListContext>(MODAL_NETWORKS_LIST_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	const showDestinationTokenList = () => {
-		if (nonNullish($sourceToken) && isDefaultEthereumToken($sourceToken)) {
-			allNetworksEnabled = false;
-			setAllowedNetworkIds([$sourceToken.network.id]);
+	type TokenSide = 'source' | 'destination';
+
+	const setNetworksMode = ({
+		enabled,
+		allowedIds
+	}: {
+		enabled: boolean;
+		allowedIds?: NetworkId[];
+	}) => {
+		allNetworksEnabled = enabled;
+
+		if (enabled) {
+			resetAllowedNetworkIds();
+
 			return;
 		}
 
-		if (isNullish($destinationToken) && nonNullish($sourceToken)) {
-			allNetworksEnabled = false;
-			setFilterNetwork($sourceToken.network);
-
-			setAllowedNetworkIds(SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id]);
-			return;
-		}
-
-		if (nonNullish($destinationToken) && nonNullish($sourceToken)) {
-			allNetworksEnabled = false;
-			setFilterNetwork($destinationToken.network);
-			setAllowedNetworkIds(SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id]);
+		if (nonNullish(allowedIds)) {
+			setAllowedNetworkIds(allowedIds);
 		}
 	};
 
-	const showSourceTokenList = () => {
-		allNetworksEnabled = true;
-		resetAllowedNetworkIds();
+	// Returns the preferred network for a given side.
+	// Priority order:
+	// 1) Primary token network
+	// 2) Selected page network
+	// 3) Secondary token network
+	// If allowedIds is provided, returns the first candidate whose id is allowed.
+	// If none match (or none exist), returns undefined.
+	const getPreferredNetworkForSide = ({
+		side,
+		allowedIds
+	}: {
+		side: TokenSide;
+		allowedIds?: readonly NetworkId[];
+	}): Network | undefined => {
+		const primary = side === 'source' ? $sourceToken?.network : $destinationToken?.network;
 
-		if (nonNullish($sourceToken)) {
-			setFilterNetwork($sourceToken.network);
+		const secondary = side === 'source' ? $destinationToken?.network : $sourceToken?.network;
+
+		return [primary, $selectedNetwork, secondary].reduce<Network | undefined>((acc, current) => {
+			if (nonNullish(acc)) {
+				return acc;
+			}
+
+			if (isNullish(current)) {
+				return;
+			}
+
+			if (nonNullish(allowedIds) && !allowedIds.includes(current.id)) {
+				return;
+			}
+
+			return current;
+		}, undefined);
+	};
+
+	const applyListConstraints = (side: TokenSide) => {
+		// SOURCE list: user can browse all networks (but keep current network preselected if any)
+		if (side === 'source') {
+			setNetworksMode({ enabled: true });
+
+			setFilterNetwork(getPreferredNetworkForSide({ side }));
+
 			return;
 		}
 
-		if (nonNullish($destinationToken) && isNullish($sourceToken)) {
-			setFilterNetwork($destinationToken.network);
+		// DESTINATION list: constrain based on source/destination
+		if (isNullish($sourceToken)) {
+			// no source yet: no constraints
+			setNetworksMode({ enabled: false });
+
+			setFilterNetwork(getPreferredNetworkForSide({ side }));
+
+			return;
 		}
+
+		// source selected (constraints apply)
+		const allowedIds = isDefaultEthereumToken($sourceToken)
+			? [$sourceToken.network.id]
+			: SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id];
+
+		setNetworksMode({ enabled: false, allowedIds });
+
+		setFilterNetwork(getPreferredNetworkForSide({ side, allowedIds }));
 	};
 
-	const showTokensList = (tokenSource: 'source' | 'destination') => {
+	const enterTokenList = (side: TokenSide) => {
 		swapAmountsStore.reset();
+
+		setFilterQuery('');
+
+		selectTokenType = side;
+
 		goToStep(WizardStepsSwap.TOKENS_LIST);
 
-		if (tokenSource === 'destination') {
-			showDestinationTokenList();
-		} else if (tokenSource === 'source') {
-			showSourceTokenList();
-		}
-
-		selectTokenType = tokenSource;
+		applyListConstraints(side);
 	};
+
+	const showTokensList = (tokenSource: TokenSide) => enterTokenList(tokenSource);
 
 	const closeTokenList = () => {
 		goToStep(WizardStepsSwap.SWAP);
-		allNetworksEnabled = true;
-		resetAllowedNetworkIds();
+
+		setNetworksMode({ enabled: true });
+
+		setFilterQuery('');
 
 		selectTokenType = undefined;
+	};
+
+	const isDestinationCompatibleWithSource = ({
+		source,
+		destination
+	}: {
+		source: Token;
+		destination: Token;
+	}): boolean => {
+		if (isDefaultEthereumToken(source)) {
+			return source.network.id === destination.network.id;
+		}
+
+		const allowed = SUPPORTED_CROSS_SWAP_NETWORKS[source.network.id];
+
+		return isNullish(allowed) ? true : allowed.includes(destination.network.id);
 	};
 
 	const selectToken = (token: Token) => {
 		if (selectTokenType === 'source') {
 			setSourceToken(token);
+
 			setFilterNetwork(token.network);
+
 			if (
-				(nonNullish($destinationToken) &&
-					SUPPORTED_CROSS_SWAP_NETWORKS[token.network.id] &&
-					!SUPPORTED_CROSS_SWAP_NETWORKS[token.network.id].includes(
-						$destinationToken?.network.id
-					)) ||
-				(isDefaultEthereumToken(token) && token.network.id !== $destinationToken?.network.id)
+				nonNullish($destinationToken) &&
+				!isDestinationCompatibleWithSource({ source: token, destination: $destinationToken })
 			) {
 				setDestinationToken(undefined);
 			}
 		} else if (selectTokenType === 'destination') {
 			setDestinationToken(token);
+
 			setFilterNetwork(token.network);
 		}
+
 		closeTokenList();
 	};
 

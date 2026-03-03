@@ -6,13 +6,15 @@ import {
 	format24hChangeInCurrency,
 	formatCurrency,
 	formatNanosecondsToDate,
+	formatNanosecondsToTimestamp,
 	formatSecondsToDate,
 	formatSecondsToNormalizedDate,
 	formatStakeApyNumber,
 	formatTimestampToDaysDifference,
 	formatToShortDateString,
 	formatToken,
-	formatTokenBigintToNumber
+	formatTokenBigintToNumber,
+	shortenWithMiddleEllipsis
 } from '$lib/utils/format.utils';
 
 describe('format.utils', () => {
@@ -167,6 +169,14 @@ describe('format.utils', () => {
 			expect(formatToken({ value: 7000000000n })).toBe('< 0.00000001');
 		});
 
+		it('should format value with bigint unitName', () => {
+			expect(formatToken({ value: 1000000000000000000n, unitName: 18n })).toBe('1');
+		});
+
+		it('should format value with named string unitName', () => {
+			expect(formatToken({ value: 1000000000n, unitName: 'gwei' })).toBe('1');
+		});
+
 		it('should format correctly for precision above the maximum', () => {
 			expect(formatToken({ value: 999999999999999876n, displayDecimals: 18, unitName: 18 })).toBe(
 				'0.999999999999999876'
@@ -208,6 +218,24 @@ describe('format.utils', () => {
 					unitName: 28
 				})
 			).toBe('111111.9999999999999999999999999876');
+		});
+	});
+
+	describe('shortenWithMiddleEllipsis', () => {
+		it('should shorten a long text', () => {
+			expect(shortenWithMiddleEllipsis({ text: '12345678901234567890' })).toBe('1234567...4567890');
+		});
+
+		it('should not shorten a short text', () => {
+			expect(shortenWithMiddleEllipsis({ text: '1234567890123456' })).toBe('1234567890123456');
+		});
+
+		it('should respect custom split length', () => {
+			expect(shortenWithMiddleEllipsis({ text: '123456789012', splitLength: 3 })).toBe('123...012');
+		});
+
+		it('should not shorten text at the minimum length boundary', () => {
+			expect(shortenWithMiddleEllipsis({ text: '12345678', splitLength: 3 })).toBe('12345678');
 		});
 	});
 
@@ -550,6 +578,15 @@ describe('format.utils', () => {
 
 			expect(result).toBe('01:15:32');
 		});
+
+		it('should display date and time when timeOnly is passed without formatOptions', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672535700,
+				timeOnly: true
+			});
+
+			expect(result).toBe('Jan 1, 2023, 01:15');
+		});
 	});
 
 	describe('formatNanosecondsToDate', () => {
@@ -583,6 +620,15 @@ describe('format.utils', () => {
 			const result = formatNanosecondsToDate({ nanoseconds: invalid });
 
 			expect(result).toBe('Invalid Date');
+		});
+	});
+
+	describe('formatNanosecondsToTimestamp', () => {
+		it('should convert nanoseconds to a timestamp in milliseconds', () => {
+			const jan1_2023_ns = BigInt(1672531200000000000);
+			const result = formatNanosecondsToTimestamp(jan1_2023_ns);
+
+			expect(result).toBe(1672531200000);
 		});
 	});
 
@@ -1342,6 +1388,22 @@ describe('format.utils', () => {
 			).toBe('$0.00001235');
 		});
 
+		it('should use baseline fraction digits when value is 0 and useMinSignificantDigits is enabled', () => {
+			expect(
+				formatCurrency({
+					value: 0,
+					currency: Currency.USD,
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH,
+					useMinSignificantDigits: true
+				})
+			).toBe('$0.0000');
+		});
+
 		it('should use the JPY threshold (below 100 => 2 decimals) when enabled', () => {
 			expect(
 				formatCurrency({
@@ -1390,6 +1452,20 @@ describe('format.utils', () => {
 
 		it('parses stake apy number correctly if it is zero', () => {
 			expect(formatStakeApyNumber(0)).toEqual('0');
+		});
+
+		it('parses negative stake apy number correctly if it has 3 digits', () => {
+			expect(formatStakeApyNumber(-101.2131231231)).toEqual('-101');
+		});
+
+		it('parses negative stake apy number correctly if it has 2 digits', () => {
+			expect(formatStakeApyNumber(-64.4656)).toEqual('-64.5');
+			expect(formatStakeApyNumber(-64.000001)).toEqual('-64.0');
+		});
+
+		it('parses negative stake apy number correctly if it has 1 digit', () => {
+			expect(formatStakeApyNumber(-6.4656)).toEqual('-6.47');
+			expect(formatStakeApyNumber(-6.0000032)).toEqual('-6.00');
 		});
 	});
 
@@ -1564,6 +1640,18 @@ describe('format.utils', () => {
 					usdChangePct: -0.001
 				})
 			).toEqual({ formattedAbs: '0.00%', sign: 'zero' });
+		});
+
+		it('should use native locale for Chinese simplified', () => {
+			const result = format24hChangeInCurrency({
+				...params,
+				language: Languages.CHINESE_SIMPLIFIED
+			});
+
+			expect(result).toBeDefined();
+			expect(result?.sign).toBe('positive');
+			expect(result?.formattedAbs).toBeDefined();
+			expect(result?.formattedAbs).toMatch(/^\d+(\.\d+)?%$/);
 		});
 	});
 });

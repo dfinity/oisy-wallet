@@ -463,7 +463,10 @@ export interface _SERVICE {
 	 */
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], AddUserHiddenDappIdResult>;
 	/**
-	 * This function authorizes the caller to spend a specific
+	 * This function authorises the caller to spend a specific
+	 * amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
+	 * providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
+	 * cycles ledger.
 	 *
 	 * Note:
 	 * - The chain fusion signer performs threshold key operations including providing public keys,
@@ -489,8 +492,7 @@ export interface _SERVICE {
 	 * and are periodically updated in the background.
 	 *
 	 * # Returns
-	 * - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
-	 * - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+	 * - `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
 	 *
 	 * # Errors
 	 * - `InternalError`: If fee percentiles are not available in the cache for the requested network
@@ -498,7 +500,7 @@ export interface _SERVICE {
 	 * # Note
 	 * This function only returns data from the in-memory cache and doesn't make any calls
 	 * to the Bitcoin API itself. If the cache doesn't have data for the requested network,
-	 * an error is returned rather than fetching fresh data.
+	 * it returns the default percentiles.
 	 */
 	btc_get_current_fee_percentiles: ActorMethod<
 		[BtcGetFeePercentilesRequest],
@@ -533,9 +535,6 @@ export interface _SERVICE {
 	 *
 	 * # Returns
 	 * The created contact on success.
-	 *
-	 * # Test
-	 * This endpoint is currently a placeholder and will be fully implemented in a future PR.
 	 */
 	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
 	/**

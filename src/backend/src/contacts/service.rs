@@ -155,6 +155,7 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
         Ok(updated_contact)
     })
 }
+
 /// Creates a new empty `StoredContacts` instance with the current timestamp
 fn create_empty_contacts() -> StoredContacts {
     StoredContacts {
@@ -162,6 +163,7 @@ fn create_empty_contacts() -> StoredContacts {
         update_timestamp_ns: time(),
     }
 }
+
 /// Safely retrieves stored contacts for a user principal, handling deserialization failures.
 ///
 /// # Arguments
