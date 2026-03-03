@@ -65,6 +65,7 @@ export const filterSpamErc20Transfers = async ({
 
 	const memoizedGetSender = (hash: string): Promise<EthAddress | undefined> => {
 		const cached = senderCache.get(hash);
+
 		if (nonNullish(cached)) {
 			return cached;
 		}
