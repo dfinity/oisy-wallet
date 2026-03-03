@@ -252,17 +252,24 @@ fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
 
 /// Calling `allow_signing` more than 3 times within 60 seconds must return
 /// `AllowSigningError::RateLimited` with the expected payload fields.
+///
+/// Note: `create_user_profile` internally calls `spawn_allow_signing_if_below_limit`,
+/// which already consumes 1 of the 3 allowed rate-limit entries.
 #[test]
 fn test_allow_signing_rate_limited_after_exceeding_limit() {
     let pic_setup = setup();
     let caller = Principal::from_text(VC_HOLDER).unwrap();
 
+    // 1 of 3 rate-limit entries consumed here.
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
-    // The per-caller rate limit is 3 calls per 60 s.  The first 3 calls may
-    // fail for unrelated reasons (e.g. missing cycles ledger) but must not
-    // return RateLimited.
-    for i in 0..3 {
+    // Process the spawned allow_signing task so the rate-limit entry is recorded.
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    // 2 more explicit calls should still be within the limit.
+    for i in 0..2 {
         let result = call_allow_signing(&pic_setup, caller, 0);
         assert!(
             !matches!(result, Err(AllowSigningError::RateLimited(_))),
@@ -270,7 +277,7 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
         );
     }
 
-    // The 4th call within the same window must be rate-limited.
+    // The next call exceeds 3 total and must be rate-limited.
     let result = call_allow_signing(&pic_setup, caller, 0);
     match result {
         Err(AllowSigningError::RateLimited(RateLimitError {
@@ -292,6 +299,8 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
 
 /// Verify that a different principal is independently tracked and not blocked
 /// by the first principal's exhausted rate limit.
+///
+/// Each `create_user_profile` consumes 1 rate-limit entry for that caller.
 #[test]
 fn test_allow_signing_rate_limit_is_per_caller() {
     let pic_setup = setup();
@@ -301,8 +310,12 @@ fn test_allow_signing_rate_limit_is_per_caller() {
     call_create_user_profile(&pic_setup, caller_a).expect("profile A");
     call_create_user_profile(&pic_setup, caller_b).expect("profile B");
 
-    // Exhaust caller_a's rate limit.
-    for _ in 0..3 {
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    // Exhaust caller_a's remaining 2 entries, then confirm the next is blocked.
+    for _ in 0..2 {
         let _ = call_allow_signing(&pic_setup, caller_a, 0);
     }
     assert!(
@@ -313,7 +326,7 @@ fn test_allow_signing_rate_limit_is_per_caller() {
         "caller_a should be rate-limited"
     );
 
-    // caller_b should still be allowed.
+    // caller_b should still be allowed (only 1 entry used by profile creation).
     let result = call_allow_signing(&pic_setup, caller_b, 0);
     assert!(
         !matches!(result, Err(AllowSigningError::RateLimited(_))),
@@ -323,15 +336,22 @@ fn test_allow_signing_rate_limit_is_per_caller() {
 
 /// After the 60-second window elapses, the same principal should be able to
 /// call `allow_signing` again without being rate-limited.
+///
+/// `create_user_profile` consumes 1 rate-limit entry for the caller.
 #[test]
 fn test_allow_signing_rate_limit_resets_after_window() {
     let pic_setup = setup();
     let caller = Principal::from_text(VC_HOLDER).unwrap();
 
+    // 1 of 3 entries consumed.
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
-    // Exhaust the rate limit.
-    for _ in 0..3 {
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    // Use remaining 2 entries, then confirm the next is blocked.
+    for _ in 0..2 {
         let _ = call_allow_signing(&pic_setup, caller, 0);
     }
     assert!(
