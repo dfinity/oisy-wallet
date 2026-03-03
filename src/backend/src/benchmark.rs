@@ -8,7 +8,7 @@ use shared::types::{
     agreement::{UserAgreement, UserAgreements},
     bitcoin::{PendingTransaction, StoredPendingTransaction},
     contact::{Contact, StoredContacts},
-    custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
+    custom_token::{CustomToken, CustomTokenId, ErcToken, ErcTokenId, Token},
     experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
     network::{NetworkSettings, NetworkSettingsFor},
     user_profile::{StoredUserProfile, UserProfile},
@@ -17,6 +17,8 @@ use shared::types::{
 use super::{
     add_to_user_token, mutate_state, read_config, read_state, remove_from_user_token, user_profile,
     ByteBuf, Candid, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
+    http_request, mutate_state, read_config, read_state, token, user_profile, ByteBuf, Candid,
+    HttpRequest, Principal, Stats, StoredPrincipal,
 };
 use crate::{
     api::admin::http_request, bitcoin::pending_tx_model::BtcUserPendingTransactionsModel,
@@ -212,7 +214,7 @@ fn bench_set_custom_token() -> BenchResult {
 
     bench_fn(|| {
         mutate_state(|s| {
-            add_to_user_token(
+            token::service::add_to_user_token(
                 sp,
                 &mut s.custom_token,
                 std::slice::from_ref(&token),
@@ -231,9 +233,12 @@ fn bench_set_many_custom_tokens_with_count(count: u8) -> BenchResult {
 
     bench_fn(|| {
         mutate_state(|s| {
-            add_to_user_token(sp, &mut s.custom_token, &tokens, |t: &CustomToken| {
-                CustomTokenId::from(&t.token)
-            });
+            token::service::add_to_user_token(
+                sp,
+                &mut s.custom_token,
+                &tokens,
+                |t: &CustomToken| CustomTokenId::from(&t.token),
+            );
         });
     })
 }
@@ -255,7 +260,7 @@ fn bench_list_custom_tokens_with_count(count: u8) -> BenchResult {
         let token = make_custom_token(1, u64::from(i));
 
         mutate_state(|s| {
-            add_to_user_token(
+            token::service::add_to_user_token(
                 sp,
                 &mut s.custom_token,
                 std::slice::from_ref(&token),
@@ -286,7 +291,7 @@ fn bench_remove_custom_token() -> BenchResult {
     let sp = bench_stored_principal();
     let token = make_custom_token(42, 0xDD);
     mutate_state(|s| {
-        add_to_user_token(
+        token::service::add_to_user_token(
             sp,
             &mut s.custom_token,
             std::slice::from_ref(&token),
@@ -296,7 +301,11 @@ fn bench_remove_custom_token() -> BenchResult {
 
     bench_fn(|| {
         mutate_state(|s| {
-            remove_from_user_token(sp, &mut s.custom_token, &matches_custom_token(&token));
+            token::service::remove_from_user_token(
+                sp,
+                &mut s.custom_token,
+                &matches_custom_token(&token),
+            );
         });
     })
 }
