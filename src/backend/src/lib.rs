@@ -255,7 +255,7 @@ mod tests {
 
     use candid_parser::utils::{service_compatible, CandidSource};
 
-     use super::*;
+    use super::*;
 
     /// Determines the workspace directory when running tests.
     fn workspace_dir() -> PathBuf {
