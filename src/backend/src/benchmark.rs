@@ -6,6 +6,7 @@ use canbench_rs::{bench, bench_fn, BenchResult};
 use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
+    bitcoin::{PendingTransaction, StoredPendingTransaction},
     contact::{Contact, StoredContacts},
     custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
     experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
@@ -15,8 +16,7 @@ use shared::types::{
 
 use super::{
     add_to_user_token, http_request, mutate_state, read_config, read_state, remove_from_user_token,
-    user_profile, ByteBuf, Candid, CustomTokenId, HttpRequest, PendingTransaction, Principal,
-    Stats, StoredPendingTransaction, StoredPrincipal,
+    user_profile, ByteBuf, Candid, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
 };
 use crate::{
     bitcoin::pending_tx_model::BtcUserPendingTransactionsModel, state::State,

@@ -10,8 +10,7 @@ use shared::{
         backend_config::{Arg, Config},
         bitcoin::{
             BtcAddPendingTransactionRequest, BtcGetFeePercentilesRequest,
-            BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeRequest,
-            StoredPendingTransaction,
+            BtcGetPendingTransactionsRequest, SelectedUtxosFeeRequest,
         },
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
