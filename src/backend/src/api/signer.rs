@@ -1,17 +1,17 @@
 use ic_cdk::update;
 use shared::types::{
-    pow::{AllowSigningStatus, ChallengeCompletion, CYCLES_PER_DIFFICULTY, POW_ENABLED},
+    pow::AllowSigningStatus,
     result_types::{AllowSigningResult, GetAllowedCyclesResult},
     signer::{
         topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-        AllowSigningError, AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
+        AllowSigningError, AllowSigningResponse, GetAllowedCyclesResponse,
     },
 };
 
 use crate::{
     guards::{caller_is_controller, caller_is_not_anonymous},
     housekeeping::ALLOW_SIGNING_RATE_LIMITER,
-    pow, rate_limiter, signer,
+    rate_limiter, signer,
 };
 
 /// Adds cycles to the cycles ledger, if it is below a certain threshold.
@@ -55,56 +55,21 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigningResult {
-    async fn inner(
-        request: Option<AllowSigningRequest>,
-    ) -> Result<AllowSigningResponse, AllowSigningError> {
+pub async fn allow_signing() -> AllowSigningResult {
+    async fn inner() -> Result<AllowSigningResponse, AllowSigningError> {
         ALLOW_SIGNING_RATE_LIMITER
             .with(rate_limiter::RateLimiter::check_caller)
             .map_err(AllowSigningError::RateLimited)?;
 
-        let principal = ic_cdk::caller();
+        // Passing None to apply the old cycle calculation logic
+        signer::allow_signing(None).await?;
 
-        // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED
-        // is disabled
-        if !POW_ENABLED {
-            // Passing None to apply the old cycle calculation logic
-            signer::allow_signing(None).await?;
-            // Returning a placeholder response that can be ignored by the frontend.
-            return Ok(AllowSigningResponse {
-                status: AllowSigningStatus::Skipped,
-                allowed_cycles: 0u64,
-                challenge_completion: None,
-            });
-        }
-
-        // we atill need to make a valid request has been sent request
-        let request = request.ok_or(AllowSigningError::Other("Invalid request".to_string()))?;
-
-        // The Proof-of-Work (PoW) protection is explicitly enforced at the HTTP entry-point level.
-        // This ensures internal calls to the business service remains unrestricted and does not
-        // require PoW protection.
-        let challenge_completion: ChallengeCompletion =
-            pow::complete_challenge(request.nonce).map_err(AllowSigningError::PowChallenge)?;
-
-        // Grant cycles proportional to difficulty
-        let allowed_cycles =
-            u64::from(challenge_completion.current_difficulty) * CYCLES_PER_DIFFICULTY;
-
-        ic_cdk::println!(
-            "Allowing principal {} to spend {} cycles on signer operations",
-            principal.to_string(),
-            allowed_cycles,
-        );
-
-        // Allow the caller to pay for cycles consumed by signer operations
-        signer::allow_signing(Some(allowed_cycles)).await?;
-
+        // Returning a placeholder response that can be ignored by the frontend.
         Ok(AllowSigningResponse {
-            status: AllowSigningStatus::Executed,
-            allowed_cycles,
-            challenge_completion: Some(challenge_completion),
+            status: AllowSigningStatus::Skipped,
+            allowed_cycles: 0u64,
+            challenge_completion: None,
         })
     }
-    inner(request).await.into()
+    inner().await.into()
 }

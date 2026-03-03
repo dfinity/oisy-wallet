@@ -4,7 +4,6 @@ import type {
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
-	CreateChallengeResponse,
 	CustomToken,
 	GetAllowedCyclesResponse,
 	PendingTransaction,
@@ -18,13 +17,11 @@ import {
 	mapAllowSigningError,
 	mapBtcPendingTransactionError,
 	mapBtcSelectUserUtxosFeeError,
-	mapCreateChallengeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
-	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
@@ -204,10 +201,10 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapGetAllowedCyclesError(response.Err);
 	};
 
-	allowSigning = async ({ request }: AllowSigningParams = {}): Promise<AllowSigningResponse> => {
+	allowSigning = async (): Promise<AllowSigningResponse> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		const response = await allow_signing(toNullable(request));
+		const response = await allow_signing();
 
 		if ('Ok' in response) {
 			const { Ok } = response;
@@ -215,18 +212,6 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapAllowSigningError(response.Err);
-	};
-
-	createPowChallenge = async (): Promise<CreateChallengeResponse> => {
-		const { create_pow_challenge } = this.caller({ certified: true });
-
-		const result = await create_pow_challenge();
-		if ('Ok' in result) {
-			const { Ok } = result;
-			return Ok;
-		}
-
-		throw mapCreateChallengeError(result.Err);
 	};
 
 	addUserHiddenDappId = async ({

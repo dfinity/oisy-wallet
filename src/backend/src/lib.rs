@@ -1,4 +1,4 @@
-use candid::{candid_method, Principal};
+use candid::Principal;
 use ic_cdk::{api::time, export_candid, init, post_upgrade, query, update};
 use serde_bytes::ByteBuf;
 use shared::{
@@ -17,20 +17,16 @@ use shared::{
         dapp::AddHiddenDappIdRequest,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
-        pow::CreateChallengeResponse,
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
-            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
-            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
-            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
+            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
+            UpdateUserNetworkSettingsResult,
         },
-        signer::{
-            topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest,
-        },
+        signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
         Stats, Timestamp,
     },
@@ -50,7 +46,6 @@ mod contacts;
 mod guards;
 mod housekeeping;
 mod impls;
-mod pow;
 pub mod random;
 mod rate_limiter;
 mod signer;
@@ -221,31 +216,6 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
     }
 
     tokens
-}
-
-/// Creates a new proof-of-work challenge for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `CreateChallengeError`.
-///
-/// # Returns
-///
-/// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-/// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-///   internal errors.
-#[update(guard = "caller_is_not_anonymous")]
-#[candid_method(update)]
-pub async fn create_pow_challenge() -> CreatePowChallengeResult {
-    let challenge = pow::create_pow_challenge().await;
-
-    match challenge {
-        Ok(challenge) => CreatePowChallengeResult::Ok(CreateChallengeResponse {
-            difficulty: challenge.difficulty,
-            start_timestamp_ms: challenge.start_timestamp_ms,
-            expiry_timestamp_ms: challenge.expiry_timestamp_ms,
-        }),
-        Err(err) => CreatePowChallengeResult::Err(err),
-    }
 }
 
 /// API method to get cycle balance and burn rate.
