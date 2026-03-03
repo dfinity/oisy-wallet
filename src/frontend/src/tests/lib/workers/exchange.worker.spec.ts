@@ -8,6 +8,7 @@ import type {
 	CoingeckoSimplePriceParams,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceParams,
+	CoingeckoSimpleErc4626TokenPriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
@@ -847,7 +848,7 @@ describe('exchange.worker', () => {
 
 				postMessageMock.mockClear();
 
-				let resolveErc4626: ((v: CoingeckoSimpleTokenPriceResponse) => void) | undefined;
+				let resolveErc4626: ((v: CoingeckoSimpleErc4626TokenPriceResponse) => void) | undefined;
 				vi.mocked(calculateErc4626Prices).mockImplementation(
 					() =>
 						new Promise((resolve) => {
