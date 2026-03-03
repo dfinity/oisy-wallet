@@ -15,10 +15,8 @@ use shared::types::{
 };
 
 use super::{
-    add_to_user_token, mutate_state, read_config, read_state, remove_from_user_token, user_profile,
-    ByteBuf, Candid, CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
-    http_request, mutate_state, read_config, read_state, token, user_profile, ByteBuf, Candid,
-    HttpRequest, Principal, Stats, StoredPrincipal,
+    mutate_state, read_config, read_state, token, user_profile, ByteBuf, Candid, HttpRequest,
+    Principal, Stats, StoredPrincipal,
 };
 use crate::{
     api::admin::http_request, bitcoin::pending_tx_model::BtcUserPendingTransactionsModel,

@@ -1,5 +1,5 @@
 use candid::Principal;
-use ic_cdk::{api::time, export_candid, init, post_upgrade, update};
+use ic_cdk::{api::time, export_candid, init, post_upgrade};
 use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
@@ -32,8 +32,6 @@ use shared::{
 };
 
 use crate::{
-    guards::caller_is_not_anonymous,
-    guards::caller_is_allowed,
     state::{mutate_state, read_config, read_state, set_config},
     types::storable::{Candid, StoredPrincipal},
 };
@@ -93,8 +91,5 @@ pub fn post_upgrade(arg: Option<Arg>) {
 
     housekeeping::start_periodic_housekeeping_timers();
 }
-
-
-
 
 export_candid!();
