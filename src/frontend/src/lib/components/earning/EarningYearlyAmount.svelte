@@ -17,6 +17,7 @@
 		showAsNeutral?: boolean;
 		showAsError?: boolean;
 		showAsSuccess?: boolean;
+		showWithShortenedLabel?: boolean;
 		fallback?: Snippet;
 	}
 
@@ -27,6 +28,7 @@
 		showAsNeutral = false,
 		showAsSuccess = false,
 		showAsError = false,
+		showWithShortenedLabel = false,
 		fallback
 	}: Props = $props();
 
@@ -43,9 +45,14 @@
 
 	let yearlyAmount = $derived(
 		nonNullish(formattedCurrency)
-			? replacePlaceholders($i18n.stake.text.active_earning_per_year, {
-					$amount: `${formattedCurrency}`
-				})
+			? replacePlaceholders(
+					showWithShortenedLabel
+						? $i18n.stake.text.active_earning_per_year_short
+						: $i18n.stake.text.active_earning_per_year,
+					{
+						$amount: `${formattedCurrency}`
+					}
+				)
 			: undefined
 	);
 
@@ -61,7 +68,7 @@
 		class:text-tertiary={!positiveAmount}
 		in:fade
 	>
-		{`${showPlusSign ? '+ ' : ''}${yearlyAmount}`}
+		{`${showPlusSign && positiveAmount ? '+ ' : ''}${yearlyAmount}`}
 	</span>
 {:else if nonNullish(fallback)}
 	{@render fallback()}
