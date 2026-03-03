@@ -2,8 +2,8 @@ import { harvestVaultsStore } from '$lib/stores/harvest.store';
 import type { HarvestVault } from '$lib/types/harvest';
 import { get } from 'svelte/store';
 
-vi.mock('$env/tokens/tokens.erc4626.env', () => ({
-	ERC4626_TOKENS: [{ address: '0xKnownVault1' }, { address: '0xKnownVault2' }]
+vi.mock('$eth/constants/harvest-autopilots.constants', () => ({
+	HARVEST_AUTOPILOT_ADDRESSES: ['0xknownvault1', '0xknownvault2']
 }));
 
 describe('harvest.store', () => {
@@ -11,6 +11,7 @@ describe('harvest.store', () => {
 		id: 'vault-1',
 		vaultAddress: '0xKnownVault1',
 		estimatedApy: '5.5',
+		totalValueLocked: '184665.22626877529493613114',
 		...overrides
 	});
 
@@ -26,7 +27,10 @@ describe('harvest.store', () => {
 		harvestVaultsStore.set([mockVault()]);
 
 		expect(get(harvestVaultsStore)).toEqual({
-			'0xKnownVault1': { estimatedApy: '5.50' }
+			'0xknownvault1': {
+				estimatedApy: '5.50',
+				totalValueLocked: '184665.22626877529493613114'
+			}
 		});
 	});
 
@@ -37,8 +41,14 @@ describe('harvest.store', () => {
 		]);
 
 		expect(get(harvestVaultsStore)).toEqual({
-			'0xKnownVault1': { estimatedApy: '5.50' },
-			'0xKnownVault2': { estimatedApy: '12.3' }
+			'0xknownvault1': {
+				estimatedApy: '5.50',
+				totalValueLocked: '184665.22626877529493613114'
+			},
+			'0xknownvault2': {
+				estimatedApy: '12.3',
+				totalValueLocked: '184665.22626877529493613114'
+			}
 		});
 	});
 
@@ -61,7 +71,10 @@ describe('harvest.store', () => {
 		harvestVaultsStore.set([mockVault({ vaultAddress: '0xknownvault1' })]);
 
 		expect(get(harvestVaultsStore)).toEqual({
-			'0xknownvault1': { estimatedApy: '5.50' }
+			'0xknownvault1': {
+				estimatedApy: '5.50',
+				totalValueLocked: '184665.22626877529493613114'
+			}
 		});
 	});
 

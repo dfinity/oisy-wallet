@@ -181,9 +181,7 @@ async fn fetch_current_fee_percentiles(
 
 /// This function returns fee percentiles data from the in-memory cache.
 /// If the data isn't available in the cache, it falls back to default values.
-pub async fn get_current_fee_percentiles(
-    network: BitcoinNetwork,
-) -> Result<Vec<MillisatoshiPerByte>, String> {
+pub fn get_current_fee_percentiles(network: BitcoinNetwork) -> Vec<MillisatoshiPerByte> {
     // Try to get from cache first
     let cached_percentiles =
         FEE_PERCENTILES_CACHE.with(|cache| cache.borrow().get(&network).cloned());
@@ -191,15 +189,14 @@ pub async fn get_current_fee_percentiles(
     match cached_percentiles {
         Some(percentiles) if !percentiles.is_empty() => {
             // Use cached values
-            Ok(percentiles)
+            percentiles
         }
         _ => {
             // Cache miss or empty cache, use default values
             ic_cdk::println!("Cache miss for network {:?}, using default values", network);
 
             // Initialize the default values for this network and return them directly
-            let default_percentiles = initialize_default_fee_percentiles(network);
-            Ok(default_percentiles)
+            initialize_default_fee_percentiles(network)
         }
     }
 }
@@ -267,16 +264,16 @@ fn initialize_default_fee_percentiles(network: BitcoinNetwork) -> Vec<u64> {
 }
 
 /// Returns the 50th percentile for sending fees.
-pub async fn get_fee_per_byte(network: BitcoinNetwork) -> Result<u64, String> {
+pub fn get_fee_per_byte(network: BitcoinNetwork) -> u64 {
     // Get fee percentiles from previous transactions to estimate our own fee.
-    let fee_percentiles = get_current_fee_percentiles(network).await?;
+    let fee_percentiles = get_current_fee_percentiles(network);
 
     if fee_percentiles.is_empty() {
         // This case should rarely happen due to default values,
         // but keeping as a fallback
-        Ok(get_default_fee_for_network(network))
+        get_default_fee_for_network(network)
     } else {
         let middle = fee_percentiles.len() / 2;
-        Ok(fee_percentiles[middle])
+        fee_percentiles[middle]
     }
 }
