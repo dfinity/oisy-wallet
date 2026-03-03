@@ -61,7 +61,8 @@ export const filterSpamErc20Transfers = async ({
 	const kept = await Promise.all(
 		zeroValue.map(async (tx): Promise<Transaction | undefined> => {
 			if (isNullish(tx.hash)) {
-				return;
+				// No hash available: we cannot look up the sender, so err on the side of showing.
+				return tx;
 			}
 
 			try {
