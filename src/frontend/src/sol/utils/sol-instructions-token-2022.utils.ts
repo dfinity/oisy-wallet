@@ -52,6 +52,7 @@ import {
 	parseInitializeNonTransferableMintInstruction,
 	parseInitializePausableConfigInstruction,
 	parseInitializePermanentDelegateInstruction,
+	parseInitializePermissionedBurnInstruction,
 	parseInitializeScaledUiAmountMintInstruction,
 	parseInitializeTokenGroupInstruction,
 	parseInitializeTokenGroupMemberInstruction,
@@ -61,6 +62,8 @@ import {
 	parseMintToCheckedInstruction,
 	parseMintToInstruction,
 	parsePauseInstruction,
+	parsePermissionedBurnCheckedInstruction,
+	parsePermissionedBurnInstruction,
 	parseReallocateInstruction,
 	parseRemoveTokenMetadataKeyInstruction,
 	parseResumeInstruction,
@@ -73,6 +76,7 @@ import {
 	parseTransferCheckedWithFeeInstruction,
 	parseTransferInstruction,
 	parseUiAmountToAmountInstruction,
+	parseUnwrapLamportsInstruction,
 	parseUpdateConfidentialTransferMintInstruction,
 	parseUpdateDefaultAccountStateInstruction,
 	parseUpdateGroupMemberPointerInstruction,
@@ -539,6 +543,26 @@ export const parseSolToken2022Instruction = (
 			return {
 				...parseInitializeTokenGroupMemberInstruction(instruction),
 				instructionType: Token2022Instruction.InitializeTokenGroupMember
+			};
+		case Token2022Instruction.UnwrapLamports:
+			return {
+				...parseUnwrapLamportsInstruction(instruction),
+				instructionType: Token2022Instruction.UnwrapLamports
+			};
+		case Token2022Instruction.InitializePermissionedBurn:
+			return {
+				...parseInitializePermissionedBurnInstruction(instruction),
+				instructionType: Token2022Instruction.InitializePermissionedBurn
+			};
+		case Token2022Instruction.PermissionedBurn:
+			return {
+				...parsePermissionedBurnInstruction(instruction),
+				instructionType: Token2022Instruction.PermissionedBurn
+			};
+		case Token2022Instruction.PermissionedBurnChecked:
+			return {
+				...parsePermissionedBurnCheckedInstruction(instruction),
+				instructionType: Token2022Instruction.PermissionedBurnChecked
 			};
 		default: {
 			assertNever(
