@@ -480,7 +480,10 @@ export interface _SERVICE {
 	 */
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], AddUserHiddenDappIdResult>;
 	/**
-	 * This function authorizes the caller to spend a specific
+	 * This function authorises the caller to spend a specific
+	 * amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
+	 * providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
+	 * cycles ledger.
 	 *
 	 * Note:
 	 * - The chain fusion signer performs threshold key operations including providing public keys,

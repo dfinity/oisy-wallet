@@ -17,7 +17,7 @@ use shared::types::{
 
 use crate::{
     guards::caller_is_not_anonymous,
-    spawn_allow_signing_if_below_limit,
+    housekeeping::spawn_allow_signing_if_below_limit,
     state::{mutate_state, read_config},
     types::storable::StoredPrincipal,
     user_profile::{credential_config::find_credential_config, model::UserProfileModel, service},
