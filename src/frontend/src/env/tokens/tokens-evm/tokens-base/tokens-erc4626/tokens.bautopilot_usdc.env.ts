@@ -22,5 +22,7 @@ export const BAUTOPILOT_USDC_TOKEN: RequiredErc4626Token = {
 	icon: '',
 	address: '0x0d877dc7c8fa3ad980dfdb18b48ec9f8768359c4',
 	assetAddress: USDC_TOKEN.address,
-	assetDecimals: USDC_TOKEN.decimals
+	assetDecimals: USDC_TOKEN.decimals,
+	assetIcon: USDC_TOKEN.icon,
+	assetSymbol: USDC_TOKEN.symbol
 };

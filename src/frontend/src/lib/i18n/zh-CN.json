@@ -43,7 +43,9 @@
 			"ellipsis": "…",
 			"learn_more": "了解更多",
 			"sorting": "排序方式",
-			"unlimited": ""
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
@@ -1862,11 +1864,10 @@
 			"go_to_earn": "前往 Earn"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "黄金收益",
-				"description": "质押 GLDT 可每日获得治理代币奖励，从黄金持有中解锁被动收益。",
-				"action": "质押 GLDT"
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"action": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
@@ -1876,6 +1877,8 @@
 		},
 		"card_fields": {
 			"apy": "年化收益率",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "已质押",
 			"currentEarning": "当前收益",
 			"earningPotential": "额外收益潜力",
@@ -1890,9 +1893,27 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
 			"gldt_stake_page_description": "",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "",
 			"stake_now": "",
 			"stake_amount": "",
@@ -1911,10 +1932,12 @@
 			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "",
 			"invested_assets": "",
 			"visit_provider": "",
 			"current_apy_label": "",
+			"max_apy_label": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1980,6 +2003,16 @@
 				"fact_3_title": "",
 				"fact_3_description": "",
 				"fact_3_description_fallback": ""
+			},
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": ""
 			}
 		},
 		"alt": {

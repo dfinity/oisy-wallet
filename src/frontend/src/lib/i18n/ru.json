@@ -43,7 +43,9 @@
 			"ellipsis": "…",
 			"learn_more": "Узнать больше",
 			"sorting": "Сортировка",
-			"unlimited": ""
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
@@ -1862,11 +1864,10 @@
 			"go_to_earn": "Перейти к Заработок"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "Зарабатывай с Gold",
-				"description": "Стейкайте GLDT для получения ежедневных наград в токенах управления, открывая пассивный доход от золотых запасов.",
-				"action": "Стейкать GLDT"
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"action": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
@@ -1876,6 +1877,8 @@
 		},
 		"card_fields": {
 			"apy": "APY",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "Застейкано",
 			"currentEarning": "Текущий заработок",
 			"earningPotential": "Потенциал дополнительного заработка",
@@ -1890,9 +1893,27 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
 			"gldt_stake_page_description": "Стейкайте токены GLDT для получения наград, обеспеченных физическим золотом",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "Стейкинг $token_symbol",
 			"stake_now": "Стейкать сейчас",
 			"stake_amount": "Сумма стейкинга $token_symbol",
@@ -1911,10 +1932,12 @@
 			"earning_potential_hint": "На основе стоимости ваших неинвестированных активов и самой высокой APY среди доступных возможностей заработка.",
 			"active_earning": "$amount/год",
 			"active_earning_per_year": "$amount/год",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "Доступно",
 			"invested_assets": "Выделено",
 			"visit_provider": "Посетить провайдера",
 			"current_apy_label": "Текущая APY",
+			"max_apy_label": "",
 			"stake_review_subtitle": "Вы стейкаете",
 			"unstake_review_subtitle": "Вы анстейкаете",
 			"delayed_dissolve": "Получить с задержкой",
@@ -1980,6 +2003,16 @@
 				"fact_3_title": "Стабильные доходы",
 				"fact_3_description": "Зарабатывайте $apy% APY с минимальным риском волатильности",
 				"fact_3_description_fallback": "Получайте стабильные награды с минимальным риском волатильности"
+			},
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": ""
 			}
 		},
 		"alt": {
