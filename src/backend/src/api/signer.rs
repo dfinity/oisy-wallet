@@ -87,7 +87,7 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
             u64::from(challenge_completion.current_difficulty) * CYCLES_PER_DIFFICULTY;
 
         ic_cdk::println!(
-            "Allowing principle {} to spend {} cycles on signer operations",
+            "Allowing principal {} to spend {} cycles on signer operations",
             principal.to_string(),
             allowed_cycles,
         );
