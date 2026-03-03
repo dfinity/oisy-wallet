@@ -3,12 +3,8 @@ use std::borrow::Cow;
 
 use candid::{decode_one, encode_one, CandidType, Deserialize, Principal};
 use ic_stable_structures::storable::{Blob, Bound, Storable};
-use shared::types::Stats;
 
-use crate::{
-    types::{Candid, StoredPrincipal, StoredTokenId},
-    State,
-};
+use crate::types::storable::{Candid, StoredPrincipal, StoredTokenId};
 
 impl<T> Storable for Candid<T>
 where
@@ -37,18 +33,6 @@ where
 
     fn deref(&self) -> &T {
         &self.0
-    }
-}
-
-impl From<&State> for Stats {
-    fn from(state: &State) -> Self {
-        Stats {
-            user_profile_count: state.user_profile.len(),
-            user_timestamps_count: state.user_profile_updated.len(),
-            user_token_count: state.user_token.len(),
-            custom_token_count: state.custom_token.len(),
-            token_activity_count: state.token_activity.len(),
-        }
     }
 }
 

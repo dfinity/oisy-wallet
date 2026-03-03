@@ -21,6 +21,7 @@ export const NETWORK_PARAM = 'network';
 export const COLLECTION_PARAM = 'collection';
 export const NFT_PARAM = 'nft';
 export const URI_PARAM = 'uri';
+export const VAULT_PARAM = 'vault';
 
 export const PARAM_MSG = 'msg';
 export const PARAM_LEVEL = 'level';
