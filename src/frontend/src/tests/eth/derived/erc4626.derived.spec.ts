@@ -1,8 +1,8 @@
 import { BASE_NETWORK, BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import {
-	erc4626AssetAddresses,
 	enabledErc4626Tokens,
+	erc4626AssetAddresses,
 	erc4626CustomTokens,
 	erc4626CustomTokensInitialized,
 	erc4626CustomTokensNotInitialized,
