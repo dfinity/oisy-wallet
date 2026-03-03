@@ -43,7 +43,9 @@
 			"ellipsis": "",
 			"learn_more": "",
 			"sorting": "Sortierung",
-			"unlimited": ""
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
@@ -1862,9 +1864,8 @@
 			"go_to_earn": ""
 		},
 		"cards": {
-			"gldt": {
-				"title1": "",
-				"title2": "",
+			"harvest_autopilot": {
+				"title": "",
 				"description": "",
 				"action": ""
 			},
@@ -1876,6 +1877,8 @@
 		},
 		"card_fields": {
 			"apy": "",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "",
 			"currentEarning": "",
 			"earningPotential": "",
@@ -1890,9 +1893,27 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
 			"gldt_stake_page_description": "",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "",
 			"stake_now": "",
 			"stake_amount": "",
@@ -1911,10 +1932,12 @@
 			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "",
 			"invested_assets": "",
 			"visit_provider": "",
 			"current_apy_label": "",
+			"max_apy_label": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1980,6 +2003,16 @@
 				"fact_3_title": "",
 				"fact_3_description": "",
 				"fact_3_description_fallback": ""
+			},
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": ""
 			}
 		},
 		"alt": {

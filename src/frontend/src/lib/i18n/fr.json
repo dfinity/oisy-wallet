@@ -43,7 +43,9 @@
 			"ellipsis": "…",
 			"learn_more": "En savoir plus",
 			"sorting": "Tri",
-			"unlimited": ""
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "À des fins de test uniquement !",
@@ -1862,11 +1864,10 @@
 			"go_to_earn": "Aller à Earn"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "Gagnez avec Gold",
-				"description": "Stakez des GLDT pour gagner des récompenses quotidiennes en tokens de gouvernance, débloquant des revenus passifs à partir de vos avoirs en or.",
-				"action": "Staker GLDT"
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"action": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
@@ -1876,6 +1877,8 @@
 		},
 		"card_fields": {
 			"apy": "APY",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "Staké",
 			"currentEarning": "Gains actuels",
 			"earningPotential": "Potentiel de gain supplémentaire",
@@ -1890,9 +1893,27 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
 			"gldt_stake_page_description": "Stakez des tokens GLDT pour gagner des récompenses adossées à de l'or physique",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "Staker $token_symbol",
 			"stake_now": "Staker maintenant",
 			"stake_amount": "Staker $amount $token_symbol",
@@ -1911,10 +1932,12 @@
 			"earning_potential_hint": "Basé sur la valeur de vos actifs non investis et l'APY le plus élevé des opportunités de gain disponibles.",
 			"active_earning": "Gains actuels",
 			"active_earning_per_year": "$amount/an",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "Disponible",
 			"invested_assets": "Alloué",
 			"visit_provider": "Visiter le site web",
 			"current_apy_label": "APY actuel",
+			"max_apy_label": "",
 			"stake_review_subtitle": "Vous stakez",
 			"unstake_review_subtitle": "Vous unstakez",
 			"delayed_dissolve": "Recevoir avec un délai",
@@ -1980,6 +2003,16 @@
 				"fact_3_title": "Rendements stables",
 				"fact_3_description": "Gagnez $apy% APY avec un risque de volatilité minimal",
 				"fact_3_description_fallback": "Gagnez des récompenses constantes avec un risque de volatilité minimal"
+			},
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": ""
 			}
 		},
 		"alt": {
