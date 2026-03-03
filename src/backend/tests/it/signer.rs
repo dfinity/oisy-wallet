@@ -9,18 +9,43 @@ use shared::types::{
             TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult,
             MAX_PERCENTAGE, MIN_PERCENTAGE,
         },
-        AllowSigningError, GetAllowedCyclesError, GetAllowedCyclesResponse, RateLimitError,
+        AllowSigningError, AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
+        GetAllowedCyclesResponse, RateLimitError,
     },
+    user_profile::UserProfile,
     Stats,
 };
 
-use crate::{
-    pow::{call_allow_signing, call_create_user_profile},
-    utils::{
-        mock::VC_HOLDER,
-        pocketic::{controller, pic_canister::PicCanisterTrait, setup, BackendBuilder},
-    },
+use crate::utils::{
+    mock::VC_HOLDER,
+    pocketic::{controller, pic_canister::PicCanisterTrait, setup, BackendBuilder, PicBackend},
 };
+
+pub fn call_create_user_profile(
+    pic_setup: &PicBackend,
+    caller: Principal,
+) -> Result<UserProfile, String> {
+    let result = pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+    assert!(
+        result.is_ok(),
+        "Expected Ok, but got Err: {}",
+        result.unwrap_err()
+    );
+    result
+}
+
+pub fn call_allow_signing(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    nonce: u64,
+) -> Result<AllowSigningResponse, AllowSigningError> {
+    let wrapped_result = pic_setup.update::<Result<AllowSigningResponse, AllowSigningError>>(
+        caller,
+        "allow_signing",
+        AllowSigningRequest { nonce },
+    );
+    wrapped_result.expect("that create_pow_challenge exists")
+}
 
 #[test]
 fn test_topup_cannot_be_called_if_not_controller() {
@@ -116,8 +141,15 @@ fn test_get_allowed_cycles_returns_correct_amount() {
     let pic_setup = setup_with_cycles_ledger();
     let caller = Principal::from_text(VC_HOLDER).unwrap();
 
-    // Create a user profile so the allow_signing function is called
+    // Create a user profile so the allow_signing function is called.
+    // `create_user_profile` spawns an async `allow_signing` task; give
+    // PocketIC a few ticks so the inter-canister call to the cycles ledger
+    // settles before we query the allowance.
     call_create_user_profile(&pic_setup, caller).expect("Failed to call create user profile");
+
+    for _ in 0..10 {
+        pic_setup.pic.tick();
+    }
 
     // Call get_allowed_cycles
     let result = call_get_allowed_cycles(&pic_setup, caller);

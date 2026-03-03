@@ -4,7 +4,7 @@ use candid::{Nat, Principal};
 use ic_cycles_ledger_client::ApproveError;
 
 use super::{CandidType, Debug, Deserialize};
-use crate::types::pow::{AllowSigningStatus, ChallengeCompletion, ChallengeCompletionError};
+use crate::types::pow::{AllowSigningStatus, ChallengeCompletion};
 /// Types related to topping up the cycles ledger account for use with the signer.
 
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
@@ -26,7 +26,6 @@ pub enum AllowSigningError {
     Other(String),
     FailedToContactCyclesLedger,
     ApproveError(ApproveError),
-    PowChallenge(ChallengeCompletionError),
     RateLimited(RateLimitError),
 }
 

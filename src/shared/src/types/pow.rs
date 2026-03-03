@@ -42,10 +42,6 @@ use super::{CandidType, Debug, Deserialize};
 // Cycles, and the next     challenge can be requested after this period. This offers strong
 // protection against abuse.
 
-// If `POW_ENABLED` is false, PoW protection remains disabled, preserving the original behavior
-// of the `allow_signing` function.
-pub const POW_ENABLED: bool = false;
-
 // If set to `true`, the difficulty for a principal auto-adjusts after each solved challenge,
 // starting at `START_DIFFICULTY`.
 pub const DIFFICULTY_AUTO_ADJUSTMENT: bool = false;

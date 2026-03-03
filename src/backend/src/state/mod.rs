@@ -33,6 +33,9 @@ pub struct State {
     pub(crate) custom_token: CustomTokenMap,
     pub(crate) user_profile: UserProfileMap,
     pub(crate) user_profile_updated: UserProfileUpdatedMap,
+    // Not used any more, but we keep it for now to avoid breaking changes and data migration. Will
+    // be removed in the future.
+    #[allow(dead_code)]
     pub(crate) pow_challenge: PowChallengeMap,
     pub(crate) contact: ContactMap,
     pub(crate) btc_user_pending_transactions: BtcUserPendingTransactionsMap,
