@@ -20,7 +20,8 @@ export type BadgeVariant =
 	| 'nft-trait'
 	| 'nft-spam'
 	| 'eligible'
-	| 'not-eligible';
+	| 'not-eligible'
+	| 'transparent';
 
 export type TagVariant =
 	| 'default'
