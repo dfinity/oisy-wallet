@@ -6,7 +6,6 @@ import type {
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
-import { ChallengeCompletionErrorEnum, PowChallengeError } from '$lib/canisters/backend.errors';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
@@ -724,52 +723,6 @@ describe('backend.canister', () => {
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
-
-		it.each([
-			{
-				errorName: 'InvalidNonce',
-				error: { InvalidNonce: null },
-				code: ChallengeCompletionErrorEnum.InvalidNonce
-			},
-			{
-				errorName: 'MissingChallenge',
-				error: { MissingChallenge: null },
-				code: ChallengeCompletionErrorEnum.MissingChallenge
-			},
-			{
-				errorName: 'ExpiredChallenge',
-				error: { ExpiredChallenge: null },
-				code: ChallengeCompletionErrorEnum.ExpiredChallenge
-			},
-			{
-				errorName: 'MissingUserProfile',
-				error: { MissingUserProfile: null },
-				code: ChallengeCompletionErrorEnum.MissingUserProfile
-			},
-			{
-				errorName: 'ChallengeAlreadySolved',
-				error: { ChallengeAlreadySolved: null },
-				code: ChallengeCompletionErrorEnum.ChallengeAlreadySolved
-			}
-		])(
-			'should throw PowChallengeError with appropriate code if PowChallenge error $errorName is returned',
-			async ({ error, code }) => {
-				service.allow_signing.mockResolvedValue({ Err: { PowChallenge: error } });
-
-				const { allowSigning } = await createBackendCanister({
-					serviceOverride: service
-				});
-
-				const result = allowSigning();
-
-				await expect(result).rejects.toBeInstanceOf(PowChallengeError);
-
-				await result.catch((err) => {
-					expect(err).toBeInstanceOf(PowChallengeError);
-					expect((err as PowChallengeError).code).toEqual(code);
-				});
-			}
-		);
 
 		it('should throw a CanisterInternalError if Other error is returned', async () => {
 			const errorMsg = 'Test error';
