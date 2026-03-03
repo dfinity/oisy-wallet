@@ -477,6 +477,9 @@ export interface _SERVICE {
 	/**
 	 * Adds a pending Bitcoin transaction for the caller.
 	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. This protects against unauthorised CLI callers.
+	 *
 	 * # Errors
 	 * Errors are enumerated by: `BtcAddPendingTransactionError`.
 	 */
