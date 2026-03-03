@@ -1,7 +1,7 @@
 import { BASE_NETWORK, BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import {
-	enabledErc4626AssetAddresses,
+	erc4626AssetAddresses,
 	enabledErc4626Tokens,
 	erc4626CustomTokens,
 	erc4626CustomTokensInitialized,
@@ -181,7 +181,7 @@ describe('erc4626.derived', () => {
 	});
 
 	describe('erc4626TokensExchangeData', () => {
-		it('should map enabled tokens to exchange data', () => {
+		it('should map tokens to exchange data', () => {
 			erc4626CustomTokensStore.setAll([{ data: mockErc4626CustomEthereumToken, certified: false }]);
 
 			const result = get(erc4626TokensExchangeData);
@@ -198,11 +198,26 @@ describe('erc4626.derived', () => {
 			]);
 		});
 
-		it('should return empty when no enabled tokens', () => {
+		it('should include disabled tokens', () => {
 			erc4626CustomTokensStore.setAll([
 				{ data: { ...mockErc4626CustomEthereumToken, enabled: false }, certified: false }
 			]);
 
+			const result = get(erc4626TokensExchangeData);
+
+			expect(result).toEqual([
+				{
+					vaultAddress: mockErc4626CustomEthereumToken.address,
+					vaultDecimals: mockErc4626CustomEthereumToken.decimals,
+					assetAddress: mockErc4626CustomEthereumToken.assetAddress,
+					assetDecimals: mockErc4626CustomEthereumToken.assetDecimals,
+					exchange: ETHEREUM_NETWORK.exchange,
+					infura: ETHEREUM_NETWORK.providers.infura
+				}
+			]);
+		});
+
+		it('should return empty when no tokens', () => {
 			const result = get(erc4626TokensExchangeData);
 
 			expect(result).toEqual([]);
@@ -233,11 +248,11 @@ describe('erc4626.derived', () => {
 		});
 	});
 
-	describe('enabledErc4626AssetAddresses', () => {
+	describe('erc4626AssetAddresses', () => {
 		it('should return asset addresses with coingecko ids', () => {
 			erc4626CustomTokensStore.setAll([{ data: mockErc4626CustomEthereumToken, certified: false }]);
 
-			const result = get(enabledErc4626AssetAddresses);
+			const result = get(erc4626AssetAddresses);
 
 			expect(result).toEqual([
 				{
@@ -247,8 +262,8 @@ describe('erc4626.derived', () => {
 			]);
 		});
 
-		it('should return empty when no enabled tokens', () => {
-			const result = get(enabledErc4626AssetAddresses);
+		it('should return empty when no tokens', () => {
+			const result = get(erc4626AssetAddresses);
 
 			expect(result).toEqual([]);
 		});
