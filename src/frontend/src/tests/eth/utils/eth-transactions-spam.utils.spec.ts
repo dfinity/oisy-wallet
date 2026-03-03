@@ -91,7 +91,7 @@ describe('eth-transactions-spam.utils', () => {
 			expect(result).toStrictEqual(txs);
 		});
 
-		it('should drop zero-value transfers without a hash', async () => {
+		it('should keep zero-value transfers without a hash', async () => {
 			const getTransactionSender = vi.fn().mockResolvedValue(userAddress);
 
 			const txs = [makeTx({ hash: undefined, value: ZERO })];
@@ -102,7 +102,7 @@ describe('eth-transactions-spam.utils', () => {
 				getTransactionSender
 			});
 
-			expect(result).toStrictEqual([]);
+			expect(result).toStrictEqual(txs);
 
 			expect(getTransactionSender).not.toHaveBeenCalled();
 		});
