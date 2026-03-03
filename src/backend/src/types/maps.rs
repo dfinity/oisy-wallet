@@ -9,7 +9,7 @@ use shared::types::{
     user_profile::StoredUserProfile, Timestamp,
 };
 
-use super::storable::{Candid, StoredPrincipal, StoredTokenId};
+use crate::types::storable::{Candid, StoredPrincipal, StoredTokenId};
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 
@@ -25,7 +25,10 @@ pub type UserProfileMap =
 
 /// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
 pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
+
 pub type PowChallengeMap = StableBTreeMap<StoredPrincipal, Candid<StoredChallenge>, VMem>;
+
+// Define a new type for the contact storage
 pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VMem>;
 
 pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>;
