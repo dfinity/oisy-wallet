@@ -80,7 +80,7 @@ fn setup_with_cycles_ledger() -> crate::utils::pocketic::PicBackend {
     pic_setup
 }
 
-fn call_get_allowed_cycles(
+pub fn call_get_allowed_cycles(
     pic_setup: &crate::utils::pocketic::PicBackend,
     caller: Principal,
 ) -> Result<GetAllowedCyclesResponse, GetAllowedCyclesError> {

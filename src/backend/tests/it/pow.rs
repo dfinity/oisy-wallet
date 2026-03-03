@@ -2,7 +2,7 @@
 
 use std::time::Duration;
 
-use candid::Principal;
+use candid::{Nat, Principal};
 use ic_cdk::api::management_canister::{main::canister_status, provisional::CanisterIdRecord};
 use ic_cycles_ledger_client::{Account, Allowance, AllowanceArgs};
 use ic_ledger_types::Subaccount;
@@ -480,5 +480,105 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
         challenge_completion.solved_duration_ms,
         TARGET_DURATION_MS,
         3_000,
+    );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Rate-limiting integration tests
+// -------------------------------------------------------------------------------------------------
+
+/// After 10 calls within the 60-second window (1 from create_user_profile +
+/// 9 from allow_signing), the next allow_signing call must be rejected with
+/// `RateLimited`.
+#[test]
+fn test_allow_signing_rate_limited_after_exceeding_limit() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // 1 rate-limit slot consumed internally by create_user_profile.
+    let _ = call_create_user_profile(&pic_setup, caller);
+
+    // Consume 9 more slots (each call passes the rate-limit check, then
+    // fails at PoW or cycles ledger — that's fine, the slot is still used).
+    for _ in 0..9 {
+        let _ = call_allow_signing(&pic_setup, caller, 0);
+    }
+
+    // The 11th call (10th to allow_signing) should hit the rate limit.
+    let result = call_allow_signing(&pic_setup, caller, 0);
+    assert!(
+        matches!(result, Err(AllowSigningError::RateLimited(_))),
+        "Expected RateLimited error, got: {result:?}"
+    );
+}
+
+/// Different principals should have independent rate-limit counters.
+#[test]
+fn test_allow_signing_rate_limit_independent_per_caller() {
+    let pic_setup = setup();
+    let caller_a: Principal = Principal::from_text(CALLER).unwrap();
+    let caller_b: Principal = Principal::self_authenticating("rate-limit-b");
+
+    // Exhaust caller A's rate limit.
+    let _ = call_create_user_profile(&pic_setup, caller_a);
+    for _ in 0..9 {
+        let _ = call_allow_signing(&pic_setup, caller_a, 0);
+    }
+    let result_a = call_allow_signing(&pic_setup, caller_a, 0);
+    assert!(
+        matches!(result_a, Err(AllowSigningError::RateLimited(_))),
+        "Caller A should be rate-limited"
+    );
+
+    // Caller B should still be allowed.
+    let _ = call_create_user_profile(&pic_setup, caller_b);
+    let result_b = call_allow_signing(&pic_setup, caller_b, 0);
+    assert!(
+        !matches!(result_b, Err(AllowSigningError::RateLimited(_))),
+        "Caller B should NOT be rate-limited, got: {result_b:?}"
+    );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Sufficient-cycles threshold integration tests
+// -------------------------------------------------------------------------------------------------
+
+/// When a user already has enough cycles (from create_user_profile), a
+/// subsequent PoW-based allow_signing should NOT reduce the existing
+/// allowance.  The `SUFFICIENT_CYCLES_THRESHOLD` check inside
+/// `signer::allow_signing` must skip the `icrc_2_approve` call.
+#[test]
+fn test_allow_signing_does_not_reduce_existing_allowance() {
+    if !helper_is_pow_enabled() {
+        return;
+    }
+    let pic_setup = setup_with_cycles_ledger();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // create_user_profile → internal allow_signing(None) → approve ~2917B
+    let _ = call_create_user_profile(&pic_setup, caller);
+
+    let before =
+        crate::signer::call_get_allowed_cycles(&pic_setup, caller).expect("allowance query failed");
+    assert!(
+        before.allowed_cycles > Nat::from(0u64),
+        "Allowance should be non-zero after profile creation"
+    );
+
+    // Solve a PoW challenge (would grant ~600B — less than current ~2917B).
+    let challenge =
+        call_create_pow_challenge(&pic_setup, caller).expect("challenge creation failed");
+    let nonce = helper_solve_challenge(challenge.start_timestamp_ms, challenge.difficulty);
+    let signing_result = call_allow_signing(&pic_setup, caller, nonce);
+    assert!(
+        signing_result.is_ok(),
+        "allow_signing should succeed: {signing_result:?}"
+    );
+
+    let after =
+        crate::signer::call_get_allowed_cycles(&pic_setup, caller).expect("allowance query failed");
+    assert_eq!(
+        before.allowed_cycles, after.allowed_cycles,
+        "Allowance should not change when already above threshold"
     );
 }
