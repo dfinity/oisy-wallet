@@ -341,7 +341,7 @@ fn test_allow_signing_rate_limit_is_per_caller() {
     );
 }
 
-/// After the 60-second window elapses, the same principal should be able to
+/// After the one-hour window elapses, the same principal should be able to
 /// call `allow_signing` again without being rate-limited.
 ///
 /// `create_user_profile` consumes 1 rate-limit entry for the caller.
@@ -369,8 +369,8 @@ fn test_allow_signing_rate_limit_resets_after_window() {
         "should be rate-limited before window elapses"
     );
 
-    // Advance time past the 60-second window.
-    pic_setup.pic.advance_time(Duration::from_secs(61));
+    // Advance time past the one-hour window.
+    pic_setup.pic.advance_time(Duration::from_secs(60 * 60 + 1));
     for _ in 0..5 {
         pic_setup.pic.tick();
     }
