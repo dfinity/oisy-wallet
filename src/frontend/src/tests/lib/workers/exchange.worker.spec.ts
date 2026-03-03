@@ -5,10 +5,10 @@ import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants'
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import type {
+	CoingeckoSimpleErc4626TokenPriceResponse,
 	CoingeckoSimplePriceParams,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceParams,
-	CoingeckoSimpleErc4626TokenPriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
