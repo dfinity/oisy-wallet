@@ -107,7 +107,7 @@ pub async fn btc_select_user_utxos_fee(
             utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
 
         // Fee calculation might still take into account default tx size and expected output.
-        // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be
+        // But if there are no selected utxos, no tx is possible. Therefore, no fee should be
         // present.
         if selected_utxos.is_empty() {
             return Ok(SelectedUtxosFeeResponse {
