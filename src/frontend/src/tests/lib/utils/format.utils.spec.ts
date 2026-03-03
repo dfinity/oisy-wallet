@@ -1453,6 +1453,20 @@ describe('format.utils', () => {
 		it('parses stake apy number correctly if it is zero', () => {
 			expect(formatStakeApyNumber(0)).toEqual('0');
 		});
+
+		it('parses negative stake apy number correctly if it has 3 digits', () => {
+			expect(formatStakeApyNumber(-101.2131231231)).toEqual('-101');
+		});
+
+		it('parses negative stake apy number correctly if it has 2 digits', () => {
+			expect(formatStakeApyNumber(-64.4656)).toEqual('-64.5');
+			expect(formatStakeApyNumber(-64.000001)).toEqual('-64.0');
+		});
+
+		it('parses negative stake apy number correctly if it has 1 digit', () => {
+			expect(formatStakeApyNumber(-6.4656)).toEqual('-6.47');
+			expect(formatStakeApyNumber(-6.0000032)).toEqual('-6.00');
+		});
 	});
 
 	describe('format24hChangeInCurrency', () => {

@@ -146,7 +146,7 @@ jobs:
         # We disable the thresholds since we will check them in the next step, when all sharded reports are merged
         run: npm run test:coverage -- --reporter=blob --reporter=default --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --coverage.thresholds.0 --coverage.thresholds.autoUpdate=false
       - name: Upload Blob Coverage Report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         if: always()
         with:
           name: vitest-coverage-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}-shard-${{ matrix.shardIndex }}
@@ -168,7 +168,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Download Blob Coverage Reports
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           path: .vitest-reports
           pattern: vitest-coverage-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}-shard-*
@@ -176,7 +176,7 @@ jobs:
       - name: Merge Coverage Reports
         run: npm run test:merge
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         if: always()
         with:
           name: vitest-coverage-merged-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -232,7 +232,7 @@ jobs:
         env:
           NETWORK: ${{ matrix.network }}
       - name: Upload Domain File
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ic-domains-${{ matrix.network }}
           path: ic-domain.${{ matrix.network }}.txt
@@ -252,7 +252,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Download All Domain Files
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           path: ic-domains
           pattern: ic-domains-*

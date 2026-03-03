@@ -36,5 +36,5 @@ export type TransactionsUiDateGroup<T extends AnyTransactionUiWithCmp> = Record<
 >;
 
 export type StakingTransactionsUiWithToken = AnyTransactionUiWithToken & {
-	isReward: boolean;
+	isReward?: boolean;
 };
