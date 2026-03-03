@@ -22,5 +22,7 @@ export const MORPHOAUTOPILOT_USDC_TOKEN: RequiredErc4626Token = {
 	icon: '',
 	address: '0xd6701905c59EE618dc36DC747506BCE0a4AC760A',
 	assetAddress: USDC_TOKEN.address,
-	assetDecimals: USDC_TOKEN.decimals
+	assetDecimals: USDC_TOKEN.decimals,
+	assetIcon: USDC_TOKEN.icon,
+	assetSymbol: USDC_TOKEN.symbol
 };
