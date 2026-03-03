@@ -9,32 +9,40 @@ use crate::types::{
 
 pub const MAX_TOKEN_LIST_LENGTH: usize = 1000;
 
-pub fn add_to_user_token<T>(
+pub fn add_to_user_token<T, Id, F>(
     stored_principal: StoredPrincipal,
     user_token: &mut StableBTreeMap<StoredPrincipal, Candid<Vec<T>>, VMem>,
-    token: &T,
-    find: &dyn Fn(&T) -> bool,
+    incoming: &[T],
+    id_of: F,
 ) where
-    T: for<'a> Deserialize<'a> + CandidType + Clone + TokenVersion,
+    T: for<'de> Deserialize<'de> + CandidType + Clone + TokenVersion,
+    Id: Eq,
+    F: Fn(&T) -> Id,
 {
     let Candid(mut tokens) = user_token.get(&stored_principal).unwrap_or_default();
 
-    if let Some(existing_token) = tokens.iter_mut().find(|token| find(*token)) {
-        if token.get_version() == existing_token.get_version() {
-            *existing_token = token.with_incremented_version();
-        } else {
-            ic_cdk::trap(&format!(
-                "Version mismatch, token update not allowed. Existing token: {existing_token:?}, New token: {token:?}"
-            ));
-        }
-    } else {
-        if tokens.len() == MAX_TOKEN_LIST_LENGTH {
-            ic_cdk::trap(&format!(
-                "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
-            ));
-        }
+    // Pre-allocate for bulk additions
+    tokens.reserve(incoming.len());
 
-        tokens.push(token.with_initial_version());
+    for token in incoming {
+        let id = id_of(token);
+
+        if let Some(slot) = tokens.iter_mut().find(|t| id_of(*t) == id) {
+            if token.get_version() == slot.get_version() {
+                *slot = token.with_incremented_version();
+            } else {
+                ic_cdk::trap(&format!(
+                    "Version mismatch, token update not allowed. Existing token: {slot:?}, New token: {token:?}"
+                ));
+            }
+        } else {
+            if tokens.len() == MAX_TOKEN_LIST_LENGTH {
+                ic_cdk::trap(&format!(
+                    "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
+                ));
+            }
+            tokens.push(token.with_initial_version());
+        }
     }
 
     user_token.insert(stored_principal, Candid(tokens));
