@@ -47,6 +47,8 @@ interface I18nCore {
 		learn_more: string;
 		sorting: string;
 		unlimited: string;
+		info: string;
+		asset: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -1464,11 +1466,13 @@ interface I18nEarning {
 		go_to_earn: string;
 	};
 	cards: {
-		gldt: { title1: string; title2: string; description: string; action: string };
+		harvest_autopilot: { title: string; description: string; action: string };
 		sprinkles: { title: string; description: string; action: string };
 	};
 	card_fields: {
 		apy: string;
+		networks: string;
+		assets: string;
 		currentStaked: string;
 		currentEarning: string;
 		earningPotential: string;
@@ -1478,9 +1482,25 @@ interface I18nEarning {
 	providers: { goldDaoStaking: { cardTitle: string } };
 }
 
+interface I18nVaults {
+	text: { autopilot: string; live_apy: string };
+}
+
 interface I18nStake {
 	text: {
 		gldt_stake_page_description: string;
+		harvest_autopilot_page_description: string;
+		harvest_autopilot_vault_page_description: string;
+		my_positions: string;
+		available_autopilots: string;
+		vault_info: string;
+		vault_address: string;
+		protocol: string;
+		harvest: string;
+		autopilot: string;
+		total_value_locked: string;
+		manager: string;
+		vault_description: string;
 		stake: string;
 		stake_now: string;
 		stake_amount: string;
@@ -1499,10 +1519,12 @@ interface I18nStake {
 		earning_potential_hint: string;
 		active_earning: string;
 		active_earning_per_year: string;
+		active_earning_per_year_short: string;
 		unproductive_assets: string;
 		invested_assets: string;
 		visit_provider: string;
 		current_apy_label: string;
+		max_apy_label: string;
 		stake_review_subtitle: string;
 		unstake_review_subtitle: string;
 		delayed_dissolve: string;
@@ -1568,6 +1590,16 @@ interface I18nStake {
 			fact_3_title: string;
 			fact_3_description: string;
 			fact_3_description_fallback: string;
+		};
+		harvest_autopilot: {
+			title: string;
+			description: string;
+			fact_1_title: string;
+			fact_1_description: string;
+			fact_2_title: string;
+			fact_2_description: string;
+			fact_3_title: string;
+			fact_3_description: string;
 		};
 	};
 	alt: { placeholder_image: string };
@@ -1684,6 +1716,7 @@ interface I18n {
 	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
+	vaults: I18nVaults;
 	stake: I18nStake;
 	get_token: I18nGet_token;
 	temporal: I18nTemporal;

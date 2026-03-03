@@ -2,6 +2,7 @@ use candid::Principal;
 pub(crate) use housekeeping::spawn_allow_signing_if_below_limit;
 use ic_cdk::{export_candid, init, post_upgrade};
 pub(crate) use memory::{mutate_state, read_config, read_state, set_config, State};
+use ic_cdk::{api::time, export_candid, init, post_upgrade};
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
@@ -33,6 +34,11 @@ use shared::{
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
         Stats, Timestamp,
     },
+};
+
+use crate::{
+    state::{mutate_state, read_config, read_state, set_config},
+    types::storable::{Candid, StoredPrincipal},
 };
 
 mod api;
@@ -83,6 +89,8 @@ pub fn post_upgrade(arg: Option<Arg>) {
     }
     bitcoin::api::init_fee_percentiles_cache();
     housekeeping::start_periodic_timers();
+
+    housekeeping::start_periodic_housekeeping_timers();
 }
 
 export_candid!();

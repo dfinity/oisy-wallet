@@ -4,6 +4,7 @@ use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::{bench, bench_fn, BenchResult};
 use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
+use serde_bytes::ByteBuf;
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
     bitcoin::{PendingTransaction, StoredPendingTransaction},
@@ -15,12 +16,12 @@ use shared::types::{
 };
 
 use super::{
-    http_request, mutate_state, read_config, read_state, token, user_profile, ByteBuf, Candid,
-    HttpRequest, Principal, Stats, StoredPrincipal,
+    mutate_state, read_config, read_state, token, user_profile, Candid, HttpRequest, Principal,
+    Stats, StoredPrincipal,
 };
 use crate::{
-    bitcoin::pending_tx_model::BtcUserPendingTransactionsModel, state::State,
-    user_profile::model::UserProfileModel,
+    api::admin::http_request, bitcoin::pending_tx_model::BtcUserPendingTransactionsModel,
+    state::State, user_profile::model::UserProfileModel,
 };
 
 const BENCH_PRINCIPAL_TEXT: &str =

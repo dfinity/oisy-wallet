@@ -43,7 +43,9 @@
 			"ellipsis": "…",
 			"learn_more": "詳細を見る",
 			"sorting": "並べ替え",
-			"unlimited": ""
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -1862,11 +1864,10 @@
 			"go_to_earn": "報酬獲得へ"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "ゴールドで報酬獲得",
-				"description": "GLDTをステーキングして、ガバナンストークンの報酬を毎日獲得。ゴールド保有で不労所得を得られます。",
-				"action": "GLDTをステーキング"
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"action": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
@@ -1876,6 +1877,8 @@
 		},
 		"card_fields": {
 			"apy": "APY",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "ステーキング中",
 			"currentEarning": "獲得済み報酬額",
 			"earningPotential": "これから獲得できる報酬額",
@@ -1890,9 +1893,27 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
 			"gldt_stake_page_description": "GLDTトークンをステーキングして、実物のゴールドに裏付けられた報酬を獲得",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "$token_symbolをステーキング",
 			"stake_now": "今すぐステーキング",
 			"stake_amount": "$amount $token_symbolをステーキング",
@@ -1911,10 +1932,12 @@
 			"earning_potential_hint": "未ステーキング資産の価値と、利用可能な運用機会の最高APYに基づいています。",
 			"active_earning": "獲得済み報酬額",
 			"active_earning_per_year": "$amount/年",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "利用可能",
 			"invested_assets": "運用中",
 			"visit_provider": "ウェブサイトを見る",
 			"current_apy_label": "現在のAPY",
+			"max_apy_label": "",
 			"stake_review_subtitle": "ステーキング額",
 			"unstake_review_subtitle": "ステーキング解除額",
 			"delayed_dissolve": "遅延受取",
@@ -1980,6 +2003,16 @@
 				"fact_3_title": "安定したリターン",
 				"fact_3_description": "最小限のボラティリティリスクで$apy%のAPYを獲得",
 				"fact_3_description_fallback": "最小限のボラティリティリスクで安定した報酬を獲得"
+			},
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": ""
 			}
 		},
 		"alt": {
