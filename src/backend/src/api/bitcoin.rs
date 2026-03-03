@@ -127,7 +127,7 @@ pub async fn btc_select_user_utxos_fee(
 }
 
 /// Adds a pending Bitcoin transaction for the caller.
-/// 
+///
 /// Requires a valid II delegation chain to verify the caller authenticated
 /// through Internet Identity. This protects against unauthorised CLI callers.
 ///
