@@ -13,17 +13,11 @@ import {
 	btcAddressTestnet
 } from '$lib/derived/address.derived';
 import { deriveBtcAddress } from '$lib/ic-pub-key/src/cli';
-import {
-	certifyAddress,
-	loadTokenAddress,
-	validateAddress,
-	type LoadTokenAddressParams
-} from '$lib/services/address.services';
+import { loadTokenAddress, type LoadTokenAddressParams } from '$lib/services/address.services';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
-	btcAddressTestnetStore,
-	type AddressStoreData
+	btcAddressTestnetStore
 } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -108,20 +102,6 @@ export const loadBtcAddressMainnet = (): Promise<ResultSuccess> =>
 	loadBtcAddress({
 		networkId: BTC_MAINNET_NETWORK_ID,
 		network: 'mainnet'
-	});
-
-const certifyBtcAddressMainnet = (address: BtcAddress): Promise<ResultSuccess<string>> =>
-	certifyAddress<BtcAddress>({
-		networkId: BTC_MAINNET_NETWORK_ID,
-		address,
-		getAddress: (identity: OptionIdentity) => getBtcAddress({ identity, network: 'mainnet' }),
-		addressStore: btcAddressMainnetStore
-	});
-
-export const validateBtcAddressMainnet = async ($addressStore: AddressStoreData<BtcAddress>) =>
-	await validateAddress<BtcAddress>({
-		$addressStore,
-		certifyAddress: certifyBtcAddressMainnet
 	});
 
 /**
