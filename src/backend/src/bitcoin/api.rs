@@ -10,11 +10,15 @@ use shared::types::bitcoin::{
     FEE_PERCENTILES_INITIAL_DELAY, FEE_PERCENTILES_UPDATE_INTERVAL, FEE_UPDATE_TIMEOUT_NS,
 };
 
-const DEFAULT_MAINNET_FEE: u64 = 10_000;
-const DEFAULT_TESTNET_FEE: u64 = 5_000;
-const DEFAULT_REGTEST_FEE: u64 = 2_000;
+// Default fee values for different networks when API fails
+const DEFAULT_MAINNET_FEE: u64 = 10_000; // 10 sat/byte (10,000 msat/byte)
+const DEFAULT_TESTNET_FEE: u64 = 5_000; // 5 sat/byte (5,000 msat/byte)
+const DEFAULT_REGTEST_FEE: u64 = 2_000; // 2 sat/byte (2,000 msat/byte)
 
 thread_local! {
+    // We use thread_local! + RefCell for fee percentiles cache since the data is refreshed
+    // regularly via timer. Heap memory provides faster access for frequent fee calculations,
+    // and there's no need to persist these quickly-stale values across canister upgrades.
     static FEE_PERCENTILES_CACHE: RefCell<HashMap<BitcoinNetwork, Vec<MillisatoshiPerByte>>> = RefCell::new(HashMap::new());
     /// `None` = idle; `Some(timestamp_ns)` = update started at that IC time.
     static FEE_UPDATE_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
@@ -47,6 +51,7 @@ pub async fn get_all_utxos(
     min_confirmations: Option<u32>,
 ) -> Result<Vec<Utxo>, String> {
     let final_min_confirmations = if network == BitcoinNetwork::Regtest {
+        // Tests with Regtest fail if min_confirmations is higher than 1.
         Some(1)
     } else {
         min_confirmations
@@ -119,17 +124,27 @@ pub fn init_fee_percentiles_cache() {
         initialize_default_fee_percentiles(network);
     }
 
+    // Schedule the initial cache population and timer setup to run after init completes
     set_timer(FEE_PERCENTILES_INITIAL_DELAY, || {
+        // Set up the recurring timer to update the data
         set_timer_interval(FEE_PERCENTILES_UPDATE_INTERVAL, || {
             spawn_fee_update_if_idle();
         });
 
+        // Initialize the cache immediately (after init)
         spawn_fee_update_if_idle();
     });
 }
 
-/// Updates the Bitcoin transaction fee percentiles cache for all networks sequentially.
+/// Updates the Bitcoin transaction fee percentiles cache for all networks (Mainnet, Testnet,
+/// Regtest) sequentially. Fetches current fee data from the bitcoin canister and stores it
+/// in the thread-local cache for quick access by other functions.
+///
+/// Networks are fetched one at a time to avoid concurrent inter-canister callbacks: if one
+/// call traps (e.g. Regtest on staging), sequential execution prevents it from corrupting
+/// the shared Wasm future state that `join_all` would use.
 async fn update_fee_percentiles_cache() -> Result<(), String> {
+    // Create an array of network types to fetch
     let networks = [BitcoinNetwork::Mainnet, BitcoinNetwork::Testnet];
 
     for network in networks {
@@ -145,6 +160,7 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
                     network,
                     err
                 );
+                // We don't return error here to allow the function to continue for other networks
             }
         }
     }
@@ -152,6 +168,7 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
     Ok(())
 }
 
+/// Internal function that actually fetches the fee percentiles from the Bitcoin canister
 async fn fetch_current_fee_percentiles(
     network: BitcoinNetwork,
 ) -> Result<Vec<MillisatoshiPerByte>, String> {
@@ -164,22 +181,28 @@ async fn fetch_current_fee_percentiles(
 
 /// This function returns fee percentiles data from the in-memory cache.
 /// If the data isn't available in the cache, it falls back to default values.
-pub async fn get_current_fee_percentiles(
-    network: BitcoinNetwork,
-) -> Result<Vec<MillisatoshiPerByte>, String> {
+pub fn get_current_fee_percentiles(network: BitcoinNetwork) -> Vec<MillisatoshiPerByte> {
+    // Try to get from cache first
     let cached_percentiles =
         FEE_PERCENTILES_CACHE.with(|cache| cache.borrow().get(&network).cloned());
 
     match cached_percentiles {
-        Some(percentiles) if !percentiles.is_empty() => Ok(percentiles),
+        Some(percentiles) if !percentiles.is_empty() => {
+            // Use cached values
+            percentiles
+        }
         _ => {
+            // Cache miss or empty cache, use default values
             ic_cdk::println!("Cache miss for network {:?}, using default values", network);
-            let default_percentiles = initialize_default_fee_percentiles(network);
-            Ok(default_percentiles)
+
+            // Initialize the default values for this network and return them directly
+            initialize_default_fee_percentiles(network)
         }
     }
 }
 
+/// Returns the default fee in millisatoshis per byte for a given Bitcoin network.
+/// This is used when actual fee data is not available from the Bitcoin API.
 fn get_default_fee_for_network(network: BitcoinNetwork) -> u64 {
     match network {
         BitcoinNetwork::Mainnet => DEFAULT_MAINNET_FEE,
@@ -188,6 +211,8 @@ fn get_default_fee_for_network(network: BitcoinNetwork) -> u64 {
     }
 }
 
+/// Generates a list of fee percentiles based on a given default fee value.
+/// The percentiles range from 50% to 150% of the default fee.
 #[allow(
     clippy::cast_sign_loss,
     clippy::cast_possible_truncation,
@@ -197,13 +222,19 @@ fn generate_fee_percentiles(default_fee: u64) -> Vec<u64> {
     let mut percentiles = Vec::with_capacity(100);
 
     for i in 0..100 {
+        // Convert i to f64 using From trait to avoid potential issues
         let i_as_f64 = f64::from(i);
+
+        // Calculate the factor, varying from 0.5 to 1.5 across percentiles
         let factor = 0.5 + (i_as_f64 / 100.0);
 
+        // Use a threshold check to prevent overflow
         let max_safe_fee = (u64::MAX as f64 / 1.5) as u64;
         let value = if default_fee <= max_safe_fee {
+            // Safe conversion - we know the result won't overflow u64
             (default_fee as f64 * factor) as u64
         } else {
+            // Handle potential overflow by capping at max u64
             u64::MAX
         };
 
@@ -213,8 +244,11 @@ fn generate_fee_percentiles(default_fee: u64) -> Vec<u64> {
     percentiles
 }
 
+// Helper function to initialize default fee percentiles for a given network
 fn initialize_default_fee_percentiles(network: BitcoinNetwork) -> Vec<u64> {
     let default_fee = get_default_fee_for_network(network);
+
+    // Generate percentiles using the helper function
     let percentiles = generate_fee_percentiles(default_fee);
 
     FEE_PERCENTILES_CACHE.with(|cache| {
@@ -230,11 +264,14 @@ fn initialize_default_fee_percentiles(network: BitcoinNetwork) -> Vec<u64> {
 }
 
 /// Returns the 50th percentile for sending fees.
-pub async fn get_fee_per_byte(network: BitcoinNetwork) -> Result<u64, String> {
-    let fee_percentiles = get_current_fee_percentiles(network).await?;
+pub fn get_fee_per_byte(network: BitcoinNetwork) -> u64 {
+    // Get fee percentiles from previous transactions to estimate our own fee.
+    let fee_percentiles = get_current_fee_percentiles(network);
 
     if fee_percentiles.is_empty() {
-        Ok(get_default_fee_for_network(network))
+        // This case should rarely happen due to default values,
+        // but keeping as a fallback
+        get_default_fee_for_network(network)
     } else {
         let middle = fee_percentiles.len() / 2;
         fee_percentiles[middle]
