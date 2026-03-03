@@ -103,8 +103,10 @@
 	// If allowedIds is provided, returns the first candidate whose id is allowed.
 	// If none match (or none exist), returns undefined.
 	const getPreferredNetworkForSide = (
-		side: TokenSide,
-		allowedIds?: readonly NetworkId[]
+		{side, allowedIds}: {
+			side: TokenSide,
+			allowedIds?: readonly NetworkId[]
+		}
 	): Network | undefined => {
 		const primary = side === 'source' ? $sourceToken?.network : $destinationToken?.network;
 
@@ -132,7 +134,7 @@
 		if (side === 'source') {
 			setNetworksMode({ enabled: true });
 
-			setFilterNetwork(getPreferredNetworkForSide(side));
+			setFilterNetwork(getPreferredNetworkForSide({side}));
 
 			return;
 		}
@@ -142,7 +144,7 @@
 			// no source yet: no constraints
 			setNetworksMode({ enabled: false });
 
-			setFilterNetwork(getPreferredNetworkForSide(side));
+			setFilterNetwork(getPreferredNetworkForSide({side}));
 
 			return;
 		}
@@ -154,7 +156,7 @@
 
 		setNetworksMode({ enabled: false, allowedIds });
 
-		setFilterNetwork(getPreferredNetworkForSide(side, allowedIds));
+		setFilterNetwork(getPreferredNetworkForSide({side, allowedIds}));
 	};
 
 	const enterTokenList = (side: TokenSide) => {
