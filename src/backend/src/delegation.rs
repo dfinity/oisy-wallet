@@ -1,6 +1,6 @@
 use candid::Principal;
 use ic_canister_sig_creation::{
-    delegation_signature_msg, hash_with_domain, CanisterSigPublicKey, DELEGATION_SIG_DOMAIN,
+    delegation_signature_msg, CanisterSigPublicKey, DELEGATION_SIG_DOMAIN,
 };
 use ic_signature_verification::verify_canister_sig;
 use shared::types::delegation::IIDelegationChain;
@@ -77,7 +77,15 @@ pub fn verify_ii_delegation_chain(
             signed_del.delegation.expiration,
             targets_as_bytes.as_ref(),
         );
-        let msg = hash_with_domain(DELEGATION_SIG_DOMAIN, &delegation_hash);
+
+        // Build the raw domain-separated message: [len(domain)] || domain || hash.
+        // verify_canister_sig will SHA256 this internally to look up in the signature tree,
+        // matching what II stored via hash_with_domain(DELEGATION_SIG_DOMAIN, delegation_hash).
+        let mut msg = Vec::with_capacity(1 + DELEGATION_SIG_DOMAIN.len() + delegation_hash.len());
+        #[allow(clippy::cast_possible_truncation)]
+        msg.push(DELEGATION_SIG_DOMAIN.len() as u8);
+        msg.extend_from_slice(DELEGATION_SIG_DOMAIN);
+        msg.extend_from_slice(&delegation_hash);
 
         verify_canister_sig(&msg, &signed_del.signature, &signing_key, ic_root_key_raw)
             .map_err(|e| format!("delegation signature verification failed: {e}"))?;
