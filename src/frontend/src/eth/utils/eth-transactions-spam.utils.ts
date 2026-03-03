@@ -67,6 +67,11 @@ export const filterSpamErc20Transfers = async ({
 			try {
 				const sender = await getTransactionSender(tx.hash);
 
+				// If the sender cannot be determined (e.g. tx pruned / not found),
+				// err on the side of showing the transfer, same as the catch branch.
+				if (isNullish(sender)) {
+					return tx;
+				}
 				if (areAddressesEqual({ address1: sender, address2: userAddress, addressType: 'Eth' })) {
 					return tx;
 				}
