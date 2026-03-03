@@ -41,7 +41,6 @@ mod contacts;
 mod guards;
 mod housekeeping;
 mod memory;
-mod pow;
 pub mod random;
 pub mod signer;
 mod token;
