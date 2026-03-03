@@ -5,6 +5,8 @@ BITCOIN_CANISTER_RELEASE="2024-08-30"
 BITCOIN_CANISTER_WASM="ic-btc-canister.wasm.gz"
 CYCLES_LEDGER_CANISTER_URL="$(jq -re .canisters.cycles_ledger.wasm dfx.json)"
 CYCLES_LEDGER_CANISTER_WASM="cycles-ledger.wasm.gz"
+II_CANISTER_URL="$(jq -re .canisters.internet_identity.wasm dfx.json)"
+II_CANISTER_WASM="internet_identity.wasm.gz"
 # If a backend wasm file exists at the root, it will be used for the tests.
 
 if [ -f "./backend.wasm.gz" ]; then
@@ -22,9 +24,11 @@ scripts/download-immutable.sh "https://github.com/dfinity/bitcoin-canister/relea
 export BITCOIN_CANISTER_WASM_FILE="../../$BITCOIN_CANISTER_WASM"
 
 scripts/download-immutable.sh "${CYCLES_LEDGER_CANISTER_URL}" "${CYCLES_LEDGER_CANISTER_WASM}"
-
 # Setting the environment variable that will be used in the test to load that particular file relative to the cargo workspace.
 export CYCLES_LEDGER_CANISTER_WASM_FILE="../../${CYCLES_LEDGER_CANISTER_WASM}"
+
+scripts/download-immutable.sh "${II_CANISTER_URL}" "${II_CANISTER_WASM}"
+export II_CANISTER_WASM_FILE="../../${II_CANISTER_WASM}"
 
 # Download PocketIC server
 

@@ -8,7 +8,7 @@ use shared::types::bitcoin::{
 
 use crate::utils::{
     mock::CALLER,
-    pocketic::{setup, PicCanisterTrait},
+    pocketic::{setup, setup_with_ii, PicCanisterTrait},
 };
 
 const MOCK_ADDRESS: &str = "bcrt1qpg7udjvq7gx2fp480pgt4hnhj3qc4nhrkstc33";
@@ -99,4 +99,46 @@ fn test_get_pending_transactions_returns_empty_for_new_user() {
         .expect("Request was not successful");
 
     pretty_assertions::assert_eq!(data.transactions.len(), 0);
+}
+
+#[test]
+fn test_add_pending_transaction_with_valid_delegation() {
+    let (pic_setup, ii) = setup_with_ii();
+
+    let device_pubkey = b"test-device-key-for-ii-registration";
+    let (user_number, device_principal) = ii.register_identity(device_pubkey);
+
+    let session_pubkey = b"test-session-key";
+
+    let delegation_chain = ii.get_delegation_chain(
+        user_number,
+        device_principal,
+        session_pubkey,
+        "https://oisy.com",
+        None,
+    );
+
+    let caller = Principal::self_authenticating(&delegation_chain.public_key);
+
+    let add_request = BtcAddPendingTransactionRequest {
+        txid: vec![],
+        utxos: vec![UTXO_1],
+        network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: Some(delegation_chain),
+    };
+
+    let add_response = pic_setup
+        .update::<Result<(), BtcAddPendingTransactionError>>(
+            caller,
+            "btc_add_pending_transaction",
+            add_request,
+        )
+        .expect("Canister call failed");
+
+    if let Err(BtcAddPendingTransactionError::InvalidDelegationChain { msg }) = add_response {
+        panic!("Delegation verification failed unexpectedly: {msg}");
+    }
+    // The delegation passed verification. The call may still fail for other reasons
+    // (e.g., InvalidUtxos because PocketIC's bitcoin canister doesn't have real UTXOs),
+    // but that's fine — we're testing delegation verification, not the full BTC flow.
 }

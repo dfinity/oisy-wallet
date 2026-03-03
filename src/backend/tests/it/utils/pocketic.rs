@@ -229,6 +229,13 @@ impl BackendBuilder {
         self.wasm_path = wasm_path.to_string();
         self
     }
+
+    /// Overrides the init argument passed to the backend canister.
+    #[allow(dead_code)]
+    pub fn with_arg(mut self, arg: Vec<u8>) -> Self {
+        self.arg = arg;
+        self
+    }
 }
 // Get parameters
 impl BackendBuilder {
@@ -380,6 +387,60 @@ pub fn controller() -> Principal {
 
 pub fn setup() -> PicBackend {
     BackendBuilder::default().deploy()
+}
+
+/// Sets up a `PocketIC` environment with NNS subnet (for root key), II subnet, and fiduciary
+/// subnet. Deploys II on the II subnet and initializes the backend with the `PocketIC` root key so
+/// that delegation signature verification works end-to-end.
+pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
+    let pic = PocketIcBuilder::new()
+        .with_nns_subnet()
+        .with_ii_subnet()
+        .with_fiduciary_subnet()
+        .build();
+
+    let root_key = pic
+        .root_key()
+        .expect("PocketIC root key requires NNS subnet");
+
+    let ii_subnet_id = pic
+        .topology()
+        .get_ii()
+        .expect("II subnet not found in topology");
+
+    let ii_canister_id = pic.create_canister_on_subnet(None, None, ii_subnet_id);
+
+    let pic = Arc::new(pic);
+
+    let ii = super::ii::IICanister::deploy(&pic, ii_canister_id);
+
+    let backend_init = Arg::Init(InitArg {
+        ecdsa_key_name: "test_key_1".to_string(),
+        allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
+        ic_root_key_der: Some(root_key),
+        supported_credentials: Some(vec![SupportedCredential {
+            ii_canister_id,
+            ii_origin: II_ORIGIN.to_string(),
+            issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
+                .expect("wrong issuer canister id"),
+            issuer_origin: ISSUER_ORIGIN.to_string(),
+            credential_type: CredentialType::ProofOfUniqueness,
+        }]),
+        cfs_canister_id: Some(
+            Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
+        ),
+        derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
+    });
+
+    let mut builder = BackendBuilder::default().with_arg(encode_one(backend_init).unwrap());
+
+    let backend_canister_id = builder.deploy_to(&pic);
+    let backend = PicBackend {
+        pic: pic.clone(),
+        canister_id: backend_canister_id,
+    };
+
+    (backend, ii)
 }
 
 impl PicBackend {
