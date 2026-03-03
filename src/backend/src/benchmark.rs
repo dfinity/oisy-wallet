@@ -4,6 +4,7 @@ use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::{bench, bench_fn, BenchResult};
 use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
+use serde_bytes::ByteBuf;
 use shared::types::{
     agreement::{UserAgreement, UserAgreements},
     bitcoin::{PendingTransaction, StoredPendingTransaction},
@@ -15,8 +16,8 @@ use shared::types::{
 };
 
 use super::{
-    mutate_state, read_config, read_state, token, user_profile, ByteBuf, Candid, HttpRequest,
-    Principal, Stats, StoredPrincipal,
+    mutate_state, read_config, read_state, token, user_profile, Candid, HttpRequest, Principal,
+    Stats, StoredPrincipal,
 };
 use crate::{
     api::admin::http_request, bitcoin::pending_tx_model::BtcUserPendingTransactionsModel,

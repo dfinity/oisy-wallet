@@ -1,6 +1,5 @@
 use candid::Principal;
 use ic_cdk::{api::time, export_candid, init, post_upgrade};
-use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
