@@ -3,7 +3,8 @@ import * as z from 'zod';
 export const HarvestVaultSchema = z.object({
 	id: z.string(),
 	vaultAddress: z.string(),
-	estimatedApy: z.string().nullish()
+	estimatedApy: z.string().nullish(),
+	totalValueLocked: z.string().nullish()
 });
 
 export const HarvestVaultsResponseSchema = z.record(
