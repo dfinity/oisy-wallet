@@ -15,8 +15,8 @@ use shared::types::{
     network::{NetworkSettings, NetworkSettingsFor},
     user_profile::{StoredUserProfile, UserProfile},
 };
-use crate::bitcoin::pending_tx_model::BtcUserPendingTransactionsModel;
-use crate::types::StoredPrincipal;
+
+use crate::{bitcoin::pending_tx_model::BtcUserPendingTransactionsModel, types::StoredPrincipal};
 
 const BENCH_PRINCIPAL_TEXT: &str =
     "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
