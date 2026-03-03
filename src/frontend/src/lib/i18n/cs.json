@@ -43,7 +43,9 @@
 			"ellipsis": "…",
 			"learn_more": "Zjistit více",
 			"sorting": "Řazení",
-			"unlimited": ""
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -1862,11 +1864,10 @@
 			"go_to_earn": "Přejít do Earn"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "Vydělávejte se zlatem",
-				"description": "Stakujte GLDT a získejte denní odměny v governance tokenech, které vám zajistí pasivní příjem ze zlatých rezerv.",
-				"action": "Stakovat GLDT"
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"action": ""
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
@@ -1876,6 +1877,8 @@
 		},
 		"card_fields": {
 			"apy": "APY",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "Stakováno",
 			"currentEarning": "Aktuálně vydělává",
 			"earningPotential": "Další potenciál výdělku",
@@ -1890,9 +1893,27 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
 			"gldt_stake_page_description": "Stakujte tokeny GLDT a získávejte odměny kryté fyzickým zlatem",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "Stakovat $token_symbol",
 			"stake_now": "Stakovat nyní",
 			"stake_amount": "Stakovat $amount $token_symbol",
@@ -1911,10 +1932,12 @@
 			"earning_potential_hint": "Na základě hodnoty vašich neinvestovaných aktiv a nejvyššího APY dostupných výdělečných příležitostí.",
 			"active_earning": "Aktuálně vydělává",
 			"active_earning_per_year": "$amount/rok",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "Dostupné",
 			"invested_assets": "Alokované",
 			"visit_provider": "Navštívit web",
 			"current_apy_label": "Aktuální APY",
+			"max_apy_label": "",
 			"stake_review_subtitle": "Stakujete",
 			"unstake_review_subtitle": "Odstakujete",
 			"delayed_dissolve": "Obdržet se zpožděním",
@@ -1980,6 +2003,16 @@
 				"fact_3_title": "Stabilní výnosy",
 				"fact_3_description": "Získejte $apy% APY s minimálním rizikem volatility",
 				"fact_3_description_fallback": "Získejte stabilní odměny s minimálním rizikem volatility"
+			},
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": ""
 			}
 		},
 		"alt": {
