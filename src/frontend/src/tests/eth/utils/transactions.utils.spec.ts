@@ -231,6 +231,7 @@ describe('transactions.utils', () => {
 
 		it('should map to "approve" when the transaction data starts with the ERC20 approve hash', () => {
 			const approveData = `${ERC20_APPROVE_HASH}000000000000000000000000abcdef1234567890abcdef1234567890abcdef12ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff`;
+
 			const result = mapEthTransactionUi({
 				transaction: { ...transaction, data: approveData },
 				ckMinterInfoAddresses,
@@ -245,6 +246,7 @@ describe('transactions.utils', () => {
 
 		it('should prioritize approve over other types when data starts with ERC20 approve hash', () => {
 			const approveData = `${ERC20_APPROVE_HASH}000000000000000000000000abcdef1234567890abcdef1234567890abcdef12ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff`;
+
 			const result = mapEthTransactionUi({
 				transaction: { ...transaction, from: '0x1234', data: approveData },
 				ckMinterInfoAddresses: ['0x1234'],
