@@ -127,6 +127,9 @@ pub async fn btc_select_user_utxos_fee(
 }
 
 /// Adds a pending Bitcoin transaction for the caller.
+/// 
+/// Requires a valid II delegation chain to verify the caller authenticated
+/// through Internet Identity. This protects against unauthorised CLI callers.
 ///
 /// # Errors
 /// Errors are enumerated by: `BtcAddPendingTransactionError`.
@@ -146,16 +149,27 @@ pub async fn btc_add_pending_transaction(
             }
         })?;
 
-        let known_ii_canister_ids = read_config(|config| {
-            config
+        let (known_ii_canister_ids, ic_root_key_raw) = read_config(|config| {
+            let ii_ids = config
                 .supported_credentials
                 .as_ref()
                 .map(|creds| creds.iter().map(|c| c.ii_canister_id).collect::<Vec<_>>())
-                .unwrap_or_default()
+                .unwrap_or_default();
+            let root_key = config
+                .ic_root_key_raw
+                .clone()
+                .expect("IC root key not configured");
+            (ii_ids, root_key)
         });
 
-        delegation::verify_ii_delegation_chain(chain, principal, &known_ii_canister_ids, now_ns)
-            .map_err(|msg| BtcAddPendingTransactionError::InvalidDelegationChain { msg })?;
+        delegation::verify_ii_delegation_chain(
+            chain,
+            principal,
+            &known_ii_canister_ids,
+            &ic_root_key_raw,
+            now_ns,
+        )
+        .map_err(|msg| BtcAddPendingTransactionError::InvalidDelegationChain { msg })?;
 
         if params.utxos.is_empty() {
             return Err(BtcAddPendingTransactionError::EmptyUtxos);
