@@ -55,7 +55,6 @@ const fn per_user_cycles_allowance() -> u64 {
     LEDGER_FEE + (LEDGER_FEE + SIGNER_FEE) * SIGNING_OPS_PER_LOGIN
 }
 
-
 /// Minimum cycles allowance below which a new approve is warranted.
 ///
 /// If the caller already has at least this many cycles, `allow_signing`
