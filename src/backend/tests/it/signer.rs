@@ -9,13 +9,13 @@ use shared::types::{
             TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult,
             MAX_PERCENTAGE, MIN_PERCENTAGE,
         },
-        GetAllowedCyclesError, GetAllowedCyclesResponse,
+        AllowSigningError, GetAllowedCyclesError, GetAllowedCyclesResponse, RateLimitError,
     },
     Stats,
 };
 
 use crate::{
-    pow::call_create_user_profile,
+    pow::{call_allow_signing, call_create_user_profile},
     utils::{
         mock::VC_HOLDER,
         pocketic::{controller, pic_canister::PicCanisterTrait, setup, BackendBuilder},
@@ -243,5 +243,115 @@ fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
     assert!(
         response.is_ok(),
         "manual top_up should succeed when cycles ledger is available"
+    );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Rate-limit integration tests for allow_signing
+// -------------------------------------------------------------------------------------------------
+
+/// Calling `allow_signing` more than 3 times within 60 seconds must return
+/// `AllowSigningError::RateLimited` with the expected payload fields.
+#[test]
+fn test_allow_signing_rate_limited_after_exceeding_limit() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(VC_HOLDER).unwrap();
+
+    call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
+
+    // The per-caller rate limit is 3 calls per 60 s.  The first 3 calls may
+    // fail for unrelated reasons (e.g. missing cycles ledger) but must not
+    // return RateLimited.
+    for i in 0..3 {
+        let result = call_allow_signing(&pic_setup, caller, 0);
+        assert!(
+            !matches!(result, Err(AllowSigningError::RateLimited(_))),
+            "call {i} (0-indexed) should not be rate-limited: {result:?}",
+        );
+    }
+
+    // The 4th call within the same window must be rate-limited.
+    let result = call_allow_signing(&pic_setup, caller, 0);
+    match result {
+        Err(AllowSigningError::RateLimited(RateLimitError {
+            max_calls,
+            window_ns,
+            caller: err_caller,
+        })) => {
+            assert_eq!(max_calls, 3, "rate limit should allow 3 calls");
+            assert_eq!(
+                window_ns,
+                60 * 1_000_000_000,
+                "rate limit window should be 60 seconds"
+            );
+            assert_eq!(err_caller, caller, "error should reference the caller");
+        }
+        other => panic!("expected AllowSigningError::RateLimited, got {other:?}"),
+    }
+}
+
+/// Verify that a different principal is independently tracked and not blocked
+/// by the first principal's exhausted rate limit.
+#[test]
+fn test_allow_signing_rate_limit_is_per_caller() {
+    let pic_setup = setup();
+    let caller_a = Principal::from_text(VC_HOLDER).unwrap();
+    let caller_b = Principal::self_authenticating("rate-limit-b");
+
+    call_create_user_profile(&pic_setup, caller_a).expect("profile A");
+    call_create_user_profile(&pic_setup, caller_b).expect("profile B");
+
+    // Exhaust caller_a's rate limit.
+    for _ in 0..3 {
+        let _ = call_allow_signing(&pic_setup, caller_a, 0);
+    }
+    assert!(
+        matches!(
+            call_allow_signing(&pic_setup, caller_a, 0),
+            Err(AllowSigningError::RateLimited(_))
+        ),
+        "caller_a should be rate-limited"
+    );
+
+    // caller_b should still be allowed.
+    let result = call_allow_signing(&pic_setup, caller_b, 0);
+    assert!(
+        !matches!(result, Err(AllowSigningError::RateLimited(_))),
+        "caller_b should not be rate-limited: {result:?}"
+    );
+}
+
+/// After the 60-second window elapses, the same principal should be able to
+/// call `allow_signing` again without being rate-limited.
+#[test]
+fn test_allow_signing_rate_limit_resets_after_window() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(VC_HOLDER).unwrap();
+
+    call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
+
+    // Exhaust the rate limit.
+    for _ in 0..3 {
+        let _ = call_allow_signing(&pic_setup, caller, 0);
+    }
+    assert!(
+        matches!(
+            call_allow_signing(&pic_setup, caller, 0),
+            Err(AllowSigningError::RateLimited(_))
+        ),
+        "should be rate-limited before window elapses"
+    );
+
+    // Advance time past the 60-second window.
+    pic_setup.pic.advance_time(Duration::from_secs(61));
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    // The next call should pass the rate-limit check again.
+    let result = call_allow_signing(&pic_setup, caller, 0);
+    assert!(
+        !matches!(result, Err(AllowSigningError::RateLimited(_))),
+        "should not be rate-limited after window elapses: {result:?}"
     );
 }

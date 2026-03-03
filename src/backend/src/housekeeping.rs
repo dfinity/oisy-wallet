@@ -89,21 +89,25 @@ pub(crate) fn release_allow_signing_slot() {
 /// Spawns an `allow_signing` task only if the number of in-flight tasks is
 /// below `MAX_CONCURRENT_ALLOW_SIGNING` and the principal hasn't exceeded
 /// its per-caller rate limit.
+///
+/// The concurrency slot is acquired *before* the rate-limit check so that a
+/// failed slot acquisition does not consume a rate-limit entry.
 pub(crate) fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincipal) {
+    if !try_acquire_allow_signing_slot() {
+        ic_cdk::eprintln!(
+            "Skipped allow_signing for user {}: too many concurrent tasks",
+            stored_principal.0,
+        );
+        return;
+    }
+
     if let Err(e) = ALLOW_SIGNING_RATE_LIMITER.with(|rl| rl.check_principal(stored_principal.0)) {
+        release_allow_signing_slot();
         ic_cdk::eprintln!(
             "Skipped allow_signing for user {}: max_calls={}, window_ns={}",
             stored_principal.0,
             e.max_calls,
             e.window_ns,
-        );
-        return;
-    }
-
-    if !try_acquire_allow_signing_slot() {
-        ic_cdk::eprintln!(
-            "Skipped allow_signing for user {}: too many concurrent tasks",
-            stored_principal.0,
         );
         return;
     }
