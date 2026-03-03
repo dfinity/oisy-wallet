@@ -4,12 +4,17 @@
 	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
-	import { highestEarningPotentialUsd } from '$lib/derived/earning.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
+
+	interface Props {
+		highestEarningPotentialUsd: number;
+	}
+
+	let { highestEarningPotentialUsd }: Props = $props();
 
 	let infoExpanded = $state(false);
 </script>
@@ -33,13 +38,12 @@
 		<div class="my-1 text-lg font-bold sm:text-xl">
 			<EarningYearlyAmount
 				showAsNeutral
-				showPlusSign={$highestEarningPotentialUsd > 0}
-				value={$highestEarningPotentialUsd}
+				showPlusSign={highestEarningPotentialUsd > 0}
+				value={highestEarningPotentialUsd}
 			/>
 		</div>
 
-		<div class="text-sm sm:text-base">
-			{$i18n.stake.text.unproductive_assets}:
+		<div class="text-sm font-bold sm:text-base">
 			{formatCurrency({
 				value: $enabledMainnetFungibleTokensUsdBalance,
 				currency: $currentCurrency,
