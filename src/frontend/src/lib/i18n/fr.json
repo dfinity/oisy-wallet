@@ -1720,15 +1720,6 @@
 			"title": "Scanner le code QR"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Préparation du signataire",
-			"description": "Vérification que vous n'êtes pas un robot",
-			"request_challenge": "En attente d'un nouveau défi",
-			"solve_challenge": "Résolution du défi",
-			"grant_cycles": "Activation de la signature"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {

@@ -1720,15 +1720,6 @@
 			"title": "QRコードをスキャン"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "署名の準備中",
-			"description": "ロボットでないことを確認しています。",
-			"request_challenge": "新しいチャレンジを待機中",
-			"solve_challenge": "チャレンジ解決中",
-			"grant_cycles": "署名を有効化中"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {

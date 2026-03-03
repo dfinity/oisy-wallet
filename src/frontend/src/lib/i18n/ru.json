@@ -1720,15 +1720,6 @@
 			"title": "Отсканировать QR-код"
 		}
 	},
-	"pow_protector": {
-		"text": {
-			"title": "Заголовок",
-			"description": "Описание",
-			"request_challenge": "Запросить Сhallenge",
-			"solve_challenge": "Разрешить Сhallenge",
-			"grant_cycles": "Предоставить Cycles"
-		}
-	},
 	"signer": {
 		"sign_in": {
 			"text": {
