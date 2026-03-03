@@ -9,4 +9,5 @@ export type EthTransactionType = Extract<
 export interface EthTransactionUi extends Omit<Transaction, 'type'> {
 	id: TransactionId;
 	type: EthTransactionType;
+	approveSpender?: string;
 }
