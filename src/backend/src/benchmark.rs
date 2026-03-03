@@ -8,7 +8,7 @@ use shared::types::{
     agreement::{UserAgreement, UserAgreements},
     bitcoin::{PendingTransaction, StoredPendingTransaction},
     contact::{Contact, StoredContacts},
-    custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
+    custom_token::{CustomToken, CustomTokenId, ErcToken, ErcTokenId, Token},
     experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
     network::{NetworkSettings, NetworkSettingsFor},
     user_profile::{StoredUserProfile, UserProfile},
@@ -16,7 +16,7 @@ use shared::types::{
 
 use super::{
     http_request, mutate_state, read_config, read_state, token, user_profile, ByteBuf, Candid,
-    CustomTokenId, HttpRequest, Principal, Stats, StoredPrincipal,
+    HttpRequest, Principal, Stats, StoredPrincipal,
 };
 use crate::{
     bitcoin::pending_tx_model::BtcUserPendingTransactionsModel, state::State,

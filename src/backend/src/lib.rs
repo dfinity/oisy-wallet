@@ -13,7 +13,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, SelectedUtxosFeeRequest,
         },
         contact::{CreateContactRequest, UpdateContactRequest},
-        custom_token::{CustomToken, CustomTokenId},
+        custom_token::CustomToken,
         dapp::AddHiddenDappIdRequest,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
