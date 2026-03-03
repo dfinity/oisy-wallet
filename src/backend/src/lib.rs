@@ -239,8 +239,7 @@ const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 /// and are periodically updated in the background.
 ///
 /// # Returns
-/// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
-/// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+/// - `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
 ///
 /// # Errors
 /// - `InternalError`: If fee percentiles are not available in the cache for the requested network
@@ -248,7 +247,7 @@ const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 /// # Note
 /// This function only returns data from the in-memory cache and doesn't make any calls
 /// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
-/// an error is returned rather than fetching fresh data.
+/// it returns the default percentiles.
 #[query(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 #[must_use]
