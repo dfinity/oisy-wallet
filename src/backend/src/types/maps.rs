@@ -12,18 +12,24 @@ use shared::types::{
 use super::storable::{Candid, StoredPrincipal, StoredTokenId};
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
+
 pub type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
+
 pub type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
+
 pub type CustomTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<CustomToken>>, VMem>;
+
 /// Map of (`updated_timestamp`, `user_principal`) to `UserProfile`
 pub type UserProfileMap =
     StableBTreeMap<(Timestamp, StoredPrincipal), Candid<StoredUserProfile>, VMem>;
+
 /// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
 pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
 pub type PowChallengeMap = StableBTreeMap<StoredPrincipal, Candid<StoredChallenge>, VMem>;
 pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VMem>;
 
 pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>;
+
 pub type BtcUserPendingTransactionsMap =
     StableBTreeMap<StoredPrincipal, Candid<PendingTransactionsMap>, VMem>;
 

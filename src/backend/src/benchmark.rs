@@ -216,11 +216,11 @@ fn bench_set_custom_token() -> BenchResult {
 
     bench_fn(|| {
         mutate_state(|s| {
-            add_to_user_token(
+            token::service::add_to_user_token(
                 sp,
                 &mut s.custom_token,
-                &token,
-                &matches_custom_token(&token),
+                std::slice::from_ref(&token),
+                |t: &CustomToken| CustomTokenId::from(&t.token),
             );
         });
     })
@@ -235,9 +235,12 @@ fn bench_set_many_custom_tokens_with_count(count: u8) -> BenchResult {
 
     bench_fn(|| {
         mutate_state(|s| {
-            for token in &tokens {
-                add_to_user_token(sp, &mut s.custom_token, token, &matches_custom_token(token));
-            }
+            token::service::add_to_user_token(
+                sp,
+                &mut s.custom_token,
+                &tokens,
+                |t: &CustomToken| CustomTokenId::from(&t.token),
+            );
         });
     })
 }
@@ -259,11 +262,11 @@ fn bench_list_custom_tokens_with_count(count: u8) -> BenchResult {
         let token = make_custom_token(1, u64::from(i));
 
         mutate_state(|s| {
-            add_to_user_token(
+            token::service::add_to_user_token(
                 sp,
                 &mut s.custom_token,
-                &token,
-                &matches_custom_token(&token),
+                std::slice::from_ref(&token),
+                |t: &CustomToken| CustomTokenId::from(&t.token),
             );
         });
     }
@@ -290,17 +293,21 @@ fn bench_remove_custom_token() -> BenchResult {
     let sp = bench_stored_principal();
     let token = make_custom_token(42, 0xDD);
     mutate_state(|s| {
-        add_to_user_token(
+        token::service::add_to_user_token(
             sp,
             &mut s.custom_token,
-            &token,
-            &matches_custom_token(&token),
+            std::slice::from_ref(&token),
+            |t: &CustomToken| CustomTokenId::from(&t.token),
         );
     });
 
     bench_fn(|| {
         mutate_state(|s| {
-            remove_from_user_token(sp, &mut s.custom_token, &matches_custom_token(&token));
+            token::service::remove_from_user_token(
+                sp,
+                &mut s.custom_token,
+                &matches_custom_token(&token),
+            );
         });
     })
 }
@@ -316,7 +323,7 @@ fn bench_create_user_profile() -> BenchResult {
     bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            let stored = user_profile::create_profile(sp, &mut m);
+            let stored = user_profile::service::create_profile(sp, &mut m);
             UserProfile::from(&stored)
         }));
     })
@@ -330,7 +337,7 @@ fn bench_get_user_profile() -> BenchResult {
         let sp = bench_stored_principal();
         std::hint::black_box(mutate_state(|s| {
             let m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::find_profile(sp, &m).map(|stored| UserProfile::from(&stored))
+            user_profile::service::find_profile(sp, &m).map(|stored| UserProfile::from(&stored))
         }));
     })
 }
@@ -340,7 +347,9 @@ fn bench_has_user_profile() -> BenchResult {
     ensure_profile_version();
 
     bench_fn(|| {
-        std::hint::black_box(user_profile::has_user_profile(bench_stored_principal()));
+        std::hint::black_box(user_profile::service::has_user_profile(
+            bench_stored_principal(),
+        ));
     })
 }
 
@@ -364,7 +373,7 @@ fn bench_update_user_network_settings() -> BenchResult {
     bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::update_network_settings(sp, version, networks.clone(), &mut m)
+            user_profile::service::update_network_settings(sp, version, networks.clone(), &mut m)
         }));
     })
 }
@@ -377,7 +386,7 @@ fn bench_set_user_show_testnets() -> BenchResult {
     bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::set_show_testnets(sp, version, true, &mut m)
+            user_profile::service::set_show_testnets(sp, version, true, &mut m)
         }));
     })
 }
@@ -390,7 +399,12 @@ fn bench_add_user_hidden_dapp_id() -> BenchResult {
     bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::add_hidden_dapp_id(sp, version, "bench-dapp-id".to_string(), &mut m)
+            user_profile::service::add_hidden_dapp_id(
+                sp,
+                version,
+                "bench-dapp-id".to_string(),
+                &mut m,
+            )
         }));
     })
 }
@@ -413,7 +427,7 @@ fn bench_update_user_agreements() -> BenchResult {
     bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::update_agreements(sp, version, agreements.clone(), &mut m)
+            user_profile::service::update_agreements(sp, version, agreements.clone(), &mut m)
         }));
     })
 }
@@ -431,7 +445,7 @@ fn bench_update_user_experimental_features() -> BenchResult {
     bench_fn(|| {
         std::hint::black_box(mutate_state(|s| {
             let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-            user_profile::update_experimental_feature_settings(
+            user_profile::service::update_experimental_feature_settings(
                 sp,
                 version,
                 features.clone(),

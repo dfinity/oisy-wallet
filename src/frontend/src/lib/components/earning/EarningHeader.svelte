@@ -4,6 +4,11 @@
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+	import {
+		allEarningPositionsUsd,
+		allEarningYearlyAmountUsd,
+		highestEarningPotentialUsd
+	} from '$lib/derived/earning.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
@@ -22,8 +27,11 @@
 		</p>
 
 		<div class="mt-4 flex w-full flex-col gap-3 sm:flex-row">
-			<EarningPositionCard />
-			<EarningPotentialCard />
+			<EarningPotentialCard highestEarningPotentialUsd={$highestEarningPotentialUsd} />
+			<EarningPositionCard
+				earningPositionsUsd={$allEarningYearlyAmountUsd}
+				earningYearlyAmountUsd={$allEarningPositionsUsd}
+			/>
 		</div>
 	{/snippet}
 </StakeContentSection>

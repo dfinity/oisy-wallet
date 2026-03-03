@@ -237,6 +237,6 @@ pub async fn get_fee_per_byte(network: BitcoinNetwork) -> Result<u64, String> {
         Ok(get_default_fee_for_network(network))
     } else {
         let middle = fee_percentiles.len() / 2;
-        Ok(fee_percentiles[middle])
+        fee_percentiles[middle]
     }
 }

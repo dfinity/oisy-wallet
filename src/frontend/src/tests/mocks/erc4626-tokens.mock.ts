@@ -10,5 +10,6 @@ export const mockValidErc4626Token: Erc4626Token = {
 	standard: { code: 'erc4626' },
 	address: '0xvaultAddress',
 	assetAddress: '0xassetAddress',
-	assetDecimals: 6
+	assetDecimals: 6,
+	assetSymbol: 'TEST'
 };

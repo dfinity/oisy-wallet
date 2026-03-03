@@ -23,7 +23,8 @@ describe('erc4626.derived', () => {
 		...mockValidToken,
 		standard: { code: 'erc4626' },
 		assetAddress: '0xassetAddress',
-		assetDecimals: 6
+		assetDecimals: 6,
+		assetSymbol: 'TEST'
 	};
 
 	const mockErc4626EthereumToken: Erc4626Token = {

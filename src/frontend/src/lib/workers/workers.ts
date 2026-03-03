@@ -6,7 +6,6 @@ import { onCkEthMinterInfoMessage } from '$icp/workers/cketh-minter-info.worker'
 import { onDip20WalletMessage } from '$icp/workers/dip20-wallet.worker';
 import { onIcpWalletMessage } from '$icp/workers/icp-wallet.worker';
 import { onIcrcWalletMessage } from '$icp/workers/icrc-wallet.worker';
-import { onPowProtectionMessage } from '$icp/workers/pow-protection.worker';
 import type {
 	PostMessage,
 	PostMessageDataRequest,
@@ -24,10 +23,6 @@ export const messageToHandler: PostMessageRequestMap = {
 
 	startExchangeTimer: onExchangeMessage,
 	stopExchangeTimer: onExchangeMessage,
-
-	startPowProtectionTimer: onPowProtectionMessage,
-	triggerPowProtectionTimer: onPowProtectionMessage,
-	stopPowProtectionTimer: onPowProtectionMessage,
 
 	startIcpWalletTimer: onIcpWalletMessage,
 	stopIcpWalletTimer: onIcpWalletMessage,

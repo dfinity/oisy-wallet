@@ -8,7 +8,8 @@ import {
 	PARAM_DELETE_IDB_CACHE,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
-	URI_PARAM
+	URI_PARAM,
+	VAULT_PARAM
 } from '$lib/constants/routes.constants';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import type { NetworkId } from '$lib/types/network';
@@ -133,6 +134,7 @@ export interface RouteParams {
 	// NFT URI parameters
 	[NFT_PARAM]: OptionString;
 	[COLLECTION_PARAM]: OptionString;
+	[VAULT_PARAM]: OptionString;
 }
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
@@ -142,7 +144,8 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 			[NETWORK_PARAM]: undefined,
 			[URI_PARAM]: undefined,
 			[NFT_PARAM]: undefined,
-			[COLLECTION_PARAM]: undefined
+			[COLLECTION_PARAM]: undefined,
+			[VAULT_PARAM]: undefined
 		};
 	}
 
@@ -159,7 +162,8 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 		[NETWORK_PARAM]: searchParams?.get(NETWORK_PARAM),
 		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null,
 		[NFT_PARAM]: searchParams?.get(NFT_PARAM),
-		[COLLECTION_PARAM]: searchParams?.get(COLLECTION_PARAM)
+		[COLLECTION_PARAM]: searchParams?.get(COLLECTION_PARAM),
+		[VAULT_PARAM]: searchParams?.get(VAULT_PARAM)
 	};
 };
 
@@ -168,7 +172,8 @@ export const resetRouteParams = (): RouteParams => ({
 	[NFT_PARAM]: null,
 	[COLLECTION_PARAM]: null,
 	[NETWORK_PARAM]: null,
-	[URI_PARAM]: null
+	[URI_PARAM]: null,
+	[VAULT_PARAM]: null
 });
 
 export const switchNetwork = async ({ networkId }: { networkId: Option<NetworkId> }) => {

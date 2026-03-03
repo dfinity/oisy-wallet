@@ -5,6 +5,7 @@ import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants'
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import type {
+	CoingeckoSimpleErc4626TokenPriceResponse,
 	CoingeckoSimplePriceParams,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceParams,
@@ -225,6 +226,158 @@ describe('exchange.worker', () => {
 				await vi.advanceTimersByTimeAsync(SYNC_EXCHANGE_TIMER_INTERVAL * 10);
 
 				expect(postMessageMock).toHaveBeenCalledTimes(10);
+			});
+
+			it('should post syncExchangeError when all exchange calls throw', async () => {
+				vi.mocked(simplePrice).mockRejectedValue(new Error('All failed'));
+				vi.mocked(simpleTokenPrice).mockRejectedValue(new Error('All failed'));
+				vi.mocked(calculateErc4626Prices).mockRejectedValue(new Error('All failed'));
+
+				await onExchangeMessage(event);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchangeError',
+					data: { err: 'All failed' }
+				});
+			});
+
+			it('should filter out unsupported coingecko platform IDs for ERC20 tokens', async () => {
+				const unsupportedErc20Addresses: Erc20ContractAddressWithNetwork[] = [
+					{ address: '0x123', coingeckoId: 'ethereum' },
+					// @ts-expect-error we test this on purpose
+					{ address: '0xunknown', coingeckoId: 'unsupported-chain' }
+				];
+
+				const mockEvent = {
+					...event,
+					data: {
+						...event.data,
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: unsupportedErc20Addresses,
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
+					id: 'ethereum',
+					vs_currencies: Currency.USD,
+					contract_addresses: ['0x123'],
+					include_market_cap: true,
+					include_24hr_change: true
+				});
+			});
+
+			it('should handle exchange rate rejection for non-USD currency', async () => {
+				vi.mocked(simplePrice).mockRejectedValue(new Error('All prices failed'));
+
+				const mockEvent = {
+					...event,
+					data: {
+						...event.data,
+						msg,
+						data: {
+							currentCurrency: Currency.JPY,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: expect.objectContaining({
+						currentExchangeRate: expect.objectContaining({
+							exchangeRateToUsd: undefined,
+							currency: Currency.JPY
+						})
+					})
+				});
+			});
+
+			it('should handle ETH, ICRC, and SPL price rejections individually', async () => {
+				vi.mocked(simplePrice).mockImplementation(
+					({ ids }: CoingeckoSimplePriceParams): Promise<CoingeckoSimplePriceResponse> => {
+						const idList = Array.isArray(ids) ? ids : ids.split(',');
+						if (idList.includes('ethereum')) {
+							return Promise.reject(new Error('ETH failed'));
+						}
+						return Promise.resolve(idList.reduce((acc, id) => ({ ...acc, [id]: { usd: 1 } }), {}));
+					}
+				);
+
+				vi.mocked(simpleTokenPrice).mockImplementation(
+					({ id }: CoingeckoSimpleTokenPriceParams): Promise<CoingeckoSimpleTokenPriceResponse> => {
+						if (id === 'internet-computer' || id === 'solana') {
+							return Promise.reject(new Error(`${id} failed`));
+						}
+						return Promise.resolve({});
+					}
+				);
+
+				const mockEvent = {
+					...event,
+					data: {
+						...event.data,
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: ['icrc1'],
+							splAddresses: ['spl1'],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: expect.objectContaining({
+						currentEthPrice: undefined,
+						currentIcrcPrices: undefined,
+						currentSplPrices: undefined
+					})
+				});
+			});
+
+			it('should handle rejected ERC20 price promises gracefully', async () => {
+				vi.mocked(simpleTokenPrice).mockRejectedValueOnce(new Error('ERC20 fetch failed'));
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...event,
+					data: {
+						...event.data,
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [{ address: '0x123', coingeckoId: 'ethereum' }],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+					msg: 'syncExchange',
+					data: expect.objectContaining({
+						currentErc20Prices: {}
+					})
+				});
 			});
 
 			it('should handle empty payload', async () => {
@@ -556,6 +709,106 @@ describe('exchange.worker', () => {
 			});
 		});
 
+		describe('error handling in syncExchange', () => {
+			const msg = 'startExchangeTimer' as const;
+
+			it('should post syncExchangeError when an unexpected error occurs', async () => {
+				vi.mocked(simplePrice).mockRejectedValue(new Error('catastrophic'));
+				vi.mocked(simpleTokenPrice).mockRejectedValue(new Error('catastrophic'));
+				vi.mocked(calculateErc4626Prices).mockRejectedValue(new Error('catastrophic'));
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						msg: 'syncExchangeError'
+					})
+				);
+			});
+		});
+
+		describe('syncInProgress guard', () => {
+			const msg = 'startExchangeTimer' as const;
+
+			it('should skip sync when one is already in progress', async () => {
+				const resolvers: Array<(value: CoingeckoSimplePriceResponse) => void> = [];
+				vi.mocked(simplePrice).mockImplementation(
+					() =>
+						new Promise<CoingeckoSimplePriceResponse>((resolve) => {
+							resolvers.push(resolve);
+						})
+				);
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				const firstCall = onExchangeMessage(mockEvent);
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				await onExchangeMessage(mockEvent);
+
+				expect(postMessageMock).not.toHaveBeenCalled();
+
+				resolvers.forEach((r) => r({ ethereum: { usd: 1 } }));
+				await firstCall;
+			});
+		});
+
+		describe('unknown coingecko platform', () => {
+			const msg = 'startExchangeTimer' as const;
+
+			it('should skip ERC20 addresses with unknown coingecko platform', async () => {
+				const unknownPlatformAddress: Erc20ContractAddressWithNetwork = {
+					address: '0xunknown',
+					coingeckoId: 'unknown-platform' as Erc20ContractAddressWithNetwork['coingeckoId']
+				};
+
+				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+					...createEvent(msg),
+					data: {
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [unknownPlatformAddress],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				};
+
+				await onExchangeMessage(mockEvent);
+
+				expect(simpleTokenPrice).not.toHaveBeenCalled();
+			});
+		});
+
 		describe('with message stopExchangeTimer', () => {
 			const startEvent = createEvent('startExchangeTimer');
 			const stopEvent = createEvent('stopExchangeTimer');
@@ -586,6 +839,38 @@ describe('exchange.worker', () => {
 				await onExchangeMessage(startEvent);
 
 				expect(postMessageMock).toHaveBeenCalledTimes(2);
+			});
+
+			it('should not reschedule when timer is stopped during sync', async () => {
+				await onExchangeMessage(startEvent);
+
+				expect(postMessageMock).toHaveBeenCalledOnce();
+
+				postMessageMock.mockClear();
+
+				let resolveErc4626: ((v: CoingeckoSimpleErc4626TokenPriceResponse) => void) | undefined;
+				vi.mocked(calculateErc4626Prices).mockImplementation(
+					() =>
+						new Promise((resolve) => {
+							resolveErc4626 = resolve;
+						})
+				);
+
+				await vi.advanceTimersByTimeAsync(SYNC_EXCHANGE_TIMER_INTERVAL);
+
+				expect(resolveErc4626).toBeDefined();
+
+				await onExchangeMessage(stopEvent);
+
+				resolveErc4626?.({});
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(postMessageMock).toHaveBeenCalledOnce();
+
+				postMessageMock.mockClear();
+				await vi.advanceTimersByTimeAsync(SYNC_EXCHANGE_TIMER_INTERVAL * 5);
+
+				expect(postMessageMock).not.toHaveBeenCalled();
 			});
 		});
 

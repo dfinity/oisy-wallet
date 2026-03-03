@@ -13,13 +13,12 @@
 
 	let { onclick }: Props = $props();
 
-	const { outflowActionsDisabled, inflowActionsDisabled } =
-		getContext<HeroContext>(HERO_CONTEXT_KEY);
+	const { inflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <ButtonHero
 	ariaLabel={$i18n.swap.text.swap}
-	disabled={$isBusy || $outflowActionsDisabled || $inflowActionsDisabled}
+	disabled={$isBusy || $inflowActionsDisabled}
 	{onclick}
 	testId={SWAP_TOKENS_MODAL_OPEN_BUTTON}
 >
