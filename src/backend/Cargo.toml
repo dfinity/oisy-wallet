@@ -14,6 +14,7 @@ getrandom = { workspace = true }
 hex = { workspace = true }
 ic-canister-sig-creation = { workspace = true }
 ic-cdk = { workspace = true }
+ic-signature-verification = { workspace = true }
 ic-cdk-timers = { workspace = true }
 ic-cycles-ledger-client = { workspace = true }
 ic-ledger-types = { workspace = true }

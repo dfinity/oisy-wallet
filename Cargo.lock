@@ -132,6 +132,7 @@ dependencies = [
  "ic-cdk-timers",
  "ic-cycles-ledger-client",
  "ic-ledger-types",
+ "ic-signature-verification",
  "ic-stable-structures",
  "ic-verifiable-credentials",
  "lazy_static",
