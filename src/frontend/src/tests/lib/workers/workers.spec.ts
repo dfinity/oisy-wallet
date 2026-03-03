@@ -53,10 +53,6 @@ vi.mock('$icp/workers/dip20-wallet.worker', () => ({
 	onDip20WalletMessage: vi.fn()
 }));
 
-vi.mock('$icp/workers/pow-protection.worker', () => ({
-	onPowProtectionMessage: vi.fn()
-}));
-
 vi.mock('$sol/workers/sol-wallet.worker', () => ({
 	onSolWalletMessage: vi.fn()
 }));
