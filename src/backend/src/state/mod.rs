@@ -8,14 +8,14 @@ use shared::types::{
 use crate::{
     state::memory::{
         BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_MEMORY_ID,
-        MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID,
+        EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID,
         USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
         USER_TOKEN_MEMORY_ID,
     },
     types::{
         maps::{
-            BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, PowChallengeMap,
-            TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
+            BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, ExchangeRateMap,
+            PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
         },
         storable::Candid,
     },
@@ -39,6 +39,7 @@ pub struct State {
     // TODO: implement a periodic cleanup of old entries
     // TODO: limit the map size with an eviction policy
     pub(crate) token_activity: TokenActivityMap,
+    pub(crate) exchange_rates: ExchangeRateMap,
 }
 
 impl From<&State> for Stats {
@@ -68,6 +69,7 @@ thread_local! {
                 mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),
             ),
             token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
+            exchange_rates: ExchangeRateMap::init(mm.borrow().get(EXCHANGE_RATE_MEMORY_ID)),
         })
     );
 }

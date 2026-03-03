@@ -187,6 +187,15 @@ type CustomToken = record {
 	version : opt nat64;
 	enabled : bool
 };
+type CustomTokenId = variant {
+	ExtV2 : principal;
+	Icrc : principal;
+	Ethereum : record { text; nat64 };
+	SolDevnet : text;
+	IcPunks : principal;
+	Dip721 : principal;
+	SolMainnet : text
+};
 type DappCarouselSettings = record { hidden_dapp_ids : vec text };
 type DappSettings = record { dapp_carousel : DappCarouselSettings };
 type DefiniteCanisterSettingsArgs = record {
@@ -199,6 +208,13 @@ type DefiniteCanisterSettingsArgs = record {
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
+type ExchangeData = record {
+	price_24h_change_pct : opt float64;
+	market_cap : opt float64;
+	timestamp_ns : nat64;
+	price : opt float64
+};
+type ExchangeRate = record { usd : ExchangeData };
 type ExperimentalFeatureSettings = record { enabled : bool };
 type ExperimentalFeatureSettingsFor = variant { AiAssistantBeta };
 type ExperimentalFeaturesSettings = record {
@@ -540,6 +556,10 @@ service : (Arg) -> {
 	// # Returns
 	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
+	get_exchange_rate : (CustomTokenId) -> (opt ExchangeRate) query;
+	get_exchange_rates : (vec CustomTokenId) -> (
+		vec record { CustomTokenId; opt ExchangeRate }
+	) query;
 	// Returns the caller's user profile.
 	//
 	// # Errors

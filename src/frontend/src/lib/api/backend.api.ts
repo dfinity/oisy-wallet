@@ -5,6 +5,8 @@ import type {
 	Contact,
 	CreateChallengeResponse,
 	CustomToken,
+	CustomTokenId,
+	ExchangeRate,
 	GetAllowedCyclesResponse,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -243,6 +245,30 @@ export const updateUserExperimentalFeatureSettings = async ({
 	const { updateUserExperimentalFeatureSettings } = await backendCanister({ identity });
 
 	return updateUserExperimentalFeatureSettings(params);
+};
+
+export const getExchangeRate = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<{
+	token_id: CustomTokenId;
+	certified: boolean;
+}>): Promise<[] | [ExchangeRate]> => {
+	const { getExchangeRate } = await backendCanister({ identity });
+
+	return getExchangeRate(params);
+};
+
+export const getExchangeRates = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<{
+	token_ids: CustomTokenId[];
+	certified: boolean;
+}>): Promise<Array<[CustomTokenId, [] | [ExchangeRate]]>> => {
+	const { getExchangeRates } = await backendCanister({ identity });
+
+	return getExchangeRates(params);
 };
 
 const backendCanister = async ({

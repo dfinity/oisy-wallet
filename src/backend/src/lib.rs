@@ -22,6 +22,7 @@ use shared::{
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::AddHiddenDappIdRequest,
+        exchange::ExchangeRate,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         pow::CreateChallengeResponse,
@@ -49,7 +50,7 @@ use crate::{
     state::{mutate_state, read_config, read_state, set_config},
     token::{add_to_user_token, remove_from_user_token},
     token_activity::{mark_token_active, mark_tokens_active},
-    types::storable::{Candid, StoredPrincipal},
+    types::storable::{Candid, StoredPrincipal, StoredTokenId},
 };
 
 mod api;
@@ -57,6 +58,7 @@ mod bitcoin_api;
 mod bitcoin_utils;
 mod btc_user_pending_tx_model;
 mod contacts;
+mod exchange;
 mod guards;
 mod housekeeping;
 mod impls;
@@ -74,6 +76,7 @@ mod tests;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
+mod utils;
 
 #[init]
 pub fn init(arg: Arg) {
@@ -230,6 +233,31 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
     }
 
     tokens
+}
+
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn get_exchange_rates(
+    token_ids: Vec<CustomTokenId>,
+) -> Vec<(CustomTokenId, Option<ExchangeRate>)> {
+    read_state(|s| {
+        token_ids
+            .into_iter()
+            .map(|id| {
+                let rate = s
+                    .exchange_rates
+                    .get(&StoredTokenId(id.clone()))
+                    .map(|c| c.0);
+                (id, rate)
+            })
+            .collect()
+    })
+}
+
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn get_exchange_rate(token_id: CustomTokenId) -> Option<ExchangeRate> {
+    read_state(|s| s.exchange_rates.get(&StoredTokenId(token_id)).map(|c| c.0))
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;

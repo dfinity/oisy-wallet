@@ -5,18 +5,10 @@ import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
 import {
-	exchangeRateBNBToUsd,
-	exchangeRateBTCToUsd,
-	exchangeRateERC20ToUsd,
-	exchangeRateETHToUsd,
-	exchangeRateICPToUsd,
-	exchangeRateICRCToUsd,
-	exchangeRatePOLToUsd,
-	exchangeRateSOLToUsd,
-	exchangeRateSPLToUsd,
-	exchangeRateUsdToCurrency
+	exchangeRateUsdToCurrency,
+	fetchAllExchangeRatesFromBackend
 } from '$lib/services/exchange.services';
-import type { CoingeckoPlatformId, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
+import type { CoingeckoPlatformId } from '$lib/types/coingecko';
 import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
 import type {
 	PostMessage,
@@ -134,70 +126,16 @@ const syncExchange = async ({
 	);
 
 	try {
-		const erc20PricesSettled = await Promise.allSettled(
-			erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params))
-		);
-
-		const currentErc20Prices = erc20PricesSettled.reduce<CoingeckoSimpleTokenPriceResponse>(
-			(acc, result) => {
-				if (result.status === 'fulfilled' && nonNullish(result.value)) {
-					Object.assign(acc, result.value);
-				}
-				return acc;
-			},
-			{}
-		);
-
-		const results = await Promise.allSettled([
+		const [currentExchangeRate, backendPrices] = await Promise.all([
 			exchangeRateUsdToCurrency(currentCurrency),
-			exchangeRateETHToUsd(),
-			exchangeRateBTCToUsd(),
-			exchangeRateICPToUsd(),
-			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
-			exchangeRateSOLToUsd(),
-			exchangeRateSPLToUsd(splTokenAddresses),
-			exchangeRateBNBToUsd(),
-			exchangeRatePOLToUsd()
+			fetchAllExchangeRatesFromBackend({
+				erc20Addresses: erc20ContractAddresses,
+				icrcCanisterIds: icrcLedgerCanisterIds,
+				splTokenAddresses
+			})
 		]);
 
-		results.forEach((result) => {
-			if (result.status === 'rejected') {
-				console.error('Error while fetching exchange rate:', result.reason);
-			}
-		});
-
-		const [
-			currentExchangeRateResult,
-			currentEthPriceResult,
-			currentBtcPriceResult,
-			currentIcpPriceResult,
-			currentIcrcPricesResult,
-			currentSolPriceResult,
-			currentSplPricesResult,
-			currentBnbPriceResult,
-			currentPolPriceResult
-		] = results;
-
-		const currentExchangeRate =
-			currentExchangeRateResult.status === 'fulfilled'
-				? currentExchangeRateResult.value
-				: undefined;
-		const currentEthPrice =
-			currentEthPriceResult.status === 'fulfilled' ? currentEthPriceResult.value : undefined;
-		const currentBtcPrice =
-			currentBtcPriceResult.status === 'fulfilled' ? currentBtcPriceResult.value : undefined;
-		const currentIcpPrice =
-			currentIcpPriceResult.status === 'fulfilled' ? currentIcpPriceResult.value : undefined;
-		const currentIcrcPrices =
-			currentIcrcPricesResult.status === 'fulfilled' ? currentIcrcPricesResult.value : undefined;
-		const currentSolPrice =
-			currentSolPriceResult.status === 'fulfilled' ? currentSolPriceResult.value : undefined;
-		const currentSplPrices =
-			currentSplPricesResult.status === 'fulfilled' ? currentSplPricesResult.value : undefined;
-		const currentBnbPrice =
-			currentBnbPriceResult.status === 'fulfilled' ? currentBnbPriceResult.value : undefined;
-		const currentPolPrice =
-			currentPolPriceResult.status === 'fulfilled' ? currentPolPriceResult.value : undefined;
+		const { currentErc20Prices, currentIcrcPrices, currentSplPrices } = backendPrices;
 
 		const currentErc4626Prices = await calculateErc4626Prices({
 			erc20Prices: currentErc20Prices,
@@ -212,16 +150,16 @@ const syncExchange = async ({
 					exchangeRate24hChangeMultiplier: currentExchangeRate?.fx24hChangeMultiplier,
 					currency: currentCurrency
 				},
-				currentEthPrice,
-				currentBtcPrice,
+				currentEthPrice: undefined,
+				currentBtcPrice: undefined,
 				currentErc20Prices,
-				currentIcpPrice,
+				currentIcpPrice: undefined,
 				currentIcrcPrices,
-				currentSolPrice,
+				currentSolPrice: undefined,
 				currentSplPrices,
 				currentErc4626Prices,
-				currentBnbPrice,
-				currentPolPrice
+				currentBnbPrice: undefined,
+				currentPolPrice: undefined
 			}
 		} as PostMessage<PostMessageDataResponseExchange>);
 	} catch (err: unknown) {

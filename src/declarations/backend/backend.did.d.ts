@@ -200,6 +200,14 @@ export interface CustomToken {
 	version: [] | [bigint];
 	enabled: boolean;
 }
+export type CustomTokenId =
+	| { ExtV2: Principal }
+	| { Icrc: Principal }
+	| { Ethereum: [string, bigint] }
+	| { SolDevnet: string }
+	| { IcPunks: Principal }
+	| { Dip721: Principal }
+	| { SolMainnet: string };
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
 }
@@ -219,6 +227,15 @@ export interface ErcToken {
 	chain_id: bigint;
 }
 export type EthAddress = { Public: string };
+export interface ExchangeData {
+	price_24h_change_pct: [] | [number];
+	market_cap: [] | [number];
+	timestamp_ns: bigint;
+	price: [] | [number];
+}
+export interface ExchangeRate {
+	usd: ExchangeData;
+}
 export interface ExperimentalFeatureSettings {
 	enabled: boolean;
 }
@@ -605,6 +622,11 @@ export interface _SERVICE {
 	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
+	get_exchange_rate: ActorMethod<[CustomTokenId], [] | [ExchangeRate]>;
+	get_exchange_rates: ActorMethod<
+		[Array<CustomTokenId>],
+		Array<[CustomTokenId, [] | [ExchangeRate]]>
+	>;
 	/**
 	 * Returns the caller's user profile.
 	 *
