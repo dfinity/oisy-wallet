@@ -16,37 +16,37 @@ use shared::types::{
 };
 
 use crate::{
-    bitcoin::{
-        api as bitcoin_api, pending_tx_model::BtcUserPendingTransactionsModel,
-        utils as bitcoin_utils,
-    },
+    bitcoin::{api, pending_tx_model::BtcUserPendingTransactionsModel, utils},
     guards::caller_is_not_anonymous,
-    mutate_state,
-    signer::btc_principal_to_p2wpkh_address,
+    signer,
+    state::mutate_state,
 };
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 
 /// Retrieves the current fee percentiles for Bitcoin transactions from the cache
-/// for the specified network.
+/// for the specified network. Fee percentiles are measured in millisatoshi per byte
+/// and are periodically updated in the background.
 ///
 /// # Returns
-/// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
-/// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+/// - `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
 ///
 /// # Errors
 /// - `InternalError`: If fee percentiles are not available in the cache for the requested network
+///
+/// # Note
+/// This function only returns data from the in-memory cache and doesn't make any calls
+/// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
+/// it returns the default percentiles.
 #[query(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
 #[must_use]
-pub async fn btc_get_current_fee_percentiles(
+pub fn btc_get_current_fee_percentiles(
     params: BtcGetFeePercentilesRequest,
 ) -> BtcGetFeePercentilesResult {
-    match bitcoin_api::get_current_fee_percentiles(params.network).await {
-        Ok(fee_percentiles) => Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into(),
-        Err(err) => {
-            BtcGetFeePercentilesResult::Err(SelectedUtxosFeeError::InternalError { msg: err })
-        }
-    }
+    let fee_percentiles = api::get_current_fee_percentiles(params.network);
+
+    Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into()
 }
 
 /// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
@@ -61,10 +61,10 @@ pub async fn btc_select_user_utxos_fee(
         params: SelectedUtxosFeeRequest,
     ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
         let principal = ic_cdk::caller();
-        let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+        let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
-        let all_utxos = bitcoin_api::get_all_utxos(
+        let all_utxos = api::get_all_utxos(
             params.network,
             source_address.clone(),
             Some(
@@ -93,17 +93,17 @@ pub async fn btc_select_user_utxos_fee(
             return Err(SelectedUtxosFeeError::PendingTransactions);
         }
 
-        let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
-            .await
-            .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+        let median_fee_millisatoshi_per_vbyte = api::get_fee_per_byte(params.network);
+        // We support sending to one destination only.
+        // Therefore, the outputs are the destination and the source address for the change.
         let output_count = 2;
         let mut available_utxos = all_utxos.clone();
-        let selected_utxos = bitcoin_utils::utxos_selection(
-            params.amount_satoshis,
-            &mut available_utxos,
-            output_count,
-        );
+        let selected_utxos =
+            utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
 
+        // Fee calculation might still take into account default tx size and expected output.
+        // But if there are no selected utxos, no tx is possible. Therefore, no fee should be
+        // present.
         if selected_utxos.is_empty() {
             return Ok(SelectedUtxosFeeResponse {
                 utxos: selected_utxos,
@@ -111,7 +111,7 @@ pub async fn btc_select_user_utxos_fee(
             });
         }
 
-        let fee_satoshis = bitcoin_utils::estimate_fee(
+        let fee_satoshis = utils::estimate_fee(
             selected_utxos.len() as u64,
             median_fee_millisatoshi_per_vbyte,
             output_count as u64,
@@ -152,11 +152,11 @@ pub async fn btc_add_pending_transaction(
 
         let principal = ic_cdk::caller();
 
-        let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+        let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
 
-        let current_utxos = bitcoin_api::get_all_utxos(
+        let current_utxos = api::get_all_utxos(
             params.network,
             source_address.clone(),
             Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
@@ -219,7 +219,7 @@ pub async fn btc_get_pending_transactions(
         let principal = ic_cdk::caller();
         let now_ns = time();
 
-        let current_utxos = bitcoin_api::get_all_utxos(
+        let current_utxos = api::get_all_utxos(
             params.network,
             params.address.clone(),
             Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),

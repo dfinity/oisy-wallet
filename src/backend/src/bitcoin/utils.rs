@@ -27,6 +27,7 @@ fn greedy(target: u64, available_utxos: &mut Vec<Utxo>) -> Vec<Utxo> {
                 .cloned()
                 .expect("bug: there must be at least one UTXO matching the criteria"),
             None => {
+                // Not enough available UTXOs to satisfy the request.
                 for u in solution {
                     available_utxos.push(u);
                 }
@@ -86,6 +87,11 @@ pub fn utxos_selection(
     input_utxos
 }
 
+/// Estimates the size of transaction (in vbytes) with the given number of inputs and outputs.
+// See [MediaWiki](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki)
+// for the transaction structure and
+// [Stack Exchange](https://bitcoin.stackexchange.com/questions/92587/calculate-transaction-fee-for-external-addresses-which-doesnt-belong-to-my-loca/92600#92600)
+// for transaction size estimate.
 const INPUT_SIZE_VBYTES: u64 = 68;
 const OUTPUT_SIZE_VBYTES: u64 = 31;
 const TX_OVERHEAD_VBYTES: u64 = 11;
@@ -111,6 +117,7 @@ pub fn estimate_fee(
 mod tests {
     use ic_cdk::api::management_canister::bitcoin::Outpoint;
 
+    // Import the outer scope
     use super::*;
 
     fn assert_utxos_eq(result_utxos: Vec<Utxo>, expected_utxos: Vec<Utxo>) {

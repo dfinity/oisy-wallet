@@ -3,12 +3,9 @@ use shared::types::custom_token::{CustomToken, CustomTokenId};
 
 use crate::{
     guards::caller_is_not_anonymous,
-    mutate_state, read_state,
-    token::{
-        add_to_user_token, mark_token_active, mark_tokens_active, remove_from_user_token,
-        MAX_TOKEN_LIST_LENGTH,
-    },
-    types::StoredPrincipal,
+    state::{mutate_state, read_state},
+    token::{activity, service, service::MAX_TOKEN_LIST_LENGTH},
+    types::storable::StoredPrincipal,
 };
 
 /// Add or update custom token for the user.
@@ -17,13 +14,16 @@ use crate::{
 pub fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &CustomToken| -> bool {
-        CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-    };
+    mutate_state(|s| {
+        service::add_to_user_token(
+            stored_principal,
+            &mut s.custom_token,
+            std::slice::from_ref(&token),
+            |t: &CustomToken| CustomTokenId::from(&t.token),
+        );
+    });
 
-    mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
-
-    mark_token_active(&CustomTokenId::from(&token.token));
+    activity::mark_token_active(&CustomTokenId::from(&token.token));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
@@ -43,16 +43,15 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
         .collect::<Vec<_>>();
 
     mutate_state(|s| {
-        for token in tokens {
-            let find = |t: &CustomToken| -> bool {
-                CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-            };
-
-            add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
-        }
+        service::add_to_user_token(
+            stored_principal,
+            &mut s.custom_token,
+            &tokens,
+            |t: &CustomToken| CustomTokenId::from(&t.token),
+        );
     });
 
-    mark_tokens_active(&ids);
+    activity::mark_tokens_active(&ids);
 }
 
 /// Remove custom token for the user.
@@ -66,15 +65,23 @@ pub fn remove_custom_token(token: CustomToken) {
             CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
         };
 
-        remove_from_user_token(stored_principal, &mut s.custom_token, &find);
+        service::remove_from_user_token(stored_principal, &mut s.custom_token, &find);
     });
 }
 
 /// List the custom tokens for the calling user.
 ///
 /// Note: This method was previously exposed as a *query* but is now an *update*
-/// call. The change is intentional: `list_custom_tokens` now tracks token activity
-/// by calling `mark_tokens_active`, which mutates canister state.
+/// call. The change is intentional and breaking: `list_custom_tokens` now tracks
+/// token activity by calling `mark_tokens_active`, which mutates canister state.
+/// Because queries must not modify state on the IC, this function must be an
+/// update, not a query.
+///
+/// Implications for callers:
+/// - This call now participates in consensus and may have higher latency than a query.
+/// - It consumes cycles as an update call.
+/// - Integrations that previously relied on query semantics must be updated to invoke this as an
+///   update method.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn list_custom_tokens() -> Vec<CustomToken> {
@@ -88,7 +95,7 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
             .map(|t| CustomTokenId::from(&t.token))
             .collect();
 
-        mark_tokens_active(&ids);
+        activity::mark_tokens_active(&ids);
     }
 
     tokens
