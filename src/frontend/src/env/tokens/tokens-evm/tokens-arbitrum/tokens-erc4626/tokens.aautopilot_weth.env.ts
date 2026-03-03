@@ -22,5 +22,7 @@ export const AAUTOPILOT_WETH_TOKEN: RequiredErc4626Token = {
 	icon: '',
 	address: '0xce4d997a3b404f9eaa796f89deae40747d3647b7',
 	assetAddress: WETH_TOKEN.address,
-	assetDecimals: WETH_TOKEN.decimals
+	assetDecimals: WETH_TOKEN.decimals,
+	assetIcon: WETH_TOKEN.icon,
+	assetSymbol: WETH_TOKEN.symbol
 };
