@@ -2,7 +2,6 @@ import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
 	ChallengeCompletionError,
-	CreateChallengeError,
 	GetAllowedCyclesError,
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
@@ -136,29 +135,6 @@ export const mapAllowSigningError = (
 
 	if ('Other' in err) {
 		return new CanisterInternalError(err.Other);
-	}
-
-	return new CanisterInternalError('An uknown error occurred.');
-};
-
-export const mapCreateChallengeError = (err: CreateChallengeError): CanisterInternalError => {
-	if ('ChallengeInProgress' in err) {
-		return new PowCreateChallengeError(
-			'Challenge is already in progress.',
-			CreateChallengeEnum.ChallengeInProgress
-		);
-	}
-
-	if ('MissingUserProfile' in err) {
-		return new CanisterInternalError('User profile is missing.');
-	}
-
-	if ('RandomnessError' in err) {
-		return new CanisterInternalError('Could not generate randomness.');
-	}
-
-	if ('Other' in err) {
-		return new CanisterInternalError('An other error occurred.');
 	}
 
 	return new CanisterInternalError('An uknown error occurred.');
