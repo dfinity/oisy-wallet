@@ -45,7 +45,6 @@ mod bitcoin;
 mod contacts;
 mod guards;
 mod housekeeping;
-mod memory;
 pub mod random;
 pub mod signer;
 mod token;
