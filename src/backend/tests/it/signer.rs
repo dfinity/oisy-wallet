@@ -116,8 +116,15 @@ fn test_get_allowed_cycles_returns_correct_amount() {
     let pic_setup = setup_with_cycles_ledger();
     let caller = Principal::from_text(VC_HOLDER).unwrap();
 
-    // Create a user profile so the allow_signing function is called
+    // Create a user profile so the allow_signing function is called.
+    // `create_user_profile` spawns an async `allow_signing` task; give
+    // PocketIC a few ticks so the inter-canister call to the cycles ledger
+    // settles before we query the allowance.
     call_create_user_profile(&pic_setup, caller).expect("Failed to call create user profile");
+
+    for _ in 0..10 {
+        pic_setup.pic.tick();
+    }
 
     // Call get_allowed_cycles
     let result = call_get_allowed_cycles(&pic_setup, caller);
