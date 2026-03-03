@@ -148,6 +148,53 @@ describe('eth-transactions-spam.utils', () => {
 
 			expect(result).toStrictEqual(legitimateTxs);
 		});
+
+		it('should call getTransactionSender only once per unique hash (memoization)', async () => {
+			const getTransactionSender = vi.fn().mockResolvedValue(attackerAddress);
+
+			const sharedHash = '0xbatch';
+			const txs = Array.from({ length: 50 }, (_, i) =>
+				makeTx({
+					hash: sharedHash,
+					value: ZERO,
+					from: userAddress,
+					to: `0xpoisoned${i}`
+				})
+			);
+
+			const result = await filterSpamErc20Transfers({
+				transactions: txs,
+				userAddress,
+				getTransactionSender
+			});
+
+			expect(result).toHaveLength(0);
+			expect(getTransactionSender).toHaveBeenCalledExactlyOnceWith(sharedHash);
+		});
+
+		it('should memoize per hash with a mix of shared and unique hashes', async () => {
+			const getTransactionSender = vi.fn().mockResolvedValue(attackerAddress);
+
+			const txs = [
+				makeTx({ hash: '0xbatchA', value: ZERO, to: '0x1' }),
+				makeTx({ hash: '0xbatchA', value: ZERO, to: '0x2' }),
+				makeTx({ hash: '0xbatchA', value: ZERO, to: '0x3' }),
+				makeTx({ hash: '0xbatchB', value: ZERO, to: '0x4' }),
+				makeTx({ hash: '0xbatchB', value: ZERO, to: '0x5' }),
+				makeTx({ hash: '0xsingle', value: ZERO, to: '0x6' })
+			];
+
+			await filterSpamErc20Transfers({
+				transactions: txs,
+				userAddress,
+				getTransactionSender
+			});
+
+			expect(getTransactionSender).toHaveBeenCalledTimes(3);
+			expect(getTransactionSender).toHaveBeenCalledWith('0xbatchA');
+			expect(getTransactionSender).toHaveBeenCalledWith('0xbatchB');
+			expect(getTransactionSender).toHaveBeenCalledWith('0xsingle');
+		});
 	});
 
 	describe('hasBalanceChanged', () => {

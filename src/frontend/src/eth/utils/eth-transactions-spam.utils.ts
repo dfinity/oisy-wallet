@@ -58,6 +58,24 @@ export const filterSpamErc20Transfers = async ({
 		return nonZero;
 	}
 
+	// In address-poisoning attacks many Transfer logs share the same outer tx hash
+	// (e.g. 103 logs in the same batch tx). Memoize per hash so the RPC callback is
+	// invoked at most once per unique hash, avoiding redundant calls and rate-limit risk.
+	const senderCache = new Map<string, Promise<EthAddress | undefined>>();
+
+	const memoizedGetSender = (hash: string): Promise<EthAddress | undefined> => {
+		const cached = senderCache.get(hash);
+		if (nonNullish(cached)) {
+			return cached;
+		}
+
+		const promise = getTransactionSender(hash);
+
+		senderCache.set(hash, promise);
+
+		return promise;
+	};
+
 	const kept = await Promise.all(
 		zeroValue.map(async (tx): Promise<Transaction | undefined> => {
 			if (isNullish(tx.hash)) {
@@ -66,7 +84,7 @@ export const filterSpamErc20Transfers = async ({
 			}
 
 			try {
-				const sender = await getTransactionSender(tx.hash);
+				const sender = await memoizedGetSender(tx.hash);
 
 				// If the sender cannot be determined (e.g. tx pruned / not found),
 				// err on the side of showing the transfer, same as the catch branch.
