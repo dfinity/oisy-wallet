@@ -89,13 +89,6 @@ export const idlFactory = ({ IDL }) => {
 		Expired: IDL.Record({ ledger_time: IDL.Nat64 }),
 		InsufficientFunds: IDL.Record({ balance: IDL.Nat })
 	});
-	const ChallengeCompletionError = IDL.Variant({
-		InvalidNonce: IDL.Null,
-		MissingChallenge: IDL.Null,
-		ExpiredChallenge: IDL.Null,
-		MissingUserProfile: IDL.Null,
-		ChallengeAlreadySolved: IDL.Null
-	});
 	const RateLimitError = IDL.Record({
 		max_calls: IDL.Nat32,
 		window_ns: IDL.Nat64,
@@ -103,7 +96,6 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const AllowSigningError = IDL.Variant({
 		ApproveError: ApproveError,
-		PowChallenge: ChallengeCompletionError,
 		RateLimited: RateLimitError,
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null

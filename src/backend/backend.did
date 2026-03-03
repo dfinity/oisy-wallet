@@ -25,7 +25,6 @@ type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type Agreements = record { agreements : UserAgreements };
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
-	PowChallenge : ChallengeCompletionError;
 	RateLimited : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
@@ -118,13 +117,6 @@ type ChallengeCompletion = record {
 	next_allowance_ms : nat64;
 	next_difficulty : nat32;
 	current_difficulty : nat32
-};
-type ChallengeCompletionError = variant {
-	InvalidNonce;
-	MissingChallenge;
-	ExpiredChallenge;
-	MissingUserProfile;
-	ChallengeAlreadySolved
 };
 type Config = record {
 	derivation_origin : opt text;

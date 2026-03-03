@@ -37,7 +37,6 @@ export interface Agreements {
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
-	| { PowChallenge: ChallengeCompletionError }
 	| { RateLimited: RateLimitError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
@@ -128,12 +127,6 @@ export interface ChallengeCompletion {
 	next_difficulty: number;
 	current_difficulty: number;
 }
-export type ChallengeCompletionError =
-	| { InvalidNonce: null }
-	| { MissingChallenge: null }
-	| { ExpiredChallenge: null }
-	| { MissingUserProfile: null }
-	| { ChallengeAlreadySolved: null };
 export interface Config {
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
