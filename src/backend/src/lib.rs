@@ -22,9 +22,8 @@ use shared::{
         },
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
-        dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        exchange::ExchangeRate,
         dapp::AddHiddenDappIdRequest,
+        exchange::ExchangeRate,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         pow::{
@@ -48,13 +47,6 @@ use shared::{
         Stats, Timestamp,
     },
 };
-use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
-use types::{
-    BtcUserPendingTransactionsMap, Candid, ConfigCell, CustomTokenMap, ExchangeRateMap,
-    StoredPrincipal, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-};
-use user_profile::{add_credential, create_profile, find_profile};
-use user_profile_model::UserProfileModel;
 
 use crate::{
     bitcoin_api::get_current_fee_percentiles,
@@ -63,12 +55,7 @@ use crate::{
     state::{mutate_state, read_config, read_state, set_config},
     token::{add_to_user_token, remove_from_user_token},
     token_activity::{mark_token_active, mark_tokens_active},
-    types::{ContactMap, PowChallengeMap, StoredTokenId},
-    user_profile::{
-        add_hidden_dapp_id, set_show_testnets, update_agreements,
-        update_experimental_feature_settings, update_network_settings,
-    },
-    types::storable::{Candid, StoredPrincipal},
+    types::storable::{Candid, StoredPrincipal, StoredTokenId},
 };
 
 mod api;
@@ -94,8 +81,6 @@ mod tests;
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
 mod utils;
-
-const EXCHANGE_RATE_MEMORY_ID: MemoryId = MemoryId::new(9);
 
 thread_local! {
     /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
@@ -306,9 +291,6 @@ pub fn http_request(request: HttpRequest) -> HttpResponse {
 pub fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-  
-  
-  
     mutate_state(|s| {
         add_to_user_token(
             stored_principal,

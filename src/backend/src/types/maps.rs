@@ -5,7 +5,7 @@ use ic_stable_structures::{
 };
 use shared::types::{
     backend_config::Config, bitcoin::StoredPendingTransaction, contact::StoredContacts,
-    custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
+    custom_token::CustomToken, exchange::ExchangeRate, pow::StoredChallenge, token::UserToken,
     user_profile::StoredUserProfile, Timestamp,
 };
 
@@ -37,6 +37,5 @@ pub type BtcUserPendingTransactionsMap =
     StableBTreeMap<StoredPrincipal, Candid<PendingTransactionsMap>, VMem>;
 
 pub type TokenActivityMap = StableBTreeMap<StoredTokenId, Timestamp, VMem>;
-
 
 pub type ExchangeRateMap = StableBTreeMap<StoredTokenId, Candid<ExchangeRate>, VMem>;

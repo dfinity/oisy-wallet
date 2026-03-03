@@ -9,7 +9,7 @@ use shared::types::{
 use crate::{
     exchange::coingecko::fetch_coingecko_token_prices,
     mutate_state, read_state,
-    types::{Candid, StoredTokenId},
+    types::storable::{Candid, StoredTokenId},
 };
 
 pub const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60; // 5 minutes

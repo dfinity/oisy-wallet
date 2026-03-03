@@ -14,6 +14,7 @@ pub const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 pub const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 pub const BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(7);
 pub const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(8);
+pub const EXCHANGE_RATE_MEMORY_ID: MemoryId = MemoryId::new(9);
 
 thread_local! {
     pub static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
