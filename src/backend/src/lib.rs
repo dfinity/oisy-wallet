@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use bitcoin_utils::estimate_fee;
 use btc_user_pending_tx_model::BtcUserPendingTransactionsModel;
 use candid::Principal;
+use candid::{candid_method, Principal};
 use ic_cdk::{api::time, export_candid, init, post_upgrade, query, update};
 use serde_bytes::ByteBuf;
 use shared::{
@@ -13,11 +14,8 @@ use shared::{
         agreement::UpdateUserAgreementsRequest,
         backend_config::{Arg, Config},
         bitcoin::{
-            BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
-            BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
-            BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
-            BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
-            SelectedUtxosFeeRequest, SelectedUtxosFeeResponse, StoredPendingTransaction,
+            BtcAddPendingTransactionRequest, BtcGetFeePercentilesRequest,
+            BtcGetPendingTransactionsRequest, SelectedUtxosFeeRequest,
         },
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
@@ -40,7 +38,6 @@ use shared::{
 };
 
 use crate::{
-    bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_not_anonymous},
     state::{mutate_state, read_config, read_state, set_config},
     token::{add_to_user_token, remove_from_user_token},
@@ -49,14 +46,13 @@ use crate::{
 };
 
 mod api;
-mod bitcoin_api;
-mod bitcoin_utils;
-mod btc_user_pending_tx_model;
+mod bitcoin;
 mod contacts;
 mod guards;
 mod housekeeping;
 mod impls;
 pub mod random;
+mod rate_limiter;
 mod signer;
 mod state;
 mod token;
@@ -78,7 +74,7 @@ pub fn init(arg: Arg) {
     }
 
     // Initialize the Bitcoin fee percentiles cache
-    bitcoin_api::init_fee_percentiles_cache();
+    bitcoin::api::init_fee_percentiles_cache();
 
     housekeeping::start_periodic_housekeeping_timers();
 }
@@ -101,7 +97,7 @@ pub fn post_upgrade(arg: Option<Arg>) {
         }
     }
     // Initialize the Bitcoin fee percentiles cache
-    bitcoin_api::init_fee_percentiles_cache();
+    bitcoin::api::init_fee_percentiles_cache();
 
     housekeeping::start_periodic_housekeeping_timers();
 }

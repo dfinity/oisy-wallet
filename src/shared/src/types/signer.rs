@@ -1,6 +1,6 @@
 //! Types related to the signer & topping up the cycles ledger account for use with the signer.
 
-use candid::Nat;
+use candid::{Nat, Principal};
 use ic_cycles_ledger_client::ApproveError;
 
 use super::{CandidType, Debug, Deserialize};
@@ -13,12 +13,21 @@ pub enum GetAllowedCyclesError {
     Other(String),
 }
 
+/// Error returned when a caller exceeds the allowed call rate.
+#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct RateLimitError {
+    pub max_calls: u32,
+    pub window_ns: u64,
+    pub caller: Principal,
+}
+
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum AllowSigningError {
     Other(String),
     FailedToContactCyclesLedger,
     ApproveError(ApproveError),
     PowChallenge(ChallengeCompletionError),
+    RateLimited(RateLimitError),
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
