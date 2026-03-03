@@ -131,6 +131,7 @@ const loadCustomTokensWithMetadata = async ({
 					category: 'custom' as const,
 					assetAddress: '' as Erc4626ContractAddress,
 					assetDecimals: ETHEREUM_DEFAULT_DECIMALS,
+					assetSymbol: '',
 					enabled,
 					version,
 					allowExternalContentSource
@@ -201,12 +202,18 @@ const loadCustomTokensWithMetadata = async ({
 			if (nonNullish(assetAddress)) {
 				resultToken = { ...resultToken, assetAddress };
 
-				const assetMetadata = await safeLoadErc20Metadata({ networkId, address: assetAddress });
-				const assetDecimals = assetMetadata?.decimals;
+				const {
+					decimals: assetDecimals,
+					symbol: assetSymbol,
+					icon: assetIcon
+				} = (await safeLoadErc20Metadata({ networkId, address: assetAddress })) ?? {};
 
-				if (nonNullish(assetDecimals)) {
-					resultToken = { ...resultToken, assetDecimals };
-				}
+				resultToken = {
+					...resultToken,
+					...(nonNullish(assetIcon) ? { assetIcon } : {}),
+					...(nonNullish(assetDecimals) ? { assetDecimals } : {}),
+					...(nonNullish(assetSymbol) ? { assetSymbol } : {})
+				};
 			}
 
 			return [...(await acc), resultToken];
