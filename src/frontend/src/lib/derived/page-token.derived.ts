@@ -1,4 +1,4 @@
-import { enabledErcFungibleTokens } from '$eth/derived/erc.derived';
+import { enabledErcFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { isTokenEthereumCustomToken } from '$eth/utils/erc20.utils';
 import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
