@@ -17,9 +17,9 @@ use shared::types::{
 
 use crate::{
     bitcoin::{api, pending_tx_model::BtcUserPendingTransactionsModel, utils},
-    guards::caller_is_not_anonymous,
     signer,
     state::mutate_state,
+    utils::guards::caller_is_not_anonymous,
 };
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
