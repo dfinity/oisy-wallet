@@ -29,7 +29,8 @@ const transaction: Transaction = {
 	nonce: 1,
 	gasLimit: ZERO,
 	value: ZERO,
-	chainId: 1n
+	chainId: 1n,
+	data: '0x'
 };
 
 const ckMinterInfoAddresses: EthAddress[] = ['0xffff'];
