@@ -34,7 +34,8 @@ pub async fn top_up_cycles_ledger(
 }
 
 /// Retrieves the amount of cycles that the signer canister is allowed to spend
-/// on behalf of the current user
+/// on behalf of the current user.
+///
 /// # Returns
 /// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
 /// - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong

@@ -6,12 +6,13 @@ use serde::Serialize;
 
 use super::{CandidType, Debug, Deserialize};
 use crate::types::pow::{AllowSigningStatus, ChallengeCompletion};
-/// Types related to topping up the cycles ledger account for use with the signer.
 
+/// Errors that can occur when retrieving the allowed cycles from the cycles ledger.
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum GetAllowedCyclesError {
     FailedToContactCyclesLedger,
     Other(String),
+    /// The caller has exceeded the call rate limit.
     RateLimited(RateLimitError),
 }
 
@@ -114,8 +115,16 @@ pub mod topup {
     #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
     pub enum TopUpCyclesLedgerError {
         CouldNotGetBalanceFromCyclesLedger,
-        InvalidArgPercentageOutOfRange { percentage: u8, min: u8, max: u8 },
-        CouldNotTopUpCyclesLedger { available: Nat, tried_to_send: Nat },
+        InvalidArgPercentageOutOfRange {
+            percentage: u8,
+            min: u8,
+            max: u8,
+        },
+        CouldNotTopUpCyclesLedger {
+            available: Nat,
+            tried_to_send: Nat,
+        },
+        /// The caller has exceeded the call rate limit.
         RateLimited(RateLimitError),
     }
     /// Possible successful responses when topping up the cycles ledger.
