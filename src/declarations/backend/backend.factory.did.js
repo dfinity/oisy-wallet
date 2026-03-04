@@ -73,7 +73,7 @@ export const idlFactory = ({ IDL }) => {
 	const AllowSigningResponse = IDL.Record({
 		status: AllowSigningStatus,
 		challenge_completion: IDL.Opt(ChallengeCompletion),
-		allowed_cycles: IDL.Nat64
+		allowed_cycles: IDL.Nat
 	});
 	const ApproveError = IDL.Variant({
 		GenericError: IDL.Record({

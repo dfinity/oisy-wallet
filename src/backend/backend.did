@@ -32,7 +32,7 @@ type AllowSigningError = variant {
 type AllowSigningResponse = record {
 	status : AllowSigningStatus;
 	challenge_completion : opt ChallengeCompletion;
-	allowed_cycles : nat64
+	allowed_cycles : nat
 };
 type AllowSigningResult = variant {
 	Ok : AllowSigningResponse;
