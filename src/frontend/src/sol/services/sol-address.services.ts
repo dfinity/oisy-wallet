@@ -8,17 +8,11 @@ import {
 import { getSchnorrPublicKey } from '$lib/api/signer.api';
 import { SIGNER_MASTER_PUB_KEY } from '$lib/constants/signer.constants';
 import { deriveSolAddress } from '$lib/ic-pub-key/src/cli';
-import {
-	certifyAddress,
-	loadTokenAddress,
-	validateAddress,
-	type LoadTokenAddressParams
-} from '$lib/services/address.services';
+import { loadTokenAddress, type LoadTokenAddressParams } from '$lib/services/address.services';
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore,
-	type AddressStoreData
+	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -127,18 +121,4 @@ export const loadSolAddressLocal = (): Promise<ResultSuccess> =>
 	loadSolAddress({
 		networkId: SOLANA_LOCAL_NETWORK_ID,
 		network: SolanaNetworks.local
-	});
-
-const certifySolAddressMainnet = (address: SolAddress): Promise<ResultSuccess<string>> =>
-	certifyAddress<SolAddress>({
-		networkId: SOLANA_MAINNET_NETWORK_ID,
-		address,
-		getAddress: (identity: OptionIdentity) => getSolAddressMainnet(identity),
-		addressStore: solAddressMainnetStore
-	});
-
-export const validateSolAddressMainnet = async ($addressStore: AddressStoreData<SolAddress>) =>
-	await validateAddress<SolAddress>({
-		$addressStore,
-		certifyAddress: certifySolAddressMainnet
 	});
