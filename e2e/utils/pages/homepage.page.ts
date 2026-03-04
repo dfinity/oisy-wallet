@@ -101,6 +101,22 @@ abstract class Homepage {
 		this.#isMobile = isMobile;
 	}
 
+	private async closeBanners(): Promise<void> {
+		const betaBannerCloseButton = this.#page
+			.locator('div:has-text("This is a beta release")')
+			.locator('[aria-label="Close"]');
+		if (await betaBannerCloseButton.isVisible()) {
+			await betaBannerCloseButton.click();
+		}
+
+		const testBannerCloseButton = this.#page
+			.locator('div.test-banner')
+			.locator('[aria-label="Close"]');
+		if (await testBannerCloseButton.isVisible()) {
+			await testBannerCloseButton.click();
+		}
+	}
+
 	protected async clickByTestId({
 		testId,
 		scrollIntoView = true
@@ -498,6 +514,8 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
+		await this.closeBanners();
+
 		if (isNullish(screenshotTarget) && !this.#isMobile) {
 			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
 			await this.viewportAdjuster();
