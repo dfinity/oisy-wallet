@@ -23,7 +23,6 @@ use crate::{
         BTC_SELECT_UTXOS_FEE_RATE_LIMITER,
     },
     rate_limiter, signer,
-    signer,
     state::mutate_state,
     utils::guards::caller_is_not_anonymous,
 };

@@ -92,9 +92,7 @@ pub enum BtcAddPendingTransactionError {
     /// Intersects with caller's existing pending reservations
     UtxosAlreadyReserved,
     /// Server-side / unexpected
-    InternalError {
-        msg: String,
-    },
+    InternalError { msg: String },
     /// The caller has exceeded the call rate limit.
     RateLimited(RateLimitError),
 }

@@ -102,7 +102,6 @@ mod tests {
         },
         signer::{topup::TopUpCyclesLedgerError, AllowSigningError, GetAllowedCyclesError},
     };
-    use shared::types::signer::AllowSigningError;
 
     use super::*;
 
