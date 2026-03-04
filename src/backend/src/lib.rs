@@ -1,5 +1,5 @@
 use candid::Principal;
-use ic_cdk::{api::time, export_candid, init, post_upgrade};
+use ic_cdk::{export_candid, init, post_upgrade};
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
@@ -30,23 +30,17 @@ use shared::{
     },
 };
 
-use crate::{
-    state::{mutate_state, read_config, read_state, set_config},
-    types::storable::{Candid, StoredPrincipal},
-};
+use crate::state::{read_state, set_config};
 
 mod api;
 mod bitcoin;
 mod contacts;
-mod guards;
-mod housekeeping;
-pub mod random;
-mod rate_limiter;
 mod signer;
 mod state;
 mod token;
 mod types;
 mod user_profile;
+mod utils;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
@@ -61,7 +55,7 @@ pub fn init(arg: Arg) {
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
-    housekeeping::start_periodic_housekeeping_timers();
+    utils::housekeeping::start_periodic_housekeeping_timers();
 }
 
 /// Post-upgrade handler.
@@ -81,10 +75,11 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
-    housekeeping::start_periodic_housekeeping_timers();
+    utils::housekeeping::start_periodic_housekeeping_timers();
 }
 
 export_candid!();
@@ -94,8 +89,6 @@ mod tests {
     use std::path::{Path, PathBuf};
 
     use candid_parser::utils::{service_compatible, CandidSource};
-
-    use super::*;
 
     /// Determines the workspace directory when running tests.
     fn workspace_dir() -> PathBuf {
@@ -114,7 +107,7 @@ mod tests {
     #[test]
     #[ignore] // Not run unless requested explicitly
     fn check_candid_interface_compatibility() {
-        let canister_interface = __export_service();
+        let canister_interface = super::__export_service();
         let prod_interface_file = workspace_dir().join("target/ic/candid/backend.ic.did");
         service_compatible(
             CandidSource::Text(&canister_interface),

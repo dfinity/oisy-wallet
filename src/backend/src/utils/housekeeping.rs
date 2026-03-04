@@ -4,7 +4,8 @@ use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::signer::topup::TopUpCyclesLedgerResult;
 
-use crate::{api, rate_limiter, signer, types::storable::StoredPrincipal};
+use super::rate_limiter;
+use crate::{api, signer, types::StoredPrincipal};
 
 thread_local! {
     /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
@@ -12,7 +13,7 @@ thread_local! {
     static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
 
     /// Rate-limits `allow_signing`: max 3 calls per caller per hour.
-    pub static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
+    pub(crate) static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
         rate_limiter::RateLimiter::new(3, 60 * 60 * 1_000_000_000);
 }
 

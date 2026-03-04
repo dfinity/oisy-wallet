@@ -2,10 +2,7 @@ use candid::{CandidType, Deserialize};
 use ic_stable_structures::StableBTreeMap;
 use shared::types::TokenVersion;
 
-use crate::types::{
-    maps::VMem,
-    storable::{Candid, StoredPrincipal},
-};
+use crate::types::{Candid, StoredPrincipal, VMem};
 
 pub const MAX_TOKEN_LIST_LENGTH: usize = 1000;
 

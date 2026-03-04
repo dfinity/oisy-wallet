@@ -3,8 +3,8 @@ use ic_stable_structures::StableBTreeMap;
 use shared::types::{custom_token::CustomTokenId, Timestamp};
 
 use crate::{
-    mutate_state,
-    types::{maps::VMem, storable::StoredTokenId},
+    state::mutate_state,
+    types::{StoredTokenId, VMem},
 };
 
 fn add_to_token_activity(

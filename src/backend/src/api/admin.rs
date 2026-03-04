@@ -9,9 +9,9 @@ use shared::{
 };
 
 use crate::{
-    guards::caller_is_allowed,
     state::{read_config, read_state},
-    types::storable::StoredPrincipal,
+    types::StoredPrincipal,
+    utils::guards::caller_is_allowed,
 };
 
 /// Gets the canister configuration.

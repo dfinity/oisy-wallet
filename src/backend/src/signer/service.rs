@@ -13,19 +13,16 @@ use ic_cycles_ledger_client::{
 };
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
-use shared::types::signer::GetAllowedCyclesError;
-pub(crate) use shared::types::signer::{
+use shared::types::signer::{
     topup::{
         TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
         TopUpCyclesLedgerResult,
     },
-    AllowSigningError,
+    AllowSigningError, GetAllowedCyclesError,
 };
 
-use crate::{
-    read_config,
-    signer::canister_ids::{CYCLES_LEDGER, SIGNER},
-};
+use super::canister_ids::{CYCLES_LEDGER, SIGNER};
+use crate::state::read_config;
 
 /// Current ledger fee in cycles.  Historically stable.
 ///
