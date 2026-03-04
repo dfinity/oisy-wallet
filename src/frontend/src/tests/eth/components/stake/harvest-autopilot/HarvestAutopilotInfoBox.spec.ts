@@ -22,10 +22,7 @@ describe('HarvestAutopilotInfoBox', () => {
 
 		const img = getByRole('presentation');
 
-		expect(img).toHaveAttribute(
-			'src',
-			stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].logo
-		);
+		expect(img).toHaveAttribute('src', stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].logo);
 	});
 
 	it('should render the external link with correct href', () => {
