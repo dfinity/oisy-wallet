@@ -8,9 +8,11 @@ import {
 	toCkEthHelperContractAddress,
 	toCkMinterAddress
 } from '$icp-eth/utils/cketh.utils';
+import { MAX_UINT_256 } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Transaction } from '$lib/types/transaction';
+import type { Option } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { AbiCoder } from 'ethers/abi';
 import { dataSlice } from 'ethers/utils';
@@ -130,3 +132,6 @@ export const mapEthTransactionUi = ({
 		approveSpender
 	};
 };
+
+export const isMaxUint256 = (value: Option<bigint>): boolean =>
+	nonNullish(value) && value === MAX_UINT_256;
