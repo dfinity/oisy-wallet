@@ -675,7 +675,7 @@ describe('backend.canister', () => {
 			const res = await allowSigning();
 
 			expect(service.allow_signing).toHaveBeenCalledOnce();
-			expect(res).toStrictEqual({ response: okResponse, rateLimited: false });
+			expect(res).toStrictEqual({ response: okResponse });
 		});
 
 		it('should throw an error if allowSigning throws', async () => {
@@ -752,7 +752,7 @@ describe('backend.canister', () => {
 			);
 		});
 
-		it('should return rateLimited outcome if RateLimited error is returned', async () => {
+		it('should return rateLimitInfo if RateLimited error is returned', async () => {
 			const response = {
 				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
 			};
@@ -772,7 +772,10 @@ describe('backend.canister', () => {
 					challenge_completion: toNullable(),
 					allowed_cycles: ZERO
 				},
-				rateLimited: true
+				rateLimitInfo: {
+					endpoint: 'allow_signing',
+					limiter: 'ALLOW_SIGNING_RATE_LIMITER'
+				}
 			});
 		});
 	});

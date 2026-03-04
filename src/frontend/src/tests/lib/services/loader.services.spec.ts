@@ -4,15 +4,8 @@ import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import { ZERO } from '$lib/constants/app.constants';
-import {
-	PLAUSIBLE_EVENT_CONTEXTS,
-	PLAUSIBLE_EVENT_SOURCES,
-	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
-	PLAUSIBLE_EVENTS
-} from '$lib/enums/plausible';
 import { loadAddresses } from '$lib/services/addresses.services';
-import { trackEvent } from '$lib/services/analytics.services';
+import { trackRateLimited } from '$lib/services/analytics.services';
 import * as authServices from '$lib/services/auth.services';
 import { nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
@@ -41,18 +34,18 @@ vi.mock('$lib/services/addresses.services', () => ({
 }));
 
 vi.mock('$lib/services/analytics.services', () => ({
-	trackEvent: vi.fn()
+	trackEvent: vi.fn(),
+	trackRateLimited: vi.fn()
 }));
 
 describe('loader.services', () => {
 	const mockExecutedOutcome: AllowSigningOutcome = {
-		response: { status: { Executed: null }, challenge_completion: [], allowed_cycles: 100n },
-		rateLimited: false
+		response: { status: { Executed: null }, challenge_completion: [], allowed_cycles: 100n }
 	};
 
 	const mockRateLimitedOutcome: AllowSigningOutcome = {
-		response: { status: { Skipped: null }, challenge_completion: [], allowed_cycles: ZERO },
-		rateLimited: true
+		response: { status: { Skipped: null }, challenge_completion: [], allowed_cycles: 0n },
+		rateLimitInfo: { endpoint: 'allow_signing', limiter: 'ALLOW_SIGNING_RATE_LIMITER' }
 	};
 
 	describe('initSignerAllowance', () => {
@@ -90,24 +83,17 @@ describe('loader.services', () => {
 
 			await initSignerAllowance();
 
-			expect(trackEvent).not.toHaveBeenCalled();
+			expect(trackRateLimited).not.toHaveBeenCalled();
 		});
 
-		it('should track rate limited event when rateLimited is true', async () => {
+		it('should track rate limited event when rateLimitInfo is present', async () => {
 			apiMock.mockResolvedValueOnce(mockRateLimitedOutcome);
 
 			await initSignerAllowance();
 
-			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: PLAUSIBLE_EVENTS.RATE_LIMITED,
-				metadata: {
-					event_context: PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
-					event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND.PER_USER,
-					location_source: PLAUSIBLE_EVENT_SOURCES.BACKEND,
-					endpoint: 'allow_signing',
-					limiter: 'ALLOW_SIGNING_RATE_LIMITER'
-				}
-			});
+			expect(trackRateLimited).toHaveBeenCalledExactlyOnceWith(
+				mockRateLimitedOutcome.rateLimitInfo
+			);
 		});
 
 		it('should handle errors', async () => {

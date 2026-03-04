@@ -33,9 +33,14 @@ export interface AddUserCredentialParams {
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
 
+export interface RateLimitInfo {
+	endpoint: string;
+	limiter: string;
+}
+
 export interface AllowSigningOutcome {
 	response: AllowSigningResponse;
-	rateLimited: boolean;
+	rateLimitInfo?: RateLimitInfo;
 }
 
 export interface BtcSelectUserUtxosFeeParams {

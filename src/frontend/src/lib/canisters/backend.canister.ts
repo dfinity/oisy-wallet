@@ -209,7 +209,7 @@ export class BackendCanister extends Canister<BackendService> {
 		const response = await allow_signing();
 
 		if ('Ok' in response) {
-			return { response: response.Ok, rateLimited: false };
+			return { response: response.Ok };
 		}
 
 		// In case of rate limit reached, we ignore the error and let the user continue (for now).
@@ -221,7 +221,10 @@ export class BackendCanister extends Canister<BackendService> {
 					challenge_completion: toNullable(),
 					allowed_cycles: ZERO
 				},
-				rateLimited: true
+				rateLimitInfo: {
+					endpoint: 'allow_signing',
+					limiter: 'ALLOW_SIGNING_RATE_LIMITER'
+				}
 			};
 		}
 
