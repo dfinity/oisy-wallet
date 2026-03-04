@@ -2,7 +2,7 @@
 	import { isMaxUint256 } from '$eth/utils/transactions.utils';
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import {  ZERO } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
