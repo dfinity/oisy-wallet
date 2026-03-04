@@ -219,7 +219,7 @@ export class BackendCanister extends Canister<BackendService> {
 			return Ok;
 		}
 
-		// In case of rate limited reached, we want to ignore the error and let the user continue (for now).
+		// In case of rate limit reached, we want to ignore the error and let the user continue (for now).
 		// However, we track it and return a placeholder response.
 		// TODO: improve placeholder with significat data, for now we do not use them
 		if ('RateLimited' in response.Err) {
