@@ -1,6 +1,5 @@
 import type {
 	AddUserCredentialResult,
-	AllowSigningResponse,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
