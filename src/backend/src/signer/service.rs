@@ -106,15 +106,16 @@ pub async fn get_allowed_cycles() -> Result<Nat, GetAllowedCyclesError> {
     Ok(allowance.allowance)
 }
 
-/// Returns `true` when the caller's current cycles allowance is at or above
-/// [`SUFFICIENT_CYCLES_THRESHOLD`], meaning a new `icrc_2_approve` is unnecessary.
+/// Returns `Some(allowance)` when the caller's current cycles allowance is
+/// at or above [`SUFFICIENT_CYCLES_THRESHOLD`], meaning a new `icrc_2_approve`
+/// is unnecessary.
 ///
-/// Returns `false` when the allowance is below threshold **or** when the
+/// Returns `None` when the allowance is below threshold **or** when the
 /// cycles ledger cannot be contacted (conservative fallback).
-pub async fn has_sufficient_allowance() -> bool {
+pub async fn has_sufficient_allowance() -> Option<Nat> {
     match get_allowed_cycles().await {
-        Ok(current) => current >= SUFFICIENT_CYCLES_THRESHOLD,
-        Err(_) => false,
+        Ok(current) if current >= SUFFICIENT_CYCLES_THRESHOLD => Some(current),
+        _ => None,
     }
 }
 
@@ -167,7 +168,7 @@ pub async fn approve_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSig
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`
 pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigningError> {
-    if has_sufficient_allowance().await {
+    if has_sufficient_allowance().await.is_some() {
         return Ok(());
     }
 

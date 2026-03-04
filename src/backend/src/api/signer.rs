@@ -56,10 +56,10 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn allow_signing() -> AllowSigningResult {
     async fn inner() -> Result<AllowSigningResponse, AllowSigningError> {
-        if signer::has_sufficient_allowance().await {
+        if let Some(current) = signer::has_sufficient_allowance().await {
             return Ok(AllowSigningResponse {
                 status: AllowSigningStatus::Skipped,
-                allowed_cycles: 0u64,
+                allowed_cycles: u64::try_from(current.0).unwrap_or(u64::MAX),
                 challenge_completion: None,
             });
         }
