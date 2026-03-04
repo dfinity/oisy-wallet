@@ -20,7 +20,8 @@ describe('eth-transactions-spam.utils', () => {
 			nonce: 0,
 			gasLimit: ZERO,
 			value: ZERO,
-			chainId: 1n
+			chainId: 1n,
+			data: '0xbase'
 		};
 
 		const makeTx = (overrides: Partial<Transaction>): Transaction => ({
