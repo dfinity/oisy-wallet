@@ -35,15 +35,12 @@ use crate::state::{read_state, set_config};
 mod api;
 mod bitcoin;
 mod contacts;
-mod guards;
-mod housekeeping;
-mod random;
-mod rate_limiter;
 mod signer;
 mod state;
 mod token;
 mod types;
 mod user_profile;
+mod utils;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
@@ -58,7 +55,7 @@ pub fn init(arg: Arg) {
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
-    housekeeping::start_periodic_housekeeping_timers();
+    utils::housekeeping::start_periodic_housekeeping_timers();
 }
 
 /// Post-upgrade handler.
@@ -82,7 +79,7 @@ pub fn post_upgrade(arg: Option<Arg>) {
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
-    housekeeping::start_periodic_housekeeping_timers();
+    utils::housekeeping::start_periodic_housekeeping_timers();
 }
 
 export_candid!();

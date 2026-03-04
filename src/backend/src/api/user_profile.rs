@@ -16,11 +16,10 @@ use shared::types::{
 };
 
 use crate::{
-    guards::caller_is_not_anonymous,
-    housekeeping::spawn_allow_signing_if_below_limit,
     state::{mutate_state, read_config},
     types::StoredPrincipal,
     user_profile::{credential_config::find_credential_config, model::UserProfileModel, service},
+    utils::{guards::caller_is_not_anonymous, housekeeping::spawn_allow_signing_if_below_limit},
 };
 
 /// Adds a verifiable credential to the user profile.
