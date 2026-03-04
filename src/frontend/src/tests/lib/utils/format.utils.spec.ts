@@ -1447,7 +1447,7 @@ describe('format.utils', () => {
 
 			expect(
 				formatCurrency({
-					value: 1.0000500,
+					value: 1.00005,
 					currency: Currency.USD,
 					exchangeRate: {
 						currency: Currency.USD,
@@ -1458,9 +1458,8 @@ describe('format.utils', () => {
 					useMinSignificantDigits: true
 				})
 			).toBe('$1.0001');
-
 		});
-		
+
 		it('should use baseline fraction digits when value is 0 and useMinSignificantDigits is enabled', () => {
 			expect(
 				formatCurrency({
