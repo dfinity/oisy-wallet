@@ -4,6 +4,7 @@ import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { ZERO } from '$lib/constants/app.constants';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
 import * as authServices from '$lib/services/auth.services';
@@ -44,7 +45,7 @@ describe('loader.services', () => {
 	};
 
 	const mockRateLimitedOutcome: AllowSigningOutcome = {
-		response: { status: { Skipped: null }, challenge_completion: [], allowed_cycles: 0n },
+		response: { status: { Skipped: null }, challenge_completion: [], allowed_cycles: ZERO },
 		rateLimitInfo: { endpoint: 'allow_signing', limiter: 'ALLOW_SIGNING_RATE_LIMITER' }
 	};
 
