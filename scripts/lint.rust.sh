@@ -3,6 +3,21 @@ set -euo pipefail
 
 FIX_ARGS=()
 
+[[ "${1:-}" != "--help" ]] || {
+  cat <<-EOF
+
+  Runs Clippy lint checks for the Rust canister crates.
+
+	Usage: $0 [--fix]
+
+	Options:
+	  --fix     Apply automatic fixes with cargo clippy (allow dirty and staged).
+	  --help    Show this help message and exit.
+
+	EOF
+  exit 0
+}
+
 if [[ "${1:-}" == "--fix" ]]; then
   FIX_ARGS+=(--fix --allow-dirty --allow-staged)
 fi
