@@ -1,5 +1,5 @@
 use candid::Principal;
-use ic_cdk::{api::time, export_candid, init, post_upgrade};
+use ic_cdk::{export_candid, init, post_upgrade};
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
@@ -24,23 +24,20 @@ use shared::{
             UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
             UpdateUserNetworkSettingsResult,
         },
-        signer::{
-            topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest,
-        },
+        signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
         Stats, Timestamp,
     },
 };
 
-use crate::state::set_config;
+use crate::state::{read_state, set_config};
 
 mod api;
 mod bitcoin;
 mod contacts;
 mod guards;
 mod housekeeping;
-pub mod random;
+mod random;
 mod rate_limiter;
 mod signer;
 mod state;
@@ -51,10 +48,6 @@ mod user_profile;
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
 
-// ---------------------------------------------------------------------------
-// Canister lifecycle
-// ---------------------------------------------------------------------------
-
 #[init]
 pub fn init(arg: Arg) {
     match arg {
@@ -63,7 +56,8 @@ pub fn init(arg: Arg) {
     }
 
     bitcoin::api::init_fee_percentiles_cache();
-    housekeeping::start_periodic_timers();
+
+    housekeeping::start_periodic_housekeeping_timers();
 }
 
 /// Post-upgrade handler.
@@ -83,7 +77,6 @@ pub fn post_upgrade(arg: Option<Arg>) {
         }
     }
     bitcoin::api::init_fee_percentiles_cache();
-    housekeeping::start_periodic_timers();
 
     housekeeping::start_periodic_housekeeping_timers();
 }
@@ -95,8 +88,6 @@ mod tests {
     use std::path::{Path, PathBuf};
 
     use candid_parser::utils::{service_compatible, CandidSource};
-
-    use super::*;
 
     fn workspace_dir() -> PathBuf {
         let output = std::process::Command::new(env!("CARGO"))
@@ -113,7 +104,7 @@ mod tests {
     #[test]
     #[ignore]
     fn check_candid_interface_compatibility() {
-        let canister_interface = __export_service();
+        let canister_interface = super::__export_service();
         let prod_interface_file = workspace_dir().join("target/ic/candid/backend.ic.did");
         service_compatible(
             CandidSource::Text(&canister_interface),

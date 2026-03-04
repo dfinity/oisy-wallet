@@ -4,10 +4,7 @@ use candid::Principal;
 use ic_cdk::api::management_canister::bitcoin::Utxo;
 use shared::types::bitcoin::StoredPendingTransaction;
 
-use crate::types::{
-    maps::BtcUserPendingTransactionsMap,
-    storable::{Candid, StoredPrincipal},
-};
+use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
 
 #[allow(dead_code)]
 const MAX_PENDING_TRANSACTIONS: usize = 1000;

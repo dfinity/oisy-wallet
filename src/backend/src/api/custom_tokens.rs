@@ -4,8 +4,8 @@ use shared::types::custom_token::{CustomToken, CustomTokenId};
 use crate::{
     guards::caller_is_not_anonymous,
     state::{mutate_state, read_state},
-    token::{activity, service, service::MAX_TOKEN_LIST_LENGTH},
-    types::storable::StoredPrincipal,
+    token::{self, MAX_TOKEN_LIST_LENGTH},
+    types::StoredPrincipal,
 };
 
 /// Add or update custom token for the user.
@@ -15,7 +15,7 @@ pub fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        service::add_to_user_token(
+        token::add_to_user_token(
             stored_principal,
             &mut s.custom_token,
             std::slice::from_ref(&token),
@@ -23,7 +23,7 @@ pub fn set_custom_token(token: CustomToken) {
         );
     });
 
-    activity::mark_token_active(&CustomTokenId::from(&token.token));
+    token::mark_token_active(&CustomTokenId::from(&token.token));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
@@ -43,7 +43,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
         .collect::<Vec<_>>();
 
     mutate_state(|s| {
-        service::add_to_user_token(
+        token::add_to_user_token(
             stored_principal,
             &mut s.custom_token,
             &tokens,
@@ -51,7 +51,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
         );
     });
 
-    activity::mark_tokens_active(&ids);
+    token::mark_tokens_active(&ids);
 }
 
 /// Remove custom token for the user.
@@ -65,7 +65,7 @@ pub fn remove_custom_token(token: CustomToken) {
             CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
         };
 
-        service::remove_from_user_token(stored_principal, &mut s.custom_token, &find);
+        token::remove_from_user_token(stored_principal, &mut s.custom_token, &find);
     });
 }
 
@@ -95,7 +95,7 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
             .map(|t| CustomTokenId::from(&t.token))
             .collect();
 
-        activity::mark_tokens_active(&ids);
+        token::mark_tokens_active(&ids);
     }
 
     tokens

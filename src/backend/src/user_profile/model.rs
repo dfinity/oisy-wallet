@@ -1,9 +1,6 @@
 use shared::types::{user_profile::StoredUserProfile, Timestamp};
 
-use crate::types::{
-    maps::{UserProfileMap, UserProfileUpdatedMap},
-    storable::{Candid, StoredPrincipal},
-};
+use crate::types::{Candid, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap};
 
 pub struct UserProfileModel<'a> {
     user_profile_map: &'a mut UserProfileMap,
