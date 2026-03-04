@@ -3,9 +3,8 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { erc1155Tokens } from '$eth/derived/erc1155.derived';
-import { erc20Tokens } from '$eth/derived/erc20.derived';
-import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -55,11 +54,10 @@ export const nativeTokens: Readable<Token[]> = derived(
 );
 
 export const fungibleTokens: Readable<Token[]> = derived(
-	[nativeTokens, erc20Tokens, erc4626Tokens, icrcTokens, splTokens],
-	([$nativeTokens, $erc20Tokens, $erc4626Tokens, $icrcTokens, $splTokens]) => [
+	[nativeTokens, ercFungibleTokens, icrcTokens, splTokens],
+	([$nativeTokens, $ercFungibleTokens, $icrcTokens, $splTokens]) => [
 		...$nativeTokens,
-		...$erc20Tokens,
-		...$erc4626Tokens,
+		...$ercFungibleTokens,
 		...$icrcTokens,
 		...$splTokens
 	]
