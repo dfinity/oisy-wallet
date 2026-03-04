@@ -1474,8 +1474,6 @@ describe('format.utils', () => {
 			).toBe('$1.001');
 		});
 
-		});
-
 		it('should use baseline fraction digits when value is 0 and useMinSignificantDigits is enabled', () => {
 			expect(
 				formatCurrency({
