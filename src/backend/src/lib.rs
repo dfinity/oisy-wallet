@@ -55,6 +55,7 @@ pub fn init(arg: Arg) {
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
 
+    // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
     housekeeping::start_periodic_housekeeping_timers();
@@ -63,7 +64,8 @@ pub fn init(arg: Arg) {
 /// Post-upgrade handler.
 ///
 /// # Panics
-/// - If the config is not initialized, which should not happen during an upgrade.
+/// - If the config is not initialized, which should not happen during an upgrade.  Maybe this is a
+///   new installation?
 #[post_upgrade]
 pub fn post_upgrade(arg: Option<Arg>) {
     match arg {
@@ -76,6 +78,8 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+
+    // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
     housekeeping::start_periodic_housekeeping_timers();
@@ -89,6 +93,7 @@ mod tests {
 
     use candid_parser::utils::{service_compatible, CandidSource};
 
+    /// Determines the workspace directory when running tests.
     fn workspace_dir() -> PathBuf {
         let output = std::process::Command::new(env!("CARGO"))
             .arg("locate-project")
@@ -101,8 +106,9 @@ mod tests {
         cargo_path.parent().unwrap().to_path_buf()
     }
 
+    /// Checks candid interface type compatibility with production.
     #[test]
-    #[ignore]
+    #[ignore] // Not run unless requested explicitly
     fn check_candid_interface_compatibility() {
         let canister_interface = super::__export_service();
         let prod_interface_file = workspace_dir().join("target/ic/candid/backend.ic.did");
