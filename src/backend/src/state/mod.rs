@@ -13,17 +13,14 @@ use crate::{
         USER_TOKEN_MEMORY_ID,
     },
     types::{
-        maps::{
-            BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, PowChallengeMap,
-            TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-        },
-        storable::Candid,
+        BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
+        PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
     },
 };
 
-pub mod memory;
+pub(crate) mod memory;
 
-pub struct State {
+pub(crate) struct State {
     pub(crate) config: ConfigCell,
     /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the
     /// users.

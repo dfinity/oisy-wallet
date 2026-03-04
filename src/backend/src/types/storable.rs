@@ -1,10 +1,7 @@
 use std::{borrow::Cow, ops::Deref};
 
 use candid::{decode_one, encode_one, CandidType, Deserialize, Principal};
-use ic_stable_structures::{
-    storable::{Blob, Bound},
-    Storable,
-};
+use ic_stable_structures::storable::{Blob, Bound, Storable};
 use shared::types::custom_token::CustomTokenId;
 
 #[derive(Default)]
