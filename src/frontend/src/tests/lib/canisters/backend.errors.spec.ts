@@ -89,7 +89,8 @@ describe('backend.errors', () => {
 				ApproveError: { GenericError: { error_code: 1n, message: 'approve failed' } }
 			});
 
-			expect(err).toBeDefined();
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toContain('approve failed');
 		});
 
 		it('should map FailedToContactCyclesLedger', () => {
