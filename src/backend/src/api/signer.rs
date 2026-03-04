@@ -1,3 +1,4 @@
+use candid::Nat;
 use ic_cdk::update;
 use shared::types::{
     pow::AllowSigningStatus,
@@ -46,31 +47,37 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
     }
 }
 
-/// This function authorises the caller to spend a specific
-///  amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
-/// providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
-/// cycles ledger.
+/// Ensures the caller has enough cycles allowance for chain-fusion signer
+/// operations (providing public keys, creating signatures, etc.).
 ///
-/// Note:
-/// - The chain fusion signer performs threshold key operations including providing public keys,
-///   creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
+/// If the caller already has sufficient allowance the call returns
+/// immediately with [`AllowSigningStatus::Skipped`] and no inter-canister
+/// call is made.  Otherwise the endpoint is rate-limited and a new
+/// `icrc_2_approve` is issued on the cycles ledger.
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn allow_signing() -> AllowSigningResult {
     async fn inner() -> Result<AllowSigningResponse, AllowSigningError> {
+        if let Some(current) = signer::has_sufficient_allowance().await {
+            return Ok(AllowSigningResponse {
+                status: AllowSigningStatus::Skipped,
+                allowed_cycles: current,
+                challenge_completion: None,
+            });
+        }
+
         ALLOW_SIGNING_RATE_LIMITER
             .with(rate_limiter::RateLimiter::check_caller)
             .map_err(AllowSigningError::RateLimited)?;
 
-        // Passing None to apply the old cycle calculation logic
-        signer::allow_signing(None).await?;
+        signer::approve_signing(None).await?;
 
         // Returning a placeholder response that can be ignored by the frontend.
         Ok(AllowSigningResponse {
             status: AllowSigningStatus::Skipped,
-            allowed_cycles: 0u64,
+            allowed_cycles: Nat::from(0u64),
             challenge_completion: None,
         })
     }
