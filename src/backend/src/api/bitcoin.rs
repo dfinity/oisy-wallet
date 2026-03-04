@@ -18,7 +18,11 @@ use shared::types::{
 use crate::{
     bitcoin::{api, pending_tx_model::BtcUserPendingTransactionsModel, utils},
     guards::caller_is_not_anonymous,
-    signer,
+    housekeeping::{
+        BTC_ADD_PENDING_TX_RATE_LIMITER, BTC_GET_PENDING_TX_RATE_LIMITER,
+        BTC_SELECT_UTXOS_FEE_RATE_LIMITER,
+    },
+    rate_limiter, signer,
     state::mutate_state,
 };
 
@@ -60,6 +64,10 @@ pub async fn btc_select_user_utxos_fee(
     async fn inner(
         params: SelectedUtxosFeeRequest,
     ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
+        BTC_SELECT_UTXOS_FEE_RATE_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(SelectedUtxosFeeError::RateLimited)?;
+
         let principal = ic_cdk::caller();
         let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
@@ -136,6 +144,10 @@ pub async fn btc_add_pending_transaction(
     async fn inner(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
+        BTC_ADD_PENDING_TX_RATE_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(BtcAddPendingTransactionError::RateLimited)?;
+
         if params.utxos.is_empty() {
             return Err(BtcAddPendingTransactionError::EmptyUtxos);
         }
@@ -216,6 +228,10 @@ pub async fn btc_get_pending_transactions(
     async fn inner(
         params: BtcGetPendingTransactionsRequest,
     ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
+        BTC_GET_PENDING_TX_RATE_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(BtcGetPendingTransactionsError::RateLimited)?;
+
         let principal = ic_cdk::caller();
         let now_ns = time();
 

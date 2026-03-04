@@ -6,6 +6,8 @@ use candid::CandidType;
 use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
 use serde::Deserialize;
 
+use super::signer::RateLimitError;
+
 /// The maximum length of a bitcoin address, expressed as a string.
 /// - The longest current formats seem to be `Bech32` and `Bech32m` which are up to 62 characters
 ///   long.
@@ -64,6 +66,7 @@ pub struct SelectedUtxosFeeResponse {
 pub enum SelectedUtxosFeeError {
     InternalError { msg: String },
     PendingTransactions,
+    RateLimited(RateLimitError),
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -86,6 +89,8 @@ pub enum BtcAddPendingTransactionError {
     UtxosAlreadyReserved,
     /// Server-side / unexpected
     InternalError { msg: String },
+    /// Caller has exceeded the rate limit for this API
+    RateLimited(RateLimitError),
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -118,4 +123,5 @@ pub struct BtcGetPendingTransactionsReponse {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcGetPendingTransactionsError {
     InternalError { msg: String },
+    RateLimited(RateLimitError),
 }
