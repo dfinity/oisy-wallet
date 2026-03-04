@@ -6,6 +6,7 @@ import {
 } from '$lib/canisters/backend.errors';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { ApproveError } from '@icp-sdk/canisters/ledger/icp';
 
 describe('backend.errors', () => {
 	describe('mapBtcPendingTransactionError', () => {
@@ -89,8 +90,8 @@ describe('backend.errors', () => {
 				ApproveError: { GenericError: { error_code: 1n, message: 'approve failed' } }
 			});
 
-			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toContain('approve failed');
+			expect(err).toBeInstanceOf(ApproveError);
+			expect(err.message).toBe('approve failed');
 		});
 
 		it('should map FailedToContactCyclesLedger', () => {
