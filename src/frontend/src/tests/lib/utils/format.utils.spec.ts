@@ -1429,7 +1429,7 @@ describe('format.utils', () => {
 					language: Languages.ENGLISH,
 					useMinSignificantDigits: true
 				})
-			).toBe('$1.0000');
+			).toBe('$1.00');
 
 			expect(
 				formatCurrency({
@@ -1443,7 +1443,7 @@ describe('format.utils', () => {
 					language: Languages.ENGLISH,
 					useMinSignificantDigits: true
 				})
-			).toBe('$1.0000');
+			).toBe('$1.00');
 
 			expect(
 				formatCurrency({
