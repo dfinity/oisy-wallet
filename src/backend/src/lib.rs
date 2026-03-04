@@ -1,7 +1,5 @@
 use candid::Principal;
-pub(crate) use housekeeping::spawn_allow_signing_if_below_limit;
 use ic_cdk::{api::time, export_candid, init, post_upgrade};
-pub(crate) use memory::{mutate_state, read_config, read_state, set_config, State};
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
@@ -21,10 +19,10 @@ use shared::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
-            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
-            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
-            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
+            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
+            UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -35,10 +33,7 @@ use shared::{
     },
 };
 
-use crate::{
-    state::{mutate_state, read_config, read_state, set_config},
-    types::storable::{Candid, StoredPrincipal},
-};
+use crate::state::set_config;
 
 mod api;
 mod bitcoin;
@@ -46,7 +41,9 @@ mod contacts;
 mod guards;
 mod housekeeping;
 pub mod random;
-pub mod signer;
+mod rate_limiter;
+mod signer;
+mod state;
 mod token;
 mod types;
 mod user_profile;
