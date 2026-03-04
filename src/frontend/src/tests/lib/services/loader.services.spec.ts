@@ -4,13 +4,22 @@ import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { ZERO } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SOURCES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import { loadAddresses } from '$lib/services/addresses.services';
+import { trackEvent } from '$lib/services/analytics.services';
 import * as authServices from '$lib/services/auth.services';
 import { nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import type { AllowSigningOutcome } from '$lib/types/api';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
@@ -31,7 +40,21 @@ vi.mock('$lib/services/addresses.services', () => ({
 	loadAddresses: vi.fn(() => Promise.resolve({ success: true }))
 }));
 
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
+
 describe('loader.services', () => {
+	const mockExecutedOutcome: AllowSigningOutcome = {
+		response: { status: { Executed: null }, challenge_completion: [], allowed_cycles: 100n },
+		rateLimited: false
+	};
+
+	const mockRateLimitedOutcome: AllowSigningOutcome = {
+		response: { status: { Skipped: null }, challenge_completion: [], allowed_cycles: ZERO },
+		rateLimited: true
+	};
+
 	describe('initSignerAllowance', () => {
 		let apiMock: MockInstance;
 
@@ -55,11 +78,36 @@ describe('loader.services', () => {
 		});
 
 		it('should work correctly', async () => {
-			apiMock.mockResolvedValueOnce(undefined);
+			apiMock.mockResolvedValueOnce(mockExecutedOutcome);
 
 			const result = await initSignerAllowance();
 
 			expect(result.success).toBeTruthy();
+		});
+
+		it('should not track event when not rate limited', async () => {
+			apiMock.mockResolvedValueOnce(mockExecutedOutcome);
+
+			await initSignerAllowance();
+
+			expect(trackEvent).not.toHaveBeenCalled();
+		});
+
+		it('should track rate limited event when rateLimited is true', async () => {
+			apiMock.mockResolvedValueOnce(mockRateLimitedOutcome);
+
+			await initSignerAllowance();
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.RATE_LIMITED,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
+					event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND.PER_USER,
+					location_source: PLAUSIBLE_EVENT_SOURCES.BACKEND,
+					endpoint: 'allow_signing',
+					limiter: 'ALLOW_SIGNING_RATE_LIMITER'
+				}
+			});
 		});
 
 		it('should handle errors', async () => {
@@ -104,7 +152,7 @@ describe('loader.services', () => {
 
 			vi.spyOn(authServices, 'signOut').mockImplementation(vi.fn());
 			vi.spyOn(authServices, 'nullishSignOut').mockImplementation(vi.fn());
-			vi.spyOn(api, 'allowSigning').mockImplementation(vi.fn());
+			vi.spyOn(api, 'allowSigning').mockResolvedValue(mockExecutedOutcome);
 
 			setupUserNetworksStore('allEnabled');
 

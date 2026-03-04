@@ -9,6 +9,13 @@ import {
 	networkEvmMainnetEnabled,
 	networkSolanaMainnetEnabled
 } from '$lib/derived/networks.derived';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SOURCES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
@@ -40,7 +47,20 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
-		await allowSigning({ identity });
+		const { rateLimited } = await allowSigning({ identity });
+
+		if (rateLimited) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.RATE_LIMITED,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
+					event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND.PER_USER,
+					location_source: PLAUSIBLE_EVENT_SOURCES.BACKEND,
+					endpoint: 'allow_signing',
+					limiter: 'ALLOW_SIGNING_RATE_LIMITER'
+				}
+			});
+		}
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);

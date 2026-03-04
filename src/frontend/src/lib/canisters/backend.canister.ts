@@ -20,16 +20,10 @@ import {
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
 import { ZERO } from '$lib/constants/app.constants';
-import {
-	PLAUSIBLE_EVENT_CONTEXTS,
-	PLAUSIBLE_EVENT_SOURCES,
-	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
-	PLAUSIBLE_EVENTS
-} from '$lib/enums/plausible';
-import { trackEvent } from '$lib/services/analytics.services';
 import type {
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
+	AllowSigningOutcome,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
@@ -209,35 +203,25 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapGetAllowedCyclesError(response.Err);
 	};
 
-	allowSigning = async (): Promise<AllowSigningResponse> => {
+	allowSigning = async (): Promise<AllowSigningOutcome> => {
 		const { allow_signing } = this.caller({ certified: true });
 
 		const response = await allow_signing();
 
 		if ('Ok' in response) {
-			const { Ok } = response;
-			return Ok;
+			return { response: response.Ok, rateLimited: false };
 		}
 
-		// In case of rate limit reached, we want to ignore the error and let the user continue (for now).
-		// However, we track it and return a placeholder response.
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
 		// TODO: improve placeholder with significant data, for now we do not use them
 		if ('RateLimited' in response.Err) {
-			trackEvent({
-				name: PLAUSIBLE_EVENTS.RATE_LIMITED,
-				metadata: {
-					event_context: PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
-					event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND.PER_USER,
-					location_source: PLAUSIBLE_EVENT_SOURCES.BACKEND,
-					endpoint: 'allow_signing',
-					limiter: 'ALLOW_SIGNING_RATE_LIMITER'
-				}
-			});
-
 			return {
-				status: { Skipped: null },
-				challenge_completion: toNullable(),
-				allowed_cycles: ZERO
+				response: {
+					status: { Skipped: null },
+					challenge_completion: toNullable(),
+					allowed_cycles: ZERO
+				},
+				rateLimited: true
 			};
 		}
 
