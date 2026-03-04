@@ -8,6 +8,13 @@ import type {
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SOURCES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
@@ -33,6 +40,10 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 		LOCAL: false
 	};
 });
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
 
 describe('backend.canister', () => {
 	const createBackendCanister = ({
@@ -749,6 +760,42 @@ describe('backend.canister', () => {
 			await expect(allowSigning()).rejects.toThrowError(
 				new CanisterInternalError('An uknown error occurred.')
 			);
+		});
+
+		it('should not throw an error if RateLimited error is returned', async () => {
+			const expected: AllowSigningResult = {
+				Ok: {
+					status: { Skipped: null },
+					challenge_completion: toNullable(),
+					allowed_cycles: ZERO
+				}
+			};
+
+			const response = {
+				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			};
+
+			service.allow_signing.mockResolvedValue(response as unknown as AllowSigningResult);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await allowSigning();
+
+			expect(service.allow_signing).toHaveBeenCalledOnce();
+			expect(res).toStrictEqual(expected.Ok);
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.RATE_LIMITED,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
+					event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND.PER_USER,
+					location_source: PLAUSIBLE_EVENT_SOURCES.BACKEND,
+					endpoint: 'allow_signing',
+					limiter: 'ALLOW_SIGNING_RATE_LIMITER'
+				}
+			});
 		});
 	});
 
