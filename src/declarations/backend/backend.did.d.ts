@@ -435,13 +435,25 @@ export interface _SERVICE {
 	/**
 	 * Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 	 *
+	 * # Arguments
+	 * * `request` - The request to add a hidden dApp ID.
+	 *
+	 * # Returns
+	 * - Returns `Ok(())` if the dApp ID was added successfully, or if it was already in the list.
+	 *
 	 * # Errors
 	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	 */
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], AddUserHiddenDappIdResult>;
 	/**
-	 * This function authorizes the caller to spend a specific
-	 * amount of cycles on behalf of the OISY backend for chain-fusion signer operations.
+	 * This function authorises the caller to spend a specific
+	 * amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
+	 * providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
+	 * cycles ledger.
+	 *
+	 * Note:
+	 * - The chain fusion signer performs threshold key operations including providing public keys,
+	 * creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `AllowSigningError`.
@@ -459,13 +471,19 @@ export interface _SERVICE {
 	>;
 	/**
 	 * Retrieves the current fee percentiles for Bitcoin transactions from the cache
-	 * for the specified network.
+	 * for the specified network. Fee percentiles are measured in millisatoshi per byte
+	 * and are periodically updated in the background.
 	 *
 	 * # Returns
 	 * - `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
 	 *
 	 * # Errors
 	 * - `InternalError`: If fee percentiles are not available in the cache for the requested network
+	 *
+	 * # Note
+	 * This function only returns data from the in-memory cache and doesn't make any calls
+	 * to the Bitcoin API itself. If the cache doesn't have data for the requested network,
+	 * it returns the default percentiles.
 	 */
 	btc_get_current_fee_percentiles: ActorMethod<
 		[BtcGetFeePercentilesRequest],
@@ -497,15 +515,11 @@ export interface _SERVICE {
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `ContactError`.
+	 *
+	 * # Returns
+	 * The created contact on success.
 	 */
 	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
-	/**
-	 * Creates a new proof-of-work challenge for the caller.
-	 *
-	 * # Errors
-	 * Errors are enumerated by: `CreateChallengeError`.
-	 */
-	create_pow_challenge: ActorMethod<[], CreatePowChallengeResult>;
 	/**
 	 * It creates a new user profile for the caller.
 	 * If the user has already a profile, it will return that profile.
@@ -516,6 +530,9 @@ export interface _SERVICE {
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `ContactError`.
+	 *
+	 * # Notes
+	 * This operation is idempotent - it will return OK if the contact has already been deleted.
 	 */
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
 	/**
@@ -524,7 +541,10 @@ export interface _SERVICE {
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
 	/**
 	 * Retrieves the amount of cycles that the signer canister is allowed to spend
-	 * on behalf of the current user.
+	 * on behalf of the current user
+	 * # Returns
+	 * - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
+	 * - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong
 	 *
 	 * # Errors
 	 * - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
@@ -537,10 +557,21 @@ export interface _SERVICE {
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	/**
 	 * Gets a contact by ID for the caller.
+	 *
+	 * # Arguments
+	 * * `contact_id` - The unique identifier of the contact to retrieve
+	 * # Returns
+	 * * `Ok(GetContactResult)` - The requested contact if found
+	 * # Errors
+	 * * `ContactNotFound` - If no contact for the provided `contact_id` could be found
 	 */
 	get_contact: ActorMethod<[bigint], GetContactResult>;
 	/**
-	 * Returns all contacts for the caller.
+	 * Returns all contacts for the caller
+	 *
+	 * This query function returns a list of the user's contacts.
+	 * # Returns
+	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
 	/**
@@ -548,10 +579,19 @@ export interface _SERVICE {
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `GetUserProfileError`.
+	 *
+	 * # Panics
+	 * - If the caller is anonymous.  See: `may_read_user_data`.
 	 */
 	get_user_profile: ActorMethod<[], GetUserProfileResult>;
 	/**
 	 * Checks if the caller has an associated user profile.
+	 *
+	 * # Returns
+	 * - `Ok(true)` if a user profile exists for the caller.
+	 * - `Ok(false)` if no user profile exists for the caller.
+	 * # Errors
+	 * Does not return any error
 	 */
 	has_user_profile: ActorMethod<[], HasUserProfileResponse>;
 	/**
@@ -562,8 +602,16 @@ export interface _SERVICE {
 	 * List the custom tokens for the calling user.
 	 *
 	 * Note: This method was previously exposed as a *query* but is now an *update*
-	 * call. The change is intentional: `list_custom_tokens` now tracks token activity
-	 * by calling `mark_tokens_active`, which mutates canister state.
+	 * call. The change is intentional and breaking: `list_custom_tokens` now tracks
+	 * token activity by calling `mark_tokens_active`, which mutates canister state.
+	 * Because queries must not modify state on the IC, this function must be an
+	 * update, not a query.
+	 *
+	 * Implications for callers:
+	 * - This call now participates in consensus and may have higher latency than a query.
+	 * - It consumes cycles as an update call.
+	 * - Integrations that previously relied on query semantics must be updated to invoke this as an
+	 * update method.
 	 */
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	/**
@@ -577,6 +625,10 @@ export interface _SERVICE {
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	/**
 	 * Sets the user's preference to show (or hide) testnets in the interface.
+	 *
+	 * # Returns
+	 * - Returns `Ok(())` if the testnets setting was saved successfully, or if it was already set to
+	 * the same value.
 	 *
 	 * # Errors
 	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
@@ -605,6 +657,12 @@ export interface _SERVICE {
 	update_contact: ActorMethod<[Contact], GetContactResult>;
 	/**
 	 * Updates the user's agreements, merging with any existing ones.
+	 * Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
+	 * set to `now`.
+	 *
+	 * # Returns
+	 * - Returns `Ok(())` if the agreements were saved successfully, or if they were already set to the
+	 * same value.
 	 *
 	 * # Errors
 	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
@@ -613,6 +671,10 @@ export interface _SERVICE {
 	/**
 	 * Updates the user's preference to enable (or disable) experimental features in the interface,
 	 * merging with any existing entries.
+	 *
+	 * # Returns
+	 * - Returns `Ok(())` if the experimental features were updated successfully, or if they were
+	 * already set to the same value.
 	 *
 	 * # Errors
 	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
@@ -624,6 +686,10 @@ export interface _SERVICE {
 	/**
 	 * Updates the user's preference to enable (or disable) networks in the interface, merging with any
 	 * existing settings.
+	 *
+	 * # Returns
+	 * - Returns `Ok(())` if the network settings were updated successfully, or if they were already
+	 * set to the same value.
 	 *
 	 * # Errors
 	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
