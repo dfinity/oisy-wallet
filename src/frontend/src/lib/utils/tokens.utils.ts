@@ -120,13 +120,14 @@ const createNetworkComparator =
  * 1. Deprecation status (non-deprecated tokens first).
  * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
  * 3. USD balance (descending).
- * 4. Explicitly pinned tokens (pinned first, preserving the order provided by `pinIndexById`).
- * 5. Token symbol (ascending, locale-aware).
- * 6. Token name (ascending, locale-aware).
- * 7. Networks according to the provided `networkComparator` (which can implement pinning or any other network prioritisation logic).
- * 8. Network name (ascending, locale-aware).
- * 9. Token balance (descending).
- * 10. USD market cap (descending).
+ * 4. If both USD balances are zero: tokens with a non-zero (native/unit) balance first (no further ordering from this rule).
+ * 5. Explicitly pinned tokens (pinned first, preserving the order provided by `pinIndexById`).
+ * 6. Token symbol (ascending, locale-aware).
+ * 7. Token name (ascending, locale-aware).
+ * 8. Networks according to the provided `networkComparator` (which can implement pinning or any other network prioritisation logic).
+ * 9. Network name (ascending, locale-aware).
+ * 10. Token balance (descending).
+ * 11. USD market cap (descending).
  *
  * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
  *
@@ -192,9 +193,24 @@ const createTokenComparator =
 
 		// Tie-breaker after primary strategy
 		// USD Balance descending
-		const usdBalanceDiff = (bUsdBalance ?? 0) - (aUsdBalance ?? 0);
+		const aUsdBalanceForTie = aUsdBalance ?? 0;
+		const bUsdBalanceForTie = bUsdBalance ?? 0;
+		const usdBalanceDiff = bUsdBalanceForTie - aUsdBalanceForTie;
 		if (usdBalanceDiff !== 0) {
 			return usdBalanceDiff;
+		}
+
+		// If both tokens have zero USD balance, prioritise tokens that still have a non-zero (native/unit) balance.
+		// This only separates “has any balance” vs “true zero”; it does not impose any further ordering.
+		if (aUsdBalanceForTie === 0 && bUsdBalanceForTie === 0) {
+			const aHasBalance = (aBalance ?? ZERO) > ZERO;
+			const bHasBalance = (bBalance ?? ZERO) > ZERO;
+			if (aHasBalance && !bHasBalance) {
+				return -1;
+			}
+			if (!aHasBalance && bHasBalance) {
+				return 1;
+			}
 		}
 
 		// Pinned tokens (pinned first; pinned order = order provided)
@@ -258,13 +274,14 @@ export function sortTokens(params: {
  * 1. Deprecation status (non-deprecated tokens first).
  * 2. Primary sorting strategy (either performance or symbol, or value by default, based on the provided parameter).
  * 3. USD balance (descending).
- * 4. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
- * 5. Token symbol (ascending, locale-aware).
- * 6. Token name (ascending, locale-aware).
- * 7. Networks according to pinning (pinned networks first, preserving the order provided in `$networksToPin`).
- * 8. Network name (ascending, locale-aware).
- * 9. Token balance (descending).
- * 10. USD market cap (descending).
+ * 4. If both USD balances are zero: tokens with a non-zero (native/unit) balance first (no further ordering from this rule).
+ * 5. Explicitly pinned tokens (pinned first, preserving the order provided in `$tokensToPin`).
+ * 6. Token symbol (ascending, locale-aware).
+ * 7. Token name (ascending, locale-aware).
+ * 8. Networks according to pinning (pinned networks first, preserving the order provided in `$networksToPin`).
+ * 9. Network name (ascending, locale-aware).
+ * 10. Token balance (descending).
+ * 11. USD market cap (descending).
  *
  * The `primarySortStrategy` parameter allows overriding the default sorting by value with either performance or symbol prioritisation.
  *
