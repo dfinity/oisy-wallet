@@ -64,7 +64,7 @@ const fn per_user_cycles_allowance() -> u64 {
 ///   adds) the value.
 ///
 /// Set to roughly 18 signing operations worth of cycles.
-const SUFFICIENT_CYCLES_THRESHOLD: u64 = (LEDGER_FEE + SIGNER_FEE) * 18;
+pub(crate) const SUFFICIENT_CYCLES_THRESHOLD: u64 = (LEDGER_FEE + SIGNER_FEE) * 18;
 
 /// Retrieves the amount of cycles that the signer canister is allowed to spend
 /// on behalf of the current canister.

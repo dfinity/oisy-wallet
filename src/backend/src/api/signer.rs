@@ -57,6 +57,16 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn allow_signing() -> AllowSigningResult {
     async fn inner() -> Result<AllowSigningResponse, AllowSigningError> {
+        if let Ok(current) = signer::get_allowed_cycles().await {
+            if current >= signer::SUFFICIENT_CYCLES_THRESHOLD {
+                return Ok(AllowSigningResponse {
+                    status: AllowSigningStatus::Skipped,
+                    allowed_cycles: u64::try_from(current.0).unwrap_or(0u64),
+                    challenge_completion: None,
+                });
+            }
+        }
+
         ALLOW_SIGNING_RATE_LIMITER
             .with(rate_limiter::RateLimiter::check_caller)
             .map_err(AllowSigningError::RateLimited)?;

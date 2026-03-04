@@ -366,6 +366,43 @@ fn test_allow_signing_rate_limit_is_per_caller() {
     );
 }
 
+/// When the caller already has sufficient cycles allowance (above
+/// `SUFFICIENT_CYCLES_THRESHOLD`), `allow_signing` should return `Skipped`
+/// without consuming a rate-limit entry — even when called more times than
+/// the rate limit would normally permit.
+#[test]
+fn test_allow_signing_skips_rate_limit_when_allowance_sufficient() {
+    let pic_setup = setup_with_cycles_ledger();
+    let caller = Principal::from_text(VC_HOLDER).unwrap();
+
+    // Create profile → housekeeping spawns allow_signing which sets up the
+    // allowance above SUFFICIENT_CYCLES_THRESHOLD (~1.458 T cycles).
+    call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
+
+    for _ in 0..10 {
+        pic_setup.pic.tick();
+    }
+
+    // Confirm the allowance is indeed above threshold.
+    let allowance =
+        call_get_allowed_cycles(&pic_setup, caller).expect("get_allowed_cycles should succeed");
+    assert!(
+        allowance.allowed_cycles > Nat::from(0u64),
+        "allowance should be non-zero after profile creation"
+    );
+
+    // Call allow_signing well beyond the 3-call rate limit.
+    // None of these should be rate-limited because the allowance check
+    // short-circuits before the rate limiter is consulted.
+    for i in 0..6 {
+        let result = call_allow_signing(&pic_setup, caller, 0);
+        assert!(
+            !matches!(result, Err(AllowSigningError::RateLimited(_))),
+            "call {i} should not be rate-limited when allowance is sufficient: {result:?}",
+        );
+    }
+}
+
 /// After the one-hour window elapses, the same principal should be able to
 /// call `allow_signing` again without being rate-limited.
 ///
