@@ -221,7 +221,7 @@ export class BackendCanister extends Canister<BackendService> {
 
 		// In case of rate limit reached, we want to ignore the error and let the user continue (for now).
 		// However, we track it and return a placeholder response.
-		// TODO: improve placeholder with significat data, for now we do not use them
+		// TODO: improve placeholder with significant data, for now we do not use them
 		if ('RateLimited' in response.Err) {
 			trackEvent({
 				name: PLAUSIBLE_EVENTS.RATE_LIMITED,
