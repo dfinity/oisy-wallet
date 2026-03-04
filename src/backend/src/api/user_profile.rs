@@ -19,7 +19,7 @@ use crate::{
     guards::caller_is_not_anonymous,
     housekeeping::spawn_allow_signing_if_below_limit,
     state::{mutate_state, read_config},
-    types::storable::StoredPrincipal,
+    types::StoredPrincipal,
     user_profile::{credential_config::find_credential_config, model::UserProfileModel, service},
 };
 

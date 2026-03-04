@@ -13,7 +13,7 @@ use std::{convert::TryInto, mem::size_of};
 /// # Panics
 /// - Panics if the random bytes returned from `raw_rand()` are fewer than 8 bytes (the size needed
 ///   for a u64), with a descriptive error message.
-pub async fn generate_random_u64() -> Result<u64, String> {
+pub(crate) async fn generate_random_u64() -> Result<u64, String> {
     // Call raw_rand() and await the result
     let (random_bytes,): (Vec<u8>,) = ic_cdk::api::management_canister::main::raw_rand()
         .await
