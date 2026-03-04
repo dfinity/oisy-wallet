@@ -140,5 +140,4 @@ describe('LoadersHarvestAutopilotBalances', () => {
 
 		vi.unstubAllGlobals();
 	});
-
 });
