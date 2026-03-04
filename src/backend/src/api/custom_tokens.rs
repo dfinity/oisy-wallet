@@ -2,10 +2,10 @@ use ic_cdk::update;
 use shared::types::custom_token::{CustomToken, CustomTokenId};
 
 use crate::{
-    guards::caller_is_not_anonymous,
     state::{mutate_state, read_state},
     token::{self, MAX_TOKEN_LIST_LENGTH},
     types::StoredPrincipal,
+    utils::guards::caller_is_not_anonymous,
 };
 
 /// Add or update custom token for the user.
