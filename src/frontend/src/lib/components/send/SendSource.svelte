@@ -42,7 +42,9 @@
 		)
 	);
 
-	let contact = $derived(getContactForAddress({ addressString: source, contactList: $allContacts }));
+	let contact = $derived(
+		getContactForAddress({ addressString: source, contactList: $allContacts })
+	);
 
 	let contactAddress = $derived(filterAddressFromContact({ contact, address: source }));
 </script>

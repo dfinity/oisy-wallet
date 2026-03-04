@@ -17,7 +17,8 @@
 	const { destination, selectedContact, aiAssistantConsoleView }: Props = $props();
 
 	let contact = $derived(
-		selectedContact ?? getContactForAddress({ addressString: destination, contactList: $allContacts })
+		selectedContact ??
+			getContactForAddress({ addressString: destination, contactList: $allContacts })
 	);
 </script>
 

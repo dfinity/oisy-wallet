@@ -91,10 +91,7 @@
 		{/snippet}
 
 		{#if erc20Approve && nonNullish(spender)}
-			<SendDataDestination
-				destination={spender}
-				label={$i18n.wallet_connect.text.spender}
-			/>
+			<SendDataDestination destination={spender} label={$i18n.wallet_connect.text.spender} />
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
