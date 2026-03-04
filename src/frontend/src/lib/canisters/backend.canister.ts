@@ -1,6 +1,5 @@
 import type {
 	AddUserCredentialResult,
-	AllowSigningResponse,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
@@ -19,9 +18,11 @@ import {
 	mapBtcSelectUserUtxosFeeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
+import { ZERO } from '$lib/constants/app.constants';
 import type {
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
+	AllowSigningOutcome,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
@@ -201,14 +202,29 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapGetAllowedCyclesError(response.Err);
 	};
 
-	allowSigning = async (): Promise<AllowSigningResponse> => {
+	allowSigning = async (): Promise<AllowSigningOutcome> => {
 		const { allow_signing } = this.caller({ certified: true });
 
 		const response = await allow_signing();
 
 		if ('Ok' in response) {
-			const { Ok } = response;
-			return Ok;
+			return { response: response.Ok };
+		}
+
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
+		// TODO: improve placeholder with significant data, for now we do not use them
+		if ('RateLimited' in response.Err) {
+			return {
+				response: {
+					status: { Skipped: null },
+					challenge_completion: toNullable(),
+					allowed_cycles: ZERO
+				},
+				rateLimitInfo: {
+					endpoint: 'allow_signing',
+					limiter: 'ALLOW_SIGNING_RATE_LIMITER'
+				}
+			};
 		}
 
 		throw mapAllowSigningError(response.Err);
