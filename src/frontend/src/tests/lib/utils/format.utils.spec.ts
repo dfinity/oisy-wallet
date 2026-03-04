@@ -1429,7 +1429,7 @@ describe('format.utils', () => {
 					language: Languages.ENGLISH,
 					useMinSignificantDigits: true
 				})
-			// TODO I think this should be $1.000 (4 significant digits)
+				// TODO I think this should be $1.000 (4 significant digits)
 			).toBe('$1.0000');
 
 			expect(
@@ -1444,7 +1444,7 @@ describe('format.utils', () => {
 					language: Languages.ENGLISH,
 					useMinSignificantDigits: true
 				})
-			// TODO I think this should be $1.000 (4 significant digits)
+				// TODO I think this should be $1.000 (4 significant digits)
 			).toBe('$1.00');
 
 			expect(
@@ -1459,7 +1459,7 @@ describe('format.utils', () => {
 					language: Languages.ENGLISH,
 					useMinSignificantDigits: true
 				})
-			// TODO I think this should be $1.000 (4 significant digits)
+				// TODO I think this should be $1.000 (4 significant digits)
 			).toBe('$1.00');
 
 			expect(
