@@ -6,6 +6,8 @@ FIX_ARGS=()
 [[ "${1:-}" != "--help" ]] || {
   cat <<-EOF
 
+  Runs Clippy lint checks for the Rust canister crates.
+
 	Usage: $0 [--fix]
 
 	Options:
