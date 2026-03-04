@@ -1,3 +1,4 @@
+use candid::Nat;
 use ic_cdk::update;
 use shared::types::{
     pow::AllowSigningStatus,
@@ -62,7 +63,7 @@ pub async fn allow_signing() -> AllowSigningResult {
         if let Some(current) = signer::has_sufficient_allowance().await {
             return Ok(AllowSigningResponse {
                 status: AllowSigningStatus::Skipped,
-                allowed_cycles: u64::try_from(current.0).unwrap_or(u64::MAX),
+                allowed_cycles: current,
                 challenge_completion: None,
             });
         }
@@ -76,7 +77,7 @@ pub async fn allow_signing() -> AllowSigningResult {
         // Returning a placeholder response that can be ignored by the frontend.
         Ok(AllowSigningResponse {
             status: AllowSigningStatus::Skipped,
-            allowed_cycles: 0u64,
+            allowed_cycles: Nat::from(0u64),
             challenge_completion: None,
         })
     }
