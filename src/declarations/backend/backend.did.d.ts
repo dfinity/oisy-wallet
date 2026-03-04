@@ -37,12 +37,9 @@ export interface Agreements {
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
-	| { PowChallenge: ChallengeCompletionError }
+	| { RateLimited: RateLimitError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
-export interface AllowSigningRequest {
-	nonce: bigint;
-}
 export interface AllowSigningResponse {
 	status: AllowSigningStatus;
 	challenge_completion: [] | [ChallengeCompletion];
@@ -130,12 +127,6 @@ export interface ChallengeCompletion {
 	next_difficulty: number;
 	current_difficulty: number;
 }
-export type ChallengeCompletionError =
-	| { InvalidNonce: null }
-	| { MissingChallenge: null }
-	| { ExpiredChallenge: null }
-	| { MissingUserProfile: null }
-	| { ChallengeAlreadySolved: null };
 export interface Config {
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
@@ -170,24 +161,11 @@ export interface ContactImage {
 	data: Uint8Array;
 	mime_type: ImageMimeType;
 }
-export type CreateChallengeError =
-	| { ChallengeInProgress: null }
-	| { MissingUserProfile: null }
-	| { RandomnessError: string }
-	| { Other: string };
-export interface CreateChallengeResponse {
-	difficulty: number;
-	start_timestamp_ms: bigint;
-	expiry_timestamp_ms: bigint;
-}
 export interface CreateContactRequest {
 	name: string;
 	image: [] | [ContactImage];
 }
 export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
-export type CreatePowChallengeResult =
-	| { Ok: CreateChallengeResponse }
-	| { Err: CreateChallengeError };
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];
 	credential_type: string;
@@ -309,6 +287,11 @@ export interface Outpoint {
 export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
+}
+export interface RateLimitError {
+	max_calls: number;
+	window_ns: bigint;
+	caller: Principal;
 }
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
@@ -475,7 +458,7 @@ export interface _SERVICE {
 	 * # Errors
 	 * Errors are enumerated by: `AllowSigningError`.
 	 */
-	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
+	allow_signing: ActorMethod<[], AllowSigningResult>;
 	/**
 	 * Adds a pending Bitcoin transaction for the caller.
 	 *
@@ -537,19 +520,6 @@ export interface _SERVICE {
 	 * The created contact on success.
 	 */
 	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
-	/**
-	 * Creates a new proof-of-work challenge for the caller.
-	 *
-	 * # Errors
-	 * Errors are enumerated by: `CreateChallengeError`.
-	 *
-	 * # Returns
-	 *
-	 * * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-	 * * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-	 * internal errors.
-	 */
-	create_pow_challenge: ActorMethod<[], CreatePowChallengeResult>;
 	/**
 	 * It creates a new user profile for the caller.
 	 * If the user has already a profile, it will return that profile.

@@ -17,3 +17,5 @@ export const HARVEST_AUTOPILOT_ADDRESSES = [
 	AAUTOPILOT_WBTC_TOKEN.address.toLowerCase(),
 	AAUTOPILOT_WETH_TOKEN.address.toLowerCase()
 ];
+
+export const HARVEST_AUTOPILOT_URL = 'https://app.harvest.finance/';

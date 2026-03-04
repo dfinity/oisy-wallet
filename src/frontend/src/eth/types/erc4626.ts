@@ -18,6 +18,8 @@ export type Erc4626ContractAddress = Erc20ContractAddress;
 export type Erc4626Contract = ContractAddress & {
 	assetAddress: Erc20ContractAddress;
 	assetDecimals: number;
+	assetSymbol: string;
+	assetIcon?: string;
 };
 
 export type Erc4626ContractAddressWithNetwork = Erc20ContractAddressWithNetwork;

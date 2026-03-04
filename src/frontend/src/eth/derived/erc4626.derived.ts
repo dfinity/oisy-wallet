@@ -100,9 +100,9 @@ export const enabledErc4626Tokens: Readable<Erc4626CustomToken[]> = derived(
 );
 
 export const erc4626TokensExchangeData: Readable<Erc4626TokensExchangeData[]> = derived(
-	[enabledErc4626Tokens],
-	([$enabledErc4626Tokens]) =>
-		$enabledErc4626Tokens.map(
+	[erc4626Tokens],
+	([$erc4626Tokens]) =>
+		$erc4626Tokens.map(
 			({
 				address,
 				decimals,
@@ -133,10 +133,10 @@ export const erc4626CustomTokensNotInitialized: Readable<boolean> = derived(
 	([$erc4626CustomTokensInitialized]) => !$erc4626CustomTokensInitialized
 );
 
-export const enabledErc4626AssetAddresses: Readable<Erc4626ContractAddressWithNetwork[]> = derived(
-	[enabledErc4626Tokens],
-	([$enabledErc4626Tokens]) =>
-		$enabledErc4626Tokens.map(({ assetAddress, network: { exchange } }) => ({
+export const erc4626AssetAddresses: Readable<Erc4626ContractAddressWithNetwork[]> = derived(
+	[erc4626Tokens],
+	([$erc4626Tokens]) =>
+		$erc4626Tokens.map(({ assetAddress, network: { exchange } }) => ({
 			address: assetAddress,
 			coingeckoId: exchange?.coingeckoId ?? 'ethereum'
 		}))

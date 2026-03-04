@@ -22,5 +22,7 @@ export const AAUTOPILOT_WBTC_TOKEN: RequiredErc4626Token = {
 	icon: '',
 	address: '0x49b2248f7a7a703731852db0b2217f40da75b8ab',
 	assetAddress: WBTC_TOKEN.address,
-	assetDecimals: WBTC_TOKEN.decimals
+	assetDecimals: WBTC_TOKEN.decimals,
+	assetIcon: WBTC_TOKEN.icon,
+	assetSymbol: WBTC_TOKEN.symbol
 };

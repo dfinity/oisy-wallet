@@ -25,11 +25,10 @@ type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type Agreements = record { agreements : UserAgreements };
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
-	PowChallenge : ChallengeCompletionError;
+	RateLimited : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
 };
-type AllowSigningRequest = record { nonce : nat64 };
 type AllowSigningResponse = record {
 	status : AllowSigningStatus;
 	challenge_completion : opt ChallengeCompletion;
@@ -119,13 +118,6 @@ type ChallengeCompletion = record {
 	next_difficulty : nat32;
 	current_difficulty : nat32
 };
-type ChallengeCompletionError = variant {
-	InvalidNonce;
-	MissingChallenge;
-	ExpiredChallenge;
-	MissingUserProfile;
-	ChallengeAlreadySolved
-};
 type Config = record {
 	derivation_origin : opt text;
 	ecdsa_key_name : text;
@@ -158,23 +150,8 @@ type ContactError = variant {
 	TooManyContactsWithImages
 };
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
-type CreateChallengeError = variant {
-	ChallengeInProgress;
-	MissingUserProfile;
-	RandomnessError : text;
-	Other : text
-};
-type CreateChallengeResponse = record {
-	difficulty : nat32;
-	start_timestamp_ms : nat64;
-	expiry_timestamp_ms : nat64
-};
 type CreateContactRequest = record { name : text; image : opt ContactImage };
 type CreateContactResult = variant { Ok : Contact; Err : ContactError };
-type CreatePowChallengeResult = variant {
-	Ok : CreateChallengeResponse;
-	Err : CreateChallengeError
-};
 type CredentialSpec = record {
 	arguments : opt vec record { text; ArgumentValue };
 	credential_type : text
@@ -281,6 +258,11 @@ type NetworksSettings = record {
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
+type RateLimitError = record {
+	max_calls : nat32;
+	window_ns : nat64;
+	caller : principal
+};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -437,7 +419,7 @@ service : (Arg) -> {
 	//
 	// # Errors
 	// Errors are enumerated by: `AllowSigningError`.
-	allow_signing : (opt AllowSigningRequest) -> (AllowSigningResult);
+	allow_signing : () -> (AllowSigningResult);
 	// Adds a pending Bitcoin transaction for the caller.
 	//
 	// # Errors
@@ -486,17 +468,6 @@ service : (Arg) -> {
 	// # Returns
 	// The created contact on success.
 	create_contact : (CreateContactRequest) -> (CreateContactResult);
-	// Creates a new proof-of-work challenge for the caller.
-	//
-	// # Errors
-	// Errors are enumerated by: `CreateChallengeError`.
-	//
-	// # Returns
-	//
-	// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-	// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-	// internal errors.
-	create_pow_challenge : () -> (CreatePowChallengeResult);
 	// It creates a new user profile for the caller.
 	// If the user has already a profile, it will return that profile.
 	create_user_profile : () -> (UserProfile);

@@ -22,5 +22,7 @@ export const BAUTOPILOT_WETH_TOKEN: RequiredErc4626Token = {
 	icon: '',
 	address: '0x7872893e528Fe2c0829e405960db5B742112aa97',
 	assetAddress: WETH_TOKEN.address,
-	assetDecimals: WETH_TOKEN.decimals
+	assetDecimals: WETH_TOKEN.decimals,
+	assetIcon: WETH_TOKEN.icon,
+	assetSymbol: WETH_TOKEN.symbol
 };

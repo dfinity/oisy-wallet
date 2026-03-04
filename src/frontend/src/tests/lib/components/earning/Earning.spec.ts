@@ -1,25 +1,14 @@
+import * as navModule from '$app/navigation';
 import * as earningCardsEnv from '$env/earning-cards.env';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
-import { GLDT_STAKE_CONTEXT_KEY } from '$icp/stores/gldt-stake.store';
 import EarningOpportunitiesPage from '$lib/components/earning/Earning.svelte';
+import * as earningDerived from '$lib/derived/earning.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { REWARD_ELIGIBILITY_CONTEXT_KEY } from '$lib/stores/reward.store';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { render, screen } from '@testing-library/svelte';
-import { get, writable } from 'svelte/store';
-
-const mockGldtStakeStore = {
-	subscribe: (fn: (v: unknown) => void) => {
-		fn({ apy: 5, position: { staked: 10 } });
-		return () => {};
-	},
-	setApy: vi.fn(),
-	resetApy: vi.fn(),
-	setPosition: vi.fn(),
-	resetPosition: vi.fn(),
-	reset: vi.fn()
-};
+import { get, readable, writable } from 'svelte/store';
 
 const mockRewardEligibilityStore = writable({
 	campaignEligibilities: [
@@ -62,20 +51,35 @@ describe('EarningOpportunitiesPage', () => {
 				actionText: 'mock.rewards.action'
 			},
 			{
-				id: 'gldt-staking',
-				titles: ['mock.gldt.title'],
-				description: 'mock.gldt.description',
+				id: 'harvest-autopilot',
+				titles: ['mock.harvest.title'],
+				description: 'mock.harvest.description',
 				logo: '/mock/logo.svg',
-				fields: [EarningCardFields.APY, EarningCardFields.CURRENT_STAKED],
-				actionText: 'mock.gldt.action'
+				fields: [EarningCardFields.NETWORKS, EarningCardFields.CURRENT_EARNING],
+				actionText: 'mock.harvest.action'
 			}
 		]);
+
+		vi.spyOn(navModule, 'goto').mockResolvedValue();
+
+		vi.spyOn(earningDerived, 'earningData', 'get').mockReturnValue(
+			readable({
+				'harvest-autopilot': {
+					[EarningCardFields.APY]: '5.5',
+					[EarningCardFields.CURRENT_STAKED]: 100,
+					[EarningCardFields.CURRENT_EARNING]: 5.5,
+					[EarningCardFields.NETWORKS]: ['eth-icon'],
+					[EarningCardFields.ASSETS]: ['usdc-icon'],
+					[EarningCardFields.EARNING_POTENTIAL]: 49.5,
+					action: () => navModule.goto('/earn/autopilot/')
+				}
+			})
+		);
 	});
 
 	it('renders PageTitle and nested earning components', () => {
 		render(EarningOpportunitiesPage, {
 			context: new Map<symbol, unknown>([
-				[GLDT_STAKE_CONTEXT_KEY, { store: mockGldtStakeStore }],
 				[REWARD_ELIGIBILITY_CONTEXT_KEY, mockRewardEligibilityContext]
 			])
 		});
@@ -85,6 +89,6 @@ describe('EarningOpportunitiesPage', () => {
 
 		// Child components should show content from earning cards
 		expect(screen.getByText('mock.rewards.title')).toBeInTheDocument();
-		expect(screen.getByText('mock.gldt.title')).toBeInTheDocument();
+		expect(screen.getByText('mock.harvest.title')).toBeInTheDocument();
 	});
 });

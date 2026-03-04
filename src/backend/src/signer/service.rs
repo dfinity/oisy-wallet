@@ -13,19 +13,16 @@ use ic_cycles_ledger_client::{
 };
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
-use shared::types::signer::GetAllowedCyclesError;
-pub(crate) use shared::types::signer::{
+use shared::types::signer::{
     topup::{
         TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
         TopUpCyclesLedgerResult,
     },
-    AllowSigningError,
+    AllowSigningError, GetAllowedCyclesError,
 };
 
-use crate::{
-    read_config,
-    signer::canister_ids::{CYCLES_LEDGER, SIGNER},
-};
+use super::canister_ids::{CYCLES_LEDGER, SIGNER};
+use crate::state::read_config;
 
 /// Current ledger fee in cycles.  Historically stable.
 ///
@@ -54,6 +51,17 @@ const fn per_user_cycles_allowance() -> u64 {
     // Every usage costs 1 ledger fee + 1 signer fee.
     LEDGER_FEE + (LEDGER_FEE + SIGNER_FEE) * SIGNING_OPS_PER_LOGIN
 }
+
+/// Minimum cycles allowance below which a new approve is warranted.
+///
+/// If the caller already has at least this many cycles, `allow_signing`
+/// skips the `icrc_2_approve` call.  This avoids:
+/// - Unnecessary inter-canister calls when the user still has plenty of cycles.
+/// - Accidentally **reducing** an existing higher allowance, since `icrc_2_approve` *sets* (not
+///   adds) the value.
+///
+/// Set to roughly 18 signing operations worth of cycles.
+const SUFFICIENT_CYCLES_THRESHOLD: u64 = (LEDGER_FEE + SIGNER_FEE) * 18;
 
 /// Retrieves the amount of cycles that the signer canister is allowed to spend
 /// on behalf of the current canister.
@@ -107,7 +115,15 @@ pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigni
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
     let caller = ic_cdk::caller();
+
+    if let Ok(current) = get_allowed_cycles().await {
+        if current >= SUFFICIENT_CYCLES_THRESHOLD {
+            return Ok(());
+        }
+    }
+
     let amount = Nat::from(allowed_cycles.unwrap_or_else(per_user_cycles_allowance));
+
     CyclesLedgerService(cycles_ledger)
         .icrc_2_approve(&ApproveArgs {
             spender: Account {
@@ -126,6 +142,7 @@ pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigni
         .map_err(|_| AllowSigningError::FailedToContactCyclesLedger)?
         .0
         .map_err(AllowSigningError::ApproveError)?;
+
     Ok(())
 }
 
