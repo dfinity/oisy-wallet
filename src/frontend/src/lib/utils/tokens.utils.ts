@@ -203,8 +203,8 @@ const createTokenComparator =
 		// If both tokens have zero USD balance, prioritise tokens that still have a non-zero (native/unit) balance.
 		// This only separates “has any balance” vs “true zero”; it does not impose any further ordering.
 		if (aUsdBalanceForTie === 0 && bUsdBalanceForTie === 0) {
-			const aHasBalance = (aBalance ?? 0) > 0;
-			const bHasBalance = (bBalance ?? 0) > 0;
+			const aHasBalance = (aBalance ?? ZERO) > ZERO;
+			const bHasBalance = (bBalance ?? ZERO) > ZERO;
 			if (aHasBalance && !bHasBalance) {
 				return -1;
 			}
