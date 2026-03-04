@@ -5,7 +5,6 @@ import type {
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import { assertNever } from '@dfinity/utils';
 import { mapIcrc2ApproveError, type ApproveError } from '@icp-sdk/canisters/ledger/icp';
 
 export const mapBtcPendingTransactionError = (
@@ -30,8 +29,6 @@ export const mapBtcSelectUserUtxosFeeError = (
 			'Selecting utxos fee is not possible - pending transactions found.'
 		);
 	}
-
-	assertNever(err)
 
 	return new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError');
 };
@@ -59,15 +56,9 @@ export const mapAllowSigningError = (
 		return new CanisterInternalError('The Cycles Ledger cannot be contacted.');
 	}
 
-	if ('RateLimited' in err) {
-		return new CanisterInternalError('Rate limit exceeded. Please try again later.');
-	}
-
 	if ('Other' in err) {
 		return new CanisterInternalError(err.Other);
 	}
-
-	assertNever(err);
 
 	return new CanisterInternalError('An uknown error occurred.');
 };
