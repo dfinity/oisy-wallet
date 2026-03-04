@@ -7,9 +7,9 @@ use shared::types::contact::{
 };
 
 use crate::{
-    random,
     state::{mutate_state, read_state},
     types::{Candid, StoredPrincipal},
+    utils::random,
 };
 
 pub(crate) async fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {

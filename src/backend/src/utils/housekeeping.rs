@@ -5,6 +5,8 @@ use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::signer::topup::TopUpCyclesLedgerResult;
 
 use crate::{api, rate_limiter, signer, types::StoredPrincipal};
+use super::rate_limiter;
+use crate::{api, signer, types::StoredPrincipal};
 
 thread_local! {
     /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.

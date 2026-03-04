@@ -7,10 +7,11 @@ import type { Erc20Token } from '$eth/types/erc20';
 import {
 	decodeErc20AbiData,
 	decodeErc20AbiDataValue,
+	isMaxUint256,
 	mapAddressToName,
 	mapEthTransactionUi
 } from '$eth/utils/transactions.utils';
-import { ZERO } from '$lib/constants/app.constants';
+import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction } from '$lib/types/transaction';
@@ -300,6 +301,26 @@ describe('transactions.utils', () => {
 					bytesParam: true
 				})
 			).toBe(result);
+		});
+	});
+
+	describe('isMaxUint256', () => {
+		it('should return true for the maximum uint256 value', () => {
+			expect(isMaxUint256(MAX_UINT_256)).toBeTruthy();
+		});
+
+		it('should return false for a value that is not the maximum uint256', () => {
+			expect(isMaxUint256(ZERO)).toBeFalsy();
+
+			expect(isMaxUint256(123456n)).toBeFalsy();
+
+			expect(isMaxUint256(MAX_UINT_256 - 1n)).toBeFalsy();
+		});
+
+		it('should return false for nullish values', () => {
+			expect(isMaxUint256(null)).toBeFalsy();
+
+			expect(isMaxUint256(undefined)).toBeFalsy();
 		});
 	});
 });

@@ -1,5 +1,4 @@
-import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
-import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
+import { enabledErcFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { isTokenEthereumCustomToken } from '$eth/utils/erc20.utils';
 import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
@@ -26,22 +25,13 @@ export const pageToken: Readable<OptionToken> = derived(
 		routeToken,
 		routeNetwork,
 		nativeTokens,
-		enabledErc20Tokens,
-		enabledErc4626Tokens,
+		enabledErcFungibleTokens,
 		enabledIcrcTokens,
 		enabledSplTokens
 	],
-	([
-		$routeToken,
-		$routeNetwork,
-		$nativeTokens,
-		$erc20Tokens,
-		$erc4626Tokens,
-		$icrcTokens,
-		$splTokens
-	]) =>
+	([$routeToken, $routeNetwork, $nativeTokens, $ercFungibleTokens, $icrcTokens, $splTokens]) =>
 		nonNullish($routeToken)
-			? [...$nativeTokens, ...$erc20Tokens, ...$erc4626Tokens, ...$icrcTokens, ...$splTokens].find(
+			? [...$nativeTokens, ...$ercFungibleTokens, ...$icrcTokens, ...$splTokens].find(
 					(token) =>
 						getPageTokenIdentifier(token) === $routeToken &&
 						token.network.id.description === $routeNetwork
