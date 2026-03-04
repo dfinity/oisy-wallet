@@ -56,11 +56,11 @@
 	});
 
 	onMount(async () => {
-		const principal = $authIdentity?.getPrincipal();
-
-		if (isNullish(principal)) {
+		if (isNullish($authIdentity)) {
 			return;
 		}
+
+		const principal = $authIdentity.getPrincipal();
 
 		loading = true;
 
