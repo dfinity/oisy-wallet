@@ -1388,6 +1388,79 @@ describe('format.utils', () => {
 			).toBe('$0.00001235');
 		});
 
+		it('should properly round USDC prices that are very near to 1', () => {
+			expect(
+				formatCurrency({
+					value: 0.999949999,
+					currency: Currency.USD,
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH,
+					useMinSignificantDigits: true
+				})
+			).toBe('$0.9999');
+
+			expect(
+				formatCurrency({
+					value: 0.99989999,
+					currency: Currency.USD,
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH,
+					useMinSignificantDigits: true
+				})
+			).toBe('$0.9999');
+
+			expect(
+				formatCurrency({
+					value: 0.99995,
+					currency: Currency.USD,
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH,
+					useMinSignificantDigits: true
+				})
+			).toBe('$1.0000');
+
+			expect(
+				formatCurrency({
+					value: 1.000049999,
+					currency: Currency.USD,
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH,
+					useMinSignificantDigits: true
+				})
+			).toBe('$1.0000');
+
+			expect(
+				formatCurrency({
+					value: 1.0000500,
+					currency: Currency.USD,
+					exchangeRate: {
+						currency: Currency.USD,
+						exchangeRateToUsd: 1,
+						exchangeRate24hChangeMultiplier: 1
+					},
+					language: Languages.ENGLISH,
+					useMinSignificantDigits: true
+				})
+			).toBe('$1.0001');
+
+		});
+		
 		it('should use baseline fraction digits when value is 0 and useMinSignificantDigits is enabled', () => {
 			expect(
 				formatCurrency({
