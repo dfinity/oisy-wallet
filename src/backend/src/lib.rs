@@ -40,7 +40,6 @@ mod bitcoin;
 mod contacts;
 mod guards;
 mod housekeeping;
-mod impls;
 pub mod random;
 mod rate_limiter;
 mod signer;
