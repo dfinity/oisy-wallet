@@ -1,14 +1,23 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';
-	import { isTransactionPending } from '$eth/utils/transactions.utils';
+	import {
+		decodeErc20AbiDataValue,
+		isMaxUint256,
+		isTransactionPending
+	} from '$eth/utils/transactions.utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -22,7 +31,8 @@
 
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let { value, timestamp, displayTimestamp, type, to, from, tokenId } = $derived(transaction);
+	let { value, timestamp, displayTimestamp, type, to, from, tokenId, approveSpender, data } =
+		$derived(transaction);
 
 	let ckTokenSymbol = $derived(
 		isSupportedEthToken(token)
@@ -31,33 +41,78 @@
 				((token as Erc20Token | undefined)?.twinTokenSymbol ?? '')
 	);
 
-	let label = $derived(
-		type === 'withdraw'
-			? replacePlaceholders(
-					pending
-						? $i18n.transaction.label.converting_ck_token
-						: $i18n.transaction.label.ck_token_converted,
-					{
-						$twinToken: token?.symbol ?? '',
-						$ckToken: ckTokenSymbol
-					}
+	let isApprove = $derived(type === 'approve');
+
+	let approveToken = $derived(
+		isApprove && nonNullish(to)
+			? $ercFungibleTokens.find(
+					({ address, network: { id: networkId } }) =>
+						areAddressesEqual({ address1: address, address2: to, networkId }) &&
+						networkId === token.network.id
 				)
-			: type === 'deposit'
+			: undefined
+	);
+
+	let approveValue = $derived(
+		isApprove && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : undefined
+	);
+
+	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
+
+	let displayToken = $derived(approveToken ?? token);
+
+	let approveAmountText = $derived.by(() => {
+		if (!isApprove) {
+			return;
+		}
+
+		const symbolText = getTokenDisplaySymbol(displayToken);
+
+		if (isUnlimitedApprove) {
+			return replacePlaceholders($i18n.core.text.unlimited, {
+				$items: symbolText
+			});
+		}
+
+		if (nonNullish(approveValue)) {
+			return `${formatToken({ value: approveValue, displayDecimals: displayToken.decimals, unitName: displayToken.decimals })} ${symbolText}`;
+		}
+
+		return symbolText;
+	});
+
+	let label = $derived(
+		isApprove
+			? replacePlaceholders($i18n.transaction.text.approve_label, {
+					$approveAmount: approveAmountText ?? ''
+				})
+			: type === 'withdraw'
 				? replacePlaceholders(
 						pending
-							? $i18n.transaction.label.converting_twin_token
-							: $i18n.transaction.label.ck_token_sent,
+							? $i18n.transaction.label.converting_ck_token
+							: $i18n.transaction.label.ck_token_converted,
 						{
 							$twinToken: token?.symbol ?? '',
 							$ckToken: ckTokenSymbol
 						}
 					)
-				: type === 'send'
-					? $i18n.send.text.send
-					: $i18n.receive.text.receive
+				: type === 'deposit'
+					? replacePlaceholders($i18n.transaction.label.twin_token_sent, {
+							$twinToken: token?.symbol ?? '',
+							$ckToken: ckTokenSymbol
+						})
+					: type === 'send'
+						? $i18n.send.text.send
+						: $i18n.receive.text.receive
 	);
 
-	let displayAmount = $derived(value * (type === 'send' || type === 'deposit' ? -1n : 1n));
+	let displayAmount = $derived(
+		isApprove
+			? isUnlimitedApprove
+				? undefined
+				: approveValue
+			: value * (type === 'send' || type === 'deposit' ? -1n : 1n)
+	);
 
 	let transactionDate = $derived(timestamp ?? displayTimestamp);
 
@@ -65,6 +120,7 @@
 </script>
 
 <Transaction
+	{approveSpender}
 	{displayAmount}
 	{from}
 	{iconType}
@@ -72,7 +128,7 @@
 	{status}
 	timestamp={transactionDate}
 	{to}
-	{token}
+	token={displayToken}
 	{tokenId}
 	{type}
 >

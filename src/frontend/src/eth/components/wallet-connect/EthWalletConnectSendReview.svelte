@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { erc4626Tokens } from '$eth/derived/erc4626.derived';
+	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
+	import { decodeErc20AbiData } from '$eth/utils/transactions.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -42,15 +41,17 @@
 		onReject
 	}: Props = $props();
 
-	let amountDisplay = $derived(
-		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount
+	let { to: destinationDisplay, value: amountDisplay } = $derived(
+		erc20Approve && nonNullish(data)
+			? decodeErc20AbiData({ data })
+			: { to: destination, value: amount }
 	);
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let token = $derived(
 		erc20Approve
-			? [...$erc20Tokens, ...$erc4626Tokens].find(
+			? $ercFungibleTokens.find(
 					({ address, network: { id: networkId } }) =>
 						areAddressesEqual({ address1: address, address2: destination, networkId }) &&
 						networkId === sourceNetworkProp.id
@@ -66,7 +67,7 @@
 		amount={amountDisplay}
 		{application}
 		{balance}
-		{destination}
+		destination={destinationDisplay}
 		showUnlimitedAmountLabel={erc20Approve}
 		source={$ethAddress ?? ''}
 		{token}
