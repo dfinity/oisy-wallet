@@ -127,6 +127,7 @@ export const idlFactory = ({ IDL }) => {
 		InvalidUtxos: IDL.Null,
 		EmptyUtxos: IDL.Null,
 		DuplicateUtxos: IDL.Null,
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text }),
 		UtxosAlreadyReserved: IDL.Null
 	});
@@ -142,6 +143,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const SelectedUtxosFeeError = IDL.Variant({
 		PendingTransactions: IDL.Null,
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
 	const BtcGetFeePercentilesResult = IDL.Variant({
@@ -160,6 +162,7 @@ export const idlFactory = ({ IDL }) => {
 		transactions: IDL.Vec(PendingTransaction)
 	});
 	const BtcGetPendingTransactionsError = IDL.Variant({
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
 	const BtcGetPendingTransactionsResult = IDL.Variant({
@@ -326,6 +329,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const GetAllowedCyclesResponse = IDL.Record({ allowed_cycles: IDL.Nat });
 	const GetAllowedCyclesError = IDL.Variant({
+		RateLimited: RateLimitError,
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
@@ -449,6 +453,7 @@ export const idlFactory = ({ IDL }) => {
 			min: IDL.Nat8,
 			percentage: IDL.Nat8
 		}),
+		RateLimited: RateLimitError,
 		CouldNotGetBalanceFromCyclesLedger: IDL.Null,
 		CouldNotTopUpCyclesLedger: IDL.Record({
 			tried_to_send: IDL.Nat,
