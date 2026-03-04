@@ -38,7 +38,7 @@
 		"cargo:test": "./scripts/test.backend.sh",
 		"clippy": "./scripts/lint.rust.sh",
 		"lint": "prettier --check --cache ${CI:+--cache-strategy content} './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,yml,did}' && eslint --concurrency=auto --cache ${CI:+--cache-strategy content} .",
-		"lint:lockfile": "lockfile-lint --type npm --path package-lock.json --validate-https --allowed-hosts registry.npmjs.org --validate-integrity --format plain",
+		"lint:lockfile": "lockfile-lint --type npm --path package-lock.json --validate-https --allowed-hosts registry.npmjs.org --validate-integrity --validate-package-urls --validate-registry",
 		"format:file": "prettier --write \"${npm_config_file}\" && eslint --fix \"${npm_config_file}\"",
 		"format": "prettier --write --cache ${CI:+--cache-strategy content} './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,yml,did}' && eslint --fix --concurrency=auto --cache ${CI:+--cache-strategy content} .",
 		"format:backend": "./scripts/format.sh",
