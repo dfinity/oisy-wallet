@@ -10,7 +10,10 @@ export const ercFungibleTokens: Readable<(Erc20CustomToken | Erc4626CustomToken)
 );
 
 export const enabledErcFungibleTokens: Readable<(Erc20CustomToken | Erc4626CustomToken)[]> =
-	derived([enabledErc20Tokens, enabledErc4626Tokens], ([$erc20Tokens, $erc4626Tokens]) => [
-		...$erc20Tokens,
-		...$erc4626Tokens
-	]);
+	derived(
+		[enabledErc20Tokens, enabledErc4626Tokens],
+		([$enabledErc20Tokens, $enabledErc4626Tokens]) => [
+			...$enabledErc20Tokens,
+			...$enabledErc4626Tokens
+		]
+	);
