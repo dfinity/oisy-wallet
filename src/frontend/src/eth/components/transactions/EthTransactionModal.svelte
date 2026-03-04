@@ -118,6 +118,17 @@
 			: to
 	);
 
+	let spenderDisplay: OptionString = $derived(
+		isApprove && nonNullish(approveSpender) && nonNullish(token)
+			? (mapAddressToName({
+					address: approveSpender,
+					networkId: token.network.id,
+					erc20Tokens: $erc20Tokens,
+					ckMinterInfo
+				}) ?? undefined)
+			: undefined
+	);
+
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openEthTransaction({
 			id: Symbol(),
@@ -284,6 +295,23 @@
 							copyAddressText={$i18n.transaction.text.to_copied}
 							externalLink={toExplorerUrl}
 							externalLinkAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+						/>
+					</span>
+				</ListItem>
+			{/if}
+
+			{#if isApprove && nonNullish(approveSpender) && nonNullish(spenderDisplay)}
+				<ListItem>
+					<span>{$i18n.wallet_connect.text.spender}</span>
+
+					<span class="flex max-w-[50%] flex-row break-all">
+						<output>{spenderDisplay}</output>
+
+						<AddressActions
+							copyAddress={approveSpender}
+							copyAddressText={$i18n.transaction.text.for_copied}
+							externalLink={approveSpenderExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_for_block_explorer}
 						/>
 					</span>
 				</ListItem>

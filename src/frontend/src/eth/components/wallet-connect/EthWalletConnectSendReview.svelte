@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import { decodeErc20AbiData } from '$eth/utils/transactions.utils';
+	import { decodeErc20AbiData, mapAddressToName } from '$eth/utils/transactions.utils';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
+	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
@@ -16,6 +20,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
+	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
 
 	interface Props {
 		amount: bigint;
@@ -41,7 +46,7 @@
 		onReject
 	}: Props = $props();
 
-	let { to: destinationDisplay, value: amountDisplay } = $derived(
+	let { to: spender, value: amountDisplay } = $derived(
 		erc20Approve && nonNullish(data)
 			? decodeErc20AbiData({ data })
 			: { to: destination, value: amount }
@@ -60,6 +65,32 @@
 	);
 
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
+
+	let ckMinterInfo = $derived(
+		$ckEthMinterInfoStore?.[
+			isNetworkIdSepolia(sourceNetworkProp.id) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
+		]
+	);
+
+	let destinationResolvedName = $derived(
+		mapAddressToName({
+			address: destination,
+			networkId: sourceNetworkProp.id,
+			erc20Tokens: $erc20Tokens,
+			ckMinterInfo
+		}) ?? undefined
+	);
+
+	let spenderResolvedName = $derived(
+		erc20Approve
+			? (mapAddressToName({
+					address: spender,
+					networkId: sourceNetworkProp.id,
+					erc20Tokens: $erc20Tokens,
+					ckMinterInfo
+				}) ?? undefined)
+			: undefined
+	);
 </script>
 
 <ContentWithToolbar>
@@ -67,7 +98,8 @@
 		amount={amountDisplay}
 		{application}
 		{balance}
-		destination={destinationDisplay}
+		{destination}
+		{destinationResolvedName}
 		showUnlimitedAmountLabel={erc20Approve}
 		source={$ethAddress ?? ''}
 		{token}
@@ -88,6 +120,14 @@
 				</WalletConnectModalValue>
 			{/if}
 		{/snippet}
+
+		{#if erc20Approve && nonNullish(spender)}
+			<SendDataDestination
+				destination={spender}
+				label={$i18n.wallet_connect.text.spender}
+				resolvedName={spenderResolvedName}
+			/>
+		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 	</SendData>
