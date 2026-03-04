@@ -386,9 +386,11 @@ fn test_allow_signing_skips_rate_limit_when_allowance_sufficient() {
     // Confirm the allowance is indeed above threshold.
     let allowance =
         call_get_allowed_cycles(&pic_setup, caller).expect("get_allowed_cycles should succeed");
-    assert!(
-        allowance.allowed_cycles > Nat::from(0u64),
-        "allowance should be non-zero after profile creation"
+    let expected = Nat::from(2917000000000u64);
+    assert_eq!(
+        allowance.allowed_cycles, expected,
+        "unexpected allowance after profile creation; expected {expected}, got {}",
+        allowance.allowed_cycles
     );
 
     // Call allow_signing well beyond the 3-call rate limit.
