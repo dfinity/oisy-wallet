@@ -31,8 +31,19 @@
 
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let { value, timestamp, displayTimestamp, type, to, from, tokenId, approveSpender, data } =
-		$derived(transaction);
+	let {
+		value,
+		timestamp,
+		displayTimestamp,
+		type,
+		to,
+		from,
+		tokenId,
+		approveSpender,
+		data,
+		gasUsed,
+		gasPrice
+	} = $derived(transaction);
 
 	let ckTokenSymbol = $derived(
 		isSupportedEthToken(token)
@@ -106,11 +117,15 @@
 						: $i18n.receive.text.receive
 	);
 
+	let gasFee = $derived(
+		nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined
+	);
+
 	let displayAmount = $derived(
 		isApprove
-			? isUnlimitedApprove
-				? undefined
-				: approveValue
+			? nonNullish(gasFee)
+				? gasFee * -1n
+				: undefined
 			: value * (type === 'send' || type === 'deposit' ? -1n : 1n)
 	);
 
@@ -128,7 +143,7 @@
 	{status}
 	timestamp={transactionDate}
 	{to}
-	token={displayToken}
+	token={isApprove ? token : displayToken}
 	{tokenId}
 	{type}
 >

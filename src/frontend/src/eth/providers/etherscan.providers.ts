@@ -76,6 +76,7 @@ export class EtherscanProvider {
 				value,
 				gas,
 				gasPrice,
+				gasUsed,
 				input: data
 			}: EtherscanProviderTransaction): Transaction => ({
 				hash,
@@ -88,7 +89,8 @@ export class EtherscanProvider {
 				gasPrice: BigInt(gasPrice),
 				value: BigInt(value),
 				chainId: this.chainId,
-				data
+				data,
+				gasUsed: BigInt(gasUsed)
 			})
 		);
 	}
