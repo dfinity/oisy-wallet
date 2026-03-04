@@ -6,7 +6,7 @@
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { contacts } from '$lib/derived/contacts.derived';
+	import { allContacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
@@ -49,7 +49,7 @@
 	let contact: ContactUi | undefined = $derived(
 		nonNullish(address)
 			? getContactForAddress({
-					contactList: $contacts,
+					contactList: $allContacts,
 					addressString: address
 				})
 			: undefined

@@ -1,12 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import { decodeErc20AbiData, mapAddressToName } from '$eth/utils/transactions.utils';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { decodeErc20AbiData } from '$eth/utils/transactions.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
@@ -20,7 +17,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
-	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
 
 	interface Props {
 		amount: bigint;
@@ -65,32 +61,6 @@
 	);
 
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
-
-	let ckMinterInfo = $derived(
-		$ckEthMinterInfoStore?.[
-			isNetworkIdSepolia(sourceNetworkProp.id) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
-		]
-	);
-
-	let destinationResolvedName = $derived(
-		mapAddressToName({
-			address: destination,
-			networkId: sourceNetworkProp.id,
-			erc20Tokens: $erc20Tokens,
-			ckMinterInfo
-		}) ?? undefined
-	);
-
-	let spenderResolvedName = $derived(
-		erc20Approve
-			? (mapAddressToName({
-					address: spender,
-					networkId: sourceNetworkProp.id,
-					erc20Tokens: $erc20Tokens,
-					ckMinterInfo
-				}) ?? undefined)
-			: undefined
-	);
 </script>
 
 <ContentWithToolbar>
@@ -99,7 +69,6 @@
 		{application}
 		{balance}
 		{destination}
-		{destinationResolvedName}
 		showUnlimitedAmountLabel={erc20Approve}
 		source={$ethAddress ?? ''}
 		{token}
@@ -125,7 +94,6 @@
 			<SendDataDestination
 				destination={spender}
 				label={$i18n.wallet_connect.text.spender}
-				resolvedName={spenderResolvedName}
 			/>
 		{/if}
 

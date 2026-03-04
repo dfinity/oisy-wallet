@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -13,8 +12,7 @@
 		isMaxUint256,
 		mapAddressToName
 	} from '$eth/utils/transactions.utils';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
+	import { ckMinterBuiltInContacts } from '$icp-eth/derived/ck-minter-contacts.derived';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -39,7 +37,7 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
+
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
@@ -90,19 +88,13 @@
 		nonNullish(approveSpender) ? `${explorerBaseUrl}/address/${approveSpender}` : undefined
 	);
 
-	let ckMinterInfo: OptionCertifiedMinterInfo = $derived(
-		$ckEthMinterInfoStore?.[
-			isNetworkIdSepolia(token?.network.id) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
-		]
-	);
-
 	let fromDisplay: OptionString = $derived(
 		nonNullish(token)
 			? (mapAddressToName({
 					address: from,
 					networkId: token.network.id,
 					erc20Tokens: $erc20Tokens,
-					ckMinterInfo
+					builtInContacts: $ckMinterBuiltInContacts
 				}) ?? from)
 			: from
 	);
@@ -113,7 +105,7 @@
 					address: to,
 					networkId: token.network.id,
 					erc20Tokens: $erc20Tokens,
-					ckMinterInfo
+					builtInContacts: $ckMinterBuiltInContacts
 				}) ?? to)
 			: to
 	);
@@ -124,7 +116,7 @@
 					address: approveSpender,
 					networkId: token.network.id,
 					erc20Tokens: $erc20Tokens,
-					ckMinterInfo
+					builtInContacts: $ckMinterBuiltInContacts
 				}) ?? undefined)
 			: undefined
 	);

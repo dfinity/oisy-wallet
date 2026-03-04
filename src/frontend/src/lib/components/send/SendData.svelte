@@ -19,7 +19,6 @@
 		showNullishAmountLabel?: boolean;
 		showUnlimitedAmountLabel?: boolean;
 		destinationLabel?: string;
-		destinationResolvedName?: string;
 		sourceNetwork: Snippet;
 		destinationNetwork?: Snippet;
 		children?: Snippet;
@@ -36,7 +35,6 @@
 		showNullishAmountLabel = false,
 		showUnlimitedAmountLabel = false,
 		destinationLabel,
-		destinationResolvedName,
 		sourceNetwork,
 		destinationNetwork,
 		children
@@ -60,11 +58,7 @@
 <SendSource {balance} {exchangeRate} {source} {token} />
 
 {#if nonNullish(destination)}
-	<SendDataDestination
-		{destination}
-		label={destinationLabel}
-		resolvedName={destinationResolvedName}
-	/>
+	<SendDataDestination {destination} label={destinationLabel} />
 {/if}
 
 {@render children?.()}

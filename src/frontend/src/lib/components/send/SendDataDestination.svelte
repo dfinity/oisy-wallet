@@ -7,7 +7,7 @@
 	import TokenAsContact from '$lib/components/tokens/TokenAsContact.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
-	import { contacts } from '$lib/derived/contacts.derived';
+	import { allContacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
@@ -16,10 +16,9 @@
 	interface Props {
 		destination: string;
 		label?: string;
-		resolvedName?: string;
 	}
 
-	let { destination, label, resolvedName }: Props = $props();
+	let { destination, label }: Props = $props();
 
 	let putativeToken = $derived(
 		$allTokens.find((t) =>
@@ -38,7 +37,7 @@
 	);
 
 	let contact = $derived(
-		getContactForAddress({ addressString: destination, contactList: $contacts })
+		getContactForAddress({ addressString: destination, contactList: $allContacts })
 	);
 
 	let contactAddress = $derived(filterAddressFromContact({ contact, address: destination }));
@@ -51,8 +50,6 @@
 			<TokenAsContact token={putativeToken} />
 		{:else if nonNullish(contact)}
 			<ContactWithAvatar {contact} {contactAddress} />
-		{:else if nonNullish(resolvedName)}
-			<span class="text-tertiary">{resolvedName}</span>
 		{/if}
 	</div>
 </WalletConnectModalValue>
