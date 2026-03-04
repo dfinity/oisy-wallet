@@ -5,6 +5,7 @@ import type {
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import { mapIcrc2ApproveError, type ApproveError } from '@icp-sdk/canisters/ledger/icp';
 
 export const mapBtcPendingTransactionError = (
@@ -56,9 +57,19 @@ export const mapAllowSigningError = (
 		return new CanisterInternalError('The Cycles Ledger cannot be contacted.');
 	}
 
+	if ('RateLimited' in err) {
+		const { max_calls: maxCalls, window_ns: windowNs } = err.RateLimited;
+
+		const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+		return new CanisterInternalError(
+			`Rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+		);
+	}
+
 	if ('Other' in err) {
 		return new CanisterInternalError(err.Other);
 	}
 
-	return new CanisterInternalError('An uknown error occurred.');
+	return new CanisterInternalError('An unknown error occurred while allowing signing.');
 };

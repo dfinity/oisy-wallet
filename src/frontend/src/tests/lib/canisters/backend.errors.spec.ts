@@ -1,0 +1,132 @@
+import {
+	mapAllowSigningError,
+	mapBtcPendingTransactionError,
+	mapBtcSelectUserUtxosFeeError,
+	mapGetAllowedCyclesError
+} from '$lib/canisters/backend.errors';
+import { CanisterInternalError } from '$lib/canisters/errors';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { ApproveError } from '@icp-sdk/canisters/ledger/icp';
+
+describe('backend.errors', () => {
+	describe('mapBtcPendingTransactionError', () => {
+		it('should map InternalError', () => {
+			const err = mapBtcPendingTransactionError({
+				InternalError: { msg: 'pending tx error' }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('pending tx error');
+		});
+
+		it('should return unknown error for unrecognized variant', () => {
+			// @ts-expect-error testing unknown error variant
+			const err = mapBtcPendingTransactionError({ SomeOther: null });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Unknown BtcAddPendingTransactionError');
+		});
+	});
+
+	describe('mapBtcSelectUserUtxosFeeError', () => {
+		it('should map InternalError', () => {
+			const err = mapBtcSelectUserUtxosFeeError({
+				InternalError: { msg: 'utxos fee error' }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('utxos fee error');
+		});
+
+		it('should map PendingTransactions', () => {
+			const err = mapBtcSelectUserUtxosFeeError({
+				PendingTransactions: null
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Selecting utxos fee is not possible - pending transactions found.');
+		});
+
+		it('should return unknown error for unrecognized variant', () => {
+			// @ts-expect-error testing unknown error variant
+			const err = mapBtcSelectUserUtxosFeeError({ SomeOther: null });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Unknown BtcSelectUserUtxosFeeError');
+		});
+	});
+
+	describe('mapGetAllowedCyclesError', () => {
+		it('should map FailedToContactCyclesLedger', () => {
+			const err = mapGetAllowedCyclesError({
+				FailedToContactCyclesLedger: null
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('The Cycles Ledger cannot be contacted.');
+		});
+
+		it('should map Other', () => {
+			const err = mapGetAllowedCyclesError({
+				Other: 'custom error message'
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('custom error message');
+		});
+
+		it('should return unknown error for unrecognized variant', () => {
+			// @ts-expect-error testing unknown error variant
+			const err = mapGetAllowedCyclesError({ SomeOther: null });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Unknown GetAllowedCyclesError');
+		});
+	});
+
+	describe('mapAllowSigningError', () => {
+		it('should map ApproveError', () => {
+			const err = mapAllowSigningError({
+				ApproveError: { GenericError: { error_code: 1n, message: 'approve failed' } }
+			});
+
+			expect(err).toBeInstanceOf(ApproveError);
+			expect(err.message).toBe('approve failed');
+		});
+
+		it('should map FailedToContactCyclesLedger', () => {
+			const err = mapAllowSigningError({
+				FailedToContactCyclesLedger: null
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('The Cycles Ledger cannot be contacted.');
+		});
+
+		it('should map RateLimited', () => {
+			const err = mapAllowSigningError({
+				RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.');
+		});
+
+		it('should map Other', () => {
+			const err = mapAllowSigningError({
+				Other: 'some other error'
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('some other error');
+		});
+
+		it('should return unknown error for unrecognized variant', () => {
+			// @ts-expect-error testing unknown error variant
+			const err = mapAllowSigningError({ SomeOther: null });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('An unknown error occurred while allowing signing.');
+		});
+	});
+});

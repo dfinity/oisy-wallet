@@ -8,10 +8,12 @@ export enum PLAUSIBLE_EVENTS {
 	OPEN_MODAL = 'open_modal',
 	LOAD_CUSTOM_TOKENS = 'load_custom_tokens',
 	PAY = 'pay',
-	SIGN_IN_CANCELLED_HELP = 'sign_in_cancelled_help'
+	SIGN_IN_CANCELLED_HELP = 'sign_in_cancelled_help',
+	RATE_LIMITED = 'rate_limited'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
+	BACKEND = 'backend',
 	NFT = 'nft',
 	ASSETS_TAB = 'assets_tab',
 	TOKENS = 'tokens',
@@ -28,6 +30,11 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NFT {
 	ERC1155 = 'erc1155'
 }
 
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND {
+	PER_USER = 'per_user',
+	GLOBAL = 'global'
+}
+
 export enum PLAUSIBLE_EVENT_VALUES {
 	NFT = 'nft',
 	NFT_COLLECTION_PAGE = 'nft-collection-page',
@@ -35,6 +42,7 @@ export enum PLAUSIBLE_EVENT_VALUES {
 }
 
 export enum PLAUSIBLE_EVENT_SOURCES {
+	BACKEND = 'backend',
 	ASSETS_PAGE = 'assets_page',
 	NFT_COLLECTION = 'nft-collection-page',
 	NFT_MEDIA_REVIEW = 'media-review',
