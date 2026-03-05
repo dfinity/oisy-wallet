@@ -76,9 +76,13 @@
 				{/if}
 				<span class="mr-2 flex">{@render logo()}</span>
 				<span class="flex min-w-0 flex-col text-left">
-					<span class="flex min-w-0 items-center">
+					<span class="flex min-w-0 items-center truncate text-nowrap">
 						{#if nonNullish(title)}
-							<span class="min-w-0 truncate text-lg font-bold text-nowrap text-primary">
+							<span
+								class="text-lg font-bold text-nowrap text-primary"
+								class:min-w-0={isNullish(subtitle)}
+								class:truncate={isNullish(subtitle)}
+							>
 								{@render title()}
 							</span>
 						{/if}
@@ -86,7 +90,7 @@
 							{#if dividers}
 								<span class="text-tertiary"><Divider /></span>
 							{/if}
-							<span class="text-base text-nowrap text-tertiary">
+							<span class="truncate text-base text-nowrap text-tertiary">
 								{@render subtitle()}
 							</span>
 						{/if}

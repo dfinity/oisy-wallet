@@ -5,7 +5,11 @@ import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.c
 import en from '$lib/i18n/en.json';
 import * as openCryptoPayServices from '$lib/services/open-crypto-pay.services';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
-import type { OpenCryptoPayResponse, PayableTokenWithFees } from '$lib/types/open-crypto-pay';
+import type {
+	OpenCryptoPayResponse,
+	PayableToken,
+	PayableTokenWithFees
+} from '$lib/types/open-crypto-pay';
 import { ScannerResults } from '$lib/types/scanner';
 import * as openCryptoPayUtils from '$lib/utils/open-crypto-pay.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
@@ -154,13 +158,13 @@ describe('ScannerCode.svelte', () => {
 		]
 	};
 
-	const mockBaseTokens = [
+	const mockBaseTokens: PayableToken[] = [
 		{
 			...ETHEREUM_TOKEN,
 			amount: '0.01',
 			minFee: 0.001,
 			tokenNetwork: 'Ethereum'
-		}
+		} as PayableToken
 	];
 
 	const mockTokensWithFees: PayableTokenWithFees[] = [
@@ -177,7 +181,7 @@ describe('ScannerCode.svelte', () => {
 				},
 				estimatedGasLimit: 25n
 			}
-		}
+		} as PayableTokenWithFees
 	];
 
 	const renderWithContext = () =>

@@ -113,7 +113,15 @@ export const mapTokenToPayableToken = ({
 	token: Token;
 	methodDataMap: Map<string, PaymentMethodData>;
 }): PayableToken | undefined => {
-	const tokenNetwork = token.network.pay?.openCryptoPay;
+	const { network } = token;
+
+	const { pay } = network;
+
+	if (isNullish(pay)) {
+		return;
+	}
+
+	const tokenNetwork = pay.openCryptoPay;
 
 	if (isNullish(tokenNetwork)) {
 		return;
@@ -135,6 +143,7 @@ export const mapTokenToPayableToken = ({
 
 	return {
 		...token,
+		network: { ...network, pay },
 		amount: assetData.amount,
 		tokenNetwork,
 		minFee: methodData.minFee

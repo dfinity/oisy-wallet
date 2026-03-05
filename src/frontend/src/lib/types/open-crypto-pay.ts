@@ -75,11 +75,14 @@ export interface PaymentMethodData {
 	minFee?: number;
 }
 
-export interface PayableToken extends Token {
+type PayableNetwork = Omit<Network, 'pay'> & Required<Pick<Network, 'pay'>>;
+
+export type PayableToken = Omit<Token, 'network'> & {
+	network: PayableNetwork;
 	amount: string;
 	tokenNetwork: NetworkOpenCryptoPay;
 	minFee?: number;
-}
+};
 
 export interface PayableTokenWithFees extends PayableToken {
 	fee?: EthFeeResult | UtxosFee;
