@@ -98,13 +98,13 @@ export const mapIcrcToken = ({
 		standard: customTokenSymbol?.standard ?? { code: 'icrc' },
 		symbol,
 		...(notEmptyString(icon) && { icon }),
-		...(nonNullish(customTokenSymbol) && {
+		...(nonNullish(customTokenSymbol?.explorerUrl) && {
 			explorerUrl: customTokenSymbol.explorerUrl
 		}),
-		...(nonNullish(customTokenSymbol) && {
+		...(nonNullish(customTokenSymbol?.alternativeName) && {
 			alternativeName: customTokenSymbol.alternativeName
 		}),
-		...(nonNullish(customTokenSymbol) && {
+		...(nonNullish(customTokenSymbol?.deprecated) && {
 			deprecated: customTokenSymbol.deprecated
 		}),
 		ledgerCanisterId,
