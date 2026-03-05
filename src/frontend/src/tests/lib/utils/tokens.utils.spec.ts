@@ -458,6 +458,13 @@ describe('tokens.utils', () => {
 				name: 'SameName',
 				network: ICP_NETWORK
 			};
+			const tokenZeroBalanceHighMcap: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-BAL0'),
+				symbol: 'SAME',
+				name: 'SameName',
+				network: ICP_NETWORK
+			};
 			const tokenNoBalanceHighMcap: Token = {
 				...mockValidToken,
 				id: parseTokenId('TokenId-NOBAL'),
@@ -469,6 +476,7 @@ describe('tokens.utils', () => {
 			const $balances: CertifiedStoreData<BalancesData> = {
 				[tokenHighBalanceLowMcap.id]: { data: 2n, certified },
 				[tokenLowBalanceHighMcap.id]: { data: 1n, certified },
+				[tokenZeroBalanceHighMcap.id]: { data: ZERO, certified },
 				[tokenNoBalanceHighMcap.id]: null
 			};
 
@@ -477,14 +485,18 @@ describe('tokens.utils', () => {
 				[tokenLowBalanceHighMcap.id]: { usd_market_cap: 999, usd: 0 }
 			};
 
-			const tokens = [tokenNoBalanceHighMcap, tokenLowBalanceHighMcap, tokenHighBalanceLowMcap].map(
-				(token) =>
-					mapTokenUi({
-						token,
-						$balances,
-						$stakeBalances: {},
-						$exchanges
-					})
+			const tokens = [
+				tokenNoBalanceHighMcap,
+				tokenZeroBalanceHighMcap,
+				tokenLowBalanceHighMcap,
+				tokenHighBalanceLowMcap
+			].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
 			);
 
 			const result = sortTokens({
@@ -496,6 +508,7 @@ describe('tokens.utils', () => {
 			expect(result.map((t) => t.id)).toEqual([
 				tokenHighBalanceLowMcap.id,
 				tokenLowBalanceHighMcap.id,
+				tokenZeroBalanceHighMcap.id,
 				tokenNoBalanceHighMcap.id
 			]);
 		});
