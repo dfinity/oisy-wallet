@@ -4,9 +4,15 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    backend_config::Config, bitcoin::StoredPendingTransaction, contact::StoredContacts,
-    custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
-    user_profile::StoredUserProfile, Timestamp,
+    backend_config::Config,
+    bitcoin::StoredPendingTransaction,
+    contact::StoredContacts,
+    custom_token::CustomToken,
+    eth_transaction::{ProviderApiKeys, UserEthTransactionsData},
+    pow::StoredChallenge,
+    token::UserToken,
+    user_profile::StoredUserProfile,
+    Timestamp,
 };
 
 use crate::types::storable::{Candid, StoredPrincipal, StoredTokenId};
@@ -37,3 +43,11 @@ pub type BtcUserPendingTransactionsMap =
     StableBTreeMap<StoredPrincipal, Candid<PendingTransactionsMap>, VMem>;
 
 pub type TokenActivityMap = StableBTreeMap<StoredTokenId, Timestamp, VMem>;
+
+pub type EthTransactionsMap =
+    StableBTreeMap<StoredPrincipal, Candid<UserEthTransactionsData>, VMem>;
+
+/// Tracks when each user was last active (nanosecond IC timestamp).
+pub type UserActivityMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
+
+pub type ProviderApiKeysCell = StableCell<Option<Candid<ProviderApiKeys>>, VMem>;
