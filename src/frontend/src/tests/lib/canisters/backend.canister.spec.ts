@@ -782,7 +782,11 @@ describe('backend.canister', () => {
 		it('should return rateLimitInfo if RateLimitedByGuard error is returned', async () => {
 			const response = {
 				Err: {
-					RateLimitedByGuard: { max_calls: 10, window_ns: 60_000_000n, caller: mockPrincipal }
+					RateLimitedByGuard: {
+						max_calls: 10,
+						window_ns: 60_000_000_000_000n,
+						caller: mockPrincipal
+					}
 				}
 			};
 
