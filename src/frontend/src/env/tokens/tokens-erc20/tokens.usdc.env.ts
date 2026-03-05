@@ -7,7 +7,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 
 export const USDC_DECIMALS = 6;
 
-export const USDC_SYMBOL = 'xUSDC';
+export const USDC_SYMBOL = 'USDC';
 
 export const USDC_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
 
@@ -16,7 +16,7 @@ export const USDC_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	name: 'xUSD Coin',
+	name: 'USD Coin',
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,
 	icon: usdc,
@@ -38,7 +38,7 @@ export const SEPOLIA_USDC_TOKEN: RequiredErc20Token = {
 	network: SEPOLIA_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	name: 'xUSDC',
+	name: 'USDC',
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,
 	icon: usdc,
