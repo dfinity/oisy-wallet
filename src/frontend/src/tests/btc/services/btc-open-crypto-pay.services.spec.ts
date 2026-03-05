@@ -64,7 +64,7 @@ describe('btc-open-crypto-pay.services', () => {
 			tokenNetwork: 'Bitcoin',
 			amount: '0.001',
 			minFee: 0
-		};
+		} as PayableToken;
 
 		const mockUtxosFee: UtxosFee = {
 			feeSatoshis: 1000n,
@@ -225,7 +225,7 @@ describe('btc-open-crypto-pay.services', () => {
 				feeSatoshis: 1000n,
 				utxos: []
 			}
-		};
+		} as PayableTokenWithConvertedAmount;
 
 		const mockValidatedData: ValidatedBtcPaymentData = {
 			destination: 'bc1qbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',

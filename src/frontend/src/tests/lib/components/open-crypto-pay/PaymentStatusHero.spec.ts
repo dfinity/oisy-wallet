@@ -27,7 +27,7 @@ describe('PaymentStatusHero', () => {
 			},
 			estimatedGasLimit: 25000n
 		}
-	};
+	} as PayableTokenWithConvertedAmount;
 
 	const mockData: OpenCryptoPayResponse = {
 		id: 'pl_test123',
