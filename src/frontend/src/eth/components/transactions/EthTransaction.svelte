@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { assertNever } from '@dfinity/utils';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';
@@ -24,38 +25,52 @@
 
 	let { value, timestamp, displayTimestamp, type, to, from, tokenId } = $derived(transaction);
 
-	let ckTokenSymbol = $derived(
-		isSupportedEthToken(token)
+	let label = $derived.by(() => {
+		if (type === 'send') {
+			return $i18n.send.text.send;
+		}
+
+		if (type === 'receive') {
+			return $i18n.receive.text.receive;
+		}
+
+		if (type === 'approve') {
+			return replacePlaceholders($i18n.transaction.text.approve_label, {
+				$approveAmount: ''
+			});
+		}
+
+		const ckTokenSymbol = isSupportedEthToken(token)
 			? token.twinTokenSymbol
 			: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
-				((token as Erc20Token | undefined)?.twinTokenSymbol ?? '')
-	);
+				((token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
 
-	let label = $derived(
-		type === 'withdraw'
-			? replacePlaceholders(
-					pending
-						? $i18n.transaction.label.converting_ck_token
-						: $i18n.transaction.label.ck_token_converted,
-					{
-						$twinToken: token?.symbol ?? '',
-						$ckToken: ckTokenSymbol
-					}
-				)
-			: type === 'deposit'
-				? replacePlaceholders(
-						pending
-							? $i18n.transaction.label.converting_twin_token
-							: $i18n.transaction.label.ck_token_sent,
-						{
-							$twinToken: token?.symbol ?? '',
-							$ckToken: ckTokenSymbol
-						}
-					)
-				: type === 'send'
-					? $i18n.send.text.send
-					: $i18n.receive.text.receive
-	);
+		if (type === 'withdraw') {
+			return replacePlaceholders(
+				pending
+					? $i18n.transaction.label.converting_ck_token
+					: $i18n.transaction.label.ck_token_converted,
+				{
+					$twinToken: token?.symbol ?? '',
+					$ckToken: ckTokenSymbol
+				}
+			);
+		}
+
+		if (type === 'deposit') {
+			return replacePlaceholders(
+				pending
+					? $i18n.transaction.label.converting_twin_token
+					: $i18n.transaction.label.ck_token_sent,
+				{
+					$twinToken: token?.symbol ?? '',
+					$ckToken: ckTokenSymbol
+				}
+			);
+		}
+
+		assertNever(type, `Unsupported transaction type: ${type}`);
+	});
 
 	let displayAmount = $derived(value * (type === 'send' || type === 'deposit' ? -1n : 1n));
 
