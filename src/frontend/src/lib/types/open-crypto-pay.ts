@@ -1,6 +1,7 @@
 import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
 import type { UtxosFee } from '$btc/types/btc-send';
 import type { EthFeeResult } from '$eth/types/pay';
+import type { IcFeeResult } from '$icp/types/pay';
 import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import type { Network, NetworkOpenCryptoPay } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
@@ -85,7 +86,7 @@ export type PayableToken = Omit<Token, 'network'> & {
 };
 
 export interface PayableTokenWithFees extends PayableToken {
-	fee?: EthFeeResult | UtxosFee;
+	fee?: EthFeeResult | UtxosFee | IcFeeResult;
 }
 
 export interface PrepareTokensParams {
