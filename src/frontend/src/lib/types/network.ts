@@ -1,9 +1,9 @@
-import {
-	type NetworkEnvironmentSchema,
-	type NetworkExchangeSchema,
-	type NetworkIdSchema,
+import type {
 	NetworkOpenCryptoPaySchema,
-	type NetworkSchema
+	NetworkEnvironmentSchema,
+	NetworkExchangeSchema,
+	NetworkIdSchema,
+	NetworkSchema
 } from '$lib/schema/network.schema';
 import type { Option } from '$lib/types/utils';
 import type * as z from 'zod';
