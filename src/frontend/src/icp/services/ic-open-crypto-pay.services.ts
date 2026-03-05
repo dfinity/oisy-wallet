@@ -6,11 +6,8 @@ import { getTokenFee } from '$icp/utils/token.utils';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
-import type { PayableToken, PayParams, ValidatedIcpPaymentData } from '$lib/types/open-crypto-pay';
-import { isNullish } from '@dfinity/utils';
 import type { PayableToken, PayParams, ValidatedIcPaymentData } from '$lib/types/open-crypto-pay';
-import { isNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
-
+import { isNullish } from '@dfinity/utils';
 
 /**
  * Calculates the fee for an ICP/ICRC token payment.

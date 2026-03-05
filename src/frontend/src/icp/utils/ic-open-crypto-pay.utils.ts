@@ -20,10 +20,6 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import type { PrincipalText } from '@dfinity/zod-schemas';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
-import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
-import type { NetworkOpenCryptoPay } from '$lib/types/network';
-import type { Token } from '$lib/types/token';
-import type { PrincipalText } from '@dfinity/zod-schemas';
 
 export const isIcPayableToken = (token: Token): token is IcToken =>
 	isTokenIcp(token) || isTokenIcrc(token);
