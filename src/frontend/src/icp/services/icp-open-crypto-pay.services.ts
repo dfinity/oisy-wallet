@@ -43,10 +43,6 @@ export const payIcp = async ({
 }: Omit<PayParams, 'data' | 'amount'> & {
 	validatedData: ValidatedIcpPaymentData;
 }) => {
-	if (isNullish(token.network.pay)) {
-		throw new Error('Token network does not support payments');
-	}
-
 	const { spender, amount, ledgerCanisterId, fee } = validatedData;
 
 	const approveAmount = amount + fee.feePerTransaction;
