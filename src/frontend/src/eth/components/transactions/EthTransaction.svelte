@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish, assertNever } from '@dfinity/utils';
+	import { assertNever, nonNullish } from '@dfinity/utils';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
