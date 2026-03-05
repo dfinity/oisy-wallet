@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { assertNever, nonNullish } from '@dfinity/utils';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
-	import { assertNever } from '@dfinity/utils';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';
@@ -91,7 +90,6 @@
 	});
 
 	let label = $derived.by(() => {
-
 		if (type === 'send') {
 			return $i18n.send.text.send;
 		}
@@ -102,7 +100,7 @@
 
 		if (type === 'approve') {
 			return replacePlaceholders($i18n.transaction.text.approve_label, {
-				$approveAmount: ''
+				$approveAmount: approveAmountText ?? ''
 			});
 		}
 
