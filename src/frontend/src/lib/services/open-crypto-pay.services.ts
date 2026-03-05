@@ -101,7 +101,7 @@ const getValidatedTransactionData = async ({
 }: Omit<PayParams, 'identity' | 'data' | 'progress'>): Promise<
 	ValidatedEthPaymentData | ValidatedBtcPaymentData | ValidatedIcpPaymentData | undefined
 > => {
-	const url = `${callback}?quote=${quoteId}&method=${token.network.pay?.openCryptoPay ?? token.network.name}&asset=${token.symbol}`;
+	const url = `${callback}?quote=${quoteId}&method=${token.network.pay.openCryptoPay}&asset=${token.symbol}`;
 	const { uri } = await fetchOpenCryptoPay<{ uri: string }>(url);
 
 	const decodedData = decodeQrCodeUrn({ urn: uri });
