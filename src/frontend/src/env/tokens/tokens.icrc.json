@@ -90,6 +90,7 @@
 		"decimals": 8,
 		"name": "BOB",
 		"symbol": "BOB",
+		"groupData": "BOB_TOKEN_GROUP",
 		"fee": {
 			"__bigint__": "1000000"
 		}
