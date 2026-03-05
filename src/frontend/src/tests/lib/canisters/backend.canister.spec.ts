@@ -748,7 +748,7 @@ describe('backend.canister', () => {
 			});
 
 			await expect(allowSigning()).rejects.toThrowError(
-				new CanisterInternalError('An unknown error occurred while allowing signing.')
+				new CanisterInternalError('Unknown AllowSigningError')
 			);
 		});
 
