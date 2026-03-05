@@ -18,7 +18,7 @@ import type {
 	PayableTokenWithFees,
 	ValidatedBtcPaymentData,
 	ValidatedEthPaymentData,
-	ValidatedIcpPaymentData
+	ValidatedIcPaymentData
 } from '$lib/types/open-crypto-pay';
 import {
 	decodeLNURL,
@@ -99,7 +99,7 @@ const getValidatedTransactionData = async ({
 	callback,
 	amount
 }: Omit<PayParams, 'identity' | 'data' | 'progress'>): Promise<
-	ValidatedEthPaymentData | ValidatedBtcPaymentData | ValidatedIcpPaymentData | undefined
+	ValidatedEthPaymentData | ValidatedBtcPaymentData | ValidatedIcPaymentData | undefined
 > => {
 	const url = `${callback}?quote=${quoteId}&method=${token.network.pay.openCryptoPay}&asset=${token.symbol}`;
 	const { uri } = await fetchOpenCryptoPay<{ uri: string }>(url);
@@ -147,6 +147,7 @@ export const pay = async ({
 			progress,
 			identity
 		});
+
 		return;
 	}
 
@@ -159,12 +160,13 @@ export const pay = async ({
 			progress,
 			identity
 		});
+
 		return;
 	}
 
 	if (isIcPayableToken(token)) {
 		await payIcp({
-			validatedData: validatedData as ValidatedIcpPaymentData,
+			validatedData: validatedData as ValidatedIcPaymentData,
 			token,
 			quoteId,
 			callback,

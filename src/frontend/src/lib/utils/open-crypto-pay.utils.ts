@@ -29,7 +29,7 @@ import type {
 	PrepareTokensParams,
 	ValidatedBtcPaymentData,
 	ValidatedEthPaymentData,
-	ValidatedIcpPaymentData
+	ValidatedIcPaymentData
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
@@ -296,7 +296,7 @@ export const validateDecodedData = ({
 	token: PayableTokenWithConvertedAmount;
 	amount: bigint;
 	uri: string;
-}): ValidatedEthPaymentData | ValidatedBtcPaymentData | ValidatedIcpPaymentData | undefined => {
+}): ValidatedEthPaymentData | ValidatedBtcPaymentData | ValidatedIcPaymentData | undefined => {
 	if (isNullish(decodedData)) {
 		throw new Error(get(i18n).scanner.error.data_is_incompleted);
 	}

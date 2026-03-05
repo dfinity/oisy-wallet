@@ -8,8 +8,9 @@ import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import type { PayableToken, PayParams, ValidatedIcpPaymentData } from '$lib/types/open-crypto-pay';
 import { isNullish } from '@dfinity/utils';
+import type { PayableToken, PayParams, ValidatedIcPaymentData } from '$lib/types/open-crypto-pay';
+import { isNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 
-const APPROVE_EXPIRATION_MINUTES = 5n;
 
 /**
  * Calculates the fee for an ICP/ICRC token payment.
@@ -41,11 +42,13 @@ export const payIcp = async ({
 	quoteId,
 	callback
 }: Omit<PayParams, 'data' | 'amount'> & {
-	validatedData: ValidatedIcpPaymentData;
+	validatedData: ValidatedIcPaymentData;
 }) => {
 	const { spender, amount, ledgerCanisterId, fee } = validatedData;
 
 	const approveAmount = amount + fee.feePerTransaction;
+
+	const APPROVE_EXPIRATION_MINUTES = 5n;
 
 	await approve({
 		identity,

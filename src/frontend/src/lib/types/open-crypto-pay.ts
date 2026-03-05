@@ -142,7 +142,7 @@ export interface ValidatedEthPaymentData {
 	estimatedGasLimit: bigint;
 }
 
-export interface ValidatedIcpPaymentData {
+export interface ValidatedIcPaymentData {
 	spender: Principal;
 	amount: bigint;
 	ledgerCanisterId: LedgerCanisterIdText;
