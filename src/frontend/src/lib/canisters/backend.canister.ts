@@ -213,7 +213,7 @@ export class BackendCanister extends Canister<BackendService> {
 
 		// In case of rate limit reached, we ignore the error and let the user continue (for now).
 		// TODO: improve placeholder with significant data, for now we do not use them
-		if ('RateLimited' in response.Err) {
+		if ('RateLimited' in response.Err || 'RateLimitedByGuard' in response.Err) {
 			return {
 				response: {
 					status: { Skipped: null },
@@ -222,7 +222,10 @@ export class BackendCanister extends Canister<BackendService> {
 				},
 				rateLimitInfo: {
 					endpoint: 'allow_signing',
-					limiter: 'ALLOW_SIGNING_RATE_LIMITER'
+					limiter:
+						'RateLimitedByGuard' in response.Err
+							? 'ALLOW_SIGNING_GUARD_LIMITER'
+							: 'ALLOW_SIGNING_RATE_LIMITER'
 				}
 			};
 		}

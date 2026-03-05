@@ -286,13 +286,14 @@ fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
 /// `AllowSigningError::RateLimited` with the expected payload fields.
 ///
 /// Note: `create_user_profile` internally calls `spawn_allow_signing_if_below_limit`,
-/// which already consumes 1 of the 3 allowed rate-limit entries.
+/// which already consumes 1 of the 3 allowed rate-limit entries (in both the
+/// guard and business limiters).
 #[test]
 fn test_allow_signing_rate_limited_after_exceeding_limit() {
     let pic_setup = setup();
     let caller = Principal::from_text(VC_HOLDER).unwrap();
 
-    // 1 of 3 rate-limit entries consumed here.
+    // 1 of 3 business rate-limit entries consumed here.
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
     // Process the spawned allow_signing task so the rate-limit entry is recorded.
@@ -300,7 +301,7 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
         pic_setup.pic.tick();
     }
 
-    // 2 more explicit calls should still be within the limit.
+    // 2 more explicit calls should still be within the business limit.
     for i in 0..2 {
         let result = call_allow_signing(&pic_setup, caller, 0);
         assert!(
@@ -309,7 +310,7 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
         );
     }
 
-    // The next call exceeds 3 total and must be rate-limited.
+    // The next call exceeds 3 total and must be rate-limited by the business limiter.
     let result = call_allow_signing(&pic_setup, caller, 0);
     match result {
         Err(AllowSigningError::RateLimited(RateLimitError {
@@ -444,5 +445,82 @@ fn test_allow_signing_rate_limit_resets_after_window() {
     assert!(
         !matches!(result, Err(AllowSigningError::RateLimited(_))),
         "should not be rate-limited after window elapses: {result:?}"
+    );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Guard rate-limit integration tests for allow_signing
+// -------------------------------------------------------------------------------------------------
+
+/// When the business limiter (3/hour) fires, the guard (10/min) should not
+/// interfere: the error must be `RateLimited`, not `RateLimitedByGuard`.
+///
+/// The guard is checked first in code, but since it is more permissive for
+/// short bursts, the business limiter is the one that rejects first in normal
+/// usage.  The guard protects against rapid automated abuse.
+#[test]
+fn test_allow_signing_guard_does_not_interfere_with_business_limiter() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(VC_HOLDER).unwrap();
+
+    call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
+
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    // Exhaust the business limiter (3 entries: 1 from profile + 2 explicit).
+    for _ in 0..2 {
+        let _ = call_allow_signing(&pic_setup, caller, 0);
+    }
+
+    // The 4th call must hit the business limiter, NOT the guard.
+    let result = call_allow_signing(&pic_setup, caller, 0);
+    assert!(
+        matches!(result, Err(AllowSigningError::RateLimited(_))),
+        "expected RateLimited (business), got {result:?}"
+    );
+}
+
+/// After the business limiter window (1 hour) elapses, the guard entries have
+/// long expired (1-minute window), so neither limiter blocks the caller.
+#[test]
+fn test_allow_signing_guard_resets_independently_of_business_limiter() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(VC_HOLDER).unwrap();
+
+    call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
+
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    // Exhaust the business limiter.
+    for _ in 0..2 {
+        let _ = call_allow_signing(&pic_setup, caller, 0);
+    }
+    assert!(
+        matches!(
+            call_allow_signing(&pic_setup, caller, 0),
+            Err(AllowSigningError::RateLimited(_))
+        ),
+        "should be rate-limited"
+    );
+
+    // Advance past both windows (> 1 hour covers both the 1-min guard and
+    // the 1-hour business window).
+    pic_setup.pic.advance_time(Duration::from_secs(60 * 60 + 1));
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    // Both limiters should have reset; the next call passes.
+    let result = call_allow_signing(&pic_setup, caller, 0);
+    assert!(
+        !matches!(
+            result,
+            Err(AllowSigningError::RateLimited(_)) | Err(AllowSigningError::RateLimitedByGuard(_))
+        ),
+        "should not be rate-limited after both windows elapse: {result:?}"
     );
 }
