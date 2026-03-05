@@ -1,13 +1,20 @@
 import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+import { currentCurrency } from '$lib/derived/currency.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { currentLanguage } from '$lib/derived/i18n.derived';
+import type { Currency } from '$lib/enums/currency';
+import type { Languages } from '$lib/enums/languages';
 import { balancesStore } from '$lib/stores/balances.store';
+import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
+import type { CurrencyExchangeData } from '$lib/types/currency';
 import type {
 	OpenCryptoPayResponse,
 	PayableTokenWithConvertedAmount,
 	PayableTokenWithFees
 } from '$lib/types/open-crypto-pay';
+import { formatCurrencyAsNumber } from '$lib/utils/format.utils';
 import { enrichTokensWithUsdAndBalance } from '$lib/utils/open-crypto-pay.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
@@ -22,6 +29,39 @@ export interface PayContext {
 	reset: () => void;
 	failedPaymentError: Writable<string | undefined>;
 }
+
+const createTokenComparator =
+	({
+		currency,
+		exchangeRate,
+		language
+	}: {
+		currency: Currency;
+		exchangeRate: CurrencyExchangeData;
+		language: Languages;
+	}) =>
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
+	(a: PayableTokenWithConvertedAmount, b: PayableTokenWithConvertedAmount): number => {
+		// Visual balance descending
+		const aSumForTie = formatCurrencyAsNumber({
+			value: a.sumInUSD,
+			currency,
+			exchangeRate,
+			language
+		});
+		const bSumForTie = formatCurrencyAsNumber({
+			value: b.sumInUSD,
+			currency,
+			exchangeRate,
+			language
+		});
+		const sumDiff = Number(bSumForTie ?? 0) - Number(aSumForTie ?? 0);
+		if (sumDiff !== 0) {
+			return sumDiff;
+		}
+
+		return 0;
+	};
 
 export const initPayContext = (): PayContext => {
 	const data = writable<OpenCryptoPayResponse | undefined>(undefined);
@@ -63,10 +103,21 @@ export const initPayContext = (): PayContext => {
 		}
 	);
 
-	const tokensSorted = derived([sufficientTokens], ([$sufficientTokens]) =>
-		$sufficientTokens.length > 0
-			? $sufficientTokens.sort((a, b) => (a.sumInUSD ?? 0) - (b.sumInUSD ?? 0))
-			: []
+	const tokensSorted = derived(
+		[sufficientTokens, currentCurrency, currencyExchangeStore, currentLanguage],
+		([$sufficientTokens, $currentCurrency, $currencyExchangeStore, $currentLanguage]) => {
+			if ($sufficientTokens.length === 0) {
+				return [];
+			}
+
+			const tokenComparator = createTokenComparator({
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage
+			});
+
+			return $sufficientTokens.sort(tokenComparator);
+		}
 	);
 
 	const selectedToken = derived([tokensSorted, userSelection], ([$tokensSorted, $userSelection]) =>
