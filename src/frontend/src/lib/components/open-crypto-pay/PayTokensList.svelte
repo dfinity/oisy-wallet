@@ -14,7 +14,8 @@
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
-		isNetworkIdEvm, isNetworkIdICP
+		isNetworkIdEvm,
+		isNetworkIdICP
 	} from '$lib/utils/network.utils';
 
 	interface Props {
