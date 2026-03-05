@@ -2,7 +2,7 @@ import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
 import type { UtxosFee } from '$btc/types/btc-send';
 import type { EthFeeResult } from '$eth/types/pay';
 import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
-import type { Network } from '$lib/types/network';
+import type { Network, NetworkOpenCryptoPay } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@icp-sdk/core/agent';
 
@@ -77,7 +77,7 @@ export interface PaymentMethodData {
 
 export interface PayableToken extends Token {
 	amount: string;
-	tokenNetwork: string;
+	tokenNetwork: NetworkOpenCryptoPay;
 	minFee?: number;
 }
 

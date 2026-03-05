@@ -13,7 +13,7 @@ import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { Network } from '$lib/types/network';
+import type { Network, NetworkOpenCryptoPay } from '$lib/types/network';
 import type {
 	Address,
 	OpenCryptoPayResponse,
@@ -299,7 +299,7 @@ export const getPaymentUri = ({
 }: {
 	callback: string;
 	quoteId: string;
-	network: string;
+	network: NetworkOpenCryptoPay;
 	rawTransaction: string;
 }): string => {
 	// By dfx documentation we need to replace 'cb' with 'tx' to get the transaction submission endpoint
