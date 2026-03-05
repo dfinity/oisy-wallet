@@ -422,8 +422,8 @@
 		"governanceCanisterId": "igbbe-6yaaa-aaaaq-aadnq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "---- (formerly CYCLES-TRANSFER-STATION)",
-			"symbol": "--- (CTS)",
+			"name": "OOO (formerly CYCLES-TRANSFER-STATION)",
+			"symbol": "OOO (CTS)",
 			"fee": {
 				"__bigint__": "1000000000000000000"
 			}
