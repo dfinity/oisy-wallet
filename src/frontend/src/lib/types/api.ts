@@ -1,5 +1,6 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
+	AllowSigningResponse,
 	BitcoinNetwork,
 	Contact,
 	CredentialSpec,
@@ -32,6 +33,16 @@ export interface AddUserCredentialParams {
 }
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
+
+export interface RateLimitInfo {
+	endpoint: string;
+	limiter: string;
+}
+
+export interface AllowSigningOutcome {
+	response: AllowSigningResponse;
+	rateLimitInfo?: RateLimitInfo;
+}
 
 export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;

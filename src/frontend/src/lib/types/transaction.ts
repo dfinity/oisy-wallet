@@ -20,8 +20,9 @@ export type EthersTransaction = Pick<
 	gasPrice?: bigint;
 };
 
-export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
+export type Transaction = Omit<EthersTransaction, 'from'> &
 	Required<Pick<EthersTransaction, 'from'>> & {
+		gasUsed?: bigint;
 		blockNumber?: number;
 		timestamp?: number;
 		pendingTimestamp?: number;

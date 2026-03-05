@@ -1,4 +1,5 @@
 import type {
+	AllowSigningResponse,
 	AllowSigningResult,
 	_SERVICE as BackendService,
 	CustomToken,
@@ -664,13 +665,13 @@ describe('backend.canister', () => {
 
 	describe('allowSigning', () => {
 		it('should allow signing', async () => {
-			const result: AllowSigningResult = {
-				Ok: {
-					status: { Executed: null },
-					challenge_completion: [],
-					allowed_cycles: ZERO
-				}
+			const okResponse: AllowSigningResponse = {
+				status: { Executed: null },
+				challenge_completion: toNullable(),
+				allowed_cycles: ZERO
 			};
+
+			const result: AllowSigningResult = { Ok: okResponse };
 
 			service.allow_signing.mockResolvedValue(result);
 
@@ -681,7 +682,7 @@ describe('backend.canister', () => {
 			const res = await allowSigning();
 
 			expect(service.allow_signing).toHaveBeenCalledOnce();
-			expect(res).toBeDefined();
+			expect(res).toStrictEqual({ response: okResponse });
 		});
 
 		it('should throw an error if allowSigning throws', async () => {
@@ -754,8 +755,35 @@ describe('backend.canister', () => {
 			});
 
 			await expect(allowSigning()).rejects.toThrowError(
-				new CanisterInternalError('An uknown error occurred.')
+				new CanisterInternalError('Unknown AllowSigningError')
 			);
+		});
+
+		it('should return rateLimitInfo if RateLimited error is returned', async () => {
+			const response = {
+				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			};
+
+			service.allow_signing.mockResolvedValue(response as unknown as AllowSigningResult);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await allowSigning();
+
+			expect(service.allow_signing).toHaveBeenCalledOnce();
+			expect(res).toStrictEqual({
+				response: {
+					status: { Skipped: null },
+					challenge_completion: toNullable(),
+					allowed_cycles: ZERO
+				},
+				rateLimitInfo: {
+					endpoint: 'allow_signing',
+					limiter: 'ALLOW_SIGNING_RATE_LIMITER'
+				}
+			});
 		});
 	});
 

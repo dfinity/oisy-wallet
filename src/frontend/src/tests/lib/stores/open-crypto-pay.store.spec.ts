@@ -120,7 +120,7 @@ describe('OpenCryptoPayStore', () => {
 			},
 			estimatedGasLimit: 25n
 		}
-	};
+	} as PayableTokenWithFees;
 
 	const mockUsdcTokenWithFee: PayableTokenWithFees = {
 		...USDC_TOKEN,
@@ -135,7 +135,7 @@ describe('OpenCryptoPayStore', () => {
 			},
 			estimatedGasLimit: 40n
 		}
-	};
+	} as PayableTokenWithFees;
 
 	const mockTokenWithConvertedAmount: PayableTokenWithConvertedAmount = {
 		...USDC_TOKEN,
@@ -153,7 +153,7 @@ describe('OpenCryptoPayStore', () => {
 			},
 			estimatedGasLimit: 25000n
 		}
-	};
+	} as PayableTokenWithConvertedAmount;
 
 	describe('data store', () => {
 		it('should initialize with undefined data', () => {
@@ -308,7 +308,7 @@ describe('OpenCryptoPayStore', () => {
 				minFee: 0.001,
 				tokenNetwork: 'Ethereum',
 				fee: undefined
-			};
+			} as PayableTokenWithFees;
 
 			context.setAvailableTokens([tokenWithoutFee]);
 
@@ -324,7 +324,7 @@ describe('OpenCryptoPayStore', () => {
 				minFee: 0.0001,
 				tokenNetwork: 'Ethereum',
 				fee: undefined
-			};
+			} as PayableTokenWithFees;
 
 			const tokens = [mockEthTokenWithFee, tokenWithoutFee];
 

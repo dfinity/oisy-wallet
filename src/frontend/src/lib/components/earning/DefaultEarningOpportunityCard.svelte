@@ -7,12 +7,15 @@
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import OverlappedLogos from '$lib/components/ui/OverlappedLogos.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { resolveText } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		cardData: EarningCards;
-		cardFields: { [key in EarningCardFields]?: string | number } & { action: () => Promise<void> };
+		cardFields: { [key in EarningCardFields]?: string | number | string[] } & {
+			action: () => Promise<void>;
+		};
 	}
 
 	const { cardData, cardFields }: Props = $props();
@@ -25,13 +28,13 @@
 		<Logo size="lg" src={cardData.logo} />
 	{/snippet}
 	{#snippet badge()}
-		{$i18n.stake.text.current_apy_label}
+		{$i18n.stake.text.max_apy_label}
 		<span class="ml-1 font-bold text-success-primary">{formattedApy}</span>
 	{/snippet}
 	{#snippet description()}
 		<p>{resolveText({ i18n: $i18n, path: cardData.description })}</p>
 
-		<List condensed itemStyleClass="gap-2 text-xs">
+		<List condensed itemStyleClass="gap-2 text-xs items-center">
 			{#each cardData.fields as cardField, i (`${cardField}-${i}`)}
 				<ListItem>
 					<span class="text-tertiary"
@@ -53,13 +56,17 @@
 									-
 								{/snippet}
 							</EarningYearlyAmount>
+						{:else if (cardField === EarningCardFields.NETWORKS || cardField === EarningCardFields.ASSETS) && Array.isArray(cardFields[cardField])}
+							<OverlappedLogos
+								icons={cardFields[cardField]}
+								invertColor={cardField === EarningCardFields.NETWORKS}
+							/>
 						{:else if cardField === EarningCardFields.CURRENT_EARNING}
 							<EarningYearlyAmount
 								showAsSuccess
-								value={nonNullish(cardFields[cardField]) &&
-								nonNullish(cardFields[EarningCardFields.APY])
-									? (Number(cardFields[cardField]) * Number(cardFields[EarningCardFields.APY])) /
-										100
+								showPlusSign
+								value={nonNullish(cardFields[cardField])
+									? Number(cardFields[cardField])
 									: undefined}
 							>
 								{#snippet fallback()}

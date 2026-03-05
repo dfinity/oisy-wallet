@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
+	import { isTransactionPending } from '$eth/utils/transactions.utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
-	import { NANO_SECONDS_IN_SECOND, ZERO } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { TransactionStatus } from '$lib/types/transaction';
 	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
 
 	interface Props {
@@ -12,67 +16,56 @@
 	}
 	const { transaction, onClick, testId }: Props = $props();
 
-	const getTimestamp = (timestampNanoseconds?: bigint | number) =>
-		nonNullish(timestampNanoseconds)
-			? Number(BigInt(timestampNanoseconds) / NANO_SECONDS_IN_SECOND)
-			: undefined;
+	let isHarvestAutopilot = $derived(isTokenHarvestAutopilot(transaction.token));
 
-	const getToAddress = (transaction: StakingTransactionsUiWithToken): string | undefined =>
-		nonNullish(transaction.to)
-			? Array.isArray(transaction.to)
-				? transaction.to[0]
-				: transaction.to
-			: undefined;
+	let {
+		token,
+		type,
+		value,
+		from,
+		to: unparsedTo,
+		timestamp: unparsedTimestamp
+	} = $derived(transaction);
 
-	const getStatus = (transaction: StakingTransactionsUiWithToken) => {
-		if ('status' in transaction && nonNullish(transaction.status)) {
-			return transaction.status === 'confirmed' ||
-				transaction.status === 'executed' ||
-				transaction.status === 'finalized' ||
-				transaction.status === 'processed'
-				? 'confirmed'
-				: transaction.status === 'pending'
-					? 'pending'
-					: 'unconfirmed';
-		}
-		return 'unconfirmed';
-	};
+	let pending = $derived(
+		isHarvestAutopilot ? isTransactionPending(transaction as EthTransactionUi) : false
+	);
 
-	const incoming = $derived('incoming' in transaction && transaction.incoming);
+	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	const getDisplayAmount = (transaction: StakingTransactionsUiWithToken) => {
-		if (nonNullish(transaction.value)) {
-			if (incoming && !transaction.isReward) {
-				return (
-					(transaction.value +
-						('fee' in transaction && nonNullish(transaction.fee) ? transaction.fee : ZERO)) *
-					-1n
-				);
-			}
-			return transaction.value;
-		}
-	};
+	let incoming = $derived(type === 'receive');
 
-	const getLabel = (transaction: StakingTransactionsUiWithToken) =>
-		incoming
-			? transaction.isReward
-				? $i18n.stake.text.reward_claimed
+	let displayAmount = $derived((value ?? ZERO) * (incoming ? 1n : -1n));
+
+	let label = $derived(
+		!isHarvestAutopilot
+			? incoming
+				? $i18n.stake.text.staked
 				: $i18n.stake.text.unstaked
-			: $i18n.stake.text.staked;
+			: incoming
+				? $i18n.receive.text.receive
+				: $i18n.send.text.send
+	);
+
+	let to = $derived(
+		nonNullish(unparsedTo) ? (Array.isArray(unparsedTo) ? unparsedTo[0] : unparsedTo) : undefined
+	);
+
+	let timestamp = $derived(nonNullish(unparsedTimestamp) ? Number(unparsedTimestamp) : undefined);
 </script>
 
 <Transaction
-	displayAmount={getDisplayAmount(transaction)}
-	from={transaction.from}
+	{displayAmount}
+	{from}
 	iconType="token"
 	{onClick}
-	status={getStatus(transaction)}
+	{status}
 	{testId}
 	timeOnly={false}
-	timestamp={getTimestamp(transaction.timestamp)}
-	to={getToAddress(transaction)}
-	token={transaction.token}
-	type={transaction.type}
+	{timestamp}
+	{to}
+	{token}
+	{type}
 >
-	{getLabel(transaction)}
+	{label}
 </Transaction>

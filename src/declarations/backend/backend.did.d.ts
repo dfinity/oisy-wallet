@@ -461,14 +461,13 @@ export interface _SERVICE {
 	 */
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], AddUserHiddenDappIdResult>;
 	/**
-	 * This function authorises the caller to spend a specific
-	 * amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
-	 * providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
-	 * cycles ledger.
+	 * Ensures the caller has enough cycles allowance for chain-fusion signer
+	 * operations (providing public keys, creating signatures, etc.).
 	 *
-	 * Note:
-	 * - The chain fusion signer performs threshold key operations including providing public keys,
-	 * creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
+	 * If the caller already has sufficient allowance the call returns
+	 * immediately with [`AllowSigningStatus::Skipped`] and no inter-canister
+	 * call is made.  Otherwise the endpoint is rate-limited and a new
+	 * `icrc_2_approve` is issued on the cycles ledger.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `AllowSigningError`.

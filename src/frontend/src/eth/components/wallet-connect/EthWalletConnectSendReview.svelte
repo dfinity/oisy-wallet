@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { erc4626Tokens } from '$eth/derived/erc4626.derived';
+	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -50,7 +49,7 @@
 
 	let token = $derived(
 		erc20Approve
-			? [...$erc20Tokens, ...$erc4626Tokens].find(
+			? $ercFungibleTokens.find(
 					({ address, network: { id: networkId } }) =>
 						areAddressesEqual({ address1: address, address2: destination, networkId }) &&
 						networkId === sourceNetworkProp.id

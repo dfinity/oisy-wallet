@@ -37,7 +37,7 @@ pub struct AllowSigningRequest {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct AllowSigningResponse {
     pub status: AllowSigningStatus,
-    pub allowed_cycles: u64,
+    pub allowed_cycles: Nat,
     pub challenge_completion: Option<ChallengeCompletion>,
 }
 

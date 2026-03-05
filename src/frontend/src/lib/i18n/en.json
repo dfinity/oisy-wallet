@@ -43,7 +43,9 @@
 			"ellipsis": "…",
 			"learn_more": "Learn more",
 			"sorting": "Sorting",
-			"unlimited": "Unlimited $items"
+			"unlimited": "Unlimited $items",
+			"info": "Info",
+			"asset": "Asset"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -1862,11 +1864,10 @@
 			"go_to_earn": "Go to Earn"
 		},
 		"cards": {
-			"gldt": {
-				"title1": "Gold DAO",
-				"title2": "Earn with Gold",
-				"description": "Stake GLDT to earn daily rewards in governance tokens, unlocking passive income from gold holdings.",
-				"action": "Stake GLDT"
+			"harvest_autopilot": {
+				"title": "Harvest - Autopilot",
+				"description": "Maximized yield efficiency with 1-click autopilot vaults.",
+				"action": "Go to Autopilot"
 			},
 			"sprinkles": {
 				"title": "OISY Sprinkles",
@@ -1876,9 +1877,11 @@
 		},
 		"card_fields": {
 			"apy": "APY",
+			"networks": "Networks",
+			"assets": "Assets",
 			"currentStaked": "Staked",
 			"currentEarning": "Currently earning",
-			"earningPotential": "Additional earning potential",
+			"earningPotential": "Earning potential",
 			"terms": "Terms"
 		},
 		"terms": {
@@ -1890,9 +1893,27 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "Autopilot",
+			"live_apy": "Live APY"
+		}
+	},
 	"stake": {
 		"text": {
 			"gldt_stake_page_description": "Stake GLDT tokens to earn rewards backed by physical gold",
+			"harvest_autopilot_page_description": "Maximized yield efficiency with 1-click autopilot vaults.",
+			"harvest_autopilot_vault_page_description": "Autopilot is powered by <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">audited IPOR</a> Fusion Vault technology.",
+			"my_positions": "My positions",
+			"available_autopilots": "Available autopilots",
+			"vault_info": "Vault info",
+			"vault_address": "Vault address",
+			"protocol": "Protocol",
+			"harvest": "Harvest",
+			"autopilot": "Autopilot",
+			"total_value_locked": "Total Value Locked (TVL)",
+			"manager": "Manager",
+			"vault_description": "This pool is designed as a \"set-and-forget\" yield management service for your $asset_symbol holdings. It automatically optimizes your DeFi position with minimal effort on your part by dynamically allocating capital to the best opportunities.",
 			"stake": "Stake $token_symbol",
 			"stake_now": "Stake now",
 			"stake_amount": "Stake $amount $token_symbol",
@@ -1907,14 +1928,16 @@
 			"executing_transaction": "Executing transaction...",
 			"unsupported_token_staking": "Staking for the selected token is not supported.",
 			"provider": "Staking terms provided by $provider",
-			"earning_potential": "Additional earning potential",
+			"earning_potential": "Earning potential",
 			"earning_potential_hint": "Based on the value of your not invested assets and the highest APY of the available earning opportunities.",
-			"active_earning": "Currently earning",
+			"active_earning": "Active earning",
 			"active_earning_per_year": "$amount/year",
+			"active_earning_per_year_short": "$amount/yr",
 			"unproductive_assets": "Available",
 			"invested_assets": "Allocated",
 			"visit_provider": "Visit website",
 			"current_apy_label": "Current APY",
+			"max_apy_label": "Max. APY",
 			"stake_review_subtitle": "You stake",
 			"unstake_review_subtitle": "You unstake",
 			"delayed_dissolve": "Receive with a delay",
@@ -1980,6 +2003,16 @@
 				"fact_3_title": "Stable returns",
 				"fact_3_description": "Earn $apy% APY with minimal volatility risk",
 				"fact_3_description_fallback": "Earn consistent rewards with minimal volatility risk"
+			},
+			"harvest_autopilot": {
+				"title": "What is Harvest Autopilot",
+				"description": "Harvest Autopilot is a specialized feature (and a specific product line) within the Harvest Finance ecosystem designed to automate and optimize your decentralized finance (DeFi) positions with minimal effort.",
+				"fact_1_title": "Smart Yield Allocation",
+				"fact_1_description": "Automatically switches protocols to capture the highest live APY.",
+				"fact_2_title": "Passive Compounding",
+				"fact_2_description": "Rewards are automatically harvested and reinvested to maximize your growth.",
+				"fact_3_title": "Gas Cost Sharing",
+				"fact_3_description": "Lowers your expenses by pooling transactions with other users to save on gas."
 			}
 		},
 		"alt": {

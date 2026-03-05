@@ -27,7 +27,7 @@ use shared::types::signer::RateLimitError;
 ///     // ... endpoint logic
 /// }
 /// ```
-pub struct RateLimiter {
+pub(crate) struct RateLimiter {
     max_calls: u32,
     window_ns: u64,
     calls: RefCell<HashMap<Principal, VecDeque<u64>>>,

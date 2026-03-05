@@ -16,11 +16,10 @@ use shared::types::{
 };
 
 use crate::{
-    guards::caller_is_not_anonymous,
-    housekeeping::spawn_allow_signing_if_below_limit,
     state::{mutate_state, read_config},
-    types::storable::StoredPrincipal,
+    types::StoredPrincipal,
     user_profile::{credential_config::find_credential_config, model::UserProfileModel, service},
+    utils::{guards::caller_is_not_anonymous, housekeeping::spawn_allow_signing_if_below_limit},
 };
 
 /// Adds a verifiable credential to the user profile.
@@ -28,7 +27,7 @@ use crate::{
 /// # Errors
 /// Errors are enumerated by: `AddUserCredentialError`.
 #[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
+#[expect(clippy::needless_pass_by_value)]
 #[must_use]
 pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredentialResult {
     let user_principal = ic_cdk::caller();
@@ -105,7 +104,7 @@ pub fn update_user_network_settings(
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)] // canister methods are necessary
+#[expect(clippy::needless_pass_by_value)] // canister methods are necessary
 #[must_use]
 pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTestnetsResult {
     let user_principal = ic_cdk::caller();

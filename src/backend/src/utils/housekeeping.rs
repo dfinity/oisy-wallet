@@ -4,16 +4,17 @@ use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::signer::topup::TopUpCyclesLedgerResult;
 
-use crate::{api, rate_limiter, signer, types::storable::StoredPrincipal};
+use super::rate_limiter;
+use crate::{api, signer, types::StoredPrincipal};
 
 thread_local! {
     /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
     static HOUSEKEEPING_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
     static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
 
-    /// Rate-limits `allow_signing`: max 3 calls per caller per 60 seconds.
-    pub static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
-        rate_limiter::RateLimiter::new(3, 60 * 1_000_000_000);
+    /// Rate-limits `allow_signing`: max 3 calls per caller per hour.
+    pub(crate) static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
+        rate_limiter::RateLimiter::new(3, 60 * 60 * 1_000_000_000);
 }
 
 /// 2 hours in nanoseconds — if a housekeeping run has been in progress for

@@ -143,6 +143,98 @@ describe('tokens.utils', () => {
 			]);
 		});
 
+		it('should prioritise tokens with non-zero native/unit balance when USD balance is tied at 0', () => {
+			const tokenHasBalance: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-HAS-BAL'),
+				symbol: 'AAA',
+				name: 'Has balance',
+				network: ICP_NETWORK
+			};
+
+			const tokenZeroBalance: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-ZERO-BAL'),
+				symbol: 'BBB',
+				name: 'Zero balance',
+				network: ICP_NETWORK
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenHasBalance.id]: { data: 2n, certified },
+				[tokenZeroBalance.id]: { data: ZERO, certified }
+			};
+
+			// Force USD balance = 0 for both, regardless of native balance.
+			const $exchanges: ExchangesData = {
+				[tokenHasBalance.id]: { usd: 0, usd_market_cap: 0 },
+				[tokenZeroBalance.id]: { usd: 0, usd_market_cap: 0 }
+			};
+
+			const tokens = [tokenZeroBalance, tokenHasBalance].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
+			const result = sortTokens({
+				$tokens: tokens,
+				$tokensToPin: [],
+				$networksToPin: []
+			});
+
+			expect(result.map((t) => t.id)).toEqual([tokenHasBalance.id, tokenZeroBalance.id]);
+		});
+
+		it('should not let pinning override the "has any balance" rule when both USD balances are 0', () => {
+			const tokenHasBalance: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-HAS-BAL-PIN-TEST'),
+				symbol: 'AAA',
+				name: 'Has balance',
+				network: ICP_NETWORK
+			};
+
+			const tokenZeroBalancePinned: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-ZERO-BAL-PINNED'),
+				symbol: 'BBB',
+				name: 'Zero balance (pinned)',
+				network: ICP_NETWORK
+			};
+
+			const $balances: CertifiedStoreData<BalancesData> = {
+				[tokenHasBalance.id]: { data: 1n, certified },
+				[tokenZeroBalancePinned.id]: { data: ZERO, certified }
+			};
+
+			// Force USD balance = 0 for both.
+			const $exchanges: ExchangesData = {
+				[tokenHasBalance.id]: { usd: 0, usd_market_cap: 0 },
+				[tokenZeroBalancePinned.id]: { usd: 0, usd_market_cap: 0 }
+			};
+
+			const tokens = [tokenZeroBalancePinned, tokenHasBalance].map((token) =>
+				mapTokenUi({
+					token,
+					$balances,
+					$stakeBalances: {},
+					$exchanges
+				})
+			);
+
+			const result = sortTokens({
+				$tokens: tokens,
+				$tokensToPin: [tokenZeroBalancePinned], // pinned, but should still come after the token with balance
+				$networksToPin: []
+			});
+
+			expect(result.map((t) => t.id)).toEqual([tokenHasBalance.id, tokenZeroBalancePinned.id]);
+		});
+
 		it('should not let pinning override a higher USD balance', () => {
 			const tokens = mockTokens.map((token) =>
 				mapTokenUi({
@@ -276,8 +368,8 @@ describe('tokens.utils', () => {
 			};
 
 			const $balances: CertifiedStoreData<BalancesData> = {
-				[tokenA.id]: { data: ZERO, certified },
-				[tokenB.id]: { data: ZERO, certified },
+				[tokenA.id]: { data: 1n, certified },
+				[tokenB.id]: { data: 1n, certified },
 				[tokenC.id]: { data: 2n, certified },
 				[tokenD.id]: { data: 1n, certified }
 			};
@@ -366,10 +458,26 @@ describe('tokens.utils', () => {
 				name: 'SameName',
 				network: ICP_NETWORK
 			};
+			const tokenZeroBalanceHighMcap: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-BAL0'),
+				symbol: 'SAME',
+				name: 'SameName',
+				network: ICP_NETWORK
+			};
+			const tokenNoBalanceHighMcap: Token = {
+				...mockValidToken,
+				id: parseTokenId('TokenId-NOBAL'),
+				symbol: 'SAME',
+				name: 'SameName',
+				network: ICP_NETWORK
+			};
 
 			const $balances: CertifiedStoreData<BalancesData> = {
 				[tokenHighBalanceLowMcap.id]: { data: 2n, certified },
-				[tokenLowBalanceHighMcap.id]: { data: 1n, certified }
+				[tokenLowBalanceHighMcap.id]: { data: 1n, certified },
+				[tokenZeroBalanceHighMcap.id]: { data: ZERO, certified },
+				[tokenNoBalanceHighMcap.id]: null
 			};
 
 			const $exchanges: ExchangesData = {
@@ -377,7 +485,12 @@ describe('tokens.utils', () => {
 				[tokenLowBalanceHighMcap.id]: { usd_market_cap: 999, usd: 0 }
 			};
 
-			const tokens = [tokenLowBalanceHighMcap, tokenHighBalanceLowMcap].map((token) =>
+			const tokens = [
+				tokenNoBalanceHighMcap,
+				tokenZeroBalanceHighMcap,
+				tokenLowBalanceHighMcap,
+				tokenHighBalanceLowMcap
+			].map((token) =>
 				mapTokenUi({
 					token,
 					$balances,
@@ -394,7 +507,9 @@ describe('tokens.utils', () => {
 
 			expect(result.map((t) => t.id)).toEqual([
 				tokenHighBalanceLowMcap.id,
-				tokenLowBalanceHighMcap.id
+				tokenLowBalanceHighMcap.id,
+				tokenZeroBalanceHighMcap.id,
+				tokenNoBalanceHighMcap.id
 			]);
 		});
 

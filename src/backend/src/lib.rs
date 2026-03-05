@@ -1,9 +1,7 @@
 use candid::Principal;
-use ic_cdk::{api::time, export_candid, init, post_upgrade, query, update};
-use serde_bytes::ByteBuf;
+use ic_cdk::{export_candid, init, post_upgrade};
 use shared::{
     http::{HttpRequest, HttpResponse},
-    metrics::get_metrics,
     std_canister_status,
     types::{
         agreement::UpdateUserAgreementsRequest,
@@ -13,7 +11,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, SelectedUtxosFeeRequest,
         },
         contact::{CreateContactRequest, UpdateContactRequest},
-        custom_token::{CustomToken, CustomTokenId},
+        custom_token::CustomToken,
         dapp::AddHiddenDappIdRequest,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
@@ -32,13 +30,7 @@ use shared::{
     },
 };
 
-use crate::{
-    guards::{caller_is_allowed, caller_is_not_anonymous},
-    state::{mutate_state, read_config, read_state, set_config},
-    token::{add_to_user_token, remove_from_user_token},
-    token_activity::{mark_token_active, mark_tokens_active},
-    types::storable::{Candid, StoredPrincipal},
-};
+use crate::state::{read_state, set_config};
 
 mod api;
 mod bitcoin;
@@ -47,17 +39,14 @@ mod delegation;
 mod guards;
 mod housekeeping;
 mod impls;
-pub mod random;
+mod random;
 mod rate_limiter;
 mod signer;
 mod state;
 mod token;
-mod token_activity;
 mod types;
 mod user_profile;
-
-#[cfg(test)]
-mod tests;
+mod utils;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
@@ -72,7 +61,7 @@ pub fn init(arg: Arg) {
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
-    housekeeping::start_periodic_housekeeping_timers();
+    utils::housekeeping::start_periodic_housekeeping_timers();
 }
 
 /// Post-upgrade handler.
@@ -92,163 +81,44 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
-    housekeeping::start_periodic_housekeeping_timers();
-}
-
-/// Gets the canister configuration.
-#[query(guard = "caller_is_allowed")]
-#[must_use]
-pub fn config() -> Config {
-    read_config(Clone::clone)
-}
-
-/// Processes external HTTP requests.
-#[query]
-#[allow(clippy::needless_pass_by_value)]
-#[must_use]
-pub fn http_request(request: HttpRequest) -> HttpResponse {
-    let path = request
-        .url
-        .split('?')
-        .next()
-        .unwrap_or_else(|| unreachable!("Even splitting an empty string yields one entry"));
-    match path {
-        "/metrics" => get_metrics(),
-        _ => HttpResponse {
-            status_code: 404,
-            headers: vec![],
-            body: ByteBuf::from(String::from("Not found.")),
-        },
-    }
-}
-
-/// Add or update custom token for the user.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-pub fn set_custom_token(token: CustomToken) {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    mutate_state(|s| {
-        add_to_user_token(
-            stored_principal,
-            &mut s.custom_token,
-            std::slice::from_ref(&token),
-            |t: &CustomToken| CustomTokenId::from(&t.token),
-        );
-    });
-
-    mark_token_active(&CustomTokenId::from(&token.token));
-}
-
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
-    if tokens.len() > token::MAX_TOKEN_LIST_LENGTH {
-        ic_cdk::trap(&format!(
-            "Token list length should not exceed {}",
-            token::MAX_TOKEN_LIST_LENGTH
-        ));
-    }
-
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    let ids = tokens
-        .iter()
-        .map(|t| CustomTokenId::from(&t.token))
-        .collect::<Vec<_>>();
-
-    mutate_state(|s| {
-        add_to_user_token(
-            stored_principal,
-            &mut s.custom_token,
-            &tokens,
-            |t: &CustomToken| CustomTokenId::from(&t.token),
-        );
-    });
-
-    mark_tokens_active(&ids);
-}
-
-/// Remove custom token for the user.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-pub fn remove_custom_token(token: CustomToken) {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    mutate_state(|s| {
-        let find = |t: &CustomToken| -> bool {
-            CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
-        };
-
-        remove_from_user_token(stored_principal, &mut s.custom_token, &find);
-    });
-}
-
-#[update(guard = "caller_is_not_anonymous")]
-#[must_use]
-/// List the custom tokens for the calling user.
-///
-/// Note: This method was previously exposed as a *query* but is now an *update*
-/// call. The change is intentional and breaking: `list_custom_tokens` now tracks
-/// token activity by calling `mark_tokens_active`, which mutates canister state.
-/// Because queries must not modify state on the IC, this function must be an
-/// update, not a query.
-///
-/// Implications for callers:
-/// - This call now participates in consensus and may have higher latency than a query.
-/// - It consumes cycles as an update call.
-/// - Integrations that previously relied on query semantics must be updated to invoke this as an
-///   update method.
-pub fn list_custom_tokens() -> Vec<CustomToken> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    let tokens = read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0);
-
-    if !tokens.is_empty() {
-        let ids: Vec<CustomTokenId> = tokens
-            .iter()
-            .map(|t| CustomTokenId::from(&t.token))
-            .collect();
-
-        mark_tokens_active(&ids);
-    }
-
-    tokens
-}
-
-/// API method to get cycle balance and burn rate.
-#[update]
-pub async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
-    std_canister_status::get_canister_status_v2().await
-}
-
-/// Gets statistics about the canister.
-///
-/// Note: This is a private method, restricted to authorized users, as some stats may not be
-/// suitable for public consumption.
-#[query(guard = "caller_is_allowed")]
-#[must_use]
-pub fn stats() -> Stats {
-    read_state(|s| Stats::from(s))
-}
-
-/// Gets account creation timestamps.
-#[query(guard = "caller_is_allowed")]
-#[must_use]
-pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
-    read_state(|s| {
-        s.user_profile
-            .iter()
-            .map(|entry| {
-                let (_updated, StoredPrincipal(principal)) = *entry.key();
-                let user = entry.value();
-                (principal, user.created_timestamp)
-            })
-            .collect()
-    })
+    utils::housekeeping::start_periodic_housekeeping_timers();
 }
 
 export_candid!();
+
+#[cfg(test)]
+mod tests {
+    use std::path::{Path, PathBuf};
+
+    use candid_parser::utils::{service_compatible, CandidSource};
+
+    /// Determines the workspace directory when running tests.
+    fn workspace_dir() -> PathBuf {
+        let output = std::process::Command::new(env!("CARGO"))
+            .arg("locate-project")
+            .arg("--workspace")
+            .arg("--message-format=plain")
+            .output()
+            .unwrap()
+            .stdout;
+        let cargo_path = Path::new(std::str::from_utf8(&output).unwrap().trim());
+        cargo_path.parent().unwrap().to_path_buf()
+    }
+
+    /// Checks candid interface type compatibility with production.
+    #[test]
+    #[ignore] // Not run unless requested explicitly
+    fn check_candid_interface_compatibility() {
+        let canister_interface = super::__export_service();
+        let prod_interface_file = workspace_dir().join("target/ic/candid/backend.ic.did");
+        service_compatible(
+            CandidSource::Text(&canister_interface),
+            CandidSource::File(&prod_interface_file.as_path()),
+        )
+        .expect("The proposed canister interface is not compatible with the production interface");
+    }
+}

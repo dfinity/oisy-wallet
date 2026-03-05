@@ -21,6 +21,9 @@ use crate::{
     guards::caller_is_not_anonymous,
     signer,
     state::{mutate_state, read_config},
+    signer,
+    state::mutate_state,
+    utils::guards::caller_is_not_anonymous,
 };
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
@@ -40,7 +43,7 @@ const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 /// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
 /// it returns the default percentiles.
 #[query(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
+#[expect(clippy::needless_pass_by_value)]
 #[must_use]
 pub fn btc_get_current_fee_percentiles(
     params: BtcGetFeePercentilesRequest,

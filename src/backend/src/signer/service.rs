@@ -13,19 +13,16 @@ use ic_cycles_ledger_client::{
 };
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
-use shared::types::signer::GetAllowedCyclesError;
-pub(crate) use shared::types::signer::{
+use shared::types::signer::{
     topup::{
         TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
         TopUpCyclesLedgerResult,
     },
-    AllowSigningError,
+    AllowSigningError, GetAllowedCyclesError,
 };
 
-use crate::{
-    read_config,
-    signer::canister_ids::{CYCLES_LEDGER, SIGNER},
-};
+use super::canister_ids::{CYCLES_LEDGER, SIGNER};
+use crate::state::read_config;
 
 /// Current ledger fee in cycles.  Historically stable.
 ///
@@ -106,24 +103,34 @@ pub async fn get_allowed_cycles() -> Result<Nat, GetAllowedCyclesError> {
     Ok(allowance.allowance)
 }
 
-/// Enables the user to sign transactions.
+/// Returns `Some(allowance)` when the caller's current cycles allowance is
+/// at or above [`SUFFICIENT_CYCLES_THRESHOLD`], meaning a new `icrc_2_approve`
+/// is unnecessary.
 ///
-/// Signing costs cycles.  Managing that cycle payment can be painful so we take care of that.
+/// Returns `None` when the allowance is below threshold **or** when the
+/// cycles ledger cannot be contacted (conservative fallback).
+pub async fn has_sufficient_allowance() -> Option<Nat> {
+    match get_allowed_cycles().await {
+        Ok(current) if current >= SUFFICIENT_CYCLES_THRESHOLD => Some(current),
+        _ => None,
+    }
+}
+
+/// Unconditionally creates a new `icrc_2_approve` for signing operations,
+/// **without** checking the current allowance first.
+///
+/// Callers that want the "check first, approve only if needed" behaviour
+/// should call [`has_sufficient_allowance`] beforehand, or use
+/// [`allow_signing`] which does both.
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`
 /// TODO Remove the Option type (that has been added for backward-compatibility)
 /// as soon as the `PoW` feature has been stabilized
-pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigningError> {
+pub async fn approve_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigningError> {
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
     let caller = ic_cdk::caller();
-
-    if let Ok(current) = get_allowed_cycles().await {
-        if current >= SUFFICIENT_CYCLES_THRESHOLD {
-            return Ok(());
-        }
-    }
 
     let amount = Nat::from(allowed_cycles.unwrap_or_else(per_user_cycles_allowance));
 
@@ -147,6 +154,22 @@ pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigni
         .map_err(AllowSigningError::ApproveError)?;
 
     Ok(())
+}
+
+/// Enables the user to sign transactions.
+///
+/// Checks the current allowance first; if already at or above
+/// [`SUFFICIENT_CYCLES_THRESHOLD`], returns immediately without making an
+/// `icrc_2_approve` call.  Otherwise delegates to [`approve_signing`].
+///
+/// # Errors
+/// Errors are enumerated by: `AllowSigningError`
+pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigningError> {
+    if has_sufficient_allowance().await.is_some() {
+        return Ok(());
+    }
+
+    approve_signing(allowed_cycles).await
 }
 
 const SUB_ACCOUNT_ZERO: Subaccount = Subaccount([0; 32]);
