@@ -12,6 +12,14 @@ thread_local! {
     static HOUSEKEEPING_STARTED_AT: RefCell<Option<u64>> = const { RefCell::new(None) };
     static ALLOW_SIGNING_IN_PROGRESS: RefCell<u32> = const { RefCell::new(0) };
 
+    /// High-frequency guard rate limiter checked **before** any inter-canister
+    /// call.  Designed to cheaply reject rapid-fire requests that would otherwise
+    /// drain cycles through the allowance check.
+    ///
+    /// Limit: 10 calls per caller per minute.
+    pub(crate) static ALLOW_SIGNING_GUARD_LIMITER: rate_limiter::RateLimiter =
+        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
+
     /// Rate-limits `allow_signing`: max 3 calls per caller per hour.
     pub(crate) static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
         rate_limiter::RateLimiter::new(3, 60 * 60 * 1_000_000_000);

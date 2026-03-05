@@ -148,6 +148,17 @@ describe('backend.errors', () => {
 			expect(err.message).toBe('Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.');
 		});
 
+		it('should map RateLimitedByGuard', () => {
+			const err = mapAllowSigningError({
+				RateLimitedByGuard: { max_calls: 10, window_ns: 60_000_000_000_000n, caller: mockPrincipal }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe(
+				'Guard rate limit exceeded. Maximum of 10 calls allowed every 60000 seconds.'
+			);
+		});
+
 		it('should map Other', () => {
 			const err = mapAllowSigningError({
 				Other: 'some other error'
