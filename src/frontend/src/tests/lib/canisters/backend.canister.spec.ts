@@ -594,7 +594,7 @@ describe('backend.canister', () => {
 					utxos: []
 				},
 				rateLimitInfo: {
-					endpoint: 'allow_signing',
+					endpoint: 'btc_select_user_utxos_fee',
 					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
 				}
 			});
