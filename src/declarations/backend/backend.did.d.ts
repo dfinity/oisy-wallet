@@ -38,6 +38,7 @@ export interface Agreements {
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
 	| { RateLimited: RateLimitError }
+	| { RateLimitedByGuard: RateLimitError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
 export interface AllowSigningResponse {
@@ -450,9 +451,15 @@ export interface _SERVICE {
 	 * operations (providing public keys, creating signatures, etc.).
 	 *
 	 * If the caller already has sufficient allowance the call returns
-	 * immediately with [`AllowSigningStatus::Skipped`] and no inter-canister
-	 * call is made.  Otherwise the endpoint is rate-limited and a new
+	 * immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
+	 * call is made.  Otherwise, the endpoint is rate-limited and a new
 	 * `icrc_2_approve` is issued on the cycles ledger.
+	 *
+	 * # Rate limiting
+	 * Two rate limiters are applied in order:
+	 * 1. **Guard limiter** – a high-frequency limiter (10 calls/min) checked *before* any
+	 * inter-canister call to cheaply reject bursts that would drain cycles.
+	 * 2. **Business limiter** – the stricter per-caller limit (3 calls/hour) for normal usage.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `AllowSigningError`.
