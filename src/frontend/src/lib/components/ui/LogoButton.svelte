@@ -111,7 +111,7 @@
 						</span>
 					{/if}
 					{#if nonNullish(descriptionEnd)}
-						<span class="text-sm text-tertiary text-nowrap">
+						<span class="text-sm text-nowrap text-tertiary">
 							{@render descriptionEnd()}
 						</span>
 					{/if}
