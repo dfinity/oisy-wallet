@@ -81,6 +81,7 @@ describe('etherscan.providers', () => {
 					value,
 					gas,
 					gasPrice,
+					gasUsed,
 					input: data
 				}: EtherscanProviderTransaction): Transaction => ({
 					hash,
@@ -91,6 +92,7 @@ describe('etherscan.providers', () => {
 					nonce: parseInt(nonce),
 					gasLimit: BigInt(gas),
 					gasPrice: BigInt(gasPrice),
+					gasUsed: BigInt(gasUsed),
 					value: BigInt(value),
 					chainId,
 					data
@@ -223,6 +225,7 @@ describe('etherscan.providers', () => {
 						nonce: 1,
 						gasLimit: 21000n,
 						gasPrice: 20000000000n,
+						gasUsed: 21000n,
 						value: 1000000000000000000n,
 						chainId,
 						data: '0x'
@@ -293,6 +296,7 @@ describe('etherscan.providers', () => {
 						nonce: 1,
 						gasLimit: 21000n,
 						gasPrice: 20000000000n,
+						gasUsed: 21000n,
 						value: BigInt(1),
 						tokenId: 132,
 						chainId,
@@ -364,6 +368,7 @@ describe('etherscan.providers', () => {
 						nonce: 1,
 						gasLimit: 21000n,
 						gasPrice: 20000000000n,
+						gasUsed: 21000n,
 						value: BigInt(3),
 						tokenId: 132,
 						chainId,
