@@ -8,6 +8,8 @@ import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { calculateIcFee, payIcp } from '$icp/services/ic-open-crypto-pay.services';
 import type { IcFeeResult } from '$icp/types/pay';
 import { isIcPayableToken } from '$icp/utils/ic-open-crypto-pay.utils';
+import { calculateIcFee } from '$icp/services/ic-open-crypto-pay.services';
+import type { IcFeeResult } from '$icp/types/pay';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
