@@ -103,15 +103,15 @@
 				</span>
 			</span>
 
-			<span class="flex items-center">
-				<span class="flex flex-col text-right">
+			<span class="flex items-center text-nowrap">
+				<span class="flex flex-col text-right text-nowrap">
 					{#if nonNullish(titleEnd)}
-						<span class="text-lg font-bold">
+						<span class="text-lg font-bold text-nowrap">
 							{@render titleEnd()}
 						</span>
 					{/if}
 					{#if nonNullish(descriptionEnd)}
-						<span class="text-sm text-tertiary">
+						<span class="text-sm text-tertiary text-nowrap">
 							{@render descriptionEnd()}
 						</span>
 					{/if}
