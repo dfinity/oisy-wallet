@@ -1,8 +1,8 @@
 import type {
-	NetworkOpenCryptoPaySchema,
 	NetworkEnvironmentSchema,
 	NetworkExchangeSchema,
 	NetworkIdSchema,
+	NetworkOpenCryptoPaySchema,
 	NetworkSchema
 } from '$lib/schema/network.schema';
 import type { Option } from '$lib/types/utils';
