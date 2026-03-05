@@ -19,7 +19,10 @@ use crate::{
     bitcoin::{api, pending_tx_model::BtcUserPendingTransactionsModel, utils},
     signer,
     state::mutate_state,
-    utils::guards::caller_is_not_anonymous,
+    utils::{
+        guards::caller_is_not_anonymous, housekeeping::BTC_SELECT_UTXOS_FEE_RATE_LIMITER,
+        rate_limiter,
+    },
 };
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
@@ -60,6 +63,10 @@ pub async fn btc_select_user_utxos_fee(
     async fn inner(
         params: SelectedUtxosFeeRequest,
     ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
+        BTC_SELECT_UTXOS_FEE_RATE_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(SelectedUtxosFeeError::RateLimited)?;
+
         let principal = ic_cdk::caller();
         let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
