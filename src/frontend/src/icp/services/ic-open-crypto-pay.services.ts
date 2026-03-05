@@ -29,7 +29,7 @@ export const calculateIcFee = (token: PayableToken): IcFeeResult | undefined => 
 };
 
 /**
- * Executes ICP payment using the ICRC-2 approve flow:
+ * Executes IC payment using the ICRC-2 approve flow:
  * 1. Calls `icrc2_approve` on the token ledger, approving the payment provider for amount + transfer fee
  * 2. Sends the user's Principal ID to the OCP API so the provider can call `icrc2_transfer_from`
  */
