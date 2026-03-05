@@ -6,8 +6,8 @@ export const DEPRECATED_SNES: Record<
 	Omit<EnvIcrcTokenMetadataWithIcon, 'decimals' | 'fee'>
 > = {
 	['itgqj-7qaaa-aaaaq-aadoa-cai']: {
-		name: '---- (formerly CYCLES-TRANSFER-STATION)',
-		symbol: '--- (CTS)',
+		name: 'OOO (formerly CYCLES-TRANSFER-STATION)',
+		symbol: 'OOO (CTS)',
 		alternativeName: undefined,
 		url: undefined,
 		icon: undefined
