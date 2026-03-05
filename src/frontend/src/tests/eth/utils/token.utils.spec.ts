@@ -27,7 +27,7 @@ describe('token.utils', () => {
 			},
 			estimatedGasLimit: 21000n
 		}
-	};
+	} as PayableTokenWithFees;
 
 	const mockNativeEthToken: PayableTokenWithFees = {
 		...ETHEREUM_TOKEN,
@@ -42,7 +42,7 @@ describe('token.utils', () => {
 			},
 			estimatedGasLimit: 21000n
 		}
-	};
+	} as PayableTokenWithFees;
 
 	describe('hasSufficientBalance', () => {
 		const tokenAmount = 1000000000000000000n; // 1 ETH

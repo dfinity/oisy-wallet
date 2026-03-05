@@ -1119,7 +1119,7 @@ describe('open-crypto-pay.utils', () => {
 				},
 				estimatedGasLimit: 21000n
 			}
-		};
+		} as PayableTokenWithFees;
 
 		const mockToken2: PayableTokenWithFees = {
 			...USDC_TOKEN,
@@ -1450,12 +1450,12 @@ describe('open-crypto-pay.utils', () => {
 		const mockToken: PayableTokenWithConvertedAmount = {
 			...ETHEREUM_TOKEN,
 			...payableTokenData
-		};
+		} as PayableTokenWithConvertedAmount;
 
 		const mockErc20Token: PayableTokenWithConvertedAmount = {
 			...USDC_TOKEN,
 			...payableTokenData
-		};
+		} as PayableTokenWithConvertedAmount;
 
 		it('should return base tracking params without token and providerData', () => {
 			const result = getOpenCryptoPayBaseTrackingParams({});
