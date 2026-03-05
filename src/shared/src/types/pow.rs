@@ -125,12 +125,12 @@ pub struct StoredChallenge {
 }
 
 impl StoredChallenge {
-    #[allow(clippy::must_use_candidate)]
+    #[expect(clippy::must_use_candidate)]
     pub fn is_expired(&self) -> bool {
         self.expiry_timestamp_ms <= (ic_cdk::api::time() / 1_000_000)
     }
 
-    #[allow(clippy::must_use_candidate)]
+    #[expect(clippy::must_use_candidate)]
     pub fn is_solved(&self) -> bool {
         self.solved
     }
