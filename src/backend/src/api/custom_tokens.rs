@@ -10,7 +10,7 @@ use crate::{
 
 /// Add or update custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
+#[expect(clippy::needless_pass_by_value)]
 pub fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -27,7 +27,7 @@ pub fn set_custom_token(token: CustomToken) {
 }
 
 #[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
+#[expect(clippy::needless_pass_by_value)]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     if tokens.len() > MAX_TOKEN_LIST_LENGTH {
         ic_cdk::trap(&format!(
@@ -56,7 +56,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 
 /// Remove custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
+#[expect(clippy::needless_pass_by_value)]
 pub fn remove_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 

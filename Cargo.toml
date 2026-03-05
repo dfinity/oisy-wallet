@@ -29,11 +29,11 @@ getrandom = { version = "0.2", features = ["custom"] }
 hex = "0.4"
 sha2 = "0.10"
 lazy_static = "1.5"
-# dfx 0.26.1 bundles pocket-ic server 8.0 which uses pocket-ic library 7.0
+# pocket-ic server 12.0 uses pocket-ic library 12.0
 # See:
-# Server version: ~/.cache/dfinity/versions/0.26.0/pocket-ic --version
-# Library version: https://docs.google.com/document/d/1VYmHUTjrgbzRHtsAyRrI5cj-gWGs7ktTnutPvUMJioU/edit?pli=1&tab=t.0#heading=h.5wf28dvt742x
-pocket-ic = "7.0"
+# Server version: https://github.com/dfinity/pocketic/releases/tag/12.0.0
+# Library version: https://docs.rs/pocket-ic/12.0.0
+pocket-ic = "12.0"
 pretty_assertions = "1.4"
 bitcoin = "0.32"
 paste = "1.0"
@@ -41,8 +41,10 @@ paste = "1.0"
 [workspace.lints.rust]
 deprecated = "allow" # Why is this allowed?
 warnings = "deny"
+unused_attributes = "warn"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
+allow_attributes = "warn"
 module_name_repetitions = "allow"
 struct_field_names = "allow"
