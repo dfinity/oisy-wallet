@@ -198,6 +198,113 @@ export interface ErcToken {
 	chain_id: bigint;
 }
 export type EthAddress = { Public: string };
+export type EthTransactionError =
+	| { NoAddressesRegistered: null }
+	| { ProviderError: string }
+	| { Unauthorized: null }
+	| { AddressAlreadyRegistered: null }
+	| { UserNotFound: null };
+export interface EtherscanErc1155Transaction {
+	to: string;
+	gas: string;
+	confirmations: string;
+	token_id: string;
+	token_symbol: string;
+	block_hash: string;
+	from: string;
+	transaction_index: string;
+	hash: string;
+	block_number: string;
+	token_value: string;
+	nonce: string;
+	cumulative_gas_used: string;
+	input: string;
+	gas_used: string;
+	contract_address: string;
+	token_name: string;
+	time_stamp: string;
+	gas_price: string;
+}
+export interface EtherscanErc20Transaction {
+	to: string;
+	gas: string;
+	confirmations: string;
+	value: string;
+	token_symbol: string;
+	block_hash: string;
+	from: string;
+	transaction_index: string;
+	hash: string;
+	block_number: string;
+	token_decimal: string;
+	nonce: string;
+	cumulative_gas_used: string;
+	input: string;
+	gas_used: string;
+	contract_address: string;
+	token_name: string;
+	time_stamp: string;
+	gas_price: string;
+}
+export interface EtherscanErc721Transaction {
+	to: string;
+	gas: string;
+	confirmations: string;
+	token_id: string;
+	token_symbol: string;
+	block_hash: string;
+	from: string;
+	transaction_index: string;
+	hash: string;
+	block_number: string;
+	token_decimal: string;
+	nonce: string;
+	cumulative_gas_used: string;
+	input: string;
+	gas_used: string;
+	contract_address: string;
+	token_name: string;
+	time_stamp: string;
+	gas_price: string;
+}
+export interface EtherscanInternalTransaction {
+	to: string;
+	gas: string;
+	value: string;
+	from: string;
+	hash: string;
+	type: string;
+	block_number: string;
+	trace_id: string;
+	is_error: string;
+	err_code: string;
+	input: string;
+	gas_used: string;
+	contract_address: string;
+	time_stamp: string;
+}
+export interface EtherscanTransaction {
+	to: string;
+	gas: string;
+	confirmations: string;
+	txreceipt_status: string;
+	value: string;
+	block_hash: string;
+	from: string;
+	transaction_index: string;
+	hash: string;
+	block_number: string;
+	is_error: string;
+	function_name: string;
+	nonce: string;
+	cumulative_gas_used: string;
+	input: string;
+	gas_used: string;
+	contract_address: string;
+	time_stamp: string;
+	method_id: string;
+	gas_price: string;
+}
 export interface ExperimentalFeatureSettings {
 	enabled: boolean;
 }
@@ -217,10 +324,25 @@ export type GetAllowedCyclesResult =
 	| { Err: GetAllowedCyclesError };
 export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
+export interface GetEthTransactionsRequest {
+	cursor: [] | [bigint];
+	limit: [] | [bigint];
+}
+export interface GetEthTransactionsResponse {
+	next_cursor: [] | [bigint];
+	transactions: Array<StoredEthTransaction>;
+}
+export type GetEthTransactionsResult =
+	| { Ok: GetEthTransactionsResponse }
+	| { Err: EthTransactionError };
 export type GetUserProfileError = { NotFound: null };
 export type GetUserProfileResult = { Ok: UserProfile } | { Err: GetUserProfileError };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
+}
+export interface HttpHeader {
+	value: string;
+	name: string;
 }
 export interface HttpRequest {
 	url: string;
@@ -232,6 +354,11 @@ export interface HttpResponse {
 	body: Uint8Array;
 	headers: Array<[string, string]>;
 	status_code: number;
+}
+export interface HttpResponse_1 {
+	status: bigint;
+	body: Uint8Array;
+	headers: Array<HttpHeader>;
 }
 export interface IcrcToken {
 	ledger_id: Principal;
@@ -294,6 +421,11 @@ export interface RateLimitError {
 	window_ns: bigint;
 	caller: Principal;
 }
+export interface RegisterEthAddressRequest {
+	chain_id: bigint;
+	address: string;
+}
+export type RegisterEthAddressResult = { Ok: null } | { Err: EthTransactionError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -310,6 +442,11 @@ export interface SelectedUtxosFeeResponse {
 	fee_satoshis: bigint;
 	utxos: Array<Utxo>;
 }
+export interface SetProviderApiKeyRequest {
+	api_key: string;
+	provider_id: string;
+}
+export type SetProviderApiKeyResult = { Ok: null } | { Err: EthTransactionError };
 export interface SetShowTestnetsRequest {
 	current_user_version: [] | [bigint];
 	show_testnets: boolean;
@@ -333,6 +470,14 @@ export interface Stats {
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
 }
+export type StoredEthTransaction =
+	| {
+			Internal: EtherscanInternalTransaction;
+	  }
+	| { Erc20: EtherscanErc20Transaction }
+	| { Normal: EtherscanTransaction }
+	| { Erc721: EtherscanErc721Transaction }
+	| { Erc1155: EtherscanErc1155Transaction };
 export interface SupportedCredential {
 	ii_canister_id: Principal;
 	issuer_origin: string;
@@ -387,6 +532,10 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
+export interface TransformArgs {
+	context: Uint8Array;
+	response: HttpResponse_1;
+}
 export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
 export interface UpdateExperimentalFeaturesSettingsRequest {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
@@ -581,7 +730,17 @@ export interface _SERVICE {
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
 	/**
-	 * Returns the caller's user profile.
+	 * Returns paginated ETH transactions for the calling user.
+	 * Transactions are sorted newest-first (by block number descending).
+	 *
+	 * Use `cursor: None` for the first page, then pass the returned
+	 * `next_cursor` value to fetch subsequent pages.
+	 */
+	get_eth_transactions: ActorMethod<[GetEthTransactionsRequest], GetEthTransactionsResult>;
+	/**
+	 * Returns the caller's user profile and marks the user as active
+	 * (used by the ETH transaction refresh scheduler to determine which
+	 * users should receive periodic transaction updates).
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `GetUserProfileError`.
@@ -621,6 +780,11 @@ export interface _SERVICE {
 	 */
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	/**
+	 * Registers an ETH address for the calling user so the backend can
+	 * fetch and cache transactions for it.
+	 */
+	register_eth_address: ActorMethod<[RegisterEthAddressRequest], RegisterEthAddressResult>;
+	/**
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
@@ -629,6 +793,13 @@ export interface _SERVICE {
 	 */
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
+	/**
+	 * Sets (or updates) an API key for a transaction data provider.
+	 *
+	 * Example `provider_id` values: `"etherscan"`, `"alchemy"`, etc.
+	 * Restricted to controllers and allowed callers.
+	 */
+	set_provider_api_key: ActorMethod<[SetProviderApiKeyRequest], SetProviderApiKeyResult>;
 	/**
 	 * Sets the user's preference to show (or hide) testnets in the interface.
 	 *
@@ -654,6 +825,11 @@ export interface _SERVICE {
 	 * Error conditions are enumerated by: `TopUpCyclesLedgerError`
 	 */
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
+	/**
+	 * Transform function for HTTP outcalls — required for IC consensus.
+	 * Passes the response body through unmodified.
+	 */
+	transform_etherscan_response: ActorMethod<[TransformArgs], HttpResponse>;
 	/**
 	 * Updates an existing contact for the caller.
 	 *
