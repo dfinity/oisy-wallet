@@ -5,6 +5,10 @@ import { calculateEthFee, payEth } from '$eth/services/eth-open-crypto-pay.servi
 import type { EthFeeResult } from '$eth/types/pay';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import { calculateIcFee, payIcp } from '$icp/services/icp-open-crypto-pay.services';
+import type { IcFeeResult } from '$icp/types/pay';
+import { isIcPayableToken } from '$icp/utils/icp-open-crypto-pay.utils';
+import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import type {
@@ -13,7 +17,8 @@ import type {
 	PayableToken,
 	PayableTokenWithFees,
 	ValidatedBtcPaymentData,
-	ValidatedEthPaymentData
+	ValidatedEthPaymentData,
+	ValidatedIcpPaymentData
 } from '$lib/types/open-crypto-pay';
 import {
 	decodeLNURL,
@@ -56,13 +61,17 @@ export const processOpenCryptoPayCode = async (code: string): Promise<OpenCrypto
 
 const calculateTokenFee = async (
 	token: PayableToken
-): Promise<EthFeeResult | UtxosFee | undefined> => {
+): Promise<EthFeeResult | UtxosFee | IcFeeResult | undefined> => {
 	if (isBitcoinToken(token)) {
 		return calculateBtcFee(token);
 	}
 
 	if (isDefaultEthereumToken(token) || isTokenErc20(token)) {
 		return await calculateEthFee(token);
+	}
+
+	if (isIcToken(token)) {
+		return calculateIcFee(token);
 	}
 };
 
@@ -90,7 +99,7 @@ const getValidatedTransactionData = async ({
 	callback,
 	amount
 }: Omit<PayParams, 'identity' | 'data' | 'progress'>): Promise<
-	ValidatedEthPaymentData | ValidatedBtcPaymentData | undefined
+	ValidatedEthPaymentData | ValidatedBtcPaymentData | ValidatedIcpPaymentData | undefined
 > => {
 	const url = `${callback}?quote=${quoteId}&method=${token.network.pay?.openCryptoPay ?? token.network.name}&asset=${token.symbol}`;
 	const { uri } = await fetchOpenCryptoPay<{ uri: string }>(url);
@@ -144,6 +153,18 @@ export const pay = async ({
 	if (isDefaultEthereumToken(token) || isTokenErc20(token)) {
 		await payEth({
 			validatedData: validatedData as ValidatedEthPaymentData,
+			token,
+			quoteId,
+			callback,
+			progress,
+			identity
+		});
+		return;
+	}
+
+	if (isIcPayableToken(token)) {
+		await payIcp({
+			validatedData: validatedData as ValidatedIcpPaymentData,
 			token,
 			quoteId,
 			callback,

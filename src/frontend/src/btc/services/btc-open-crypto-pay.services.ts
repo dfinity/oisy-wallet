@@ -48,6 +48,10 @@ export const payBtc = async ({
 }: Omit<PayParams, 'data' | 'amount'> & {
 	validatedData: ValidatedBtcPaymentData;
 }) => {
+	if (isNullish(token.network.pay)) {
+		throw new Error('Token network does not support payments');
+	}
+
 	const { txid, signed_transaction_hex } = await signBtc({
 		identity,
 		network: token.network.env,
@@ -61,7 +65,7 @@ export const payBtc = async ({
 	const apiUrl = getPaymentUri({
 		callback,
 		quoteId,
-		network: token.network.pay?.openCryptoPay ?? token.network.name,
+		network: token.network.pay.openCryptoPay,
 		rawTransaction: signed_transaction_hex
 	});
 

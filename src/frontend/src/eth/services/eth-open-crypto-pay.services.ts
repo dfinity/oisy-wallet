@@ -158,6 +158,10 @@ export const payEth = async ({
 }: Omit<PayParams, 'data' | 'amount'> & {
 	validatedData: ValidatedEthPaymentData;
 }) => {
+	if (isNullish(token.network.pay)) {
+		throw new Error('Token network does not support payments');
+	}
+
 	const address = get(ethAddress);
 
 	if (isNullish(address)) {
@@ -190,7 +194,7 @@ export const payEth = async ({
 	const apiUrl = getPaymentUri({
 		callback,
 		quoteId,
-		network: token.network.pay?.openCryptoPay ?? token.network.name,
+		network: token.network.pay.openCryptoPay,
 		rawTransaction
 	});
 

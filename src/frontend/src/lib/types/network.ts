@@ -1,8 +1,9 @@
-import type {
-	NetworkEnvironmentSchema,
-	NetworkExchangeSchema,
-	NetworkIdSchema,
-	NetworkSchema
+import {
+	type NetworkEnvironmentSchema,
+	type NetworkExchangeSchema,
+	type NetworkIdSchema,
+	NetworkOpenCryptoPaySchema,
+	type NetworkSchema
 } from '$lib/schema/network.schema';
 import type { Option } from '$lib/types/utils';
 import type * as z from 'zod';
@@ -16,3 +17,5 @@ export type Network = z.infer<typeof NetworkSchema>;
 export type NetworkExchange = z.infer<typeof NetworkExchangeSchema>;
 
 export type OptionNetworkId = Option<NetworkId>;
+
+export type NetworkOpenCryptoPay = z.infer<typeof NetworkOpenCryptoPaySchema>;
