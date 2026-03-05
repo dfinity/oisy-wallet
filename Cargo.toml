@@ -41,8 +41,10 @@ paste = "1.0"
 [workspace.lints.rust]
 deprecated = "allow" # Why is this allowed?
 warnings = "deny"
+unused_attributes = "warn"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
+allow_attributes = "warn"
 module_name_repetitions = "allow"
 struct_field_names = "allow"
