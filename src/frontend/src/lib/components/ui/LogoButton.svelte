@@ -86,7 +86,7 @@
 							{#if dividers}
 								<span class="text-tertiary"><Divider /></span>
 							{/if}
-							<span class="text-base text-nowrap text-tertiary truncate">
+							<span class="truncate text-base text-nowrap text-tertiary">
 								{@render subtitle()}
 							</span>
 						{/if}
