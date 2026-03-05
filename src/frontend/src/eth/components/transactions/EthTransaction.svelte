@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { nonNullish, assertNever } from '@dfinity/utils';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
@@ -108,7 +108,6 @@
 			? token.twinTokenSymbol
 			: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
 				((token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
-
 
 		if (type === 'withdraw') {
 			return replacePlaceholders(

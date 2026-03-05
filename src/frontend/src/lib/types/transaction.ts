@@ -28,7 +28,6 @@ export type Transaction = Omit<EthersTransaction, 'from'> &
 		pendingTimestamp?: number;
 		displayTimestamp?: number;
 		tokenId?: number;
-		gasUsed?: bigint;
 	};
 
 export type TransactionResponseWithBigInt = Omit<

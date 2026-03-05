@@ -90,8 +90,7 @@ export class EtherscanProvider {
 				gasUsed: BigInt(gasUsed),
 				value: BigInt(value),
 				chainId: this.chainId,
-				data,
-				gasUsed: BigInt(gasUsed)
+				data
 			})
 		);
 	}
