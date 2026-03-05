@@ -52,7 +52,7 @@ fi
 
 scripts/download-immutable.sh "https://github.com/dfinity/pocketic/releases/download/${POCKET_IC_SERVER_VERSION}/pocket-ic-${ARCH}-${PLATFORM}.gz" "${POCKET_IC_SERVER_PATH}.gz"
 
-if [ ! -f "${POCKET_IC_SERVER_PATH}" ]; then
+if [ ! -f "${POCKET_IC_SERVER_PATH}" ] || [ "${POCKET_IC_SERVER_PATH}.gz" -nt "${POCKET_IC_SERVER_PATH}" ]; then
   gzip -dc "${POCKET_IC_SERVER_PATH}.gz" >"${POCKET_IC_SERVER_PATH}"
   chmod +x "${POCKET_IC_SERVER_PATH}"
 fi
