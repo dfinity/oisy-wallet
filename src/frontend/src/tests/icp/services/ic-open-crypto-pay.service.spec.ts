@@ -128,13 +128,13 @@ describe('ic-open-crypto-pay.services', () => {
 		it('should propagate errors from approve', async () => {
 			vi.mocked(approve).mockRejectedValueOnce(new Error('Approve failed'));
 
-			await expect(payIcp(baseParams)).rejects.toThrow('Approve failed');
+			await expect(payIcp(baseParams)).rejects.toThrowError('Approve failed');
 		});
 
 		it('should propagate errors from fetchOpenCryptoPay', async () => {
 			vi.mocked(fetchOpenCryptoPay).mockRejectedValueOnce(new Error('Payment API failed'));
 
-			await expect(payIcp(baseParams)).rejects.toThrow('Payment API failed');
+			await expect(payIcp(baseParams)).rejects.toThrowError('Payment API failed');
 		});
 	});
 });
