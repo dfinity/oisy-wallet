@@ -7,7 +7,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 
 export const USDT_DECIMALS = 6;
 
-export const USDT_SYMBOL = 'USDT';
+export const USDT_SYMBOL = 'xUSDT';
 
 export const USDT_TOKEN_ID: TokenId = parseTokenId(USDT_SYMBOL);
 
@@ -16,7 +16,7 @@ export const USDT_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	name: 'Tether USD',
+	name: 'Tether xUSD',
 	symbol: USDT_SYMBOL,
 	decimals: USDT_DECIMALS,
 	icon: usdt,
