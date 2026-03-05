@@ -19,5 +19,3 @@ export type NetworkExchange = z.infer<typeof NetworkExchangeSchema>;
 export type NetworkOpenCryptoPay = z.infer<typeof NetworkOpenCryptoPaySchema>;
 
 export type OptionNetworkId = Option<NetworkId>;
-
-export type NetworkOpenCryptoPay = z.infer<typeof NetworkOpenCryptoPaySchema>;
