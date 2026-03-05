@@ -96,6 +96,16 @@ export const mapAllowSigningError = (
 		);
 	}
 
+	if ('RateLimitedByGuard' in err) {
+		const { max_calls: maxCalls, window_ns: windowNs } = err.RateLimitedByGuard;
+
+		const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+		return new CanisterInternalError(
+			`Guard rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+		);
+	}
+
 	if ('Other' in err) {
 		return new CanisterInternalError(err.Other);
 	}
