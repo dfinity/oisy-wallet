@@ -32,7 +32,7 @@ pub(crate) struct State {
     pub(crate) user_profile_updated: UserProfileUpdatedMap,
     // Not used any more, but we keep it for now to avoid breaking changes and data migration. Will
     // be removed in the future.
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub(crate) pow_challenge: PowChallengeMap,
     pub(crate) contact: ContactMap,
     pub(crate) btc_user_pending_transactions: BtcUserPendingTransactionsMap,
