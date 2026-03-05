@@ -16,6 +16,7 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import { TRANSACTION_CHILDREN_CONTAINER } from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -36,7 +37,6 @@
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
-	import {TRANSACTION_CHILDREN_CONTAINER} from "$lib/constants/test-ids.constants";
 
 	interface Props {
 		displayAmount?: bigint;
