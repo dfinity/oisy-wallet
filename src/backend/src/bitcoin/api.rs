@@ -213,7 +213,7 @@ fn get_default_fee_for_network(network: BitcoinNetwork) -> u64 {
 
 /// Generates a list of fee percentiles based on a given default fee value.
 /// The percentiles range from 50% to 150% of the default fee.
-#[allow(
+#[expect(
     clippy::cast_sign_loss,
     clippy::cast_possible_truncation,
     clippy::cast_precision_loss
