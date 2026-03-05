@@ -105,6 +105,19 @@ export const idlFactory = ({ IDL }) => {
 		Ok: AllowSigningResponse,
 		Err: AllowSigningError
 	});
+	const Delegation = IDL.Record({
+		pubkey: IDL.Vec(IDL.Nat8),
+		targets: IDL.Opt(IDL.Vec(IDL.Principal)),
+		expiration: IDL.Nat64
+	});
+	const SignedDelegation = IDL.Record({
+		signature: IDL.Vec(IDL.Nat8),
+		delegation: Delegation
+	});
+	const IIDelegationChain = IDL.Record({
+		public_key: IDL.Vec(IDL.Nat8),
+		delegations: IDL.Vec(SignedDelegation)
+	});
 	const BitcoinNetwork = IDL.Variant({
 		mainnet: IDL.Null,
 		regtest: IDL.Null,
@@ -121,6 +134,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const BtcAddPendingTransactionRequest = IDL.Record({
 		txid: IDL.Vec(IDL.Nat8),
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
 		network: BitcoinNetwork,
 		utxos: IDL.Vec(Utxo)
 	});
@@ -128,6 +142,7 @@ export const idlFactory = ({ IDL }) => {
 		InvalidUtxos: IDL.Null,
 		EmptyUtxos: IDL.Null,
 		DuplicateUtxos: IDL.Null,
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
 		InternalError: IDL.Record({ msg: IDL.Text }),
 		UtxosAlreadyReserved: IDL.Null
 	});

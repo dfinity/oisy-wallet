@@ -58,11 +58,13 @@ type BtcAddPendingTransactionError = variant {
 	InvalidUtxos;
 	EmptyUtxos;
 	DuplicateUtxos;
+	InvalidDelegationChain : record { msg : text };
 	InternalError : record { msg : text };
 	UtxosAlreadyReserved
 };
 type BtcAddPendingTransactionRequest = record {
 	txid : blob;
+	ii_delegation_chain : opt IIDelegationChain;
 	network : BitcoinNetwork;
 	utxos : vec Utxo
 };
@@ -174,6 +176,11 @@ type DefiniteCanisterSettingsArgs = record {
 	memory_allocation : nat;
 	compute_allocation : nat
 };
+type Delegation = record {
+	pubkey : blob;
+	targets : opt vec principal;
+	expiration : nat64
+};
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
@@ -213,6 +220,10 @@ type HttpResponse = record {
 	body : blob;
 	headers : vec record { text; text };
 	status_code : nat16
+};
+type IIDelegationChain = record {
+	public_key : blob;
+	delegations : vec SignedDelegation
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type Icrcv2AccountId = variant {
@@ -292,6 +303,7 @@ type Settings = record {
 	dapp : DappSettings;
 	experimental_features : ExperimentalFeaturesSettings
 };
+type SignedDelegation = record { signature : blob; delegation : Delegation };
 type SplToken = record {
 	decimals : opt nat8;
 	token_address : text;
@@ -427,6 +439,9 @@ service : (Arg) -> {
 	// Errors are enumerated by: `AllowSigningError`.
 	allow_signing : () -> (AllowSigningResult);
 	// Adds a pending Bitcoin transaction for the caller.
+	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. This protects against unauthorised CLI callers.
 	//
 	// # Errors
 	// Errors are enumerated by: `BtcAddPendingTransactionError`.

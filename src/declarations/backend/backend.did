@@ -55,13 +55,31 @@ type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
 type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type BtcAddPendingTransactionError = variant {
-	InternalError : record { msg : text }
+	InvalidUtxos;
+	EmptyUtxos;
+	DuplicateUtxos;
+	InvalidDelegationChain : record { msg : text };
+	InternalError : record { msg : text };
+	UtxosAlreadyReserved
 };
 type BtcAddPendingTransactionRequest = record {
 	txid : blob;
 	network : BitcoinNetwork;
-	address : text;
-	utxos : vec Utxo
+	utxos : vec Utxo;
+	ii_delegation_chain : opt IIDelegationChain
+};
+type Delegation = record {
+	pubkey : blob;
+	expiration : nat64;
+	targets : opt vec principal
+};
+type IIDelegationChain = record {
+	delegations : vec SignedDelegation;
+	public_key : blob
+};
+type SignedDelegation = record {
+	delegation : Delegation;
+	signature : blob
 };
 type BtcAddPendingTransactionResult = variant {
 	Ok;

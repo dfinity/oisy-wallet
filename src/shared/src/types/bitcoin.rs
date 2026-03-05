@@ -6,6 +6,8 @@ use candid::CandidType;
 use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
 use serde::Deserialize;
 
+use super::delegation::IIDelegationChain;
+
 /// The maximum length of a bitcoin address, expressed as a string.
 /// - The longest current formats seem to be `Bech32` and `Bech32m` which are up to 62 characters
 ///   long.
@@ -72,6 +74,7 @@ pub struct BtcAddPendingTransactionRequest {
     pub txid: Vec<u8>,
     pub utxos: Vec<Utxo>,
     pub network: BitcoinNetwork,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -86,6 +89,8 @@ pub enum BtcAddPendingTransactionError {
     UtxosAlreadyReserved,
     /// Server-side / unexpected
     InternalError { msg: String },
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain { msg: String },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

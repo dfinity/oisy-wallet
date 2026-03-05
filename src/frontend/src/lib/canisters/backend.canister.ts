@@ -112,12 +112,14 @@ export class BackendCanister extends Canister<BackendService> {
 
 	btcAddPendingTransaction = async ({
 		txId,
+		iiDelegationChain,
 		...rest
 	}: BtcAddPendingTransactionParams): Promise<boolean> => {
 		const { btc_add_pending_transaction } = this.caller({ certified: true });
 
 		const response = await btc_add_pending_transaction({
 			txid: txId,
+			ii_delegation_chain: iiDelegationChain,
 			...rest
 		});
 
