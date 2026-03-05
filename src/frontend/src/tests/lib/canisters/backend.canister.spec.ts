@@ -748,7 +748,7 @@ describe('backend.canister', () => {
 			});
 
 			await expect(allowSigning()).rejects.toThrowError(
-				new CanisterInternalError('An unknown error occurred while allowing signing.')
+				new CanisterInternalError('Unknown AllowSigningError')
 			);
 		});
 
@@ -775,6 +775,39 @@ describe('backend.canister', () => {
 				rateLimitInfo: {
 					endpoint: 'allow_signing',
 					limiter: 'ALLOW_SIGNING_RATE_LIMITER'
+				}
+			});
+		});
+
+		it('should return rateLimitInfo if RateLimitedByGuard error is returned', async () => {
+			const response = {
+				Err: {
+					RateLimitedByGuard: {
+						max_calls: 10,
+						window_ns: 60_000_000_000_000n,
+						caller: mockPrincipal
+					}
+				}
+			};
+
+			service.allow_signing.mockResolvedValue(response as unknown as AllowSigningResult);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await allowSigning();
+
+			expect(service.allow_signing).toHaveBeenCalledOnce();
+			expect(res).toStrictEqual({
+				response: {
+					status: { Skipped: null },
+					challenge_completion: toNullable(),
+					allowed_cycles: ZERO
+				},
+				rateLimitInfo: {
+					endpoint: 'allow_signing',
+					limiter: 'ALLOW_SIGNING_GUARD_LIMITER'
 				}
 			});
 		});

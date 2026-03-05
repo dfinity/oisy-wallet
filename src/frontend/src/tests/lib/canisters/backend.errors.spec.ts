@@ -19,6 +19,42 @@ describe('backend.errors', () => {
 			expect(err.message).toBe('pending tx error');
 		});
 
+		it('should map InvalidUtxos', () => {
+			const err = mapBtcPendingTransactionError({
+				InvalidUtxos: null
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('The provided UTXOs are invalid.');
+		});
+
+		it('should map EmptyUtxos', () => {
+			const err = mapBtcPendingTransactionError({
+				EmptyUtxos: null
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('No UTXOs provided.');
+		});
+
+		it('should map DuplicateUtxos', () => {
+			const err = mapBtcPendingTransactionError({
+				DuplicateUtxos: null
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Duplicate UTXOs provided.');
+		});
+
+		it('should map UtxosAlreadyReserved', () => {
+			const err = mapBtcPendingTransactionError({
+				UtxosAlreadyReserved: null
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Some of the provided UTXOs are already reserved.');
+		});
+
 		it('should return unknown error for unrecognized variant', () => {
 			// @ts-expect-error testing unknown error variant
 			const err = mapBtcPendingTransactionError({ SomeOther: null });
@@ -112,6 +148,17 @@ describe('backend.errors', () => {
 			expect(err.message).toBe('Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.');
 		});
 
+		it('should map RateLimitedByGuard', () => {
+			const err = mapAllowSigningError({
+				RateLimitedByGuard: { max_calls: 10, window_ns: 60_000_000_000_000n, caller: mockPrincipal }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe(
+				'Guard rate limit exceeded. Maximum of 10 calls allowed every 60000 seconds.'
+			);
+		});
+
 		it('should map Other', () => {
 			const err = mapAllowSigningError({
 				Other: 'some other error'
@@ -126,7 +173,7 @@ describe('backend.errors', () => {
 			const err = mapAllowSigningError({ SomeOther: null });
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('An unknown error occurred while allowing signing.');
+			expect(err.message).toBe('Unknown AllowSigningError');
 		});
 	});
 });

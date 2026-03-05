@@ -6,7 +6,20 @@ import type {
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
+import { assertNever } from '@dfinity/utils';
 import { mapIcrc2ApproveError, type ApproveError } from '@icp-sdk/canisters/ledger/icp';
+
+// eslint-disable-next-line local-rules/prefer-object-params -- this util is more meaningful with separate parameters instead of an object
+const assertNeverOr = <T>(value: never, fallback: T): T => {
+	try {
+		assertNever(value);
+	} catch {
+		// If a new/untracked variant arrives at runtime, assertNever will throw.
+		// We deliberately return the fallback instead of crashing.
+	}
+
+	return fallback;
+};
 
 export const mapBtcPendingTransactionError = (
 	err: BtcAddPendingTransactionError
@@ -15,7 +28,23 @@ export const mapBtcPendingTransactionError = (
 		return new CanisterInternalError(err.InternalError.msg);
 	}
 
-	return new CanisterInternalError('Unknown BtcAddPendingTransactionError');
+	if ('InvalidUtxos' in err) {
+		return new CanisterInternalError('The provided UTXOs are invalid.');
+	}
+
+	if ('EmptyUtxos' in err) {
+		return new CanisterInternalError('No UTXOs provided.');
+	}
+
+	if ('DuplicateUtxos' in err) {
+		return new CanisterInternalError('Duplicate UTXOs provided.');
+	}
+
+	if ('UtxosAlreadyReserved' in err) {
+		return new CanisterInternalError('Some of the provided UTXOs are already reserved.');
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcAddPendingTransactionError'));
 };
 
 export const mapBtcSelectUserUtxosFeeError = (
@@ -31,7 +60,7 @@ export const mapBtcSelectUserUtxosFeeError = (
 		);
 	}
 
-	return new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError');
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError'));
 };
 
 export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterInternalError => {
@@ -43,7 +72,7 @@ export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterIn
 		return new CanisterInternalError(err.Other);
 	}
 
-	return new CanisterInternalError('Unknown GetAllowedCyclesError');
+	return assertNeverOr(err, new CanisterInternalError('Unknown GetAllowedCyclesError'));
 };
 
 export const mapAllowSigningError = (
@@ -67,9 +96,19 @@ export const mapAllowSigningError = (
 		);
 	}
 
+	if ('RateLimitedByGuard' in err) {
+		const { max_calls: maxCalls, window_ns: windowNs } = err.RateLimitedByGuard;
+
+		const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+		return new CanisterInternalError(
+			`Guard rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+		);
+	}
+
 	if ('Other' in err) {
 		return new CanisterInternalError(err.Other);
 	}
 
-	return new CanisterInternalError('An unknown error occurred while allowing signing.');
+	return assertNeverOr(err, new CanisterInternalError('Unknown AllowSigningError'));
 };

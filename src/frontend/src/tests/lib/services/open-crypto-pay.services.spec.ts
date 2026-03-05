@@ -237,21 +237,21 @@ describe('open-crypto-pay.service', () => {
 			amount: '1.5',
 			minFee: 0.001,
 			tokenNetwork: 'Ethereum'
-		};
+		} as PayableToken;
 
 		const mockErc20Token: PayableToken = {
 			...USDC_TOKEN,
 			amount: '100',
 			minFee: 0.0001,
 			tokenNetwork: 'Ethereum'
-		};
+		} as PayableToken;
 
 		const mockBtcToken: PayableToken = {
 			...BTC_MAINNET_TOKEN,
 			amount: '0.5',
 			minFee: 0.0001,
 			tokenNetwork: 'Bitcoin'
-		};
+		} as PayableToken;
 
 		const mockFeeResult: EthFeeResult = {
 			feeInWei: 300000n,
@@ -560,7 +560,7 @@ describe('open-crypto-pay.service', () => {
 				},
 				estimatedGasLimit: 25000n
 			}
-		};
+		} as PayableTokenWithConvertedAmount;
 
 		const mockData: OpenCryptoPayResponse = {
 			id: 'pl_test123',

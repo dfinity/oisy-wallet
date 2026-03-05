@@ -97,6 +97,7 @@ export const idlFactory = ({ IDL }) => {
 	const AllowSigningError = IDL.Variant({
 		ApproveError: ApproveError,
 		RateLimited: RateLimitError,
+		RateLimitedByGuard: RateLimitError,
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});

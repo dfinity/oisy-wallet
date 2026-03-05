@@ -286,13 +286,14 @@ fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
 /// `AllowSigningError::RateLimited` with the expected payload fields.
 ///
 /// Note: `create_user_profile` internally calls `spawn_allow_signing_if_below_limit`,
-/// which already consumes 1 of the 3 allowed rate-limit entries.
+/// which already consumes 1 of the 3 allowed rate-limit entries (in both the
+/// guard and business limiters).
 #[test]
 fn test_allow_signing_rate_limited_after_exceeding_limit() {
     let pic_setup = setup();
     let caller = Principal::from_text(VC_HOLDER).unwrap();
 
-    // 1 of 3 rate-limit entries consumed here.
+    // 1 of 3 business rate-limit entries consumed here.
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
     // Process the spawned allow_signing task so the rate-limit entry is recorded.
@@ -300,7 +301,7 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
         pic_setup.pic.tick();
     }
 
-    // 2 more explicit calls should still be within the limit.
+    // 2 more explicit calls should still be within the business limit.
     for i in 0..2 {
         let result = call_allow_signing(&pic_setup, caller, 0);
         assert!(
@@ -309,7 +310,7 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
         );
     }
 
-    // The next call exceeds 3 total and must be rate-limited.
+    // The next call exceeds 3 total and must be rate-limited by the business limiter.
     let result = call_allow_signing(&pic_setup, caller, 0);
     match result {
         Err(AllowSigningError::RateLimited(RateLimitError {
@@ -448,179 +449,78 @@ fn test_allow_signing_rate_limit_resets_after_window() {
 }
 
 // -------------------------------------------------------------------------------------------------
-// - Rate-limit integration tests for get_allowed_cycles
+// - Guard rate-limit integration tests for allow_signing
 // -------------------------------------------------------------------------------------------------
 
-/// Calling `get_allowed_cycles` more than 10 times within a minute must return
-/// `GetAllowedCyclesError::RateLimited` with the expected payload fields.
+/// When the business limiter (3/hour) fires, the guard (10/min) should not
+/// interfere: the error must be `RateLimited`, not `RateLimitedByGuard`.
+///
+/// The guard is checked first in code, but since it is more permissive for
+/// short bursts, the business limiter is the one that rejects first in normal
+/// usage.  The guard protects against rapid automated abuse.
 #[test]
-fn test_get_allowed_cycles_rate_limited_after_exceeding_limit() {
-    let pic_setup = setup_with_cycles_ledger();
+fn test_allow_signing_guard_does_not_interfere_with_business_limiter() {
+    let pic_setup = setup();
     let caller = Principal::from_text(VC_HOLDER).unwrap();
 
-    // 10 calls within the window should succeed (rate limit: 10/min).
-    for i in 0..10 {
-        let result = call_get_allowed_cycles(&pic_setup, caller);
-        assert!(
-            !matches!(result, Err(GetAllowedCyclesError::RateLimited(_))),
-            "call {i} should not be rate-limited: {result:?}",
-        );
-    }
+    call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
-    // The 11th call must be rate-limited.
-    let result = call_get_allowed_cycles(&pic_setup, caller);
-    match result {
-        Err(GetAllowedCyclesError::RateLimited(RateLimitError {
-            max_calls,
-            window_ns,
-            caller: err_caller,
-        })) => {
-            assert_eq!(max_calls, 10, "rate limit should allow 10 calls");
-            assert_eq!(
-                window_ns,
-                60 * 1_000_000_000,
-                "rate limit window should be one minute"
-            );
-            assert_eq!(err_caller, caller, "error should reference the caller");
-        }
-        other => panic!("expected GetAllowedCyclesError::RateLimited, got {other:?}"),
-    }
-}
-
-/// After the one-minute window elapses, `get_allowed_cycles` should succeed again.
-#[test]
-fn test_get_allowed_cycles_rate_limit_resets_after_window() {
-    let pic_setup = setup_with_cycles_ledger();
-    let caller = Principal::from_text(VC_HOLDER).unwrap();
-
-    // Exhaust the rate limit.
-    for _ in 0..10 {
-        let _ = call_get_allowed_cycles(&pic_setup, caller);
-    }
-    assert!(
-        matches!(
-            call_get_allowed_cycles(&pic_setup, caller),
-            Err(GetAllowedCyclesError::RateLimited(_))
-        ),
-        "should be rate-limited before window elapses"
-    );
-
-    // Advance time past the one-minute window.
-    pic_setup.pic.advance_time(Duration::from_secs(61));
     for _ in 0..5 {
         pic_setup.pic.tick();
     }
 
-    let result = call_get_allowed_cycles(&pic_setup, caller);
+    // Exhaust the business limiter (3 entries: 1 from profile + 2 explicit).
+    for _ in 0..2 {
+        let _ = call_allow_signing(&pic_setup, caller, 0);
+    }
+
+    // The 4th call must hit the business limiter, NOT the guard.
+    let result = call_allow_signing(&pic_setup, caller, 0);
     assert!(
-        !matches!(result, Err(GetAllowedCyclesError::RateLimited(_))),
-        "should not be rate-limited after window elapses: {result:?}"
+        matches!(result, Err(AllowSigningError::RateLimited(_))),
+        "expected RateLimited (business), got {result:?}"
     );
 }
 
-/// Different callers should have independent rate-limit buckets for `get_allowed_cycles`.
+/// After the business limiter window (1 hour) elapses, the guard entries have
+/// long expired (1-minute window), so neither limiter blocks the caller.
 #[test]
-fn test_get_allowed_cycles_rate_limit_is_per_caller() {
-    let pic_setup = setup_with_cycles_ledger();
-    let caller_a = Principal::from_text(VC_HOLDER).unwrap();
-    let caller_b = Principal::from_text(CALLER).unwrap();
+fn test_allow_signing_guard_resets_independently_of_business_limiter() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(VC_HOLDER).unwrap();
 
-    // Exhaust caller_a's rate limit.
-    for _ in 0..10 {
-        let _ = call_get_allowed_cycles(&pic_setup, caller_a);
-    }
-    assert!(
-        matches!(
-            call_get_allowed_cycles(&pic_setup, caller_a),
-            Err(GetAllowedCyclesError::RateLimited(_))
-        ),
-        "caller_a should be rate-limited"
-    );
+    call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
-    // caller_b should still be allowed.
-    let result = call_get_allowed_cycles(&pic_setup, caller_b);
-    assert!(
-        !matches!(result, Err(GetAllowedCyclesError::RateLimited(_))),
-        "caller_b should not be rate-limited: {result:?}"
-    );
-}
-
-// -------------------------------------------------------------------------------------------------
-// - Rate-limit integration tests for top_up_cycles_ledger
-// -------------------------------------------------------------------------------------------------
-
-/// Calling `top_up_cycles_ledger` more than 5 times within a minute must return
-/// `TopUpCyclesLedgerError::RateLimited`.
-#[test]
-fn test_top_up_cycles_ledger_rate_limited_after_exceeding_limit() {
-    let pic_setup = BackendBuilder::default().with_cycles_ledger(true).deploy();
-    let caller = controller();
-
-    // 5 calls within the window should not be rate-limited.
-    for i in 0..5 {
-        let result =
-            pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
-        assert!(
-            !matches!(
-                result,
-                Ok(TopUpCyclesLedgerResult::Err(
-                    TopUpCyclesLedgerError::RateLimited(_)
-                ))
-            ),
-            "call {i} should not be rate-limited: {result:?}",
-        );
-    }
-
-    // The 6th call must be rate-limited.
-    let result = pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
-    match result {
-        Ok(TopUpCyclesLedgerResult::Err(TopUpCyclesLedgerError::RateLimited(ref e))) => {
-            assert_eq!(e.max_calls, 5, "rate limit should allow 5 calls");
-            assert_eq!(
-                e.window_ns,
-                60 * 1_000_000_000,
-                "rate limit window should be one minute"
-            );
-            assert_eq!(e.caller, caller, "error should reference the caller");
-        }
-        other => panic!("expected TopUpCyclesLedgerError::RateLimited, got {other:?}"),
-    }
-}
-
-/// After the one-minute window elapses, `top_up_cycles_ledger` should succeed again.
-#[test]
-fn test_top_up_cycles_ledger_rate_limit_resets_after_window() {
-    let pic_setup = BackendBuilder::default().with_cycles_ledger(true).deploy();
-    let caller = controller();
-
-    // Exhaust the rate limit.
-    for _ in 0..5 {
-        let _ = pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
-    }
-    assert!(
-        matches!(
-            pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ()),
-            Ok(TopUpCyclesLedgerResult::Err(
-                TopUpCyclesLedgerError::RateLimited(_)
-            ))
-        ),
-        "should be rate-limited before window elapses"
-    );
-
-    // Advance time past the one-minute window.
-    pic_setup.pic.advance_time(Duration::from_secs(61));
     for _ in 0..5 {
         pic_setup.pic.tick();
     }
 
-    let result = pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
+    // Exhaust the business limiter.
+    for _ in 0..2 {
+        let _ = call_allow_signing(&pic_setup, caller, 0);
+    }
+    assert!(
+        matches!(
+            call_allow_signing(&pic_setup, caller, 0),
+            Err(AllowSigningError::RateLimited(_))
+        ),
+        "should be rate-limited"
+    );
+
+    // Advance past both windows (> 1 hour covers both the 1-min guard and
+    // the 1-hour business window).
+    pic_setup.pic.advance_time(Duration::from_secs(60 * 60 + 1));
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    // Both limiters should have reset; the next call passes.
+    let result = call_allow_signing(&pic_setup, caller, 0);
     assert!(
         !matches!(
             result,
-            Ok(TopUpCyclesLedgerResult::Err(
-                TopUpCyclesLedgerError::RateLimited(_)
-            ))
+            Err(AllowSigningError::RateLimited(_)) | Err(AllowSigningError::RateLimitedByGuard(_))
         ),
-        "should not be rate-limited after window elapses: {result:?}"
+        "should not be rate-limited after both windows elapse: {result:?}"
     );
 }

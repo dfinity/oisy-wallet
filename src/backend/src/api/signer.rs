@@ -17,6 +17,7 @@ use crate::{
             ALLOW_SIGNING_RATE_LIMITER, GET_ALLOWED_CYCLES_RATE_LIMITER,
             TOP_UP_CYCLES_LEDGER_RATE_LIMITER,
         },
+        housekeeping::{ALLOW_SIGNING_GUARD_LIMITER, ALLOW_SIGNING_RATE_LIMITER},
         rate_limiter,
     },
 };
@@ -65,15 +66,25 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
 /// operations (providing public keys, creating signatures, etc.).
 ///
 /// If the caller already has sufficient allowance the call returns
-/// immediately with [`AllowSigningStatus::Skipped`] and no inter-canister
-/// call is made.  Otherwise the endpoint is rate-limited and a new
+/// immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
+/// call is made.  Otherwise, the endpoint is rate-limited and a new
 /// `icrc_2_approve` is issued on the cycles ledger.
+///
+/// # Rate limiting
+/// Two rate limiters are applied in order:
+/// 1. **Guard limiter** – a high-frequency limiter (10 calls/min) checked *before* any
+///    inter-canister call to cheaply reject bursts that would drain cycles.
+/// 2. **Business limiter** – the stricter per-caller limit (3 calls/hour) for normal usage.
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn allow_signing() -> AllowSigningResult {
     async fn inner() -> Result<AllowSigningResponse, AllowSigningError> {
+        ALLOW_SIGNING_GUARD_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(AllowSigningError::RateLimitedByGuard)?;
+
         if let Some(current) = signer::has_sufficient_allowance().await {
             return Ok(AllowSigningResponse {
                 status: AllowSigningStatus::Skipped,

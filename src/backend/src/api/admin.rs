@@ -23,7 +23,7 @@ pub fn config() -> Config {
 
 /// Processes external HTTP requests.
 #[query]
-#[allow(clippy::needless_pass_by_value)]
+#[expect(clippy::needless_pass_by_value)]
 #[must_use]
 pub fn http_request(request: HttpRequest) -> HttpResponse {
     let path = request
