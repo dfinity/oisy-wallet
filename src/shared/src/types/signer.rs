@@ -26,7 +26,11 @@ pub enum AllowSigningError {
     Other(String),
     FailedToContactCyclesLedger,
     ApproveError(ApproveError),
+    /// The caller exceeded the per-caller business rate limit.
     RateLimited(RateLimitError),
+    /// The caller hit the high-frequency guard rate limit designed to prevent
+    /// cycle-draining attacks before any inter-canister call is made.
+    RateLimitedByGuard(RateLimitError),
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

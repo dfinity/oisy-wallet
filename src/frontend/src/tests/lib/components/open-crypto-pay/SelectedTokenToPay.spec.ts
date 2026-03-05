@@ -67,7 +67,7 @@ describe('SelectedTokenToPay', () => {
 			},
 			estimatedGasLimit: 25n
 		}
-	};
+	} as PayableTokenWithConvertedAmount;
 
 	const mockUsdcToken: PayableTokenWithConvertedAmount = {
 		...USDC_TOKEN,
