@@ -43,8 +43,8 @@ export const mapBtcPendingTransactionError = (
 	if ('UtxosAlreadyReserved' in err) {
 		return new CanisterInternalError('Some of the provided UTXOs are already reserved.');
 	}
-  
-  if ('InvalidDelegationChain' in err) {
+
+	if ('InvalidDelegationChain' in err) {
 		return new CanisterInternalError(
 			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
 		);
