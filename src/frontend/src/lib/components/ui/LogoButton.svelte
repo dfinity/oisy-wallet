@@ -78,7 +78,7 @@
 				<span class="flex min-w-0 flex-col text-left">
 					<span class="flex min-w-0 items-center truncate text-nowrap">
 						{#if nonNullish(title)}
-							<span class="text-lg font-bold text-nowrap text-primary" class:truncate={isNullish(subtitle)}>
+							<span class="text-lg font-bold text-nowrap text-primary" class:truncate={isNullish(subtitle)} class:min-w-0={isNullish(subtitle)}>
 								{@render title()}
 							</span>
 						{/if}
