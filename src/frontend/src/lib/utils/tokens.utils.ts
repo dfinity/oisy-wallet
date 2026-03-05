@@ -211,8 +211,8 @@ const createTokenComparator =
 			if (aHasBalance && bHasBalance) {
 				const aVal = aBalance;
 				const bVal = bBalance;
-				const aIsZero = !(aVal > ZERO) && !(aVal < ZERO);
-				const bIsZero = !(bVal > ZERO) && !(bVal < ZERO);
+				const aIsZero = aVal === ZERO;
+				const bIsZero = bVal === ZERO;
 				if (aIsZero !== bIsZero) {
 					return aIsZero ? 1 : -1; // non-zero first
 				}
