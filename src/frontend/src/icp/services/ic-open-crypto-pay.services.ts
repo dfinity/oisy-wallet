@@ -1,7 +1,7 @@
 import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcFeeResult } from '$icp/types/pay';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-import { getIcPaymentUri } from '$icp/utils/icp-open-crypto-pay.utils';
+import { getIcPaymentUri } from '$icp/utils/ic-open-crypto-pay.utils';
 import { getTokenFee } from '$icp/utils/token.utils';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';

@@ -5,9 +5,9 @@ import { calculateEthFee, payEth } from '$eth/services/eth-open-crypto-pay.servi
 import type { EthFeeResult } from '$eth/types/pay';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
-import { calculateIcFee, payIcp } from '$icp/services/icp-open-crypto-pay.services';
+import { calculateIcFee, payIcp } from '$icp/services/ic-open-crypto-pay.services';
 import type { IcFeeResult } from '$icp/types/pay';
-import { isIcPayableToken } from '$icp/utils/icp-open-crypto-pay.utils';
+import { isIcPayableToken } from '$icp/utils/ic-open-crypto-pay.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
