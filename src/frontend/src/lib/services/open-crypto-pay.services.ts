@@ -5,8 +5,9 @@ import { calculateEthFee, payEth } from '$eth/services/eth-open-crypto-pay.servi
 import type { EthFeeResult } from '$eth/types/pay';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
-import { calculateIcFee } from '$icp/services/ic-open-crypto-pay.services';
+import { calculateIcFee, payIcp } from '$icp/services/ic-open-crypto-pay.services';
 import type { IcFeeResult } from '$icp/types/pay';
+import { isIcPayableToken } from '$icp/utils/ic-open-crypto-pay.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
@@ -16,7 +17,8 @@ import type {
 	PayableToken,
 	PayableTokenWithFees,
 	ValidatedBtcPaymentData,
-	ValidatedEthPaymentData
+	ValidatedEthPaymentData,
+	ValidatedIcPaymentData
 } from '$lib/types/open-crypto-pay';
 import {
 	decodeLNURL,
@@ -97,7 +99,7 @@ const getValidatedTransactionData = async ({
 	callback,
 	amount
 }: Omit<PayParams, 'identity' | 'data' | 'progress'>): Promise<
-	ValidatedEthPaymentData | ValidatedBtcPaymentData | undefined
+	ValidatedEthPaymentData | ValidatedBtcPaymentData | ValidatedIcPaymentData | undefined
 > => {
 	const url = `${callback}?quote=${quoteId}&method=${token.network.pay.openCryptoPay}&asset=${token.symbol}`;
 	const { uri } = await fetchOpenCryptoPay<{ uri: string }>(url);
@@ -145,12 +147,26 @@ export const pay = async ({
 			progress,
 			identity
 		});
+
 		return;
 	}
 
 	if (isDefaultEthereumToken(token) || isTokenErc20(token)) {
 		await payEth({
 			validatedData: validatedData as ValidatedEthPaymentData,
+			token,
+			quoteId,
+			callback,
+			progress,
+			identity
+		});
+
+		return;
+	}
+
+	if (isIcPayableToken(token)) {
+		await payIcp({
+			validatedData: validatedData as ValidatedIcPaymentData,
 			token,
 			quoteId,
 			callback,
