@@ -1,6 +1,6 @@
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
+import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
-import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcTokens } from '$icp/derived/icrc.derived';
@@ -50,18 +50,10 @@ export const allKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = de
 );
 
 export const allTokens: Readable<CustomToken<Token>[]> = derived(
-	[nativeTokens, erc20Tokens, erc4626Tokens, allIcrcTokens, splTokens, nonFungibleTokens],
-	([
-		$nativeTokens,
-		$erc20Tokens,
-		$erc4626Tokens,
-		$allIcrcTokens,
-		$splTokens,
-		$nonFungibleTokens
-	]) => [
+	[nativeTokens, ercFungibleTokens, allIcrcTokens, splTokens, nonFungibleTokens],
+	([$nativeTokens, $ercFungibleTokens, $allIcrcTokens, $splTokens, $nonFungibleTokens]) => [
 		...$nativeTokens.map((token) => ({ ...token, enabled: true })),
-		...$erc20Tokens,
-		...$erc4626Tokens,
+		...$ercFungibleTokens,
 		...$allIcrcTokens,
 		...$splTokens,
 		...$nonFungibleTokens
