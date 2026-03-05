@@ -19,6 +19,42 @@ describe('backend.errors', () => {
 			expect(err.message).toBe('pending tx error');
 		});
 
+		it('should map InvalidUtxos', () => {
+			const err = mapBtcPendingTransactionError({
+				InvalidUtxos: null
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('The provided UTXOs are invalid.');
+		});
+
+		it('should map EmptyUtxos', () => {
+			const err = mapBtcPendingTransactionError({
+				EmptyUtxos: null
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('No UTXOs provided.');
+		});
+
+		it('should map DuplicateUtxos', () => {
+			const err = mapBtcPendingTransactionError({
+				DuplicateUtxos: null
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Duplicate UTXOs provided.');
+		});
+
+		it('should map UtxosAlreadyReserved', () => {
+			const err = mapBtcPendingTransactionError({
+				UtxosAlreadyReserved: null
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Some of the provided UTXOs are already reserved.');
+		});
+
 		it('should return unknown error for unrecognized variant', () => {
 			// @ts-expect-error testing unknown error variant
 			const err = mapBtcPendingTransactionError({ SomeOther: null });
@@ -126,7 +162,7 @@ describe('backend.errors', () => {
 			const err = mapAllowSigningError({ SomeOther: null });
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('An unknown error occurred while allowing signing.');
+			expect(err.message).toBe('Unknown AllowSigningError');
 		});
 	});
 });

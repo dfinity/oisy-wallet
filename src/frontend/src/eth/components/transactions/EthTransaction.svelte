@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { assertNever, nonNullish } from '@dfinity/utils';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
@@ -8,6 +9,8 @@
 		decodeErc20AbiDataValue,
 		isMaxUint256,
 		isTransactionPending
+		isTransactionPending,
+		isMaxUint256
 	} from '$eth/utils/transactions.utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -45,12 +48,69 @@
 		gasPrice
 	} = $derived(transaction);
 
-	let ckTokenSymbol = $derived(
-		isSupportedEthToken(token)
+	let isApprove = $derived(type === 'approve');
+
+	let approveToken = $derived(
+		isApprove && nonNullish(to)
+			? $ercFungibleTokens.find(
+					({ address, network: { id: networkId } }) =>
+						areAddressesEqual({ address1: address, address2: to, networkId }) &&
+						networkId === token.network.id
+				)
+			: undefined
+	);
+
+	let displayToken = $derived(approveToken ?? token);
+
+	let approveValue = $derived(
+		isApprove && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : undefined
+	);
+
+	let approveAmountText = $derived.by(() => {
+		if (!isApprove) {
+			return;
+		}
+
+		const symbolText = getTokenDisplaySymbol(displayToken);
+
+		if (isMaxUint256(approveValue)) {
+			return replacePlaceholders($i18n.core.text.unlimited, {
+				$items: symbolText
+			});
+		}
+
+		if (nonNullish(approveValue)) {
+			const valueText = formatToken({
+				value: approveValue,
+				displayDecimals: displayToken.decimals,
+				unitName: displayToken.decimals
+			});
+
+			return `${valueText} ${symbolText}`;
+		}
+
+		return symbolText;
+	});
+
+	let label = $derived.by(() => {
+		if (type === 'send') {
+			return $i18n.send.text.send;
+		}
+
+		if (type === 'receive') {
+			return $i18n.receive.text.receive;
+		}
+
+		if (type === 'approve') {
+			return replacePlaceholders($i18n.transaction.text.approve_label, {
+				$approveAmount: approveAmountText ?? ''
+			});
+		}
+
+		const ckTokenSymbol = isSupportedEthToken(token)
 			? token.twinTokenSymbol
 			: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
-				((token as Erc20Token | undefined)?.twinTokenSymbol ?? '')
-	);
+				((token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
 
 	let isApprove = $derived(type === 'approve');
 

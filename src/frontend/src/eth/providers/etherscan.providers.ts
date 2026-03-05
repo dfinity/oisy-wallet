@@ -87,6 +87,7 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
+				gasUsed: BigInt(gasUsed),
 				value: BigInt(value),
 				chainId: this.chainId,
 				data,
@@ -175,6 +176,7 @@ export class EtherscanProvider {
 				nonce,
 				gas,
 				gasPrice,
+				gasUsed,
 				hash,
 				blockNumber,
 				timeStamp,
@@ -191,6 +193,7 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
+				gasUsed: BigInt(gasUsed),
 				value: BigInt(value),
 				chainId: this.chainId,
 				data
@@ -226,6 +229,7 @@ export class EtherscanProvider {
 				nonce,
 				gas,
 				gasPrice,
+				gasUsed,
 				hash,
 				blockNumber,
 				timeStamp,
@@ -244,6 +248,7 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
+				gasUsed: BigInt(gasUsed),
 				chainId: this.chainId,
 				data
 			})
@@ -278,6 +283,7 @@ export class EtherscanProvider {
 				nonce,
 				gas,
 				gasPrice,
+				gasUsed,
 				hash,
 				blockNumber,
 				timeStamp,
@@ -297,6 +303,7 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
+				gasUsed: BigInt(gasUsed),
 				chainId: this.chainId,
 				data
 			})
