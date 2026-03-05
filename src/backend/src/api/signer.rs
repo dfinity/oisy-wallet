@@ -52,7 +52,7 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
 ///
 /// If the caller already has sufficient allowance the call returns
 /// immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
-/// call is made.  Otherwise the endpoint is rate-limited and a new
+/// call is made.  Otherwise, the endpoint is rate-limited and a new
 /// `icrc_2_approve` is issued on the cycles ledger.
 ///
 /// # Rate limiting
