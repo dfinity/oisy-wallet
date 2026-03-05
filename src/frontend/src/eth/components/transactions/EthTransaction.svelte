@@ -108,6 +108,33 @@
 			? token.twinTokenSymbol
 			: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
 				((token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
+
+
+		if (type === 'withdraw') {
+			return replacePlaceholders(
+				pending
+					? $i18n.transaction.label.converting_ck_token
+					: $i18n.transaction.label.ck_token_converted,
+				{
+					$twinToken: token?.symbol ?? '',
+					$ckToken: ckTokenSymbol
+				}
+			);
+		}
+
+		if (type === 'deposit') {
+			return replacePlaceholders(
+				pending
+					? $i18n.transaction.label.converting_twin_token
+					: $i18n.transaction.label.ck_token_sent,
+				{
+					$twinToken: token?.symbol ?? '',
+					$ckToken: ckTokenSymbol
+				}
+			);
+		}
+
+		assertNever(type, `Unsupported transaction type: ${type}`);
 	});
 
 	let gasFee = $derived(
