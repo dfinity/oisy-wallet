@@ -17,12 +17,8 @@ use shared::types::{
 
 use crate::{
     bitcoin::{api, pending_tx_model::BtcUserPendingTransactionsModel, utils},
-    delegation,
-    guards::caller_is_not_anonymous,
-    signer,
+    delegation, signer,
     state::{mutate_state, read_config},
-    signer,
-    state::mutate_state,
     utils::guards::caller_is_not_anonymous,
 };
 
