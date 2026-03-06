@@ -95,8 +95,8 @@ describe('GetTokenModal', () => {
 
 		expect(
 			getAllByText(
-				replacePlaceholders(en.stake.text.get_tokens, {
-					$token_symbol: ICP_TOKEN.symbol
+				replacePlaceholders(en.get_token.text.title, {
+					$token: ICP_TOKEN.symbol
 				})
 			)[0]
 		).toBeInTheDocument();
