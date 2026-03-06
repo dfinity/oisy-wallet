@@ -17,7 +17,7 @@ use shared::types::{
 };
 
 use crate::utils::{
-    mock::VC_HOLDER,
+    mock::{CALLER, VC_HOLDER},
     pocketic::{controller, pic_canister::PicCanisterTrait, setup, BackendBuilder, PicBackend},
 };
 
@@ -522,5 +522,183 @@ fn test_allow_signing_guard_resets_independently_of_business_limiter() {
             Err(AllowSigningError::RateLimited(_)) | Err(AllowSigningError::RateLimitedByGuard(_))
         ),
         "should not be rate-limited after both windows elapse: {result:?}"
+    );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Rate-limit integration tests for get_allowed_cycles
+// -------------------------------------------------------------------------------------------------
+
+/// Calling `get_allowed_cycles` more than 10 times within a minute must return
+/// `GetAllowedCyclesError::RateLimited` with the expected payload fields.
+#[test]
+fn test_get_allowed_cycles_rate_limited_after_exceeding_limit() {
+    let pic_setup = setup_with_cycles_ledger();
+    let caller = Principal::from_text(VC_HOLDER).unwrap();
+
+    // 10 calls within the window should succeed (rate limit: 10/min).
+    for i in 0..10 {
+        let result = call_get_allowed_cycles(&pic_setup, caller);
+        assert!(
+            !matches!(result, Err(GetAllowedCyclesError::RateLimited(_))),
+            "call {i} should not be rate-limited: {result:?}",
+        );
+    }
+
+    // The 11th call must be rate-limited.
+    let result = call_get_allowed_cycles(&pic_setup, caller);
+    match result {
+        Err(GetAllowedCyclesError::RateLimited(RateLimitError {
+            max_calls,
+            window_ns,
+            caller: err_caller,
+        })) => {
+            assert_eq!(max_calls, 10, "rate limit should allow 10 calls");
+            assert_eq!(
+                window_ns,
+                60 * 1_000_000_000,
+                "rate limit window should be one minute"
+            );
+            assert_eq!(err_caller, caller, "error should reference the caller");
+        }
+        other => panic!("expected GetAllowedCyclesError::RateLimited, got {other:?}"),
+    }
+}
+
+/// After the one-minute window elapses, `get_allowed_cycles` should succeed again.
+#[test]
+fn test_get_allowed_cycles_rate_limit_resets_after_window() {
+    let pic_setup = setup_with_cycles_ledger();
+    let caller = Principal::from_text(VC_HOLDER).unwrap();
+
+    // Exhaust the rate limit.
+    for _ in 0..10 {
+        let _ = call_get_allowed_cycles(&pic_setup, caller);
+    }
+    assert!(
+        matches!(
+            call_get_allowed_cycles(&pic_setup, caller),
+            Err(GetAllowedCyclesError::RateLimited(_))
+        ),
+        "should be rate-limited before window elapses"
+    );
+
+    // Advance time past the one-minute window.
+    pic_setup.pic.advance_time(Duration::from_secs(61));
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    let result = call_get_allowed_cycles(&pic_setup, caller);
+    assert!(
+        !matches!(result, Err(GetAllowedCyclesError::RateLimited(_))),
+        "should not be rate-limited after window elapses: {result:?}"
+    );
+}
+
+/// Different callers should have independent rate-limit buckets for `get_allowed_cycles`.
+#[test]
+fn test_get_allowed_cycles_rate_limit_is_per_caller() {
+    let pic_setup = setup_with_cycles_ledger();
+    let caller_a = Principal::from_text(VC_HOLDER).unwrap();
+    let caller_b = Principal::from_text(CALLER).unwrap();
+
+    // Exhaust caller_a's rate limit.
+    for _ in 0..10 {
+        let _ = call_get_allowed_cycles(&pic_setup, caller_a);
+    }
+    assert!(
+        matches!(
+            call_get_allowed_cycles(&pic_setup, caller_a),
+            Err(GetAllowedCyclesError::RateLimited(_))
+        ),
+        "caller_a should be rate-limited"
+    );
+
+    // caller_b should still be allowed.
+    let result = call_get_allowed_cycles(&pic_setup, caller_b);
+    assert!(
+        !matches!(result, Err(GetAllowedCyclesError::RateLimited(_))),
+        "caller_b should not be rate-limited: {result:?}"
+    );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Rate-limit integration tests for top_up_cycles_ledger
+// -------------------------------------------------------------------------------------------------
+
+/// Calling `top_up_cycles_ledger` more than 5 times within a minute must return
+/// `TopUpCyclesLedgerError::RateLimited`.
+#[test]
+fn test_top_up_cycles_ledger_rate_limited_after_exceeding_limit() {
+    let pic_setup = BackendBuilder::default().with_cycles_ledger(true).deploy();
+    let caller = controller();
+
+    // 5 calls within the window should not be rate-limited.
+    for i in 0..5 {
+        let result =
+            pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
+        assert!(
+            !matches!(
+                result,
+                Ok(TopUpCyclesLedgerResult::Err(
+                    TopUpCyclesLedgerError::RateLimited(_)
+                ))
+            ),
+            "call {i} should not be rate-limited: {result:?}",
+        );
+    }
+
+    // The 6th call must be rate-limited.
+    let result = pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
+    match result {
+        Ok(TopUpCyclesLedgerResult::Err(TopUpCyclesLedgerError::RateLimited(ref e))) => {
+            assert_eq!(e.max_calls, 5, "rate limit should allow 5 calls");
+            assert_eq!(
+                e.window_ns,
+                60 * 1_000_000_000,
+                "rate limit window should be one minute"
+            );
+            assert_eq!(e.caller, caller, "error should reference the caller");
+        }
+        other => panic!("expected TopUpCyclesLedgerError::RateLimited, got {other:?}"),
+    }
+}
+
+/// After the one-minute window elapses, `top_up_cycles_ledger` should succeed again.
+#[test]
+fn test_top_up_cycles_ledger_rate_limit_resets_after_window() {
+    let pic_setup = BackendBuilder::default().with_cycles_ledger(true).deploy();
+    let caller = controller();
+
+    // Exhaust the rate limit.
+    for _ in 0..5 {
+        let _ = pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
+    }
+    assert!(
+        matches!(
+            pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ()),
+            Ok(TopUpCyclesLedgerResult::Err(
+                TopUpCyclesLedgerError::RateLimited(_)
+            ))
+        ),
+        "should be rate-limited before window elapses"
+    );
+
+    // Advance time past the one-minute window.
+    pic_setup.pic.advance_time(Duration::from_secs(61));
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    let result = pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
+    assert!(
+        !matches!(
+            result,
+            Ok(TopUpCyclesLedgerResult::Err(
+                TopUpCyclesLedgerError::RateLimited(_)
+            ))
+        ),
+        "should not be rate-limited after window elapses: {result:?}"
     );
 }

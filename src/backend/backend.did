@@ -58,6 +58,7 @@ type BtcAddPendingTransactionError = variant {
 	InvalidUtxos;
 	EmptyUtxos;
 	DuplicateUtxos;
+	RateLimited : RateLimitError;
 	InternalError : record { msg : text };
 	UtxosAlreadyReserved
 };
@@ -84,6 +85,7 @@ type BtcGetFeePercentilesResult = variant {
 	Err : SelectedUtxosFeeError
 };
 type BtcGetPendingTransactionsError = variant {
+	RateLimited : RateLimitError;
 	InternalError : record { msg : text }
 };
 type BtcGetPendingTransactionsReponse = record {
@@ -187,6 +189,7 @@ type ExperimentalFeaturesSettings = record {
 };
 type ExtV2Token = record { canister_id : principal };
 type GetAllowedCyclesError = variant {
+	RateLimited : RateLimitError;
 	Other : text;
 	FailedToContactCyclesLedger
 };
@@ -338,6 +341,7 @@ type TopUpCyclesLedgerError = variant {
 		min : nat8;
 		percentage : nat8
 	};
+	RateLimited : RateLimitError;
 	CouldNotGetBalanceFromCyclesLedger;
 	CouldNotTopUpCyclesLedger : record { tried_to_send : nat; available : nat }
 };
@@ -491,7 +495,8 @@ service : (Arg) -> {
 		vec record { principal; nat64 }
 	) query;
 	// Retrieves the amount of cycles that the signer canister is allowed to spend
-	// on behalf of the current user
+	// on behalf of the current user.
+	//
 	// # Returns
 	// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
 	// - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong

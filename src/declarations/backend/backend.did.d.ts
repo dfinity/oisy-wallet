@@ -67,6 +67,7 @@ export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
 	| { EmptyUtxos: null }
 	| { DuplicateUtxos: null }
+	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } }
 	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {
@@ -92,9 +93,11 @@ export type BtcGetFeePercentilesResult =
 			Ok: BtcGetFeePercentilesResponse;
 	  }
 	| { Err: SelectedUtxosFeeError };
-export type BtcGetPendingTransactionsError = {
-	InternalError: { msg: string };
-};
+export type BtcGetPendingTransactionsError =
+	| {
+			RateLimited: RateLimitError;
+	  }
+	| { InternalError: { msg: string } };
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
@@ -208,7 +211,10 @@ export interface ExperimentalFeaturesSettings {
 export interface ExtV2Token {
 	canister_id: Principal;
 }
-export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
+export type GetAllowedCyclesError =
+	| { RateLimited: RateLimitError }
+	| { Other: string }
+	| { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
 	allowed_cycles: bigint;
 }
@@ -369,6 +375,7 @@ export type TopUpCyclesLedgerError =
 				percentage: number;
 			};
 	  }
+	| { RateLimited: RateLimitError }
 	| { CouldNotGetBalanceFromCyclesLedger: null }
 	| {
 			CouldNotTopUpCyclesLedger: {
@@ -548,7 +555,8 @@ export interface _SERVICE {
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
 	/**
 	 * Retrieves the amount of cycles that the signer canister is allowed to spend
-	 * on behalf of the current user
+	 * on behalf of the current user.
+	 *
 	 * # Returns
 	 * - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
 	 * - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong

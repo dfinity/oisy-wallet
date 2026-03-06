@@ -24,9 +24,26 @@ thread_local! {
     pub(crate) static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
         rate_limiter::RateLimiter::new(3, 60 * 60 * 1_000_000_000);
 
+    /// Rate-limits `get_allowed_cycles`: max 10 calls per caller per minute.
+    pub(crate) static GET_ALLOWED_CYCLES_RATE_LIMITER: rate_limiter::RateLimiter =
+        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Rate-limits `top_up_cycles_ledger`: max 5 calls per caller per minute.
+    pub(crate) static TOP_UP_CYCLES_LEDGER_RATE_LIMITER: rate_limiter::RateLimiter =
+        rate_limiter::RateLimiter::new(5, 60 * 1_000_000_000);
+
     /// Rate-limits `btc_select_user_utxos_fee`: max 10 calls per caller per minute.
     pub(crate) static BTC_SELECT_UTXOS_FEE_RATE_LIMITER: rate_limiter::RateLimiter =
         rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Rate-limits `btc_add_pending_transaction`: max 10 calls per caller per minute.
+    pub(crate) static BTC_ADD_PENDING_TX_RATE_LIMITER: rate_limiter::RateLimiter =
+        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
+    pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: rate_limiter::RateLimiter =
+        rate_limiter::RateLimiter::new(15, 60 * 1_000_000_000);
+
 }
 
 /// 2 hours in nanoseconds — if a housekeeping run has been in progress for
