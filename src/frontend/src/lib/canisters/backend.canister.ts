@@ -6,7 +6,6 @@ import type {
 	CustomToken,
 	GetAllowedCyclesResponse,
 	PendingTransaction,
-	SelectedUtxosFeeResponse,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -30,6 +29,7 @@ import type {
 	GetUserProfileResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
@@ -154,7 +154,7 @@ export class BackendCanister extends Canister<BackendService> {
 		network,
 		minConfirmations,
 		amountSatoshis
-	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeResponse> => {
+	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeOutcome> => {
 		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
 
 		const response = await btc_select_user_utxos_fee({
@@ -164,8 +164,22 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 
 		if ('Ok' in response) {
-			const { Ok } = response;
-			return Ok;
+			return { response: response.Ok };
+		}
+
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
+		// TODO: improve placeholder with significant data, for now we do not use them
+		if ('RateLimited' in response.Err) {
+			return {
+				response: {
+					fee_satoshis: ZERO,
+					utxos: []
+				},
+				rateLimitInfo: {
+					endpoint: 'btc_select_user_utxos_fee',
+					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
+				}
+			};
 		}
 
 		throw mapBtcSelectUserUtxosFeeError(response.Err);

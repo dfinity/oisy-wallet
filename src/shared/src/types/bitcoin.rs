@@ -6,6 +6,8 @@ use candid::CandidType;
 use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
 use serde::Deserialize;
 
+use crate::types::signer::RateLimitError;
+
 /// The maximum length of a bitcoin address, expressed as a string.
 /// - The longest current formats seem to be `Bech32` and `Bech32m` which are up to 62 characters
 ///   long.
@@ -62,8 +64,12 @@ pub struct SelectedUtxosFeeResponse {
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SelectedUtxosFeeError {
-    InternalError { msg: String },
+    InternalError {
+        msg: String,
+    },
     PendingTransactions,
+    /// The caller has exceeded the call rate limit.
+    RateLimited(RateLimitError),
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
