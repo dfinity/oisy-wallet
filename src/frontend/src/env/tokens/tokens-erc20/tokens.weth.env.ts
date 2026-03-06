@@ -21,5 +21,8 @@ export const WETH_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: WETH_DECIMALS,
 	icon: weth,
 	address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-	groupData: WETH_TOKEN_GROUP
+	groupData: WETH_TOKEN_GROUP,
+	buy: {
+		onramperId: 'weth_ethereum'
+	}
 };
