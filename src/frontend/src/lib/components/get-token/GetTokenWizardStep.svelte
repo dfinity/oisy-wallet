@@ -30,26 +30,27 @@
 	interface Props {
 		token: Token;
 		currentApy: number;
+		availableBalance?: number;
 		onGoToStep: (stepName: WizardStepsGetTokenType) => void;
 		onClose: () => void;
 	}
 
 	const { setDestinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	let { token, currentApy, onGoToStep, onClose }: Props = $props();
+	let { token, currentApy, availableBalance, onGoToStep, onClose }: Props = $props();
 
 	let tokenSymbol = $derived(getTokenDisplaySymbol(token));
 
 	let tokenExchangeRate = $derived($exchanges?.[token.id]?.usd ?? 0);
 
+	let balanceToSpend = $derived(availableBalance ?? $enabledMainnetFungibleTokensUsdBalance);
+
 	let potentialTokenBalance = $derived(
-		tokenExchangeRate > 0 && $enabledMainnetFungibleTokensUsdBalance > 0
-			? Math.round($enabledMainnetFungibleTokensUsdBalance / tokenExchangeRate)
-			: 0
+		tokenExchangeRate > 0 && balanceToSpend > 0 ? balanceToSpend / tokenExchangeRate : 0
 	);
 
 	let convertibleAssetsUsdBalance = $derived(
-		$enabledMainnetFungibleTokensUsdBalance - $enabledMainnetFungibleIcTokensUsdBalance
+		balanceToSpend - $enabledMainnetFungibleIcTokensUsdBalance
 	);
 
 	let noSwappableAssets = $derived($enabledMainnetFungibleIcTokensUsdBalance <= 0);
@@ -69,7 +70,7 @@
 		<div class="mb-2 text-base font-bold sm:text-lg" in:fade>
 			{replacePlaceholders($i18n.stake.text.get_tokens_with_amount, {
 				$token_symbol: tokenSymbol,
-				$amount: `${potentialTokenBalance}`
+				$amount: `${potentialTokenBalance < 1 && potentialTokenBalance > 0 ? '< 1' : Math.ceil(potentialTokenBalance)}`
 			})}
 		</div>
 	{/if}

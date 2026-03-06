@@ -1960,7 +1960,7 @@
 			"claim_now": "Réclamer maintenant",
 			"claiming": "Réclamation...",
 			"get_tokens_with_amount": "Obtenir jusqu'à $amount $token_symbol",
-			"get_tokens": "Obtenir plus de $token_symbol",
+			"get_asset_tokens": "",
 			"reward_claimed": "Récompense réclamée",
 			"staked": "Staké",
 			"unstaked": "Unstaké",
