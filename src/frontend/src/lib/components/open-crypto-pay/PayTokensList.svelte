@@ -14,7 +14,8 @@
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
-		isNetworkIdEvm
+		isNetworkIdEvm,
+		isNetworkIdICP
 	} from '$lib/utils/network.utils';
 
 	interface Props {
@@ -29,7 +30,7 @@
 {#if nonNullish($availableTokens) && $availableTokens.length > 0}
 	<List noPadding>
 		{#each $availableTokens as token (token.id)}
-			{#if isNetworkIdBitcoin(token.network.id) || isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)}
+			{#if isNetworkIdBitcoin(token.network.id) || isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id) || isNetworkIdICP(token.network.id)}
 				<ListItem styleClass="first-of-type:border-t-1">
 					<LogoButton
 						dividers={false}

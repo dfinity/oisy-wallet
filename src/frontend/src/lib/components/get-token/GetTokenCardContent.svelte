@@ -28,7 +28,7 @@
 
 	let potentialTokenBalance = $derived(
 		tokenExchangeRate > 0 && potentialTokensUsdBalance > 0
-			? Math.round(potentialTokensUsdBalance / tokenExchangeRate)
+			? potentialTokensUsdBalance / tokenExchangeRate
 			: 0
 	);
 
@@ -60,7 +60,7 @@
 
 		{#if positivePotentialTokenBalance}
 			<span class="text-tertiary" in:fade>
-				{`${positivePotentialTokenBalance ? '~' : ''}${potentialTokenBalance}`}
+				{`${positivePotentialTokenBalance ? (potentialTokenBalance < 1 ? '< ' : '~') : ''}${Math.ceil(potentialTokenBalance)}`}
 				{tokenSymbol}
 			</span>
 		{/if}

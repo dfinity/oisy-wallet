@@ -1960,7 +1960,7 @@
 			"claim_now": "Vybrat nyní",
 			"claiming": "Vybírání...",
 			"get_tokens_with_amount": "Získat až $amount $token_symbol",
-			"get_tokens": "Získat více $token_symbol",
+			"get_asset_tokens": "",
 			"reward_claimed": "Odměna vybrána",
 			"staked": "Stakováno",
 			"unstaked": "Odstakováno",
