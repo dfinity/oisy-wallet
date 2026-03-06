@@ -10,7 +10,7 @@ import type { NetworkOpenCryptoPay } from '$lib/types/network';
 import type {
 	PayableTokenWithConvertedAmount,
 	PayableTokenWithFees,
-	ValidatedIcpPaymentData
+	ValidatedIcPaymentData
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
@@ -88,7 +88,7 @@ export const validateIcTransfer = ({
 	decodedData: DecodedUrn;
 	token: PayableTokenWithConvertedAmount;
 	amount: bigint;
-}): ValidatedIcpPaymentData => {
+}): ValidatedIcPaymentData => {
 	const { destination, amount: amountParam } = decodedData;
 
 	const {
