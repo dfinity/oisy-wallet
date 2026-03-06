@@ -8,6 +8,7 @@ import {
 } from '$eth/utils/eth-open-crypto-pay.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { getPendingTransactions } from '$icp/utils/btc.utils';
+import { isIcPayableToken, validateIcTransfer } from '$icp/utils/ic-open-crypto-pay.utils';
 import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_EVENTS_KEYS } from '$lib/enums/plausible';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -298,6 +299,10 @@ export const validateDecodedData = ({
 
 	if (isDefaultEthereumToken(token) || isTokenErc20(token)) {
 		return validateEthEvmTransfer({ decodedData, amount, token, uri });
+	}
+
+	if (isIcPayableToken(token)) {
+		return validateIcTransfer({ decodedData, amount, token });
 	}
 };
 
