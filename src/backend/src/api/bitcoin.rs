@@ -25,7 +25,6 @@ use crate::{
             BTC_ADD_PENDING_TX_RATE_LIMITER, BTC_GET_PENDING_TX_RATE_LIMITER,
             BTC_SELECT_UTXOS_FEE_RATE_LIMITER,
         },
-        guards::caller_is_not_anonymous, housekeeping::BTC_SELECT_UTXOS_FEE_RATE_LIMITER,
         rate_limiter,
     },
 };
