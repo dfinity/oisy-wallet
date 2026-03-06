@@ -6,7 +6,6 @@ import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkOpenCryptoPay } from '$lib/types/network';
 import type {
 	PayableTokenWithConvertedAmount,
@@ -25,7 +24,7 @@ import { get } from 'svelte/store';
 export const isIcPayableToken = (token: Token): token is IcToken =>
 	isTokenIcp(token) || isTokenIcrc(token);
 
- const isIcFeeResult = (fee: PayableTokenWithFees['fee']): fee is IcFeeResult =>
+const isIcFeeResult = (fee: PayableTokenWithFees['fee']): fee is IcFeeResult =>
 	nonNullish(fee) && 'feePerTransaction' in fee && 'totalFee' in fee;
 
 export const enrichIcPayableToken = ({
