@@ -270,6 +270,7 @@ type SaveNetworksSettingsRequest = record {
 };
 type SelectedUtxosFeeError = variant {
 	PendingTransactions;
+	RateLimited : RateLimitError;
 	InternalError : record { msg : text }
 };
 type SelectedUtxosFeeRequest = record {

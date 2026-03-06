@@ -23,6 +23,10 @@ thread_local! {
     /// Rate-limits `allow_signing`: max 3 calls per caller per hour.
     pub(crate) static ALLOW_SIGNING_RATE_LIMITER: rate_limiter::RateLimiter =
         rate_limiter::RateLimiter::new(3, 60 * 60 * 1_000_000_000);
+
+    /// Rate-limits `btc_select_user_utxos_fee`: max 10 calls per caller per minute.
+    pub(crate) static BTC_SELECT_UTXOS_FEE_RATE_LIMITER: rate_limiter::RateLimiter =
+        rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
 }
 
 /// 2 hours in nanoseconds — if a housekeeping run has been in progress for

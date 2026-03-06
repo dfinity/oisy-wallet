@@ -2,6 +2,7 @@ import type {
 	AllowSigningResponse,
 	AllowSigningResult,
 	_SERVICE as BackendService,
+	BtcSelectUserUtxosFeeResult,
 	CustomToken,
 	IcrcToken,
 	UserProfile
@@ -493,7 +494,7 @@ describe('backend.canister', () => {
 			expect(service.btc_select_user_utxos_fee).toHaveBeenCalledWith(
 				btcSelectUserUtxosFeeEndpointParams
 			);
-			expect(res).toEqual(response.Ok);
+			expect(res).toEqual({ response: response.Ok });
 		});
 
 		it('should throw an error if btc_select_user_utxos_fee returns an internal error', async () => {
@@ -567,6 +568,36 @@ describe('backend.canister', () => {
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
 			await expect(res).rejects.toThrowError();
+		});
+
+		it('should return rateLimitInfo if RateLimited error is returned', async () => {
+			const response = {
+				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			};
+
+			service.btc_select_user_utxos_fee.mockResolvedValue(
+				response as unknown as BtcSelectUserUtxosFeeResult
+			);
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			expect(service.btc_select_user_utxos_fee).toHaveBeenCalledWith(
+				btcSelectUserUtxosFeeEndpointParams
+			);
+			expect(res).toStrictEqual({
+				response: {
+					fee_satoshis: ZERO,
+					utxos: []
+				},
+				rateLimitInfo: {
+					endpoint: 'btc_select_user_utxos_fee',
+					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
+				}
+			});
 		});
 	});
 

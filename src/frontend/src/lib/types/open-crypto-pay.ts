@@ -1,10 +1,13 @@
 import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
 import type { UtxosFee } from '$btc/types/btc-send';
 import type { EthFeeResult } from '$eth/types/pay';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { IcFeeResult } from '$icp/types/pay';
 import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import type { Network, NetworkOpenCryptoPay } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@icp-sdk/core/agent';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export interface Address {
 	street?: string;
@@ -85,7 +88,7 @@ export type PayableToken = Omit<Token, 'network'> & {
 };
 
 export interface PayableTokenWithFees extends PayableToken {
-	fee?: EthFeeResult | UtxosFee;
+	fee?: EthFeeResult | UtxosFee | IcFeeResult;
 }
 
 export interface PrepareTokensParams {
@@ -137,4 +140,11 @@ export interface ValidatedEthPaymentData {
 		maxPriorityFeePerGas: bigint;
 	};
 	estimatedGasLimit: bigint;
+}
+
+export interface ValidatedIcPaymentData {
+	spender: Principal;
+	amount: bigint;
+	ledgerCanisterId: LedgerCanisterIdText;
+	fee: IcFeeResult;
 }

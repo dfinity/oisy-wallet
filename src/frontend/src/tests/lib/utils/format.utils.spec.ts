@@ -5,6 +5,7 @@ import { Languages } from '$lib/enums/languages';
 import {
 	format24hChangeInCurrency,
 	formatCurrency,
+	formatCurrencyAsNumber,
 	formatNanosecondsToDate,
 	formatNanosecondsToTimestamp,
 	formatSecondsToDate,
@@ -1433,6 +1434,73 @@ describe('format.utils', () => {
 				})
 			).toBe('¥100');
 		});
+	});
+
+	describe('formatCurrencyAsNumber', () => {
+		const testCases: {
+			value: number;
+			currency: Currency;
+			language: Languages;
+			expected: number;
+		}[] = [
+			{
+				value: 1234.56,
+				currency: Currency.USD,
+				language: Languages.ENGLISH,
+				expected: 1234.56
+			},
+			{
+				value: 987654321.12,
+				currency: Currency.EUR,
+				language: Languages.ENGLISH,
+				expected: 987654321.12
+			},
+			{ value: 0.99, currency: Currency.GBP, language: Languages.ENGLISH, expected: 0.99 },
+			{
+				value: 1000000,
+				currency: Currency.JPY,
+				language: Languages.ENGLISH,
+				expected: 1000000
+			},
+			{
+				value: 123456789.99,
+				currency: Currency.CNY,
+				language: Languages.ENGLISH,
+				expected: 123456789.99
+			},
+			{
+				value: 123456789.12345,
+				currency: Currency.CHF,
+				language: Languages.ENGLISH,
+				expected: 123456789.12
+			},
+			{
+				value: 1000000.99,
+				currency: Currency.JPY,
+				language: Languages.GERMAN,
+				expected: 1000001
+			},
+			{
+				value: 1000000.4,
+				currency: Currency.JPY,
+				language: Languages.GERMAN,
+				expected: 1000000
+			}
+		];
+
+		it.each(testCases)(
+			`should format value $value for currency $currency in language $language as expected`,
+			({ value, currency, language, expected }) => {
+				expect(
+					formatCurrencyAsNumber({
+						value,
+						currency,
+						exchangeRate: { currency, exchangeRateToUsd: 1, exchangeRate24hChangeMultiplier: 1 },
+						language
+					})
+				).toBe(expected);
+			}
+		);
 	});
 
 	describe('formatStakeApyNumber', () => {
