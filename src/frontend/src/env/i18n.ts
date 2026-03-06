@@ -15,6 +15,7 @@ export const LANGUAGES = {
 	[Languages.PORTUGUESE]: 'Português',
 	[Languages.RUSSIAN]: 'Русский',
 	[Languages.SPANISH]: 'Español',
+	[Languages.URDU]: 'اردو',
 	[Languages.VIETNAMESE]: 'Tiếng việt',
 	[Languages.CHINESE_SIMPLIFIED]: '中文 (简体)'
 };
