@@ -20,11 +20,22 @@ vi.mock('$lib/stores/toasts.store', () => ({
 }));
 
 const postMessageSpy = vi.fn();
+const addEventListenerSpy = vi.fn();
+const removeEventListenerSpy = vi.fn();
 
 class MockWorker {
 	postMessage = postMessageSpy;
 	onmessage: ((event: MessageEvent) => void) | null = null;
 	terminate: () => void = vi.fn();
+	addEventListener = addEventListenerSpy;
+	removeEventListener = removeEventListenerSpy;
+
+	#listeners: Record<string, ((event: any) => void)[]> = {};
+
+	dispatchEvent = (event: any) => {
+		this.onmessage?.(event);
+		this.#listeners['message']?.forEach((l) => l(event));
+	};
 }
 
 vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
@@ -65,6 +76,8 @@ describe('worker.exchange.services', () => {
 
 		beforeEach(async () => {
 			vi.clearAllMocks();
+
+			AppWorker.resetForTesting();
 
 			worker = await ExchangeWorker.init();
 		});
@@ -123,7 +136,7 @@ describe('worker.exchange.services', () => {
 					currentPolPrice: {}
 				};
 				const payload = { msg: 'syncExchange', data: mockData };
-				workerInstance.onmessage?.({ data: payload } as MessageEvent);
+				(workerInstance as unknown as MockWorker).dispatchEvent({ data: payload } as MessageEvent);
 
 				expect(syncExchange).toHaveBeenCalledExactlyOnceWith(mockData);
 			});
@@ -133,7 +146,7 @@ describe('worker.exchange.services', () => {
 					msg: 'syncExchangeError',
 					data: { err: 'Exchange error' }
 				};
-				workerInstance.onmessage?.({ data: payload } as MessageEvent);
+				(workerInstance as unknown as MockWorker).dispatchEvent({ data: payload } as MessageEvent);
 
 				expect(console.error).toHaveBeenCalledExactlyOnceWith(
 					'An error occurred while attempting to retrieve the USD exchange rates.',
