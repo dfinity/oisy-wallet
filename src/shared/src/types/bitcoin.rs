@@ -6,7 +6,7 @@ use candid::CandidType;
 use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
 use serde::Deserialize;
 
-use super::signer::RateLimitError;
+use crate::types::signer::RateLimitError;
 
 /// The maximum length of a bitcoin address, expressed as a string.
 /// - The longest current formats seem to be `Bech32` and `Bech32m` which are up to 62 characters

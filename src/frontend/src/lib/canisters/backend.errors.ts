@@ -60,6 +60,16 @@ export const mapBtcSelectUserUtxosFeeError = (
 		);
 	}
 
+	if ('RateLimited' in err) {
+		const { max_calls: maxCalls, window_ns: windowNs } = err.RateLimited;
+
+		const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+		return new CanisterInternalError(
+			`Rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+		);
+	}
+
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError'));
 };
 

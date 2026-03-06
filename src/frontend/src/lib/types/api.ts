@@ -5,6 +5,7 @@ import type {
 	Contact,
 	CredentialSpec,
 	GetUserProfileError,
+	SelectedUtxosFeeResponse,
 	UserProfile,
 	Utxo
 } from '$declarations/backend/backend.did';
@@ -36,6 +37,11 @@ export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfile
 export interface RateLimitInfo {
 	endpoint: string;
 	limiter: string;
+}
+
+export interface SelectedUtxosFeeOutcome {
+	response: SelectedUtxosFeeResponse;
+	rateLimitInfo?: RateLimitInfo;
 }
 
 export interface AllowSigningOutcome {
