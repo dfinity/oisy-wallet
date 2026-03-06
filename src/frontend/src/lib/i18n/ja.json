@@ -1960,7 +1960,7 @@
 			"claim_now": "今すぐ請求",
 			"claiming": "請求中...",
 			"get_tokens_with_amount": "最大$amount $token_symbolを入手",
-			"get_tokens": "さらに$token_symbolを入手",
+			"get_asset_tokens": "",
 			"reward_claimed": "受領済み報酬",
 			"staked": "ステーキング中",
 			"unstaked": "ステーキング解除済み",

@@ -1,6 +1,7 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as ethPayServices from '$eth/services/eth-open-crypto-pay.services';
 import { buildTransactionBaseParams } from '$eth/services/eth-open-crypto-pay.services';
 import { getNonce } from '$eth/services/nonce.services';
@@ -25,6 +26,7 @@ import type {
 } from '$lib/types/open-crypto-pay';
 import { extractQuoteData } from '$lib/utils/open-crypto-pay.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { readable } from 'svelte/store';
 
@@ -253,6 +255,20 @@ describe('open-crypto-pay.service', () => {
 			tokenNetwork: 'Bitcoin'
 		} as PayableToken;
 
+		const mockIcpToken: PayableToken = {
+			...ICP_TOKEN,
+			amount: '10',
+			minFee: 0.01,
+			tokenNetwork: 'InternetComputer'
+		} as PayableToken;
+
+		const mockIcrcToken: PayableToken = {
+			...mockValidIcrcToken,
+			amount: '20',
+			minFee: 0.02,
+			tokenNetwork: 'InternetComputer'
+		} as PayableToken;
+
 		const mockFeeResult: EthFeeResult = {
 			feeInWei: 300000n,
 			feeData: {
@@ -293,7 +309,7 @@ describe('open-crypto-pay.service', () => {
 			expect(ethPayServices.calculateEthFee).toHaveBeenCalledWith(mockErc20Token);
 		});
 
-		it('should skip non-Ethereum tokens', async () => {
+		it('should skip Bitcoin tokens', async () => {
 			const result = await calculateTokensWithFees([mockBtcToken]);
 
 			expect(result).toHaveLength(1);
@@ -301,15 +317,25 @@ describe('open-crypto-pay.service', () => {
 			expect(ethPayServices.calculateEthFee).not.toHaveBeenCalled();
 		});
 
-		it('should handle mixed tokens (ETH, ERC20, Bitcoin)', async () => {
-			const tokens = [mockPayableToken, mockErc20Token, mockBtcToken];
+		it('should handle mixed tokens', async () => {
+			const tokens = [mockPayableToken, mockErc20Token, mockBtcToken, mockIcpToken, mockIcrcToken];
 
 			const result = await calculateTokensWithFees(tokens);
 
-			expect(result).toHaveLength(3);
-			expect(result[0].fee).toBeDefined();
-			expect(result[1].fee).toBeDefined();
-			expect(result[2].fee).toBeUndefined();
+			expect(result.map(({ fee }) => fee)).toStrictEqual([
+				mockFeeResult,
+				mockFeeResult,
+				undefined,
+				{
+					feePerTransaction: ICP_TOKEN.fee,
+					totalFee: ICP_TOKEN.fee * 2n
+				},
+				{
+					feePerTransaction: mockValidIcrcToken.fee,
+					totalFee: mockValidIcrcToken.fee * 2n
+				}
+			]);
+
 			expect(ethPayServices.calculateEthFee).toHaveBeenCalledTimes(2);
 		});
 

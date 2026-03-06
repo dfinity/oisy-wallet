@@ -5,7 +5,6 @@ import type {
 	CustomToken,
 	GetAllowedCyclesResponse,
 	PendingTransaction,
-	SelectedUtxosFeeResponse,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
@@ -24,6 +23,7 @@ import type {
 	GetUserProfileResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateContactParams,
 	UpdateUserExperimentalFeatureSettings
@@ -120,7 +120,7 @@ export const getPendingBtcTransactions = async ({
 export const selectUserUtxosFee = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeResponse> => {
+}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeOutcome> => {
 	const { btcSelectUserUtxosFee } = await backendCanister({ identity });
 
 	return btcSelectUserUtxosFee(params);

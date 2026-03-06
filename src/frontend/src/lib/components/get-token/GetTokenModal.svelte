@@ -38,9 +38,10 @@
 		token: Token;
 		receiveAddress?: Address;
 		currentApy: number;
+		availableBalance?: number;
 	}
 
-	let { token, currentApy, receiveAddress }: Props = $props();
+	let { token, currentApy, receiveAddress, availableBalance }: Props = $props();
 
 	const { reset: resetSwapStore } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -135,7 +136,13 @@
 
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsGetToken.GET_TOKEN}
-			<GetTokenWizardStep {currentApy} onClose={close} onGoToStep={goToStep} {token} />
+			<GetTokenWizardStep
+				{availableBalance}
+				{currentApy}
+				onClose={close}
+				onGoToStep={goToStep}
+				{token}
+			/>
 		{:else if currentStep?.name === WizardStepsGetToken.RECEIVE}
 			<ReceiveAddressQrCode
 				address={receiveAddress}

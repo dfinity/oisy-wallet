@@ -432,6 +432,7 @@ export interface SaveNetworksSettingsRequest {
 }
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
+	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } };
 export interface SelectedUtxosFeeRequest {
 	network: BitcoinNetwork;
