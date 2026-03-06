@@ -219,7 +219,7 @@ export const PostMessageDataResponseBTCAddressSchema = PostMessageDataResponseSc
 }).strict();
 
 export const PostMessageCommonSchema = z.object({
-	ref: z.string().optional()
+	ref: z.string()
 });
 
 const buildPostMessageSchema = <T extends z.ZodTypeAny, MsgSchema extends z.ZodTypeAny>({
