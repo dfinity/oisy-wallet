@@ -13,6 +13,7 @@ import {
 	isIcPayableToken,
 	validateIcTransfer
 } from '$icp/utils/ic-open-crypto-pay.utils';
+import { isIcPayableToken, validateIcTransfer } from '$icp/utils/ic-open-crypto-pay.utils';
 import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_EVENTS_KEYS } from '$lib/enums/plausible';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
