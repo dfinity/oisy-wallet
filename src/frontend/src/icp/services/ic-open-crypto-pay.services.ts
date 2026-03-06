@@ -1,12 +1,13 @@
 import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcFeeResult } from '$icp/types/pay';
+import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getIcPaymentUri } from '$icp/utils/ic-open-crypto-pay.utils';
 import { getTokenFee } from '$icp/utils/token.utils';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import type { PayableToken, PayParams, ValidatedIcPaymentData } from '$lib/types/open-crypto-pay';
-import { isNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 
 /**
  * Calculates the fee for an ICP/ICRC token payment.
