@@ -18,7 +18,9 @@ use shared::types::{
 use crate::{
     state::{mutate_state, read_config},
     types::StoredPrincipal,
-    user_profile::{credential_config::find_credential_config, model::UserProfileModel, service},
+    user_profile::{
+        activity, credential_config::find_credential_config, model::UserProfileModel, service,
+    },
     utils::{guards::caller_is_not_anonymous, housekeeping::spawn_allow_signing_if_below_limit},
 };
 
@@ -238,17 +240,21 @@ pub fn create_user_profile() -> UserProfile {
     user_profile
 }
 
-/// Returns the caller's user profile.
+/// Returns the caller's user profile and marks the user as active
+/// (used by the ETH transaction refresh scheduler to determine which
+/// users should receive periodic transaction updates).
 ///
 /// # Errors
 /// Errors are enumerated by: `GetUserProfileError`.
 ///
 /// # Panics
 /// - If the caller is anonymous.  See: `may_read_user_data`.
-#[query(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_user_profile() -> GetUserProfileResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    activity::mark_user_active(stored_principal);
 
     mutate_state(|s| {
         let user_profile_model =

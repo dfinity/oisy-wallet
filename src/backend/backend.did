@@ -177,6 +177,114 @@ type DefiniteCanisterSettingsArgs = record {
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
+type EthTransactionError = variant {
+	NoAddressesRegistered;
+	ProviderError : text;
+	Unauthorized;
+	AddressAlreadyRegistered;
+	UserNotFound
+};
+type EtherscanErc1155Transaction = record {
+	to : text;
+	gas : text;
+	confirmations : text;
+	token_id : text;
+	token_symbol : text;
+	block_hash : text;
+	from : text;
+	transaction_index : text;
+	hash : text;
+	block_number : text;
+	token_value : text;
+	nonce : text;
+	cumulative_gas_used : text;
+	input : text;
+	gas_used : text;
+	contract_address : text;
+	token_name : text;
+	time_stamp : text;
+	gas_price : text
+};
+type EtherscanErc20Transaction = record {
+	to : text;
+	gas : text;
+	confirmations : text;
+	value : text;
+	token_symbol : text;
+	block_hash : text;
+	from : text;
+	transaction_index : text;
+	hash : text;
+	block_number : text;
+	token_decimal : text;
+	nonce : text;
+	cumulative_gas_used : text;
+	input : text;
+	gas_used : text;
+	contract_address : text;
+	token_name : text;
+	time_stamp : text;
+	gas_price : text
+};
+type EtherscanErc721Transaction = record {
+	to : text;
+	gas : text;
+	confirmations : text;
+	token_id : text;
+	token_symbol : text;
+	block_hash : text;
+	from : text;
+	transaction_index : text;
+	hash : text;
+	block_number : text;
+	token_decimal : text;
+	nonce : text;
+	cumulative_gas_used : text;
+	input : text;
+	gas_used : text;
+	contract_address : text;
+	token_name : text;
+	time_stamp : text;
+	gas_price : text
+};
+type EtherscanInternalTransaction = record {
+	to : text;
+	gas : text;
+	value : text;
+	from : text;
+	hash : text;
+	"type" : text;
+	block_number : text;
+	trace_id : text;
+	is_error : text;
+	err_code : text;
+	input : text;
+	gas_used : text;
+	contract_address : text;
+	time_stamp : text
+};
+type EtherscanTransaction = record {
+	to : text;
+	gas : text;
+	confirmations : text;
+	txreceipt_status : text;
+	value : text;
+	block_hash : text;
+	from : text;
+	transaction_index : text;
+	hash : text;
+	block_number : text;
+	is_error : text;
+	function_name : text;
+	nonce : text;
+	cumulative_gas_used : text;
+	input : text;
+	gas_used : text;
+	contract_address : text;
+	time_stamp : text;
+	method_id : text;
+	gas_price : text
+};
 type ExperimentalFeatureSettings = record { enabled : bool };
 type ExperimentalFeatureSettingsFor = variant { AiAssistantBeta };
 type ExperimentalFeaturesSettings = record {
@@ -197,12 +305,25 @@ type GetAllowedCyclesResult = variant {
 };
 type GetContactResult = variant { Ok : Contact; Err : ContactError };
 type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
+type GetEthTransactionsRequest = record {
+	cursor : opt nat64;
+	limit : opt nat64
+};
+type GetEthTransactionsResponse = record {
+	next_cursor : opt nat64;
+	transactions : vec StoredEthTransaction
+};
+type GetEthTransactionsResult = variant {
+	Ok : GetEthTransactionsResponse;
+	Err : EthTransactionError
+};
 type GetUserProfileError = variant { NotFound };
 type GetUserProfileResult = variant {
 	Ok : UserProfile;
 	Err : GetUserProfileError
 };
 type HasUserProfileResponse = record { has_user_profile : bool };
+type HttpHeader = record { value : text; name : text };
 type HttpRequest = record {
 	url : text;
 	method : text;
@@ -213,6 +334,11 @@ type HttpResponse = record {
 	body : blob;
 	headers : vec record { text; text };
 	status_code : nat16
+};
+type HttpResponse_1 = record {
+	status : nat;
+	body : blob;
+	headers : vec HttpHeader
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type Icrcv2AccountId = variant {
@@ -264,6 +390,8 @@ type RateLimitError = record {
 	window_ns : nat64;
 	caller : principal
 };
+type RegisterEthAddressRequest = record { chain_id : nat64; address : text };
+type RegisterEthAddressResult = variant { Ok; Err : EthTransactionError };
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -282,6 +410,8 @@ type SelectedUtxosFeeResponse = record {
 	fee_satoshis : nat64;
 	utxos : vec Utxo
 };
+type SetProviderApiKeyRequest = record { api_key : text; provider_id : text };
+type SetProviderApiKeyResult = variant { Ok; Err : EthTransactionError };
 type SetShowTestnetsRequest = record {
 	current_user_version : opt nat64;
 	show_testnets : bool
@@ -304,6 +434,13 @@ type Stats = record {
 	token_activity_count : nat64;
 	user_timestamps_count : nat64;
 	user_token_count : nat64
+};
+type StoredEthTransaction = variant {
+	Internal : EtherscanInternalTransaction;
+	Erc20 : EtherscanErc20Transaction;
+	Normal : EtherscanTransaction;
+	Erc721 : EtherscanErc721Transaction;
+	Erc1155 : EtherscanErc1155Transaction
 };
 type SupportedCredential = record {
 	ii_canister_id : principal;
@@ -354,6 +491,7 @@ type TopUpCyclesLedgerResult = variant {
 	Ok : TopUpCyclesLedgerResponse;
 	Err : TopUpCyclesLedgerError
 };
+type TransformArgs = record { context : blob; response : HttpResponse_1 };
 type UpdateAgreementsError = variant { VersionMismatch; UserNotFound };
 type UpdateExperimentalFeaturesSettingsRequest = record {
 	experimental_features : vec record {
@@ -517,14 +655,24 @@ service : (Arg) -> {
 	// # Returns
 	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
-	// Returns the caller's user profile.
+	// Returns paginated ETH transactions for the calling user.
+	// Transactions are sorted newest-first (by block number descending).
+	//
+	// Use `cursor: None` for the first page, then pass the returned
+	// `next_cursor` value to fetch subsequent pages.
+	get_eth_transactions : (GetEthTransactionsRequest) -> (
+		GetEthTransactionsResult
+	) query;
+	// Returns the caller's user profile and marks the user as active
+	// (used by the ETH transaction refresh scheduler to determine which
+	// users should receive periodic transaction updates).
 	//
 	// # Errors
 	// Errors are enumerated by: `GetUserProfileError`.
 	//
 	// # Panics
 	// - If the caller is anonymous.  See: `may_read_user_data`.
-	get_user_profile : () -> (GetUserProfileResult) query;
+	get_user_profile : () -> (GetUserProfileResult);
 	// Checks if the caller has an associated user profile.
 	//
 	// # Returns
@@ -549,11 +697,23 @@ service : (Arg) -> {
 	// - Integrations that previously relied on query semantics must be updated to invoke this as an
 	// update method.
 	list_custom_tokens : () -> (vec CustomToken);
+	// Registers an ETH address for the calling user so the backend can
+	// fetch and cache transactions for it.
+	register_eth_address : (RegisterEthAddressRequest) -> (
+		RegisterEthAddressResult
+	);
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
 	// Add or update custom token for the user.
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
+	// Sets (or updates) an API key for a transaction data provider.
+	//
+	// Example `provider_id` values: `"etherscan"`, `"alchemy"`, etc.
+	// Restricted to controllers and allowed callers.
+	set_provider_api_key : (SetProviderApiKeyRequest) -> (
+		SetProviderApiKeyResult
+	);
 	// Sets the user's preference to show (or hide) testnets in the interface.
 	//
 	// # Returns
@@ -577,6 +737,9 @@ service : (Arg) -> {
 	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
 		TopUpCyclesLedgerResult
 	);
+	// Transform function for HTTP outcalls — required for IC consensus.
+	// Passes the response body through unmodified.
+	transform_etherscan_response : (TransformArgs) -> (HttpResponse) query;
 	// Updates an existing contact for the caller.
 	//
 	// # Errors

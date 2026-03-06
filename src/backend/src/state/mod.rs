@@ -8,13 +8,15 @@ use shared::types::{
 use crate::{
     state::memory::{
         BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_MEMORY_ID,
-        MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID,
+        ETH_TRANSACTIONS_MEMORY_ID, MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID,
+        PROVIDER_API_KEYS_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID, USER_ACTIVITY_MEMORY_ID,
         USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
         USER_TOKEN_MEMORY_ID,
     },
     types::{
         BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
-        PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
+        EthTransactionsMap, PowChallengeMap, ProviderApiKeysCell, TokenActivityMap,
+        UserActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
     },
 };
 
@@ -39,6 +41,11 @@ pub(crate) struct State {
     // TODO: implement a periodic cleanup of old entries
     // TODO: limit the map size with an eviction policy
     pub(crate) token_activity: TokenActivityMap,
+    pub(crate) eth_transactions: EthTransactionsMap,
+    /// Nanosecond timestamp of last activity per principal.
+    /// A user is considered "active" if their last activity is within 1 hour.
+    pub(crate) user_activity: UserActivityMap,
+    pub(crate) provider_api_keys: ProviderApiKeysCell,
 }
 
 impl From<&State> for Stats {
@@ -68,6 +75,9 @@ thread_local! {
                 mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),
             ),
             token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
+            eth_transactions: EthTransactionsMap::init(mm.borrow().get(ETH_TRANSACTIONS_MEMORY_ID)),
+            user_activity: UserActivityMap::init(mm.borrow().get(USER_ACTIVITY_MEMORY_ID)),
+            provider_api_keys: ProviderApiKeysCell::init(mm.borrow().get(PROVIDER_API_KEYS_MEMORY_ID), None),
         })
     );
 }

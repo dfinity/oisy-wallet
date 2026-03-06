@@ -7,6 +7,7 @@ use super::{
         BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
     dapp::AddDappSettingsError,
+    eth_transaction::{EthTransactionError, GetEthTransactionsResponse},
     pow::{CreateChallengeError, CreateChallengeResponse},
     signer::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
@@ -352,6 +353,48 @@ impl From<Result<(), UpdateExperimentalFeaturesSettingsError>>
         match result {
             Ok(()) => UpdateExperimentalFeaturesSettingsResult::Ok(()),
             Err(err) => UpdateExperimentalFeaturesSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub enum RegisterEthAddressResult {
+    Ok(()),
+    Err(EthTransactionError),
+}
+impl From<Result<(), EthTransactionError>> for RegisterEthAddressResult {
+    fn from(result: Result<(), EthTransactionError>) -> Self {
+        match result {
+            Ok(()) => RegisterEthAddressResult::Ok(()),
+            Err(err) => RegisterEthAddressResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub enum GetEthTransactionsResult {
+    Ok(GetEthTransactionsResponse),
+    Err(EthTransactionError),
+}
+impl From<Result<GetEthTransactionsResponse, EthTransactionError>> for GetEthTransactionsResult {
+    fn from(result: Result<GetEthTransactionsResponse, EthTransactionError>) -> Self {
+        match result {
+            Ok(response) => GetEthTransactionsResult::Ok(response),
+            Err(err) => GetEthTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub enum SetProviderApiKeyResult {
+    Ok(()),
+    Err(EthTransactionError),
+}
+impl From<Result<(), EthTransactionError>> for SetProviderApiKeyResult {
+    fn from(result: Result<(), EthTransactionError>) -> Self {
+        match result {
+            Ok(()) => SetProviderApiKeyResult::Ok(()),
+            Err(err) => SetProviderApiKeyResult::Err(err),
         }
     }
 }

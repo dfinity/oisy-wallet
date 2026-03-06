@@ -366,6 +366,133 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Vec(Contact),
 		Err: ContactError
 	});
+	const GetEthTransactionsRequest = IDL.Record({
+		cursor: IDL.Opt(IDL.Nat64),
+		limit: IDL.Opt(IDL.Nat64)
+	});
+	const EtherscanInternalTransaction = IDL.Record({
+		to: IDL.Text,
+		gas: IDL.Text,
+		value: IDL.Text,
+		from: IDL.Text,
+		hash: IDL.Text,
+		type: IDL.Text,
+		block_number: IDL.Text,
+		trace_id: IDL.Text,
+		is_error: IDL.Text,
+		err_code: IDL.Text,
+		input: IDL.Text,
+		gas_used: IDL.Text,
+		contract_address: IDL.Text,
+		time_stamp: IDL.Text
+	});
+	const EtherscanErc20Transaction = IDL.Record({
+		to: IDL.Text,
+		gas: IDL.Text,
+		confirmations: IDL.Text,
+		value: IDL.Text,
+		token_symbol: IDL.Text,
+		block_hash: IDL.Text,
+		from: IDL.Text,
+		transaction_index: IDL.Text,
+		hash: IDL.Text,
+		block_number: IDL.Text,
+		token_decimal: IDL.Text,
+		nonce: IDL.Text,
+		cumulative_gas_used: IDL.Text,
+		input: IDL.Text,
+		gas_used: IDL.Text,
+		contract_address: IDL.Text,
+		token_name: IDL.Text,
+		time_stamp: IDL.Text,
+		gas_price: IDL.Text
+	});
+	const EtherscanTransaction = IDL.Record({
+		to: IDL.Text,
+		gas: IDL.Text,
+		confirmations: IDL.Text,
+		txreceipt_status: IDL.Text,
+		value: IDL.Text,
+		block_hash: IDL.Text,
+		from: IDL.Text,
+		transaction_index: IDL.Text,
+		hash: IDL.Text,
+		block_number: IDL.Text,
+		is_error: IDL.Text,
+		function_name: IDL.Text,
+		nonce: IDL.Text,
+		cumulative_gas_used: IDL.Text,
+		input: IDL.Text,
+		gas_used: IDL.Text,
+		contract_address: IDL.Text,
+		time_stamp: IDL.Text,
+		method_id: IDL.Text,
+		gas_price: IDL.Text
+	});
+	const EtherscanErc721Transaction = IDL.Record({
+		to: IDL.Text,
+		gas: IDL.Text,
+		confirmations: IDL.Text,
+		token_id: IDL.Text,
+		token_symbol: IDL.Text,
+		block_hash: IDL.Text,
+		from: IDL.Text,
+		transaction_index: IDL.Text,
+		hash: IDL.Text,
+		block_number: IDL.Text,
+		token_decimal: IDL.Text,
+		nonce: IDL.Text,
+		cumulative_gas_used: IDL.Text,
+		input: IDL.Text,
+		gas_used: IDL.Text,
+		contract_address: IDL.Text,
+		token_name: IDL.Text,
+		time_stamp: IDL.Text,
+		gas_price: IDL.Text
+	});
+	const EtherscanErc1155Transaction = IDL.Record({
+		to: IDL.Text,
+		gas: IDL.Text,
+		confirmations: IDL.Text,
+		token_id: IDL.Text,
+		token_symbol: IDL.Text,
+		block_hash: IDL.Text,
+		from: IDL.Text,
+		transaction_index: IDL.Text,
+		hash: IDL.Text,
+		block_number: IDL.Text,
+		token_value: IDL.Text,
+		nonce: IDL.Text,
+		cumulative_gas_used: IDL.Text,
+		input: IDL.Text,
+		gas_used: IDL.Text,
+		contract_address: IDL.Text,
+		token_name: IDL.Text,
+		time_stamp: IDL.Text,
+		gas_price: IDL.Text
+	});
+	const StoredEthTransaction = IDL.Variant({
+		Internal: EtherscanInternalTransaction,
+		Erc20: EtherscanErc20Transaction,
+		Normal: EtherscanTransaction,
+		Erc721: EtherscanErc721Transaction,
+		Erc1155: EtherscanErc1155Transaction
+	});
+	const GetEthTransactionsResponse = IDL.Record({
+		next_cursor: IDL.Opt(IDL.Nat64),
+		transactions: IDL.Vec(StoredEthTransaction)
+	});
+	const EthTransactionError = IDL.Variant({
+		NoAddressesRegistered: IDL.Null,
+		ProviderError: IDL.Text,
+		Unauthorized: IDL.Null,
+		AddressAlreadyRegistered: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const GetEthTransactionsResult = IDL.Variant({
+		Ok: GetEthTransactionsResponse,
+		Err: EthTransactionError
+	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
 	const GetUserProfileResult = IDL.Variant({
 		Ok: UserProfile,
@@ -417,6 +544,22 @@ export const idlFactory = ({ IDL }) => {
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
 	});
+	const RegisterEthAddressRequest = IDL.Record({
+		chain_id: IDL.Nat64,
+		address: IDL.Text
+	});
+	const RegisterEthAddressResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: EthTransactionError
+	});
+	const SetProviderApiKeyRequest = IDL.Record({
+		api_key: IDL.Text,
+		provider_id: IDL.Text
+	});
+	const SetProviderApiKeyResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: EthTransactionError
+	});
 	const SetShowTestnetsRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
@@ -460,6 +603,16 @@ export const idlFactory = ({ IDL }) => {
 	const TopUpCyclesLedgerResult = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
+	});
+	const HttpHeader = IDL.Record({ value: IDL.Text, name: IDL.Text });
+	const HttpResponse_1 = IDL.Record({
+		status: IDL.Nat,
+		body: IDL.Vec(IDL.Nat8),
+		headers: IDL.Vec(HttpHeader)
+	});
+	const TransformArgs = IDL.Record({
+		context: IDL.Vec(IDL.Nat8),
+		response: HttpResponse_1
 	});
 	const UpdateUserAgreementsRequest = IDL.Record({
 		agreements: UserAgreements,
@@ -508,13 +661,16 @@ export const idlFactory = ({ IDL }) => {
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult]),
 		get_contacts: IDL.Func([], [GetContactsResult]),
-		get_user_profile: IDL.Func([], [GetUserProfileResult]),
+		get_eth_transactions: IDL.Func([GetEthTransactionsRequest], [GetEthTransactionsResult]),
+		get_user_profile: IDL.Func([], [GetUserProfileResult], []),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
+		register_eth_address: IDL.Func([RegisterEthAddressRequest], [RegisterEthAddressResult], []),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
+		set_provider_api_key: IDL.Func([SetProviderApiKeyRequest], [SetProviderApiKeyResult], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
 		stats: IDL.Func([], [Stats]),
 		top_up_cycles_ledger: IDL.Func(
@@ -522,6 +678,7 @@ export const idlFactory = ({ IDL }) => {
 			[TopUpCyclesLedgerResult],
 			[]
 		),
+		transform_etherscan_response: IDL.Func([TransformArgs], [HttpResponse]),
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
 		update_user_agreements: IDL.Func(
 			[UpdateUserAgreementsRequest],

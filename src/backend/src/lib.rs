@@ -1,5 +1,7 @@
 use candid::Principal;
-use ic_cdk::{export_candid, init, post_upgrade};
+use ic_cdk::{
+    api::management_canister::http_request::TransformArgs, export_candid, init, post_upgrade,
+};
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
@@ -13,6 +15,9 @@ use shared::{
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::CustomToken,
         dapp::AddHiddenDappIdRequest,
+        eth_transaction::{
+            GetEthTransactionsRequest, RegisterEthAddressRequest, SetProviderApiKeyRequest,
+        },
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         result_types::{
@@ -20,7 +25,8 @@ use shared::{
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
             DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            GetEthTransactionsResult, GetUserProfileResult, RegisterEthAddressResult,
+            SetProviderApiKeyResult, SetUserShowTestnetsResult, UpdateContactResult,
             UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
             UpdateUserNetworkSettingsResult,
         },
@@ -38,6 +44,7 @@ mod contacts;
 mod signer;
 mod state;
 mod token;
+mod transactions;
 mod types;
 mod user_profile;
 mod utils;
@@ -56,6 +63,8 @@ pub fn init(arg: Arg) {
     bitcoin::api::init_fee_percentiles_cache();
 
     utils::housekeeping::start_periodic_housekeeping_timers();
+
+    transactions::eth::scheduler::start_eth_transaction_refresh_timer();
 }
 
 /// Post-upgrade handler.
@@ -80,6 +89,8 @@ pub fn post_upgrade(arg: Option<Arg>) {
     bitcoin::api::init_fee_percentiles_cache();
 
     utils::housekeeping::start_periodic_housekeeping_timers();
+
+    transactions::eth::scheduler::start_eth_transaction_refresh_timer();
 }
 
 export_candid!();
