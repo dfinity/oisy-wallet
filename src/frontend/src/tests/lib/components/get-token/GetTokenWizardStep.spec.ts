@@ -38,40 +38,42 @@ describe('GetTokenWizardStep', () => {
 		exchangeStore.reset();
 	});
 
-	it('renders correct title if exchange is not available', () => {
+	it('does not render amount title if exchange is not available', () => {
 		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
 			readable(balance)
 		);
 
-		const { getAllByText } = render(GetTokenWizardStep, {
+		const { queryByText } = render(GetTokenWizardStep, {
 			props,
 			context: mockContext()
 		});
 
 		expect(
-			getAllByText(
-				replacePlaceholders(en.stake.text.get_tokens, {
-					$token_symbol: ETHEREUM_TOKEN.symbol
+			queryByText(
+				replacePlaceholders(en.stake.text.get_tokens_with_amount, {
+					$token_symbol: ETHEREUM_TOKEN.symbol,
+					$amount: `${balance / exchangeRate}`
 				})
-			)[0]
-		).toBeInTheDocument();
+			)
+		).not.toBeInTheDocument();
 	});
 
-	it('renders correct title if balance is not available', () => {
+	it('does not render amount title if balance is not available', () => {
 		exchangeStore.set([{ ethereum: { usd: exchangeRate } }]);
 
-		const { getAllByText } = render(GetTokenWizardStep, {
+		const { queryByText } = render(GetTokenWizardStep, {
 			props,
 			context: mockContext()
 		});
 
 		expect(
-			getAllByText(
-				replacePlaceholders(en.stake.text.get_tokens, {
-					$token_symbol: ETHEREUM_TOKEN.symbol
+			queryByText(
+				replacePlaceholders(en.stake.text.get_tokens_with_amount, {
+					$token_symbol: ETHEREUM_TOKEN.symbol,
+					$amount: `${balance / exchangeRate}`
 				})
-			)[0]
-		).toBeInTheDocument();
+			)
+		).not.toBeInTheDocument();
 	});
 
 	it('renders correct title if exchange and balance are available', () => {
@@ -90,6 +92,49 @@ describe('GetTokenWizardStep', () => {
 				replacePlaceholders(en.stake.text.get_tokens_with_amount, {
 					$token_symbol: ETHEREUM_TOKEN.symbol,
 					$amount: `${balance / exchangeRate}`
+				})
+			)
+		).toBeInTheDocument();
+	});
+
+	it('uses availableBalance prop instead of derived balance when provided', () => {
+		const availableBalance = 500;
+		exchangeStore.set([{ ethereum: { usd: exchangeRate } }]);
+
+		const { getByText } = render(GetTokenWizardStep, {
+			props: {
+				...props,
+				availableBalance
+			},
+			context: mockContext()
+		});
+
+		expect(
+			getByText(
+				replacePlaceholders(en.stake.text.get_tokens_with_amount, {
+					$token_symbol: ETHEREUM_TOKEN.symbol,
+					$amount: `${Math.ceil(availableBalance / exchangeRate)}`
+				})
+			)
+		).toBeInTheDocument();
+	});
+
+	it('renders "< 1" when potential token balance is less than 1', () => {
+		exchangeStore.set([{ ethereum: { usd: exchangeRate } }]);
+
+		const { getByText } = render(GetTokenWizardStep, {
+			props: {
+				...props,
+				availableBalance: 1
+			},
+			context: mockContext()
+		});
+
+		expect(
+			getByText(
+				replacePlaceholders(en.stake.text.get_tokens_with_amount, {
+					$token_symbol: ETHEREUM_TOKEN.symbol,
+					$amount: '< 1'
 				})
 			)
 		).toBeInTheDocument();
