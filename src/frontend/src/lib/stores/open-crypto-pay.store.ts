@@ -64,6 +64,7 @@ export const createTokenComparator =
 	}) =>
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
 	(a: PayableTokenWithConvertedAmount, b: PayableTokenWithConvertedAmount): number => {
+		// Visual balance descending
 		const aSum = formatCurrencyAsNumber({
 			value: a.sumInUSD,
 			currency,
