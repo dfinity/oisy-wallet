@@ -309,13 +309,13 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
             .with_cycles(to_send_128)
             .await
             .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
-                available: backend_cycles,
+                available: backend_cycles.clone(),
                 tried_to_send: to_send.clone(),
             })
             .and_then(|r| {
                 r.candid()
                     .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
-                        available: Nat::from(0u32),
+                        available: backend_cycles,
                         tried_to_send: to_send.clone(),
                     })
             }) {
