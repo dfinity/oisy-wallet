@@ -12,6 +12,7 @@
 		isMaxUint256,
 		mapAddressToName
 	} from '$eth/utils/transactions.utils';
+	import { ckMinterBuiltInContacts } from '$icp-eth/derived/ck-minter-contacts.derived';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -39,7 +40,6 @@
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
-	import {ckMinterBuiltInContacts} from "$icp-eth/derived/ck-minter-contacts.derived";
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -94,8 +94,6 @@
 		notEmptyString(to) ? `${explorerBaseUrl}/address/${to}` : undefined
 	);
 
-
-
 	let approveSpenderExplorerUrl = $derived(
 		nonNullish(approveSpender) ? `${explorerBaseUrl}/address/${approveSpender}` : undefined
 	);
@@ -106,7 +104,7 @@
 					address: from,
 					networkId: token.network.id,
 					erc20Tokens: $erc20Tokens,
-						builtInContacts: $ckMinterBuiltInContacts
+					builtInContacts: $ckMinterBuiltInContacts
 				}) ?? from)
 			: from
 	);
@@ -117,7 +115,7 @@
 					address: to,
 					networkId: token.network.id,
 					erc20Tokens: $erc20Tokens,
-						builtInContacts: $ckMinterBuiltInContacts
+					builtInContacts: $ckMinterBuiltInContacts
 				}) ?? to)
 			: to
 	);
