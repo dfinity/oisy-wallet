@@ -48,7 +48,7 @@ describe('EthTransactionModal', () => {
 			token: ETHEREUM_TOKEN
 		});
 
-		expect(getByText(get(i18n).transaction.type['send'])).toBeInTheDocument();
+		expect(getByText(get(i18n).transaction.type.send)).toBeInTheDocument();
 	});
 
 	it('should display correct amount and currency for fungible token', () => {
