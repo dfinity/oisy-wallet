@@ -423,10 +423,7 @@ describe('backend.canister', () => {
 				btcAddPendingTransactionEndpointParams
 			);
 			expect(res).toStrictEqual({
-				response: {
-					fee_satoshis: ZERO,
-					utxos: []
-				},
+				response: true,
 				rateLimitInfo: {
 					endpoint: 'btc_add_pending_transaction',
 					limiter: 'BTC_ADD_PENDING_TX_RATE_LIMITER'
