@@ -46,7 +46,7 @@ import { readable } from 'svelte/store';
 describe('BtcConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
-	const pendingBtcTransactionResponse = true;
+	const pendingBtcTransactionResponse = { response: true };
 	const mockContext = ({
 		sourceToken = BTC_MAINNET_TOKEN,
 		mockUtxosFeeStore

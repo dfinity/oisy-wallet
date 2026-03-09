@@ -35,7 +35,7 @@ import { readable } from 'svelte/store';
 describe('BtcSendTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
-	const pendingBtcTransactionResponse = true;
+	const pendingBtcTransactionResponse = { response: true };
 
 	const mockContext = ({
 		token = BTC_MAINNET_TOKEN,

@@ -32,7 +32,7 @@ import { fireEvent, render, waitFor } from '@testing-library/svelte';
 describe('AiAssistantReviewSendBtcToken', () => {
 	const sendAmount = 0.0001;
 	const transactionId = 'txid';
-	const pendingBtcTransactionResponse = true;
+	const pendingBtcTransactionResponse = { response: true };
 	const mockContext = ({
 		token = BTC_MAINNET_TOKEN,
 		utxosFee
