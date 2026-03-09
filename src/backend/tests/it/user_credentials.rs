@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use candid::Principal;
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
+use pretty_assertions::assert_eq;
 use shared::types::{
     result_types::AddUserCredentialResult,
     user_profile::{

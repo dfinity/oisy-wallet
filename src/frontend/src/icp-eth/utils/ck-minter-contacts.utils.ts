@@ -18,6 +18,8 @@ const CK_MINTER_CONTRACT_DEFS: {
 	{ name: 'CK Ethereum Minter', addressFn: toCkMinterAddress }
 ];
 
+const BUILT_IN_CONTACT_ID_BASE = -100_000n;
+
 /**
  * Builds built-in `ContactUi` entries for CK minter contract addresses derived from minter info.
  *
@@ -30,10 +32,8 @@ export const toCkMinterBuiltInContacts = ({
 }: {
 	minterInfo: OptionCertifiedMinterInfo;
 	idOffset?: bigint;
-}): ContactUi[] => {
-	const BUILT_IN_CONTACT_ID_BASE = -1000n;
-
-	return CK_MINTER_CONTRACT_DEFS.reduce<ContactUi[]>((contacts, { name, addressFn }, index) => {
+}): ContactUi[] =>
+	CK_MINTER_CONTRACT_DEFS.reduce<ContactUi[]>((contacts, { name, addressFn }, index) => {
 		const address = addressFn(minterInfo);
 
 		if (nonNullish(address)) {
@@ -47,4 +47,3 @@ export const toCkMinterBuiltInContacts = ({
 
 		return contacts;
 	}, []);
-};

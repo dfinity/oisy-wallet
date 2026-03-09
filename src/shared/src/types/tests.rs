@@ -15,7 +15,7 @@ mod bitcoin {
 
     test_validate_on_deserialize!(
         BtcAddPendingTransactionRequest,
-        vec![
+        [
             TestVector {
                 description: "BtcAddPendingTransactionRequest with max length txid",
                 input: BtcAddPendingTransactionRequest {
@@ -84,13 +84,13 @@ mod bitcoin {
                     network: BitcoinNetwork::Mainnet,
                 },
                 valid: false,
-            },
+            }
         ]
     );
 
     test_validate_on_deserialize!(
         BtcGetPendingTransactionsRequest,
-        vec![
+        [
             TestVector {
                 description: "BtcGetPendingTransactionsRequest with max length address",
                 input: BtcGetPendingTransactionsRequest {
@@ -106,13 +106,13 @@ mod bitcoin {
                     network: BitcoinNetwork::Mainnet,
                 },
                 valid: false,
-            },
+            }
         ]
     );
 
     test_validate_on_deserialize!(
         PendingTransaction,
-        vec![
+        [
             TestVector {
                 description: "PendingTransaction with max length txid",
                 input: PendingTransaction {
@@ -161,13 +161,13 @@ mod bitcoin {
                     }],
                 },
                 valid: false,
-            },
+            }
         ]
     );
 }
 
 mod contact_image {
-    //! Tests for ContactImage validation
+    //! Tests for `ContactImage` validation
     use candid::{Decode, Encode};
     use serde_bytes::ByteBuf;
 
@@ -178,7 +178,7 @@ mod contact_image {
 
     test_validate_on_deserialize!(
         ContactImage,
-        vec![
+        [
             TestVector {
                 description: "ContactImage at max size (100 KB)",
                 input: ContactImage {
@@ -194,7 +194,7 @@ mod contact_image {
                     mime_type: ImageMimeType::Jpeg,
                 },
                 valid: false,
-            },
+            }
         ]
     );
 
@@ -227,7 +227,7 @@ mod contact_image {
 
         test_validate_on_deserialize!(
             SplToken,
-            vec![
+            [
                 TestVector {
                     input: SplToken {
                         token_address: SplTokenId("1".repeat(32)),
@@ -281,7 +281,7 @@ mod contact_image {
                     },
                     valid: true,
                     description: "Minimum decimals",
-                },
+                }
             ]
         );
     }
@@ -296,7 +296,7 @@ mod contact_image {
 
         test_validate_on_deserialize!(
             ErcToken,
-            vec![
+            [
                 TestVector {
                     input: ErcToken {
                         token_address: ErcTokenId(
@@ -344,7 +344,7 @@ mod contact_image {
                     },
                     valid: true,
                     description: "Minimum chain ID",
-                },
+                }
             ]
         );
     }
@@ -460,7 +460,7 @@ mod contact_image {
     }
 
     mod ext_v2 {
-        //! Tests for the ext_v2 module.
+        //! Tests for the `ext_v2` module.
         use candid::Principal;
 
         use super::*;
@@ -479,7 +479,7 @@ mod contact_image {
 
         test_validate_on_deserialize!(
             ExtV2Token,
-            vec![
+            [
                 TestVector {
                     input: ExtV2Token {
                         canister_id: canister_id1(),
@@ -507,7 +507,7 @@ mod contact_image {
                     },
                     valid: false,
                     description: "ExtV2Token with user or network principal as canister_id",
-                },
+                }
             ]
         );
     }
@@ -532,7 +532,7 @@ mod contact_image {
 
         test_validate_on_deserialize!(
             Dip721Token,
-            vec![
+            [
                 TestVector {
                     input: Dip721Token {
                         canister_id: canister_id1(),
@@ -560,7 +560,7 @@ mod contact_image {
                     },
                     valid: false,
                     description: "Dip721Token with user or network principal as canister_id",
-                },
+                }
             ]
         );
     }
@@ -585,7 +585,7 @@ mod contact_image {
 
         test_validate_on_deserialize!(
             IcPunksToken,
-            vec![
+            [
                 TestVector {
                     input: IcPunksToken {
                         canister_id: canister_id1(),
@@ -613,7 +613,7 @@ mod contact_image {
                     },
                     valid: false,
                     description: "IcPunksToken with user or network principal as canister_id",
-                },
+                }
             ]
         );
     }
@@ -629,7 +629,7 @@ mod token {
 
     test_validate_on_deserialize!(
         UserToken,
-        vec![
+        [
             TestVector {
                 description: "UserToken with valid contract address",
                 input: UserToken {
@@ -677,7 +677,7 @@ mod token {
                     enabled: None,
                 },
                 valid: false,
-            },
+            }
         ]
     );
 }
@@ -701,7 +701,7 @@ mod user_profile {
 
     test_validate_on_deserialize!(
         UserCredential,
-        vec![
+        [
             TestVector {
                 description: "UserCredential with max length issuer",
                 input: UserCredential {
@@ -719,7 +719,7 @@ mod user_profile {
                     verified_date_timestamp: None,
                 },
                 valid: false,
-            },
+            }
         ]
     );
 
@@ -733,7 +733,7 @@ mod user_profile {
 
     test_validate_on_deserialize!(
         UserProfile,
-        vec![
+        [
             TestVector {
                 description: "UserProfile with max length credentials",
                 input: UserProfile {
@@ -757,13 +757,13 @@ mod user_profile {
                     agreements: None,
                 },
                 valid: false,
-            },
+            }
         ]
     );
 
     test_validate_on_deserialize!(
         AddUserCredentialRequest,
-        vec![
+        [
             TestVector {
                 description: "AddUserCredentialRequest with credential_jwt at max length is valid",
                 input: AddUserCredentialRequest {
@@ -815,9 +815,13 @@ mod user_profile {
                             .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
                         arguments: Some({
                             let mut args = HashMap::new();
-                            for i in 0..AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENTS + 1
+                            for i in 0_i32
+                                ..=i32::try_from(
+                                    AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENTS,
+                                )
+                                .expect("MAX_CREDENTIAL_SPEC_ARGUMENTS should fit into i32")
                             {
-                                args.insert(i.to_string(), ArgumentValue::Int(i as i32));
+                                args.insert(i.to_string(), ArgumentValue::Int(i));
                             }
                             args
                         }),
@@ -862,7 +866,7 @@ mod user_profile {
                     current_user_version: None,
                 },
                 valid: false,
-            },
+            }
         ]
     );
 }

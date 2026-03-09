@@ -3,6 +3,7 @@
 use std::time::Duration;
 
 use candid::{Nat, Principal};
+use pretty_assertions::assert_eq;
 use shared::types::{
     signer::{
         topup::{
@@ -98,11 +99,10 @@ fn test_topup_fails_for_percentage_out_of_bounds() {
 
 fn setup_with_cycles_ledger() -> crate::utils::pocketic::PicBackend {
     // Creating a setup with cycles ledger similar to the one in pow.rs
-    let pic_setup = crate::utils::pocketic::BackendBuilder::default()
-        .with_cycles_ledger(true)
-        .deploy();
 
-    pic_setup
+    crate::utils::pocketic::BackendBuilder::default()
+        .with_cycles_ledger(true)
+        .deploy()
 }
 
 fn call_get_allowed_cycles(
@@ -156,7 +156,7 @@ fn test_get_allowed_cycles_returns_correct_amount() {
 
     assert!(result.is_ok());
     let response = result.unwrap();
-    assert_eq!(response.allowed_cycles, Nat::from(2917000000000u64));
+    assert_eq!(response.allowed_cycles, Nat::from(2_917_000_000_000_u64));
 }
 
 #[test]
@@ -223,7 +223,7 @@ fn test_housekeeping_lock_resets_after_failed_topup() {
 
 /// Verify that creating many user profiles in quick succession does not cause
 /// the canister to become unresponsive, even without a cycles ledger
-/// (each spawned allow_signing task will fail).
+/// (each spawned `allow_signing` task will fail).
 #[test]
 fn test_allow_signing_backpressure_under_burst() {
     let pic_setup = setup();
@@ -387,7 +387,7 @@ fn test_allow_signing_skips_rate_limit_when_allowance_sufficient() {
     // Confirm the allowance is indeed above threshold.
     let allowance =
         call_get_allowed_cycles(&pic_setup, caller).expect("get_allowed_cycles should succeed");
-    let expected = Nat::from(2917000000000u64);
+    let expected = Nat::from(2_917_000_000_000_u64);
     assert_eq!(
         allowance.allowed_cycles, expected,
         "unexpected allowance after profile creation; expected {expected}, got {}",
@@ -519,7 +519,7 @@ fn test_allow_signing_guard_resets_independently_of_business_limiter() {
     assert!(
         !matches!(
             result,
-            Err(AllowSigningError::RateLimited(_)) | Err(AllowSigningError::RateLimitedByGuard(_))
+            Err(AllowSigningError::RateLimited(_) | AllowSigningError::RateLimitedByGuard(_))
         ),
         "should not be rate-limited after both windows elapse: {result:?}"
     );

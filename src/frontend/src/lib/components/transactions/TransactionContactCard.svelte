@@ -49,8 +49,8 @@
 	let contact: ContactUi | undefined = $derived(
 		nonNullish(address)
 			? getContactForAddress({
-					contactList: $allContacts,
-					addressString: address
+					addressString: address,
+					contactList: $allContacts
 				})
 			: undefined
 	);

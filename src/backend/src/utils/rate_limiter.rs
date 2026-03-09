@@ -96,6 +96,7 @@ impl RateLimiter {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
     use shared::types::{bitcoin::SelectedUtxosFeeError, signer::AllowSigningError};
 
     use super::*;
@@ -111,7 +112,7 @@ mod tests {
         let rl = RateLimiter::new(3, 10 * ONE_SEC);
         let caller = test_principal(1);
 
-        assert!(rl.check_at(caller, 1 * ONE_SEC).is_ok());
+        assert!(rl.check_at(caller, ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 2 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 3 * ONE_SEC).is_ok());
     }
@@ -121,7 +122,7 @@ mod tests {
         let rl = RateLimiter::new(3, 10 * ONE_SEC);
         let caller = test_principal(1);
 
-        assert!(rl.check_at(caller, 1 * ONE_SEC).is_ok());
+        assert!(rl.check_at(caller, ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 2 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 3 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 4 * ONE_SEC).is_err());
@@ -132,7 +133,7 @@ mod tests {
         let rl = RateLimiter::new(2, 5 * ONE_SEC);
         let caller = test_principal(1);
 
-        assert!(rl.check_at(caller, 1 * ONE_SEC).is_ok());
+        assert!(rl.check_at(caller, ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 2 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 3 * ONE_SEC).is_err());
 
@@ -159,7 +160,7 @@ mod tests {
         let caller = test_principal(1);
 
         // Fill window: [t=1, t=3, t=5]
-        assert!(rl.check_at(caller, 1 * ONE_SEC).is_ok());
+        assert!(rl.check_at(caller, ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 3 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 5 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 5 * ONE_SEC).is_err());
