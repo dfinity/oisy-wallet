@@ -1,7 +1,7 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
 	AllowSigningResponse,
-	BitcoinNetwork,
+	Network as BitcoinNetwork,
 	Contact,
 	CredentialSpec,
 	GetUserProfileError,
