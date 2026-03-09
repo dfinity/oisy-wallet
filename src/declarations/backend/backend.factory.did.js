@@ -128,6 +128,7 @@ export const idlFactory = ({ IDL }) => {
 		InvalidUtxos: IDL.Null,
 		EmptyUtxos: IDL.Null,
 		DuplicateUtxos: IDL.Null,
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text }),
 		UtxosAlreadyReserved: IDL.Null
 	});
