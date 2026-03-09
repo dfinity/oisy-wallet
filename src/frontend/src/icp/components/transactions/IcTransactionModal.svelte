@@ -142,6 +142,7 @@
 					</output>
 				</ListItem>
 			{/if}
+
 			{#if nonNullish(approveExpiresAt)}
 				<ListItem>
 					<span>{$i18n.transaction?.text?.expiration}</span>
