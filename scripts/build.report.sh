@@ -6,8 +6,11 @@ CANISTER="$1"
 
 # Hash the files:
 sha256sum "out/${CANISTER}".* >out/filelist.txt
-# Get the metadata keys:
-ic-wasm <(gunzip <"./out/${CANISTER}.wasm.gz") metadata >out/metadata_keys.txt
+# Get the metadata keys (avoid process substitution: /dev/fd can break in build runners)
+tmp_wasm="$(mktemp)"
+gunzip -c "./out/${CANISTER}.wasm.gz" >"$tmp_wasm"
+ic-wasm "$tmp_wasm" metadata >out/metadata_keys.txt
+rm -f "$tmp_wasm"
 # Write a report
 {
   printf "\n%s\n" "$CANISTER:"
