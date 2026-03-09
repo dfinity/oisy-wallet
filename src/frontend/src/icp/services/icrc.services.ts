@@ -22,7 +22,6 @@ import {
 	type IcToken
 } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	mapIcrcToken,
@@ -53,6 +52,7 @@ import {
 	fromNullable,
 	isNullish,
 	nonNullish,
+	nowInBigIntNanoSeconds,
 	queryAndUpdate,
 	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';

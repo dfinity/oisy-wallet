@@ -1,6 +1,5 @@
 import { agreementsData } from '$env/agreements.env';
 import type { EnvAgreements } from '$env/types/env-agreements';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { updateUserAgreements } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -9,7 +8,7 @@ import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { AgreementsToAccept, UserAgreements } from '$lib/types/user-agreements';
 import { emit } from '$lib/utils/events.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const acceptAgreements = async ({

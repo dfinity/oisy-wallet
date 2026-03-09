@@ -3,11 +3,16 @@
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
+	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
-	import { mapAddressToName } from '$eth/utils/transactions.utils';
+	import {
+		decodeErc20AbiDataValue,
+		isMaxUint256,
+		mapAddressToName
+	} from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 	import List from '$lib/components/common/List.svelte';
@@ -27,6 +32,7 @@
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -45,7 +51,39 @@
 
 	const { transaction, token }: Props = $props();
 
-	let { from, value, timestamp, hash, blockNumber, to, type } = $derived(transaction);
+	let {
+		from,
+		value,
+		timestamp,
+		hash,
+		blockNumber,
+		to,
+		type,
+		approveSpender,
+		data,
+		gasUsed,
+		gasPrice
+	} = $derived(transaction);
+
+	let isApprove = $derived(type === 'approve');
+
+	let approveToken = $derived(
+		isApprove && nonNullish(to) && nonNullish(token)
+			? $ercFungibleTokens.find(
+					({ address, network: { id: networkId } }) =>
+						areAddressesEqual({ address1: address, address2: to, networkId }) &&
+						networkId === token.network.id
+				)
+			: undefined
+	);
+
+	let approveValue = $derived(
+		isApprove && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : undefined
+	);
+
+	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
+
+	let displayToken = $derived(approveToken ?? token);
 
 	let explorerBaseUrl = $derived(getExplorerUrl({ token }));
 
@@ -63,6 +101,10 @@
 		$ckEthMinterInfoStore?.[
 			isNetworkIdSepolia(token?.network.id) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
 		]
+	);
+
+	let approveSpenderExplorerUrl = $derived(
+		nonNullish(approveSpender) ? `${explorerBaseUrl}/address/${approveSpender}` : undefined
 	);
 
 	let fromDisplay: OptionString = $derived(
@@ -87,6 +129,23 @@
 			: to
 	);
 
+	let spenderDisplay = $derived(
+		isApprove && nonNullish(approveSpender) && nonNullish(token)
+			? (mapAddressToName({
+					address: approveSpender,
+					networkId: token.network.id,
+					erc20Tokens: $erc20Tokens,
+					ckMinterInfo
+				}) ?? undefined)
+			: undefined
+	);
+
+	let gasFee = $derived(
+		nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined
+	);
+
+	let fee = $derived(isApprove ? gasFee : undefined);
+
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openEthTransaction({
 			id: Symbol(),
@@ -110,19 +169,36 @@
 	<ContentWithToolbar>
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
-				{#if nonNullish(token)}
-					{#if isTokenNonFungible(token) && nonNullish(nft)}
+				{#if nonNullish(displayToken)}
+					{#if nonNullish(token) && isTokenNonFungible(token) && nonNullish(nft)}
 						<NftCard {nft} />
 					{:else}
-						<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
+						<TokenLogo badge={{ type: 'network' }} data={displayToken} logoSize="lg" />
 					{/if}
 				{/if}
 			{/snippet}
+
 			{#snippet subtitle()}
-				<span class="capitalize">{type}</span>
+				<span class="capitalize">{$i18n.transaction.type[type]}</span>
 			{/snippet}
+
 			{#snippet title()}
-				{#if nonNullish(token) && !isTokenErc721(token) && nonNullish(value)}
+				{#if isApprove && nonNullish(displayToken)}
+					<output>
+						{#if isUnlimitedApprove}
+							{replacePlaceholders($i18n.core.text.unlimited, {
+								$items: displayToken.symbol
+							})}
+						{:else if nonNullish(approveValue)}
+							{formatToken({
+								value: approveValue,
+								unitName: displayToken.decimals,
+								displayDecimals: displayToken.decimals
+							})}
+							{displayToken.symbol}
+						{/if}
+					</output>
+				{:else if nonNullish(token) && !isTokenErc721(token) && nonNullish(value)}
 					<output class:text-success-primary={type === 'receive'}>
 						{formatToken({
 							value,
@@ -136,7 +212,16 @@
 			{/snippet}
 		</ModalHero>
 
-		{#if nonNullish(to) && nonNullish(from)}
+		{#if isApprove && nonNullish(approveSpender)}
+			<TransactionContactCard
+				{approveSpender}
+				{approveSpenderExplorerUrl}
+				{from}
+				{fromExplorerUrl}
+				{onSaveAddressComplete}
+				type="approve"
+			/>
+		{:else if nonNullish(to) && nonNullish(from)}
 			<TransactionContactCard
 				{from}
 				{fromExplorerUrl}
@@ -229,6 +314,38 @@
 							copyAddressText={$i18n.transaction.text.to_copied}
 							externalLink={toExplorerUrl}
 							externalLinkAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+						/>
+					</span>
+				</ListItem>
+			{/if}
+
+			{#if isApprove && nonNullish(fee) && nonNullish(token)}
+				<ListItem>
+					<span>{$i18n.fee.text.fee}</span>
+
+					<output>
+						{formatToken({
+							value: fee,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
+
+			{#if isApprove && nonNullish(approveSpender)}
+				<ListItem>
+					<span>{$i18n.wallet_connect.text.spender}</span>
+
+					<span class="flex max-w-[50%] flex-row break-all">
+						<output>{spenderDisplay ?? shortenWithMiddleEllipsis({ text: approveSpender })}</output>
+
+						<AddressActions
+							copyAddress={approveSpender}
+							copyAddressText={$i18n.transaction.text.for_copied}
+							externalLink={approveSpenderExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_for_block_explorer}
 						/>
 					</span>
 				</ListItem>

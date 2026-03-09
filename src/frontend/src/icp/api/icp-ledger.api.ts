@@ -1,8 +1,7 @@
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import {
 	AccountIdentifier,
 	IcpLedgerCanister,
