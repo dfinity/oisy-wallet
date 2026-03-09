@@ -1,7 +1,6 @@
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcFeeResult } from '$icp/types/pay';
 import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
-import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -44,13 +43,17 @@ export const enrichIcPayableToken = ({
 
 	const { totalFee } = fee;
 
-	const exchangeRate = exchanges?.[tokenId]?.usd;
+	const exchangeRate = exchanges[tokenId]?.usd;
 
 	if (isNullish(exchangeRate)) {
 		return;
 	}
 
-	const balance = balances?.[tokenId]?.data ?? ZERO;
+	const balance = balances?.[tokenId]?.data;
+
+	if (isNullish(balance)) {
+		return;
+	}
 
 	const amountToPay = parseToken({
 		value: amount,
