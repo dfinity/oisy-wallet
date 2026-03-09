@@ -2,8 +2,8 @@ import { btcKnownDestinations, sortedBtcTransactions } from '$btc/derived/btc-tr
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import { BTC_MAINNET_TOKEN, BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { token } from '$lib/stores/token.store';
+import { nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 describe('btc-transactions.derived', () => {

@@ -12,7 +12,6 @@ import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { hasSufficientIcrcAllowance, loadCustomTokens } from '$icp/services/icrc.services';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
@@ -80,7 +79,7 @@ import {
 	mapVeloraSwapResult
 } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import {

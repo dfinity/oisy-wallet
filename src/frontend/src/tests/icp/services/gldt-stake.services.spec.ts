@@ -10,7 +10,6 @@ import {
 	withdrawGldtStakingDissolvedTokens
 } from '$icp/services/gldt-stake.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
-import * as dateUtils from '$icp/utils/date.utils';
 import * as backendApi from '$lib/api/backend.api';
 import * as appConstants from '$lib/constants/app.constants';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
@@ -22,7 +21,16 @@ import {
 import { stakePositionMockResponse } from '$tests/mocks/gldt_stake.mock';
 import { mockLedgerCanisterId, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
+
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn()
+	};
+});
 
 describe('gldt-stake.services', () => {
 	const mockProgress = vi.fn();
@@ -47,7 +55,7 @@ describe('gldt-stake.services', () => {
 			() => mockLedgerCanisterId
 		);
 		vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
-		vi.spyOn(dateUtils, 'nowInBigIntNanoSeconds').mockResolvedValue(987_654_321n);
+		vi.mocked(nowInBigIntNanoSeconds).mockReturnValue(987_654_321n);
 		vi.spyOn(gldtStakeApi, 'manageStakePosition').mockResolvedValue(stakePositionMockResponse);
 	});
 
@@ -60,7 +68,7 @@ describe('gldt-stake.services', () => {
 				identity: mockIdentity,
 				ledgerCanisterId: gldtToken.ledgerCanisterId,
 				amount: mockAmount + gldtToken.fee * 2n,
-				expiresAt: dateUtils.nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
 				spender: {
 					owner: Principal.from(mockLedgerCanisterId)
 				}
