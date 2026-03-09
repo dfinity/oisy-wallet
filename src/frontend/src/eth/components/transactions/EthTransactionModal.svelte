@@ -13,8 +13,6 @@
 		mapAddressToName
 	} from '$eth/utils/transactions.utils';
 	import { ckMinterBuiltInContacts } from '$icp-eth/derived/ck-minter-contacts.derived';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -94,10 +92,6 @@
 
 	let toExplorerUrl: string | undefined = $derived(
 		notEmptyString(to) ? `${explorerBaseUrl}/address/${to}` : undefined
-	);
-
-	let approveSpenderExplorerUrl: string | undefined = $derived(
-		nonNullish(approveSpender) ? `${explorerBaseUrl}/address/${approveSpender}` : undefined
 	);
 
 	let approveSpenderExplorerUrl = $derived(
