@@ -3,7 +3,7 @@ pub mod impls;
 use std::time::Duration;
 
 use candid::CandidType;
-use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
+use ic_cdk::bitcoin_canister::{MillisatoshiPerByte, Network as BitcoinNetwork, Utxo};
 use serde::Deserialize;
 
 use crate::types::signer::RateLimitError;
