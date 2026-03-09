@@ -15,6 +15,12 @@ import type {
 	PayableTokenWithFees
 } from '$lib/types/open-crypto-pay';
 import { formatCurrencyAsNumber } from '$lib/utils/format.utils';
+import {
+	isNetworkIdBitcoin,
+	isNetworkIdEthereum,
+	isNetworkIdEvm,
+	isNetworkIdICP
+} from '$lib/utils/network.utils';
 import { enrichTokensWithUsdAndBalance } from '$lib/utils/open-crypto-pay.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
@@ -30,7 +36,23 @@ export interface PayContext {
 	failedPaymentError: Writable<string | undefined>;
 }
 
-const createTokenComparator =
+const getNetworkTypePriority = ({ network: { id } }: PayableTokenWithConvertedAmount): number => {
+	if (isNetworkIdICP(id)) {
+		return 0;
+	}
+
+	if (isNetworkIdEthereum(id) || isNetworkIdEvm(id)) {
+		return 1;
+	}
+
+	if (isNetworkIdBitcoin(id)) {
+		return 2;
+	}
+
+	return 3;
+};
+
+export const createTokenComparator =
 	({
 		currency,
 		exchangeRate,
@@ -42,25 +64,35 @@ const createTokenComparator =
 	}) =>
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
 	(a: PayableTokenWithConvertedAmount, b: PayableTokenWithConvertedAmount): number => {
-		// Visual balance descending
-		const aSumForTie = formatCurrencyAsNumber({
+		// Sort by visual balance (fiat value) ascending
+		const aSum = formatCurrencyAsNumber({
 			value: a.sumInUSD,
 			currency,
 			exchangeRate,
 			language
 		});
-		const bSumForTie = formatCurrencyAsNumber({
+		const bSum = formatCurrencyAsNumber({
 			value: b.sumInUSD,
 			currency,
 			exchangeRate,
 			language
 		});
-		const sumDiff = Number(bSumForTie ?? 0) - Number(aSumForTie ?? 0);
+		const sumDiff = Number(aSum ?? 0) - Number(bSum ?? 0);
 		if (sumDiff !== 0) {
 			return sumDiff;
 		}
 
-		return 0;
+		const networkDiff = getNetworkTypePriority(a) - getNetworkTypePriority(b);
+		if (networkDiff !== 0) {
+			return networkDiff;
+		}
+
+		const symbolDiff = a.symbol.localeCompare(b.symbol);
+		if (symbolDiff !== 0) {
+			return symbolDiff;
+		}
+
+		return a.network.name.localeCompare(b.network.name);
 	};
 
 export const initPayContext = (): PayContext => {
