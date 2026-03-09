@@ -3,9 +3,6 @@
 	import { type Component, type Snippet, untrack } from 'svelte';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import type { EthNonFungibleToken } from '$eth/types/nft';
-	import { isTokenErc } from '$eth/utils/erc.utils';
-	import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
-	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -27,16 +24,15 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { findPutativeToken } from '$lib/utils/tokens.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
-	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
 		displayAmount?: bigint;
@@ -88,23 +84,7 @@
 					: undefined
 	);
 
-	const putativeToken = $derived(
-		nonNullish(address)
-			? $allTokens.find((t) =>
-					areAddressesEqual({
-						address1: address,
-						address2: isTokenIc(t)
-							? t.ledgerCanisterId
-							: isTokenErc(t) || isTokenSpl(t)
-								? t.address
-								: isTokenIcNft(t)
-									? t.canisterId
-									: undefined,
-						networkId: t.network.id
-					})
-				)
-			: undefined
-	);
+	const putativeToken = $derived(findPutativeToken({ tokens: $allTokens, identifier: address }));
 
 	const contact = $derived(
 		nonNullish(address)
