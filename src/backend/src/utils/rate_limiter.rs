@@ -96,12 +96,11 @@ impl RateLimiter {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
     use shared::types::{
         bitcoin::{BtcAddPendingTransactionError, SelectedUtxosFeeError},
         signer::AllowSigningError,
     };
-    use pretty_assertions::assert_eq;
-    use shared::types::{bitcoin::SelectedUtxosFeeError, signer::AllowSigningError};
 
     use super::*;
 
