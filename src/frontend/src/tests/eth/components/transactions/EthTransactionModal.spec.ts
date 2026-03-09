@@ -33,11 +33,15 @@ const [mockErc721TransactionUi] = createMockNftTransactionsUi(1);
 describe('EthTransactionModal', () => {
 	const mockApproveSpender = '0x1234567890abcdef1234567890abcdef12345678';
 
+	// { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: 1000000n }
+	const mockData =
+		'0x26b3293f000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000f42401db5f0b9209d75b4b358ddd228eb7097ccec7b8f65e0acef29e51271ce020000';
+
 	const mockApproveTransactionUi = {
 		...mockEthTransactionUi,
 		type: 'approve' as const,
 		approveSpender: mockApproveSpender,
-		data: undefined,
+		data: mockData,
 		gasUsed: 21_000n,
 		gasPrice: 1_000_000_000n
 	};
@@ -144,6 +148,21 @@ describe('EthTransactionModal', () => {
 		});
 
 		expect(getByText(shortenWithMiddleEllipsis({ text: mockApproveSpender }))).toBeInTheDocument();
+	});
+
+	it('should display approved amount for approve transaction', () => {
+		const { getAllByText } = render(EthTransactionModal, {
+			transaction: mockApproveTransactionUi,
+			token: ETHEREUM_TOKEN
+		});
+
+		const formattedAmount = `${formatToken({
+			value: 1000000n,
+			unitName: ETHEREUM_TOKEN.decimals,
+			displayDecimals: ETHEREUM_TOKEN.decimals
+		})} ${ETHEREUM_TOKEN.symbol}`;
+
+		expect(getAllByText(formattedAmount)[0]).toBeInTheDocument();
 	});
 
 	it('should display fee for approve transaction', () => {
