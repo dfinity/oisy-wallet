@@ -13,6 +13,8 @@
 		mapAddressToName
 	} from '$eth/utils/transactions.utils';
 	import { ckMinterBuiltInContacts } from '$icp-eth/derived/ck-minter-contacts.derived';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -48,8 +50,19 @@
 
 	const { transaction, token }: Props = $props();
 
-	let { from, value, timestamp, hash, blockNumber, to, type, approveSpender, data } =
-		$derived(transaction);
+	let {
+		from,
+		value,
+		timestamp,
+		hash,
+		blockNumber,
+		to,
+		type,
+		approveSpender,
+		data,
+		gasUsed,
+		gasPrice
+	} = $derived(transaction);
 
 	let isApprove = $derived(type === 'approve');
 
@@ -87,6 +100,10 @@
 		nonNullish(approveSpender) ? `${explorerBaseUrl}/address/${approveSpender}` : undefined
 	);
 
+	let approveSpenderExplorerUrl = $derived(
+		nonNullish(approveSpender) ? `${explorerBaseUrl}/address/${approveSpender}` : undefined
+	);
+
 	let fromDisplay: OptionString = $derived(
 		nonNullish(token)
 			? (mapAddressToName({
@@ -109,7 +126,7 @@
 			: to
 	);
 
-	let spenderDisplay: OptionString = $derived(
+	let spenderDisplay = $derived(
 		isApprove && nonNullish(approveSpender) && nonNullish(token)
 			? (mapAddressToName({
 					address: approveSpender,
@@ -119,6 +136,12 @@
 				}) ?? undefined)
 			: undefined
 	);
+
+	let gasFee = $derived(
+		nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined
+	);
+
+	let fee = $derived(isApprove ? gasFee : undefined);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openEthTransaction({
@@ -151,9 +174,11 @@
 					{/if}
 				{/if}
 			{/snippet}
+
 			{#snippet subtitle()}
 				<span class="capitalize">{$i18n.transaction.type[type]}</span>
 			{/snippet}
+
 			{#snippet title()}
 				{#if isApprove && nonNullish(displayToken)}
 					<output>
@@ -291,12 +316,27 @@
 				</ListItem>
 			{/if}
 
-			{#if isApprove && nonNullish(approveSpender) && nonNullish(spenderDisplay)}
+			{#if isApprove && nonNullish(fee) && nonNullish(token)}
+				<ListItem>
+					<span>{$i18n.fee.text.fee}</span>
+
+					<output>
+						{formatToken({
+							value: fee,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
+
+			{#if isApprove && nonNullish(approveSpender)}
 				<ListItem>
 					<span>{$i18n.wallet_connect.text.spender}</span>
 
 					<span class="flex max-w-[50%] flex-row break-all">
-						<output>{spenderDisplay}</output>
+						<output>{spenderDisplay ?? shortenWithMiddleEllipsis({ text: approveSpender })}</output>
 
 						<AddressActions
 							copyAddress={approveSpender}
