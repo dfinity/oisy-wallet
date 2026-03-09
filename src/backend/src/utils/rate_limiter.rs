@@ -100,6 +100,7 @@ mod tests {
         bitcoin::{BtcAddPendingTransactionError, SelectedUtxosFeeError},
         signer::AllowSigningError,
     };
+
     use super::*;
 
     fn test_principal(id: u8) -> Principal {
