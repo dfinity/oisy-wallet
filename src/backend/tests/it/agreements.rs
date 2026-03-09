@@ -1,12 +1,14 @@
+use std::sync::LazyLock;
+
 use candid::Principal;
-use lazy_static::lazy_static;
+use pretty_assertions::assert_eq;
 use shared::types::{
     agreement::{
         UpdateAgreementsError, UpdateUserAgreementsRequest, UserAgreement, UserAgreements,
         SHA256_HEX_LENGTH,
     },
     user_profile::{GetUserProfileError, UserProfile},
-    Timestamp,
+    Timestamp, Version,
 };
 
 use crate::utils::{
@@ -14,32 +16,76 @@ use crate::utils::{
     pocketic::{setup, PicCanisterTrait},
 };
 
-lazy_static! {
-    pub static ref EMPTY_AGREEMENTS: UserAgreements = UserAgreements::default();
-    pub static ref INITIAL_AGREEMENTS: UserAgreements = UserAgreements {
-        license_agreement: UserAgreement {
-            accepted: Some(true),
+pub static EMPTY_AGREEMENTS: LazyLock<UserAgreements> = LazyLock::new(UserAgreements::default);
+
+pub static INITIAL_AGREEMENTS: LazyLock<UserAgreements> = LazyLock::new(|| UserAgreements {
+    license_agreement: UserAgreement {
+        accepted: Some(true),
+        ..Default::default()
+    },
+    terms_of_use: UserAgreement::default(),
+    privacy_policy: UserAgreement::default(),
+});
+
+pub static NEW_AGREEMENTS: LazyLock<UserAgreements> = LazyLock::new(|| UserAgreements {
+    license_agreement: UserAgreement {
+        accepted: None,
+        ..Default::default()
+    },
+    terms_of_use: UserAgreement {
+        accepted: Some(true),
+        ..Default::default()
+    },
+    privacy_policy: UserAgreement {
+        accepted: Some(false),
+        ..Default::default()
+    },
+});
+
+pub static UPDATED_AGREEMENTS_ACCEPTED: LazyLock<(Option<bool>, Option<bool>, Option<bool>)> =
+    LazyLock::new(|| (Some(true), Some(true), Some(false)));
+
+fn assert_invalid_sha256(
+    pic_setup: &impl PicCanisterTrait,
+    caller: Principal,
+    profile_version: Option<Version>,
+    invalid_sha256: &str,
+) {
+    let arg = UpdateUserAgreementsRequest {
+        current_user_version: profile_version,
+        agreements: UserAgreements {
+            license_agreement: UserAgreement {
+                accepted: Some(true),
+                text_sha256: Some(invalid_sha256.to_string()),
+                ..Default::default()
+            },
             ..Default::default()
         },
-        terms_of_use: UserAgreement::default(),
-        privacy_policy: UserAgreement::default(),
     };
-    pub static ref NEW_AGREEMENTS: UserAgreements = UserAgreements {
-        license_agreement: UserAgreement {
-            accepted: None,
-            ..Default::default()
-        },
-        terms_of_use: UserAgreement {
-            accepted: Some(true),
-            ..Default::default()
-        },
-        privacy_policy: UserAgreement {
-            accepted: Some(false),
-            ..Default::default()
-        },
-    };
-    pub static ref UPDATED_AGREEMENTS_ACCEPTED: (Option<bool>, Option<bool>, Option<bool>) =
-        (Some(true), Some(true), Some(false),);
+
+    let resp = pic_setup.update::<Result<(), UpdateAgreementsError>>(
+        caller,
+        "update_user_agreements",
+        arg,
+    );
+
+    assert!(resp.is_err());
+    assert!(resp.unwrap_err().contains(
+        format!(
+            "Invalid SHA256 hex length: {}, expected {}",
+            invalid_sha256.len(),
+            SHA256_HEX_LENGTH
+        )
+        .as_str()
+    ));
+
+    let user_profile = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    let agreements = user_profile.agreements.unwrap().agreements;
+    assert_eq!(agreements.license_agreement.text_sha256, None);
 }
 
 #[test]
@@ -378,117 +424,19 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
         .update::<UserProfile>(caller, "create_user_profile", ())
         .expect("Create failed");
 
-    let invalid_sha256 = "a".repeat(SHA256_HEX_LENGTH - 1);
-
-    let arg = UpdateUserAgreementsRequest {
-        current_user_version: profile.version,
-        agreements: UserAgreements {
-            license_agreement: UserAgreement {
-                accepted: Some(true),
-                text_sha256: Some(invalid_sha256.clone()),
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-    };
-
-    let resp = pic_setup.update::<Result<(), UpdateAgreementsError>>(
+    assert_invalid_sha256(
+        &pic_setup,
         caller,
-        "update_user_agreements",
-        arg,
+        profile.version,
+        &"a".repeat(SHA256_HEX_LENGTH - 1),
     );
 
-    assert!(resp.is_err());
-    assert!(resp.unwrap_err().contains(
-        format!(
-            "Invalid SHA256 hex length: {}, expected {}",
-            invalid_sha256.len(),
-            SHA256_HEX_LENGTH
-        )
-        .as_str()
-    ));
-
-    let user_profile = pic_setup
-        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
-        .unwrap()
-        .unwrap();
-
-    let agreements = user_profile.agreements.unwrap().agreements;
-    assert_eq!(agreements.license_agreement.text_sha256, None);
-
-    let invalid_sha256 = "a".repeat(SHA256_HEX_LENGTH + 1);
-
-    let arg = UpdateUserAgreementsRequest {
-        current_user_version: profile.version,
-        agreements: UserAgreements {
-            license_agreement: UserAgreement {
-                accepted: Some(true),
-                text_sha256: Some(invalid_sha256.clone()),
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-    };
-
-    let resp = pic_setup.update::<Result<(), UpdateAgreementsError>>(
+    assert_invalid_sha256(
+        &pic_setup,
         caller,
-        "update_user_agreements",
-        arg,
+        profile.version,
+        &"a".repeat(SHA256_HEX_LENGTH + 1),
     );
 
-    assert!(resp.is_err());
-    assert!(resp.unwrap_err().contains(
-        format!(
-            "Invalid SHA256 hex length: {}, expected {}",
-            invalid_sha256.len(),
-            SHA256_HEX_LENGTH
-        )
-        .as_str()
-    ));
-
-    let user_profile = pic_setup
-        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
-        .unwrap()
-        .unwrap();
-
-    let agreements = user_profile.agreements.unwrap().agreements;
-    assert_eq!(agreements.license_agreement.text_sha256, None);
-
-    let invalid_sha256 = "";
-
-    let arg = UpdateUserAgreementsRequest {
-        current_user_version: profile.version,
-        agreements: UserAgreements {
-            license_agreement: UserAgreement {
-                accepted: Some(true),
-                text_sha256: Some(invalid_sha256.parse().unwrap()),
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-    };
-
-    let resp = pic_setup.update::<Result<(), UpdateAgreementsError>>(
-        caller,
-        "update_user_agreements",
-        arg,
-    );
-
-    assert!(resp.is_err());
-    assert!(resp.unwrap_err().contains(
-        format!(
-            "Invalid SHA256 hex length: {}, expected {}",
-            invalid_sha256.len(),
-            SHA256_HEX_LENGTH
-        )
-        .as_str()
-    ));
-
-    let user_profile = pic_setup
-        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
-        .unwrap()
-        .unwrap();
-
-    let agreements = user_profile.agreements.unwrap().agreements;
-    assert_eq!(agreements.license_agreement.text_sha256, None);
+    assert_invalid_sha256(&pic_setup, caller, profile.version, "");
 }

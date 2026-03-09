@@ -18,7 +18,7 @@
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { TRANSACTION_CHILDREN_CONTAINER } from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
-	import { contacts } from '$lib/derived/contacts.derived';
+	import { allContacts } from '$lib/derived/contacts.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -108,7 +108,7 @@
 
 	const contact = $derived(
 		nonNullish(address)
-			? getContactForAddress({ addressString: address, contactList: $contacts })
+			? getContactForAddress({ addressString: address, contactList: $allContacts })
 			: undefined
 	);
 

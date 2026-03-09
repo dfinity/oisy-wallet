@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
-	import { contacts } from '$lib/derived/contacts.derived';
+	import { allContacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 
@@ -13,7 +13,7 @@
 	let { destination }: Props = $props();
 
 	let contact = $derived(
-		getContactForAddress({ addressString: destination, contactList: $contacts })
+		getContactForAddress({ addressString: destination, contactList: $allContacts })
 	);
 
 	let contactAddress = $derived(filterAddressFromContact({ contact, address: destination }));

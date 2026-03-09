@@ -182,6 +182,8 @@ async fn hourly_housekeeping_tasks() {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     fn reset_housekeeping() {

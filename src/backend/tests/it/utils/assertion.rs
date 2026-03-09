@@ -1,3 +1,4 @@
+use pretty_assertions::assert_eq;
 use shared::types::custom_token::CustomToken;
 
 pub fn assert_tokens_data_eq<T: PartialEq + std::fmt::Debug>(
@@ -18,10 +19,7 @@ pub fn assert_tokens_data_eq<T: PartialEq + std::fmt::Debug>(
     }
 }
 
-pub fn assert_custom_tokens_eq(
-    results_tokens: Vec<CustomToken>,
-    expected_tokens: Vec<CustomToken>,
-) {
+pub fn assert_custom_tokens_eq(results_tokens: &[CustomToken], expected_tokens: &[CustomToken]) {
     assert_eq!(
         results_tokens.len(),
         expected_tokens.len(),

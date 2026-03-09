@@ -3,6 +3,10 @@ set -euo pipefail
 
 FIX_ARGS=()
 
+# On native targets, ic_cdk print macros expand to their std:: equivalents
+# (the wasm32 run above already enforces disallowed_macros on production code).
+DISALLOWED_MACROS_ALLOW=(-- -A clippy::disallowed_macros)
+
 [[ "${1:-}" != "--help" ]] || {
   cat <<-EOF
 
@@ -29,4 +33,19 @@ for crate in src/backend/Cargo.toml src/shared/Cargo.toml; do
     --locked \
     --target wasm32-unknown-unknown \
     --all-features
+
+  cargo clippy "${FIX_ARGS[@]}" \
+    --manifest-path "$crate" \
+    --locked \
+    --all-features \
+    --tests \
+    "${DISALLOWED_MACROS_ALLOW[@]}"
+
+  cargo clippy "${FIX_ARGS[@]}" \
+    --manifest-path "$crate" \
+    --locked \
+    --all-features \
+    --examples \
+    --benches \
+    "${DISALLOWED_MACROS_ALLOW[@]}"
 done
