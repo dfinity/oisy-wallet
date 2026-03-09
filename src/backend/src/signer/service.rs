@@ -7,6 +7,7 @@ use ic_cdk::api::{
         bitcoin::BitcoinNetwork,
         ecdsa::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument},
     },
+    msg_caller,
 };
 use ic_cycles_ledger_client::{
     Account, AllowanceArgs, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
@@ -80,7 +81,7 @@ const SUFFICIENT_CYCLES_THRESHOLD: u64 = (LEDGER_FEE + SIGNER_FEE) * 18;
 pub async fn get_allowed_cycles() -> Result<Nat, GetAllowedCyclesError> {
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
-    let caller = ic_cdk::caller();
+    let caller = msg_caller();
 
     // Create the AllowanceArgs structure as specified in the JSON
     let allowance_args = AllowanceArgs {
@@ -130,7 +131,7 @@ pub async fn has_sufficient_allowance() -> Option<Nat> {
 pub async fn approve_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigningError> {
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
-    let caller = ic_cdk::caller();
+    let caller = msg_caller();
 
     let amount = Nat::from(allowed_cycles.unwrap_or_else(per_user_cycles_allowance));
 

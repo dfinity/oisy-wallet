@@ -32,12 +32,14 @@ for crate in src/backend/Cargo.toml src/shared/Cargo.toml; do
     --manifest-path "$crate" \
     --locked \
     --target wasm32-unknown-unknown \
-    --all-features
+    --all-features \
+    -- -W deprecated
 
   cargo clippy "${FIX_ARGS[@]}" \
     --manifest-path "$crate" \
     --locked \
     --all-features \
+    -- -W deprecated \
     --tests \
     "${DISALLOWED_MACROS_ALLOW[@]}"
 
@@ -45,6 +47,7 @@ for crate in src/backend/Cargo.toml src/shared/Cargo.toml; do
     --manifest-path "$crate" \
     --locked \
     --all-features \
+    -- -W deprecated \
     --examples \
     --benches \
     "${DISALLOWED_MACROS_ALLOW[@]}"

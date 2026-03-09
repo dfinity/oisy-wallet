@@ -4,6 +4,7 @@ use std::{
 };
 
 use candid::Principal;
+use ic_cdk::api::msg_caller;
 use shared::types::signer::RateLimitError;
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
@@ -61,7 +62,7 @@ impl RateLimiter {
     /// Records the call timestamp when within limits; returns
     /// [`RateLimitError`] when the limit has been reached.
     pub fn check_caller(&self) -> Result<(), RateLimitError> {
-        self.check_principal(ic_cdk::caller())
+        self.check_principal(msg_caller())
     }
 
     /// Checks the rate limit for a given principal at a specific timestamp.
