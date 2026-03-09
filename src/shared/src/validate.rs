@@ -53,7 +53,7 @@ macro_rules! test_validate_on_deserialize {
             } in $test_vectors
             {
                 let result = input.validate();
-                assert_eq!(
+                pretty_assertions::assert_eq!(
                     valid,
                     result.is_ok(),
                     "Validation does not match for: {} yielding: {:?}",
@@ -62,14 +62,14 @@ macro_rules! test_validate_on_deserialize {
                 );
                 let candid = Encode!(&input).unwrap();
                 let result: Result<$type, _> = Decode!(&candid, $type);
-                assert_eq!(
+                pretty_assertions::assert_eq!(
                     valid,
                     result.is_ok(),
                     "Candid deserialization did not match for: {}",
                     description
                 );
                 if valid {
-                    assert_eq!(input, result.unwrap());
+                    pretty_assertions::assert_eq!(input, result.unwrap());
                 }
             }
         }

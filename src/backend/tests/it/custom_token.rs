@@ -1,6 +1,7 @@
 use std::sync::LazyLock;
 
 use candid::Principal;
+use pretty_assertions::assert_eq;
 use shared::types::{
     custom_token::{
         ChainId, CustomToken, Dip721Token, ErcToken, ErcTokenId, ExtV2Token, IcPunksToken,
@@ -65,7 +66,7 @@ static ERC20_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
 static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc20(ErcToken {
         token_address: ERC20_TOKEN_ID.clone(),
-        chain_id: ERC20_CHAIN_ID.clone(),
+        chain_id: *ERC20_CHAIN_ID,
     }),
     enabled: true,
     version: None,
@@ -78,7 +79,7 @@ static ERC4626_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
 static ERC4626_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc20(ErcToken {
         token_address: ERC4626_TOKEN_ID.clone(),
-        chain_id: ERC4626_CHAIN_ID.clone(),
+        chain_id: *ERC4626_CHAIN_ID,
     }),
     enabled: true,
     version: None,
@@ -91,7 +92,7 @@ static ERC721_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 137);
 static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc721(ErcToken {
         token_address: ERC721_TOKEN_ID.clone(),
-        chain_id: ERC721_CHAIN_ID.clone(),
+        chain_id: *ERC721_CHAIN_ID,
     }),
     enabled: true,
     version: None,
@@ -104,7 +105,7 @@ static ERC1155_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 42161);
 static ERC1155_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc1155(ErcToken {
         token_address: ERC1155_TOKEN_ID.clone(),
-        chain_id: ERC1155_CHAIN_ID.clone(),
+        chain_id: *ERC1155_CHAIN_ID,
     }),
     enabled: true,
     version: None,
@@ -181,52 +182,52 @@ fn test_add_custom_token(user_token: &CustomToken) {
 
 #[test]
 fn test_remove_custom_spl_token() {
-    test_remove_custom_token(&SPL_TOKEN)
+    test_remove_custom_token(&SPL_TOKEN);
 }
 
 #[test]
 fn test_remove_custom_erc20_token() {
-    test_remove_custom_token(&ERC20_TOKEN)
+    test_remove_custom_token(&ERC20_TOKEN);
 }
 
 #[test]
 fn test_remove_custom_erc721_token() {
-    test_remove_custom_token(&ERC721_TOKEN)
+    test_remove_custom_token(&ERC721_TOKEN);
 }
 
 #[test]
 fn test_remove_custom_erc1155_token() {
-    test_remove_custom_token(&ERC1155_TOKEN)
+    test_remove_custom_token(&ERC1155_TOKEN);
 }
 
 #[test]
 fn test_remove_custom_erc4626_token() {
-    test_remove_custom_token(&ERC4626_TOKEN)
+    test_remove_custom_token(&ERC4626_TOKEN);
 }
 
 #[test]
 fn test_remove_custom_icrc_token() {
-    test_remove_custom_token(&USER_TOKEN)
+    test_remove_custom_token(&USER_TOKEN);
 }
 
 #[test]
 fn test_remove_custom_ext_v2_token() {
-    test_remove_custom_token(&EXT_V2_TOKEN)
+    test_remove_custom_token(&EXT_V2_TOKEN);
 }
 
 #[test]
 fn test_remove_custom_di721_token() {
-    test_remove_custom_token(&DIP721_TOKEN)
+    test_remove_custom_token(&DIP721_TOKEN);
 }
 
 #[test]
 fn test_remove_custom_icpunks_token() {
-    test_remove_custom_token(&ICPUNKS_TOKEN)
+    test_remove_custom_token(&ICPUNKS_TOKEN);
 }
 
 #[test]
 fn test_remove_custom_no_index_token() {
-    test_remove_custom_token(&USER_TOKEN_NO_INDEX)
+    test_remove_custom_token(&USER_TOKEN_NO_INDEX);
 }
 
 fn test_remove_custom_token(token: &CustomToken) {
@@ -281,14 +282,14 @@ fn test_update_custom_token(user_token: &CustomToken) {
 
     assert!(results.is_ok());
 
-    assert_custom_tokens_eq(results.clone().unwrap(), expected_tokens);
+    assert_custom_tokens_eq(&results.clone().unwrap(), &expected_tokens);
 
     let update_token: CustomToken = CustomToken {
         enabled: false,
         token: user_token.token.clone(),
         version: results.unwrap().first().unwrap().version,
         section: user_token.section.clone(),
-        allow_external_content_source: user_token.allow_external_content_source.clone(),
+        allow_external_content_source: user_token.allow_external_content_source,
     };
 
     let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
@@ -303,7 +304,7 @@ fn test_update_custom_token(user_token: &CustomToken) {
 
     let updated_tokens = updated_results.unwrap();
 
-    assert_custom_tokens_eq(updated_tokens.clone(), expected_updated_tokens);
+    assert_custom_tokens_eq(&updated_tokens.clone(), &expected_updated_tokens);
 }
 
 #[test]
@@ -371,14 +372,14 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
         ANOTHER_USER_TOKEN.with_incremented_version(),
     ];
 
-    assert_custom_tokens_eq(results.clone().unwrap(), expected_tokens);
+    assert_custom_tokens_eq(&results.clone().unwrap(), &expected_tokens);
 
     let update_token: CustomToken = CustomToken {
         enabled: false,
         token: user_token.token.clone(),
         version: results.clone().unwrap().first().unwrap().version,
         section: user_token.section.clone(),
-        allow_external_content_source: user_token.allow_external_content_source.clone(),
+        allow_external_content_source: user_token.allow_external_content_source,
     };
 
     let update_another_token: CustomToken = CustomToken {
@@ -386,7 +387,7 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
         token: ANOTHER_USER_TOKEN.token.clone(),
         version: results.unwrap().get(1).unwrap().version,
         section: user_token.section.clone(),
-        allow_external_content_source: user_token.allow_external_content_source.clone(),
+        allow_external_content_source: user_token.allow_external_content_source,
     };
 
     let update_tokens: Vec<CustomToken> = vec![update_token.clone(), update_another_token.clone()];
@@ -405,9 +406,9 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
         update_another_token.with_incremented_version(),
     ];
 
-    let updated_tokens = updated_results.unwrap();
+    let reupdated_tokens = updated_results.unwrap();
 
-    assert_custom_tokens_eq(updated_tokens.clone(), expected_update_tokens);
+    assert_custom_tokens_eq(&reupdated_tokens.clone(), &expected_update_tokens);
 }
 
 #[test]
@@ -431,7 +432,7 @@ fn test_list_custom_tokens() {
 
     let list_tokens = results.unwrap();
 
-    assert_custom_tokens_eq(list_tokens.clone(), expected_tokens);
+    assert_custom_tokens_eq(&list_tokens.clone(), &expected_tokens);
 }
 
 #[test]
@@ -458,7 +459,7 @@ fn test_cannot_update_custom_token_without_version(user_token: &CustomToken) {
         token: user_token.token.clone(),
         version: None,
         section: user_token.section.clone(),
-        allow_external_content_source: user_token.allow_external_content_source.clone(),
+        allow_external_content_source: user_token.allow_external_content_source,
     };
 
     let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
@@ -491,9 +492,9 @@ fn test_cannot_update_custom_token_with_invalid_version(user_token: &CustomToken
     let update_token: CustomToken = CustomToken {
         enabled: false,
         token: user_token.token.clone(),
-        version: Some(123456789),
+        version: Some(123_456_789),
         section: user_token.section.clone(),
-        allow_external_content_source: user_token.allow_external_content_source.clone(),
+        allow_external_content_source: user_token.allow_external_content_source,
     };
 
     let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());

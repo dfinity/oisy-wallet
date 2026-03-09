@@ -3501,6 +3501,7 @@ dependencies = [
  "ic-metrics-encoder",
  "ic-verifiable-credentials",
  "paste",
+ "pretty_assertions",
  "serde",
  "serde_bytes",
  "sha2 0.10.9",

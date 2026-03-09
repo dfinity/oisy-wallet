@@ -29,4 +29,17 @@ for crate in src/backend/Cargo.toml src/shared/Cargo.toml; do
     --locked \
     --target wasm32-unknown-unknown \
     --all-features
+
+  cargo clippy "${FIX_ARGS[@]}" \
+    --manifest-path "$crate" \
+    --locked \
+    --all-features \
+    --tests
+
+  cargo clippy "${FIX_ARGS[@]}" \
+    --manifest-path "$crate" \
+    --locked \
+    --all-features \
+    --examples \
+    --benches
 done
