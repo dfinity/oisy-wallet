@@ -11,7 +11,9 @@ import {
 	mapAddressToName,
 	mapEthTransactionUi
 } from '$eth/utils/transactions.utils';
+import { toCkMinterBuiltInContacts } from '$icp-eth/utils/ck-minter-contacts.utils';
 import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
+import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction } from '$lib/types/transaction';
@@ -50,11 +52,15 @@ describe('transactions.utils', () => {
 			certified: false
 		};
 
+		const mockBuiltInContacts: ContactUi[] = toCkMinterBuiltInContacts({
+			minterInfo: mockMinterInfo
+		});
+
 		const mockParams = {
 			address: mockAddress,
 			networkId: mockNetworkId,
 			erc20Tokens: mockErc20Tokens,
-			ckMinterInfo: mockMinterInfo
+			builtInContacts: mockBuiltInContacts
 		};
 
 		it('should return undefined if the address is nullish', () => {
@@ -143,12 +149,12 @@ describe('transactions.utils', () => {
 			).toBe('CK Ethereum Minter');
 		});
 
-		it('should return undefined if the CK Helper Contract info are nullish', () => {
+		it('should return undefined if no built-in contacts are provided', () => {
 			expect(
 				mapAddressToName({
 					...mockParams,
 					address: mockEthHelperContractAddress,
-					ckMinterInfo: undefined
+					builtInContacts: []
 				})
 			).toBeUndefined();
 
@@ -156,7 +162,7 @@ describe('transactions.utils', () => {
 				mapAddressToName({
 					...mockParams,
 					address: mockErc20HelperContractAddress,
-					ckMinterInfo: null
+					builtInContacts: undefined
 				})
 			).toBeUndefined();
 		});
