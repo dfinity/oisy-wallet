@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use candid::Principal;
-use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Outpoint, Utxo};
+use ic_cdk::bitcoin_canister::{Network as BitcoinNetwork, Outpoint, Utxo};
 use pretty_assertions::assert_eq;
 use shared::types::{
     bitcoin::{

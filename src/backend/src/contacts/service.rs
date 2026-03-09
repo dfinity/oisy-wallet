@@ -31,7 +31,7 @@ pub(crate) async fn create_contact(request: CreateContactRequest) -> Result<Cont
                 contacts
             } else {
                 // Log deserialization failure and create empty contacts
-                ic_cdk::api::print(format!(
+                ic_cdk::api::debug_print(format!(
                     "Failed to deserialize contacts for principal: {}. Creating empty contacts.",
                     stored_principal.0
                 ));
@@ -123,7 +123,7 @@ pub(crate) fn update_contact(request: UpdateContactRequest) -> Result<Contact, C
                 contacts
             } else {
                 // Log deserialization failure and create empty contacts
-                ic_cdk::api::print(format!(
+                ic_cdk::api::debug_print(format!(
                     "Failed to deserialize contacts for principal: {}. Creating empty contacts.",
                     stored_principal.0
                 ));
@@ -185,7 +185,7 @@ fn get_stored_contacts_safely(stored_principal: &StoredPrincipal) -> StoredConta
                 contacts
             } else {
                 // Log deserialization failure and return empty contacts
-                ic_cdk::api::print(format!(
+                ic_cdk::api::debug_print(format!(
                     "Failed to deserialize contacts for principal: {}. Creating empty contacts.",
                     stored_principal.0
                 ));

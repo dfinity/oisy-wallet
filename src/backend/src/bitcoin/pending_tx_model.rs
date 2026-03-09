@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use candid::Principal;
-use ic_cdk::api::management_canister::bitcoin::Utxo;
+use ic_cdk::bitcoin_canister::Utxo;
 use shared::types::bitcoin::StoredPendingTransaction;
 
 use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
@@ -185,7 +185,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
 mod tests {
     use std::{cell::RefCell, collections::HashMap, sync::LazyLock};
 
-    use ic_cdk::api::management_canister::bitcoin::Outpoint;
+    use ic_cdk::bitcoin_canister::Outpoint;
     use ic_stable_structures::{
         memory_manager::{MemoryId, MemoryManager},
         DefaultMemoryImpl,
