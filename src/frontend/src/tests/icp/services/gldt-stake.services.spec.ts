@@ -55,7 +55,7 @@ describe('gldt-stake.services', () => {
 			() => mockLedgerCanisterId
 		);
 		vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
-		vi.mocked(nowInBigIntNanoSeconds).mockResolvedValue(987_654_321n);
+		vi.mocked(nowInBigIntNanoSeconds).mockReturnValue(987_654_321n);
 		vi.spyOn(gldtStakeApi, 'manageStakePosition').mockResolvedValue(stakePositionMockResponse);
 	});
 
