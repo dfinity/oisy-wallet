@@ -8,6 +8,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Transaction } from '$lib/types/transaction';
 import type { Option } from '$lib/types/utils';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 import { getContactForAddress } from '$lib/utils/contact.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { AbiCoder } from 'ethers/abi';
@@ -65,12 +66,13 @@ export const mapAddressToName = ({
 	builtInContacts?: ContactUi[];
 }): OptionString => {
 	if (isNullish(address)) {
-		return undefined;
+		return;
 	}
 
 	const putativeErc20TokenName: string | undefined = erc20Tokens.find(
 		({ address: tokenAddress, network: { id: tokenNetworkId } }) =>
-			tokenAddress === address && tokenNetworkId === networkId
+			areAddressesEqual({ address1: tokenAddress, address2: address, networkId }) &&
+			tokenNetworkId === networkId
 	)?.name;
 
 	const builtInContact = getContactForAddress({
