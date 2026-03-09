@@ -9,7 +9,6 @@ import {
 	loadDisabledIcrcTokensExchanges
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
@@ -31,7 +30,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, nonNullish, nowInBigIntNanoSeconds, toNullable } from '@dfinity/utils';
 import {
 	IcrcLedgerCanister,
 	fromCandidAccount,

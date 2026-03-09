@@ -1,9 +1,13 @@
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterApiFunctionParams, CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import { assertNonNullish, fromDefinedNullable, type QueryParams } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	fromDefinedNullable,
+	nowInBigIntNanoSeconds,
+	type QueryParams
+} from '@dfinity/utils';
 import {
 	IcrcLedgerCanister,
 	fromCandidAccount,

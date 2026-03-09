@@ -1,7 +1,10 @@
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcFeeResult } from '$icp/types/pay';
 import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
+import type { BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { i18n } from '$lib/stores/i18n.store';
+import type { ExchangesData } from '$lib/types/exchange';
 import type { NetworkOpenCryptoPay } from '$lib/types/network';
 import type {
 	PayableTokenWithConvertedAmount,
@@ -10,6 +13,7 @@ import type {
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
+import { formatToken } from '$lib/utils/format.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { PrincipalText } from '@dfinity/zod-schemas';
@@ -21,6 +25,63 @@ export const isIcPayableToken = (token: Token): token is IcToken =>
 
 const isIcFeeResult = (fee: PayableTokenWithFees['fee']): fee is IcFeeResult =>
 	nonNullish(fee) && 'feePerTransaction' in fee && 'totalFee' in fee;
+
+export const enrichIcPayableToken = ({
+	token,
+	exchanges,
+	balances
+}: {
+	token: PayableTokenWithFees;
+	exchanges: ExchangesData;
+	balances: CertifiedStoreData<BalancesData>;
+}): PayableTokenWithConvertedAmount | undefined => {
+	const { id: tokenId, fee, amount, decimals } = token;
+
+	if (!isIcFeeResult(fee)) {
+		return;
+	}
+
+	const { totalFee } = fee;
+
+	const exchangeRate = exchanges[tokenId]?.usd;
+
+	if (isNullish(exchangeRate)) {
+		return;
+	}
+
+	const balance = balances?.[tokenId]?.data;
+
+	if (isNullish(balance)) {
+		return;
+	}
+
+	const amountToPay = parseToken({
+		value: amount,
+		unitName: decimals
+	});
+
+	if (balance < amountToPay + totalFee) {
+		return;
+	}
+
+	const formattedFee = Number(
+		formatToken({
+			value: totalFee,
+			unitName: decimals,
+			displayDecimals: decimals
+		})
+	);
+
+	const amountInUSD = Number(amount) * exchangeRate;
+	const feeInUSD = formattedFee * exchangeRate;
+
+	return {
+		...token,
+		amountInUSD,
+		feeInUSD,
+		sumInUSD: amountInUSD + feeInUSD
+	};
+};
 
 export const validateIcTransfer = ({
 	decodedData,
