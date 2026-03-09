@@ -1,7 +1,7 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::LazyLock};
 
 use candid::Principal;
-use lazy_static::lazy_static;
+use pretty_assertions::assert_eq;
 use shared::types::{
     experimental_feature::{
         ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor,
@@ -16,32 +16,35 @@ use crate::utils::{
     pocketic::{setup, PicCanisterTrait},
 };
 
-lazy_static! {
-    pub static ref INITIAL_EXPERIMENTAL_FEATURES: ExperimentalFeatureSettingsMap = {
+pub static INITIAL_EXPERIMENTAL_FEATURES: LazyLock<ExperimentalFeatureSettingsMap> =
+    LazyLock::new(|| {
         let mut map = BTreeMap::new();
         map.insert(
             ExperimentalFeatureSettingsFor::AiAssistantBeta,
             ExperimentalFeatureSettings { enabled: false },
         );
         map
-    };
-    pub static ref NEW_EXPERIMENTAL_FEATURES: ExperimentalFeatureSettingsMap = {
+    });
+
+pub static NEW_EXPERIMENTAL_FEATURES: LazyLock<ExperimentalFeatureSettingsMap> =
+    LazyLock::new(|| {
         let mut map = BTreeMap::new();
         map.insert(
             ExperimentalFeatureSettingsFor::AiAssistantBeta,
             ExperimentalFeatureSettings { enabled: true },
         );
         map
-    };
-    pub static ref UPDATE_EXPERIMENTAL_FEATURES: ExperimentalFeatureSettingsMap = {
+    });
+
+pub static UPDATE_EXPERIMENTAL_FEATURES: LazyLock<ExperimentalFeatureSettingsMap> =
+    LazyLock::new(|| {
         let mut map = BTreeMap::new();
         map.insert(
             ExperimentalFeatureSettingsFor::AiAssistantBeta,
             ExperimentalFeatureSettings { enabled: true },
         );
         map
-    };
-}
+    });
 
 #[test]
 fn test_update_user_experimental_feature_settings_saves_settings() {

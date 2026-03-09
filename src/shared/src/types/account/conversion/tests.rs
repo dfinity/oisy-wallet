@@ -3,6 +3,7 @@
 use std::fmt::Debug;
 
 use candid::Principal;
+use pretty_assertions::assert_eq;
 
 use super::*;
 

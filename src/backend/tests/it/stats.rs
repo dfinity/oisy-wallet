@@ -3,6 +3,7 @@
 use std::sync::LazyLock;
 
 use candid::Principal;
+use pretty_assertions::assert_eq;
 use shared::types::{
     custom_token::{CustomToken, IcrcToken, Token},
     user_profile::OisyUser,
@@ -38,13 +39,14 @@ static ANOTHER_USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken 
 
 #[test]
 fn stats_returns_correct_number_of_users() {
+    const NUM_USERS_WITH_TOKENS: usize = 3;
+
     let pic_setup = BackendBuilder::default().deploy();
 
     // Create five users.
     let expected_users: Vec<OisyUser> = pic_setup.create_users(1..=5);
     // Create three users with tokens.
     let user_tokens = vec![USER_TOKEN.clone(), ANOTHER_USER_TOKEN.clone()];
-    const NUM_USERS_WITH_TOKENS: usize = 3;
     for user in &expected_users[0..NUM_USERS_WITH_TOKENS] {
         pic_setup
             .update::<()>(user.principal, "set_many_custom_tokens", &user_tokens)
