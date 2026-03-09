@@ -37,6 +37,7 @@ describe('EthTransactionModal', () => {
 		...mockEthTransactionUi,
 		type: 'approve' as const,
 		approveSpender: mockApproveSpender,
+		data: undefined,
 		gasUsed: 21_000n,
 		gasPrice: 1_000_000_000n
 	};
@@ -47,7 +48,7 @@ describe('EthTransactionModal', () => {
 			token: ETHEREUM_TOKEN
 		});
 
-		expect(getByText('send')).toBeInTheDocument();
+		expect(getByText(get(i18n).transaction.type['send'])).toBeInTheDocument();
 	});
 
 	it('should display correct amount and currency for fungible token', () => {
