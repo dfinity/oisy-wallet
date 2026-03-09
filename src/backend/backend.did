@@ -53,7 +53,6 @@ type ApproveError = variant {
 };
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
-type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type BtcAddPendingTransactionError = variant {
 	InvalidUtxos;
 	EmptyUtxos;
@@ -63,7 +62,7 @@ type BtcAddPendingTransactionError = variant {
 };
 type BtcAddPendingTransactionRequest = record {
 	txid : blob;
-	network : BitcoinNetwork;
+	network : Network;
 	utxos : vec Utxo
 };
 type BtcAddPendingTransactionResult = variant {
@@ -77,7 +76,7 @@ type BtcAddress = variant {
 	P2SH : text;
 	P2TR : text
 };
-type BtcGetFeePercentilesRequest = record { network : BitcoinNetwork };
+type BtcGetFeePercentilesRequest = record { network : Network };
 type BtcGetFeePercentilesResponse = record { fee_percentiles : vec nat64 };
 type BtcGetFeePercentilesResult = variant {
 	Ok : BtcGetFeePercentilesResponse;
@@ -90,7 +89,7 @@ type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
 type BtcGetPendingTransactionsRequest = record {
-	network : BitcoinNetwork;
+	network : Network;
 	address : text
 };
 type BtcGetPendingTransactionsResult = variant {
@@ -233,6 +232,7 @@ type InitArg = record {
 	supported_credentials : opt vec SupportedCredential;
 	ic_root_key_der : opt blob
 };
+type Network = variant { mainnet; regtest; testnet };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
 type NetworkSettingsFor = variant {
 	ArbitrumMainnet;
@@ -274,7 +274,7 @@ type SelectedUtxosFeeError = variant {
 	InternalError : record { msg : text }
 };
 type SelectedUtxosFeeRequest = record {
-	network : BitcoinNetwork;
+	network : Network;
 	amount_satoshis : nat64;
 	min_confirmations : opt nat32
 };

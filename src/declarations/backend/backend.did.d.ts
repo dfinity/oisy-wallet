@@ -62,7 +62,6 @@ export type ApproveError =
 	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
-export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
 export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
 	| { EmptyUtxos: null }
@@ -71,7 +70,7 @@ export type BtcAddPendingTransactionError =
 	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
-	network: BitcoinNetwork;
+	network: Network;
 	utxos: Array<Utxo>;
 }
 export type BtcAddPendingTransactionResult = { Ok: null } | { Err: BtcAddPendingTransactionError };
@@ -82,7 +81,7 @@ export type BtcAddress =
 	| { P2SH: string }
 	| { P2TR: string };
 export interface BtcGetFeePercentilesRequest {
-	network: BitcoinNetwork;
+	network: Network;
 }
 export interface BtcGetFeePercentilesResponse {
 	fee_percentiles: BigUint64Array;
@@ -99,7 +98,7 @@ export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
 export interface BtcGetPendingTransactionsRequest {
-	network: BitcoinNetwork;
+	network: Network;
 	address: string;
 }
 export type BtcGetPendingTransactionsResult =
@@ -255,6 +254,7 @@ export interface InitArg {
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array];
 }
+export type Network = { mainnet: null } | { regtest: null } | { testnet: null };
 export interface NetworkSettings {
 	enabled: boolean;
 	is_testnet: boolean;
@@ -303,7 +303,7 @@ export type SelectedUtxosFeeError =
 	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } };
 export interface SelectedUtxosFeeRequest {
-	network: BitcoinNetwork;
+	network: Network;
 	amount_satoshis: bigint;
 	min_confirmations: [] | [number];
 }

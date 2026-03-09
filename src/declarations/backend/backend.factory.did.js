@@ -105,7 +105,7 @@ export const idlFactory = ({ IDL }) => {
 		Ok: AllowSigningResponse,
 		Err: AllowSigningError
 	});
-	const BitcoinNetwork = IDL.Variant({
+	const Network = IDL.Variant({
 		mainnet: IDL.Null,
 		regtest: IDL.Null,
 		testnet: IDL.Null
@@ -121,7 +121,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const BtcAddPendingTransactionRequest = IDL.Record({
 		txid: IDL.Vec(IDL.Nat8),
-		network: BitcoinNetwork,
+		network: Network,
 		utxos: IDL.Vec(Utxo)
 	});
 	const BtcAddPendingTransactionError = IDL.Variant({
@@ -135,9 +135,7 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: BtcAddPendingTransactionError
 	});
-	const BtcGetFeePercentilesRequest = IDL.Record({
-		network: BitcoinNetwork
-	});
+	const BtcGetFeePercentilesRequest = IDL.Record({ network: Network });
 	const BtcGetFeePercentilesResponse = IDL.Record({
 		fee_percentiles: IDL.Vec(IDL.Nat64)
 	});
@@ -151,7 +149,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: SelectedUtxosFeeError
 	});
 	const BtcGetPendingTransactionsRequest = IDL.Record({
-		network: BitcoinNetwork,
+		network: Network,
 		address: IDL.Text
 	});
 	const PendingTransaction = IDL.Record({
@@ -169,7 +167,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: BtcGetPendingTransactionsError
 	});
 	const SelectedUtxosFeeRequest = IDL.Record({
-		network: BitcoinNetwork,
+		network: Network,
 		amount_satoshis: IDL.Nat64,
 		min_confirmations: IDL.Opt(IDL.Nat32)
 	});
