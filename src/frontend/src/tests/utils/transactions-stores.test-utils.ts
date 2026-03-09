@@ -1,6 +1,6 @@
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
+import { nowInBigIntNanoSeconds } from '@dfinity/utils';
 
 const createIcTransactionUiMock = (id: string): IcTransactionUi => ({
 	id,
