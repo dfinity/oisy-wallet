@@ -1,4 +1,3 @@
-import { isTokenErc } from '$eth/utils/erc.utils';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20, isTokenErc20CustomToken } from '$eth/utils/erc20.utils';
 import { isTokenErc4626CustomToken } from '$eth/utils/erc4626.utils';
@@ -32,6 +31,7 @@ import {
 	areAddressesPartiallyEqual,
 	getCaseSensitiveness
 } from '$lib/utils/address.utils';
+import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
@@ -730,20 +730,6 @@ export const getCodebaseTokenIconPath = <T extends Token>({
 			.replace(/-+/g, '-'); // collapse multiple -
 
 		return `/icons/${networkSymbol}/${identifier}.${extension}`;
-	}
-};
-
-export const getTokenIdentifier = <T extends Token>(token: T): string | undefined => {
-	if (isTokenErc(token) || isTokenSpl(token)) {
-		return token.address;
-	}
-
-	if (isTokenIc(token)) {
-		return token.ledgerCanisterId;
-	}
-
-	if (isTokenIcNft(token)) {
-		return token.canisterId;
 	}
 };
 

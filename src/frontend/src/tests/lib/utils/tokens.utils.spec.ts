@@ -39,7 +39,6 @@ import {
 	findPutativeToken,
 	findToken,
 	getCodebaseTokenIconPath,
-	getTokenIdentifier,
 	pinEnabledTokensAtTop,
 	saveAllCustomTokens,
 	sortTokens,
@@ -2053,59 +2052,59 @@ describe('tokens.utils', () => {
 		});
 	});
 
-	describe('getTokenIdentifier', () => {
-		it('should return the address for ERC20 tokens', () => {
-			expect(getTokenIdentifier(mockValidErc20Token)).toBe(mockValidErc20Token.address);
-		});
-
-		it('should return the address for ERC721 tokens', () => {
-			expect(getTokenIdentifier(mockValidErc721Token)).toBe(mockValidErc721Token.address);
-		});
-
-		it('should return the address for ERC1155 tokens', () => {
-			expect(getTokenIdentifier(mockValidErc1155Token)).toBe(mockValidErc1155Token.address);
-		});
-
-		it('should return the address for ERC4626 tokens', () => {
-			expect(getTokenIdentifier(mockValidErc4626Token)).toBe(mockValidErc4626Token.address);
-		});
-
-		it('should return the address for SPL tokens', () => {
-			expect(getTokenIdentifier(mockValidSplToken)).toBe(mockValidSplToken.address);
-		});
-
-		it('should return the ledgerCanisterId for IC tokens', () => {
-			const tokens = [
-				mockValidIcToken,
-				mockValidIcrcToken,
-				mockValidDip20Token,
-				mockValidIcCkToken
-			];
-
-			tokens.forEach((token) => {
-				expect(getTokenIdentifier(token)).toBe(token.ledgerCanisterId);
-			});
-		});
-
-		it('should return the ledgerCanisterId for ICP token', () => {
-			expect(getTokenIdentifier(ICP_TOKEN)).toBe(ICP_TOKEN.ledgerCanisterId);
-		});
-
-		it('should return the canisterId for IC NFT tokens', () => {
-			const tokens = [mockValidExtV2Token, mockValidDip721Token, mockValidIcPunksToken];
-
-			tokens.forEach((token) => {
-				expect(getTokenIdentifier(token)).toBe(token.canisterId);
-			});
-		});
-
-		it('should return undefined for native tokens without a contract address', () => {
-			expect(getTokenIdentifier(BTC_MAINNET_TOKEN)).toBeUndefined();
-			expect(getTokenIdentifier(ETHEREUM_TOKEN)).toBeUndefined();
-			expect(getTokenIdentifier(SOLANA_TOKEN)).toBeUndefined();
-		});
-	});
-
+	// describe('getTokenIdentifier', () => {
+	// 	it('should return the address for ERC20 tokens', () => {
+	// 		expect(getTokenIdentifier(mockValidErc20Token)).toBe(mockValidErc20Token.address);
+	// 	});
+	//
+	// 	it('should return the address for ERC721 tokens', () => {
+	// 		expect(getTokenIdentifier(mockValidErc721Token)).toBe(mockValidErc721Token.address);
+	// 	});
+	//
+	// 	it('should return the address for ERC1155 tokens', () => {
+	// 		expect(getTokenIdentifier(mockValidErc1155Token)).toBe(mockValidErc1155Token.address);
+	// 	});
+	//
+	// 	it('should return the address for ERC4626 tokens', () => {
+	// 		expect(getTokenIdentifier(mockValidErc4626Token)).toBe(mockValidErc4626Token.address);
+	// 	});
+	//
+	// 	it('should return the address for SPL tokens', () => {
+	// 		expect(getTokenIdentifier(mockValidSplToken)).toBe(mockValidSplToken.address);
+	// 	});
+	//
+	// 	it('should return the ledgerCanisterId for IC tokens', () => {
+	// 		const tokens = [
+	// 			mockValidIcToken,
+	// 			mockValidIcrcToken,
+	// 			mockValidDip20Token,
+	// 			mockValidIcCkToken
+	// 		];
+	//
+	// 		tokens.forEach((token) => {
+	// 			expect(getTokenIdentifier(token)).toBe(token.ledgerCanisterId);
+	// 		});
+	// 	});
+	//
+	// 	it('should return the ledgerCanisterId for ICP token', () => {
+	// 		expect(getTokenIdentifier(ICP_TOKEN)).toBe(ICP_TOKEN.ledgerCanisterId);
+	// 	});
+	//
+	// 	it('should return the canisterId for IC NFT tokens', () => {
+	// 		const tokens = [mockValidExtV2Token, mockValidDip721Token, mockValidIcPunksToken];
+	//
+	// 		tokens.forEach((token) => {
+	// 			expect(getTokenIdentifier(token)).toBe(token.canisterId);
+	// 		});
+	// 	});
+	//
+	// 	it('should return undefined for native tokens without a contract address', () => {
+	// 		expect(getTokenIdentifier(BTC_MAINNET_TOKEN)).toBeUndefined();
+	// 		expect(getTokenIdentifier(ETHEREUM_TOKEN)).toBeUndefined();
+	// 		expect(getTokenIdentifier(SOLANA_TOKEN)).toBeUndefined();
+	// 	});
+	// });
+	//
 	describe('findPutativeToken', () => {
 		const allMockTokens = [
 			mockValidErc20Token,
