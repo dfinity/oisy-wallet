@@ -1,4 +1,5 @@
 use candid::Principal;
+use pretty_assertions::assert_eq;
 use shared::types::{
     dapp::{AddDappSettingsError, AddHiddenDappIdRequest, MAX_DAPP_ID_LIST_LENGTH},
     user_profile::{GetUserProfileError, UserProfile},
@@ -377,7 +378,7 @@ fn test_add_user_hidden_dapp_id_does_not_allow_to_add_too_many_ids() {
             .expect("Get profile failed");
 
         let add_hidden_dapp_id_arg = AddHiddenDappIdRequest {
-            dapp_id: format!("test_dapp_id_{}", i),
+            dapp_id: format!("test_dapp_id_{i}"),
             current_user_version: current_user_profile.version,
         };
 

@@ -719,7 +719,7 @@ fn test_update_contact_preserves_other_contacts() {
     let contact3 = result3.unwrap();
 
     // Update the second contact
-    let updated_contact2 = Contact {
+    let changed_contact = Contact {
         id: contact2.id,
         name: "Updated Contact 2".to_string(),
         addresses: vec![],
@@ -727,7 +727,7 @@ fn test_update_contact_preserves_other_contacts() {
         image: None,
     };
 
-    let update_result = call_update_contact(&pic_setup, caller, updated_contact2);
+    let update_result = call_update_contact(&pic_setup, caller, changed_contact);
     assert!(update_result.is_ok());
 
     // Get all contacts after update
@@ -735,23 +735,23 @@ fn test_update_contact_preserves_other_contacts() {
     assert_eq!(updated_contacts.len(), 3); // Should still have 3 contacts
 
     // Find each contact by ID and verify
-    let updated_contact1 = updated_contacts
+    let updated_contact_first = updated_contacts
         .iter()
         .find(|c| c.id == contact1.id)
         .unwrap();
-    let updated_contact2 = updated_contacts
+    let updated_contact_second = updated_contacts
         .iter()
         .find(|c| c.id == contact2.id)
         .unwrap();
-    let updated_contact3 = updated_contacts
+    let updated_contact_third = updated_contacts
         .iter()
         .find(|c| c.id == contact3.id)
         .unwrap();
 
     // Verify only contact2 was changed
-    assert_eq!(updated_contact1.name, "Contact 1");
-    assert_eq!(updated_contact2.name, "Updated Contact 2");
-    assert_eq!(updated_contact3.name, "Contact 3");
+    assert_eq!(updated_contact_first.name, "Contact 1");
+    assert_eq!(updated_contact_second.name, "Updated Contact 2");
+    assert_eq!(updated_contact_third.name, "Contact 3");
 }
 
 #[test]
@@ -853,8 +853,7 @@ fn test_update_contact_image_jpeg() {
 
 #[cfg(test)]
 mod tests {
-    use std::assert_eq;
-
+    use pretty_assertions::assert_eq;
     use serde_bytes::ByteBuf;
     use shared::types::contact::{ContactImage, ImageMimeType};
 

@@ -4,7 +4,7 @@
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
-	import { contacts } from '$lib/derived/contacts.derived';
+	import { allContacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionToken } from '$lib/types/token';
@@ -19,7 +19,9 @@
 
 	let { token, balance, source, exchangeRate }: Props = $props();
 
-	let contact = $derived(getContactForAddress({ addressString: source, contactList: $contacts }));
+	let contact = $derived(
+		getContactForAddress({ addressString: source, contactList: $allContacts })
+	);
 
 	let contactAddress = $derived(filterAddressFromContact({ contact, address: source }));
 </script>

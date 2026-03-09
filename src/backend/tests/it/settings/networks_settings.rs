@@ -1,7 +1,7 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::LazyLock};
 
 use candid::Principal;
-use lazy_static::lazy_static;
+use pretty_assertions::assert_eq;
 use shared::types::{
     network::{
         NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, SaveNetworksSettingsRequest,
@@ -15,97 +15,97 @@ use crate::utils::{
     pocketic::{setup, PicCanisterTrait},
 };
 
-lazy_static! {
-    pub static ref INITIAL_NETWORKS: NetworkSettingsMap = {
-        let mut map = BTreeMap::new();
-        map.insert(
-            NetworkSettingsFor::EthereumSepolia,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::EthereumMainnet,
-            NetworkSettings {
-                enabled: false,
-                is_testnet: false,
-            },
-        );
-        map
-    };
-    pub static ref NEW_NETWORKS: NetworkSettingsMap = {
-        let mut map = BTreeMap::new();
-        map.insert(
-            NetworkSettingsFor::EthereumMainnet,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: false,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::SolanaDevnet,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::BitcoinRegtest,
-            NetworkSettings {
-                enabled: false,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::InternetComputer,
-            NetworkSettings {
-                enabled: false,
-                is_testnet: false,
-            },
-        );
-        map
-    };
-    pub static ref UPDATED_NETWORKS: NetworkSettingsMap = {
-        let mut map = BTreeMap::new();
-        map.insert(
-            NetworkSettingsFor::EthereumSepolia,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::EthereumMainnet,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: false,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::SolanaDevnet,
-            NetworkSettings {
-                enabled: true,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::BitcoinRegtest,
-            NetworkSettings {
-                enabled: false,
-                is_testnet: true,
-            },
-        );
-        map.insert(
-            NetworkSettingsFor::InternetComputer,
-            NetworkSettings {
-                enabled: false,
-                is_testnet: false,
-            },
-        );
-        map
-    };
-}
+pub static INITIAL_NETWORKS: LazyLock<NetworkSettingsMap> = LazyLock::new(|| {
+    let mut map = BTreeMap::new();
+    map.insert(
+        NetworkSettingsFor::EthereumSepolia,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::EthereumMainnet,
+        NetworkSettings {
+            enabled: false,
+            is_testnet: false,
+        },
+    );
+    map
+});
+
+pub static NEW_NETWORKS: LazyLock<NetworkSettingsMap> = LazyLock::new(|| {
+    let mut map = BTreeMap::new();
+    map.insert(
+        NetworkSettingsFor::EthereumMainnet,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: false,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::SolanaDevnet,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::BitcoinRegtest,
+        NetworkSettings {
+            enabled: false,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::InternetComputer,
+        NetworkSettings {
+            enabled: false,
+            is_testnet: false,
+        },
+    );
+    map
+});
+
+pub static UPDATED_NETWORKS: LazyLock<NetworkSettingsMap> = LazyLock::new(|| {
+    let mut map = BTreeMap::new();
+    map.insert(
+        NetworkSettingsFor::EthereumSepolia,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::EthereumMainnet,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: false,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::SolanaDevnet,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::BitcoinRegtest,
+        NetworkSettings {
+            enabled: false,
+            is_testnet: true,
+        },
+    );
+    map.insert(
+        NetworkSettingsFor::InternetComputer,
+        NetworkSettings {
+            enabled: false,
+            is_testnet: false,
+        },
+    );
+    map
+});
 
 #[test]
 fn test_update_user_network_settings_saves_settings() {

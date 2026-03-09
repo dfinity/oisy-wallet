@@ -1,9 +1,16 @@
 import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
-import { initPayContext } from '$lib/stores/open-crypto-pay.store';
+import { Currency } from '$lib/enums/currency';
+import { Languages } from '$lib/enums/languages';
+import { createTokenComparator, initPayContext } from '$lib/stores/open-crypto-pay.store';
+import type { CurrencyExchangeData } from '$lib/types/currency';
 import type {
 	OpenCryptoPayResponse,
 	PayableTokenWithConvertedAmount,
@@ -578,6 +585,135 @@ describe('OpenCryptoPayStore', () => {
 			context.failedPaymentError.set('');
 
 			expect(get(context.failedPaymentError)).toBe('');
+		});
+	});
+
+	describe('createTokenComparator', () => {
+		const exchangeRate: CurrencyExchangeData = {
+			currency: Currency.USD,
+			exchangeRateToUsd: 1,
+			exchangeRate24hChangeMultiplier: null
+		};
+
+		const comparator = createTokenComparator({
+			currency: Currency.USD,
+			exchangeRate,
+			language: Languages.ENGLISH
+		});
+
+		const buildToken = ({
+			network,
+			tokenNetwork,
+			symbol,
+			sumInUSD
+		}: {
+			network: PayableTokenWithConvertedAmount['network'];
+			tokenNetwork: PayableTokenWithConvertedAmount['tokenNetwork'];
+			symbol: string;
+			sumInUSD: number;
+		}): PayableTokenWithConvertedAmount =>
+			({
+				...ETHEREUM_TOKEN,
+				network,
+				tokenNetwork,
+				symbol,
+				amount: '1',
+				amountInUSD: sumInUSD - 1,
+				feeInUSD: 1,
+				sumInUSD
+			}) as PayableTokenWithConvertedAmount;
+
+		const icpToken = buildToken({
+			network: { ...ICP_NETWORK, pay: { openCryptoPay: 'InternetComputer' } },
+			tokenNetwork: 'InternetComputer',
+			symbol: 'ICP',
+			sumInUSD: 10
+		});
+
+		const ethToken = buildToken({
+			network: { ...ETHEREUM_NETWORK, pay: { openCryptoPay: 'Ethereum' } },
+			tokenNetwork: 'Ethereum',
+			symbol: 'ETH',
+			sumInUSD: 10
+		});
+
+		const usdcEthToken = buildToken({
+			network: { ...ETHEREUM_NETWORK, pay: { openCryptoPay: 'Ethereum' } },
+			tokenNetwork: 'Ethereum',
+			symbol: 'USDC',
+			sumInUSD: 10
+		});
+
+		const usdcBaseToken = buildToken({
+			network: { ...BASE_NETWORK, pay: { openCryptoPay: 'Base' } },
+			tokenNetwork: 'Base',
+			symbol: 'USDC',
+			sumInUSD: 10
+		});
+
+		const btcToken = buildToken({
+			network: { ...BTC_MAINNET_NETWORK, pay: { openCryptoPay: 'Bitcoin' } },
+			tokenNetwork: 'Bitcoin',
+			symbol: 'BTC',
+			sumInUSD: 10
+		});
+
+		it('should sort by displayed fiat value ascending', () => {
+			const cheapToken = { ...ethToken, sumInUSD: 5, amountInUSD: 4 };
+			const expensiveToken = { ...ethToken, sumInUSD: 20, amountInUSD: 19 };
+
+			expect(comparator(cheapToken, expensiveToken)).toBeLessThan(0);
+			expect(comparator(expensiveToken, cheapToken)).toBeGreaterThan(0);
+		});
+
+		it('should sort ICP before EVM when fiat value is equal', () => {
+			expect(comparator(icpToken, ethToken)).toBeLessThan(0);
+			expect(comparator(ethToken, icpToken)).toBeGreaterThan(0);
+		});
+
+		it('should sort ICP before BTC when fiat value is equal', () => {
+			expect(comparator(icpToken, btcToken)).toBeLessThan(0);
+			expect(comparator(btcToken, icpToken)).toBeGreaterThan(0);
+		});
+
+		it('should sort EVM before BTC when fiat value is equal', () => {
+			expect(comparator(ethToken, btcToken)).toBeLessThan(0);
+			expect(comparator(btcToken, ethToken)).toBeGreaterThan(0);
+		});
+
+		it('should sort by symbol ascending within same network type and fiat value', () => {
+			expect(comparator(ethToken, usdcEthToken)).toBeLessThan(0);
+			expect(comparator(usdcEthToken, ethToken)).toBeGreaterThan(0);
+		});
+
+		it('should sort by network name ascending within same network type, symbol, and fiat value', () => {
+			expect(comparator(usdcBaseToken, usdcEthToken)).toBeLessThan(0);
+			expect(comparator(usdcEthToken, usdcBaseToken)).toBeGreaterThan(0);
+		});
+
+		it('should return 0 for identical tokens', () => {
+			expect(comparator(icpToken, icpToken)).toBe(0);
+		});
+
+		it('should prioritize fiat value over network type', () => {
+			const cheapBtc = { ...btcToken, sumInUSD: 5, amountInUSD: 4 };
+			const expensiveIcp = { ...icpToken, sumInUSD: 20, amountInUSD: 19 };
+
+			expect(comparator(cheapBtc, expensiveIcp)).toBeLessThan(0);
+		});
+
+		it('should sort a full list correctly with all criteria', () => {
+			const tokens = [btcToken, usdcEthToken, icpToken, usdcBaseToken, ethToken];
+
+			const sorted = [...tokens].sort(comparator);
+
+			expect(sorted.map(({ symbol, network }) => `${symbol}@${network.name}`)).toEqual([
+				'ICP@Internet Computer',
+				'ETH@Ethereum',
+				'USDC@Base',
+				'USDC@Ethereum',
+				'BTC@Bitcoin'
+			]);
 		});
 	});
 });
