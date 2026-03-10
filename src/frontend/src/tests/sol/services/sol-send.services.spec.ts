@@ -186,7 +186,8 @@ describe('sol-send.services', () => {
 				Promise.resolve(mockTransactionPlan as never)
 			);
 			vi.mocked(createTransactionPlanExecutor).mockImplementation(
-				({ executeTransactionMessage }) => (async () => {
+				({ executeTransactionMessage }) =>
+					(async () => {
 						const context = {};
 						await executeTransactionMessage(context, 'mock-planned-message' as never);
 						return 'mock-result';
