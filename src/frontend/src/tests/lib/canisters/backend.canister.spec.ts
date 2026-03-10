@@ -3,6 +3,7 @@ import type {
 	AllowSigningResult,
 	_SERVICE as BackendService,
 	BtcAddPendingTransactionResult,
+	BtcGetPendingTransactionsResult,
 	BtcSelectUserUtxosFeeResult,
 	CustomToken,
 	IcrcToken,
@@ -499,6 +500,33 @@ describe('backend.canister', () => {
 			const res = btcGetPendingTransactions(btcGetPendingTransactionParams);
 
 			await expect(res).rejects.toThrowError();
+		});
+
+		it('should return rateLimitInfo if RateLimited error is returned', async () => {
+			const response = {
+				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			};
+
+			service.btc_get_pending_transactions.mockResolvedValue(
+				response as unknown as BtcGetPendingTransactionsResult
+			);
+
+			const { btcGetPendingTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcGetPendingTransactions(btcGetPendingTransactionParams);
+
+			expect(service.btc_get_pending_transactions).toHaveBeenCalledWith(
+				btcGetPendingTransactionParams
+			);
+			expect(res).toStrictEqual({
+				response: [],
+				rateLimitInfo: {
+					endpoint: 'btc_get_pending_transactions',
+					limiter: 'BTC_GET_PENDING_TX_RATE_LIMITER'
+				}
+			});
 		});
 	});
 
