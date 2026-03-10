@@ -3,6 +3,7 @@
 	import { isTokenErc } from '$eth/utils/erc.utils';
 	import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 	import { isTokenIc } from '$icp/utils/icrc.utils';
+	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import TokenAsContact from '$lib/components/tokens/TokenAsContact.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
@@ -12,10 +13,7 @@
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
-	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
-	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-
+		
 	interface Props {
 		destination: string;
 		label?: string;
