@@ -372,7 +372,7 @@ describe('backend.canister', () => {
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
 			await expect(res).rejects.toThrowError(
-				new CanisterInternalError('Unknown BtcAddPendingTransactionError')
+				new CanisterInternalError('Unknown BtcPendingTransactionError')
 			);
 		});
 
