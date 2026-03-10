@@ -4,14 +4,8 @@ import * as contactsDerived from '$lib/derived/contacts.derived';
 import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import {
-	getMockContactsUi,
-	mockContactEthAddressUi
-} from '$tests/mocks/contacts.mock';
-import {
-	mockLedgerCanisterId,
-	mockValidIcToken
-} from '$tests/mocks/ic-tokens.mock';
+import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
+import { mockLedgerCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
 const mockAllTokens = (tokens: Token[]) => {
@@ -97,9 +91,7 @@ describe('ContactOrToken', () => {
 			props: { identifier: longIdentifier, showFallback: true }
 		});
 
-		expect(
-			getByText(shortenWithMiddleEllipsis({ text: longIdentifier }))
-		).toBeInTheDocument();
+		expect(getByText(shortenWithMiddleEllipsis({ text: longIdentifier }))).toBeInTheDocument();
 	});
 
 	it('should not render fallback when showFallback is false', () => {
