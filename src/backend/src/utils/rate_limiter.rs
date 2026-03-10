@@ -103,8 +103,6 @@ mod tests {
             BtcAddPendingTransactionError, BtcGetPendingTransactionsError, SelectedUtxosFeeError,
         },
         signer::{topup::TopUpCyclesLedgerError, AllowSigningError, GetAllowedCyclesError},
-        bitcoin::{BtcAddPendingTransactionError, SelectedUtxosFeeError},
-        signer::AllowSigningError,
     };
 
     use super::*;
