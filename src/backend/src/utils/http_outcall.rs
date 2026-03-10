@@ -7,9 +7,8 @@ const USER_AGENT: &str = "OisyWalletBackend";
 
 /// Builds an [`HttpRequestArgs`] with the given parameters.
 ///
-/// Always includes a `User-Agent` header. When a `body` is present, a
-/// `Content-Type: application/json` header is added automatically.
-/// Any `extra_headers` are appended after the default ones.
+/// Always includes a `User-Agent` header. Any `extra_headers` are appended
+/// after it.
 fn build_request(
     url: &str,
     method: HttpMethod,
@@ -21,13 +20,6 @@ fn build_request(
         name: "User-Agent".to_string(),
         value: USER_AGENT.to_string(),
     }];
-
-    if body.is_some() {
-        headers.push(HttpHeader {
-            name: "Content-Type".to_string(),
-            value: "application/json".to_string(),
-        });
-    }
 
     headers.extend(extra_headers);
 
@@ -41,11 +33,13 @@ fn build_request(
     }
 }
 
-/// Returns the response unchanged if its status is `200`, otherwise returns
-/// an error containing the status code.
+/// Returns the response unchanged if its status is in the 2xx range,
+/// otherwise returns an error containing the status code.
 fn validate_response(response: HttpRequestResult) -> Result<HttpRequestResult, String> {
-    let ok: Nat = 200u32.into();
-    if response.status == ok {
+    let status_200: Nat = 200u32.into();
+    let status_300: Nat = 300u32.into();
+
+    if response.status >= status_200 && response.status < status_300 {
         Ok(response)
     } else {
         Err(format!(
@@ -66,7 +60,7 @@ async fn execute(request: &HttpRequestArgs) -> Result<HttpRequestResult, String>
 /// Performs an HTTP GET outcall.
 ///
 /// Sends a GET request to `url` with a `User-Agent` header and validates
-/// that the response status is `200`.
+/// that the response status is in the 2xx range.
 ///
 /// # Arguments
 /// * `url` - The URL to fetch.
@@ -78,10 +72,11 @@ pub(crate) async fn get(url: &str, max_response_bytes: u64) -> Result<HttpReques
     execute(&request).await
 }
 
-/// Performs an HTTP POST outcall.
+/// Performs an HTTP POST outcall with a JSON body.
 ///
-/// Sends a POST request to `url` with the given `body` (assumed JSON) and
-/// validates that the response status is `200`.
+/// Sends a POST request to `url` with the given `body` and a
+/// `Content-Type: application/json` header, then validates that the
+/// response status is in the 2xx range.
 ///
 /// # Idempotency
 ///
@@ -108,7 +103,7 @@ pub(crate) async fn get(url: &str, max_response_bytes: u64) -> Result<HttpReques
 /// # Arguments
 /// * `url` - The endpoint to call.
 /// * `body` - The JSON request body as raw bytes.
-/// * `headers` - Additional headers appended after the defaults (`User-Agent`, `Content-Type`).
+/// * `headers` - Additional headers appended after `User-Agent` and `Content-Type`.
 /// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
 ///   to minimise cycle costs.
 #[expect(dead_code)]
@@ -118,11 +113,18 @@ pub(crate) async fn post(
     headers: Vec<HttpHeader>,
     max_response_bytes: u64,
 ) -> Result<HttpRequestResult, String> {
+    let mut post_headers = vec![HttpHeader {
+        name: "Content-Type".to_string(),
+        value: "application/json".to_string(),
+    }];
+
+    post_headers.extend(headers);
+
     let request = build_request(
         url,
         HttpMethod::POST,
         Some(body),
-        headers,
+        post_headers,
         max_response_bytes,
     );
     execute(&request).await
@@ -193,7 +195,7 @@ mod tests {
     }
 
     #[test]
-    fn test_build_request_get_has_only_user_agent_header() {
+    fn test_build_request_has_only_user_agent_header_by_default() {
         let request = build_request("https://example.com", HttpMethod::GET, None, vec![], 1024);
         assert_eq!(request.headers.len(), 1);
         assert_eq!(request.headers[0].name, "User-Agent");
@@ -201,7 +203,7 @@ mod tests {
     }
 
     #[test]
-    fn test_build_request_post_has_user_agent_and_content_type_headers() {
+    fn test_build_request_does_not_add_content_type() {
         let request = build_request(
             "https://example.com",
             HttpMethod::POST,
@@ -209,19 +211,22 @@ mod tests {
             vec![],
             1024,
         );
-        assert_eq!(request.headers.len(), 2);
+        assert_eq!(request.headers.len(), 1);
         assert_eq!(request.headers[0].name, "User-Agent");
-        assert_eq!(request.headers[0].value, USER_AGENT);
-        assert_eq!(request.headers[1].name, "Content-Type");
-        assert_eq!(request.headers[1].value, "application/json");
     }
 
     #[test]
     fn test_build_request_appends_extra_headers() {
-        let extra = vec![HttpHeader {
-            name: "Idempotency-Key".to_string(),
-            value: "abc-123".to_string(),
-        }];
+        let extra = vec![
+            HttpHeader {
+                name: "Content-Type".to_string(),
+                value: "application/json".to_string(),
+            },
+            HttpHeader {
+                name: "Idempotency-Key".to_string(),
+                value: "abc-123".to_string(),
+            },
+        ];
         let request = build_request(
             "https://example.com",
             HttpMethod::POST,
@@ -262,6 +267,28 @@ mod tests {
     }
 
     #[test]
+    fn test_validate_response_accepts_201_created() {
+        let response = HttpRequestResult {
+            status: Nat::from(201u32),
+            headers: vec![],
+            body: vec![],
+        };
+
+        assert!(validate_response(response).is_ok());
+    }
+
+    #[test]
+    fn test_validate_response_accepts_204_no_content() {
+        let response = HttpRequestResult {
+            status: Nat::from(204u32),
+            headers: vec![],
+            body: vec![],
+        };
+
+        assert!(validate_response(response).is_ok());
+    }
+
+    #[test]
     fn test_validate_response_preserves_body_and_headers() {
         let response = HttpRequestResult {
             status: Nat::from(200u32),
@@ -277,6 +304,28 @@ mod tests {
         assert_eq!(ok.body, b"{\"key\":\"value\"}");
         assert_eq!(ok.headers.len(), 1);
         assert_eq!(ok.headers[0].name, "Content-Type");
+    }
+
+    #[test]
+    fn test_validate_response_rejects_199() {
+        let response = HttpRequestResult {
+            status: Nat::from(199u32),
+            headers: vec![],
+            body: vec![],
+        };
+
+        assert!(validate_response(response).is_err());
+    }
+
+    #[test]
+    fn test_validate_response_rejects_300() {
+        let response = HttpRequestResult {
+            status: Nat::from(300u32),
+            headers: vec![],
+            body: vec![],
+        };
+
+        assert!(validate_response(response).is_err());
     }
 
     #[test]
@@ -317,8 +366,7 @@ mod tests {
             body: vec![],
         };
 
-        let result = validate_response(response);
-        assert!(result.is_err());
+        assert!(validate_response(response).is_err());
     }
 
     #[test]
@@ -329,7 +377,6 @@ mod tests {
             body: vec![],
         };
 
-        let result = validate_response(response);
-        assert!(result.is_err());
+        assert!(validate_response(response).is_err());
     }
 }
