@@ -1,11 +1,3 @@
-//! Utilities for making IC HTTP outcalls from the backend canister.
-//!
-//! Wraps the IC management canister's `http_request` API with ergonomic
-//! [`get`] and [`post`] helpers that handle request construction, default
-//! headers, and response validation.
-//!
-//! Cycle costs are calculated automatically by the underlying `ic-cdk` call.
-
 use candid::Nat;
 use ic_cdk::management_canister::{
     http_request, HttpHeader, HttpMethod, HttpRequestArgs, HttpRequestResult,
