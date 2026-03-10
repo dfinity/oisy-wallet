@@ -43,11 +43,45 @@ describe('Transaction', () => {
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: fromAddress }));
 	});
 
+	it('should render `from` when we WITHDRAW address', () => {
+		const fromAddress = '0xdeadbeef';
+
+		const { container, getByText } = render(Transaction, {
+			displayAmount: 10n,
+			type: 'withdraw',
+			status: 'confirmed',
+			timestamp: 1_690_000_000,
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			from: fromAddress,
+			children: mockSnippet
+		});
+
+		expect(getByText(/From/i)).toBeInTheDocument();
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: fromAddress }));
+	});
+
 	it('should show "To" and a shortened address when no contact is found', () => {
 		const toAddress = '0xno-contact';
 
 		const { container, getByText } = render(Transaction, {
 			type: 'send',
+			status: 'confirmed',
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			to: toAddress,
+			children: mockSnippet
+		});
+
+		expect(getByText(/^to$/i)).toBeInTheDocument();
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: toAddress }));
+	});
+
+	it('should show "To" and a shortened address for deposit transactions', () => {
+		const toAddress = '0xdeposit-addr';
+
+		const { container, getByText } = render(Transaction, {
+			type: 'deposit',
 			status: 'confirmed',
 			token: ICP_TOKEN,
 			iconType: 'transaction',
@@ -86,6 +120,66 @@ describe('Transaction', () => {
 		});
 
 		expect(getByText(/^to$/i)).toBeInTheDocument();
+		expect(getByText(/^Johnny$/i)).toBeInTheDocument();
+	});
+
+	it('should show "To" and the contacts name for deposit transactions when a contact is found', () => {
+		const toAddress = '0xJOHNNY';
+
+		const contact = getMockContactsUi({
+			n: 1,
+			name: 'Johnny',
+			addresses: [
+				{
+					addressType: 'Btc',
+					address: toAddress,
+					label: 'My Bitcoin Address'
+				}
+			]
+		});
+
+		contactsStore.set([...contact]);
+
+		const { getByText } = render(Transaction, {
+			type: 'deposit',
+			status: 'confirmed',
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			to: toAddress,
+			children: mockSnippet
+		});
+
+		expect(getByText(/^to$/i)).toBeInTheDocument();
+		expect(getByText(/^Johnny$/i)).toBeInTheDocument();
+	});
+
+	it('should show "From" and the contacts name for withdraw transactions when a contact is found', () => {
+		const fromAddress = '0xJOHNNY';
+
+		const contact = getMockContactsUi({
+			n: 1,
+			name: 'Johnny',
+			addresses: [
+				{
+					addressType: 'Btc',
+					address: fromAddress,
+					label: 'My Bitcoin Address'
+				}
+			]
+		});
+
+		contactsStore.set([...contact]);
+
+		const { getByText } = render(Transaction, {
+			type: 'withdraw',
+			status: 'confirmed',
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			from: fromAddress,
+			children: mockSnippet
+		});
+
+		expect(getByText(/^from$/i)).toBeInTheDocument();
 		expect(getByText(/^Johnny$/i)).toBeInTheDocument();
 	});
 
