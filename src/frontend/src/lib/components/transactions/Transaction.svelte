@@ -3,19 +3,16 @@
 	import { type Component, type Snippet, untrack } from 'svelte';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import type { EthNonFungibleToken } from '$eth/types/nft';
-	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
+	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
-	import TokenAsContact from '$lib/components/tokens/TokenAsContact.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { TRANSACTION_CHILDREN_CONTAINER } from '$lib/constants/test-ids.constants';
-	import { allTokens } from '$lib/derived/all-tokens.derived';
-	import { allContacts } from '$lib/derived/contacts.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -24,13 +21,11 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
-	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
+	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import { findPutativeToken } from '$lib/utils/tokens.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
 
@@ -83,16 +78,6 @@
 					? approveSpender
 					: undefined
 	);
-
-	const putativeToken = $derived(findPutativeToken({ tokens: $allTokens, identifier: address }));
-
-	const contact = $derived(
-		nonNullish(address)
-			? getContactForAddress({ addressString: address, contactList: $allContacts })
-			: undefined
-	);
-
-	const contactAddress = $derived(filterAddressFromContact({ contact, address }));
 
 	const network: Network | undefined = $derived(token.network);
 
@@ -224,15 +209,7 @@
 							<span class="shrink-0">{$i18n.transaction.text.for}</span>
 						{/if}
 
-						{#if nonNullish(putativeToken)}
-							<TokenAsContact token={putativeToken} />
-						{:else if nonNullish(contact)}
-							<ContactWithAvatar {contact} {contactAddress} />
-						{:else if nonNullish(address)}
-							<span class="flex inline-block max-w-38 min-w-0 flex-wrap items-center truncate">
-								{shortenWithMiddleEllipsis({ text: address })}
-							</span>
-						{/if}
+						<ContactOrToken identifier={address} showFallback />
 					</span>
 					<span class="truncate text-tertiary">
 						<TransactionStatusComponent {status} />
