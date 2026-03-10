@@ -33,8 +33,8 @@ const mapRateLimitError = (err: RateLimitError): CanisterInternalError => {
 	);
 };
 
-export const mapBtcPendingTransactionError = (
-	err: BtcAddPendingTransactionError | BtcGetPendingTransactionsError
+export const mapBtcAddPendingTransactionError = (
+	err: BtcAddPendingTransactionError
 ): CanisterInternalError => {
 	if ('InternalError' in err) {
 		return new CanisterInternalError(err.InternalError.msg);
@@ -54,6 +54,20 @@ export const mapBtcPendingTransactionError = (
 
 	if ('UtxosAlreadyReserved' in err) {
 		return new CanisterInternalError('Some of the provided UTXOs are already reserved.');
+	}
+
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcPendingTransactionError'));
+};
+
+export const mapBtcGetPendingTransactionsError = (
+	err: BtcGetPendingTransactionsError
+): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
 	}
 
 	if ('RateLimited' in err) {

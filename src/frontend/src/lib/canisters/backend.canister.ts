@@ -5,7 +5,6 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	PendingTransaction,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -13,7 +12,8 @@ import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.f
 import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
-	mapBtcPendingTransactionError,
+	mapBtcAddPendingTransactionError,
+	mapBtcGetPendingTransactionsError,
 	mapBtcSelectUserUtxosFeeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
@@ -27,6 +27,7 @@ import type {
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
@@ -138,14 +139,13 @@ export class BackendCanister extends Canister<BackendService> {
 			};
 		}
 
-		throw mapBtcPendingTransactionError(response.Err);
+		throw mapBtcAddPendingTransactionError(response.Err);
 	};
 
-	// TODO: rename to plural
-	btcGetPendingTransaction = async ({
+	btcGetPendingTransactions = async ({
 		network,
 		address
-	}: BtcGetPendingTransactionParams): Promise<PendingTransaction[]> => {
+	}: BtcGetPendingTransactionParams): Promise<GetPendingTransactionsOutcome> => {
 		const { btc_get_pending_transactions } = this.caller({ certified: true });
 
 		const response = await btc_get_pending_transactions({
@@ -157,10 +157,22 @@ export class BackendCanister extends Canister<BackendService> {
 			const {
 				Ok: { transactions }
 			} = response;
-			return transactions;
+			return { response: transactions };
 		}
 
-		throw mapBtcPendingTransactionError(response.Err);
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
+		// TODO: improve placeholder with significant data, for now we do not use them
+		if ('RateLimited' in response.Err) {
+			return {
+				response: [],
+				rateLimitInfo: {
+					endpoint: 'btc_get_pending_transactions',
+					limiter: 'BTC_GET_PENDING_TX_RATE_LIMITER'
+				}
+			};
+		}
+
+		throw mapBtcGetPendingTransactionsError(response.Err);
 	};
 
 	btcSelectUserUtxosFee = async ({

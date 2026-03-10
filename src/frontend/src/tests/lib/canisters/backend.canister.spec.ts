@@ -447,26 +447,26 @@ describe('backend.canister', () => {
 
 			service.btc_get_pending_transactions.mockResolvedValue(response);
 
-			const { btcGetPendingTransaction } = await createBackendCanister({
+			const { btcGetPendingTransactions } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = await btcGetPendingTransaction(btcGetPendingTransactionParams);
+			const res = await btcGetPendingTransactions(btcGetPendingTransactionParams);
 
 			expect(service.btc_get_pending_transactions).toHaveBeenCalledWith(
 				btcGetPendingTransactionParams
 			);
-			expect(res).toEqual(response.Ok.transactions);
+			expect(res).toEqual({ response: response.Ok.transactions });
 		});
 
 		it('should throw an error if btc_get_pending_transactions returns an internal error', async () => {
 			service.btc_get_pending_transactions.mockResolvedValue(errorResponse);
 
-			const { btcGetPendingTransaction } = await createBackendCanister({
+			const { btcGetPendingTransactions } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+			const res = btcGetPendingTransactions(btcGetPendingTransactionParams);
 
 			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(errorResponse.Err.InternalError.msg)
@@ -479,11 +479,11 @@ describe('backend.canister', () => {
 				throw mockResponseError;
 			});
 
-			const { btcGetPendingTransaction } = await createBackendCanister({
+			const { btcGetPendingTransactions } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+			const res = btcGetPendingTransactions(btcGetPendingTransactionParams);
 
 			await expect(res).rejects.toThrowError(mockResponseError);
 		});
@@ -492,11 +492,11 @@ describe('backend.canister', () => {
 			// @ts-expect-error we test this in purposes
 			service.btc_get_pending_transactions.mockResolvedValue({ test: 'unexpected' });
 
-			const { btcGetPendingTransaction } = await createBackendCanister({
+			const { btcGetPendingTransactions } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+			const res = btcGetPendingTransactions(btcGetPendingTransactionParams);
 
 			await expect(res).rejects.toThrowError();
 		});
