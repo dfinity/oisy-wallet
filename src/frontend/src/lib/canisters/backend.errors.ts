@@ -60,7 +60,7 @@ export const mapBtcPendingTransactionError = (
 		return mapRateLimitError(err.RateLimited);
 	}
 
-	return assertNeverOr(err, new CanisterInternalError('Unknown BtcAddPendingTransactionError'));
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcPendingTransactionError'));
 };
 
 export const mapBtcSelectUserUtxosFeeError = (
