@@ -4,15 +4,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		destination: string;
+		spender: string;
 	}
 
-	let { destination }: Props = $props();
+	let { spender }: Props = $props();
 </script>
 
-<WalletConnectModalValue label={$i18n.send.text.destination} ref="destination">
+<WalletConnectModalValue label={$i18n.wallet_connect.text.spender} ref="spender">
 	<div class="flex flex-col gap-1">
-		{destination}
-		<ContactOrToken identifier={destination} />
+		{spender}
+		<ContactOrToken identifier={spender} />
 	</div>
 </WalletConnectModalValue>

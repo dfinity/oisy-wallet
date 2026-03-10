@@ -6,7 +6,7 @@
 	import { decodeErc20AbiData } from '$eth/utils/transactions.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
-	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
+	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
@@ -91,7 +91,7 @@
 		{/snippet}
 
 		{#if erc20Approve && nonNullish(spender)}
-			<SendDataDestination destination={spender} label={$i18n.wallet_connect.text.spender} />
+			<SendDataSpender {spender} />
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
