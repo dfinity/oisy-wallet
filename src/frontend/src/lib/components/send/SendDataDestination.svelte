@@ -13,7 +13,7 @@
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
-		
+
 	interface Props {
 		destination: string;
 		label?: string;

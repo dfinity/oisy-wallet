@@ -17,7 +17,7 @@
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
-			
+
 	interface Props {
 		token: OptionToken;
 		balance: OptionBalance;
