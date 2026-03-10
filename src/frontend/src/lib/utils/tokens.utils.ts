@@ -26,7 +26,12 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import type { TokensSortType } from '$lib/types/tokens-sort';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { areAddressesPartiallyEqual, getCaseSensitiveness } from '$lib/utils/address.utils';
+import {
+	areAddressesEqual,
+	areAddressesPartiallyEqual,
+	getCaseSensitiveness
+} from '$lib/utils/address.utils';
+import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
@@ -727,3 +732,22 @@ export const getCodebaseTokenIconPath = <T extends Token>({
 		return `/icons/${networkSymbol}/${identifier}.${extension}`;
 	}
 };
+
+export const findPutativeToken = <T extends Token>({
+	tokens,
+	identifier
+}: {
+	tokens: T[];
+	identifier: string | undefined;
+}): T | undefined =>
+	nonNullish(identifier) && tokens.length > 0
+		? tokens.find((t) => {
+				const address2 = getTokenIdentifier(t);
+
+				return areAddressesEqual({
+					address1: identifier,
+					address2,
+					networkId: t.network.id
+				});
+			})
+		: undefined;
