@@ -5,7 +5,6 @@ import type { Token } from '$lib/types/token';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
-import { signTransaction } from '$sol/services/sol-sign.services';
 import {
 	calculateAssociatedTokenAddress,
 	createAtaInstruction
@@ -22,33 +21,36 @@ import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	estimateComputeUnitLimitFactory,
-	getSetComputeUnitPriceInstruction
+	setTransactionMessageComputeUnitPrice
 } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-program/token';
 import {
-	appendTransactionMessageInstructions,
 	assertIsFullySignedTransaction,
+	assertIsSuccessfulSingleTransactionPlanResult,
+	assertIsTransactionWithBlockhashLifetime,
 	assertIsTransactionWithinSizeLimit,
 	createTransactionMessage,
+	createTransactionPlanExecutor,
+	createTransactionPlanner,
+	flattenTransactionPlanResult,
 	lamports,
+	nonDivisibleSequentialInstructionPlan,
 	pipe,
-	prependTransactionMessageInstruction,
 	sendTransactionWithoutConfirmingFactory,
 	setTransactionMessageFeePayerSigner,
 	setTransactionMessageLifetimeUsingBlockhash,
+	signTransactionMessageWithSigners,
 	address as solAddress,
 	type Commitment,
+	type InstructionPlan,
 	type Rpc,
-	type RpcSubscriptions,
 	type Signature,
 	type SolanaRpcApi,
-	type SolanaRpcSubscriptionsApi,
 	type TransactionMessage,
 	type TransactionMessageWithFeePayer,
 	type TransactionPartialSigner,
-	type TransactionSigner,
-	type TransactionVersion
+	type TransactionSigner
 } from '@solana/kit';
 import {
 	createBlockHeightExceedencePromiseFactory,
@@ -84,49 +86,24 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 	);
 };
 
-const createDefaultTransaction = async ({
-	rpc,
-	feePayer,
-	version = 0
-}: {
-	rpc: Rpc<SolanaRpcApi>;
-	feePayer: TransactionSigner;
-	version?: TransactionVersion;
-}): Promise<SolTransactionMessage> =>
-	await pipe(
-		createTransactionMessage({ version }),
-		async (tx) =>
-			await setLifetimeAndFeePayerToTransaction({ transactionMessage: tx, rpc, feePayer })
-	);
-
-const createSolTransactionMessage = async ({
+const createSolInstructionPlan = ({
 	signer,
 	destination,
-	amount,
-	network
+	amount
 }: {
 	signer: TransactionSigner;
 	destination: SolAddress;
 	amount: bigint;
-	network: SolanaNetworkType;
-}): Promise<SolTransactionMessage> => {
-	const rpc = solanaHttpRpc(network);
+}): InstructionPlan =>
+	nonDivisibleSequentialInstructionPlan([
+		getTransferSolInstruction({
+			source: signer,
+			destination: solAddress(destination),
+			amount: lamports(amount)
+		})
+	]);
 
-	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
-		appendTransactionMessageInstructions(
-			[
-				getTransferSolInstruction({
-					source: signer,
-					destination: solAddress(destination),
-					amount: lamports(amount)
-				})
-			],
-			tx
-		)
-	);
-};
-
-const createSplTokenTransactionMessage = async ({
+const createSplTokenInstructionPlan = async ({
 	signer,
 	destination,
 	amount,
@@ -138,15 +115,13 @@ const createSplTokenTransactionMessage = async ({
 	amount: bigint;
 	network: SolanaNetworkType;
 	token: SplToken;
-}): Promise<SolTransactionMessage> => {
+}): Promise<InstructionPlan> => {
 	const {
 		address: tokenAddress,
 		owner: tokenOwnerAddress,
 		mintAuthority: tokenMintAuthority,
 		decimals: tokenDecimals
 	} = token;
-
-	const rpc = solanaHttpRpc(network);
 
 	const source = signer.address;
 
@@ -228,12 +203,10 @@ const createSplTokenTransactionMessage = async ({
 			)
 		: getTransferInstruction(transferParams, config);
 
-	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
-		appendTransactionMessageInstructions(
-			[...(mustCreateDestinationTokenAccount ? [ataInstruction] : []), transferInstruction],
-			tx
-		)
-	);
+	return nonDivisibleSequentialInstructionPlan([
+		...(mustCreateDestinationTokenAccount ? [ataInstruction] : []),
+		transferInstruction
+	]);
 };
 
 export const sendSignedTransaction = async ({
@@ -253,42 +226,11 @@ export const sendSignedTransaction = async ({
 	await sendTransaction(signedTransaction, { commitment });
 };
 
-const confirmSignedTransaction = async ({
-	rpc,
-	rpcSubscriptions,
-	signedTransaction,
-	commitment = 'confirmed'
-}: {
-	rpc: Rpc<SolanaRpcApi>;
-	rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>;
-	signedTransaction: SolSignedTransaction;
-	commitment?: Commitment;
-}) => {
-	assertIsFullySignedTransaction(signedTransaction);
-
-	const getBlockHeightExceedencePromise = createBlockHeightExceedencePromiseFactory({
-		rpc,
-		rpcSubscriptions
-	});
-
-	const getRecentSignatureConfirmationPromise = createRecentSignatureConfirmationPromiseFactory({
-		rpc,
-		rpcSubscriptions
-	});
-
-	await waitForRecentTransactionConfirmation({
-		transaction: signedTransaction,
-		commitment,
-		getBlockHeightExceedencePromise,
-		getRecentSignatureConfirmationPromise
-	});
-};
-
 /**
  * Send SOL or SPL tokens from one address to another.
  *
- * This function will sign the transaction with the provided identity and send it to the network.
- * It is based on the Solana web3.js library.
+ * Uses Solana Instruction Plans to declaratively compose instructions,
+ * then plans them into transactions and executes them.
  * https://solana.com/developers/cookbook/transactions/send-sol
  */
 export const sendSol = async ({
@@ -325,57 +267,99 @@ export const sendSol = async ({
 		network: solNetwork
 	});
 
-	const transactionMessage = isTokenSpl(token)
-		? await createSplTokenTransactionMessage({
+	const instructionPlan = isTokenSpl(token)
+		? await createSplTokenInstructionPlan({
 				signer,
 				destination,
 				amount,
 				network: solNetwork,
 				token
 			})
-		: await createSolTransactionMessage({
+		: createSolInstructionPlan({
 				signer,
 				destination,
-				amount,
-				network: solNetwork
+				amount
 			});
 
-	const getComputeUnitEstimateForTransactionMessage = estimateComputeUnitLimitFactory({
-		rpc
+	const planner = createTransactionPlanner({
+		createTransactionMessage: () =>
+			pipe(createTransactionMessage({ version: 0 }), (message) =>
+				setTransactionMessageFeePayerSigner(signer, message)
+			)
 	});
 
-	const computeUnitsEstimate =
-		await getComputeUnitEstimateForTransactionMessage(transactionMessage);
+	const transactionPlan = await planner(instructionPlan);
 
-	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
+	const estimateComputeUnitLimit = estimateComputeUnitLimitFactory({ rpc });
 
-	const transactionMessageWithComputeUnitPrice = prependTransactionMessageInstruction(
-		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
-		transactionMessage
-	);
+	const executor = createTransactionPlanExecutor({
+		// eslint-disable-next-line local-rules/prefer-object-params
+		executeTransactionMessage: async (context, message) => {
+			const { value: latestBlockhash } = await rpc
+				.getLatestBlockhash({ commitment: 'confirmed' })
+				.send();
 
-	progress?.(ProgressStepsSendSol.SIGN);
+			const messageWithLifetime = setTransactionMessageLifetimeUsingBlockhash(
+				latestBlockhash,
+				message
+			);
 
-	const { signedTransaction, signature } = await signTransaction(
-		prioritizationFee > ZERO ? transactionMessageWithComputeUnitPrice : transactionMessage
-	);
+			context.message = messageWithLifetime;
 
-	progress?.(ProgressStepsSendSol.SEND);
+			const computeUnitsEstimate = await estimateComputeUnitLimit(messageWithLifetime);
 
-	await sendSignedTransaction({
-		rpc,
-		signedTransaction
+			const finalMessage =
+				prioritizationFee > ZERO
+					? setTransactionMessageComputeUnitPrice(
+							BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate)),
+							messageWithLifetime
+						)
+					: messageWithLifetime;
+
+			context.message = finalMessage;
+
+			progress?.(ProgressStepsSendSol.SIGN);
+
+			const transaction = await signTransactionMessageWithSigners(finalMessage);
+
+			context.transaction = transaction;
+
+			assertIsTransactionWithBlockhashLifetime(transaction);
+			assertIsFullySignedTransaction(transaction);
+			assertIsTransactionWithinSizeLimit(transaction);
+
+			progress?.(ProgressStepsSendSol.SEND);
+
+			const sendTransaction = sendTransactionWithoutConfirmingFactory({ rpc });
+
+			await sendTransaction(transaction, { commitment: 'confirmed' });
+
+			progress?.(ProgressStepsSendSol.CONFIRM);
+
+			await waitForRecentTransactionConfirmation({
+				transaction,
+				commitment: 'confirmed',
+				getBlockHeightExceedencePromise: createBlockHeightExceedencePromiseFactory({
+					rpc,
+					rpcSubscriptions
+				}),
+				getRecentSignatureConfirmationPromise: createRecentSignatureConfirmationPromiseFactory({
+					rpc,
+					rpcSubscriptions
+				})
+			});
+
+			return transaction;
+		}
 	});
 
-	progress?.(ProgressStepsSendSol.CONFIRM);
-
-	await confirmSignedTransaction({
-		rpc,
-		rpcSubscriptions,
-		signedTransaction
-	});
+	const result = await executor(transactionPlan);
 
 	progress?.(ProgressStepsSendSol.DONE);
 
-	return signature;
+	const [firstResult] = flattenTransactionPlanResult(result);
+
+	assertIsSuccessfulSingleTransactionPlanResult(firstResult);
+
+	return firstResult.context.signature;
 };
