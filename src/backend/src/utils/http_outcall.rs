@@ -1,3 +1,11 @@
+//! Utilities for making IC HTTP outcalls from the backend canister.
+//!
+//! Wraps the IC management canister's `http_request` API with ergonomic
+//! [`get`] and [`post`] helpers that handle request construction, default
+//! headers, and response validation.
+//!
+//! Cycle costs are calculated automatically by the underlying `ic-cdk` call.
+
 use candid::Nat;
 use ic_cdk::management_canister::{
     http_request, HttpHeader, HttpMethod, HttpRequestArgs, HttpRequestResult,
@@ -5,6 +13,11 @@ use ic_cdk::management_canister::{
 
 const USER_AGENT: &str = "OisyWalletBackend";
 
+/// Builds an [`HttpRequestArgs`] with the given parameters.
+///
+/// Always includes a `User-Agent` header. When a `body` is present, a
+/// `Content-Type: application/json` header is added automatically.
+/// Any `extra_headers` are appended after the default ones.
 fn build_request(
     url: &str,
     method: HttpMethod,
@@ -36,6 +49,8 @@ fn build_request(
     }
 }
 
+/// Returns the response unchanged if its status is `200`, otherwise returns
+/// an error containing the status code.
 fn validate_response(response: HttpRequestResult) -> Result<HttpRequestResult, String> {
     let ok: Nat = 200u32.into();
     if response.status == ok {
@@ -48,6 +63,7 @@ fn validate_response(response: HttpRequestResult) -> Result<HttpRequestResult, S
     }
 }
 
+/// Sends the request via the management canister and validates the response.
 async fn execute(request: &HttpRequestArgs) -> Result<HttpRequestResult, String> {
     match http_request(request).await {
         Ok(response) => validate_response(response),
@@ -55,12 +71,54 @@ async fn execute(request: &HttpRequestArgs) -> Result<HttpRequestResult, String>
     }
 }
 
+/// Performs an HTTP GET outcall.
+///
+/// Sends a GET request to `url` with a `User-Agent` header and validates
+/// that the response status is `200`.
+///
+/// # Arguments
+/// * `url` - The URL to fetch.
+/// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
+///   to minimise cycle costs.
 #[expect(dead_code)]
 pub(crate) async fn get(url: &str, max_response_bytes: u64) -> Result<HttpRequestResult, String> {
     let request = build_request(url, HttpMethod::GET, None, vec![], max_response_bytes);
     execute(&request).await
 }
 
+/// Performs an HTTP POST outcall.
+///
+/// Sends a POST request to `url` with the given `body` (assumed JSON) and
+/// validates that the response status is `200`.
+///
+/// # Idempotency
+///
+/// On the IC every replica in the subnet executes the outcall independently,
+/// so the remote server will receive the request *n* times (once per
+/// replica). For endpoints that are **not** inherently idempotent, pass an
+/// `Idempotency-Key` header via `headers` so the server can deduplicate:
+///
+/// ```ignore
+/// http_outcall::post(
+///     url,
+///     body,
+///     vec![HttpHeader {
+///         name: "Idempotency-Key".to_string(),
+///         value: unique_key,
+///     }],
+///     max_response_bytes,
+/// )
+/// ```
+///
+/// Whether the server honours this key must be verified on a case-by-case
+/// basis.
+///
+/// # Arguments
+/// * `url` - The endpoint to call.
+/// * `body` - The JSON request body as raw bytes.
+/// * `headers` - Additional headers appended after the defaults (`User-Agent`, `Content-Type`).
+/// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
+///   to minimise cycle costs.
 #[expect(dead_code)]
 pub(crate) async fn post(
     url: &str,
@@ -68,7 +126,13 @@ pub(crate) async fn post(
     headers: Vec<HttpHeader>,
     max_response_bytes: u64,
 ) -> Result<HttpRequestResult, String> {
-    let request = build_request(url, HttpMethod::POST, Some(body), headers, max_response_bytes);
+    let request = build_request(
+        url,
+        HttpMethod::POST,
+        Some(body),
+        headers,
+        max_response_bytes,
+    );
     execute(&request).await
 }
 
@@ -80,8 +144,13 @@ mod tests {
 
     #[test]
     fn test_build_request_sets_url() {
-        let request =
-            build_request("https://example.com/api", HttpMethod::GET, None, vec![], 2048);
+        let request = build_request(
+            "https://example.com/api",
+            HttpMethod::GET,
+            None,
+            vec![],
+            2048,
+        );
         assert_eq!(request.url, "https://example.com/api");
     }
 
@@ -181,13 +250,7 @@ mod tests {
             name: "Authorization".to_string(),
             value: "Bearer token".to_string(),
         }];
-        let request = build_request(
-            "https://example.com",
-            HttpMethod::GET,
-            None,
-            extra,
-            1024,
-        );
+        let request = build_request("https://example.com", HttpMethod::GET, None, extra, 1024);
         assert_eq!(request.headers.len(), 2);
         assert_eq!(request.headers[0].name, "User-Agent");
         assert_eq!(request.headers[1].name, "Authorization");
