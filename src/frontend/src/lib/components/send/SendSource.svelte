@@ -4,6 +4,7 @@
 	import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
+	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import TokenAsContact from '$lib/components/tokens/TokenAsContact.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
@@ -16,6 +17,9 @@
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionBalance } from '$lib/types/balance';
+	import type { OptionToken } from '$lib/types/token';
 
 	interface Props {
 		token: OptionToken;
@@ -65,10 +69,6 @@
 <WalletConnectModalValue label={$i18n.send.text.source} ref="source">
 	<div class="flex flex-col gap-1">
 		{source}
-		{#if nonNullish(putativeToken)}
-			<TokenAsContact token={putativeToken} />
-		{:else if nonNullish(contact)}
-			<ContactWithAvatar {contact} {contactAddress} />
-		{/if}
+		<ContactOrToken identifier={source} />
 	</div>
 </WalletConnectModalValue>

@@ -39,6 +39,11 @@ export interface RateLimitInfo {
 	limiter: string;
 }
 
+export interface AddPendingTransactionOutcome {
+	response: true;
+	rateLimitInfo?: RateLimitInfo;
+}
+
 export interface SelectedUtxosFeeOutcome {
 	response: SelectedUtxosFeeResponse;
 	rateLimitInfo?: RateLimitInfo;

@@ -98,7 +98,10 @@ impl RateLimiter {
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
-    use shared::types::{bitcoin::SelectedUtxosFeeError, signer::AllowSigningError};
+    use shared::types::{
+        bitcoin::{BtcAddPendingTransactionError, SelectedUtxosFeeError},
+        signer::AllowSigningError,
+    };
 
     use super::*;
 
@@ -263,6 +266,27 @@ mod tests {
 
         match res.unwrap_err() {
             SelectedUtxosFeeError::RateLimited(e) => {
+                assert_eq!(e.max_calls, 1);
+                assert_eq!(e.window_ns, 60 * ONE_SEC);
+                assert_eq!(e.caller, caller);
+            }
+            other => panic!("expected RateLimited, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn btc_add_pending_tx_error_carries_rate_limit_details() {
+        let rl = RateLimiter::new(1, 60 * ONE_SEC);
+        let caller = test_principal(42);
+
+        rl.check_at(caller, ONE_SEC).unwrap();
+
+        let res: Result<(), BtcAddPendingTransactionError> = rl
+            .check_at(caller, 2 * ONE_SEC)
+            .map_err(BtcAddPendingTransactionError::RateLimited);
+
+        match res.unwrap_err() {
+            BtcAddPendingTransactionError::RateLimited(e) => {
                 assert_eq!(e.max_calls, 1);
                 assert_eq!(e.window_ns, 60 * ONE_SEC);
                 assert_eq!(e.caller, caller);

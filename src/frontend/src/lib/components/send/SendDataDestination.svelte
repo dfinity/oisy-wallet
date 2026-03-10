@@ -12,6 +12,9 @@
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
+	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
+	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		destination: string;
@@ -46,10 +49,6 @@
 <WalletConnectModalValue label={label ?? $i18n.send.text.destination} ref="destination">
 	<div class="flex flex-col gap-1">
 		{destination}
-		{#if nonNullish(putativeToken)}
-			<TokenAsContact token={putativeToken} />
-		{:else if nonNullish(contact)}
-			<ContactWithAvatar {contact} {contactAddress} />
-		{/if}
+		<ContactOrToken identifier={destination} />
 	</div>
 </WalletConnectModalValue>

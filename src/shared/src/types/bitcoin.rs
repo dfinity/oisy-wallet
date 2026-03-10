@@ -92,6 +92,8 @@ pub enum BtcAddPendingTransactionError {
     UtxosAlreadyReserved,
     /// Server-side / unexpected
     InternalError { msg: String },
+    /// The caller has exceeded the call rate limit.
+    RateLimited(RateLimitError),
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

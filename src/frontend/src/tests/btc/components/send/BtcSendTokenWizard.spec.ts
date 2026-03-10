@@ -21,6 +21,7 @@ import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import type { AddPendingTransactionOutcome } from '$lib/types/api';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -35,7 +36,7 @@ import { readable } from 'svelte/store';
 describe('BtcSendTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
-	const pendingBtcTransactionResponse = true;
+	const pendingBtcTransactionResponse: AddPendingTransactionOutcome = { response: true };
 
 	const mockContext = ({
 		token = BTC_MAINNET_TOKEN,
