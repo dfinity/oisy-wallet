@@ -1,7 +1,9 @@
 import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
+	BtcGetPendingTransactionsError,
 	GetAllowedCyclesError,
+	RateLimitError,
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -21,8 +23,18 @@ const assertNeverOr = <T>(value: never, fallback: T): T => {
 	return fallback;
 };
 
+const mapRateLimitError = (err: RateLimitError): CanisterInternalError => {
+	const { max_calls: maxCalls, window_ns: windowNs } = err;
+
+	const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+	return new CanisterInternalError(
+		`Rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+	);
+};
+
 export const mapBtcPendingTransactionError = (
-	err: BtcAddPendingTransactionError
+	err: BtcAddPendingTransactionError | BtcGetPendingTransactionsError
 ): CanisterInternalError => {
 	if ('InternalError' in err) {
 		return new CanisterInternalError(err.InternalError.msg);
@@ -44,7 +56,11 @@ export const mapBtcPendingTransactionError = (
 		return new CanisterInternalError('Some of the provided UTXOs are already reserved.');
 	}
 
-	return assertNeverOr(err, new CanisterInternalError('Unknown BtcAddPendingTransactionError'));
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcPendingTransactionError'));
 };
 
 export const mapBtcSelectUserUtxosFeeError = (
@@ -61,13 +77,7 @@ export const mapBtcSelectUserUtxosFeeError = (
 	}
 
 	if ('RateLimited' in err) {
-		const { max_calls: maxCalls, window_ns: windowNs } = err.RateLimited;
-
-		const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
-
-		return new CanisterInternalError(
-			`Rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
-		);
+		return mapRateLimitError(err.RateLimited);
 	}
 
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError'));
@@ -97,13 +107,7 @@ export const mapAllowSigningError = (
 	}
 
 	if ('RateLimited' in err) {
-		const { max_calls: maxCalls, window_ns: windowNs } = err.RateLimited;
-
-		const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
-
-		return new CanisterInternalError(
-			`Rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
-		);
+		return mapRateLimitError(err.RateLimited);
 	}
 
 	if ('RateLimitedByGuard' in err) {

@@ -1,4 +1,7 @@
-use ic_cdk::{api::time, query, update};
+use ic_cdk::{
+    api::{msg_caller, time},
+    query, update,
+};
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use shared::types::{
     agreement::UpdateUserAgreementsRequest,
@@ -27,10 +30,9 @@ use crate::{
 /// # Errors
 /// Errors are enumerated by: `AddUserCredentialError`.
 #[update(guard = "caller_is_not_anonymous")]
-#[expect(clippy::needless_pass_by_value)]
 #[must_use]
 pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredentialResult {
-    let user_principal = ic_cdk::caller();
+    let user_principal = msg_caller();
     let stored_principal = StoredPrincipal(user_principal);
     let current_time_ns = u128::from(time());
 
@@ -40,12 +42,19 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
         return AddUserCredentialResult::Err(AddUserCredentialError::ConfigurationError);
     };
 
+    let AddUserCredentialRequest {
+        credential_jwt,
+        credential_spec,
+        current_user_version,
+        ..
+    } = request;
+
     match validate_ii_presentation_and_claims(
-        &request.credential_jwt,
+        &credential_jwt,
         user_principal,
         derivation_origin,
         &vc_flow_signers,
-        &request.credential_spec,
+        &credential_spec,
         &root_pk_raw,
         current_time_ns,
     ) {
@@ -54,7 +63,7 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
                 UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             service::add_credential(
                 stored_principal,
-                request.current_user_version,
+                current_user_version,
                 &credential_type,
                 vc_flow_signers.issuer_origin,
                 &mut user_profile_model,
@@ -79,7 +88,7 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
 pub fn update_user_network_settings(
     request: SaveNetworksSettingsRequest,
 ) -> UpdateUserNetworkSettingsResult {
-    let user_principal = ic_cdk::caller();
+    let user_principal = msg_caller();
     let stored_principal = StoredPrincipal(user_principal);
 
     mutate_state(|s| {
@@ -104,10 +113,9 @@ pub fn update_user_network_settings(
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "caller_is_not_anonymous")]
-#[expect(clippy::needless_pass_by_value)] // canister methods are necessary
 #[must_use]
 pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTestnetsResult {
-    let user_principal = ic_cdk::caller();
+    let user_principal = msg_caller();
     let stored_principal = StoredPrincipal(user_principal);
 
     mutate_state(|s| {
@@ -138,7 +146,7 @@ pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTes
 pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHiddenDappIdResult {
     fn inner(request: AddHiddenDappIdRequest) -> Result<(), AddDappSettingsError> {
         request.check()?;
-        let user_principal = ic_cdk::caller();
+        let user_principal = msg_caller();
         let stored_principal = StoredPrincipal(user_principal);
 
         mutate_state(|s| {
@@ -168,7 +176,7 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUserAgreementsResult {
-    let user_principal = ic_cdk::caller();
+    let user_principal = msg_caller();
     let stored_principal = StoredPrincipal(user_principal);
 
     mutate_state(|s| {
@@ -198,7 +206,7 @@ pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUse
 pub fn update_user_experimental_feature_settings(
     request: UpdateExperimentalFeaturesSettingsRequest,
 ) -> UpdateExperimentalFeaturesSettingsResult {
-    let user_principal = ic_cdk::caller();
+    let user_principal = msg_caller();
     let stored_principal = StoredPrincipal(user_principal);
 
     mutate_state(|s| {
@@ -219,7 +227,7 @@ pub fn update_user_experimental_feature_settings(
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn create_user_profile() -> UserProfile {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     let user_profile: UserProfile = mutate_state(|s| {
         let mut user_profile_model =
@@ -248,7 +256,7 @@ pub fn create_user_profile() -> UserProfile {
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_user_profile() -> GetUserProfileResult {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     mutate_state(|s| {
         let user_profile_model =
@@ -271,7 +279,7 @@ pub fn get_user_profile() -> GetUserProfileResult {
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn has_user_profile() -> HasUserProfileResponse {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     // candid does not support to directly return a bool
     HasUserProfileResponse {

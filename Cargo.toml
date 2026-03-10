@@ -10,18 +10,18 @@ resolver = "2"
 
 [workspace.dependencies]
 bs58 = "0.5"
-ic-cdk = "0.17"
-ic-cdk-timers = "0.11"
+ic-cdk = "0.18.7"
+ic-cdk-timers = "0.12.3"
 canbench-rs = { version = "0.2.0" }
 ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
 ic-cycles-ledger-pic = { path = "src/cycles_ledger/pic" }
 ic-cycles-ledger-types = { path = "src/cycles_ledger/types" }
-ic-ledger-types = "0.14"
+ic-ledger-types = "0.15.0"
 ic-stable-structures = "0.7"
 ic-metrics-encoder = "1.1"
 ic-canister-sig-creation = "1.3"
 ic-verifiable-credentials = "1.0"
-candid = "0.10"
+candid = "0.10.24"
 candid_parser = "0.3"
 serde = "1"
 serde_bytes = "0.11"
@@ -33,7 +33,7 @@ lazy_static = "1.5"
 # See:
 # Server version: https://github.com/dfinity/pocketic/releases/tag/12.0.0
 # Library version: https://docs.rs/pocket-ic/12.0.0
-pocket-ic = "12.0"
+pocket-ic = "12.0.0"
 pretty_assertions = "1.4"
 bitcoin = "0.32"
 paste = "1.0"

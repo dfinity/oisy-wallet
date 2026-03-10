@@ -19,6 +19,7 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { POUH_ISSUER_CANISTER_ID } from '$lib/constants/app.constants';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import type {
+	AddPendingTransactionOutcome,
 	AddUserCredentialParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
@@ -326,7 +327,7 @@ describe('backend.api', () => {
 			address: 'address'
 		};
 
-		const mockResponse = true;
+		const mockResponse: AddPendingTransactionOutcome = { response: true };
 
 		beforeEach(() => {
 			backendCanisterMock.btcAddPendingTransaction.mockResolvedValue(mockResponse);

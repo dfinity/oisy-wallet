@@ -2,6 +2,7 @@ import type {
 	AllowSigningResponse,
 	AllowSigningResult,
 	_SERVICE as BackendService,
+	BtcAddPendingTransactionResult,
 	BtcSelectUserUtxosFeeResult,
 	CustomToken,
 	IcrcToken,
@@ -371,7 +372,7 @@ describe('backend.canister', () => {
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
 			await expect(res).rejects.toThrowError(
-				new CanisterInternalError('Unknown BtcAddPendingTransactionError')
+				new CanisterInternalError('Unknown BtcPendingTransactionError')
 			);
 		});
 
@@ -401,6 +402,33 @@ describe('backend.canister', () => {
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
 			await expect(res).rejects.toThrowError();
+		});
+
+		it('should return rateLimitInfo if RateLimited error is returned', async () => {
+			const response = {
+				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			};
+
+			service.btc_add_pending_transaction.mockResolvedValue(
+				response as unknown as BtcAddPendingTransactionResult
+			);
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcAddPendingTransaction(btcAddPendingTransactionParams);
+
+			expect(service.btc_add_pending_transaction).toHaveBeenCalledWith(
+				btcAddPendingTransactionEndpointParams
+			);
+			expect(res).toStrictEqual({
+				response: true,
+				rateLimitInfo: {
+					endpoint: 'btc_add_pending_transaction',
+					limiter: 'BTC_ADD_PENDING_TX_RATE_LIMITER'
+				}
+			});
 		});
 	});
 

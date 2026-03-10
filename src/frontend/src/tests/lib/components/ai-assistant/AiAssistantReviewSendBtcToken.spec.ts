@@ -19,6 +19,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import type { AddPendingTransactionOutcome } from '$lib/types/api';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -32,7 +33,7 @@ import { fireEvent, render, waitFor } from '@testing-library/svelte';
 describe('AiAssistantReviewSendBtcToken', () => {
 	const sendAmount = 0.0001;
 	const transactionId = 'txid';
-	const pendingBtcTransactionResponse = true;
+	const pendingBtcTransactionResponse: AddPendingTransactionOutcome = { response: true };
 	const mockContext = ({
 		token = BTC_MAINNET_TOKEN,
 		utxosFee

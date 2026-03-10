@@ -1,6 +1,9 @@
 use std::collections::HashSet;
 
-use ic_cdk::{api::time, query, update};
+use ic_cdk::{
+    api::{msg_caller, time},
+    query, update,
+};
 use shared::types::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -25,6 +28,7 @@ use crate::{
             BTC_ADD_PENDING_TX_RATE_LIMITER, BTC_GET_PENDING_TX_RATE_LIMITER,
             BTC_SELECT_UTXOS_FEE_RATE_LIMITER,
         },
+        housekeeping::{BTC_ADD_PENDING_TX_RATE_LIMITER, BTC_SELECT_UTXOS_FEE_RATE_LIMITER},
         rate_limiter,
     },
 };
@@ -46,7 +50,6 @@ const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 /// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
 /// it returns the default percentiles.
 #[query(guard = "caller_is_not_anonymous")]
-#[expect(clippy::needless_pass_by_value)]
 #[must_use]
 pub fn btc_get_current_fee_percentiles(
     params: BtcGetFeePercentilesRequest,
@@ -71,7 +74,7 @@ pub async fn btc_select_user_utxos_fee(
             .with(rate_limiter::RateLimiter::check_caller)
             .map_err(SelectedUtxosFeeError::RateLimited)?;
 
-        let principal = ic_cdk::caller();
+        let principal = msg_caller();
         let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
@@ -165,7 +168,7 @@ pub async fn btc_add_pending_transaction(
             return Err(BtcAddPendingTransactionError::DuplicateUtxos);
         }
 
-        let principal = ic_cdk::caller();
+        let principal = msg_caller();
 
         let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
@@ -235,7 +238,7 @@ pub async fn btc_get_pending_transactions(
             .with(rate_limiter::RateLimiter::check_caller)
             .map_err(BtcGetPendingTransactionsError::RateLimited)?;
 
-        let principal = ic_cdk::caller();
+        let principal = msg_caller();
         let now_ns = time();
 
         let current_utxos = api::get_all_utxos(

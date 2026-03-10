@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use ic_cdk::api::time;
+use ic_cdk::api::{msg_caller, time};
 use shared::types::contact::{
     Contact, ContactError, CreateContactRequest, StoredContacts, UpdateContactRequest,
     MAX_CONTACTS_PER_USER,
@@ -13,7 +13,7 @@ use crate::{
 };
 
 pub(crate) async fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
     let current_time = time();
 
     // Generate a random ID BEFORE mutate_state, since it's an async operation
@@ -31,7 +31,7 @@ pub(crate) async fn create_contact(request: CreateContactRequest) -> Result<Cont
                 contacts
             } else {
                 // Log deserialization failure and create empty contacts
-                ic_cdk::api::print(format!(
+                ic_cdk::api::debug_print(format!(
                     "Failed to deserialize contacts for principal: {}. Creating empty contacts.",
                     stored_principal.0
                 ));
@@ -71,7 +71,7 @@ pub(crate) async fn create_contact(request: CreateContactRequest) -> Result<Cont
 }
 
 pub(crate) fn get_contacts() -> Vec<Contact> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     // Use our helper function to safely get contacts
     let stored_contacts = get_stored_contacts_safely(&stored_principal);
@@ -89,7 +89,7 @@ pub(crate) fn get_contacts() -> Vec<Contact> {
 /// * `Ok(Contact)` - The requested contact if found
 /// * `Err(ContactError::ContactNotFound)` - If no contact with the given ID exists for the user
 pub(crate) fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     // Use our helper function to safely get contacts
     let stored_contacts = get_stored_contacts_safely(&stored_principal);
@@ -112,7 +112,7 @@ pub(crate) fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
 /// * `Err(ContactError::ContactNotFound)` - If no contact with the given ID exists for the user
 /// * `Err(ContactError::InvalidContactData)` - If the contact data is invalid
 pub(crate) fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactError> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
     let current_time = time();
 
     mutate_state(|s| {
@@ -123,7 +123,7 @@ pub(crate) fn update_contact(request: UpdateContactRequest) -> Result<Contact, C
                 contacts
             } else {
                 // Log deserialization failure and create empty contacts
-                ic_cdk::api::print(format!(
+                ic_cdk::api::debug_print(format!(
                     "Failed to deserialize contacts for principal: {}. Creating empty contacts.",
                     stored_principal.0
                 ));
@@ -185,7 +185,7 @@ fn get_stored_contacts_safely(stored_principal: &StoredPrincipal) -> StoredConta
                 contacts
             } else {
                 // Log deserialization failure and return empty contacts
-                ic_cdk::api::print(format!(
+                ic_cdk::api::debug_print(format!(
                     "Failed to deserialize contacts for principal: {}. Creating empty contacts.",
                     stored_principal.0
                 ));
@@ -207,7 +207,7 @@ fn get_stored_contacts_safely(stored_principal: &StoredPrincipal) -> StoredConta
 /// * `Err(ContactError::ContactNotFound)` - If the contact does not exist or the contacts store has
 ///   not been initialized
 pub(crate) fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
     let current_time = time();
 
     mutate_state(|s| {

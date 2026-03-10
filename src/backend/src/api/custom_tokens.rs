@@ -1,4 +1,4 @@
-use ic_cdk::update;
+use ic_cdk::{api::msg_caller, update};
 use shared::types::custom_token::{CustomToken, CustomTokenId};
 
 use crate::{
@@ -10,9 +10,8 @@ use crate::{
 
 /// Add or update custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
-#[expect(clippy::needless_pass_by_value)]
 pub fn set_custom_token(token: CustomToken) {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     mutate_state(|s| {
         token::add_to_user_token(
@@ -23,19 +22,22 @@ pub fn set_custom_token(token: CustomToken) {
         );
     });
 
-    token::mark_token_active(&CustomTokenId::from(&token.token));
+    let CustomToken { token, .. } = token;
+
+    token::mark_token_active(&CustomTokenId::from(&token));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
-#[expect(clippy::needless_pass_by_value)]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
+    let tokens = tokens.into_boxed_slice();
+
     if tokens.len() > MAX_TOKEN_LIST_LENGTH {
-        ic_cdk::trap(&format!(
+        ic_cdk::trap(format!(
             "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
         ));
     }
 
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     let ids = tokens
         .iter()
@@ -56,13 +58,14 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 
 /// Remove custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
-#[expect(clippy::needless_pass_by_value)]
 pub fn remove_custom_token(token: CustomToken) {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let CustomToken { token, .. } = token;
+
+    let stored_principal = StoredPrincipal(msg_caller());
 
     mutate_state(|s| {
         let find = |t: &CustomToken| -> bool {
-            CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
+            CustomTokenId::from(&t.token) == CustomTokenId::from(&token)
         };
 
         token::remove_from_user_token(stored_principal, &mut s.custom_token, &find);
@@ -85,7 +88,7 @@ pub fn remove_custom_token(token: CustomToken) {
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn list_custom_tokens() -> Vec<CustomToken> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     let tokens = read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0);
 

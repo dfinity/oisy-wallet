@@ -2,17 +2,14 @@ import { ERC20_APPROVE_HASH } from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
-import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
-import {
-	toCkErc20HelperContractAddress,
-	toCkEthHelperContractAddress,
-	toCkMinterAddress
-} from '$icp-eth/utils/cketh.utils';
 import { MAX_UINT_256 } from '$lib/constants/app.constants';
+import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Transaction } from '$lib/types/transaction';
 import type { Option } from '$lib/types/utils';
+import { areAddressesEqual } from '$lib/utils/address.utils';
+import { getContactForAddress } from '$lib/utils/contact.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { AbiCoder } from 'ethers/abi';
 import { dataSlice } from 'ethers/utils';
@@ -53,49 +50,37 @@ export const decodeErc20AbiDataValue = ({
 };
 
 /**
- * It will try to map an address to a name among the known addresses (e.g. ERC20 tokens, CK minters).
+ * It will try to map an address to a name among the known addresses (e.g. ERC20 tokens, built-in contacts).
  *
  * The string will be used to be displayed instead of the address and make it more user-friendly, avoiding confusions.
  */
-// TODO: check if can try and fetch metadata for the putative token if it is not in the list
 export const mapAddressToName = ({
 	address,
 	networkId,
 	erc20Tokens,
-	ckMinterInfo
+	builtInContacts = []
 }: {
 	address: OptionEthAddress;
 	networkId: NetworkId;
 	erc20Tokens: Erc20Token[];
-	ckMinterInfo: OptionCertifiedMinterInfo;
+	builtInContacts?: ContactUi[];
 }): OptionString => {
 	if (isNullish(address)) {
-		return undefined;
+		return;
 	}
 
 	const putativeErc20TokenName: string | undefined = erc20Tokens.find(
 		({ address: tokenAddress, network: { id: tokenNetworkId } }) =>
-			tokenAddress === address && tokenNetworkId === networkId
+			areAddressesEqual({ address1: tokenAddress, address2: address, networkId }) &&
+			tokenNetworkId === networkId
 	)?.name;
 
-	const ckEthHelperContractAddress = toCkEthHelperContractAddress(ckMinterInfo);
-	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(ckMinterInfo);
-	const ckMinterAddress = toCkMinterAddress(ckMinterInfo);
+	const builtInContact = getContactForAddress({
+		addressString: address,
+		contactList: builtInContacts
+	});
 
-	// TODO: find a way to get the contracts name more dynamically
-	const ckMinterNameMap: Record<EthAddress, string> = {
-		...(nonNullish(ckEthHelperContractAddress) && {
-			[ckEthHelperContractAddress.toLowerCase()]: 'ckETH Minter Helper Contract'
-		}),
-		...(nonNullish(ckErc20HelperContractAddress) && {
-			[ckErc20HelperContractAddress.toLowerCase()]: 'ckERC20 Minter Helper Contract'
-		}),
-		...(nonNullish(ckMinterAddress) && { [ckMinterAddress.toLowerCase()]: 'CK Ethereum Minter' })
-	};
-
-	const putativeCkMinterName: string | undefined = ckMinterNameMap[address.toLowerCase()];
-
-	return putativeErc20TokenName ?? putativeCkMinterName;
+	return putativeErc20TokenName ?? builtInContact?.name;
 };
 
 /**

@@ -55,12 +55,21 @@ describe('backend.errors', () => {
 			expect(err.message).toBe('Some of the provided UTXOs are already reserved.');
 		});
 
+		it('should map RateLimited', () => {
+			const err = mapBtcPendingTransactionError({
+				RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.');
+		});
+
 		it('should return unknown error for unrecognized variant', () => {
 			// @ts-expect-error testing unknown error variant
 			const err = mapBtcPendingTransactionError({ SomeOther: null });
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('Unknown BtcAddPendingTransactionError');
+			expect(err.message).toBe('Unknown BtcPendingTransactionError');
 		});
 	});
 

@@ -3,7 +3,7 @@ pub mod impls;
 use std::time::Duration;
 
 use candid::CandidType;
-use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
+use ic_cdk::bitcoin_canister::{MillisatoshiPerByte, Network as BitcoinNetwork, Utxo};
 use serde::Deserialize;
 
 use crate::types::signer::RateLimitError;
@@ -38,7 +38,7 @@ pub const FEE_PERCENTILES_UPDATE_INTERVAL: Duration = Duration::from_secs(60);
 pub const FEE_UPDATE_TIMEOUT_NS: u64 =
     5 * FEE_PERCENTILES_UPDATE_INTERVAL.as_secs() * 1_000_000_000;
 
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[derive(CandidType, Deserialize, Clone, Copy, Eq, PartialEq, Debug)]
 pub struct BtcGetFeePercentilesRequest {
     pub network: BitcoinNetwork,
 }

@@ -4,7 +4,7 @@ use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::{bench, bench_fn, BenchResult};
 use candid::Principal;
-use ic_cdk::api::management_canister::bitcoin::{Outpoint, Utxo};
+use ic_cdk::bitcoin_canister::{Outpoint, Utxo};
 use serde_bytes::ByteBuf;
 use shared::{
     http::HttpRequest,

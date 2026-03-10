@@ -36,6 +36,7 @@ import {
 	filterEnabledTokens,
 	filterTokens,
 	filterTokensByNft,
+	findPutativeToken,
 	findToken,
 	getCodebaseTokenIconPath,
 	pinEnabledTokensAtTop,
@@ -59,6 +60,7 @@ import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import i18nMock from '$tests/mocks/i18n.mock';
 import {
 	mockIndexCanisterId,
+	mockValidDip20Token,
 	mockValidIcCkToken,
 	mockValidIcrcToken,
 	mockValidIcToken
@@ -2047,6 +2049,163 @@ describe('tokens.utils', () => {
 			expect(path4).toBe(
 				`/icons/${mockValidSplToken.network.id.description?.toLowerCase()}/${mockValidSplToken.address.toUpperCase()}.webp`
 			);
+		});
+	});
+
+	describe('findPutativeToken', () => {
+		const allMockTokens = [
+			mockValidErc20Token,
+			mockValidErc721Token,
+			mockValidErc1155Token,
+			mockValidErc4626Token,
+			mockValidSplToken,
+			mockValidIcrcToken,
+			mockValidIcCkToken,
+			mockValidDip20Token,
+			mockValidExtV2Token,
+			mockValidDip721Token,
+			mockValidIcPunksToken
+		];
+
+		it('should return undefined when identifier is undefined', () => {
+			expect(findPutativeToken({ tokens: allMockTokens, identifier: undefined })).toBeUndefined();
+		});
+
+		it('should return undefined when tokens array is empty', () => {
+			expect(
+				findPutativeToken({ tokens: [], identifier: mockValidErc20Token.address })
+			).toBeUndefined();
+		});
+
+		it('should return undefined when no token matches the identifier', () => {
+			expect(
+				findPutativeToken({ tokens: allMockTokens, identifier: 'non-existent' })
+			).toBeUndefined();
+		});
+
+		it('should find an ERC20 token by its address', () => {
+			expect(
+				findPutativeToken({ tokens: allMockTokens, identifier: mockValidErc20Token.address })
+			).toBe(mockValidErc20Token);
+		});
+
+		it('should find an ERC721 token by its address', () => {
+			expect(
+				findPutativeToken({ tokens: allMockTokens, identifier: mockValidErc721Token.address })
+			).toBe(mockValidErc721Token);
+		});
+
+		it('should find an ERC1155 token by its address', () => {
+			expect(
+				findPutativeToken({ tokens: allMockTokens, identifier: mockValidErc1155Token.address })
+			).toBe(mockValidErc1155Token);
+		});
+
+		it('should find an ERC4626 token by its address', () => {
+			expect(
+				findPutativeToken({ tokens: allMockTokens, identifier: mockValidErc4626Token.address })
+			).toBe(mockValidErc4626Token);
+		});
+
+		it('should find an SPL token by its address', () => {
+			expect(
+				findPutativeToken({ tokens: allMockTokens, identifier: mockValidSplToken.address })
+			).toBe(mockValidSplToken);
+		});
+
+		it('should find an ICRC token by its ledgerCanisterId', () => {
+			expect(
+				findPutativeToken({
+					tokens: allMockTokens,
+					identifier: mockValidIcrcToken.ledgerCanisterId
+				})
+			).toBe(mockValidIcrcToken);
+		});
+
+		it('should find an EXT token by its canisterId', () => {
+			expect(
+				findPutativeToken({
+					tokens: allMockTokens,
+					identifier: mockValidExtV2Token.canisterId
+				})
+			).toBe(mockValidExtV2Token);
+		});
+
+		it('should find a DIP721 token by its canisterId', () => {
+			expect(
+				findPutativeToken({
+					tokens: allMockTokens,
+					identifier: mockValidDip721Token.canisterId
+				})
+			).toBe(mockValidDip721Token);
+		});
+
+		it('should find an ICPunks token by its canisterId', () => {
+			expect(
+				findPutativeToken({
+					tokens: allMockTokens,
+					identifier: mockValidIcPunksToken.canisterId
+				})
+			).toBe(mockValidIcPunksToken);
+		});
+
+		it('should match ERC addresses case-insensitively', () => {
+			expect(
+				findPutativeToken({
+					tokens: allMockTokens,
+					identifier: mockValidErc20Token.address.toUpperCase()
+				})
+			).toBe(mockValidErc20Token);
+
+			expect(
+				findPutativeToken({
+					tokens: allMockTokens,
+					identifier: mockValidErc20Token.address.toLowerCase()
+				})
+			).toBe(mockValidErc20Token);
+		});
+
+		it('should match SPL addresses case-sensitively', () => {
+			expect(
+				findPutativeToken({
+					tokens: allMockTokens,
+					identifier: mockValidSplToken.address
+				})
+			).toBe(mockValidSplToken);
+
+			expect(
+				findPutativeToken({
+					tokens: allMockTokens,
+					identifier: mockValidSplToken.address.toLowerCase()
+				})
+			).toBeUndefined();
+
+			expect(
+				findPutativeToken({
+					tokens: allMockTokens,
+					identifier: mockValidSplToken.address.toUpperCase()
+				})
+			).toBeUndefined();
+		});
+
+		it('should return the first matching token when multiple tokens share the same identifier', () => {
+			const duplicate = { ...mockValidIcrcToken, id: parseTokenId('DuplicateId') };
+
+			const result = findPutativeToken({
+				tokens: [mockValidIcrcToken, duplicate],
+				identifier: mockValidIcrcToken.ledgerCanisterId
+			});
+
+			expect(result).toBe(mockValidIcrcToken);
+		});
+
+		it('should not match tokens that have no contract address', () => {
+			expect(
+				findPutativeToken({
+					tokens: [BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, SOLANA_TOKEN],
+					identifier: 'BTC'
+				})
+			).toBeUndefined();
 		});
 	});
 });
