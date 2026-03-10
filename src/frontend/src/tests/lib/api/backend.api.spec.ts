@@ -381,7 +381,7 @@ describe('backend.api', () => {
 		it('should successfully call btcGetPendingTransaction endpoint', async () => {
 			const result = await getPendingBtcTransactions(mockParams);
 
-			expect(result).toEqual(mockResponse);
+			expect(result).toEqual({ response: mockResponse });
 			expect(backendCanisterMock.btcGetPendingTransactions).toHaveBeenCalledExactlyOnceWith({
 				network: { mainnet: null },
 				address: 'address'
