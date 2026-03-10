@@ -131,7 +131,7 @@ pub struct SaveNetworksSettingsRequest {
     pub current_user_version: Option<Version>,
 }
 
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[derive(CandidType, Deserialize, Clone, Copy, Eq, PartialEq, Debug)]
 pub struct SetShowTestnetsRequest {
     pub show_testnets: bool,
     pub current_user_version: Option<Version>,

@@ -70,7 +70,7 @@ fn spawn_housekeeping_if_idle() {
 
     HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = Some(now));
 
-    ic_cdk::spawn(async {
+    ic_cdk::futures::spawn(async {
         hourly_housekeeping_tasks().await;
         HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = None);
     });
@@ -125,7 +125,7 @@ pub(crate) fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincip
         return;
     }
 
-    ic_cdk::spawn(async move {
+    ic_cdk::futures::spawn(async move {
         if let Err(e) = signer::allow_signing(None).await {
             ic_cdk::println!(
                 "Error enabling signing for user {}: {:?}",

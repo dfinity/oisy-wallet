@@ -28,13 +28,13 @@ pub fn add_to_user_token<T, Id, F>(
             if token.get_version() == slot.get_version() {
                 *slot = token.with_incremented_version();
             } else {
-                ic_cdk::trap(&format!(
+                ic_cdk::trap(format!(
                     "Version mismatch, token update not allowed. Existing token: {slot:?}, New token: {token:?}"
                 ));
             }
         } else {
             if tokens.len() == MAX_TOKEN_LIST_LENGTH {
-                ic_cdk::trap(&format!(
+                ic_cdk::trap(format!(
                     "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
                 ));
             }

@@ -23,14 +23,15 @@ pub fn config() -> Config {
 
 /// Processes external HTTP requests.
 #[query]
-#[expect(clippy::needless_pass_by_value)]
 #[must_use]
 pub fn http_request(request: HttpRequest) -> HttpResponse {
-    let path = request
-        .url
+    let HttpRequest { url, .. } = request;
+
+    let path = url
         .split('?')
         .next()
         .unwrap_or_else(|| unreachable!("Even splitting an empty string yields one entry"));
+
     match path {
         "/metrics" => get_metrics(),
         _ => HttpResponse {

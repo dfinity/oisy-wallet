@@ -1,9 +1,9 @@
 use std::{cell::RefCell, collections::HashMap};
 
-use ic_cdk::api::management_canister::bitcoin::{
-    bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, BitcoinNetwork,
-    GetCurrentFeePercentilesRequest, GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Utxo,
-    UtxoFilter,
+use ic_cdk::bitcoin_canister::{
+    bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, GetCurrentFeePercentilesRequest,
+    GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Network as BitcoinNetwork, Utxo,
+    UtxosFilter,
 };
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::bitcoin::{
@@ -31,17 +31,15 @@ thread_local! {
 async fn get_utxos(
     network: BitcoinNetwork,
     address: String,
-    filter: Option<UtxoFilter>,
+    filter: Option<UtxosFilter>,
 ) -> Result<GetUtxosResponse, String> {
-    let utxos_res = bitcoin_get_utxos(GetUtxosRequest {
+    bitcoin_get_utxos(&GetUtxosRequest {
         address,
         network,
         filter,
     })
     .await
-    .map_err(|err| err.1)?;
-
-    Ok(utxos_res.0)
+    .map_err(|err| err.to_string())
 }
 /// Returns all the UTXOs of a specific address.
 /// API interface returns a paginated view of the utxos but we need to get them all.
@@ -56,14 +54,14 @@ pub async fn get_all_utxos(
     } else {
         min_confirmations
     };
-    let filter = final_min_confirmations.map(UtxoFilter::MinConfirmations);
+    let filter = final_min_confirmations.map(UtxosFilter::MinConfirmations);
     let mut utxos_response = get_utxos(network, address.clone(), filter).await?;
 
     let mut all_utxos: Vec<Utxo> = utxos_response.utxos;
     let mut next_page: Option<Vec<u8>> = utxos_response.next_page;
     while next_page.is_some() {
         utxos_response =
-            get_utxos(network, address.clone(), next_page.map(UtxoFilter::Page)).await?;
+            get_utxos(network, address.clone(), next_page.map(UtxosFilter::Page)).await?;
         all_utxos.extend(utxos_response.utxos);
         next_page = utxos_response.next_page;
     }
@@ -103,7 +101,7 @@ fn spawn_fee_update_if_idle() {
         *cell.borrow_mut() = Some(now);
     });
 
-    ic_cdk::spawn(async {
+    ic_cdk::futures::spawn_017_compat(async {
         let _ = update_fee_percentiles_cache().await;
         FEE_UPDATE_STARTED_AT.with(|cell| {
             *cell.borrow_mut() = None;
@@ -172,11 +170,9 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
 async fn fetch_current_fee_percentiles(
     network: BitcoinNetwork,
 ) -> Result<Vec<MillisatoshiPerByte>, String> {
-    let res = bitcoin_get_current_fee_percentiles(GetCurrentFeePercentilesRequest { network })
+    bitcoin_get_current_fee_percentiles(&GetCurrentFeePercentilesRequest { network })
         .await
-        .map_err(|err| err.1)?;
-
-    Ok(res.0)
+        .map_err(|err| err.to_string())
 }
 
 /// This function returns fee percentiles data from the in-memory cache.

@@ -5,7 +5,7 @@
 //! Adapted from: <https://github.com/dfinity/candid/blob/master/rust/candid_parser/src/bindings/rust_call.hbs>
 #![allow(dead_code, unused_imports, clippy::all, clippy::missing_errors_doc)]
 use candid::{self, CandidType, Deserialize, Principal};
-use ic_cdk::api::call::CallResult;
+use ic_cdk::call::CallResult;
 
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub enum ChangeIndexId {
