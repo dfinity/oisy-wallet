@@ -70,9 +70,9 @@
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
 	const address: string | undefined = $derived(
-		type === 'send'
+		type === 'send' || type === 'deposit'
 			? to
-			: type === 'receive'
+			: type === 'receive' || type === 'withdraw'
 				? from
 				: type === 'approve'
 					? approveSpender
@@ -201,9 +201,9 @@
 					class="flex min-w-0 flex-col items-center items-start text-xs text-primary sm:flex-row sm:text-sm"
 				>
 					<span class="inline-flex min-w-0 items-center gap-1">
-						{#if type === 'send'}
+						{#if type === 'send' || type === 'deposit'}
 							<span class="shrink-0">{$i18n.transaction.text.to}</span>
-						{:else if type === 'receive'}
+						{:else if type === 'receive' || type === 'withdraw'}
 							<span class="shrink-0">{$i18n.transaction.text.from}</span>
 						{:else if type === 'approve'}
 							<span class="shrink-0">{$i18n.transaction.text.for}</span>
