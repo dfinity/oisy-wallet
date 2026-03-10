@@ -9,8 +9,6 @@
 	}
 
 	let { destination, label }: Props = $props();
-
-
 </script>
 
 <WalletConnectModalValue label={label ?? $i18n.send.text.destination} ref="destination">

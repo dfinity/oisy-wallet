@@ -16,9 +16,6 @@
 	}
 
 	let { token, balance, source, exchangeRate }: Props = $props();
-
-
-
 </script>
 
 <WalletConnectModalValue label={$i18n.send.text.balance} ref="balance">
