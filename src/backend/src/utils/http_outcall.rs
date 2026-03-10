@@ -9,6 +9,7 @@ fn build_request(
     url: &str,
     method: HttpMethod,
     body: Option<Vec<u8>>,
+    extra_headers: Vec<HttpHeader>,
     max_response_bytes: u64,
 ) -> HttpRequestArgs {
     let mut headers = vec![HttpHeader {
@@ -22,6 +23,8 @@ fn build_request(
             value: "application/json".to_string(),
         });
     }
+
+    headers.extend(extra_headers);
 
     HttpRequestArgs {
         url: url.to_string(),
@@ -54,7 +57,7 @@ async fn execute(request: &HttpRequestArgs) -> Result<HttpRequestResult, String>
 
 #[expect(dead_code)]
 pub(crate) async fn get(url: &str, max_response_bytes: u64) -> Result<HttpRequestResult, String> {
-    let request = build_request(url, HttpMethod::GET, None, max_response_bytes);
+    let request = build_request(url, HttpMethod::GET, None, vec![], max_response_bytes);
     execute(&request).await
 }
 
@@ -62,9 +65,10 @@ pub(crate) async fn get(url: &str, max_response_bytes: u64) -> Result<HttpReques
 pub(crate) async fn post(
     url: &str,
     body: Vec<u8>,
+    headers: Vec<HttpHeader>,
     max_response_bytes: u64,
 ) -> Result<HttpRequestResult, String> {
-    let request = build_request(url, HttpMethod::POST, Some(body), max_response_bytes);
+    let request = build_request(url, HttpMethod::POST, Some(body), headers, max_response_bytes);
     execute(&request).await
 }
 
@@ -76,22 +80,29 @@ mod tests {
 
     #[test]
     fn test_build_request_sets_url() {
-        let request = build_request("https://example.com/api", HttpMethod::GET, None, 2048);
+        let request =
+            build_request("https://example.com/api", HttpMethod::GET, None, vec![], 2048);
         assert_eq!(request.url, "https://example.com/api");
     }
 
     #[test]
     fn test_build_request_sets_method() {
-        let get = build_request("https://example.com", HttpMethod::GET, None, 1024);
+        let get = build_request("https://example.com", HttpMethod::GET, None, vec![], 1024);
         assert!(matches!(get.method, HttpMethod::GET));
 
-        let post = build_request("https://example.com", HttpMethod::POST, Some(vec![]), 1024);
+        let post = build_request(
+            "https://example.com",
+            HttpMethod::POST,
+            Some(vec![]),
+            vec![],
+            1024,
+        );
         assert!(matches!(post.method, HttpMethod::POST));
     }
 
     #[test]
     fn test_build_request_get_has_no_body() {
-        let request = build_request("https://example.com", HttpMethod::GET, None, 1024);
+        let request = build_request("https://example.com", HttpMethod::GET, None, vec![], 1024);
         assert_eq!(request.body, None);
     }
 
@@ -102,6 +113,7 @@ mod tests {
             "https://example.com",
             HttpMethod::POST,
             Some(body.clone()),
+            vec![],
             1024,
         );
         assert_eq!(request.body, Some(body));
@@ -109,19 +121,19 @@ mod tests {
 
     #[test]
     fn test_build_request_sets_max_response_bytes() {
-        let request = build_request("https://example.com", HttpMethod::GET, None, 5000);
+        let request = build_request("https://example.com", HttpMethod::GET, None, vec![], 5000);
         assert_eq!(request.max_response_bytes, Some(5000));
     }
 
     #[test]
     fn test_build_request_has_no_transform() {
-        let request = build_request("https://example.com", HttpMethod::GET, None, 1024);
+        let request = build_request("https://example.com", HttpMethod::GET, None, vec![], 1024);
         assert_eq!(request.transform, None);
     }
 
     #[test]
     fn test_build_request_get_has_only_user_agent_header() {
-        let request = build_request("https://example.com", HttpMethod::GET, None, 1024);
+        let request = build_request("https://example.com", HttpMethod::GET, None, vec![], 1024);
         assert_eq!(request.headers.len(), 1);
         assert_eq!(request.headers[0].name, "User-Agent");
         assert_eq!(request.headers[0].value, USER_AGENT);
@@ -133,6 +145,7 @@ mod tests {
             "https://example.com",
             HttpMethod::POST,
             Some(b"{}".to_vec()),
+            vec![],
             1024,
         );
         assert_eq!(request.headers.len(), 2);
@@ -140,6 +153,45 @@ mod tests {
         assert_eq!(request.headers[0].value, USER_AGENT);
         assert_eq!(request.headers[1].name, "Content-Type");
         assert_eq!(request.headers[1].value, "application/json");
+    }
+
+    #[test]
+    fn test_build_request_appends_extra_headers() {
+        let extra = vec![HttpHeader {
+            name: "Idempotency-Key".to_string(),
+            value: "abc-123".to_string(),
+        }];
+        let request = build_request(
+            "https://example.com",
+            HttpMethod::POST,
+            Some(b"{}".to_vec()),
+            extra,
+            1024,
+        );
+        assert_eq!(request.headers.len(), 3);
+        assert_eq!(request.headers[0].name, "User-Agent");
+        assert_eq!(request.headers[1].name, "Content-Type");
+        assert_eq!(request.headers[2].name, "Idempotency-Key");
+        assert_eq!(request.headers[2].value, "abc-123");
+    }
+
+    #[test]
+    fn test_build_request_extra_headers_on_get() {
+        let extra = vec![HttpHeader {
+            name: "Authorization".to_string(),
+            value: "Bearer token".to_string(),
+        }];
+        let request = build_request(
+            "https://example.com",
+            HttpMethod::GET,
+            None,
+            extra,
+            1024,
+        );
+        assert_eq!(request.headers.len(), 2);
+        assert_eq!(request.headers[0].name, "User-Agent");
+        assert_eq!(request.headers[1].name, "Authorization");
+        assert_eq!(request.headers[1].value, "Bearer token");
     }
 
     #[test]
