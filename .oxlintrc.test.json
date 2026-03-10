@@ -1,0 +1,21 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["typescript", "unicorn", "import", "vitest"],
+	"categories": {
+		"correctness": "error",
+		"style": "error",
+		"restriction": "error",
+		"pedantic": "error",
+		"suspicious": "warn"
+	},
+	"env": {
+		"builtin": true,
+		"es2020": true,
+		"browser": true,
+		"node": true
+	},
+	"jsPlugins": ["eslint-plugin-local-rules", "eslint-plugin-prefer-arrow"],
+	"globals": {
+		"NodeJS": "writable"
+	}
+}
