@@ -70,7 +70,7 @@ describe('backend.errors', () => {
 			const err = mapBtcAddPendingTransactionError({ SomeOther: null });
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('Unknown BtcPendingTransactionError');
+			expect(err.message).toBe('Unknown BtcAddPendingTransactionError');
 		});
 	});
 
@@ -98,7 +98,7 @@ describe('backend.errors', () => {
 			const err = mapBtcGetPendingTransactionsError({ SomeOther: null });
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('Unknown BtcPendingTransactionError');
+			expect(err.message).toBe('Unknown BtcGetPendingTransactionError');
 		});
 	});
 
