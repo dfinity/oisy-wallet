@@ -296,3 +296,81 @@ fn test_btc_add_pending_transaction_rate_limited_after_exceeding_limit() {
         other => panic!("expected BtcAddPendingTransactionError::RateLimited, got {other:?}"),
     }
 }
+
+// -------------------------------------------------------------------------------------------------
+// - Rate-limit integration tests for btc_get_pending_transactions
+// -------------------------------------------------------------------------------------------------
+
+fn call_btc_get_pending_transactions(
+    pic_setup: &crate::utils::pocketic::PicBackend,
+    caller: Principal,
+) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
+    let request = BtcGetPendingTransactionsRequest {
+        address: MOCK_ADDRESS.to_string(),
+        network: BitcoinNetwork::Regtest,
+    };
+    pic_setup
+        .update::<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError>>(
+            caller,
+            "btc_get_pending_transactions",
+            request,
+        )
+        .expect("btc_get_pending_transactions should exist")
+}
+
+/// Calling `btc_get_pending_transactions` more than 15 times within a minute must
+/// return `BtcGetPendingTransactionsError::RateLimited` with the expected payload.
+#[test]
+fn test_btc_get_pending_transactions_rate_limited_after_exceeding_limit() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    for i in 0..15 {
+        let result = call_btc_get_pending_transactions(&pic_setup, caller);
+        assert!(
+            !matches!(result, Err(BtcGetPendingTransactionsError::RateLimited(_))),
+            "call {i} should not be rate-limited: {result:?}",
+        );
+    }
+
+    let result = call_btc_get_pending_transactions(&pic_setup, caller);
+    match result {
+        Err(BtcGetPendingTransactionsError::RateLimited(RateLimitError {
+            max_calls,
+            window_ns,
+            caller: err_caller,
+        })) => {
+            assert_eq!(max_calls, 15);
+            assert_eq!(window_ns, 60 * 1_000_000_000);
+            assert_eq!(err_caller, caller);
+        }
+        other => panic!("expected BtcGetPendingTransactionsError::RateLimited, got {other:?}"),
+    }
+}
+
+/// Different callers should have independent rate-limit buckets for BTC methods.
+#[test]
+fn test_btc_get_pending_transactions_rate_limit_is_per_caller() {
+    let pic_setup = setup();
+    let caller_a = Principal::from_text(CALLER).unwrap();
+    let caller_b = Principal::self_authenticating("btc-rate-limit-b");
+
+    // Exhaust caller_a's rate limit (15 calls/min).
+    for _ in 0..15 {
+        let _ = call_btc_get_pending_transactions(&pic_setup, caller_a);
+    }
+    assert!(
+        matches!(
+            call_btc_get_pending_transactions(&pic_setup, caller_a),
+            Err(BtcGetPendingTransactionsError::RateLimited(_))
+        ),
+        "caller_a should be rate-limited"
+    );
+
+    // caller_b should not be affected.
+    let result = call_btc_get_pending_transactions(&pic_setup, caller_b);
+    assert!(
+        !matches!(result, Err(BtcGetPendingTransactionsError::RateLimited(_))),
+        "caller_b should not be rate-limited: {result:?}"
+    );
+}
