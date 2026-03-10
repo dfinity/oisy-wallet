@@ -4,9 +4,7 @@
 	import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
-	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
-	import TokenAsContact from '$lib/components/tokens/TokenAsContact.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';

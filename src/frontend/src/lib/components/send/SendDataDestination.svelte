@@ -1,11 +1,8 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { isTokenErc } from '$eth/utils/erc.utils';
 	import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
 	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
-	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
-	import TokenAsContact from '$lib/components/tokens/TokenAsContact.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { allContacts } from '$lib/derived/contacts.derived';
