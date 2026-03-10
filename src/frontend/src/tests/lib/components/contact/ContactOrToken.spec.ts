@@ -33,7 +33,9 @@ describe('ContactOrToken', () => {
 
 	beforeEach(() => {
 		vi.restoreAllMocks();
+
 		mockAllTokens([]);
+
 		mockAllContacts([]);
 	});
 
