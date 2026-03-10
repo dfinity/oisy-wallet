@@ -98,7 +98,7 @@ describe('backend.errors', () => {
 			const err = mapBtcGetPendingTransactionsError({ SomeOther: null });
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('Unknown BtcGetPendingTransactionError');
+			expect(err.message).toBe('Unknown BtcGetPendingTransactionsError');
 		});
 	});
 
