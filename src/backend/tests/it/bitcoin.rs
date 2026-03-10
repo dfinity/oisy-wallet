@@ -244,3 +244,55 @@ fn test_btc_select_user_utxos_fee_rate_limit_resets_after_window() {
         "should not be rate-limited after window elapses: {result:?}"
     );
 }
+
+// -------------------------------------------------------------------------------------------------
+// - Rate-limit integration tests for btc_add_pending_transaction
+// -------------------------------------------------------------------------------------------------
+
+fn call_btc_add_pending_transaction(
+    pic_setup: &crate::utils::pocketic::PicBackend,
+    caller: Principal,
+) -> Result<(), BtcAddPendingTransactionError> {
+    let request = BtcAddPendingTransactionRequest {
+        txid: vec![],
+        utxos: vec![UTXO_1],
+        network: BitcoinNetwork::Regtest,
+    };
+    pic_setup
+        .update::<Result<(), BtcAddPendingTransactionError>>(
+            caller,
+            "btc_add_pending_transaction",
+            request,
+        )
+        .expect("btc_add_pending_transaction should exist")
+}
+
+/// Calling `btc_add_pending_transaction` more than 10 times within a minute must
+/// return `BtcAddPendingTransactionError::RateLimited`.
+#[test]
+fn test_btc_add_pending_transaction_rate_limited_after_exceeding_limit() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    for i in 0..10 {
+        let result = call_btc_add_pending_transaction(&pic_setup, caller);
+        assert!(
+            !matches!(result, Err(BtcAddPendingTransactionError::RateLimited(_))),
+            "call {i} should not be rate-limited: {result:?}",
+        );
+    }
+
+    let result = call_btc_add_pending_transaction(&pic_setup, caller);
+    match result {
+        Err(BtcAddPendingTransactionError::RateLimited(RateLimitError {
+            max_calls,
+            window_ns,
+            caller: err_caller,
+        })) => {
+            assert_eq!(max_calls, 10);
+            assert_eq!(window_ns, 60 * 1_000_000_000);
+            assert_eq!(err_caller, caller);
+        }
+        other => panic!("expected BtcAddPendingTransactionError::RateLimited, got {other:?}"),
+    }
+}

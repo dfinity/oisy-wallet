@@ -57,6 +57,7 @@ type BtcAddPendingTransactionError = variant {
 	InvalidUtxos;
 	EmptyUtxos;
 	DuplicateUtxos;
+	RateLimited : RateLimitError;
 	InternalError : record { msg : text };
 	UtxosAlreadyReserved
 };

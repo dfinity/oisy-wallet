@@ -66,6 +66,7 @@ export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
 	| { EmptyUtxos: null }
 	| { DuplicateUtxos: null }
+	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } }
 	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {

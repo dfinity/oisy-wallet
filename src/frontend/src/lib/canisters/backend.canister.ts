@@ -19,6 +19,7 @@ import {
 } from '$lib/canisters/backend.errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type {
+	AddPendingTransactionOutcome,
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
@@ -113,7 +114,7 @@ export class BackendCanister extends Canister<BackendService> {
 	btcAddPendingTransaction = async ({
 		txId,
 		...rest
-	}: BtcAddPendingTransactionParams): Promise<boolean> => {
+	}: BtcAddPendingTransactionParams): Promise<AddPendingTransactionOutcome> => {
 		const { btc_add_pending_transaction } = this.caller({ certified: true });
 
 		const response = await btc_add_pending_transaction({
@@ -122,7 +123,19 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 
 		if ('Ok' in response) {
-			return true;
+			return { response: true };
+		}
+
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
+		// TODO: improve placeholder with significant data, for now we do not use them
+		if ('RateLimited' in response.Err) {
+			return {
+				response: true,
+				rateLimitInfo: {
+					endpoint: 'btc_add_pending_transaction',
+					limiter: 'BTC_ADD_PENDING_TX_RATE_LIMITER'
+				}
+			};
 		}
 
 		throw mapBtcPendingTransactionError(response.Err);
