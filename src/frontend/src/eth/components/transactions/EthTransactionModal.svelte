@@ -4,11 +4,12 @@
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { enabledEthEvmNativeTokens } from '$eth/derived/tokens.derived';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import {
+		decodeErc20AbiData,
 		isErc20TransactionDeposit,
 		isMaxUint256,
 		mapAddressToName

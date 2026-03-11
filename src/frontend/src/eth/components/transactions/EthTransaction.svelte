@@ -3,6 +3,14 @@
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { mapEthTransactionToViewModel } from '$eth/utils/eth-transaction-row.utils';
 	import TransactionRow from '$lib/components/transactions/TransactionRow.svelte';
+	import { isSupportedEthToken } from '$eth/utils/eth.utils';
+	import {
+		isTransactionPending,
+		isMaxUint256,
+		decodeErc20AbiData,
+		isErc20TransactionDeposit
+	} from '$eth/utils/transactions.utils';
+	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
