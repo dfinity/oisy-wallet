@@ -8,6 +8,7 @@ This document lists a couple of useful information for development and deploymen
 - [Internationalization](#internationalization)
 - [Faucets](#faucets)
 - [Testing](#testing)
+- [Debugging Reactivity](#debugging-reactivity)
 - [Integrate ckERC20 Tokens](#integrate-ckerc20-tokens)
 - [Bitcoin](#bitcoin)
 - [Routes Styles](#routes-styles)
@@ -137,6 +138,82 @@ This last step will generate the screenshots for the CI and add them to your PR.
 
 - We develop on macOS, while GitHub Actions use Linux. Therefore, there are two sets of screenshots: `darwin` for macOS and `linux` for Linux.
 - For more information, refer to the Playwright [documentation](https://playwright.dev/docs/test-snapshots).
+
+## Debugging Reactivity
+
+When investigating performance issues, runaway reactive loops, or excessive recomputations during login or normal app usage, you can enable a built-in reactivity debug tool that counts every store `derived` recomputation and reports the results.
+
+### How it works
+
+A Vite plugin (`vite.plugin.reactivity-debug.ts`) transparently intercepts every `import { derived } from 'svelte/store'` **in user source code only** (not `node_modules`) and redirects it to a debug wrapper in `$lib/utils/reactivity-debug.utils.ts`.
+
+The wrapper:
+
+- Delegates to the real `derived` from `svelte/store`.
+- Wraps the derivation callback so that **every recomputation** increments a counter.
+- Auto-generates a label from the call-site stack trace (e.g. `lib/derived/auth.derived.ts:5`), so you never need to add labels manually.
+- When `VITE_REACTIVITY_DEBUG` is not `true`, the plugin does not activate and the wrapper is a zero-overhead pass-through.
+
+### Coverage
+
+| Reactive primitive              | Coverage                                                                         | Notes                                                                  |
+| ------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `derived()` from `svelte/store` | **Automatic** — all ~100 derived store files are instrumented by the Vite plugin | No code changes needed                                                 |
+| `$effect()` runes               | **Manual** — call `reactivityDebugHit('label')` inside the effect body           | Already wired in the root and app layout effects                       |
+| `$derived()` runes              | **Manual** — use Svelte 5's built-in `$inspect(value)` for ad-hoc debugging      | See [Svelte docs on $inspect](https://svelte.dev/docs/svelte/$inspect) |
+
+### Usage
+
+1. Enable the debug flag in your `.env.development` (or whichever env file you use locally):
+
+```
+VITE_REACTIVITY_DEBUG=true
+```
+
+2. Start the dev server. You will see a purple log confirming activation:
+
+```
+[reactivity-debug] plugin active — every store `derived` recomputation will be counted
+```
+
+3. Open the browser DevTools console and use the global helpers:
+
+```javascript
+// Clear all counters (e.g. right before logging in)
+__oisyReactivityDebug.reset();
+
+// ... perform login, navigate, wait ...
+
+// Print a ranked table of the top recomputed stores
+__oisyReactivityDebug.printTop();
+
+// Or get the raw sorted array for scripting
+__oisyReactivityDebug.snapshot();
+// → [["lib/derived/tokens.derived.ts:33", 482], ["lib/derived/exchange.derived.ts:42", 310], ...]
+```
+
+### Interpreting results
+
+- If a label's count keeps **climbing while the app is idle**, that store is likely part of a reactive loop or an over-triggered dependency chain.
+- Labels point directly to the file and line where the `derived` store is declared, so you can jump straight to the source.
+- Use `$inspect(value)` in Svelte components to trace which specific `$derived` rune or prop is changing unexpectedly.
+
+### Manually instrumenting `$effect` blocks
+
+For `$effect` blocks (which the Vite plugin cannot auto-wrap), import `reactivityDebugHit` and call it at the top of the effect body:
+
+```svelte
+<script lang="ts">
+	import { reactivityDebugHit } from '$lib/utils/reactivity-debug.utils';
+
+	$effect(() => {
+		reactivityDebugHit('MyComponent:someEffect');
+		// ... effect logic ...
+	});
+</script>
+```
+
+The call is a no-op when `VITE_REACTIVITY_DEBUG` is not enabled, so it is safe to leave in the codebase.
 
 ## Integrate ckERC20 Tokens
 

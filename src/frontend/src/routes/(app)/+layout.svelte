@@ -32,6 +32,7 @@
 		isRouteTokens,
 		isRouteTransactions
 	} from '$lib/utils/nav.utils';
+	import { reactivityDebugHit } from '$lib/utils/reactivity-debug.utils';
 
 	interface Props {
 		children: Snippet;
@@ -53,6 +54,7 @@
 	let showHero = $derived((assetsRoute || transactionsRoute) && !nftsCollectionRoute);
 
 	$effect(() => {
+		reactivityDebugHit('routes/(app)/+layout:setTokenEffect');
 		token.set(nftsCollectionRoute ? ($pageNonFungibleToken ?? $pageToken) : $pageToken); // we could be on the nfts page without a pageNonFungibleToken set
 	});
 
@@ -74,6 +76,7 @@
 	};
 
 	$effect(() => {
+		reactivityDebugHit('routes/(app)/+layout:updateIcMintingAccountStatusEffect');
 		[$authIdentity, $icrcAccount, $pageToken, transactionsRoute];
 
 		untrack(() => updateIcMintingAccountStatus());
