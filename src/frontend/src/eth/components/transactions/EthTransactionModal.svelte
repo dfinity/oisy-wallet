@@ -4,6 +4,7 @@
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
@@ -62,7 +63,11 @@
 		gasPrice
 	} = $derived(transaction);
 
+	let isSend = $derived(type === 'send');
+	let isDeposit = $derived(type === 'deposit');
 	let isApprove = $derived(type === 'approve');
+
+	let isOutFlow = $derived(isSend || isDeposit || isApprove);
 
 	let approveToken = $derived(
 		isApprove && nonNullish(to) && nonNullish(token)
@@ -135,7 +140,13 @@
 		nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined
 	);
 
-	let fee = $derived(isApprove ? gasFee : undefined);
+	let fee = $derived(isOutFlow ? gasFee : undefined);
+
+	let nativeToken = $derived(
+		$enabledEthEvmNativeTokens.find(
+			({ network: { id: networkId } }) => networkId === token?.network.id
+		)
+	);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openEthTransaction({
@@ -310,17 +321,17 @@
 				</ListItem>
 			{/if}
 
-			{#if isApprove && nonNullish(fee) && nonNullish(token)}
+			{#if nonNullish(fee) && nonNullish(nativeToken)}
 				<ListItem>
 					<span>{$i18n.fee.text.fee}</span>
 
 					<output>
 						{formatToken({
 							value: fee,
-							unitName: token.decimals,
-							displayDecimals: token.decimals
+							unitName: nativeToken.decimals,
+							displayDecimals: nativeToken.decimals
 						})}
-						{token.symbol}
+						{nativeToken.symbol}
 					</output>
 				</ListItem>
 			{/if}
