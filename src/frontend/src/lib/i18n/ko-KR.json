@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "보내기",
+			"send_token": "",
 			"destination": "수신처",
 			"source": "출처",
 			"balance": "잔액",
