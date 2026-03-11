@@ -23,19 +23,8 @@
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
-	import { derivedMemo } from '$lib/utils/derived-memo.utils';
 	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-
-	const countSymbolKeys = (store: Record<symbol, unknown> | undefined): number =>
-		store ? Object.getOwnPropertySymbols(store).length : 0;
-
-	const transactionTokenEntryCount = derivedMemo(
-		[btcTransactionsStore, ethTransactionsStore, icTransactionsStore, solTransactionsStore],
-		([$btc, $eth, $ic, $sol]) =>
-			countSymbolKeys($btc) + countSymbolKeys($eth) + countSymbolKeys($ic) + countSymbolKeys($sol),
-		(a, b) => a === b
-	);
 
 	let timer: NodeJS.Timeout | undefined = undefined;
 	let syncInProgress = false;
@@ -119,6 +108,23 @@
 		debounceTrigger();
 	};
 
+	const countSymbolKeys = (store: Record<symbol, unknown> | undefined): number =>
+		store ? Object.getOwnPropertySymbols(store).length : 0;
+
+	// const transactionTokenEntryCount = derivedMemo(
+	// 	[btcTransactionsStore, ethTransactionsStore, icTransactionsStore, solTransactionsStore],
+	// 	([$btc, $eth, $ic, $sol]) =>
+	// 		countSymbolKeys($btc) + countSymbolKeys($eth) + countSymbolKeys($ic) + countSymbolKeys($sol),
+	// 	(a, b) => a === b
+	// );
+
+	const transactionTokenEntryCount = $derived(
+		countSymbolKeys($btcTransactionsStore) +
+			countSymbolKeys($ethTransactionsStore) +
+			countSymbolKeys($icTransactionsStore) +
+			countSymbolKeys($solTransactionsStore)
+	);
+
 	// The snapshot should be triggered for any change in the following variables (for now).
 	// Auth: We should trigger the snapshot when the user is signed in. If the user is not signed in, we should not trigger the snapshot. We should also not trigger the snapshot if the user is busy.
 	// Addresses: the addresses of each network.
@@ -138,8 +144,9 @@
 			$tokens,
 			$anyBalanceNonZero,
 			$exchangeNotInitialized,
-			$transactionTokenEntryCount
+			transactionTokenEntryCount
 		];
+
 		untrack(() => triggerTimer());
 	});
 </script>

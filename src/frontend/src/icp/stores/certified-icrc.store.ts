@@ -56,7 +56,9 @@ export const initCertifiedIcrcTokensStore = <T extends IcToken>(): CertifiedIcrc
 		}
 
 		update((state) => {
-			const batchCanisterIds = new Set(batch.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId));
+			const batchCanisterIds = new Set(
+				batch.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
+			);
 			const filtered = (state ?? []).filter(
 				({ data: { ledgerCanisterId } }) => !batchCanisterIds.has(ledgerCanisterId)
 			);
