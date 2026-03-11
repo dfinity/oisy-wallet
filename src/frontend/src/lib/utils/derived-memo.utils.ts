@@ -86,8 +86,6 @@ export const derivedMemo = <S extends Stores, T>(
 	};
 };
 
-
-
 /**
  * Compares two TokenUi arrays by id, balance, and USD balance.
  * Prevents re-renders when balance updates for tokens outside the current view
