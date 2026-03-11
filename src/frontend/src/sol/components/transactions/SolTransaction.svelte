@@ -24,15 +24,7 @@
 
 	let transactionStatus: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let displayAmount = $derived(
-		nonNullish(display?.amount)
-			? display.amount
-			: nonNullish(value)
-				? type === 'send'
-					? value * -1n
-					: value
-				: value
-	);
+	let displayAmount = $derived(display.amount);
 
 	const modalId = Symbol();
 </script>

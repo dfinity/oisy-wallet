@@ -9,7 +9,6 @@
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import {
-		decodeErc20AbiData,
 		isErc20TransactionDeposit,
 		isMaxUint256,
 		mapAddressToName
@@ -71,15 +70,7 @@
 
 	let isOutFlow = $derived(isSend || isDeposit || isApprove);
 
-	let isErc20Deposit = $derived(
-		isErc20TransactionDeposit(data) || display?.isErc20Deposit === true
-	);
-
-	let { value: dataValue } = $derived(
-		(isApprove || isErc20Deposit) && nonNullish(data)
-			? decodeErc20AbiData({ data })
-			: { value: undefined }
-	);
+	let isErc20Deposit = $derived(display.isErc20Deposit === true || isErc20TransactionDeposit(data));
 
 	let approveToken = $derived(
 		isApprove && nonNullish(to) && nonNullish(token)
@@ -91,11 +82,9 @@
 			: undefined
 	);
 
-	let approveValue = $derived(
-		isApprove ? (nonNullish(dataValue) ? dataValue : display?.approveValue) : undefined
-	);
+	let approveValue = $derived(display.approveValue);
 
-	let isUnlimitedApprove = $derived(display?.isUnlimitedApprove || isMaxUint256(approveValue));
+	let isUnlimitedApprove = $derived(display.isUnlimitedApprove || isMaxUint256(approveValue));
 
 	let displayToken = $derived(approveToken ?? token);
 
@@ -149,7 +138,7 @@
 	);
 
 	let gasFee = $derived(
-		nonNullish(display?.fee)
+		nonNullish(display.fee)
 			? display.fee
 			: nonNullish(gasUsed) && nonNullish(gasPrice)
 				? gasUsed * gasPrice
@@ -180,13 +169,7 @@
 			: undefined
 	);
 
-	let displayValue = $derived(
-		nonNullish(display?.displayValue)
-			? display.displayValue
-			: isErc20Deposit && nonNullish(gasFee)
-				? gasFee
-				: value
-	);
+	let displayValue = $derived(display.displayValue);
 </script>
 
 <Modal onClose={modalStore.close}>

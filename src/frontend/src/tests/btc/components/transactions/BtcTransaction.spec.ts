@@ -10,7 +10,11 @@ describe('BtcTransaction', () => {
 		status: 'confirmed',
 		value: 40827n,
 		confirmations: 88822,
-		from: '0xD379F3d4578DE7aC47a5928811B3407Ef03F7C49'
+		from: '0xD379F3d4578DE7aC47a5928811B3407Ef03F7C49',
+		display: {
+			amount: -40827n,
+			labelAmount: 40827n
+		}
 	};
 
 	it('should calculate amount for send transaction correctly', () => {
@@ -26,7 +30,11 @@ describe('BtcTransaction', () => {
 	});
 
 	it('should calculate amount for receive transaction correctly', () => {
-		const btcTransaction: BtcTransactionUi = { ...mockTransaction, type: 'receive' };
+		const btcTransaction: BtcTransactionUi = {
+			...mockTransaction,
+			type: 'receive',
+			display: { ...mockTransaction.display, amount: 40827n }
+		};
 
 		const props = {
 			transaction: btcTransaction,

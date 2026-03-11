@@ -104,7 +104,11 @@ describe('ic-transactions.derived', () => {
 			id: 'tx1',
 			value: 100n,
 			type: 'send',
-			status: 'pending'
+			status: 'pending',
+			display: {
+				amount: -100n,
+				labelAmount: 100n
+			}
 		};
 
 		const tokenId: TokenId = parseTokenId('ckTest');

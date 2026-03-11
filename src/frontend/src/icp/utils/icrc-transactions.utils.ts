@@ -115,6 +115,7 @@ export const mapIcrcTransaction = ({
 
 	const value = data?.amount;
 	const fee = isApprove ? approveFee : transferFee;
+	const labelAmount = nonNullish(value) ? value : ZERO;
 	const amount =
 		type === 'approve'
 			? (fee ?? ZERO) * -1n
@@ -122,7 +123,7 @@ export const mapIcrcTransaction = ({
 				? source.incoming
 					? value
 					: (value + (fee ?? ZERO)) * -1n
-				: undefined;
+				: ZERO;
 
 	const approveData = fromNullable(approve);
 	const approveSpender = nonNullish(approveData)
@@ -140,6 +141,7 @@ export const mapIcrcTransaction = ({
 		...(nonNullish(fee) && { fee }),
 		display: {
 			amount,
+			labelAmount,
 			fee
 		},
 		timestamp,

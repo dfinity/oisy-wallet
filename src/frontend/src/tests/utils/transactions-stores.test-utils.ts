@@ -9,7 +9,11 @@ const createIcTransactionUiMock = (id: string): IcTransactionUi => ({
 	value: 100n,
 	from: 'sender',
 	to: 'receiver',
-	status: 'pending'
+	status: 'pending',
+	display: {
+		amount: -100n,
+		labelAmount: 100n
+	}
 });
 
 export const createCertifiedIcTransactionUiMock = (id: string): IcCertifiedTransaction => ({

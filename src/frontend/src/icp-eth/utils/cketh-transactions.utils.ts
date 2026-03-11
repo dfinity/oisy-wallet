@@ -2,6 +2,7 @@ import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 import type { IcCkLinkedAssets, IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { isNetworkIdETH, isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionToken } from '$lib/types/token';
@@ -70,6 +71,11 @@ const mapPendingTransaction = ({
 			$ckToken: symbol
 		}),
 		value,
+		display: {
+			amount: value,
+			labelAmount: value,
+			fee: ZERO
+		},
 		fromExplorerUrl: `${explorerUrl}/address/${from}`,
 		toExplorerUrl: `${explorerUrl}/address/${to}`,
 		txExplorerUrl: `${explorerUrl}/tx/${hash}`

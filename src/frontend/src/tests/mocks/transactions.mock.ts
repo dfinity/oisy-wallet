@@ -15,7 +15,11 @@ export const createTransactionsUiWithCmp = (n: number): AnyTransactionUiWithCmp[
 			transactionComponent: 'transactionComponent',
 			timestamp: BigInt(i),
 			from: 'from',
-			to: 'to'
+			to: 'to',
+			display: {
+				amount: -1n,
+				labelAmount: 1n
+			}
 		},
 		component: 'ic'
 	}));

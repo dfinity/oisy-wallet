@@ -46,6 +46,7 @@ describe('mapBtcTransaction', () => {
 			status: 'pending',
 			display: {
 				amount: mockBtcTransactionUi.value,
+				labelAmount: mockBtcTransactionUi.value,
 				fee: undefined
 			}
 		};
@@ -70,6 +71,7 @@ describe('mapBtcTransaction', () => {
 			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1,
 			display: {
 				amount: mockBtcTransactionUi.value,
+				labelAmount: mockBtcTransactionUi.value,
 				fee: undefined
 			}
 		};
@@ -94,6 +96,7 @@ describe('mapBtcTransaction', () => {
 			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1,
 			display: {
 				amount: mockBtcTransactionUi.value,
+				labelAmount: mockBtcTransactionUi.value,
 				fee: undefined
 			}
 		};
@@ -118,6 +121,7 @@ describe('mapBtcTransaction', () => {
 			status: 'pending',
 			display: {
 				amount: sendTransactionValue * -1n,
+				labelAmount: sendTransactionValue,
 				fee: sendFee
 			}
 		};
@@ -146,6 +150,7 @@ describe('mapBtcTransaction', () => {
 			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1,
 			display: {
 				amount: sendTransactionValue * -1n,
+				labelAmount: sendTransactionValue,
 				fee: sendFee
 			}
 		};
@@ -173,6 +178,7 @@ describe('mapBtcTransaction', () => {
 			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1,
 			display: {
 				amount: sendTransactionValue * -1n,
+				labelAmount: sendTransactionValue,
 				fee: sendFee
 			}
 		};
@@ -224,6 +230,7 @@ describe('mapBtcTransaction', () => {
 			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1,
 			display: {
 				amount: BigInt(transaction.inputs[0].prev_out.value) * -1n,
+				labelAmount: BigInt(transaction.inputs[0].prev_out.value),
 				fee: BigInt(
 					transaction.inputs.reduce((acc, { prev_out }) => acc + prev_out.value, 0) -
 						transaction.out.reduce((acc, { value }) => acc + value, 0)

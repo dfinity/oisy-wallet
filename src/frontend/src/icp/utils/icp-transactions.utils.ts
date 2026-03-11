@@ -102,6 +102,7 @@ export const mapIcpTransaction = ({
 			...(nonNullish(approveFee) && { fee: approveFee }),
 			display: {
 				amount: (approveFee ?? ZERO) * -1n,
+				labelAmount: approveValue,
 				fee: approveFee
 			},
 			...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
@@ -118,7 +119,8 @@ export const mapIcpTransaction = ({
 			...mapFrom(operation.Burn.from),
 			value,
 			display: {
-				amount: value * -1n
+				amount: value * -1n,
+				labelAmount: value
 			}
 		};
 	}
@@ -132,7 +134,8 @@ export const mapIcpTransaction = ({
 			incoming: true,
 			value,
 			display: {
-				amount: value
+				amount: value,
+				labelAmount: value
 			}
 		};
 	}
@@ -153,6 +156,7 @@ export const mapIcpTransaction = ({
 			...(nonNullish(transferFee) && { fee: transferFee }),
 			display: {
 				amount,
+				labelAmount: value,
 				fee: transferFee
 			}
 		};

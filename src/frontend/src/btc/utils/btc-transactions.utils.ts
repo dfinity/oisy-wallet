@@ -86,6 +86,9 @@ export const mapBtcTransaction = ({
 			: undefined;
 
 	// Step 7: Compose the final structured BTC transaction object for the UI
+	const labelAmount = nonNullish(value) ? value : 0n;
+	const displayAmount = nonNullish(value) ? (isTypeSend ? value * -1n : value) : 0n;
+
 	return {
 		id: hash,
 		timestamp: BigInt(time),
@@ -97,7 +100,8 @@ export const mapBtcTransaction = ({
 		to: selfTransaction ? [btcAddress] : to,
 		confirmations,
 		display: {
-			amount: nonNullish(value) ? (isTypeSend ? value * -1n : value) : undefined,
+			amount: displayAmount,
+			labelAmount,
 			fee: isTypeSend ? BigInt(utxosFee) : undefined
 		}
 	};

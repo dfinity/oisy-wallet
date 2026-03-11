@@ -31,7 +31,13 @@ export const createMockEthTransactionsUi = (n: number): EthTransactionUi[] =>
 		...mockEthTransaction,
 		id: Math.random().toString(36).substring(7),
 		hash: Math.random().toString(36).substring(7),
-		type: 'send'
+		type: 'send',
+		display: {
+			amount: mockEthTransaction.value * -1n,
+			labelAmount: mockEthTransaction.value,
+			displayValue: mockEthTransaction.value,
+			approveValue: mockEthTransaction.value
+		}
 	}));
 
 export const createMockNftTransactionsUi = (n: number): EthTransactionUi[] =>
@@ -40,5 +46,11 @@ export const createMockNftTransactionsUi = (n: number): EthTransactionUi[] =>
 		id: Math.random().toString(36).substring(7),
 		hash: Math.random().toString(36).substring(7),
 		type: 'send',
-		tokenId: 123
+		tokenId: 123,
+		display: {
+			amount: mockEthTransaction.value * -1n,
+			labelAmount: mockEthTransaction.value,
+			displayValue: mockEthTransaction.value,
+			approveValue: mockEthTransaction.value
+		}
 	}));

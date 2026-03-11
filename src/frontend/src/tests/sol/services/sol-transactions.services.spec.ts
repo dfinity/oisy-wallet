@@ -139,6 +139,7 @@ describe('sol-transactions.services', () => {
 			fee: mockTransactionDetail.meta?.fee,
 			display: {
 				amount: mockMappedTransaction.value * -1n,
+				labelAmount: mockMappedTransaction.value,
 				fee: mockTransactionDetail.meta?.fee
 			}
 		};

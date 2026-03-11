@@ -32,7 +32,7 @@ import type {
 	EthCertifiedTransaction,
 	EthCertifiedTransactionsData
 } from '$eth/stores/eth-transactions.store';
-import type { EthTransactionType } from '$eth/types/eth-transaction';
+import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
@@ -119,15 +119,13 @@ describe('transactions.utils', () => {
 			}))
 		];
 
-		const type = 'receive' as EthTransactionType;
-
 		const expectedEthMainnetTransactions: AllTransactionUiWithCmp[] = [
 			...mockEthMainnetTransactions.map(({ data: transaction }) => ({
-				transaction: {
-					...transaction,
-					id: transaction.hash ?? '',
-					type
-				},
+				transaction: mapEthTransactionUi({
+					transaction,
+					ckMinterInfoAddresses: [],
+					ethAddress: undefined
+				}),
 				token: ETHEREUM_TOKEN,
 				component: 'ethereum' as const
 			}))
@@ -135,11 +133,11 @@ describe('transactions.utils', () => {
 
 		const expectedSepoliaTransactions: AllTransactionUiWithCmp[] = [
 			...mockSepoliaTransactions.map(({ data: transaction }) => ({
-				transaction: {
-					...transaction,
-					id: transaction.hash ?? '',
-					type
-				},
+				transaction: mapEthTransactionUi({
+					transaction,
+					ckMinterInfoAddresses: [],
+					ethAddress: undefined
+				}),
 				token: SEPOLIA_TOKEN,
 				component: 'ethereum' as const
 			}))
@@ -147,11 +145,11 @@ describe('transactions.utils', () => {
 
 		const expectedBaseMainnetTransactions: AllTransactionUiWithCmp[] = [
 			...mockBaseMainnetTransactions.map(({ data: transaction }) => ({
-				transaction: {
-					...transaction,
-					id: transaction.hash ?? '',
-					type
-				},
+				transaction: mapEthTransactionUi({
+					transaction,
+					ckMinterInfoAddresses: [],
+					ethAddress: undefined
+				}),
 				token: BASE_ETH_TOKEN,
 				component: 'ethereum' as const
 			}))
@@ -159,11 +157,11 @@ describe('transactions.utils', () => {
 
 		const expectedBnbMainnetTransactions: AllTransactionUiWithCmp[] = [
 			...mockBnbMainnetTransactions.map(({ data: transaction }) => ({
-				transaction: {
-					...transaction,
-					id: transaction.hash ?? '',
-					type
-				},
+				transaction: mapEthTransactionUi({
+					transaction,
+					ckMinterInfoAddresses: [],
+					ethAddress: undefined
+				}),
 				token: BNB_MAINNET_TOKEN,
 				component: 'ethereum' as const
 			}))
@@ -171,11 +169,11 @@ describe('transactions.utils', () => {
 
 		const expectedErc20Transactions: AllTransactionUiWithCmp[] = [
 			...mockErc20Transactions.map(({ data: transaction }) => ({
-				transaction: {
-					...transaction,
-					id: transaction.hash ?? '',
-					type
-				},
+				transaction: mapEthTransactionUi({
+					transaction,
+					ckMinterInfoAddresses: [],
+					ethAddress: undefined
+				}),
 				token: PEPE_TOKEN,
 				component: 'ethereum' as const
 			}))

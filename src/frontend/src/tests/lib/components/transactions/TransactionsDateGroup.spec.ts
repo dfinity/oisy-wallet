@@ -1,5 +1,6 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 import type {
 	AllTransactionUiWithCmp,
@@ -27,11 +28,11 @@ describe('TransactionsDateGroup', () => {
 	const mockEthTransactionsUi: AllTransactionUiWithCmp[] = createMockEthTransactions(
 		ethTransactionsNumber
 	).map((transaction) => ({
-		transaction: {
-			...transaction,
-			id: transaction.hash ?? '',
-			type: 'send'
-		},
+		transaction: mapEthTransactionUi({
+			transaction,
+			ckMinterInfoAddresses: [],
+			ethAddress: transaction.from
+		}),
 		timestamp: todayTimestamp,
 		token: ETHEREUM_TOKEN,
 		component: 'ethereum'

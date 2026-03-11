@@ -18,15 +18,7 @@
 
 	let label = $derived(type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive);
 
-	let displayAmount = $derived(
-		nonNullish(display?.amount)
-			? display.amount
-			: nonNullish(value)
-				? type === 'send'
-					? value * -1n
-					: value
-				: undefined
-	);
+	let displayAmount = $derived(display.amount);
 
 	const modalId = Symbol();
 </script>

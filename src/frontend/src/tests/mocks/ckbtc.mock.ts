@@ -19,5 +19,9 @@ export const mockCkBtcPendingUtxoTransaction: IcTransactionUi = {
 	txExplorerUrl: `${BTC_MAINNET_EXPLORER_URL}/tx/${utxoTxIdToString(mockPendingUtxo.outpoint.txid)}`,
 	type: 'receive',
 	typeLabel: 'transaction.label.converting_twin_token',
-	value: mockPendingUtxo.value - mockCkBtcMinterInfo.kyt_fee
+	value: mockPendingUtxo.value - mockCkBtcMinterInfo.kyt_fee,
+	display: {
+		amount: mockPendingUtxo.value - mockCkBtcMinterInfo.kyt_fee,
+		labelAmount: mockPendingUtxo.value - mockCkBtcMinterInfo.kyt_fee
+	}
 };

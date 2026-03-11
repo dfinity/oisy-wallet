@@ -33,7 +33,6 @@
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
 	let {
-		value,
 		timestamp,
 		displayTimestamp,
 		type,
@@ -42,21 +41,17 @@
 		tokenId,
 		approveSpender,
 		data,
-		display,
-		gasUsed,
-		gasPrice
+		display
 	} = $derived(transaction);
 
 	let isApprove = $derived(type === 'approve');
 
-	let isErc20Deposit = $derived(
-		isErc20TransactionDeposit(data) || display?.isErc20Deposit === true
-	);
+	let isErc20Deposit = $derived(display.isErc20Deposit === true || isErc20TransactionDeposit(data));
 
-	let { to: dataTo, value: dataValue } = $derived(
+	let { to: dataTo } = $derived(
 		(isApprove || isErc20Deposit) && nonNullish(data)
 			? decodeErc20AbiData({ data })
-			: { to: undefined, value: undefined }
+			: { to: undefined }
 	);
 
 	let depositToken = $derived(
@@ -81,9 +76,7 @@
 
 	let displayToken = $derived(approveToken ?? token);
 
-	let approveValue = $derived(
-		isApprove ? (nonNullish(dataValue) ? dataValue : display?.approveValue) : undefined
-	);
+	let approveValue = $derived(display.approveValue);
 
 	let approveAmountText = $derived.by(() => {
 		if (!isApprove) {
@@ -92,23 +85,19 @@
 
 		const symbolText = getTokenDisplaySymbol(displayToken);
 
-		if (display?.isUnlimitedApprove || isMaxUint256(approveValue)) {
+		if (display.isUnlimitedApprove || isMaxUint256(approveValue)) {
 			return replacePlaceholders($i18n.core.text.unlimited, {
 				$items: symbolText
 			});
 		}
 
-		if (nonNullish(approveValue)) {
-			const valueText = formatToken({
-				value: approveValue,
-				displayDecimals: displayToken.decimals,
-				unitName: displayToken.decimals
-			});
+		const valueText = formatToken({
+			value: display.labelAmount,
+			displayDecimals: displayToken.decimals,
+			unitName: displayToken.decimals
+		});
 
-			return `${valueText} ${symbolText}`;
-		}
-
-		return symbolText;
+		return `${valueText} ${symbolText}`;
 	});
 
 	let label = $derived.by(() => {
@@ -168,19 +157,7 @@
 		assertNever(type, `Unsupported transaction type: ${type}`);
 	});
 
-	let gasFee = $derived(
-		nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined
-	);
-
-	let displayAmount = $derived(
-		nonNullish(display?.amount)
-			? display.amount
-			: isApprove || isErc20Deposit
-				? nonNullish(gasFee)
-					? gasFee * -1n
-					: undefined
-				: value * (type === 'send' || type === 'deposit' ? -1n : 1n)
-	);
+	let displayAmount = $derived(display.amount);
 
 	let transactionDate = $derived(timestamp ?? displayTimestamp);
 

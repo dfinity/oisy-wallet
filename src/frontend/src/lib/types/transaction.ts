@@ -53,7 +53,8 @@ export type TransactionType = z.infer<typeof TransactionTypeSchema>;
 export type TransactionStatus = z.infer<typeof TransactionStatusSchema>;
 
 export interface TransactionUiDisplay {
-	amount?: bigint;
+	amount: bigint;
+	labelAmount: bigint;
 	fee?: bigint;
 }
 
@@ -68,5 +69,5 @@ export interface TransactionUiCommon<
 	toExplorerUrl?: string;
 	fromExplorerUrl?: string;
 	blockNumber?: number;
-	display?: TDisplay;
+	display: TDisplay;
 }

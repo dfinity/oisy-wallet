@@ -14,7 +14,11 @@ describe('btc-transactions.derived', () => {
 		value: 100n,
 		from: 'sender',
 		to: ['receiver'],
-		status: 'pending'
+		status: 'pending',
+		display: {
+			amount: -100n,
+			labelAmount: 100n
+		}
 	});
 
 	describe('sortedBtcTransactions', () => {

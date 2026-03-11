@@ -33,17 +33,7 @@
 
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let displayAmount = $derived(
-		nonNullish(display?.amount)
-			? display.amount
-			: type === 'approve'
-				? (fee ?? ZERO) * -1n
-				: nonNullish(value)
-					? incoming
-						? value
-						: (value + (fee ?? ZERO)) * -1n
-					: value
-	);
+	let displayAmount = $derived(display.amount);
 
 	let timestamp = $derived(
 		nonNullish(timestampNanoseconds)
@@ -67,5 +57,5 @@
 	{token}
 	{type}
 >
-	<IcTransactionLabel amount={value} label={transactionTypeLabel} {token} {type} />
+	<IcTransactionLabel amount={display.labelAmount} label={transactionTypeLabel} {token} {type} />
 </Transaction>
