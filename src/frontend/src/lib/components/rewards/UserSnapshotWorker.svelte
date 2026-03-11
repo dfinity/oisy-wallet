@@ -24,9 +24,9 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
 	import { balancesStore } from '$lib/stores/balances.store';
+	import { derivedMemo } from '$lib/utils/derived-memo.utils';
 	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import {derivedMemo} from "$lib/utils/derived-memo.utils";
 
 	let timer: NodeJS.Timeout | undefined = undefined;
 	let syncInProgress = false;
