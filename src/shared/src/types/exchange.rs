@@ -16,3 +16,8 @@ pub struct ExchangeData {
 pub struct ExchangeRate {
     pub usd: ExchangeData,
 }
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum ExchangeError {
+    ApiKeyNotSet,
+}

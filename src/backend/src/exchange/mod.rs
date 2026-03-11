@@ -1,20 +1,22 @@
 mod coingecko;
 
+use std::collections::HashMap;
+
 use ic_cdk::api::time;
 use shared::types::{
     custom_token::CustomTokenId,
-    exchange::{ExchangeData, ExchangeRate},
+    exchange::{ExchangeData, ExchangeError, ExchangeRate},
 };
 
 use crate::{
     exchange::coingecko::fetch_coingecko_token_prices,
     read_state,
-    state::mutate_state,
+    state::{mutate_state, read_api_keys},
     types::storable::{Candid, StoredTokenId},
 };
 
-pub const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60; // 5 minutes
-pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60; // 1 hour
+pub const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60;
+pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60;
 
 fn update_price(token_id: &StoredTokenId, price_data: (Option<f64>, Option<f64>, Option<f64>)) {
     // TODO: use timestamp from price data when available, for now use current time
@@ -37,12 +39,20 @@ fn update_price(token_id: &StoredTokenId, price_data: (Option<f64>, Option<f64>,
     });
 }
 
-async fn fetch_and_update_prices(token_ids: Vec<StoredTokenId>) {
-    let mut platforms: std::collections::HashMap<String, Vec<String>> =
-        std::collections::HashMap::new();
+fn coingecko_platform(chain_id: u64) -> Option<&'static str> {
+    match chain_id {
+        1 => Some("ethereum"),
+        56 => Some("binance-smart-chain"),
+        137 => Some("polygon-pos"),
+        8453 => Some("base"),
+        42161 => Some("arbitrum-one"),
+        _ => None,
+    }
+}
 
-    let mut address_to_token_id: std::collections::HashMap<(String, String), StoredTokenId> =
-        std::collections::HashMap::new();
+async fn fetch_and_update_prices(api_key: &str, token_ids: Vec<StoredTokenId>) {
+    let mut platforms: HashMap<String, Vec<String>> = HashMap::new();
+    let mut address_to_token_id: HashMap<(String, String), StoredTokenId> = HashMap::new();
 
     for token_id in token_ids {
         let StoredTokenId(inner) = &token_id;
@@ -60,15 +70,10 @@ async fn fetch_and_update_prices(token_ids: Vec<StoredTokenId>) {
                 );
             }
             CustomTokenId::Ethereum(address, chain_id) => {
-                let platform = match chain_id {
-                    1 => "ethereum",
-                    56 => "binance-smart-chain",
-                    137 => "polygon-pos",
-                    8453 => "base",
-                    42161 => "arbitrum-one",
-                    _ => continue,
+                let Some(platform) = coingecko_platform(*chain_id) else {
+                    continue;
                 };
-                let addr_str = address.as_str().to_owned();
+                let addr_str = address.0.clone();
                 platforms
                     .entry(platform.to_string())
                     .or_default()
@@ -77,7 +82,7 @@ async fn fetch_and_update_prices(token_ids: Vec<StoredTokenId>) {
                     .insert((platform.to_string(), addr_str.to_lowercase()), token_id);
             }
             CustomTokenId::SolMainnet(address) => {
-                let addr_str = address.as_str().to_owned();
+                let addr_str = address.0.clone();
                 platforms
                     .entry("solana".to_string())
                     .or_default()
@@ -89,23 +94,31 @@ async fn fetch_and_update_prices(token_ids: Vec<StoredTokenId>) {
         }
     }
 
-    for (platform, addresses) in platforms {
+    for (platform, addresses) in &platforms {
         for chunk in addresses.chunks(50) {
-            if let Ok(prices) = fetch_coingecko_token_prices(&platform, chunk).await {
-                for (address, price_data) in prices {
-                    if let Some(token_id) =
-                        address_to_token_id.get(&(platform.clone(), address.to_lowercase()))
-                    {
-                        update_price(token_id, price_data);
+            match fetch_coingecko_token_prices(api_key, platform, chunk).await {
+                Ok(prices) => {
+                    for (address, price_data) in prices {
+                        if let Some(token_id) =
+                            address_to_token_id.get(&(platform.clone(), address.to_lowercase()))
+                        {
+                            update_price(token_id, price_data);
+                        }
                     }
+                }
+                Err(err) => {
+                    ic_cdk::println!("Failed to fetch prices for {platform}: {err}");
                 }
             }
         }
     }
 }
 
-pub async fn refresh_exchange_rates() {
+pub async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
+    let api_key = read_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
+
     let now = time();
+
     let threshold = now - PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000;
 
     let active_tokens: Vec<StoredTokenId> = read_state(|s| {
@@ -117,8 +130,10 @@ pub async fn refresh_exchange_rates() {
     });
 
     if active_tokens.is_empty() {
-        return;
+        return Ok(());
     }
 
-    fetch_and_update_prices(active_tokens).await;
+    fetch_and_update_prices(&api_key, active_tokens).await;
+
+    Ok(())
 }

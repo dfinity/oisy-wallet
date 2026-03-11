@@ -1,19 +1,29 @@
+use std::collections::HashMap;
+
+use ic_cdk::management_canister::HttpHeader;
+
 use crate::utils::http_outcall::get;
 
 pub async fn fetch_coingecko_token_prices(
+    api_key: &str,
     platform: &str,
     addresses: &[String],
-) -> Result<std::collections::HashMap<String, (Option<f64>, Option<f64>, Option<f64>)>, String> {
+) -> Result<HashMap<String, (Option<f64>, Option<f64>, Option<f64>)>, String> {
     let addr_str = addresses.join(",");
 
-    let url = format!("https://api.coingecko.com/api/v3/simple/token_price/{platform}?contract_addresses={addr_str}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true");
+    let url = format!("https://pro-api.coingecko.com/api/v3/simple/token_price/{platform}?contract_addresses={addr_str}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true");
 
-    let response = get(&url, 8192).await?;
+    let headers = vec![HttpHeader {
+        name: "x-cg-pro-api-key".to_string(),
+        value: api_key.to_string(),
+    }];
+
+    let response = get(&url, headers, 8192).await?;
 
     let json: serde_json::Value =
         serde_json::from_slice(&response.body).map_err(|e| format!("Failed to parse JSON: {e}"))?;
 
-    let mut result = std::collections::HashMap::new();
+    let mut result = HashMap::new();
 
     for addr in addresses {
         if let Some(data) = json.get(addr.to_lowercase()) {

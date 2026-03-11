@@ -164,7 +164,11 @@ pub(crate) fn start_periodic_housekeeping_timers() {
     // Refresh exchange rates periodically
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
     let _ = set_timer_interval(refresh_interval, || {
-        ic_cdk::futures::spawn(refresh_exchange_rates());
+        ic_cdk::futures::spawn(async {
+            if let Err(err) = refresh_exchange_rates().await {
+                ic_cdk::println!("Exchange rate refresh skipped: {err:?}");
+            }
+        });
     });
 }
 
