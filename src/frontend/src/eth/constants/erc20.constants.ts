@@ -22,9 +22,17 @@ export const ERC20_PERMIT_ABI = [
 	'function DOMAIN_SEPARATOR() view returns (bytes32)'
 ];
 
-// We assumed that ERC20 approve contract function prefix is 0x095ea7b3
-// https://sepolia.etherscan.io/address/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984#writeContract#F1
+// The ERC20 approve contract function prefix is 0x095ea7b3
+// https://etherscan.io/tx/0x9a5c9c548a71b839682919b4632bc77b401a5f8992fc866134fc363d22f8b5a0
 export const ERC20_APPROVE_HASH = '0x095ea7b3';
+
+// The ERC20 deposit contract function prefix is 0x26b3293f
+// https://etherscan.io/tx/0x8ec324a6e4290540ac355cc506b4caafa8fc925dda226b0db4b02d44f9039df6
+export const ERC20_DEPOSIT_HASH = '0x26b3293f';
+
+// The ERC20 deposit contract function prefix is 0xdb9751af
+// https://etherscan.io/tx/0x6d6027a32a817833daa02ca4a6fa7fb4b22ce18570f0a6f1ddaf03dd06776a5b
+export const ERC20_DEPOSIT_ERC20_HASH = '0xdb9751af';
 
 // Use when UNPREDICTABLE_GAS_LIMIT error are thrown while fetching the fee data.
 // See: https://docs.ethers.org/v5/troubleshooting/errors/#help-UNPREDICTABLE_GAS_LIMIT

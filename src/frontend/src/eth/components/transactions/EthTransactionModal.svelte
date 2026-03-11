@@ -9,7 +9,8 @@
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import {
-		decodeErc20AbiDataValue,
+		decodeErc20AbiData,
+		isErc20TransactionDeposit,
 		isMaxUint256,
 		mapAddressToName
 	} from '$eth/utils/transactions.utils';
@@ -69,6 +70,14 @@
 
 	let isOutFlow = $derived(isSend || isDeposit || isApprove);
 
+	let isErc20Deposit = $derived(isErc20TransactionDeposit(data));
+
+	let { value: dataValue } = $derived(
+		(isApprove || isErc20Deposit) && nonNullish(data)
+			? decodeErc20AbiData({ data })
+			: { value: undefined }
+	);
+
 	let approveToken = $derived(
 		isApprove && nonNullish(to) && nonNullish(token)
 			? $ercFungibleTokens.find(
@@ -79,9 +88,7 @@
 			: undefined
 	);
 
-	let approveValue = $derived(
-		isApprove && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : undefined
-	);
+	let approveValue = $derived(isApprove ? dataValue : undefined);
 
 	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
 
@@ -140,7 +147,7 @@
 		nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined
 	);
 
-	let fee = $derived(isOutFlow ? gasFee : undefined);
+	let fee = $derived(isOutFlow && !isErc20Deposit ? gasFee : undefined);
 
 	let nativeToken = $derived(
 		$enabledEthEvmNativeTokens.find(
@@ -163,6 +170,8 @@
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(String(transaction.tokenId)) })
 			: undefined
 	);
+
+	let displayValue = $derived(isErc20Deposit && nonNullish(gasFee) ? gasFee : value);
 </script>
 
 <Modal onClose={modalStore.close}>
@@ -203,7 +212,7 @@
 				{:else if nonNullish(token) && !isTokenErc721(token) && nonNullish(value)}
 					<output class:text-success-primary={type === 'receive'}>
 						{formatToken({
-							value,
+							value: displayValue,
 							unitName: token.decimals,
 							displayDecimals: token.decimals,
 							showPlusSign: type === 'receive'
