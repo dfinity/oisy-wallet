@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
-	import { enabledEthEvmNativeTokens } from '$eth/derived/tokens.derived';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import {
 		COLLECTION_TIMER_INTERVAL_MILLIS,
 		MILLISECONDS_IN_DAY,
