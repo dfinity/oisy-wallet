@@ -79,10 +79,11 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
-    // Initialize the Bitcoin fee percentiles cache
-    bitcoin_api::init_fee_percentiles_cache();
 
-    housekeeping::start_periodic_housekeeping_timers();
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin::api::init_fee_percentiles_cache();
+
+    utils::housekeeping::start_periodic_housekeeping_timers();
 }
 
 /// Gets the canister configuration.
