@@ -161,6 +161,7 @@ export const idlFactory = ({ IDL }) => {
 		transactions: IDL.Vec(PendingTransaction)
 	});
 	const BtcGetPendingTransactionsError = IDL.Variant({
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
 	const BtcGetPendingTransactionsResult = IDL.Variant({

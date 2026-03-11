@@ -123,7 +123,12 @@ pub struct BtcGetPendingTransactionsReponse {
     pub transactions: Vec<PendingTransaction>,
 }
 
+/// Errors that can occur when retrieving pending Bitcoin transactions.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcGetPendingTransactionsError {
-    InternalError { msg: String },
+    InternalError {
+        msg: String,
+    },
+    /// The caller has exceeded the call rate limit.
+    RateLimited(RateLimitError),
 }

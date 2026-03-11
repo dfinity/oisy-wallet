@@ -5,6 +5,7 @@ import type {
 	Contact,
 	CredentialSpec,
 	GetUserProfileError,
+	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
 	Utxo
@@ -41,6 +42,11 @@ export interface RateLimitInfo {
 
 export interface AddPendingTransactionOutcome {
 	response: true;
+	rateLimitInfo?: RateLimitInfo;
+}
+
+export interface GetPendingTransactionsOutcome {
+	response: PendingTransaction[];
 	rateLimitInfo?: RateLimitInfo;
 }
 

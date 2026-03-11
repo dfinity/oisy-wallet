@@ -1503,8 +1503,6 @@
 		},
 		"label": {
 			"reimbursement": "Возмещение",
-			"twin_token_sent": "$twinToken отправлен",
-			"ck_token_sent": "$ckToken отправлен",
 			"twin_token_converted": "Обменяно из $twinToken",
 			"ck_token_converted": "Обменяно из $ckToken",
 			"sending_twin_token": "Отправка $twinToken",

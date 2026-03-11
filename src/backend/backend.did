@@ -84,6 +84,7 @@ type BtcGetFeePercentilesResult = variant {
 	Err : SelectedUtxosFeeError
 };
 type BtcGetPendingTransactionsError = variant {
+	RateLimited : RateLimitError;
 	InternalError : record { msg : text }
 };
 type BtcGetPendingTransactionsReponse = record {

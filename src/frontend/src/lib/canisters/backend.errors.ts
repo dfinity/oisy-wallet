@@ -33,8 +33,8 @@ const mapRateLimitError = (err: RateLimitError): CanisterInternalError => {
 	);
 };
 
-export const mapBtcPendingTransactionError = (
-	err: BtcAddPendingTransactionError | BtcGetPendingTransactionsError
+export const mapBtcAddPendingTransactionError = (
+	err: BtcAddPendingTransactionError
 ): CanisterInternalError => {
 	if ('InternalError' in err) {
 		return new CanisterInternalError(err.InternalError.msg);
@@ -60,7 +60,21 @@ export const mapBtcPendingTransactionError = (
 		return mapRateLimitError(err.RateLimited);
 	}
 
-	return assertNeverOr(err, new CanisterInternalError('Unknown BtcPendingTransactionError'));
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcAddPendingTransactionError'));
+};
+
+export const mapBtcGetPendingTransactionsError = (
+	err: BtcGetPendingTransactionsError
+): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
+	}
+
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetPendingTransactionsError'));
 };
 
 export const mapBtcSelectUserUtxosFeeError = (

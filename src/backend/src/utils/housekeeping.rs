@@ -31,6 +31,10 @@ thread_local! {
     /// Rate-limits `btc_add_pending_transaction`: max 10 calls per caller per minute.
     pub(crate) static BTC_ADD_PENDING_TX_RATE_LIMITER: rate_limiter::RateLimiter =
         rate_limiter::RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
+    pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: rate_limiter::RateLimiter =
+        rate_limiter::RateLimiter::new(15, 60 * 1_000_000_000);
 }
 
 /// 2 hours in nanoseconds — if a housekeeping run has been in progress for
