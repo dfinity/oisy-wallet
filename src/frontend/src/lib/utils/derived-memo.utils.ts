@@ -23,7 +23,7 @@ export const derivedMemo = <S extends Stores, T>(
 	isEqual: (a: T, b: T) => boolean
 ): Readable<T> => {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const source = derived(stores as any, fn as any);
+	const source: Readable<T> = derived(stores as any, fn as any);
 
 	let value: T;
 	let initialized = false;
