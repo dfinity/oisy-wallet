@@ -23,7 +23,6 @@
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import { derivedMemo } from '$lib/utils/derived-memo.utils';
 	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
@@ -110,13 +109,17 @@
 		debounceTrigger();
 	};
 
-	const countSymbolKeys = (store: Record<symbol, unknown> | undefined): number =>
-		store ? Object.getOwnPropertySymbols(store).length : 0;
+	const countNonNullishSymbolEntries = (store: Record<symbol, unknown> | undefined): number =>
+		store ? Object.getOwnPropertySymbols(store).filter((key) => nonNullish(store[key])).length : 0;
 
 	const transactionTokenEntryCount = derivedMemo(
 		[btcTransactionsStore, ethTransactionsStore, icTransactionsStore, solTransactionsStore],
 		([$btc, $eth, $ic, $sol]) =>
-			countSymbolKeys($btc) + countSymbolKeys($eth) + countSymbolKeys($ic) + countSymbolKeys($sol),
+			countNonNullishSymbolEntries($btc) +
+			countNonNullishSymbolEntries($eth) +
+			countNonNullishSymbolEntries($ic) +
+			countNonNullishSymbolEntries($sol),
+		// eslint-disable-next-line local-rules/prefer-object-params
 		(a, b) => a === b
 	);
 
