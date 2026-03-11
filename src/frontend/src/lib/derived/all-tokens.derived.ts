@@ -9,6 +9,7 @@ import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { Token } from '$lib/types/token';
+import { derivedMemo, tokenListEqual } from '$lib/utils/derived-memo.utils';
 import { isTokenFungible } from '$lib/utils/nft.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { nonNullish } from '@dfinity/utils';
@@ -17,7 +18,7 @@ import { derived, type Readable } from 'svelte/store';
 // The entire list of ICRC tokens to display to the user:
 // This includes the default tokens (disabled or enabled), the custom tokens (disabled or enabled),
 // and the environment tokens that have never been used.
-export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
+export const allIcrcTokens: Readable<IcTokenToggleable[]> = derivedMemo(
 	[icrcTokens],
 	([$icrcTokens]) => {
 		// The list of ICRC tokens (SNSes) is defined as environment variables.
@@ -34,7 +35,8 @@ export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 				({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
 			)
 		];
-	}
+	},
+	tokenListEqual
 );
 
 export const allSortedIcrcTokens: Readable<IcTokenToggleable[]> = derived(
@@ -48,7 +50,7 @@ export const allKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = de
 		$allIcrcTokens.filter(({ symbol }) => nonNullish($kongSwapTokensStore?.[symbol]))
 );
 
-export const allTokens: Readable<CustomToken<Token>[]> = derived(
+export const allTokens: Readable<CustomToken<Token>[]> = derivedMemo(
 	[nativeTokens, ercFungibleTokens, allIcrcTokens, splTokens, nonFungibleTokens],
 	([$nativeTokens, $ercFungibleTokens, $allIcrcTokens, $splTokens, $nonFungibleTokens]) => [
 		...$nativeTokens.map((token) => ({ ...token, enabled: true })),
@@ -56,11 +58,14 @@ export const allTokens: Readable<CustomToken<Token>[]> = derived(
 		...$allIcrcTokens,
 		...$splTokens,
 		...$nonFungibleTokens
-	]
+	],
+	tokenListEqual
 );
 
-export const allFungibleTokens: Readable<Token[]> = derived([allTokens], ([$tokens]) =>
-	$tokens.filter(isTokenFungible)
+export const allFungibleTokens: Readable<Token[]> = derivedMemo(
+	[allTokens],
+	([$tokens]) => $tokens.filter(isTokenFungible),
+	tokenListEqual
 );
 
 export const allCrossChainSwapTokens = derived(
