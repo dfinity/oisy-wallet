@@ -326,7 +326,6 @@ describe('derived-memo.utils', () => {
 
 			unsubscribe();
 		});
-
 	});
 
 	describe('tokenListEqual', () => {
