@@ -141,7 +141,7 @@
 			$tokens,
 			$anyBalanceNonZero,
 			$exchangeNotInitialized,
-			transactionTokenEntryCount
+			$transactionTokenEntryCount
 		];
 
 		untrack(() => triggerTimer());
