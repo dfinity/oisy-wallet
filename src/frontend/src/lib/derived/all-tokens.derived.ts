@@ -1,8 +1,7 @@
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
-import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
@@ -65,10 +64,9 @@ export const allFungibleTokens: Readable<Token[]> = derived([allTokens], ([$toke
 );
 
 export const allCrossChainSwapTokens = derived(
-	[erc20Tokens, enabledEthereumTokens, enabledEvmTokens],
-	([$erc20Tokens, $enabledEthereumTokens, $enabledEvmTokens]) => [
-		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-		...$enabledEvmTokens.map((token) => ({ ...token, enabled: true })),
+	[erc20Tokens, enabledEthEvmNativeTokens],
+	([$erc20Tokens, $ethEvmNativeTokens]) => [
+		...$ethEvmNativeTokens.map((token) => ({ ...token, enabled: true })),
 		...$erc20Tokens.map((token) => ({ ...token, enabled: true }))
 	]
 );

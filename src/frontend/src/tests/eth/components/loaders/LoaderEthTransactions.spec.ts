@@ -111,8 +111,8 @@ describe('LoaderEthTransactions', () => {
 
 	const allExpectedTokens = [
 		...SUPPORTED_ETHEREUM_TOKENS,
-		...mockErc20CustomTokens,
 		...SUPPORTED_EVM_TOKENS,
+		...mockErc20CustomTokens,
 		...mockErc721CustomTokens,
 		...mockErc1155CustomTokens
 	];

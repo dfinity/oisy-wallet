@@ -1,6 +1,5 @@
 import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
-import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 import { currentCurrency } from '$lib/derived/currency.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -105,16 +104,14 @@ export const initPayContext = (): PayContext => {
 		[
 			availableTokens,
 			enabledMainnetBitcoinToken,
-			enabledEvmTokens,
-			enabledEthereumTokens,
+			enabledEthEvmNativeTokens,
 			exchanges,
 			balancesStore
 		],
 		([
 			$availableTokens,
 			$enabledMainnetBitcoinToken,
-			$enabledEvmTokens,
-			$enabledEthereumTokens,
+			$enabledEthEvmNativeTokens,
 			$exchanges,
 			$balances
 		]) => {
@@ -125,8 +122,7 @@ export const initPayContext = (): PayContext => {
 			return enrichTokensWithUsdAndBalance({
 				tokens: $availableTokens,
 				nativeTokens: [
-					...$enabledEvmTokens,
-					...$enabledEthereumTokens,
+					...$enabledEthEvmNativeTokens,
 					...(nonNullish($enabledMainnetBitcoinToken) ? [$enabledMainnetBitcoinToken] : [])
 				],
 				exchanges: $exchanges,
