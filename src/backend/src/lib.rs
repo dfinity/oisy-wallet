@@ -31,25 +31,13 @@ use shared::{
     },
 };
 
-use crate::{
-    bitcoin_api::get_current_fee_percentiles,
-    guards::{caller_is_allowed, caller_is_not_anonymous},
-    state::{mutate_state, read_config, read_state, set_config},
-    token::{add_to_user_token, remove_from_user_token},
-    token_activity::{mark_token_active, mark_tokens_active},
-    types::storable::{Candid, StoredPrincipal, StoredTokenId},
-};
+
 use crate::state::{read_state, set_config};
 
 mod api;
 mod bitcoin;
 mod contacts;
 mod exchange;
-mod guards;
-mod housekeeping;
-mod impls;
-mod pow;
-mod random;
 mod signer;
 mod state;
 mod token;
@@ -59,7 +47,7 @@ mod utils;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
-mod utils;
+
 
 #[init]
 pub fn init(arg: Arg) {
