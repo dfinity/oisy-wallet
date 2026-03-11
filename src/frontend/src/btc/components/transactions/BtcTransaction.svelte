@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import type { BtcTransactionUi } from '$btc/types/btc';
-	import Transaction from '$lib/components/transactions/Transaction.svelte';
+	import { mapBtcTransactionToViewModel } from '$btc/utils/btc-transaction-row.utils';
+	import TransactionRow from '$lib/components/transactions/TransactionRow.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
+	import { createOpenTransactionModal } from '$lib/utils/transaction-modal.utils';
 
 	interface Props {
 		transaction: BtcTransactionUi;
@@ -14,25 +15,27 @@
 
 	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	let { type, status, value, timestamp, to, from, display } = $derived(transaction);
+	let { row, label } = $derived(
+		mapBtcTransactionToViewModel({
+			transaction,
+			token,
+			i18n: { send: $i18n.send.text.send, receive: $i18n.receive.text.receive }
+		})
+	);
 
-	let label = $derived(type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive);
-
-	let displayAmount = $derived(display.amount);
-
-	const modalId = Symbol();
+	let onClick = $derived(
+		createOpenTransactionModal({
+			openModal: modalStore.openBtcTransaction,
+			transaction,
+			token
+		})
+	);
 </script>
 
-<Transaction
-	{displayAmount}
-	{from}
+<TransactionRow
+	{row}
 	{iconType}
-	onClick={() => modalStore.openBtcTransaction({ id: modalId, data: { transaction, token } })}
-	{status}
-	timestamp={Number(timestamp)}
-	to={nonNullish(to?.[0]) ? to[0] : undefined}
-	{token}
-	{type}
+	{onClick}
 >
 	{label}
-</Transaction>
+</TransactionRow>

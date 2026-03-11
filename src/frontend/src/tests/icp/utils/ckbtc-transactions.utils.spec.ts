@@ -29,6 +29,8 @@ describe('ckbtc-transactions.utils', () => {
 		const mockId = utxoTxIdToString(mockPendingUtxo.outpoint.txid);
 
 		it('should map correctly a pending UTXO transaction for mainnet', () => {
+			const expectedValue = mockPendingUtxo.value - mockKytFee;
+
 			expect(
 				mapCkBTCPendingUtxo({
 					utxo: mockPendingUtxo,
@@ -42,12 +44,19 @@ describe('ckbtc-transactions.utils', () => {
 				status: 'pending',
 				fromLabel: 'transaction.label.twin_network',
 				typeLabel: 'transaction.label.converting_twin_token',
-				value: mockPendingUtxo.value - mockKytFee,
-				txExplorerUrl: `${BTC_MAINNET_EXPLORER_URL}/tx/${mockId}`
+				value: expectedValue,
+				txExplorerUrl: `${BTC_MAINNET_EXPLORER_URL}/tx/${mockId}`,
+				display: {
+					amount: expectedValue,
+					detailsAmount: expectedValue,
+					labelAmount: expectedValue
+				}
 			});
 		});
 
 		it('should map correctly a pending UTXO transaction for testnet', () => {
+			const expectedValue = mockPendingUtxo.value - mockKytFee;
+
 			expect(
 				mapCkBTCPendingUtxo({
 					utxo: mockPendingUtxo,
@@ -61,8 +70,13 @@ describe('ckbtc-transactions.utils', () => {
 				status: 'pending',
 				fromLabel: 'transaction.label.twin_network',
 				typeLabel: 'transaction.label.converting_twin_token',
-				value: mockPendingUtxo.value - mockKytFee,
-				txExplorerUrl: `${BTC_TESTNET_EXPLORER_URL}/tx/${mockId}`
+				value: expectedValue,
+				txExplorerUrl: `${BTC_TESTNET_EXPLORER_URL}/tx/${mockId}`,
+				display: {
+					amount: expectedValue,
+					detailsAmount: expectedValue,
+					labelAmount: expectedValue
+				}
 			});
 		});
 	});
