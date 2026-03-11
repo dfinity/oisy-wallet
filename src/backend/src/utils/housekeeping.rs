@@ -84,7 +84,7 @@ fn spawn_housekeeping_if_idle() {
 
     HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = Some(now));
 
-    ic_cdk::spawn(async {
+    ic_cdk::futures::spawn(async {
         hourly_housekeeping_tasks().await;
         HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = None);
     });
