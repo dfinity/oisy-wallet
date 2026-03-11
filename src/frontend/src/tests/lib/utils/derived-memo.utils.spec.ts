@@ -214,6 +214,7 @@ describe('derived-memo.utils', () => {
 			const store = derivedMemo(
 				source,
 				($source) => ({ parity: $source % 2 === 0 ? 'even' : 'odd' }),
+				// eslint-disable-next-line local-rules/prefer-object-params
 				(a, b) => a.parity === b.parity
 			);
 
