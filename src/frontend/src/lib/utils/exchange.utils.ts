@@ -68,7 +68,7 @@ export const findMissingLedgerCanisterIds = ({
 };
 
 /**
- * Compares two ExchangesData records by symbol keys and usd price.
+ * Compares two ExchangesData records by TokenId keys (stored as JS symbol property keys) and usd price.
  * Uses Object.getOwnPropertySymbols since TokenId keys are JS symbols.
  */
 // eslint-disable-next-line local-rules/prefer-object-params
