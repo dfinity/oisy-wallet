@@ -13,6 +13,7 @@ use shared::{
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::AddHiddenDappIdRequest,
+        exchange::ExchangeRate,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         result_types::{
