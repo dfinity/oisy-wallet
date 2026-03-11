@@ -6,7 +6,6 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
-	import { enabledEthEvmNativeTokens } from '$eth/derived/tokens.derived';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -45,6 +44,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
+    import {enabledEthEvmNativeTokens} from "$eth/derived/native-tokens.derived";
 
 	interface Props {
 		swapAmount: OptionAmount;

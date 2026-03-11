@@ -1,7 +1,7 @@
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
-import { enabledEthEvmNativeTokens } from '$eth/derived/tokens.derived';
+import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';

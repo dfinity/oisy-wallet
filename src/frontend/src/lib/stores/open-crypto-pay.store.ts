@@ -1,5 +1,5 @@
 import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
-import { enabledEthEvmNativeTokens } from '$eth/derived/tokens.derived';
+import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 import { currentCurrency } from '$lib/derived/currency.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { currentLanguage } from '$lib/derived/i18n.derived';
