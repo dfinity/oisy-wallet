@@ -18,7 +18,7 @@ import { derived, type Readable } from 'svelte/store';
 // The entire list of ICRC tokens to display to the user:
 // This includes the default tokens (disabled or enabled), the custom tokens (disabled or enabled),
 // and the environment tokens that have never been used.
-export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
+export const allIcrcTokens: Readable<IcTokenToggleable[]> = derivedMemo(
 	[icrcTokens],
 	([$icrcTokens]) => {
 		const icrcEnvTokens: IcTokenToggleable[] =
@@ -32,7 +32,8 @@ export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 				({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
 			)
 		];
-	}
+	},
+	tokenListEqual
 );
 
 export const allSortedIcrcTokens: Readable<IcTokenToggleable[]> = derived(
@@ -46,7 +47,7 @@ export const allKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = de
 		$allIcrcTokens.filter(({ symbol }) => nonNullish($kongSwapTokensStore?.[symbol]))
 );
 
-export const allTokens: Readable<CustomToken<Token>[]> = derived(
+export const allTokens: Readable<CustomToken<Token>[]> = derivedMemo(
 	[nativeTokens, ercFungibleTokens, allIcrcTokens, splTokens, nonFungibleTokens],
 	([$nativeTokens, $ercFungibleTokens, $allIcrcTokens, $splTokens, $nonFungibleTokens]) => [
 		...$nativeTokens.map((token) => ({ ...token, enabled: true })),
@@ -54,7 +55,8 @@ export const allTokens: Readable<CustomToken<Token>[]> = derived(
 		...$allIcrcTokens,
 		...$splTokens,
 		...$nonFungibleTokens
-	]
+	],
+	tokenListEqual
 );
 
 export const allFungibleTokens: Readable<Token[]> = derivedMemo(

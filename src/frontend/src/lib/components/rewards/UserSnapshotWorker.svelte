@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
@@ -14,13 +14,15 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import { noPositiveBalanceAndNotAllBalancesZero } from '$lib/derived/balances.derived';
+	import {
+		anyBalanceNonZero,
+		noPositiveBalanceAndNotAllBalancesZero
+	} from '$lib/derived/balances.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { exchangeNotInitialized } from '$lib/derived/exchange.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
@@ -110,7 +112,7 @@
 	// Auth: We should trigger the snapshot when the user is signed in. If the user is not signed in, we should not trigger the snapshot. We should also not trigger the snapshot if the user is busy.
 	// Addresses: the addresses of each network.
 	// Tokens: any new token added to the list of tokens or any change in the token list.
-	// Balances: All balances (since we need to check if the user has any balance).
+	// Balances: Coarse boolean signal (memoized) — flips only when balance status changes, not per-token.
 	// Exchanges: All exchanges initialized (since we have no disclaimer specific for the tokens we are interested in).
 	// Transactions: all transactions related to each network.
 	$effect(() => {
@@ -122,13 +124,13 @@
 			$solAddressMainnet,
 			$solAddressDevnet,
 			$tokens,
-			$balancesStore,
+			$anyBalanceNonZero,
 			$exchangeNotInitialized,
 			$btcTransactionsStore,
 			$ethTransactionsStore,
 			$icTransactionsStore,
 			$solTransactionsStore
 		];
-		triggerTimer();
+		untrack(() => triggerTimer());
 	});
 </script>

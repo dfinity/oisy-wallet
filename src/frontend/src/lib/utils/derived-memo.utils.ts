@@ -1,4 +1,14 @@
+import type { ExchangesData } from '$lib/types/exchange';
+import type { TokenId } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
 import { derived, type Readable, type Subscriber, type Unsubscriber } from 'svelte/store';
+
+type Stores =
+	| Readable<unknown>
+	| [Readable<unknown>, ...Array<Readable<unknown>>]
+	| Array<Readable<unknown>>;
+type StoresValues<T> =
+	T extends Readable<infer U> ? U : { [K in keyof T]: T[K] extends Readable<infer U> ? U : never };
 
 /**
  * Like Svelte's `derived`, but only notifies subscribers when the output
@@ -7,14 +17,13 @@ import { derived, type Readable, type Subscriber, type Unsubscriber } from 'svel
  * derived stores produce the same value from different source triggers.
  */
 // eslint-disable-next-line local-rules/prefer-object-params
-export const derivedMemo = <T>(
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	stores: Readable<any> | Array<Readable<any>>,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	fn: (values: any) => T,
+export const derivedMemo = <S extends Stores, T>(
+	stores: S,
+	fn: (values: StoresValues<S>) => T,
 	isEqual: (a: T, b: T) => boolean
 ): Readable<T> => {
-	const source = derived(stores, fn);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const source = derived(stores as any, fn as any);
 
 	let value: T;
 	let initialized = false;
@@ -64,10 +73,63 @@ export const derivedMemo = <T>(
  * Fast O(n) check — catches the common case of identical token lists
  * produced from unchanged inputs.
  */
-// eslint-disable-next-line local-rules/prefer-object-params -- Being a comparison function, it's more ergonomic to take two separate arrays than an object param with two arrays.
+// eslint-disable-next-line local-rules/prefer-object-params
 export const tokenListEqual = <T extends { id: symbol }>(a: T[], b: T[]): boolean => {
 	if (a.length !== b.length) {
 		return false;
 	}
 	return a.every((item, i) => item.id === b[i].id);
+};
+
+/**
+ * Compares two TokenUi arrays by id, balance, and USD balance.
+ * Prevents re-renders when balance updates for tokens outside the current view
+ * produce an identical mapped result.
+ */
+// eslint-disable-next-line local-rules/prefer-object-params
+export const tokenUiListEqual = (a: TokenUi[], b: TokenUi[]): boolean => {
+	if (a.length !== b.length) {
+		return false;
+	}
+	return a.every((item, i) => {
+		const other = b[i];
+		return (
+			item.id === other.id && item.balance === other.balance && item.usdBalance === other.usdBalance
+		);
+	});
+};
+
+/**
+ * Compares two ExchangesData records by symbol keys and usd price.
+ * Uses Object.getOwnPropertySymbols since TokenId keys are JS symbols.
+ */
+// eslint-disable-next-line local-rules/prefer-object-params
+export const exchangesDataEqual = (a: ExchangesData, b: ExchangesData): boolean => {
+	const keysA = Object.getOwnPropertySymbols(a);
+	const keysB = Object.getOwnPropertySymbols(b);
+	if (keysA.length !== keysB.length) {
+		return false;
+	}
+	return keysA.every((k) => {
+		const va = a[k as TokenId];
+		const vb = b[k as TokenId];
+		if (va === vb) {
+			return true;
+		}
+		if (va === undefined || vb === undefined) {
+			return false;
+		}
+		return va.usd === vb.usd;
+	});
+};
+
+// eslint-disable-next-line local-rules/prefer-object-params
+export const primitiveArrayEqual = <T extends string | number | boolean>(
+	a: T[],
+	b: T[]
+): boolean => {
+	if (a.length !== b.length) {
+		return false;
+	}
+	return a.every((v, i) => v === b[i]);
 };
