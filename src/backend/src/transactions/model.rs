@@ -1,12 +1,15 @@
 use candid::Principal;
-use shared::types::stored_transaction::{
-    GetStoredTransactionsRequest, GetStoredTransactionsResponse, SaveStoredTransactionsRequest,
-    StoredTransaction, StoredTransactionError, TransactionTokenId, MAX_GET_TRANSACTIONS_RESULTS,
-    MAX_SAVE_TRANSACTIONS_BATCH, MAX_STORED_TRANSACTIONS_PER_TOKEN,
+use shared::types::{
+    backend_token_id::TokenId,
+    stored_transaction::{
+        GetStoredTransactionsRequest, GetStoredTransactionsResponse, SaveStoredTransactionsRequest,
+        StoredTransaction, StoredTransactionError, MAX_GET_TRANSACTIONS_RESULTS,
+        MAX_SAVE_TRANSACTIONS_BATCH, MAX_STORED_TRANSACTIONS_PER_TOKEN,
+    },
 };
 
 use crate::types::{
-    Candid, StoredPrincipal, StoredTransactionKey, StoredTransactionTokenId, StoredTransactionsMap,
+    Candid, StoredBackendTokenId, StoredPrincipal, StoredTransactionKey, StoredTransactionsMap,
 };
 
 /// Read paginated transactions from the map without mutating state.
@@ -63,7 +66,7 @@ impl<'a> StoredTransactionsModel<'a> {
     }
 
     /// Save finalized transactions for a user and token.
-    /// Transactions are deduplicated by hash and kept sorted by block_number ascending.
+    /// Transactions are deduplicated by hash and kept sorted by `block_number` ascending.
     pub fn save_transactions(
         &mut self,
         principal: Principal,
@@ -101,10 +104,10 @@ impl<'a> StoredTransactionsModel<'a> {
     }
 }
 
-fn make_key(principal: Principal, token_id: &TransactionTokenId) -> StoredTransactionKey {
+fn make_key(principal: Principal, token_id: &TokenId) -> StoredTransactionKey {
     StoredTransactionKey(
         StoredPrincipal(principal),
-        StoredTransactionTokenId(token_id.clone()),
+        StoredBackendTokenId(token_id.clone()),
     )
 }
 
@@ -150,8 +153,8 @@ mod tests {
         }
     }
 
-    fn eth_native_token() -> TransactionTokenId {
-        TransactionTokenId::EvmNative(1)
+    fn eth_native_token() -> TokenId {
+        TokenId::EvmNative(1)
     }
 
     #[test]
@@ -330,7 +333,7 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
         let eth_tx = make_tx("0xeth_hash", 100, 1000);
-        let erc20_token_id = TransactionTokenId::Erc20(
+        let erc20_token_id = TokenId::Erc20(
             shared::types::custom_token::ErcTokenId(
                 "0xdAC17F958D2ee523a2206206994597C13D831ec7".to_string(),
             ),

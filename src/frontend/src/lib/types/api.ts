@@ -7,7 +7,7 @@ import type {
 	GetUserProfileError,
 	SelectedUtxosFeeResponse,
 	StoredTransaction,
-	TransactionTokenId,
+	TokenId as BackendTokenId,
 	UserProfile,
 	Utxo
 } from '$declarations/backend/backend.did';
@@ -200,12 +200,12 @@ export interface UpdateUserExperimentalFeatureSettings {
 }
 
 export interface GetStoredTransactionsParams {
-	tokenId: TransactionTokenId;
+	tokenId: BackendTokenId;
 	start?: bigint;
 	maxResults: bigint;
 }
 
 export interface SaveStoredTransactionsParams {
-	tokenId: TransactionTokenId;
+	tokenId: BackendTokenId;
 	transactions: StoredTransaction[];
 }

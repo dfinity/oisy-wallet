@@ -8,6 +8,6 @@ pub(crate) use self::{
         UserTokenMap, VMem,
     },
     storable::{
-        Candid, StoredPrincipal, StoredTokenId, StoredTransactionKey, StoredTransactionTokenId,
+        Candid, StoredBackendTokenId, StoredPrincipal, StoredTokenId, StoredTransactionKey,
     },
 };

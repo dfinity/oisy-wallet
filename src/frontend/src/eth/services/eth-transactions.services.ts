@@ -21,7 +21,7 @@ import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { filterSpamErc20Transfers } from '$eth/utils/eth-transactions-spam.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import { buildEvmNativeTransactionTokenId } from '$eth/utils/stored-transactions.utils';
+import { buildEvmNativeBackendTokenId } from '$eth/utils/stored-transactions.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
@@ -84,7 +84,7 @@ const loadEthTransactions = async ({
 	}
 
 	try {
-		const transactionTokenId = buildEvmNativeTransactionTokenId({ networkId });
+		const transactionTokenId = buildEvmNativeBackendTokenId({ networkId });
 
 		// Load stored finalized transactions from backend to get the newest stored block
 		const stored = nonNullish(transactionTokenId)

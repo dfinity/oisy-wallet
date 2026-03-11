@@ -218,7 +218,7 @@ export type GetAllowedCyclesResult =
 export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
 export interface GetStoredTransactionsRequest {
-	token_id: TransactionTokenId;
+	token_id: TokenId;
 	max_results: bigint;
 	start: [] | [bigint];
 }
@@ -342,7 +342,7 @@ export interface SplToken {
 	symbol: [] | [string];
 }
 export interface SaveStoredTransactionsRequest {
-	token_id: TransactionTokenId;
+	token_id: TokenId;
 	transactions: Array<StoredTransaction>;
 }
 export type SaveStoredTransactionsResult = { Ok: null } | { Err: StoredTransactionError };
@@ -400,7 +400,7 @@ export type TokenAccountId =
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
 export type TokenSection = { Spam: null } | { Hidden: null };
-export type TransactionTokenId =
+export type TokenId =
 	| { Erc20: [string, bigint] }
 	| { SolNativeDevnet: null }
 	| { Icrc: Principal }

@@ -1,6 +1,6 @@
 use candid::{CandidType, Deserialize, Nat};
 
-use super::custom_token::{ChainId, ErcTokenId, LedgerId, SplTokenId};
+use super::{backend_token_id::TokenId, custom_token::ChainId};
 
 /// Maximum number of transactions that can be stored per (user, token) pair.
 pub const MAX_STORED_TRANSACTIONS_PER_TOKEN: usize = 10_000;
@@ -10,37 +10,6 @@ pub const MAX_SAVE_TRANSACTIONS_BATCH: usize = 500;
 
 /// Maximum number of transactions that can be returned in a single response.
 pub const MAX_GET_TRANSACTIONS_RESULTS: u64 = 100;
-
-/// Identifies which token's transactions are being stored/retrieved.
-/// Covers both native tokens and custom/wrapped tokens across all supported chains.
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
-#[repr(u8)]
-pub enum TransactionTokenId {
-    /// Native EVM token (ETH, MATIC, BNB, etc.) identified by chain ID
-    EvmNative(ChainId) = 0,
-    /// ERC-20 token on an EVM chain
-    Erc20(ErcTokenId, ChainId) = 1,
-    /// ERC-721 NFT on an EVM chain
-    Erc721(ErcTokenId, ChainId) = 2,
-    /// ERC-1155 multi-token on an EVM chain
-    Erc1155(ErcTokenId, ChainId) = 3,
-    /// ERC-4626 vault token on an EVM chain
-    Erc4626(ErcTokenId, ChainId) = 4,
-    /// ICRC token on ICP
-    Icrc(LedgerId) = 5,
-    /// Native ICP
-    IcpNative = 6,
-    /// SPL token on Solana mainnet
-    SplMainnet(SplTokenId) = 7,
-    /// SPL token on Solana devnet
-    SplDevnet(SplTokenId) = 8,
-    /// Native SOL on mainnet
-    SolNativeMainnet = 9,
-    /// Native SOL on devnet
-    SolNativeDevnet = 10,
-    /// Native BTC
-    BtcNative = 11,
-}
 
 /// A finalized transaction stored in the backend.
 /// Contains all fields needed to reconstruct the frontend `Transaction` type.
@@ -79,10 +48,10 @@ pub struct StoredTransaction {
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct GetStoredTransactionsRequest {
     /// Which token's transactions to retrieve
-    pub token_id: TransactionTokenId,
+    pub token_id: TokenId,
     /// Cursor for pagination: block number to start before (exclusive).
     /// `None` returns from the newest transactions.
-    /// `Some(block_number)` returns transactions with block_number < this value.
+    /// `Some(block_number)` returns transactions with `block_number` < this value.
     pub start: Option<u64>,
     /// Maximum number of transactions to return (capped at `MAX_GET_TRANSACTIONS_RESULTS`)
     pub max_results: u64,
@@ -105,7 +74,7 @@ pub struct GetStoredTransactionsResponse {
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct SaveStoredTransactionsRequest {
     /// Which token these transactions belong to
-    pub token_id: TransactionTokenId,
+    pub token_id: TokenId,
     /// Transactions to save (must be finalized/immutable)
     pub transactions: Vec<StoredTransaction>,
 }

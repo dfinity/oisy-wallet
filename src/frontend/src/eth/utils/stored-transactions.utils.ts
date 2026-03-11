@@ -1,6 +1,6 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import type { StoredTransaction, TransactionTokenId } from '$declarations/backend/backend.did';
+import type { StoredTransaction, TokenId as BackendTokenId } from '$declarations/backend/backend.did';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { Erc4626ContractAddress } from '$eth/types/erc4626';
@@ -68,13 +68,13 @@ export const isTransactionFinalized = ({
 const allEthNetworks = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS];
 
 /**
- * Maps a frontend networkId + optional contract info to a Candid TransactionTokenId.
+ * Maps a frontend networkId + optional contract info to a Candid BackendTokenId.
  */
-export const buildEvmNativeTransactionTokenId = ({
+export const buildEvmNativeBackendTokenId = ({
 	networkId
 }: {
 	networkId: NetworkId;
-}): TransactionTokenId | undefined => {
+}): BackendTokenId | undefined => {
 	const network = allEthNetworks.find(({ id }) => id === networkId);
 	if (isNullish(network)) {
 		return undefined;
@@ -82,7 +82,7 @@ export const buildEvmNativeTransactionTokenId = ({
 	return { EvmNative: network.chainId };
 };
 
-export const buildErcTransactionTokenId = ({
+export const buildErcBackendTokenId = ({
 	networkId,
 	contractAddress,
 	standard
@@ -90,7 +90,7 @@ export const buildErcTransactionTokenId = ({
 	networkId: NetworkId;
 	contractAddress: string;
 	standard: TokenStandard;
-}): TransactionTokenId | undefined => {
+}): BackendTokenId | undefined => {
 	const network = allEthNetworks.find(({ id }) => id === networkId);
 	if (isNullish(network)) {
 		return undefined;

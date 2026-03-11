@@ -1,4 +1,4 @@
-import type { TransactionTokenId } from '$declarations/backend/backend.did';
+import type { TokenId as BackendTokenId } from '$declarations/backend/backend.did';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import {
 	isTransactionFinalized,
@@ -26,7 +26,7 @@ export const loadStoredTransactions = async ({
 	start,
 	maxResults = WALLET_PAGINATION
 }: {
-	tokenId: TransactionTokenId;
+	tokenId: BackendTokenId;
 	start?: bigint;
 	maxResults?: bigint;
 }): Promise<{
@@ -72,7 +72,7 @@ export const saveFinalizedTransactions = async ({
 	transactions,
 	currentBlockNumber
 }: {
-	tokenId: TransactionTokenId;
+	tokenId: BackendTokenId;
 	transactions: Transaction[];
 	currentBlockNumber: number;
 }): Promise<ResultSuccess> => {
@@ -117,7 +117,7 @@ export const loadNextEthStoredTransactions = async ({
 	tokenId,
 	lastBlockNumber
 }: {
-	transactionTokenId: TransactionTokenId;
+	transactionTokenId: BackendTokenId;
 	tokenId: TokenId;
 	lastBlockNumber: bigint;
 }): Promise<{ hasMore: boolean }> => {

@@ -198,7 +198,7 @@ type GetAllowedCyclesResult = variant {
 type GetContactResult = variant { Ok : Contact; Err : ContactError };
 type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
 type GetStoredTransactionsRequest = record {
-	token_id : TransactionTokenId;
+	token_id : TokenId;
 	max_results : nat64;
 	start : opt nat64
 };
@@ -280,7 +280,7 @@ type RateLimitError = record {
 	caller : principal
 };
 type SaveStoredTransactionsRequest = record {
-	token_id : TransactionTokenId;
+	token_id : TokenId;
 	transactions : vec StoredTransaction
 };
 type SaveStoredTransactionsResult = variant {
@@ -376,7 +376,7 @@ type TokenAccountId = variant {
 	Icrcv2 : Icrcv2AccountId
 };
 type TokenSection = variant { Spam; Hidden };
-type TransactionTokenId = variant {
+type TokenId = variant {
 	Erc20 : record { text; nat64 };
 	SolNativeDevnet;
 	Icrc : principal;

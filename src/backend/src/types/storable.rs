@@ -2,7 +2,7 @@ use std::{borrow::Cow, ops::Deref};
 
 use candid::{decode_one, encode_one, CandidType, Deserialize, Principal};
 use ic_stable_structures::storable::{Blob, Bound, Storable};
-use shared::types::{custom_token::CustomTokenId, stored_transaction::TransactionTokenId};
+use shared::types::{backend_token_id::TokenId, custom_token::CustomTokenId};
 
 #[derive(Default)]
 pub struct Candid<T>(pub T)
@@ -88,27 +88,27 @@ impl Storable for StoredTokenId {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct StoredTransactionTokenId(pub TransactionTokenId);
+pub struct StoredBackendTokenId(pub TokenId);
 
-impl Storable for StoredTransactionTokenId {
+impl Storable for StoredBackendTokenId {
     const BOUND: Bound = Bound::Unbounded;
 
     fn to_bytes(&self) -> Cow<'_, [u8]> {
-        Cow::Owned(encode_one(&self.0).expect("failed to candid-encode TransactionTokenId"))
+        Cow::Owned(encode_one(&self.0).expect("failed to candid-encode TokenId"))
     }
 
     fn into_bytes(self) -> Vec<u8> {
-        encode_one(&self.0).expect("failed to candid-encode TransactionTokenId")
+        encode_one(&self.0).expect("failed to candid-encode TokenId")
     }
 
     fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
-        Self(decode_one(bytes.as_ref()).expect("failed to candid-decode TransactionTokenId"))
+        Self(decode_one(bytes.as_ref()).expect("failed to candid-decode TokenId"))
     }
 }
 
 /// Composite key for per-user, per-token transaction storage.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct StoredTransactionKey(pub StoredPrincipal, pub StoredTransactionTokenId);
+pub struct StoredTransactionKey(pub StoredPrincipal, pub StoredBackendTokenId);
 
 impl Storable for StoredTransactionKey {
     const BOUND: Bound = Bound::Unbounded;
@@ -135,8 +135,7 @@ impl Storable for StoredTransactionKey {
                 .expect("failed to decode principal length"),
         ) as usize;
         let principal = StoredPrincipal::from_bytes(Cow::Borrowed(&bytes[4..4 + principal_len]));
-        let token_id =
-            StoredTransactionTokenId::from_bytes(Cow::Borrowed(&bytes[4 + principal_len..]));
+        let token_id = StoredBackendTokenId::from_bytes(Cow::Borrowed(&bytes[4 + principal_len..]));
         Self(principal, token_id)
     }
 }
