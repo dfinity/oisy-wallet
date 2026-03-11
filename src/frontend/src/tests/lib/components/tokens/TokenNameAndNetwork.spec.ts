@@ -3,8 +3,8 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 import type { CardData } from '$lib/types/token-card';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { render, screen } from '@testing-library/svelte';
 import en from '$tests/mocks/i18n.mock';
+import { render, screen } from '@testing-library/svelte';
 
 describe('TokenNameAndNetwork', () => {
 	const renderComponent = (data: CardData) => render(TokenNameAndNetwork, { props: { data } });
