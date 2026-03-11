@@ -81,6 +81,104 @@ export const exchangeRateUsdToCurrency = async (
 	return { rate, fx24hChangeMultiplier };
 };
 
+export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'ethereum',
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
+	});
+
+export const exchangeRateBTCToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'bitcoin',
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
+	});
+
+export const exchangeRateICPToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'internet-computer',
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
+	});
+
+export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'solana',
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
+	});
+
+export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'binancecoin',
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
+	});
+
+export const exchangeRatePOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'polygon-ecosystem-token',
+		vs_currencies: Currency.USD,
+		include_24hr_change: true
+	});
+
+export const exchangeRateERC20ToUsd = async ({
+	coingeckoPlatformId: id,
+	contractAddresses
+}: CoingeckoErc20PriceParams): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
+	if (contractAddresses.length === 0) {
+		return null;
+	}
+
+	return await simpleTokenPrice({
+		id,
+		vs_currencies: Currency.USD,
+		contract_addresses: contractAddresses.map(({ address }) => address),
+		include_market_cap: true,
+		include_24hr_change: true
+	});
+};
+
+export const exchangeRateICRCToUsd = async (
+	ledgerCanisterIds: LedgerCanisterIdText[]
+): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
+	if (ledgerCanisterIds.length === 0) {
+		return null;
+	}
+
+	const coingeckoPrices = await fetchIcrcPricesFromCoingecko(ledgerCanisterIds);
+	const missingIds = findMissingLedgerCanisterIds({
+		allLedgerCanisterIds: ledgerCanisterIds,
+		coingeckoResponse: coingeckoPrices
+	});
+	if (missingIds.length === 0) {
+		return coingeckoPrices;
+	}
+
+	const kongSwapPrices = await fetchIcrcPricesFromKongSwap(missingIds);
+	return {
+		...(coingeckoPrices ?? {}),
+		...(kongSwapPrices ?? {})
+	};
+};
+
+export const exchangeRateSPLToUsd = async (
+	tokenAddresses: SplTokenAddress[]
+): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
+	if (tokenAddresses.length === 0) {
+		return null;
+	}
+
+	return await simpleTokenPrice({
+		id: 'solana',
+		vs_currencies: Currency.USD,
+		contract_addresses: tokenAddresses,
+		include_market_cap: true,
+		include_24hr_change: true
+	});
+};
+
 export const toCustomTokenId = (token: {
 	address: string;
 	coingeckoId?: string;
