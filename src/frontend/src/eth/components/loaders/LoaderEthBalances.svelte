@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
@@ -8,7 +9,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledErc20Tokens, enabledErc4626Tokens } from '$lib/derived/tokens.derived';
 	import { syncBalancesFromCache } from '$lib/services/listener.services';
-    import {enabledEthEvmNativeTokens} from "$eth/derived/native-tokens.derived";
 
 	let loading = $state(false);
 	let timer = $state<NodeJS.Timeout | undefined>();

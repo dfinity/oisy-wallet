@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import {
 		COLLECTION_TIMER_INTERVAL_MILLIS,
 		MILLISECONDS_IN_DAY,
@@ -12,7 +13,6 @@
 		enabledNonFungibleTokensWithoutSpam
 	} from '$lib/derived/tokens.derived';
 	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
-    import {enabledEthEvmNativeTokens} from "$eth/derived/native-tokens.derived";
 
 	let fungibleTokens = $derived([
 		...$enabledEthEvmNativeTokens,
