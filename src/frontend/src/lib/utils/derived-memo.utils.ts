@@ -41,7 +41,9 @@ export const derivedMemo = <S extends Stores, T>(
 		stopSource = source.subscribe((next) => {
 			if (!initialized || !isEqual(value, next)) {
 				initialized = true;
+
 				value = next;
+
 				for (const sub of subscribers) {
 					sub(value);
 				}
@@ -51,7 +53,9 @@ export const derivedMemo = <S extends Stores, T>(
 
 	const stop = () => {
 		stopSource?.();
+
 		stopSource = undefined;
+
 		initialized = false;
 	};
 
