@@ -109,7 +109,7 @@ export function reactivityDebugPlugin(): Plugin {
 				alreadyImported
 					? result
 					: result.replace(
-							/(<script[^>]*>)/,
+							/(<script\b[^>]*>)/i,
 							`$1\n\timport { ${DEBUG_HIT_FN} } from '${DEBUG_IMPORT_SOURCE}';`
 						);
 
