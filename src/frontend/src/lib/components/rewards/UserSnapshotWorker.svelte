@@ -25,6 +25,7 @@
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
 	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+    import {derivedMemo} from "$lib/utils/derived-memo.utils";
 
 	let timer: NodeJS.Timeout | undefined = undefined;
 	let syncInProgress = false;
@@ -111,18 +112,11 @@
 	const countSymbolKeys = (store: Record<symbol, unknown> | undefined): number =>
 		store ? Object.getOwnPropertySymbols(store).length : 0;
 
-	// const transactionTokenEntryCount = derivedMemo(
-	// 	[btcTransactionsStore, ethTransactionsStore, icTransactionsStore, solTransactionsStore],
-	// 	([$btc, $eth, $ic, $sol]) =>
-	// 		countSymbolKeys($btc) + countSymbolKeys($eth) + countSymbolKeys($ic) + countSymbolKeys($sol),
-	// 	(a, b) => a === b
-	// );
-
-	const transactionTokenEntryCount = $derived(
-		countSymbolKeys($btcTransactionsStore) +
-			countSymbolKeys($ethTransactionsStore) +
-			countSymbolKeys($icTransactionsStore) +
-			countSymbolKeys($solTransactionsStore)
+	const transactionTokenEntryCount = derivedMemo(
+		[btcTransactionsStore, ethTransactionsStore, icTransactionsStore, solTransactionsStore],
+		([$btc, $eth, $ic, $sol]) =>
+			countSymbolKeys($btc) + countSymbolKeys($eth) + countSymbolKeys($ic) + countSymbolKeys($sol),
+		(a, b) => a === b
 	);
 
 	// The snapshot should be triggered for any change in the following variables (for now).
