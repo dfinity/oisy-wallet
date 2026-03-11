@@ -31,8 +31,7 @@ const extractFileLabel = (id: string): string => {
  * 2. `transform` — injects `reactivityDebugHit()` calls into every `$effect`
  *    and `$derived.by` callback in `.svelte` files.
  *
- * Activate by setting `VITE_REACTIVITY_DEBUG=true` in your `.env` file.
- * The plugin is a complete no-op when the flag is absent or false.
+ * Automatically active in every environment except production (`DFX_NETWORK=ic`).
  */
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions,func-style
 export function reactivityDebugPlugin(): Plugin {
@@ -43,7 +42,8 @@ export function reactivityDebugPlugin(): Plugin {
 		enforce: 'pre',
 
 		configResolved: () => {
-			enabled = process.env.VITE_REACTIVITY_DEBUG === 'true';
+			const network = process.env.DFX_NETWORK ?? 'local';
+			enabled = network !== 'ic';
 
 			if (enabled) {
 				// eslint-disable-next-line no-console

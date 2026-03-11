@@ -141,7 +141,7 @@ This last step will generate the screenshots for the CI and add them to your PR.
 
 ## Debugging Reactivity
 
-When investigating performance issues, runaway reactive loops, or excessive recomputations during login or normal app usage, you can enable a built-in reactivity debug tool that counts every store `derived` recomputation and reports the results.
+When investigating performance issues, runaway reactive loops, or excessive recomputations during login or normal app usage, a built-in reactivity debug tool automatically counts every reactive recomputation in all environments except production (`DFX_NETWORK=ic`). This includes local development, staging, beta, and all test-fe environments.
 
 ### How it works
 
@@ -151,7 +151,7 @@ A Vite plugin (`vite.plugin.reactivity-debug.ts`) uses two mechanisms:
 
 2. **`transform`** — rewrites `.svelte` files before the Svelte compiler sees them, injecting a `reactivityDebugHit()` call at the top of every `$effect(() => { ... })` and `$derived.by(() => { ... })` callback body. Labels are auto-generated as `file:line:$effect` or `file:line:$derived.by`. If an effect already contains a manual `reactivityDebugHit` call, it is left untouched.
 
-When `VITE_REACTIVITY_DEBUG` is not `true`, the plugin does not activate and both mechanisms are complete no-ops.
+The plugin activates automatically when `DFX_NETWORK` is not `ic` (production) and is a complete no-op in production builds.
 
 ### Coverage
 
@@ -164,19 +164,13 @@ When `VITE_REACTIVITY_DEBUG` is not `true`, the plugin does not activate and bot
 
 ### Usage
 
-1. Enable the debug flag in your `.env.development` (or whichever env file you use locally):
+1. Start the dev server or deploy to any non-production environment. You will see a purple log confirming activation:
 
 ```
-VITE_REACTIVITY_DEBUG=true
+[reactivity-debug] plugin active — store derived + $effect/$derived.by recomputations will be counted
 ```
 
-2. Start the dev server. You will see a purple log confirming activation:
-
-```
-[reactivity-debug] plugin active — every store `derived` recomputation will be counted
-```
-
-3. Open the browser DevTools console and use the global helpers:
+2. Open the browser DevTools console and use the global helpers:
 
 ```javascript
 // Clear all counters (e.g. right before logging in)
@@ -214,7 +208,7 @@ All `$effect` and `$derived.by` blocks are instrumented automatically. If you pr
 </script>
 ```
 
-The call is a no-op when `VITE_REACTIVITY_DEBUG` is not enabled, so it is safe to leave in the codebase.
+The call is a no-op in production, so it is safe to leave in the codebase.
 
 ## Integrate ckERC20 Tokens
 

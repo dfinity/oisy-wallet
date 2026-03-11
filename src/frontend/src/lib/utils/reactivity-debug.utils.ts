@@ -10,10 +10,7 @@ export type {
 	Writable
 } from 'svelte/store';
 
-const ENABLED =
-	import.meta.env.DEV &&
-	typeof window !== 'undefined' &&
-	import.meta.env.VITE_REACTIVITY_DEBUG === 'true';
+const ENABLED = VITE_DFX_NETWORK !== 'ic' && typeof window !== 'undefined';
 
 const counters = new Map<string, number>();
 
@@ -59,9 +56,9 @@ const printTop = (limit = 25): void => {
 /**
  * Drop-in replacement for svelte/store `derived`.
  *
- * When `VITE_REACTIVITY_DEBUG=true` (dev-only), every recomputation is
- * counted and logged with an auto-generated label extracted from the
- * call-site stack trace. When disabled this is a zero-overhead pass-through.
+ * In every environment except production, every recomputation is counted
+ * with an auto-generated label extracted from the call-site stack trace.
+ * In production this is a zero-overhead pass-through.
  */
 // eslint-disable-next-line local-rules/prefer-object-params
 export const derived: typeof originalDerived = ((
@@ -93,17 +90,16 @@ export const derived: typeof originalDerived = ((
 }) as typeof originalDerived;
 
 /**
- * Manual hit counter for `$effect` / `$derived` rune blocks that
- * cannot be auto-intercepted by the Vite plugin.
+ * Hit counter for `$effect` / `$derived.by` rune blocks.
+ * Auto-injected by the Vite plugin's `transform` hook; can also
+ * be called manually for custom labels.
  */
 export const reactivityDebugHit = (label: string): void => {
 	if (!ENABLED) {
 		return;
 	}
 
-	const count = bumpCounter(label);
-	// eslint-disable-next-line no-console
-	console.debug(`[reactivity] ${label} #${count}`);
+	bumpCounter(label);
 };
 
 export const getReactivityDebugSnapshot = (): ReadonlyArray<[string, number]> => sortEntries();
