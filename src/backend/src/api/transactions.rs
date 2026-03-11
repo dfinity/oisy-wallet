@@ -21,13 +21,15 @@ use crate::{
 /// Errors are enumerated by: `StoredTransactionError`.
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn get_stored_transactions(
+pub fn get_user_transactions(
     request: GetStoredTransactionsRequest,
 ) -> GetStoredTransactionsResult {
     let principal = msg_caller();
+
     let response = read_state(|state| {
         model::get_transactions(&state.stored_transactions, principal, &request)
     });
+
     GetStoredTransactionsResult::Ok(response)
 }
 
@@ -36,7 +38,7 @@ pub fn get_stored_transactions(
 /// # Errors
 /// Errors are enumerated by: `StoredTransactionError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn save_stored_transactions(
+pub fn save_user_transactions(
     request: SaveStoredTransactionsRequest,
 ) -> SaveStoredTransactionsResult {
     fn inner(request: SaveStoredTransactionsRequest) -> Result<(), StoredTransactionError> {
@@ -44,8 +46,10 @@ pub fn save_stored_transactions(
 
         mutate_state(|state| {
             let mut tx_model = model::StoredTransactionsModel::new(&mut state.stored_transactions);
+
             tx_model.save_transactions(principal, &request)
         })
     }
+
     inner(request).into()
 }
