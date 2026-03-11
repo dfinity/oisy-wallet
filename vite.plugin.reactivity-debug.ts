@@ -2,7 +2,9 @@ import { resolve } from 'node:path';
 import type { Plugin } from 'vite';
 
 const SRC_FENCE = '/src/frontend/src/';
-const SELF_MARKER = 'reactivity-debug';
+const EXCLUDED_MARKERS = ['reactivity-debug', 'derived-memo'];
+const isExcludedPath = (path: string): boolean =>
+	EXCLUDED_MARKERS.some((marker) => path.includes(marker));
 const DEBUG_IMPORT_SOURCE = '$lib/utils/reactivity-debug.utils';
 const DEBUG_HIT_FN = 'reactivityDebugHit';
 const DEBUG_LABEL_FN = '_setNextDerivedLabel';
@@ -69,7 +71,7 @@ export function reactivityDebugPlugin(): Plugin {
 				!importer ||
 				!importer.includes(SRC_FENCE) ||
 				importer.includes('node_modules') ||
-				importer.includes(SELF_MARKER)
+				isExcludedPath(importer)
 			) {
 				return;
 			}
@@ -82,7 +84,8 @@ export function reactivityDebugPlugin(): Plugin {
 			if (!enabled) {
 				return;
 			}
-			if (!id.includes(SRC_FENCE) || id.includes('node_modules') || id.includes(SELF_MARKER)) {
+
+			if (!id.includes(SRC_FENCE) || id.includes('node_modules') || isExcludedPath(id)) {
 				return;
 			}
 
@@ -102,34 +105,28 @@ export function reactivityDebugPlugin(): Plugin {
 			if (isSvelte && EFFECT_PATTERN.test(code)) {
 				EFFECT_PATTERN.lastIndex = 0;
 
-				result = result.replace(
-					EFFECT_PATTERN,
-					(match, _group: string, offset: number) => {
-						const afterMatch = code.slice(offset + match.length);
-						if (/^\s*\n\s*reactivityDebugHit/.test(afterMatch)) {
-							return match;
-						}
-
-						needsHitImport = true;
-						const line = code.slice(0, offset).split('\n').length;
-						const kind = match.includes('derived.by') ? '$derived.by' : '$effect';
-						return `${match}\n\t\t${DEBUG_HIT_FN}('${fileLabel}:${line}:${kind}');`;
+				result = result.replace(EFFECT_PATTERN, (match, _group: string, offset: number) => {
+					const afterMatch = code.slice(offset + match.length);
+					if (/^\s*\n\s*reactivityDebugHit/.test(afterMatch)) {
+						return match;
 					}
-				);
+
+					needsHitImport = true;
+					const line = code.slice(0, offset).split('\n').length;
+					const kind = match.includes('derived.by') ? '$derived.by' : '$effect';
+					return `${match}\n\t\t${DEBUG_HIT_FN}('${fileLabel}:${line}:${kind}');`;
+				});
 			}
 
 			// --- derived() label injection (ts and svelte files) ---
 			if (DERIVED_CALL_PATTERN.test(result)) {
 				DERIVED_CALL_PATTERN.lastIndex = 0;
 
-				result = result.replace(
-					DERIVED_CALL_PATTERN,
-					(match, offset: number) => {
-						needsLabelImport = true;
-						const line = result.slice(0, offset).split('\n').length;
-						return `(${DEBUG_LABEL_FN}('${fileLabel}:${line}:derived'), derived)(`;
-					}
-				);
+				result = result.replace(DERIVED_CALL_PATTERN, (match, offset: number) => {
+					needsLabelImport = true;
+					const line = result.slice(0, offset).split('\n').length;
+					return `(${DEBUG_LABEL_FN}('${fileLabel}:${line}:derived'), derived)(`;
+				});
 			}
 
 			if (result === code) {
@@ -147,10 +144,7 @@ export function reactivityDebugPlugin(): Plugin {
 				const importStatement = `import { ${fnsToImport.join(', ')} } from '${DEBUG_IMPORT_SOURCE}';`;
 
 				if (isSvelte) {
-					result = result.replace(
-						/(<script\b[^>]*>)/i,
-						`$1\n\t${importStatement}`
-					);
+					result = result.replace(/(<script\b[^>]*>)/i, `$1\n\t${importStatement}`);
 				} else {
 					result = `${importStatement}\n${result}`;
 				}
@@ -158,7 +152,9 @@ export function reactivityDebugPlugin(): Plugin {
 				// Add missing functions to existing import
 				for (const fn of fnsToImport) {
 					result = result.replace(
-						new RegExp(`(import\\s*\\{[^}]*)(\\}\\s*from\\s*['"]${DEBUG_IMPORT_SOURCE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"])`),
+						new RegExp(
+							`(import\\s*\\{[^}]*)(\\}\\s*from\\s*['"]${DEBUG_IMPORT_SOURCE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"])`
+						),
 						`$1, ${fn} $2`
 					);
 				}

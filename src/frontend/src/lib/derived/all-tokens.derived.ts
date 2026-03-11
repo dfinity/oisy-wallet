@@ -9,6 +9,7 @@ import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { Token } from '$lib/types/token';
+import { derivedMemo, tokenListEqual } from '$lib/utils/derived-memo.utils';
 import { isTokenFungible } from '$lib/utils/nft.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { nonNullish } from '@dfinity/utils';
@@ -20,12 +21,9 @@ import { derived, type Readable } from 'svelte/store';
 export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 	[icrcTokens],
 	([$icrcTokens]) => {
-		// The list of ICRC tokens (SNSes) is defined as environment variables.
-		// These tokens are not necessarily loaded at boot time if the user has not added them to their list of custom tokens.
 		const icrcEnvTokens: IcTokenToggleable[] =
 			IC_BUILTIN_TOKENS.map((token) => ({ ...token, enabled: false })) ?? [];
 
-		// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
 		const knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);
 
 		return [
@@ -59,8 +57,10 @@ export const allTokens: Readable<CustomToken<Token>[]> = derived(
 	]
 );
 
-export const allFungibleTokens: Readable<Token[]> = derived([allTokens], ([$tokens]) =>
-	$tokens.filter(isTokenFungible)
+export const allFungibleTokens: Readable<Token[]> = derivedMemo(
+	[allTokens],
+	([$tokens]) => $tokens.filter(isTokenFungible),
+	tokenListEqual
 );
 
 export const allCrossChainSwapTokens = derived(
