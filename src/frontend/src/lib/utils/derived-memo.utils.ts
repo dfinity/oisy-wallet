@@ -15,26 +15,38 @@ type StoresValues<T> =
  * actually changes according to the provided equality function.
  * This prevents unnecessary downstream recomputations when intermediate
  * derived stores produce the same value from different source triggers.
+ *
+ * Note: Svelte's `derived` already deduplicates primitive values via
+ * reference equality (`safe_not_equal`, i.e. `!==`). This utility is
+ * therefore only useful when `fn` returns objects or arrays — values
+ * where each invocation produces a new reference even if the contents
+ * are semantically identical.
  */
-// eslint-disable-next-line local-rules/prefer-object-params
+// eslint-disable-next-line local-rules/prefer-object-params -- The structure replicates Svelte's `derived` store, which takes separate store arguments rather than an object param.
 export const derivedMemo = <S extends Stores, T>(
 	stores: S,
 	fn: (values: StoresValues<S>) => T,
 	isEqual: (a: T, b: T) => boolean
 ): Readable<T> => {
+	// TODO: Strengthen the type signatures
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const source: Readable<T> = derived(stores as any, fn as any);
 
 	let value: T;
+
 	let initialized = false;
+
 	const subscribers = new Set<Subscriber<T>>();
+
 	let stopSource: Unsubscriber | undefined;
 
 	const start = () => {
 		stopSource = source.subscribe((next) => {
 			if (!initialized || !isEqual(value, next)) {
 				initialized = true;
+
 				value = next;
+
 				for (const sub of subscribers) {
 					sub(value);
 				}
@@ -44,7 +56,9 @@ export const derivedMemo = <S extends Stores, T>(
 
 	const stop = () => {
 		stopSource?.();
+
 		stopSource = undefined;
+
 		initialized = false;
 	};
 
@@ -56,10 +70,14 @@ export const derivedMemo = <S extends Stores, T>(
 			}
 
 			subscribers.add(run);
-			run(value);
+
+			if (initialized) {
+				run(value);
+			}
 
 			return () => {
 				subscribers.delete(run);
+
 				if (subscribers.size === 0) {
 					stop();
 				}
@@ -68,19 +86,7 @@ export const derivedMemo = <S extends Stores, T>(
 	};
 };
 
-/**
- * Compares two token arrays by length and token identity (symbol id).
- * Fast O(n) check — catches the common case of identical token lists
- * produced from unchanged inputs.
- */
-// eslint-disable-next-line local-rules/prefer-object-params
-export const tokenListEqual = <T extends { id: symbol }>(a: T[], b: T[]): boolean => {
-	if (a.length !== b.length) {
-		return false;
-	}
 
-	return a.every((item, i) => item.id === b[i].id);
-};
 
 /**
  * Compares two TokenUi arrays by id, balance, and USD balance.

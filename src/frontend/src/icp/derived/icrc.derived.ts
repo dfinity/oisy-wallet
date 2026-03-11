@@ -13,8 +13,9 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import type { CanisterIdText } from '$lib/types/canister';
-import { derivedMemo, primitiveArrayEqual, tokenListEqual } from '$lib/utils/derived-memo.utils';
+import { derivedMemo, primitiveArrayEqual } from '$lib/utils/derived-memo.utils';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
+import { tokenListEqual } from '$lib/utils/tokens.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 

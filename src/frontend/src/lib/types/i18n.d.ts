@@ -591,6 +591,7 @@ interface I18nReceive {
 interface I18nSend {
 	text: {
 		send: string;
+		send_token: string;
 		destination: string;
 		source: string;
 		balance: string;

@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "Send",
+			"send_token": "Send $token",
 			"destination": "Destination",
 			"source": "Source",
 			"balance": "Balance",

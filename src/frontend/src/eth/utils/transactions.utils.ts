@@ -1,4 +1,8 @@
-import { ERC20_APPROVE_HASH } from '$eth/constants/erc20.constants';
+import {
+	ERC20_APPROVE_HASH,
+	ERC20_DEPOSIT_ERC20_HASH,
+	ERC20_DEPOSIT_HASH
+} from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
@@ -19,6 +23,10 @@ export const isTransactionPending = ({ blockNumber }: EthTransactionUi): boolean
 
 export const isErc20TransactionApprove = (data: string | undefined): boolean =>
 	nonNullish(data) && data.startsWith(ERC20_APPROVE_HASH);
+
+export const isErc20TransactionDeposit = (data: string | undefined): boolean =>
+	nonNullish(data) &&
+	(data.startsWith(ERC20_DEPOSIT_HASH) || data.startsWith(ERC20_DEPOSIT_ERC20_HASH));
 
 const abiCoder = AbiCoder.defaultAbiCoder();
 
