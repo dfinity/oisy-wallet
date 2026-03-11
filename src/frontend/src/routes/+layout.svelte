@@ -26,7 +26,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
-	import { reactivityDebugHit } from '$lib/utils/reactivity-debug.utils';
 
 	interface Props {
 		children: Snippet;
@@ -88,7 +87,6 @@
 	onDestroy(() => worker?.destroy());
 
 	$effect(() => {
-		reactivityDebugHit('routes/+layout:syncAuthIdleEffect');
 		[worker, $authStore, $isLocked];
 		worker?.syncAuthIdle({ auth: $authStore, locked: $isLocked });
 	});
@@ -100,7 +98,6 @@
 	// To improve the UX while the app is loading on mainnet we display a spinner which is attached statically in the index.html files.
 	// Once the authentication has been initialised, we know most JavaScript resources have been loaded, and therefore we can hide the spinner, the loading information.
 	$effect(() => {
-		reactivityDebugHit('routes/+layout:removeSpinnerEffect');
 		if (!browser) {
 			return;
 		}
@@ -173,7 +170,6 @@
 	};
 
 	$effect(() => {
-		reactivityDebugHit('routes/+layout:iosBodyScrollEffect');
 		if (isIOS()) {
 			if (nonNullish($modalStore?.type)) {
 				lockBodyScroll();

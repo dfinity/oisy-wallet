@@ -145,22 +145,22 @@ When investigating performance issues, runaway reactive loops, or excessive reco
 
 ### How it works
 
-A Vite plugin (`vite.plugin.reactivity-debug.ts`) transparently intercepts every `import { derived } from 'svelte/store'` **in user source code only** (not `node_modules`) and redirects it to a debug wrapper in `$lib/utils/reactivity-debug.utils.ts`.
+A Vite plugin (`vite.plugin.reactivity-debug.ts`) uses two mechanisms:
 
-The wrapper:
+1. **`resolveId`** — transparently intercepts every `import { derived } from 'svelte/store'` in user source code (not `node_modules`) and redirects it to a debug wrapper in `$lib/utils/reactivity-debug.utils.ts`. The wrapper delegates to the real `derived`, wraps the derivation callback so that every recomputation increments a counter, and auto-generates a label from the call-site stack trace (e.g. `lib/derived/auth.derived.ts:5`).
 
-- Delegates to the real `derived` from `svelte/store`.
-- Wraps the derivation callback so that **every recomputation** increments a counter.
-- Auto-generates a label from the call-site stack trace (e.g. `lib/derived/auth.derived.ts:5`), so you never need to add labels manually.
-- When `VITE_REACTIVITY_DEBUG` is not `true`, the plugin does not activate and the wrapper is a zero-overhead pass-through.
+2. **`transform`** — rewrites `.svelte` files before the Svelte compiler sees them, injecting a `reactivityDebugHit()` call at the top of every `$effect(() => { ... })` and `$derived.by(() => { ... })` callback body. Labels are auto-generated as `file:line:$effect` or `file:line:$derived.by`. If an effect already contains a manual `reactivityDebugHit` call, it is left untouched.
+
+When `VITE_REACTIVITY_DEBUG` is not `true`, the plugin does not activate and both mechanisms are complete no-ops.
 
 ### Coverage
 
-| Reactive primitive              | Coverage                                                                         | Notes                                                                  |
-| ------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `derived()` from `svelte/store` | **Automatic** — all ~100 derived store files are instrumented by the Vite plugin | No code changes needed                                                 |
-| `$effect()` runes               | **Manual** — call `reactivityDebugHit('label')` inside the effect body           | Already wired in the root and app layout effects                       |
-| `$derived()` runes              | **Manual** — use Svelte 5's built-in `$inspect(value)` for ad-hoc debugging      | See [Svelte docs on $inspect](https://svelte.dev/docs/svelte/$inspect) |
+| Reactive primitive              | Coverage                                                                        | Notes                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `derived()` from `svelte/store` | **Automatic** — all derived store files are instrumented via `resolveId`        | No code changes needed                                                 |
+| `$effect()` runes               | **Automatic** — all `.svelte` files are instrumented via `transform`            | No code changes needed                                                 |
+| `$derived.by()` runes           | **Automatic** — block-body callbacks are instrumented via `transform`           | No code changes needed                                                 |
+| `$derived()` runes (expression) | **Manual** — use Svelte 5's built-in `$inspect(value)` for ad-hoc debugging    | See [Svelte docs on $inspect](https://svelte.dev/docs/svelte/$inspect) |
 
 ### Usage
 
@@ -194,20 +194,21 @@ __oisyReactivityDebug.snapshot();
 
 ### Interpreting results
 
-- If a label's count keeps **climbing while the app is idle**, that store is likely part of a reactive loop or an over-triggered dependency chain.
-- Labels point directly to the file and line where the `derived` store is declared, so you can jump straight to the source.
-- Use `$inspect(value)` in Svelte components to trace which specific `$derived` rune or prop is changing unexpectedly.
+- If a label's count keeps **climbing while the app is idle**, that reactive primitive is likely part of a loop or an over-triggered dependency chain.
+- Store `derived` labels point to the file and line where the store is declared (e.g. `lib/derived/auth.derived.ts:5`).
+- `$effect` / `$derived.by` labels include the rune type (e.g. `lib/components/loaders/Loader.svelte:51:$effect`).
+- Use `$inspect(value)` in Svelte components to trace which specific `$derived` expression or prop is changing unexpectedly.
 
-### Manually instrumenting `$effect` blocks
+### Custom labels (optional)
 
-For `$effect` blocks (which the Vite plugin cannot auto-wrap), import `reactivityDebugHit` and call it at the top of the effect body:
+All `$effect` and `$derived.by` blocks are instrumented automatically. If you prefer a descriptive label for a specific effect, you can add a manual `reactivityDebugHit` call — the plugin detects it and skips its own injection for that block:
 
 ```svelte
 <script lang="ts">
 	import { reactivityDebugHit } from '$lib/utils/reactivity-debug.utils';
 
 	$effect(() => {
-		reactivityDebugHit('MyComponent:someEffect');
+		reactivityDebugHit('MyComponent:descriptiveName');
 		// ... effect logic ...
 	});
 </script>
