@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "Gửi",
+			"send_token": "",
 			"destination": "Tới",
 			"source": "Nguồn",
 			"balance": "Số dư",
