@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "보내기",
+			"send_token": "",
 			"destination": "수신처",
 			"source": "출처",
 			"balance": "잔액",
@@ -1547,7 +1548,7 @@
 			"loading_token": "토큰으로의 제공된 링크가 유효하지 않습니다."
 		}
 	},
-"about": {
+	"about": {
 		"why_oisy": {
 			"text": {
 				"label": "$oisy_short를 선택하는 이유",
