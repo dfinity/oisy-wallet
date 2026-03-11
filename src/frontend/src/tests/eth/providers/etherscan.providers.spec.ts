@@ -80,7 +80,9 @@ describe('etherscan.providers', () => {
 					to,
 					value,
 					gas,
-					gasPrice
+					gasPrice,
+					gasUsed,
+					input: data
 				}: EtherscanProviderTransaction): Transaction => ({
 					hash,
 					blockNumber: parseInt(blockNumber),
@@ -90,8 +92,10 @@ describe('etherscan.providers', () => {
 					nonce: parseInt(nonce),
 					gasLimit: BigInt(gas),
 					gasPrice: BigInt(gasPrice),
+					gasUsed: BigInt(gasUsed),
 					value: BigInt(value),
-					chainId
+					chainId,
+					data
 				})
 			);
 
@@ -103,7 +107,8 @@ describe('etherscan.providers', () => {
 					from,
 					to,
 					value,
-					gas
+					gas,
+					input: data
 				}: EtherscanProviderInternalTransaction): Transaction => ({
 					hash,
 					blockNumber: parseInt(blockNumber),
@@ -113,7 +118,8 @@ describe('etherscan.providers', () => {
 					nonce: 0,
 					gasLimit: BigInt(gas),
 					value: BigInt(value),
-					chainId
+					chainId,
+					data
 				})
 			);
 
@@ -219,8 +225,10 @@ describe('etherscan.providers', () => {
 						nonce: 1,
 						gasLimit: 21000n,
 						gasPrice: 20000000000n,
+						gasUsed: 21000n,
 						value: 1000000000000000000n,
-						chainId
+						chainId,
+						data: '0x'
 					}
 				];
 
@@ -288,9 +296,11 @@ describe('etherscan.providers', () => {
 						nonce: 1,
 						gasLimit: 21000n,
 						gasPrice: 20000000000n,
+						gasUsed: 21000n,
 						value: BigInt(1),
 						tokenId: 132,
-						chainId
+						chainId,
+						data: '0x'
 					}
 				];
 
@@ -358,9 +368,11 @@ describe('etherscan.providers', () => {
 						nonce: 1,
 						gasLimit: 21000n,
 						gasPrice: 20000000000n,
+						gasUsed: 21000n,
 						value: BigInt(3),
 						tokenId: 132,
-						chainId
+						chainId,
+						data: '0x'
 					}
 				];
 

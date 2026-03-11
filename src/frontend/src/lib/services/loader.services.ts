@@ -10,6 +10,7 @@ import {
 	networkSolanaMainnetEnabled
 } from '$lib/derived/networks.derived';
 import { loadAddresses } from '$lib/services/addresses.services';
+import { trackRateLimited } from '$lib/services/analytics.services';
 import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
@@ -17,7 +18,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -40,7 +41,11 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
-		await allowSigning({ identity });
+		const { rateLimitInfo } = await allowSigning({ identity });
+
+		if (nonNullish(rateLimitInfo)) {
+			trackRateLimited(rateLimitInfo);
+		}
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);

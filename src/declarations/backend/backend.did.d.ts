@@ -37,12 +37,10 @@ export interface Agreements {
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
-	| { PowChallenge: ChallengeCompletionError }
+	| { RateLimited: RateLimitError }
+	| { RateLimitedByGuard: RateLimitError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
-export interface AllowSigningRequest {
-	nonce: bigint;
-}
 export interface AllowSigningResponse {
 	status: AllowSigningStatus;
 	challenge_completion: [] | [ChallengeCompletion];
@@ -64,16 +62,16 @@ export type ApproveError =
 	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
-export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
 export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
 	| { EmptyUtxos: null }
 	| { DuplicateUtxos: null }
+	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } }
 	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
-	network: BitcoinNetwork;
+	network: Network;
 	utxos: Array<Utxo>;
 }
 export type BtcAddPendingTransactionResult = { Ok: null } | { Err: BtcAddPendingTransactionError };
@@ -84,7 +82,7 @@ export type BtcAddress =
 	| { P2SH: string }
 	| { P2TR: string };
 export interface BtcGetFeePercentilesRequest {
-	network: BitcoinNetwork;
+	network: Network;
 }
 export interface BtcGetFeePercentilesResponse {
 	fee_percentiles: BigUint64Array;
@@ -94,14 +92,16 @@ export type BtcGetFeePercentilesResult =
 			Ok: BtcGetFeePercentilesResponse;
 	  }
 	| { Err: SelectedUtxosFeeError };
-export type BtcGetPendingTransactionsError = {
-	InternalError: { msg: string };
-};
+export type BtcGetPendingTransactionsError =
+	| {
+			RateLimited: RateLimitError;
+	  }
+	| { InternalError: { msg: string } };
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
 export interface BtcGetPendingTransactionsRequest {
-	network: BitcoinNetwork;
+	network: Network;
 	address: string;
 }
 export type BtcGetPendingTransactionsResult =
@@ -130,12 +130,6 @@ export interface ChallengeCompletion {
 	next_difficulty: number;
 	current_difficulty: number;
 }
-export type ChallengeCompletionError =
-	| { InvalidNonce: null }
-	| { MissingChallenge: null }
-	| { ExpiredChallenge: null }
-	| { MissingUserProfile: null }
-	| { ChallengeAlreadySolved: null };
 export interface Config {
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
@@ -170,24 +164,11 @@ export interface ContactImage {
 	data: Uint8Array;
 	mime_type: ImageMimeType;
 }
-export type CreateChallengeError =
-	| { ChallengeInProgress: null }
-	| { MissingUserProfile: null }
-	| { RandomnessError: string }
-	| { Other: string };
-export interface CreateChallengeResponse {
-	difficulty: number;
-	start_timestamp_ms: bigint;
-	expiry_timestamp_ms: bigint;
-}
 export interface CreateContactRequest {
 	name: string;
 	image: [] | [ContactImage];
 }
 export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
-export type CreatePowChallengeResult =
-	| { Ok: CreateChallengeResponse }
-	| { Err: CreateChallengeError };
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];
 	credential_type: string;
@@ -293,6 +274,7 @@ export interface InitArg {
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array];
 }
+export type Network = { mainnet: null } | { regtest: null } | { testnet: null };
 export interface NetworkSettings {
 	enabled: boolean;
 	is_testnet: boolean;
@@ -327,15 +309,21 @@ export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
 }
+export interface RateLimitError {
+	max_calls: number;
+	window_ns: bigint;
+	caller: Principal;
+}
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
 }
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
+	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } };
 export interface SelectedUtxosFeeRequest {
-	network: BitcoinNetwork;
+	network: Network;
 	amount_satoshis: bigint;
 	min_confirmations: [] | [number];
 }
@@ -480,19 +468,24 @@ export interface _SERVICE {
 	 */
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], AddUserHiddenDappIdResult>;
 	/**
-	 * This function authorises the caller to spend a specific
-	 * amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
-	 * providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
-	 * cycles ledger.
+	 * Ensures the caller has enough cycles allowance for chain-fusion signer
+	 * operations (providing public keys, creating signatures, etc.).
 	 *
-	 * Note:
-	 * - The chain fusion signer performs threshold key operations including providing public keys,
-	 * creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
+	 * If the caller already has sufficient allowance the call returns
+	 * immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
+	 * call is made.  Otherwise, the endpoint is rate-limited and a new
+	 * `icrc_2_approve` is issued on the cycles ledger.
+	 *
+	 * # Rate limiting
+	 * Two rate limiters are applied in order:
+	 * 1. **Guard limiter** – a high-frequency limiter (10 calls/min) checked *before* any
+	 * inter-canister call to cheaply reject bursts that would drain cycles.
+	 * 2. **Business limiter** – the stricter per-caller limit (3 calls/hour) for normal usage.
 	 *
 	 * # Errors
 	 * Errors are enumerated by: `AllowSigningError`.
 	 */
-	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
+	allow_signing: ActorMethod<[], AllowSigningResult>;
 	/**
 	 * Adds a pending Bitcoin transaction for the caller.
 	 *
@@ -509,8 +502,7 @@ export interface _SERVICE {
 	 * and are periodically updated in the background.
 	 *
 	 * # Returns
-	 * - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
-	 * - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+	 * - `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
 	 *
 	 * # Errors
 	 * - `InternalError`: If fee percentiles are not available in the cache for the requested network
@@ -518,7 +510,7 @@ export interface _SERVICE {
 	 * # Note
 	 * This function only returns data from the in-memory cache and doesn't make any calls
 	 * to the Bitcoin API itself. If the cache doesn't have data for the requested network,
-	 * an error is returned rather than fetching fresh data.
+	 * it returns the default percentiles.
 	 */
 	btc_get_current_fee_percentiles: ActorMethod<
 		[BtcGetFeePercentilesRequest],
@@ -555,19 +547,6 @@ export interface _SERVICE {
 	 * The created contact on success.
 	 */
 	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
-	/**
-	 * Creates a new proof-of-work challenge for the caller.
-	 *
-	 * # Errors
-	 * Errors are enumerated by: `CreateChallengeError`.
-	 *
-	 * # Returns
-	 *
-	 * * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-	 * * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-	 * internal errors.
-	 */
-	create_pow_challenge: ActorMethod<[], CreatePowChallengeResult>;
 	/**
 	 * It creates a new user profile for the caller.
 	 * If the user has already a profile, it will return that profile.

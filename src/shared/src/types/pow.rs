@@ -42,10 +42,6 @@ use super::{CandidType, Debug, Deserialize};
 // Cycles, and the next     challenge can be requested after this period. This offers strong
 // protection against abuse.
 
-// If `POW_ENABLED` is false, PoW protection remains disabled, preserving the original behavior
-// of the `allow_signing` function.
-pub const POW_ENABLED: bool = false;
-
 // If set to `true`, the difficulty for a principal auto-adjusts after each solved challenge,
 // starting at `START_DIFFICULTY`.
 pub const DIFFICULTY_AUTO_ADJUSTMENT: bool = false;
@@ -129,12 +125,12 @@ pub struct StoredChallenge {
 }
 
 impl StoredChallenge {
-    #[allow(clippy::must_use_candidate)]
+    #[expect(clippy::must_use_candidate)]
     pub fn is_expired(&self) -> bool {
         self.expiry_timestamp_ms <= (ic_cdk::api::time() / 1_000_000)
     }
 
-    #[allow(clippy::must_use_candidate)]
+    #[expect(clippy::must_use_candidate)]
     pub fn is_solved(&self) -> bool {
         self.solved
     }

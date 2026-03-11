@@ -9,6 +9,8 @@ updates:
       interval: weekly
     commit-message:
       prefix: 'chore(github-actions): '
+    cooldown:
+      default-days: 30
 
   - package-ecosystem: cargo
     directory: '/'

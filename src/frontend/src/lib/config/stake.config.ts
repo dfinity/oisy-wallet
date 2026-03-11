@@ -1,4 +1,5 @@
 import { goto } from '$app/navigation';
+import { HARVEST_AUTOPILOT_URL } from '$eth/constants/harvest-autopilots.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import {
 	WizardStepsClaimStakingReward,
@@ -72,10 +73,18 @@ export const stakeProvidersConfig: Record<StakeProvider, StakeProviderConfig> = 
 		name: 'Gold DAO',
 		logo: '/images/dapps/gold-dao-logo.svg',
 		url: 'https://app.gldt.org/earn/',
-		pageDescriptionKey: 'stake.text.gldt_stake_page_description',
 		card: {
 			titles: ['earning.cards.gldt.title1', 'earning.cards.gldt.title2'],
 			action: () => goto(AppPath.EarnGold)
+		}
+	},
+	[StakeProvider.HARVEST_AUTOPILOTS]: {
+		name: 'Harvest - Autopilot',
+		logo: '/images/dapps/harvest-autopilot-logo.svg',
+		url: `${HARVEST_AUTOPILOT_URL}autopilot/`,
+		card: {
+			titles: ['earning.cards.harvest_autopilot.title'],
+			action: () => goto(AppPath.EarnAutopilot)
 		}
 	}
 };

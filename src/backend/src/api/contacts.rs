@@ -7,7 +7,7 @@ use shared::types::{
     },
 };
 
-use crate::{contacts, guards::caller_is_not_anonymous};
+use crate::{contacts, utils::guards::caller_is_not_anonymous};
 
 /// Creates a new contact for the caller.
 ///

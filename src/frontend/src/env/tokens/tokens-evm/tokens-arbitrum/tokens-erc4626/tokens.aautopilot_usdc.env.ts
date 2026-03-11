@@ -22,5 +22,7 @@ export const AAUTOPILOT_USDC_TOKEN: RequiredErc4626Token = {
 	icon: '',
 	address: '0x407d3d942d0911a2fea7e22417f81e27c02d6c6f',
 	assetAddress: USDC_TOKEN.address,
-	assetDecimals: USDC_TOKEN.decimals
+	assetDecimals: USDC_TOKEN.decimals,
+	assetIcon: USDC_TOKEN.icon,
+	assetSymbol: USDC_TOKEN.symbol
 };

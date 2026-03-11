@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { isMaxUint256 } from '$eth/utils/transactions.utils';
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -22,7 +23,7 @@
 		showUnlimitedLabel = false
 	}: Props = $props();
 
-	let isUnlimited = $derived(showUnlimitedLabel && amount === MAX_UINT_256);
+	let isUnlimited = $derived(showUnlimitedLabel && isMaxUint256(amount));
 </script>
 
 <Value element="div" ref="amount">

@@ -22,5 +22,7 @@ export const BAUTOPILOT_CBBTC_TOKEN: RequiredErc4626Token = {
 	// TODO: add custom icon
 	icon: '',
 	assetAddress: CBBTC_TOKEN.address,
-	assetDecimals: CBBTC_TOKEN.decimals
+	assetDecimals: CBBTC_TOKEN.decimals,
+	assetIcon: CBBTC_TOKEN.icon,
+	assetSymbol: CBBTC_TOKEN.symbol
 };

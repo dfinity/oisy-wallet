@@ -1,16 +1,12 @@
 import type {
 	AddUserCredentialResult,
-	AllowSigningResponse,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
-	CreateChallengeResponse,
 	CustomToken,
 	CustomTokenId,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
-	PendingTransaction,
-	SelectedUtxosFeeResponse,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -18,22 +14,26 @@ import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.f
 import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
-	mapBtcPendingTransactionError,
+	mapBtcAddPendingTransactionError,
+	mapBtcGetPendingTransactionsError,
 	mapBtcSelectUserUtxosFeeError,
-	mapCreateChallengeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
+import { ZERO } from '$lib/constants/app.constants';
 import type {
+	AddPendingTransactionOutcome,
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
-	AllowSigningParams,
+	AllowSigningOutcome,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
@@ -117,7 +117,7 @@ export class BackendCanister extends Canister<BackendService> {
 	btcAddPendingTransaction = async ({
 		txId,
 		...rest
-	}: BtcAddPendingTransactionParams): Promise<boolean> => {
+	}: BtcAddPendingTransactionParams): Promise<AddPendingTransactionOutcome> => {
 		const { btc_add_pending_transaction } = this.caller({ certified: true });
 
 		const response = await btc_add_pending_transaction({
@@ -126,17 +126,28 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 
 		if ('Ok' in response) {
-			return true;
+			return { response: true };
 		}
 
-		throw mapBtcPendingTransactionError(response.Err);
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
+		// TODO: improve placeholder with significant data, for now we do not use them
+		if ('RateLimited' in response.Err) {
+			return {
+				response: true,
+				rateLimitInfo: {
+					endpoint: 'btc_add_pending_transaction',
+					limiter: 'BTC_ADD_PENDING_TX_RATE_LIMITER'
+				}
+			};
+		}
+
+		throw mapBtcAddPendingTransactionError(response.Err);
 	};
 
-	// TODO: rename to plural
-	btcGetPendingTransaction = async ({
+	btcGetPendingTransactions = async ({
 		network,
 		address
-	}: BtcGetPendingTransactionParams): Promise<PendingTransaction[]> => {
+	}: BtcGetPendingTransactionParams): Promise<GetPendingTransactionsOutcome> => {
 		const { btc_get_pending_transactions } = this.caller({ certified: true });
 
 		const response = await btc_get_pending_transactions({
@@ -148,17 +159,29 @@ export class BackendCanister extends Canister<BackendService> {
 			const {
 				Ok: { transactions }
 			} = response;
-			return transactions;
+			return { response: transactions };
 		}
 
-		throw mapBtcPendingTransactionError(response.Err);
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
+		// TODO: improve placeholder with significant data, for now we do not use them
+		if ('RateLimited' in response.Err) {
+			return {
+				response: [],
+				rateLimitInfo: {
+					endpoint: 'btc_get_pending_transactions',
+					limiter: 'BTC_GET_PENDING_TX_RATE_LIMITER'
+				}
+			};
+		}
+
+		throw mapBtcGetPendingTransactionsError(response.Err);
 	};
 
 	btcSelectUserUtxosFee = async ({
 		network,
 		minConfirmations,
 		amountSatoshis
-	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeResponse> => {
+	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeOutcome> => {
 		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
 
 		const response = await btc_select_user_utxos_fee({
@@ -168,8 +191,22 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 
 		if ('Ok' in response) {
-			const { Ok } = response;
-			return Ok;
+			return { response: response.Ok };
+		}
+
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
+		// TODO: improve placeholder with significant data, for now we do not use them
+		if ('RateLimited' in response.Err) {
+			return {
+				response: {
+					fee_satoshis: ZERO,
+					utxos: []
+				},
+				rateLimitInfo: {
+					endpoint: 'btc_select_user_utxos_fee',
+					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
+				}
+			};
 		}
 
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
@@ -206,29 +243,35 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapGetAllowedCyclesError(response.Err);
 	};
 
-	allowSigning = async ({ request }: AllowSigningParams = {}): Promise<AllowSigningResponse> => {
+	allowSigning = async (): Promise<AllowSigningOutcome> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		const response = await allow_signing(toNullable(request));
+		const response = await allow_signing();
 
 		if ('Ok' in response) {
-			const { Ok } = response;
-			return Ok;
+			return { response: response.Ok };
+		}
+
+		// In case of rate limit reached, we ignore the error and let the user continue (for now).
+		// TODO: improve placeholder with significant data, for now we do not use them
+		if ('RateLimited' in response.Err || 'RateLimitedByGuard' in response.Err) {
+			return {
+				response: {
+					status: { Skipped: null },
+					challenge_completion: toNullable(),
+					allowed_cycles: ZERO
+				},
+				rateLimitInfo: {
+					endpoint: 'allow_signing',
+					limiter:
+						'RateLimitedByGuard' in response.Err
+							? 'ALLOW_SIGNING_GUARD_LIMITER'
+							: 'ALLOW_SIGNING_RATE_LIMITER'
+				}
+			};
 		}
 
 		throw mapAllowSigningError(response.Err);
-	};
-
-	createPowChallenge = async (): Promise<CreateChallengeResponse> => {
-		const { create_pow_challenge } = this.caller({ certified: true });
-
-		const result = await create_pow_challenge();
-		if ('Ok' in result) {
-			const { Ok } = result;
-			return Ok;
-		}
-
-		throw mapCreateChallengeError(result.Err);
 	};
 
 	addUserHiddenDappId = async ({

@@ -19,9 +19,13 @@ import {
 } from '@icp-sdk/canisters/ckbtc';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('$icp/utils/date.utils', () => ({
-	nowInBigIntNanoSeconds: vi.fn()
-}));
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn()
+	};
+});
 
 describe('ckbtc-minter.api', () => {
 	const canisterMock = mock<CkBtcMinterCanister>();

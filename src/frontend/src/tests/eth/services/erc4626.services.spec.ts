@@ -78,7 +78,8 @@ describe('erc4626.services', () => {
 				symbol: mockMetadata1.symbol,
 				icon: mockMetadata1.icon,
 				assetAddress: mockAssetAddress1,
-				assetDecimals: mockAssetDecimals1
+				assetDecimals: mockAssetDecimals1,
+				assetSymbol: 'USDC'
 			}
 		},
 		{
@@ -96,7 +97,8 @@ describe('erc4626.services', () => {
 				symbol: mockMetadata2.symbol,
 				icon: undefined,
 				assetAddress: mockAssetAddress2,
-				assetDecimals: 18
+				assetDecimals: 18,
+				assetSymbol: ''
 			}
 		},
 		{
@@ -114,7 +116,8 @@ describe('erc4626.services', () => {
 				symbol: mockMetadata2.symbol,
 				icon: undefined,
 				assetAddress: '',
-				assetDecimals: 18
+				assetDecimals: 18,
+				assetSymbol: ''
 			}
 		}
 	];

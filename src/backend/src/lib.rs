@@ -1,44 +1,31 @@
-use std::collections::HashSet;
-
-use bitcoin_utils::estimate_fee;
-use btc_user_pending_tx_model::BtcUserPendingTransactionsModel;
-use candid::{candid_method, Principal};
-use ic_cdk::{api::time, export_candid, init, post_upgrade, query, update};
-use serde_bytes::ByteBuf;
+use candid::Principal;
+use ic_cdk::{export_candid, init, post_upgrade};
 use shared::{
     http::{HttpRequest, HttpResponse},
-    metrics::get_metrics,
     std_canister_status,
     types::{
         agreement::UpdateUserAgreementsRequest,
         backend_config::{Arg, Config},
         bitcoin::{
-            BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
-            BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
-            BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
-            BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
-            SelectedUtxosFeeRequest, SelectedUtxosFeeResponse, StoredPendingTransaction,
+            BtcAddPendingTransactionRequest, BtcGetFeePercentilesRequest,
+            BtcGetPendingTransactionsRequest, SelectedUtxosFeeRequest,
         },
         contact::{CreateContactRequest, UpdateContactRequest},
-        custom_token::{CustomToken, CustomTokenId},
+        custom_token::CustomToken,
         dapp::AddHiddenDappIdRequest,
         exchange::ExchangeRate,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
-        pow::CreateChallengeResponse,
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
-            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
-            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
-            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
+            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
+            UpdateUserNetworkSettingsResult,
         },
-        signer::{
-            topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest,
-        },
+        signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
         Stats, Timestamp,
     },
@@ -52,27 +39,23 @@ use crate::{
     token_activity::{mark_token_active, mark_tokens_active},
     types::storable::{Candid, StoredPrincipal, StoredTokenId},
 };
+use crate::state::{read_state, set_config};
 
 mod api;
-mod bitcoin_api;
-mod bitcoin_utils;
-mod btc_user_pending_tx_model;
+mod bitcoin;
 mod contacts;
 mod exchange;
 mod guards;
 mod housekeeping;
 mod impls;
 mod pow;
-pub mod random;
+mod random;
 mod signer;
 mod state;
 mod token;
-mod token_activity;
 mod types;
 mod user_profile;
-
-#[cfg(test)]
-mod tests;
+mod utils;
 
 #[cfg(feature = "canbench-rs")]
 mod benchmark;
@@ -86,9 +69,9 @@ pub fn init(arg: Arg) {
     }
 
     // Initialize the Bitcoin fee percentiles cache
-    bitcoin_api::init_fee_percentiles_cache();
+    bitcoin::api::init_fee_percentiles_cache();
 
-    housekeeping::start_periodic_housekeeping_timers();
+    utils::housekeeping::start_periodic_housekeeping_timers();
 }
 
 /// Post-upgrade handler.
@@ -318,241 +301,43 @@ pub async fn btc_select_user_utxos_fee(
         .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
         let now_ns = time();
 
-        let has_pending_transactions = mutate_state(|state| {
-            let mut model = BtcUserPendingTransactionsModel::new(
-                &mut state.btc_user_pending_transactions,
-                None,
-                None,
-            );
-            model.prune_pending_transactions(principal, &all_utxos, now_ns);
-            !model
-                .get_pending_transactions(&principal, &source_address)
-                .is_empty()
-        });
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin::api::init_fee_percentiles_cache();
 
-        if has_pending_transactions {
-            return Err(SelectedUtxosFeeError::PendingTransactions);
-        }
-
-        let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
-            .await
-            .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
-        // We support sending to one destination only.
-        // Therefore, the outputs are the destination and the source address for the change.
-        let output_count = 2;
-        let mut available_utxos = all_utxos.clone();
-        let selected_utxos = bitcoin_utils::utxos_selection(
-            params.amount_satoshis,
-            &mut available_utxos,
-            output_count,
-        );
-
-        // Fee calculation might still take into account default tx size and expected output.
-        // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be
-        // present.
-        if selected_utxos.is_empty() {
-            return Ok(SelectedUtxosFeeResponse {
-                utxos: selected_utxos,
-                fee_satoshis: 0,
-            });
-        }
-
-        let fee_satoshis = estimate_fee(
-            selected_utxos.len() as u64,
-            median_fee_millisatoshi_per_vbyte,
-            output_count as u64,
-        );
-
-        Ok(SelectedUtxosFeeResponse {
-            utxos: selected_utxos,
-            fee_satoshis,
-        })
-    }
-    inner(params).await.into()
-}
-
-/// Adds a pending Bitcoin transaction for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `BtcAddPendingTransactionError`.
-#[update(guard = "caller_is_not_anonymous")]
-pub async fn btc_add_pending_transaction(
-    params: BtcAddPendingTransactionRequest,
-) -> BtcAddPendingTransactionResult {
-    async fn inner(
-        params: BtcAddPendingTransactionRequest,
-    ) -> Result<(), BtcAddPendingTransactionError> {
-        if params.utxos.is_empty() {
-            return Err(BtcAddPendingTransactionError::EmptyUtxos);
-        }
-
-        let unique_keys: HashSet<(&[u8], u32)> = params
-            .utxos
-            .iter()
-            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
-            .collect();
-
-        if unique_keys.len() != params.utxos.len() {
-            return Err(BtcAddPendingTransactionError::DuplicateUtxos);
-        }
-
-        let principal = ic_cdk::caller();
-
-        let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
-            .await
-            .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
-
-        let current_utxos = bitcoin_api::get_all_utxos(
-            params.network,
-            source_address.clone(),
-            Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
-        )
-        .await
-        .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
-
-        let now_ns = time();
-
-        let current_keys: HashSet<(&[u8], u32)> = current_utxos
-            .iter()
-            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
-            .collect();
-
-        let all_param_utxos_are_current = params
-            .utxos
-            .iter()
-            .all(|u| current_keys.contains(&(u.outpoint.txid.as_slice(), u.outpoint.vout)));
-
-        if !all_param_utxos_are_current {
-            return Err(BtcAddPendingTransactionError::InvalidUtxos);
-        }
-
-        mutate_state(|state| {
-            let mut model = BtcUserPendingTransactionsModel::new(
-                &mut state.btc_user_pending_transactions,
-                None,
-                None,
-            );
-            model.prune_pending_transactions(principal, &current_utxos, now_ns);
-
-            if model.has_intersecting_pending_utxos(principal, &params.utxos) {
-                return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
-            }
-
-            let current_pending_transaction = StoredPendingTransaction {
-                txid: params.txid,
-                utxos: params.utxos,
-                created_at_timestamp_ns: now_ns,
-            };
-            model
-                .add_pending_transaction(principal, source_address, current_pending_transaction)
-                .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
-        })
-    }
-    inner(params).await.into()
-}
-
-/// Returns the pending Bitcoin transactions for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `BtcGetPendingTransactionsError`.
-#[update(guard = "caller_is_not_anonymous")]
-pub async fn btc_get_pending_transactions(
-    params: BtcGetPendingTransactionsRequest,
-) -> BtcGetPendingTransactionsResult {
-    async fn inner(
-        params: BtcGetPendingTransactionsRequest,
-    ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
-        let principal = ic_cdk::caller();
-        let now_ns = time();
-
-        let current_utxos = bitcoin_api::get_all_utxos(
-            params.network,
-            params.address.clone(),
-            Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
-        )
-        .await
-        .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
-
-        let stored_transactions = mutate_state(|state| {
-            let mut model = BtcUserPendingTransactionsModel::new(
-                &mut state.btc_user_pending_transactions,
-                None,
-                None,
-            );
-            model.prune_pending_transactions(principal, &current_utxos, now_ns);
-            model.get_pending_transactions(&principal, &params.address)
-        });
-
-        let pending_transactions = stored_transactions
-            .iter()
-            .map(|tx| PendingTransaction {
-                txid: tx.txid.clone(),
-                utxos: tx.utxos.clone(),
-            })
-            .collect();
-
-        Ok(BtcGetPendingTransactionsReponse {
-            transactions: pending_transactions,
-        })
-    }
-    inner(params).await.into()
-}
-
-/// Creates a new proof-of-work challenge for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `CreateChallengeError`.
-///
-/// # Returns
-///
-/// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-/// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-///   internal errors.
-#[update(guard = "caller_is_not_anonymous")]
-#[candid_method(update)]
-pub async fn create_pow_challenge() -> CreatePowChallengeResult {
-    let challenge = pow::create_pow_challenge().await;
-
-    match challenge {
-        Ok(challenge) => CreatePowChallengeResult::Ok(CreateChallengeResponse {
-            difficulty: challenge.difficulty,
-            start_timestamp_ms: challenge.start_timestamp_ms,
-            expiry_timestamp_ms: challenge.expiry_timestamp_ms,
-        }),
-        Err(err) => CreatePowChallengeResult::Err(err),
-    }
-}
-
-/// API method to get cycle balance and burn rate.
-#[update]
-pub async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
-    std_canister_status::get_canister_status_v2().await
-}
-
-/// Gets statistics about the canister.
-///
-/// Note: This is a private method, restricted to authorized users, as some stats may not be
-/// suitable for public consumption.
-#[query(guard = "caller_is_allowed")]
-#[must_use]
-pub fn stats() -> Stats {
-    read_state(|s| Stats::from(s))
-}
-
-/// Gets account creation timestamps.
-#[query(guard = "caller_is_allowed")]
-#[must_use]
-pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
-    read_state(|s| {
-        s.user_profile
-            .iter()
-            .map(|entry| {
-                let (_updated, StoredPrincipal(principal)) = *entry.key();
-                let user = entry.value();
-                (principal, user.created_timestamp)
-            })
-            .collect()
-    })
+    utils::housekeeping::start_periodic_housekeeping_timers();
 }
 
 export_candid!();
+
+#[cfg(test)]
+mod tests {
+    use std::path::{Path, PathBuf};
+
+    use candid_parser::utils::{service_compatible, CandidSource};
+
+    /// Determines the workspace directory when running tests.
+    fn workspace_dir() -> PathBuf {
+        let output = std::process::Command::new(env!("CARGO"))
+            .arg("locate-project")
+            .arg("--workspace")
+            .arg("--message-format=plain")
+            .output()
+            .unwrap()
+            .stdout;
+        let cargo_path = Path::new(std::str::from_utf8(&output).unwrap().trim());
+        cargo_path.parent().unwrap().to_path_buf()
+    }
+
+    /// Checks candid interface type compatibility with production.
+    #[test]
+    #[ignore = "Not run unless requested explicitly"]
+    fn check_candid_interface_compatibility() {
+        let canister_interface = super::__export_service();
+        let prod_interface_file = workspace_dir().join("target/ic/candid/backend.ic.did");
+        service_compatible(
+            CandidSource::Text(&canister_interface),
+            CandidSource::File(prod_interface_file.as_path()),
+        )
+        .expect("The proposed canister interface is not compatible with the production interface");
+    }
+}

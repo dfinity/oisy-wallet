@@ -59,7 +59,6 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddDappSettingsError
 	});
-	const AllowSigningRequest = IDL.Record({ nonce: IDL.Nat64 });
 	const AllowSigningStatus = IDL.Variant({
 		Skipped: IDL.Null,
 		Failed: IDL.Null,
@@ -74,7 +73,7 @@ export const idlFactory = ({ IDL }) => {
 	const AllowSigningResponse = IDL.Record({
 		status: AllowSigningStatus,
 		challenge_completion: IDL.Opt(ChallengeCompletion),
-		allowed_cycles: IDL.Nat64
+		allowed_cycles: IDL.Nat
 	});
 	const ApproveError = IDL.Variant({
 		GenericError: IDL.Record({
@@ -90,16 +89,15 @@ export const idlFactory = ({ IDL }) => {
 		Expired: IDL.Record({ ledger_time: IDL.Nat64 }),
 		InsufficientFunds: IDL.Record({ balance: IDL.Nat })
 	});
-	const ChallengeCompletionError = IDL.Variant({
-		InvalidNonce: IDL.Null,
-		MissingChallenge: IDL.Null,
-		ExpiredChallenge: IDL.Null,
-		MissingUserProfile: IDL.Null,
-		ChallengeAlreadySolved: IDL.Null
+	const RateLimitError = IDL.Record({
+		max_calls: IDL.Nat32,
+		window_ns: IDL.Nat64,
+		caller: IDL.Principal
 	});
 	const AllowSigningError = IDL.Variant({
 		ApproveError: ApproveError,
-		PowChallenge: ChallengeCompletionError,
+		RateLimited: RateLimitError,
+		RateLimitedByGuard: RateLimitError,
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
@@ -107,7 +105,7 @@ export const idlFactory = ({ IDL }) => {
 		Ok: AllowSigningResponse,
 		Err: AllowSigningError
 	});
-	const BitcoinNetwork = IDL.Variant({
+	const Network = IDL.Variant({
 		mainnet: IDL.Null,
 		regtest: IDL.Null,
 		testnet: IDL.Null
@@ -123,13 +121,14 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const BtcAddPendingTransactionRequest = IDL.Record({
 		txid: IDL.Vec(IDL.Nat8),
-		network: BitcoinNetwork,
+		network: Network,
 		utxos: IDL.Vec(Utxo)
 	});
 	const BtcAddPendingTransactionError = IDL.Variant({
 		InvalidUtxos: IDL.Null,
 		EmptyUtxos: IDL.Null,
 		DuplicateUtxos: IDL.Null,
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text }),
 		UtxosAlreadyReserved: IDL.Null
 	});
@@ -137,14 +136,13 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: BtcAddPendingTransactionError
 	});
-	const BtcGetFeePercentilesRequest = IDL.Record({
-		network: BitcoinNetwork
-	});
+	const BtcGetFeePercentilesRequest = IDL.Record({ network: Network });
 	const BtcGetFeePercentilesResponse = IDL.Record({
 		fee_percentiles: IDL.Vec(IDL.Nat64)
 	});
 	const SelectedUtxosFeeError = IDL.Variant({
 		PendingTransactions: IDL.Null,
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
 	const BtcGetFeePercentilesResult = IDL.Variant({
@@ -152,7 +150,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: SelectedUtxosFeeError
 	});
 	const BtcGetPendingTransactionsRequest = IDL.Record({
-		network: BitcoinNetwork,
+		network: Network,
 		address: IDL.Text
 	});
 	const PendingTransaction = IDL.Record({
@@ -163,6 +161,7 @@ export const idlFactory = ({ IDL }) => {
 		transactions: IDL.Vec(PendingTransaction)
 	});
 	const BtcGetPendingTransactionsError = IDL.Variant({
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
 	const BtcGetPendingTransactionsResult = IDL.Variant({
@@ -170,7 +169,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: BtcGetPendingTransactionsError
 	});
 	const SelectedUtxosFeeRequest = IDL.Record({
-		network: BitcoinNetwork,
+		network: Network,
 		amount_satoshis: IDL.Nat64,
 		min_confirmations: IDL.Opt(IDL.Nat32)
 	});
@@ -251,21 +250,6 @@ export const idlFactory = ({ IDL }) => {
 	const CreateContactResult = IDL.Variant({
 		Ok: Contact,
 		Err: ContactError
-	});
-	const CreateChallengeResponse = IDL.Record({
-		difficulty: IDL.Nat32,
-		start_timestamp_ms: IDL.Nat64,
-		expiry_timestamp_ms: IDL.Nat64
-	});
-	const CreateChallengeError = IDL.Variant({
-		ChallengeInProgress: IDL.Null,
-		MissingUserProfile: IDL.Null,
-		RandomnessError: IDL.Text,
-		Other: IDL.Text
-	});
-	const CreatePowChallengeResult = IDL.Variant({
-		Ok: CreateChallengeResponse,
-		Err: CreateChallengeError
 	});
 	const UserAgreement = IDL.Record({
 		last_accepted_at_ns: IDL.Opt(IDL.Nat64),
@@ -511,7 +495,7 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [AddUserCredentialResult], []),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [AddUserHiddenDappIdResult], []),
-		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [AllowSigningResult], []),
+		allow_signing: IDL.Func([], [AllowSigningResult], []),
 		btc_add_pending_transaction: IDL.Func(
 			[BtcAddPendingTransactionRequest],
 			[BtcAddPendingTransactionResult],
@@ -534,7 +518,6 @@ export const idlFactory = ({ IDL }) => {
 		),
 		config: IDL.Func([], [Config], ['query']),
 		create_contact: IDL.Func([CreateContactRequest], [CreateContactResult], []),
-		create_pow_challenge: IDL.Func([], [CreatePowChallengeResult], []),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
 		get_account_creation_timestamps: IDL.Func(

@@ -114,7 +114,7 @@ describe('OpenCryptoPay', () => {
 			},
 			estimatedGasLimit: 25n
 		}
-	};
+	} as PayableTokenWithConvertedAmount;
 
 	const createMockContext = ({
 		data,

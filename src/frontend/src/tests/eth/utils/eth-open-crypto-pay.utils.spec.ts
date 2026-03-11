@@ -34,7 +34,7 @@ describe('eth-open-crypto-pay.utils', () => {
 				},
 				estimatedGasLimit: 21000n
 			}
-		};
+		} as PayableTokenWithFees;
 
 		const mockNativeEthToken: PayableTokenWithFees = {
 			...ETHEREUM_TOKEN,
@@ -49,7 +49,7 @@ describe('eth-open-crypto-pay.utils', () => {
 				},
 				estimatedGasLimit: 21000n
 			}
-		};
+		} as PayableTokenWithFees;
 
 		const nativeTokens: Token[] = [ETHEREUM_TOKEN];
 
@@ -554,7 +554,10 @@ describe('eth-open-crypto-pay.utils', () => {
 					ethereumChainId: '137'
 				};
 
-				const polygonToken = { ...nativeToken, network: POLYGON_MAINNET_NETWORK };
+				const polygonToken = {
+					...nativeToken,
+					network: POLYGON_MAINNET_NETWORK
+				} as PayableTokenWithConvertedAmount;
 
 				const result = validateEthEvmTransfer({
 					decodedData,
@@ -740,7 +743,7 @@ describe('eth-open-crypto-pay.utils', () => {
 					...erc20Token,
 					network: BSC_MAINNET_NETWORK,
 					address: baseToken
-				};
+				} as PayableTokenWithConvertedAmount;
 
 				const decodedData: DecodedUrn = {
 					prefix: 'ethereum',

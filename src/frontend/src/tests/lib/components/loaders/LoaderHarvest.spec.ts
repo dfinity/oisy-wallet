@@ -5,8 +5,8 @@ import type { HarvestVault } from '$lib/types/harvest';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-vi.mock('$env/tokens/tokens.erc4626.env', () => ({
-	ERC4626_TOKENS: [{ address: '0xVaultAddress' }]
+vi.mock('$eth/constants/harvest-autopilots.constants', () => ({
+	HARVEST_AUTOPILOT_ADDRESSES: ['0xvaultaddress']
 }));
 
 let earningEnabled = true;
@@ -19,7 +19,8 @@ vi.mock('$env/earning', () => ({
 const mockVault: HarvestVault = {
 	id: 'vault-1',
 	vaultAddress: '0xVaultAddress',
-	estimatedApy: '4.25'
+	estimatedApy: '4.25',
+	totalValueLocked: '100000.50'
 };
 
 describe('LoaderHarvest', () => {
@@ -42,7 +43,7 @@ describe('LoaderHarvest', () => {
 
 			await waitFor(() => {
 				expect(get(harvestVaultsStore)).toEqual({
-					'0xVaultAddress': { estimatedApy: '4.25' }
+					'0xvaultaddress': { estimatedApy: '4.25', totalValueLocked: '100000.50' }
 				});
 			});
 		});

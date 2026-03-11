@@ -5,6 +5,7 @@ import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants'
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import type {
+	CoingeckoSimpleErc4626TokenPriceResponse,
 	CoingeckoSimplePriceParams,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceParams,
@@ -847,7 +848,7 @@ describe('exchange.worker', () => {
 
 				postMessageMock.mockClear();
 
-				let resolveErc4626: ((v: CoingeckoSimpleTokenPriceResponse) => void) | undefined;
+				let resolveErc4626: ((v: CoingeckoSimpleErc4626TokenPriceResponse) => void) | undefined;
 				vi.mocked(calculateErc4626Prices).mockImplementation(
 					() =>
 						new Promise((resolve) => {

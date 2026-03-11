@@ -41,7 +41,7 @@ describe('btc-send.services', () => {
 		it('should call all required functions', async () => {
 			const addPendingBtcTransactionSpy = vi
 				.spyOn(backendAPI, 'addPendingBtcTransaction')
-				.mockResolvedValue(true);
+				.mockResolvedValue({ response: true });
 			const sendBtcApiSpy = vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
 			const txidStringToUint8ArraySpy = vi
 				.spyOn(btcUtils, 'txidStringToUint8Array')

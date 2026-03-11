@@ -1,10 +1,10 @@
 //! Types related to the signer & topping up the cycles ledger account for use with the signer.
 
-use candid::Nat;
+use candid::{Nat, Principal};
 use ic_cycles_ledger_client::ApproveError;
 
 use super::{CandidType, Debug, Deserialize};
-use crate::types::pow::{AllowSigningStatus, ChallengeCompletion, ChallengeCompletionError};
+use crate::types::pow::{AllowSigningStatus, ChallengeCompletion};
 /// Types related to topping up the cycles ledger account for use with the signer.
 
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
@@ -13,12 +13,24 @@ pub enum GetAllowedCyclesError {
     Other(String),
 }
 
+/// Error returned when a caller exceeds the allowed call rate.
+#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct RateLimitError {
+    pub max_calls: u32,
+    pub window_ns: u64,
+    pub caller: Principal,
+}
+
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum AllowSigningError {
     Other(String),
     FailedToContactCyclesLedger,
     ApproveError(ApproveError),
-    PowChallenge(ChallengeCompletionError),
+    /// The caller exceeded the per-caller business rate limit.
+    RateLimited(RateLimitError),
+    /// The caller hit the high-frequency guard rate limit designed to prevent
+    /// cycle-draining attacks before any inter-canister call is made.
+    RateLimitedByGuard(RateLimitError),
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -29,7 +41,7 @@ pub struct AllowSigningRequest {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct AllowSigningResponse {
     pub status: AllowSigningStatus,
-    pub allowed_cycles: u64,
+    pub allowed_cycles: Nat,
     pub challenge_completion: Option<ChallengeCompletion>,
 }
 

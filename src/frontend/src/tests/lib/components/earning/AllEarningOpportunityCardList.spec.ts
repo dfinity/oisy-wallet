@@ -2,33 +2,12 @@ import * as navModule from '$app/navigation';
 import * as earningCardsEnv from '$env/earning-cards.env';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
-import * as tokenFilter from '$icp-eth/utils/token.utils';
-import { GLDT_STAKE_CONTEXT_KEY } from '$icp/stores/gldt-stake.store';
 import AllEarningOpportunityCardList from '$lib/components/earning/AllEarningOpportunityCardList.svelte';
-import * as exchangeDerived from '$lib/derived/exchange.derived';
-import * as tokensUiDerived from '$lib/derived/tokens-ui.derived';
+import * as earningDerived from '$lib/derived/earning.derived';
 import { REWARD_ELIGIBILITY_CONTEXT_KEY } from '$lib/stores/reward.store';
-import type { Token } from '$lib/types/token';
-import * as formatUtils from '$lib/utils/format.utils';
-import * as tokenUtils from '$lib/utils/token.utils';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { render, screen } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
-
-// mock contexts
-const mockGldtStakeStore = {
-	subscribe: (fn: (v: unknown) => void) => {
-		fn({ apy: 5, position: { staked: 10 } });
-		return () => {};
-	},
-	setApy: vi.fn(),
-	resetApy: vi.fn(),
-	setPosition: vi.fn(),
-	resetPosition: vi.fn(),
-	reset: vi.fn()
-};
-
-const mockGldtStakeContext = { store: mockGldtStakeStore };
 
 const mockRewardEligibilityStore = writable({
 	campaignEligibilities: [
@@ -58,13 +37,12 @@ const mockRewardEligibilityContext = {
 };
 
 const mockContexts = new Map<symbol, unknown>([
-	[GLDT_STAKE_CONTEXT_KEY, mockGldtStakeContext],
 	[REWARD_ELIGIBILITY_CONTEXT_KEY, mockRewardEligibilityContext]
 ]);
 
 describe('AllEarningOpportunityCardList', () => {
 	beforeEach(() => {
-		vi.restoreAllMocks();
+		vi.resetAllMocks();
 
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
 			{
@@ -76,51 +54,35 @@ describe('AllEarningOpportunityCardList', () => {
 				actionText: 'mock.rewards.action'
 			},
 			{
-				id: 'gldt-staking',
-				titles: ['mock.gldt.title'],
-				description: 'mock.gldt.description',
+				id: 'harvest-autopilot',
+				titles: ['mock.harvest.title'],
+				description: 'mock.harvest.description',
 				logo: '/mock/logo.svg',
 				fields: [
-					EarningCardFields.APY,
-					EarningCardFields.CURRENT_STAKED,
+					EarningCardFields.NETWORKS,
+					EarningCardFields.ASSETS,
 					EarningCardFields.CURRENT_EARNING,
-					EarningCardFields.EARNING_POTENTIAL,
-					EarningCardFields.TERMS
+					EarningCardFields.EARNING_POTENTIAL
 				],
-				actionText: 'mock.gldt.action'
+				actionText: 'mock.harvest.action'
 			}
 		]);
 
 		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue(mockRewardCampaigns);
 
-		const mockGldtToken = {
-			id: 'mock-gldt',
-			symbol: 'GLDT',
-			name: 'Gold DAO Token',
-			decimals: 8,
-			network: { id: 'mock-network', env: 'mainnet' },
-			address: '0xmock',
-			enabled: true
-		} as unknown as Token;
-
-		// mock derived stores
-		const enabledFungibleTokensUi = writable([mockGldtToken]);
-		const enabledMainnetFungibleTokensUsdBalance = readable(1000);
-
-		vi.spyOn(tokensUiDerived, 'enabledFungibleTokensUi', 'get').mockReturnValue(
-			enabledFungibleTokensUi
+		vi.spyOn(earningDerived, 'earningData', 'get').mockReturnValue(
+			readable({
+				'harvest-autopilot': {
+					[EarningCardFields.APY]: '5.5',
+					[EarningCardFields.CURRENT_STAKED]: 100,
+					[EarningCardFields.CURRENT_EARNING]: 5.5,
+					[EarningCardFields.NETWORKS]: ['eth-icon'],
+					[EarningCardFields.ASSETS]: ['usdc-icon'],
+					[EarningCardFields.EARNING_POTENTIAL]: 49.5,
+					action: () => navModule.goto('/earn/autopilot/')
+				}
+			})
 		);
-		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
-			enabledMainnetFungibleTokensUsdBalance
-		);
-
-		vi.spyOn(exchangeDerived, 'exchanges', 'get').mockReturnValue(readable({}));
-
-		// mock utils
-		vi.spyOn(tokenFilter, 'isGLDTToken').mockReturnValue(true);
-		vi.spyOn(tokenUtils, 'calculateTokenUsdAmount').mockReturnValue(123.45);
-		vi.spyOn(formatUtils, 'formatToken').mockReturnValue('10.00');
-		vi.spyOn(formatUtils, 'formatToShortDateString').mockReturnValue('Dec 31, 2024');
 
 		// mock navigation
 		vi.spyOn(navModule, 'goto').mockResolvedValue();
@@ -131,8 +93,8 @@ describe('AllEarningOpportunityCardList', () => {
 
 		expect(screen.getByText('mock.rewards.title')).toBeInTheDocument();
 		expect(screen.getByText('mock.rewards.description')).toBeInTheDocument();
-		expect(screen.getByText('mock.gldt.title')).toBeInTheDocument();
-		expect(screen.getByText('mock.gldt.description')).toBeInTheDocument();
+		expect(screen.getByText('mock.harvest.title')).toBeInTheDocument();
+		expect(screen.getByText('mock.harvest.description')).toBeInTheDocument();
 	});
 
 	it('renders all card buttons with correct text', () => {
@@ -144,7 +106,7 @@ describe('AllEarningOpportunityCardList', () => {
 
 		expect(buttons).toHaveLength(2);
 		expect(buttons[0]).toHaveTextContent('mock.rewards.action');
-		expect(buttons[1]).toHaveTextContent('mock.gldt.action');
+		expect(buttons[1]).toHaveTextContent('mock.harvest.action');
 	});
 
 	it('calls goto when a card action button is clicked', async () => {

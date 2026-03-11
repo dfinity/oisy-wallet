@@ -1,16 +1,21 @@
+use candid::Nat;
 use ic_cdk::update;
 use shared::types::{
-    pow::{AllowSigningStatus, ChallengeCompletion, CYCLES_PER_DIFFICULTY, POW_ENABLED},
+    pow::AllowSigningStatus,
     result_types::{AllowSigningResult, GetAllowedCyclesResult},
     signer::{
         topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-        AllowSigningError, AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
+        AllowSigningError, AllowSigningResponse, GetAllowedCyclesResponse,
     },
 };
 
 use crate::{
-    guards::{caller_is_controller, caller_is_not_anonymous},
-    pow, signer,
+    signer,
+    utils::{
+        guards::{caller_is_controller, caller_is_not_anonymous},
+        housekeeping::{ALLOW_SIGNING_GUARD_LIMITER, ALLOW_SIGNING_RATE_LIMITER},
+        rate_limiter,
+    },
 };
 
 /// Adds cycles to the cycles ledger, if it is below a certain threshold.
@@ -42,64 +47,49 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
     }
 }
 
-/// This function authorises the caller to spend a specific
-///  amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
-/// providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
-/// cycles ledger.
+/// Ensures the caller has enough cycles allowance for chain-fusion signer
+/// operations (providing public keys, creating signatures, etc.).
 ///
-/// Note:
-/// - The chain fusion signer performs threshold key operations including providing public keys,
-///   creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
+/// If the caller already has sufficient allowance the call returns
+/// immediately with [`AllowSigningStatus::Skipped`] and no other inter-canister
+/// call is made.  Otherwise, the endpoint is rate-limited and a new
+/// `icrc_2_approve` is issued on the cycles ledger.
+///
+/// # Rate limiting
+/// Two rate limiters are applied in order:
+/// 1. **Guard limiter** – a high-frequency limiter (10 calls/min) checked *before* any
+///    inter-canister call to cheaply reject bursts that would drain cycles.
+/// 2. **Business limiter** – the stricter per-caller limit (3 calls/hour) for normal usage.
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigningResult {
-    async fn inner(
-        request: Option<AllowSigningRequest>,
-    ) -> Result<AllowSigningResponse, AllowSigningError> {
-        let principal = ic_cdk::caller();
+pub async fn allow_signing() -> AllowSigningResult {
+    async fn inner() -> Result<AllowSigningResponse, AllowSigningError> {
+        ALLOW_SIGNING_GUARD_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(AllowSigningError::RateLimitedByGuard)?;
 
-        // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED
-        // is disabled
-        if !POW_ENABLED {
-            // Passing None to apply the old cycle calculation logic
-            signer::allow_signing(None).await?;
-            // Returning a placeholder response that can be ignored by the frontend.
+        if let Some(current) = signer::has_sufficient_allowance().await {
             return Ok(AllowSigningResponse {
                 status: AllowSigningStatus::Skipped,
-                allowed_cycles: 0u64,
+                allowed_cycles: current,
                 challenge_completion: None,
             });
         }
 
-        // we atill need to make a valid request has been sent request
-        let request = request.ok_or(AllowSigningError::Other("Invalid request".to_string()))?;
+        ALLOW_SIGNING_RATE_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(AllowSigningError::RateLimited)?;
 
-        // The Proof-of-Work (PoW) protection is explicitly enforced at the HTTP entry-point level.
-        // This ensures internal calls to the business service remains unrestricted and does not
-        // require PoW protection.
-        let challenge_completion: ChallengeCompletion =
-            pow::complete_challenge(request.nonce).map_err(AllowSigningError::PowChallenge)?;
+        signer::approve_signing(None).await?;
 
-        // Grant cycles proportional to difficulty
-        let allowed_cycles =
-            u64::from(challenge_completion.current_difficulty) * CYCLES_PER_DIFFICULTY;
-
-        ic_cdk::println!(
-            "Allowing principal {} to spend {} cycles on signer operations",
-            principal.to_string(),
-            allowed_cycles,
-        );
-
-        // Allow the caller to pay for cycles consumed by signer operations
-        signer::allow_signing(Some(allowed_cycles)).await?;
-
+        // Returning a placeholder response that can be ignored by the frontend.
         Ok(AllowSigningResponse {
-            status: AllowSigningStatus::Executed,
-            allowed_cycles,
-            challenge_completion: Some(challenge_completion),
+            status: AllowSigningStatus::Skipped,
+            allowed_cycles: Nat::from(0u64),
+            challenge_completion: None,
         })
     }
-    inner(request).await.into()
+    inner().await.into()
 }

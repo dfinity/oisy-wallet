@@ -1,23 +1,20 @@
 import type {
 	AddUserCredentialResult,
-	AllowSigningResponse,
 	BtcGetFeePercentilesResponse,
 	Contact,
-	CreateChallengeResponse,
 	CustomToken,
 	CustomTokenId,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
-	PendingTransaction,
-	SelectedUtxosFeeResponse,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
+	AddPendingTransactionOutcome,
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
-	AllowSigningParams,
+	AllowSigningOutcome,
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
@@ -25,9 +22,11 @@ import type {
 	CreateContactParams,
 	DeleteContactParams,
 	GetContactParams,
+	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateContactParams,
 	UpdateUserExperimentalFeatureSettings
@@ -106,7 +105,7 @@ export const addUserCredential = async ({
 export const addPendingBtcTransaction = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcAddPendingTransactionParams>): Promise<boolean> => {
+}: CanisterApiFunctionParams<BtcAddPendingTransactionParams>): Promise<AddPendingTransactionOutcome> => {
 	const { btcAddPendingTransaction } = await backendCanister({ identity });
 
 	return btcAddPendingTransaction(params);
@@ -115,16 +114,16 @@ export const addPendingBtcTransaction = async ({
 export const getPendingBtcTransactions = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<PendingTransaction[]> => {
-	const { btcGetPendingTransaction } = await backendCanister({ identity });
+}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<GetPendingTransactionsOutcome> => {
+	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
-	return btcGetPendingTransaction(params);
+	return btcGetPendingTransactions(params);
 };
 
 export const selectUserUtxosFee = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeResponse> => {
+}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeOutcome> => {
 	const { btcSelectUserUtxosFee } = await backendCanister({ identity });
 
 	return btcSelectUserUtxosFee(params);
@@ -139,13 +138,6 @@ export const getCurrentBtcFeePercentiles = async ({
 	return btcGetCurrentFeePercentiles(params);
 };
 
-export const createPowChallenge = async ({
-	identity
-}: CanisterApiFunctionParams): Promise<CreateChallengeResponse> => {
-	const { createPowChallenge } = await backendCanister({ identity });
-	return createPowChallenge();
-};
-
 export const getAllowedCycles = async ({
 	identity
 }: CanisterApiFunctionParams): Promise<GetAllowedCyclesResponse> => {
@@ -155,12 +147,11 @@ export const getAllowedCycles = async ({
 };
 
 export const allowSigning = async ({
-	identity,
-	...params
-}: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningResponse> => {
+	identity
+}: CanisterApiFunctionParams): Promise<AllowSigningOutcome> => {
 	const { allowSigning } = await backendCanister({ identity });
 
-	return allowSigning(params);
+	return allowSigning();
 };
 
 export const addUserHiddenDappId = async ({

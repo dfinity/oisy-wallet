@@ -182,7 +182,7 @@ const burnStatus = (
 		retrieveBtcStatus;
 
 	return {
-		typeLabel: 'transaction.label.twin_token_sent',
+		typeLabel: 'send.text.send',
 		status: 'executed'
 	};
 };

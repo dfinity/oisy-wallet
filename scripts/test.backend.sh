@@ -1,6 +1,6 @@
 #!/bin/bash
 
-POCKET_IC_SERVER_VERSION=8.0.0
+POCKET_IC_SERVER_VERSION=12.0.0
 BITCOIN_CANISTER_RELEASE="2024-08-30"
 BITCOIN_CANISTER_WASM="ic-btc-canister.wasm.gz"
 CYCLES_LEDGER_CANISTER_URL="$(jq -re .canisters.cycles_ledger.wasm dfx.json)"
@@ -43,7 +43,19 @@ else
   exit 1
 fi
 
-scripts/download-immutable.sh "https://github.com/dfinity/pocketic/releases/download/${POCKET_IC_SERVER_VERSION}/pocket-ic-x86_64-${PLATFORM}.gz" "${POCKET_IC_SERVER_PATH}.gz"
+ARCH=$(uname -m)
+if [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
+  ARCH=arm64
+else
+  ARCH=x86_64
+fi
+
+scripts/download-immutable.sh "https://github.com/dfinity/pocketic/releases/download/${POCKET_IC_SERVER_VERSION}/pocket-ic-${ARCH}-${PLATFORM}.gz" "${POCKET_IC_SERVER_PATH}.gz"
+
+if [ ! -f "${POCKET_IC_SERVER_PATH}" ] || [ "${POCKET_IC_SERVER_PATH}.gz" -nt "${POCKET_IC_SERVER_PATH}" ]; then
+  gzip -dc "${POCKET_IC_SERVER_PATH}.gz" >"${POCKET_IC_SERVER_PATH}"
+  chmod +x "${POCKET_IC_SERVER_PATH}"
+fi
 
 export POCKET_IC_BIN="../../${POCKET_IC_SERVER_PATH}"
 export POCKET_IC_MUTE_SERVER=1

@@ -5,9 +5,9 @@ import type {
 } from '$declarations/rewards/rewards.did';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { ETH_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.eth.env';
+import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.testnet.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';

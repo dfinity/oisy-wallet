@@ -1,6 +1,6 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
-import { ICRC_TOKENS } from '$env/networks/networks.icrc.env';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
+import { ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.env';
 import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
 import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
@@ -22,7 +22,6 @@ import {
 	type IcToken
 } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	mapIcrcToken,
@@ -53,6 +52,7 @@ import {
 	fromNullable,
 	isNullish,
 	nonNullish,
+	nowInBigIntNanoSeconds,
 	queryAndUpdate,
 	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';

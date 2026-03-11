@@ -90,17 +90,22 @@ export const mapIcrcToken = ({
 	// We do not allow external URLs anyway, so it is safe to use the static icon, even if it does not exist
 	const icon = dynamicIconIsUrl ? staticIcon : dynamicIcon;
 
+	const customTokenSymbol = icrcCustomTokens?.[ledgerCanisterId];
+
 	return {
 		id: parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
-		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? { code: 'icrc' },
+		standard: customTokenSymbol?.standard ?? { code: 'icrc' },
 		symbol,
 		...(notEmptyString(icon) && { icon }),
-		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
-			explorerUrl: icrcCustomTokens[ledgerCanisterId].explorerUrl
+		...(nonNullish(customTokenSymbol?.explorerUrl) && {
+			explorerUrl: customTokenSymbol.explorerUrl
 		}),
-		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.alternativeName) && {
-			alternativeName: icrcCustomTokens[ledgerCanisterId].alternativeName
+		...(nonNullish(customTokenSymbol?.alternativeName) && {
+			alternativeName: customTokenSymbol.alternativeName
+		}),
+		...(nonNullish(customTokenSymbol?.deprecated) && {
+			deprecated: customTokenSymbol.deprecated
 		}),
 		ledgerCanisterId,
 		...metadataToken,

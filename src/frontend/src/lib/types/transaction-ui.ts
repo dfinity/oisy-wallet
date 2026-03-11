@@ -28,6 +28,11 @@ export type AllTransactionUiWithCmp = AnyTransactionUiWithCmp & {
 	token: Token;
 };
 
+export type EthAllTransactionUiWithCmp = Extract<
+	AllTransactionUiWithCmp,
+	{ component: 'ethereum' }
+>;
+
 export type AllTransactionUiWithCmpNonEmptyList = NonEmptyArray<AllTransactionUiWithCmp>;
 
 export type TransactionsUiDateGroup<T extends AnyTransactionUiWithCmp> = Record<
@@ -36,5 +41,5 @@ export type TransactionsUiDateGroup<T extends AnyTransactionUiWithCmp> = Record<
 >;
 
 export type StakingTransactionsUiWithToken = AnyTransactionUiWithToken & {
-	isReward: boolean;
+	isReward?: boolean;
 };

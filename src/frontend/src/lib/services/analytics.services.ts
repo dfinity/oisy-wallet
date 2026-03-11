@@ -1,7 +1,14 @@
 import { browser } from '$app/environment';
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SOURCES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import { loadPlausibleTracker } from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
+import type { RateLimitInfo } from '$lib/types/api';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { init, track } from '@plausible-analytics/tracker';
 
@@ -56,4 +63,17 @@ export const trackEvent = ({ name, metadata, warning }: TrackEventParams) => {
 			console.warn(warning);
 		}
 	}
+};
+
+export const trackRateLimited = ({ endpoint, limiter }: RateLimitInfo) => {
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.RATE_LIMITED,
+		metadata: {
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
+			event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND.PER_USER,
+			location_source: PLAUSIBLE_EVENT_SOURCES.BACKEND,
+			endpoint,
+			limiter
+		}
+	});
 };

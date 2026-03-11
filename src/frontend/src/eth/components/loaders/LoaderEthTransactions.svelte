@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import {
 		COLLECTION_TIMER_INTERVAL_MILLIS,
 		MILLISECONDS_IN_DAY,
@@ -16,10 +15,9 @@
 	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
 
 	let fungibleTokens = $derived([
-		...$enabledEthereumTokens,
+		...$enabledEthEvmNativeTokens,
 		...$enabledErc20Tokens,
-		...$enabledErc4626Tokens,
-		...$enabledEvmTokens
+		...$enabledErc4626Tokens
 	]);
 
 	let nonFungibleTokens = $derived([...$enabledNonFungibleTokensWithoutSpam]);

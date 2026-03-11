@@ -56,6 +56,19 @@ describe('GetTokenCardContent', () => {
 		expect(() => getByText(ETHEREUM_TOKEN.symbol)).toThrowError();
 	});
 
+	it('displays "< " prefix when potential token balance is less than 1', () => {
+		exchangeStore.set([{ ethereum: { usd: 5 } }]);
+
+		const { container } = render(GetTokenCardContent, {
+			props: {
+				...props,
+				potentialTokensUsdBalance: 1
+			}
+		});
+
+		expect(container).toHaveTextContent(`< 1 ${ETHEREUM_TOKEN.symbol}`);
+	});
+
 	it('displays balance value correctly if exchange is available', () => {
 		exchangeStore.set([{ ethereum: { usd: 5 } }]);
 

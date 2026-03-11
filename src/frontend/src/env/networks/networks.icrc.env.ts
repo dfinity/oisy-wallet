@@ -1,13 +1,3 @@
-import {
-	ADDITIONAL_ICRC_TOKENS,
-	TICRC1_LEDGER_CANISTER_ID
-} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
-import {
-	CK_LEDGER_CANISTER_TESTNET_IDS,
-	ICRC_CK_TOKENS,
-	PUBLIC_ICRC_TOKENS
-} from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
-import type { IcInterface } from '$icp/types/ic-token';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import { nonNullish } from '@dfinity/utils';
@@ -28,18 +18,3 @@ export const CYCLES_LEDGER_CANISTER_ID: CanisterIdText =
 		: (STAGING || BETA || PROD) && nonNullish(STAGING_CYCLES_LEDGER_CANISTER_ID)
 			? STAGING_CYCLES_LEDGER_CANISTER_ID
 			: IC_CYCLES_LEDGER_CANISTER_ID;
-
-/**
- * All ICRC tokens data
- */
-
-export const ICRC_TOKENS: IcInterface[] = [
-	...PUBLIC_ICRC_TOKENS,
-	...ADDITIONAL_ICRC_TOKENS,
-	...ICRC_CK_TOKENS
-];
-
-export const ICRC_LEDGER_CANISTER_TESTNET_IDS = [
-	...CK_LEDGER_CANISTER_TESTNET_IDS,
-	TICRC1_LEDGER_CANISTER_ID
-];

@@ -43,7 +43,9 @@
 			"ellipsis": "",
 			"learn_more": "",
 			"sorting": "छँटाई",
-			"unlimited": ""
+			"unlimited": "",
+			"info": "",
+			"asset": ""
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -819,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "भेजें",
+			"send_token": "",
 			"destination": "गंतव्य",
 			"source": "स्रोत",
 			"balance": "शेष राशि",
@@ -1501,8 +1504,6 @@
 		},
 		"label": {
 			"reimbursement": "प्रतिपूर्ति",
-			"twin_token_sent": "$twinToken भेजा गया",
-			"ck_token_sent": "$ckToken भेजा गया",
 			"twin_token_converted": "$twinToken से परिवर्तित",
 			"ck_token_converted": "$ckToken से परिवर्तित",
 			"sending_twin_token": "$twinToken भेज रहा है",
@@ -1862,9 +1863,8 @@
 			"go_to_earn": ""
 		},
 		"cards": {
-			"gldt": {
-				"title1": "",
-				"title2": "",
+			"harvest_autopilot": {
+				"title": "",
 				"description": "",
 				"action": ""
 			},
@@ -1876,6 +1876,8 @@
 		},
 		"card_fields": {
 			"apy": "",
+			"networks": "",
+			"assets": "",
 			"currentStaked": "",
 			"currentEarning": "",
 			"earningPotential": "",
@@ -1890,9 +1892,27 @@
 			}
 		}
 	},
+	"vaults": {
+		"text": {
+			"autopilot": "",
+			"live_apy": ""
+		}
+	},
 	"stake": {
 		"text": {
 			"gldt_stake_page_description": "",
+			"harvest_autopilot_page_description": "",
+			"harvest_autopilot_vault_page_description": "",
+			"my_positions": "",
+			"available_autopilots": "",
+			"vault_info": "",
+			"vault_address": "",
+			"protocol": "",
+			"harvest": "",
+			"autopilot": "",
+			"total_value_locked": "",
+			"manager": "",
+			"vault_description": "",
 			"stake": "",
 			"stake_now": "",
 			"stake_amount": "",
@@ -1911,10 +1931,12 @@
 			"earning_potential_hint": "",
 			"active_earning": "",
 			"active_earning_per_year": "",
+			"active_earning_per_year_short": "",
 			"unproductive_assets": "",
 			"invested_assets": "",
 			"visit_provider": "",
 			"current_apy_label": "",
+			"max_apy_label": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
 			"delayed_dissolve": "",
@@ -1937,7 +1959,7 @@
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": "",
+			"get_asset_tokens": "",
 			"reward_claimed": "",
 			"staked": "",
 			"unstaked": "",
@@ -1980,6 +2002,16 @@
 				"fact_3_title": "",
 				"fact_3_description": "",
 				"fact_3_description_fallback": ""
+			},
+			"harvest_autopilot": {
+				"title": "",
+				"description": "",
+				"fact_1_title": "",
+				"fact_1_description": "",
+				"fact_2_title": "",
+				"fact_2_description": "",
+				"fact_3_title": "",
+				"fact_3_description": ""
 			}
 		},
 		"alt": {

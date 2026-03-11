@@ -3,7 +3,6 @@ import { manageStakePosition } from '$icp/api/gldt_stake.api';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { GLDT_STAKE_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import {
@@ -14,6 +13,7 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
+import { nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';

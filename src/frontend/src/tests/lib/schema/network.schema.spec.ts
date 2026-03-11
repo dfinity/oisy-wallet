@@ -52,7 +52,7 @@ describe('network.schema', () => {
 			...validNetworkWithRequiredFields,
 			icon: 'https://example.com/icon.svg',
 			buy: { onramperId: 'icp' },
-			pay: { openCryptoPay: 'Internet Computer' }
+			pay: { openCryptoPay: 'InternetComputer' }
 		};
 
 		it('should validate a complete network', () => {

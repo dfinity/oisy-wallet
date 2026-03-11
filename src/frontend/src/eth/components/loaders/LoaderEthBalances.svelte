@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
-	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -42,7 +41,7 @@
 
 		await Promise.allSettled([
 			// We might require Ethereum balance on IC network as well given that one can convert ckETH to ETH.
-			loadEthBalances([...$enabledEthereumTokens, ...$enabledEvmTokens]),
+			loadEthBalances($enabledEthEvmNativeTokens),
 			loadErc20Balances({
 				address: $ethAddress,
 				tokens: [...$enabledErc20Tokens, ...$enabledErc4626Tokens]
@@ -56,13 +55,7 @@
 
 	$effect(() => {
 		// To trigger the load function when any of the dependencies change.
-		[
-			$ethAddress,
-			$enabledEthereumTokens,
-			$enabledEvmTokens,
-			$enabledErc20Tokens,
-			$enabledErc4626Tokens
-		];
+		[$ethAddress, $enabledEthEvmNativeTokens, $enabledErc20Tokens, $enabledErc4626Tokens];
 
 		debounceLoad();
 	});
@@ -77,18 +70,15 @@
 		loading = true;
 
 		await Promise.allSettled(
-			[
-				...$enabledEthereumTokens,
-				...$enabledEvmTokens,
-				...$enabledErc20Tokens,
-				...$enabledErc4626Tokens
-			].map(async ({ id: tokenId, network: { id: networkId } }) => {
-				await syncBalancesFromCache({
-					principal,
-					tokenId,
-					networkId
-				});
-			})
+			[...$enabledEthEvmNativeTokens, ...$enabledErc20Tokens, ...$enabledErc4626Tokens].map(
+				async ({ id: tokenId, network: { id: networkId } }) => {
+					await syncBalancesFromCache({
+						principal,
+						tokenId,
+						networkId
+					});
+				}
+			)
 		);
 
 		loading = false;

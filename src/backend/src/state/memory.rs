@@ -17,7 +17,7 @@ pub const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(8);
 pub const EXCHANGE_RATE_MEMORY_ID: MemoryId = MemoryId::new(9);
 
 thread_local! {
-    pub static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
+    pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
         MemoryManager::init(DefaultMemoryImpl::default())
     );
 }

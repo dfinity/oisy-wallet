@@ -19,14 +19,15 @@ describe('btc-open-crypto-pay.utils', () => {
 		const mockExchangeRate = 50000;
 		const mockBalance = 100000000n;
 
-		const createMockToken = (overrides?: Partial<PayableTokenWithFees>): PayableTokenWithFees => ({
-			...BTC_MAINNET_TOKEN,
-			amount: '0.001',
-			minFee: 0.00001,
-			fee: mockUtxosFee,
-			tokenNetwork: 'bitcoin',
-			...overrides
-		});
+		const createMockToken = (overrides?: Partial<PayableTokenWithFees>): PayableTokenWithFees =>
+			({
+				...BTC_MAINNET_TOKEN,
+				amount: '0.001',
+				minFee: 0.00001,
+				fee: mockUtxosFee,
+				tokenNetwork: 'bitcoin',
+				...overrides
+			}) as PayableTokenWithFees;
 
 		const createMockExchanges = (rate?: number): ExchangesData => ({
 			[BTC_MAINNET_TOKEN.id]: { usd: rate ?? mockExchangeRate }
@@ -132,17 +133,18 @@ describe('btc-open-crypto-pay.utils', () => {
 
 		const createMockToken = (
 			overrides?: Partial<PayableTokenWithConvertedAmount>
-		): PayableTokenWithConvertedAmount => ({
-			...BTC_MAINNET_TOKEN,
-			amount: '0.001',
-			minFee: 0.00001,
-			fee: mockUtxosFee,
-			amountInUSD: 50,
-			feeInUSD: 0.5,
-			sumInUSD: 50.5,
-			tokenNetwork: 'bitcoin',
-			...overrides
-		});
+		): PayableTokenWithConvertedAmount =>
+			({
+				...BTC_MAINNET_TOKEN,
+				amount: '0.001',
+				minFee: 0.00001,
+				fee: mockUtxosFee,
+				amountInUSD: 50,
+				feeInUSD: 0.5,
+				sumInUSD: 50.5,
+				tokenNetwork: 'bitcoin',
+				...overrides
+			}) as PayableTokenWithConvertedAmount;
 
 		const createMockDecodedData = (overrides?: Partial<DecodedUrn>): DecodedUrn => ({
 			destination: mockBtcAddress,
@@ -154,7 +156,7 @@ describe('btc-open-crypto-pay.utils', () => {
 		it('should throw error when token is not Bitcoin token', () => {
 			const token = createMockToken({
 				...ETHEREUM_TOKEN
-			});
+			} as Partial<PayableTokenWithConvertedAmount>);
 
 			expect(() =>
 				validateBtcTransfer({
