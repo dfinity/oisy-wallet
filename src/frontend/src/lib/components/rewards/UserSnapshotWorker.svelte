@@ -138,7 +138,7 @@
 			$tokens,
 			$anyBalanceNonZero,
 			$exchangeNotInitialized,
-			transactionTokenEntryCount
+			$transactionTokenEntryCount
 		];
 
 		triggerTimer();
