@@ -14,13 +14,16 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import { noPositiveBalanceAndNotAllBalancesZero } from '$lib/derived/balances.derived';
+	import {
+		anyBalanceNonZero,
+		noPositiveBalanceAndNotAllBalancesZero
+	} from '$lib/derived/balances.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { exchangeNotInitialized } from '$lib/derived/exchange.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
-	import { balancesStore } from '$lib/stores/balances.store';
+	import { derivedMemo } from '$lib/utils/derived-memo.utils';
 	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
@@ -106,13 +109,27 @@
 		debounceTrigger();
 	};
 
+	const countNonNullishSymbolEntries = (store: Record<symbol, unknown> | undefined): number =>
+		store ? Object.getOwnPropertySymbols(store).filter((key) => nonNullish(store[key])).length : 0;
+
+	const transactionTokenEntryCount = derivedMemo(
+		[btcTransactionsStore, ethTransactionsStore, icTransactionsStore, solTransactionsStore],
+		([$btc, $eth, $ic, $sol]) =>
+			countNonNullishSymbolEntries($btc) +
+			countNonNullishSymbolEntries($eth) +
+			countNonNullishSymbolEntries($ic) +
+			countNonNullishSymbolEntries($sol),
+		// eslint-disable-next-line local-rules/prefer-object-params
+		(a, b) => a === b
+	);
+
 	// The snapshot should be triggered for any change in the following variables (for now).
 	// Auth: We should trigger the snapshot when the user is signed in. If the user is not signed in, we should not trigger the snapshot. We should also not trigger the snapshot if the user is busy.
 	// Addresses: the addresses of each network.
 	// Tokens: any new token added to the list of tokens or any change in the token list.
-	// Balances: All balances (since we need to check if the user has any balance).
+	// Balances: Coarse boolean signal (memoized) — flips only when balance status changes, not per-token.
 	// Exchanges: All exchanges initialized (since we have no disclaimer specific for the tokens we are interested in).
-	// Transactions: all transactions related to each network.
+	// Transactions: Coarse entry-count signal — emits only when a new token's transactions appear, not on data updates. The periodic timer captures ongoing transaction changes.
 	$effect(() => {
 		[
 			$authSignedIn,
@@ -122,13 +139,11 @@
 			$solAddressMainnet,
 			$solAddressDevnet,
 			$tokens,
-			$balancesStore,
+			$anyBalanceNonZero,
 			$exchangeNotInitialized,
-			$btcTransactionsStore,
-			$ethTransactionsStore,
-			$icTransactionsStore,
-			$solTransactionsStore
+			$transactionTokenEntryCount
 		];
+
 		triggerTimer();
 	});
 </script>

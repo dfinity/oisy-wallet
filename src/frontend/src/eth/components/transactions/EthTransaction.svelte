@@ -57,12 +57,22 @@
 	);
 
 	let depositToken = $derived(
-		isErc20Deposit
+		isErc20Deposit && nonNullish(dataTo)
 			? $ercFungibleTokens.find(
 					({ address, network: { id: networkId } }) =>
 						areAddressesEqual({ address1: address, address2: dataTo, networkId }) &&
 						networkId === token.network.id
 				)
+			: undefined
+	);
+
+	let depositValue = $derived(
+		isErc20Deposit && nonNullish(depositToken) && nonNullish(dataValue)
+			? formatToken({
+					value: dataValue,
+					displayDecimals: depositToken.decimals,
+					unitName: depositToken.decimals
+				})
 			: undefined
 	);
 
@@ -108,9 +118,9 @@
 
 	let label = $derived.by(() => {
 		if (type === 'send') {
-			if (isErc20Deposit && nonNullish(depositToken)) {
+			if (isErc20Deposit && nonNullish(depositToken) && nonNullish(depositValue)) {
 				return replacePlaceholders($i18n.send.text.send_token, {
-					$token: depositToken.symbol
+					$token: `${depositValue} ${depositToken.symbol}`
 				});
 			}
 

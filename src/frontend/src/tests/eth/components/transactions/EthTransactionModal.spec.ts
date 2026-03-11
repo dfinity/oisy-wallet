@@ -223,21 +223,33 @@ describe('EthTransactionModal', () => {
 		expect(getByText(formattedFee)).toBeInTheDocument();
 	});
 
-	it('should not display fee for ERC20 deposit transaction', () => {
+	it('should display fee for ERC20 deposit transaction', () => {
+		const gasUsed = 21_000n;
+		const gasPrice = 1_000_000_000n;
+
 		const mockDepositData = `${ERC20_DEPOSIT_HASH}000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000f42401db5f0b9209d75b4b358ddd228eb7097ccec7b8f65e0acef29e51271ce020000`;
 
-		const { queryByText } = render(EthTransactionModal, {
+		const { getByText } = render(EthTransactionModal, {
 			transaction: {
 				...mockEthTransactionUi,
 				type: 'deposit' as const,
 				data: mockDepositData,
-				gasUsed: 21_000n,
-				gasPrice: 1_000_000_000n
+				gasUsed,
+				gasPrice
 			},
 			token: ETHEREUM_TOKEN
 		});
 
-		expect(queryByText(get(i18n).fee.text.fee)).not.toBeInTheDocument();
+		const fee = gasUsed * gasPrice;
+
+		const formattedFee = `${formatToken({
+			value: fee,
+			unitName: ETHEREUM_TOKEN.decimals,
+			displayDecimals: ETHEREUM_TOKEN.decimals
+		})} ${ETHEREUM_TOKEN.symbol}`;
+
+		expect(getByText(get(i18n).fee.text.fee)).toBeInTheDocument();
+		expect(getByText(formattedFee)).toBeInTheDocument();
 	});
 
 	it('should display gas fee as value for ERC20 deposit transaction', () => {
