@@ -3,6 +3,7 @@ export enum Languages {
 	CZECH = 'cs',
 	GERMAN = 'de',
 	SPANISH = 'es',
+	PERSIAN = 'fa',
 	FRENCH = 'fr',
 	HINDI = 'hi',
 	ITALIAN = 'it',
