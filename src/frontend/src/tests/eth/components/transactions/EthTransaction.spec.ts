@@ -186,7 +186,7 @@ describe('EthTransaction', () => {
 			gasPrice: mockGasPrice
 		};
 
-		it('should render "Send {token}" label for send type with ERC20 deposit data', () => {
+		it('should render "Send" label with amount and token for send type with ERC20 deposit data', () => {
 			const { getByTestId } = render(EthTransaction, {
 				props: {
 					transaction: { ...mockDepositTx, type: 'send' as const },
@@ -199,7 +199,7 @@ describe('EthTransaction', () => {
 			assertNonNullish(labelElement);
 
 			const expected = replacePlaceholders(get(i18n).send.text.send_token, {
-				$token: USDC_TOKEN.symbol
+				$token: `1 ${USDC_TOKEN.symbol}`
 			});
 
 			expect(labelElement.textContent).toBe(expected);
