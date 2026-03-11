@@ -123,9 +123,7 @@
 
 		if (type === 'deposit') {
 			return replacePlaceholders(
-				pending
-					? $i18n.transaction.label.converting_twin_token
-					: $i18n.send.text.send,
+				pending ? $i18n.transaction.label.converting_twin_token : $i18n.send.text.send,
 				{
 					$twinToken: token?.symbol ?? '',
 					$ckToken: ckTokenSymbol
