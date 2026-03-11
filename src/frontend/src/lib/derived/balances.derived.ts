@@ -21,9 +21,8 @@ export const balanceZero: Readable<boolean> = derived(
 		$balanceStore[$token.id]?.data === ZERO
 );
 
-export const anyBalanceNonZero: Readable<boolean> = derived(
-	[balancesStore],
-	([$balanceStore]) => checkAnyNonZeroBalance($balanceStore)
+export const anyBalanceNonZero: Readable<boolean> = derived([balancesStore], ([$balanceStore]) =>
+	checkAnyNonZeroBalance($balanceStore)
 );
 
 export const allBalancesZero: Readable<boolean> = derived(
