@@ -1,8 +1,9 @@
 import { ETH_MAINNET_ENABLED } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userNetworks } from '$lib/derived/user-networks.derived';
-import type { RequiredTokenWithLinkedData } from '$lib/types/token';
+import type { RequiredToken, RequiredTokenWithLinkedData } from '$lib/types/token';
 import { defineEnabledTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -16,4 +17,9 @@ export const enabledEthereumTokens: Readable<RequiredTokenWithLinkedData[]> = de
 			mainnetTokens: [ETHEREUM_TOKEN],
 			testnetTokens: [SEPOLIA_TOKEN]
 		})
+);
+
+export const enabledEthEvmNativeTokens: Readable<RequiredToken[]> = derived(
+	[enabledEthereumTokens, enabledEvmTokens],
+	([$enabledEthereumTokens, $enabledEvmTokens]) => [...$enabledEthereumTokens, ...$enabledEvmTokens]
 );
