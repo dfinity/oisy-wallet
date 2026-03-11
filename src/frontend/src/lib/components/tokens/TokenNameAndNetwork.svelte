@@ -11,8 +11,12 @@
 
 	let { data }: Props = $props();
 
-	let networkName = $derived(data.network?.name);
+
 	let name = $derived(getTokenDisplayName(data));
+
+	let networkName = $derived(data.network?.name);
+
+
 </script>
 
 <span class="text-primary">{name}</span>
