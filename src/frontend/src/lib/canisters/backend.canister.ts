@@ -5,7 +5,9 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
+	GetStoredTransactionsResponse,
 	PendingTransaction,
+	StoredTransaction,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -27,7 +29,9 @@ import type {
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	GetStoredTransactionsParams,
 	GetUserProfileResponse,
+	SaveStoredTransactionsParams,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SelectedUtxosFeeOutcome,
@@ -368,5 +372,43 @@ export class BackendCanister extends Canister<BackendService> {
 			experimental_features: mapUserExperimentalFeatures(experimentalFeatures),
 			current_user_version: toNullable(currentUserVersion)
 		});
+	};
+
+	getStoredTransactions = async ({
+		tokenId,
+		start,
+		maxResults
+	}: GetStoredTransactionsParams): Promise<GetStoredTransactionsResponse> => {
+		const { get_stored_transactions } = this.caller({ certified: false });
+
+		const response = await get_stored_transactions({
+			token_id: tokenId,
+			start: toNullable(start),
+			max_results: maxResults
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw response.Err;
+	};
+
+	saveStoredTransactions = async ({
+		tokenId,
+		transactions
+	}: SaveStoredTransactionsParams): Promise<void> => {
+		const { save_stored_transactions } = this.caller({ certified: true });
+
+		const response = await save_stored_transactions({
+			token_id: tokenId,
+			transactions
+		});
+
+		if ('Ok' in response) {
+			return;
+		}
+
+		throw response.Err;
 	};
 }

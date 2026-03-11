@@ -5,6 +5,10 @@ import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
+import {
+	loadStoredTransactions,
+	saveFinalizedTransactions
+} from '$eth/services/eth-stored-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import type { EthAddress } from '$eth/types/address';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
@@ -17,6 +21,7 @@ import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { filterSpamErc20Transfers } from '$eth/utils/eth-transactions-spam.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { buildEvmNativeTransactionTokenId } from '$eth/utils/stored-transactions.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
@@ -29,7 +34,7 @@ import type { TokenId, TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadEthereumTransactions = ({
@@ -79,12 +84,26 @@ const loadEthTransactions = async ({
 	}
 
 	try {
-		const { transactions: transactionsProviders } = etherscanProviders(networkId);
-		const transactions = await transactionsProviders({ address });
+		const transactionTokenId = buildEvmNativeTransactionTokenId({ networkId });
 
-		const certifiedTransactions = transactions.map((transaction) => ({
+		// Load stored finalized transactions from backend to get the newest stored block
+		const stored = nonNullish(transactionTokenId)
+			? await loadStoredTransactions({ tokenId: transactionTokenId })
+			: null;
+
+		// Fetch from Etherscan starting after the newest stored block (incremental loading)
+		const startBlock = nonNullish(stored?.newestBlockNumber)
+			? stored.newestBlockNumber + 1
+			: 0;
+
+		const { transactions: transactionsProviders } = etherscanProviders(networkId);
+		const newTransactions = await transactionsProviders({ address, startBlock });
+
+		// Combine: stored transactions + newly fetched ones
+		const allTransactions = [...(stored?.transactions ?? []), ...newTransactions];
+
+		const certifiedTransactions = allTransactions.map((transaction) => ({
 			data: transaction,
-			// We set the certified property to false because we don't have a way to certify ETH transactions for now.
 			certified: false
 		}));
 
@@ -94,6 +113,25 @@ const loadEthTransactions = async ({
 			);
 		} else {
 			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
+		}
+
+		// Save newly finalized transactions to backend (fire-and-forget)
+		if (newTransactions.length > 0 && nonNullish(transactionTokenId)) {
+			const maxBlockNumber = Math.max(
+				...newTransactions
+					.filter((tx) => nonNullish(tx.blockNumber))
+					.map((tx) => tx.blockNumber!)
+			);
+
+			if (maxBlockNumber > 0) {
+				saveFinalizedTransactions({
+					tokenId: transactionTokenId,
+					transactions: newTransactions,
+					currentBlockNumber: maxBlockNumber
+				}).catch((err) =>
+					console.error('Background save of finalized transactions failed:', err)
+				);
+			}
 		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);

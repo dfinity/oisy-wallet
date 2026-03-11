@@ -2,7 +2,7 @@ use std::{borrow::Cow, ops::Deref};
 
 use candid::{decode_one, encode_one, CandidType, Deserialize, Principal};
 use ic_stable_structures::storable::{Blob, Bound, Storable};
-use shared::types::custom_token::CustomTokenId;
+use shared::types::{custom_token::CustomTokenId, stored_transaction::TransactionTokenId};
 
 #[derive(Default)]
 pub struct Candid<T>(pub T)
@@ -84,5 +84,59 @@ impl Storable for StoredTokenId {
 
     fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
         Self(decode_one(bytes.as_ref()).expect("failed to candid-decode CustomTokenId"))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct StoredTransactionTokenId(pub TransactionTokenId);
+
+impl Storable for StoredTransactionTokenId {
+    const BOUND: Bound = Bound::Unbounded;
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        Cow::Owned(encode_one(&self.0).expect("failed to candid-encode TransactionTokenId"))
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        encode_one(&self.0).expect("failed to candid-encode TransactionTokenId")
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        Self(decode_one(bytes.as_ref()).expect("failed to candid-decode TransactionTokenId"))
+    }
+}
+
+/// Composite key for per-user, per-token transaction storage.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct StoredTransactionKey(pub StoredPrincipal, pub StoredTransactionTokenId);
+
+impl Storable for StoredTransactionKey {
+    const BOUND: Bound = Bound::Unbounded;
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        let principal_bytes = self.0.to_bytes();
+        let token_id_bytes = self.1.to_bytes();
+        let principal_len = principal_bytes.len() as u32;
+        let mut buf = Vec::with_capacity(4 + principal_bytes.len() + token_id_bytes.len());
+        buf.extend_from_slice(&principal_len.to_be_bytes());
+        buf.extend_from_slice(&principal_bytes);
+        buf.extend_from_slice(&token_id_bytes);
+        Cow::Owned(buf)
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        self.to_bytes().to_vec()
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        let principal_len = u32::from_be_bytes(
+            bytes[..4]
+                .try_into()
+                .expect("failed to decode principal length"),
+        ) as usize;
+        let principal = StoredPrincipal::from_bytes(Cow::Borrowed(&bytes[4..4 + principal_len]));
+        let token_id =
+            StoredTransactionTokenId::from_bytes(Cow::Borrowed(&bytes[4 + principal_len..]));
+        Self(principal, token_id)
     }
 }

@@ -20,11 +20,13 @@ use shared::{
             BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
             DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            GetStoredTransactionsResult, GetUserProfileResult, SaveStoredTransactionsResult,
+            SetUserShowTestnetsResult, UpdateContactResult,
             UpdateExperimentalFeaturesSettingsResult, UpdateUserAgreementsResult,
             UpdateUserNetworkSettingsResult,
         },
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        stored_transaction::{GetStoredTransactionsRequest, SaveStoredTransactionsRequest},
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
         Stats, Timestamp,
     },
@@ -38,6 +40,7 @@ mod contacts;
 mod signer;
 mod state;
 mod token;
+mod transactions;
 mod types;
 mod user_profile;
 mod utils;

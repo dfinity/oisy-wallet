@@ -197,6 +197,20 @@ type GetAllowedCyclesResult = variant {
 };
 type GetContactResult = variant { Ok : Contact; Err : ContactError };
 type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
+type GetStoredTransactionsRequest = record {
+	token_id : TransactionTokenId;
+	max_results : nat64;
+	start : opt nat64
+};
+type GetStoredTransactionsResponse = record {
+	next_start : opt nat64;
+	newest_block_number : opt nat64;
+	transactions : vec StoredTransaction
+};
+type GetStoredTransactionsResult = variant {
+	Ok : GetStoredTransactionsResponse;
+	Err : StoredTransactionError
+};
 type GetUserProfileError = variant { NotFound };
 type GetUserProfileResult = variant {
 	Ok : UserProfile;
@@ -265,6 +279,14 @@ type RateLimitError = record {
 	window_ns : nat64;
 	caller : principal
 };
+type SaveStoredTransactionsRequest = record {
+	token_id : TransactionTokenId;
+	transactions : vec StoredTransaction
+};
+type SaveStoredTransactionsResult = variant {
+	Ok;
+	Err : StoredTransactionError
+};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -298,6 +320,27 @@ type SplToken = record {
 	decimals : opt nat8;
 	token_address : text;
 	symbol : opt text
+};
+type StoredTransaction = record {
+	to : opt text;
+	token_id : opt nat32;
+	value : nat;
+	data : opt text;
+	from : text;
+	hash : text;
+	block_number : nat64;
+	chain_id : opt nat64;
+	nonce : opt nat32;
+	timestamp : nat64;
+	gas_limit : opt nat;
+	gas_used : opt nat;
+	gas_price : opt nat
+};
+type StoredTransactionError = variant {
+	DuplicateTransaction : record { hash : text };
+	InternalError : record { msg : text };
+	TooManyTransactions;
+	UserNotFound
 };
 type Stats = record {
 	user_profile_count : nat64;
@@ -333,6 +376,20 @@ type TokenAccountId = variant {
 	Icrcv2 : Icrcv2AccountId
 };
 type TokenSection = variant { Spam; Hidden };
+type TransactionTokenId = variant {
+	Erc20 : record { text; nat64 };
+	SolNativeDevnet;
+	Icrc : principal;
+	EvmNative : nat64;
+	Erc721 : record { text; nat64 };
+	SolNativeMainnet;
+	SplDevnet : text;
+	BtcNative;
+	SplMainnet : text;
+	IcpNative;
+	Erc1155 : record { text; nat64 };
+	Erc4626 : record { text; nat64 }
+};
 type TopUpCyclesLedgerError = variant {
 	InvalidArgPercentageOutOfRange : record {
 		max : nat8;
@@ -518,6 +575,16 @@ service : (Arg) -> {
 	// # Returns
 	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
+	// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
+	//
+	// # Returns
+	// - `Ok(GetStoredTransactionsResponse)` with the requested page of transactions
+	//
+	// # Errors
+	// Errors are enumerated by: `StoredTransactionError`.
+	get_stored_transactions : (GetStoredTransactionsRequest) -> (
+		GetStoredTransactionsResult
+	) query;
 	// Returns the caller's user profile.
 	//
 	// # Errors
@@ -552,6 +619,13 @@ service : (Arg) -> {
 	list_custom_tokens : () -> (vec CustomToken);
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
+	// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
+	//
+	// # Errors
+	// Errors are enumerated by: `StoredTransactionError`.
+	save_stored_transactions : (SaveStoredTransactionsRequest) -> (
+		SaveStoredTransactionsResult
+	);
 	// Add or update custom token for the user.
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();

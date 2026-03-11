@@ -217,6 +217,19 @@ export type GetAllowedCyclesResult =
 	| { Err: GetAllowedCyclesError };
 export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
+export interface GetStoredTransactionsRequest {
+	token_id: TransactionTokenId;
+	max_results: bigint;
+	start: [] | [bigint];
+}
+export interface GetStoredTransactionsResponse {
+	next_start: [] | [bigint];
+	newest_block_number: [] | [bigint];
+	transactions: Array<StoredTransaction>;
+}
+export type GetStoredTransactionsResult =
+	| { Ok: GetStoredTransactionsResponse }
+	| { Err: StoredTransactionError };
 export type GetUserProfileError = { NotFound: null };
 export type GetUserProfileResult = { Ok: UserProfile } | { Err: GetUserProfileError };
 export interface HasUserProfileResponse {
@@ -328,6 +341,31 @@ export interface SplToken {
 	token_address: string;
 	symbol: [] | [string];
 }
+export interface SaveStoredTransactionsRequest {
+	token_id: TransactionTokenId;
+	transactions: Array<StoredTransaction>;
+}
+export type SaveStoredTransactionsResult = { Ok: null } | { Err: StoredTransactionError };
+export interface StoredTransaction {
+	to: [] | [string];
+	token_id: [] | [number];
+	value: bigint;
+	data: [] | [string];
+	from: string;
+	hash: string;
+	block_number: bigint;
+	chain_id: [] | [bigint];
+	nonce: [] | [number];
+	timestamp: bigint;
+	gas_limit: [] | [bigint];
+	gas_used: [] | [bigint];
+	gas_price: [] | [bigint];
+}
+export type StoredTransactionError =
+	| { DuplicateTransaction: { hash: string } }
+	| { InternalError: { msg: string } }
+	| { TooManyTransactions: null }
+	| { UserNotFound: null };
 export interface Stats {
 	user_profile_count: bigint;
 	custom_token_count: bigint;
@@ -362,6 +400,19 @@ export type TokenAccountId =
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
 export type TokenSection = { Spam: null } | { Hidden: null };
+export type TransactionTokenId =
+	| { Erc20: [string, bigint] }
+	| { SolNativeDevnet: null }
+	| { Icrc: Principal }
+	| { EvmNative: bigint }
+	| { Erc721: [string, bigint] }
+	| { SolNativeMainnet: null }
+	| { SplDevnet: string }
+	| { BtcNative: null }
+	| { SplMainnet: string }
+	| { IcpNative: null }
+	| { Erc1155: [string, bigint] }
+	| { Erc4626: [string, bigint] };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {
@@ -591,6 +642,10 @@ export interface _SERVICE {
 	 * # Panics
 	 * - If the caller is anonymous.  See: `may_read_user_data`.
 	 */
+	get_stored_transactions: ActorMethod<
+		[GetStoredTransactionsRequest],
+		GetStoredTransactionsResult
+	>;
 	get_user_profile: ActorMethod<[], GetUserProfileResult>;
 	/**
 	 * Checks if the caller has an associated user profile.
@@ -626,6 +681,10 @@ export interface _SERVICE {
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
+	save_stored_transactions: ActorMethod<
+		[SaveStoredTransactionsRequest],
+		SaveStoredTransactionsResult
+	>;
 	/**
 	 * Add or update custom token for the user.
 	 */

@@ -6,6 +6,8 @@ import type {
 	CredentialSpec,
 	GetUserProfileError,
 	SelectedUtxosFeeResponse,
+	StoredTransaction,
+	TransactionTokenId,
 	UserProfile,
 	Utxo
 } from '$declarations/backend/backend.did';
@@ -195,4 +197,15 @@ export interface DeleteContactParams {
 export interface UpdateUserExperimentalFeatureSettings {
 	experimentalFeatures: UserExperimentalFeatures;
 	currentUserVersion?: bigint;
+}
+
+export interface GetStoredTransactionsParams {
+	tokenId: TransactionTokenId;
+	start?: bigint;
+	maxResults: bigint;
+}
+
+export interface SaveStoredTransactionsParams {
+	tokenId: TransactionTokenId;
+	transactions: StoredTransaction[];
 }
