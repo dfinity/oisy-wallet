@@ -78,6 +78,7 @@ export const tokenListEqual = <T extends { id: symbol }>(a: T[], b: T[]): boolea
 	if (a.length !== b.length) {
 		return false;
 	}
+
 	return a.every((item, i) => item.id === b[i].id);
 };
 
