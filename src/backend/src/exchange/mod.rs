@@ -23,6 +23,8 @@ const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60;
 /// and skipped during price refreshes (1 hour).
 pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60;
 
+/// Starts a recurring timer that refreshes exchange rates for active tokens
+/// every [`PRICE_REFRESH_INTERVAL_SEC`] seconds.
 pub(crate) fn start_exchange_rate_timer() {
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
 
