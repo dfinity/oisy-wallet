@@ -9,8 +9,7 @@ const DEBUG_HIT_FN = 'reactivityDebugHit';
 const debugModulePath = resolve('src/frontend/src/lib/utils/reactivity-debug.utils.ts');
 
 // Matches  $effect(() => {  |  $effect(async () => {  |  $derived.by(() => {
-const EFFECT_PATTERN =
-	/(\$(?:effect|derived\.by)\s*\(\s*(?:async\s+)?\(\s*\)\s*=>\s*\{)/g;
+const EFFECT_PATTERN = /(\$(?:effect|derived\.by)\s*\(\s*(?:async\s+)?\(\s*\)\s*=>\s*\{)/g;
 
 const extractFileLabel = (id: string): string => {
 	const idx = id.indexOf(SRC_FENCE);
@@ -105,13 +104,12 @@ export function reactivityDebugPlugin(): Plugin {
 				return;
 			}
 
-			const withImport =
-				alreadyImported
-					? result
-					: result.replace(
-							/(<script\b[^>]*>)/i,
-							`$1\n\timport { ${DEBUG_HIT_FN} } from '${DEBUG_IMPORT_SOURCE}';`
-						);
+			const withImport = alreadyImported
+				? result
+				: result.replace(
+						/(<script\b[^>]*>)/i,
+						`$1\n\timport { ${DEBUG_HIT_FN} } from '${DEBUG_IMPORT_SOURCE}';`
+					);
 
 			return { code: withImport, map: null };
 		}

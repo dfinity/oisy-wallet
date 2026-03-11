@@ -155,12 +155,12 @@ The plugin activates automatically when `DFX_NETWORK` is not `ic` (production) a
 
 ### Coverage
 
-| Reactive primitive              | Coverage                                                                        | Notes                                                                  |
-| ------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `derived()` from `svelte/store` | **Automatic** — all derived store files are instrumented via `resolveId`        | No code changes needed                                                 |
-| `$effect()` runes               | **Automatic** — all `.svelte` files are instrumented via `transform`            | No code changes needed                                                 |
-| `$derived.by()` runes           | **Automatic** — block-body callbacks are instrumented via `transform`           | No code changes needed                                                 |
-| `$derived()` runes (expression) | **Manual** — use Svelte 5's built-in `$inspect(value)` for ad-hoc debugging    | See [Svelte docs on $inspect](https://svelte.dev/docs/svelte/$inspect) |
+| Reactive primitive              | Coverage                                                                    | Notes                                                                  |
+| ------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `derived()` from `svelte/store` | **Automatic** — all derived store files are instrumented via `resolveId`    | No code changes needed                                                 |
+| `$effect()` runes               | **Automatic** — all `.svelte` files are instrumented via `transform`        | No code changes needed                                                 |
+| `$derived.by()` runes           | **Automatic** — block-body callbacks are instrumented via `transform`       | No code changes needed                                                 |
+| `$derived()` runes (expression) | **Manual** — use Svelte 5's built-in `$inspect(value)` for ad-hoc debugging | See [Svelte docs on $inspect](https://svelte.dev/docs/svelte/$inspect) |
 
 ### Usage
 
