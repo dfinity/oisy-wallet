@@ -4,11 +4,9 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { token } from '$lib/stores/token.store';
 import type { OptionBalance } from '$lib/types/balance';
 import { checkAllBalancesZero, checkAnyNonZeroBalance } from '$lib/utils/balances.utils';
-import { derivedMemo } from '$lib/utils/derived-memo.utils';
+import { booleanEqual, derivedMemo } from '$lib/utils/derived-memo.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
-
-const booleanEqual = (a: boolean, b: boolean): boolean => a === b;
 
 export const balance: Readable<OptionBalance> = derived(
 	[balancesStore, token],
