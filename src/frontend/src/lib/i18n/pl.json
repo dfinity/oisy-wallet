@@ -1503,8 +1503,6 @@
 		},
 		"label": {
 			"reimbursement": "Zwrot kosztów",
-			"twin_token_sent": "Wysłano $twinToken",
-			"ck_token_sent": "Wysłano $ckToken",
 			"twin_token_converted": "Przekonwertowano z $twinToken",
 			"ck_token_converted": "Przekonwertowano z $ckToken",
 			"sending_twin_token": "Wysyłanie $twinToken",

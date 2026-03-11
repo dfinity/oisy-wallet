@@ -92,9 +92,11 @@ export type BtcGetFeePercentilesResult =
 			Ok: BtcGetFeePercentilesResponse;
 	  }
 	| { Err: SelectedUtxosFeeError };
-export type BtcGetPendingTransactionsError = {
-	InternalError: { msg: string };
-};
+export type BtcGetPendingTransactionsError =
+	| {
+			RateLimited: RateLimitError;
+	  }
+	| { InternalError: { msg: string } };
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }

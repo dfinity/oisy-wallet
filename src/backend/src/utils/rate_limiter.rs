@@ -99,7 +99,9 @@ impl RateLimiter {
 mod tests {
     use pretty_assertions::assert_eq;
     use shared::types::{
-        bitcoin::{BtcAddPendingTransactionError, SelectedUtxosFeeError},
+        bitcoin::{
+            BtcAddPendingTransactionError, BtcGetPendingTransactionsError, SelectedUtxosFeeError,
+        },
         signer::AllowSigningError,
     };
 
@@ -285,13 +287,36 @@ mod tests {
             .check_at(caller, 2 * ONE_SEC)
             .map_err(BtcAddPendingTransactionError::RateLimited);
 
-        match res.unwrap_err() {
-            BtcAddPendingTransactionError::RateLimited(e) => {
-                assert_eq!(e.max_calls, 1);
-                assert_eq!(e.window_ns, 60 * ONE_SEC);
-                assert_eq!(e.caller, caller);
-            }
-            other => panic!("expected RateLimited, got {other:?}"),
-        }
+        let err = res.unwrap_err();
+
+        let BtcAddPendingTransactionError::RateLimited(e) = err else {
+            panic!("expected RateLimited");
+        };
+
+        assert_eq!(e.max_calls, 1);
+        assert_eq!(e.window_ns, 60 * ONE_SEC);
+        assert_eq!(e.caller, caller);
+    }
+
+    #[test]
+    fn btc_get_pending_tx_error_carries_rate_limit_details() {
+        let rl = RateLimiter::new(1, 60 * ONE_SEC);
+        let caller = test_principal(42);
+
+        rl.check_at(caller, ONE_SEC).unwrap();
+
+        let res: Result<(), BtcGetPendingTransactionsError> = rl
+            .check_at(caller, 2 * ONE_SEC)
+            .map_err(BtcGetPendingTransactionsError::RateLimited);
+
+        let err = res.unwrap_err();
+
+        let BtcGetPendingTransactionsError::RateLimited(e) = err else {
+            panic!("expected RateLimited");
+        };
+
+        assert_eq!(e.max_calls, 1);
+        assert_eq!(e.window_ns, 60 * ONE_SEC);
+        assert_eq!(e.caller, caller);
     }
 }
