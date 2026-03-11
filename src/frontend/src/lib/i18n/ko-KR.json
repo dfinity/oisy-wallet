@@ -71,369 +71,369 @@
 	},
 	"navigation": {
 		"text": {
-			"tokens": "",
-			"settings": "",
-			"dapp_explorer": "",
-			"activity": "",
-			"airdrops": "",
-			"earning": "",
-			"source_code_on_github": "",
-			"view_on_explorer": "",
-			"source_code": "",
-			"changelog": "",
-			"documentation": "",
-			"support": "",
-			"confirm_navigate": "",
-			"vip_qr_code": "",
-			"binance_qr_code": "",
-			"refer_a_friend": "",
-			"address_book": "",
-			"hide_balances": "",
-			"show_balances": "",
-			"privacy_mode_enabled": "",
-			"privacy_mode_disabled": ""
+			"tokens": "자산",
+			"settings": "설정",
+			"dapp_explorer": "탐색",
+			"activity": "활동",
+			"airdrops": "리워드",
+			"earning": "수익",
+			"source_code_on_github": "GitHub 소스 코드",
+			"view_on_explorer": "탐색기에서 보기",
+			"source_code": "소스 코드",
+			"changelog": "변경 로그",
+			"documentation": "문서",
+			"support": "지원",
+			"confirm_navigate": "정말로 이 페이지를 떠나시겠습니까?",
+			"vip_qr_code": "VIP QR 코드",
+			"binance_qr_code": "바이낸스 클럽하우스 QR",
+			"refer_a_friend": "친구 추천",
+			"address_book": "연락처",
+			"hide_balances": "잔액 숨기기",
+			"show_balances": "잔액 표시",
+			"privacy_mode_enabled": "개인정보 보호 모드가 활성화되었습니다. [P]를 눌러 잔액을 다시 표시하세요.",
+			"privacy_mode_disabled": "개인정보 보호 모드가 비활성화되었습니다. [P]를 눌러 잔액을 숨기세요."
 		},
 		"alt": {
-			"tokens": "",
-			"settings": "",
-			"dapp_explorer": "",
-			"activity": "",
-			"airdrops": "",
-			"menu": "",
-			"changelog": "",
-			"documentation": "",
-			"support": "",
-			"open_twitter": "",
-			"vip_qr_code": "",
-			"binance_qr_code": "",
-			"refer_a_friend": "",
-			"address_book": "",
-			"hide_balances": "",
-			"show_balances": ""
+			"tokens": "자산 보기로 이동",
+			"settings": "설정 열기",
+			"dapp_explorer": "앱 탐색기 열기",
+			"activity": "활동 보기 열기",
+			"airdrops": "리워드 보기 열기",
+			"menu": "지갑 주소, 설정, 로그아웃 및 외부 링크",
+			"changelog": "GitHub에서 $oisy_name의 변경 로그를 열어 최신 업데이트를 확인하세요",
+			"documentation": "$oisy_name 문서 열기",
+			"support": "$oisy_name 문서의 지원 섹션 열기",
+			"open_twitter": "DFINITY X/트위터 피드 열기",
+			"vip_qr_code": "초대 링크 생성",
+			"binance_qr_code": "바이낸스 클럽하우스 링크 생성",
+			"refer_a_friend": "친구를 위한 추천 링크 생성",
+			"address_book": "연락처 열기",
+			"hide_balances": "표시된 잔액 숨기기",
+			"show_balances": "숨겨진 잔액 표시"
 		},
 		"short": {
-			"documentation": ""
+			"documentation": "문서"
 		}
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
-			"logout": "",
-			"lock": "",
-			"authenticate": "",
-			"asset_types": "",
-			"instant_and_private": "",
-			"advanced_cryptography": "",
-			"social_login": ""
+			"title_part_1": "나의 디지털 자산",
+			"title_part_2": "안전하고 프라이빗하게",
+			"logout": "로그아웃",
+			"lock": "잠금",
+			"authenticate": "열기 또는 만들기",
+			"asset_types": "비트코인, 솔라나, 이더리움, ICP 등 다양한 자산 관리",
+			"instant_and_private": "개인정보 보호가 기본인 내장 AI 어시스턴트",
+			"advanced_cryptography": "고급 암호화 기술로 보호 - 100% 온체인",
+			"social_login": "즉각적이고 프라이빗한 액세스 + 소셜 로그인"
 		},
 		"alt": {
-			"preview": ""
+			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기"
 		},
 		"message": {
-			"session_locked": ""
+			"session_locked": "다른 탭에서 세션이 잠겼습니다."
 		},
 		"warning": {
-			"not_signed_in": "",
-			"session_expired": "",
-			"reload_and_retry": ""
+			"not_signed_in": "로그인되어 있지 않습니다. 계속하려면 로그인해 주세요.",
+			"session_expired": "세션이 만료되어 로그아웃되었습니다.",
+			"reload_and_retry": "로그인 중 문제가 발생했습니다. 페이지를 새로고침하고 다시 시도해 주세요. 문제가 지속되면 지원팀에 문의하세요."
 		},
 		"error": {
-			"no_internet_identity": "",
-			"invalid_pouh_credential": "",
-			"error_validating_pouh_credential_oisy": "",
-			"error_validating_pouh_credential": "",
-			"error_requesting_pouh_credential": "",
-			"missing_pouh_issuer_origin": "",
-			"no_pouh_credential": "",
-			"error_while_signing_in": "",
-			"unexpected_issue_with_syncing": ""
+			"no_internet_identity": "인터넷 아이덴티티가 없습니다.",
+			"invalid_pouh_credential": "죄송합니다. 인류 자격 증명을 검증하는 중 오류가 발생했습니다. 발급자에게 문의하여 자격 증명을 다시 요청해 주세요.",
+			"error_validating_pouh_credential_oisy": "죄송합니다. $oisy_short에서 인류 자격 증명을 검증하는 중 오류가 발생했습니다: $error",
+			"error_validating_pouh_credential": "죄송합니다. 인류 자격 증명을 검증하는 중 오류가 발생했습니다.",
+			"error_requesting_pouh_credential": "죄송합니다. 인류 자격 증명을 요청하는 중 오류가 발생했습니다.",
+			"missing_pouh_issuer_origin": "죄송합니다. 인류 자격 증명을 요청하는 중 오류가 발생했습니다. 발급자 출처가 없습니다.",
+			"no_pouh_credential": "죄송합니다. 인류 자격 증명을 요청하는 중 오류가 발생했습니다. Decide AI에 유효한 자격 증명이 있으신가요?",
+			"error_while_signing_in": "로그인 중 문제가 발생했습니다.",
+			"unexpected_issue_with_syncing": "인증 상태를 동기화하는 중 예기치 않은 문제가 발생했습니다."
 		},
 		"help": {
 			"text": {
-				"title": "",
-				"description": "",
-				"login_page_looks_different": "",
-				"use_identity_number": "",
-				"feedback_text": "",
-				"thanks_text": "",
-				"useful_links": "",
-				"identity_new_identity": "",
-				"switch_to_new_internet_identity": "",
-				"identity_new_identity_title": "",
-				"identity_new_identity_item_1": "",
-				"oisy_introduction": "",
-				"logging_into_oisy": "",
-				"creating_a_wallet": "",
-				"asset_control": "",
-				"internet_identity_help_center": "",
-				"need_help": "",
-				"sign_in": ""
+				"title": "로그인 과정이 중단되었습니다",
+				"description": "로그인 또는 회원가입을 취소하신 것 같습니다. 경험을 개선할 수 있도록 어떤 일이 있었는지 알고 싶습니다.",
+				"login_page_looks_different": "로그인 페이지가 왜 다르게 보이나요?",
+				"use_identity_number": "인터넷 아이덴티티 번호를 사용하고 싶습니다",
+				"feedback_text": "여러분의 피드백은 $oisy_short을 더 좋게 만드는 데 도움이 됩니다.",
+				"thanks_text": "감사합니다!",
+				"useful_links": "유용한 링크",
+				"identity_new_identity": "$oisy_short 지갑은 인터넷 아이덴티티 도메인을 <span class=\"font-bold\">identity.internetcomputer.org</span>로 전환합니다",
+				"switch_to_new_internet_identity": "$oisy_name이 인터넷 아이덴티티 2.0으로 전환합니다",
+				"identity_new_identity_title": "$oisy_name은 이제 인터넷 아이덴티티 2.0을 사용하며, 여러 개선 사항을 제공하고 Apple, Google 또는 Microsoft 로그인과 아이덴티티를 연결할 수 있습니다.",
+				"identity_new_identity_item_1": "기존 아이덴티티를 업데이트하려면 새 로그인 페이지 상단의 \"아이덴티티 업그레이드\" 링크를 클릭하고 단계를 따르세요.",
+				"oisy_introduction": "$oisy_short 소개",
+				"logging_into_oisy": "$oisy_short에 로그인하기",
+				"creating_a_wallet": "지갑 만들기",
+				"asset_control": "$oisy_short 지갑의 자산 관리, 복구 및 거버넌스",
+				"internet_identity_help_center": "인터넷 아이덴티티 2.0 도움말 센터",
+				"need_help": "도움이 필요하신가요",
+				"sign_in": "로그인하는 데?"
 			},
 			"alt": {
-				"internet_identity": ""
+				"internet_identity": "새 인터넷 아이덴티티 이미지"
 			}
 		}
 	},
 	"lock": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
-			"unlock": "",
-			"logout": "",
-			"logout_clear_cash_message": "",
-			"learn_more": ""
+			"title_part_1": "계속하려면 잠금 해제하세요",
+			"title_part_2": "지갑을 안전하게 보호하기 위해 잠금 설정되었습니다. 이전에 하던 작업을 계속하거나 로그아웃하세요.",
+			"unlock": "잠금 해제",
+			"logout": "로그아웃",
+			"logout_clear_cash_message": "로그아웃하면 모든 캐시 데이터가 삭제됩니다",
+			"learn_more": "자세히 알아보기"
 		}
 	},
 	"dapps": {
 		"text": {
-			"all_dapps": "",
-			"featured": "",
-			"sign_in": "",
-			"title": "",
-			"open_dapp": "",
-			"submit_your_dapp": ""
+			"all_dapps": "모든 앱",
+			"featured": "추천",
+			"sign_in": "로그인하여 생태계를 탐색하세요.",
+			"title": "앱 탐색",
+			"open_dapp": "$dAppName 열기",
+			"submit_your_dapp": "앱 제출하기"
 		},
 		"alt": {
-			"learn_more": "",
-			"logo": "",
-			"show_all": "",
-			"show_tag": "",
-			"open_dapp": "",
-			"open_telegram": "",
-			"open_open_chat": "",
-			"open_twitter": "",
-			"source_code_on_github": "",
-			"submit_your_dapp": "",
-			"tags": "",
-			"website": ""
+			"learn_more": "$dAppName에 대해 자세히 알아보기",
+			"logo": "$dAppName 로고",
+			"show_all": "모든 애플리케이션 표시",
+			"show_tag": "$tag 태그가 있는 애플리케이션 표시",
+			"open_dapp": "$dAppName 앱 열기",
+			"open_telegram": "텔레그램에서 $dAppName 열기",
+			"open_open_chat": "OpenChat에서 $dAppName 열기",
+			"open_twitter": "$dAppName X/트위터 피드 열기",
+			"source_code_on_github": "GitHub에서 $dAppName의 소스 코드 보기",
+			"submit_your_dapp": "앱 탐색기에 표시할 앱 제출하기",
+			"tags": "$dAppName 관련 태그",
+			"website": "$dAppName 이미지"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
-			"ai": "",
-			"defi": "",
-			"game": "",
-			"nft": "",
-			"rwa": "",
-			"social_media": "",
-			"staking": "",
-			"tools": "",
-			"walletconnect": ""
+			"aa_new": "최근 추가됨",
+			"ab_icp": "ICP",
+			"ai": "AI",
+			"defi": "DeFi",
+			"game": "게임",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social_media": "소셜 미디어",
+			"staking": "스테이킹",
+			"tools": "도구",
+			"walletconnect": "WalletConnect"
 		},
 		"descriptions": {
 			"kongswap": {
-				"name": "",
-				"one_liner": "",
-				"description": "",
+				"name": "KongSwap",
+				"one_liner": "원스톱 토큰 거래소 - KongSwap을 사용해 모든 체인에서 손쉽게 토큰을 거래하세요.",
+				"description": "KongSwap은 ICP, 비트코인, 이더리움, 솔라나에 걸쳐 브릿지 없이 크로스체인 거래를 제공하는 완전 탈중앙화 거래소(DEX)입니다. <br/><br/>체인 퓨전 기술과 인터넷 컴퓨터 프로토콜을 활용하여 수수료를 낮추고, 사용자 경험을 단순화하며, 유동성 분산을 방지합니다. 프론트엔드와 백엔드 모두 스마트 계약을 통해 온체인에서 운영되어 원활한 DeFi 경험을 제공합니다.",
 				"carousel": {
-					"text": "",
-					"call_to_action": ""
+					"text": "DEX에서 토큰 스왑",
+					"call_to_action": "KongSwap 사용해보기"
 				}
 			},
 			"openchat": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": "",
-				"stats": "",
+				"name": "OpenChat",
+				"one_liner": "WhatsApp의 탈중앙화 대안.",
+				"call_to_action": "OpenChat으로 이동",
+				"description": "OpenChat은 인터넷 컴퓨터 블록체인에서 엔드투엔드로 실행되는 완전한 기능의 채팅 애플리케이션입니다.<br/><br/>OpenChat은 DAO로서 커뮤니티에 의해 운영되며 자체 CHAT 토큰을 보유합니다. CHAT 토큰은 사용자에게 성장을 촉진하고 수백만 명의 지지자 팀을 구성하는 보상으로 지급되어, OpenChat이 중앙화된 빅테크 경쟁자들에 대한 실질적인 대안이 될 수 있도록 합니다!",
+				"stats": "80,000명 이상의 사용자",
 				"carousel": {
-					"text": "",
-					"call_to_action": ""
+					"text": "OpenChat - 프라이버시 메신저",
+					"call_to_action": "더 보기"
 				}
 			},
 			"decideid": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"stats": "",
-				"description": "",
+				"name": "DecideID",
+				"one_liner": "신뢰할 수 있는 디지털 참여를 위한 고유 신원 인증.",
+				"call_to_action": "DecideID 열기",
+				"stats": "50,000건 이상의 추론 요청",
+				"description": "Decide ID는 Decide AI 시스템의 핵심으로, 고유한 인격 증명(PoP) 방법론을 통해 신뢰와 보안을 보장합니다. 가입 시 여러 증명을 제공하고 특별한 도전 과제를 완료하는 인증 과정을 거쳐 신원을 확인합니다. 이를 통해 모든 사용자가 실제 인물이며, 중복되지 않고, 봇이 아님을 보장합니다. 이 과정에서 고유한 온체인 식별자인 Principal ID가 생성됩니다. 이는 인증된 인격이 필요한 다양한 애플리케이션에서 사용되어, 앱의 회원가입 또는 로그인 프로세스에 안전하고 원활하게 통합됩니다. 또한 영지식 증명을 사용하여 생체 정보와 같은 개인 데이터가 기밀로 안전하게 유지됩니다.<br/><br/>Decide ID와 함께 유연하고 안전하며 프라이버시 우선의 방식으로 온라인에서 인증하고 참여하세요.",
 				"carousel": {
-					"text": "",
-					"call_to_action": ""
+					"text": "프라이버시 우선의 방식으로 온라인에서 인증하고 참여하세요",
+					"call_to_action": "관심 있으신가요?"
 				}
 			},
 			"icpswap": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "ICPSwap",
+				"one_liner": "ICPSwap은 완전히 온체인으로 구축된 AMM DEX로, ICP의 풀스택 금융 및 DAO 서비스의 중심 허브입니다.",
+				"call_to_action": "미래를 만나보세요",
+				"description": "미래 탈중앙화 금융의 허브!<br/>ICPSwap은 거래소를 허브로 재정의하여 인터넷 컴퓨터 위에서 풀스택 금융, 시장 및 DAO 서비스를 제공합니다. DFINITY의 인터넷 컴퓨터 기반 기술을 바탕으로 ICPSwap은 사용자와 개발자가 함께 프로젝트를 구축하는 방식을 재구성하여 진정한 탈중앙화 금융 생태계를 구축합니다."
 			},
 			"nnsdapp": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "NNS Dapp",
+				"one_liner": "NNS 프론트엔드 dapp을 통해 누구나 사용자 친화적인 UI로 인터넷 컴퓨터의 네트워크 신경 시스템과 상호작용할 수 있습니다.",
+				"call_to_action": "참여하기",
+				"description": "NNS 프론트엔드 dapp을 통해 누구나 사용자 친화적인 UI로 인터넷 컴퓨터의 네트워크 신경 시스템과 상호작용할 수 있습니다. 블록체인을 통해 완전한 엔드투엔드로 제공되는 이 탈중앙화 dapp을 통해 다음 작업을 쉽게 수행할 수 있습니다:<br/><ul><li>토큰 송수신 (ICP, ckBTC, CHAT 등)</li><li>뉴런 스테이킹 및 관리</li><li>인터넷 컴퓨터 및 SNS 거버넌스 투표</li><li>탈중앙화 스왑 참여</li><li>캐니스터 생성 및 충전</li><li>거버넌스 보상 수령</li></ul>"
 			},
 			"uniswap": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Uniswap",
+				"one_liner": "최대 규모의 온체인 마켓플레이스. 이더리움 및 11개 이상의 체인에서 암호화폐를 사고 파세요.",
+				"call_to_action": "지금 스왑하기",
+				"description": "Uniswap은 스마트 계약을 사용하여 거래 실행을 위한 유동성 풀을 생성하는 탈중앙화 암호화폐 거래소입니다. 오픈 소스 프로젝트로, 중앙화 거래소 대신 스마트 계약을 통해 거래를 촉진하는 DeFi 제품에 속합니다."
 			},
 			"oneinch": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "1inch",
+				"one_liner": "여러 네트워크의 수백 개 DEX에서 최적화된 거래를 경험하세요.",
+				"call_to_action": "살펴보기",
+				"description": "1inch 네트워크는 1inch dApp, 지갑, 개발자 포털, 포트폴리오, Fusion 등의 제품으로 구성된 DeFi 생태계를 제공합니다. 1inch는 여러 블록체인의 수백 개 유동성 소스에 접근할 수 있습니다.<br/><br/>1inch 스왑 엔진으로 구동되는 Fusion 모드를 통해 네트워크 수수료 없이 가장 유리한 환율로 토큰을 스왑할 수 있습니다. 또한 Fusion 모드는 MEV 추가 보호 기능을 제공합니다. Fusion 모드의 모든 스왑은 사용자의 스왑을 MEV로부터 보호하는 가장 정교하고 효율적인 방법을 사용하는 전문 트레이더인 리졸버에 의해 실행됩니다."
 			},
 			"compound_finance": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Compound Finance",
+				"one_liner": "이더리움 기반의 탈중앙화 머니 마켓 및 대출 프로토콜.",
+				"call_to_action": "시작하기",
+				"description": "Compound Finance는 <b>이더리움 기반의 탈중앙화 머니 마켓 및 대출 프로토콜</b>입니다. Compound III(Comet) 프로토콜을 통해 사용자는 단일 담보 \"기반 자산\" 풀에서 차입 또는 대출할 수 있습니다. Compound III는 이더리움, Polygon, Base, Arbitrum에서 기반 자산(예: USDC, WETH 등)을 지원합니다."
 			},
 			"aave": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Aave",
+				"one_liner": "Aave는 사용자가 공급자 또는 차입자로 참여할 수 있는 탈중앙화 비수탁형 유동성 프로토콜입니다.",
+				"call_to_action": "DeFi의 완전한 힘에 접근하세요",
+				"description": "Aave는 사용자가 공급자 또는 차입자로 참여할 수 있는 탈중앙화 비수탁형 유동성 프로토콜입니다. 공급자는 시장에 유동성을 제공하며 이자를 받고, 차입자는 차입 금액을 초과하는 담보를 제공하여 유동성에 접근할 수 있습니다.\n완전히 무허가형으로, 누구든 사용자 친화적인 인터페이스 또는 지원되는 블록체인 네트워크의 스마트 계약을 통해 Aave에 접근하고 상호작용할 수 있습니다."
 			},
 			"eigenlayer": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "EigenLayer",
+				"one_liner": "ERC20 토큰 스테이킹을 허용하는 리스테이킹을 도입한 이더리움 기반 프로토콜.",
+				"call_to_action": "지금 리스테이킹",
+				"description": "EigenLayer는 암호경제 보안의 새로운 기본 요소인 리스테이킹을 도입한 이더리움 기반 프로토콜입니다. 사용자는 Native ETH, 유동 스테이킹 토큰(LST), EIGEN 토큰 또는 ERC20 토큰과 같은 자산을 EigenLayer 스마트 계약에 스테이킹하여 네트워크의 추가 애플리케이션에 이더리움의 암호경제 보안을 확장할 수 있습니다."
 			},
 			"curve_finance": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Curve Finance",
+				"one_liner": "이더리움 및 EVM 호환 체인의 선도적인 DEX, 스테이블코인 공급자 및 대출 플랫폼.",
+				"call_to_action": "경험해보기",
+				"description": "Curve Finance는 이더리움 및 EVM 호환 체인의 선도적인 탈중앙화 거래소, 스테이블코인 공급자 및 대출 플랫폼입니다. 스테이블코인 및 변동성 자산을 위한 고급 자동화 마켓 메이커와 대출을 위한 독자적인 소프트 청산 시스템으로 잘 알려져 있습니다."
 			},
 			"sonic": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": "",
+				"name": "Sonic",
+				"one_liner": "DeFi의 완전한 잠재력과 간소화된 거래를 경험하세요. 토큰 스왑, 유동성 공급자로 수익 창출, Bitfinity EVM의 선도적인 AMM 활용.",
+				"call_to_action": "Sonic 열기",
+				"description": "인터넷 컴퓨터 프로토콜(ICP) 기반의 멀티체인 탈중앙화 거래소인 Sonic은 광범위한 DeFi 서비스를 제공합니다. 사용자는 토큰과 무기한 계약을 쉽게 거래하고, 유동성을 제공하며, LBP 토큰 세일에 참여할 수 있습니다. DAO 거버넌스 참여, 보상 스테이킹, 플랫폼 결정 투표도 가능합니다.<br/><br/>완전 온체인 및 오픈 소스! 전문가처럼 토큰을 스왑하고, 유동성 공급자로 수수료를 쌓고, AMM에 참여하며, Sonic DAO의 핵심 구성원이 되세요.",
 				"carousel": {
-					"text": "",
-					"call_to_action": ""
+					"text": "DeFi의 완전한 잠재력을 경험하세요",
+					"call_to_action": "Sonic 열기"
 				}
 			},
 			"raydium": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Raydium",
+				"one_liner": "솔라나 블록체인에 구축된 DEX 및 자동화 마켓 메이커로, 빠른 거래를 가능하게 하는 중앙 지정가 주문서를 제공합니다.",
+				"call_to_action": "DeFi의 진화를 이끌어가세요",
+				"description": "Raydium은 솔라나 블록체인에 구축된 자동화 마켓 메이커(AMM)로, AMM 기술과 Serum 탈중앙화 거래소 유동성에 대한 고유한 접근을 결합합니다. AMM으로서 Raydium은 유동성 풀을 사용하여 무허가 방식으로 디지털 자산 거래를 가능하게 합니다."
 			},
 			"jupiter": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Jupiter",
+				"one_liner": "지원되는 모든 토큰 쌍에서 최선의 스왑을 최적화하는 솔라나 기반 DEX 애그리게이터.",
+				"call_to_action": "무한한 가능성으로",
+				"description": "Jupiter는 솔라나 블록체인의 탈중앙화 금융 플랫폼으로, 유동성 애그리게이터로서 DeFi 공간 내 거래 활동을 간소화하고 최적화합니다. 유동성 제공과 토큰 스왑을 촉진하도록 설계된 프로토콜로, 효율적이고 저지연 및 비용 효율적인 거래를 보장합니다. 자동화 마켓 메이커(AMM) 모델을 통해 사용자는 토큰 스왑, 유동성 제공, 수익 파밍에 참여할 수 있습니다."
 			},
 			"waterneuron": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "WaterNeuron",
+				"one_liner": "ICP 유동 스테이킹 - ICP를 유동 스테이킹하여 자본 효율성을 극대화하세요.",
+				"description": "WaterNeuron은 토큰을 유동적으로 유지하면서 ICP 스테이킹 보상에 노출을 유지할 수 있도록 하여 보다 자본 효율적인 스테이킹 방법을 제공합니다. 이 방식은 스테이킹 프로세스를 단순화하여 보상 극대화를 위한 특정 검증자 선택이 필요 없습니다."
 			},
 			"taggr": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Taggr",
+				"one_liner": "탈중앙화 소셜 미디어 - 게시하고, 수익을 올리고, 소유하세요.",
+				"call_to_action": "Taggr로 이동",
+				"description": "Taggr는 인터넷 컴퓨터를 기반으로 하는 공개 분산 컴퓨팅 네트워크에서 운영되는 완전 탈중앙화 소셜 미디어 플랫폼입니다. 기업이 통제하는 전통적인 소셜 미디어 플랫폼과 달리, Taggr는 전적으로 사용자에 의해 소유되고 운영됩니다."
 			},
 			"toolkit": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Toolkit",
+				"one_liner": "거버넌스와 협업이 만나 혁신을 점화하는 곳.",
+				"description": "Toolkit은 인터넷 컴퓨터의 서비스 신경 시스템(SNS) 및 프로젝트 관리를 위한 다재다능한 도구 모음입니다. 거버넌스 제안부터 캐니스터 배포까지, 사용자가 원활하게 혁신하고, 협업하고, 탈중앙화할 수 있도록 지원합니다."
 			},
 			"altitudefi": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Altitude",
+				"one_liner": "Altitude는 사용자의 부채와 담보를 실시간으로 적극적으로 관리하여 자본 효율성을 최적화합니다.",
+				"description": "DeFi 대출은 일반적으로 과도한 담보와 낮은 자본 효율성을 요구하는데, Altitude는 DeFi 대출을 최적화하는 비수탁형 프로토콜입니다. Altitude는 사용자의 부채와 담보를 실시간으로 적극적으로 관리하여 자본 효율성을 최적화합니다."
 			},
 			"usdai": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "USD.AI",
+				"one_liner": "수익 창출 AI 컴퓨팅 인프라로 USDai를 지원하고 sUSDai를 통해 수익을 제공하는 합성 달러 프로토콜.",
+				"description": "USD.AI는 수익 창출 AI 컴퓨팅 인프라로 뒷받침되는 합성 달러 프로토콜로, USDai라는 탈중앙화 스테이블코인을 생성합니다. 사용자는 USDai를 보유하거나 스테이킹하여 프로토콜 수익을 반영하는 수익 창출 버전인 sUSDai를 받을 수 있습니다. 이 시스템은 법정화폐 담보 스테이블코인에 대한 구성 가능하고 생산적이며 탈중앙화된 대안을 만들도록 설계되었습니다."
 			},
 			"caffeine": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": "",
+				"name": "Caffeine",
+				"one_liner": "자체 작성 앱을 구축하기 위한 최초의 플랫폼.",
+				"call_to_action": "Caffeine 사용해보기",
+				"description": "Caffeine은 자체 작성 앱을 구축하기 위한 최초의 플랫폼입니다. 데스크탑 또는 모바일에서 AI와 대화하기만 하면 OISY 지갑에 연결되는 앱과 서비스를 포함한 앱이 생성됩니다. AI 기반 개발로 앱 개발의 미래를 경험해보세요.",
 				"carousel": {
-					"text": "",
-					"call_to_action": ""
+					"text": "안녕하세요, 자체 작성 인터넷",
+					"call_to_action": "더 알아보기"
 				}
 			},
 			"beam": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Beam",
+				"one_liner": "프론티어 기술, 특히 Web3 게임에 투자하고 가속화하며, Beam 네트워크의 생태계에 자금을 지원하고 구동하는 독립적인 L1 블록체인.",
+				"call_to_action": "함께하기",
+				"description": "Beam은 게임, Web3 및 프론티어 혁신 전반에 걸쳐 고영향 기술에 자금을 지원하고 가속화하도록 설계된 독립적인 레이어 1 블록체인입니다. 온체인 재무 및 그랜트 생태계로 뒷받침되는 Beam은 팀과 인프라에 직접 투자합니다. 이 체인은 기본 도구와 긴밀한 창업자 협업을 통해 확장 가능한 탈중앙화 애플리케이션을 지원합니다."
 			},
 			"axie_infinity": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Axie Infinity",
+				"one_liner": "플레이어가 NFT 생물(Axie)을 수집, 사육, 전투하고 Ronin 사이드체인의 플레이어 소유 경제에서 토큰(AXS, SLP)을 획득하는 포켓몬 스타일의 블록체인 게임.",
+				"description": "Axie Infinity는 플레이어가 Axie라고 불리는 NFT 생물을 수집, 사육, 전투하는 플레이 투 언 블록체인 게임입니다. Ronin 사이드체인에 구축된 이 게임은 플레이어에게 $AXS 및 $SLP 토큰을 보상으로 제공하여 소유권과 경쟁의 순환 경제를 만듭니다. Axie는 P2E 모델을 선도했으며 Web3의 초기 주류 게임 성공 사례 중 하나가 되었습니다."
 			},
 			"mobox": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Mobox",
+				"one_liner": "플레이 투 언과 커뮤니티 거버넌스를 기반으로 무료 플레이 게임, DeFi 수익 파밍, NFT 메커니즘을 결합한 BNB 체인의 GameFi 플랫폼.",
+				"description": "MOBOX는 DeFi 수익 파밍, NFT 생태계, 무료 플레이 게임을 결합한 BNB 체인의 GameFi 플랫폼입니다. 플레이어는 게임플레이, NFT 스테이킹, 수익 파밍을 통해 MBOX 토큰을 획득하며 탈중앙화 거버넌스에 참여합니다. MOMO NFT와 크로스 게임 유틸리티를 통해 MOBOX는 완전히 게임화된 경제를 구축하고자 합니다."
 			},
 			"cyql": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "cyql.io",
+				"one_liner": "인터넷 컴퓨터 생태계 허브. 인터넷 컴퓨터의 최신 Web3 프로젝트를 발견하고 추적하세요.",
+				"description": "cyql.io – 인터넷 컴퓨터 생태계 허브. 인터넷 컴퓨터의 최신 Web3 프로젝트를 발견하고 추적하세요. 게임, AI 에이전트, 메타버스 세계부터 소셜 dApp, 베팅, DeFi에 이르기까지 cyql.io는 탈중앙화 기술의 미래를 탐색하는 놀이터입니다."
 			},
 			"icpanda_message": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "dMsg.net",
+				"one_liner": "Signal의 탈중앙화 대안.",
+				"description": "ICPanda Message(dMsg.net)는 인터넷 컴퓨터 블록체인에서 완전히 실행되는 탈중앙화 엔드투엔드 암호화 메시징 애플리케이션입니다."
 			},
 			"opensea": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "OpenSea",
+				"one_liner": "OpenSea, 모든 것을 교환하세요 — 토큰 거래 및 NFT 마켓플레이스. 온체인에서 발견하고, 거래하고, 창작하기 가장 좋은 곳에 오신 것을 환영합니다.",
+				"description": "OpenSea는 사용자가 예술, 수집품, 가상 아이템과 같은 고유한 디지털 자산을 생성, 구매, 판매, 거래할 수 있는 세계 최대의 탈중앙화 대체 불가능 토큰(NFT) 마켓플레이스입니다. 2017년에 설립되었으며 여러 블록체인에서 운영되어 사용자가 암호화폐 지갑을 연결하여 디지털 자산을 관리할 수 있습니다."
 			},
 			"pacifica": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Pacifica",
+				"one_liner": "Pacifica는 사용자가 레버리지를 활용하여 영구 암호화폐 선물을 거래할 수 있는 솔라나 네트워크 기반의 탈중앙화 영구 거래소(DEX)입니다.",
+				"description": "Pacifica는 사용자가 레버리지를 활용하여 영구 암호화폐 선물을 거래할 수 있는 솔라나 네트워크 기반의 탈중앙화 영구 거래소(DEX)입니다. 다양한 주문 유형, 기관 트레이더를 위한 서브 계정, 봇을 위한 API 접근 등 중앙화 거래소와 유사한 고성능 및 고급 기능을 제공하도록 설계되었습니다."
 			},
 			"magic_eden": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Magic Eden",
+				"one_liner": "Magic Eden은 사용자가 여러 블록체인에서 대체 불가능한 토큰(NFT)을 생성, 구매, 판매, 거래할 수 있는 멀티체인 NFT 마켓플레이스입니다.",
+				"description": "Magic Eden은 사용자가 여러 블록체인에서 대체 불가능한 토큰(NFT)을 생성, 구매, 판매, 거래할 수 있는 멀티체인 NFT 마켓플레이스입니다. 사용자 친화적인 인터페이스, 낮은 거래 수수료, 창작자와 수집가를 위한 다양한 도구로 잘 알려져 있습니다."
 			},
 			"solayer": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Solayer",
+				"one_liner": "네이티브 유동 스테이킹(sSOL), 스테이블코인(sUSD), 에메랄드 카드를 통한 실생활 결제를 제공하는 솔라나 기반의 고속 DeFi 플랫폼.",
+				"description": "Solayer는 솔라나에 구축된 수직 통합 블록체인 스택으로, InfiniSVM을 활용하여 초저지연 및 고처리량을 달성하며 초당 100만 건 이상의 트랜잭션으로 확장됩니다. 네이티브 스테이킹(sSOL), 스테이블코인(sUSD), 에메랄드 카드를 통한 실생활 결제를 통합합니다. Solayer의 아키텍처는 단일 고성능 체인 아래 DeFi, 결제, 인프라를 결합합니다."
 			},
 			"kamino": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Kamino",
+				"one_liner": "Kamino은 솔라나 최대의 차입 및 대출 프로토콜로, 네트워크 DeFi 활동의 상당 부분을 담당합니다.",
+				"description": "Kamino는 솔라나 블록체인의 탈중앙화 금융(DeFi) 플랫폼으로, 유동성 제공, 대출, 레버리지 거래를 단일 제품 모음으로 통합합니다. 특히 자동화된 유동성 볼트와 Kamino Lend 시스템을 통해 이러한 DeFi 전략을 단순화하고, 집중 유동성 관리를 사용하여 사용자의 자본 효율성을 높입니다."
 			},
 			"helium": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Helium",
+				"one_liner": "핫스팟을 통해 LoRaWAN IoT 및 모바일 오프로드 서비스를 제공하는 커뮤니티 구축 탈중앙화 무선 네트워크로, 솔라나의 토큰 인센티브로 구동됩니다.",
+				"description": "Helium은 개인이 핫스팟을 배포하여 토큰 인센티브의 대가로 LoRaWAN 및 모바일 네트워크 커버리지를 제공하는 탈중앙화 무선 네트워크입니다. 네트워크는 더 나은 확장성을 위해 솔라나로 전환했으며 이제 모바일 및 IoT 분야와 통합되었습니다. 모든 데이터와 보상은 온체인에서 정산되어 Helium을 탈중앙화 인프라의 핵심 플레이어로 만듭니다."
 			},
 			"sanctum": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Sanctum",
+				"one_liner": "LST 간 즉시 스왑과 자체 LST 출시 도구를 갖춘 솔라나 네이티브 유동 스테이킹 프로토콜.",
+				"description": "Sanctum은 유동 스테이킹 토큰(LST) 간 즉각적이고 슬리피지 없는 스왑을 가능하게 하는 솔라나의 유동 스테이킹 인프라 프로토콜입니다. 새로운 LST가 공유 유동성을 활용할 수 있도록 지원하여 생태계 성장을 도모하며, 자동화된 발행 및 상환 기능이 있는 브랜드 토큰 발행 도구를 제공합니다. 플랫폼의 Infinity 풀, 라우터, 리저브 시스템은 스테이킹 생태계 전반에 걸쳐 깊은 유동성, 구성 가능성 및 안전성을 제공합니다."
 			},
 			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Sphere Finance",
+				"one_liner": "거버넌스 획득, 재무 수익 파밍, $SPHERE 토큰 중심의 수익 창출 도구 구축에 초점을 맞춘 메타 거버넌스 DeFi 프로토콜.",
+				"description": "Sphere Finance는 거버넌스 토큰을 획득하고 기본 토큰인 $SPHERE 주변의 프로토콜 수익을 극대화하는 도구를 구축하는 DeFi 메타 거버넌스 프로토콜입니다. 파트너 프로토콜 전반에 걸쳐 자본 배분을 자동화하고 재무를 사용하여 수익을 창출합니다. 거버넌스는 veTETU 스타일 스테이킹을 통해 획득되며, 장기적인 프로토콜 건전성과 인센티브를 일치시킵니다."
 			},
 			"binaryx": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "BinaryX",
+				"one_liner": "전 세계 부동산에 대한 분할 소유권과 수동 소득을 제공하는 토큰화된 부동산 투자 플랫폼.",
+				"description": "BinaryX는 글로벌 부동산의 분할 소유권과 수동 소득을 제공하는 토큰화된 부동산 투자 플랫폼입니다. 투자자는 단 $50부터 임대 또는 미분양 부동산을 나타내는 법적으로 구조화된 DAO-LLC에 투자할 수 있습니다. 수익은 임대 수입이나 자산 가치 상승으로부터 분배되며, 부동산은 2차 마켓플레이스에서 거래될 수 있습니다."
 			},
 			"parcl": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Parcl",
+				"one_liner": "크로스 마진 및 LP 지원 유동성으로 합성 부동산 시장을 제공하는 솔라나 기반 영구 거래소.",
+				"description": "Parcl은 사용자가 합성 부동산 지수를 롱 또는 숏할 수 있는 부동산 가격 영구 계약을 위한 솔라나 기반 탈중앙화 거래소입니다. Parcl Labs의 가격 데이터와 LP 지원 유동성을 사용하여 크로스 마진 거래를 제공합니다. 이 프로토콜은 기초 부동산을 보유하지 않고도 실물 자산 성과에 노출을 원하는 트레이더를 위해 맞춤화되었습니다."
 			}
 		}
 	},
