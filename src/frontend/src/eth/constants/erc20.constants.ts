@@ -34,6 +34,10 @@ export const ERC20_DEPOSIT_HASH = '0x26b3293f';
 // https://etherscan.io/tx/0x6d6027a32a817833daa02ca4a6fa7fb4b22ce18570f0a6f1ddaf03dd06776a5b
 export const ERC20_DEPOSIT_ERC20_HASH = '0xdb9751af';
 
+// The ERC20 transfer contract function prefix is 0xa9059cbb
+// https://polygonscan.com/tx/0x99358ec7a9b45aec7f9587ae48edc06528d1c600db53329b9c1eebb10ce64640
+export const ERC20_TRANSFER_HASH = '0xa9059cbb';
+
 // Use when UNPREDICTABLE_GAS_LIMIT error are thrown while fetching the fee data.
 // See: https://docs.ethers.org/v5/troubleshooting/errors/#help-UNPREDICTABLE_GAS_LIMIT
 export const ERC20_FALLBACK_FEE = 500_000n;
