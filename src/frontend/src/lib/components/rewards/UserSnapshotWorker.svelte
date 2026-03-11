@@ -126,8 +126,7 @@
 	// Tokens: any new token added to the list of tokens or any change in the token list.
 	// Balances: Coarse boolean signal (memoized) — flips only when balance status changes, not per-token.
 	// Exchanges: All exchanges initialized (since we have no disclaimer specific for the tokens we are interested in).
-	// Transactions: Coarse entry-count signal — emits only when a new token's transactions appear, not on data updates.
-	// The periodic timer captures ongoing transaction changes.
+	// Transactions: Coarse entry-count signal — emits only when a new token's transactions appear, not on data updates. The periodic timer captures ongoing transaction changes.
 	$effect(() => {
 		[
 			$authSignedIn,
