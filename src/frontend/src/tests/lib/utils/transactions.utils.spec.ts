@@ -592,7 +592,7 @@ describe('transactions.utils', () => {
 				});
 
 				expect(result).toHaveLength(2);
-				expect(result.every(({ token }) => token.standard.code !== 'ethereum')).toBe(true);
+				expect(result.every(({ token }) => token.standard.code !== 'ethereum')).toBeTruthy();
 				expect(result.map(({ token }) => token)).toEqual([PEPE_TOKEN, USDC_TOKEN]);
 			});
 
