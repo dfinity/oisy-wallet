@@ -3,14 +3,42 @@ import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20'
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
 import { Currency } from '$lib/enums/currency';
-import { simplePrice } from '$lib/rest/coingecko.rest';
+import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
+import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
-import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
+import type {
+	CoingeckoSimplePriceResponse,
+	CoingeckoSimpleTokenPriceResponse
+} from '$lib/types/coingecko';
+import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
+import {
+	findMissingLedgerCanisterIds,
+	formatKongSwapToCoingeckoPrices
+} from '$lib/utils/exchange.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+const fetchIcrcPricesFromCoingecko = (
+	ledgerCanisterIds: LedgerCanisterIdText[]
+): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
+	simpleTokenPrice({
+		id: 'internet-computer',
+		vs_currencies: Currency.USD,
+		contract_addresses: ledgerCanisterIds,
+		include_market_cap: true,
+		include_24hr_change: true
+	});
+
+const fetchIcrcPricesFromKongSwap = async (
+	missingIds: LedgerCanisterIdText[]
+): Promise<CoingeckoSimpleTokenPriceResponse> => {
+	const tokens = await fetchBatchKongSwapPrices(missingIds);
+
+	return formatKongSwapToCoingeckoPrices(tokens);
+};
 
 // To calculate an FX rate for a currency vs USD, we cross-reference a very liquid asset (BTC) with the currency and with the USD.
 // In this way, we can easily calculate the cross USDXXX rate as BTCUSD / BTCXXX.
