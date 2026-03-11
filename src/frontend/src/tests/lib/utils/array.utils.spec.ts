@@ -32,6 +32,18 @@ describe('array.utils', () => {
 			expect(primitiveArrayEqual([true, false, true], [true, false, true])).toBeTruthy();
 		});
 
+		it('should return true for identical bigint arrays', () => {
+			expect(primitiveArrayEqual([1n, 2n, 3n], [1n, 2n, 3n])).toBeTruthy();
+		});
+
+		it('should return true for identical symbol arrays', () => {
+			const sym1 = Symbol('a');
+			const sym2 = Symbol('b');
+			const sym3 = Symbol('c');
+
+			expect(primitiveArrayEqual([sym1, sym2, sym3], [sym1, sym2, sym3])).toBeTruthy();
+		});
+
 		it('should return false for arrays with different lengths', () => {
 			expect(primitiveArrayEqual([1, 2], [1, 2, 3])).toBeFalsy();
 		});

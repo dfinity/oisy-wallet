@@ -4,7 +4,7 @@ export const last = <T>(elements: T[]): T | undefined => {
 };
 
 // eslint-disable-next-line local-rules/prefer-object-params
-export const primitiveArrayEqual = <T extends string | number | boolean>(
+export const primitiveArrayEqual = <T extends string | number | boolean | bigint | symbol>(
 	a: T[],
 	b: T[]
 ): boolean => {
