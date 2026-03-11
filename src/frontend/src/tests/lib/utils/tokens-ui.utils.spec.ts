@@ -58,21 +58,15 @@ describe('tokens-ui.utils', () => {
 		});
 
 		it('should return false when one array is empty and the other is not', () => {
-			const token = [
-				{ id: Symbol('a'), balance: 100n, usdBalance: 5 }
-			] as unknown as TokenUi[];
+			const token = [{ id: Symbol('a'), balance: 100n, usdBalance: 5 }] as unknown as TokenUi[];
 
 			expect(tokenUiListEqual([], token)).toBeFalsy();
 			expect(tokenUiListEqual(token, [])).toBeFalsy();
 		});
 
 		it('should return false when ids differ', () => {
-			const left = [
-				{ id: Symbol('a'), balance: 100n, usdBalance: 5 }
-			] as unknown as TokenUi[];
-			const right = [
-				{ id: Symbol('b'), balance: 100n, usdBalance: 5 }
-			] as unknown as TokenUi[];
+			const left = [{ id: Symbol('a'), balance: 100n, usdBalance: 5 }] as unknown as TokenUi[];
+			const right = [{ id: Symbol('b'), balance: 100n, usdBalance: 5 }] as unknown as TokenUi[];
 
 			expect(tokenUiListEqual(left, right)).toBeFalsy();
 		});
