@@ -4,8 +4,6 @@ export { get, readable, readonly, writable } from 'svelte/store';
 export type {
 	Readable,
 	StartStopNotifier,
-	Stores,
-	StoresValues,
 	Subscriber,
 	Unsubscriber,
 	Updater,
@@ -65,6 +63,7 @@ const printTop = (limit = 25): void => {
  * counted and logged with an auto-generated label extracted from the
  * call-site stack trace. When disabled this is a zero-overhead pass-through.
  */
+// eslint-disable-next-line local-rules/prefer-object-params
 export const derived: typeof originalDerived = ((
 	stores: Parameters<typeof originalDerived>[0],
 	fn: Parameters<typeof originalDerived>[1],
@@ -84,7 +83,7 @@ export const derived: typeof originalDerived = ((
 					bumpCounter(label);
 					return (fn as (values: unknown) => unknown)(values);
 				}
-			: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+			: // eslint-disable-next-line @typescript-eslint/no-explicit-any,local-rules/prefer-object-params
 				(values: any, set: any) => {
 					bumpCounter(label);
 					return (fn as (values: unknown, set: unknown) => unknown)(values, set);
