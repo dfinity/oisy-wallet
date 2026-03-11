@@ -12,8 +12,14 @@ type StoresValues<T> =
  * actually changes according to the provided equality function.
  * This prevents unnecessary downstream recomputations when intermediate
  * derived stores produce the same value from different source triggers.
+ *
+ * Note: Svelte's `derived` already deduplicates primitive values via
+ * reference equality (`safe_not_equal`, i.e. `!==`). This utility is
+ * therefore only useful when `fn` returns objects or arrays — values
+ * where each invocation produces a new reference even if the contents
+ * are semantically identical.
  */
-// eslint-disable-next-line local-rules/prefer-object-params
+// eslint-disable-next-line local-rules/prefer-object-params -- The structure replicates Svelte's `derived` store, which takes separate store arguments rather than an object param.
 export const derivedMemo = <S extends Stores, T>(
 	stores: S,
 	fn: (values: StoresValues<S>) => T,
