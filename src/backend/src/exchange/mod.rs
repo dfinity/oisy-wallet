@@ -8,7 +8,8 @@ use shared::types::{
 
 use crate::{
     exchange::coingecko::fetch_coingecko_token_prices,
-    mutate_state, read_state,
+    read_state,
+    state::mutate_state,
     types::storable::{Candid, StoredTokenId},
 };
 
