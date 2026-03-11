@@ -3,19 +3,19 @@ use candid::{CandidType, Deserialize, Nat};
 use super::{backend_token_id::TokenId, custom_token::ChainId};
 
 /// Maximum number of transactions that can be stored per (user, token) pair.
-pub const MAX_STORED_TRANSACTIONS_PER_TOKEN: usize = 10_000;
+pub const MAX_USER_TRANSACTIONS_PER_TOKEN: usize = 10_000;
 
 /// Maximum number of transactions that can be saved in a single request.
-pub const MAX_SAVE_TRANSACTIONS_BATCH: usize = 500;
+pub const MAX_SAVE_USER_TRANSACTIONS_BATCH: usize = 500;
 
 /// Maximum number of transactions that can be returned in a single response.
-pub const MAX_GET_TRANSACTIONS_RESULTS: u64 = 100;
+pub const MAX_GET_USER_TRANSACTIONS_RESULTS: u64 = 100;
 
 /// A finalized transaction stored in the backend.
 /// Contains all fields needed to reconstruct the frontend `Transaction` type.
 /// Only fully confirmed/finalized transactions should be stored here.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct StoredTransaction {
+pub struct UserTransaction {
     /// Transaction hash (unique identifier)
     pub hash: String,
     /// Block number where the transaction was included
@@ -46,22 +46,22 @@ pub struct StoredTransaction {
 
 /// Request to retrieve stored transactions with cursor-based pagination.
 #[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct GetStoredTransactionsRequest {
+pub struct GetUserTransactionsRequest {
     /// Which token's transactions to retrieve
     pub token_id: TokenId,
     /// Cursor for pagination: block number to start before (exclusive).
     /// `None` returns from the newest transactions.
     /// `Some(block_number)` returns transactions with `block_number` < this value.
     pub start: Option<u64>,
-    /// Maximum number of transactions to return (capped at `MAX_GET_TRANSACTIONS_RESULTS`)
+    /// Maximum number of transactions to return (capped at `MAX_GET_USER_TRANSACTIONS_RESULTS`)
     pub max_results: u64,
 }
 
 /// Response containing stored transactions and pagination info.
 #[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct GetStoredTransactionsResponse {
+pub struct GetUserTransactionsResponse {
     /// The requested transactions, sorted newest first
-    pub transactions: Vec<StoredTransaction>,
+    pub transactions: Vec<UserTransaction>,
     /// Block number of the newest stored transaction for this token.
     /// The frontend should fetch from the network starting after this block.
     pub newest_block_number: Option<u64>,
@@ -72,15 +72,15 @@ pub struct GetStoredTransactionsResponse {
 
 /// Request to save finalized transactions.
 #[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct SaveStoredTransactionsRequest {
+pub struct SaveUserTransactionsRequest {
     /// Which token these transactions belong to
     pub token_id: TokenId,
     /// Transactions to save (must be finalized/immutable)
-    pub transactions: Vec<StoredTransaction>,
+    pub transactions: Vec<UserTransaction>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum StoredTransactionError {
+pub enum UserTransactionError {
     /// Reserved for future caller-validation logic.
     UserNotFound,
     TooManyTransactions,

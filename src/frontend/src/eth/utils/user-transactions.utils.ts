@@ -1,6 +1,6 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import type { StoredTransaction, TokenId as BackendTokenId } from '$declarations/backend/backend.did';
+import type { UserTransaction, TokenId as BackendTokenId } from '$declarations/backend/backend.did';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
@@ -12,7 +12,7 @@ import { isNullish, toNullable } from '@dfinity/utils';
  */
 export const ETH_FINALITY_BLOCKS = 64;
 
-export const mapTransactionToStored = (tx: Transaction): StoredTransaction => {
+export const mapTransactionToUserTransaction = (tx: Transaction): UserTransaction => {
 	if (tx.hash === undefined || tx.hash === null) {
 		throw new Error('Cannot store a transaction without a hash');
 	}
@@ -34,7 +34,7 @@ export const mapTransactionToStored = (tx: Transaction): StoredTransaction => {
 	};
 };
 
-export const mapStoredToTransaction = (stored: StoredTransaction): Transaction => ({
+export const mapUserTransactionToTransaction = (stored: UserTransaction): Transaction => ({
 	hash: stored.hash,
 	blockNumber: Number(stored.block_number),
 	timestamp: Number(stored.timestamp),

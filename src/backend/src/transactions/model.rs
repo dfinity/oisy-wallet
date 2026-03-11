@@ -3,38 +3,38 @@ use std::collections::HashSet;
 use candid::Principal;
 use shared::types::{
     backend_token_id::TokenId,
-    stored_transaction::{
-        GetStoredTransactionsRequest, GetStoredTransactionsResponse, SaveStoredTransactionsRequest,
-        StoredTransaction, StoredTransactionError, MAX_GET_TRANSACTIONS_RESULTS,
-        MAX_SAVE_TRANSACTIONS_BATCH, MAX_STORED_TRANSACTIONS_PER_TOKEN,
+    user_transaction::{
+        GetUserTransactionsRequest, GetUserTransactionsResponse, SaveUserTransactionsRequest,
+        UserTransaction, UserTransactionError, MAX_GET_USER_TRANSACTIONS_RESULTS,
+        MAX_SAVE_USER_TRANSACTIONS_BATCH, MAX_USER_TRANSACTIONS_PER_TOKEN,
     },
 };
 
 use crate::types::{
-    Candid, StoredBackendTokenId, StoredPrincipal, StoredTransactionKey, StoredTransactionsMap,
+    Candid, StoredBackendTokenId, StoredPrincipal, UserTransactionKey, UserTransactionsMap,
 };
 
 /// Read paginated transactions from the map without mutating state.
 ///
 /// **Performance note:** The current storage layout (`StableBTreeMap<Key, Candid<Vec<T>>>`)
 /// requires deserializing the full transaction list to serve any page. If per-token lists grow
-/// large (approaching `MAX_STORED_TRANSACTIONS_PER_TOKEN`), consider migrating to individual
-/// entries keyed by `(principal, token_id, block_number)` for O(page_size) reads.
+/// large (approaching `MAX_USER_TRANSACTIONS_PER_TOKEN`), consider migrating to individual
+/// entries keyed by `(principal, token_id, block_number)` for `O(page_size)` reads.
 pub fn get_transactions(
-    map: &StoredTransactionsMap,
+    map: &UserTransactionsMap,
     principal: Principal,
-    request: &GetStoredTransactionsRequest,
-) -> GetStoredTransactionsResponse {
+    request: &GetUserTransactionsRequest,
+) -> GetUserTransactionsResponse {
     let key = make_key(principal, &request.token_id);
 
     let transactions = map.get(&key).map(|c| c.0).unwrap_or_default();
 
-    let max_results = usize::try_from(request.max_results.min(MAX_GET_TRANSACTIONS_RESULTS))
+    let max_results = usize::try_from(request.max_results.min(MAX_GET_USER_TRANSACTIONS_RESULTS))
         .expect("max_results should fit in usize");
 
     let newest_block_number = transactions.last().map(|t| t.block_number);
 
-    let filtered: Vec<StoredTransaction> = match request.start {
+    let filtered: Vec<UserTransaction> = match request.start {
         None => transactions.into_iter().rev().take(max_results).collect(),
         Some(start_block) => transactions
             .into_iter()
@@ -50,7 +50,7 @@ pub fn get_transactions(
         None
     };
 
-    GetStoredTransactionsResponse {
+    GetUserTransactionsResponse {
         transactions: filtered,
         newest_block_number,
         next_start,
@@ -58,14 +58,14 @@ pub fn get_transactions(
 }
 
 /// Mutable model for saving transactions.
-pub struct StoredTransactionsModel<'a> {
-    stored_transactions_map: &'a mut StoredTransactionsMap,
+pub struct UserTransactionsModel<'a> {
+    user_transactions_map: &'a mut UserTransactionsMap,
 }
 
-impl<'a> StoredTransactionsModel<'a> {
-    pub fn new(stored_transactions_map: &'a mut StoredTransactionsMap) -> Self {
+impl<'a> UserTransactionsModel<'a> {
+    pub fn new(user_transactions_map: &'a mut UserTransactionsMap) -> Self {
         Self {
-            stored_transactions_map,
+            user_transactions_map,
         }
     }
 
@@ -74,16 +74,16 @@ impl<'a> StoredTransactionsModel<'a> {
     pub fn save_transactions(
         &mut self,
         principal: Principal,
-        request: &SaveStoredTransactionsRequest,
-    ) -> Result<(), StoredTransactionError> {
-        if request.transactions.len() > MAX_SAVE_TRANSACTIONS_BATCH {
-            return Err(StoredTransactionError::TooManyTransactions);
+        request: &SaveUserTransactionsRequest,
+    ) -> Result<(), UserTransactionError> {
+        if request.transactions.len() > MAX_SAVE_USER_TRANSACTIONS_BATCH {
+            return Err(UserTransactionError::TooManyTransactions);
         }
 
         let key = make_key(principal, &request.token_id);
 
         let mut existing = self
-            .stored_transactions_map
+            .user_transactions_map
             .get(&key)
             .map(|c| c.0)
             .unwrap_or_default();
@@ -95,8 +95,8 @@ impl<'a> StoredTransactionsModel<'a> {
                 continue;
             }
 
-            if existing.len() >= MAX_STORED_TRANSACTIONS_PER_TOKEN {
-                return Err(StoredTransactionError::TooManyTransactions);
+            if existing.len() >= MAX_USER_TRANSACTIONS_PER_TOKEN {
+                return Err(UserTransactionError::TooManyTransactions);
             }
 
             existing.push(tx.clone());
@@ -104,14 +104,14 @@ impl<'a> StoredTransactionsModel<'a> {
 
         existing.sort_unstable_by_key(|t| t.block_number);
 
-        self.stored_transactions_map.insert(key, Candid(existing));
+        self.user_transactions_map.insert(key, Candid(existing));
 
         Ok(())
     }
 }
 
-fn make_key(principal: Principal, token_id: &TokenId) -> StoredTransactionKey {
-    StoredTransactionKey(
+fn make_key(principal: Principal, token_id: &TokenId) -> UserTransactionKey {
+    UserTransactionKey(
         StoredPrincipal(principal),
         StoredBackendTokenId(token_id.clone()),
     )
@@ -133,16 +133,16 @@ mod tests {
     const PRINCIPAL_TEXT: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
 
     fn setup() -> (
-        StoredTransactionsMap,
+        UserTransactionsMap,
         RefCell<MemoryManager<DefaultMemoryImpl>>,
     ) {
         let memory_manager = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
-        let map = StoredTransactionsMap::init(memory_manager.borrow().get(MemoryId::new(0)));
+        let map = UserTransactionsMap::init(memory_manager.borrow().get(MemoryId::new(0)));
         (map, memory_manager)
     }
 
-    fn make_tx(hash: &str, block_number: u64, timestamp: u64) -> StoredTransaction {
-        StoredTransaction {
+    fn make_tx(hash: &str, block_number: u64, timestamp: u64) -> UserTransaction {
+        UserTransaction {
             hash: hash.to_string(),
             block_number,
             timestamp,
@@ -171,7 +171,7 @@ mod tests {
         let result = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 10,
@@ -192,10 +192,10 @@ mod tests {
         let tx2 = make_tx("0xhash2", 200, 2000);
         let tx3 = make_tx("0xhash3", 300, 3000);
 
-        StoredTransactionsModel::new(&mut map)
+        UserTransactionsModel::new(&mut map)
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![tx1.clone(), tx2.clone(), tx3.clone()],
                 },
@@ -205,7 +205,7 @@ mod tests {
         let result = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 10,
@@ -224,14 +224,14 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<StoredTransaction> = (1..=5)
+        let txs: Vec<UserTransaction> = (1..=5)
             .map(|i| make_tx(&format!("0xhash{i}"), i * 100, i * 1000))
             .collect();
 
-        StoredTransactionsModel::new(&mut map)
+        UserTransactionsModel::new(&mut map)
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: txs,
                 },
@@ -242,7 +242,7 @@ mod tests {
         let page1 = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 2,
@@ -259,7 +259,7 @@ mod tests {
         let page2 = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: page1.next_start,
                 max_results: 2,
@@ -275,7 +275,7 @@ mod tests {
         let page3 = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: page2.next_start,
                 max_results: 2,
@@ -294,11 +294,11 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
         let tx = make_tx("0xhash1", 100, 1000);
 
-        let mut model = StoredTransactionsModel::new(&mut map);
+        let mut model = UserTransactionsModel::new(&mut map);
         model
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![tx.clone()],
                 },
@@ -308,7 +308,7 @@ mod tests {
         model
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![tx],
                 },
@@ -316,9 +316,9 @@ mod tests {
             .unwrap();
 
         let result = get_transactions(
-            model.stored_transactions_map,
+            model.user_transactions_map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 10,
@@ -342,12 +342,12 @@ mod tests {
         );
         let erc20_tx = make_tx("0xerc20_hash", 200, 2000);
 
-        let mut model = StoredTransactionsModel::new(&mut map);
+        let mut model = UserTransactionsModel::new(&mut map);
 
         model
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![eth_tx],
                 },
@@ -357,7 +357,7 @@ mod tests {
         model
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: erc20_token_id.clone(),
                     transactions: vec![erc20_tx],
                 },
@@ -365,9 +365,9 @@ mod tests {
             .unwrap();
 
         let eth_result = get_transactions(
-            model.stored_transactions_map,
+            model.user_transactions_map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 10,
@@ -377,9 +377,9 @@ mod tests {
         assert_eq!(eth_result.transactions[0].hash, "0xeth_hash");
 
         let erc20_result = get_transactions(
-            model.stored_transactions_map,
+            model.user_transactions_map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: erc20_token_id,
                 start: None,
                 max_results: 10,
@@ -400,12 +400,12 @@ mod tests {
         let tx1 = make_tx("0xuser1_hash", 100, 1000);
         let tx2 = make_tx("0xuser2_hash", 200, 2000);
 
-        let mut model = StoredTransactionsModel::new(&mut map);
+        let mut model = UserTransactionsModel::new(&mut map);
 
         model
             .save_transactions(
                 principal1,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![tx1],
                 },
@@ -415,7 +415,7 @@ mod tests {
         model
             .save_transactions(
                 principal2,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![tx2],
                 },
@@ -423,9 +423,9 @@ mod tests {
             .unwrap();
 
         let result1 = get_transactions(
-            model.stored_transactions_map,
+            model.user_transactions_map,
             principal1,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 10,
@@ -435,9 +435,9 @@ mod tests {
         assert_eq!(result1.transactions[0].hash, "0xuser1_hash");
 
         let result2 = get_transactions(
-            model.stored_transactions_map,
+            model.user_transactions_map,
             principal2,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 10,
@@ -452,14 +452,14 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<StoredTransaction> = (1..=200)
+        let txs: Vec<UserTransaction> = (1..=200)
             .map(|i| make_tx(&format!("0xhash{i}"), i, i * 10))
             .collect();
 
-        StoredTransactionsModel::new(&mut map)
+        UserTransactionsModel::new(&mut map)
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: txs,
                 },
@@ -469,7 +469,7 @@ mod tests {
         let result = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 1000,
@@ -478,7 +478,7 @@ mod tests {
 
         assert_eq!(
             result.transactions.len(),
-            usize::try_from(MAX_GET_TRANSACTIONS_RESULTS).unwrap()
+            usize::try_from(MAX_GET_USER_TRANSACTIONS_RESULTS).unwrap()
         );
     }
 
@@ -492,10 +492,10 @@ mod tests {
         let tx1 = make_tx("0xhash1", 100, 1000);
         let tx2 = make_tx("0xhash2", 200, 2000);
 
-        StoredTransactionsModel::new(&mut map)
+        UserTransactionsModel::new(&mut map)
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![tx3, tx1, tx2],
                 },
@@ -505,7 +505,7 @@ mod tests {
         let result = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 10,
@@ -522,12 +522,12 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let mut model = StoredTransactionsModel::new(&mut map);
+        let mut model = UserTransactionsModel::new(&mut map);
 
         model
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![make_tx("0xhash1", 100, 1000)],
                 },
@@ -537,7 +537,7 @@ mod tests {
         model
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![
                         make_tx("0xhash2", 200, 2000),
@@ -548,9 +548,9 @@ mod tests {
             .unwrap();
 
         let result = get_transactions(
-            model.stored_transactions_map,
+            model.user_transactions_map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 10,
@@ -569,11 +569,11 @@ mod tests {
 
         {
             let memory = memory_manager.borrow().get(MemoryId::new(0));
-            let mut map = StoredTransactionsMap::init(memory);
-            StoredTransactionsModel::new(&mut map)
+            let mut map = UserTransactionsMap::init(memory);
+            UserTransactionsModel::new(&mut map)
                 .save_transactions(
                     principal,
-                    &SaveStoredTransactionsRequest {
+                    &SaveUserTransactionsRequest {
                         token_id: eth_native_token(),
                         transactions: vec![tx.clone()],
                     },
@@ -584,11 +584,11 @@ mod tests {
         // Re-init with same memory
         {
             let memory = memory_manager.borrow().get(MemoryId::new(0));
-            let map = StoredTransactionsMap::init(memory);
+            let map = UserTransactionsMap::init(memory);
             let result = get_transactions(
                 &map,
                 principal,
-                &GetStoredTransactionsRequest {
+                &GetUserTransactionsRequest {
                     token_id: eth_native_token(),
                     start: None,
                     max_results: 10,
@@ -609,10 +609,10 @@ mod tests {
         let tx0 = make_tx("0xgenesis", 0, 0);
         let tx1 = make_tx("0xblock1", 1, 10);
 
-        StoredTransactionsModel::new(&mut map)
+        UserTransactionsModel::new(&mut map)
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![tx0.clone(), tx1.clone()],
                 },
@@ -623,7 +623,7 @@ mod tests {
         let page1 = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 1,
@@ -638,7 +638,7 @@ mod tests {
         let page2 = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: page1.next_start,
                 max_results: 1,
@@ -656,10 +656,10 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        StoredTransactionsModel::new(&mut map)
+        UserTransactionsModel::new(&mut map)
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![make_tx("0xonly", 50, 500)],
                 },
@@ -669,7 +669,7 @@ mod tests {
         let result = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 10,
@@ -684,14 +684,14 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<StoredTransaction> = (1..=3)
+        let txs: Vec<UserTransaction> = (1..=3)
             .map(|i| make_tx(&format!("0xhash{i}"), i * 10, i * 100))
             .collect();
 
-        StoredTransactionsModel::new(&mut map)
+        UserTransactionsModel::new(&mut map)
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: txs,
                 },
@@ -703,7 +703,7 @@ mod tests {
         let result = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 3,
@@ -718,7 +718,7 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<StoredTransaction> = (0..=MAX_SAVE_TRANSACTIONS_BATCH)
+        let txs: Vec<UserTransaction> = (0..=MAX_SAVE_USER_TRANSACTIONS_BATCH)
             .map(|i| {
                 make_tx(
                     &format!("0xhash{i}"),
@@ -728,15 +728,15 @@ mod tests {
             })
             .collect();
 
-        let result = StoredTransactionsModel::new(&mut map).save_transactions(
+        let result = UserTransactionsModel::new(&mut map).save_transactions(
             principal,
-            &SaveStoredTransactionsRequest {
+            &SaveUserTransactionsRequest {
                 token_id: eth_native_token(),
                 transactions: txs,
             },
         );
 
-        assert_eq!(result, Err(StoredTransactionError::TooManyTransactions));
+        assert_eq!(result, Err(UserTransactionError::TooManyTransactions));
     }
 
     #[test]
@@ -744,15 +744,15 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        // Fill to exactly the limit by saving in batches of MAX_SAVE_TRANSACTIONS_BATCH.
-        let mut model = StoredTransactionsModel::new(&mut map);
-        let total = MAX_STORED_TRANSACTIONS_PER_TOKEN;
-        let batch = MAX_SAVE_TRANSACTIONS_BATCH;
+        // Fill to exactly the limit by saving in batches of MAX_SAVE_USER_TRANSACTIONS_BATCH.
+        let mut model = UserTransactionsModel::new(&mut map);
+        let total = MAX_USER_TRANSACTIONS_PER_TOKEN;
+        let batch = MAX_SAVE_USER_TRANSACTIONS_BATCH;
         let full_batches = total / batch;
         let remainder = total % batch;
 
         for b in 0..full_batches {
-            let txs: Vec<StoredTransaction> = (0..batch)
+            let txs: Vec<UserTransaction> = (0..batch)
                 .map(|i| {
                     let idx = b * batch + i;
                     make_tx(
@@ -765,7 +765,7 @@ mod tests {
             model
                 .save_transactions(
                     principal,
-                    &SaveStoredTransactionsRequest {
+                    &SaveUserTransactionsRequest {
                         token_id: eth_native_token(),
                         transactions: txs,
                     },
@@ -774,7 +774,7 @@ mod tests {
         }
 
         if remainder > 0 {
-            let txs: Vec<StoredTransaction> = (0..remainder)
+            let txs: Vec<UserTransaction> = (0..remainder)
                 .map(|i| {
                     let idx = full_batches * batch + i;
                     make_tx(
@@ -787,7 +787,7 @@ mod tests {
             model
                 .save_transactions(
                     principal,
-                    &SaveStoredTransactionsRequest {
+                    &SaveUserTransactionsRequest {
                         token_id: eth_native_token(),
                         transactions: txs,
                     },
@@ -796,20 +796,19 @@ mod tests {
         }
 
         // Now at capacity — adding one more should fail
-        let overflow = StoredTransactionsModel::new(model.stored_transactions_map)
-            .save_transactions(
-                principal,
-                &SaveStoredTransactionsRequest {
-                    token_id: eth_native_token(),
-                    transactions: vec![make_tx("0xoverflow", 999_999, 9_999_990)],
-                },
-            );
-        assert_eq!(overflow, Err(StoredTransactionError::TooManyTransactions));
+        let overflow = UserTransactionsModel::new(model.user_transactions_map).save_transactions(
+            principal,
+            &SaveUserTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: vec![make_tx("0xoverflow", 999_999, 9_999_990)],
+            },
+        );
+        assert_eq!(overflow, Err(UserTransactionError::TooManyTransactions));
 
         // But duplicates of existing hashes should still succeed (they're skipped, no new insert)
-        let dup_ok = StoredTransactionsModel::new(model.stored_transactions_map).save_transactions(
+        let dup_ok = UserTransactionsModel::new(model.user_transactions_map).save_transactions(
             principal,
-            &SaveStoredTransactionsRequest {
+            &SaveUserTransactionsRequest {
                 token_id: eth_native_token(),
                 transactions: vec![make_tx("0xfill0", 0, 0)],
             },
@@ -822,7 +821,7 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let txs: Vec<StoredTransaction> = (0..200)
+        let txs: Vec<UserTransaction> = (0..200)
             .map(|i| {
                 make_tx(
                     &format!("0xhash{i}"),
@@ -832,11 +831,11 @@ mod tests {
             })
             .collect();
 
-        let mut model = StoredTransactionsModel::new(&mut map);
+        let mut model = UserTransactionsModel::new(&mut map);
         model
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: txs.clone(),
                 },
@@ -847,7 +846,7 @@ mod tests {
         model
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: txs,
                 },
@@ -855,17 +854,17 @@ mod tests {
             .unwrap();
 
         let result = get_transactions(
-            model.stored_transactions_map,
+            model.user_transactions_map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
-                max_results: MAX_GET_TRANSACTIONS_RESULTS,
+                max_results: MAX_GET_USER_TRANSACTIONS_RESULTS,
             },
         );
         assert_eq!(
             result.transactions.len(),
-            usize::try_from(MAX_GET_TRANSACTIONS_RESULTS).unwrap()
+            usize::try_from(MAX_GET_USER_TRANSACTIONS_RESULTS).unwrap()
         );
         assert_eq!(result.newest_block_number, Some(199));
     }
@@ -875,10 +874,10 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        StoredTransactionsModel::new(&mut map)
+        UserTransactionsModel::new(&mut map)
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![make_tx("0xhash1", 100, 1000)],
                 },
@@ -888,7 +887,7 @@ mod tests {
         let result = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 0,
@@ -905,9 +904,9 @@ mod tests {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
-        let result = StoredTransactionsModel::new(&mut map).save_transactions(
+        let result = UserTransactionsModel::new(&mut map).save_transactions(
             principal,
-            &SaveStoredTransactionsRequest {
+            &SaveUserTransactionsRequest {
                 token_id: eth_native_token(),
                 transactions: vec![],
             },
@@ -925,10 +924,10 @@ mod tests {
         let tx_b = make_tx("0xhash_b", 100, 1001);
         let tx_c = make_tx("0xhash_c", 100, 1002);
 
-        StoredTransactionsModel::new(&mut map)
+        UserTransactionsModel::new(&mut map)
             .save_transactions(
                 principal,
-                &SaveStoredTransactionsRequest {
+                &SaveUserTransactionsRequest {
                     token_id: eth_native_token(),
                     transactions: vec![tx_a, tx_b, tx_c],
                 },
@@ -938,7 +937,7 @@ mod tests {
         let result = get_transactions(
             &map,
             principal,
-            &GetStoredTransactionsRequest {
+            &GetUserTransactionsRequest {
                 token_id: eth_native_token(),
                 start: None,
                 max_results: 10,
@@ -956,13 +955,13 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
         let count = 250usize;
-        // Save in batches of MAX_SAVE_TRANSACTIONS_BATCH
-        let batch_size = MAX_SAVE_TRANSACTIONS_BATCH;
-        let mut model = StoredTransactionsModel::new(&mut map);
+        // Save in batches of MAX_SAVE_USER_TRANSACTIONS_BATCH
+        let batch_size = MAX_SAVE_USER_TRANSACTIONS_BATCH;
+        let mut model = UserTransactionsModel::new(&mut map);
 
         for start in (0..count).step_by(batch_size) {
             let end = (start + batch_size).min(count);
-            let txs: Vec<StoredTransaction> = (start..end)
+            let txs: Vec<UserTransaction> = (start..end)
                 .map(|i| {
                     make_tx(
                         &format!("0xhash{i}"),
@@ -974,7 +973,7 @@ mod tests {
             model
                 .save_transactions(
                     principal,
-                    &SaveStoredTransactionsRequest {
+                    &SaveUserTransactionsRequest {
                         token_id: eth_native_token(),
                         transactions: txs,
                     },
@@ -989,9 +988,9 @@ mod tests {
 
         loop {
             let page = get_transactions(
-                model.stored_transactions_map,
+                model.user_transactions_map,
                 principal,
-                &GetStoredTransactionsRequest {
+                &GetUserTransactionsRequest {
                     token_id: eth_native_token(),
                     start: cursor,
                     max_results: page_size,

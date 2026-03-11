@@ -1,8 +1,8 @@
 use ic_cdk::{api::msg_caller, query, update};
 use shared::types::{
-    result_types::{GetStoredTransactionsResult, SaveStoredTransactionsResult},
-    stored_transaction::{
-        GetStoredTransactionsRequest, SaveStoredTransactionsRequest, StoredTransactionError,
+    result_types::{GetUserTransactionsResult, SaveUserTransactionsResult},
+    user_transaction::{
+        GetUserTransactionsRequest, SaveUserTransactionsRequest, UserTransactionError,
     },
 };
 
@@ -15,37 +15,32 @@ use crate::{
 /// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
 ///
 /// # Returns
-/// - `Ok(GetStoredTransactionsResponse)` with the requested page of transactions
+/// - `Ok(GetUserTransactionsResponse)` with the requested page of transactions
 ///
 /// # Errors
-/// Errors are enumerated by: `StoredTransactionError`.
+/// Errors are enumerated by: `UserTransactionError`.
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn get_user_transactions(
-    request: GetStoredTransactionsRequest,
-) -> GetStoredTransactionsResult {
+pub fn get_user_transactions(request: GetUserTransactionsRequest) -> GetUserTransactionsResult {
     let principal = msg_caller();
 
-    let response = read_state(|state| {
-        model::get_transactions(&state.stored_transactions, principal, &request)
-    });
+    let response =
+        read_state(|state| model::get_transactions(&state.user_transactions, principal, &request));
 
-    GetStoredTransactionsResult::Ok(response)
+    GetUserTransactionsResult::Ok(response)
 }
 
 /// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
 ///
 /// # Errors
-/// Errors are enumerated by: `StoredTransactionError`.
+/// Errors are enumerated by: `UserTransactionError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn save_user_transactions(
-    request: SaveStoredTransactionsRequest,
-) -> SaveStoredTransactionsResult {
-    fn inner(request: SaveStoredTransactionsRequest) -> Result<(), StoredTransactionError> {
+pub fn save_user_transactions(request: SaveUserTransactionsRequest) -> SaveUserTransactionsResult {
+    fn inner(request: SaveUserTransactionsRequest) -> Result<(), UserTransactionError> {
         let principal = msg_caller();
 
         mutate_state(|state| {
-            let mut tx_model = model::StoredTransactionsModel::new(&mut state.stored_transactions);
+            let mut tx_model = model::UserTransactionsModel::new(&mut state.user_transactions);
 
             tx_model.save_transactions(principal, &request)
         })

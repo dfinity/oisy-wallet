@@ -2,12 +2,12 @@ import type { TokenId as BackendTokenId } from '$declarations/backend/backend.di
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import {
 	isTransactionFinalized,
-	mapStoredToTransaction,
-	mapTransactionToStored
-} from '$eth/utils/stored-transactions.utils';
+	mapUserTransactionToTransaction,
+	mapTransactionToUserTransaction
+} from '$eth/utils/user-transactions.utils';
 import {
-	getStoredTransactions,
-	saveStoredTransactions
+	getUserTransactions,
+	saveUserTransactions
 } from '$lib/api/backend.api';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { authIdentity } from '$lib/derived/auth.derived';
@@ -21,7 +21,7 @@ import { get } from 'svelte/store';
  * Loads stored finalized transactions from the backend canister.
  * Returns the transactions and the newest stored block number (for incremental loading).
  */
-export const loadStoredTransactions = async ({
+export const loadUserTransactions = async ({
 	tokenId,
 	start,
 	maxResults = WALLET_PAGINATION
@@ -41,14 +41,14 @@ export const loadStoredTransactions = async ({
 	}
 
 	try {
-		const response = await getStoredTransactions({
+		const response = await getUserTransactions({
 			identity,
 			tokenId,
 			start,
 			maxResults
 		});
 
-		const transactions = response.transactions.map(mapStoredToTransaction);
+		const transactions = response.transactions.map(mapUserTransactionToTransaction);
 		const newestBlockNumber =
 			response.newest_block_number.length > 0
 				? Number(response.newest_block_number[0])
@@ -94,10 +94,10 @@ export const saveFinalizedTransactions = async ({
 	}
 
 	try {
-		await saveStoredTransactions({
+		await saveUserTransactions({
 			identity,
 			tokenId,
-			transactions: finalized.map(mapTransactionToStored)
+			transactions: finalized.map(mapTransactionToUserTransaction)
 		});
 		return { success: true };
 	} catch (err) {
@@ -112,7 +112,7 @@ export const saveFinalizedTransactions = async ({
  *
  * @returns `true` if more pages exist, `false` if we reached the end.
  */
-export const loadNextEthStoredTransactions = async ({
+export const loadNextEthUserTransactions = async ({
 	transactionTokenId,
 	tokenId,
 	lastBlockNumber
@@ -121,7 +121,7 @@ export const loadNextEthStoredTransactions = async ({
 	tokenId: TokenId;
 	lastBlockNumber: bigint;
 }): Promise<{ hasMore: boolean }> => {
-	const result = await loadStoredTransactions({
+	const result = await loadUserTransactions({
 		tokenId: transactionTokenId,
 		start: lastBlockNumber,
 		maxResults: WALLET_PAGINATION

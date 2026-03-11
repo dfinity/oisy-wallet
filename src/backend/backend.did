@@ -198,19 +198,19 @@ type GetAllowedCyclesResult = variant {
 };
 type GetContactResult = variant { Ok : Contact; Err : ContactError };
 type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
-type GetStoredTransactionsRequest = record {
+type GetUserTransactionsRequest = record {
 	token_id : TokenId;
 	max_results : nat64;
 	start : opt nat64
 };
-type GetStoredTransactionsResponse = record {
+type GetUserTransactionsResponse = record {
 	next_start : opt nat64;
 	newest_block_number : opt nat64;
-	transactions : vec StoredTransaction
+	transactions : vec UserTransaction
 };
-type GetStoredTransactionsResult = variant {
-	Ok : GetStoredTransactionsResponse;
-	Err : StoredTransactionError
+type GetUserTransactionsResult = variant {
+	Ok : GetUserTransactionsResponse;
+	Err : UserTransactionError
 };
 type GetUserProfileError = variant { NotFound };
 type GetUserProfileResult = variant {
@@ -280,13 +280,13 @@ type RateLimitError = record {
 	window_ns : nat64;
 	caller : principal
 };
-type SaveStoredTransactionsRequest = record {
+type SaveUserTransactionsRequest = record {
 	token_id : TokenId;
-	transactions : vec StoredTransaction
+	transactions : vec UserTransaction
 };
-type SaveStoredTransactionsResult = variant {
+type SaveUserTransactionsResult = variant {
 	Ok;
-	Err : StoredTransactionError
+	Err : UserTransactionError
 };
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
@@ -322,7 +322,7 @@ type SplToken = record {
 	token_address : text;
 	symbol : opt text
 };
-type StoredTransaction = record {
+type UserTransaction = record {
 	to : opt text;
 	token_id : opt nat32;
 	value : nat;
@@ -337,7 +337,7 @@ type StoredTransaction = record {
 	gas_used : opt nat;
 	gas_price : opt nat
 };
-type StoredTransactionError = variant {
+type UserTransactionError = variant {
 	DuplicateTransaction : record { hash : text };
 	InternalError : record { msg : text };
 	TooManyTransactions;
@@ -579,12 +579,12 @@ service : (Arg) -> {
 	// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
 	//
 	// # Returns
-	// - `Ok(GetStoredTransactionsResponse)` with the requested page of transactions
+	// - `Ok(GetUserTransactionsResponse)` with the requested page of transactions
 	//
 	// # Errors
-	// Errors are enumerated by: `StoredTransactionError`.
-	get_stored_transactions : (GetStoredTransactionsRequest) -> (
-		GetStoredTransactionsResult
+	// Errors are enumerated by: `UserTransactionError`.
+	get_user_transactions : (GetUserTransactionsRequest) -> (
+		GetUserTransactionsResult
 	) query;
 	// Returns the caller's user profile.
 	//
@@ -623,9 +623,9 @@ service : (Arg) -> {
 	// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
 	//
 	// # Errors
-	// Errors are enumerated by: `StoredTransactionError`.
-	save_stored_transactions : (SaveStoredTransactionsRequest) -> (
-		SaveStoredTransactionsResult
+	// Errors are enumerated by: `UserTransactionError`.
+	save_user_transactions : (SaveUserTransactionsRequest) -> (
+		SaveUserTransactionsResult
 	);
 	// Add or update custom token for the user.
 	set_custom_token : (CustomToken) -> ();

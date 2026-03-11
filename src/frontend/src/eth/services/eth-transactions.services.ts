@@ -6,9 +6,9 @@ import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import {
-	loadStoredTransactions,
+	loadUserTransactions,
 	saveFinalizedTransactions
-} from '$eth/services/eth-stored-transactions.services';
+} from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import type { EthAddress } from '$eth/types/address';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
@@ -21,7 +21,7 @@ import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { filterSpamErc20Transfers } from '$eth/utils/eth-transactions-spam.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import { buildEvmNativeBackendTokenId } from '$eth/utils/stored-transactions.utils';
+import { buildEvmNativeBackendTokenId } from '$eth/utils/user-transactions.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
@@ -88,7 +88,7 @@ const loadEthTransactions = async ({
 
 		// Load stored finalized transactions from backend to get the newest stored block
 		const stored = nonNullish(transactionTokenId)
-			? await loadStoredTransactions({ tokenId: transactionTokenId })
+			? await loadUserTransactions({ tokenId: transactionTokenId })
 			: null;
 
 		// Fetch from Etherscan starting after the newest stored block (incremental loading)

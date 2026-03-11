@@ -7,7 +7,7 @@ import type {
 	GetUserProfileError,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
-	StoredTransaction,
+	UserTransaction,
 	TokenId as BackendTokenId,
 	UserProfile,
 	Utxo
@@ -205,13 +205,13 @@ export interface UpdateUserExperimentalFeatureSettings {
 	currentUserVersion?: bigint;
 }
 
-export interface GetStoredTransactionsParams {
+export interface GetUserTransactionsParams {
 	tokenId: BackendTokenId;
 	start?: bigint;
 	maxResults: bigint;
 }
 
-export interface SaveStoredTransactionsParams {
+export interface SaveUserTransactionsParams {
 	tokenId: BackendTokenId;
-	transactions: StoredTransaction[];
+	transactions: UserTransaction[];
 }

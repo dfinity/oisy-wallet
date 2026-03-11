@@ -11,8 +11,8 @@ use super::{
     signer::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
     },
-    stored_transaction::{GetStoredTransactionsResponse, StoredTransactionError},
     user_profile::{GetUserProfileError, UserProfile},
+    user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
 use crate::types::{
     agreement::UpdateAgreementsError,
@@ -358,21 +358,21 @@ impl From<Result<(), UpdateExperimentalFeaturesSettingsError>>
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
-pub enum GetStoredTransactionsResult {
-    Ok(GetStoredTransactionsResponse),
-    Err(StoredTransactionError),
+pub enum GetUserTransactionsResult {
+    Ok(GetUserTransactionsResponse),
+    Err(UserTransactionError),
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum SaveStoredTransactionsResult {
+pub enum SaveUserTransactionsResult {
     Ok(()),
-    Err(StoredTransactionError),
+    Err(UserTransactionError),
 }
-impl From<Result<(), StoredTransactionError>> for SaveStoredTransactionsResult {
-    fn from(result: Result<(), StoredTransactionError>) -> Self {
+impl From<Result<(), UserTransactionError>> for SaveUserTransactionsResult {
+    fn from(result: Result<(), UserTransactionError>) -> Self {
         match result {
-            Ok(()) => SaveStoredTransactionsResult::Ok(()),
-            Err(err) => SaveStoredTransactionsResult::Err(err),
+            Ok(()) => SaveUserTransactionsResult::Ok(()),
+            Err(err) => SaveUserTransactionsResult::Err(err),
         }
     }
 }

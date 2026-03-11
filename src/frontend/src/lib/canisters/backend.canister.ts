@@ -5,9 +5,9 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	GetStoredTransactionsResponse,
+	GetUserTransactionsResponse,
 	PendingTransaction,
-	StoredTransaction,
+	UserTransaction,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -30,10 +30,10 @@ import type {
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
-	GetStoredTransactionsParams,
+	GetUserTransactionsParams,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
-	SaveStoredTransactionsParams,
+	SaveUserTransactionsParams,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SelectedUtxosFeeOutcome,
@@ -387,14 +387,14 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 	};
 
-	getStoredTransactions = async ({
+	getUserTransactions = async ({
 		tokenId,
 		start,
 		maxResults
-	}: GetStoredTransactionsParams): Promise<GetStoredTransactionsResponse> => {
-		const { get_stored_transactions } = this.caller({ certified: false });
+	}: GetUserTransactionsParams): Promise<GetUserTransactionsResponse> => {
+		const { get_user_transactions } = this.caller({ certified: false });
 
-		const response = await get_stored_transactions({
+		const response = await get_user_transactions({
 			token_id: tokenId,
 			start: toNullable(start),
 			max_results: maxResults
@@ -407,13 +407,13 @@ export class BackendCanister extends Canister<BackendService> {
 		throw response.Err;
 	};
 
-	saveStoredTransactions = async ({
+	saveUserTransactions = async ({
 		tokenId,
 		transactions
-	}: SaveStoredTransactionsParams): Promise<void> => {
-		const { save_stored_transactions } = this.caller({ certified: true });
+	}: SaveUserTransactionsParams): Promise<void> => {
+		const { save_user_transactions } = this.caller({ certified: true });
 
-		const response = await save_stored_transactions({
+		const response = await save_user_transactions({
 			token_id: tokenId,
 			transactions
 		});

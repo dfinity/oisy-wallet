@@ -4,7 +4,7 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	GetStoredTransactionsResponse,
+	GetUserTransactionsResponse,
 	PendingTransaction,
 	UserProfile
 } from '$declarations/backend/backend.did';
@@ -22,10 +22,10 @@ import type {
 	CreateContactParams,
 	DeleteContactParams,
 	GetContactParams,
-	GetStoredTransactionsParams,
+	GetUserTransactionsParams,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
-	SaveStoredTransactionsParams,
+	SaveUserTransactionsParams,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SelectedUtxosFeeOutcome,
@@ -240,22 +240,22 @@ export const updateUserExperimentalFeatureSettings = async ({
 	return updateUserExperimentalFeatureSettings(params);
 };
 
-export const getStoredTransactions = async ({
+export const getUserTransactions = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<GetStoredTransactionsParams>): Promise<GetStoredTransactionsResponse> => {
-	const { getStoredTransactions } = await backendCanister({ identity });
+}: CanisterApiFunctionParams<GetUserTransactionsParams>): Promise<GetUserTransactionsResponse> => {
+	const { getUserTransactions } = await backendCanister({ identity });
 
-	return getStoredTransactions(params);
+	return getUserTransactions(params);
 };
 
-export const saveStoredTransactions = async ({
+export const saveUserTransactions = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<SaveStoredTransactionsParams>): Promise<void> => {
-	const { saveStoredTransactions } = await backendCanister({ identity });
+}: CanisterApiFunctionParams<SaveUserTransactionsParams>): Promise<void> => {
+	const { saveUserTransactions } = await backendCanister({ identity });
 
-	return saveStoredTransactions(params);
+	return saveUserTransactions(params);
 };
 
 const backendCanister = async ({

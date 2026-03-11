@@ -108,9 +108,9 @@ impl Storable for StoredBackendTokenId {
 
 /// Composite key for per-user, per-token transaction storage.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct StoredTransactionKey(pub StoredPrincipal, pub StoredBackendTokenId);
+pub struct UserTransactionKey(pub StoredPrincipal, pub StoredBackendTokenId);
 
-impl Storable for StoredTransactionKey {
+impl Storable for UserTransactionKey {
     const BOUND: Bound = Bound::Unbounded;
 
     fn to_bytes(&self) -> Cow<'_, [u8]> {

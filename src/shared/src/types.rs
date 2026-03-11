@@ -19,12 +19,12 @@ pub mod pow;
 pub mod result_types;
 pub mod settings;
 pub mod signer;
-pub mod stored_transaction;
 pub mod token;
 pub mod token_id;
 pub mod token_standard;
 pub mod transaction;
 pub mod user_profile;
+pub mod user_transaction;
 pub mod verifiable_credential;
 
 #[cfg(test)]

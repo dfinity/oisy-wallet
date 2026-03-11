@@ -219,19 +219,19 @@ export type GetAllowedCyclesResult =
 	| { Err: GetAllowedCyclesError };
 export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
-export interface GetStoredTransactionsRequest {
+export interface GetUserTransactionsRequest {
 	token_id: TokenId;
 	max_results: bigint;
 	start: [] | [bigint];
 }
-export interface GetStoredTransactionsResponse {
+export interface GetUserTransactionsResponse {
 	next_start: [] | [bigint];
 	newest_block_number: [] | [bigint];
-	transactions: Array<StoredTransaction>;
+	transactions: Array<UserTransaction>;
 }
-export type GetStoredTransactionsResult =
-	| { Ok: GetStoredTransactionsResponse }
-	| { Err: StoredTransactionError };
+export type GetUserTransactionsResult =
+	| { Ok: GetUserTransactionsResponse }
+	| { Err: UserTransactionError };
 export type GetUserProfileError = { NotFound: null };
 export type GetUserProfileResult = { Ok: UserProfile } | { Err: GetUserProfileError };
 export interface HasUserProfileResponse {
@@ -343,12 +343,12 @@ export interface SplToken {
 	token_address: string;
 	symbol: [] | [string];
 }
-export interface SaveStoredTransactionsRequest {
+export interface SaveUserTransactionsRequest {
 	token_id: TokenId;
-	transactions: Array<StoredTransaction>;
+	transactions: Array<UserTransaction>;
 }
-export type SaveStoredTransactionsResult = { Ok: null } | { Err: StoredTransactionError };
-export interface StoredTransaction {
+export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
+export interface UserTransaction {
 	to: [] | [string];
 	token_id: [] | [number];
 	value: bigint;
@@ -363,7 +363,7 @@ export interface StoredTransaction {
 	gas_used: [] | [bigint];
 	gas_price: [] | [bigint];
 }
-export type StoredTransactionError =
+export type UserTransactionError =
 	| { DuplicateTransaction: { hash: string } }
 	| { InternalError: { msg: string } }
 	| { TooManyTransactions: null }
@@ -644,9 +644,9 @@ export interface _SERVICE {
 	 * # Panics
 	 * - If the caller is anonymous.  See: `may_read_user_data`.
 	 */
-	get_stored_transactions: ActorMethod<
-		[GetStoredTransactionsRequest],
-		GetStoredTransactionsResult
+	get_user_transactions: ActorMethod<
+		[GetUserTransactionsRequest],
+		GetUserTransactionsResult
 	>;
 	get_user_profile: ActorMethod<[], GetUserProfileResult>;
 	/**
@@ -683,9 +683,9 @@ export interface _SERVICE {
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
-	save_stored_transactions: ActorMethod<
-		[SaveStoredTransactionsRequest],
-		SaveStoredTransactionsResult
+	save_user_transactions: ActorMethod<
+		[SaveUserTransactionsRequest],
+		SaveUserTransactionsResult
 	>;
 	/**
 	 * Add or update custom token for the user.
