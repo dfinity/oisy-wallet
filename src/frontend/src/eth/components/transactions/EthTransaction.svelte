@@ -42,13 +42,16 @@
 		tokenId,
 		approveSpender,
 		data,
+		display,
 		gasUsed,
 		gasPrice
 	} = $derived(transaction);
 
 	let isApprove = $derived(type === 'approve');
 
-	let isErc20Deposit = $derived(isErc20TransactionDeposit(data));
+	let isErc20Deposit = $derived(
+		isErc20TransactionDeposit(data) || display?.isErc20Deposit === true
+	);
 
 	let { to: dataTo, value: dataValue } = $derived(
 		(isApprove || isErc20Deposit) && nonNullish(data)
@@ -78,7 +81,9 @@
 
 	let displayToken = $derived(approveToken ?? token);
 
-	let approveValue = $derived(isApprove ? dataValue : undefined);
+	let approveValue = $derived(
+		isApprove ? (nonNullish(dataValue) ? dataValue : display?.approveValue) : undefined
+	);
 
 	let approveAmountText = $derived.by(() => {
 		if (!isApprove) {
@@ -87,7 +92,7 @@
 
 		const symbolText = getTokenDisplaySymbol(displayToken);
 
-		if (isMaxUint256(approveValue)) {
+		if (display?.isUnlimitedApprove || isMaxUint256(approveValue)) {
 			return replacePlaceholders($i18n.core.text.unlimited, {
 				$items: symbolText
 			});
@@ -168,11 +173,13 @@
 	);
 
 	let displayAmount = $derived(
-		isApprove || isErc20Deposit
-			? nonNullish(gasFee)
-				? gasFee * -1n
-				: undefined
-			: value * (type === 'send' || type === 'deposit' ? -1n : 1n)
+		nonNullish(display?.amount)
+			? display.amount
+			: isApprove || isErc20Deposit
+				? nonNullish(gasFee)
+					? gasFee * -1n
+					: undefined
+				: value * (type === 'send' || type === 'deposit' ? -1n : 1n)
 	);
 
 	let transactionDate = $derived(timestamp ?? displayTimestamp);

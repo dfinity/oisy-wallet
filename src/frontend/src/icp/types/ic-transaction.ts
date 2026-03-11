@@ -1,7 +1,7 @@
 import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { icpTransactionTypes } from '$lib/schema/transaction.schema';
-import type { TransactionId, TransactionType } from '$lib/types/transaction';
+import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 
@@ -31,7 +31,7 @@ export type IcTransactionIdText = string;
 
 export type IcTransactionStatus = 'executed' | 'pending' | 'reimbursed' | 'failed';
 
-export interface IcTransactionUi {
+export interface IcTransactionUi extends Omit<TransactionUiCommon, 'from' | 'to'> {
 	id: TransactionId;
 	type: IcTransactionType;
 	// e.g. BTC Received
@@ -40,16 +40,12 @@ export interface IcTransactionUi {
 	from?: string;
 	// e.g. From: BTC Network
 	fromLabel?: string;
-	fromExplorerUrl?: string;
 	to?: string;
 	// e.g. To: BTC Network
 	toLabel?: string;
-	toExplorerUrl?: string;
 	incoming?: boolean;
 	value?: bigint;
-	timestamp?: bigint;
 	status: IcTransactionStatus;
-	txExplorerUrl?: string;
 	approveSpender?: string;
 	approveSpenderExplorerUrl?: string;
 	approveExpiresAt?: bigint;
