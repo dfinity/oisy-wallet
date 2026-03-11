@@ -78,19 +78,20 @@ const findDuplicateEthNativeTransactions = (
 		}
 	}
 
-	// For each group with duplicates, mark all but the winner for removal.
+	// For each group with duplicates, mark native fee entries for removal
+	// only when the group also contains at least one non-native (e.g. ERC-20) transfer.
 	const duplicates = new Set<EthAllTransactionUiWithCmp>();
 
 	for (const networkMap of groupsByNetworkAndHash.values()) {
 		for (const group of networkMap.values()) {
 			if (group.length > 1) {
-				// Prefer the non-native (e.g. ERC-20) transaction over the native fee payment.
-				// Falls back to the first entry if all duplicates are native tokens.
-				const winner = group.find(({ token }) => token.standard.code !== 'ethereum') ?? group[0];
+				const hasNonNative = group.some(({ token }) => token.standard.code !== 'ethereum');
 
-				for (const tx of group) {
-					if (tx !== winner) {
-						duplicates.add(tx);
+				if (hasNonNative) {
+					for (const tx of group) {
+						if (tx.token.standard.code === 'ethereum') {
+							duplicates.add(tx);
+						}
 					}
 				}
 			}

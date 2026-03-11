@@ -4,6 +4,7 @@ import type { BtcTransactionType } from '$btc/types/btc-transaction';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN, PEPE_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { USDC_TOKEN, USDC_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import {
 	BASE_ETH_TOKEN,
 	BASE_ETH_TOKEN_ID
@@ -563,6 +564,36 @@ describe('transactions.utils', () => {
 				});
 
 				expect(result).toHaveLength(2);
+			});
+
+			it('should keep all non-native transactions and only remove the native one when multiple ERC-20 transfers share the same hash', () => {
+				const sharedHash = duplicateHash;
+				const nativeTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: sharedHash },
+					certified: false
+				};
+				const pepeTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: sharedHash },
+					certified: false
+				};
+				const usdcTx: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: sharedHash },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN, PEPE_TOKEN, USDC_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [nativeTx],
+						[PEPE_TOKEN_ID]: [pepeTx],
+						[USDC_TOKEN_ID]: [usdcTx]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(2);
+				expect(result.every(({ token }) => token.standard.code !== 'ethereum')).toBe(true);
+				expect(result.map(({ token }) => token)).toEqual([PEPE_TOKEN, USDC_TOKEN]);
 			});
 
 			it('should keep the native transaction if no non-native duplicate exists', () => {
