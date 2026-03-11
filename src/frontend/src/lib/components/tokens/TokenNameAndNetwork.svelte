@@ -11,10 +11,7 @@
 
 	let { data }: Props = $props();
 
-	let { network } = $derived(data);
-
-	let { name: networkName } = $derived(network ?? { name: undefined });
-
+	let networkName = $derived(data.network?.name);
 	let name = $derived(getTokenDisplayName(data));
 </script>
 
