@@ -43,6 +43,67 @@ import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
+ * Finds EVM/ETH native-token transactions that are duplicates of non-native transactions
+ * sharing the same hash on the same network.
+ *
+ * For deposit/transfer operations, two transactions are received: the ERC token transfer
+ * and the native fee payment. This identifies the native fee entries to exclude.
+ */
+const findDuplicateEthNativeTransactions = (
+	ethTransactions: AllTransactionUiWithCmp[]
+): Set<AllTransactionUiWithCmp> => {
+	// Group ETH transactions by (networkId, hash) to detect duplicates.
+	const groupsByNetworkAndHash = new Map<symbol, Map<string, AllTransactionUiWithCmp[]>>();
+
+	for (const tx of ethTransactions) {
+		const { hash } = tx.transaction;
+
+		if (isNullish(hash)) {
+			continue;
+		}
+
+		const networkId = tx.token.network.id;
+
+		if (!groupsByNetworkAndHash.has(networkId)) {
+			groupsByNetworkAndHash.set(networkId, new Map());
+		}
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const networkMap = groupsByNetworkAndHash.get(networkId)!;
+
+		if (!networkMap.has(hash)) {
+			networkMap.set(hash, []);
+		}
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		networkMap.get(hash)!.push(tx);
+	}
+
+	// For each group with duplicates, mark all but the winner for removal.
+	const duplicates = new Set<AllTransactionUiWithCmp>();
+
+	for (const networkMap of groupsByNetworkAndHash.values()) {
+		for (const group of networkMap.values()) {
+			if (group.length <= 1) {
+				continue;
+			}
+
+			// Prefer the non-native (e.g. ERC-20) transaction over the native fee payment.
+			// Falls back to the first entry if all duplicates are native tokens.
+			const winner = group.find(({ token }) => token.standard.code !== 'ethereum') ?? group[0];
+
+			for (const tx of group) {
+				if (tx !== winner) {
+					duplicates.add(tx);
+				}
+			}
+		}
+	}
+
+	return duplicates;
+};
+
+/**
  * Maps the transactions stores to a unified list of transactions with their respective token and components.
  *
  * @param tokens - The tokens to map the transactions for.
@@ -88,7 +149,10 @@ export const mapAllTransactionsUi = ({
 		$ckEthMinterInfo?.[SEPOLIA_TOKEN_ID]
 	);
 
-	return tokens.reduce<AllTransactionUiWithCmp[]>((acc, token) => {
+	// Collected separately to scope deduplication only to ETH/EVM transactions.
+	const ethTransactions: AllTransactionUiWithCmp[] = [];
+
+	const allTransactions = tokens.reduce<AllTransactionUiWithCmp[]>((acc, token) => {
 		const {
 			id: tokenId,
 			network: { id: networkId }
@@ -112,20 +176,21 @@ export const mapAllTransactionsUi = ({
 		if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
 			const isSepoliaNetwork = isNetworkIdSepolia(networkId);
 
-			return [
-				...acc,
-				...($ethTransactions?.[tokenId] ?? []).map(({ data: transaction }) => ({
-					transaction: mapEthTransactionUi({
-						transaction,
-						ckMinterInfoAddresses: isSepoliaNetwork
-							? ckEthMinterInfoAddressesSepolia
-							: ckEthMinterInfoAddressesMainnet,
-						ethAddress: $ethAddress
-					}),
-					token,
-					component: 'ethereum' as const
-				}))
-			];
+			const mapped = ($ethTransactions?.[tokenId] ?? []).map(({ data: transaction }) => ({
+				transaction: mapEthTransactionUi({
+					transaction,
+					ckMinterInfoAddresses: isSepoliaNetwork
+						? ckEthMinterInfoAddressesSepolia
+						: ckEthMinterInfoAddressesMainnet,
+					ethAddress: $ethAddress
+				}),
+				token,
+				component: 'ethereum' as const
+			}));
+
+			ethTransactions.push(...mapped);
+
+			return [...acc, ...mapped];
 		}
 
 		if (isNetworkIdICP(networkId)) {
@@ -187,6 +252,13 @@ export const mapAllTransactionsUi = ({
 
 		return acc;
 	}, []);
+
+	// Remove native ETH/EVM transactions that duplicate an ERC token transfer on the same network and hash.
+	const duplicates = findDuplicateEthNativeTransactions(ethTransactions);
+
+	return duplicates.size > 0
+		? allTransactions.filter((tx) => !duplicates.has(tx))
+		: allTransactions;
 };
 
 // When using this filter function in combination with an infinite loader we need to make sure that the transactions are filtered while loading and not right before displaying them.
