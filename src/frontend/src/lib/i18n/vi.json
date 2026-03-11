@@ -1503,8 +1503,6 @@
 		},
 		"label": {
 			"reimbursement": "Hoàn tiền",
-			"twin_token_sent": "$twinToken đã gửi",
-			"ck_token_sent": "$ckToken đã gửi",
 			"twin_token_converted": "Đã chuyển đổi từ $twinToken",
 			"ck_token_converted": "Đã chuyển đổi từ $ckToken",
 			"sending_twin_token": "Đang gửi $twinToken",

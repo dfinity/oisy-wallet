@@ -1503,8 +1503,6 @@
 		},
 		"label": {
 			"reimbursement": "Náhrada",
-			"twin_token_sent": "$twinToken odeslán",
-			"ck_token_sent": "$ckToken odeslán",
 			"twin_token_converted": "Převedeno z $twinToken",
 			"ck_token_converted": "Převedeno z $ckToken",
 			"sending_twin_token": "Odesílání $twinToken",

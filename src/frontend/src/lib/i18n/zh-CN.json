@@ -1503,8 +1503,6 @@
 		},
 		"label": {
 			"reimbursement": "报销",
-			"twin_token_sent": "已发送 $twinToken",
-			"ck_token_sent": "已发送 $ckToken",
 			"twin_token_converted": "从 $twinToken 转换",
 			"ck_token_converted": "从 $ckToken 转换",
 			"sending_twin_token": "正在发送 $twinToken",

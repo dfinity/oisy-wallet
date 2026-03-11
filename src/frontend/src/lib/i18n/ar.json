@@ -1503,8 +1503,6 @@
 		},
 		"label": {
 			"reimbursement": "تعويض",
-			"twin_token_sent": "تم إرسال $twinToken",
-			"ck_token_sent": "تم إرسال $ckToken",
 			"twin_token_converted": "تم التحويل من $twinToken",
 			"ck_token_converted": "تم التحويل من $ckToken",
 			"sending_twin_token": "جاري إرسال $twinToken",

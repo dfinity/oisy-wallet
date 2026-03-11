@@ -1503,8 +1503,6 @@
 		},
 		"label": {
 			"reimbursement": "Rimborso",
-			"twin_token_sent": "$twinToken inviato",
-			"ck_token_sent": "$ckToken inviato",
 			"twin_token_converted": "Convertito da $twinToken",
 			"ck_token_converted": "Convertito da $ckToken",
 			"sending_twin_token": "Invio di $twinToken",
