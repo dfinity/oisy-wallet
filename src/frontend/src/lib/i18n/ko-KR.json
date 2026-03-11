@@ -821,7 +821,6 @@
 	"send": {
 		"text": {
 			"send": "보내기",
-			"send_token": "",
 			"destination": "수신처",
 			"source": "출처",
 			"balance": "잔액",
@@ -1548,34 +1547,34 @@
 			"loading_token": "토큰으로의 제공된 링크가 유효하지 않습니다."
 		}
 	},
-	"about": {
+"about": {
 		"why_oisy": {
 			"text": {
-				"label": "",
-				"title": "",
+				"label": "$oisy_short를 선택하는 이유",
+				"title": "$oisy_short를 선택하는 이유",
 				"hold_crypto": {
-					"title": "",
-					"description": ""
+					"title": "모든 디지털 자산의 통합 관리",
+					"description": "$oisy_short를 사용하면 비트코인, 솔라나, 이더리움, ICP 등 모든 디지털 자산을 하나의 통합 지갑에서 관리할 수 있습니다. 여러 암호화폐를 위해 다수의 지갑을 사용할 필요 없이 다양한 플랫폼에서 원활하고 효율적인 경험을 즐기세요."
 				},
 				"network_custody": {
-					"title": "",
-					"description": ""
+					"title": "네트워크 수탁으로 개인 키 걱정 없이",
+					"description": "$oisy_name은 인터넷 컴퓨터의 고급 암호화 기술을 활용하는 혁신적인 방식인 네트워크 수탁(Network Custody)을 구현하여 개인 키를 직접 관리할 필요를 없앱니다. 이는 기존 방식에 대한 안전하고 사용자 친화적인 대안을 제공하며, 분산 네트워크 운영을 통해 보안과 사이버 공격 저항성을 강화하는 '온체인이 새로운 온라인' 운동과 궤를 같이합니다."
 				},
 				"fully_on_chain": {
-					"title": "",
-					"description": ""
+					"title": "완전 온체인 지갑으로 변조 방지 보안 실현",
+					"description": "키 보안뿐만 아니라 전체 지갑 애플리케이션이 인터넷 컴퓨터에 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">완전 온체인</a>으로 저장되어 브라우저에 직접 제공됩니다. 이는 지갑 전체가 탈중앙화된 신뢰 모델의 혜택을 받아 변조가 불가능하고 매우 안전함을 의미합니다."
 				},
 				"cross_device": {
-					"title": "",
-					"description": ""
+					"title": "언제 어디서나 지갑에 접근",
+					"description": "<a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.internetcomputer.org/\">인터넷 아이덴티티</a>를 사용하여 $oisy_short는 개인 분산 아이덴티티에 연결된 모든 기기에서 쉽게 사용할 수 있습니다. 스마트폰, 태블릿, 데스크톱 어디서든 지갑에 원활하고 안전하게 접근할 수 있습니다."
 				},
 				"verifiable_credentials": {
-					"title": "",
-					"description": ""
+					"title": "검증 가능한 자격 증명으로 추가 기능 잠금 해제",
+					"description": "$oisy_short는 인터넷 컴퓨터의 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">검증 가능한 자격 증명</a> 플랫폼과 통합됩니다. 특정 유형의 자격 증명을 획득하여 에어드롭 및 독점 기능과 같은 추가 기능에 접근하고 전반적인 경험을 향상시키세요."
 				},
 				"open_source": {
-					"title": "",
-					"description": ""
+					"title": "오픈 소스로 투명성에 대한 신뢰",
+					"description": "$oisy_short는 200명 이상의 세계 최고 암호학자와 엔지니어의 지원을 받는 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY 재단</a> 내 전담 팀이 이끄는 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">오픈 소스</a> 프로젝트입니다. 오픈 소스화는 투명성을 보장하여 커뮤니티가 지갑의 무결성을 감사하고, 기여하며, 신뢰할 수 있도록 합니다."
 				}
 			}
 		}
@@ -1583,507 +1582,507 @@
 	"vip": {
 		"reward": {
 			"text": {
-				"open_wallet": "",
-				"title_successful": "",
-				"title_failed": "",
-				"reward_received": "",
-				"reward_failed": "",
-				"reward_received_description": "",
-				"brand_reward_received_description": "",
-				"reward_failed_description": ""
+				"open_wallet": "지갑으로 이동",
+				"title_successful": "축하합니다!",
+				"title_failed": "유효하지 않은 초대 코드",
+				"reward_received": "$oisy_short에 오신 것을 환영합니다!",
+				"reward_failed": "코드가 만료되었습니다",
+				"reward_received_description": "곧 웰컴 선물을 받으실 수 있습니다.",
+				"brand_reward_received_description": "더 많이 얻고 싶으신가요? 친구를 초대하고 가입한 모든 사람에 대해 보상을 받으세요.",
+				"reward_failed_description": "새 코드를 요청하고 다시 시도하세요"
 			},
 			"error": {
-				"loading_reward": "",
-				"loading_user_data": "",
-				"loading_eligibility": ""
+				"loading_reward": "새 보상 코드를 불러오는 중 오류가 발생했습니다.",
+				"loading_user_data": "보상 캐니스터에서 사용자 데이터를 불러오지 못했습니다.",
+				"loading_eligibility": "캠페인 자격 요건을 불러오는 중 오류가 발생했습니다."
 			}
 		},
 		"invitation": {
 			"text": {
-				"title": "",
-				"binance_title": "",
-				"invitation_link_copied": "",
-				"generate_new_link": "",
-				"generating_new_code": "",
-				"regenerate_countdown_text": ""
+				"title": "초대 링크 생성",
+				"binance_title": "바이낸스 클럽하우스 QR",
+				"invitation_link_copied": "초대 링크가 클립보드에 복사되었습니다.",
+				"generate_new_link": "새 링크 생성",
+				"generating_new_code": "새 코드 생성 중",
+				"regenerate_countdown_text": "$counter초 후에 새 링크가 생성됩니다"
 			}
 		}
 	},
 	"referral": {
 		"invitation": {
 			"text": {
-				"title": "",
-				"referral_link_copied": "",
-				"information": "",
-				"not_referred_yet": "",
-				"referred_amount": "",
-				"learn_more": ""
+				"title": "친구 추천",
+				"referral_link_copied": "추천 링크가 클립보드에 복사되었습니다.",
+				"information": "친구를 추천하고 보너스 스프링클을 받으세요!",
+				"not_referred_yet": "아직 추천한 사람이 없습니다",
+				"referred_amount": "이미 $amount명을 추천하셨습니다",
+				"learn_more": "자세히 알아보기"
 			},
 			"error": {
-				"loading_referrer_info": "",
-				"setting_referrer": ""
+				"loading_referrer_info": "추천 정보를 불러오는 중 오류가 발생했습니다",
+				"setting_referrer": "추천인 설정 중 오류가 발생했습니다"
 			}
 		}
 	},
 	"address_book": {
 		"text": {
-			"title": "",
-			"empty_title": "",
-			"empty_text": "",
-			"add_new_contact": "",
-			"add_contact": "",
-			"search_contact": "",
-			"no_address_found": "",
-			"no_contact_found": ""
+			"title": "연락처",
+			"empty_title": "연락처가 비어 있습니다",
+			"empty_text": "모든 연락처가 여기에 표시됩니다",
+			"add_new_contact": "새 연락처 추가",
+			"add_contact": "연락처 추가",
+			"search_contact": "연락처 검색",
+			"no_address_found": "사용 가능한 주소가 없습니다.",
+			"no_contact_found": "연락처를 찾을 수 없습니다"
 		},
 		"alt": {
-			"show_addresses_of_contact": "",
-			"hide_addresses": ""
+			"show_addresses_of_contact": "연락처의 모든 주소 보기",
+			"hide_addresses": "연락처 주소 숨기기"
 		},
 		"edit_contact": {
-			"title": "",
-			"add_address": "",
-			"delete_contact": ""
+			"title": "연락처 수정",
+			"add_address": "주소 추가",
+			"delete_contact": "연락처 삭제"
 		},
 		"avatar": {
-			"default": "",
-			"avatar_for": "",
-			"avatar_loading": ""
+			"default": "기본 아바타",
+			"avatar_for": "아바타 대상",
+			"avatar_loading": "아바타 불러오는 중..."
 		},
 		"edit_avatar": {
-			"menu_title": "",
-			"upload_image": "",
-			"replace_image": "",
-			"remove_image": ""
+			"menu_title": "연락처 이미지",
+			"upload_image": "업로드",
+			"replace_image": "교체",
+			"remove_image": "제거"
 		},
 		"show_contact": {
-			"title": "",
-			"add_address": "",
-			"show_address_text": "",
-			"add_first_address": ""
+			"title": "연락처",
+			"add_address": "주소 추가",
+			"show_address_text": "연결된 주소가 여기에 표시됩니다",
+			"add_first_address": "$contactName에 첫 번째 주소를 추가하세요!"
 		},
 		"create_contact": {
-			"title": ""
+			"title": "연락처 만들기"
 		}
 	},
 	"contact": {
 		"form": {
-			"edit_contact": "",
-			"add_new_contact": ""
+			"edit_contact": "연락처 수정",
+			"add_new_contact": "새 연락처 추가"
 		},
 		"fields": {
-			"name": ""
+			"name": "이름"
 		},
 		"delete": {
-			"title": "",
-			"delete_contact": "",
-			"content_text": ""
+			"title": "$contact 연락처를 삭제하시겠습니까?",
+			"delete_contact": "연락처 삭제",
+			"content_text": "$contact 및 연결된 모든 주소가 연락처에서 삭제됩니다. 이 작업은 취소할 수 없습니다."
 		},
 		"error": {
-			"create": "",
-			"update": "",
-			"delete": "",
-			"name_too_long": ""
+			"create": "연락처를 만들지 못했습니다",
+			"update": "연락처를 업데이트하지 못했습니다",
+			"delete": "연락처를 삭제하지 못했습니다",
+			"name_too_long": "이름을 $maxCharacters자 이하로 입력해 주세요."
 		}
 	},
 	"address": {
 		"types": {
-			"Icrcv2": "",
-			"Btc": "",
-			"Eth": "",
-			"Sol": ""
+			"Icrcv2": "인터넷 컴퓨터",
+			"Btc": "비트코인",
+			"Eth": "이더리움",
+			"Sol": "솔라나"
 		},
 		"form": {
-			"new_address": "",
-			"address_placeholder": "",
-			"label_placeholder": "",
-			"invalid_address": "",
-			"valid_for_networks": "",
+			"new_address": "새 주소",
+			"address_placeholder": "주소를 입력하거나 붙여넣으세요",
+			"label_placeholder": "예: \"엄마 지갑\"",
+			"invalid_address": "유효하지 않은 주소",
+			"valid_for_networks": "유효한 네트워크:",
 			"error": {
-				"label_too_long": ""
+				"label_too_long": "레이블은 $maxCharacters자를 초과할 수 없습니다"
 			}
 		},
 		"fields": {
-			"label": "",
-			"address": ""
+			"label": "별칭",
+			"address": "주소"
 		},
 		"delete": {
-			"title": "",
-			"delete_address": "",
-			"content_text": ""
+			"title": "주소를 삭제하시겠습니까?",
+			"delete_address": "주소 삭제",
+			"content_text": "$contact의 연락처에서 <strong>$address</strong> 주소가 삭제됩니다.<br>이 작업은 취소할 수 없습니다."
 		},
 		"save": {
-			"title": "",
-			"add_to_existing_contact": "",
-			"create_contact": ""
+			"title": "주소 저장",
+			"add_to_existing_contact": "기존 연락처에 추가",
+			"create_contact": "연락처 만들기"
 		},
 		"qr": {
-			"title": ""
+			"title": "QR 코드 스캔"
 		}
 	},
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "",
-				"open_or_create": ""
+				"access_your_wallet": "$oisy_name에 접근",
+				"open_or_create": "지갑을 열거나 만들어 dApp에 안전하게 연결하고 자산 관리를 시작하세요."
 			}
 		},
 		"idle": {
 			"text": {
-				"waiting": ""
+				"waiting": "dApp 상호작용을 기다리는 중..."
 			},
 			"alt": {
-				"img_placeholder": ""
+				"img_placeholder": "우주비행사 로고가 신뢰 당사자 dApp의 메시지를 기다리며 눈을 좌우로 움직입니다"
 			}
 		},
 		"permissions": {
 			"text": {
-				"title": "",
-				"requested_permissions": "",
-				"your_wallet_address": "",
-				"icrc27_accounts": "",
-				"icrc49_call_canister": ""
+				"title": "권한 검토",
+				"requested_permissions": "요청된 권한",
+				"your_wallet_address": "내 지갑 주소",
+				"icrc27_accounts": "$oisy_name 주소 보기",
+				"icrc49_call_canister": "거래 승인 요청"
 			},
 			"error": {
-				"no_confirm_callback": ""
+				"no_confirm_callback": "권한을 확인할 콜백이 없습니다. 예상치 못한 상황입니다. 지갑을 닫고 다시 시도하세요."
 			}
 		},
 		"origin": {
 			"text": {
-				"request_from": "",
-				"invalid_origin": ""
+				"request_from": "요청 출처:",
+				"invalid_origin": "유효하지 않은 출처️!!"
 			},
 			"alt": {
-				"link_to_dapp": ""
+				"link_to_dapp": "권한을 요청하는 dApp 링크"
 			}
 		},
 		"consent_message": {
 			"text": {
-				"loading": ""
+				"loading": "동의 메시지 불러오는 중..."
 			},
 			"warning": {
-				"token_without_consent_message": ""
+				"token_without_consent_message": "이 토큰은 확인 메시지를 제공하지 않으므로 아래 정보는 $oisy_short에서 추출한 것입니다."
 			},
 			"error": {
-				"no_approve_callback": "",
-				"no_reject_callback": "",
-				"retrieve": ""
+				"no_approve_callback": "동의 메시지를 승인할 콜백이 없습니다. 예상치 못한 상황입니다. 지갑을 닫고 다시 시도하세요.",
+				"no_reject_callback": "동의 메시지를 거부할 콜백이 없습니다. 예상치 못한 상황입니다. 지갑을 닫고 다시 시도하세요.",
+				"retrieve": "동의 메시지를 가져오는 중 오류가 발생했습니다"
 			}
 		},
 		"call_canister": {
 			"text": {
-				"processing": "",
-				"executed": "",
-				"close_window": "",
-				"error": "",
-				"try_again": ""
+				"processing": "요청 처리 중...",
+				"executed": "요청이 실행되었습니다",
+				"close_window": "이 창을 닫을 수 있습니다",
+				"error": "오류로 인해 요청이 실패했습니다",
+				"try_again": "다시 시도해 주세요. 문제가 지속되면 요청을 시작한 dApp 개발자에게 문의하세요."
 			},
 			"error": {
-				"cannot_call": ""
+				"cannot_call": "호출을 처리할 수 없습니다"
 			}
 		}
 	},
 	"carousel": {
 		"text": {
-			"next_slide": "",
-			"prev_slide": "",
-			"indicator": ""
+			"next_slide": "다음 슬라이드",
+			"prev_slide": "이전 슬라이드",
+			"indicator": "$index번 슬라이드로 이동"
 		}
 	},
 	"agreements": {
 		"text": {
-			"updated_agreements_warning": ""
+			"updated_agreements_warning": "$agreements가 업데이트되었습니다. $oisy_short를 사용함으로써 업데이트 내용을 읽고 동의한 것으로 확인합니다."
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "약관 업데이트 중 문제가 발생했습니다."
 		}
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "라이선스 계약",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "해당 ",
+				"possessive": "당사 "
 			},
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"license_agreement": ""
+			"license_agreement": "$oisy_name 라이선스 계약"
 		}
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
+			"terms_of_use": "이용 약관",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "해당 ",
+				"possessive": "당사 "
 			},
 			"title": "",
-			"instruction": "",
+			"instruction": "이 버튼을 클릭하면 $link에 동의하는 것으로 간주합니다",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "이용 약관 링크"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
+			"privacy_policy": "개인정보 처리방침",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "해당 ",
+				"possessive": "당사 "
 			},
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "개인정보 처리방침 링크"
 		}
 	},
 	"activity": {
 		"text": {
-			"title": ""
+			"title": "최근 활동"
 		},
 		"info": {
-			"btc_transactions": ""
+			"btc_transactions": "BTC 거래 정보는 중앙 집중식 제3자로부터 제공되므로 독립적으로 검증해야 합니다."
 		},
 		"warning": {
-			"no_index_canister": "",
-			"unavailable_index_canister": ""
+			"no_index_canister": "$token_list에 대한 거래를 표시할 수 없습니다. 사용 가능한 인덱스 캐니스터가 없습니다.",
+			"unavailable_index_canister": "$token_list에 대한 거래를 표시할 수 없습니다. 인덱스 캐니스터를 현재 사용할 수 없습니다."
 		}
 	},
 	"earning": {
 		"text": {
-			"title": "",
-			"tab_title": "",
-			"earning_opportunities": "",
-			"header_title": "",
-			"header_description": "",
-			"go_to_earn": ""
+			"title": "수익",
+			"tab_title": "수익 창출",
+			"earning_opportunities": "수익 창출 기회",
+			"header_title": "수익 창출에 오신 것을 환영합니다!",
+			"header_description": "토큰을 수익 창출 기회에 할당하여 디지털 자산 포트폴리오를 늘리세요.",
+			"go_to_earn": "수익 창출로 이동"
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "하베스트 - 자동 운용",
+				"description": "원클릭 자동 운용 볼트로 최대 수익 효율 실현.",
+				"action": "자동 운용으로 이동"
 			},
 			"sprinkles": {
-				"title": "",
-				"description": "",
-				"action": ""
+				"title": "OISY 스프링클",
+				"description": "OISY를 사용하고 수익을 얻으세요! Ep. 5가 공개되었습니다 🎉",
+				"action": "상태 확인"
 			}
 		},
 		"card_fields": {
-			"apy": "",
-			"networks": "",
-			"assets": "",
-			"currentStaked": "",
-			"currentEarning": "",
-			"earningPotential": "",
-			"terms": ""
+			"apy": "APY",
+			"networks": "네트워크",
+			"assets": "자산",
+			"currentStaked": "스테이킹됨",
+			"currentEarning": "현재 수익 중",
+			"earningPotential": "수익 잠재력",
+			"terms": "조건"
 		},
 		"terms": {
-			"flexible": ""
+			"flexible": "유연함"
 		},
 		"providers": {
 			"goldDaoStaking": {
-				"cardTitle": ""
+				"cardTitle": "Gold DAO로 수익 얻기"
 			}
 		}
 	},
 	"vaults": {
 		"text": {
-			"autopilot": "",
-			"live_apy": ""
+			"autopilot": "자동 운용",
+			"live_apy": "실시간 APY"
 		}
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
-			"harvest_autopilot_page_description": "",
-			"harvest_autopilot_vault_page_description": "",
-			"my_positions": "",
-			"available_autopilots": "",
-			"vault_info": "",
-			"vault_address": "",
-			"protocol": "",
-			"harvest": "",
-			"autopilot": "",
-			"total_value_locked": "",
-			"manager": "",
-			"vault_description": "",
-			"stake": "",
-			"stake_now": "",
-			"stake_amount": "",
-			"not_enough_to_stake": "",
-			"unstake": "",
-			"unstake_now": "",
-			"unstaking": "",
-			"unstake_token": "",
-			"enable_token_text": "",
-			"enable_token_button": "",
-			"review": "",
-			"executing_transaction": "",
-			"unsupported_token_staking": "",
-			"provider": "",
-			"earning_potential": "",
-			"earning_potential_hint": "",
-			"active_earning": "",
-			"active_earning_per_year": "",
-			"active_earning_per_year_short": "",
-			"unproductive_assets": "",
-			"invested_assets": "",
-			"visit_provider": "",
-			"current_apy_label": "",
-			"max_apy_label": "",
-			"stake_review_subtitle": "",
-			"unstake_review_subtitle": "",
-			"delayed_dissolve": "",
-			"immediate_dissolve": "",
-			"included_token_fee": "",
-			"included_dissolve_fee": "",
-			"delayed_dissolve_terms": "",
-			"delayed_dissolve_info": "",
-			"immediate_dissolve_terms": "",
-			"amount_to_receive": "",
-			"unclaimed_rewards": "",
-			"unlock_requests": "",
-			"unlocking_in": "",
-			"unlocked": "",
-			"withdraw": "",
-			"withdraw_successful": "",
-			"claim_reward": "",
-			"claim_rewards": "",
-			"claim_reward_short": "",
-			"claim_now": "",
-			"claiming": "",
-			"get_tokens_with_amount": "",
-			"get_asset_tokens": "",
-			"reward_claimed": "",
-			"staked": "",
-			"unstaked": "",
-			"title_empty_1": "",
-			"title_empty_2_usd": "",
-			"title_empty_2_apy": "",
+			"gldt_stake_page_description": "GLDT 토큰을 스테이킹하여 실물 금으로 뒷받침된 보상을 받으세요",
+			"harvest_autopilot_page_description": "원클릭 자동 운용 볼트로 최대 수익 효율 실현.",
+			"harvest_autopilot_vault_page_description": "자동 운용은 <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">감사 완료된 IPOR</a> Fusion Vault 기술을 기반으로 합니다.",
+			"my_positions": "내 포지션",
+			"available_autopilots": "사용 가능한 자동 운용",
+			"vault_info": "볼트 정보",
+			"vault_address": "볼트 주소",
+			"protocol": "프로토콜",
+			"harvest": "하베스트",
+			"autopilot": "자동 운용",
+			"total_value_locked": "총 예치 가치 (TVL)",
+			"manager": "매니저",
+			"vault_description": "이 풀은 $asset_symbol 보유 자산에 대한 '설정 후 방치' 수익 관리 서비스로 설계되었습니다. 최적의 기회에 자본을 동적으로 할당하여 최소한의 노력으로 DeFi 포지션을 자동으로 최적화합니다.",
+			"stake": "$token_symbol 스테이킹",
+			"stake_now": "지금 스테이킹",
+			"stake_amount": "$amount $token_symbol 스테이킹",
+			"not_enough_to_stake": "스테이킹할 $token_symbol이 없습니다",
+			"unstake": "언스테이킹",
+			"unstake_now": "지금 언스테이킹",
+			"unstaking": "언스테이킹 중...",
+			"unstake_token": "$token_symbol 언스테이킹",
+			"enable_token_text": "$token_symbol을 활성화해야 합니다",
+			"enable_token_button": "$token_symbol 활성화",
+			"review": "거래 검토",
+			"executing_transaction": "거래 실행 중...",
+			"unsupported_token_staking": "선택한 토큰에 대한 스테이킹은 지원되지 않습니다.",
+			"provider": "$provider가 제공하는 스테이킹 조건",
+			"earning_potential": "수익 잠재력",
+			"earning_potential_hint": "투자되지 않은 자산의 가치와 사용 가능한 수익 기회의 최고 APY를 기반으로 합니다.",
+			"active_earning": "활성 수익",
+			"active_earning_per_year": "$amount/년",
+			"active_earning_per_year_short": "$amount/년",
+			"unproductive_assets": "사용 가능",
+			"invested_assets": "할당됨",
+			"visit_provider": "웹사이트 방문",
+			"current_apy_label": "현재 APY",
+			"max_apy_label": "최대 APY",
+			"stake_review_subtitle": "스테이킹 금액",
+			"unstake_review_subtitle": "언스테이킹 금액",
+			"delayed_dissolve": "지연 수령",
+			"immediate_dissolve": "즉시 수령",
+			"included_token_fee": "포함된 네트워크 수수료",
+			"included_dissolve_fee": "포함된 잠금 해제 수수료",
+			"delayed_dissolve_terms": "$token을 스테이킹에서 잠금 해제할 때, 토큰은 추가 보상 없이 $delay일 동안 잠기며 이후 출금 가능합니다.",
+			"delayed_dissolve_info": "$token 스테이크 잠금 해제를 시작하면 새로운 보상을 더 이상 받지 못합니다.",
+			"immediate_dissolve_terms": "$token을 즉시 수령하지만 잠금 해제하는 $token 토큰에 대해 수수료가 부과됩니다.",
+			"amount_to_receive": "수령 금액",
+			"unclaimed_rewards": "미청구 보상",
+			"unlock_requests": "잠금 해제 요청",
+			"unlocking_in": "$time 후 잠금 해제",
+			"unlocked": "잠금 해제됨",
+			"withdraw": "출금",
+			"withdraw_successful": "토큰이 성공적으로 출금되었습니다.",
+			"claim_reward": "보상 청구",
+			"claim_rewards": "보상 청구",
+			"claim_reward_short": "청구",
+			"claim_now": "지금 청구",
+			"claiming": "청구 중...",
+			"get_tokens_with_amount": "최대 $amount $token_symbol 받기",
+			"get_asset_tokens": "$token_symbol 받기",
+			"reward_claimed": "보상 청구 완료",
+			"staked": "스테이킹됨",
+			"unstaked": "언스테이킹됨",
+			"title_empty_1": "최대",
+			"title_empty_2_usd": "/년 수익",
+			"title_empty_2_apy": "연간",
 			"title_empty_3": "",
-			"description_empty": "",
-			"full_history": "",
-			"recent_history": "",
-			"gldt_stake_carousel_slide_title": "",
-			"gldt_stake_carousel_slide_cta": ""
+			"description_empty": "아직 스테이킹한 토큰이 없는 것 같습니다",
+			"full_history": "전체 기록 보기",
+			"recent_history": "전체 기록 닫기",
+			"gldt_stake_carousel_slide_title": "Gold DAO 스테이킹으로 APY 수익 창출",
+			"gldt_stake_carousel_slide_cta": "자세히 알아보기"
 		},
 		"error": {
-			"unexpected_error_on_withdraw": "",
-			"unexpected_error_on_unstake": "",
-			"dissolvement_limit_reached": ""
+			"unexpected_error_on_withdraw": "토큰 출금 중 문제가 발생했습니다.",
+			"unexpected_error_on_unstake": "토큰 언스테이킹 중 문제가 발생했습니다.",
+			"dissolvement_limit_reached": "활성 잠금 해제 요청의 최대 $limit개에 도달했습니다. 새 요청을 만들기 전에 일부를 완료하세요.<br/>참고로 '즉시' 옵션을 사용하여 언제든지 언스테이킹할 수 있습니다."
 		},
 		"terms": {
 			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
+				"item1_title": "현재 APY $apy%",
+				"item1_description": "최신 보상을 기반으로 합니다. 실효 APY는 매일 스테이킹된 $token의 총 수량에 따라 달라집니다.",
+				"item2_title_1": "스테이킹 보상은 ",
+				"item2_title_2": " GOLDAO 토큰으로 지급됩니다",
+				"item3_title": "1주일 잠금 해제 지연",
+				"item3_description": "GLDT를 스테이킹에서 잠금 해제할 때, 토큰은 추가 보상 없이 1주일 동안 잠기며 이후 출금 가능합니다. 즉시 잠금 해제를 위해 스테이크의 5% 수수료를 지불할 수 있습니다.",
+				"item4_title": "나이 보너스",
+				"item4_description": "GLDT 스테이크는 1일차부터 나이 보너스를 획득하기 시작합니다. 스테이크가 오래될수록 나이 보너스가 커지며, 연간 100%의 선형 증가율로 성장합니다.",
+				"item5_title": "GLDT 스테이크 잠금 해제를 시작하면 새로운 보상을 더 이상 받지 못합니다"
 			}
 		},
 		"info": {
 			"gldt": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
+				"title": "GLDT란 무엇인가",
+				"description": "GLDT는 '골드 토큰(Gold Token)'의 약자로, GLD NFT로 뒷받침되는 대체 가능한 토큰입니다. GLD NFT는 실물 금괴의 확실한 소유권을 나타내는 NFT입니다. 1 GLDT는 정확히 0.01g의 금을 나타내며, GLD NFT는 1g당 100 GLDT의 비율로 교환할 수 있습니다.",
+				"fact_1_title": "실물 금으로 뒷받침",
+				"fact_1_description": "모든 GLDT 토큰은 안전한 금고에 보관된 실제 금으로 뒷받침됩니다",
+				"fact_2_title": "유연한 조건",
+				"fact_2_description": "잠금 기간 없이 원할 때 언제든지 스테이킹 및 언스테이킹 가능",
+				"fact_3_title": "안정적인 수익",
+				"fact_3_description": "최소한의 변동성 위험으로 $apy% APY 수익 창출",
+				"fact_3_description_fallback": "최소한의 변동성 위험으로 일관된 보상 획득"
 			},
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": ""
+				"title": "하베스트 자동 운용이란",
+				"description": "하베스트 자동 운용은 최소한의 노력으로 탈중앙화 금융(DeFi) 포지션을 자동화하고 최적화하기 위해 설계된 하베스트 파이낸스 생태계 내의 전문 기능(및 특정 제품 라인)입니다.",
+				"fact_1_title": "스마트 수익 할당",
+				"fact_1_description": "최고의 실시간 APY를 포착하기 위해 자동으로 프로토콜을 전환합니다.",
+				"fact_2_title": "수동적 복리 운용",
+				"fact_2_description": "보상이 자동으로 수확되고 재투자되어 성장을 극대화합니다.",
+				"fact_3_title": "가스비 분담",
+				"fact_3_description": "다른 사용자와 거래를 묶어 가스비를 절약하여 비용을 낮춥니다."
 			}
 		},
 		"alt": {
-			"placeholder_image": ""
+			"placeholder_image": "아직 스테이킹된 토큰이 없습니다"
 		}
 	},
 	"get_token": {
 		"text": {
-			"title": "",
-			"swap_to_token": "",
-			"ready_to_swap": "",
-			"convert_assets": "",
-			"convertible_assets": "",
-			"how_to_convert": "",
-			"get_more_token": "",
-			"receive_token": "",
-			"receive_token_title": "",
-			"receive_token_text": "",
-			"buy_assets": "",
-			"buy_assets_title": "",
-			"buy_assets_text": ""
+			"title": "$token 받기",
+			"swap_to_token": "$token으로 스왑",
+			"ready_to_swap": "스왑 준비 완료",
+			"convert_assets": "자산 변환",
+			"convertible_assets": "변환 가능한 자산",
+			"how_to_convert": "변환 방법",
+			"get_more_token": "$token 더 받기",
+			"receive_token": "$token 수령",
+			"receive_token_title": "$token 직접 수령",
+			"receive_token_text": "내 계정으로 $token을 직접 수령하세요",
+			"buy_assets": "자산 구매",
+			"buy_assets_title": "변환 가능한 자산 구매",
+			"buy_assets_text": "더 많은 자산을 구매하여 $token으로 변환하세요"
 		}
 	},
 	"temporal": {
 		"seconds_to_duration": {
-			"year": "",
-			"year_plural": "",
-			"month": "",
-			"month_plural": "",
-			"day": "",
-			"day_plural": "",
-			"hour": "",
-			"hour_plural": "",
-			"minute": "",
-			"minute_plural": "",
-			"second": "",
-			"second_plural": ""
+			"year": "년",
+			"year_plural": "년",
+			"month": "개월",
+			"month_plural": "개월",
+			"day": "일",
+			"day_plural": "일",
+			"hour": "시간",
+			"hour_plural": "시간",
+			"minute": "분",
+			"minute_plural": "분",
+			"second": "초",
+			"second_plural": "초"
 		},
 		"time_frame": {
-			"t_24h": ""
+			"t_24h": "24시간"
 		}
 	},
 	"ai_assistant": {
 		"text": {
-			"title": "",
-			"welcome_message": "",
-			"action_button_contacts_title": "",
-			"action_button_contacts_subtitle": "",
-			"action_button_contacts_prompt": "",
-			"action_button_send_tokens_title": "",
-			"action_button_send_tokens_subtitle": "",
-			"action_button_send_tokens_prompt": "",
-			"action_button_show_balance_title": "",
-			"action_button_show_balance_subtitle": "",
-			"action_button_show_balance_prompt": "",
-			"select_contact_message": "",
-			"send_to_message": "",
-			"send_message": "",
-			"send_message_input_placeholder": "",
-			"send_token_on_network_message": "",
-			"send_token_message": "",
-			"send_on_network_message": "",
-			"send_token_succeeded": "",
-			"show_total_balance_tool_card_title": "",
-			"no_contacts_found_message": "",
-			"loading": "",
-			"reset_chat_history": "",
-			"feature_description": ""
+			"title": "$oisy_short AI 어시스턴트",
+			"welcome_message": "안녕하세요! 👋 저는 개인 AI 컨시어지입니다. 무엇을 도와드릴까요?",
+			"action_button_contacts_title": "연락처 보기",
+			"action_button_contacts_subtitle": "저장된 연락처 표시",
+			"action_button_contacts_prompt": "내 연락처를 보여주세요.",
+			"action_button_send_tokens_title": "자산 전송",
+			"action_button_send_tokens_subtitle": "몇 초 만에 전송 설정",
+			"action_button_send_tokens_prompt": "토큰을 전송하고 싶습니다.",
+			"action_button_show_balance_title": "잔액 확인",
+			"action_button_show_balance_subtitle": "계정 잔액에 대해 문의",
+			"action_button_show_balance_prompt": "내 총 지갑 잔액은 얼마인가요?",
+			"select_contact_message": "전송 프로세스를 시작할 연락처를 선택하세요:",
+			"send_to_message": "$contact_name ($address_info)에게 전송합니다.",
+			"send_message": "메시지 전송",
+			"send_message_input_placeholder": "무엇을 하고 싶으신가요?",
+			"send_token_on_network_message": "$network 네트워크에서 $token 토큰을 전송하고 싶습니다.",
+			"send_token_message": "$token 토큰을 전송하고 싶습니다.",
+			"send_on_network_message": "$network 네트워크에서 토큰을 전송하고 싶습니다.",
+			"send_token_succeeded": "거래가 완료되었습니다!",
+			"show_total_balance_tool_card_title": "총 잔액",
+			"no_contacts_found_message": "죄송합니다. 주소록에서 적합한 연락처를 찾을 수 없습니다.",
+			"loading": "생각 중...",
+			"reset_chat_history": "채팅 기록 초기화",
+			"feature_description": "AI 어시스턴트를 사용하면 일반 암호화폐 관련 주제에 대해 질문하고, 특정 OISY 기능에 대한 도움을 받으며, 토큰을 전송할 수 있습니다. 귀하 또는 연락처의 주소와 같은 민감한 데이터는 어시스턴트에게 전송되지 않으며, 모든 거래는 사용자가 확인해야 합니다. 이 기능은 아직 베타 상태이며 정기적으로 새로운 기능을 출시하고 있습니다."
 		},
 		"errors": {
-			"unknown": "",
-			"no_response": ""
+			"unknown": "죄송합니다. LLM에서 응답을 가져오는 중 문제가 발생했습니다.",
+			"no_response": "죄송합니다. LLM에서 응답을 받지 못했습니다."
 		}
 	}
 }
