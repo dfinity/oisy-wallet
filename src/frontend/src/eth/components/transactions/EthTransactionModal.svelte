@@ -72,11 +72,23 @@
 
 	let isErc20Deposit = $derived(isErc20TransactionDeposit(data));
 
-	let { value: dataValue } = $derived(
+	let { to: dataTo, value: dataValue } = $derived(
 		(isApprove || isErc20Deposit) && nonNullish(data)
 			? decodeErc20AbiData({ data })
-			: { value: undefined }
+			: { to: undefined, value: undefined }
 	);
+
+	let depositToken = $derived(
+		isErc20Deposit && nonNullish(dataTo) && nonNullish(token)
+			? $ercFungibleTokens.find(
+					({ address, network: { id: networkId } }) =>
+						areAddressesEqual({ address1: address, address2: dataTo, networkId }) &&
+						networkId === token.network.id
+				)
+			: undefined
+	);
+
+	let depositValue = $derived(isErc20Deposit ? dataValue : undefined);
 
 	let approveToken = $derived(
 		isApprove && nonNullish(to) && nonNullish(token)
@@ -92,7 +104,7 @@
 
 	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
 
-	let displayToken = $derived(approveToken ?? token);
+	let displayToken = $derived(depositToken ?? approveToken ?? token);
 
 	let explorerBaseUrl = $derived(getExplorerUrl({ token }));
 
@@ -147,7 +159,7 @@
 		nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined
 	);
 
-	let fee = $derived(isOutFlow && !isErc20Deposit ? gasFee : undefined);
+	let fee = $derived(isOutFlow ? gasFee : undefined);
 
 	let nativeToken = $derived(
 		$enabledEthEvmNativeTokens.find(
@@ -172,6 +184,8 @@
 	);
 
 	let displayValue = $derived(isErc20Deposit && nonNullish(gasFee) ? gasFee : value);
+
+	let displayType = $derived(isErc20Deposit ? 'deposit' : type);
 </script>
 
 <Modal onClose={modalStore.close}>
@@ -190,11 +204,11 @@
 			{/snippet}
 
 			{#snippet subtitle()}
-				<span class="capitalize">{$i18n.transaction.type[type]}</span>
+				<span class="capitalize">{$i18n.transaction.type[displayType]}</span>
 			{/snippet}
 
 			{#snippet title()}
-				{#if isApprove && nonNullish(displayToken)}
+				{#if (isApprove || isErc20Deposit) && nonNullish(displayToken)}
 					<output>
 						{#if isUnlimitedApprove}
 							{replacePlaceholders($i18n.core.text.unlimited, {
@@ -203,6 +217,13 @@
 						{:else if nonNullish(approveValue)}
 							{formatToken({
 								value: approveValue,
+								unitName: displayToken.decimals,
+								displayDecimals: displayToken.decimals
+							})}
+							{displayToken.symbol}
+						{:else if nonNullish(depositValue)}
+							{formatToken({
+								value: depositValue,
 								unitName: displayToken.decimals,
 								displayDecimals: displayToken.decimals
 							})}
