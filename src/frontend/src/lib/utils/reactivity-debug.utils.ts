@@ -34,21 +34,36 @@ const extractCallerLabel = (): string => {
 	}
 
 	const fallbackMatch = callerFrame.match(/\/([^/]+\.(?:ts|svelte)):(\d+)/);
+
 	return fallbackMatch ? `${fallbackMatch[1]}:${fallbackMatch[2]}` : 'unknown';
 };
 
 const bumpCounter = (label: string): number => {
 	const nextValue = (counters.get(label) ?? 0) + 1;
+
 	counters.set(label, nextValue);
+
 	return nextValue;
 };
 
 const sortEntries = () => [...counters.entries()].sort(([, a], [, b]) => b - a);
 
 const printTop = (limit = 25): void => {
-	const rows = sortEntries()
-		.slice(0, limit)
-		.map(([label, count]) => ({ label, count }));
+	const entries = sortEntries();
+
+	if (entries.length === 0) {
+		// eslint-disable-next-line no-console
+		console.log('[reactivity-debug] No recomputations recorded yet.');
+
+		return;
+	}
+
+	const total = entries.reduce((sum, [, count]) => sum + count, 0);
+	// eslint-disable-next-line no-console
+	console.log(`[reactivity-debug] ${entries.length} tracked primitives, ${total} total hits:`);
+
+	const rows = entries.slice(0, limit).map(([label, count]) => ({ label, count }));
+
 	// eslint-disable-next-line no-console
 	console.table(rows);
 };
@@ -105,7 +120,12 @@ export const reactivityDebugHit = (label: string): void => {
 export const getReactivityDebugSnapshot = (): ReadonlyArray<[string, number]> => sortEntries();
 
 export const resetReactivityDebug = (): void => {
+	const count = counters.size;
+
 	counters.clear();
+
+	// eslint-disable-next-line no-console
+	console.log(`[reactivity-debug] Reset — cleared ${count} tracked primitives.`);
 };
 
 declare global {
