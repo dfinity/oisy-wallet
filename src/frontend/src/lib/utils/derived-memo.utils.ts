@@ -1,22 +1,27 @@
 import { derived, type Readable, type Subscriber, type Unsubscriber } from 'svelte/store';
 
+type Stores =
+	| Readable<unknown>
+	| [Readable<unknown>, ...Array<Readable<unknown>>]
+	| Array<Readable<unknown>>;
+type StoresValues<T> =
+	T extends Readable<infer U> ? U : { [K in keyof T]: T[K] extends Readable<infer U> ? U : never };
+
 /**
  * Like Svelte's `derived`, but only notifies subscribers when the output
  * actually changes according to the provided equality function.
  * This prevents unnecessary downstream recomputations when intermediate
  * derived stores produce the same value from different source triggers.
- *
- * TODO: Strengthen the type signatures
  */
 // eslint-disable-next-line local-rules/prefer-object-params
-export const derivedMemo = <T>(
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	stores: Readable<any> | Array<Readable<any>>,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	fn: (values: any) => T,
+export const derivedMemo = <S extends Stores, T>(
+	stores: S,
+	fn: (values: StoresValues<S>) => T,
 	isEqual: (a: T, b: T) => boolean
 ): Readable<T> => {
-	const source = derived(stores, fn);
+	// TODO: Strengthen the type signatures
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const source: Readable<T> = derived(stores as any, fn as any);
 
 	let value: T;
 
