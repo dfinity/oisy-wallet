@@ -136,7 +136,11 @@ describe('sol-transactions.services', () => {
 			to: mockSolAddress2,
 			type: 'send',
 			status: mockTransactionDetail.confirmationStatus,
-			fee: mockTransactionDetail.meta?.fee
+			fee: mockTransactionDetail.meta?.fee,
+			display: {
+				amount: mockMappedTransaction.value * -1n,
+				fee: mockTransactionDetail.meta?.fee
+			}
 		};
 
 		const indexStartAtaMapping = Math.floor(mockAllInstructions.length / 3);
@@ -315,7 +319,11 @@ describe('sol-transactions.services', () => {
 					id: `${expected.id}-0-${mockInstructions[0].programId}-self`,
 					type: 'receive',
 					from: mockSolAddress,
-					to: mockSolAddress
+					to: mockSolAddress,
+					display: {
+						...expected.display,
+						amount: mockMappedTransaction.value
+					}
 				},
 				{ ...expectedResults[expectedResults.length - 1], from: mockSolAddress, to: mockSolAddress }
 			]);

@@ -95,7 +95,11 @@ export const mapBtcTransaction = ({
 		type: isTypeSend ? 'send' : 'receive',
 		from: isTypeSend ? btcAddress : inputs[0].prev_out.addr,
 		to: selfTransaction ? [btcAddress] : to,
-		confirmations
+		confirmations,
+		display: {
+			amount: nonNullish(value) ? (isTypeSend ? value * -1n : value) : undefined,
+			fee: isTypeSend ? BigInt(utxosFee) : undefined
+		}
 	};
 };
 

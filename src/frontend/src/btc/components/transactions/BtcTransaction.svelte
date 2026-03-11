@@ -14,12 +14,18 @@
 
 	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	let { type, status, value, timestamp, to, from } = $derived(transaction);
+	let { type, status, value, timestamp, to, from, display } = $derived(transaction);
 
 	let label = $derived(type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive);
 
 	let displayAmount = $derived(
-		nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined
+		nonNullish(display?.amount)
+			? display.amount
+			: nonNullish(value)
+				? type === 'send'
+					? value * -1n
+					: value
+				: undefined
 	);
 
 	const modalId = Symbol();

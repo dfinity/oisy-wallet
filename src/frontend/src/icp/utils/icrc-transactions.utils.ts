@@ -5,6 +5,7 @@ import type {
 	IcrcTransaction
 } from '$icp/types/ic-transaction';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import {
 	fromNullable,
@@ -114,6 +115,14 @@ export const mapIcrcTransaction = ({
 
 	const value = data?.amount;
 	const fee = isApprove ? approveFee : transferFee;
+	const amount =
+		type === 'approve'
+			? (fee ?? ZERO) * -1n
+			: nonNullish(value)
+				? source.incoming
+					? value
+					: (value + (fee ?? ZERO)) * -1n
+				: undefined;
 
 	const approveData = fromNullable(approve);
 	const approveSpender = nonNullish(approveData)
@@ -129,6 +138,10 @@ export const mapIcrcTransaction = ({
 		to: 'to' in data ? encodeIcrcAccount(fromCandidAccount(data.to)) : undefined,
 		...(nonNullish(value) && { value }),
 		...(nonNullish(fee) && { fee }),
+		display: {
+			amount,
+			fee
+		},
 		timestamp,
 		status: 'executed',
 		...(nonNullish(approveSpender) && { approveSpender }),

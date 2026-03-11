@@ -25,7 +25,8 @@
 		to,
 		from,
 		fee,
-		approveSpender
+		approveSpender,
+		display
 	} = $derived(transaction);
 
 	let pending = $derived(transaction?.status === 'pending');
@@ -33,13 +34,15 @@
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
 	let displayAmount = $derived(
-		type === 'approve'
-			? (fee ?? ZERO) * -1n
-			: nonNullish(value)
-				? incoming
-					? value
-					: (value + (fee ?? ZERO)) * -1n
-				: value
+		nonNullish(display?.amount)
+			? display.amount
+			: type === 'approve'
+				? (fee ?? ZERO) * -1n
+				: nonNullish(value)
+					? incoming
+						? value
+						: (value + (fee ?? ZERO)) * -1n
+					: value
 	);
 
 	let timestamp = $derived(
