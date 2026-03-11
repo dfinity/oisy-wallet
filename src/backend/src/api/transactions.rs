@@ -2,8 +2,7 @@ use ic_cdk::{api::msg_caller, query, update};
 use shared::types::{
     result_types::{GetStoredTransactionsResult, SaveStoredTransactionsResult},
     stored_transaction::{
-        GetStoredTransactionsRequest, GetStoredTransactionsResponse, SaveStoredTransactionsRequest,
-        StoredTransactionError,
+        GetStoredTransactionsRequest, SaveStoredTransactionsRequest, StoredTransactionError,
     },
 };
 
@@ -25,14 +24,10 @@ use crate::{
 pub fn get_stored_transactions(
     request: GetStoredTransactionsRequest,
 ) -> GetStoredTransactionsResult {
-    fn inner(
-        request: GetStoredTransactionsRequest,
-    ) -> Result<GetStoredTransactionsResponse, StoredTransactionError> {
-        let principal = msg_caller();
-
-        read_state(|state| model::get_transactions(&state.stored_transactions, principal, &request))
-    }
-    inner(request).into()
+    let principal = msg_caller();
+    let response =
+        read_state(|state| model::get_transactions(&state.stored_transactions, principal, &request));
+    GetStoredTransactionsResult::Ok(response)
 }
 
 /// Saves finalized transactions for the caller. Transactions are deduplicated by hash.

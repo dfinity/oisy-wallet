@@ -17,17 +17,16 @@ pub fn get_transactions(
     map: &StoredTransactionsMap,
     principal: Principal,
     request: &GetStoredTransactionsRequest,
-) -> Result<GetStoredTransactionsResponse, StoredTransactionError> {
+) -> GetStoredTransactionsResponse {
     let key = make_key(principal, &request.token_id);
 
     let transactions = map.get(&key).map(|c| c.0).unwrap_or_default();
 
-    let max_results = request.max_results.min(MAX_GET_TRANSACTIONS_RESULTS) as usize;
+    let max_results = usize::try_from(request.max_results.min(MAX_GET_TRANSACTIONS_RESULTS))
+        .expect("max_results should fit in usize");
 
     let newest_block_number = transactions.last().map(|t| t.block_number);
 
-    // Transactions are stored sorted by block_number ascending.
-    // For pagination we return newest first, walking backwards.
     let filtered: Vec<StoredTransaction> = match request.start {
         None => transactions.into_iter().rev().take(max_results).collect(),
         Some(start_block) => transactions
@@ -46,11 +45,11 @@ pub fn get_transactions(
         }
     });
 
-    Ok(GetStoredTransactionsResponse {
+    GetStoredTransactionsResponse {
         transactions: filtered,
         newest_block_number,
         next_start,
-    })
+    }
 }
 
 /// Mutable model for saving transactions.
@@ -170,8 +169,7 @@ mod tests {
                 start: None,
                 max_results: 10,
             },
-        )
-        .unwrap();
+        );
 
         assert!(result.transactions.is_empty());
         assert!(result.newest_block_number.is_none());
@@ -205,8 +203,7 @@ mod tests {
                 start: None,
                 max_results: 10,
             },
-        )
-        .unwrap();
+        );
 
         assert_eq!(result.transactions.len(), 3);
         assert_eq!(result.transactions[0].hash, "0xhash3");
@@ -243,8 +240,7 @@ mod tests {
                 start: None,
                 max_results: 2,
             },
-        )
-        .unwrap();
+        );
 
         assert_eq!(page1.transactions.len(), 2);
         assert_eq!(page1.transactions[0].block_number, 500);
@@ -261,8 +257,7 @@ mod tests {
                 start: page1.next_start,
                 max_results: 2,
             },
-        )
-        .unwrap();
+        );
 
         assert_eq!(page2.transactions.len(), 2);
         assert_eq!(page2.transactions[0].block_number, 300);
@@ -278,8 +273,7 @@ mod tests {
                 start: page2.next_start,
                 max_results: 2,
             },
-        )
-        .unwrap();
+        );
 
         assert_eq!(page3.transactions.len(), 1);
         assert_eq!(page3.transactions[0].block_number, 100);
@@ -321,8 +315,7 @@ mod tests {
                 start: None,
                 max_results: 10,
             },
-        )
-        .unwrap();
+        );
 
         assert_eq!(result.transactions.len(), 1);
     }
@@ -371,8 +364,7 @@ mod tests {
                 start: None,
                 max_results: 10,
             },
-        )
-        .unwrap();
+        );
         assert_eq!(eth_result.transactions.len(), 1);
         assert_eq!(eth_result.transactions[0].hash, "0xeth_hash");
 
@@ -384,8 +376,7 @@ mod tests {
                 start: None,
                 max_results: 10,
             },
-        )
-        .unwrap();
+        );
         assert_eq!(erc20_result.transactions.len(), 1);
         assert_eq!(erc20_result.transactions[0].hash, "0xerc20_hash");
     }
@@ -431,8 +422,7 @@ mod tests {
                 start: None,
                 max_results: 10,
             },
-        )
-        .unwrap();
+        );
         assert_eq!(result1.transactions.len(), 1);
         assert_eq!(result1.transactions[0].hash, "0xuser1_hash");
 
@@ -444,8 +434,7 @@ mod tests {
                 start: None,
                 max_results: 10,
             },
-        )
-        .unwrap();
+        );
         assert_eq!(result2.transactions.len(), 1);
         assert_eq!(result2.transactions[0].hash, "0xuser2_hash");
     }
@@ -477,12 +466,11 @@ mod tests {
                 start: None,
                 max_results: 1000,
             },
-        )
-        .unwrap();
+        );
 
         assert_eq!(
             result.transactions.len(),
-            MAX_GET_TRANSACTIONS_RESULTS as usize
+            usize::try_from(MAX_GET_TRANSACTIONS_RESULTS).unwrap()
         );
     }
 
@@ -514,8 +502,7 @@ mod tests {
                 start: None,
                 max_results: 10,
             },
-        )
-        .unwrap();
+        );
 
         assert_eq!(result.transactions[0].block_number, 300);
         assert_eq!(result.transactions[1].block_number, 200);
@@ -560,8 +547,7 @@ mod tests {
                 start: None,
                 max_results: 10,
             },
-        )
-        .unwrap();
+        );
 
         assert_eq!(result.transactions.len(), 3);
         assert_eq!(result.newest_block_number, Some(300));
@@ -599,8 +585,7 @@ mod tests {
                     start: None,
                     max_results: 10,
                 },
-            )
-            .unwrap();
+            );
             assert_eq!(result.transactions.len(), 1);
             assert_eq!(result.transactions[0].hash, "0xpersist");
         }

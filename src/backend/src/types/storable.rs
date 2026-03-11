@@ -116,7 +116,8 @@ impl Storable for StoredTransactionKey {
     fn to_bytes(&self) -> Cow<'_, [u8]> {
         let principal_bytes = self.0.to_bytes();
         let token_id_bytes = self.1.to_bytes();
-        let principal_len = principal_bytes.len() as u32;
+        let principal_len =
+            u32::try_from(principal_bytes.len()).expect("principal length should fit in u32");
         let mut buf = Vec::with_capacity(4 + principal_bytes.len() + token_id_bytes.len());
         buf.extend_from_slice(&principal_len.to_be_bytes());
         buf.extend_from_slice(&principal_bytes);
