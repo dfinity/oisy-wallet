@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "Odeslat",
+			"send_token": "",
 			"destination": "Cíl",
 			"source": "Zdroj",
 			"balance": "Zůstatek",

@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "भेजें",
+			"send_token": "",
 			"destination": "गंतव्य",
 			"source": "स्रोत",
 			"balance": "शेष राशि",

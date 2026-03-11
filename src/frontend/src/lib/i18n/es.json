@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "Enviar",
+			"send_token": "",
 			"destination": "Destino",
 			"source": "Origen",
 			"balance": "Saldo",

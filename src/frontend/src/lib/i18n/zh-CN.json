@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "发送",
+			"send_token": "",
 			"destination": "目标地址",
 			"source": "来源地址",
 			"balance": "余额",

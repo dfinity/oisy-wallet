@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "Senden",
+			"send_token": "",
 			"destination": "Ziel",
 			"source": "Quelle",
 			"balance": "Guthaben",

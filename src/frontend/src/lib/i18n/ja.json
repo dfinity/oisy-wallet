@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "送信",
+			"send_token": "",
 			"destination": "宛先",
 			"source": "送信元",
 			"balance": "残高",

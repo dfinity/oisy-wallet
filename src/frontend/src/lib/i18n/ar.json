@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "إرسال",
+			"send_token": "",
 			"destination": "الوجهة",
 			"source": "المصدر",
 			"balance": "الرصيد",
