@@ -110,7 +110,7 @@ export const mapCkEthereumTransaction = ({
 
 		return {
 			...tx,
-			typeLabel: 'transaction.label.twin_token_sent',
+			typeLabel: 'send.text.send',
 			...(notEmptyString(to) && {
 				to,
 				toExplorerUrl: `${ethExplorerUrl}/address/${to}`
