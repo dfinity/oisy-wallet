@@ -62,7 +62,6 @@ pub struct SelectedUtxosFeeResponse {
     pub fee_satoshis: u64,
 }
 
-/// Errors that can occur when selecting UTXOs and calculating the fee for a Bitcoin transaction.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SelectedUtxosFeeError {
     InternalError {
@@ -124,7 +123,6 @@ pub struct BtcGetPendingTransactionsReponse {
     pub transactions: Vec<PendingTransaction>,
 }
 
-/// Errors that can occur when retrieving pending Bitcoin transactions.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcGetPendingTransactionsError {
     InternalError {
