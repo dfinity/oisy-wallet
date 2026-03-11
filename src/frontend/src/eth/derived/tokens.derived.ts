@@ -19,7 +19,6 @@ export const enabledEthereumTokens: Readable<RequiredTokenWithLinkedData[]> = de
 		})
 );
 
-export const enabledEthEvmNativeTokens: Readable<RequiredToken[]> = derived(
-	[enabledEthereumTokens, enabledEvmTokens],
-	([$enabledEthereumTokens, $enabledEvmTokens]) => [...$enabledEthereumTokens, ...$enabledEvmTokens]
-);
+
+
+
