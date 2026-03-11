@@ -66,7 +66,6 @@ async fn execute(request: &HttpRequestArgs) -> Result<HttpRequestResult, String>
 /// * `url` - The URL to fetch.
 /// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
 ///   to minimise cycle costs.
-#[expect(dead_code)]
 pub(crate) async fn get(url: &str, max_response_bytes: u64) -> Result<HttpRequestResult, String> {
     let request = build_request(url, HttpMethod::GET, None, vec![], max_response_bytes);
     execute(&request).await

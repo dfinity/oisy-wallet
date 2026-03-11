@@ -9,6 +9,7 @@ use crate::{
     api,
     exchange::{refresh_exchange_rates, PRICE_REFRESH_INTERVAL_SEC},
     signer,
+    types::StoredPrincipal,
 };
 
 thread_local! {
@@ -163,7 +164,7 @@ pub(crate) fn start_periodic_housekeeping_timers() {
     // Refresh exchange rates periodically
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
     let _ = set_timer_interval(refresh_interval, || {
-        ic_cdk::futures::spawn(refresh_exchange_rates())
+        ic_cdk::futures::spawn(refresh_exchange_rates());
     });
 }
 
