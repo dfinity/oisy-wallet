@@ -222,9 +222,7 @@ const syncExchangeFromCoingecko = async ({
 	] = results;
 
 	const currentExchangeRate =
-		currentExchangeRateResult.status === 'fulfilled'
-			? currentExchangeRateResult.value
-			: undefined;
+		currentExchangeRateResult.status === 'fulfilled' ? currentExchangeRateResult.value : undefined;
 	const currentEthPrice =
 		currentEthPriceResult.status === 'fulfilled' ? currentEthPriceResult.value : undefined;
 	const currentBtcPrice =
