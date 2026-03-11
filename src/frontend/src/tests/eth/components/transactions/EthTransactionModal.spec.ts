@@ -27,6 +27,15 @@ vi.mock(import('$eth/utils/transactions.utils'), async (importOriginal) => {
 	};
 });
 
+vi.mock(import('$eth/derived/native-tokens.derived'), async () => {
+	const { readable } = await import('svelte/store');
+	const { ETHEREUM_TOKEN } = await import('$env/tokens/tokens.eth.env');
+
+	return {
+		enabledEthEvmNativeTokens: readable([ETHEREUM_TOKEN])
+	};
+});
+
 const [mockEthTransactionUi] = createMockEthTransactionsUi(1);
 const [mockErc721TransactionUi] = createMockNftTransactionsUi(1);
 
@@ -35,7 +44,7 @@ describe('EthTransactionModal', () => {
 
 	// { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: 1000000n }
 	const mockData =
-		'0x26b3293f000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000f42401db5f0b9209d75b4b358ddd228eb7097ccec7b8f65e0acef29e51271ce020000';
+		'0x095ea7b3000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000f4240';
 
 	const mockApproveTransactionUi = {
 		...mockEthTransactionUi,
