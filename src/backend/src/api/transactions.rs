@@ -25,8 +25,9 @@ pub fn get_stored_transactions(
     request: GetStoredTransactionsRequest,
 ) -> GetStoredTransactionsResult {
     let principal = msg_caller();
-    let response =
-        read_state(|state| model::get_transactions(&state.stored_transactions, principal, &request));
+    let response = read_state(|state| {
+        model::get_transactions(&state.stored_transactions, principal, &request)
+    });
     GetStoredTransactionsResult::Ok(response)
 }
 

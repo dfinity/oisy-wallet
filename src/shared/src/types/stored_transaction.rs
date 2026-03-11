@@ -85,6 +85,10 @@ pub enum StoredTransactionError {
     UserNotFound,
     TooManyTransactions,
     /// Reserved — duplicates are currently silently skipped during save.
-    DuplicateTransaction { hash: String },
-    InternalError { msg: String },
+    DuplicateTransaction {
+        hash: String,
+    },
+    InternalError {
+        msg: String,
+    },
 }

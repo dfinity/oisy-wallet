@@ -807,14 +807,13 @@ mod tests {
         assert_eq!(overflow, Err(StoredTransactionError::TooManyTransactions));
 
         // But duplicates of existing hashes should still succeed (they're skipped, no new insert)
-        let dup_ok = StoredTransactionsModel::new(model.stored_transactions_map)
-            .save_transactions(
-                principal,
-                &SaveStoredTransactionsRequest {
-                    token_id: eth_native_token(),
-                    transactions: vec![make_tx("0xfill0", 0, 0)],
-                },
-            );
+        let dup_ok = StoredTransactionsModel::new(model.stored_transactions_map).save_transactions(
+            principal,
+            &SaveStoredTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: vec![make_tx("0xfill0", 0, 0)],
+            },
+        );
         assert!(dup_ok.is_ok());
     }
 
@@ -824,7 +823,13 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
         let txs: Vec<StoredTransaction> = (0..200)
-            .map(|i| make_tx(&format!("0xhash{i}"), u64::try_from(i).unwrap(), u64::try_from(i * 10).unwrap()))
+            .map(|i| {
+                make_tx(
+                    &format!("0xhash{i}"),
+                    u64::try_from(i).unwrap(),
+                    u64::try_from(i * 10).unwrap(),
+                )
+            })
             .collect();
 
         let mut model = StoredTransactionsModel::new(&mut map);
@@ -858,7 +863,10 @@ mod tests {
                 max_results: MAX_GET_TRANSACTIONS_RESULTS,
             },
         );
-        assert_eq!(result.transactions.len(), usize::try_from(MAX_GET_TRANSACTIONS_RESULTS).unwrap());
+        assert_eq!(
+            result.transactions.len(),
+            usize::try_from(MAX_GET_TRANSACTIONS_RESULTS).unwrap()
+        );
         assert_eq!(result.newest_block_number, Some(199));
     }
 
