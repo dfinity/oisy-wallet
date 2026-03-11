@@ -61,7 +61,8 @@
 		approveSpender,
 		data,
 		gasUsed,
-		gasPrice
+		gasPrice,
+		display
 	} = $derived(transaction);
 
 	let isSend = $derived(type === 'send');
@@ -70,13 +71,7 @@
 
 	let isOutFlow = $derived(isSend || isDeposit || isApprove);
 
-	let isErc20Deposit = $derived(isErc20TransactionDeposit(data));
-
-	let { value: dataValue } = $derived(
-		(isApprove || isErc20Deposit) && nonNullish(data)
-			? decodeErc20AbiData({ data })
-			: { value: undefined }
-	);
+	let isErc20Deposit = $derived(display.isErc20Deposit === true || isErc20TransactionDeposit(data));
 
 	let approveToken = $derived(
 		isApprove && nonNullish(to) && nonNullish(token)
@@ -88,9 +83,9 @@
 			: undefined
 	);
 
-	let approveValue = $derived(isApprove ? dataValue : undefined);
+	let approveValue = $derived(display.labelAmount);
 
-	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
+	let isUnlimitedApprove = $derived(display.isUnlimitedApprove || isMaxUint256(approveValue));
 
 	let displayToken = $derived(approveToken ?? token);
 
@@ -144,10 +139,14 @@
 	);
 
 	let gasFee = $derived(
-		nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined
+		nonNullish(display.fee)
+			? display.fee
+			: nonNullish(gasUsed) && nonNullish(gasPrice)
+				? gasUsed * gasPrice
+				: undefined
 	);
 
-	let fee = $derived(isOutFlow && !isErc20Deposit ? gasFee : undefined);
+	let fee = $derived(isOutFlow && (!isErc20Deposit || isApprove) ? gasFee : undefined);
 
 	let nativeToken = $derived(
 		$enabledEthEvmNativeTokens.find(
@@ -171,7 +170,7 @@
 			: undefined
 	);
 
-	let displayValue = $derived(isErc20Deposit && nonNullish(gasFee) ? gasFee : value);
+	let displayValue = $derived(display.detailsAmount);
 </script>
 
 <Modal onClose={modalStore.close}>

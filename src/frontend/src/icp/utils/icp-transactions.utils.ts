@@ -5,6 +5,7 @@ import type {
 	IcpTransaction
 } from '$icp/types/ic-transaction';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
@@ -99,6 +100,12 @@ export const mapIcpTransaction = ({
 			...mapFrom(operation.Approve.from),
 			value: approveValue,
 			...(nonNullish(approveFee) && { fee: approveFee }),
+			display: {
+				amount: (approveFee ?? ZERO) * -1n,
+				detailsAmount: approveValue,
+				labelAmount: approveValue,
+				fee: approveFee
+			},
 			...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
 			approveSpender: approve.spender,
 			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approve.spender}`
@@ -106,35 +113,56 @@ export const mapIcpTransaction = ({
 	}
 
 	if ('Burn' in operation) {
+		const value = operation.Burn.amount.e8s;
 		return {
 			...tx,
 			type: 'burn',
 			...mapFrom(operation.Burn.from),
-			value: operation.Burn.amount.e8s
+			value,
+			display: {
+				amount: value * -1n,
+				detailsAmount: value,
+				labelAmount: value
+			}
 		};
 	}
 
 	if ('Mint' in operation) {
+		const value = operation.Mint.amount.e8s;
 		return {
 			...tx,
 			type: 'mint',
 			...mapTo(operation.Mint.to),
 			incoming: true,
-			value: operation.Mint.amount.e8s
+			value,
+			display: {
+				amount: value,
+				detailsAmount: value,
+				labelAmount: value
+			}
 		};
 	}
 
 	if ('Transfer' in operation) {
 		const source = mapFrom(operation.Transfer.from);
 		const transferFee = operation.Transfer.fee?.e8s;
+		const value = operation.Transfer.amount.e8s;
+		const amount =
+			source.incoming === true ? value : (value + (transferFee ?? ZERO)) * -1n;
 
 		return {
 			...tx,
 			type: source.incoming === false ? 'send' : 'receive',
 			...source,
 			...mapTo(operation.Transfer.to),
-			value: operation.Transfer.amount.e8s,
-			...(nonNullish(transferFee) && { fee: transferFee })
+			value,
+			...(nonNullish(transferFee) && { fee: transferFee }),
+			display: {
+				amount,
+				detailsAmount: value,
+				labelAmount: value,
+				fee: transferFee
+			}
 		};
 	}
 

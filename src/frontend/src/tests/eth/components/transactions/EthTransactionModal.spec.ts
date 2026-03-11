@@ -53,7 +53,13 @@ describe('EthTransactionModal', () => {
 		approveSpender: mockApproveSpender,
 		data: mockData,
 		gasUsed: 21_000n,
-		gasPrice: 1_000_000_000n
+		gasPrice: 1_000_000_000n,
+		display: {
+			...mockEthTransactionUi.display,
+			amount: -21_000n * 1_000_000_000n,
+			labelAmount: 1_000_000n,
+			detailsAmount: mockEthTransactionUi.value ?? ZERO
+		}
 	};
 
 	it('should render the ETH transaction modal', () => {

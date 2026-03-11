@@ -13,7 +13,16 @@ describe('SolTransaction', () => {
 	it('should render correct amount for send transactions', () => {
 		const { container } = render(SolTransaction, {
 			props: {
-				transaction: { ...mockTrx, value: 123450000000000n, type: 'send' },
+				transaction: {
+					...mockTrx,
+					value: 123450000000000n,
+					type: 'send',
+					display: {
+						...mockTrx.display,
+						amount: -123450000000000n,
+						labelAmount: 123450000000000n
+					}
+				},
 				token: SOLANA_TOKEN
 			}
 		});
@@ -35,7 +44,16 @@ describe('SolTransaction', () => {
 	it('should render correct amount for receive transactions', () => {
 		const { container } = render(SolTransaction, {
 			props: {
-				transaction: { ...mockTrx, value: 123450000000000n, type: 'receive' },
+				transaction: {
+					...mockTrx,
+					value: 123450000000000n,
+					type: 'receive',
+					display: {
+						...mockTrx.display,
+						amount: 123450000000000n,
+						labelAmount: 123450000000000n
+					}
+				},
 				token: SOLANA_TOKEN
 			}
 		});

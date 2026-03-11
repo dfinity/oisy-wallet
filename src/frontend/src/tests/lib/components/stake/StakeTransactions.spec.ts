@@ -29,7 +29,12 @@ const makeTx = ({
 		isReward: false,
 		type: 'send',
 		status: 'confirmed',
-		value: 10000000000n
+		value: 10000000000n,
+		display: {
+			amount: 10000000000n,
+			detailsAmount: 10000000000n,
+			labelAmount: 10000000000n
+		}
 	}) as unknown as StakingTransactionsUiWithToken;
 
 const renderTxs = (txs: StakingTransactionsUiWithToken[]) =>

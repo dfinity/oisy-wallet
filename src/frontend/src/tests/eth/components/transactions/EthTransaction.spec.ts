@@ -32,7 +32,17 @@ describe('EthTransaction', () => {
 	it('should render correct amount for send transactions', () => {
 		const { container } = render(EthTransaction, {
 			props: {
-				transaction: { ...mockTrx, value: 123450000000000n, type: 'send' },
+				transaction: {
+					...mockTrx,
+					value: 123450000000000n,
+					type: 'send',
+					display: {
+						...mockTrx.display,
+						amount: -123450000000000n,
+						labelAmount: 123450000000000n,
+						detailsAmount: 123450000000000n
+					}
+				},
 				token: ETHEREUM_TOKEN
 			}
 		});
@@ -54,7 +64,17 @@ describe('EthTransaction', () => {
 	it('should render correct amount for receive transactions', () => {
 		const { container } = render(EthTransaction, {
 			props: {
-				transaction: { ...mockTrx, value: 123450000000000n, type: 'receive' },
+				transaction: {
+					...mockTrx,
+					value: 123450000000000n,
+					type: 'receive',
+					display: {
+						...mockTrx.display,
+						amount: 123450000000000n,
+						labelAmount: 123450000000000n,
+						detailsAmount: 123450000000000n
+					}
+				},
 				token: ETHEREUM_TOKEN
 			}
 		});
@@ -89,7 +109,13 @@ describe('EthTransaction', () => {
 			approveSpender: '0xSpenderAddress',
 			data: mockData,
 			gasUsed: mockGasUsed,
-			gasPrice: mockGasPrice
+			gasPrice: mockGasPrice,
+			display: {
+				...mockTrx.display,
+				amount: mockGasUsed * mockGasPrice * -1n,
+				labelAmount: 6000000n,
+				detailsAmount: 123450000000000n
+			}
 		};
 
 		it('should render correct label', () => {
@@ -143,7 +169,14 @@ describe('EthTransaction', () => {
 
 			const { container, getByTestId } = render(EthTransaction, {
 				props: {
-					transaction: { ...mockApproveTx, data: mockData },
+					transaction: {
+						...mockApproveTx,
+						data: mockData,
+						display: {
+							...mockApproveTx.display,
+							isUnlimitedApprove: true
+						}
+					},
 					token: ETHEREUM_TOKEN
 				}
 			});

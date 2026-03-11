@@ -43,7 +43,12 @@ export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	value: 100n,
 	from: 'sender',
 	to: 'receiver',
-	status: 'finalized'
+	status: 'finalized',
+	display: {
+		amount: -100n,
+		detailsAmount: 100n,
+		labelAmount: 100n
+	}
 });
 
 export const mockSolRpcReceiveTransaction: SolRpcTransaction = {

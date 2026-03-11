@@ -24,7 +24,13 @@ export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 		fee: bn1Bi,
 		from: 'dndtm-gk4kn-ssvos-asuit-2q33x-lgtpj-5bnoi-v5ync-m4iza-xclem-mae',
 		to: 'cmpd6-ywgum-ofyfa-masyv-v3gba-il2hu-upwxw-xhdq3-mzkhx-zfhpb-7ae',
-		timestamp: 1_747_732_396_194_882_329n
+		timestamp: 1_747_732_396_194_882_329n,
+		display: {
+			amount: -(bn3Bi + bn1Bi),
+			detailsAmount: bn3Bi,
+			labelAmount: bn3Bi,
+			fee: bn1Bi
+		}
 	}));
 
 export const setupIcTransactionsStore = ({ tokenId }: { tokenId: TokenId }) => {

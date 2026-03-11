@@ -10,7 +10,12 @@ export const mockBtcTransactionUi: BtcTransactionUi = {
 	to: ['bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7'],
 	type: 'receive',
 	value: 126527n,
-	confirmations: 1
+	confirmations: 1,
+	display: {
+		amount: 126527n,
+		detailsAmount: 126527n,
+		labelAmount: 126527n
+	}
 };
 
 export const createMockBtcTransactionsUi = (n: number): BtcTransactionUi[] =>

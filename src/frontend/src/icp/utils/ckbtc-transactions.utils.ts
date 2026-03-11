@@ -125,7 +125,12 @@ export const mapCkBTCPendingUtxo = ({
 		fromLabel: 'transaction.label.twin_network',
 		typeLabel: 'transaction.label.converting_twin_token',
 		value: value - kytFee,
-		txExplorerUrl: `${bitcoinExplorerUrl}/tx/${id}`
+		txExplorerUrl: `${bitcoinExplorerUrl}/tx/${id}`,
+		display: {
+			amount: value - kytFee,
+			detailsAmount: value - kytFee,
+			labelAmount: value - kytFee
+		}
 	};
 };
 

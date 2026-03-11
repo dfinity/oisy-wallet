@@ -52,12 +52,23 @@ export type TransactionType = z.infer<typeof TransactionTypeSchema>;
 
 export type TransactionStatus = z.infer<typeof TransactionStatusSchema>;
 
-export interface TransactionUiCommon {
+export interface TransactionUiDisplay {
+	amount: bigint;
+	detailsAmount: bigint;
+	labelAmount: bigint;
+	fee?: bigint;
+}
+
+export interface TransactionUiCommon<
+	TDisplay extends TransactionUiDisplay = TransactionUiDisplay,
+	TTimestamp extends bigint | number = bigint
+> {
 	from: string;
 	to?: string;
-	timestamp?: bigint;
+	timestamp?: TTimestamp;
 	txExplorerUrl?: string;
 	toExplorerUrl?: string;
 	fromExplorerUrl?: string;
 	blockNumber?: number;
+	display: TDisplay;
 }

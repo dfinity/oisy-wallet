@@ -103,26 +103,46 @@ export const mapEthTransactionUi = ({
 	ckMinterInfoAddresses: EthAddress[];
 	ethAddress: OptionEthAddress;
 }): EthTransactionUi => {
-	const { from, to, data } = transaction;
+	const { from, to, data, value, gasUsed, gasPrice } = transaction;
 
 	const isApprove = isErc20TransactionApprove(data);
+	const isErc20Deposit = isErc20TransactionDeposit(data);
 
-	const { to: approveSpender } =
-		isApprove && nonNullish(data) ? decodeErc20AbiData({ data }) : { to: undefined };
+	const { to: approveSpender, value: decodedValue } =
+		(isApprove || isErc20Deposit) && nonNullish(data)
+			? decodeErc20AbiData({ data })
+			: { to: undefined, value: undefined };
+
+	const labelAmount = isApprove || isErc20Deposit ? (decodedValue ?? value) : value;
+	const fee = nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined;
+	const type = isApprove
+		? 'approve'
+		: ckMinterInfoAddresses.includes(from.toLowerCase())
+			? 'withdraw'
+			: nonNullish(to) && ckMinterInfoAddresses.includes(to.toLowerCase())
+				? 'deposit'
+				: from?.toLowerCase() === ethAddress?.toLowerCase()
+					? 'send'
+					: 'receive';
 
 	return {
 		...transaction,
 		id: transaction.hash ?? '',
-		type: isApprove
-			? 'approve'
-			: ckMinterInfoAddresses.includes(from.toLowerCase())
-				? 'withdraw'
-				: nonNullish(to) && ckMinterInfoAddresses.includes(to.toLowerCase())
-					? 'deposit'
-					: from?.toLowerCase() === ethAddress?.toLowerCase()
-						? 'send'
-						: 'receive',
-		approveSpender
+		type,
+		approveSpender,
+		display: {
+			amount:
+				isApprove || isErc20Deposit
+					? nonNullish(fee)
+						? fee * -1n
+						: value * (type === 'send' || type === 'deposit' || type === 'approve' ? -1n : 1n)
+					: value * (type === 'send' || type === 'deposit' ? -1n : 1n),
+			detailsAmount: isErc20Deposit && nonNullish(fee) ? fee : value,
+			labelAmount,
+			fee,
+			isUnlimitedApprove: isMaxUint256(labelAmount),
+			isErc20Deposit
+		}
 	};
 };
 

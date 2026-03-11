@@ -5,6 +5,7 @@ import type {
 	IcTransactionAddOnsInfo,
 	IcTransactionUi
 } from '$icp/types/ic-transaction';
+import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 
 // TODO: implement this function
@@ -29,4 +30,13 @@ export const mapDip20Transaction = ({
 	transaction: Dip20Transaction;
 	identity: OptionIdentity;
 }): IcTransactionUi =>
-	({ id: id.toString(), type: 'approve', status: 'executed' }) as IcTransactionUi;
+	({
+		id: id.toString(),
+		type: 'approve',
+		status: 'executed',
+		display: {
+			amount: ZERO,
+			detailsAmount: ZERO,
+			labelAmount: ZERO
+		}
+	}) as IcTransactionUi;

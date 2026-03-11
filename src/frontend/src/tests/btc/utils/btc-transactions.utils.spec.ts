@@ -25,6 +25,10 @@ describe('mapBtcTransaction', () => {
 		]
 	} as BitcoinTransaction;
 	const sendTransactionValue = 202174416n;
+	const sendFee = BigInt(
+		sendTransaction.inputs.reduce((acc, { prev_out }) => acc + prev_out.value, 0) -
+			sendTransaction.out.reduce((acc, { value }) => acc + value, 0)
+	);
 	const to = mockBtcTransaction.out
 		.map(({ addr }) => addr)
 		.filter((addr) => addr !== mockBtcAddress);
@@ -39,7 +43,13 @@ describe('mapBtcTransaction', () => {
 			...mockBtcTransactionUi,
 			blockNumber: undefined,
 			confirmations: undefined,
-			status: 'pending'
+			status: 'pending',
+			display: {
+				amount: mockBtcTransactionUi.value,
+				detailsAmount: mockBtcTransactionUi.value,
+				labelAmount: mockBtcTransactionUi.value,
+				fee: undefined
+			}
 		};
 
 		expect(result).toEqual(expectedResult);
@@ -59,7 +69,13 @@ describe('mapBtcTransaction', () => {
 		const expectedResult = {
 			...mockBtcTransactionUi,
 			status: 'unconfirmed',
-			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
+			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1,
+			display: {
+				amount: mockBtcTransactionUi.value,
+				detailsAmount: mockBtcTransactionUi.value,
+				labelAmount: mockBtcTransactionUi.value,
+				fee: undefined
+			}
 		};
 
 		expect(result).toEqual(expectedResult);
@@ -79,7 +95,13 @@ describe('mapBtcTransaction', () => {
 
 		const expectedResult = {
 			...mockBtcTransactionUi,
-			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
+			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1,
+			display: {
+				amount: mockBtcTransactionUi.value,
+				detailsAmount: mockBtcTransactionUi.value,
+				labelAmount: mockBtcTransactionUi.value,
+				fee: undefined
+			}
 		};
 
 		expect(result).toEqual(expectedResult);
@@ -99,7 +121,13 @@ describe('mapBtcTransaction', () => {
 			type: 'send',
 			blockNumber: undefined,
 			confirmations: undefined,
-			status: 'pending'
+			status: 'pending',
+			display: {
+				amount: sendTransactionValue * -1n,
+				detailsAmount: sendTransactionValue,
+				labelAmount: sendTransactionValue,
+				fee: sendFee
+			}
 		};
 
 		expect(result).toEqual(expectedResult);
@@ -123,7 +151,13 @@ describe('mapBtcTransaction', () => {
 			to,
 			value: sendTransactionValue,
 			type: 'send',
-			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
+			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1,
+			display: {
+				amount: sendTransactionValue * -1n,
+				detailsAmount: sendTransactionValue,
+				labelAmount: sendTransactionValue,
+				fee: sendFee
+			}
 		};
 
 		expect(result).toEqual(expectedResult);
@@ -146,7 +180,13 @@ describe('mapBtcTransaction', () => {
 			to,
 			value: sendTransactionValue,
 			type: 'send',
-			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
+			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1,
+			display: {
+				amount: sendTransactionValue * -1n,
+				detailsAmount: sendTransactionValue,
+				labelAmount: sendTransactionValue,
+				fee: sendFee
+			}
 		};
 
 		expect(result).toEqual(expectedResult);
@@ -193,7 +233,16 @@ describe('mapBtcTransaction', () => {
 			to: [mockBtcAddress],
 			value: BigInt(transaction.inputs[0].prev_out.value),
 			type: 'send',
-			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
+			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1,
+			display: {
+				amount: BigInt(transaction.inputs[0].prev_out.value) * -1n,
+				detailsAmount: BigInt(transaction.inputs[0].prev_out.value),
+				labelAmount: BigInt(transaction.inputs[0].prev_out.value),
+				fee: BigInt(
+					transaction.inputs.reduce((acc, { prev_out }) => acc + prev_out.value, 0) -
+						transaction.out.reduce((acc, { value }) => acc + value, 0)
+				)
+			}
 		};
 
 		expect(result).toEqual(expectedResult);

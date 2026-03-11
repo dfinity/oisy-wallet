@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
-	import Transaction from '$lib/components/transactions/Transaction.svelte';
-	import { NANO_SECONDS_IN_SECOND, ZERO } from '$lib/constants/app.constants';
+	import { mapIcTransactionToViewModel } from '$icp/utils/ic-transaction-row.utils';
+	import TransactionRow from '$lib/components/transactions/TransactionRow.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
-	import type { TransactionStatus } from '$lib/types/transaction';
+	import { createOpenTransactionModal } from '$lib/utils/transaction-modal.utils';
 
 	interface Props {
 		transaction: IcTransactionUi;
@@ -16,53 +15,22 @@
 
 	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	let {
-		type,
-		typeLabel: transactionTypeLabel,
-		value,
-		timestamp: timestampNanoseconds,
-		incoming,
-		to,
-		from,
-		fee,
-		approveSpender
-	} = $derived(transaction);
+	let { row, label } = $derived(mapIcTransactionToViewModel({ transaction, token }));
 
-	let pending = $derived(transaction?.status === 'pending');
-
-	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
-
-	let displayAmount = $derived(
-		type === 'approve'
-			? (fee ?? ZERO) * -1n
-			: nonNullish(value)
-				? incoming
-					? value
-					: (value + (fee ?? ZERO)) * -1n
-				: value
+	let onClick = $derived(
+		createOpenTransactionModal({
+			openModal: modalStore.openIcTransaction,
+			transaction,
+			token
+		})
 	);
-
-	let timestamp = $derived(
-		nonNullish(timestampNanoseconds)
-			? Number(timestampNanoseconds / NANO_SECONDS_IN_SECOND)
-			: undefined
-	);
-
-	const modalId = Symbol();
 </script>
 
-<Transaction
-	{approveSpender}
-	{displayAmount}
-	{from}
+<TransactionRow
+	{row}
 	{iconType}
-	onClick={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}
-	{status}
+	{onClick}
 	styleClass="block w-full border-0"
-	{timestamp}
-	{to}
-	{token}
-	{type}
 >
-	<IcTransactionLabel amount={value} label={transactionTypeLabel} {token} {type} />
-</Transaction>
+	<IcTransactionLabel amount={label.amount} label={label.label} {token} type={label.type} />
+</TransactionRow>

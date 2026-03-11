@@ -17,7 +17,18 @@ describe('IcTransaction', () => {
 	it('should render correct amount for send transactions', () => {
 		const { container } = render(IcTransaction, {
 			props: {
-				transaction: { ...mockTrx, value: 12345n, type: 'send' },
+				transaction: {
+					...mockTrx,
+					value: 12345n,
+					type: 'send',
+					display: {
+						...mockTrx.display,
+						amount: -12345n - bn1Bi,
+						detailsAmount: 12345n,
+						labelAmount: 12345n,
+						fee: bn1Bi
+					}
+				},
 				token: ICP_TOKEN
 			}
 		});
@@ -39,7 +50,20 @@ describe('IcTransaction', () => {
 	it('should render correct amount for receive transactions', () => {
 		const { container } = render(IcTransaction, {
 			props: {
-				transaction: { ...mockTrx, value: 12345n, fee: ZERO, type: 'receive', incoming: true },
+				transaction: {
+					...mockTrx,
+					value: 12345n,
+					fee: ZERO,
+					type: 'receive',
+					incoming: true,
+					display: {
+						...mockTrx.display,
+						amount: 12345n,
+						detailsAmount: 12345n,
+						labelAmount: 12345n,
+						fee: ZERO
+					}
+				},
 				token: ICP_TOKEN
 			}
 		});
@@ -61,7 +85,19 @@ describe('IcTransaction', () => {
 	it('should render correct amount for approve transactions', () => {
 		const { container } = render(IcTransaction, {
 			props: {
-				transaction: { ...mockTrx, value: 12345n, fee: 5000n, type: 'approve' },
+				transaction: {
+					...mockTrx,
+					value: 12345n,
+					fee: 5000n,
+					type: 'approve',
+					display: {
+						...mockTrx.display,
+						amount: -5000n,
+						detailsAmount: 12345n,
+						labelAmount: 12345n,
+						fee: 5000n
+					}
+				},
 				token: ICP_TOKEN
 			}
 		});
@@ -83,7 +119,17 @@ describe('IcTransaction', () => {
 	it('should render correct label for approve transactions including full allowance amount', () => {
 		const { container } = render(IcTransaction, {
 			props: {
-				transaction: { ...mockTrx, value: 12345n, type: 'approve' },
+				transaction: {
+					...mockTrx,
+					value: 12345n,
+					type: 'approve',
+					display: {
+						...mockTrx.display,
+						amount: -(mockTrx.fee ?? ZERO),
+						detailsAmount: 12345n,
+						labelAmount: 12345n
+					}
+				},
 				token: ICP_TOKEN
 			}
 		});
