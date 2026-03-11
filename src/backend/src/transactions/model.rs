@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use candid::Principal;
 use shared::types::{
     backend_token_id::TokenId,
@@ -13,6 +15,11 @@ use crate::types::{
 };
 
 /// Read paginated transactions from the map without mutating state.
+///
+/// **Performance note:** The current storage layout (`StableBTreeMap<Key, Candid<Vec<T>>>`)
+/// requires deserializing the full transaction list to serve any page. If per-token lists grow
+/// large (approaching `MAX_STORED_TRANSACTIONS_PER_TOKEN`), consider migrating to individual
+/// entries keyed by `(principal, token_id, block_number)` for O(page_size) reads.
 pub fn get_transactions(
     map: &StoredTransactionsMap,
     principal: Principal,
@@ -37,13 +44,11 @@ pub fn get_transactions(
             .collect(),
     };
 
-    let next_start = filtered.last().and_then(|last_tx| {
-        if last_tx.block_number > 0 {
-            Some(last_tx.block_number)
-        } else {
-            None
-        }
-    });
+    let next_start = if filtered.len() == max_results {
+        filtered.last().map(|t| t.block_number)
+    } else {
+        None
+    };
 
     GetStoredTransactionsResponse {
         transactions: filtered,
@@ -83,8 +88,10 @@ impl<'a> StoredTransactionsModel<'a> {
             .map(|c| c.0)
             .unwrap_or_default();
 
+        let known_hashes: HashSet<String> = existing.iter().map(|e| e.hash.clone()).collect();
+
         for tx in &request.transactions {
-            if existing.iter().any(|e| e.hash == tx.hash) {
+            if known_hashes.contains(&tx.hash) {
                 continue;
             }
 
@@ -95,7 +102,7 @@ impl<'a> StoredTransactionsModel<'a> {
             existing.push(tx.clone());
         }
 
-        existing.sort_by_key(|t| t.block_number);
+        existing.sort_unstable_by_key(|t| t.block_number);
 
         self.stored_transactions_map.insert(key, Candid(existing));
 
@@ -277,7 +284,8 @@ mod tests {
 
         assert_eq!(page3.transactions.len(), 1);
         assert_eq!(page3.transactions[0].block_number, 100);
-        assert_eq!(page3.next_start, Some(100));
+        // Page not full (1 < max_results=2), so no more pages.
+        assert_eq!(page3.next_start, None);
     }
 
     #[test]
@@ -588,6 +596,420 @@ mod tests {
             );
             assert_eq!(result.transactions.len(), 1);
             assert_eq!(result.transactions[0].hash, "0xpersist");
+        }
+    }
+
+    // --- Edge case tests ---
+
+    #[test]
+    fn test_transaction_at_block_zero() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let tx0 = make_tx("0xgenesis", 0, 0);
+        let tx1 = make_tx("0xblock1", 1, 10);
+
+        StoredTransactionsModel::new(&mut map)
+            .save_transactions(
+                principal,
+                &SaveStoredTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: vec![tx0.clone(), tx1.clone()],
+                },
+            )
+            .unwrap();
+
+        // Page size 1: first page returns block 1
+        let page1 = get_transactions(
+            &map,
+            principal,
+            &GetStoredTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 1,
+            },
+        );
+        assert_eq!(page1.transactions.len(), 1);
+        assert_eq!(page1.transactions[0].block_number, 1);
+        // Page is full, so next_start is set
+        assert_eq!(page1.next_start, Some(1));
+
+        // Second page: block 0 should still be returned
+        let page2 = get_transactions(
+            &map,
+            principal,
+            &GetStoredTransactionsRequest {
+                token_id: eth_native_token(),
+                start: page1.next_start,
+                max_results: 1,
+            },
+        );
+        assert_eq!(page2.transactions.len(), 1);
+        assert_eq!(page2.transactions[0].block_number, 0);
+        // Page is full (1 == max_results), so next_start is returned.
+        // The caller discovers nothing remains on the next call (start=0 yields empty).
+        assert_eq!(page2.next_start, Some(0));
+    }
+
+    #[test]
+    fn test_next_start_none_when_page_not_full() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        StoredTransactionsModel::new(&mut map)
+            .save_transactions(
+                principal,
+                &SaveStoredTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: vec![make_tx("0xonly", 50, 500)],
+                },
+            )
+            .unwrap();
+
+        let result = get_transactions(
+            &map,
+            principal,
+            &GetStoredTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 10,
+            },
+        );
+        assert_eq!(result.transactions.len(), 1);
+        assert_eq!(result.next_start, None);
+    }
+
+    #[test]
+    fn test_next_start_some_when_page_exactly_full() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let txs: Vec<StoredTransaction> = (1..=3)
+            .map(|i| make_tx(&format!("0xhash{i}"), i * 10, i * 100))
+            .collect();
+
+        StoredTransactionsModel::new(&mut map)
+            .save_transactions(
+                principal,
+                &SaveStoredTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: txs,
+                },
+            )
+            .unwrap();
+
+        // Request exactly 3 — even though there are no more, the page is "full"
+        // so next_start is returned (the caller discovers there's nothing on the next call).
+        let result = get_transactions(
+            &map,
+            principal,
+            &GetStoredTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 3,
+            },
+        );
+        assert_eq!(result.transactions.len(), 3);
+        assert!(result.next_start.is_some());
+    }
+
+    #[test]
+    fn test_save_batch_exceeds_limit_returns_error() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let txs: Vec<StoredTransaction> = (0..=MAX_SAVE_TRANSACTIONS_BATCH)
+            .map(|i| {
+                make_tx(
+                    &format!("0xhash{i}"),
+                    u64::try_from(i).unwrap(),
+                    u64::try_from(i * 10).unwrap(),
+                )
+            })
+            .collect();
+
+        let result = StoredTransactionsModel::new(&mut map).save_transactions(
+            principal,
+            &SaveStoredTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: txs,
+            },
+        );
+
+        assert_eq!(result, Err(StoredTransactionError::TooManyTransactions));
+    }
+
+    #[test]
+    fn test_save_at_capacity_limit() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        // Fill to exactly the limit by saving in batches of MAX_SAVE_TRANSACTIONS_BATCH.
+        let mut model = StoredTransactionsModel::new(&mut map);
+        let total = MAX_STORED_TRANSACTIONS_PER_TOKEN;
+        let batch = MAX_SAVE_TRANSACTIONS_BATCH;
+        let full_batches = total / batch;
+        let remainder = total % batch;
+
+        for b in 0..full_batches {
+            let txs: Vec<StoredTransaction> = (0..batch)
+                .map(|i| {
+                    let idx = b * batch + i;
+                    make_tx(
+                        &format!("0xfill{idx}"),
+                        u64::try_from(idx).unwrap(),
+                        u64::try_from(idx * 10).unwrap(),
+                    )
+                })
+                .collect();
+            model
+                .save_transactions(
+                    principal,
+                    &SaveStoredTransactionsRequest {
+                        token_id: eth_native_token(),
+                        transactions: txs,
+                    },
+                )
+                .unwrap();
+        }
+
+        if remainder > 0 {
+            let txs: Vec<StoredTransaction> = (0..remainder)
+                .map(|i| {
+                    let idx = full_batches * batch + i;
+                    make_tx(
+                        &format!("0xfill{idx}"),
+                        u64::try_from(idx).unwrap(),
+                        u64::try_from(idx * 10).unwrap(),
+                    )
+                })
+                .collect();
+            model
+                .save_transactions(
+                    principal,
+                    &SaveStoredTransactionsRequest {
+                        token_id: eth_native_token(),
+                        transactions: txs,
+                    },
+                )
+                .unwrap();
+        }
+
+        // Now at capacity — adding one more should fail
+        let overflow = StoredTransactionsModel::new(model.stored_transactions_map)
+            .save_transactions(
+                principal,
+                &SaveStoredTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: vec![make_tx("0xoverflow", 999_999, 9_999_990)],
+                },
+            );
+        assert_eq!(overflow, Err(StoredTransactionError::TooManyTransactions));
+
+        // But duplicates of existing hashes should still succeed (they're skipped, no new insert)
+        let dup_ok = StoredTransactionsModel::new(model.stored_transactions_map)
+            .save_transactions(
+                principal,
+                &SaveStoredTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: vec![make_tx("0xfill0", 0, 0)],
+                },
+            );
+        assert!(dup_ok.is_ok());
+    }
+
+    #[test]
+    fn test_deduplication_large_batch() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let txs: Vec<StoredTransaction> = (0..200)
+            .map(|i| make_tx(&format!("0xhash{i}"), u64::try_from(i).unwrap(), u64::try_from(i * 10).unwrap()))
+            .collect();
+
+        let mut model = StoredTransactionsModel::new(&mut map);
+        model
+            .save_transactions(
+                principal,
+                &SaveStoredTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: txs.clone(),
+                },
+            )
+            .unwrap();
+
+        // Re-save the same batch — all should be deduplicated
+        model
+            .save_transactions(
+                principal,
+                &SaveStoredTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: txs,
+                },
+            )
+            .unwrap();
+
+        let result = get_transactions(
+            model.stored_transactions_map,
+            principal,
+            &GetStoredTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: MAX_GET_TRANSACTIONS_RESULTS,
+            },
+        );
+        assert_eq!(result.transactions.len(), usize::try_from(MAX_GET_TRANSACTIONS_RESULTS).unwrap());
+        assert_eq!(result.newest_block_number, Some(199));
+    }
+
+    #[test]
+    fn test_max_results_zero() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        StoredTransactionsModel::new(&mut map)
+            .save_transactions(
+                principal,
+                &SaveStoredTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: vec![make_tx("0xhash1", 100, 1000)],
+                },
+            )
+            .unwrap();
+
+        let result = get_transactions(
+            &map,
+            principal,
+            &GetStoredTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 0,
+            },
+        );
+
+        assert!(result.transactions.is_empty());
+        assert_eq!(result.newest_block_number, Some(100));
+        assert_eq!(result.next_start, None);
+    }
+
+    #[test]
+    fn test_save_empty_batch_is_ok() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let result = StoredTransactionsModel::new(&mut map).save_transactions(
+            principal,
+            &SaveStoredTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: vec![],
+            },
+        );
+
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_multiple_transactions_same_block_number() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let tx_a = make_tx("0xhash_a", 100, 1000);
+        let tx_b = make_tx("0xhash_b", 100, 1001);
+        let tx_c = make_tx("0xhash_c", 100, 1002);
+
+        StoredTransactionsModel::new(&mut map)
+            .save_transactions(
+                principal,
+                &SaveStoredTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: vec![tx_a, tx_b, tx_c],
+                },
+            )
+            .unwrap();
+
+        let result = get_transactions(
+            &map,
+            principal,
+            &GetStoredTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 10,
+            },
+        );
+
+        assert_eq!(result.transactions.len(), 3);
+        assert_eq!(result.newest_block_number, Some(100));
+        assert!(result.transactions.iter().all(|t| t.block_number == 100));
+    }
+
+    #[test]
+    fn test_pagination_walks_entire_large_dataset() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let count = 250usize;
+        // Save in batches of MAX_SAVE_TRANSACTIONS_BATCH
+        let batch_size = MAX_SAVE_TRANSACTIONS_BATCH;
+        let mut model = StoredTransactionsModel::new(&mut map);
+
+        for start in (0..count).step_by(batch_size) {
+            let end = (start + batch_size).min(count);
+            let txs: Vec<StoredTransaction> = (start..end)
+                .map(|i| {
+                    make_tx(
+                        &format!("0xhash{i}"),
+                        u64::try_from(i + 1).unwrap(),
+                        u64::try_from((i + 1) * 10).unwrap(),
+                    )
+                })
+                .collect();
+            model
+                .save_transactions(
+                    principal,
+                    &SaveStoredTransactionsRequest {
+                        token_id: eth_native_token(),
+                        transactions: txs,
+                    },
+                )
+                .unwrap();
+        }
+
+        // Walk through all pages
+        let mut all_hashes = Vec::new();
+        let mut cursor: Option<u64> = None;
+        let page_size = 30u64;
+
+        loop {
+            let page = get_transactions(
+                model.stored_transactions_map,
+                principal,
+                &GetStoredTransactionsRequest {
+                    token_id: eth_native_token(),
+                    start: cursor,
+                    max_results: page_size,
+                },
+            );
+
+            all_hashes.extend(page.transactions.iter().map(|t| t.hash.clone()));
+
+            if page.next_start.is_none() {
+                break;
+            }
+            cursor = page.next_start;
+        }
+
+        assert_eq!(all_hashes.len(), count);
+
+        // Verify monotonically decreasing block numbers (newest first)
+        let block_numbers: Vec<u64> = all_hashes
+            .iter()
+            .map(|h| {
+                let num: usize = h.trim_start_matches("0xhash").parse().unwrap();
+                u64::try_from(num + 1).unwrap()
+            })
+            .collect();
+        for window in block_numbers.windows(2) {
+            assert!(window[0] >= window[1], "blocks should be newest-first");
         }
     }
 }

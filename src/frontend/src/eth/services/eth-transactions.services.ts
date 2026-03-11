@@ -115,7 +115,10 @@ const loadEthTransactions = async ({
 			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
 		}
 
-		// Save newly finalized transactions to backend (fire-and-forget)
+		// Save newly finalized transactions to backend (fire-and-forget).
+		// We use the highest block number in the batch as the "tip" for finality checks.
+		// This means only transactions at least ETH_FINALITY_BLOCKS behind this tip will
+		// be saved — the most recent transactions in the batch will be saved on a future load.
 		if (newTransactions.length > 0 && nonNullish(transactionTokenId)) {
 			const maxBlockNumber = Math.max(
 				...newTransactions

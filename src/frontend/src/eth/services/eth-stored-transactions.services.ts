@@ -136,9 +136,7 @@ export const loadNextEthStoredTransactions = async ({
 		certified: false
 	}));
 
-	certifiedTransactions.forEach((transaction) =>
-		ethTransactionsStore.append({ tokenId, transactions: [transaction] })
-	);
+	ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
 
 	return { hasMore: nonNullish(result.nextStart) };
 };

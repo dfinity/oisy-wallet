@@ -362,16 +362,6 @@ pub enum GetStoredTransactionsResult {
     Ok(GetStoredTransactionsResponse),
     Err(StoredTransactionError),
 }
-impl From<Result<GetStoredTransactionsResponse, StoredTransactionError>>
-    for GetStoredTransactionsResult
-{
-    fn from(result: Result<GetStoredTransactionsResponse, StoredTransactionError>) -> Self {
-        match result {
-            Ok(response) => GetStoredTransactionsResult::Ok(response),
-            Err(err) => GetStoredTransactionsResult::Err(err),
-        }
-    }
-}
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SaveStoredTransactionsResult {

@@ -1,10 +1,6 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import type { StoredTransaction, TokenId as BackendTokenId } from '$declarations/backend/backend.did';
-import type { Erc1155ContractAddress } from '$eth/types/erc1155';
-import type { Erc20ContractAddress } from '$eth/types/erc20';
-import type { Erc4626ContractAddress } from '$eth/types/erc4626';
-import type { Erc721ContractAddress } from '$eth/types/erc721';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
@@ -16,21 +12,27 @@ import { isNullish, toNullable } from '@dfinity/utils';
  */
 export const ETH_FINALITY_BLOCKS = 64;
 
-export const mapTransactionToStored = (tx: Transaction): StoredTransaction => ({
-	hash: tx.hash ?? '',
-	block_number: BigInt(tx.blockNumber ?? 0),
-	timestamp: BigInt(tx.timestamp ?? 0),
-	from: tx.from,
-	to: toNullable(tx.to ?? undefined),
-	nonce: toNullable(tx.nonce !== undefined ? tx.nonce : undefined),
-	value: tx.value ?? 0n,
-	chain_id: toNullable(tx.chainId !== undefined ? BigInt(tx.chainId) : undefined),
-	gas_limit: toNullable(tx.gasLimit ?? undefined),
-	gas_price: toNullable(tx.gasPrice ?? undefined),
-	gas_used: toNullable(tx.gasUsed ?? undefined),
-	data: toNullable(tx.data ?? undefined),
-	token_id: toNullable(tx.tokenId ?? undefined)
-});
+export const mapTransactionToStored = (tx: Transaction): StoredTransaction => {
+	if (tx.hash === undefined || tx.hash === null) {
+		throw new Error('Cannot store a transaction without a hash');
+	}
+
+	return {
+		hash: tx.hash,
+		block_number: BigInt(tx.blockNumber ?? 0),
+		timestamp: BigInt(tx.timestamp ?? 0),
+		from: tx.from,
+		to: toNullable(tx.to ?? undefined),
+		nonce: toNullable(tx.nonce !== undefined ? tx.nonce : undefined),
+		value: tx.value ?? 0n,
+		chain_id: toNullable(tx.chainId !== undefined ? BigInt(tx.chainId) : undefined),
+		gas_limit: toNullable(tx.gasLimit ?? undefined),
+		gas_price: toNullable(tx.gasPrice ?? undefined),
+		gas_used: toNullable(tx.gasUsed ?? undefined),
+		data: toNullable(tx.data ?? undefined),
+		token_id: toNullable(tx.tokenId ?? undefined)
+	};
+};
 
 export const mapStoredToTransaction = (stored: StoredTransaction): Transaction => ({
 	hash: stored.hash,

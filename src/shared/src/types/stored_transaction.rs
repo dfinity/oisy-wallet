@@ -81,8 +81,10 @@ pub struct SaveStoredTransactionsRequest {
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum StoredTransactionError {
+    /// Reserved for future caller-validation logic.
     UserNotFound,
     TooManyTransactions,
+    /// Reserved — duplicates are currently silently skipped during save.
     DuplicateTransaction { hash: String },
     InternalError { msg: String },
 }
