@@ -145,11 +145,15 @@ When investigating performance issues, runaway reactive loops, or excessive reco
 
 ### How it works
 
-A Vite plugin (`vite.plugin.reactivity-debug.ts`) uses two mechanisms:
+A Vite plugin (`vite.plugin.reactivity-debug.ts`) uses three mechanisms:
 
-1. **`resolveId`** — transparently intercepts every `import { derived } from 'svelte/store'` in user source code (not `node_modules`) and redirects it to a debug wrapper in `$lib/utils/reactivity-debug.utils.ts`. The wrapper delegates to the real `derived`, wraps the derivation callback so that every recomputation increments a counter, and auto-generates a label from the call-site stack trace (e.g. `lib/derived/auth.derived.ts:5`).
+1. **`resolveId`** — transparently intercepts every `import { derived } from 'svelte/store'` in user source code (not `node_modules`) and redirects it to a debug wrapper in `$lib/utils/reactivity-debug.utils.ts`. The wrapper delegates to the real `derived` and wraps the derivation callback so that every recomputation increments a counter.
 
-2. **`transform`** — rewrites `.svelte` files before the Svelte compiler sees them, injecting a `reactivityDebugHit()` call at the top of every `$effect(() => { ... })` and `$derived.by(() => { ... })` callback body. Labels are auto-generated as `file:line:$effect` or `file:line:$derived.by`. If an effect already contains a manual `reactivityDebugHit` call, it is left untouched.
+2. **`transform` on `.ts` files** — injects a `_setNextDerivedLabel('file:line:derived')` call before every `derived()` call. Because the label is embedded at compile time it survives minification and works correctly in staging, beta, and other built environments where stack traces only contain mangled chunk names.
+
+3. **`transform` on `.svelte` files** — injects `reactivityDebugHit()` at the top of every `$effect(() => { ... })` and `$derived.by(() => { ... })` callback body, and also injects `_setNextDerivedLabel()` before any `derived()` calls. If an effect already contains a manual `reactivityDebugHit` call, it is left untouched.
+
+All labels are generated at compile time from the source file path and line number, so they are reliable in every environment (dev, staging, beta, etc.).
 
 The plugin activates automatically when `DFX_NETWORK` is not `ic` (production) and is a complete no-op in production builds.
 

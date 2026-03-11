@@ -14,35 +14,26 @@ const ENABLED = VITE_DFX_NETWORK !== 'ic' && typeof window !== 'undefined';
 
 const counters = new Map<string, number>();
 
-const extractCallerLabel = (): string => {
-	const stack = new Error().stack ?? '';
-	const lines = stack.split('\n');
+let _pendingDerivedLabel: string | undefined;
 
-	const callerFrame = lines.find(
-		(line) =>
-			(line.includes('.ts:') || line.includes('.svelte:')) && !line.includes('reactivity-debug')
-	);
+/**
+ * Called by the Vite plugin's `transform` hook right before each `derived()`
+ * call to set the label at compile time (works in all environments including
+ * minified builds where stack traces are useless).
+ */
+export const _setNextDerivedLabel = (label: string): void => {
+	_pendingDerivedLabel = label;
+};
 
-	if (!callerFrame) {
-		return 'unknown';
-	}
-
-	const projectMatch = callerFrame.match(/src\/frontend\/src\/(.+?)(?::(\d+))?(?::(\d+))?\)?$/);
-	if (projectMatch) {
-		const [, filePath, line] = projectMatch;
-		return line ? `${filePath}:${line}` : filePath;
-	}
-
-	const fallbackMatch = callerFrame.match(/\/([^/]+\.(?:ts|svelte)):(\d+)/);
-
-	return fallbackMatch ? `${fallbackMatch[1]}:${fallbackMatch[2]}` : 'unknown';
+const consumeLabel = (): string => {
+	const label = _pendingDerivedLabel ?? 'derived:unknown';
+	_pendingDerivedLabel = undefined;
+	return label;
 };
 
 const bumpCounter = (label: string): number => {
 	const nextValue = (counters.get(label) ?? 0) + 1;
-
 	counters.set(label, nextValue);
-
 	return nextValue;
 };
 
@@ -54,7 +45,6 @@ const printTop = (limit = 25): void => {
 	if (entries.length === 0) {
 		// eslint-disable-next-line no-console
 		console.log('[reactivity-debug] No recomputations recorded yet.');
-
 		return;
 	}
 
@@ -63,7 +53,6 @@ const printTop = (limit = 25): void => {
 	console.log(`[reactivity-debug] ${entries.length} tracked primitives, ${total} total hits:`);
 
 	const rows = entries.slice(0, limit).map(([label, count]) => ({ label, count }));
-
 	// eslint-disable-next-line no-console
 	console.table(rows);
 };
@@ -72,7 +61,7 @@ const printTop = (limit = 25): void => {
  * Drop-in replacement for svelte/store `derived`.
  *
  * In every environment except production, every recomputation is counted
- * with an auto-generated label extracted from the call-site stack trace.
+ * with a label injected at compile time by the Vite plugin.
  * In production this is a zero-overhead pass-through.
  */
 // eslint-disable-next-line local-rules/prefer-object-params
@@ -86,7 +75,7 @@ export const derived: typeof originalDerived = ((
 		return originalDerived(stores, fn as never, initialValue);
 	}
 
-	const label = extractCallerLabel();
+	const label = consumeLabel();
 
 	const wrappedFn =
 		fn.length < 2
@@ -121,9 +110,7 @@ export const getReactivityDebugSnapshot = (): ReadonlyArray<[string, number]> =>
 
 export const resetReactivityDebug = (): void => {
 	const count = counters.size;
-
 	counters.clear();
-
 	// eslint-disable-next-line no-console
 	console.log(`[reactivity-debug] Reset — cleared ${count} tracked primitives.`);
 };
