@@ -26,7 +26,8 @@ import type { Token } from '$lib/types/token';
 import type {
 	AllTransactionUiWithCmp,
 	AnyTransactionUi,
-	AnyTransactionUiWithToken
+	AnyTransactionUiWithToken,
+	EthAllTransactionUiWithCmp
 } from '$lib/types/transaction-ui';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
 import { usdValue } from '$lib/utils/exchange.utils';
@@ -50,51 +51,47 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * and the native fee payment. This identifies the native fee entries to exclude.
  */
 const findDuplicateEthNativeTransactions = (
-	ethTransactions: AllTransactionUiWithCmp[]
-): Set<AllTransactionUiWithCmp> => {
+	ethTransactions: EthAllTransactionUiWithCmp[]
+): Set<EthAllTransactionUiWithCmp> => {
 	// Group ETH transactions by (networkId, hash) to detect duplicates.
-	const groupsByNetworkAndHash = new Map<symbol, Map<string, AllTransactionUiWithCmp[]>>();
+	const groupsByNetworkAndHash = new Map<symbol, Map<string, EthAllTransactionUiWithCmp[]>>();
 
 	for (const tx of ethTransactions) {
 		const { hash } = tx.transaction;
 
-		if (isNullish(hash)) {
-			continue;
+		if (nonNullish(hash)) {
+			const networkId = tx.token.network.id;
+
+			if (!groupsByNetworkAndHash.has(networkId)) {
+				groupsByNetworkAndHash.set(networkId, new Map());
+			}
+
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			const networkMap = groupsByNetworkAndHash.get(networkId)!;
+
+			if (!networkMap.has(hash)) {
+				networkMap.set(hash, []);
+			}
+
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			networkMap.get(hash)!.push(tx);
 		}
-
-		const networkId = tx.token.network.id;
-
-		if (!groupsByNetworkAndHash.has(networkId)) {
-			groupsByNetworkAndHash.set(networkId, new Map());
-		}
-
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		const networkMap = groupsByNetworkAndHash.get(networkId)!;
-
-		if (!networkMap.has(hash)) {
-			networkMap.set(hash, []);
-		}
-
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		networkMap.get(hash)!.push(tx);
 	}
 
 	// For each group with duplicates, mark all but the winner for removal.
-	const duplicates = new Set<AllTransactionUiWithCmp>();
+	const duplicates = new Set<EthAllTransactionUiWithCmp>();
 
 	for (const networkMap of groupsByNetworkAndHash.values()) {
 		for (const group of networkMap.values()) {
-			if (group.length <= 1) {
-				continue;
-			}
+			if (group.length > 1) {
+				// Prefer the non-native (e.g. ERC-20) transaction over the native fee payment.
+				// Falls back to the first entry if all duplicates are native tokens.
+				const winner = group.find(({ token }) => token.standard.code !== 'ethereum') ?? group[0];
 
-			// Prefer the non-native (e.g. ERC-20) transaction over the native fee payment.
-			// Falls back to the first entry if all duplicates are native tokens.
-			const winner = group.find(({ token }) => token.standard.code !== 'ethereum') ?? group[0];
-
-			for (const tx of group) {
-				if (tx !== winner) {
-					duplicates.add(tx);
+				for (const tx of group) {
+					if (tx !== winner) {
+						duplicates.add(tx);
+					}
 				}
 			}
 		}
@@ -150,7 +147,7 @@ export const mapAllTransactionsUi = ({
 	);
 
 	// Collected separately to scope deduplication only to ETH/EVM transactions.
-	const ethTransactions: AllTransactionUiWithCmp[] = [];
+	const ethTransactions: EthAllTransactionUiWithCmp[] = [];
 
 	const allTransactions = tokens.reduce<AllTransactionUiWithCmp[]>((acc, token) => {
 		const {
@@ -257,7 +254,7 @@ export const mapAllTransactionsUi = ({
 	const duplicates = findDuplicateEthNativeTransactions(ethTransactions);
 
 	return duplicates.size > 0
-		? allTransactions.filter((tx) => !duplicates.has(tx))
+		? allTransactions.filter((tx) => !duplicates.has(tx as EthAllTransactionUiWithCmp))
 		: allTransactions;
 };
 
