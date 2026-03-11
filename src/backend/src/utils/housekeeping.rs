@@ -5,12 +5,7 @@ use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::signer::topup::TopUpCyclesLedgerResult;
 
 use super::rate_limiter;
-use crate::{
-    api,
-    exchange::{refresh_exchange_rates, PRICE_REFRESH_INTERVAL_SEC},
-    signer,
-    types::StoredPrincipal,
-};
+use crate::{api, signer, types::StoredPrincipal};
 
 thread_local! {
     /// `None` means idle; `Some(ns)` is the IC timestamp when the current run started.
@@ -160,16 +155,6 @@ pub(crate) fn start_periodic_housekeeping_timers() {
     // Then periodically:
     let hour = Duration::from_secs(60 * 60);
     let _ = set_timer_interval(hour, spawn_housekeeping_if_idle);
-
-    // Refresh exchange rates periodically
-    let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
-    let _ = set_timer_interval(refresh_interval, || {
-        ic_cdk::futures::spawn(async {
-            if let Err(err) = refresh_exchange_rates().await {
-                ic_cdk::println!("Exchange rate refresh skipped: {err:?}");
-            }
-        });
-    });
 }
 
 /// Runs hourly housekeeping tasks:

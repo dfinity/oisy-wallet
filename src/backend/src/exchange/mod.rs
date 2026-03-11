@@ -1,8 +1,9 @@
 mod coingecko;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use ic_cdk::api::time;
+use ic_cdk_timers::set_timer_interval;
 use shared::types::{
     custom_token::CustomTokenId,
     exchange::{ExchangeData, ExchangeError, ExchangeRate},
@@ -15,8 +16,24 @@ use crate::{
     types::storable::{Candid, StoredTokenId},
 };
 
-pub const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60;
+/// How often exchange rates are refreshed (5 minutes).
+const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60;
+
+/// Tokens that haven't been queried within this window are considered inactive
+/// and skipped during price refreshes (1 hour).
 pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60;
+
+pub(crate) fn start_exchange_rate_timer() {
+    let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
+
+    let _ = set_timer_interval(refresh_interval, || {
+        ic_cdk::futures::spawn(async {
+            if let Err(err) = refresh_exchange_rates().await {
+                ic_cdk::println!("Exchange rate refresh skipped: {err:?}");
+            }
+        });
+    });
+}
 
 fn update_price(token_id: &StoredTokenId, price_data: (Option<f64>, Option<f64>, Option<f64>)) {
     // TODO: use timestamp from price data when available, for now use current time
@@ -60,6 +77,7 @@ async fn fetch_and_update_prices(api_key: &str, token_ids: Vec<StoredTokenId>) {
         match inner {
             CustomTokenId::Icrc(ledger_id) => {
                 let ledger_str = ledger_id.to_text();
+
                 platforms
                     .entry("internet-computer".to_string())
                     .or_default()
@@ -73,7 +91,9 @@ async fn fetch_and_update_prices(api_key: &str, token_ids: Vec<StoredTokenId>) {
                 let Some(platform) = coingecko_platform(*chain_id) else {
                     continue;
                 };
+
                 let addr_str = address.0.clone();
+
                 platforms
                     .entry(platform.to_string())
                     .or_default()
@@ -83,6 +103,7 @@ async fn fetch_and_update_prices(api_key: &str, token_ids: Vec<StoredTokenId>) {
             }
             CustomTokenId::SolMainnet(address) => {
                 let addr_str = address.0.clone();
+
                 platforms
                     .entry("solana".to_string())
                     .or_default()
@@ -115,7 +136,8 @@ async fn fetch_and_update_prices(api_key: &str, token_ids: Vec<StoredTokenId>) {
 }
 
 pub async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
-    let api_key = read_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
+    let api_key =
+        read_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
 
     let now = time();
 

@@ -59,6 +59,8 @@ pub fn init(arg: Arg) {
     bitcoin::api::init_fee_percentiles_cache();
 
     utils::housekeeping::start_periodic_housekeeping_timers();
+
+    exchange::start_exchange_rate_timer();
 }
 
 /// Post-upgrade handler.
@@ -83,6 +85,8 @@ pub fn post_upgrade(arg: Option<Arg>) {
     bitcoin::api::init_fee_percentiles_cache();
 
     utils::housekeeping::start_periodic_housekeeping_timers();
+
+    exchange::start_exchange_rate_timer();
 }
 
 export_candid!();
