@@ -134,6 +134,3 @@ export const primitiveArrayEqual = <T extends string | number | boolean>(
 	}
 	return a.every((v, i) => v === b[i]);
 };
-
-// eslint-disable-next-line local-rules/prefer-object-params
-export const booleanEqual = (a: boolean, b: boolean): boolean => a === b;
