@@ -751,3 +751,17 @@ export const findPutativeToken = <T extends Token>({
 				});
 			})
 		: undefined;
+
+/**
+ * Compares two token arrays by length and token identity (symbol id).
+ * Fast O(n) check — catches the common case of identical token lists
+ * produced from unchanged inputs.
+ */
+// eslint-disable-next-line local-rules/prefer-object-params -- Being a comparison function, it's more ergonomic to take two separate arrays than an object param with two arrays.
+export const tokenListEqual = <T extends { id: symbol }>(a: T[], b: T[]): boolean => {
+	if (a.length !== b.length) {
+		return false;
+	}
+
+	return a.every((item, i) => item.id === b[i].id);
+};

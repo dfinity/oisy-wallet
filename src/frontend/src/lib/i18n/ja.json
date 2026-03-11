@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "送信",
+			"send_token": "",
 			"destination": "宛先",
 			"source": "送信元",
 			"balance": "残高",
@@ -1503,8 +1504,6 @@
 		},
 		"label": {
 			"reimbursement": "払い戻し",
-			"twin_token_sent": "$twinToken送信済み",
-			"ck_token_sent": "$ckToken送信済み",
 			"twin_token_converted": "$twinTokenから変換済み",
 			"ck_token_converted": "$ckTokenから変換済み",
 			"sending_twin_token": "$twinToken送信中",

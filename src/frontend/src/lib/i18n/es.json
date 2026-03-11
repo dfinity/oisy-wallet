@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "Enviar",
+			"send_token": "",
 			"destination": "Destino",
 			"source": "Origen",
 			"balance": "Saldo",
@@ -1503,8 +1504,6 @@
 		},
 		"label": {
 			"reimbursement": "Reembolso",
-			"twin_token_sent": "$twinToken enviado",
-			"ck_token_sent": "$ckToken enviado",
 			"twin_token_converted": "Convertido desde $twinToken",
 			"ck_token_converted": "Convertido desde $ckToken",
 			"sending_twin_token": "Enviando $twinToken",

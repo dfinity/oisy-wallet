@@ -591,6 +591,7 @@ interface I18nReceive {
 interface I18nSend {
 	text: {
 		send: string;
+		send_token: string;
 		destination: string;
 		source: string;
 		balance: string;
@@ -1227,8 +1228,6 @@ interface I18nTransaction {
 	};
 	label: {
 		reimbursement: string;
-		twin_token_sent: string;
-		ck_token_sent: string;
 		twin_token_converted: string;
 		ck_token_converted: string;
 		sending_twin_token: string;

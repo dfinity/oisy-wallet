@@ -45,7 +45,8 @@ import {
 	sumMainnetTokensUsdBalancesPerNetwork,
 	sumMainnetTokensUsdStakeBalancesPerNetwork,
 	sumTokensUiUsdBalance,
-	sumTokensUiUsdStakeBalance
+	sumTokensUiUsdStakeBalance,
+	tokenListEqual
 } from '$lib/utils/tokens.utils';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -2206,6 +2207,131 @@ describe('tokens.utils', () => {
 					identifier: 'BTC'
 				})
 			).toBeUndefined();
+		});
+	});
+
+	describe('tokenListEqual', () => {
+		it('should return true for two empty arrays', () => {
+			expect(tokenListEqual([], [])).toBeTruthy();
+		});
+
+		it('should return true for arrays with the same ids in the same order', () => {
+			const idA = Symbol('a');
+			const idB = Symbol('b');
+
+			const left = [{ id: idA }, { id: idB }];
+			const right = [{ id: idA }, { id: idB }];
+
+			expect(tokenListEqual(left, right)).toBeTruthy();
+		});
+
+		it('should return true for arrays containing the same object references', () => {
+			const first = { id: Symbol('a') };
+			const second = { id: Symbol('b') };
+
+			expect(tokenListEqual([first, second], [first, second])).toBeTruthy();
+		});
+
+		it('should return true for different objects that share the same ids in the same order', () => {
+			const idA = Symbol('a');
+			const idB = Symbol('b');
+
+			const left = [
+				{ id: idA, label: 'left-a' },
+				{ id: idB, label: 'left-b' }
+			];
+			const right = [
+				{ id: idA, label: 'right-a' },
+				{ id: idB, label: 'right-b' }
+			];
+
+			expect(tokenListEqual(left, right)).toBeTruthy();
+		});
+
+		it('should return false when array lengths differ', () => {
+			const idA = Symbol('a');
+			const idB = Symbol('b');
+
+			expect(tokenListEqual([{ id: idA }], [{ id: idA }, { id: idB }])).toBeFalsy();
+			expect(tokenListEqual([{ id: idA }, { id: idB }], [{ id: idA }])).toBeFalsy();
+		});
+
+		it('should return false when ids differ', () => {
+			const idA = Symbol('a');
+			const idB = Symbol('b');
+			const idC = Symbol('c');
+
+			const left = [{ id: idA }, { id: idB }];
+			const right = [{ id: idA }, { id: idC }];
+
+			expect(tokenListEqual(left, right)).toBeFalsy();
+		});
+
+		it('should return false when ids differ at the first position', () => {
+			const idA = Symbol('a');
+			const idB = Symbol('b');
+			const idC = Symbol('c');
+
+			const left = [{ id: idA }, { id: idB }];
+			const right = [{ id: idC }, { id: idB }];
+
+			expect(tokenListEqual(left, right)).toBeFalsy();
+		});
+
+		it('should return false when ids differ at the last position', () => {
+			const idA = Symbol('a');
+			const idB = Symbol('b');
+			const idC = Symbol('c');
+
+			const left = [{ id: idA }, { id: idB }];
+			const right = [{ id: idA }, { id: idC }];
+
+			expect(tokenListEqual(left, right)).toBeFalsy();
+		});
+
+		it('should return false when the same ids appear in a different order', () => {
+			const idA = Symbol('a');
+			const idB = Symbol('b');
+
+			const left = [{ id: idA }, { id: idB }];
+			const right = [{ id: idB }, { id: idA }];
+
+			expect(tokenListEqual(left, right)).toBeFalsy();
+		});
+
+		it('should return false when one array is empty and the other is not', () => {
+			const idA = Symbol('a');
+
+			expect(tokenListEqual([], [{ id: idA }])).toBeFalsy();
+			expect(tokenListEqual([{ id: idA }], [])).toBeFalsy();
+		});
+
+		it('should compare only the id field and ignore other properties', () => {
+			const idA = Symbol('a');
+
+			const left = [{ id: idA, value: 1, nested: { side: 'left' } }];
+			const right = [{ id: idA, value: 999, nested: { side: 'right' } }];
+
+			expect(tokenListEqual(left, right)).toBeTruthy();
+		});
+
+		it('should return true for longer arrays with matching ids in the same order', () => {
+			const ids = [Symbol('a'), Symbol('b'), Symbol('c'), Symbol('d'), Symbol('e')];
+
+			const left = ids.map((id, index) => ({ id, index }));
+			const right = ids.map((id, index) => ({ id, index: index + 100 }));
+
+			expect(tokenListEqual(left, right)).toBeTruthy();
+		});
+
+		it('should return false for longer arrays when a single id differs', () => {
+			const ids = [Symbol('a'), Symbol('b'), Symbol('c'), Symbol('d')];
+			const differentId = Symbol('x');
+
+			const left = ids.map((id) => ({ id }));
+			const right = [{ id: ids[0] }, { id: ids[1] }, { id: differentId }, { id: ids[3] }];
+
+			expect(tokenListEqual(left, right)).toBeFalsy();
 		});
 	});
 });

@@ -23,6 +23,7 @@ import type {
 	DeleteContactParams,
 	GetContactParams,
 	GetStoredTransactionsParams,
+	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	SaveStoredTransactionsParams,
 	SaveUserAgreements,
@@ -115,10 +116,10 @@ export const addPendingBtcTransaction = async ({
 export const getPendingBtcTransactions = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<PendingTransaction[]> => {
-	const { btcGetPendingTransaction } = await backendCanister({ identity });
+}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<GetPendingTransactionsOutcome> => {
+	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
-	return btcGetPendingTransaction(params);
+	return btcGetPendingTransactions(params);
 };
 
 export const selectUserUtxosFee = async ({

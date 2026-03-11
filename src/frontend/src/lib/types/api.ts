@@ -5,6 +5,7 @@ import type {
 	Contact,
 	CredentialSpec,
 	GetUserProfileError,
+	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	StoredTransaction,
 	TokenId as BackendTokenId,
@@ -43,6 +44,11 @@ export interface RateLimitInfo {
 
 export interface AddPendingTransactionOutcome {
 	response: true;
+	rateLimitInfo?: RateLimitInfo;
+}
+
+export interface GetPendingTransactionsOutcome {
+	response: PendingTransaction[];
 	rateLimitInfo?: RateLimitInfo;
 }
 
