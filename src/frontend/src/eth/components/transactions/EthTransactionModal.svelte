@@ -82,7 +82,7 @@
 			: undefined
 	);
 
-	let approveValue = $derived(display.approveValue);
+	let approveValue = $derived(display.labelAmount);
 
 	let isUnlimitedApprove = $derived(display.isUnlimitedApprove || isMaxUint256(approveValue));
 
@@ -169,7 +169,7 @@
 			: undefined
 	);
 
-	let displayValue = $derived(display.displayValue);
+	let displayValue = $derived(display.detailsAmount);
 </script>
 
 <Modal onClose={modalStore.close}>

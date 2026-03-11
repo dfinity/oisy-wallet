@@ -73,6 +73,7 @@ const mapPendingTransaction = ({
 		value,
 		display: {
 			amount: value,
+			detailsAmount: value,
 			labelAmount: value,
 			fee: ZERO
 		},

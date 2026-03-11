@@ -36,6 +36,7 @@ export const mapDip20Transaction = ({
 		status: 'executed',
 		display: {
 			amount: ZERO,
+			detailsAmount: ZERO,
 			labelAmount: ZERO
 		}
 	}) as IcTransactionUi;

@@ -141,6 +141,7 @@ export const mapIcrcTransaction = ({
 		...(nonNullish(fee) && { fee }),
 		display: {
 			amount,
+			detailsAmount: labelAmount,
 			labelAmount,
 			fee
 		},

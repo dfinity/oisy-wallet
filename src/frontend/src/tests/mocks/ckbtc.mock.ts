@@ -22,6 +22,7 @@ export const mockCkBtcPendingUtxoTransaction: IcTransactionUi = {
 	value: mockPendingUtxo.value - mockCkBtcMinterInfo.kyt_fee,
 	display: {
 		amount: mockPendingUtxo.value - mockCkBtcMinterInfo.kyt_fee,
+		detailsAmount: mockPendingUtxo.value - mockCkBtcMinterInfo.kyt_fee,
 		labelAmount: mockPendingUtxo.value - mockCkBtcMinterInfo.kyt_fee
 	}
 };

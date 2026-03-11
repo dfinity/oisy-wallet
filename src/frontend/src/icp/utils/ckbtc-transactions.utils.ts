@@ -128,6 +128,7 @@ export const mapCkBTCPendingUtxo = ({
 		txExplorerUrl: `${bitcoinExplorerUrl}/tx/${id}`,
 		display: {
 			amount: value - kytFee,
+			detailsAmount: value - kytFee,
 			labelAmount: value - kytFee
 		}
 	};

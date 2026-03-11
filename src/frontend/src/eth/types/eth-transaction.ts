@@ -14,8 +14,6 @@ export type EthTransactionType = Extract<
 >;
 
 export interface EthTransactionUiDisplay extends TransactionUiDisplay {
-	displayValue: bigint;
-	approveValue: bigint;
 	isUnlimitedApprove?: boolean;
 	isErc20Deposit?: boolean;
 }

@@ -12,6 +12,7 @@ const createIcTransactionUiMock = (id: string): IcTransactionUi => ({
 	status: 'pending',
 	display: {
 		amount: -100n,
+		detailsAmount: 100n,
 		labelAmount: 100n
 	}
 });

@@ -76,7 +76,7 @@
 
 	let displayToken = $derived(approveToken ?? token);
 
-	let approveValue = $derived(display.approveValue);
+	let approveValue = $derived(display.labelAmount);
 
 	let approveAmountText = $derived.by(() => {
 		if (!isApprove) {

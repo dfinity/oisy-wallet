@@ -113,7 +113,6 @@ export const mapEthTransactionUi = ({
 			? decodeErc20AbiData({ data })
 			: { to: undefined, value: undefined };
 
-	const approveValue = isApprove ? (decodedValue ?? value) : value;
 	const labelAmount = isApprove || isErc20Deposit ? (decodedValue ?? value) : value;
 	const fee = nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined;
 	const type = isApprove
@@ -138,11 +137,10 @@ export const mapEthTransactionUi = ({
 						? fee * -1n
 						: value * (type === 'send' || type === 'deposit' || type === 'approve' ? -1n : 1n)
 					: value * (type === 'send' || type === 'deposit' ? -1n : 1n),
+			detailsAmount: isErc20Deposit && nonNullish(fee) ? fee : value,
 			labelAmount,
-			displayValue: isErc20Deposit && nonNullish(fee) ? fee : value,
 			fee,
-			approveValue,
-			isUnlimitedApprove: isMaxUint256(approveValue),
+			isUnlimitedApprove: isMaxUint256(labelAmount),
 			isErc20Deposit
 		}
 	};

@@ -13,6 +13,7 @@ export const mockBtcTransactionUi: BtcTransactionUi = {
 	confirmations: 1,
 	display: {
 		amount: 126527n,
+		detailsAmount: 126527n,
 		labelAmount: 126527n
 	}
 };

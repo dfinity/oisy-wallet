@@ -13,6 +13,7 @@ describe('BtcTransaction', () => {
 		from: '0xD379F3d4578DE7aC47a5928811B3407Ef03F7C49',
 		display: {
 			amount: -40827n,
+			detailsAmount: 40827n,
 			labelAmount: 40827n
 		}
 	};

@@ -226,6 +226,7 @@ export const fetchSolTransactionsForSignature = async ({
 				...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO }),
 				display: {
 					amount: (address === from || ataAddress === from ? value * -1n : value),
+					detailsAmount: value,
 					labelAmount: value,
 					...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO })
 				}

@@ -24,6 +24,7 @@ describe('IcTransaction', () => {
 					display: {
 						...mockTrx.display,
 						amount: -12345n - bn1Bi,
+						detailsAmount: 12345n,
 						labelAmount: 12345n,
 						fee: bn1Bi
 					}
@@ -58,6 +59,7 @@ describe('IcTransaction', () => {
 					display: {
 						...mockTrx.display,
 						amount: 12345n,
+						detailsAmount: 12345n,
 						labelAmount: 12345n,
 						fee: ZERO
 					}
@@ -91,6 +93,7 @@ describe('IcTransaction', () => {
 					display: {
 						...mockTrx.display,
 						amount: -5000n,
+						detailsAmount: 12345n,
 						labelAmount: 12345n,
 						fee: 5000n
 					}
@@ -123,6 +126,7 @@ describe('IcTransaction', () => {
 					display: {
 						...mockTrx.display,
 						amount: -(mockTrx.fee ?? ZERO),
+						detailsAmount: 12345n,
 						labelAmount: 12345n
 					}
 				},

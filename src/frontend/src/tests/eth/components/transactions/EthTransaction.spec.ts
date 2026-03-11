@@ -22,7 +22,7 @@ describe('EthTransaction', () => {
 						...mockTrx.display,
 						amount: -123450000000000n,
 						labelAmount: 123450000000000n,
-						displayValue: 123450000000000n
+						detailsAmount: 123450000000000n
 					}
 				},
 				token: ETHEREUM_TOKEN
@@ -54,7 +54,7 @@ describe('EthTransaction', () => {
 						...mockTrx.display,
 						amount: 123450000000000n,
 						labelAmount: 123450000000000n,
-						displayValue: 123450000000000n
+						detailsAmount: 123450000000000n
 					}
 				},
 				token: ETHEREUM_TOKEN
@@ -96,8 +96,7 @@ describe('EthTransaction', () => {
 				...mockTrx.display,
 				amount: mockGasUsed * mockGasPrice * -1n,
 				labelAmount: 6000000n,
-				displayValue: 123450000000000n,
-				approveValue: 6000000n
+				detailsAmount: 123450000000000n
 			}
 		};
 

@@ -101,6 +101,7 @@ export const mapBtcTransaction = ({
 		confirmations,
 		display: {
 			amount: displayAmount,
+			detailsAmount: labelAmount,
 			labelAmount,
 			fee: isTypeSend ? BigInt(utxosFee) : undefined
 		}

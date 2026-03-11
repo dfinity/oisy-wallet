@@ -27,6 +27,7 @@ export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 		timestamp: 1_747_732_396_194_882_329n,
 		display: {
 			amount: -(bn3Bi + bn1Bi),
+			detailsAmount: bn3Bi,
 			labelAmount: bn3Bi,
 			fee: bn1Bi
 		}

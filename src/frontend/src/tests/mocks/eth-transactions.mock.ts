@@ -34,9 +34,9 @@ export const createMockEthTransactionsUi = (n: number): EthTransactionUi[] =>
 		type: 'send',
 		display: {
 			amount: mockEthTransaction.value * -1n,
+			detailsAmount: mockEthTransaction.value,
 			labelAmount: mockEthTransaction.value,
-			displayValue: mockEthTransaction.value,
-			approveValue: mockEthTransaction.value
+			isUnlimitedApprove: false
 		}
 	}));
 
@@ -49,8 +49,8 @@ export const createMockNftTransactionsUi = (n: number): EthTransactionUi[] =>
 		tokenId: 123,
 		display: {
 			amount: mockEthTransaction.value * -1n,
+			detailsAmount: mockEthTransaction.value,
 			labelAmount: mockEthTransaction.value,
-			displayValue: mockEthTransaction.value,
-			approveValue: mockEthTransaction.value
+			isUnlimitedApprove: false
 		}
 	}));

@@ -48,8 +48,7 @@ describe('EthTransactionModal', () => {
 			...mockEthTransactionUi.display,
 			amount: -21_000n * 1_000_000_000n,
 			labelAmount: 1_000_000n,
-			displayValue: mockEthTransactionUi.value ?? ZERO,
-			approveValue: 1_000_000n
+			detailsAmount: mockEthTransactionUi.value ?? ZERO
 		}
 	};
 

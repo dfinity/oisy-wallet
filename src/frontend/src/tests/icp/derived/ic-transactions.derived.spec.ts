@@ -107,6 +107,7 @@ describe('ic-transactions.derived', () => {
 			status: 'pending',
 			display: {
 				amount: -100n,
+				detailsAmount: 100n,
 				labelAmount: 100n
 			}
 		};

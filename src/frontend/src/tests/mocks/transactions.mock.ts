@@ -18,6 +18,7 @@ export const createTransactionsUiWithCmp = (n: number): AnyTransactionUiWithCmp[
 			to: 'to',
 			display: {
 				amount: -1n,
+				detailsAmount: 1n,
 				labelAmount: 1n
 			}
 		},
