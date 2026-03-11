@@ -177,7 +177,7 @@ describe('ckbtc-transactions.utils', () => {
 						...mockBurnTransaction,
 						data: {
 							...mockBurnTransaction.data,
-							typeLabel: 'transaction.label.twin_token_sent',
+							typeLabel: 'send.text.send',
 							status: 'executed'
 						}
 					});
@@ -199,7 +199,7 @@ describe('ckbtc-transactions.utils', () => {
 					...mockBurnTransaction,
 					data: {
 						...mockBurnTransaction.data,
-						typeLabel: 'transaction.label.twin_token_sent',
+						typeLabel: 'send.text.send',
 						status: 'executed'
 					}
 				});

@@ -1503,8 +1503,6 @@
 		},
 		"label": {
 			"reimbursement": "Rückerstattung",
-			"twin_token_sent": "$twinToken gesendet",
-			"ck_token_sent": "$ckToken gesendet",
 			"twin_token_converted": "Von $twinToken konvertiert",
 			"ck_token_converted": "Von $ckToken konvertiert",
 			"sending_twin_token": "Sende $twinToken",

@@ -4,7 +4,6 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	PendingTransaction,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
@@ -21,6 +20,7 @@ import type {
 	CreateContactParams,
 	DeleteContactParams,
 	GetContactParams,
+	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
@@ -112,10 +112,10 @@ export const addPendingBtcTransaction = async ({
 export const getPendingBtcTransactions = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<PendingTransaction[]> => {
-	const { btcGetPendingTransaction } = await backendCanister({ identity });
+}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<GetPendingTransactionsOutcome> => {
+	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
-	return btcGetPendingTransaction(params);
+	return btcGetPendingTransactions(params);
 };
 
 export const selectUserUtxosFee = async ({

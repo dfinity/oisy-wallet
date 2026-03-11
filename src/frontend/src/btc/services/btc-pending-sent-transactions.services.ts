@@ -43,7 +43,7 @@ export const loadBtcPendingSentTransactions = async ({
 		});
 		btcPendingSentTransactionsStore.setPendingTransactions({
 			address,
-			pendingTransactions
+			pendingTransactions: pendingTransactions.response
 		});
 		return { success: true };
 	} catch (err: unknown) {

@@ -1,6 +1,7 @@
 import {
 	mapAllowSigningError,
-	mapBtcPendingTransactionError,
+	mapBtcAddPendingTransactionError,
+	mapBtcGetPendingTransactionsError,
 	mapBtcSelectUserUtxosFeeError,
 	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
@@ -9,9 +10,9 @@ import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { ApproveError } from '@icp-sdk/canisters/ledger/icp';
 
 describe('backend.errors', () => {
-	describe('mapBtcPendingTransactionError', () => {
+	describe('mapBtcAddPendingTransactionError', () => {
 		it('should map InternalError', () => {
-			const err = mapBtcPendingTransactionError({
+			const err = mapBtcAddPendingTransactionError({
 				InternalError: { msg: 'pending tx error' }
 			});
 
@@ -20,7 +21,7 @@ describe('backend.errors', () => {
 		});
 
 		it('should map InvalidUtxos', () => {
-			const err = mapBtcPendingTransactionError({
+			const err = mapBtcAddPendingTransactionError({
 				InvalidUtxos: null
 			});
 
@@ -29,7 +30,7 @@ describe('backend.errors', () => {
 		});
 
 		it('should map EmptyUtxos', () => {
-			const err = mapBtcPendingTransactionError({
+			const err = mapBtcAddPendingTransactionError({
 				EmptyUtxos: null
 			});
 
@@ -38,7 +39,7 @@ describe('backend.errors', () => {
 		});
 
 		it('should map DuplicateUtxos', () => {
-			const err = mapBtcPendingTransactionError({
+			const err = mapBtcAddPendingTransactionError({
 				DuplicateUtxos: null
 			});
 
@@ -47,7 +48,7 @@ describe('backend.errors', () => {
 		});
 
 		it('should map UtxosAlreadyReserved', () => {
-			const err = mapBtcPendingTransactionError({
+			const err = mapBtcAddPendingTransactionError({
 				UtxosAlreadyReserved: null
 			});
 
@@ -56,7 +57,7 @@ describe('backend.errors', () => {
 		});
 
 		it('should map RateLimited', () => {
-			const err = mapBtcPendingTransactionError({
+			const err = mapBtcAddPendingTransactionError({
 				RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal }
 			});
 
@@ -66,10 +67,38 @@ describe('backend.errors', () => {
 
 		it('should return unknown error for unrecognized variant', () => {
 			// @ts-expect-error testing unknown error variant
-			const err = mapBtcPendingTransactionError({ SomeOther: null });
+			const err = mapBtcAddPendingTransactionError({ SomeOther: null });
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('Unknown BtcPendingTransactionError');
+			expect(err.message).toBe('Unknown BtcAddPendingTransactionError');
+		});
+	});
+
+	describe('mapBtcGetPendingTransactionsError', () => {
+		it('should map InternalError', () => {
+			const err = mapBtcGetPendingTransactionsError({
+				InternalError: { msg: 'pending tx error' }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('pending tx error');
+		});
+
+		it('should map RateLimited', () => {
+			const err = mapBtcGetPendingTransactionsError({
+				RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.');
+		});
+
+		it('should return unknown error for unrecognized variant', () => {
+			// @ts-expect-error testing unknown error variant
+			const err = mapBtcGetPendingTransactionsError({ SomeOther: null });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Unknown BtcGetPendingTransactionsError');
 		});
 	});
 
