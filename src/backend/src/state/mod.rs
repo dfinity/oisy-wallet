@@ -14,12 +14,9 @@ use crate::{
         USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
-        BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
-        PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-        UserTransactionsMap,
         maps::ApiKeysCell, BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap,
         CustomTokenMap, PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap,
-        UserTokenMap,
+        UserTokenMap, UserTransactionsMap,
     },
 };
 
