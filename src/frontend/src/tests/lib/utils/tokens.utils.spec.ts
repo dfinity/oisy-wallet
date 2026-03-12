@@ -2306,7 +2306,7 @@ describe('tokens.utils', () => {
 			expect(tokenListEqual([{ id: idA }], [])).toBeFalsy();
 		});
 
-		it('should compare only the id field and ignore other properties', () => {
+		it('should compare only the id field and ignore other non-enabled properties', () => {
 			const idA = Symbol('a');
 
 			const left = [{ id: idA, value: 1, nested: { side: 'left' } }];
@@ -2330,6 +2330,47 @@ describe('tokens.utils', () => {
 
 			const left = ids.map((id) => ({ id }));
 			const right = [{ id: ids[0] }, { id: ids[1] }, { id: differentId }, { id: ids[3] }];
+
+			expect(tokenListEqual(left, right)).toBeFalsy();
+		});
+
+		it('should return false when enabled property differs', () => {
+			const idA = Symbol('a');
+			const idB = Symbol('b');
+
+			const left = [
+				{ id: idA, enabled: true },
+				{ id: idB, enabled: false }
+			];
+			const right = [
+				{ id: idA, enabled: true },
+				{ id: idB, enabled: true }
+			];
+
+			expect(tokenListEqual(left, right)).toBeFalsy();
+		});
+
+		it('should return true when enabled property is the same', () => {
+			const idA = Symbol('a');
+			const idB = Symbol('b');
+
+			const left = [
+				{ id: idA, enabled: true },
+				{ id: idB, enabled: false }
+			];
+			const right = [
+				{ id: idA, enabled: true },
+				{ id: idB, enabled: false }
+			];
+
+			expect(tokenListEqual(left, right)).toBeTruthy();
+		});
+
+		it('should return false when one item has enabled and the other does not', () => {
+			const idA = Symbol('a');
+
+			const left = [{ id: idA, enabled: true }];
+			const right = [{ id: idA }];
 
 			expect(tokenListEqual(left, right)).toBeFalsy();
 		});

@@ -16,7 +16,8 @@ import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 vi.mock('$icp/services/worker.ck-minter-info.services', () => ({
-	initCkBTCMinterInfoWorker: vi.fn()
+	initCkBTCMinterInfoWorker: vi.fn(),
+	initCkETHMinterInfoWorker: vi.fn()
 }));
 
 vi.mock('$icp/services/icrc-minting.services', () => ({

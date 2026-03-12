@@ -18,7 +18,7 @@
 
 {#if nonNullish($selectedToken) && nonNullish($data?.displayName)}
 	<div
-		class="bg-pos-0 mb-6 flex h-full w-full flex-col content-center items-center justify-center overflow-hidden rounded-[24px] pt-6 text-center text-primary-inverted md:rounded-[28px]"
+		class="bg-pos-0 mb-6 flex w-full flex-col content-center items-center overflow-hidden rounded-[24px] pt-6 text-center text-primary-inverted md:rounded-[28px]"
 		class:bg-error-subtle-20={status === 'failure'}
 		class:bg-success-subtle-20={status === 'success'}
 	>
