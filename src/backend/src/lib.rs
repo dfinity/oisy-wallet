@@ -5,6 +5,7 @@ use shared::{
     std_canister_status,
     types::{
         agreement::UpdateUserAgreementsRequest,
+        api_keys::ApiKeys,
         backend_config::{Arg, Config},
         bitcoin::{
             BtcAddPendingTransactionRequest, BtcGetFeePercentilesRequest,

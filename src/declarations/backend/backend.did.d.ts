@@ -48,6 +48,12 @@ export interface AllowSigningResponse {
 }
 export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
+export interface ApiKeys {
+	alchemy_api_key: [] | [string];
+	etherscan_api_key: [] | [string];
+	coingecko_api_key: [] | [string];
+	infura_api_key: [] | [string];
+}
 export type ApproveError =
 	| {
 			GenericError: { message: string; error_code: bigint };
@@ -562,6 +568,12 @@ export interface _SERVICE {
 	 */
 	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
 	/**
+	 * Returns the currently stored API keys.
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	get_api_keys: ActorMethod<[], ApiKeys>;
+	/**
 	 * API method to get cycle balance and burn rate.
 	 */
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
@@ -628,6 +640,12 @@ export interface _SERVICE {
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
+	/**
+	 * Overwrites the stored API keys.
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_api_keys: ActorMethod<[ApiKeys], undefined>;
 	/**
 	 * Add or update custom token for the user.
 	 */
