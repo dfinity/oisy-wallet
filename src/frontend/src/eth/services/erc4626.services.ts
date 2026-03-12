@@ -46,7 +46,7 @@ export const loadErc4626Tokens = async ({
 	await loadCustomErc4626Tokens({ identity, useCache: true });
 };
 
-const loadDefaultErc4626Tokens = (): void => {
+export const loadDefaultErc4626Tokens = (): void => {
 	erc4626DefaultTokensStore.set(ERC4626_TOKENS);
 };
 
@@ -242,4 +242,16 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.erc4626_custom_tokens },
 		err
 	});
+};
+
+export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+	try {
+		const response = await loadCustomTokensWithMetadata(params);
+
+		loadCustomTokenData({ response, certified: params.certified });
+	} catch (err) {
+		if (params.certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };

@@ -27,7 +27,7 @@ export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }):
 	await Promise.all([loadDefaultSplTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
-const loadDefaultSplTokens = (): ResultSuccess => {
+export const loadDefaultSplTokens = (): ResultSuccess => {
 	try {
 		splDefaultTokensStore.set(SPL_TOKENS);
 	} catch (err: unknown) {
@@ -194,6 +194,18 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.spl_custom_tokens },
 		err
 	});
+};
+
+export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+	try {
+		const response = await loadCustomTokensWithMetadata(params);
+
+		loadCustomTokenData({ response, certified: params.certified });
+	} catch (err) {
+		if (params.certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };
 
 export const getSplMetadata = async ({

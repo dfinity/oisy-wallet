@@ -1,6 +1,6 @@
 use candid::{CandidType, Deserialize};
 
-use super::custom_token::{ChainId, ErcTokenId, LedgerId, SplTokenId};
+use super::custom_token::{CanisterId, ChainId, ErcTokenId, LedgerId, SplTokenId};
 
 /// A unified token identifier covering both native and custom tokens for the main supported chains.
 /// Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
@@ -36,4 +36,10 @@ pub enum TokenId {
     BtcNativeMainnet = 11,
     /// Native BTC on testnet
     BtcNativeTestnet = 12,
+    /// EXT v2 token on the Internet Computer
+    ExtV2(CanisterId) = 13,
+    /// DIP721 token on the Internet Computer
+    Dip721(CanisterId) = 14,
+    /// ICPunks-compatible token on the Internet Computer
+    IcPunks(CanisterId) = 15,
 }

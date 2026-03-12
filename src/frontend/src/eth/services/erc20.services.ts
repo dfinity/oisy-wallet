@@ -48,7 +48,7 @@ const ALL_DEFAULT_ERC20_TOKENS = [
 ];
 
 // TODO(GIX-2740): use environment static metadata
-const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
+export const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 	try {
 		type ContractData = Erc20Contract &
 			Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
@@ -227,4 +227,16 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.erc20_custom_tokens },
 		err
 	});
+};
+
+export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+	try {
+		const response = await loadCustomTokensWithMetadata(params);
+
+		loadCustomTokenData({ response, certified: params.certified });
+	} catch (err) {
+		if (params.certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };
