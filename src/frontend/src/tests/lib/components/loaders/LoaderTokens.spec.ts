@@ -23,6 +23,7 @@ import {
 import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 import * as appConstants from '$lib/constants/app.constants';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
+import * as authDerived from '$lib/derived/auth.derived';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import {
 	ethAddressStore,
@@ -47,11 +48,10 @@ import {
 } from '$tests/mocks/user-profile.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
-import type { Identity } from '@icp-sdk/core/agent';
 import { toNullable } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { render, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
-import * as authDerived from '$lib/derived/auth.derived';
 
 vi.mock('@dfinity/utils', async () => {
 	const mod = await vi.importActual<object>('@dfinity/utils');
@@ -452,9 +452,7 @@ describe('LoaderTokens', () => {
 			identityStore.set(identityB);
 
 			await waitFor(() => {
-				expect(vi.mocked(loadNetworkCustomTokens).mock.calls.length).toBeGreaterThan(
-					callsBefore
-				);
+				expect(vi.mocked(loadNetworkCustomTokens).mock.calls.length).toBeGreaterThan(callsBefore);
 			});
 		});
 
@@ -488,9 +486,7 @@ describe('LoaderTokens', () => {
 
 			// Identity B's responses resolve → processing fires again
 			await waitFor(() => {
-				expect(vi.mocked(processIcrcCustomTokens).mock.calls.length).toBeGreaterThan(
-					callsAfterA
-				);
+				expect(vi.mocked(processIcrcCustomTokens).mock.calls.length).toBeGreaterThan(callsAfterA);
 			});
 
 			const callsAfterB = vi.mocked(processIcrcCustomTokens).mock.calls.length;
@@ -501,7 +497,7 @@ describe('LoaderTokens', () => {
 			await new Promise((resolve) => setTimeout(resolve, 100));
 
 			// No additional processing should have occurred
-			expect(vi.mocked(processIcrcCustomTokens).mock.calls.length).toBe(callsAfterB);
+			expect(vi.mocked(processIcrcCustomTokens).mock.calls).toHaveLength(callsAfterB);
 		});
 	});
 });
