@@ -1,6 +1,6 @@
 use candid::{CandidType, Deserialize, Nat};
 
-use super::{backend_token_id::TokenId, custom_token::ChainId};
+use super::{custom_token::ChainId, token_id::TokenId};
 
 /// Maximum number of transactions that can be stored per (user, token) pair.
 pub const MAX_USER_TRANSACTIONS_PER_TOKEN: usize = 10_000;

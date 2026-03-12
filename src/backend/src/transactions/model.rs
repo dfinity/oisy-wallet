@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use candid::Principal;
 use shared::types::{
-    backend_token_id::TokenId,
+    token_id::TokenId,
     user_transaction::{
         GetUserTransactionsRequest, GetUserTransactionsResponse, SaveUserTransactionsRequest,
         UserTransaction, UserTransactionError, MAX_GET_USER_TRANSACTIONS_RESULTS,

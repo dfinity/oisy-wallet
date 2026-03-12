@@ -7,7 +7,6 @@ pub type Timestamp = u64;
 pub mod account;
 pub mod agreement;
 pub mod backend_config;
-pub mod backend_token_id;
 pub mod bitcoin;
 pub mod contact;
 pub mod custom_token;
