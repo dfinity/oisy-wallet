@@ -225,7 +225,6 @@ impl BackendBuilder {
     }
 
     /// Overrides the init argument passed to the backend canister.
-    #[allow(dead_code)]
     pub fn with_arg(mut self, arg: Vec<u8>) -> Self {
         self.arg = arg;
         self
