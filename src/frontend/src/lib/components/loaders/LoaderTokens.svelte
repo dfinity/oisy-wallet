@@ -111,16 +111,30 @@
 
 	let fetchedTokens = $state<FetchedTokensState | undefined>();
 
-	// Single backend call — re-runs only when identity changes.
+	// Guards against stale callbacks from a previous identity's in-flight queryAndUpdate.
+	// When identity changes the effect re-runs and bumps the counter; lingering onLoad/onUpdateError
+	// callbacks from the old request see a mismatched generation and bail out.
+	let fetchGeneration = 0;
+
+	// Single queryAndUpdate pipeline — re-runs only when identity changes.
 	$effect(() => {
 		const identity = $authIdentity;
+		const generation = ++fetchGeneration;
 
 		queryAndUpdate<CustomToken[]>({
 			request: ({ certified }) => loadNetworkCustomTokens({ certified, identity, useCache: true }),
 			onLoad: ({ response: tokens, certified }) => {
+				if (generation !== fetchGeneration) {
+					return;
+				}
+
 				fetchedTokens = { tokens, certified, identity };
 			},
 			onUpdateError: ({ error: err }) => {
+				if (generation !== fetchGeneration) {
+					return;
+				}
+
 				toastsError({
 					msg: { text: get(i18n).init.error.custom_tokens },
 					err
