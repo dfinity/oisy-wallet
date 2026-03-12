@@ -210,7 +210,7 @@ describe('LoaderTokens', () => {
 				expect(loadNetworkCustomTokens).toHaveBeenCalled();
 			});
 
-			const calls = vi.mocked(loadNetworkCustomTokens).mock.calls;
+			const {calls} = vi.mocked(loadNetworkCustomTokens).mock;
 			const uniqueIdentities = new Set(calls.map(([{ certified }]) => certified));
 
 			expect(uniqueIdentities.size).toBeLessThanOrEqual(2);
