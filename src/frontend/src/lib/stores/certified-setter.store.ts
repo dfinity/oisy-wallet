@@ -27,14 +27,19 @@ export const initCertifiedSetterStore = <
 	const { subscribe, update, reset, reinitialize } = initCertifiedStore<T, Id>();
 
 	let pending: Array<{ id: Id; data: T }> = [];
+
 	let scheduled = false;
+
+	const resetBatch = () => {
+		pending = [];
+
+		scheduled = false;
+	};
 
 	const flushBatch = () => {
 		const batch = pending;
 
-		pending = [];
-
-		scheduled = false;
+		resetBatch();
 
 		if (batch.length === 0) {
 			return;
@@ -70,8 +75,7 @@ export const initCertifiedSetterStore = <
 			reset(id);
 		},
 		reinitialize: () => {
-			pending = [];
-			scheduled = false;
+			resetBatch();
 			reinitialize();
 		},
 		subscribe
