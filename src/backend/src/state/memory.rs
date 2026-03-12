@@ -15,6 +15,8 @@ pub(crate) const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 pub(crate) const BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(7);
 pub(crate) const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(8);
 pub(crate) const USER_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(9);
+pub(crate) const API_KEYS_MEMORY_ID: MemoryId = MemoryId::new(9);
+pub(crate) const USER_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(10);
 
 thread_local! {
     pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(

@@ -1,14 +1,15 @@
 use std::cell::RefCell;
 
 use shared::types::{
+    api_keys::ApiKeys,
     backend_config::{Config, InitArg},
     Stats,
 };
 
 use crate::{
     state::memory::{
-        BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_MEMORY_ID,
-        MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID,
+        API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID,
+        CONTACT_MEMORY_ID, MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID,
         USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
         USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
@@ -16,6 +17,9 @@ use crate::{
         BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
         PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
         UserTransactionsMap,
+        maps::ApiKeysCell, BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap,
+        CustomTokenMap, PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap,
+        UserTokenMap,
     },
 };
 
@@ -23,6 +27,7 @@ pub(crate) mod memory;
 
 pub(crate) struct State {
     pub(crate) config: ConfigCell,
+    pub(crate) api_keys: ApiKeysCell,
     /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the
     /// users.
     pub(crate) user_token: UserTokenMap,
@@ -59,6 +64,7 @@ thread_local! {
     pub static STATE: RefCell<State> = RefCell::new(
         MEMORY_MANAGER.with(|mm| State {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None),
+             api_keys: ApiKeysCell::init(mm.borrow().get(API_KEYS_MEMORY_ID), None),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
             // Use `UserProfileModel` to access and manage access to these states
@@ -101,5 +107,23 @@ pub(crate) fn set_config(arg: InitArg) {
     let config = Config::from(arg);
     mutate_state(|state| {
         state.config.set(Some(Candid(config)));
+    });
+}
+
+pub(crate) fn with_api_keys<R>(f: impl FnOnce(&ApiKeys) -> R) -> R {
+    read_state(|state| {
+        let default = ApiKeys::default();
+        let api_keys = state
+            .api_keys
+            .get()
+            .as_ref()
+            .map_or(&default, |candid| &candid.0);
+        f(api_keys)
+    })
+}
+
+pub(crate) fn write_api_keys(api_keys: ApiKeys) {
+    mutate_state(|state| {
+        state.api_keys.set(Some(Candid(api_keys)));
     });
 }

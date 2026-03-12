@@ -1145,7 +1145,7 @@
 			"chain_key": "체인 키",
 			"show_more_networks": "$number개의 네트워크 더 보기",
 			"hide_more_networks": "네트워크 더 보기 숨기기",
-			"on_network": " ($network에서)",
+			"on_network": " : $network",
 			"delete_token": "토큰 삭제",
 			"edit_token": "토큰 편집",
 			"sort_by_value": "가치",

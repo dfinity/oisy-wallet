@@ -7,6 +7,9 @@ use shared::types::{
     backend_config::Config, bitcoin::StoredPendingTransaction, contact::StoredContacts,
     custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
     user_profile::StoredUserProfile, user_transaction::UserTransaction, Timestamp,
+    api_keys::ApiKeys, backend_config::Config, bitcoin::StoredPendingTransaction,
+    contact::StoredContacts, custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
+    user_profile::StoredUserProfile, Timestamp,
 };
 
 use crate::types::storable::{Candid, StoredPrincipal, StoredTokenId, UserTransactionKey};
@@ -14,6 +17,8 @@ use crate::types::storable::{Candid, StoredPrincipal, StoredTokenId, UserTransac
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 
 pub type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
+
+pub type ApiKeysCell = StableCell<Option<Candid<ApiKeys>>, VMem>;
 
 pub type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
 
