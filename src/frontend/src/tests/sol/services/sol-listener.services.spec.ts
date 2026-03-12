@@ -37,6 +37,10 @@ describe('sol-listener.services', () => {
 			solTransactionsStore.reset(tokenId);
 		});
 
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
 		describe('syncWallet', () => {
 			it('should set the balance in balancesStore', async () => {
 				vi.useFakeTimers();
@@ -51,8 +55,6 @@ describe('sol-listener.services', () => {
 					data: mockBalance,
 					certified: true
 				});
-
-				vi.useRealTimers();
 			});
 
 			it('should reset balanceStore if balance is empty', () => {

@@ -76,6 +76,10 @@ describe('btc-listener', () => {
 		btcTransactionsStore.reset(tokenId);
 	});
 
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
 	describe('syncWallet', () => {
 		it('should set the balance in balancesStore', async () => {
 			vi.useFakeTimers();
@@ -90,8 +94,6 @@ describe('btc-listener', () => {
 				data: mockBalance.confirmed,
 				certified: false
 			});
-
-			vi.useRealTimers();
 		});
 
 		it('should set the transactions in btcTransactionsStore', () => {
