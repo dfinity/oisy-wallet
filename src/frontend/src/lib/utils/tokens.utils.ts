@@ -771,12 +771,18 @@ export const tokenListEqual = <T extends { id: symbol }>(a: T[], b: T[]): boolea
 			return false;
 		}
 
-		if ('enabled' in item !== 'enabled' in other) {
+		const itemHasEnabled = 'enabled' in item;
+		const otherHasEnabled = 'enabled' in other;
+
+		if (itemHasEnabled !== otherHasEnabled) {
 			return false;
 		}
 
-		if ('enabled' in item && 'enabled' in other) {
-			return (item as { enabled: boolean }).enabled === (other as { enabled: boolean }).enabled;
+		if (itemHasEnabled && otherHasEnabled) {
+			return (
+				(item as { enabled: unknown }).enabled ===
+				(other as { enabled: unknown }).enabled
+			);
 		}
 
 		return true;
