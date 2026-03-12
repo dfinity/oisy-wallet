@@ -40,6 +40,12 @@ type AllowSigningResult = variant {
 	Err : AllowSigningError
 };
 type AllowSigningStatus = variant { Skipped; Failed; Executed };
+type ApiKeys = record {
+	alchemy_api_key : opt text;
+	etherscan_api_key : opt text;
+	coingecko_api_key : opt text;
+	infura_api_key : opt text
+};
 type ApproveError = variant {
 	GenericError : record { message : text; error_code : nat };
 	TemporarilyUnavailable;
@@ -502,6 +508,10 @@ service : (Arg) -> {
 	// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 	// - `Other`: If another error occurred during the operation
 	get_allowed_cycles : () -> (GetAllowedCyclesResult);
+	// Returns the currently stored API keys.
+	//
+	// Restricted to canister controllers only.
+	get_api_keys : () -> (ApiKeys) query;
 	// API method to get cycle balance and burn rate.
 	get_canister_status : () -> (CanisterStatusResultV2);
 	// Gets a contact by ID for the caller.
@@ -553,6 +563,10 @@ service : (Arg) -> {
 	list_custom_tokens : () -> (vec CustomToken);
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
+	// Overwrites the stored API keys.
+	//
+	// Restricted to canister controllers only.
+	set_api_keys : (ApiKeys) -> ();
 	// Add or update custom token for the user.
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
