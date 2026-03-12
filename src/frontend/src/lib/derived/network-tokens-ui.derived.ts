@@ -7,9 +7,10 @@ import { tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
-import { derivedMemo, tokenUiListEqual } from '$lib/utils/derived-memo.utils';
+import { derivedMemo } from '$lib/utils/derived-memo.utils';
 import { groupTokens } from '$lib/utils/token-group.utils';
 import { mapTokenUi } from '$lib/utils/token.utils';
+import { tokenUiListEqual } from '$lib/utils/tokens-ui.utils';
 import { sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 

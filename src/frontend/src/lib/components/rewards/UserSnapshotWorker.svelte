@@ -144,6 +144,6 @@
 			$transactionTokenEntryCount
 		];
 
-		untrack(() => triggerTimer());
+		untrack(triggerTimer);
 	});
 </script>
