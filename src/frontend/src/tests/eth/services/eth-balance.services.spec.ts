@@ -45,6 +45,14 @@ vi.mock('$lib/services/analytics.services', () => ({
 }));
 
 describe('eth-balance.services', () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
 	describe('loadEthBalances', () => {
 		const mockTokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN];
 
@@ -93,6 +101,8 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: true });
 
+			await vi.runAllTimersAsync();
+
 			mockTokens.forEach(({ id }) => {
 				expect(get(balancesStore)?.[id]).toEqual({ certified: false, data: mockBalance });
 			});
@@ -122,6 +132,8 @@ describe('eth-balance.services', () => {
 			// Required for the type interpreter
 			assertNonNullish(ETHEREUM_TOKEN_ID.description);
 			assertNonNullish(ETHEREUM_NETWORK_ID.description);
+
+			await vi.runAllTimersAsync();
 
 			expect(get(balancesStore)?.[ETHEREUM_TOKEN_ID]).toEqual(null);
 			expect(get(balancesStore)?.[SEPOLIA_TOKEN_ID]).toEqual({
@@ -223,6 +235,8 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: true });
 
+			await vi.runAllTimersAsync();
+
 			mockErc20DefaultTokens.forEach(({ id }) => {
 				expect(get(balancesStore)?.[id]).toEqual({ certified: false, data: mockBalance });
 			});
@@ -248,6 +262,8 @@ describe('eth-balance.services', () => {
 					$network: mockErc20DefaultTokens[0].network.name
 				})} ${mockError.toString()}`
 			});
+
+			await vi.runAllTimersAsync();
 
 			expect(get(balancesStore)?.[mockErc20DefaultTokens[0].id]).toEqual(null);
 
@@ -317,6 +333,8 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: true });
 
+			await vi.runAllTimersAsync();
+
 			expect(get(balancesStore)?.[ETHEREUM_TOKEN_ID]).toEqual({
 				certified: false,
 				data: mockBalance
@@ -333,6 +351,8 @@ describe('eth-balance.services', () => {
 			const result = await reloadEthereumBalance(mockValidErc20Token);
 
 			expect(result).toEqual({ success: true });
+
+			await vi.runAllTimersAsync();
 
 			expect(get(balancesStore)?.[mockValidErc20Token.id]).toEqual({
 				certified: false,

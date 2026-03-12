@@ -41,8 +41,12 @@ describe('ic-listener', () => {
 			icTransactionsStore.reset(tokenId);
 		});
 
-		it('should set the balance in balancesStore', () => {
+		it('should set the balance in balancesStore', async () => {
+			vi.useFakeTimers();
+
 			syncWallet({ data: mockPostMessage, tokenId });
+
+			await vi.runAllTimersAsync();
 
 			const balance = get(balancesStore);
 
@@ -50,6 +54,8 @@ describe('ic-listener', () => {
 				data: mockBalance,
 				certified: true
 			});
+
+			vi.useRealTimers();
 		});
 
 		describe('with transactions', () => {

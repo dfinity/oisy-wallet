@@ -563,10 +563,14 @@ describe('icrc.services', () => {
 		});
 
 		it('should load tokens balances for the provided tokens', async () => {
+			vi.useFakeTimers();
+
 			await loadDisabledIcrcTokensBalances({
 				identity: mockIdentity,
 				disabledIcrcTokens
 			});
+
+			await vi.runAllTimersAsync();
 
 			expect(get(balancesStore)).toEqual({
 				[disabledIcrcTokens[0].id]: {
@@ -578,6 +582,8 @@ describe('icrc.services', () => {
 					data: balance
 				}
 			});
+
+			vi.useRealTimers();
 		});
 	});
 
