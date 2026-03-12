@@ -4,8 +4,8 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    backend_config::Config, bitcoin::StoredPendingTransaction, contact::StoredContacts,
-    custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
+    api_keys::ApiKeys, backend_config::Config, bitcoin::StoredPendingTransaction,
+    contact::StoredContacts, custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
     user_profile::StoredUserProfile, Timestamp,
 };
 
@@ -14,6 +14,8 @@ use crate::types::storable::{Candid, StoredPrincipal, StoredTokenId};
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 
 pub type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
+
+pub type ApiKeysCell = StableCell<Option<Candid<ApiKeys>>, VMem>;
 
 pub type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
 
