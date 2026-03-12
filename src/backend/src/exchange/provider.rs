@@ -1,5 +1,3 @@
-use std::future::Future;
-
 use crate::types::storable::StoredTokenId;
 
 /// Price data returned by an exchange provider for a single token.
@@ -14,8 +12,8 @@ pub struct PriceData {
 /// Implementations handle all provider-specific concerns such as API
 /// authentication, platform mapping, request batching, and response parsing.
 pub trait ExchangePriceProvider {
-    fn fetch_prices(
+    async fn fetch_prices(
         &self,
         token_ids: &[StoredTokenId],
-    ) -> impl Future<Output = Result<Vec<(StoredTokenId, PriceData)>, String>>;
+    ) -> Result<Vec<(StoredTokenId, PriceData)>, String>;
 }

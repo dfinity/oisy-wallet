@@ -1,4 +1,3 @@
-#[derive(CandidType, Deserialize, Clone, Debug, Default, Eq, PartialEq)]
 use std::fmt::Debug;
 
 use candid::{CandidType, Deserialize};

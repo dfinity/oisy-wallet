@@ -13,7 +13,7 @@ use crate::{
         providers::coingecko::CoinGeckoProvider,
     },
     read_state,
-    state::{mutate_state, read_api_keys},
+    state::{mutate_state, with_api_keys},
     types::storable::{Candid, StoredTokenId},
 };
 
@@ -81,7 +81,7 @@ async fn fetch_and_update_prices(
 
 pub async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     let api_key =
-        read_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
+        with_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
 
     let provider = CoinGeckoProvider::new(api_key);
 
