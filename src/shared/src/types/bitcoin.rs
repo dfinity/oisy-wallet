@@ -94,7 +94,7 @@ pub enum BtcAddPendingTransactionError {
     UtxosAlreadyReserved,
     /// Server-side / unexpected
     InternalError { msg: String },
-      /// The caller has exceeded the call rate limit.
+    /// The caller has exceeded the call rate limit.
     RateLimited(RateLimitError),
     /// The provided II delegation chain is missing or failed verification.
     InvalidDelegationChain { msg: String },

@@ -22,9 +22,6 @@ use crate::{
     bitcoin::{api, pending_tx_model::BtcUserPendingTransactionsModel, utils},
     delegation, signer,
     state::{mutate_state, read_config},
-    utils::guards::caller_is_not_anonymous,
-    signer,
-    state::mutate_state,
     utils::{
         guards::caller_is_not_anonymous,
         housekeeping::{
@@ -155,12 +152,11 @@ pub async fn btc_add_pending_transaction(
     async fn inner(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
-              BTC_ADD_PENDING_TX_RATE_LIMITER
+        BTC_ADD_PENDING_TX_RATE_LIMITER
             .with(rate_limiter::RateLimiter::check_caller)
             .map_err(BtcAddPendingTransactionError::RateLimited)?;
-      
-      
-           let principal = msg_caller();
+
+        let principal = msg_caller();
         let now_ns = time();
 
         let chain = params.ii_delegation_chain.as_ref().ok_or_else(|| {
