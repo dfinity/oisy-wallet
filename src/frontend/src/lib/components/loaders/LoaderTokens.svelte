@@ -84,7 +84,6 @@
 	);
 	let loadSpl = $derived(loadSplMainnet || loadSplDevnet || loadSplLocal);
 
-	// SPL defaults re-load whenever Solana network conditions change.
 	$effect(() => {
 		if (loadSpl) {
 			loadDefaultSplTokens();
