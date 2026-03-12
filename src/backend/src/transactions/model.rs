@@ -76,11 +76,11 @@ pub fn save_transactions(
 
     let mut existing = map.get(&key).map(|c| c.0).unwrap_or_default();
 
-    let known_hashes: HashSet<&str> = existing.iter().map(|e| e.hash.as_str()).collect();
+    let known_ids: HashSet<&str> = existing.iter().map(|e| e.id.as_str()).collect();
 
     let mut new_txs = Vec::new();
     for tx in &request.transactions {
-        if known_hashes.contains(tx.hash.as_str()) {
+        if known_ids.contains(tx.id.as_str()) {
             continue;
         }
 
@@ -147,6 +147,9 @@ mod tests {
         DefaultMemoryImpl,
     };
     use pretty_assertions::assert_eq;
+    use shared::types::user_transaction::{
+        EvmTransactionData, NetworkTransactionData, UserTransaction,
+    };
 
     use super::*;
 
@@ -161,21 +164,23 @@ mod tests {
         (map, memory_manager)
     }
 
-    fn make_tx(hash: &str, block_index: u64, timestamp: u64) -> UserTransaction {
+    fn make_tx(id: &str, block_index: u64, timestamp: u64) -> UserTransaction {
         UserTransaction {
-            hash: hash.to_string(),
+            id: id.to_string(),
             block_index,
             timestamp,
             from: "0xabc".to_string(),
             to: Some("0xdef".to_string()),
-            nonce: Some(1),
             value: Nat::from(1000u64),
-            chain_id: Some(1),
-            gas_limit: Some(Nat::from(21000u64)),
-            gas_price: Some(Nat::from(20_000_000_000u64)),
-            gas_used: Some(Nat::from(21000u64)),
-            data: None,
-            token_id: None,
+            network_data: NetworkTransactionData::Evm(EvmTransactionData {
+                chain_id: Some(1),
+                nonce: Some(1),
+                gas_limit: Some(Nat::from(21000u64)),
+                gas_price: Some(Nat::from(20_000_000_000u64)),
+                gas_used: Some(Nat::from(21000u64)),
+                data: None,
+                nft_token_id: None,
+            }),
         }
     }
 
@@ -233,9 +238,9 @@ mod tests {
         );
 
         assert_eq!(result.transactions.len(), 3);
-        assert_eq!(result.transactions[0].hash, "0xhash3");
-        assert_eq!(result.transactions[1].hash, "0xhash2");
-        assert_eq!(result.transactions[2].hash, "0xhash1");
+        assert_eq!(result.transactions[0].id, "0xhash3");
+        assert_eq!(result.transactions[1].id, "0xhash2");
+        assert_eq!(result.transactions[2].id, "0xhash1");
         assert_eq!(result.newest_block_index, Some(300));
     }
 
@@ -390,7 +395,7 @@ mod tests {
             },
         );
         assert_eq!(eth_result.transactions.len(), 1);
-        assert_eq!(eth_result.transactions[0].hash, "0xeth_hash");
+        assert_eq!(eth_result.transactions[0].id, "0xeth_hash");
 
         let erc20_result = get_transactions(
             &map,
@@ -402,7 +407,7 @@ mod tests {
             },
         );
         assert_eq!(erc20_result.transactions.len(), 1);
-        assert_eq!(erc20_result.transactions[0].hash, "0xerc20_hash");
+        assert_eq!(erc20_result.transactions[0].id, "0xerc20_hash");
     }
 
     #[test]
@@ -446,7 +451,7 @@ mod tests {
             },
         );
         assert_eq!(result1.transactions.len(), 1);
-        assert_eq!(result1.transactions[0].hash, "0xuser1_hash");
+        assert_eq!(result1.transactions[0].id, "0xuser1_hash");
 
         let result2 = get_transactions(
             &map,
@@ -458,7 +463,7 @@ mod tests {
             },
         );
         assert_eq!(result2.transactions.len(), 1);
-        assert_eq!(result2.transactions[0].hash, "0xuser2_hash");
+        assert_eq!(result2.transactions[0].id, "0xuser2_hash");
     }
 
     #[test]
@@ -604,7 +609,7 @@ mod tests {
                 },
             );
             assert_eq!(result.transactions.len(), 1);
-            assert_eq!(result.transactions[0].hash, "0xpersist");
+            assert_eq!(result.transactions[0].id, "0xpersist");
         }
     }
 
@@ -1060,7 +1065,7 @@ mod tests {
                 },
             );
 
-            all_hashes.extend(page.transactions.iter().map(|t| t.hash.clone()));
+            all_hashes.extend(page.transactions.iter().map(|t| t.id.clone()));
 
             if page.next_start.is_none() {
                 break;

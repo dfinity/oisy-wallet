@@ -354,23 +354,50 @@ export interface SaveUserTransactionsRequest {
 	transactions: Array<UserTransaction>;
 }
 export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
-export interface UserTransaction {
-	to: [] | [string];
-	token_id: [] | [number];
-	value: bigint;
-	data: [] | [string];
-	from: string;
-	hash: string;
-	block_index: bigint;
+export interface EvmTransactionData {
 	chain_id: [] | [bigint];
 	nonce: [] | [number];
-	timestamp: bigint;
 	gas_limit: [] | [bigint];
-	gas_used: [] | [bigint];
 	gas_price: [] | [bigint];
+	gas_used: [] | [bigint];
+	data: [] | [string];
+	nft_token_id: [] | [number];
+}
+export type IcrcTransactionType =
+	| { Transfer: null }
+	| { Approve: { spender: string } }
+	| { Mint: null }
+	| { Burn: null };
+export interface IcrcTransactionData {
+	fee: [] | [bigint];
+	memo: [] | [Uint8Array | number[]];
+	tx_type: IcrcTransactionType;
+}
+export interface BtcTransactionData {
+	fee: [] | [bigint];
+	confirmations: [] | [number];
+}
+export interface SolTransactionData {
+	fee: [] | [bigint];
+	from_owner: [] | [string];
+	to_owner: [] | [string];
+}
+export type NetworkTransactionData =
+	| { Evm: EvmTransactionData }
+	| { Icrc: IcrcTransactionData }
+	| { Btc: BtcTransactionData }
+	| { Sol: SolTransactionData };
+export interface UserTransaction {
+	id: string;
+	block_index: bigint;
+	timestamp: bigint;
+	from: string;
+	to: [] | [string];
+	value: bigint;
+	network_data: NetworkTransactionData;
 }
 export type UserTransactionError =
-	| { DuplicateTransaction: { hash: string } }
+	| { DuplicateTransaction: { id: string } }
 	| { InternalError: { msg: string } }
 	| { TooManyTransactions: null }
 	| { UserNotFound: null };

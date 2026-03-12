@@ -321,23 +321,52 @@ type SplToken = record {
 	token_address : text;
 	symbol : opt text
 };
-type UserTransaction = record {
-	to : opt text;
-	token_id : opt nat32;
-	value : nat;
-	data : opt text;
-	from : text;
-	hash : text;
-	block_index : nat64;
+type EvmTransactionData = record {
 	chain_id : opt nat64;
 	nonce : opt nat32;
-	timestamp : nat64;
 	gas_limit : opt nat;
+	gas_price : opt nat;
 	gas_used : opt nat;
-	gas_price : opt nat
+	data : opt text;
+	nft_token_id : opt nat32
+};
+type IcrcTransactionType = variant {
+	Transfer;
+	Approve : record { spender : text };
+	Mint;
+	Burn
+};
+type IcrcTransactionData = record {
+	fee : opt nat;
+	memo : opt blob;
+	tx_type : IcrcTransactionType
+};
+type BtcTransactionData = record {
+	fee : opt nat64;
+	confirmations : opt nat32
+};
+type SolTransactionData = record {
+	fee : opt nat64;
+	from_owner : opt text;
+	to_owner : opt text
+};
+type NetworkTransactionData = variant {
+	Evm : EvmTransactionData;
+	Icrc : IcrcTransactionData;
+	Btc : BtcTransactionData;
+	Sol : SolTransactionData
+};
+type UserTransaction = record {
+	id : text;
+	block_index : nat64;
+	timestamp : nat64;
+	from : text;
+	to : opt text;
+	value : nat;
+	network_data : NetworkTransactionData
 };
 type UserTransactionError = variant {
-	DuplicateTransaction : record { hash : text };
+	DuplicateTransaction : record { id : text };
 	InternalError : record { msg : text };
 	TooManyTransactions;
 	UserNotFound

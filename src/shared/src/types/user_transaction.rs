@@ -12,37 +12,85 @@ pub const MAX_SAVE_USER_TRANSACTIONS_BATCH: usize = 500;
 pub const MAX_GET_USER_TRANSACTIONS_RESULTS: u64 = 100;
 
 /// A finalized transaction stored in the backend.
-/// Contains all fields needed to reconstruct the frontend `Transaction` type.
-/// Only fully confirmed/finalized transactions should be stored here.
+///
+/// Contains common fields shared across all networks plus a network-specific
+/// payload via [`NetworkTransactionData`]. Only fully confirmed/finalized
+/// transactions should be stored here.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct UserTransaction {
-    /// Transaction hash (unique identifier)
-    pub hash: String,
-    /// Chain-specific ordering index (EVM block number, Bitcoin block height, Solana slot, ICP
-    /// block index, etc.)
+    /// Network-unique identifier (EVM tx hash, BTC txid, SOL signature,
+    /// stringified ICRC block index, etc.)
+    pub id: String,
+    /// Chain-specific ordering index (EVM block number, Bitcoin block height,
+    /// Solana slot, ICP block index, etc.)
     pub block_index: u64,
-    /// Block timestamp in seconds since epoch
+    /// Block timestamp in seconds since epoch.
     pub timestamp: u64,
-    /// Sender address
+    /// Sender address or account.
     pub from: String,
-    /// Recipient address (None for contract creation)
+    /// Recipient address or account (`None` for contract creation, mint, burn, …).
     pub to: Option<String>,
-    /// Transaction nonce
-    pub nonce: Option<u32>,
-    /// Value transferred in the token's smallest unit
+    /// Value transferred in the token's smallest unit.
     pub value: Nat,
-    /// Chain ID (for EVM chains)
+    /// Network-specific data that only applies to a particular chain family.
+    pub network_data: NetworkTransactionData,
+}
+
+/// Discriminated union carrying the chain-specific portion of a transaction.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum NetworkTransactionData {
+    Evm(EvmTransactionData),
+    Icrc(IcrcTransactionData),
+    Btc(BtcTransactionData),
+    Sol(SolTransactionData),
+}
+
+/// EVM / Ethereum-family transaction data.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct EvmTransactionData {
     pub chain_id: Option<ChainId>,
-    /// Gas limit
+    pub nonce: Option<u32>,
     pub gas_limit: Option<Nat>,
-    /// Gas price
     pub gas_price: Option<Nat>,
-    /// Gas used
     pub gas_used: Option<Nat>,
-    /// Input data (hex-encoded)
+    /// Hex-encoded input data.
     pub data: Option<String>,
-    /// NFT token ID (for ERC-721/ERC-1155)
-    pub token_id: Option<u32>,
+    /// NFT token ID (ERC-721 / ERC-1155).
+    pub nft_token_id: Option<u32>,
+}
+
+/// ICRC / ICP transaction data.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct IcrcTransactionData {
+    pub fee: Option<Nat>,
+    pub memo: Option<Vec<u8>>,
+    pub tx_type: IcrcTransactionType,
+}
+
+/// The kind of ICRC ledger operation.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum IcrcTransactionType {
+    Transfer,
+    Approve { spender: String },
+    Mint,
+    Burn,
+}
+
+/// Bitcoin transaction data.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct BtcTransactionData {
+    pub fee: Option<u64>,
+    pub confirmations: Option<u32>,
+}
+
+/// Solana transaction data.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct SolTransactionData {
+    pub fee: Option<u64>,
+    /// Owner account that controls the source token account (relevant for SPL).
+    pub from_owner: Option<String>,
+    /// Owner account that controls the destination token account.
+    pub to_owner: Option<String>,
 }
 
 /// Request to retrieve stored transactions with cursor-based pagination.
@@ -86,7 +134,7 @@ pub enum UserTransactionError {
     TooManyTransactions,
     /// Reserved — duplicates are currently silently skipped during save.
     DuplicateTransaction {
-        hash: String,
+        id: String,
     },
     InternalError {
         msg: String,

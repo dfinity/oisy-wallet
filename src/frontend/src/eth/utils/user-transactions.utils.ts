@@ -19,37 +19,49 @@ export const mapTransactionToUserTransaction = (tx: Transaction): UserTransactio
 	}
 
 	return {
-		hash: tx.hash,
+		id: tx.hash,
 		block_index: BigInt(tx.blockNumber ?? 0),
 		timestamp: BigInt(tx.timestamp ?? 0),
 		from: tx.from,
 		to: toNullable(tx.to ?? undefined),
-		nonce: toNullable(nonNullish(tx.nonce) ? tx.nonce : undefined),
 		value: tx.value ?? ZERO,
-		chain_id: toNullable(nonNullish(tx.chainId) ? BigInt(tx.chainId) : undefined),
-		gas_limit: toNullable(tx.gasLimit ?? undefined),
-		gas_price: toNullable(tx.gasPrice ?? undefined),
-		gas_used: toNullable(tx.gasUsed ?? undefined),
-		data: toNullable(tx.data ?? undefined),
-		token_id: toNullable(tx.tokenId ?? undefined)
+		network_data: {
+			Evm: {
+				chain_id: toNullable(nonNullish(tx.chainId) ? BigInt(tx.chainId) : undefined),
+				nonce: toNullable(nonNullish(tx.nonce) ? tx.nonce : undefined),
+				gas_limit: toNullable(tx.gasLimit ?? undefined),
+				gas_price: toNullable(tx.gasPrice ?? undefined),
+				gas_used: toNullable(tx.gasUsed ?? undefined),
+				data: toNullable(tx.data ?? undefined),
+				nft_token_id: toNullable(tx.tokenId ?? undefined)
+			}
+		}
 	};
 };
 
-export const mapUserTransactionToTransaction = (stored: UserTransaction): Transaction => ({
-	hash: stored.hash,
-	blockNumber: Number(stored.block_index),
-	timestamp: Number(stored.timestamp),
-	from: stored.from,
-	to: stored.to.length > 0 ? stored.to[0] : undefined,
-	nonce: stored.nonce.length > 0 ? stored.nonce[0] : undefined,
-	value: stored.value,
-	chainId: stored.chain_id.length > 0 ? Number(stored.chain_id[0]) : undefined,
-	gasLimit: stored.gas_limit.length > 0 ? stored.gas_limit[0] : undefined,
-	gasPrice: stored.gas_price.length > 0 ? stored.gas_price[0] : undefined,
-	gasUsed: stored.gas_used.length > 0 ? stored.gas_used[0] : undefined,
-	data: stored.data.length > 0 ? stored.data[0] : undefined,
-	tokenId: stored.token_id.length > 0 ? stored.token_id[0] : undefined
-});
+export const mapUserTransactionToTransaction = (stored: UserTransaction): Transaction => {
+	if (!('Evm' in stored.network_data)) {
+		throw new Error('Expected Evm network data for ETH transaction mapping');
+	}
+
+	const evm = stored.network_data.Evm;
+
+	return {
+		hash: stored.id,
+		blockNumber: Number(stored.block_index),
+		timestamp: Number(stored.timestamp),
+		from: stored.from,
+		to: stored.to.length > 0 ? stored.to[0] : undefined,
+		value: stored.value,
+		chainId: evm.chain_id.length > 0 ? Number(evm.chain_id[0]) : undefined,
+		nonce: evm.nonce.length > 0 ? evm.nonce[0] : undefined,
+		gasLimit: evm.gas_limit.length > 0 ? evm.gas_limit[0] : undefined,
+		gasPrice: evm.gas_price.length > 0 ? evm.gas_price[0] : undefined,
+		gasUsed: evm.gas_used.length > 0 ? evm.gas_used[0] : undefined,
+		data: evm.data.length > 0 ? evm.data[0] : undefined,
+		tokenId: evm.nft_token_id.length > 0 ? evm.nft_token_id[0] : undefined
+	};
+};
 
 /**
  * Returns true if a transaction is finalized (immutable) based on the current block number.
