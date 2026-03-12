@@ -39,15 +39,14 @@ pub(crate) fn start_exchange_rate_timer() {
 }
 
 fn update_price(token_id: &StoredTokenId, price_data: &PriceData) {
-    // TODO: use timestamp from price data when available, for now use current time
-    let now = time();
+    let timestamp_ns = price_data.timestamp_nanos.unwrap_or_else(time);
 
     mutate_state(|s| {
         s.exchange_rates.insert(
             token_id.clone(),
             Candid(ExchangeRate {
                 usd: ExchangeData {
-                    timestamp_ns: now,
+                    timestamp_ns,
                     price: price_data.price,
                     price_24h_change_pct: price_data.price_24h_change_pct,
                     market_cap: price_data.market_cap,

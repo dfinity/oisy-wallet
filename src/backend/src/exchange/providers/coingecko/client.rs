@@ -43,7 +43,7 @@ impl CoinGeckoClient {
         let addr_str = addresses.join(",");
 
         let url = format!(
-            "{}{TOKEN_PRICE_PATH}/{platform}?contract_addresses={addr_str}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
+            "{}{TOKEN_PRICE_PATH}/{platform}?contract_addresses={addr_str}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true&include_last_updated_at=true",
             self.base_url
         );
 
@@ -56,9 +56,14 @@ impl CoinGeckoClient {
 
         for addr in addresses {
             if let Some(data) = json.get(addr.to_lowercase()) {
+                let timestamp_nanos = data["last_updated_at"]
+                    .as_u64()
+                    .map(|secs| secs * 1_000_000_000);
+
                 result.insert(
                     addr.clone(),
                     PriceData {
+                        timestamp_nanos,
                         price: data["usd"].as_f64(),
                         price_24h_change_pct: data["usd_24h_change"].as_f64(),
                         market_cap: data["usd_market_cap"].as_f64(),

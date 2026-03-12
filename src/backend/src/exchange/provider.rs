@@ -2,6 +2,8 @@ use crate::types::storable::StoredTokenId;
 
 /// Price data returned by an exchange provider for a single token.
 pub struct PriceData {
+    /// Provider-reported timestamp in nanoseconds, if available.
+    pub timestamp_nanos: Option<u64>,
     pub price: Option<f64>,
     pub price_24h_change_pct: Option<f64>,
     pub market_cap: Option<f64>,
