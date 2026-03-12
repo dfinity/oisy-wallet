@@ -36,7 +36,6 @@ import {
 } from '$sol/services/spl.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
