@@ -2,10 +2,10 @@ use candid::{CandidType, Deserialize};
 
 use super::custom_token::{ChainId, ErcTokenId, LedgerId, SplTokenId};
 
-/// A universal token identifier covering both native and custom tokens across all chains.
+/// A unified token identifier covering both native and custom tokens for the main supported chains.
 /// Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
-/// native tokens (ETH, ICP, SOL, BTC) and distinguishes ERC sub-standards.
-/// Suitable for any flow that needs to reference a specific token: transactions, activity, etc.
+/// selected native tokens (e.g., ETH, ICP, SOL, BTC) and distinguishes several ERC sub-standards.
+/// Suitable for flows that need to reference one of these supported tokens: transactions, activity, etc.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 #[repr(u8)]
 pub enum TokenId {
