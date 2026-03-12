@@ -19,18 +19,19 @@ describe('certified-setter.store', () => {
 		const data: MockData = { name: 'Test Item', values: [1, 2, 3] };
 		let mockStore: CertifiedSetterStoreStore<MockData> & WritableUpdateStore<MockData>;
 
+		const flushScheduledBatch = async () => {
+			await vi.runAllTimersAsync();
+		};
+
 		beforeEach(() => {
 			vi.useFakeTimers();
+
 			mockStore = initCertifiedSetterStore<MockData>();
 		});
 
 		afterEach(() => {
 			vi.useRealTimers();
 		});
-
-		const flushScheduledBatch = async () => {
-			await vi.runAllTimersAsync();
-		};
 
 		it('should initialise with undefined state', () => {
 			expect(get(mockStore)).toBeUndefined();
@@ -109,7 +110,7 @@ describe('certified-setter.store', () => {
 
 				await flushScheduledBatch();
 
-				expect(subscriber).toHaveBeenCalledTimes(1);
+				expect(subscriber).toHaveBeenCalledOnce();
 
 				unsubscribe();
 			});
@@ -241,17 +242,17 @@ describe('certified-setter.store', () => {
 					Symbol(`token-${i}`)
 				) as TokenId[];
 
-				for (const id of ids) {
+				ids.forEach((id) => {
 					mockStore.batchSet({ id, data: { name: `Token ${String(id)}`, values: [1] } });
-				}
+				});
 
 				await flushScheduledBatch();
 
 				const state = get(mockStore);
 
-				for (const id of ids) {
+				ids.forEach((id) => {
 					expect(state?.[id]).toBeDefined();
-				}
+				});
 			});
 		});
 	});
