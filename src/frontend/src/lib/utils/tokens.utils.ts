@@ -753,7 +753,8 @@ export const findPutativeToken = <T extends Token>({
 		: undefined;
 
 /**
- * Compares two token arrays by length and token identity (symbol id).
+ * Compares two token arrays by length, token identity (symbol id),
+ * and — for toggleable tokens — the `enabled` flag.
  * Fast O(n) check — catches the common case of identical token lists
  * produced from unchanged inputs.
  */
@@ -763,5 +764,24 @@ export const tokenListEqual = <T extends { id: symbol }>(a: T[], b: T[]): boolea
 		return false;
 	}
 
-	return a.every((item, i) => item.id === b[i].id);
+	return a.every((item, i) => {
+		const other = b[i];
+
+		if (item.id !== other.id) {
+			return false;
+		}
+
+		const itemHasEnabled = 'enabled' in item;
+		const otherHasEnabled = 'enabled' in other;
+
+		if (itemHasEnabled !== otherHasEnabled) {
+			return false;
+		}
+
+		if (itemHasEnabled && otherHasEnabled) {
+			return (item as { enabled: unknown }).enabled === (other as { enabled: unknown }).enabled;
+		}
+
+		return true;
+	});
 };
