@@ -15,9 +15,21 @@ export interface CertifiedSetterStoreStore<T, Id extends symbol = TokenId> exten
 	batchSet: (params: { id: Id; data: T }) => void;
 }
 
+// Picks the best deferred-execution strategy so that multiple synchronous
+// `batchSet` calls coalesce into a single Svelte store update:
+//
+// - Browser: `requestAnimationFrame` aligns the flush with the next repaint
+//   frame (~16 ms budget), so every `batchSet` issued between two frames
+//   produces only one `update()` / subscriber notification.
+//   Caveat: rAF callbacks are paused while the tab is in the background,
+//   which delays the flush until the tab is re-focused.
+//
+// - Non-browser (SSR / test runners): falls back to `queueMicrotask`, which
+//   drains at the end of the current microtask checkpoint — still enough to
+//   batch all synchronous call-sites, though the window is tighter than rAF.
 const scheduleFlush =
 	typeof requestAnimationFrame === 'function'
-		? (fn: () => void) => requestAnimationFrame(() => fn())
+		? (fn: () => void) => requestAnimationFrame(fn)
 		: (fn: () => void) => queueMicrotask(fn);
 
 export const initCertifiedSetterStore = <
