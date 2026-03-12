@@ -111,8 +111,8 @@
 
 	let fetchedTokens = $state<FetchedTokensState | undefined>();
 
-	// Guards against stale callbacks from a previous identity's in-flight `queryAndUpdate`.
-	// When identity changes the effect re-runs and bumps the counter; lingering `onLoad`/`onUpdateError`
+	// Guards against stale callbacks from a previous identity's in-flight queryAndUpdate.
+	// When identity changes the effect re-runs and bumps the counter; lingering onLoad/onUpdateError
 	// callbacks from the old request see a mismatched generation and bail out.
 	let fetchGeneration = 0;
 
