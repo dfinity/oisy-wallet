@@ -372,14 +372,23 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Vec(Contact),
 		Err: ContactError
 	});
-	const CustomTokenId = IDL.Variant({
+	const TokenId = IDL.Variant({
+		Erc20: IDL.Tuple(IDL.Text, IDL.Nat64),
 		ExtV2: IDL.Principal,
+		SolNativeDevnet: IDL.Null,
 		Icrc: IDL.Principal,
-		Ethereum: IDL.Tuple(IDL.Text, IDL.Nat64),
-		SolDevnet: IDL.Text,
+		EvmNative: IDL.Nat64,
+		BtcNativeMainnet: IDL.Null,
+		Erc721: IDL.Tuple(IDL.Text, IDL.Nat64),
+		SolNativeMainnet: IDL.Null,
+		SplDevnet: IDL.Text,
+		SplMainnet: IDL.Text,
+		IcpNative: IDL.Null,
 		IcPunks: IDL.Principal,
-		Dip721: IDL.Principal,
-		SolMainnet: IDL.Text
+		BtcNativeTestnet: IDL.Null,
+		Erc1155: IDL.Tuple(IDL.Text, IDL.Nat64),
+		Erc4626: IDL.Tuple(IDL.Text, IDL.Nat64),
+		Dip721: IDL.Principal
 	});
 	const ExchangeData = IDL.Record({
 		price_24h_change_pct: IDL.Opt(IDL.Float64),
@@ -531,10 +540,10 @@ export const idlFactory = ({ IDL }) => {
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult]),
 		get_contacts: IDL.Func([], [GetContactsResult]),
-		get_exchange_rate: IDL.Func([CustomTokenId], [IDL.Opt(ExchangeRate)]),
+		get_exchange_rate: IDL.Func([TokenId], [IDL.Opt(ExchangeRate)]),
 		get_exchange_rates: IDL.Func(
-			[IDL.Vec(CustomTokenId)],
-			[IDL.Vec(IDL.Tuple(CustomTokenId, IDL.Opt(ExchangeRate)))]
+			[IDL.Vec(TokenId)],
+			[IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))]
 		),
 		get_user_profile: IDL.Func([], [GetUserProfileResult]),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse]),

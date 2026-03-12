@@ -187,14 +187,6 @@ export interface CustomToken {
 	version: [] | [bigint];
 	enabled: boolean;
 }
-export type CustomTokenId =
-	| { ExtV2: Principal }
-	| { Icrc: Principal }
-	| { Ethereum: [string, bigint] }
-	| { SolDevnet: string }
-	| { IcPunks: Principal }
-	| { Dip721: Principal }
-	| { SolMainnet: string };
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
 }
@@ -386,6 +378,23 @@ export type TokenAccountId =
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
+export type TokenId =
+	| { Erc20: [string, bigint] }
+	| { ExtV2: Principal }
+	| { SolNativeDevnet: null }
+	| { Icrc: Principal }
+	| { EvmNative: bigint }
+	| { BtcNativeMainnet: null }
+	| { Erc721: [string, bigint] }
+	| { SolNativeMainnet: null }
+	| { SplDevnet: string }
+	| { SplMainnet: string }
+	| { IcpNative: null }
+	| { IcPunks: Principal }
+	| { BtcNativeTestnet: null }
+	| { Erc1155: [string, bigint] }
+	| { Erc4626: [string, bigint] }
+	| { Dip721: Principal };
 export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
@@ -613,11 +622,8 @@ export interface _SERVICE {
 	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
-	get_exchange_rate: ActorMethod<[CustomTokenId], [] | [ExchangeRate]>;
-	get_exchange_rates: ActorMethod<
-		[Array<CustomTokenId>],
-		Array<[CustomTokenId, [] | [ExchangeRate]]>
-	>;
+	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
+	get_exchange_rates: ActorMethod<[Array<TokenId>], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
 	 * Returns the caller's user profile.
 	 *
