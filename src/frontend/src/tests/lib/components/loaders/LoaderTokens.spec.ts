@@ -37,6 +37,7 @@ import {
 } from '$sol/services/spl.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockIdentity, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
@@ -46,8 +47,11 @@ import {
 } from '$tests/mocks/user-profile.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
+import { writable } from 'svelte/store';
+import * as authDerived from '$lib/derived/auth.derived';
 
 vi.mock('@dfinity/utils', async () => {
 	const mod = await vi.importActual<object>('@dfinity/utils');
@@ -424,6 +428,80 @@ describe('LoaderTokens', () => {
 				expect(loadDefaultSplTokens).toHaveBeenCalled();
 				expect(processSplCustomTokens).toHaveBeenCalled();
 			});
+		});
+	});
+
+	describe('Identity changes', () => {
+		const identityB = {
+			...mockIdentity,
+			getPrincipal: () => mockPrincipal2
+		} as unknown as Identity;
+
+		it('should re-fetch custom tokens when identity changes', async () => {
+			const identityStore = writable(mockIdentity as Identity | null);
+			vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(identityStore);
+
+			render(LoaderTokens);
+
+			await waitFor(() => {
+				expect(loadNetworkCustomTokens).toHaveBeenCalled();
+			});
+
+			const callsBefore = vi.mocked(loadNetworkCustomTokens).mock.calls.length;
+
+			identityStore.set(identityB);
+
+			await waitFor(() => {
+				expect(vi.mocked(loadNetworkCustomTokens).mock.calls.length).toBeGreaterThan(
+					callsBefore
+				);
+			});
+		});
+
+		it('should discard stale responses from a previous identity', async () => {
+			const identityStore = writable(mockIdentity as Identity | null);
+			vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(identityStore);
+
+			let resolveStaleUpdate!: (value: never[]) => void;
+
+			vi.mocked(loadNetworkCustomTokens)
+				.mockResolvedValueOnce([])
+				.mockImplementationOnce(
+					() =>
+						new Promise((resolve) => {
+							resolveStaleUpdate = resolve;
+						})
+				)
+				.mockResolvedValue([]);
+
+			render(LoaderTokens);
+
+			// Identity A's query path resolves → processing fires
+			await waitFor(() => {
+				expect(processIcrcCustomTokens).toHaveBeenCalled();
+			});
+
+			const callsAfterA = vi.mocked(processIcrcCustomTokens).mock.calls.length;
+
+			// Change identity → new queryAndUpdate starts, old one still in-flight
+			identityStore.set(identityB);
+
+			// Identity B's responses resolve → processing fires again
+			await waitFor(() => {
+				expect(vi.mocked(processIcrcCustomTokens).mock.calls.length).toBeGreaterThan(
+					callsAfterA
+				);
+			});
+
+			const callsAfterB = vi.mocked(processIcrcCustomTokens).mock.calls.length;
+
+			// NOW resolve the stale update from identity A — generation counter should discard it
+			resolveStaleUpdate([]);
+
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
+			// No additional processing should have occurred
+			expect(vi.mocked(processIcrcCustomTokens).mock.calls.length).toBe(callsAfterB);
 		});
 	});
 });
