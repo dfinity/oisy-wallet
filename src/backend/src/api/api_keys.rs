@@ -2,7 +2,7 @@ use ic_cdk::{query, update};
 use shared::types::api_keys::ApiKeys;
 
 use crate::{
-    state::{read_api_keys, write_api_keys},
+    state::{with_api_keys, write_api_keys},
     utils::guards::caller_is_controller,
 };
 
@@ -12,7 +12,7 @@ use crate::{
 #[query(guard = "caller_is_controller")]
 #[must_use]
 pub fn get_api_keys() -> ApiKeys {
-    read_api_keys(Clone::clone)
+    with_api_keys(Clone::clone)
 }
 
 /// Overwrites the stored API keys.

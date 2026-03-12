@@ -64,6 +64,7 @@ async fn execute(request: &HttpRequestArgs) -> Result<HttpRequestResult, String>
 ///
 /// # Arguments
 /// * `url` - The URL to fetch.
+/// * `headers` - Additional headers appended after `User-Agent`.
 /// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
 ///   to minimise cycle costs.
 pub(crate) async fn get(
