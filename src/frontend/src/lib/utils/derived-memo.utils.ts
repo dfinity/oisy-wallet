@@ -86,55 +86,6 @@ export const derivedMemo = <S extends Stores, T>(
 	};
 };
 
-/**
- * Compares two TokenUi arrays by id, balance, and USD balance.
- * Prevents re-renders when balance updates for tokens outside the current view
- * produce an identical mapped result.
- */
-// eslint-disable-next-line local-rules/prefer-object-params
-export const tokenUiListEqual = (a: TokenUi[], b: TokenUi[]): boolean => {
-	if (a.length !== b.length) {
-		return false;
-	}
-	return a.every((item, i) => {
-		const other = b[i];
-		return (
-			item.id === other.id && item.balance === other.balance && item.usdBalance === other.usdBalance
-		);
-	});
-};
 
-/**
- * Compares two ExchangesData records by symbol keys and usd price.
- * Uses Object.getOwnPropertySymbols since TokenId keys are JS symbols.
- */
-// eslint-disable-next-line local-rules/prefer-object-params
-export const exchangesDataEqual = (a: ExchangesData, b: ExchangesData): boolean => {
-	const keysA = Object.getOwnPropertySymbols(a);
-	const keysB = Object.getOwnPropertySymbols(b);
-	if (keysA.length !== keysB.length) {
-		return false;
-	}
-	return keysA.every((k) => {
-		const va = a[k as TokenId];
-		const vb = b[k as TokenId];
-		if (va === vb) {
-			return true;
-		}
-		if (va === undefined || vb === undefined) {
-			return false;
-		}
-		return va.usd === vb.usd;
-	});
-};
 
-// eslint-disable-next-line local-rules/prefer-object-params
-export const primitiveArrayEqual = <T extends string | number | boolean>(
-	a: T[],
-	b: T[]
-): boolean => {
-	if (a.length !== b.length) {
-		return false;
-	}
-	return a.every((v, i) => v === b[i]);
-};
+
