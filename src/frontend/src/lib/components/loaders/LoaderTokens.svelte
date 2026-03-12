@@ -54,12 +54,7 @@
 	} from '$sol/services/spl.services';
 	import { get } from 'svelte/store';
 
-	// =====================================================================
-	// Default token loading
-	// =====================================================================
-	// ICP-native defaults (ICRC, EXT, ICPunks) have no reactive guards —
-	// they load once when the component mounts (no tracked dependencies).
-
+	// IC default tokens have no reactive guards, they load once when the component mounts (no tracked dependencies).
 	$effect(() => {
 		loadDefaultIcrcTokens();
 		loadDefaultExtTokens();
@@ -73,7 +68,6 @@
 				($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled)))
 	);
 
-	// ERC defaults re-load whenever EVM network conditions change.
 	$effect(() => {
 		if (loadErc) {
 			loadDefaultErc20Tokens();
@@ -139,7 +133,6 @@
 	});
 
 	// Fan-out: distribute pre-fetched tokens to per-standard processors.
-	// Tracked deps: `fetchedTokens`, `loadErc`, `loadSpl` — NOT `$authIdentity`.
 	$effect(() => {
 		if (isNullish(fetchedTokens)) {
 			return;
