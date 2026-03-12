@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
+	import { get } from 'svelte/store';
+	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { processCustomTokens as processErc1155CustomTokens } from '$eth/services/erc1155.services';
 	import {
 		loadDefaultErc20Tokens,
@@ -52,7 +53,6 @@
 		loadDefaultSplTokens,
 		processCustomTokens as processSplCustomTokens
 	} from '$sol/services/spl.services';
-	import { get } from 'svelte/store';
 
 	// IC default tokens have no reactive guards, they load once when the component mounts (no tracked dependencies).
 	$effect(() => {
@@ -116,8 +116,7 @@
 		const identity = $authIdentity;
 
 		queryAndUpdate<CustomToken[]>({
-			request: ({ certified }) =>
-				loadNetworkCustomTokens({ certified, identity, useCache: true }),
+			request: ({ certified }) => loadNetworkCustomTokens({ certified, identity, useCache: true }),
 			onLoad: ({ response: tokens, certified }) => {
 				fetchedTokens = { tokens, certified, identity };
 			},
