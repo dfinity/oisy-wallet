@@ -76,7 +76,7 @@ describe('idb.api', () => {
 			mockDatabases.mockResolvedValueOnce([
 				{ name: 'oisy-btc-transactions' },
 				{ name: 'other-db' },
-				{ name: 'oisy-eth-balances' }
+				{ name: 'oisy-balances' }
 			]);
 
 			mockDeleteDatabase.mockImplementation(() => ({
@@ -94,13 +94,13 @@ describe('idb.api', () => {
 
 			expect(mockDeleteDatabase).toHaveBeenCalledTimes(2);
 			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-transactions');
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-eth-balances');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-balances');
 		});
 
 		it('should handle gracefully a failure during a database deletion', async () => {
 			mockDatabases.mockResolvedValueOnce([
 				{ name: 'oisy-btc-transactions' },
-				{ name: 'oisy-eth-balances' }
+				{ name: 'oisy-balances' }
 			]);
 
 			mockDeleteDatabase
@@ -127,13 +127,13 @@ describe('idb.api', () => {
 
 			expect(mockDeleteDatabase).toHaveBeenCalledTimes(2);
 			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-transactions');
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-eth-balances');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-balances');
 		});
 
 		it('should handle gracefully a blocked database deletion', async () => {
 			mockDatabases.mockResolvedValueOnce([
 				{ name: 'oisy-btc-transactions' },
-				{ name: 'oisy-eth-balances' }
+				{ name: 'oisy-balances' }
 			]);
 
 			mockDeleteDatabase
@@ -160,7 +160,7 @@ describe('idb.api', () => {
 
 			expect(mockDeleteDatabase).toHaveBeenCalledTimes(2);
 			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-transactions');
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-eth-balances');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-balances');
 		});
 	});
 });
