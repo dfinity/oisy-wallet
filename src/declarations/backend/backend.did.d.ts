@@ -79,7 +79,6 @@ export type BtcAddPendingTransactionError =
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
 	ii_delegation_chain: [] | [IIDelegationChain];
-	network: BitcoinNetwork;
 	network: Network;
 	utxos: Array<Utxo>;
 }
