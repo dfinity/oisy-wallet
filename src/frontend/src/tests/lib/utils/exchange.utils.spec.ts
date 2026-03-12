@@ -1,5 +1,8 @@
 import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
+import type { ExchangesData } from '$lib/types/exchange';
+import type { TokenId } from '$lib/types/token';
 import {
+	exchangesDataEqual,
 	findMissingLedgerCanisterIds,
 	formatKongSwapToCoingeckoPrices
 } from '$lib/utils/exchange.utils';
@@ -159,5 +162,96 @@ describe('findMissingCanisterIds', () => {
 		});
 
 		expect(result).toEqual([MOCK_CANISTER_ID_1]);
+	});
+});
+
+describe('exchangesDataEqual', () => {
+	const tokenA = Symbol('tokenA') as TokenId;
+	const tokenB = Symbol('tokenB') as TokenId;
+	const tokenC = Symbol('tokenC') as TokenId;
+
+	const price = (usd: number) => ({ usd });
+
+	it('returns true for two empty records', () => {
+		const a = {} as ExchangesData;
+		const b = {} as ExchangesData;
+
+		expect(exchangesDataEqual(a, b)).toBeTruthy();
+	});
+
+	it('returns true when both records have the same keys with the same usd values', () => {
+		const a = { [tokenA]: price(1.5), [tokenB]: price(2.0) } as ExchangesData;
+		const b = { [tokenA]: price(1.5), [tokenB]: price(2.0) } as ExchangesData;
+
+		expect(exchangesDataEqual(a, b)).toBeTruthy();
+	});
+
+	it('returns true when both entries share the same object reference', () => {
+		const shared = price(10);
+		const a = { [tokenA]: shared } as ExchangesData;
+		const b = { [tokenA]: shared } as ExchangesData;
+
+		expect(exchangesDataEqual(a, b)).toBeTruthy();
+	});
+
+	it('returns true when both entries are undefined', () => {
+		const a = { [tokenA]: undefined } as ExchangesData;
+		const b = { [tokenA]: undefined } as ExchangesData;
+
+		expect(exchangesDataEqual(a, b)).toBeTruthy();
+	});
+
+	it('returns false when key counts differ', () => {
+		const a = { [tokenA]: price(1) } as ExchangesData;
+		const b = { [tokenA]: price(1), [tokenB]: price(2) } as ExchangesData;
+
+		expect(exchangesDataEqual(a, b)).toBeFalsy();
+	});
+
+	it('returns false when usd values differ for the same key', () => {
+		const a = { [tokenA]: price(1) } as ExchangesData;
+		const b = { [tokenA]: price(999) } as ExchangesData;
+
+		expect(exchangesDataEqual(a, b)).toBeFalsy();
+	});
+
+	it('returns false when a key exists in a but not in b', () => {
+		const a = { [tokenA]: price(1) } as ExchangesData;
+		const b = { [tokenB]: price(1) } as ExchangesData;
+
+		expect(exchangesDataEqual(a, b)).toBeFalsy();
+	});
+
+	it('returns false when one entry is undefined and the other is not', () => {
+		const a = { [tokenA]: undefined } as ExchangesData;
+		const b = { [tokenA]: price(5) } as ExchangesData;
+
+		expect(exchangesDataEqual(a, b)).toBeFalsy();
+	});
+
+	it('ignores non-usd fields when comparing', () => {
+		const a = {
+			[tokenA]: { usd: 1, usd_market_cap: 100, usd_24h_vol: 50 }
+		} as ExchangesData;
+		const b = {
+			[tokenA]: { usd: 1, usd_market_cap: 999, usd_24h_vol: 999 }
+		} as ExchangesData;
+
+		expect(exchangesDataEqual(a, b)).toBeTruthy();
+	});
+
+	it('handles multiple keys where only one differs', () => {
+		const a = {
+			[tokenA]: price(1),
+			[tokenB]: price(2),
+			[tokenC]: price(3)
+		} as ExchangesData;
+		const b = {
+			[tokenA]: price(1),
+			[tokenB]: price(2),
+			[tokenC]: price(999)
+		} as ExchangesData;
+
+		expect(exchangesDataEqual(a, b)).toBeFalsy();
 	});
 });
