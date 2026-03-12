@@ -1,6 +1,3 @@
-import type { ExchangesData } from '$lib/types/exchange';
-import type { TokenId } from '$lib/types/token';
-import type { TokenUi } from '$lib/types/token-ui';
 import { derived, type Readable, type Subscriber, type Unsubscriber } from 'svelte/store';
 
 type Stores =
@@ -85,7 +82,3 @@ export const derivedMemo = <S extends Stores, T>(
 		}
 	};
 };
-
-
-
-
