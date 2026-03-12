@@ -78,7 +78,7 @@ enum DeviceProtection {
 }
 
 #[derive(CandidType, Serialize)]
-#[allow(dead_code)]
+#[expect(dead_code)]
 enum MetadataValue {
     #[serde(rename = "string")]
     String(String),
