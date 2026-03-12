@@ -23,6 +23,7 @@ import {
 import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 import * as appConstants from '$lib/constants/app.constants';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
+import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import {
 	ethAddressStore,
 	solAddressDevnetStore,
@@ -202,6 +203,19 @@ describe('LoaderTokens', () => {
 	});
 
 	describe('Custom token loading', () => {
+		it('should fetch custom tokens via a single loadNetworkCustomTokens call', async () => {
+			render(LoaderTokens);
+
+			await waitFor(() => {
+				expect(loadNetworkCustomTokens).toHaveBeenCalled();
+			});
+
+			const calls = vi.mocked(loadNetworkCustomTokens).mock.calls;
+			const uniqueIdentities = new Set(calls.map(([{ certified }]) => certified));
+
+			expect(uniqueIdentities.size).toBeLessThanOrEqual(2);
+		});
+
 		it('should always process ICRC, EXT, and ICPunks custom tokens', async () => {
 			render(LoaderTokens);
 
