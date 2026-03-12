@@ -3,9 +3,12 @@ mod platform;
 
 use std::collections::HashMap;
 
-use shared::types::custom_token::CustomTokenId;
+use shared::types::token_id::TokenId;
 
-use self::{client::CoinGeckoClient, platform::coingecko_platform};
+use self::{
+    client::CoinGeckoClient,
+    platform::{coingecko_native_coin, coingecko_platform},
+};
 use crate::{
     exchange::provider::{ExchangePriceProvider, PriceData},
     types::storable::StoredTokenId,
@@ -36,33 +39,51 @@ impl ExchangePriceProvider for CoinGeckoProvider {
         &self,
         token_ids: &[StoredTokenId],
     ) -> Result<Vec<(StoredTokenId, PriceData)>, String> {
-        let mut platforms: HashMap<String, Vec<String>> = HashMap::new();
+        let mut result = Vec::new();
+
+        let mut native_coins: HashMap<&str, Vec<StoredTokenId>> = HashMap::new();
+        let mut contract_platforms: HashMap<String, Vec<String>> = HashMap::new();
         let mut address_to_token_id: HashMap<(String, String), StoredTokenId> = HashMap::new();
 
         for token_id in token_ids {
             let StoredTokenId(inner) = token_id;
 
             match inner {
-                CustomTokenId::Icrc(ledger_id) => {
-                    let ledger_str = ledger_id.to_text();
-
-                    platforms
-                        .entry("internet-computer".to_string())
-                        .or_default()
-                        .push(ledger_str.clone());
-                    address_to_token_id.insert(
-                        ("internet-computer".to_string(), ledger_str.to_lowercase()),
-                        token_id.clone(),
-                    );
+                TokenId::EvmNative(chain_id) => {
+                    if let Some(coin_id) = coingecko_native_coin(*chain_id) {
+                        native_coins
+                            .entry(coin_id)
+                            .or_default()
+                            .push(token_id.clone());
+                    }
                 }
-                CustomTokenId::Ethereum(address, chain_id) => {
+                TokenId::IcpNative => {
+                    native_coins
+                        .entry("internet-computer")
+                        .or_default()
+                        .push(token_id.clone());
+                }
+                TokenId::SolNativeMainnet => {
+                    native_coins
+                        .entry("solana")
+                        .or_default()
+                        .push(token_id.clone());
+                }
+                TokenId::BtcNativeMainnet => {
+                    native_coins
+                        .entry("bitcoin")
+                        .or_default()
+                        .push(token_id.clone());
+                }
+
+                TokenId::Erc20(address, chain_id) => {
                     let Some(platform) = coingecko_platform(*chain_id) else {
                         continue;
                     };
 
-                    let addr_str = address.0.clone();
+                    let addr_str = address.as_str().to_string();
 
-                    platforms
+                    contract_platforms
                         .entry(platform.to_string())
                         .or_default()
                         .push(addr_str.clone());
@@ -71,10 +92,22 @@ impl ExchangePriceProvider for CoinGeckoProvider {
                         token_id.clone(),
                     );
                 }
-                CustomTokenId::SolMainnet(address) => {
-                    let addr_str = address.0.clone();
+                TokenId::Icrc(ledger_id) => {
+                    let ledger_str = ledger_id.to_text();
 
-                    platforms
+                    contract_platforms
+                        .entry("internet-computer".to_string())
+                        .or_default()
+                        .push(ledger_str.clone());
+                    address_to_token_id.insert(
+                        ("internet-computer".to_string(), ledger_str.to_lowercase()),
+                        token_id.clone(),
+                    );
+                }
+                TokenId::SplMainnet(address) => {
+                    let addr_str = address.as_str().to_string();
+
+                    contract_platforms
                         .entry("solana".to_string())
                         .or_default()
                         .push(addr_str.clone());
@@ -83,13 +116,33 @@ impl ExchangePriceProvider for CoinGeckoProvider {
                         token_id.clone(),
                     );
                 }
+
                 _ => {}
             }
         }
 
-        let mut result = Vec::new();
+        // Fetch native coin prices via /simple/price
+        if !native_coins.is_empty() {
+            let coin_ids: Vec<&str> = native_coins.keys().copied().collect();
 
-        for (platform, addresses) in &platforms {
+            match self.client.fetch_coin_prices(&coin_ids).await {
+                Ok(prices) => {
+                    for (coin_id, price_data) in &prices {
+                        if let Some(token_ids) = native_coins.get(coin_id.as_str()) {
+                            for token_id in token_ids {
+                                result.push((token_id.clone(), price_data.clone()));
+                            }
+                        }
+                    }
+                }
+                Err(err) => {
+                    ic_cdk::println!("Failed to fetch native coin prices: {err}");
+                }
+            }
+        }
+
+        // Fetch contract token prices via /simple/token_price
+        for (platform, addresses) in &contract_platforms {
             for chunk in addresses.chunks(CHUNK_SIZE) {
                 match self.client.fetch_token_prices(platform, chunk).await {
                     Ok(prices) => {

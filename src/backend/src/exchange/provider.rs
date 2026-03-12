@@ -1,6 +1,7 @@
 use crate::types::storable::StoredTokenId;
 
 /// Price data returned by an exchange provider for a single token.
+#[derive(Clone)]
 pub struct PriceData {
     /// Provider-reported timestamp in nanoseconds, if available.
     pub timestamp_nanos: Option<u64>,

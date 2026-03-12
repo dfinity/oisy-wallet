@@ -5,7 +5,10 @@ use std::time::Duration;
 
 use ic_cdk::api::time;
 use ic_cdk_timers::set_timer_interval;
-use shared::types::exchange::{ExchangeData, ExchangeError, ExchangeRate};
+use shared::types::{
+    exchange::{ExchangeData, ExchangeError, ExchangeRate},
+    token_id::TokenId,
+};
 
 use crate::{
     exchange::{
@@ -23,6 +26,20 @@ const PRICE_REFRESH_INTERVAL_SEC: u64 = 5 * 60;
 /// Tokens that haven't been queried within this window are considered inactive
 /// and skipped during price refreshes (1 hour).
 pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 60 * 60;
+
+/// Native tokens whose prices are always fetched, regardless of user activity.
+fn native_token_ids() -> Vec<StoredTokenId> {
+    vec![
+        StoredTokenId(TokenId::EvmNative(1)),
+        StoredTokenId(TokenId::EvmNative(56)),
+        StoredTokenId(TokenId::EvmNative(137)),
+        StoredTokenId(TokenId::EvmNative(8453)),
+        StoredTokenId(TokenId::EvmNative(42161)),
+        StoredTokenId(TokenId::IcpNative),
+        StoredTokenId(TokenId::SolNativeMainnet),
+        StoredTokenId(TokenId::BtcNativeMainnet),
+    ]
+}
 
 /// Starts a recurring timer that refreshes exchange rates for active tokens
 /// every [`PRICE_REFRESH_INTERVAL_SEC`] seconds.
@@ -62,8 +79,8 @@ async fn fetch_and_update_prices(
 ) {
     match provider.fetch_prices(token_ids).await {
         Ok(prices) => {
-            for (token_id, price_data) in prices {
-                update_price(&token_id, &price_data);
+            for (token_id, price_data) in &prices {
+                update_price(token_id, price_data);
             }
         }
         Err(err) => {
@@ -79,10 +96,11 @@ pub async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     let provider = CoinGeckoProvider::new(api_key);
 
     let now = time();
-
     let threshold = now - PRICE_ACTIVITY_THRESHOLD_SEC * 1_000_000_000;
 
-    let active_tokens: Vec<StoredTokenId> = read_state(|s| {
+    let mut tokens_to_fetch: Vec<StoredTokenId> = native_token_ids();
+
+    let active_custom_tokens: Vec<StoredTokenId> = read_state(|s| {
         s.token_activity
             .iter()
             .filter(|entry| entry.value() > threshold)
@@ -90,11 +108,13 @@ pub async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
             .collect()
     });
 
-    if active_tokens.is_empty() {
+    tokens_to_fetch.extend(active_custom_tokens);
+
+    if tokens_to_fetch.is_empty() {
         return Ok(());
     }
 
-    fetch_and_update_prices(&provider, &active_tokens).await;
+    fetch_and_update_prices(&provider, &tokens_to_fetch).await;
 
     Ok(())
 }
