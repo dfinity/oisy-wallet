@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "Envoyer",
+			"send_token": "",
 			"destination": "Destination",
 			"source": "Source",
 			"balance": "Solde",
@@ -1503,8 +1504,6 @@
 		},
 		"label": {
 			"reimbursement": "Remboursement",
-			"twin_token_sent": "$twinToken envoyé",
-			"ck_token_sent": "$ckToken envoyé",
 			"twin_token_converted": "Converti depuis $twinToken",
 			"ck_token_converted": "Converti depuis $ckToken",
 			"sending_twin_token": "Envoi de $twinToken",
@@ -1960,7 +1959,7 @@
 			"claim_now": "Réclamer maintenant",
 			"claiming": "Réclamation...",
 			"get_tokens_with_amount": "Obtenir jusqu'à $amount $token_symbol",
-			"get_tokens": "Obtenir plus de $token_symbol",
+			"get_asset_tokens": "",
 			"reward_claimed": "Récompense réclamée",
 			"staked": "Staké",
 			"unstaked": "Unstaké",

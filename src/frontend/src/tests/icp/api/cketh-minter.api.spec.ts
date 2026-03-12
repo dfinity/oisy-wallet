@@ -12,9 +12,13 @@ import { CkEthMinterCanister, type CkEthMinterDid } from '@icp-sdk/canisters/cke
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('$icp/utils/date.utils', () => ({
-	nowInBigIntNanoSeconds: vi.fn()
-}));
+vi.mock('@dfinity/utils', async () => {
+	const mod = await vi.importActual<object>('@dfinity/utils');
+	return {
+		...mod,
+		nowInBigIntNanoSeconds: vi.fn()
+	};
+});
 
 describe('cketh-minter.api', () => {
 	const canisterMock = mock<CkEthMinterCanister>();

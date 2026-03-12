@@ -3,10 +3,11 @@ pub mod impls;
 use std::time::Duration;
 
 use candid::CandidType;
-use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
+use ic_cdk::bitcoin_canister::{MillisatoshiPerByte, Network as BitcoinNetwork, Utxo};
 use serde::Deserialize;
 
 use super::delegation::IIDelegationChain;
+use crate::types::signer::RateLimitError;
 
 /// The maximum length of a bitcoin address, expressed as a string.
 /// - The longest current formats seem to be `Bech32` and `Bech32m` which are up to 62 characters
@@ -38,7 +39,7 @@ pub const FEE_PERCENTILES_UPDATE_INTERVAL: Duration = Duration::from_secs(60);
 pub const FEE_UPDATE_TIMEOUT_NS: u64 =
     5 * FEE_PERCENTILES_UPDATE_INTERVAL.as_secs() * 1_000_000_000;
 
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[derive(CandidType, Deserialize, Clone, Copy, Eq, PartialEq, Debug)]
 pub struct BtcGetFeePercentilesRequest {
     pub network: BitcoinNetwork,
 }
@@ -64,8 +65,12 @@ pub struct SelectedUtxosFeeResponse {
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SelectedUtxosFeeError {
-    InternalError { msg: String },
+    InternalError {
+        msg: String,
+    },
     PendingTransactions,
+    /// The caller has exceeded the call rate limit.
+    RateLimited(RateLimitError),
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -89,6 +94,8 @@ pub enum BtcAddPendingTransactionError {
     UtxosAlreadyReserved,
     /// Server-side / unexpected
     InternalError { msg: String },
+      /// The caller has exceeded the call rate limit.
+    RateLimited(RateLimitError),
     /// The provided II delegation chain is missing or failed verification.
     InvalidDelegationChain { msg: String },
 }
@@ -120,7 +127,12 @@ pub struct BtcGetPendingTransactionsReponse {
     pub transactions: Vec<PendingTransaction>,
 }
 
+/// Errors that can occur when retrieving pending Bitcoin transactions.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcGetPendingTransactionsError {
-    InternalError { msg: String },
+    InternalError {
+        msg: String,
+    },
+    /// The caller has exceeded the call rate limit.
+    RateLimited(RateLimitError),
 }

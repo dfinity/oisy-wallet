@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "भेजें",
+			"send_token": "",
 			"destination": "गंतव्य",
 			"source": "स्रोत",
 			"balance": "शेष राशि",
@@ -1503,8 +1504,6 @@
 		},
 		"label": {
 			"reimbursement": "प्रतिपूर्ति",
-			"twin_token_sent": "$twinToken भेजा गया",
-			"ck_token_sent": "$ckToken भेजा गया",
 			"twin_token_converted": "$twinToken से परिवर्तित",
 			"ck_token_converted": "$ckToken से परिवर्तित",
 			"sending_twin_token": "$twinToken भेज रहा है",
@@ -1960,7 +1959,7 @@
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": "",
+			"get_asset_tokens": "",
 			"reward_claimed": "",
 			"staked": "",
 			"unstaked": "",

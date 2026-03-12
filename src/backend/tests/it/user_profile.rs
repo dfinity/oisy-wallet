@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use candid::Principal;
+use pretty_assertions::assert_eq;
 use shared::types::user_profile::{GetUserProfileError, HasUserProfileResponse, UserProfile};
 
 use crate::utils::{
@@ -105,10 +106,9 @@ fn test_exists_profile_should_return_true_if_profile_exists() {
     assert!(exists_response.is_ok());
     assert!(
         exists_response
-            .ok()
             .expect("Can not access has_user_profile")
             .has_user_profile
-    )
+    );
 }
 
 #[test]
@@ -123,8 +123,7 @@ fn test_exists_profile_should_return_false_if_profile_not_exists() {
     assert!(exists_response.is_ok());
     assert!(
         !exists_response
-            .ok()
             .expect("Can not access has_user_profile")
             .has_user_profile
-    )
+    );
 }

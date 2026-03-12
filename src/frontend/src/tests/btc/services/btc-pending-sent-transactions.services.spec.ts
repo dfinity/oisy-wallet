@@ -21,7 +21,9 @@ describe('BTC Pending Sent Transactions Services', () => {
 
 	describe('loadBtcPendingSentTransactions', () => {
 		it('should store the pending transactions', async () => {
-			vi.spyOn(backendAPI, 'getPendingBtcTransactions').mockResolvedValue([mockPendingTransaction]);
+			vi.spyOn(backendAPI, 'getPendingBtcTransactions').mockResolvedValue({
+				response: [mockPendingTransaction]
+			});
 
 			const result = await loadBtcPendingSentTransactions({
 				address,

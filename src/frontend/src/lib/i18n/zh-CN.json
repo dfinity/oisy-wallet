@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "发送",
+			"send_token": "",
 			"destination": "目标地址",
 			"source": "来源地址",
 			"balance": "余额",
@@ -1503,8 +1504,6 @@
 		},
 		"label": {
 			"reimbursement": "报销",
-			"twin_token_sent": "已发送 $twinToken",
-			"ck_token_sent": "已发送 $ckToken",
 			"twin_token_converted": "从 $twinToken 转换",
 			"ck_token_converted": "从 $ckToken 转换",
 			"sending_twin_token": "正在发送 $twinToken",
@@ -1960,7 +1959,7 @@
 			"claim_now": "",
 			"claiming": "",
 			"get_tokens_with_amount": "",
-			"get_tokens": "",
+			"get_asset_tokens": "",
 			"reward_claimed": "",
 			"staked": "",
 			"unstaked": "",

@@ -1,4 +1,5 @@
 use candid::Principal;
+use pretty_assertions::assert_eq;
 use shared::types::{
     backend_config::{Arg, Config},
     user_profile::UserProfile,
@@ -9,9 +10,7 @@ use crate::utils::pocketic::{controller, init_arg, setup, PicCanisterTrait};
 #[test]
 fn config_is_available_to_allowed_users_only() {
     let pic_setup = setup();
-    let init_arg = if let Arg::Init(arg) = init_arg() {
-        arg
-    } else {
+    let Arg::Init(init_arg) = init_arg() else {
         unreachable!("The init arg is definitely an init arg")
     };
     let expected_config = Config::from(init_arg);

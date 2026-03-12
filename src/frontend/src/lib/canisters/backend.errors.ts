@@ -1,7 +1,9 @@
 import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
+	BtcGetPendingTransactionsError,
 	GetAllowedCyclesError,
+	RateLimitError,
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -21,7 +23,17 @@ const assertNeverOr = <T>(value: never, fallback: T): T => {
 	return fallback;
 };
 
-export const mapBtcPendingTransactionError = (
+const mapRateLimitError = (err: RateLimitError): CanisterInternalError => {
+	const { max_calls: maxCalls, window_ns: windowNs } = err;
+
+	const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+	return new CanisterInternalError(
+		`Rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+	);
+};
+
+export const mapBtcAddPendingTransactionError = (
 	err: BtcAddPendingTransactionError
 ): CanisterInternalError => {
 	if ('InternalError' in err) {
@@ -44,6 +56,11 @@ export const mapBtcPendingTransactionError = (
 		return new CanisterInternalError('Some of the provided UTXOs are already reserved.');
 	}
 
+  	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+      	}
+  
+  
 	if ('InvalidDelegationChain' in err) {
 		return new CanisterInternalError(
 			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
@@ -51,6 +68,20 @@ export const mapBtcPendingTransactionError = (
 	}
 
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcAddPendingTransactionError'));
+};
+
+export const mapBtcGetPendingTransactionsError = (
+	err: BtcGetPendingTransactionsError
+): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
+	}
+
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetPendingTransactionsError'));
 };
 
 export const mapBtcSelectUserUtxosFeeError = (
@@ -64,6 +95,10 @@ export const mapBtcSelectUserUtxosFeeError = (
 		return new CanisterInternalError(
 			'Selecting utxos fee is not possible - pending transactions found.'
 		);
+	}
+
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
 	}
 
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError'));
@@ -93,13 +128,7 @@ export const mapAllowSigningError = (
 	}
 
 	if ('RateLimited' in err) {
-		const { max_calls: maxCalls, window_ns: windowNs } = err.RateLimited;
-
-		const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
-
-		return new CanisterInternalError(
-			`Rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
-		);
+		return mapRateLimitError(err.RateLimited);
 	}
 
 	if ('RateLimitedByGuard' in err) {

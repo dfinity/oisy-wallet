@@ -4,13 +4,12 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	PendingTransaction,
-	SelectedUtxosFeeResponse,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
+	AddPendingTransactionOutcome,
 	AddUserCredentialParams,
 	AddUserHiddenDappIdParams,
 	AllowSigningOutcome,
@@ -21,9 +20,11 @@ import type {
 	CreateContactParams,
 	DeleteContactParams,
 	GetContactParams,
+	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateContactParams,
 	UpdateUserExperimentalFeatureSettings
@@ -102,7 +103,7 @@ export const addUserCredential = async ({
 export const addPendingBtcTransaction = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcAddPendingTransactionParams>): Promise<boolean> => {
+}: CanisterApiFunctionParams<BtcAddPendingTransactionParams>): Promise<AddPendingTransactionOutcome> => {
 	const { btcAddPendingTransaction } = await backendCanister({ identity });
 
 	return btcAddPendingTransaction(params);
@@ -111,16 +112,16 @@ export const addPendingBtcTransaction = async ({
 export const getPendingBtcTransactions = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<PendingTransaction[]> => {
-	const { btcGetPendingTransaction } = await backendCanister({ identity });
+}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<GetPendingTransactionsOutcome> => {
+	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
-	return btcGetPendingTransaction(params);
+	return btcGetPendingTransactions(params);
 };
 
 export const selectUserUtxosFee = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeResponse> => {
+}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeOutcome> => {
 	const { btcSelectUserUtxosFee } = await backendCanister({ identity });
 
 	return btcSelectUserUtxosFee(params);

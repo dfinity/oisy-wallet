@@ -2,6 +2,9 @@ import type {
 	AllowSigningResponse,
 	AllowSigningResult,
 	_SERVICE as BackendService,
+	BtcAddPendingTransactionResult,
+	BtcGetPendingTransactionsResult,
+	BtcSelectUserUtxosFeeResult,
 	CustomToken,
 	IcrcToken,
 	UserProfile
@@ -408,6 +411,33 @@ describe('backend.canister', () => {
 
 			await expect(res).rejects.toThrowError();
 		});
+
+		it('should return rateLimitInfo if RateLimited error is returned', async () => {
+			const response = {
+				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			};
+
+			service.btc_add_pending_transaction.mockResolvedValue(
+				response as unknown as BtcAddPendingTransactionResult
+			);
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcAddPendingTransaction(btcAddPendingTransactionParams);
+
+			expect(service.btc_add_pending_transaction).toHaveBeenCalledWith(
+				btcAddPendingTransactionEndpointParams
+			);
+			expect(res).toStrictEqual({
+				response: true,
+				rateLimitInfo: {
+					endpoint: 'btc_add_pending_transaction',
+					limiter: 'BTC_ADD_PENDING_TX_RATE_LIMITER'
+				}
+			});
+		});
 	});
 
 	describe('btc_get_pending_transactions', () => {
@@ -425,26 +455,26 @@ describe('backend.canister', () => {
 
 			service.btc_get_pending_transactions.mockResolvedValue(response);
 
-			const { btcGetPendingTransaction } = await createBackendCanister({
+			const { btcGetPendingTransactions } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = await btcGetPendingTransaction(btcGetPendingTransactionParams);
+			const res = await btcGetPendingTransactions(btcGetPendingTransactionParams);
 
 			expect(service.btc_get_pending_transactions).toHaveBeenCalledWith(
 				btcGetPendingTransactionParams
 			);
-			expect(res).toEqual(response.Ok.transactions);
+			expect(res).toEqual({ response: response.Ok.transactions });
 		});
 
 		it('should throw an error if btc_get_pending_transactions returns an internal error', async () => {
 			service.btc_get_pending_transactions.mockResolvedValue(errorResponse);
 
-			const { btcGetPendingTransaction } = await createBackendCanister({
+			const { btcGetPendingTransactions } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+			const res = btcGetPendingTransactions(btcGetPendingTransactionParams);
 
 			await expect(res).rejects.toThrowError(
 				new CanisterInternalError(errorResponse.Err.InternalError.msg)
@@ -457,11 +487,11 @@ describe('backend.canister', () => {
 				throw mockResponseError;
 			});
 
-			const { btcGetPendingTransaction } = await createBackendCanister({
+			const { btcGetPendingTransactions } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+			const res = btcGetPendingTransactions(btcGetPendingTransactionParams);
 
 			await expect(res).rejects.toThrowError(mockResponseError);
 		});
@@ -470,13 +500,40 @@ describe('backend.canister', () => {
 			// @ts-expect-error we test this in purposes
 			service.btc_get_pending_transactions.mockResolvedValue({ test: 'unexpected' });
 
-			const { btcGetPendingTransaction } = await createBackendCanister({
+			const { btcGetPendingTransactions } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+			const res = btcGetPendingTransactions(btcGetPendingTransactionParams);
 
 			await expect(res).rejects.toThrowError();
+		});
+
+		it('should return rateLimitInfo if RateLimited error is returned', async () => {
+			const response = {
+				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			};
+
+			service.btc_get_pending_transactions.mockResolvedValue(
+				response as unknown as BtcGetPendingTransactionsResult
+			);
+
+			const { btcGetPendingTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcGetPendingTransactions(btcGetPendingTransactionParams);
+
+			expect(service.btc_get_pending_transactions).toHaveBeenCalledWith(
+				btcGetPendingTransactionParams
+			);
+			expect(res).toStrictEqual({
+				response: [],
+				rateLimitInfo: {
+					endpoint: 'btc_get_pending_transactions',
+					limiter: 'BTC_GET_PENDING_TX_RATE_LIMITER'
+				}
+			});
 		});
 	});
 
@@ -500,7 +557,7 @@ describe('backend.canister', () => {
 			expect(service.btc_select_user_utxos_fee).toHaveBeenCalledWith(
 				btcSelectUserUtxosFeeEndpointParams
 			);
-			expect(res).toEqual(response.Ok);
+			expect(res).toEqual({ response: response.Ok });
 		});
 
 		it('should throw an error if btc_select_user_utxos_fee returns an internal error', async () => {
@@ -574,6 +631,36 @@ describe('backend.canister', () => {
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
 			await expect(res).rejects.toThrowError();
+		});
+
+		it('should return rateLimitInfo if RateLimited error is returned', async () => {
+			const response = {
+				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			};
+
+			service.btc_select_user_utxos_fee.mockResolvedValue(
+				response as unknown as BtcSelectUserUtxosFeeResult
+			);
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			expect(service.btc_select_user_utxos_fee).toHaveBeenCalledWith(
+				btcSelectUserUtxosFeeEndpointParams
+			);
+			expect(res).toStrictEqual({
+				response: {
+					fee_satoshis: ZERO,
+					utxos: []
+				},
+				rateLimitInfo: {
+					endpoint: 'btc_select_user_utxos_fee',
+					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
+				}
+			});
 		});
 	});
 

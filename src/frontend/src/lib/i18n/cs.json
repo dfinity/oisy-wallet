@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "Odeslat",
+			"send_token": "",
 			"destination": "Cíl",
 			"source": "Zdroj",
 			"balance": "Zůstatek",
@@ -1503,8 +1504,6 @@
 		},
 		"label": {
 			"reimbursement": "Náhrada",
-			"twin_token_sent": "$twinToken odeslán",
-			"ck_token_sent": "$ckToken odeslán",
 			"twin_token_converted": "Převedeno z $twinToken",
 			"ck_token_converted": "Převedeno z $ckToken",
 			"sending_twin_token": "Odesílání $twinToken",
@@ -1960,7 +1959,7 @@
 			"claim_now": "Vybrat nyní",
 			"claiming": "Vybírání...",
 			"get_tokens_with_amount": "Získat až $amount $token_symbol",
-			"get_tokens": "Získat více $token_symbol",
+			"get_asset_tokens": "",
 			"reward_claimed": "Odměna vybrána",
 			"staked": "Stakováno",
 			"unstaked": "Odstakováno",

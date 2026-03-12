@@ -5,6 +5,7 @@ use shared::{
     std_canister_status,
     types::{
         agreement::UpdateUserAgreementsRequest,
+        api_keys::ApiKeys,
         backend_config::{Arg, Config},
         bitcoin::{
             BtcAddPendingTransactionRequest, BtcGetFeePercentilesRequest,
@@ -106,13 +107,13 @@ mod tests {
 
     /// Checks candid interface type compatibility with production.
     #[test]
-    #[ignore] // Not run unless requested explicitly
+    #[ignore = "Not run unless requested explicitly"]
     fn check_candid_interface_compatibility() {
         let canister_interface = super::__export_service();
         let prod_interface_file = workspace_dir().join("target/ic/candid/backend.ic.did");
         service_compatible(
             CandidSource::Text(&canister_interface),
-            CandidSource::File(&prod_interface_file.as_path()),
+            CandidSource::File(prod_interface_file.as_path()),
         )
         .expect("The proposed canister interface is not compatible with the production interface");
     }

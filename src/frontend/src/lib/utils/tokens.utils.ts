@@ -26,7 +26,12 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import type { TokensSortType } from '$lib/types/tokens-sort';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { areAddressesPartiallyEqual, getCaseSensitiveness } from '$lib/utils/address.utils';
+import {
+	areAddressesEqual,
+	areAddressesPartiallyEqual,
+	getCaseSensitiveness
+} from '$lib/utils/address.utils';
+import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
@@ -726,4 +731,57 @@ export const getCodebaseTokenIconPath = <T extends Token>({
 
 		return `/icons/${networkSymbol}/${identifier}.${extension}`;
 	}
+};
+
+export const findPutativeToken = <T extends Token>({
+	tokens,
+	identifier
+}: {
+	tokens: T[];
+	identifier: string | undefined;
+}): T | undefined =>
+	nonNullish(identifier) && tokens.length > 0
+		? tokens.find((t) => {
+				const address2 = getTokenIdentifier(t);
+
+				return areAddressesEqual({
+					address1: identifier,
+					address2,
+					networkId: t.network.id
+				});
+			})
+		: undefined;
+
+/**
+ * Compares two token arrays by length, token identity (symbol id),
+ * and — for toggleable tokens — the `enabled` flag.
+ * Fast O(n) check — catches the common case of identical token lists
+ * produced from unchanged inputs.
+ */
+// eslint-disable-next-line local-rules/prefer-object-params -- Being a comparison function, it's more ergonomic to take two separate arrays than an object param with two arrays.
+export const tokenListEqual = <T extends { id: symbol }>(a: T[], b: T[]): boolean => {
+	if (a.length !== b.length) {
+		return false;
+	}
+
+	return a.every((item, i) => {
+		const other = b[i];
+
+		if (item.id !== other.id) {
+			return false;
+		}
+
+		const itemHasEnabled = 'enabled' in item;
+		const otherHasEnabled = 'enabled' in other;
+
+		if (itemHasEnabled !== otherHasEnabled) {
+			return false;
+		}
+
+		if (itemHasEnabled && otherHasEnabled) {
+			return (item as { enabled: unknown }).enabled === (other as { enabled: unknown }).enabled;
+		}
+
+		return true;
+	});
 };

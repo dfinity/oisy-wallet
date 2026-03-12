@@ -3,7 +3,7 @@ pub mod pic_canister;
 use std::{env, fs::read, ops::RangeBounds, sync::Arc, time::Duration};
 
 use candid::{encode_one, CandidType, Principal};
-use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
+use ic_cdk::bitcoin_canister::Network as BitcoinNetwork;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{PocketIc, PocketIcBuilder};
@@ -156,7 +156,7 @@ impl BackendBuilder {
             index_id: None,
         };
 
-        encode_one(&LedgerArgs::Init(init_config)).unwrap()
+        encode_one(LedgerArgs::Init(init_config)).unwrap()
     }
 
     /// The default argument to pass to the backend canister.
@@ -211,14 +211,14 @@ impl Default for BackendBuilder {
 // Customisation
 impl BackendBuilder {
     /// Sets custom controllers for the backend canister.
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn with_controllers(mut self, controllers: Vec<Principal>) -> Self {
         self.controllers = controllers;
         self
     }
 
     /// Configures the deployment to use a custom Wasm file.
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn with_wasm(mut self, wasm_path: &str) -> Self {
         self.wasm_path = wasm_path.to_string();
         self
@@ -251,10 +251,12 @@ impl BackendBuilder {
 
     /// Reads the cycles ledger Wasm bytes from the configured path.
     fn cycles_ledger_wasm_bytes(&self) -> Vec<u8> {
-        read(self.cycles_ledger_wasm_path.clone()).expect(&format!(
-            "Could not find the cycles ledger wasm: {}",
-            self.cycles_ledger_wasm_path
-        ))
+        read(self.cycles_ledger_wasm_path.clone()).unwrap_or_else(|_| {
+            panic!(
+                "Could not find the cycles ledger wasm: {}",
+                self.cycles_ledger_wasm_path
+            )
+        })
     }
 }
 // Builder
@@ -360,13 +362,12 @@ impl BackendBuilder {
 
 impl BackendBuilder {
     /// Enables the cycles ledger canister
-    #[allow(dead_code)]
     pub fn with_cycles_ledger(mut self, cycle_ledger_enabled: bool) -> Self {
         self.cycles_ledger_enabled = cycle_ledger_enabled;
         self
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn with_auto_progress(mut self, auto_progress_enabled: bool) -> Self {
         self.auto_progress_enabled = auto_progress_enabled;
         self
@@ -438,7 +439,7 @@ pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
 }
 
 impl PicBackend {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn upgrade_latest_wasm(&self, encoded_arg: Option<Vec<u8>>) -> Result<(), String> {
         let backend_wasm_path =
             env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());

@@ -7,6 +7,7 @@
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TOKEN_CARD, type TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
@@ -20,7 +21,7 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
-	import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		data: CardData;
@@ -60,8 +61,6 @@
 				})
 			: undefined
 	);
-
-	let name = $derived(getTokenDisplayName(data));
 </script>
 
 <div class="flex w-full flex-col">
@@ -130,11 +129,8 @@
 							<Divider />
 						{/if}{network}
 					{/each}
-				{:else if !asNetwork && nonNullish(data.network)}
-					<span class="text-primary">{name}</span>
-					{#if name !== data.network.name}
-						{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
-					{/if}
+				{:else if !asNetwork}
+					<TokenNameAndNetwork {data} />
 				{/if}
 			</span>
 		{/snippet}

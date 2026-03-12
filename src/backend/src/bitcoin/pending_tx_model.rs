@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use candid::Principal;
-use ic_cdk::api::management_canister::bitcoin::Utxo;
+use ic_cdk::bitcoin_canister::Utxo;
 use shared::types::bitcoin::StoredPendingTransaction;
 
 use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
@@ -185,11 +185,12 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
 mod tests {
     use std::{cell::RefCell, collections::HashMap, sync::LazyLock};
 
-    use ic_cdk::api::management_canister::bitcoin::Outpoint;
+    use ic_cdk::bitcoin_canister::Outpoint;
     use ic_stable_structures::{
         memory_manager::{MemoryId, MemoryManager},
         DefaultMemoryImpl,
     };
+    use pretty_assertions::assert_eq;
 
     use super::*;
 
@@ -197,7 +198,7 @@ mod tests {
     const TXID_B: &[u8] = &[0xBB; 32];
     const TXID_C: &[u8] = &[0xCC; 32];
 
-    const UTXO_1: LazyLock<Utxo> = LazyLock::new(|| Utxo {
+    static UTXO_1: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
             txid: TXID_A.to_vec(),
             vout: 0,
@@ -205,7 +206,7 @@ mod tests {
         value: 1000,
         height: 100,
     });
-    const UTXO_2: LazyLock<Utxo> = LazyLock::new(|| Utxo {
+    static UTXO_2: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
             txid: TXID_A.to_vec(),
             vout: 1,
@@ -213,7 +214,7 @@ mod tests {
         value: 2000,
         height: 120,
     });
-    const UTXO_3: LazyLock<Utxo> = LazyLock::new(|| Utxo {
+    static UTXO_3: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
             txid: TXID_B.to_vec(),
             vout: 2,
@@ -221,7 +222,7 @@ mod tests {
         value: 3000,
         height: 150,
     });
-    const UTXO_4: LazyLock<Utxo> = LazyLock::new(|| Utxo {
+    static UTXO_4: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
             txid: TXID_B.to_vec(),
             vout: 2,
@@ -229,7 +230,7 @@ mod tests {
         value: 8000,
         height: 160,
     });
-    const UTXO_5: LazyLock<Utxo> = LazyLock::new(|| Utxo {
+    static UTXO_5: LazyLock<Utxo> = LazyLock::new(|| Utxo {
         outpoint: Outpoint {
             txid: TXID_C.to_vec(),
             vout: 9,

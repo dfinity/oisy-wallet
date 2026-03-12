@@ -1,11 +1,13 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
 	AllowSigningResponse,
-	BitcoinNetwork,
+	Network as BitcoinNetwork,
 	Contact,
 	CredentialSpec,
 	GetUserProfileError,
 	IIDelegationChain,
+	PendingTransaction,
+	SelectedUtxosFeeResponse,
 	UserProfile,
 	Utxo
 } from '$declarations/backend/backend.did';
@@ -37,6 +39,21 @@ export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfile
 export interface RateLimitInfo {
 	endpoint: string;
 	limiter: string;
+}
+
+export interface AddPendingTransactionOutcome {
+	response: true;
+	rateLimitInfo?: RateLimitInfo;
+}
+
+export interface GetPendingTransactionsOutcome {
+	response: PendingTransaction[];
+	rateLimitInfo?: RateLimitInfo;
+}
+
+export interface SelectedUtxosFeeOutcome {
+	response: SelectedUtxosFeeResponse;
+	rateLimitInfo?: RateLimitInfo;
 }
 
 export interface AllowSigningOutcome {

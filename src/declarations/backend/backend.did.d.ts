@@ -48,6 +48,12 @@ export interface AllowSigningResponse {
 }
 export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
+export interface ApiKeys {
+	alchemy_api_key: [] | [string];
+	etherscan_api_key: [] | [string];
+	coingecko_api_key: [] | [string];
+	infura_api_key: [] | [string];
+}
 export type ApproveError =
 	| {
 			GenericError: { message: string; error_code: bigint };
@@ -62,18 +68,19 @@ export type ApproveError =
 	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
-export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
 export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
 	| { EmptyUtxos: null }
 	| { DuplicateUtxos: null }
 	| { InvalidDelegationChain: { msg: string } }
+	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } }
 	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
 	ii_delegation_chain: [] | [IIDelegationChain];
 	network: BitcoinNetwork;
+	network: Network;
 	utxos: Array<Utxo>;
 }
 export type BtcAddPendingTransactionResult = { Ok: null } | { Err: BtcAddPendingTransactionError };
@@ -84,7 +91,7 @@ export type BtcAddress =
 	| { P2SH: string }
 	| { P2TR: string };
 export interface BtcGetFeePercentilesRequest {
-	network: BitcoinNetwork;
+	network: Network;
 }
 export interface BtcGetFeePercentilesResponse {
 	fee_percentiles: BigUint64Array;
@@ -94,14 +101,16 @@ export type BtcGetFeePercentilesResult =
 			Ok: BtcGetFeePercentilesResponse;
 	  }
 	| { Err: SelectedUtxosFeeError };
-export type BtcGetPendingTransactionsError = {
-	InternalError: { msg: string };
-};
+export type BtcGetPendingTransactionsError =
+	| {
+			RateLimited: RateLimitError;
+	  }
+	| { InternalError: { msg: string } };
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
 export interface BtcGetPendingTransactionsRequest {
-	network: BitcoinNetwork;
+	network: Network;
 	address: string;
 }
 export type BtcGetPendingTransactionsResult =
@@ -266,6 +275,7 @@ export interface InitArg {
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array];
 }
+export type Network = { mainnet: null } | { regtest: null } | { testnet: null };
 export interface NetworkSettings {
 	enabled: boolean;
 	is_testnet: boolean;
@@ -311,9 +321,10 @@ export interface SaveNetworksSettingsRequest {
 }
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
+	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } };
 export interface SelectedUtxosFeeRequest {
-	network: BitcoinNetwork;
+	network: Network;
 	amount_satoshis: bigint;
 	min_confirmations: [] | [number];
 }
@@ -576,6 +587,12 @@ export interface _SERVICE {
 	 */
 	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
 	/**
+	 * Returns the currently stored API keys.
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	get_api_keys: ActorMethod<[], ApiKeys>;
+	/**
 	 * API method to get cycle balance and burn rate.
 	 */
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
@@ -642,6 +659,12 @@ export interface _SERVICE {
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
+	/**
+	 * Overwrites the stored API keys.
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_api_keys: ActorMethod<[ApiKeys], undefined>;
 	/**
 	 * Add or update custom token for the user.
 	 */

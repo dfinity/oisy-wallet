@@ -1,5 +1,5 @@
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
-import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
+import { WBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.wbtc.env';
 import type { RequiredErc4626Token } from '$eth/types/erc4626';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';

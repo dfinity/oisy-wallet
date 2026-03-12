@@ -105,20 +105,7 @@ export const idlFactory = ({ IDL }) => {
 		Ok: AllowSigningResponse,
 		Err: AllowSigningError
 	});
-	const Delegation = IDL.Record({
-		pubkey: IDL.Vec(IDL.Nat8),
-		targets: IDL.Opt(IDL.Vec(IDL.Principal)),
-		expiration: IDL.Nat64
-	});
-	const SignedDelegation = IDL.Record({
-		signature: IDL.Vec(IDL.Nat8),
-		delegation: Delegation
-	});
-	const IIDelegationChain = IDL.Record({
-		public_key: IDL.Vec(IDL.Nat8),
-		delegations: IDL.Vec(SignedDelegation)
-	});
-	const BitcoinNetwork = IDL.Variant({
+	const Network = IDL.Variant({
 		mainnet: IDL.Null,
 		regtest: IDL.Null,
 		testnet: IDL.Null
@@ -134,15 +121,14 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const BtcAddPendingTransactionRequest = IDL.Record({
 		txid: IDL.Vec(IDL.Nat8),
-		ii_delegation_chain: IDL.Opt(IIDelegationChain),
-		network: BitcoinNetwork,
+		network: Network,
 		utxos: IDL.Vec(Utxo)
 	});
 	const BtcAddPendingTransactionError = IDL.Variant({
 		InvalidUtxos: IDL.Null,
 		EmptyUtxos: IDL.Null,
 		DuplicateUtxos: IDL.Null,
-		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text }),
 		UtxosAlreadyReserved: IDL.Null
 	});
@@ -150,14 +136,13 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: BtcAddPendingTransactionError
 	});
-	const BtcGetFeePercentilesRequest = IDL.Record({
-		network: BitcoinNetwork
-	});
+	const BtcGetFeePercentilesRequest = IDL.Record({ network: Network });
 	const BtcGetFeePercentilesResponse = IDL.Record({
 		fee_percentiles: IDL.Vec(IDL.Nat64)
 	});
 	const SelectedUtxosFeeError = IDL.Variant({
 		PendingTransactions: IDL.Null,
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
 	const BtcGetFeePercentilesResult = IDL.Variant({
@@ -165,7 +150,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: SelectedUtxosFeeError
 	});
 	const BtcGetPendingTransactionsRequest = IDL.Record({
-		network: BitcoinNetwork,
+		network: Network,
 		address: IDL.Text
 	});
 	const PendingTransaction = IDL.Record({
@@ -176,6 +161,7 @@ export const idlFactory = ({ IDL }) => {
 		transactions: IDL.Vec(PendingTransaction)
 	});
 	const BtcGetPendingTransactionsError = IDL.Variant({
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
 	const BtcGetPendingTransactionsResult = IDL.Variant({
@@ -183,7 +169,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: BtcGetPendingTransactionsError
 	});
 	const SelectedUtxosFeeRequest = IDL.Record({
-		network: BitcoinNetwork,
+		network: Network,
 		amount_satoshis: IDL.Nat64,
 		min_confirmations: IDL.Opt(IDL.Nat32)
 	});
@@ -348,6 +334,12 @@ export const idlFactory = ({ IDL }) => {
 	const GetAllowedCyclesResult = IDL.Variant({
 		Ok: GetAllowedCyclesResponse,
 		Err: GetAllowedCyclesError
+	});
+	const ApiKeys = IDL.Record({
+		alchemy_api_key: IDL.Opt(IDL.Text),
+		etherscan_api_key: IDL.Opt(IDL.Text),
+		coingecko_api_key: IDL.Opt(IDL.Text),
+		infura_api_key: IDL.Opt(IDL.Text)
 	});
 	const CanisterStatusType = IDL.Variant({
 		stopped: IDL.Null,
@@ -519,6 +511,7 @@ export const idlFactory = ({ IDL }) => {
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
 		get_account_creation_timestamps: IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))]),
 		get_allowed_cycles: IDL.Func([], [GetAllowedCyclesResult], []),
+		get_api_keys: IDL.Func([], [ApiKeys]),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult]),
 		get_contacts: IDL.Func([], [GetContactsResult]),
@@ -527,6 +520,7 @@ export const idlFactory = ({ IDL }) => {
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
+		set_api_keys: IDL.Func([ApiKeys], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),

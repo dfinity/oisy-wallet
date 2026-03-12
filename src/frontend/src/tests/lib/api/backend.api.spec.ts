@@ -19,6 +19,7 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { POUH_ISSUER_CANISTER_ID } from '$lib/constants/app.constants';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import type {
+	AddPendingTransactionOutcome,
 	AddUserCredentialParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
@@ -328,7 +329,7 @@ describe('backend.api', () => {
 			iiDelegationChain: mockIIDelegationChain
 		};
 
-		const mockResponse = true;
+		const mockResponse: AddPendingTransactionOutcome = { response: true };
 
 		beforeEach(() => {
 			backendCanisterMock.btcAddPendingTransaction.mockResolvedValue(mockResponse);
@@ -377,14 +378,14 @@ describe('backend.api', () => {
 		];
 
 		beforeEach(() => {
-			backendCanisterMock.btcGetPendingTransaction.mockResolvedValue(mockResponse);
+			backendCanisterMock.btcGetPendingTransactions.mockResolvedValue({ response: mockResponse });
 		});
 
 		it('should successfully call btcGetPendingTransaction endpoint', async () => {
 			const result = await getPendingBtcTransactions(mockParams);
 
-			expect(result).toEqual(mockResponse);
-			expect(backendCanisterMock.btcGetPendingTransaction).toHaveBeenCalledExactlyOnceWith({
+			expect(result).toEqual({ response: mockResponse });
+			expect(backendCanisterMock.btcGetPendingTransactions).toHaveBeenCalledExactlyOnceWith({
 				network: { mainnet: null },
 				address: 'address'
 			});
@@ -397,7 +398,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if getPendingBtcTransactions throws', async () => {
-			backendCanisterMock.btcGetPendingTransaction.mockImplementation(() => {
+			backendCanisterMock.btcGetPendingTransactions.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 

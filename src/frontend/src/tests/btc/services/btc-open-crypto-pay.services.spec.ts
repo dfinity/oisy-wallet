@@ -246,7 +246,7 @@ describe('btc-open-crypto-pay.services', () => {
 				signed_transaction_hex: 'abc123hex'
 			});
 			vi.mocked(fetchOpenCryptoPay).mockResolvedValue(undefined);
-			vi.mocked(backendApi.addPendingBtcTransaction).mockResolvedValue(true);
+			vi.mocked(backendApi.addPendingBtcTransaction).mockResolvedValue({ response: true });
 		});
 
 		it('should call signBtc with correct parameters', async () => {

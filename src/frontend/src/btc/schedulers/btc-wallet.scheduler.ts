@@ -118,7 +118,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			});
 
 			return {
-				transactions: pendingTransactions.map((transaction) => ({
+				transactions: pendingTransactions.response.map((transaction) => ({
 					data: transaction,
 					certified: false
 				}))

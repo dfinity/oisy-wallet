@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "Send",
+			"send_token": "Send $token",
 			"destination": "Destination",
 			"source": "Source",
 			"balance": "Balance",
@@ -1503,8 +1504,6 @@
 		},
 		"label": {
 			"reimbursement": "Reimbursement",
-			"twin_token_sent": "$twinToken sent",
-			"ck_token_sent": "$ckToken sent",
 			"twin_token_converted": "Converted from $twinToken",
 			"ck_token_converted": "Converted from $ckToken",
 			"sending_twin_token": "Sending $twinToken",
@@ -1960,7 +1959,7 @@
 			"claim_now": "Claim now",
 			"claiming": "Claiming...",
 			"get_tokens_with_amount": "Get up to $amount $token_symbol",
-			"get_tokens": "Get more $token_symbol",
+			"get_asset_tokens": "Get $token_symbol",
 			"reward_claimed": "Reward claimed",
 			"staked": "Staked",
 			"unstaked": "Unstaked",

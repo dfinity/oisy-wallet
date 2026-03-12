@@ -1,37 +1,39 @@
-use candid::{CandidType, Deserialize, Principal};
-use serde::Serialize;
+use candid::{CandidType, Deserialize};
 
-use super::{
-    account::{EthAddress, SolPrincipal},
-    network::marker_trait::{BitcoinMainnet, BitcoinRegtest, BitcoinTestnet, InternetComputer},
-};
-use crate::types::network::marker_trait::Network;
+use super::custom_token::{ChainId, ErcTokenId, LedgerId, SplTokenId};
 
-/// A marker trait, used to indicate that a type can be used a token identifier for a given network.
-pub trait TokenId<T>
-where
-    T: Network,
-{
+/// A unified token identifier covering both native and custom tokens for the main supported chains.
+/// Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
+/// selected native tokens (e.g., ETH, ICP, SOL, BTC) and distinguishes several ERC sub-standards.
+/// Suitable for flows that need to reference one of these supported tokens: transactions, activity,
+/// etc.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
+#[repr(u8)]
+pub enum TokenId {
+    /// Native EVM token (ETH, MATIC, BNB, etc.) identified by chain ID
+    EvmNative(ChainId) = 0,
+    /// ERC-20 token on an EVM chain
+    Erc20(ErcTokenId, ChainId) = 1,
+    /// ERC-721 NFT on an EVM chain
+    Erc721(ErcTokenId, ChainId) = 2,
+    /// ERC-1155 multi-token on an EVM chain
+    Erc1155(ErcTokenId, ChainId) = 3,
+    /// ERC-4626 vault token on an EVM chain
+    Erc4626(ErcTokenId, ChainId) = 4,
+    /// ICRC token on ICP
+    Icrc(LedgerId) = 5,
+    /// Native ICP
+    IcpNative = 6,
+    /// SPL token on Solana mainnet
+    SplMainnet(SplTokenId) = 7,
+    /// SPL token on Solana devnet
+    SplDevnet(SplTokenId) = 8,
+    /// Native SOL on mainnet
+    SolNativeMainnet = 9,
+    /// Native SOL on devnet
+    SolNativeDevnet = 10,
+    /// Native BTC on mainnet
+    BtcNativeMainnet = 11,
+    /// Native BTC on testnet
+    BtcNativeTestnet = 12,
 }
-
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub enum BtcTokenId {
-    Native,
-}
-impl TokenId<BitcoinMainnet> for BtcTokenId {}
-impl TokenId<BitcoinTestnet> for BtcTokenId {}
-impl TokenId<BitcoinRegtest> for BtcTokenId {}
-
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub enum IcrcTokenId {
-    Native,
-    Icrc {
-        ledger: Principal,
-        index: Option<Principal>,
-    },
-}
-impl TokenId<InternetComputer> for IcrcTokenId {}
-
-pub type SolTokenId = SolPrincipal;
-
-pub type EthTokenId = EthAddress;

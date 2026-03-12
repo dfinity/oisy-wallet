@@ -4,6 +4,7 @@ use std::{
 };
 
 use candid::Principal;
+use ic_cdk::api::msg_caller;
 use shared::types::signer::RateLimitError;
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
@@ -61,7 +62,7 @@ impl RateLimiter {
     /// Records the call timestamp when within limits; returns
     /// [`RateLimitError`] when the limit has been reached.
     pub fn check_caller(&self) -> Result<(), RateLimitError> {
-        self.check_principal(ic_cdk::caller())
+        self.check_principal(msg_caller())
     }
 
     /// Checks the rate limit for a given principal at a specific timestamp.
@@ -96,7 +97,13 @@ impl RateLimiter {
 
 #[cfg(test)]
 mod tests {
-    use shared::types::signer::AllowSigningError;
+    use pretty_assertions::assert_eq;
+    use shared::types::{
+        bitcoin::{
+            BtcAddPendingTransactionError, BtcGetPendingTransactionsError, SelectedUtxosFeeError,
+        },
+        signer::AllowSigningError,
+    };
 
     use super::*;
 
@@ -111,7 +118,7 @@ mod tests {
         let rl = RateLimiter::new(3, 10 * ONE_SEC);
         let caller = test_principal(1);
 
-        assert!(rl.check_at(caller, 1 * ONE_SEC).is_ok());
+        assert!(rl.check_at(caller, ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 2 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 3 * ONE_SEC).is_ok());
     }
@@ -121,7 +128,7 @@ mod tests {
         let rl = RateLimiter::new(3, 10 * ONE_SEC);
         let caller = test_principal(1);
 
-        assert!(rl.check_at(caller, 1 * ONE_SEC).is_ok());
+        assert!(rl.check_at(caller, ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 2 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 3 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 4 * ONE_SEC).is_err());
@@ -132,7 +139,7 @@ mod tests {
         let rl = RateLimiter::new(2, 5 * ONE_SEC);
         let caller = test_principal(1);
 
-        assert!(rl.check_at(caller, 1 * ONE_SEC).is_ok());
+        assert!(rl.check_at(caller, ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 2 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 3 * ONE_SEC).is_err());
 
@@ -159,7 +166,7 @@ mod tests {
         let caller = test_principal(1);
 
         // Fill window: [t=1, t=3, t=5]
-        assert!(rl.check_at(caller, 1 * ONE_SEC).is_ok());
+        assert!(rl.check_at(caller, ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 3 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 5 * ONE_SEC).is_ok());
         assert!(rl.check_at(caller, 5 * ONE_SEC).is_err());
@@ -246,5 +253,70 @@ mod tests {
         let caller = test_principal(1);
 
         assert!(rl.check_at(caller, ONE_SEC).is_err());
+    }
+
+    #[test]
+    fn selected_utxos_fee_error_carries_rate_limit_details() {
+        let rl = RateLimiter::new(1, 60 * ONE_SEC);
+        let caller = test_principal(42);
+
+        rl.check_at(caller, ONE_SEC).unwrap();
+
+        let res: Result<(), SelectedUtxosFeeError> = rl
+            .check_at(caller, 2 * ONE_SEC)
+            .map_err(SelectedUtxosFeeError::RateLimited);
+
+        match res.unwrap_err() {
+            SelectedUtxosFeeError::RateLimited(e) => {
+                assert_eq!(e.max_calls, 1);
+                assert_eq!(e.window_ns, 60 * ONE_SEC);
+                assert_eq!(e.caller, caller);
+            }
+            other => panic!("expected RateLimited, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn btc_add_pending_tx_error_carries_rate_limit_details() {
+        let rl = RateLimiter::new(1, 60 * ONE_SEC);
+        let caller = test_principal(42);
+
+        rl.check_at(caller, ONE_SEC).unwrap();
+
+        let res: Result<(), BtcAddPendingTransactionError> = rl
+            .check_at(caller, 2 * ONE_SEC)
+            .map_err(BtcAddPendingTransactionError::RateLimited);
+
+        let err = res.unwrap_err();
+
+        let BtcAddPendingTransactionError::RateLimited(e) = err else {
+            panic!("expected RateLimited");
+        };
+
+        assert_eq!(e.max_calls, 1);
+        assert_eq!(e.window_ns, 60 * ONE_SEC);
+        assert_eq!(e.caller, caller);
+    }
+
+    #[test]
+    fn btc_get_pending_tx_error_carries_rate_limit_details() {
+        let rl = RateLimiter::new(1, 60 * ONE_SEC);
+        let caller = test_principal(42);
+
+        rl.check_at(caller, ONE_SEC).unwrap();
+
+        let res: Result<(), BtcGetPendingTransactionsError> = rl
+            .check_at(caller, 2 * ONE_SEC)
+            .map_err(BtcGetPendingTransactionsError::RateLimited);
+
+        let err = res.unwrap_err();
+
+        let BtcGetPendingTransactionsError::RateLimited(e) = err else {
+            panic!("expected RateLimited");
+        };
+
+        assert_eq!(e.max_calls, 1);
+        assert_eq!(e.window_ns, 60 * ONE_SEC);
+        assert_eq!(e.caller, caller);
     }
 }

@@ -821,6 +821,7 @@
 	"send": {
 		"text": {
 			"send": "Отправить",
+			"send_token": "",
 			"destination": "Получатель",
 			"source": "Источник",
 			"balance": "Баланс",
@@ -1503,8 +1504,6 @@
 		},
 		"label": {
 			"reimbursement": "Возмещение",
-			"twin_token_sent": "$twinToken отправлен",
-			"ck_token_sent": "$ckToken отправлен",
 			"twin_token_converted": "Обменяно из $twinToken",
 			"ck_token_converted": "Обменяно из $ckToken",
 			"sending_twin_token": "Отправка $twinToken",
@@ -1960,7 +1959,7 @@
 			"claim_now": "Забрать сейчас",
 			"claiming": "Запрос",
 			"get_tokens_with_amount": "Получить до $amount $token_symbol",
-			"get_tokens": "Получить $token_symbol",
+			"get_asset_tokens": "",
 			"reward_claimed": "Награда получена",
 			"staked": "Застейкано",
 			"unstaked": "Разстейкано",

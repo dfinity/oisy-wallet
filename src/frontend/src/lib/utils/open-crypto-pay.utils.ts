@@ -8,6 +8,11 @@ import {
 } from '$eth/utils/eth-open-crypto-pay.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { getPendingTransactions } from '$icp/utils/btc.utils';
+import {
+	enrichIcPayableToken,
+	isIcPayableToken,
+	validateIcTransfer
+} from '$icp/utils/ic-open-crypto-pay.utils';
 import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_EVENTS_KEYS } from '$lib/enums/plausible';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -23,7 +28,8 @@ import type {
 	PaymentMethodData,
 	PrepareTokensParams,
 	ValidatedBtcPaymentData,
-	ValidatedEthPaymentData
+	ValidatedEthPaymentData,
+	ValidatedIcPaymentData
 } from '$lib/types/open-crypto-pay';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
@@ -192,9 +198,9 @@ export const prepareBasePayableTokens = ({
  * Currently, supports:
  * - Bitcoin
  * - Ethereum/EVM networks
+ * - ICP/ICRC tokens
  *
  * Future support:
- * - ICP
  * - Solana
  *
  * @param token - Token with fee data to enrich
@@ -229,6 +235,14 @@ const enrichTokenWithUsdAndBalance = ({
 		return enrichEthEvmPayableToken({
 			token,
 			nativeTokens,
+			exchanges,
+			balances
+		});
+	}
+
+	if (isIcPayableToken(token)) {
+		return enrichIcPayableToken({
+			token,
 			exchanges,
 			balances
 		});
@@ -282,7 +296,7 @@ export const validateDecodedData = ({
 	token: PayableTokenWithConvertedAmount;
 	amount: bigint;
 	uri: string;
-}): ValidatedEthPaymentData | ValidatedBtcPaymentData | undefined => {
+}): ValidatedEthPaymentData | ValidatedBtcPaymentData | ValidatedIcPaymentData | undefined => {
 	if (isNullish(decodedData)) {
 		throw new Error(get(i18n).scanner.error.data_is_incompleted);
 	}
@@ -297,6 +311,10 @@ export const validateDecodedData = ({
 
 	if (isDefaultEthereumToken(token) || isTokenErc20(token)) {
 		return validateEthEvmTransfer({ decodedData, amount, token, uri });
+	}
+
+	if (isIcPayableToken(token)) {
+		return validateIcTransfer({ decodedData, amount, token });
 	}
 };
 

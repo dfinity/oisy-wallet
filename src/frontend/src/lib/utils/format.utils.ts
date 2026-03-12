@@ -320,6 +320,39 @@ export const formatCurrency = ({
 	return formatted;
 };
 
+export const formatCurrencyAsNumber = ({
+	value,
+	currency,
+	exchangeRate,
+	language
+}: {
+	value: number;
+	currency: Currency;
+	exchangeRate: CurrencyExchangeData;
+	language: Languages;
+}): number | undefined => {
+	const formatted = formatCurrency({
+		value,
+		currency,
+		exchangeRate,
+		language,
+		hideSymbol: true,
+		normalizeSeparators: true
+	});
+
+	if (isNullish(formatted)) {
+		return;
+	}
+
+	try {
+		const number = Number(formatted);
+
+		return isNaN(number) ? undefined : number;
+	} catch {
+		// In case the formatted string cannot be parsed to a number, we return undefined
+	}
+};
+
 export const formatStakeApyNumber = (apy: number): string => {
 	if (apy === 0) {
 		return '0';

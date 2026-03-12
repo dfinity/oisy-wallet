@@ -1,6 +1,6 @@
 //! Functions [inspired by ckBTC Minter](https://github.com/dfinity/ic/blob/285a5db07da50a4e350ec43bf3b488cc6fe36102/rs/bitcoin/ckbtc/minter/src/lib.rs#L1258)
 
-use ic_cdk::api::management_canister::bitcoin::Utxo;
+use ic_cdk::bitcoin_canister::Utxo;
 
 /// Selects a subset of UTXOs with the specified total target value and removes
 /// the selected UTXOs from the available set.
@@ -115,12 +115,13 @@ pub fn estimate_fee(
 
 #[cfg(test)]
 mod tests {
-    use ic_cdk::api::management_canister::bitcoin::Outpoint;
+    use ic_cdk::bitcoin_canister::Outpoint;
+    use pretty_assertions::assert_eq;
 
     // Import the outer scope
     use super::*;
 
-    fn assert_utxos_eq(result_utxos: Vec<Utxo>, expected_utxos: Vec<Utxo>) {
+    fn assert_utxos_eq(result_utxos: &[Utxo], expected_utxos: &[Utxo]) {
         assert_eq!(result_utxos.len(), expected_utxos.len(),);
 
         for (user, expected) in result_utxos.iter().zip(expected_utxos.iter()) {
@@ -170,7 +171,7 @@ mod tests {
         };
         let mut available_utxos: Vec<Utxo> = vec![utxo_50, utxo_120.clone(), utxo_200];
         let selected_utxos = utxos_selection(target, &mut available_utxos, 2);
-        assert_utxos_eq(selected_utxos, vec![utxo_120]);
+        assert_utxos_eq(&selected_utxos, &[utxo_120]);
     }
 
     #[test]
@@ -236,7 +237,7 @@ mod tests {
         };
         let mut available_utxos: Vec<Utxo> = vec![utxo_50.clone(), utxo_80.clone(), utxo_60];
         let selected_utxos = utxos_selection(target, &mut available_utxos, 2);
-        assert_utxos_eq(selected_utxos, vec![utxo_80, utxo_50]);
+        assert_utxos_eq(&selected_utxos, &[utxo_80, utxo_50]);
     }
 
     #[test]
