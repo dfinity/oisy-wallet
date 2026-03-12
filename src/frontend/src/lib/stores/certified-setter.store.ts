@@ -57,12 +57,17 @@ export const initCertifiedSetterStore = <
 			return;
 		}
 
-		update(
-			(state) =>
-				batch.reduce((acc, { id, data }) => ({ ...acc, [id]: data }), {
-					...(nonNullish(state) && state)
-				}) as CertifiedStoreData<T, Id>
-		);
+		update((state) => {
+			const acc = {
+				...(nonNullish(state) && state)
+			} as NonNullable<CertifiedStoreData<T, Id>>;
+
+			for (const { id, data } of batch) {
+				acc[id] = data;
+			}
+
+			return acc;
+		});
 	};
 
 	return {
