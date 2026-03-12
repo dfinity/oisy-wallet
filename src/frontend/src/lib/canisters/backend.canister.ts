@@ -6,8 +6,6 @@ import type {
 	CustomToken,
 	GetAllowedCyclesResponse,
 	GetUserTransactionsResponse,
-	PendingTransaction,
-	UserTransaction,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -30,12 +28,12 @@ import type {
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
-	GetUserTransactionsParams,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
-	SaveUserTransactionsParams,
+	GetUserTransactionsParams,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SaveUserTransactionsParams,
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateUserExperimentalFeatureSettings

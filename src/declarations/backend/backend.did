@@ -204,7 +204,7 @@ type GetUserTransactionsRequest = record {
 };
 type GetUserTransactionsResponse = record {
 	next_start : opt nat64;
-	newest_block_number : opt nat64;
+	newest_block_index : opt nat64;
 	transactions : vec UserTransaction
 };
 type GetUserTransactionsResult = variant {
@@ -328,7 +328,7 @@ type UserTransaction = record {
 	data : opt text;
 	from : text;
 	hash : text;
-	block_number : nat64;
+	block_index : nat64;
 	chain_id : opt nat64;
 	nonce : opt nat32;
 	timestamp : nat64;

@@ -18,8 +18,9 @@ pub const MAX_GET_USER_TRANSACTIONS_RESULTS: u64 = 100;
 pub struct UserTransaction {
     /// Transaction hash (unique identifier)
     pub hash: String,
-    /// Block number where the transaction was included
-    pub block_number: u64,
+    /// Chain-specific ordering index (EVM block number, Bitcoin block height, Solana slot, ICP
+    /// block index, etc.)
+    pub block_index: u64,
     /// Block timestamp in seconds since epoch
     pub timestamp: u64,
     /// Sender address
@@ -49,9 +50,8 @@ pub struct UserTransaction {
 pub struct GetUserTransactionsRequest {
     /// Which token's transactions to retrieve
     pub token_id: TokenId,
-    /// Cursor for pagination: block number to start before (exclusive).
-    /// `None` returns from the newest transactions.
-    /// `Some(block_number)` returns transactions with `block_number` < this value.
+    /// Opaque pagination cursor returned as `next_start` from a previous response.
+    /// `None` starts from the newest transactions.
     pub start: Option<u64>,
     /// Maximum number of transactions to return (capped at `MAX_GET_USER_TRANSACTIONS_RESULTS`)
     pub max_results: u64,
@@ -62,11 +62,11 @@ pub struct GetUserTransactionsRequest {
 pub struct GetUserTransactionsResponse {
     /// The requested transactions, sorted newest first
     pub transactions: Vec<UserTransaction>,
-    /// Block number of the newest stored transaction for this token.
+    /// Block index of the newest stored transaction for this token.
     /// The frontend should fetch from the network starting after this block.
-    pub newest_block_number: Option<u64>,
-    /// Block number of the oldest transaction in this response, to be used as `start` for the
-    /// next page. `None` if no more older transactions exist.
+    pub newest_block_index: Option<u64>,
+    /// Opaque cursor for the next page. Pass as `start` to fetch older transactions.
+    /// `None` when there are no more older transactions.
     pub next_start: Option<u64>,
 }
 

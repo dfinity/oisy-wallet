@@ -1,10 +1,11 @@
+import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import type { UserTransaction, TokenId as BackendTokenId } from '$declarations/backend/backend.did';
+import { ZERO } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
-import { isNullish, toNullable } from '@dfinity/utils';
+import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
 
 /**
  * Number of blocks behind the tip at which an ETH transaction is considered finalized.
@@ -19,13 +20,13 @@ export const mapTransactionToUserTransaction = (tx: Transaction): UserTransactio
 
 	return {
 		hash: tx.hash,
-		block_number: BigInt(tx.blockNumber ?? 0),
+		block_index: BigInt(tx.blockNumber ?? 0),
 		timestamp: BigInt(tx.timestamp ?? 0),
 		from: tx.from,
 		to: toNullable(tx.to ?? undefined),
-		nonce: toNullable(tx.nonce !== undefined ? tx.nonce : undefined),
-		value: tx.value ?? 0n,
-		chain_id: toNullable(tx.chainId !== undefined ? BigInt(tx.chainId) : undefined),
+		nonce: toNullable(nonNullish(tx.nonce) ? tx.nonce : undefined),
+		value: tx.value ?? ZERO,
+		chain_id: toNullable(nonNullish(tx.chainId) ? BigInt(tx.chainId) : undefined),
 		gas_limit: toNullable(tx.gasLimit ?? undefined),
 		gas_price: toNullable(tx.gasPrice ?? undefined),
 		gas_used: toNullable(tx.gasUsed ?? undefined),
@@ -36,7 +37,7 @@ export const mapTransactionToUserTransaction = (tx: Transaction): UserTransactio
 
 export const mapUserTransactionToTransaction = (stored: UserTransaction): Transaction => ({
 	hash: stored.hash,
-	blockNumber: Number(stored.block_number),
+	blockNumber: Number(stored.block_index),
 	timestamp: Number(stored.timestamp),
 	from: stored.from,
 	to: stored.to.length > 0 ? stored.to[0] : undefined,

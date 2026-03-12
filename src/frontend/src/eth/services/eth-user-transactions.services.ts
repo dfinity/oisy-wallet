@@ -2,13 +2,10 @@ import type { TokenId as BackendTokenId } from '$declarations/backend/backend.di
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import {
 	isTransactionFinalized,
-	mapUserTransactionToTransaction,
-	mapTransactionToUserTransaction
+	mapTransactionToUserTransaction,
+	mapUserTransactionToTransaction
 } from '$eth/utils/user-transactions.utils';
-import {
-	getUserTransactions,
-	saveUserTransactions
-} from '$lib/api/backend.api';
+import { getUserTransactions, saveUserTransactions } from '$lib/api/backend.api';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { authIdentity } from '$lib/derived/auth.derived';
 import type { TokenId } from '$lib/types/token';
@@ -19,7 +16,7 @@ import { get } from 'svelte/store';
 
 /**
  * Loads stored finalized transactions from the backend canister.
- * Returns the transactions and the newest stored block number (for incremental loading).
+ * Returns the transactions and the newest stored block index (for incremental loading).
  */
 export const loadUserTransactions = async ({
 	tokenId,
@@ -31,7 +28,7 @@ export const loadUserTransactions = async ({
 	maxResults?: bigint;
 }): Promise<{
 	transactions: Transaction[];
-	newestBlockNumber: number | undefined;
+	newestBlockIndex: number | undefined;
 	nextStart: bigint | undefined;
 } | null> => {
 	const identity = get(authIdentity);
@@ -49,14 +46,11 @@ export const loadUserTransactions = async ({
 		});
 
 		const transactions = response.transactions.map(mapUserTransactionToTransaction);
-		const newestBlockNumber =
-			response.newest_block_number.length > 0
-				? Number(response.newest_block_number[0])
-				: undefined;
-		const nextStart =
-			response.next_start.length > 0 ? response.next_start[0] : undefined;
+		const newestBlockIndex =
+			response.newest_block_index.length > 0 ? Number(response.newest_block_index[0]) : undefined;
+		const nextStart = response.next_start.length > 0 ? response.next_start[0] : undefined;
 
-		return { transactions, newestBlockNumber, nextStart };
+		return { transactions, newestBlockIndex, nextStart };
 	} catch (err) {
 		console.error('Failed to load stored transactions from backend:', err);
 		return null;
@@ -115,15 +109,15 @@ export const saveFinalizedTransactions = async ({
 export const loadNextEthUserTransactions = async ({
 	transactionTokenId,
 	tokenId,
-	lastBlockNumber
+	cursor
 }: {
 	transactionTokenId: BackendTokenId;
 	tokenId: TokenId;
-	lastBlockNumber: bigint;
+	cursor: bigint;
 }): Promise<{ hasMore: boolean }> => {
 	const result = await loadUserTransactions({
 		tokenId: transactionTokenId,
-		start: lastBlockNumber,
+		start: cursor,
 		maxResults: WALLET_PAGINATION
 	});
 

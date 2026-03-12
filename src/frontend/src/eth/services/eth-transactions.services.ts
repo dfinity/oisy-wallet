@@ -92,9 +92,7 @@ const loadEthTransactions = async ({
 			: null;
 
 		// Fetch from Etherscan starting after the newest stored block (incremental loading)
-		const startBlock = nonNullish(stored?.newestBlockNumber)
-			? stored.newestBlockNumber + 1
-			: 0;
+		const startBlock = nonNullish(stored?.newestBlockIndex) ? stored.newestBlockIndex + 1 : 0;
 
 		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const newTransactions = await transactionsProviders({ address, startBlock });
@@ -121,9 +119,7 @@ const loadEthTransactions = async ({
 		// be saved — the most recent transactions in the batch will be saved on a future load.
 		if (newTransactions.length > 0 && nonNullish(transactionTokenId)) {
 			const maxBlockNumber = Math.max(
-				...newTransactions
-					.filter((tx) => nonNullish(tx.blockNumber))
-					.map((tx) => tx.blockNumber!)
+				...newTransactions.filter((tx) => nonNullish(tx.blockNumber)).map((tx) => tx.blockNumber!)
 			);
 
 			if (maxBlockNumber > 0) {
@@ -131,9 +127,7 @@ const loadEthTransactions = async ({
 					tokenId: transactionTokenId,
 					transactions: newTransactions,
 					currentBlockNumber: maxBlockNumber
-				}).catch((err) =>
-					console.error('Background save of finalized transactions failed:', err)
-				);
+				}).catch((err) => console.error('Background save of finalized transactions failed:', err));
 			}
 		}
 	} catch (err: unknown) {

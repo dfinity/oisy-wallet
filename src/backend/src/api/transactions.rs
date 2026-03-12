@@ -1,9 +1,7 @@
 use ic_cdk::{api::msg_caller, query, update};
 use shared::types::{
     result_types::{GetUserTransactionsResult, SaveUserTransactionsResult},
-    user_transaction::{
-        GetUserTransactionsRequest, SaveUserTransactionsRequest, UserTransactionError,
-    },
+    user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
 };
 
 use crate::{
@@ -36,15 +34,11 @@ pub fn get_user_transactions(request: GetUserTransactionsRequest) -> GetUserTran
 /// Errors are enumerated by: `UserTransactionError`.
 #[update(guard = "caller_is_not_anonymous")]
 pub fn save_user_transactions(request: SaveUserTransactionsRequest) -> SaveUserTransactionsResult {
-    fn inner(request: SaveUserTransactionsRequest) -> Result<(), UserTransactionError> {
-        let principal = msg_caller();
+    let principal = msg_caller();
 
-        mutate_state(|state| {
-            let mut tx_model = model::UserTransactionsModel::new(&mut state.user_transactions);
+    let result = mutate_state(|state| {
+        model::save_transactions(&mut state.user_transactions, principal, &request)
+    });
 
-            tx_model.save_transactions(principal, &request)
-        })
-    }
-
-    inner(request).into()
+    result.into()
 }

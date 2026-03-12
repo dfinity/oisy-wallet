@@ -226,7 +226,7 @@ export interface GetUserTransactionsRequest {
 }
 export interface GetUserTransactionsResponse {
 	next_start: [] | [bigint];
-	newest_block_number: [] | [bigint];
+	newest_block_index: [] | [bigint];
 	transactions: Array<UserTransaction>;
 }
 export type GetUserTransactionsResult =
@@ -355,7 +355,7 @@ export interface UserTransaction {
 	data: [] | [string];
 	from: string;
 	hash: string;
-	block_number: bigint;
+	block_index: bigint;
 	chain_id: [] | [bigint];
 	nonce: [] | [number];
 	timestamp: bigint;
@@ -644,10 +644,7 @@ export interface _SERVICE {
 	 * # Panics
 	 * - If the caller is anonymous.  See: `may_read_user_data`.
 	 */
-	get_user_transactions: ActorMethod<
-		[GetUserTransactionsRequest],
-		GetUserTransactionsResult
-	>;
+	get_user_transactions: ActorMethod<[GetUserTransactionsRequest], GetUserTransactionsResult>;
 	get_user_profile: ActorMethod<[], GetUserProfileResult>;
 	/**
 	 * Checks if the caller has an associated user profile.
@@ -683,10 +680,7 @@ export interface _SERVICE {
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
-	save_user_transactions: ActorMethod<
-		[SaveUserTransactionsRequest],
-		SaveUserTransactionsResult
-	>;
+	save_user_transactions: ActorMethod<[SaveUserTransactionsRequest], SaveUserTransactionsResult>;
 	/**
 	 * Add or update custom token for the user.
 	 */

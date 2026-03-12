@@ -5,7 +5,6 @@ import type {
 	CustomToken,
 	GetAllowedCyclesResponse,
 	GetUserTransactionsResponse,
-	PendingTransaction,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
@@ -22,12 +21,12 @@ import type {
 	CreateContactParams,
 	DeleteContactParams,
 	GetContactParams,
-	GetUserTransactionsParams,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
-	SaveUserTransactionsParams,
+	GetUserTransactionsParams,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
+	SaveUserTransactionsParams,
 	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
 	UpdateContactParams,
