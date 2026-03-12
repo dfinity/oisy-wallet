@@ -56,11 +56,10 @@ export const mapBtcAddPendingTransactionError = (
 		return new CanisterInternalError('Some of the provided UTXOs are already reserved.');
 	}
 
-  	if ('RateLimited' in err) {
+	if ('RateLimited' in err) {
 		return mapRateLimitError(err.RateLimited);
-      	}
-  
-  
+	}
+
 	if ('InvalidDelegationChain' in err) {
 		return new CanisterInternalError(
 			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
