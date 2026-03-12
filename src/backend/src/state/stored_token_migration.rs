@@ -19,7 +19,7 @@ use ic_stable_structures::{
     storable::{Bound, Storable},
     StableBTreeMap,
 };
-use shared::types::{custom_token::CustomTokenId, Timestamp};
+use shared::types::{custom_token::CustomTokenId, token_id::TokenId, Timestamp};
 
 use crate::{
     state::{
@@ -75,7 +75,7 @@ pub(crate) fn extract_legacy_token_activity() -> LegacyEntries {
 
     entries
         .into_iter()
-        .map(|(legacy_key, timestamp)| (StoredTokenId::from(&legacy_key.0), timestamp))
+        .map(|(legacy_key, timestamp)| (StoredTokenId(TokenId::from(&legacy_key.0)), timestamp))
         .collect()
 }
 

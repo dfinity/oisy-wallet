@@ -2,7 +2,7 @@ use std::{borrow::Cow, ops::Deref};
 
 use candid::{decode_one, encode_one, CandidType, Deserialize, Principal};
 use ic_stable_structures::storable::{Blob, Bound, Storable};
-use shared::types::{custom_token::CustomTokenId, token_id::TokenId};
+use shared::types::token_id::TokenId;
 
 #[derive(Default)]
 pub struct Candid<T>(pub T)
@@ -67,22 +67,6 @@ impl Storable for StoredPrincipal {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct StoredTokenId(pub TokenId);
-
-impl From<&CustomTokenId> for StoredTokenId {
-    fn from(id: &CustomTokenId) -> Self {
-        match id {
-            CustomTokenId::Icrc(ledger) => Self(TokenId::Icrc(*ledger)),
-            CustomTokenId::Ethereum(addr, chain_id) => {
-                Self(TokenId::Erc20(addr.clone(), *chain_id))
-            }
-            CustomTokenId::SolMainnet(addr) => Self(TokenId::SplMainnet(addr.clone())),
-            CustomTokenId::SolDevnet(addr) => Self(TokenId::SplDevnet(addr.clone())),
-            CustomTokenId::ExtV2(id) => Self(TokenId::ExtV2(*id)),
-            CustomTokenId::Dip721(id) => Self(TokenId::Dip721(*id)),
-            CustomTokenId::IcPunks(id) => Self(TokenId::IcPunks(*id)),
-        }
-    }
-}
 
 impl Storable for StoredTokenId {
     const BOUND: Bound = Bound::Unbounded;

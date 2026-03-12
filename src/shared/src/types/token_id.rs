@@ -1,6 +1,6 @@
 use candid::{CandidType, Deserialize, Principal};
 
-use super::custom_token::{ChainId, ErcTokenId, LedgerId, SplTokenId};
+use super::custom_token::{ChainId, CustomTokenId, ErcTokenId, LedgerId, SplTokenId};
 
 pub type CanisterId = Principal;
 
@@ -44,4 +44,18 @@ pub enum TokenId {
     Dip721(CanisterId) = 14,
     /// ICPunks-compatible token on the Internet Computer
     IcPunks(CanisterId) = 15,
+}
+
+impl From<&CustomTokenId> for TokenId {
+    fn from(id: &CustomTokenId) -> Self {
+        match id {
+            CustomTokenId::Icrc(ledger) => Self::Icrc(*ledger),
+            CustomTokenId::Ethereum(addr, chain_id) => Self::Erc20(addr.clone(), *chain_id),
+            CustomTokenId::SolMainnet(addr) => Self::SplMainnet(addr.clone()),
+            CustomTokenId::SolDevnet(addr) => Self::SplDevnet(addr.clone()),
+            CustomTokenId::ExtV2(id) => Self::ExtV2(*id),
+            CustomTokenId::Dip721(id) => Self::Dip721(*id),
+            CustomTokenId::IcPunks(id) => Self::IcPunks(*id),
+        }
+    }
 }
