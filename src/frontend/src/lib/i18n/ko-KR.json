@@ -659,6 +659,7 @@
 			"icrc_custom_token": "ICRC 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"ext_custom_tokens": "EXT 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"icpunks_custom_tokens": "ICPunks 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "지갑에 필요한 초기 데이터가 아직 로드되지 않았습니다. 다시 시도해 주세요.",
 			"allow_signing": "서명을 위한 지갑 설정 중 문제가 발생하여 로그아웃되었습니다. 문제가 지속되면 지원팀에 문의하세요.",
 			"waiting_for_allowed_cycles_aborted": "사이클 레저 준비가 중단되었습니다. 나중에 다시 로그인을 시도해 주세요",

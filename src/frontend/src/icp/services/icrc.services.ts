@@ -64,7 +64,7 @@ export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity })
 	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
-const loadDefaultIcrcTokens = async () => {
+export const loadDefaultIcrcTokens = async () => {
 	await Promise.all(
 		ICRC_TOKENS.map(mapTokenOisyName)
 			.map(mapTokenOisySymbol)
@@ -283,6 +283,18 @@ const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.icrc_canisters },
 		err
 	});
+};
+
+export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+	try {
+		const response = await loadIcrcCustomTokens(params);
+
+		loadIcrcCustomData({ response, certified: params.certified });
+	} catch (err) {
+		if (params.certified) {
+			onCustomTokensUpdateError({ error: err });
+		}
+	}
 };
 
 const onDefaultTokensUpdateError = ({
