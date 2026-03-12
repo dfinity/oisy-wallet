@@ -7,8 +7,7 @@ use shared::types::{
 };
 
 use crate::{
-
-        state::memory::{
+    state::memory::{
         API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID,
         CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID,
         TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
@@ -21,19 +20,9 @@ use crate::{
             UserProfileUpdatedMap, UserTokenMap,
         },
         storable::Candid,
-          },
-        state::memory::{
-        API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID,
-        CONTACT_MEMORY_ID, MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID,
-        USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
-        USER_TOKEN_MEMORY_ID,
+        BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
+        PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
     },
-    types::{
-        maps::ApiKeysCell, BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap,
-        CustomTokenMap, PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap,
-        UserTokenMap,
-          },
-
 };
 
 pub(crate) mod memory;
