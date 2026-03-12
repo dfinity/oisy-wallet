@@ -438,6 +438,7 @@ interface I18nInit {
 		icrc_custom_token: string;
 		ext_custom_tokens: string;
 		icpunks_custom_tokens: string;
+		custom_tokens: string;
 		loading_wallet_timeout: string;
 		allow_signing: string;
 		waiting_for_allowed_cycles_aborted: string;
