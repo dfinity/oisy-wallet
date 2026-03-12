@@ -5,7 +5,8 @@ use super::custom_token::{ChainId, ErcTokenId, LedgerId, SplTokenId};
 /// A unified token identifier covering both native and custom tokens for the main supported chains.
 /// Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
 /// selected native tokens (e.g., ETH, ICP, SOL, BTC) and distinguishes several ERC sub-standards.
-/// Suitable for flows that need to reference one of these supported tokens: transactions, activity, etc.
+/// Suitable for flows that need to reference one of these supported tokens: transactions, activity,
+/// etc.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 #[repr(u8)]
 pub enum TokenId {
