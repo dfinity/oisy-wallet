@@ -198,7 +198,8 @@ impl AccountId<EthereumSepolia> for EthAddress {}
 impl TokenId<EthereumMainnet> for EthAddress {}
 impl TokenId<EthereumSepolia> for EthAddress {}
 
-/// A marker trait, used to indicate that a type can be used as a token identifier for a given network.
+/// A marker trait, used to indicate that a type can be used as a token identifier for a given
+/// network.
 pub trait TokenId<T>
 where
     T: Network,
