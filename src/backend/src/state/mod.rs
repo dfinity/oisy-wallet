@@ -108,12 +108,12 @@ pub(crate) fn set_config(arg: InitArg) {
 pub(crate) fn with_api_keys<R>(f: impl FnOnce(&ApiKeys) -> R) -> R {
     read_state(|state| {
         let default = ApiKeys::default();
-        let keys = state
+        let api_keys = state
             .api_keys
             .get()
             .as_ref()
             .map_or(&default, |candid| &candid.0);
-        f(keys)
+        f(api_keys)
     })
 }
 
