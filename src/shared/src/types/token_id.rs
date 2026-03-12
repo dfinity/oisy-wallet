@@ -1,7 +1,6 @@
 use candid::{CandidType, Deserialize};
 
-use super::custom_token::{ChainId, ErcTokenId, LedgerId, SplTokenId};
-use crate::types::custom_token::CanisterId;
+use super::custom_token::{CanisterId, ChainId, ErcTokenId, LedgerId, SplTokenId};
 
 /// A unified token identifier covering both native and custom tokens for the main supported chains.
 /// Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
