@@ -243,6 +243,7 @@ fn call_btc_add_pending_transaction(
         txid: vec![],
         utxos: vec![UTXO_1],
         network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: None,
     };
     pic_setup
         .update::<Result<(), BtcAddPendingTransactionError>>(
