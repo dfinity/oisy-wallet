@@ -6,6 +6,7 @@ pub type Timestamp = u64;
 
 pub mod account;
 pub mod agreement;
+pub mod api_keys;
 pub mod backend_config;
 pub mod bitcoin;
 pub mod contact;
