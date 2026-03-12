@@ -9,14 +9,14 @@ use shared::types::{
 use crate::{
     state::memory::{
         API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID,
-        CONTACT_MEMORY_ID, MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID,
-        USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
-        USER_TOKEN_MEMORY_ID,
+        CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID,
+        TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
+        USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID,
     },
     types::{
-        maps::ApiKeysCell, BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap,
-        CustomTokenMap, PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap,
-        UserTokenMap,
+        maps::{ApiKeysCell, ExchangeRateMap},
+        BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
+        PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
     },
 };
 
@@ -42,6 +42,7 @@ pub(crate) struct State {
     // TODO: implement a periodic cleanup of old entries
     // TODO: limit the map size with an eviction policy
     pub(crate) token_activity: TokenActivityMap,
+    pub(crate) exchange_rates: ExchangeRateMap,
 }
 
 impl From<&State> for Stats {
@@ -60,7 +61,7 @@ thread_local! {
     pub static STATE: RefCell<State> = RefCell::new(
         MEMORY_MANAGER.with(|mm| State {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None),
-             api_keys: ApiKeysCell::init(mm.borrow().get(API_KEYS_MEMORY_ID), None),
+            api_keys: ApiKeysCell::init(mm.borrow().get(API_KEYS_MEMORY_ID), None),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
             // Use `UserProfileModel` to access and manage access to these states
@@ -72,6 +73,7 @@ thread_local! {
                 mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),
             ),
             token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
+            exchange_rates: ExchangeRateMap::init(mm.borrow().get(EXCHANGE_RATE_MEMORY_ID)),
         })
     );
 }
