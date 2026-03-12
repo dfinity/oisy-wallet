@@ -31,6 +31,8 @@ pub enum TokenId {
     SolNativeMainnet = 9,
     /// Native SOL on devnet
     SolNativeDevnet = 10,
-    /// Native BTC
-    BtcNative = 11,
+    /// Native BTC on mainnet
+    BtcNativeMainnet = 11,
+    /// Native BTC on testnet
+    BtcNativeTestnet = 12,
 }
