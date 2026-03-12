@@ -10,6 +10,10 @@ import {
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import CkMinterInfoLoader from '$icp/components/loaders/CkMinterInfoLoader.svelte';
+import {
+	initCkBTCMinterInfoWorker,
+	initCkETHMinterInfoWorker
+} from '$icp/services/worker.ck-minter-info.services';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import * as tokensStore from '$lib/derived/tokens.derived';
@@ -22,10 +26,6 @@ vi.mock('$icp/services/worker.ck-minter-info.services', () => ({
 	initCkBTCMinterInfoWorker: vi.fn(),
 	initCkETHMinterInfoWorker: vi.fn()
 }));
-
-const { initCkBTCMinterInfoWorker, initCkETHMinterInfoWorker } = await import(
-	'$icp/services/worker.ck-minter-info.services'
-);
 
 describe('CkMinterInfoLoader', () => {
 	const mockWorkerResult = {
@@ -86,8 +86,7 @@ describe('CkMinterInfoLoader', () => {
 		render(CkMinterInfoLoader);
 
 		await waitFor(() => {
-			expect(initCkBTCMinterInfoWorker).toHaveBeenCalledOnce();
-			expect(initCkBTCMinterInfoWorker).toHaveBeenCalledWith({
+			expect(initCkBTCMinterInfoWorker).toHaveBeenCalledExactlyOnceWith({
 				token: mockCkBtcToken,
 				twinToken: BTC_MAINNET_TOKEN,
 				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID
@@ -131,8 +130,7 @@ describe('CkMinterInfoLoader', () => {
 		render(CkMinterInfoLoader);
 
 		await waitFor(() => {
-			expect(initCkETHMinterInfoWorker).toHaveBeenCalledOnce();
-			expect(initCkETHMinterInfoWorker).toHaveBeenCalledWith({
+			expect(initCkETHMinterInfoWorker).toHaveBeenCalledExactlyOnceWith({
 				token: ETHEREUM_TOKEN,
 				minterCanisterId: IC_CKETH_MINTER_CANISTER_ID
 			});
