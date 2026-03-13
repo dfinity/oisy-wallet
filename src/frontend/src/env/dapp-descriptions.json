@@ -3,7 +3,6 @@
 		"id": "caffeine",
 		"name": "dapps.descriptions.caffeine.name",
 		"oneLiner": "dapps.descriptions.caffeine.one_liner",
-		"callToAction": "dapps.descriptions.caffeine.call_to_action",
 		"website": "https://caffeine.ai/",
 		"twitter": "https://x.com/caffeineai",
 		"tags": ["dapps.categories.ai", "dapps.categories.ab_icp"],
