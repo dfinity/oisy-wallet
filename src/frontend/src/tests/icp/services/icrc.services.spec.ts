@@ -479,7 +479,7 @@ describe('icrc.services', () => {
 				expect(spyToastsShow).not.toHaveBeenCalled();
 			});
 
-			it('should reset tokens on metadata error when metadata is not cached', async () => {
+			it('should reset tokens on metadata error', async () => {
 				const initialTokens = get(icrcCustomTokensStore);
 
 				expect(initialTokens).toHaveLength(1);
