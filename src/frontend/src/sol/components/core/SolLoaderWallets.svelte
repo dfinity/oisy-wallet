@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
+	import { debounce, nonNullish } from '@dfinity/utils';
+	import { onDestroy } from 'svelte';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -13,7 +13,7 @@
 		isNetworkIdSOLMainnet
 	} from '$lib/utils/network.utils';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
-	import { SolWalletWorker } from '$sol/services/worker.sol-wallet.services';
+	import { SolBatchWalletWorker } from '$sol/services/worker.sol-wallet-batch.services';
 
 	let walletWorkerTokens = $derived(
 		[...$enabledSolanaTokens, ...$enabledSplTokens].filter(
@@ -23,6 +23,40 @@
 				(isNetworkIdSOLMainnet(networkId) && nonNullish($solAddressMainnet))
 		)
 	);
+
+	let worker: SolBatchWalletWorker | undefined;
+
+	const manageWorker = async () => {
+		if (nonNullish(worker)) {
+			worker.stop();
+			worker.destroy();
+			worker = undefined;
+		}
+
+		if (walletWorkerTokens.length === 0) {
+			return;
+		}
+
+		worker = await SolBatchWalletWorker.init({ tokens: walletWorkerTokens });
+
+		worker.stop();
+		worker.start();
+	};
+
+	const debounceManageWorker = debounce(manageWorker, 500);
+
+	$effect(() => {
+		[walletWorkerTokens];
+		debounceManageWorker();
+	});
+
+	onDestroy(() => {
+		worker?.destroy();
+	});
+
+	const triggerTimer = () => worker?.trigger();
+
+	const debounceTriggerTimer = debounce(triggerTimer, 1000);
 </script>
 
-<WalletWorkers initWalletWorker={SolWalletWorker.init} tokens={walletWorkerTokens} />
+<svelte:window onoisyTriggerWallet={debounceTriggerTimer} />

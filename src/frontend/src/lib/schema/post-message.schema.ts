@@ -43,6 +43,9 @@ export const POST_MESSAGE_REQUESTS = [
 	'startSolWalletTimer',
 	'triggerBtcWalletTimer',
 	'triggerSolWalletTimer',
+	'stopSolBatchWalletTimer',
+	'startSolBatchWalletTimer',
+	'triggerSolBatchWalletTimer',
 	'stopBtcStatusesTimer',
 	'startBtcStatusesTimer',
 	'triggerBtcStatusesTimer',
@@ -117,10 +120,19 @@ export const PostMessageDataRequestSolSchema = z.object({
 	tokenOwnerAddress: z.custom<SolAddress>().optional()
 });
 
+export const PostMessageDataRequestSolBatchSchema = z.object({
+	tokens: z.array(
+		PostMessageDataRequestSolSchema.extend({
+			ref: z.string()
+		})
+	)
+});
+
 export const PostMessageResponseStatusSchema = z.enum([
 	'syncIcWalletStatus',
 	'syncBtcWalletStatus',
 	'syncSolWalletStatus',
+	'syncSolBatchWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
 	'syncCkBTCUpdateBalanceStatus'

@@ -10,6 +10,7 @@ import { POST_MESSAGE_REQUESTS } from '$lib/schema/post-message.schema';
 import { onAuthMessage } from '$lib/workers/auth.worker';
 import { onExchangeMessage } from '$lib/workers/exchange.worker';
 import { messageToHandler } from '$lib/workers/workers';
+import { onSolBatchWalletMessage } from '$sol/workers/sol-wallet-batch.worker';
 import { onSolWalletMessage } from '$sol/workers/sol-wallet.worker';
 import { createMockEvent } from '$tests/mocks/workers.mock';
 
@@ -57,6 +58,10 @@ vi.mock('$sol/workers/sol-wallet.worker', () => ({
 	onSolWalletMessage: vi.fn()
 }));
 
+vi.mock('$sol/workers/sol-wallet-batch.worker', () => ({
+	onSolBatchWalletMessage: vi.fn()
+}));
+
 describe('workers', () => {
 	describe('onmessage', () => {
 		const mockEvent = createMockEvent('mock-event');
@@ -72,7 +77,8 @@ describe('workers', () => {
 			{ name: 'onIcpWalletMessage', onMessageFn: onIcpWalletMessage },
 			{ name: 'onIcrcWalletMessage', onMessageFn: onIcrcWalletMessage },
 			{ name: 'onDip20WalletMessage', onMessageFn: onDip20WalletMessage },
-			{ name: 'onSolWalletMessage', onMessageFn: onSolWalletMessage }
+			{ name: 'onSolWalletMessage', onMessageFn: onSolWalletMessage },
+			{ name: 'onSolBatchWalletMessage', onMessageFn: onSolBatchWalletMessage }
 		];
 
 		beforeEach(() => {

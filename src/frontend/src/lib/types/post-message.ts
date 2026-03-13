@@ -11,6 +11,7 @@ import type {
 	PostMessageDataRequestIcrcSchema,
 	PostMessageDataRequestIcrcStrictSchema,
 	PostMessageDataRequestSchema,
+	PostMessageDataRequestSolBatchSchema,
 	PostMessageDataRequestSolSchema,
 	PostMessageDataResponseAuthSchema,
 	PostMessageDataResponseBTCAddressSchema,
@@ -56,6 +57,8 @@ export type PostMessageDataRequestIcCkBTCUpdateBalance = z.infer<
 export type PostMessageDataRequestBtc = z.infer<typeof PostMessageDataRequestBtcSchema>;
 
 export type PostMessageDataRequestSol = z.infer<typeof PostMessageDataRequestSolSchema>;
+
+export type PostMessageDataRequestSolBatch = z.infer<typeof PostMessageDataRequestSolBatchSchema>;
 
 export type PostMessageResponseStatus = z.infer<typeof PostMessageResponseStatusSchema>;
 

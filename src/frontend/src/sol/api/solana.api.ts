@@ -232,13 +232,68 @@ const addressToAccountInfo = new Map<
 	Map<SolAddress, SolanaGetAccountInfoReturn>
 >();
 
+// Microtask-based batching: collect addresses requested within the same event-loop tick
+// and flush them in a single getMultipleAccounts RPC call.
+const pendingBatches = new Map<
+	SolanaNetworkType,
+	Map<
+		SolAddress,
+		{ resolve: (v: SolanaGetAccountInfoReturn) => void; reject: (e: unknown) => void }[]
+	>
+>();
+const scheduledFlushes = new Set<SolanaNetworkType>();
+
+const MAX_BATCH_SIZE = 100;
+
+const flushBatch = async (network: SolanaNetworkType): Promise<void> => {
+	scheduledFlushes.delete(network);
+
+	const networkPending = pendingBatches.get(network);
+
+	if (isNullish(networkPending) || networkPending.size === 0) {
+		return;
+	}
+
+	const entries = [...networkPending.entries()];
+	networkPending.clear();
+
+	const addressMap =
+		addressToAccountInfo.get(network) ?? new Map<SolAddress, SolanaGetAccountInfoReturn>();
+	addressToAccountInfo.set(network, addressMap);
+
+	// Process in chunks of MAX_BATCH_SIZE
+	for (let i = 0; i < entries.length; i += MAX_BATCH_SIZE) {
+		const chunk = entries.slice(i, i + MAX_BATCH_SIZE);
+		const addresses = chunk.map(([addr]) => solAddress(addr));
+
+		try {
+			const { getMultipleAccounts } = solanaHttpRpc(network);
+			const { value: accounts } = await getMultipleAccounts(addresses, {
+				encoding: 'jsonParsed'
+			}).send();
+
+			chunk.forEach(([addr, callbacks], idx) => {
+				const account = accounts[idx];
+				const result = { value: account } as SolanaGetAccountInfoReturn;
+
+				addressMap.set(addr, result);
+				callbacks.forEach(({ resolve }) => resolve(result));
+			});
+		} catch (err) {
+			chunk.forEach(([, callbacks]) => {
+				callbacks.forEach(({ reject }) => reject(err));
+			});
+		}
+	}
+};
+
 export const getAccountInfo = async ({
 	address,
 	network
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-}) => {
+}): Promise<SolanaGetAccountInfoReturn> => {
 	const addressMap =
 		addressToAccountInfo.get(network) ?? new Map<SolAddress, SolanaGetAccountInfoReturn>();
 
@@ -250,13 +305,29 @@ export const getAccountInfo = async ({
 		return cachedInfo;
 	}
 
-	const { getAccountInfo } = solanaHttpRpc(network);
+	// Add to pending batch
+	let networkPending = pendingBatches.get(network);
 
-	const info = await getAccountInfo(solAddress(address), { encoding: 'jsonParsed' }).send();
+	if (isNullish(networkPending)) {
+		networkPending = new Map();
+		pendingBatches.set(network, networkPending);
+	}
 
-	addressMap.set(address, info);
+	const promise = new Promise<SolanaGetAccountInfoReturn>((resolve, reject) => {
+		const existing = networkPending.get(address) ?? [];
+		existing.push({ resolve, reject });
+		networkPending.set(address, existing);
+	});
 
-	return info;
+	// Schedule flush on next microtask if not already scheduled
+	if (!scheduledFlushes.has(network)) {
+		scheduledFlushes.add(network);
+		queueMicrotask(() => {
+			flushBatch(network);
+		});
+	}
+
+	return promise;
 };
 
 // https://solana.com/docs/tokens/extensions
