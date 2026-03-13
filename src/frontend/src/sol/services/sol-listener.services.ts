@@ -25,7 +25,7 @@ export const syncWallet = ({
 	} = data;
 
 	if (nonNullish(balance)) {
-		balancesStore.set({
+		balancesStore.batchSet({
 			id: tokenId,
 			data: {
 				data: balance,

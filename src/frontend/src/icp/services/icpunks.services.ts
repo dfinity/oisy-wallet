@@ -36,7 +36,7 @@ export const loadIcPunksTokens = async ({
 	await Promise.all([loadDefaultIcPunksTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
-const loadDefaultIcPunksTokens = (): ResultSuccess => {
+export const loadDefaultIcPunksTokens = (): ResultSuccess => {
 	icPunksDefaultTokensStore.set(
 		IC_PUNKS_BUILTIN_TOKENS.map((token) => ({ ...token, id: parseTokenId(token.symbol) }))
 	);
@@ -138,4 +138,16 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.icpunks_custom_tokens },
 		err
 	});
+};
+
+export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+	try {
+		const response = await loadCustomTokensWithMetadata(params);
+
+		loadCustomTokenData({ response, certified: params.certified });
+	} catch (err) {
+		if (params.certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };

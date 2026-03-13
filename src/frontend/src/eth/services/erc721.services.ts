@@ -176,3 +176,15 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		err
 	});
 };
+
+export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+	try {
+		const response = await loadCustomTokensWithMetadata(params);
+
+		loadCustomTokenData({ response, certified: params.certified });
+	} catch (err) {
+		if (params.certified) {
+			onUpdateError({ error: err });
+		}
+	}
+};

@@ -12,13 +12,63 @@ export interface CertifiedSetterStoreStore<T, Id extends symbol = TokenId> exten
 	Id
 > {
 	set: (params: { id: Id; data: T }) => void;
+	batchSet: (params: { id: Id; data: T }) => void;
 }
+
+// Picks the best deferred-execution strategy so that multiple synchronous
+// `batchSet` calls coalesce into a single Svelte store update:
+//
+// - Browser: `requestAnimationFrame` aligns the flush with the next repaint
+//   frame (~16 ms budget), so every `batchSet` issued between two frames
+//   produces only one `update()` / subscriber notification.
+//   Caveat: rAF callbacks are paused while the tab is in the background,
+//   which delays the flush until the tab is re-focused.
+//
+// - Non-browser (SSR / test runners): falls back to `queueMicrotask`, which
+//   drains at the end of the current microtask checkpoint — still enough to
+//   batch all synchronous call-sites, though the window is tighter than rAF.
+const scheduleFlush =
+	typeof requestAnimationFrame === 'function'
+		? (fn: () => void) => requestAnimationFrame(fn)
+		: (fn: () => void) => queueMicrotask(fn);
 
 export const initCertifiedSetterStore = <
 	T,
 	Id extends symbol = TokenId
 >(): CertifiedSetterStoreStore<T, Id> & WritableUpdateStore<T, Id> => {
 	const { subscribe, update, reset, reinitialize } = initCertifiedStore<T, Id>();
+
+	let pending: Array<{ id: Id; data: T }> = [];
+
+	let scheduled = false;
+
+	const resetBatch = () => {
+		pending = [];
+
+		scheduled = false;
+	};
+
+	const flushBatch = () => {
+		const batch = pending;
+
+		resetBatch();
+
+		if (batch.length === 0) {
+			return;
+		}
+
+		update((state) => {
+			const acc = {
+				...(nonNullish(state) && state)
+			} as NonNullable<CertifiedStoreData<T, Id>>;
+
+			for (const { id, data } of batch) {
+				acc[id] = data;
+			}
+
+			return acc;
+		});
+	};
 
 	return {
 		set: ({ id, data }: { id: Id; data: T }) =>
@@ -29,9 +79,22 @@ export const initCertifiedSetterStore = <
 						[id]: data
 					}) as CertifiedStoreData<T, Id>
 			),
+		batchSet: ({ id, data }: { id: Id; data: T }) => {
+			pending.push({ id, data });
+			if (!scheduled) {
+				scheduled = true;
+				scheduleFlush(flushBatch);
+			}
+		},
 		update,
-		reset,
-		reinitialize,
+		reset: (id: Id) => {
+			pending = pending.filter((item) => item.id !== id);
+			reset(id);
+		},
+		reinitialize: () => {
+			resetBatch();
+			reinitialize();
+		},
 		subscribe
 	};
 };

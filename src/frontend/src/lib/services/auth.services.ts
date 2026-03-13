@@ -1,13 +1,5 @@
 import { browser } from '$app/environment';
 import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
-import {
-	clearIdbBtcAddressMainnet,
-	clearIdbBtcAddressTestnet,
-	clearIdbEthAddress,
-	clearIdbSolAddressDevnet,
-	clearIdbSolAddressLocal,
-	clearIdbSolAddressMainnet
-} from '$lib/api/idb-addresses.api';
 import { clearIdbBalances } from '$lib/api/idb-balances.api';
 import { clearIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import {
@@ -203,13 +195,6 @@ const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 };
 
 const clearIdbStoreList = [
-	// Addresses
-	clearIdbBtcAddressMainnet,
-	clearIdbBtcAddressTestnet,
-	clearIdbEthAddress,
-	clearIdbSolAddressMainnet,
-	clearIdbSolAddressDevnet,
-	clearIdbSolAddressLocal,
 	// Tokens
 	clearIdbAllCustomTokens,
 	// Transactions
