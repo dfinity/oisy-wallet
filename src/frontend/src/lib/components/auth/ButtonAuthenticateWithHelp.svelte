@@ -39,7 +39,7 @@
 		if (success === 'ok') {
 			authLocked.unlock({ source: 'login from landing page' });
 
-			tokensSortStore.set({ key: 'tokens-sort', value: { type: 'value' } });
+			tokensSortStore.reset({ key: 'tokens-sort' });
 		} else if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}
