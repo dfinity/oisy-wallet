@@ -101,16 +101,7 @@
 	//
 	// Now we fetch once and fan the result out to per-standard processors.
 
-	interface FetchedTokensState {
-		tokens: CustomToken[];
-		certified: boolean;
-		// Identity is bundled here so the processing effect below doesn't need
-		// to read `$authIdentity` directly, avoiding a spurious re-trigger
-		// (old tokens + new identity) when identity changes.
-		identity: OptionIdentity;
-	}
-
-	let fetchedTokens = $state<FetchedTokensState | undefined>();
+	let loadParams = $state<LoadCustomTokenParams | undefined>();
 
 	// Guards against stale callbacks from a previous identity's in-flight `queryAndUpdate`.
 	// When identity changes the effect re-runs and bumps the counter; lingering `onLoad`/`onUpdateError`
@@ -128,7 +119,7 @@
 					return;
 				}
 
-				fetchedTokens = { tokens, certified, identity };
+				loadParams = { tokens, certified, identity };
 			},
 			onUpdateError: ({ error: err }) => {
 				if (generation !== fetchGeneration) {
@@ -144,42 +135,37 @@
 		});
 	};
 
-	// This is a util just for visual understanding
-	const buildParams: LoadCustomTokenParams | undefined = $derived(
-		nonNullish(fetchedTokens) ? { ...fetchedTokens } : undefined
-	);
-
 	const processFetchedIcTokens = async () => {
-		if (isNullish(buildParams)) {
+		if (isNullish(loadParams)) {
 			return;
 		}
 
 		await Promise.allSettled([
-			processIcrcCustomTokens(buildParams),
-			processExtCustomTokens(buildParams),
-			processIcPunksCustomTokens(buildParams)
+			processIcrcCustomTokens(loadParams),
+			processExtCustomTokens(loadParams),
+			processIcPunksCustomTokens(loadParams)
 		]);
 	};
 
 	const processFetchedEthTokens = async () => {
-		if (isNullish(buildParams) || !loadErc) {
+		if (isNullish(loadParams) || !loadErc) {
 			return;
 		}
 
 		await Promise.allSettled([
-			processErc20CustomTokens(buildParams),
-			processErc721CustomTokens(buildParams),
-			processErc1155CustomTokens(buildParams),
-			processErc4626CustomTokens(buildParams)
+			processErc20CustomTokens(loadParams),
+			processErc721CustomTokens(loadParams),
+			processErc1155CustomTokens(loadParams),
+			processErc4626CustomTokens(loadParams)
 		]);
 	};
 
 	const processFetchedSolTokens = async () => {
-		if (isNullish(buildParams) || !loadSpl) {
+		if (isNullish(loadParams) || !loadSpl) {
 			return;
 		}
 
-		await Promise.allSettled([processSplCustomTokens(buildParams)]);
+		await Promise.allSettled([processSplCustomTokens(loadParams)]);
 	};
 
 	// Single queryAndUpdate pipeline — re-runs only when identity changes.
@@ -190,19 +176,19 @@
 	});
 
 	$effect(() => {
-		[fetchedTokens];
+		[loadParams];
 
 		untrack(processFetchedIcTokens);
 	});
 
 	$effect(() => {
-		[fetchedTokens, loadErc];
+		[loadParams, loadErc];
 
 		untrack(processFetchedEthTokens);
 	});
 
 	$effect(() => {
-		[fetchedTokens, loadSpl];
+		[loadParams, loadSpl];
 
 		untrack(processFetchedSolTokens);
 	});
