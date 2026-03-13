@@ -78,7 +78,9 @@
 
 	const updateFeeData = async () => {
 		try {
-			if (isNullish($ethAddress)) {
+			// The debounce utility has no cancel support, so this callback can fire after the component
+			// is destroyed or after the swap store has been reset (`sendToken` becomes `undefined`).
+			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress)) {
 				return;
 			}
 
@@ -196,7 +198,13 @@
 		}
 	};
 
-	const debounceUpdateFeeData = debounce(updateFeeData);
+	// Wrap the debounced function to prevent scheduling new calls after the component is destroyed.
+	const debouncedFn = debounce(updateFeeData);
+	const debounceUpdateFeeData = (...args: unknown[]) => {
+		if (!isDestroyed) {
+			debouncedFn(...args);
+		}
+	};
 
 	let listenerCallbackTimer = $state<NodeJS.Timeout | undefined>();
 

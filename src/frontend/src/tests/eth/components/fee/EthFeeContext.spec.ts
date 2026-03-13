@@ -19,6 +19,7 @@ import * as evmNativeUtils from '$evm/utils/native-token.utils';
 import * as ckethStoreMod from '$icp-eth/stores/cketh.store';
 import { ZERO } from '$lib/constants/app.constants';
 import * as addressDerived from '$lib/derived/address.derived';
+import * as toastsStore from '$lib/stores/toasts.store';
 import type { Network } from '$lib/types/network';
 import type { Nft } from '$lib/types/nft';
 import type { OptionAmount } from '$lib/types/send';
@@ -223,5 +224,62 @@ describe('EthFeeContext', () => {
 		await vi.runAllTimersAsync();
 
 		expect(feeStore.setFee).not.toHaveBeenCalled();
+	});
+
+	describe('safety after unmount', () => {
+		it('does not fetch fee data when debounced call fires after component is destroyed', async () => {
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const { unmount } = renderWith();
+
+			unmount();
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).not.toHaveBeenCalled();
+		});
+
+		it('does not schedule new fee fetches after component is destroyed', async () => {
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const { unmount } = renderWith();
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).toHaveBeenCalledTimes(1);
+
+			setFeeMock.mockClear();
+
+			unmount();
+
+			await vi.advanceTimersByTimeAsync(15_000);
+
+			expect(feeStore.setFee).not.toHaveBeenCalled();
+		});
+
+		it('does not throw or show error toast when sendToken is nullish', async () => {
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+
+			renderWith({ sendToken: undefined as unknown as Token });
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).not.toHaveBeenCalled();
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+		});
+
+		it('does not show "cannot fetch gas fee" toast after unmount', async () => {
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const { unmount } = renderWith();
+
+			unmount();
+
+			await vi.runAllTimersAsync();
+
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+		});
 	});
 });
