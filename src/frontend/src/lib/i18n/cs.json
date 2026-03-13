@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "První platforma pro tvorbu self-writing aplikací.",
-				"call_to_action": "Vyzkoušejte Caffeine",
 				"description": "Caffeine je první platforma pro vytváření aplikací, které se samy píší. Stačí si promluvit s umělou inteligencí na počítači nebo mobilu a ona pro vás vytvoří aplikace a služby – včetně těch, které se připojují k peněžence OISY Wallet. Zažijte budoucnost vývoje aplikací s pomocí umělé inteligence.",
 				"carousel": {
 					"text": "Hello, self-writing internet",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
