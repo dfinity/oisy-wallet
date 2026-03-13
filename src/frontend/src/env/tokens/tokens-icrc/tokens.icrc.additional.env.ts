@@ -49,17 +49,17 @@ export const ADDITIONAL_ICRC_TOKENS_METADATA: Map<LedgerCanisterIdText, IcrcToke
 					return acc;
 				}
 
-				return [
-					...acc,
+				acc.push([
+					ledgerCanisterId,
 					[
-						ledgerCanisterId,
-						[
-							[IcrcMetadataResponseEntries.SYMBOL, { Text: symbol }],
-							[IcrcMetadataResponseEntries.NAME, { Text: name }],
-							[IcrcMetadataResponseEntries.FEE, { Nat: fee }],
-							[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(decimals) }]
-						]
+						[IcrcMetadataResponseEntries.SYMBOL, { Text: symbol }],
+						[IcrcMetadataResponseEntries.NAME, { Text: name }],
+						[IcrcMetadataResponseEntries.FEE, { Nat: fee }],
+						[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(decimals) }],
+						[IcrcMetadataResponseEntries.LOGO, { Text: `/icons/icrc/${ledgerCanisterId}.png` }]
 					]
-				];
+				]);
+
+				return acc;
 			}, [])
 	);
