@@ -48,7 +48,6 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
-
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
 }));
