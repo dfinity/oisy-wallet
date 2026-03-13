@@ -1,6 +1,7 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import {
 	hasSufficientIcrcAllowance,
 	isIcrcTokenSupportIcrc2,
@@ -9,6 +10,7 @@ import {
 	loadDisabledIcrcTokensExchanges
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import * as icrcUtils from '$icp/utils/icrc.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
@@ -416,7 +418,7 @@ describe('icrc.services', () => {
 				});
 			});
 
-			it('should show a toast on metadata error if the token was enabled', async () => {
+			it('should show a custom toast on metadata error if the token was enabled', async () => {
 				backendCanisterMock.listCustomTokens.mockResolvedValue([
 					{ ...mockCustomToken, enabled: true }
 				]);
@@ -427,8 +429,42 @@ describe('icrc.services', () => {
 				await loadCustomTokens({ identity: mockIdentity });
 
 				expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
-					text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
+					text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading_custom, {
 						$ledgerCanisterId: mockLedgerCanisterId
+					}),
+					level: 'warn'
+				});
+			});
+
+			it('should show a curated toast on metadata error if the token is in the curated list', async () => {
+				const [curatedToken] = SNS_BUILTIN_TOKENS;
+				const curatedLedgerCanisterId = curatedToken.ledgerCanisterId;
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([
+					{
+						...mockCustomToken,
+						enabled: true,
+						token: {
+							Icrc: {
+								index_id: [Principal.fromText(mockIndexCanisterId)],
+								ledger_id: Principal.fromText(curatedLedgerCanisterId)
+							}
+						}
+					}
+				]);
+
+				vi.spyOn(icrcUtils, 'buildIcrcCustomTokenMetadataPseudoResponse').mockReturnValue(
+					undefined
+				);
+
+				const err = new Error('test');
+				ledgerCanisterMock.metadata.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
+					text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading_curated, {
+						$tokenSymbol: curatedToken.symbol
 					}),
 					level: 'warn'
 				});
