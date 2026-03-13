@@ -38,6 +38,7 @@ describe('icrc-ledger.api', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
 		clearIcrcApiCaches();
 
 		vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
@@ -85,7 +86,7 @@ describe('icrc-ledger.api', () => {
 			await expect(metadata({ ...params, identity: undefined })).rejects.toThrowError();
 		});
 
-		it('returns cached metadata on subsequent calls for the same canister', async () => {
+		it('caches certified metadata and returns it on subsequent calls', async () => {
 			const first = await metadata(params);
 			const second = await metadata({ ...params, certified: false });
 
@@ -93,6 +94,13 @@ describe('icrc-ledger.api', () => {
 			expect(second).toEqual(mockMetadata);
 
 			expect(ledgerCanisterMock.metadata).toHaveBeenCalledOnce();
+		});
+
+		it('does not cache non-certified metadata', async () => {
+			await metadata({ ...params, certified: false });
+			await metadata({ ...params, certified: false });
+
+			expect(ledgerCanisterMock.metadata).toHaveBeenCalledTimes(2);
 		});
 
 		it('does not share cache across different canister IDs', async () => {
@@ -686,7 +694,7 @@ describe('icrc-ledger.api', () => {
 			});
 		});
 
-		it('returns cached minting account on subsequent calls', async () => {
+		it('caches certified minting account and returns it on subsequent calls', async () => {
 			const first = await getMintingAccount(params);
 			const second = await getMintingAccount({ ...params, certified: false });
 
@@ -696,7 +704,14 @@ describe('icrc-ledger.api', () => {
 			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledOnce();
 		});
 
-		it('caches undefined when getMintingAccount throws', async () => {
+		it('does not cache non-certified minting account', async () => {
+			await getMintingAccount({ ...params, certified: false });
+			await getMintingAccount({ ...params, certified: false });
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledTimes(2);
+		});
+
+		it('caches undefined when certified getMintingAccount throws', async () => {
 			ledgerCanisterMock.getMintingAccount.mockRejectedValue(
 				new Error('Minting account not found')
 			);
@@ -708,6 +723,17 @@ describe('icrc-ledger.api', () => {
 			expect(second).toBeUndefined();
 
 			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledOnce();
+		});
+
+		it('does not cache undefined when non-certified getMintingAccount throws', async () => {
+			ledgerCanisterMock.getMintingAccount.mockRejectedValue(
+				new Error('Minting account not found')
+			);
+
+			await getMintingAccount({ ...params, certified: false });
+			await getMintingAccount({ ...params, certified: false });
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledTimes(2);
 		});
 	});
 });

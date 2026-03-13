@@ -60,7 +60,9 @@ export const metadata = async ({
 
 	const response = await metadata({ certified });
 
-	cachedMetadata.set(ledgerCanisterId, response);
+	if (certified === true) {
+		cachedMetadata.set(ledgerCanisterId, response);
+	}
 
 	return response;
 };
@@ -311,11 +313,15 @@ export const getMintingAccount = async ({
 
 		const result = fromCandidAccount(fromDefinedNullable(account));
 
-		cachedMintingAccount.set(ledgerCanisterId, result);
+		if (certified === true) {
+			cachedMintingAccount.set(ledgerCanisterId, result);
+		}
 
 		return result;
 	} catch (_: unknown) {
-		cachedMintingAccount.set(ledgerCanisterId, undefined);
+		if (certified === true) {
+			cachedMintingAccount.set(ledgerCanisterId, undefined);
+		}
 	}
 };
 
