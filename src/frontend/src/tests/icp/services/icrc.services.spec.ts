@@ -10,7 +10,7 @@ import {
 	loadDisabledIcrcTokensExchanges
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import * as icrcUtils from '$icp/utils/icrc.utils';
+import * as icrcMetadataUtils from '$icp/utils/icrc-metadata.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
@@ -449,7 +449,7 @@ describe('icrc.services', () => {
 					}
 				]);
 
-				vi.spyOn(icrcUtils, 'buildIcrcCustomTokenMetadataPseudoResponse').mockReturnValue(
+				vi.spyOn(icrcMetadataUtils, 'buildIcrcCustomTokenMetadataPseudoResponse').mockReturnValue(
 					undefined
 				);
 
