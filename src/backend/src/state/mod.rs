@@ -54,6 +54,7 @@ impl From<&State> for Stats {
             user_token_count: state.user_token.len(),
             custom_token_count: state.custom_token.len(),
             token_activity_count: state.token_activity.len(),
+            exchange_rates_count: state.exchange_rates.len(),
         }
     }
 }
