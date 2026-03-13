@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
-	import {onMount, untrack} from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { processCustomTokens as processErc1155CustomTokens } from '$eth/services/erc1155.services';
@@ -181,14 +181,12 @@
 	$effect(() => {
 		[$authIdentity];
 
-
 		untrack(loadFetchedTokens);
 	});
 
 	// Fan-out: distribute pre-fetched tokens to per-standard processors.
 	$effect(() => {
 		[fetchedTokens, loadErc, loadSpl];
-
 
 		untrack(processFetchedTokens);
 	});
