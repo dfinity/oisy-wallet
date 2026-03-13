@@ -263,7 +263,7 @@ export const processCustomTokens = async ({
 		lastCustomTokensResponse = response;
 
 		loadCustomTokenData({ response, certified });
-	} catch (err) {
+	} catch (err: unknown) {
 		lastCustomTokensResponse = undefined;
 
 		if (certified) {
