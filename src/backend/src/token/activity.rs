@@ -1,6 +1,6 @@
 use ic_cdk::api::time;
 use ic_stable_structures::StableBTreeMap;
-use shared::types::{custom_token::CustomTokenId, Timestamp};
+use shared::types::{token_id::TokenId, Timestamp};
 
 use crate::{
     state::mutate_state,
@@ -15,7 +15,7 @@ fn add_to_token_activity(
     token_activity.insert(token_id, timestamp);
 }
 
-pub fn mark_token_active(token_id: &CustomTokenId) {
+pub fn mark_token_active(token_id: &TokenId) {
     mutate_state(|s| {
         add_to_token_activity(
             StoredTokenId(token_id.clone()),
@@ -25,7 +25,7 @@ pub fn mark_token_active(token_id: &CustomTokenId) {
     });
 }
 
-pub fn mark_tokens_active(token_ids: &[CustomTokenId]) {
+pub fn mark_tokens_active(token_ids: &[TokenId]) {
     let now = time();
 
     mutate_state(|s| {
