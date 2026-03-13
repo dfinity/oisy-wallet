@@ -69,6 +69,10 @@ pub fn init(arg: Arg) {
 ///   new installation?
 #[post_upgrade]
 pub fn post_upgrade(arg: Option<Arg>) {
+    // TODO: remove migration after all canisters have been upgraded past this release.
+    // Phase 1: extract old CustomTokenId-keyed entries BEFORE STATE is initialised.
+    let migrated_entries = state::stored_token_migration::extract_legacy_token_activity();
+
     match arg {
         Some(Arg::Init(arg)) => set_config(arg),
         _ => {
@@ -79,6 +83,9 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+
+    // Phase 2: insert converted entries now that STATE owns the (empty) map.
+    state::stored_token_migration::insert_migrated_token_activity(migrated_entries);
 
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();

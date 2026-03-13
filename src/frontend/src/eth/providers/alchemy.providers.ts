@@ -263,6 +263,10 @@ const cachedContractMetadata = new SvelteMap<
 	SvelteMap<EthAddress, Erc1155Metadata | Erc721Metadata>
 >();
 
+// Prevents concurrent API calls for the same contract (thundering herd).
+// While a request is in-flight, subsequent callers receive the same promise.
+const inFlightContractMetadata = new Map<string, Promise<Erc1155Metadata | Erc721Metadata>>();
+
 const getCachedContractMetadata = ({
 	network,
 	address
@@ -517,6 +521,28 @@ export class AlchemyProvider {
 			return cachedMetadata;
 		}
 
+		const cacheKey = `${this.network}:${address}`;
+
+		const inFlight = inFlightContractMetadata.get(cacheKey);
+
+		if (nonNullish(inFlight)) {
+			return inFlight;
+		}
+
+		const promise = this.fetchContractMetadata(address);
+
+		inFlightContractMetadata.set(cacheKey, promise);
+
+		try {
+			return await promise;
+		} finally {
+			inFlightContractMetadata.delete(cacheKey);
+		}
+	};
+
+	private fetchContractMetadata = async (
+		address: EthAddress
+	): Promise<Erc1155Metadata | Erc721Metadata> => {
 		const result: AlchemyProviderContract =
 			await this.deprecatedProvider.nft.getContractMetadata(address);
 
