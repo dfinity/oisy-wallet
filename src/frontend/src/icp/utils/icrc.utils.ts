@@ -15,18 +15,12 @@ import type {
 } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
-import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-import {
-	IcrcMetadataResponseEntries,
-	mapTokenMetadata,
-	type IcrcLedgerDid,
-	type IcrcTokenMetadataResponse
-} from '@icp-sdk/canisters/ledger/icrc';
+import { mapTokenMetadata, type IcrcTokenMetadataResponse } from '@icp-sdk/canisters/ledger/icrc';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	metadata: IcrcTokenMetadataResponse;
@@ -126,36 +120,6 @@ export const sortIcTokens = (
 	exchangeCoinIdA === exchangeCoinIdB || isNullish(exchangeCoinIdA) || isNullish(exchangeCoinIdB)
 		? nameA.localeCompare(nameB)
 		: exchangeCoinIdA.localeCompare(exchangeCoinIdB);
-
-export const buildIcrcCustomTokenMetadataPseudoResponse = ({
-	icrcCustomTokens,
-	ledgerCanisterId
-}: {
-	ledgerCanisterId: CanisterIdText;
-	icrcCustomTokens: Record<LedgerCanisterIdText, IcTokenWithoutId>;
-}): IcrcTokenMetadataResponse | undefined => {
-	const token = icrcCustomTokens[ledgerCanisterId];
-
-	if (isNullish(token)) {
-		return undefined;
-	}
-
-	const { symbol, icon: tokenIcon, name, fee, decimals } = token;
-
-	const icon: [IcrcMetadataResponseEntries.LOGO, IcrcLedgerDid.Value] | undefined = nonNullish(
-		tokenIcon
-	)
-		? [IcrcMetadataResponseEntries.LOGO, { Text: tokenIcon }]
-		: undefined;
-
-	return [
-		[IcrcMetadataResponseEntries.SYMBOL, { Text: symbol }],
-		[IcrcMetadataResponseEntries.NAME, { Text: name }],
-		[IcrcMetadataResponseEntries.FEE, { Nat: fee }],
-		[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(decimals) }],
-		...(nonNullish(icon) ? [icon] : [])
-	];
-};
 
 export const isTokenIcp = (token: Partial<IcToken>): token is IcToken =>
 	token.standard?.code === 'icp';
