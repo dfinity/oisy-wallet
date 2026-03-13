@@ -250,6 +250,8 @@ export const processCustomTokens = async ({
 
 		loadCustomTokenData({ response, certified });
 	} catch (err) {
+		lastCustomTokensResponse = undefined;
+
 		if (certified) {
 			onUpdateError({ error: err });
 		}
