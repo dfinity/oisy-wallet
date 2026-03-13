@@ -144,37 +144,42 @@
 		});
 	};
 
-	const processFetchedTokens = async () => {
-		if (isNullish(fetchedTokens)) {
+	// This is a util just for visual understanding
+	const buildParams: LoadCustomTokenParams | undefined = $derived(
+		nonNullish(fetchedTokens) ? { ...fetchedTokens } : undefined
+	);
+
+	const processFetchedIcTokens = async () => {
+		if (isNullish(buildParams)) {
 			return;
 		}
 
-		const { tokens, certified, identity } = fetchedTokens;
+		await Promise.allSettled([
+			processIcrcCustomTokens(buildParams),
+			processExtCustomTokens(buildParams),
+			processIcPunksCustomTokens(buildParams)
+		]);
+	};
 
-		const params: LoadCustomTokenParams = { tokens, certified, identity };
-
-		const tasks = [];
-
-		tasks.push(
-			processIcrcCustomTokens(params),
-			processExtCustomTokens(params),
-			processIcPunksCustomTokens(params)
-		);
-
-		if (loadErc) {
-			tasks.push(
-				processErc20CustomTokens(params),
-				processErc721CustomTokens(params),
-				processErc1155CustomTokens(params),
-				processErc4626CustomTokens(params)
-			);
+	const processFetchedEthTokens = async () => {
+		if (isNullish(buildParams) || !loadErc) {
+			return;
 		}
 
-		if (loadSpl) {
-			tasks.push(processSplCustomTokens(params));
+		await Promise.allSettled([
+			processErc20CustomTokens(buildParams),
+			processErc721CustomTokens(buildParams),
+			processErc1155CustomTokens(buildParams),
+			processErc4626CustomTokens(buildParams)
+		]);
+	};
+
+	const processFetchedSolTokens = async () => {
+		if (isNullish(buildParams) || !loadSpl) {
+			return;
 		}
 
-		await Promise.allSettled(tasks);
+		await Promise.allSettled([processSplCustomTokens(buildParams)]);
 	};
 
 	// Single queryAndUpdate pipeline — re-runs only when identity changes.
@@ -184,11 +189,22 @@
 		untrack(loadFetchedTokens);
 	});
 
-	// Fan-out: distribute pre-fetched tokens to per-standard processors.
 	$effect(() => {
-		[fetchedTokens, loadErc, loadSpl];
+		[fetchedTokens];
 
-		untrack(processFetchedTokens);
+		untrack(processFetchedIcTokens);
+	});
+
+	$effect(() => {
+		[fetchedTokens, loadErc];
+
+		untrack(processFetchedEthTokens);
+	});
+
+	$effect(() => {
+		[fetchedTokens, loadSpl];
+
+		untrack(processFetchedSolTokens);
 	});
 </script>
 
