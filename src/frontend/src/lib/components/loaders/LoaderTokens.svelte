@@ -86,7 +86,6 @@
 	let loadSpl = $derived(loadSplMainnet || loadSplDevnet || loadSplLocal);
 
 	$effect(() => {
-		console.log(4)
 		if (loadSpl) {
 			untrack(loadDefaultSplTokens);
 		}
