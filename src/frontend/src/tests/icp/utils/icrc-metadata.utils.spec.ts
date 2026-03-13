@@ -54,8 +54,7 @@ describe('icrc-metadata.utils', () => {
 				[IcrcMetadataResponseEntries.SYMBOL, { Text: 'T1' }],
 				[IcrcMetadataResponseEntries.NAME, { Text: 'Token1' }],
 				[IcrcMetadataResponseEntries.FEE, { Nat: 100n }],
-				[IcrcMetadataResponseEntries.DECIMALS, { Nat: 8n }],
-				[IcrcMetadataResponseEntries.LOGO, { Text: '/icons/icrc/canister-1.png' }]
+				[IcrcMetadataResponseEntries.DECIMALS, { Nat: 8n }]
 			]);
 			expect(result[1][0]).toBe('canister-2');
 		});
@@ -113,6 +112,50 @@ describe('icrc-metadata.utils', () => {
 			const result = buildIcrcTokensMetadataEntries(tokens);
 
 			expect(result).toEqual([]);
+		});
+
+		it('should use explicit icon path when provided', () => {
+			const tokens = [
+				{
+					ledgerCanisterId: 'canister-1',
+					name: 'Token1',
+					symbol: 'T1',
+					fee: 100n,
+					decimals: 8,
+					icon: '/icons/sns/canister-1.png'
+				}
+			];
+
+			const result = buildIcrcTokensMetadataEntries(tokens);
+
+			expect(result[0][1]).toEqual([
+				[IcrcMetadataResponseEntries.SYMBOL, { Text: 'T1' }],
+				[IcrcMetadataResponseEntries.NAME, { Text: 'Token1' }],
+				[IcrcMetadataResponseEntries.FEE, { Nat: 100n }],
+				[IcrcMetadataResponseEntries.DECIMALS, { Nat: 8n }],
+				[IcrcMetadataResponseEntries.LOGO, { Text: '/icons/sns/canister-1.png' }]
+			]);
+		});
+
+		it('should omit LOGO entry when icon is not provided', () => {
+			const tokens = [
+				{
+					ledgerCanisterId: 'canister-1',
+					name: 'Token1',
+					symbol: 'T1',
+					fee: 100n,
+					decimals: 8
+				}
+			];
+
+			const result = buildIcrcTokensMetadataEntries(tokens);
+
+			expect(result[0][1]).toEqual([
+				[IcrcMetadataResponseEntries.SYMBOL, { Text: 'T1' }],
+				[IcrcMetadataResponseEntries.NAME, { Text: 'Token1' }],
+				[IcrcMetadataResponseEntries.FEE, { Nat: 100n }],
+				[IcrcMetadataResponseEntries.DECIMALS, { Nat: 8n }]
+			]);
 		});
 	});
 

@@ -32,10 +32,11 @@ export const buildIcrcTokensMetadataEntries = (
 		symbol?: string;
 		fee?: bigint;
 		decimals?: number;
+		icon?: string;
 	}[]
 ): [LedgerCanisterIdText, IcrcTokenMetadataResponse][] =>
 	tokens.reduce<[LedgerCanisterIdText, IcrcTokenMetadataResponse][]>((acc, token) => {
-		const { ledgerCanisterId, name, symbol, fee, decimals } = token;
+		const { ledgerCanisterId, name, symbol, fee, decimals, icon } = token;
 
 		if (isNullish(name) || isNullish(symbol) || isNullish(fee) || isNullish(decimals)) {
 			return acc;
@@ -45,7 +46,9 @@ export const buildIcrcTokensMetadataEntries = (
 			ledgerCanisterId,
 			[
 				...buildIcrcMetadataResponse({ name, symbol, fee, decimals }),
-				[IcrcMetadataResponseEntries.LOGO, { Text: `/icons/icrc/${ledgerCanisterId}.png` }]
+				...(nonNullish(icon)
+					? ([[IcrcMetadataResponseEntries.LOGO, { Text: icon }]] as IcrcTokenMetadataResponse)
+					: [])
 			]
 		]);
 
