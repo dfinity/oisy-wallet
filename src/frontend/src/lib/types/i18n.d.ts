@@ -262,7 +262,6 @@ interface I18nDapps {
 		caffeine: {
 			name: string;
 			one_liner: string;
-			call_to_action: string;
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
