@@ -1,4 +1,4 @@
-use ic_cdk::{query};
+use ic_cdk::query;
 use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 
 use crate::{state::read_state, types::StoredTokenId, utils::guards::caller_is_not_anonymous};
