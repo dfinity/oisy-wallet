@@ -1,6 +1,8 @@
 use candid::{CandidType, Deserialize};
 
-use super::custom_token::{CanisterId, ChainId, CustomTokenId, ErcTokenId, LedgerId, SplTokenId};
+use super::custom_token::{
+    CanisterId, ChainId, CustomTokenId, ErcTokenId, LedgerId, SplTokenId, Token,
+};
 
 /// A unified token identifier covering both native and custom tokens for the main supported chains.
 /// Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
@@ -44,6 +46,26 @@ pub enum TokenId {
     IcPunks(CanisterId) = 15,
 }
 
+impl From<&Token> for TokenId {
+    fn from(token: &Token) -> Self {
+        match token {
+            Token::Icrc(t) => Self::Icrc(t.ledger_id),
+            Token::Erc20(t) => Self::Erc20(t.token_address.clone(), t.chain_id),
+            Token::Erc721(t) => Self::Erc721(t.token_address.clone(), t.chain_id),
+            Token::Erc1155(t) => Self::Erc1155(t.token_address.clone(), t.chain_id),
+            Token::Erc4626(t) => Self::Erc4626(t.token_address.clone(), t.chain_id),
+            Token::SplMainnet(t) => Self::SplMainnet(t.token_address.clone()),
+            Token::SplDevnet(t) => Self::SplDevnet(t.token_address.clone()),
+            Token::ExtV2(t) => Self::ExtV2(t.canister_id),
+            Token::Dip721(t) => Self::Dip721(t.canister_id),
+            Token::IcPunks(t) => Self::IcPunks(t.canister_id),
+        }
+    }
+}
+
+/// Lossy conversion: `CustomTokenId::Ethereum` always maps to `TokenId::Erc20` because
+/// `CustomTokenId` does not distinguish ERC sub-standards.  Used only by the one-shot
+/// stable-memory migration where the richer `Token` type is unavailable.
 impl From<&CustomTokenId> for TokenId {
     fn from(id: &CustomTokenId) -> Self {
         match id {

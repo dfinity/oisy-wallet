@@ -27,7 +27,7 @@ pub fn set_custom_token(token: CustomToken) {
 
     let CustomToken { token, .. } = token;
 
-    token::mark_token_active(&TokenId::from(&CustomTokenId::from(&token)));
+    token::mark_token_active(&TokenId::from(&token));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
@@ -42,10 +42,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 
     let stored_principal = StoredPrincipal(msg_caller());
 
-    let ids: Vec<TokenId> = tokens
-        .iter()
-        .map(|t| TokenId::from(&CustomTokenId::from(&t.token)))
-        .collect();
+    let ids: Vec<TokenId> = tokens.iter().map(|t| TokenId::from(&t.token)).collect();
 
     mutate_state(|s| {
         token::add_to_user_token(
@@ -96,10 +93,7 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
     let tokens = read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0);
 
     if !tokens.is_empty() {
-        let ids: Vec<TokenId> = tokens
-            .iter()
-            .map(|t| TokenId::from(&CustomTokenId::from(&t.token)))
-            .collect();
+        let ids: Vec<TokenId> = tokens.iter().map(|t| TokenId::from(&t.token)).collect();
 
         token::mark_tokens_active(&ids);
     }
