@@ -437,7 +437,7 @@ describe('icrc.services', () => {
 			});
 
 			it('should show a curated toast on metadata error if the token is in the curated list', async () => {
-				const curatedToken = SNS_BUILTIN_TOKENS[0];
+				const [curatedToken] = SNS_BUILTIN_TOKENS;
 				const curatedLedgerCanisterId = curatedToken.ledgerCanisterId;
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([
