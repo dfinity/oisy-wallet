@@ -296,7 +296,7 @@ describe('icrc.services', () => {
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				expect(idbKeyval.set).toHaveBeenCalledWith(
+				expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
 					mockIdentity.getPrincipal().toText(),
 					[mockCustomToken],
 					expect.any(Object)
@@ -306,7 +306,7 @@ describe('icrc.services', () => {
 			it('should fetch the cached custom tokens in IDB on query call', async () => {
 				await loadCustomTokens({ identity: mockIdentity, useCache: true });
 
-				expect(idbKeyval.get).toHaveBeenCalledWith(
+				expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(
 					mockIdentity.getPrincipal().toText(),
 					expect.any(Object)
 				);
