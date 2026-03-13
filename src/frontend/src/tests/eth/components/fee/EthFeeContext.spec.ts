@@ -102,6 +102,7 @@ describe('EthFeeContext', () => {
 
 		vi.spyOn(ckethStoreMod, 'ckEthMinterInfoStore', 'get').mockReturnValue({
 			...writable({}),
+			batchSet: vi.fn(),
 			reset: vi.fn(),
 			reinitialize: vi.fn()
 		});

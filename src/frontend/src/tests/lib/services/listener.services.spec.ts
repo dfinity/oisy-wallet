@@ -36,7 +36,7 @@ describe('listener.services', () => {
 
 			mockAuthStore();
 
-			vi.spyOn(balancesStore, 'set');
+			vi.spyOn(balancesStore, 'batchSet');
 
 			balancesStore.reset(mockTokenId);
 		});
@@ -71,7 +71,7 @@ describe('listener.services', () => {
 				principal: mockIdentity.getPrincipal()
 			});
 
-			expect(balancesStore.set).not.toHaveBeenCalled();
+			expect(balancesStore.batchSet).not.toHaveBeenCalled();
 		});
 
 		it('should not return early if getIdbTransactions returns nullish', async () => {
@@ -113,7 +113,7 @@ describe('listener.services', () => {
 				principal: mockIdentity.getPrincipal()
 			});
 
-			expect(balancesStore.set).not.toHaveBeenCalled();
+			expect(balancesStore.batchSet).not.toHaveBeenCalled();
 		});
 
 		it('should append transactions to store', async () => {
@@ -151,7 +151,7 @@ describe('listener.services', () => {
 				principal: mockIdentity.getPrincipal()
 			});
 
-			expect(balancesStore.set).toHaveBeenCalledWith({
+			expect(balancesStore.batchSet).toHaveBeenCalledWith({
 				id: mockTokenId,
 				data: {
 					data: mockBalance,
@@ -195,7 +195,7 @@ describe('listener.services', () => {
 				principal: mockIdentity.getPrincipal()
 			});
 
-			expect(balancesStore.set).not.toHaveBeenCalled();
+			expect(balancesStore.batchSet).not.toHaveBeenCalled();
 		});
 	});
 });

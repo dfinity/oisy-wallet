@@ -30,7 +30,6 @@ vi.mock('$lib/services/load-user-profile.services', () => ({
 }));
 
 vi.mock('$lib/services/addresses.services', () => ({
-	loadIdbAddresses: vi.fn(() => Promise.resolve({ success: true })),
 	loadAddresses: vi.fn(() => Promise.resolve({ success: true }))
 }));
 
