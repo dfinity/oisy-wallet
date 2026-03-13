@@ -43,7 +43,7 @@ impl Storable for LegacyStoredTokenId {
     fn to_bytes(&self) -> Cow<'_, [u8]> {
         match &self.0 {
             Some(id) => Cow::Owned(encode_one(id).expect("failed to candid-encode CustomTokenId")),
-            None => Cow::Owned(Vec::new()),
+            None => Cow::Borrowed(&[]),
         }
     }
 
@@ -55,7 +55,18 @@ impl Storable for LegacyStoredTokenId {
     }
 
     fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
-        Self(decode_one(bytes.as_ref()).ok())
+        match decode_one::<CustomTokenId>(bytes.as_ref()) {
+            Ok(id) => {
+                let reencoded = encode_one(&id)
+                    .expect("failed to candid-encode CustomTokenId during round-trip");
+                if reencoded == bytes.as_ref() {
+                    Self(Some(id))
+                } else {
+                    Self(None)
+                }
+            }
+            Err(_) => Self(None),
+        }
     }
 }
 
