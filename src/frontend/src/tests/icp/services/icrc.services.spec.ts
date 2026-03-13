@@ -604,6 +604,8 @@ describe('icrc.services', () => {
 				disabledIcrcTokens
 			});
 
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
 			expect(get(balancesStore)).toEqual({
 				[disabledIcrcTokens[0].id]: {
 					certified: true,

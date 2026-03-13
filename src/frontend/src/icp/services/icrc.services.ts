@@ -345,7 +345,7 @@ export const loadDisabledIcrcTokensBalances = async ({
 	results.forEach((result) => {
 		if (result.status === 'fulfilled') {
 			const { id, icrcTokenBalance } = result.value;
-			balancesStore.set({
+			balancesStore.batchSet({
 				id,
 				data: {
 					data: icrcTokenBalance,
