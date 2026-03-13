@@ -70,7 +70,6 @@
 	);
 
 	$effect(() => {
-		console.log(3)
 		if (loadErc) {
 			untrack(loadDefaultErc20Tokens);
 			untrack(loadDefaultErc4626Tokens);
