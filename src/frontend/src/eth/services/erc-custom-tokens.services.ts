@@ -8,17 +8,15 @@ import { areAddressesEqual } from '$lib/utils/address.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
-export const saveErcCustomTokens = async ({
+export const buildNewErcTokens = ({
 	contracts,
 	customTokens,
-	network,
-	identity
+	network
 }: {
 	contracts: OwnedContract[];
 	customTokens: CustomToken[];
 	network: EthereumNetwork;
-	identity: Identity;
-}) => {
+}): (SaveCustomErc721Variant | SaveCustomErc1155Variant)[] => {
 	const [erc721Tokens, erc1155Tokens] = contracts.reduce<
 		[SaveCustomErc721Variant[], SaveCustomErc1155Variant[]]
 	>(
@@ -102,7 +100,21 @@ export const saveErcCustomTokens = async ({
 		[[], []]
 	);
 
-	const ercTokens = [...erc721Tokens, ...erc1155Tokens];
+	return [...erc721Tokens, ...erc1155Tokens];
+};
+
+export const saveErcCustomTokens = async ({
+	contracts,
+	customTokens,
+	network,
+	identity
+}: {
+	contracts: OwnedContract[];
+	customTokens: CustomToken[];
+	network: EthereumNetwork;
+	identity: Identity;
+}) => {
+	const ercTokens = buildNewErcTokens({ contracts, customTokens, network });
 
 	if (ercTokens.length === 0) {
 		return;
