@@ -14,6 +14,7 @@ use shared::{
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::CustomToken,
         dapp::AddHiddenDappIdRequest,
+        exchange::ExchangeRate,
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         result_types::{
@@ -26,6 +27,7 @@ use shared::{
             UpdateUserNetworkSettingsResult,
         },
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        token_id::TokenId,
         user_profile::{AddUserCredentialRequest, HasUserProfileResponse, UserProfile},
         Stats, Timestamp,
     },
