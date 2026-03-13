@@ -41,16 +41,15 @@ export const buildIcrcTokensMetadataEntries = (
 			return acc;
 		}
 
-		return [
-			...acc,
+		acc.push([
+			ledgerCanisterId,
 			[
-				ledgerCanisterId,
-				[
-					...buildIcrcMetadataResponse({ name, symbol, fee, decimals }),
-					[IcrcMetadataResponseEntries.LOGO, { Text: `/icons/icrc/${ledgerCanisterId}.png` }]
-				]
+				...buildIcrcMetadataResponse({ name, symbol, fee, decimals }),
+				[IcrcMetadataResponseEntries.LOGO, { Text: `/icons/icrc/${ledgerCanisterId}.png` }]
 			]
-		];
+		]);
+
+		return acc;
 	}, []);
 
 export const buildIcrcCustomTokenMetadataPseudoResponse = ({
