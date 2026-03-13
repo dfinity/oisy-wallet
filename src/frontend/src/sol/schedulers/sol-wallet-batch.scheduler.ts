@@ -8,6 +8,7 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Option } from '$lib/types/utils';
+import { promiseAllLimited } from '$lib/utils/promise.utils';
 import {
 	fetchSignatures,
 	fetchTransactionDetailForSignature,
@@ -25,6 +26,9 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { address as solAddress } from '@solana/kit';
+
+const TOKEN_CONCURRENCY = 5;
+const TX_PREFETCH_CONCURRENCY = 10;
 
 interface TokenGroup {
 	address: SolAddress;
@@ -112,10 +116,10 @@ export class SolWalletBatchScheduler implements Scheduler<PostMessageDataRequest
 		try {
 			await retryWithDelay({
 				request: async () => {
-					// Phase 1: Fetch signatures for all tokens in parallel.
+					// Phase 1: Fetch signatures for all tokens with bounded concurrency.
 					// Each SPL token fetches from its ATA; native SOL fetches from the wallet address.
-					const tokenSignatures = await Promise.all(
-						tokens.map(async (token) => {
+					const tokenSignatures = await promiseAllLimited({
+						tasks: tokens.map((token) => async () => {
 							const { tokenAddress, tokenOwnerAddress } = token;
 
 							const [relevantAddress] =
@@ -134,27 +138,29 @@ export class SolWalletBatchScheduler implements Scheduler<PostMessageDataRequest
 							});
 
 							return { token, signatures };
-						})
-					);
+						}),
+						concurrency: TOKEN_CONCURRENCY
+					});
 
-					// Phase 2: Deduplicate signatures and pre-fetch all transaction details in parallel.
+					// Phase 2: Deduplicate signatures and pre-fetch transaction details with bounded concurrency.
 					// This is the key optimization: shared transactions are fetched once instead of N times.
 					const allSignatures = tokenSignatures.flatMap(({ signatures }) => signatures);
 					const uniqueSignatures = allSignatures.filter(
 						(sig, index, self) => self.findIndex((s) => s.signature === sig.signature) === index
 					);
 
-					await Promise.all(
-						uniqueSignatures.map((sig) =>
-							fetchTransactionDetailForSignature({ signature: sig, network })
-						)
-					);
+					await promiseAllLimited({
+						tasks: uniqueSignatures.map(
+							(sig) => () => fetchTransactionDetailForSignature({ signature: sig, network })
+						),
+						concurrency: TX_PREFETCH_CONCURRENCY
+					});
 
-					// Phase 3: Process per-token transactions and balances in parallel.
+					// Phase 3: Process per-token transactions and balances with bounded concurrency.
 					// Transaction details are cached from Phase 2, so the main work here is
 					// instruction mapping (which calls getAccountInfo — batched via microtask).
-					await Promise.all(
-						tokenSignatures.map(async ({ token, signatures }) => {
+					await promiseAllLimited({
+						tasks: tokenSignatures.map(({ token, signatures }) => async () => {
 							const { ref, tokenAddress, tokenOwnerAddress } = token;
 
 							const [balance, transactions] = await Promise.all([
@@ -171,8 +177,9 @@ export class SolWalletBatchScheduler implements Scheduler<PostMessageDataRequest
 							]);
 
 							this.syncWalletData({ ref, response: { balance, transactions } });
-						})
-					);
+						}),
+						concurrency: TOKEN_CONCURRENCY
+					});
 				},
 				maxRetries: 10
 			});

@@ -287,7 +287,7 @@ const flushBatch = async (network: SolanaNetworkType): Promise<void> => {
 	}
 };
 
-export const getAccountInfo = async ({
+export const getAccountInfo = ({
 	address,
 	network
 }: {
@@ -302,7 +302,7 @@ export const getAccountInfo = async ({
 	const cachedInfo = addressMap.get(address);
 
 	if (nonNullish(cachedInfo?.value)) {
-		return cachedInfo;
+		return Promise.resolve(cachedInfo);
 	}
 
 	// Add to pending batch
