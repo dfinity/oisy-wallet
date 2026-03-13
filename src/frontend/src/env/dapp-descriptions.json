@@ -41,6 +41,22 @@
 		}
 	},
 	{
+		"id": "liquidium",
+		"name": "dapps.descriptions.liquidium.name",
+		"oneLiner": "dapps.descriptions.liquidium.one_liner",
+		"website": "https://liquidium.fi/",
+		"twitter": "https://x.com/liquidiumfi",
+		"discord": "https://discord.com/invite/8TEMtqJJCS",
+		"github": "https://github.com/Liquidium-Inc",
+		"telegram": "https://t.me/LiquidiumWTF",
+		"tags": ["dapps.categories.defi", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.liquidium.description",
+		"usesInternetIdentity": false,
+		"stats": "",
+		"logo": "/images/dapps/liquidium-logo.webp",
+		"screenshots": ["/images/dapps/liquidium-screenshot.webp"]
+	},
+	{
 		"id": "openchat",
 		"name": "dapps.descriptions.openchat.name",
 		"oneLiner": "dapps.descriptions.openchat.one_liner",
