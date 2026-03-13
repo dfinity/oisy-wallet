@@ -788,6 +788,30 @@ describe('alchemy.providers', () => {
 			expect(metadata).toStrictEqual(expectedMetadata);
 			expect(Alchemy.prototype.nft?.getContractMetadata).not.toHaveBeenCalled();
 		});
+
+		it('should deduplicate concurrent requests for the same address', async () => {
+			const mockGetContractMetadata = vi.fn().mockResolvedValue(mockApiResponse);
+
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getContractMetadata: mockGetContractMetadata
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			const [result1, result2, result3] = await Promise.all([
+				provider.getContractMetadata(mockEthAddress),
+				provider.getContractMetadata(mockEthAddress),
+				provider.getContractMetadata(mockEthAddress)
+			]);
+
+			expect(mockGetContractMetadata).toHaveBeenCalledOnce();
+			expect(result1).toStrictEqual(expectedMetadata);
+			expect(result2).toStrictEqual(expectedMetadata);
+			expect(result3).toStrictEqual(expectedMetadata);
+		});
 	});
 
 	describe('alchemyProviders', () => {
