@@ -5,6 +5,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import {
 	assertNonNullish,
 	fromDefinedNullable,
+	nonNullish,
 	nowInBigIntNanoSeconds,
 	type QueryParams
 } from '@dfinity/utils';
@@ -20,6 +21,16 @@ import {
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
+const cachedMetadata = new Map<CanisterIdText, IcrcTokenMetadataResponse>();
+
+const cachedMintingAccount = new Map<CanisterIdText, IcrcAccount | undefined>();
+
+export const clearIcrcApiCaches = () => {
+	cachedMetadata.clear();
+
+	cachedMintingAccount.clear();
+};
+
 /**
  * Retrieves metadata for the ICRC token.
  *
@@ -27,22 +38,31 @@ import { Principal } from '@icp-sdk/core/principal';
  * @param {boolean} [params.certified] - Whether the data should be certified.
  * @param {OptionIdentity} params.identity - The identity to use for the request.
  * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
- * @param {QueryParams} params.rest - Additional query parameters.
  * @returns {Promise<IcrcTokenMetadataResponse>} The metadata response for the ICRC token.
  */
 export const metadata = async ({
 	certified,
 	identity,
-	...rest
+	ledgerCanisterId
 }: {
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
 } & QueryParams): Promise<IcrcTokenMetadataResponse> => {
+	const cached = cachedMetadata.get(ledgerCanisterId);
+
+	if (nonNullish(cached)) {
+		return cached;
+	}
+
 	assertNonNullish(identity);
 
-	const { metadata } = await ledgerCanister({ identity, ...rest });
+	const { metadata } = await ledgerCanister({ identity, ledgerCanisterId });
 
-	return metadata({ certified });
+	const response = await metadata({ certified });
+
+	cachedMetadata.set(ledgerCanisterId, response);
+
+	return response;
 };
 
 /**
@@ -278,6 +298,10 @@ export const getMintingAccount = async ({
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
 } & QueryParams): Promise<IcrcAccount | undefined> => {
+	if (cachedMintingAccount.has(ledgerCanisterId)) {
+		return cachedMintingAccount.get(ledgerCanisterId);
+	}
+
 	assertNonNullish(identity);
 
 	const { getMintingAccount } = await ledgerCanister({ identity, ledgerCanisterId });
@@ -285,9 +309,13 @@ export const getMintingAccount = async ({
 	try {
 		const account = await getMintingAccount({ certified });
 
-		return fromCandidAccount(fromDefinedNullable(account));
+		const result = fromCandidAccount(fromDefinedNullable(account));
+
+		cachedMintingAccount.set(ledgerCanisterId, result);
+
+		return result;
 	} catch (_: unknown) {
-		// In case the method is not implemented, return undefined
+		cachedMintingAccount.set(ledgerCanisterId, undefined);
 	}
 };
 

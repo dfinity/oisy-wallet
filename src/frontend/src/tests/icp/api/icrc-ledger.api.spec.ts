@@ -3,6 +3,7 @@ import {
 	allowance,
 	approve,
 	balance,
+	clearIcrcApiCaches,
 	getBlocks,
 	getMintingAccount,
 	icrc10SupportedStandards,
@@ -37,6 +38,7 @@ describe('icrc-ledger.api', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		clearIcrcApiCaches();
 
 		vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 	});
@@ -81,6 +83,25 @@ describe('icrc-ledger.api', () => {
 
 		it('throws an error if identity is undefined', async () => {
 			await expect(metadata({ ...params, identity: undefined })).rejects.toThrowError();
+		});
+
+		it('returns cached metadata on subsequent calls for the same canister', async () => {
+			const first = await metadata(params);
+			const second = await metadata({ ...params, certified: false });
+
+			expect(first).toEqual(mockMetadata);
+			expect(second).toEqual(mockMetadata);
+
+			expect(ledgerCanisterMock.metadata).toHaveBeenCalledOnce();
+		});
+
+		it('does not share cache across different canister IDs', async () => {
+			const otherCanisterId = 'ss2fx-dyaaa-aaaar-qacoq-cai';
+
+			await metadata(params);
+			await metadata({ ...params, ledgerCanisterId: otherCanisterId });
+
+			expect(ledgerCanisterMock.metadata).toHaveBeenCalledTimes(2);
 		});
 	});
 
@@ -663,6 +684,30 @@ describe('icrc-ledger.api', () => {
 			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledExactlyOnceWith({
 				certified: true
 			});
+		});
+
+		it('returns cached minting account on subsequent calls', async () => {
+			const first = await getMintingAccount(params);
+			const second = await getMintingAccount({ ...params, certified: false });
+
+			expect(first).toEqual(expectedAccount);
+			expect(second).toEqual(expectedAccount);
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledOnce();
+		});
+
+		it('caches undefined when getMintingAccount throws', async () => {
+			ledgerCanisterMock.getMintingAccount.mockRejectedValue(
+				new Error('Minting account not found')
+			);
+
+			const first = await getMintingAccount(params);
+			const second = await getMintingAccount(params);
+
+			expect(first).toBeUndefined();
+			expect(second).toBeUndefined();
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledOnce();
 		});
 	});
 });

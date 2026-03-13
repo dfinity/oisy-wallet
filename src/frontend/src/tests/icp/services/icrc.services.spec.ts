@@ -2,6 +2,7 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
+import { clearIcrcApiCaches } from '$icp/api/icrc-ledger.api';
 import {
 	hasSufficientIcrcAllowance,
 	isIcrcTokenSupportIcrc2,
@@ -92,6 +93,7 @@ describe('icrc.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+			clearIcrcApiCaches();
 
 			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 
@@ -483,21 +485,15 @@ describe('icrc.services', () => {
 				expect(spyToastsShow).not.toHaveBeenCalled();
 			});
 
-			it('should reset tokens on metadata error', async () => {
+			it('should reset tokens on metadata error when metadata is not cached', async () => {
 				const initialTokens = get(icrcCustomTokensStore);
 
 				expect(initialTokens).toHaveLength(1);
 
-				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
-
-				await loadCustomTokens({ identity: mockIdentity });
-
-				const tokens = get(icrcCustomTokensStore);
-
-				expect(tokens).toHaveLength(2);
-
 				const err = new Error('test');
 				ledgerCanisterMock.metadata.mockRejectedValue(err);
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
 
 				await loadCustomTokens({ identity: mockIdentity });
 
@@ -524,6 +520,28 @@ describe('icrc.services', () => {
 						error: err.message
 					}
 				});
+			});
+
+			it('should keep tokens alive on metadata error when metadata is cached', async () => {
+				const initialTokens = get(icrcCustomTokensStore);
+
+				expect(initialTokens).toHaveLength(1);
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				const tokens = get(icrcCustomTokensStore);
+
+				expect(tokens).toHaveLength(2);
+
+				ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				const afterTokens = get(icrcCustomTokensStore);
+
+				expect(afterTokens).toHaveLength(2);
 			});
 
 			it('should not cache the custom tokens in IDB', async () => {
