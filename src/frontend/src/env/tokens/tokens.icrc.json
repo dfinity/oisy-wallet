@@ -1,13 +1,4 @@
 {
-	"HAR": {
-		"ledgerCanisterId": "vpyll-myaaa-aaaar-qac4q-cai",
-		"decimals": 8,
-		"name": "Hare",
-		"symbol": "HAR",
-		"fee": {
-			"__bigint__": "0"
-		}
-	},
 	"BURN": {
 		"ledgerCanisterId": "egjwt-lqaaa-aaaak-qi2aa-cai",
 		"mintingAccount": "r75zk-hyaaa-aaaak-ak6zq-cai",
