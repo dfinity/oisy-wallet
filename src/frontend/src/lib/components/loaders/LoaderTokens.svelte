@@ -49,7 +49,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { LoadCustomTokenParams } from '$lib/types/custom-token';
-	import type { OptionIdentity } from '$lib/types/identity';
 	import {
 		loadDefaultSplTokens,
 		processCustomTokens as processSplCustomTokens
