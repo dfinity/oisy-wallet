@@ -1,9 +1,65 @@
 import { ADDITIONAL_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
+import ckErc20Tokens from '$env/tokens/tokens.ckerc20.json';
+import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
+import snsTokens from '$env/tokens/tokens.sns.json';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcInterface } from '$icp/types/ic-token';
+import { buildIcrcTokensMetadataEntries } from '$icp/utils/icrc-metadata.utils';
+import { nonNullish } from '@dfinity/utils';
+import type { IcrcTokenMetadataResponse } from '@icp-sdk/canisters/ledger/icrc';
 
 export const ICRC_TOKENS: IcInterface[] = [
 	...PUBLIC_ICRC_TOKENS,
 	...ADDITIONAL_ICRC_TOKENS,
 	...ICRC_CK_TOKENS
 ];
+
+const additionalIcrcTokensMetadataEntries = buildIcrcTokensMetadataEntries(
+	Object.values(additionalIcrcTokens).filter(nonNullish)
+);
+
+const ckErc20MetadataEntries = buildIcrcTokensMetadataEntries(
+	Object.values(ckErc20Tokens.production ?? {})
+		.concat(Object.values(ckErc20Tokens.staging ?? {}))
+		.filter(nonNullish)
+		.map(({ fee: { __bigint__ }, ...rest }) => ({ ...rest, fee: BigInt(__bigint__) }))
+);
+
+const snsMetadataEntries = buildIcrcTokensMetadataEntries(
+	(
+		snsTokens as {
+			ledgerCanisterId: string;
+			metadata: {
+				name: string;
+				symbol: string;
+				fee: { __bigint__: string };
+				decimals: number;
+			};
+		}[]
+	).map(
+		({
+			ledgerCanisterId,
+			metadata: {
+				name,
+				symbol,
+				fee: { __bigint__ },
+				decimals
+			}
+		}) => ({
+			ledgerCanisterId,
+			name,
+			symbol,
+			fee: BigInt(__bigint__),
+			decimals
+		})
+	)
+);
+
+// Metadata pseudo-responses for built-in ICRC tokens whose name, symbol, decimals
+// and fee are already known at build time. Avoids redundant canister metadata() calls.
+export const ICRC_TOKENS_METADATA: Map<LedgerCanisterIdText, IcrcTokenMetadataResponse> = new Map([
+	...additionalIcrcTokensMetadataEntries,
+	...ckErc20MetadataEntries,
+	...snsMetadataEntries
+]);
