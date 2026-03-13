@@ -239,10 +239,16 @@ const loadCustomIcrcTokensData = async ({
 
 				// To avoid polluting the screen, we show the toast error only after the update call.
 				if (enabled && certified) {
+					const curatedToken = indexedIcrcCustomTokens[ledgerCanisterId];
+
 					toastsShow({
-						text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
-							$ledgerCanisterId: ledgerCanisterId
-						}),
+						text: nonNullish(curatedToken)
+							? replacePlaceholders(get(i18n).init.error.icrc_canister_loading_curated, {
+									$tokenSymbol: curatedToken.symbol
+								})
+							: replacePlaceholders(get(i18n).init.error.icrc_canister_loading_custom, {
+									$ledgerCanisterId: ledgerCanisterId
+								}),
 						level: 'warn'
 					});
 				}
