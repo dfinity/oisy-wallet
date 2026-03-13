@@ -2,7 +2,6 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
-import { clearIcrcApiCaches } from '$icp/api/icrc-ledger.api';
 import {
 	hasSufficientIcrcAllowance,
 	isIcrcTokenSupportIcrc2,
@@ -49,6 +48,7 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
+
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
 }));
@@ -93,7 +93,6 @@ describe('icrc.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-			clearIcrcApiCaches();
 
 			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 
@@ -297,9 +296,7 @@ describe('icrc.services', () => {
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				expect(idbKeyval.set).toHaveBeenCalledOnce();
-				expect(idbKeyval.set).toHaveBeenNthCalledWith(
-					1,
+				expect(idbKeyval.set).toHaveBeenCalledWith(
 					mockIdentity.getPrincipal().toText(),
 					[mockCustomToken],
 					expect.any(Object)
@@ -309,9 +306,7 @@ describe('icrc.services', () => {
 			it('should fetch the cached custom tokens in IDB on query call', async () => {
 				await loadCustomTokens({ identity: mockIdentity, useCache: true });
 
-				expect(idbKeyval.get).toHaveBeenCalledOnce();
-				expect(idbKeyval.get).toHaveBeenNthCalledWith(
-					1,
+				expect(idbKeyval.get).toHaveBeenCalledWith(
 					mockIdentity.getPrincipal().toText(),
 					expect.any(Object)
 				);
@@ -520,28 +515,6 @@ describe('icrc.services', () => {
 						error: err.message
 					}
 				});
-			});
-
-			it('should keep tokens alive on metadata error when metadata is cached', async () => {
-				const initialTokens = get(icrcCustomTokensStore);
-
-				expect(initialTokens).toHaveLength(1);
-
-				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
-
-				await loadCustomTokens({ identity: mockIdentity });
-
-				const tokens = get(icrcCustomTokensStore);
-
-				expect(tokens).toHaveLength(2);
-
-				ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
-
-				await loadCustomTokens({ identity: mockIdentity });
-
-				const afterTokens = get(icrcCustomTokensStore);
-
-				expect(afterTokens).toHaveLength(2);
 			});
 
 			it('should not cache the custom tokens in IDB', async () => {

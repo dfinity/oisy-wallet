@@ -5,7 +5,6 @@ import type { OptionIdentity } from '$lib/types/identity';
 import {
 	assertNonNullish,
 	fromDefinedNullable,
-	nonNullish,
 	nowInBigIntNanoSeconds,
 	type QueryParams
 } from '@dfinity/utils';
@@ -20,16 +19,6 @@ import {
 } from '@icp-sdk/canisters/ledger/icrc';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
-
-const cachedMetadata = new Map<CanisterIdText, IcrcTokenMetadataResponse>();
-
-const cachedMintingAccount = new Map<CanisterIdText, IcrcAccount | undefined>();
-
-export const clearIcrcApiCaches = () => {
-	cachedMetadata.clear();
-
-	cachedMintingAccount.clear();
-};
 
 /**
  * Retrieves metadata for the ICRC token.
@@ -48,23 +37,11 @@ export const metadata = async ({
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
 } & QueryParams): Promise<IcrcTokenMetadataResponse> => {
-	const cached = cachedMetadata.get(ledgerCanisterId);
-
-	if (nonNullish(cached)) {
-		return cached;
-	}
-
 	assertNonNullish(identity);
 
 	const { metadata } = await ledgerCanister({ identity, ledgerCanisterId });
 
-	const response = await metadata({ certified });
-
-	if (certified === true) {
-		cachedMetadata.set(ledgerCanisterId, response);
-	}
-
-	return response;
+	return metadata({ certified });
 };
 
 /**
@@ -300,10 +277,6 @@ export const getMintingAccount = async ({
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
 } & QueryParams): Promise<IcrcAccount | undefined> => {
-	if (cachedMintingAccount.has(ledgerCanisterId)) {
-		return cachedMintingAccount.get(ledgerCanisterId);
-	}
-
 	assertNonNullish(identity);
 
 	const { getMintingAccount } = await ledgerCanister({ identity, ledgerCanisterId });
@@ -311,17 +284,9 @@ export const getMintingAccount = async ({
 	try {
 		const account = await getMintingAccount({ certified });
 
-		const result = fromCandidAccount(fromDefinedNullable(account));
-
-		if (certified === true) {
-			cachedMintingAccount.set(ledgerCanisterId, result);
-		}
-
-		return result;
+		return fromCandidAccount(fromDefinedNullable(account));
 	} catch (_: unknown) {
-		if (certified === true) {
-			cachedMintingAccount.set(ledgerCanisterId, undefined);
-		}
+		// Minting account not available for this ledger
 	}
 };
 

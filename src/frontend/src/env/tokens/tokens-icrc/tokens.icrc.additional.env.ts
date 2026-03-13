@@ -2,7 +2,11 @@ import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcInterface } from '$icp/types/ic-token';
 import { mapIcrcData } from '$icp/utils/map-icrc-data';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import {
+	IcrcMetadataResponseEntries,
+	type IcrcTokenMetadataResponse
+} from '@icp-sdk/canisters/ledger/icrc';
 
 const ADDITIONAL_ICRC_PRODUCTION_DATA = mapIcrcData(additionalIcrcTokens);
 
@@ -33,3 +37,29 @@ export const TICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 export const ADDITIONAL_ICRC_TOKENS: IcInterface[] = Object.values(
 	ADDITIONAL_ICRC_PRODUCTION_DATA ?? {}
 ).filter(nonNullish);
+
+export const ADDITIONAL_ICRC_TOKENS_METADATA: Map<LedgerCanisterIdText, IcrcTokenMetadataResponse> =
+	new Map(
+		Object.values(additionalIcrcTokens)
+			.filter(nonNullish)
+			.reduce<[LedgerCanisterIdText, IcrcTokenMetadataResponse][]>((acc, token) => {
+				const { ledgerCanisterId, name, symbol, fee, decimals } = token;
+
+				if (isNullish(name) || isNullish(symbol) || isNullish(fee) || isNullish(decimals)) {
+					return acc;
+				}
+
+				return [
+					...acc,
+					[
+						ledgerCanisterId,
+						[
+							[IcrcMetadataResponseEntries.SYMBOL, { Text: symbol }],
+							[IcrcMetadataResponseEntries.NAME, { Text: name }],
+							[IcrcMetadataResponseEntries.FEE, { Nat: fee }],
+							[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(decimals) }]
+						]
+					]
+				];
+			}, [])
+	);
