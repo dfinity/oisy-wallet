@@ -229,13 +229,28 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 	});
 };
 
-export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
-	try {
-		const response = await loadCustomTokensWithMetadata(params);
+// ERC20 metadata is fetched from third-party APIs (Infura) that don't depend on
+// the IC certified flag. On the certified round we reuse the query round's response
+// to avoid redundant HTTP calls — only the store's certified tag is updated.
+let lastCustomTokensResponse: Erc20CustomToken[] | undefined;
 
-		loadCustomTokenData({ response, certified: params.certified });
+export const processCustomTokens = async ({
+	certified,
+	...rest
+}: LoadCustomTokenParams): Promise<void> => {
+	try {
+		if (certified && nonNullish(lastCustomTokensResponse)) {
+			loadCustomTokenData({ response: lastCustomTokensResponse, certified });
+
+			return;
+		}
+
+		const response = await loadCustomTokensWithMetadata({ ...rest, certified });
+		lastCustomTokensResponse = response;
+
+		loadCustomTokenData({ response, certified });
 	} catch (err) {
-		if (params.certified) {
+		if (certified) {
 			onUpdateError({ error: err });
 		}
 	}

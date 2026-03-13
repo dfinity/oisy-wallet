@@ -196,13 +196,26 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 	});
 };
 
-export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
-	try {
-		const response = await loadCustomTokensWithMetadata(params);
+// SPL metadata is fetched from Solana RPCs / QuickNode and doesn't depend on the IC certified flag.
+// On the certified round we reuse the query round's response to skip redundant HTTP calls.
+let lastCustomTokensResponse: SplCustomToken[] | undefined;
 
-		loadCustomTokenData({ response, certified: params.certified });
+export const processCustomTokens = async ({
+	certified,
+	...rest
+}: LoadCustomTokenParams): Promise<void> => {
+	try {
+		if (certified && nonNullish(lastCustomTokensResponse)) {
+			loadCustomTokenData({ response: lastCustomTokensResponse, certified });
+			return;
+		}
+
+		const response = await loadCustomTokensWithMetadata({ ...rest, certified });
+		lastCustomTokensResponse = response;
+
+		loadCustomTokenData({ response, certified });
 	} catch (err) {
-		if (params.certified) {
+		if (certified) {
 			onUpdateError({ error: err });
 		}
 	}
