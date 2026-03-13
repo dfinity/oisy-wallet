@@ -40,7 +40,7 @@ export const syncWallet = ({
 		});
 	}
 	if (nonNullish(btcWalletBalance)) {
-		balancesStore.set({
+		balancesStore.batchSet({
 			id: tokenId,
 			data: {
 				data: btcWalletBalance.confirmed,

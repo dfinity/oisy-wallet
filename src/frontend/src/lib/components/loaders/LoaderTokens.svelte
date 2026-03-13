@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
+	import { untrack } from 'svelte';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { processCustomTokens as processErc1155CustomTokens } from '$eth/services/erc1155.services';
@@ -116,12 +117,11 @@
 	// callbacks from the old request see a mismatched generation and bail out.
 	let fetchGeneration = 0;
 
-	// Single queryAndUpdate pipeline — re-runs only when identity changes.
-	$effect(() => {
+	const loadFetchedTokens = async () => {
 		const identity = $authIdentity;
 		const generation = ++fetchGeneration;
 
-		queryAndUpdate<CustomToken[]>({
+		await queryAndUpdate<CustomToken[]>({
 			request: ({ certified }) => loadNetworkCustomTokens({ certified, identity, useCache: true }),
 			onLoad: ({ response: tokens, certified }) => {
 				if (generation !== fetchGeneration) {
@@ -142,10 +142,9 @@
 			},
 			identity
 		});
-	});
+	};
 
-	// Fan-out: distribute pre-fetched tokens to per-standard processors.
-	$effect(() => {
+	const processFetchedTokens = async () => {
 		if (isNullish(fetchedTokens)) {
 			return;
 		}
@@ -154,20 +153,42 @@
 
 		const params: LoadCustomTokenParams = { tokens, certified, identity };
 
-		processIcrcCustomTokens(params);
-		processExtCustomTokens(params);
-		processIcPunksCustomTokens(params);
+		const tasks = [];
+
+		tasks.push(
+			processIcrcCustomTokens(params),
+			processExtCustomTokens(params),
+			processIcPunksCustomTokens(params)
+		);
 
 		if (loadErc) {
-			processErc20CustomTokens(params);
-			processErc721CustomTokens(params);
-			processErc1155CustomTokens(params);
-			processErc4626CustomTokens(params);
+			tasks.push(
+				processErc20CustomTokens(params),
+				processErc721CustomTokens(params),
+				processErc1155CustomTokens(params),
+				processErc4626CustomTokens(params)
+			);
 		}
 
 		if (loadSpl) {
-			processSplCustomTokens(params);
+			tasks.push(processSplCustomTokens(params));
 		}
+
+		await Promise.allSettled(tasks);
+	};
+
+	// Single queryAndUpdate pipeline — re-runs only when identity changes.
+	$effect(() => {
+		[$authIdentity];
+
+		untrack(loadFetchedTokens);
+	});
+
+	// Fan-out: distribute pre-fetched tokens to per-standard processors.
+	$effect(() => {
+		[fetchedTokens, loadErc, loadSpl];
+
+		untrack(processFetchedTokens);
 	});
 </script>
 

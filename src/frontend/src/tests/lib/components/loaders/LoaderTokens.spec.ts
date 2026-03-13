@@ -66,41 +66,41 @@ vi.mock('$lib/services/custom-tokens.services', () => ({
 }));
 
 vi.mock('$eth/services/erc20.services', () => ({
-	loadDefaultErc20Tokens: vi.fn(),
-	processCustomTokens: vi.fn()
+	loadDefaultErc20Tokens: vi.fn().mockResolvedValue(undefined),
+	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('$eth/services/erc721.services', () => ({
-	processCustomTokens: vi.fn()
+	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('$eth/services/erc1155.services', () => ({
-	processCustomTokens: vi.fn()
+	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('$eth/services/erc4626.services', () => ({
-	loadDefaultErc4626Tokens: vi.fn(),
-	processCustomTokens: vi.fn()
+	loadDefaultErc4626Tokens: vi.fn().mockResolvedValue(undefined),
+	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('$icp/services/icrc.services', () => ({
-	loadDefaultIcrcTokens: vi.fn(),
-	processCustomTokens: vi.fn()
+	loadDefaultIcrcTokens: vi.fn().mockResolvedValue(undefined),
+	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('$icp/services/ext.services', () => ({
-	loadDefaultExtTokens: vi.fn(),
-	processCustomTokens: vi.fn()
+	loadDefaultExtTokens: vi.fn().mockResolvedValue(undefined),
+	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('$icp/services/icpunks.services', () => ({
-	loadDefaultIcPunksTokens: vi.fn(),
-	processCustomTokens: vi.fn()
+	loadDefaultIcPunksTokens: vi.fn().mockResolvedValue(undefined),
+	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('$sol/services/spl.services', () => ({
-	loadDefaultSplTokens: vi.fn(),
-	processCustomTokens: vi.fn()
+	loadDefaultSplTokens: vi.fn().mockResolvedValue(undefined),
+	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('$lib/api/backend.api', () => ({
@@ -258,6 +258,22 @@ describe('LoaderTokens', () => {
 				expect(processSplCustomTokens).toHaveBeenCalled();
 				expect(processExtCustomTokens).toHaveBeenCalled();
 				expect(processIcPunksCustomTokens).toHaveBeenCalled();
+			});
+		});
+
+		it('should still process other custom tokens when one processor rejects', async () => {
+			setupUserNetworksStore('allEnabled');
+
+			vi.mocked(processIcrcCustomTokens).mockRejectedValueOnce(new Error('ICRC failed'));
+
+			render(LoaderTokens);
+
+			await waitFor(() => {
+				expect(processIcrcCustomTokens).toHaveBeenCalled();
+				expect(processExtCustomTokens).toHaveBeenCalled();
+				expect(processIcPunksCustomTokens).toHaveBeenCalled();
+				expect(processErc20CustomTokens).toHaveBeenCalled();
+				expect(processSplCustomTokens).toHaveBeenCalled();
 			});
 		});
 	});
