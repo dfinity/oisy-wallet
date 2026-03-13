@@ -155,11 +155,11 @@
 
 		const tasks = [];
 
-		tasks.push([
+		tasks.push(
 			processIcrcCustomTokens(params),
 			processExtCustomTokens(params),
 			processIcPunksCustomTokens(params)
-		]);
+		);
 
 		if (loadErc) {
 			tasks.push(
