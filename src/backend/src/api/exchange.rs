@@ -1,4 +1,4 @@
-use ic_cdk::{query, trap};
+use ic_cdk::{query};
 use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 
 use crate::{state::read_state, types::StoredTokenId, utils::guards::caller_is_not_anonymous};
@@ -9,7 +9,7 @@ const MAX_TOKEN_LIST_LENGTH: usize = 1000;
 #[must_use]
 pub fn get_exchange_rates(token_ids: Vec<TokenId>) -> Vec<(TokenId, Option<ExchangeRate>)> {
     if token_ids.len() > MAX_TOKEN_LIST_LENGTH {
-        trap(&format!(
+        ic_cdk::trap(&format!(
             "Maximum number of token_ids exceeded: {} > {}",
             token_ids.len(),
             MAX_TOKEN_LIST_LENGTH
