@@ -434,6 +434,11 @@
 				"name": "Parcl",
 				"one_liner": "A Solana‑based perpetuals exchange offering synthetic real‑estate markets—trade real‑estate price indexes with cross‑margin and LP‑backed liquidity.",
 				"description": "Parcl is a Solana-based decentralized exchange for real-estate price perpetuals, enabling users to long or short synthetic property indexes. It uses price data from Parcl Labs and LP-backed liquidity for cross-margined trading. The protocol is tailored to traders seeking exposure to real-world asset performance without holding the underlying property."
+			},
+			"liquidium": {
+				"name": "Liquidium",
+				"one_liner": "Borrow & lend native Bitcoin against USDT.",
+				"description": "Liquidium is unlocking the next chapter of Bitcoin DeFi. As the largest and most trusted digital asset class, Bitcoin has long lacked native financial tools. By building on ICP's Chain Fusion technology, Liquidium makes it possible to lend and borrow Bitcoin directly—without centralized bridges or wrapping. This marks a major step toward bringing more real utility to Bitcoin and expanding its role in the broader world of decentralized finance."
 			}
 		}
 	},
