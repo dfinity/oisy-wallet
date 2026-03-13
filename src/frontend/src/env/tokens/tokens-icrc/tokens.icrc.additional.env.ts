@@ -55,7 +55,8 @@ export const ADDITIONAL_ICRC_TOKENS_METADATA: Map<LedgerCanisterIdText, IcrcToke
 						[IcrcMetadataResponseEntries.SYMBOL, { Text: symbol }],
 						[IcrcMetadataResponseEntries.NAME, { Text: name }],
 						[IcrcMetadataResponseEntries.FEE, { Nat: fee }],
-						[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(decimals) }]
+						[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(decimals) }],		
+[IcrcMetadataResponseEntries.LOGO,{ Text: `/icons/icrc/${ledgerCanisterId}.png` }],
 					]
 				]);
 
