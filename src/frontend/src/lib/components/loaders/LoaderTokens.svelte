@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
-	import { untrack } from 'svelte';
+	import {onMount, untrack} from 'svelte';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { processCustomTokens as processErc1155CustomTokens } from '$eth/services/erc1155.services';
@@ -56,7 +56,7 @@
 	} from '$sol/services/spl.services';
 
 	// IC default tokens have no reactive guards, they load once when the component mounts (no tracked dependencies).
-	$effect(() => {
+	onMount(() => {
 		loadDefaultIcrcTokens();
 		loadDefaultExtTokens();
 		loadDefaultIcPunksTokens();
@@ -70,9 +70,10 @@
 	);
 
 	$effect(() => {
+		console.log(3)
 		if (loadErc) {
-			loadDefaultErc20Tokens();
-			loadDefaultErc4626Tokens();
+			untrack(loadDefaultErc20Tokens);
+			untrack(loadDefaultErc4626Tokens);
 		}
 	});
 
@@ -86,8 +87,9 @@
 	let loadSpl = $derived(loadSplMainnet || loadSplDevnet || loadSplLocal);
 
 	$effect(() => {
+		console.log(4)
 		if (loadSpl) {
-			loadDefaultSplTokens();
+			untrack(loadDefaultSplTokens);
 		}
 	});
 
@@ -181,12 +183,14 @@
 	$effect(() => {
 		[$authIdentity];
 
+
 		untrack(loadFetchedTokens);
 	});
 
 	// Fan-out: distribute pre-fetched tokens to per-standard processors.
 	$effect(() => {
 		[fetchedTokens, loadErc, loadSpl];
+
 
 		untrack(processFetchedTokens);
 	});
