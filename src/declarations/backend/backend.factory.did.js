@@ -547,6 +547,8 @@ export const idlFactory = ({ IDL }) => {
 	const GetUserTransactionsResponse = IDL.Record({
 		next_start: IDL.Opt(IDL.Nat64),
 		newest_block_index: IDL.Opt(IDL.Nat64),
+		oldest_block_index: IDL.Opt(IDL.Nat64),
+		total_stored: IDL.Nat64,
 		transactions: IDL.Vec(UserTransaction)
 	});
 	const UserTransactionError = IDL.Variant({

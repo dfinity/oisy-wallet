@@ -233,6 +233,8 @@ export interface GetUserTransactionsRequest {
 export interface GetUserTransactionsResponse {
 	next_start: [] | [bigint];
 	newest_block_index: [] | [bigint];
+	oldest_block_index: [] | [bigint];
+	total_stored: bigint;
 	transactions: Array<UserTransaction>;
 }
 export type GetUserTransactionsResult =

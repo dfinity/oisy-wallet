@@ -36,8 +36,10 @@ pub fn get_transactions(
         .expect("max_results should fit in usize");
 
     let newest_block_index = transactions.last().map(|t| t.block_index);
+    let oldest_block_index = transactions.first().map(|t| t.block_index);
 
     let len = transactions.len();
+    let total_stored = u64::try_from(len).expect("len should fit in u64");
 
     let end = match request.start {
         None => len,
@@ -57,6 +59,8 @@ pub fn get_transactions(
     GetUserTransactionsResponse {
         transactions: page,
         newest_block_index,
+        oldest_block_index,
+        total_stored,
         next_start,
     }
 }
@@ -83,17 +87,34 @@ pub fn save_transactions(
         if known_ids.contains(tx.id.as_str()) {
             continue;
         }
-
-        if existing.len() + new_txs.len() >= MAX_USER_TRANSACTIONS_PER_TOKEN {
-            return Err(UserTransactionError::TooManyTransactions);
-        }
-
         new_txs.push(tx.clone());
     }
 
     if !new_txs.is_empty() {
         new_txs.sort_unstable_by_key(|t| t.block_index);
         existing = merge_sorted(existing, new_txs);
+
+        if existing.len() > MAX_USER_TRANSACTIONS_PER_TOKEN {
+            let mut trim_at = existing.len() - MAX_USER_TRANSACTIONS_PER_TOKEN;
+
+            // If the trim lands mid-block, advance to the next complete block boundary
+            // so we never store a partial block at the oldest end.
+            if trim_at < existing.len() {
+                let boundary_block = existing[trim_at].block_index;
+                if trim_at > 0 && existing[trim_at - 1].block_index == boundary_block {
+                    if let Some(offset) = existing[trim_at..]
+                        .iter()
+                        .position(|t| t.block_index != boundary_block)
+                    {
+                        trim_at += offset;
+                    }
+                    // If every remaining tx shares the same block_index, keep the
+                    // original trim_at to avoid dropping everything.
+                }
+            }
+
+            existing = existing.split_off(trim_at);
+        }
     }
 
     map.insert(key, Candid(existing));
@@ -205,6 +226,8 @@ mod tests {
 
         assert!(result.transactions.is_empty());
         assert!(result.newest_block_index.is_none());
+        assert!(result.oldest_block_index.is_none());
+        assert_eq!(result.total_stored, 0);
         assert!(result.next_start.is_none());
     }
 
@@ -242,6 +265,8 @@ mod tests {
         assert_eq!(result.transactions[1].id, "0xhash2");
         assert_eq!(result.transactions[2].id, "0xhash1");
         assert_eq!(result.newest_block_index, Some(300));
+        assert_eq!(result.oldest_block_index, Some(100));
+        assert_eq!(result.total_stored, 3);
     }
 
     #[test]
@@ -751,7 +776,7 @@ mod tests {
     }
 
     #[test]
-    fn test_save_at_capacity_limit() {
+    fn test_save_at_capacity_evicts_oldest() {
         let (mut map, _mm) = setup();
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
 
@@ -804,7 +829,7 @@ mod tests {
             .unwrap();
         }
 
-        // Now at capacity — adding one more should fail
+        // At capacity — adding a newer transaction should succeed and evict the oldest
         let overflow = save_transactions(
             &mut map,
             principal,
@@ -813,18 +838,471 @@ mod tests {
                 transactions: vec![make_tx("0xoverflow", 999_999, 9_999_990)],
             },
         );
-        assert_eq!(overflow, Err(UserTransactionError::TooManyTransactions));
+        assert!(overflow.is_ok());
 
-        // But duplicates of existing hashes should still succeed (they're skipped, no new insert)
+        let result = get_transactions(
+            &map,
+            principal,
+            &GetUserTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 1,
+            },
+        );
+        assert_eq!(result.transactions[0].id, "0xoverflow");
+        assert_eq!(
+            result.total_stored,
+            u64::try_from(MAX_USER_TRANSACTIONS_PER_TOKEN).unwrap()
+        );
+        // The oldest (block_index=0, "0xfill0") should have been evicted
+        assert_eq!(result.oldest_block_index, Some(1));
+
+        // Duplicates of existing hashes should still succeed (they're skipped, no new insert)
         let dup_ok = save_transactions(
             &mut map,
             principal,
             &SaveUserTransactionsRequest {
                 token_id: eth_native_token(),
-                transactions: vec![make_tx("0xfill0", 0, 0)],
+                transactions: vec![make_tx("0xfill1", 1, 10)],
             },
         );
         assert!(dup_ok.is_ok());
+    }
+
+    #[test]
+    fn test_eviction_drops_oldest_preserves_newest() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let total = MAX_USER_TRANSACTIONS_PER_TOKEN;
+        let batch = MAX_SAVE_USER_TRANSACTIONS_BATCH;
+
+        for b in 0..(total / batch) {
+            let txs: Vec<UserTransaction> = (0..batch)
+                .map(|i| {
+                    let idx = b * batch + i;
+                    make_tx(
+                        &format!("0xfill{idx}"),
+                        u64::try_from(idx + 1).unwrap(),
+                        u64::try_from((idx + 1) * 10).unwrap(),
+                    )
+                })
+                .collect();
+            save_transactions(
+                &mut map,
+                principal,
+                &SaveUserTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: txs,
+                },
+            )
+            .unwrap();
+        }
+
+        // Save 3 new transactions above the existing range
+        let new_txs = vec![
+            make_tx("0xnew1", 20_001, 200_010),
+            make_tx("0xnew2", 20_002, 200_020),
+            make_tx("0xnew3", 20_003, 200_030),
+        ];
+        save_transactions(
+            &mut map,
+            principal,
+            &SaveUserTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: new_txs,
+            },
+        )
+        .unwrap();
+
+        let result = get_transactions(
+            &map,
+            principal,
+            &GetUserTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 3,
+            },
+        );
+
+        assert_eq!(result.newest_block_index, Some(20_003));
+        assert_eq!(result.transactions[0].id, "0xnew3");
+        assert_eq!(result.transactions[1].id, "0xnew2");
+        assert_eq!(result.transactions[2].id, "0xnew1");
+
+        // The 3 oldest (block_index 1, 2, 3) should have been evicted
+        assert_eq!(result.oldest_block_index, Some(4));
+        assert_eq!(
+            result.total_stored,
+            u64::try_from(MAX_USER_TRANSACTIONS_PER_TOKEN).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_save_older_transactions_at_capacity_evicts_them() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let total = MAX_USER_TRANSACTIONS_PER_TOKEN;
+        let batch = MAX_SAVE_USER_TRANSACTIONS_BATCH;
+
+        // Fill with block_index 1000..=(999+total)
+        let base = 1000u64;
+        for b in 0..(total / batch) {
+            let txs: Vec<UserTransaction> = (0..batch)
+                .map(|i| {
+                    let idx = b * batch + i;
+                    let bi = base + u64::try_from(idx).unwrap();
+                    make_tx(&format!("0xfill{idx}"), bi, bi * 10)
+                })
+                .collect();
+            save_transactions(
+                &mut map,
+                principal,
+                &SaveUserTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: txs,
+                },
+            )
+            .unwrap();
+        }
+
+        // Save transactions that are OLDER than everything stored
+        let old_txs = vec![make_tx("0xancient1", 1, 10), make_tx("0xancient2", 2, 20)];
+        save_transactions(
+            &mut map,
+            principal,
+            &SaveUserTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: old_txs,
+            },
+        )
+        .unwrap();
+
+        let result = get_transactions(
+            &map,
+            principal,
+            &GetUserTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 1,
+            },
+        );
+
+        // The ancient transactions become the new oldest and get evicted immediately,
+        // leaving the original window unchanged
+        assert_eq!(
+            result.total_stored,
+            u64::try_from(MAX_USER_TRANSACTIONS_PER_TOKEN).unwrap()
+        );
+        assert_eq!(result.oldest_block_index, Some(base));
+    }
+
+    #[test]
+    fn test_eviction_mid_block_drops_entire_partial_block() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let total = MAX_USER_TRANSACTIONS_PER_TOKEN;
+        let batch = MAX_SAVE_USER_TRANSACTIONS_BATCH;
+
+        // Fill with block_index = idx+1 (unique per tx) for most of the capacity,
+        // but put 3 txs at the SAME block_index at the very start.
+        // Layout: [block 1, block 1, block 1, block 2, block 3, ..., block 9998]
+        // Total = 10,000
+        let shared_block: u64 = 1;
+        let txs_in_shared_block: usize = 3;
+
+        // First batch: the 3 txs sharing block 1
+        save_transactions(
+            &mut map,
+            principal,
+            &SaveUserTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: (0..txs_in_shared_block)
+                    .map(|i| {
+                        make_tx(
+                            &format!("0xshared{i}"),
+                            shared_block,
+                            shared_block * 10 + u64::try_from(i).unwrap(),
+                        )
+                    })
+                    .collect(),
+            },
+        )
+        .unwrap();
+
+        // Fill the rest: block_index 2, 3, ..., 9998 (total - 3 = 9997 unique-block txs)
+        let remaining = total - txs_in_shared_block;
+        for b in 0..(remaining / batch) {
+            let txs: Vec<UserTransaction> = (0..batch)
+                .map(|i| {
+                    let idx = b * batch + i;
+                    let bi = u64::try_from(idx + 2).unwrap(); // starts at block 2
+                    make_tx(&format!("0xfill{idx}"), bi, bi * 10)
+                })
+                .collect();
+            save_transactions(
+                &mut map,
+                principal,
+                &SaveUserTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: txs,
+                },
+            )
+            .unwrap();
+        }
+        let filled = (remaining / batch) * batch;
+        if filled < remaining {
+            let txs: Vec<UserTransaction> = (filled..remaining)
+                .map(|i| {
+                    let bi = u64::try_from(i + 2).unwrap();
+                    make_tx(&format!("0xfill{i}"), bi, bi * 10)
+                })
+                .collect();
+            save_transactions(
+                &mut map,
+                principal,
+                &SaveUserTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: txs,
+                },
+            )
+            .unwrap();
+        }
+
+        // Verify we're at capacity
+        let before = get_transactions(
+            &map,
+            principal,
+            &GetUserTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 1,
+            },
+        );
+        assert_eq!(before.total_stored, u64::try_from(total).unwrap());
+        assert_eq!(before.oldest_block_index, Some(shared_block));
+
+        // Now add 1 new tx — naive eviction would drop 1 of the 3 txs at block 1,
+        // leaving a partial block. With block-boundary eviction, all 3 should be dropped.
+        save_transactions(
+            &mut map,
+            principal,
+            &SaveUserTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: vec![make_tx("0xnew", 100_000, 1_000_000)],
+            },
+        )
+        .unwrap();
+
+        let after = get_transactions(
+            &map,
+            principal,
+            &GetUserTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 1,
+            },
+        );
+
+        // All 3 txs from block 1 were dropped (not just 1), so oldest is now block 2
+        assert_eq!(after.oldest_block_index, Some(2));
+        // We stored fewer than MAX because we dropped 3 but only added 1
+        assert_eq!(
+            after.total_stored,
+            u64::try_from(total - txs_in_shared_block + 1).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_eviction_on_clean_block_boundary_keeps_exact_capacity() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let total = MAX_USER_TRANSACTIONS_PER_TOKEN;
+        let batch = MAX_SAVE_USER_TRANSACTIONS_BATCH;
+
+        // Each tx has a unique block_index, so the eviction boundary never falls mid-block
+        for b in 0..(total / batch) {
+            let txs: Vec<UserTransaction> = (0..batch)
+                .map(|i| {
+                    let idx = b * batch + i;
+                    make_tx(
+                        &format!("0xfill{idx}"),
+                        u64::try_from(idx + 1).unwrap(),
+                        u64::try_from((idx + 1) * 10).unwrap(),
+                    )
+                })
+                .collect();
+            save_transactions(
+                &mut map,
+                principal,
+                &SaveUserTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: txs,
+                },
+            )
+            .unwrap();
+        }
+
+        // Add 2 new txs — evicts exactly 2 oldest
+        save_transactions(
+            &mut map,
+            principal,
+            &SaveUserTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: vec![
+                    make_tx("0xnew1", 50_001, 500_010),
+                    make_tx("0xnew2", 50_002, 500_020),
+                ],
+            },
+        )
+        .unwrap();
+
+        let result = get_transactions(
+            &map,
+            principal,
+            &GetUserTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 1,
+            },
+        );
+
+        assert_eq!(
+            result.total_stored,
+            u64::try_from(MAX_USER_TRANSACTIONS_PER_TOKEN).unwrap()
+        );
+        // Blocks 1 and 2 evicted, oldest is now 3
+        assert_eq!(result.oldest_block_index, Some(3));
+        assert_eq!(result.newest_block_index, Some(50_002));
+    }
+
+    #[test]
+    fn test_eviction_multiple_txs_same_block_at_boundary() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        // Manually build a small scenario to test block-boundary eviction precisely.
+        // Storage: 8 txs — we'll set MAX to 10,000 but just test the logic with a nearly
+        // full store and verify the boundary behavior.
+        //
+        // Instead, let's fill to capacity with a known layout:
+        // Blocks: [1, 1, 2, 2, 2, 3, 4, 5, 6, ...]
+        // where block 1 has 2 txs, block 2 has 3 txs, and blocks 3+ have 1 each.
+        let total = MAX_USER_TRANSACTIONS_PER_TOKEN;
+        let batch = MAX_SAVE_USER_TRANSACTIONS_BATCH;
+
+        // First: 2 txs at block 1
+        save_transactions(
+            &mut map,
+            principal,
+            &SaveUserTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: vec![make_tx("0xb1_a", 1, 10), make_tx("0xb1_b", 1, 11)],
+            },
+        )
+        .unwrap();
+
+        // Then: 3 txs at block 2
+        save_transactions(
+            &mut map,
+            principal,
+            &SaveUserTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: vec![
+                    make_tx("0xb2_a", 2, 20),
+                    make_tx("0xb2_b", 2, 21),
+                    make_tx("0xb2_c", 2, 22),
+                ],
+            },
+        )
+        .unwrap();
+
+        // Fill the rest with unique blocks: block 3, 4, ..., up to capacity
+        let filled_so_far = 5;
+        let remaining = total - filled_so_far;
+        for b in 0..(remaining / batch) {
+            let txs: Vec<UserTransaction> = (0..batch)
+                .map(|i| {
+                    let idx = b * batch + i;
+                    let bi = u64::try_from(idx + 3).unwrap(); // start at block 3
+                    make_tx(&format!("0xfill{idx}"), bi, bi * 10)
+                })
+                .collect();
+            save_transactions(
+                &mut map,
+                principal,
+                &SaveUserTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: txs,
+                },
+            )
+            .unwrap();
+        }
+        let full_batches = (remaining / batch) * batch;
+        if full_batches < remaining {
+            let txs: Vec<UserTransaction> = (full_batches..remaining)
+                .map(|i| {
+                    let bi = u64::try_from(i + 3).unwrap();
+                    make_tx(&format!("0xfill{i}"), bi, bi * 10)
+                })
+                .collect();
+            save_transactions(
+                &mut map,
+                principal,
+                &SaveUserTransactionsRequest {
+                    token_id: eth_native_token(),
+                    transactions: txs,
+                },
+            )
+            .unwrap();
+        }
+
+        let before = get_transactions(
+            &map,
+            principal,
+            &GetUserTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 1,
+            },
+        );
+        assert_eq!(before.total_stored, u64::try_from(total).unwrap());
+        assert_eq!(before.oldest_block_index, Some(1));
+
+        // Add 3 new txs → naive eviction drops 3, which cuts into block 2 (2 from block 1
+        // + 1 from block 2). Block-boundary eviction should drop all of block 1 (2 txs)
+        // AND all of block 2 (3 txs) = 5 dropped total.
+        save_transactions(
+            &mut map,
+            principal,
+            &SaveUserTransactionsRequest {
+                token_id: eth_native_token(),
+                transactions: vec![
+                    make_tx("0xnew1", 200_001, 2_000_010),
+                    make_tx("0xnew2", 200_002, 2_000_020),
+                    make_tx("0xnew3", 200_003, 2_000_030),
+                ],
+            },
+        )
+        .unwrap();
+
+        let after = get_transactions(
+            &map,
+            principal,
+            &GetUserTransactionsRequest {
+                token_id: eth_native_token(),
+                start: None,
+                max_results: 1,
+            },
+        );
+
+        // Block 1 (2 txs) and block 2 (3 txs) fully evicted — oldest is now block 3
+        assert_eq!(after.oldest_block_index, Some(3));
+        // We had 10,000, added 3, dropped 5 → 9,998
+        assert_eq!(after.total_stored, u64::try_from(total - 5 + 3).unwrap());
     }
 
     #[test]
@@ -906,6 +1384,8 @@ mod tests {
 
         assert!(result.transactions.is_empty());
         assert_eq!(result.newest_block_index, Some(100));
+        assert_eq!(result.oldest_block_index, Some(100));
+        assert_eq!(result.total_stored, 1);
         assert_eq!(result.next_start, None);
     }
 

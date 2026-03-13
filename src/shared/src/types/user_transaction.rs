@@ -113,6 +113,14 @@ pub struct GetUserTransactionsResponse {
     /// Block index of the newest stored transaction for this token.
     /// The frontend should fetch from the network starting after this block.
     pub newest_block_index: Option<u64>,
+    /// Block index of the oldest stored transaction for this token.
+    /// The frontend can fetch from the network with `endBlock = oldest_block_index - 1`
+    /// to load even older history.
+    pub oldest_block_index: Option<u64>,
+    /// Total number of transactions stored for this (user, token) pair.
+    /// The frontend can compare this against `MAX_USER_TRANSACTIONS_PER_TOKEN` to skip
+    /// saving older transactions that would be immediately evicted.
+    pub total_stored: u64,
     /// Opaque cursor for the next page. Pass as `start` to fetch older transactions.
     /// `None` when there are no more older transactions.
     pub next_start: Option<u64>,
