@@ -32,7 +32,6 @@ vi.mock('@dfinity/utils', async () => {
 	};
 });
 
-
 describe('icrc-ledger.api', () => {
 	const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 
@@ -83,7 +82,6 @@ describe('icrc-ledger.api', () => {
 		it('throws an error if identity is undefined', async () => {
 			await expect(metadata({ ...params, identity: undefined })).rejects.toThrowError();
 		});
-
 	});
 
 	describe('transactionFee', () => {
@@ -666,6 +664,5 @@ describe('icrc-ledger.api', () => {
 				certified: true
 			});
 		});
-
 	});
 });
