@@ -4,7 +4,6 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import {
 	CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID,
-	buildIcrcCustomTokenMetadataPseudoResponse,
 	isTokenDip20,
 	isTokenIc,
 	isTokenIcp,
@@ -243,54 +242,6 @@ describe('icrc.utils', () => {
 			const b = { ...mockValidIcToken, name: 'Beta', position: 1 };
 
 			expect(sortIcTokens(a, b)).toBeLessThan(0);
-		});
-	});
-
-	describe('buildIcrcCustomTokenMetadataPseudoResponse', () => {
-		it('should return undefined if token is not found', () => {
-			const result = buildIcrcCustomTokenMetadataPseudoResponse({
-				ledgerCanisterId: mockValidIcToken.ledgerCanisterId,
-				icrcCustomTokens: {}
-			});
-
-			expect(result).toBeUndefined();
-		});
-
-		it('should return pseudo metadata response if token exists', () => {
-			const token = { ...mockValidIcToken, icon: 'https://icon.png' };
-
-			const result = buildIcrcCustomTokenMetadataPseudoResponse({
-				ledgerCanisterId: token.ledgerCanisterId,
-				icrcCustomTokens: {
-					[token.ledgerCanisterId]: token
-				}
-			});
-
-			expect(result).toEqual([
-				[IcrcMetadataResponseEntries.SYMBOL, { Text: token.symbol }],
-				[IcrcMetadataResponseEntries.NAME, { Text: token.name }],
-				[IcrcMetadataResponseEntries.FEE, { Nat: token.fee }],
-				[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(token.decimals) }],
-				[IcrcMetadataResponseEntries.LOGO, { Text: token.icon }]
-			]);
-		});
-
-		it('should handle nullish token icon', () => {
-			const { icon: _, ...token } = mockValidIcToken;
-
-			const result = buildIcrcCustomTokenMetadataPseudoResponse({
-				ledgerCanisterId: token.ledgerCanisterId,
-				icrcCustomTokens: {
-					[token.ledgerCanisterId]: token
-				}
-			});
-
-			expect(result).toEqual([
-				[IcrcMetadataResponseEntries.SYMBOL, { Text: token.symbol }],
-				[IcrcMetadataResponseEntries.NAME, { Text: token.name }],
-				[IcrcMetadataResponseEntries.FEE, { Nat: token.fee }],
-				[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(token.decimals) }]
-			]);
 		});
 	});
 
