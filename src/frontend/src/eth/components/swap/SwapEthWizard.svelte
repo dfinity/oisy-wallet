@@ -59,6 +59,7 @@
 		currentStep?: WizardStep;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -76,6 +77,7 @@
 		onStopTriggerAmount,
 		onStartTriggerAmount,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext,
 		onBack
@@ -340,6 +342,7 @@
 					{nativeEthereumToken}
 					{onClose}
 					{onNext}
+					{onShowProviderList}
 					{onShowTokensList}
 					bind:swapAmount
 					bind:receiveAmount

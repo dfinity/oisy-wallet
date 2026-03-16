@@ -32,7 +32,7 @@ export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[ETHEREUM_NETWORK_ID]: 'eth',
 	[ARBITRUM_MAINNET_NETWORK_ID]: 'arb',
 	[BASE_NETWORK_ID]: 'base',
-	[BASE_NETWORK_ID]: 'bsc',
+	[BSC_MAINNET_NETWORK_ID]: 'bsc',
 	[POLYGON_MAINNET_NETWORK_ID]: 'pol'
 };
 
