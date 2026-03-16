@@ -121,6 +121,7 @@ export const saveIcon = ({
 	}
 
 	const [, encodedStr] = logoData.split(',');
+
 	const buffer = Buffer.from(encodedStr, 'base64');
 
 	writeFileSync(filePath, buffer);
