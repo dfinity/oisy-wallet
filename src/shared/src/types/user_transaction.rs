@@ -53,7 +53,7 @@ pub struct EvmTransactionData {
     /// Hex-encoded input data.
     pub data: Option<String>,
     /// NFT token ID (ERC-721 / ERC-1155).
-    pub nft_token_id: Option<u32>,
+    pub nft_token_id: Option<Nat>,
 }
 
 /// Request to retrieve stored transactions with cursor-based pagination.
