@@ -1,6 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc20Token } from '$eth/types/erc20';
-import { NEAR_INTENTS_SWAP_PROVIDER } from '$lib/constants/swap.constants';
 import * as nearIntentsApi from '$lib/rest/near-intents.rest';
 import {
 	clearNearIntentsTokensCache,
@@ -10,6 +9,7 @@ import {
 	pollNearIntentsStatus,
 	submitNearIntentsDepositTx
 } from '$lib/services/near-intents.services';
+import { SwapProvider } from '$lib/types/swap';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import {
@@ -35,11 +35,12 @@ vi.mock('$lib/rest/near-intents.rest', () => ({
 describe('near-intents.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+
 		clearNearIntentsTokensCache();
 	});
 
 	describe('loadNearIntentsTokens', () => {
-		it('fetches tokens from the API', async () => {
+		it('should fetch tokens from the API', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
 
 			const result = await loadNearIntentsTokens();
@@ -48,7 +49,7 @@ describe('near-intents.services', () => {
 			expect(result).toEqual(mockNearIntentsTokens);
 		});
 
-		it('caches tokens after first fetch', async () => {
+		it('should cache tokens after first fetch', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
 
 			await loadNearIntentsTokens();
@@ -57,7 +58,7 @@ describe('near-intents.services', () => {
 			expect(nearIntentsApi.fetchNearIntentsTokens).toHaveBeenCalledOnce();
 		});
 
-		it('refetches after cache is cleared', async () => {
+		it('should refetch after cache is cleared', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
 
 			await loadNearIntentsTokens();
@@ -69,10 +70,13 @@ describe('near-intents.services', () => {
 	});
 
 	describe('mapNearIntentsQuoteResult', () => {
-		it('maps a quote response to a SwapMappedResult', () => {
+		it('should map a quote response to a SwapMappedResult', () => {
 			const result = mapNearIntentsQuoteResult(mockNearIntentsQuoteResponse);
 
-			expect(result.provider).toBe(NEAR_INTENTS_SWAP_PROVIDER);
+			expect(result.provider).toBe(SwapProvider.NEAR_INTENTS);
+
+			assert(result.provider === SwapProvider.NEAR_INTENTS);
+
 			expect(result.receiveAmount).toBe(BigInt(mockNearIntentsQuoteResponse.quote.amountOut));
 			expect(result.receiveOutMinimum).toBe(
 				BigInt(mockNearIntentsQuoteResponse.quote.minAmountOut ?? '0')
@@ -80,13 +84,15 @@ describe('near-intents.services', () => {
 			expect(result.swapDetails).toBe(mockNearIntentsQuoteResponse);
 		});
 
-		it('sets receiveOutMinimum to undefined when minAmountOut is absent', () => {
+		it('should set receiveOutMinimum to undefined when minAmountOut is absent', () => {
 			const quoteWithoutMin = {
 				...mockNearIntentsQuoteResponse,
 				quote: { ...mockNearIntentsQuoteResponse.quote, minAmountOut: undefined }
 			};
 
 			const result = mapNearIntentsQuoteResult(quoteWithoutMin);
+
+			assert(result.provider === SwapProvider.NEAR_INTENTS);
 
 			expect(result.receiveOutMinimum).toBeUndefined();
 		});
@@ -109,7 +115,7 @@ describe('near-intents.services', () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
 		});
 
-		it('returns a SwapMappedResult on successful quote', async () => {
+		it('should return a SwapMappedResult on successful quote', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
 				mockNearIntentsQuoteResponse
 			);
@@ -122,11 +128,11 @@ describe('near-intents.services', () => {
 			});
 
 			expect(result).not.toBeNull();
-			expect(result?.provider).toBe(NEAR_INTENTS_SWAP_PROVIDER);
+			expect(result?.provider).toBe(SwapProvider.NEAR_INTENTS);
 			expect(result?.receiveAmount).toBe(BigInt(mockNearIntentsQuoteResponse.quote.amountOut));
 		});
 
-		it('calls the API with dry: true and EXACT_INPUT swap type', async () => {
+		it('should call the API with dry: true and EXACT_INPUT swap type', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
 				mockNearIntentsQuoteResponse
 			);
@@ -152,7 +158,7 @@ describe('near-intents.services', () => {
 			);
 		});
 
-		it('returns null when userEthAddress is nullish', async () => {
+		it('should return null when userEthAddress is nullish', async () => {
 			const result = await fetchNearIntentsSwapQuote({
 				sourceToken,
 				destinationToken,
@@ -164,7 +170,7 @@ describe('near-intents.services', () => {
 			expect(nearIntentsApi.fetchNearIntentsQuote).not.toHaveBeenCalled();
 		});
 
-		it('returns null when source token blockchain is unsupported', async () => {
+		it('should return null when source token blockchain is unsupported', async () => {
 			const unsupportedToken: Erc20Token = {
 				...sourceToken,
 				network: { ...sourceToken.network, name: 'UNSUPPORTED' }
@@ -180,7 +186,7 @@ describe('near-intents.services', () => {
 			expect(result).toBeNull();
 		});
 
-		it('returns null when source token is not found in NEAR Intents tokens', async () => {
+		it('should return null when source token is not found in NEAR Intents tokens', async () => {
 			const unknownToken: Erc20Token = {
 				...sourceToken,
 				address: '0xUnknownContractAddress'
@@ -196,7 +202,7 @@ describe('near-intents.services', () => {
 			expect(result).toBeNull();
 		});
 
-		it('returns null when destination token is not found in NEAR Intents tokens', async () => {
+		it('should return null when destination token is not found in NEAR Intents tokens', async () => {
 			const unknownDest: Erc20Token = {
 				...destinationToken,
 				address: '0xUnknownDestAddress'
@@ -214,7 +220,7 @@ describe('near-intents.services', () => {
 	});
 
 	describe('submitNearIntentsDepositTx', () => {
-		it('calls submitNearIntentsDeposit with correct params', async () => {
+		it('should call submitNearIntentsDeposit with correct params', async () => {
 			vi.mocked(nearIntentsApi.submitNearIntentsDeposit).mockResolvedValue(
 				mockNearIntentsStatusSuccess
 			);
@@ -230,7 +236,7 @@ describe('near-intents.services', () => {
 			});
 		});
 
-		it('includes memo when provided', async () => {
+		it('should include memo when provided', async () => {
 			vi.mocked(nearIntentsApi.submitNearIntentsDeposit).mockResolvedValue(
 				mockNearIntentsStatusSuccess
 			);
@@ -250,7 +256,7 @@ describe('near-intents.services', () => {
 	});
 
 	describe('pollNearIntentsStatus', () => {
-		it('resolves when status is SUCCESS', async () => {
+		it('should resolve when status is SUCCESS', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsStatus).mockResolvedValue(
 				mockNearIntentsStatusSuccess
 			);
@@ -260,7 +266,7 @@ describe('near-intents.services', () => {
 			expect(nearIntentsApi.fetchNearIntentsStatus).toHaveBeenCalledOnce();
 		});
 
-		it('throws when status is FAILED', async () => {
+		it('should throw when status is FAILED', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsStatus).mockResolvedValue(
 				mockNearIntentsStatusFailed
 			);
@@ -270,7 +276,7 @@ describe('near-intents.services', () => {
 			);
 		});
 
-		it('polls multiple times until terminal status', async () => {
+		it('should poll multiple times until terminal status', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsStatus)
 				.mockResolvedValueOnce(mockNearIntentsStatusPending)
 				.mockResolvedValueOnce({ ...mockNearIntentsStatusPending, status: 'PROCESSING' })

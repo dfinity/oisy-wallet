@@ -2,6 +2,7 @@ import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { createPermit } from '$eth/services/eip2612-permit.services';
+import { send as sendEvm } from '$eth/services/send.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
@@ -14,7 +15,9 @@ import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
+import * as nearIntentsServices from '$lib/services/near-intents.services';
 import {
+	fetchNearIntentsSwap,
 	fetchSwapAmounts,
 	fetchSwapAmountsEVM,
 	fetchVeloraDeltaSwap,
@@ -24,11 +27,11 @@ import {
 	withdrawICPSwapAfterFailedSwap,
 	withdrawUserUnusedBalance
 } from '$lib/services/swap.services';
+import { fetchVeloraSwapAmount } from '$lib/services/velora-swap.services';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
 import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
-import { geSwapEthTokenAddress } from '$lib/utils/swap.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -69,6 +72,28 @@ vi.mock('$lib/api/icp-swap-pool.api', () => ({
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
+}));
+
+const mockVeloraGetQuote = vi.hoisted(() => vi.fn());
+
+vi.mock('$lib/providers/evm-swap.providers', () => ({
+	evmSwapProviders: [
+		{
+			key: 'velora',
+			getQuote: mockVeloraGetQuote,
+			isEnabled: true
+		}
+	]
+}));
+
+vi.mock('$lib/services/near-intents.services', () => ({
+	executeNearIntentsSwap: vi.fn(),
+	submitNearIntentsDepositTx: vi.fn(),
+	pollNearIntentsStatus: vi.fn()
+}));
+
+vi.mock('$eth/services/send.services', () => ({
+	send: vi.fn()
 }));
 
 vi.mock('@velora-dex/sdk', () => ({
@@ -328,13 +353,7 @@ describe('swap.services', () => {
 		});
 
 		it('should call fetchSwapAmountsEVM when network.id !== ICP_NETWORK_ID', async () => {
-			const mockGetQuote = vi.fn();
-
-			vi.mocked(constructSimpleSDK).mockReturnValue({
-				quote: { getQuote: mockGetQuote }
-			} as unknown as ReturnType<typeof constructSimpleSDK>);
-
-			mockGetQuote.mockResolvedValue({});
+			mockVeloraGetQuote.mockResolvedValue(null);
 
 			const evmToken = {
 				...mockValidErc20Token,
@@ -357,7 +376,7 @@ describe('swap.services', () => {
 				userEthAddress: '0xUser'
 			});
 
-			expect(mockGetQuote).toHaveBeenCalled();
+			expect(mockVeloraGetQuote).toHaveBeenCalled();
 		});
 	});
 
@@ -381,22 +400,12 @@ describe('swap.services', () => {
 		const amount = BigInt('1000000000000000000');
 		const userEthAddress = '0xUser';
 
-		const mockGetQuote = vi.fn();
-
 		beforeEach(() => {
 			vi.clearAllMocks();
-
-			vi.mocked(constructSimpleSDK).mockReturnValue({
-				quote: { getQuote: mockGetQuote }
-			} as unknown as ReturnType<typeof constructSimpleSDK>);
 		});
 
-		afterEach(() => {
-			mockGetQuote.mockReset();
-		});
-
-		it('returns [] when quote has neither delta nor market', async () => {
-			mockGetQuote.mockResolvedValue({});
+		it('returns [] when all providers return null', async () => {
+			mockVeloraGetQuote.mockResolvedValue(null);
 
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
@@ -408,12 +417,12 @@ describe('swap.services', () => {
 			expect(result).toEqual([]);
 		});
 
-		it('calls delta mapper when quote contains delta without bridge and returns single-item array', async () => {
-			mockGetQuote.mockResolvedValue({
-				delta: {
-					destAmount: '123',
-					bridge: { scalingFactor: 0 }
-				}
+		it('returns provider results and passes params correctly', async () => {
+			mockVeloraGetQuote.mockResolvedValue({
+				provider: SwapProvider.VELORA,
+				receiveAmount: 123n,
+				swapDetails: {},
+				type: 'delta'
 			});
 
 			const result = await fetchSwapAmountsEVM({
@@ -423,40 +432,35 @@ describe('swap.services', () => {
 				userEthAddress
 			});
 
-			expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
+			expect(mockVeloraGetQuote).toHaveBeenCalledWith({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
 			expect(result).toHaveLength(1);
 			expect(result[0].provider).toBe(SwapProvider.VELORA);
 			expect(result[0].receiveAmount).toBe(123n);
-			expect(result[0].type).toBe('delta');
 		});
 
-		it('calls delta mapper when quote contains delta with bridge and returns correct receiveAmount', async () => {
-			mockGetQuote.mockResolvedValue({
-				delta: {
-					destAmount: '123',
-					bridgeInfo: { destAmountAfterBridge: '949920' }
-				}
-			});
-
+		it('returns [] when userEthAddress is nullish', async () => {
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress: undefined
 			});
 
-			expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
-			expect(result).toHaveLength(1);
-			expect(result[0].provider).toBe(SwapProvider.VELORA);
-			expect(result[0].receiveAmount).toBe(949920n);
-			expect(result[0].type).toBe('delta');
+			expect(mockVeloraGetQuote).not.toHaveBeenCalled();
+			expect(result).toEqual([]);
 		});
 
-		it('calls market mapper when quote contains market and returns single-item array', async () => {
-			mockGetQuote.mockResolvedValue({
-				market: {
-					destAmount: '456'
-				}
+		it('sorts results by receiveAmount descending', async () => {
+			mockVeloraGetQuote.mockResolvedValue({
+				provider: SwapProvider.VELORA,
+				receiveAmount: 100n,
+				swapDetails: {},
+				type: 'delta'
 			});
 
 			const result = await fetchSwapAmountsEVM({
@@ -467,9 +471,20 @@ describe('swap.services', () => {
 			});
 
 			expect(result).toHaveLength(1);
-			expect(result[0].provider).toBe(SwapProvider.VELORA);
-			expect(result[0].receiveAmount).toBe(456n);
-			expect(result[0].type).toBe('market');
+			expect(result[0].receiveAmount).toBe(100n);
+		});
+
+		it('skips providers whose quote rejects', async () => {
+			mockVeloraGetQuote.mockRejectedValue(new Error('Velora error'));
+
+			const result = await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(result).toEqual([]);
 		});
 	});
 
@@ -1186,7 +1201,7 @@ describe('swap.services', () => {
 				}
 			});
 
-			await fetchSwapAmountsEVM({
+			await fetchVeloraSwapAmount({
 				sourceToken,
 				destinationToken,
 				amount,
@@ -1213,7 +1228,7 @@ describe('swap.services', () => {
 				}
 			});
 
-			await fetchSwapAmountsEVM({
+			await fetchVeloraSwapAmount({
 				sourceToken,
 				destinationToken,
 				amount,
@@ -1235,7 +1250,7 @@ describe('swap.services', () => {
 			const error = new Error('Velora API Error');
 			mockGetQuote.mockRejectedValue(error);
 
-			await fetchSwapAmountsEVM({
+			await fetchVeloraSwapAmount({
 				sourceToken,
 				destinationToken,
 				amount,
@@ -1261,7 +1276,7 @@ describe('swap.services', () => {
 				}
 			});
 
-			await fetchSwapAmountsEVM({
+			await fetchVeloraSwapAmount({
 				sourceToken,
 				destinationToken,
 				amount,
@@ -1453,6 +1468,167 @@ describe('swap.services', () => {
 						event_subcontext: SwapProvider.KONG_SWAP,
 						result_status: 'success'
 					})
+				})
+			);
+		});
+	});
+
+	describe('fetchNearIntentsSwap', () => {
+		const sourceToken = {
+			...mockValidErc20Token,
+			decimals: 6,
+			address: '0xUSDC'
+		};
+
+		const destinationToken = {
+			...mockValidErc20Token,
+			decimals: 6,
+			address: '0xARB_USDC'
+		};
+
+		const mockProgress = vi.fn();
+
+		const mockWetQuote = {
+			correlationId: 'test-id',
+			timestamp: '2026-03-16T00:00:00.000Z',
+			signature: 'sig',
+			quoteRequest: {} as never,
+			quote: {
+				depositAddress: '0xDepositAddr',
+				depositMemo: null,
+				amountIn: '1000000',
+				amountInFormatted: '1.00',
+				amountInUsd: '1.00',
+				amountOut: '900000',
+				amountOutFormatted: '0.90',
+				amountOutUsd: '0.90',
+				deadline: '2026-03-16T00:10:00.000Z',
+				timeEstimate: 120,
+				refundFee: '0'
+			}
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(nearIntentsServices.executeNearIntentsSwap).mockResolvedValue(mockWetQuote);
+			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
+			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
+		});
+
+		it('should execute the full NEAR Intents swap flow', async () => {
+			await fetchNearIntentsSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: mockWetQuote
+			});
+
+			expect(nearIntentsServices.executeNearIntentsSwap).toHaveBeenCalledOnce();
+			expect(sendEvm).toHaveBeenCalledWith(
+				expect.objectContaining({
+					from: mockEthAddress,
+					to: '0xDepositAddr'
+				})
+			);
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
+				depositAddress: '0xDepositAddr',
+				txHash: '0xTxHash123'
+			});
+			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
+				depositAddress: '0xDepositAddr'
+			});
+		});
+
+		it('should report progress steps in correct order', async () => {
+			await fetchNearIntentsSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: mockWetQuote
+			});
+
+			expect(mockProgress).toHaveBeenCalledTimes(4);
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SWAP);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.SIGN_TRANSFER);
+			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.SWAP);
+			expect(mockProgress).toHaveBeenNthCalledWith(4, ProgressStepsSwap.UPDATE_UI);
+		});
+
+		it('should pass depositMemo when present in quote', async () => {
+			const quoteWithMemo = {
+				...mockWetQuote,
+				quote: { ...mockWetQuote.quote, depositMemo: 'stellar-memo' }
+			};
+
+			vi.mocked(nearIntentsServices.executeNearIntentsSwap).mockResolvedValue(quoteWithMemo);
+
+			await fetchNearIntentsSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: mockWetQuote
+			});
+
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
+				depositAddress: '0xDepositAddr',
+				txHash: '0xTxHash123',
+				depositMemo: 'stellar-memo'
+			});
+			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
+				depositAddress: '0xDepositAddr',
+				depositMemo: 'stellar-memo'
+			});
+		});
+
+		it('should convert slippage percentage to basis points', async () => {
+			await fetchNearIntentsSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1.5',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: mockWetQuote
+			});
+
+			expect(nearIntentsServices.executeNearIntentsSwap).toHaveBeenCalledWith(
+				expect.objectContaining({
+					slippageTolerance: 150
 				})
 			);
 		});
