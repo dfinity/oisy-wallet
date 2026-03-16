@@ -46,7 +46,7 @@ pub enum NetworkTransactionData {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct EvmTransactionData {
     pub chain_id: Option<ChainId>,
-    pub nonce: Option<u32>,
+    pub nonce: Option<u64>,
     pub gas_limit: Option<Nat>,
     pub gas_price: Option<Nat>,
     pub gas_used: Option<Nat>,
