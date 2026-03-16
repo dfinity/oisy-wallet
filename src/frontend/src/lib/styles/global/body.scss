@@ -6,7 +6,7 @@ body {
 	overflow-x: hidden;
 
 	&:has([role='menu']),
-	&:has([role='dialog']) {
+	&:has([role='dialog']:not(.toast)) {
 		overflow: hidden;
 	}
 }
