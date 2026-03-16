@@ -94,9 +94,7 @@ describe('approve.services', () => {
 			expect(data).toMatch(/^0x095ea7b3/);
 
 			const erc20Interface = new Interface(ERC20_APPROVE_ABI);
-			const decoded = erc20Interface.decodeFunctionData('approve', data);
-			const decodedSpender = decoded[0];
-			const decodedAmount = decoded[1];
+			const [decodedSpender, decodedAmount] = erc20Interface.decodeFunctionData('approve', data);
 
 			expect(decodedSpender).toBe(spender);
 			expect(decodedAmount.toString()).toBe(amount.toString());
