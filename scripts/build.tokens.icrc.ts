@@ -129,15 +129,18 @@ const saveTokenIcon = ({
 const findAdditionalIcrc = async () => {
 	const { tokens, icons }: TokensAndIcons = await buildIcrcTokens();
 
-	const iconPaths: Record<LedgerCanisterIdText, string> = {};
+	const iconPaths = icons.reduce<Record<LedgerCanisterIdText, string>>(
+		(acc, { ledgerCanisterId, name, icon }) => {
+			const iconPath = saveTokenIcon({ ledgerCanisterId, icon, name });
 
-	for (const { ledgerCanisterId, name, icon } of icons) {
-		const iconPath = saveTokenIcon({ ledgerCanisterId, icon, name });
+			if (nonNullish(iconPath)) {
+				acc[ledgerCanisterId] = iconPath;
+			}
 
-		if (nonNullish(iconPath)) {
-			iconPaths[ledgerCanisterId] = iconPath;
-		}
-	}
+			return acc;
+		},
+		{}
+	);
 
 	const tokensWithIcons = Object.fromEntries(
 		Object.entries(tokens).map(([key, { icon: _, ...token }]) => {
