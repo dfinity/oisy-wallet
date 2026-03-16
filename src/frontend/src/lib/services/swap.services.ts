@@ -270,7 +270,8 @@ export const fetchSwapAmounts = async ({
 				sourceToken: sourceToken as Erc20Token,
 				destinationToken: destinationToken as Erc20Token,
 				amount: sourceAmount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 };
 
@@ -774,7 +775,8 @@ export const fetchSwapAmountsEVM = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userEthAddress
+	userEthAddress,
+	slippage
 }: EvmQuoteParams): Promise<SwapMappedResult[]> => {
 	if (isNullish(userEthAddress)) {
 		return [];
@@ -784,7 +786,7 @@ export const fetchSwapAmountsEVM = async ({
 
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userEthAddress })
+			getQuote({ sourceToken, destinationToken, amount, userEthAddress, slippage })
 		)
 	);
 

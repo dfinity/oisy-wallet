@@ -24,9 +24,9 @@ export const fetchVeloraSwapAmount = async ({
 	destinationToken,
 	amount,
 	userEthAddress
-}: EvmQuoteParams): Promise<SwapMappedResult | null> => {
+}: EvmQuoteParams): Promise<SwapMappedResult | undefined> => {
 	if (isNullish(userEthAddress)) {
-		return null;
+		return;
 	}
 
 	const {
@@ -126,8 +126,6 @@ export const fetchVeloraSwapAmount = async ({
 			});
 			return mapVeloraMarketSwapResult(data.market);
 		}
-
-		return null;
 	} catch (error: unknown) {
 		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
@@ -139,7 +137,5 @@ export const fetchVeloraSwapAmount = async ({
 				result_error: errorMessage
 			}
 		});
-
-		return null;
 	}
 };

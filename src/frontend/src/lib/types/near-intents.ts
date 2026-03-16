@@ -17,16 +17,16 @@ export type NearIntentsRecipientType = 'DESTINATION_CHAIN' | 'INTENTS';
 export interface NearIntentsQuoteRequest {
 	dry: boolean;
 	swapType: NearIntentsSwapType;
-	slippageTolerance?: number;
+	slippageTolerance: number;
 	originAsset: string;
-	depositType?: NearIntentsDepositType;
+	depositType: NearIntentsDepositType;
 	destinationAsset: string;
 	amount: string;
 	recipient: string;
-	recipientType?: NearIntentsRecipientType;
+	recipientType: NearIntentsRecipientType;
 	refundTo: string;
-	refundType?: NearIntentsDepositType;
-	deadline?: string;
+	refundType: NearIntentsDepositType;
+	deadline: string;
 	quoteWaitingTimeMs?: number;
 	referral?: string;
 }

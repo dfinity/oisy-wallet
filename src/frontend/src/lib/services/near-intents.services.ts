@@ -18,9 +18,9 @@ import {
 } from '$lib/types/near-intents';
 import type { EvmQuoteParams, SwapMappedResult } from '$lib/types/swap';
 import {
-	findNearIntentsAsset,
+	buildNearIntentsQuoteRequest,
 	mapNearIntentsQuoteResult,
-	resolveNearIntentsBlockchain
+	resolveNearIntentsSwapAssets
 } from '$lib/utils/swap.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -44,48 +44,31 @@ export const fetchNearIntentsSwapQuote = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userEthAddress
-}: EvmQuoteParams): Promise<SwapMappedResult | null> => {
+	userEthAddress,
+	slippage
+}: EvmQuoteParams): Promise<SwapMappedResult | undefined> => {
 	if (!NEAR_INTENTS_SWAP_ENABLED || isNullish(userEthAddress)) {
-		return null;
+		return;
 	}
 
 	const nearTokens = await loadNearIntentsTokens();
 
-	const srcBlockchain = resolveNearIntentsBlockchain(sourceToken.network.id);
-	const destBlockchain = resolveNearIntentsBlockchain(destinationToken.network.id);
+	const assets = resolveNearIntentsSwapAssets({ nearTokens, sourceToken, destinationToken });
 
-	if (isNullish(srcBlockchain) || isNullish(destBlockchain)) {
-		return null;
+	if (isNullish(assets)) {
+		return;
 	}
 
-	const srcAsset = findNearIntentsAsset({
-		tokens: nearTokens,
-		token: sourceToken,
-		blockchain: srcBlockchain
-	});
-
-	const destAsset = findNearIntentsAsset({
-		tokens: nearTokens,
-		token: destinationToken,
-		blockchain: destBlockchain
-	});
-
-	if (isNullish(srcAsset) || isNullish(destAsset)) {
-		return null;
-	}
-
-	const quoteResponse = await fetchNearIntentsQuote({
-		dry: true,
-		swapType: 'EXACT_INPUT',
-		slippageTolerance: 100,
-		originAsset: srcAsset.assetId,
-		destinationAsset: destAsset.assetId,
-		amount: amount.toString(),
-		recipient: userEthAddress,
-		refundTo: userEthAddress,
-		deadline: new Date(Date.now() + NEAR_INTENTS_QUOTE_DEADLINE_MS).toISOString()
-	});
+	const quoteResponse = await fetchNearIntentsQuote(
+		buildNearIntentsQuoteRequest({
+			dry: true,
+			slippageTolerance: Math.round(Number(slippage) * 100),
+			...assets,
+			amount,
+			userEthAddress,
+			deadlineMs: NEAR_INTENTS_QUOTE_DEADLINE_MS
+		})
+	);
 
 	return mapNearIntentsQuoteResult(quoteResponse);
 };
@@ -105,40 +88,22 @@ export const executeNearIntentsSwap = async ({
 }): Promise<NearIntentsQuoteResponse> => {
 	const nearTokens = await loadNearIntentsTokens();
 
-	const srcBlockchain = resolveNearIntentsBlockchain(sourceToken.network.id);
-	const destBlockchain = resolveNearIntentsBlockchain(destinationToken.network.id);
+	const assets = resolveNearIntentsSwapAssets({ nearTokens, sourceToken, destinationToken });
 
-	if (isNullish(srcBlockchain) || isNullish(destBlockchain)) {
-		throw new Error('Unsupported blockchain for NEAR Intents swap');
-	}
-
-	const srcAsset = findNearIntentsAsset({
-		tokens: nearTokens,
-		token: sourceToken,
-		blockchain: srcBlockchain
-	});
-
-	const destAsset = findNearIntentsAsset({
-		tokens: nearTokens,
-		token: destinationToken,
-		blockchain: destBlockchain
-	});
-
-	if (isNullish(srcAsset) || isNullish(destAsset)) {
+	if (isNullish(assets)) {
 		throw new Error('Token not supported by NEAR Intents');
 	}
 
-	return fetchNearIntentsQuote({
-		dry: false,
-		swapType: 'EXACT_INPUT',
-		slippageTolerance,
-		originAsset: srcAsset.assetId,
-		destinationAsset: destAsset.assetId,
-		amount: amount.toString(),
-		recipient: userEthAddress,
-		refundTo: userEthAddress,
-		deadline: new Date(Date.now() + NEAR_INTENTS_QUOTE_DEADLINE_MS).toISOString()
-	});
+	return fetchNearIntentsQuote(
+		buildNearIntentsQuoteRequest({
+			dry: false,
+			slippageTolerance,
+			...assets,
+			amount,
+			userEthAddress,
+			deadlineMs: NEAR_INTENTS_QUOTE_DEADLINE_MS
+		})
+	);
 };
 
 export const submitNearIntentsDepositTx = async ({

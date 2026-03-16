@@ -69,10 +69,14 @@ export const mockNearIntentsQuoteResponse: NearIntentsQuoteResponse = {
 		swapType: 'EXACT_INPUT',
 		slippageTolerance: 100,
 		originAsset: 'nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near',
+		depositType: 'ORIGIN_CHAIN',
 		destinationAsset: 'nep141:arb-0xaf88d065e77c8cc2239327c5edb3a432268e5831.omft.near',
 		amount: '1000000',
 		recipient: '0xUser',
-		refundTo: '0xUser'
+		recipientType: 'DESTINATION_CHAIN',
+		refundTo: '0xUser',
+		refundType: 'ORIGIN_CHAIN',
+		deadline: '2026-03-16T00:10:00.000Z'
 	},
 	quote: mockNearIntentsQuote
 };

@@ -132,7 +132,7 @@ export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
 
 export interface EvmSwapProviderConfig {
 	key: SwapProvider;
-	getQuote: (params: EvmQuoteParams) => Promise<SwapMappedResult | null>;
+	getQuote: (params: EvmQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
 }
 
@@ -195,6 +195,7 @@ export interface EvmQuoteParams {
 	destinationToken: Erc20Token;
 	amount: bigint;
 	userEthAddress: OptionEthAddress;
+	slippage: Slippage;
 }
 
 export interface GetWithdrawableTokenParams {

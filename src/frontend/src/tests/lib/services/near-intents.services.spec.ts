@@ -101,6 +101,8 @@ describe('near-intents.services', () => {
 	});
 
 	describe('fetchNearIntentsSwapQuote', () => {
+		const slippage = 1.5;
+
 		const sourceToken: Erc20Token = {
 			...mockValidErc20Token,
 			network: ETHEREUM_NETWORK,
@@ -126,7 +128,8 @@ describe('near-intents.services', () => {
 				sourceToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				slippage
 			});
 
 			expect(result).not.toBeNull();
@@ -143,36 +146,41 @@ describe('near-intents.services', () => {
 				sourceToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				slippage
 			});
 
 			expect(nearIntentsApi.fetchNearIntentsQuote).toHaveBeenCalledWith(
 				expect.objectContaining({
 					dry: true,
 					swapType: 'EXACT_INPUT',
-					slippageTolerance: 100,
+					slippageTolerance: 150,
 					originAsset: 'nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near',
+					depositType: 'ORIGIN_CHAIN',
 					destinationAsset: 'nep141:arb-0xaf88d065e77c8cc2239327c5edb3a432268e5831.omft.near',
 					amount: '1000000',
 					recipient: mockEthAddress,
-					refundTo: mockEthAddress
+					recipientType: 'DESTINATION_CHAIN',
+					refundTo: mockEthAddress,
+					refundType: 'ORIGIN_CHAIN'
 				})
 			);
 		});
 
-		it('should return null when userEthAddress is nullish', async () => {
+		it('should return undefined when userEthAddress is nullish', async () => {
 			const result = await fetchNearIntentsSwapQuote({
 				sourceToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: undefined
+				userEthAddress: undefined,
+				slippage
 			});
 
-			expect(result).toBeNull();
+			expect(result).toBeUndefined();
 			expect(nearIntentsApi.fetchNearIntentsQuote).not.toHaveBeenCalled();
 		});
 
-		it('should return null when source token blockchain is unsupported', async () => {
+		it('should return undefined when source token blockchain is unsupported', async () => {
 			const unsupportedToken: Erc20Token = {
 				...sourceToken,
 				network: { ...sourceToken.network, id: parseNetworkId('UNSUPPORTED') }
@@ -182,13 +190,14 @@ describe('near-intents.services', () => {
 				sourceToken: unsupportedToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				slippage
 			});
 
-			expect(result).toBeNull();
+			expect(result).toBeUndefined();
 		});
 
-		it('should return null when source token is not found in NEAR Intents tokens', async () => {
+		it('should return undefined when source token is not found in NEAR Intents tokens', async () => {
 			const unknownToken: Erc20Token = {
 				...sourceToken,
 				address: '0xUnknownContractAddress'
@@ -198,13 +207,14 @@ describe('near-intents.services', () => {
 				sourceToken: unknownToken,
 				destinationToken,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				slippage
 			});
 
-			expect(result).toBeNull();
+			expect(result).toBeUndefined();
 		});
 
-		it('should return null when destination token is not found in NEAR Intents tokens', async () => {
+		it('should return undefined when destination token is not found in NEAR Intents tokens', async () => {
 			const unknownDest: Erc20Token = {
 				...destinationToken,
 				address: '0xUnknownDestAddress'
@@ -214,10 +224,11 @@ describe('near-intents.services', () => {
 				sourceToken,
 				destinationToken: unknownDest,
 				amount: 1_000_000n,
-				userEthAddress: mockEthAddress
+				userEthAddress: mockEthAddress,
+				slippage
 			});
 
-			expect(result).toBeNull();
+			expect(result).toBeUndefined();
 		});
 	});
 

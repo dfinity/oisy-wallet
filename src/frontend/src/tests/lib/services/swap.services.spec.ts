@@ -391,6 +391,7 @@ describe('swap.services', () => {
 
 		const amount = BigInt('1000000000000000000');
 		const userEthAddress = '0xUser';
+		const slippage = 1.5;
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -403,7 +404,8 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(result).toEqual([]);
@@ -421,14 +423,16 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(mockVeloraGetQuote).toHaveBeenCalledWith({
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 			expect(result).toHaveLength(1);
 			expect(result[0].provider).toBe(SwapProvider.VELORA);
@@ -440,7 +444,8 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress: undefined
+				userEthAddress: undefined,
+				slippage
 			});
 
 			expect(mockVeloraGetQuote).not.toHaveBeenCalled();
@@ -459,7 +464,8 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(result).toHaveLength(1);
@@ -473,7 +479,8 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(result).toEqual([]);
