@@ -126,7 +126,7 @@ export const saveIcon = ({
 		writeFileSync(filePath, buffer, { flag: 'wx' });
 	} catch (err: unknown) {
 		if (typeof err === 'object' && err !== null && 'code' in err && err.code === 'EEXIST') {
-// File already exists
+			// File already exists
 			return ext;
 		}
 
