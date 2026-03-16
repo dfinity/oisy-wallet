@@ -11,7 +11,6 @@ import {
 } from '$tests/mocks/near-intents.mock';
 
 vi.mock('$env/rest/near-intents.env', () => ({
-	NEAR_INTENTS_API_KEY: 'mock-api-key',
 	NEAR_INTENTS_API_URL: 'https://1click.chaindefuser.com/v0'
 }));
 
@@ -60,7 +59,7 @@ describe('near-intents.rest', () => {
 			deadline: '2026-03-16T00:10:00.000Z'
 		};
 
-		it('sends a POST request with authorization header and returns the quote', async () => {
+		it('sends a POST request and returns the quote', async () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => Promise.resolve(mockNearIntentsQuoteResponse)
@@ -71,8 +70,7 @@ describe('near-intents.rest', () => {
 			expect(fetch).toHaveBeenCalledWith('https://1click.chaindefuser.com/v0/quote', {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json',
-					Authorization: 'Bearer mock-api-key'
+					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify(quoteRequest)
 			});
@@ -119,8 +117,7 @@ describe('near-intents.rest', () => {
 				'https://1click.chaindefuser.com/v0/status?depositAddress=0xDeposit123',
 				{
 					headers: {
-						'Content-Type': 'application/json',
-						Authorization: 'Bearer mock-api-key'
+						'Content-Type': 'application/json'
 					}
 				}
 			);
@@ -173,8 +170,7 @@ describe('near-intents.rest', () => {
 			expect(fetch).toHaveBeenCalledWith('https://1click.chaindefuser.com/v0/deposit/submit', {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json',
-					Authorization: 'Bearer mock-api-key'
+					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify(request)
 			});

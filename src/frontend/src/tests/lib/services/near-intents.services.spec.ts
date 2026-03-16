@@ -1,3 +1,4 @@
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as nearIntentsApi from '$lib/rest/near-intents.rest';
@@ -10,6 +11,7 @@ import {
 } from '$lib/services/near-intents.services';
 import { SwapProvider } from '$lib/types/swap';
 import { mapNearIntentsQuoteResult } from '$lib/utils/swap.utils';
+import { parseNetworkId } from '$lib/validation/network.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import {
@@ -101,13 +103,13 @@ describe('near-intents.services', () => {
 	describe('fetchNearIntentsSwapQuote', () => {
 		const sourceToken: Erc20Token = {
 			...mockValidErc20Token,
-			network: { ...ETHEREUM_NETWORK, name: 'ETH' },
+			network: ETHEREUM_NETWORK,
 			address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
 		};
 
 		const destinationToken: Erc20Token = {
 			...mockValidErc20Token,
-			network: { ...mockValidErc20Token.network, name: 'ARB' },
+			network: ARBITRUM_MAINNET_NETWORK,
 			address: '0xaf88d065e77c8cc2239327c5edb3a432268e5831'
 		};
 
@@ -173,7 +175,7 @@ describe('near-intents.services', () => {
 		it('should return null when source token blockchain is unsupported', async () => {
 			const unsupportedToken: Erc20Token = {
 				...sourceToken,
-				network: { ...sourceToken.network, name: 'UNSUPPORTED' }
+				network: { ...sourceToken.network, id: parseNetworkId('UNSUPPORTED') }
 			};
 
 			const result = await fetchNearIntentsSwapQuote({
