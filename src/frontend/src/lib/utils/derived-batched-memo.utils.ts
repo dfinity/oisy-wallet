@@ -1,4 +1,3 @@
-import { tick } from 'svelte';
 import { derived, type Readable, type Subscriber, type Unsubscriber } from 'svelte/store';
 
 type Stores =
@@ -7,6 +6,16 @@ type Stores =
 	| Array<Readable<unknown>>;
 type StoresValues<T> =
 	T extends Readable<infer U> ? U : { [K in keyof T]: T[K] extends Readable<infer U> ? U : never };
+
+const nextFrame = (): Promise<void> =>
+	new Promise((resolve) => {
+		if (typeof requestAnimationFrame === 'function') {
+			requestAnimationFrame(() => resolve());
+			return;
+		}
+
+		setTimeout(resolve, 0);
+	});
 
 /**
  * Like {@link derivedMemo}, but emits subsequent source updates in incremental
@@ -75,7 +84,7 @@ export const derivedBatchedMemo = <S extends Stores, T>(
 			if (!isEqual(emittedValue, batch)) {
 				notify(batch);
 
-				await tick();
+				await nextFrame();
 			}
 		}
 
