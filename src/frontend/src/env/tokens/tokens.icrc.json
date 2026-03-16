@@ -193,8 +193,7 @@
 		"symbol": "BITTYICP",
 		"fee": {
 			"__bigint__": "1000000"
-		},
-		"icon": "/icons/icrc/qroj6-lyaaa-aaaam-qeqta-cai.jpg"
+		}
 	},
 	"EXE": {
 		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai",
