@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "La primera plataforma para construir aplicaciones que se escriben solas.",
-				"call_to_action": "Prueba Caffeine",
 				"description": "Caffeine es la primera plataforma para construir aplicaciones que se escriben solas. Simplemente habla con la IA en tu escritorio o móvil, y crea aplicaciones y servicios para ti, incluyendo aquellos que se conectan con OISY Wallet. Experimenta el futuro del desarrollo de aplicaciones con la creación impulsada por IA.",
 				"carousel": {
 					"text": "Hola, internet que se escribe solo",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

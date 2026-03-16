@@ -30,22 +30,43 @@ use crate::{
 };
 
 /// The key type that was previously stored in memory page 8.
+///
+/// Wraps `Option<CustomTokenId>` so that keys already migrated to the newer
+/// `TokenId` format (which has variants unknown to `CustomTokenId`) decode as
+/// `None` instead of panicking.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-struct LegacyStoredTokenId(CustomTokenId);
+struct LegacyStoredTokenId(Option<CustomTokenId>);
 
 impl Storable for LegacyStoredTokenId {
     const BOUND: Bound = Bound::Unbounded;
 
     fn to_bytes(&self) -> Cow<'_, [u8]> {
-        Cow::Owned(encode_one(&self.0).expect("failed to candid-encode CustomTokenId"))
+        match &self.0 {
+            Some(id) => Cow::Owned(encode_one(id).expect("failed to candid-encode CustomTokenId")),
+            None => Cow::Borrowed(&[]),
+        }
     }
 
     fn into_bytes(self) -> Vec<u8> {
-        encode_one(&self.0).expect("failed to candid-encode CustomTokenId")
+        match self.0 {
+            Some(id) => encode_one(&id).expect("failed to candid-encode CustomTokenId"),
+            None => Vec::new(),
+        }
     }
 
     fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
-        Self(decode_one(bytes.as_ref()).expect("failed to candid-decode CustomTokenId"))
+        match decode_one::<CustomTokenId>(bytes.as_ref()) {
+            Ok(id) => {
+                let reencoded = encode_one(&id)
+                    .expect("failed to candid-encode CustomTokenId during round-trip");
+                if reencoded == bytes.as_ref() {
+                    Self(Some(id))
+                } else {
+                    Self(None)
+                }
+            }
+            Err(_) => Self(None),
+        }
     }
 }
 
@@ -64,6 +85,17 @@ pub(crate) fn extract_legacy_token_activity() -> LegacyEntries {
         return Vec::new();
     }
 
+    // If the first key can't be decoded as CustomTokenId, the map already holds
+    // TokenId keys from a previous upgrade and no migration is needed.
+    let is_legacy = old_map
+        .iter()
+        .next()
+        .is_some_and(|entry| entry.key().0.is_some());
+
+    if !is_legacy {
+        return Vec::new();
+    }
+
     let entries: Vec<(LegacyStoredTokenId, Timestamp)> = old_map
         .iter()
         .map(|entry| (entry.key().clone(), entry.value()))
@@ -75,7 +107,11 @@ pub(crate) fn extract_legacy_token_activity() -> LegacyEntries {
 
     entries
         .into_iter()
-        .map(|(legacy_key, timestamp)| (StoredTokenId(TokenId::from(&legacy_key.0)), timestamp))
+        .filter_map(|(legacy_key, timestamp)| {
+            legacy_key
+                .0
+                .map(|id| (StoredTokenId(TokenId::from(&id)), timestamp))
+        })
         .collect()
 }
 

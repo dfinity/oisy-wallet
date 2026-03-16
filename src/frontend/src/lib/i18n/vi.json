@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "Nền tảng đầu tiên để xây dựng các ứng dụng tự viết.",
-				"call_to_action": "Thử Caffeine",
 				"description": "Caffeine là nền tảng đầu tiên để xây dựng các ứng dụng tự viết. Chỉ cần trò chuyện với AI trên máy tính hoặc điện thoại, nó sẽ tạo ra các ứng dụng và dịch vụ cho bạn – bao gồm cả những ứng dụng kết nối với Ví OISY. Trải nghiệm tương lai của việc phát triển ứng dụng với khả năng sáng tạo được hỗ trợ bởi AI.",
 				"carousel": {
 					"text": "Xin chào, internet tự viết",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

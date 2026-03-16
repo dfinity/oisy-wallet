@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "",
 				"one_liner": "",
-				"call_to_action": "",
 				"description": "",
 				"carousel": {
 					"text": "",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
