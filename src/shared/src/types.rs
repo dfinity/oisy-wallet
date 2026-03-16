@@ -55,4 +55,5 @@ pub struct Stats {
     pub user_token_count: u64,
     pub custom_token_count: u64,
     pub token_activity_count: u64,
+    pub exchange_rates_count: u64,
 }

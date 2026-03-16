@@ -10,7 +10,7 @@ import {
 	loadDisabledIcrcTokensExchanges
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import * as icrcUtils from '$icp/utils/icrc.utils';
+import * as icrcMetadataUtils from '$icp/utils/icrc-metadata.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
@@ -295,9 +295,7 @@ describe('icrc.services', () => {
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				expect(idbKeyval.set).toHaveBeenCalledOnce();
-				expect(idbKeyval.set).toHaveBeenNthCalledWith(
-					1,
+				expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
 					mockIdentity.getPrincipal().toText(),
 					[mockCustomToken],
 					expect.any(Object)
@@ -307,9 +305,7 @@ describe('icrc.services', () => {
 			it('should fetch the cached custom tokens in IDB on query call', async () => {
 				await loadCustomTokens({ identity: mockIdentity, useCache: true });
 
-				expect(idbKeyval.get).toHaveBeenCalledOnce();
-				expect(idbKeyval.get).toHaveBeenNthCalledWith(
-					1,
+				expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(
 					mockIdentity.getPrincipal().toText(),
 					expect.any(Object)
 				);
@@ -453,7 +449,7 @@ describe('icrc.services', () => {
 					}
 				]);
 
-				vi.spyOn(icrcUtils, 'buildIcrcCustomTokenMetadataPseudoResponse').mockReturnValue(
+				vi.spyOn(icrcMetadataUtils, 'buildIcrcCustomTokenMetadataPseudoResponse').mockReturnValue(
 					undefined
 				);
 
@@ -488,16 +484,10 @@ describe('icrc.services', () => {
 
 				expect(initialTokens).toHaveLength(1);
 
-				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
-
-				await loadCustomTokens({ identity: mockIdentity });
-
-				const tokens = get(icrcCustomTokensStore);
-
-				expect(tokens).toHaveLength(2);
-
 				const err = new Error('test');
 				ledgerCanisterMock.metadata.mockRejectedValue(err);
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
 
 				await loadCustomTokens({ identity: mockIdentity });
 

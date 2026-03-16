@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "自己記述型アプリを構築するための初のプラットフォーム",
-				"call_to_action": "Caffeineを試す",
 				"description": "Caffeine は、自己記述型アプリを構築するための初のプラットフォームです。デスクトップやモバイルで AI と会話するだけで、OISY Wallet と連携するものを含むアプリやサービスを自動で作成します。AI主導の開発によって実現する、アプリ開発の未来を体験してください。",
 				"carousel": {
 					"text": "こんにちは、自己記述型インターネット",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -649,8 +653,8 @@
 			"btc_withdrawal_statuses": "BTC引き出しステータスの取得中にエラーが発生しました。",
 			"transaction_price": "トランザクション価格の見積もりの読み込み中にエラーが発生しました。",
 			"icrc_canisters": "ICRCキャニスターの読み込み中にエラーが発生しました。",
-			"icrc_canister_loading_curated": "",
-			"icrc_canister_loading_custom": "",
+			"icrc_canister_loading_curated": "トークン$tokenSymbolを読み取ることができませんでした。現在、応答がありません。後ほどもう一度お試しください。",
+			"icrc_canister_loading_custom": "Ledgerキャニスター$ledgerCanisterIdのトークンを読み込めませんでした。現在、応答していません。後ほどもう一度お試しください。",
 			"erc20_custom_tokens": "ERC20カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "ERC721カスタムトークンの読み込み中にエラーが発生しました。",

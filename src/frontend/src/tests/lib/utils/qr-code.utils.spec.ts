@@ -9,9 +9,13 @@ import { assertNonNullish } from '@dfinity/utils';
 import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
 import { get } from 'svelte/store';
 
-vi.mock('@icp-sdk/canisters/ledger/icrc', () => ({
-	decodePayment: vi.fn()
-}));
+vi.mock(import('@icp-sdk/canisters/ledger/icrc'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		decodePayment: vi.fn()
+	};
+});
 
 describe('decodeUrn', () => {
 	const tokenList = get(tokens);

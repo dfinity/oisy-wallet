@@ -177,13 +177,29 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 	});
 };
 
-export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
-	try {
-		const response = await loadCustomTokensWithMetadata(params);
+// ERC1155 metadata is fetched from Alchemy and doesn't depend on the IC certified flag.
+// On the certified round we reuse the query round's response to skip redundant HTTP calls.
+let lastCustomTokensResponse: Erc1155CustomToken[] | undefined;
 
-		loadCustomTokenData({ response, certified: params.certified });
-	} catch (err) {
-		if (params.certified) {
+export const processCustomTokens = async ({
+	certified,
+	...rest
+}: LoadCustomTokenParams): Promise<void> => {
+	try {
+		if (certified && nonNullish(lastCustomTokensResponse)) {
+			loadCustomTokenData({ response: lastCustomTokensResponse, certified });
+
+			return;
+		}
+
+		const response = await loadCustomTokensWithMetadata({ ...rest, certified });
+		lastCustomTokensResponse = response;
+
+		loadCustomTokenData({ response, certified });
+	} catch (err: unknown) {
+		lastCustomTokensResponse = undefined;
+
+		if (certified) {
 			onUpdateError({ error: err });
 		}
 	}

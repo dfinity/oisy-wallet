@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "La primera plataforma para construir aplicaciones que se escriben solas.",
-				"call_to_action": "Prueba Caffeine",
 				"description": "Caffeine es la primera plataforma para construir aplicaciones que se escriben solas. Simplemente habla con la IA en tu escritorio o móvil, y crea aplicaciones y servicios para ti, incluyendo aquellos que se conectan con OISY Wallet. Experimenta el futuro del desarrollo de aplicaciones con la creación impulsada por IA.",
 				"carousel": {
 					"text": "Hola, internet que se escribe solo",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -649,8 +653,8 @@
 			"btc_withdrawal_statuses": "Error al obtener los estados de retiro de BTC.",
 			"transaction_price": "Error al cargar la estimación del precio de una transacción.",
 			"icrc_canisters": "Error al cargar los canisters de ICRC.",
-			"icrc_canister_loading_curated": "",
-			"icrc_canister_loading_custom": "",
+			"icrc_canister_loading_curated": "El token $tokenSymbol no responde y no se puede cargar ahora mismo. Inténtalo de nuevo más tarde.",
+			"icrc_canister_loading_custom": "El token con el canister de Ledger $ledgerCanisterId no responde y no se puede cargar en este momento. Inténtalo de nuevo más tarde.",
 			"erc20_custom_tokens": "Error al cargar los tokens ERC20 personalizados.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Error al cargar los tokens ERC721 personalizados.",
