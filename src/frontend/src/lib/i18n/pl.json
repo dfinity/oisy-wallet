@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "",
 				"one_liner": "",
-				"call_to_action": "",
 				"description": "",
 				"carousel": {
 					"text": "",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -649,8 +653,8 @@
 			"btc_withdrawal_statuses": "Błąd podczas pobierania statusów wypłat BTC.",
 			"transaction_price": "Błąd podczas ładowania oszacowania ceny transakcji.",
 			"icrc_canisters": "Błąd podczas ładowania kanistrów ICRC.",
-			"icrc_canister_loading_curated": "",
-			"icrc_canister_loading_custom": "",
+			"icrc_canister_loading_curated": "Token $tokenSymbol nie odpowiada i nie może być teraz załadowany. Spróbuj ponownie później.",
+			"icrc_canister_loading_custom": "Token z kanistrem rejestru $ledgerCanisterId nie odpowiada i nie może być teraz załadowany. Spróbuj ponownie później.",
 			"erc20_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC721.",

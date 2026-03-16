@@ -351,11 +351,10 @@
 			},
 			"caffeine": {
 				"name": "Caffeine",
-				"one_liner": "The first platform for building self-writing apps.",
-				"call_to_action": "Try Caffeine",
-				"description": "Caffeine is the first platform for building self-writing apps. Just talk to AI on desktop or mobile, and it creates apps and services for you – including ones that connect to OISY Wallet. Experience the future of app development with AI-powered creation.",
+				"one_liner": "Create the future internet, one app at a time. Chat with AI on Caffeine to create apps and websites.",
+				"description": "Chat with AI on Caffeine to create apps and websites. Our AI builds on a new open tech stack designed to power apps that are self-writing, which grants them incredible security and resilience, and provides a guarantee that a mistake during a software update cannot cause data loss. AI writes your backend software using Motoko, the first programming language for AI, and runs your apps on the revolutionary Internet Computer network (ICP).",
 				"carousel": {
-					"text": "Hello, self-writing internet",
+					"text": "Chat to create!",
 					"call_to_action": "Learn more"
 				}
 			},
@@ -434,6 +433,11 @@
 				"name": "Parcl",
 				"one_liner": "A Solana‑based perpetuals exchange offering synthetic real‑estate markets—trade real‑estate price indexes with cross‑margin and LP‑backed liquidity.",
 				"description": "Parcl is a Solana-based decentralized exchange for real-estate price perpetuals, enabling users to long or short synthetic property indexes. It uses price data from Parcl Labs and LP-backed liquidity for cross-margined trading. The protocol is tailored to traders seeking exposure to real-world asset performance without holding the underlying property."
+			},
+			"liquidium": {
+				"name": "Liquidium",
+				"one_liner": "Borrow & lend native Bitcoin against USDT.",
+				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes."
 			}
 		}
 	},
@@ -649,8 +653,8 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
-			"icrc_canister_loading_curated": "We could not load information about the $tokenSymbol token because it’s currently not responding. It will therefore not appear in your list, but you can refresh the page in a few minutes to try loading the token again.",
-			"icrc_canister_loading_custom": "We could not load information about one of your manually added tokens with ledger id $ledgerCanisterId because it’s currently not responding. It will therefore not appear in your list, but you can refresh the page in a few minutes to try loading the token again.",
+			"icrc_canister_loading_curated": "The $tokenSymbol token is not responding and can't be loaded right now. Try again later.",
+			"icrc_canister_loading_custom": "The token with ledger canister $ledgerCanisterId is not responding and can't be loaded right now. Try again later.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc4626_custom_tokens": "Error while loading the ERC4626 custom tokens.",
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",

@@ -372,6 +372,31 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Vec(Contact),
 		Err: ContactError
 	});
+	const TokenId = IDL.Variant({
+		Erc20: IDL.Tuple(IDL.Text, IDL.Nat64),
+		ExtV2: IDL.Principal,
+		SolNativeDevnet: IDL.Null,
+		Icrc: IDL.Principal,
+		EvmNative: IDL.Nat64,
+		BtcNativeMainnet: IDL.Null,
+		Erc721: IDL.Tuple(IDL.Text, IDL.Nat64),
+		SolNativeMainnet: IDL.Null,
+		SplDevnet: IDL.Text,
+		SplMainnet: IDL.Text,
+		IcpNative: IDL.Null,
+		IcPunks: IDL.Principal,
+		BtcNativeTestnet: IDL.Null,
+		Erc1155: IDL.Tuple(IDL.Text, IDL.Nat64),
+		Erc4626: IDL.Tuple(IDL.Text, IDL.Nat64),
+		Dip721: IDL.Principal
+	});
+	const ExchangeData = IDL.Record({
+		price_24h_change_pct: IDL.Opt(IDL.Float64),
+		market_cap: IDL.Opt(IDL.Float64),
+		timestamp_ns: IDL.Nat64,
+		price: IDL.Opt(IDL.Float64)
+	});
+	const ExchangeRate = IDL.Record({ usd: ExchangeData });
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
 	const GetUserProfileResult = IDL.Variant({
 		Ok: UserProfile,
@@ -438,6 +463,7 @@ export const idlFactory = ({ IDL }) => {
 	const Stats = IDL.Record({
 		user_profile_count: IDL.Nat64,
 		custom_token_count: IDL.Nat64,
+		exchange_rates_count: IDL.Nat64,
 		token_activity_count: IDL.Nat64,
 		user_timestamps_count: IDL.Nat64,
 		user_token_count: IDL.Nat64
@@ -608,6 +634,12 @@ export const idlFactory = ({ IDL }) => {
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult], ['query']),
 		get_contacts: IDL.Func([], [GetContactsResult], ['query']),
+		get_exchange_rate: IDL.Func([TokenId], [IDL.Opt(ExchangeRate)], ['query']),
+		get_exchange_rates: IDL.Func(
+			[IDL.Vec(TokenId)],
+			[IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))],
+			['query']
+		),
 		get_user_profile: IDL.Func([], [GetUserProfileResult], ['query']),
 		get_user_transactions: IDL.Func(
 			[GetUserTransactionsRequest],
