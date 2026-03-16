@@ -1,6 +1,5 @@
 use candid::{CandidType, Deserialize, Principal};
 
-use super::custom_token::{CanisterId, ChainId, CustomTokenId, ErcTokenId, LedgerId, SplTokenId};
 use super::custom_token::{
     CanisterId, ChainId, CustomTokenId, ErcTokenId, LedgerId, SplTokenId, Token,
 };
