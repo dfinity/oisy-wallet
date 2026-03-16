@@ -79,9 +79,9 @@ const MIME_TO_EXT: Record<string, string> = {
 };
 
 /**
- * Saves an icon from any data URI format (SVG, PNG, JPEG, WebP, GIF) to the
+ * Saves an icon from a base64-encoded data URI (SVG, PNG, JPEG, WebP, GIF) to the
  * given directory. Returns the file extension on success, or undefined if the
- * data URI is invalid or has an unsupported MIME type.
+ * data URI is invalid, not base64-encoded, or has an unsupported MIME type.
  */
 export const saveIcon = ({
 	logoData,
