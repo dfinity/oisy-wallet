@@ -205,7 +205,8 @@
 		"symbol": "EXE",
 		"fee": {
 			"__bigint__": "100000"
-		}
+		},
+		"icon": "/icons/icrc/rh2pm-ryaaa-aaaan-qeniq-cai.jpg"
 	},
 	"OHSHII": {
 		"ledgerCanisterId": "7rrmx-tyaaa-aaaal-qsraq-cai",
