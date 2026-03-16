@@ -19,6 +19,7 @@ import { filterSpamErc20Transfers } from '$eth/utils/eth-transactions-spam.utils
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
+import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import { retryWithDelay } from '$lib/services/rest.services';
@@ -265,13 +266,11 @@ const loadErc4626Transactions = async ({
 	token: Erc4626CustomToken;
 	address: Address;
 }): Promise<Transaction[]> => {
-	const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-
 	const transactions = await loadErc20Transactions({ networkId, token, address });
 
 	return transactions.map((tx) => {
-		const isMint = tx.from.toLowerCase() === ZERO_ADDRESS;
-		const isBurn = tx.to?.toLowerCase() === ZERO_ADDRESS;
+		const isMint = tx.from.toLowerCase() === ZERO_ETH_ADDRESS;
+		const isBurn = tx.to?.toLowerCase() === ZERO_ETH_ADDRESS;
 
 		return {
 			...tx,
