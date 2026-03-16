@@ -25,7 +25,7 @@ import { mockEthTransaction } from '$tests/mocks/eth-transactions.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
-import { Interface } from 'ethers';
+import { Interface } from 'ethers/abi';
 
 describe('approve.services', () => {
 	describe('erc20ContractAllowance', () => {
