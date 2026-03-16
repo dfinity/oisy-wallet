@@ -362,11 +362,11 @@ pub enum GetUserTransactionsResult {
     Ok(GetUserTransactionsResponse),
     Err(UserTransactionError),
 }
- impl From<Result<GetUserTransactionsResponse, UserTransactionError>> for GetUserTransactionsResult {
-     fn from(result: Result<GetUserTransactionsResponse, UserTransactionError>) -> Self {
-         match result {
-             Ok(response) => GetUserTransactionsResult::Ok(response),
-             Err(err) => GetUserTransactionsResult::Err(err),
-         }
-     }
- }
+impl From<Result<GetUserTransactionsResponse, UserTransactionError>> for GetUserTransactionsResult {
+    fn from(result: Result<GetUserTransactionsResponse, UserTransactionError>) -> Self {
+        match result {
+            Ok(response) => GetUserTransactionsResult::Ok(response),
+            Err(err) => GetUserTransactionsResult::Err(err),
+        }
+    }
+}
