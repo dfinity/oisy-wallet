@@ -5,11 +5,11 @@ import {
 	clearNearIntentsTokensCache,
 	fetchNearIntentsSwapQuote,
 	loadNearIntentsTokens,
-	mapNearIntentsQuoteResult,
 	pollNearIntentsStatus,
 	submitNearIntentsDepositTx
 } from '$lib/services/near-intents.services';
 import { SwapProvider } from '$lib/types/swap';
+import { mapNearIntentsQuoteResult } from '$lib/utils/swap.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import {

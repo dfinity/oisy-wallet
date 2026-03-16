@@ -1,55 +1,48 @@
 <script lang="ts">
-	import { Html, type WizardStep } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
-	import { writable } from 'svelte/store';
-	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
+	import {Html, type WizardStep} from '@dfinity/gix-components';
+	import {isNullish, nonNullish} from '@dfinity/utils';
+	import {getContext, setContext} from 'svelte';
+	import {writable} from 'svelte/store';
+	import {NEAR_INTENTS_SWAP_ENABLED} from '$env/rest/near-intents.env';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
-	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
-	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+	import {enabledEthEvmNativeTokens} from '$eth/derived/native-tokens.derived';
+	import {infuraErc20Providers} from '$eth/providers/infura-erc20.providers';
 	import {
 		ETH_FEE_CONTEXT_KEY,
+		type EthFeeContext as FeeContextType,
 		initEthFeeContext,
-		initEthFeeStore,
-		type EthFeeContext as FeeContextType
+		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
-	import type { Erc20Token } from '$eth/types/erc20';
-	import type { ProgressStep } from '$eth/types/send';
-	import { isTokenErc20 } from '$eth/utils/erc20.utils';
-	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
+	import type {Erc20Token} from '$eth/types/erc20';
+	import type {ProgressStep} from '$eth/types/send';
+	import {isTokenErc20} from '$eth/utils/erc20.utils';
+	import {isNotDefaultEthereumToken} from '$eth/utils/eth.utils';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
-	import {
-		TRACK_COUNT_SWAP_ERROR,
-		TRACK_COUNT_SWAP_SUCCESS
-	} from '$lib/constants/analytics.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { exchanges } from '$lib/derived/exchange.derived';
-	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
-	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import {
-		fetchNearIntentsSwap,
-		fetchVeloraDeltaSwap,
-		fetchVeloraMarketSwap
-	} from '$lib/services/swap.services';
-	import { i18n } from '$lib/stores/i18n.store';
+	import {TRACK_COUNT_SWAP_ERROR, TRACK_COUNT_SWAP_SUCCESS} from '$lib/constants/analytics.constants';
+	import {ethAddress} from '$lib/derived/address.derived';
+	import {authIdentity} from '$lib/derived/auth.derived';
+	import {exchanges} from '$lib/derived/exchange.derived';
+	import {ProgressStepsSwap} from '$lib/enums/progress-steps';
+	import {WizardStepsSwap} from '$lib/enums/wizard-steps';
+	import {trackEvent} from '$lib/services/analytics.services';
+	import {fetchNearIntentsSwap, fetchVeloraDeltaSwap, fetchVeloraMarketSwap} from '$lib/services/swap.services';
+	import {i18n} from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext as SwapAmountsContextType
 	} from '$lib/stores/swap-amounts.store';
-	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import { toastsError } from '$lib/stores/toasts.store';
-	import type { OptionAmount } from '$lib/types/send';
-	import { SwapProvider, VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
-	import type { TokenId } from '$lib/types/token';
-	import { errorDetailToString } from '$lib/utils/error.utils';
-	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
-	import { isNetworkEthereum } from '$lib/utils/network.utils';
+	import {SWAP_CONTEXT_KEY, type SwapContext} from '$lib/stores/swap.store';
+	import {toastsError} from '$lib/stores/toasts.store';
+	import type {OptionAmount} from '$lib/types/send';
+	import {SwapProvider, type VeloraSwapDetails, VeloraSwapTypes} from '$lib/types/swap';
+	import type {TokenId} from '$lib/types/token';
+	import {errorDetailToString} from '$lib/utils/error.utils';
+	import {formatTokenBigintToNumber} from '$lib/utils/format.utils';
+	import {isNetworkEthereum} from '$lib/utils/network.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;

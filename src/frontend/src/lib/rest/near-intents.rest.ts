@@ -1,4 +1,4 @@
-import { NEAR_INTENTS_API_KEY, NEAR_INTENTS_API_URL } from '$env/rest/near-intents.env';
+import { NEAR_INTENTS_API_URL } from '$env/rest/near-intents.env';
 import type {
 	NearIntentsDepositSubmitRequest,
 	NearIntentsQuoteRequest,
@@ -6,16 +6,18 @@ import type {
 	NearIntentsStatusResponse,
 	NearIntentsToken
 } from '$lib/types/near-intents';
-import { isEmptyString, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 
 const buildHeaders = (): HeadersInit => {
-	if (isEmptyString(NEAR_INTENTS_API_KEY)) {
-		throw new Error('No Near Intents API key provided.');
-	}
+	// Apparently we do not need an API keys for Near Intents, we can do unauthorised calls
+	// if (isEmptyString(NEAR_INTENTS_API_KEY)) {
+	// 	throw new Error('No Near Intents API key provided.');
+	// }
 
 	return {
-		'Content-Type': 'application/json',
-		Authorization: `Bearer ${NEAR_INTENTS_API_KEY}`
+		'Content-Type': 'application/json'
+		// Apparently we do not need an API keys for Near Intents, we can do unauthorised calls
+		// Authorization: `Bearer ${NEAR_INTENTS_API_KEY}`
 	};
 };
 

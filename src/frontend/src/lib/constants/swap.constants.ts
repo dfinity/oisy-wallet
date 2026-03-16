@@ -23,7 +23,6 @@ export const SWAP_VALUE_DIFFERENCE_ERROR_VALUE = -5;
 export const KONG_SWAP_PROVIDER = 'kongSwap';
 export const ICP_SWAP_PROVIDER = 'icpSwap';
 export const VELORA_SWAP_PROVIDER = 'velora';
-
 export const ICP_SWAP_POOL_FEE = 3000n;
 
 export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -31,6 +30,18 @@ export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeee
 export const SWAP_DELTA_TIMEOUT_MS = 5 * 60_000;
 export const SWAP_DELTA_INTERVAL_MS = 3_000;
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
+
+export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<string, string> = {
+	ETH: 'eth',
+	ARB: 'arb',
+	BASE: 'base',
+	BSC: 'bsc',
+	POL: 'pol'
+};
+
+export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;
+export const NEAR_INTENTS_POLL_INTERVAL_MS = 2_000;
+export const NEAR_INTENTS_POLL_MAX_ATTEMPTS = 120;
 
 export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';

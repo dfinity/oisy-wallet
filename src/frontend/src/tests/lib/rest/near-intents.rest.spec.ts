@@ -11,7 +11,8 @@ import {
 } from '$tests/mocks/near-intents.mock';
 
 vi.mock('$env/rest/near-intents.env', () => ({
-	NEAR_INTENTS_API_KEY: 'mock-api-key'
+	NEAR_INTENTS_API_KEY: 'mock-api-key',
+	NEAR_INTENTS_API_URL: 'https://1click.chaindefuser.com/v0'
 }));
 
 describe('near-intents.rest', () => {

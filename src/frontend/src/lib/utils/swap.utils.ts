@@ -10,6 +10,7 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	NEAR_INTENTS_BLOCKCHAIN_MAP,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
 	swapProvidersDetails
@@ -17,6 +18,8 @@ import {
 import { SwapError } from '$lib/services/swap-errors.services';
 import type { AmountString } from '$lib/types/amount';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
+import type { NearIntentsQuoteResponse, NearIntentsToken } from '$lib/types/near-intents';
+import type { NetworkId } from '$lib/types/network';
 import type { OptionAmount } from '$lib/types/send';
 import {
 	SwapProvider,
@@ -199,6 +202,31 @@ export const mapVeloraMarketSwapResult = (swap: OptimalRate): SwapMappedResult =
 	swapDetails: swap as VeloraSwapDetails,
 	type: VeloraSwapTypes.MARKET
 });
+
+export const mapNearIntentsQuoteResult = (quote: NearIntentsQuoteResponse): SwapMappedResult => ({
+	provider: SwapProvider.NEAR_INTENTS,
+	receiveAmount: BigInt(quote.quote.amountOut),
+	receiveOutMinimum: quote.quote.minAmountOut ? BigInt(quote.quote.minAmountOut) : undefined,
+	swapDetails: quote
+});
+
+export const resolveNearIntentsBlockchain = (networkId: NetworkId): string | undefined =>
+	NEAR_INTENTS_BLOCKCHAIN_MAP[networkId];
+
+export const findNearIntentsAsset = ({
+	tokens,
+	token,
+	blockchain
+}: {
+	tokens: NearIntentsToken[];
+	token: Erc20Token;
+	blockchain: string;
+}): NearIntentsToken | undefined =>
+	tokens.find(
+		(t) =>
+			t.blockchain === blockchain &&
+			t.contractAddress?.toLowerCase() === token.address.toLowerCase()
+	);
 
 export const geSwapEthTokenAddress = (token: Erc20Token) => {
 	if (isDefaultEthereumToken(token)) {
