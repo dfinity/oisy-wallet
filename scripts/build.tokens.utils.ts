@@ -102,6 +102,7 @@ export const saveIcon = ({
 	}
 
 	const [, mime] = mimeMatch;
+
 	const ext = MIME_TO_EXT[mime];
 
 	if (isNullish(ext)) {
