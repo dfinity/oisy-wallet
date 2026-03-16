@@ -22,13 +22,17 @@ import {
 	mockSolAddress2,
 	mockSolAddress3
 } from '$tests/mocks/sol.mock';
-import { estimateComputeUnitLimitFactory } from '@solana-program/compute-budget';
+import {
+	estimateComputeUnitLimitFactory,
+	setTransactionMessageComputeUnitPrice
+} from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-program/token';
-import * as solanaWeb3 from '@solana/kit';
 import {
-	appendTransactionMessageInstructions,
-	pipe,
+	createTransactionPlanExecutor,
+	createTransactionPlanner,
+	flattenTransactionPlanResult,
+	nonDivisibleSequentialInstructionPlan,
 	sendTransactionWithoutConfirmingFactory,
 	type Rpc,
 	type RpcSubscriptions,
@@ -46,15 +50,18 @@ vi.mock(import('@solana/kit'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
-		appendTransactionMessageInstructions: vi.fn(),
 		assertIsFullySignedTransaction: vi.fn(),
+		assertIsSuccessfulSingleTransactionPlanResult: vi.fn(),
 		assertIsTransactionPartialSigner: vi.fn(),
 		assertIsTransactionSigner: vi.fn(),
 		assertIsTransactionWithBlockhashLifetime: vi.fn(),
 		assertIsTransactionWithinSizeLimit: vi.fn(),
 		createTransactionMessage: vi.fn().mockReturnValue('mock-transaction-message'),
+		createTransactionPlanExecutor: vi.fn(),
+		createTransactionPlanner: vi.fn(),
+		flattenTransactionPlanResult: vi.fn(),
 		getSignatureFromTransaction: vi.fn(),
-		prependTransactionMessageInstruction: vi.fn(),
+		nonDivisibleSequentialInstructionPlan: vi.fn(),
 		sendTransactionWithoutConfirmingFactory: vi.fn(),
 		setTransactionMessageFeePayer: vi.fn((message) => message),
 		setTransactionMessageFeePayerSigner: vi.fn((message) => message),
@@ -75,7 +82,9 @@ vi.mock(import('@solana/transaction-confirmation'), async (importOriginal) => {
 
 vi.mock('@solana-program/compute-budget', () => ({
 	estimateComputeUnitLimitFactory: vi.fn(),
-	getSetComputeUnitPriceInstruction: vi.fn().mockReturnValue('mock-compute-unit-price-instruction')
+	setTransactionMessageComputeUnitPrice: vi
+		.fn()
+		.mockReturnValue('mock-message-with-compute-unit-price')
 }));
 
 vi.mock('@solana-program/system', () => ({
@@ -97,7 +106,6 @@ vi.mock('$lib/api/signer.api', () => ({
 }));
 
 describe('sol-send.services', () => {
-	// TODO: add more practical tests deploying the Solana local node
 	describe('sendSol', () => {
 		const mockAmount = 1000000n;
 		const mockSource = mockSolAddress;
@@ -117,7 +125,13 @@ describe('sol-send.services', () => {
 		};
 
 		const mockBlockhash = 'mock-blockhash';
-		const mockTx = { blockhash: mockBlockhash, lastValidBlockHeight: undefined };
+		const mockSignature = 'mock-signature';
+		const mockInstructionPlan = 'mock-instruction-plan';
+		const mockTransactionPlan = 'mock-transaction-plan';
+		const mockSuccessfulResult = {
+			status: 'successful',
+			context: { signature: mockSignature }
+		};
 
 		const mockRpc = {
 			getLatestBlockhash: vi.fn(() => ({
@@ -153,8 +167,6 @@ describe('sol-send.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(solanaWeb3, 'pipe');
-
 			vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 			vi.mocked(solanaWebSocketRpc).mockReturnValue(mockRpcSubscriptions);
 			vi.mocked(signWithSchnorr).mockResolvedValue(new Uint8Array([0, 1, 2, 3]));
@@ -166,6 +178,22 @@ describe('sol-send.services', () => {
 			vi.mocked(waitForRecentTransactionConfirmation).mockResolvedValue();
 
 			vi.mocked(estimateComputeUnitLimitFactory).mockReturnValue(() => Promise.resolve(123));
+
+			vi.mocked(nonDivisibleSequentialInstructionPlan).mockReturnValue(
+				mockInstructionPlan as never
+			);
+			vi.mocked(createTransactionPlanner).mockReturnValue(() =>
+				Promise.resolve(mockTransactionPlan as never)
+			);
+			vi.mocked(createTransactionPlanExecutor).mockImplementation(
+				({ executeTransactionMessage }) =>
+					(async () => {
+						const context = {};
+						await executeTransactionMessage(context, 'mock-planned-message' as never);
+						return 'mock-result';
+					}) as never
+			);
+			vi.mocked(flattenTransactionPlanResult).mockReturnValue([mockSuccessfulResult] as never);
 
 			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'safeMapNetworkIdToNetwork');
 
@@ -195,16 +223,16 @@ describe('sol-send.services', () => {
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(SOLANA_TOKEN.network.id);
 
-			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
-				['mock-transfer-sol-instruction'],
-				mockTx
-			);
+			expect(nonDivisibleSequentialInstructionPlan).toHaveBeenCalledExactlyOnceWith([
+				'mock-transfer-sol-instruction'
+			]);
 			expect(getTransferSolInstruction).toHaveBeenCalledExactlyOnceWith({
 				source: mockSigner,
 				destination: mockDestination,
 				amount: mockAmount
 			});
+			expect(createTransactionPlanner).toHaveBeenCalledOnce();
+			expect(createTransactionPlanExecutor).toHaveBeenCalledOnce();
 		});
 
 		it('should send SPL tokens successfully', async () => {
@@ -217,11 +245,9 @@ describe('sol-send.services', () => {
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 
-			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
-				['mock-transfer-instruction'],
-				mockTx
-			);
+			expect(nonDivisibleSequentialInstructionPlan).toHaveBeenCalledExactlyOnceWith([
+				'mock-transfer-instruction'
+			]);
 			expect(getTransferInstruction).toHaveBeenCalledWith(
 				{
 					source: mockAtaAddress,
@@ -243,11 +269,9 @@ describe('sol-send.services', () => {
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 
-			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
-				['mock-transfer-checked-instruction'],
-				mockTx
-			);
+			expect(nonDivisibleSequentialInstructionPlan).toHaveBeenCalledExactlyOnceWith([
+				'mock-transfer-checked-instruction'
+			]);
 			expect(getTransferCheckedInstruction).toHaveBeenCalledWith(
 				{
 					source: mockAtaAddress,
@@ -271,11 +295,9 @@ describe('sol-send.services', () => {
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 
-			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
-				['mock-transfer-checked-instruction'],
-				mockTx
-			);
+			expect(nonDivisibleSequentialInstructionPlan).toHaveBeenCalledExactlyOnceWith([
+				'mock-transfer-checked-instruction'
+			]);
 			expect(getTransferCheckedInstruction).toHaveBeenCalledWith(
 				{
 					source: mockAtaAddress,
@@ -290,7 +312,6 @@ describe('sol-send.services', () => {
 		});
 
 		it('should send add ATA creation instructions if needed', async () => {
-			// Removing the mocked ATA address for the destination address
 			vi.mocked(solanaHttpRpc).mockReturnValue({
 				...mockRpc,
 				getTokenAccountsByOwner: vi.fn((address: SolAddress) => ({
@@ -317,11 +338,10 @@ describe('sol-send.services', () => {
 				tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
 			});
 
-			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
-				[{ keys: 'mock-ata-creation-instruction' }, 'mock-transfer-instruction'],
-				mockTx
-			);
+			expect(nonDivisibleSequentialInstructionPlan).toHaveBeenCalledExactlyOnceWith([
+				{ keys: 'mock-ata-creation-instruction' },
+				'mock-transfer-instruction'
+			]);
 			expect(getTransferInstruction).toHaveBeenCalledWith(
 				{
 					source: mockAtaAddress,
@@ -334,7 +354,6 @@ describe('sol-send.services', () => {
 		});
 
 		it('should use the destination address if it is an ATA address already', async () => {
-			// Providing an owner for the destination address so that it is considered an ATA address
 			vi.mocked(solanaHttpRpc).mockReturnValue({
 				...mockRpc,
 				getAccountInfo: vi.fn((address: SolAddress) => ({
@@ -364,11 +383,9 @@ describe('sol-send.services', () => {
 			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledOnce();
 			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
 
-			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
-				['mock-transfer-instruction'],
-				mockTx
-			);
+			expect(nonDivisibleSequentialInstructionPlan).toHaveBeenCalledExactlyOnceWith([
+				'mock-transfer-instruction'
+			]);
 			expect(getTransferInstruction).toHaveBeenCalledExactlyOnceWith(
 				{
 					source: mockAtaAddress,
@@ -407,6 +424,32 @@ describe('sol-send.services', () => {
 			await expect(sendSol({ ...mockParams, token: DEVNET_USDC_TOKEN })).rejects.toThrowError(
 				`Destination ATA address is different from the calculated one. Destination: different-address, Calculated: ${mockAtaAddress2}`
 			);
+		});
+
+		it('should apply compute unit price when prioritization fee is set', async () => {
+			const prioritizationFee = 1000n;
+
+			await expect(
+				sendSol({
+					...mockParams,
+					prioritizationFee,
+					token: SOLANA_TOKEN
+				})
+			).resolves.not.toThrowError();
+
+			expect(setTransactionMessageComputeUnitPrice).toHaveBeenCalledOnce();
+		});
+
+		it('should not apply compute unit price when prioritization fee is zero', async () => {
+			await expect(
+				sendSol({
+					...mockParams,
+					prioritizationFee: ZERO,
+					token: SOLANA_TOKEN
+				})
+			).resolves.not.toThrowError();
+
+			expect(setTransactionMessageComputeUnitPrice).not.toHaveBeenCalled();
 		});
 	});
 });
