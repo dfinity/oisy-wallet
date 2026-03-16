@@ -34,11 +34,7 @@
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
 	let tokensUi: TokenUi[] = $derived(
-		[
-			{ ...ICP_TOKEN, enabled: true },
-			...$allSortedIcrcTokens,
-			...( $allCrossChainSwapTokens)
-		]
+		[{ ...ICP_TOKEN, enabled: true }, ...$allSortedIcrcTokens, ...$allCrossChainSwapTokens]
 			.filter((token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id)
 			.map((token: Token) =>
 				mapTokenUi({
@@ -67,10 +63,7 @@
 	};
 </script>
 
-<ModalTokensList
-	{onSelectNetworkFilter}
-	{onTokenButtonClick}
->
+<ModalTokensList {onSelectNetworkFilter} {onTokenButtonClick}>
 	{#snippet tokenListItem(token, onClick)}
 		<ModalTokensListItem {onClick} {token} />
 	{/snippet}
