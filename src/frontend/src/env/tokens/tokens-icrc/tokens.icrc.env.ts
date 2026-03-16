@@ -15,13 +15,7 @@ export const ICRC_TOKENS: IcInterface[] = [
 ];
 
 const additionalIcrcTokensMetadataEntries = buildIcrcTokensMetadataEntries(
-	Object.values(additionalIcrcTokens)
-		.filter(nonNullish)
-		.map(({ ledgerCanisterId, icon, ...rest }) => ({
-			...rest,
-			ledgerCanisterId,
-			icon: icon ?? `/icons/icrc/${ledgerCanisterId}.png`
-		}))
+	Object.values(additionalIcrcTokens).filter(nonNullish)
 );
 
 const snsMetadataEntries = buildIcrcTokensMetadataEntries(
