@@ -57,7 +57,7 @@ pub struct EvmTransactionData {
 }
 
 /// Request to retrieve stored transactions with cursor-based pagination.
-#[derive(CandidType, Deserialize, Clone, Debug)]
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct GetUserTransactionsRequest {
     /// Which token's transactions to retrieve
     pub token_id: TokenId,
@@ -69,7 +69,7 @@ pub struct GetUserTransactionsRequest {
 }
 
 /// Response containing stored transactions and pagination info.
-#[derive(CandidType, Deserialize, Clone, Debug)]
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct GetUserTransactionsResponse {
     /// The requested transactions, sorted newest first
     pub transactions: Vec<UserTransaction>,
