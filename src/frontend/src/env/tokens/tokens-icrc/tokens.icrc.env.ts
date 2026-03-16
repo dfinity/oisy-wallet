@@ -58,8 +58,8 @@ const snsMetadataEntries = buildIcrcTokensMetadataEntries(
 // Metadata pseudo-responses for built-in ICRC tokens whose name, symbol, decimals
 // and fee are already known at build time. Avoids redundant canister metadata() calls.
 // The ckERC20 tokens are excluded because they have no static icons at all and their
-// metadata are more complex than the other IC tokens (for example twin tokens property).
-// TODO: Add static icons for ckERC20 and add them in this list.
+// metadata is more complex than that of the other ICRC tokens (for example, twin-token properties).
+// TODO: Add static icons for ckERC20 and include them in this list.
 export const ICRC_TOKENS_METADATA: Map<LedgerCanisterIdText, IcrcTokenMetadataResponse> = new Map([
 	...additionalIcrcTokensMetadataEntries,
 	...snsMetadataEntries
