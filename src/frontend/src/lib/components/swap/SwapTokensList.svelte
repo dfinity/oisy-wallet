@@ -35,11 +35,7 @@
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
 	let tokensUi: TokenToggleable<TokenUi>[] = $derived(
-		[
-			{ ...ICP_TOKEN, enabled: true },
-			...$allSortedIcrcTokens,
-			...( $allCrossChainSwapTokens)
-		]
+		[{ ...ICP_TOKEN, enabled: true }, ...$allSortedIcrcTokens, ...$allCrossChainSwapTokens]
 			.filter(
 				(token: TokenToggleable<Token>) =>
 					token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
