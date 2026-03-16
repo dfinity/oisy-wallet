@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import { VELORA_SWAP_ENABLED } from '$env/velora-swap.env';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -38,7 +37,7 @@
 		[
 			{ ...ICP_TOKEN, enabled: true },
 			...$allSortedIcrcTokens,
-			...(VELORA_SWAP_ENABLED ? $allCrossChainSwapTokens : [])
+			...( $allCrossChainSwapTokens)
 		]
 			.filter((token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id)
 			.map((token: Token) =>
@@ -69,7 +68,6 @@
 </script>
 
 <ModalTokensList
-	networkSelectorViewOnly={!VELORA_SWAP_ENABLED}
 	{onSelectNetworkFilter}
 	{onTokenButtonClick}
 >
