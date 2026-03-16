@@ -19,7 +19,7 @@
 	import { isDesktop } from '$lib/utils/device.utils';
 
 	interface Props {
-		networkSelectorViewOnly: boolean;
+		networkSelectorViewOnly?: boolean;
 		tokenListItem: Snippet<[Token, () => void]>;
 		toolbar: Snippet;
 		noResults?: Snippet;
