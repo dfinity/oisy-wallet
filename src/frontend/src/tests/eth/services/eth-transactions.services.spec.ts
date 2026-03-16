@@ -11,15 +11,15 @@ import {
 } from '$eth/services/eth-transactions.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
-import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
