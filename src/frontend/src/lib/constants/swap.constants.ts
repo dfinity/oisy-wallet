@@ -31,12 +31,12 @@ export const SWAP_DELTA_TIMEOUT_MS = 5 * 60_000;
 export const SWAP_DELTA_INTERVAL_MS = 3_000;
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
-export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<string, string> = {
-	ETH: 'eth',
-	ARB: 'arb',
-	BASE: 'base',
-	BSC: 'bsc',
-	POL: 'pol'
+export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
+	[ETHEREUM_NETWORK_ID]: 'eth',
+	[ARBITRUM_MAINNET_NETWORK_ID]: 'arb',
+	[BASE_NETWORK_ID]: 'base',
+	[BASE_NETWORK_ID]: 'bsc',
+	[POLYGON_MAINNET_NETWORK_ID]: 'pol'
 };
 
 export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;

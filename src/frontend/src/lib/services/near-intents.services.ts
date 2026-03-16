@@ -52,8 +52,8 @@ export const fetchNearIntentsSwapQuote = async ({
 
 	const nearTokens = await loadNearIntentsTokens();
 
-	const srcBlockchain = resolveNearIntentsBlockchain(sourceToken.network.name);
-	const destBlockchain = resolveNearIntentsBlockchain(destinationToken.network.name);
+	const srcBlockchain = resolveNearIntentsBlockchain(sourceToken.network.id);
+	const destBlockchain = resolveNearIntentsBlockchain(destinationToken.network.id);
 
 	if (isNullish(srcBlockchain) || isNullish(destBlockchain)) {
 		return null;
@@ -105,8 +105,8 @@ export const executeNearIntentsSwap = async ({
 }): Promise<NearIntentsQuoteResponse> => {
 	const nearTokens = await loadNearIntentsTokens();
 
-	const srcBlockchain = resolveNearIntentsBlockchain(sourceToken.network.name);
-	const destBlockchain = resolveNearIntentsBlockchain(destinationToken.network.name);
+	const srcBlockchain = resolveNearIntentsBlockchain(sourceToken.network.id);
+	const destBlockchain = resolveNearIntentsBlockchain(destinationToken.network.id);
 
 	if (isNullish(srcBlockchain) || isNullish(destBlockchain)) {
 		throw new Error('Unsupported blockchain for NEAR Intents swap');
