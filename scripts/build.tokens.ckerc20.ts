@@ -11,9 +11,9 @@ import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { CkEthOrchestratorCanister, type CkEthOrchestratorDid } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
-import { existsSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { agent, loadMetadata, saveLogo } from './build.tokens.utils';
+import { agent, loadMetadata, saveIcon } from './build.tokens.utils';
 import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 interface TokensAndIcons {
@@ -151,14 +151,17 @@ const ORCHESTRATOR_PRODUCTION_ID: Principal = Principal.fromText('vxkom-oyaaa-aa
 const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp-eth', 'assets');
 
 const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: string }) => {
-	const logoName = name.toLowerCase().replace('ck', '').replace('sepolia', '');
-	const file = join(LOGO_FOLDER, `${logoName}.svg`);
+	if (!logoData.startsWith('data:image/svg+xml;')) {
+		const mimeMatch = logoData.match(/^data:([^;]+);/);
 
-	if (existsSync(file)) {
+		console.warn(`Non-SVG logo for ${name}, skipping (MIME: ${mimeMatch?.[1] ?? 'unknown'})`);
+
 		return;
 	}
 
-	saveLogo({ logoData, file, name });
+	const logoName = name.toLowerCase().replace('ck', '').replace('sepolia', '');
+
+	saveIcon({ logoData, destDir: LOGO_FOLDER, fileName: logoName, name });
 };
 
 const findCkErc20 = async () => {
