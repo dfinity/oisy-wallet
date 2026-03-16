@@ -1,4 +1,5 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
+import { ADDITIONAL_ICRC_TOKENS_INDEXED } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { ICRC_TOKENS, ICRC_TOKENS_METADATA } from '$env/tokens/tokens-icrc/tokens.icrc.env';
 import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
@@ -158,7 +159,8 @@ const loadCustomIcrcTokensData = async ({
 	const indexedIcrcCustomTokens = {
 		...SUPPORTED_ICP_TOKENS_INDEXED,
 		...SNS_BUILTIN_TOKENS_INDEXED,
-		...DIP20_BUILTIN_TOKENS_INDEXED
+		...DIP20_BUILTIN_TOKENS_INDEXED,
+		...ADDITIONAL_ICRC_TOKENS_INDEXED
 	};
 
 	const requestIcrcCustomTokenMetadata = async (
