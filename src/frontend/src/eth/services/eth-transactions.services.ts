@@ -239,16 +239,22 @@ const loadErc20Transactions = async ({
 };
 
 /**
- * Loads ERC4626 vault token transactions and corrects mint/burn addresses.
+ * Loads ERC4626 vault token transactions and normalizes mint/burn addresses for UI/analytics.
  *
  * ERC4626 vaults emit standard ERC20 Transfer events for share minting/burning:
  * - Deposit (mint shares): Transfer(from=0x0, to=user, amount)
  * - Redeem (burn shares): Transfer(from=user, to=0x0, amount)
  *
- * Since Etherscan's `tokentx` API returns the event's from/to (not the tx signer),
- * we replace the zero address with the vault contract address so that:
- * - Mint: from=0x0 → from=vault (shares came from the vault)
- * - Burn: to=0x0 → to=vault (shares returned to the vault)
+ * On-chain, these represent supply changes between the user and the zero address, not transfers
+ * to or from the vault's own balance.
+ *
+ * Since Etherscan's `tokentx` API returns the event's from/to (not the tx signer), we normalize
+ * the zero address to the vault contract address in our transaction list so that:
+ * - Mint: from=0x0 → from=vault (treated as vault-issued shares for display)
+ * - Burn: to=0x0 → to=vault (treated as vault-received/burned shares for display)
+ *
+ * This is a presentation/analytics convention only; the underlying on-chain events still use
+ * the zero address as the mint/burn counterparty.
  */
 const loadErc4626Transactions = async ({
 	networkId,
