@@ -140,8 +140,9 @@ const findAdditionalIcrc = async () => {
 	}
 
 	const tokensWithIcons = Object.fromEntries(
-		Object.entries(tokens).map(([key, token]) => {
+		Object.entries(tokens).map(([key, { icon: _, ...token }]) => {
 			const iconPath = iconPaths[token.ledgerCanisterId];
+
 			return [key, nonNullish(iconPath) ? { ...token, icon: iconPath } : token];
 		})
 	);
