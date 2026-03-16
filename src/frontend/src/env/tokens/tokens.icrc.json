@@ -7,7 +7,8 @@
 		"symbol": "BURN",
 		"fee": {
 			"__bigint__": "10000"
-		}
+		},
+		"icon": "/icons/icrc/egjwt-lqaaa-aaaak-qi2aa-cai.svg"
 	},
 	"AAA": {
 		"ledgerCanisterId": "l67es-4iaaa-aaaag-atvda-cai",
@@ -17,7 +18,8 @@
 		"symbol": "AAA",
 		"fee": {
 			"__bigint__": "10000"
-		}
+		},
+		"icon": "/icons/icrc/l67es-4iaaa-aaaag-atvda-cai.svg"
 	},
 	"GLDT": {
 		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai",
@@ -28,7 +30,8 @@
 		"symbol": "GLDT",
 		"fee": {
 			"__bigint__": "10000000"
-		}
+		},
+		"icon": "/icons/icrc/6c7su-kiaaa-aaaar-qaira-cai.png"
 	},
 	"nICP": {
 		"ledgerCanisterId": "buwm7-7yaaa-aaaar-qagva-cai",
@@ -39,7 +42,8 @@
 		"symbol": "nICP",
 		"fee": {
 			"__bigint__": "1000000"
-		}
+		},
+		"icon": "/icons/icrc/buwm7-7yaaa-aaaar-qagva-cai.svg"
 	},
 	"NAK": {
 		"ledgerCanisterId": "eig2s-waaaa-aaaam-qbg5a-cai",
@@ -50,7 +54,8 @@
 		"symbol": "NAK",
 		"fee": {
 			"__bigint__": "1000000"
-		}
+		},
+		"icon": "/icons/icrc/eig2s-waaaa-aaaam-qbg5a-cai.jpg"
 	},
 	"VCHF": {
 		"ledgerCanisterId": "ly36x-wiaaa-aaaai-aqj7q-cai",
@@ -61,7 +66,8 @@
 		"symbol": "VCHF",
 		"fee": {
 			"__bigint__": "10000"
-		}
+		},
+		"icon": "/icons/icrc/ly36x-wiaaa-aaaai-aqj7q-cai.png"
 	},
 	"VEUR": {
 		"ledgerCanisterId": "wu6g4-6qaaa-aaaan-qmrza-cai",
@@ -72,7 +78,8 @@
 		"symbol": "VEUR",
 		"fee": {
 			"__bigint__": "10000"
-		}
+		},
+		"icon": "/icons/icrc/wu6g4-6qaaa-aaaan-qmrza-cai.png"
 	},
 	"GHOSTNODE": {
 		"ledgerCanisterId": "sx3gz-hqaaa-aaaar-qaoca-cai",
@@ -92,7 +99,8 @@
 		"symbol": "BOB",
 		"fee": {
 			"__bigint__": "1000000"
-		}
+		},
+		"icon": "/icons/icrc/7pail-xaaaa-aaaas-aabmq-cai.png"
 	},
 	"ICONFUCIUS": {
 		"ledgerCanisterId": "5kijx-siaaa-aaaar-qaqda-cai",
@@ -163,7 +171,8 @@
 		"symbol": "TICRC1",
 		"fee": {
 			"__bigint__": "10000"
-		}
+		},
+		"icon": "/icons/icrc/3jkp5-oyaaa-aaaaj-azwqa-cai.png"
 	},
 	"TCYCLES": {
 		"ledgerCanisterId": "um5iw-rqaaa-aaaaq-qaaba-cai",
@@ -173,7 +182,8 @@
 		"symbol": "TCYCLES",
 		"fee": {
 			"__bigint__": "100000000"
-		}
+		},
+		"icon": "/icons/icrc/um5iw-rqaaa-aaaaq-qaaba-cai.svg"
 	},
 	"BITTYICP": {
 		"ledgerCanisterId": "qroj6-lyaaa-aaaam-qeqta-cai",
@@ -205,6 +215,7 @@
 		"symbol": "OHSHII",
 		"fee": {
 			"__bigint__": "1000000"
-		}
+		},
+		"icon": "/icons/icrc/7rrmx-tyaaa-aaaal-qsraq-cai.png"
 	}
 }
