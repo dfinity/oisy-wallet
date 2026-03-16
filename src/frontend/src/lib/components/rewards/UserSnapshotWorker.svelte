@@ -42,8 +42,7 @@
 		} catch (error: unknown) {
 			trackEvent({
 				name: TRACK_SNAPSHOT_SEND_ERROR,
-				metadata: mapIcErrorMetadata(error),
-				warning: `Unexpected error while taking user snapshot: ${error}`
+				metadata: mapIcErrorMetadata(error)
 			});
 		}
 
