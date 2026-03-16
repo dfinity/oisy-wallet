@@ -10,7 +10,7 @@ import {
 } from '@icp-sdk/canisters/ledger/icrc';
 import { AnonymousIdentity, type HttpAgent } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, writeSync } from 'node:fs';
 import { join } from 'node:path';
 
 export const agent: HttpAgent = await createAgent({
@@ -118,15 +118,23 @@ export const saveIcon = ({
 
 	const filePath = join(destDir, `${fileName}.${ext}`);
 
-	if (existsSync(filePath)) {
-		return ext;
-	}
-
 	const [, encodedStr] = logoData.split(',');
 
 	const buffer = Buffer.from(encodedStr, 'base64');
 
-	writeFileSync(filePath, buffer);
+	try {
+		const fd = openSync(filePath, 'wx');
+
+		writeSync(fd, buffer);
+
+		closeSync(fd);
+	} catch (err: unknown) {
+		if (typeof err === 'object' && err !== null && 'code' in err && err.code === 'EEXIST') {
+			return ext;
+		}
+
+		throw err;
+	}
 
 	return ext;
 };
