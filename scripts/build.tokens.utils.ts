@@ -1,6 +1,6 @@
 import type { EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { createAgent, fromDefinedNullable } from '@dfinity/utils';
+import { createAgent, fromDefinedNullable, isNullish } from '@dfinity/utils';
 import {
 	IcrcLedgerCanister,
 	fromCandidAccount,
@@ -95,7 +95,7 @@ export const saveIcon = ({
 }): string | undefined => {
 	const mimeMatch = logoData.match(/^data:([^;]+);base64,/);
 
-	if (!mimeMatch) {
+	if (isNullish(mimeMatch)) {
 		console.error(`Invalid or non-base64 data URI for ${name}: ${logoData.substring(0, 60)}...`);
 
 		return;
@@ -104,7 +104,7 @@ export const saveIcon = ({
 	const [, mime] = mimeMatch;
 	const ext = MIME_TO_EXT[mime];
 
-	if (!ext) {
+	if (isNullish(ext)) {
 		console.warn(`Unsupported image MIME type for ${name}: ${mime}`);
 
 		return;
