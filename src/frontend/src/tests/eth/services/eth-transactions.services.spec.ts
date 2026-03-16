@@ -269,6 +269,10 @@ describe('eth-transactions.services', () => {
 				erc4626DefaultTokensStore.set([mockValidErc4626Token]);
 			});
 
+			afterEach(() => {
+				erc4626DefaultTokensStore.set([]);
+			});
+
 			it('should replace zero address with vault address for mint transactions', async () => {
 				const mintTransaction = {
 					...createMockEthTransactions(1)[0],
