@@ -73,6 +73,7 @@ const MIME_TO_EXT: Record<string, string> = {
 	'image/svg+xml': 'svg',
 	'image/png': 'png',
 	'image/jpeg': 'jpg',
+	'image/jpg': 'jpg',
 	'image/webp': 'webp',
 	'image/gif': 'gif'
 };
