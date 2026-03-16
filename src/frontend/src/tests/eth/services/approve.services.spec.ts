@@ -25,6 +25,7 @@ import { mockEthTransaction } from '$tests/mocks/eth-transactions.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
+import { Interface } from 'ethers';
 
 describe('approve.services', () => {
 	describe('erc20ContractAllowance', () => {
@@ -77,6 +78,7 @@ describe('approve.services', () => {
 		const tokenAddress = USDC_TOKEN.address;
 		const spender = mockEthAddress3;
 		const amount = bn3Bi;
+		const ERC20_APPROVE_ABI = ['function approve(address spender, uint256 amount)'];
 
 		it('should return the token address as the "to" field', () => {
 			const { to } = encodeErc20Approve({ tokenAddress, spender, amount });
@@ -90,6 +92,14 @@ describe('approve.services', () => {
 			expect(data).toBeTypeOf('string');
 			// ERC20 approve function selector: 0x095ea7b3
 			expect(data).toMatch(/^0x095ea7b3/);
+
+			const erc20Interface = new Interface(ERC20_APPROVE_ABI);
+			const decoded = erc20Interface.decodeFunctionData('approve', data);
+			const decodedSpender = decoded[0];
+			const decodedAmount = decoded[1];
+
+			expect(decodedSpender).toBe(spender);
+			expect(decodedAmount.toString()).toBe(amount.toString());
 		});
 
 		it('should encode different amounts differently', () => {
