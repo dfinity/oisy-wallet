@@ -194,7 +194,6 @@
 		"fee": {
 			"__bigint__": "1000000"
 		}
-	},
 	"EXE": {
 		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai",
 		"indexCanisterId": "us3ng-pyaaa-aaaan-q2cva-cai",
