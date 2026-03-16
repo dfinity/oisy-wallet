@@ -157,8 +157,9 @@ const loadErcTransactions = async ({
 	}
 
 	try {
-		const transactions =
-			isTokenErc20(token) || isTokenErc4626(token)
+		const transactions = isTokenErc4626(token)
+			? await loadErc4626Transactions({ networkId, token, address })
+			: isTokenErc20(token)
 				? await loadErc20Transactions({ networkId, token, address })
 				: isTokenErc721(token)
 					? await loadErc721Transactions({ networkId, token, address })
@@ -234,6 +235,43 @@ const loadErc20Transactions = async ({
 			const tx = await getTransaction(hash);
 			return tx?.from;
 		}
+	});
+};
+
+/**
+ * Loads ERC4626 vault token transactions and corrects mint/burn addresses.
+ *
+ * ERC4626 vaults emit standard ERC20 Transfer events for share minting/burning:
+ * - Deposit (mint shares): Transfer(from=0x0, to=user, amount)
+ * - Redeem (burn shares): Transfer(from=user, to=0x0, amount)
+ *
+ * Since Etherscan's `tokentx` API returns the event's from/to (not the tx signer),
+ * we replace the zero address with the vault contract address so that:
+ * - Mint: from=0x0 → from=vault (shares came from the vault)
+ * - Burn: to=0x0 → to=vault (shares returned to the vault)
+ */
+const loadErc4626Transactions = async ({
+	networkId,
+	token,
+	address
+}: {
+	networkId: NetworkId;
+	token: Erc4626CustomToken;
+	address: Address;
+}): Promise<Transaction[]> => {
+	const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+	const transactions = await loadErc20Transactions({ networkId, token, address });
+
+	return transactions.map((tx) => {
+		const isMint = tx.from.toLowerCase() === ZERO_ADDRESS;
+		const isBurn = tx.to?.toLowerCase() === ZERO_ADDRESS;
+
+		return {
+			...tx,
+			...(isMint ? { from: token.address } : {}),
+			...(isBurn ? { to: token.address } : {})
+		};
 	});
 };
 

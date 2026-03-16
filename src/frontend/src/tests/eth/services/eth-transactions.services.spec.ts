@@ -12,11 +12,13 @@ import {
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
+import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
@@ -249,6 +251,105 @@ describe('eth-transactions.services', () => {
 				}
 			);
 		}, 60000);
+
+		describe('when token is ERC4626', () => {
+			const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+			let etherscanProvidersSpy: MockInstance;
+
+			const mockErcTransactions = vi.fn();
+
+			beforeEach(() => {
+				etherscanProvidersSpy = vi.spyOn(etherscanProvidersModule, 'etherscanProviders');
+
+				etherscanProvidersSpy.mockReturnValue({
+					erc20Transactions: mockErcTransactions
+				} as unknown as EtherscanProvider);
+
+				erc4626DefaultTokensStore.set([mockValidErc4626Token]);
+			});
+
+			it('should replace zero address with vault address for mint transactions', async () => {
+				const mintTransaction = {
+					...createMockEthTransactions(1)[0],
+					from: ZERO_ADDRESS,
+					to: mockEthAddress
+				};
+
+				mockErcTransactions.mockResolvedValueOnce([mintTransaction]);
+
+				const result = await loadEthereumTransactions({
+					networkId: mockValidErc4626Token.network.id,
+					tokenId: mockValidErc4626Token.id,
+					standard: mockValidErc4626Token.standard
+				});
+
+				expect(result).toEqual({ success: true });
+
+				const transactionStore = get(ethTransactionsStore);
+				assertNonNullish(transactionStore);
+
+				const storedTransactions = transactionStore[mockValidErc4626Token.id];
+				assertNonNullish(storedTransactions);
+
+				expect(storedTransactions[0].data.from).toBe(mockValidErc4626Token.address);
+				expect(storedTransactions[0].data.to).toBe(mockEthAddress);
+			});
+
+			it('should replace zero address with vault address for burn transactions', async () => {
+				const burnTransaction = {
+					...createMockEthTransactions(1)[0],
+					from: mockEthAddress,
+					to: ZERO_ADDRESS
+				};
+
+				mockErcTransactions.mockResolvedValueOnce([burnTransaction]);
+
+				const result = await loadEthereumTransactions({
+					networkId: mockValidErc4626Token.network.id,
+					tokenId: mockValidErc4626Token.id,
+					standard: mockValidErc4626Token.standard
+				});
+
+				expect(result).toEqual({ success: true });
+
+				const transactionStore = get(ethTransactionsStore);
+				assertNonNullish(transactionStore);
+
+				const storedTransactions = transactionStore[mockValidErc4626Token.id];
+				assertNonNullish(storedTransactions);
+
+				expect(storedTransactions[0].data.from).toBe(mockEthAddress);
+				expect(storedTransactions[0].data.to).toBe(mockValidErc4626Token.address);
+			});
+
+			it('should not modify addresses for regular transfer transactions', async () => {
+				const regularTransaction = {
+					...createMockEthTransactions(1)[0],
+					from: mockEthAddress,
+					to: mockEthAddress
+				};
+
+				mockErcTransactions.mockResolvedValueOnce([regularTransaction]);
+
+				const result = await loadEthereumTransactions({
+					networkId: mockValidErc4626Token.network.id,
+					tokenId: mockValidErc4626Token.id,
+					standard: mockValidErc4626Token.standard
+				});
+
+				expect(result).toEqual({ success: true });
+
+				const transactionStore = get(ethTransactionsStore);
+				assertNonNullish(transactionStore);
+
+				const storedTransactions = transactionStore[mockValidErc4626Token.id];
+				assertNonNullish(storedTransactions);
+
+				expect(storedTransactions[0].data.from).toBe(mockEthAddress);
+				expect(storedTransactions[0].data.to).toBe(mockEthAddress);
+			});
+		});
 	});
 
 	describe('reloadEthereumTransactions', () => {
