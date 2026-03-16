@@ -634,13 +634,13 @@ export const saveAllCustomTokens = async ({
 	});
 };
 
-export const filterTokensByNft = ({
+export const filterTokensByNft = <T extends Token>({
 	tokens,
 	filterNfts
 }: {
-	tokens: Token[];
+	tokens: T[];
 	filterNfts?: boolean;
-}): Token[] =>
+}): T[] =>
 	isNullish(filterNfts)
 		? tokens
 		: tokens.filter((t) => {

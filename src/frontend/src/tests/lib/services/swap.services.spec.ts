@@ -43,14 +43,6 @@ import { mockVeloraSwapDetails } from '$tests/mocks/velora.mock';
 import { constructSimpleSDK } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 
-vi.mock(import('$env/icp-swap.env'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		ICP_SWAP_ENABLED: true
-	};
-});
-
 vi.mock('$icp/api/icrc-ledger.api', () => ({
 	icrc1SupportedStandards: vi.fn()
 }));

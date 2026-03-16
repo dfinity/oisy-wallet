@@ -9,7 +9,11 @@ import type { InfuraErc20Provider } from '$eth/providers/infura-erc20.providers'
 import * as infuraErc20Providers from '$eth/providers/infura-erc20.providers';
 import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as infuraProviders from '$eth/providers/infura.providers';
-import { approve, erc20ContractAllowance } from '$eth/services/approve.services';
+import {
+	approve,
+	encodeErc20Approve,
+	erc20ContractAllowance
+} from '$eth/services/approve.services';
 import type { ApproveParams } from '$eth/types/send';
 import * as signerApiLib from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
@@ -18,9 +22,10 @@ import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockCkMinterInfo, mockErc20HelperContractAddress } from '$tests/mocks/ck-minter.mock';
 import { mockEthTransaction } from '$tests/mocks/eth-transactions.mock';
-import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
+import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
+import { Interface } from 'ethers/abi';
 
 describe('approve.services', () => {
 	describe('erc20ContractAllowance', () => {
@@ -66,6 +71,55 @@ describe('approve.services', () => {
 				owner: mockParams.owner,
 				spender: mockParams.spender
 			});
+		});
+	});
+
+	describe('encodeErc20Approve', () => {
+		const tokenAddress = USDC_TOKEN.address;
+		const spender = mockEthAddress3;
+		const amount = bn3Bi;
+		const ERC20_APPROVE_ABI = ['function approve(address spender, uint256 amount)'];
+
+		it('should return the token address as the "to" field', () => {
+			const { to } = encodeErc20Approve({ tokenAddress, spender, amount });
+
+			expect(to).toBe(tokenAddress);
+		});
+
+		it('should return encoded approve function data', () => {
+			const { data } = encodeErc20Approve({ tokenAddress, spender, amount });
+
+			expect(data).toBeTypeOf('string');
+			// ERC20 approve function selector: 0x095ea7b3
+			expect(data).toMatch(/^0x095ea7b3/);
+
+			const erc20Interface = new Interface(ERC20_APPROVE_ABI);
+			const [decodedSpender, decodedAmount] = erc20Interface.decodeFunctionData('approve', data);
+
+			expect(decodedSpender).toBe(spender);
+			expect(decodedAmount.toString()).toBe(amount.toString());
+		});
+
+		it('should encode different amounts differently', () => {
+			const { data: data1 } = encodeErc20Approve({ tokenAddress, spender, amount: bn1Bi });
+			const { data: data2 } = encodeErc20Approve({ tokenAddress, spender, amount: bn3Bi });
+
+			expect(data1).not.toBe(data2);
+		});
+
+		it('should encode different spenders differently', () => {
+			const { data: data1 } = encodeErc20Approve({
+				tokenAddress,
+				spender: mockEthAddress3,
+				amount
+			});
+			const { data: data2 } = encodeErc20Approve({
+				tokenAddress,
+				spender: USDC_TOKEN.address,
+				amount
+			});
+
+			expect(data1).not.toBe(data2);
 		});
 	});
 
