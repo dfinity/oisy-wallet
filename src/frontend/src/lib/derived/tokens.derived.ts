@@ -22,6 +22,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
+import { derivedBatchedMemo } from '$lib/utils/derived-batched-memo.utils';
 import { derivedMemo } from '$lib/utils/derived-memo.utils';
 import { filterEnabledTokens, tokenListEqual } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
@@ -55,7 +56,7 @@ export const nativeTokens: Readable<Token[]> = derivedMemo(
 	tokenListEqual
 );
 
-export const fungibleTokens: Readable<Token[]> = derivedMemo(
+export const fungibleTokens: Readable<Token[]> = derivedBatchedMemo(
 	[nativeTokens, ercFungibleTokens, icrcTokens, splTokens],
 	([$nativeTokens, $ercFungibleTokens, $icrcTokens, $splTokens]) => [
 		...$nativeTokens,
@@ -63,7 +64,8 @@ export const fungibleTokens: Readable<Token[]> = derivedMemo(
 		...$icrcTokens,
 		...$splTokens
 	],
-	tokenListEqual
+	tokenListEqual,
+	10
 );
 
 export const nonFungibleTokens: Readable<CustomToken<NonFungibleToken>[]> = derived(
