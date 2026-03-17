@@ -13,6 +13,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { emit } from '$lib/utils/events.utils';
+	import TokensCategoryFilterToggle from "$lib/components/tokens/TokensCategoryFilterToggle.svelte";
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
