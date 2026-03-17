@@ -279,7 +279,6 @@ export const resolveNearIntentsSwapAssets = ({
 };
 
 export const buildNearIntentsQuoteRequest = ({
-	dry,
 	slippageTolerance,
 	srcAsset,
 	destAsset,
@@ -287,7 +286,6 @@ export const buildNearIntentsQuoteRequest = ({
 	userEthAddress,
 	deadlineMs
 }: {
-	dry: boolean;
 	slippageTolerance: number;
 	srcAsset: NearIntentsToken;
 	destAsset: NearIntentsToken;
@@ -295,7 +293,7 @@ export const buildNearIntentsQuoteRequest = ({
 	userEthAddress: string;
 	deadlineMs: number;
 }): NearIntentsQuoteRequest => ({
-	dry,
+	dry: false,
 	swapType: 'EXACT_INPUT',
 	slippageTolerance,
 	originAsset: srcAsset.assetId,

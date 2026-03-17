@@ -1,5 +1,4 @@
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
-import type { Erc20Token } from '$eth/types/erc20';
 import {
 	NEAR_INTENTS_POLL_INTERVAL_MS,
 	NEAR_INTENTS_POLL_MAX_ATTEMPTS,
@@ -11,11 +10,7 @@ import {
 	fetchNearIntentsTokens,
 	submitNearIntentsDeposit
 } from '$lib/rest/near-intents.rest';
-import {
-	NEAR_INTENTS_TERMINAL_STATUSES,
-	type NearIntentsQuoteResponse,
-	type NearIntentsToken
-} from '$lib/types/near-intents';
+import { NEAR_INTENTS_TERMINAL_STATUSES, type NearIntentsToken } from '$lib/types/near-intents';
 import type { EvmQuoteParams, SwapMappedResult } from '$lib/types/swap';
 import {
 	buildNearIntentsQuoteRequest,
@@ -61,7 +56,6 @@ export const fetchNearIntentsSwapQuote = async ({
 
 	const quoteResponse = await fetchNearIntentsQuote(
 		buildNearIntentsQuoteRequest({
-			dry: true,
 			slippageTolerance: Math.round(Number(slippage) * 100),
 			...assets,
 			amount,
@@ -71,39 +65,6 @@ export const fetchNearIntentsSwapQuote = async ({
 	);
 
 	return mapNearIntentsQuoteResult(quoteResponse);
-};
-
-export const executeNearIntentsSwap = async ({
-	sourceToken,
-	destinationToken,
-	amount,
-	userEthAddress,
-	slippageTolerance
-}: {
-	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
-	amount: bigint;
-	userEthAddress: string;
-	slippageTolerance: number;
-}): Promise<NearIntentsQuoteResponse> => {
-	const nearTokens = await loadNearIntentsTokens();
-
-	const assets = resolveNearIntentsSwapAssets({ nearTokens, sourceToken, destinationToken });
-
-	if (isNullish(assets)) {
-		throw new Error('Token not supported by NEAR Intents');
-	}
-
-	return fetchNearIntentsQuote(
-		buildNearIntentsQuoteRequest({
-			dry: false,
-			slippageTolerance,
-			...assets,
-			amount,
-			userEthAddress,
-			deadlineMs: NEAR_INTENTS_QUOTE_DEADLINE_MS
-		})
-	);
 };
 
 export const submitNearIntentsDepositTx = async ({

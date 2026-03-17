@@ -936,9 +936,8 @@ describe('swap utils', () => {
 	describe('buildNearIntentsQuoteRequest', () => {
 		const [srcAsset, , destAsset] = mockNearIntentsTokens;
 
-		it('should build a dry quote request with all required fields', () => {
+		it('should build a quote request with all required fields', () => {
 			const result = buildNearIntentsQuoteRequest({
-				dry: true,
 				slippageTolerance: 150,
 				srcAsset,
 				destAsset,
@@ -948,7 +947,7 @@ describe('swap utils', () => {
 			});
 
 			expect(result).toStrictEqual({
-				dry: true,
+				dry: false,
 				swapType: 'EXACT_INPUT',
 				slippageTolerance: 150,
 				originAsset: srcAsset.assetId,
@@ -963,30 +962,10 @@ describe('swap utils', () => {
 			});
 		});
 
-		it('should build a wet quote request with dry set to false', () => {
-			const result = buildNearIntentsQuoteRequest({
-				dry: false,
-				slippageTolerance: 100,
-				srcAsset,
-				destAsset,
-				amount: 500_000n,
-				userEthAddress: mockEthAddress,
-				deadlineMs: 180_000
-			});
-
-			expect(result).toStrictEqual(
-				expect.objectContaining({
-					dry: false,
-					amount: '500000'
-				})
-			);
-		});
-
 		it('should set deadline as ISO string in the future', () => {
 			const before = Date.now();
 
 			const result = buildNearIntentsQuoteRequest({
-				dry: true,
 				slippageTolerance: 100,
 				srcAsset,
 				destAsset,

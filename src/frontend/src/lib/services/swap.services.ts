@@ -44,7 +44,6 @@ import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
-	executeNearIntentsSwap,
 	pollNearIntentsStatus,
 	submitNearIntentsDepositTx
 } from '$lib/services/near-intents.services';
@@ -607,31 +606,20 @@ export const fetchNearIntentsSwap = async ({
 	identity,
 	progress,
 	sourceToken,
-	destinationToken,
 	swapAmount,
-	slippageValue,
 	sourceNetwork,
 	userAddress,
 	gas,
 	maxFeePerGas,
-	maxPriorityFeePerGas
+	maxPriorityFeePerGas,
+	swapDetails
 }: SwapNearIntentsParams): Promise<void> => {
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
 	});
 
-	const slippageBasisPoints = Math.round(Number(slippageValue) * 100);
-
-	const wetQuote = await executeNearIntentsSwap({
-		sourceToken,
-		destinationToken,
-		amount: parsedSwapAmount,
-		userEthAddress: userAddress,
-		slippageTolerance: slippageBasisPoints
-	});
-
-	const { depositAddress, depositMemo } = wetQuote.quote;
+	const { depositAddress, depositMemo } = swapDetails.quote;
 
 	progress(ProgressStepsSwap.SIGN_TRANSFER);
 

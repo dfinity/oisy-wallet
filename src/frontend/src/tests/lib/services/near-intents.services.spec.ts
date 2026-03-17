@@ -140,7 +140,7 @@ describe('near-intents.services', () => {
 			});
 		});
 
-		it('should call the API with dry: true and EXACT_INPUT swap type', async () => {
+		it('should call the API with EXACT_INPUT swap type', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
 				mockNearIntentsQuoteResponse
 			);
@@ -155,7 +155,6 @@ describe('near-intents.services', () => {
 
 			expect(nearIntentsApi.fetchNearIntentsQuote).toHaveBeenCalledWith(
 				expect.objectContaining({
-					dry: true,
 					swapType: 'EXACT_INPUT',
 					slippageTolerance: 150,
 					originAsset: 'nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near',

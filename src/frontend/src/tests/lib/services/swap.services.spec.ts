@@ -79,7 +79,6 @@ vi.mock('$lib/providers/evm-swap.providers', () => ({
 }));
 
 vi.mock('$lib/services/near-intents.services', () => ({
-	executeNearIntentsSwap: vi.fn(),
 	submitNearIntentsDepositTx: vi.fn(),
 	pollNearIntentsStatus: vi.fn()
 }));
@@ -1516,13 +1515,12 @@ describe('swap.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.mocked(nearIntentsServices.executeNearIntentsSwap).mockResolvedValue(mockWetQuote);
 			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
 			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
 		});
 
-		it('should execute the full NEAR Intents swap flow', async () => {
+		it('should execute the full NEAR Intents swap flow using swapDetails directly', async () => {
 			await fetchNearIntentsSwap({
 				identity: mockIdentity,
 				progress: mockProgress,
@@ -1539,7 +1537,6 @@ describe('swap.services', () => {
 				swapDetails: mockWetQuote
 			});
 
-			expect(nearIntentsServices.executeNearIntentsSwap).toHaveBeenCalledOnce();
 			expect(sendEvm).toHaveBeenCalledWith(
 				expect.objectContaining({
 					from: mockEthAddress,
@@ -1573,9 +1570,9 @@ describe('swap.services', () => {
 			});
 
 			expect(mockProgress).toHaveBeenCalledTimes(3);
-			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.SIGN_TRANSFER);
-			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.SWAP);
-			expect(mockProgress).toHaveBeenNthCalledWith(4, ProgressStepsSwap.UPDATE_UI);
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SIGN_TRANSFER);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.SWAP);
+			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
 		});
 
 		it('should pass depositMemo when present in quote', async () => {
@@ -1583,8 +1580,6 @@ describe('swap.services', () => {
 				...mockWetQuote,
 				quote: { ...mockWetQuote.quote, depositMemo: 'stellar-memo' }
 			};
-
-			vi.mocked(nearIntentsServices.executeNearIntentsSwap).mockResolvedValue(quoteWithMemo);
 
 			await fetchNearIntentsSwap({
 				identity: mockIdentity,
@@ -1599,7 +1594,7 @@ describe('swap.services', () => {
 				gas: 21000n,
 				maxFeePerGas: 20000000000n,
 				maxPriorityFeePerGas: 2000000000n,
-				swapDetails: mockWetQuote
+				swapDetails: quoteWithMemo
 			});
 
 			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
@@ -1611,30 +1606,6 @@ describe('swap.services', () => {
 				depositAddress: '0xDepositAddr',
 				depositMemo: 'stellar-memo'
 			});
-		});
-
-		it('should convert slippage percentage to basis points', async () => {
-			await fetchNearIntentsSwap({
-				identity: mockIdentity,
-				progress: mockProgress,
-				sourceToken,
-				destinationToken,
-				swapAmount: '1',
-				receiveAmount: 900000n,
-				slippageValue: '1.5',
-				sourceNetwork: ETHEREUM_NETWORK,
-				userAddress: mockEthAddress,
-				gas: 21000n,
-				maxFeePerGas: 20000000000n,
-				maxPriorityFeePerGas: 2000000000n,
-				swapDetails: mockWetQuote
-			});
-
-			expect(nearIntentsServices.executeNearIntentsSwap).toHaveBeenCalledWith(
-				expect.objectContaining({
-					slippageTolerance: 150
-				})
-			);
 		});
 	});
 });
