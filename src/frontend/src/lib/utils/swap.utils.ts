@@ -236,13 +236,16 @@ export const findSwapProvider = (
 		return icDAppProvider;
 	}
 
-	const swapProviderDetails = swapProvidersDetails[normalizedId];
+	const exactMatch = swapProvidersDetails[providerId];
 
-	if (swapProviderDetails) {
-		return {
-			id: normalizedId,
-			...swapProviderDetails
-		};
+	if (nonNullish(exactMatch)) {
+		return { id: providerId, ...exactMatch };
+	}
+
+	const normalizedMatch = swapProvidersDetails[normalizedId];
+
+	if (nonNullish(normalizedMatch)) {
+		return { id: normalizedId, ...normalizedMatch };
 	}
 };
 
