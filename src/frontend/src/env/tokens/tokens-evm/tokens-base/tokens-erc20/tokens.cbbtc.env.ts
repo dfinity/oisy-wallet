@@ -16,6 +16,7 @@ export const CBBTC_TOKEN: RequiredEvmErc20Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Coinbase Wrapped BTC',
 	symbol: CBBTC_SYMBOL,
 	decimals: CBBTC_DECIMALS,

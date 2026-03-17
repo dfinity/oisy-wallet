@@ -16,6 +16,7 @@ export const AMDON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'AMD (Ondo Tokenized Stock)',
 	symbol: AMDON_SYMBOL,
 	decimals: AMDON_DECIMALS,

@@ -102,6 +102,7 @@ const mapIcPunksCustomToken = async ({
 		symbol,
 		standard: { code: 'icpunks' as const },
 		category: 'custom' as const,
+		tags: [],
 		enabled,
 		version,
 		...(nonNullish(mappedSection) && {

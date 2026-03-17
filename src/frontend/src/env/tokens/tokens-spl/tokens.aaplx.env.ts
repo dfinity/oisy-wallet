@@ -16,6 +16,7 @@ export const AAPLX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Apple xStock',
 	symbol: AAPLX_SYMBOL,
 	decimals: AAPLX_DECIMALS,

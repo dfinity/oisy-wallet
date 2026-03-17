@@ -15,6 +15,7 @@ export const BAUTOPILOT_USDC_TOKEN: RequiredErc4626Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc4626' },
 	category: 'default',
+	tags: [],
 	name: 'Autopilot USDC Base',
 	symbol: BAUTOPILOT_USDC_SYMBOL,
 	decimals: BAUTOPILOT_USDC_DECIMALS,

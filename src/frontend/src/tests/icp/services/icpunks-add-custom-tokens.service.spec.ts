@@ -37,6 +37,7 @@ describe('icpunks-add-custom-tokens.service', () => {
 			canisterId: mockCanisterId,
 			standard: { code: 'icpunks' },
 			category: 'custom',
+			tags: [],
 			name: mockFetchedMetadata.name,
 			symbol: mockFetchedMetadata.symbol,
 			decimals: 0,

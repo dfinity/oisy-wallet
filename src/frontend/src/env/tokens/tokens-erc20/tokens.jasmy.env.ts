@@ -15,6 +15,7 @@ export const JASMY_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'JasmyCoin',
 	symbol: JASMY_SYMBOL,
 	decimals: JASMY_DECIMALS,

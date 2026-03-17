@@ -16,6 +16,7 @@ export const XAUT_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Tether Gold',
 	symbol: XAUT_SYMBOL,
 	decimals: XAUT_DECIMALS,

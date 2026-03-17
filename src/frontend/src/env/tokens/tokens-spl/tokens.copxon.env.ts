@@ -17,6 +17,7 @@ export const COPXON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Global X Copper Miners ETF (Ondo Tokenized)',
 	symbol: COPXON_SYMBOL,
 	decimals: COPXON_DECIMALS,

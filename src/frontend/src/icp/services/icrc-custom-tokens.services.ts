@@ -62,6 +62,7 @@ const mapIcrcCustomToken = ({
 	exchangeCoinId: undefined,
 	standard: { code: 'icrc' },
 	category: 'custom',
+	tags: [],
 	fee,
 	alternativeName,
 	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`,

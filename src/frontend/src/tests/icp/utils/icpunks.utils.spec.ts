@@ -91,7 +91,8 @@ describe('icpunks.utils', () => {
 			symbol: mockSymbol,
 			decimals: 0,
 			standard: { code: 'icpunks' },
-			category: 'custom'
+			category: 'custom',
+			tags: []
 		};
 
 		it('should correctly map an ICPunks token', () => {

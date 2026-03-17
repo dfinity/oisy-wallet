@@ -16,6 +16,7 @@ export const EFAON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'iShares MSCI EAFE ETF (Ondo Tokenized)',
 	symbol: EFAON_SYMBOL,
 	decimals: EFAON_DECIMALS,

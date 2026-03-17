@@ -31,6 +31,7 @@ describe('ext-add-custom-tokens.service', () => {
 			canisterId: mockCanisterId,
 			standard: { code: 'ext', version: 'v2' },
 			category: 'custom',
+			tags: [],
 			name: expectedName,
 			symbol: expectedName,
 			decimals: 0,

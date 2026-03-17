@@ -16,6 +16,7 @@ export const WBTC_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Wrapped BTC',
 	symbol: WBTC_SYMBOL,
 	decimals: WBTC_DECIMALS,

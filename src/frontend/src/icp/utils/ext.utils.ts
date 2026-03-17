@@ -81,5 +81,6 @@ export const mapExtToken = ({
 		code: 'ext',
 		version: mapStandardVersion(standardVersion)
 	},
-	category: 'custom'
+	category: 'custom',
+	tags: []
 });

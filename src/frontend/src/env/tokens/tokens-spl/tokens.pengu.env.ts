@@ -16,6 +16,7 @@ export const PENGU_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Pudgy Penguins',
 	symbol: PENGU_SYMBOL,
 	decimals: PENGU_DECIMALS,

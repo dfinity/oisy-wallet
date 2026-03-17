@@ -16,6 +16,7 @@ export const WSTETH_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Wrapped liquid staked Ether 2.0',
 	symbol: WSTETH_SYMBOL,
 	decimals: WSTETH_DECIMALS,

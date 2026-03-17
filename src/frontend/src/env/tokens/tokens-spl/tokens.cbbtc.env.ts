@@ -17,6 +17,7 @@ export const CBBTC_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Coinbase Wrapped BTC',
 	symbol: CBBTC_SYMBOL,
 	decimals: CBBTC_DECIMALS,
