@@ -1,6 +1,6 @@
 import { initStorageStore, type StorageStore } from '$lib/stores/storage.store';
-import type { Nullish } from '@dfinity/zod-schemas';
 import { del as delStorage, get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/utils/storage.utils', () => ({

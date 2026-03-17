@@ -1,7 +1,7 @@
 import type { OptionAmount } from '$lib/types/send';
 import type { OptionString } from '$lib/types/string';
-import type { Nullish } from '@dfinity/zod-schemas';
 import { isEmptyString, isNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 export const isNullishOrEmpty = (value: OptionString): value is Nullish<''> => isEmptyString(value);
 

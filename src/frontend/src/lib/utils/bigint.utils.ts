@@ -1,5 +1,5 @@
-import type { Nullish } from '@dfinity/zod-schemas';
 import { nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 export function maxBigInt(n1: bigint, n2: bigint): bigint;
 export function maxBigInt(n1: bigint, n2: Nullish<bigint>): bigint;

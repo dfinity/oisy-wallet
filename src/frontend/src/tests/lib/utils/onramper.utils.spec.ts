@@ -8,7 +8,6 @@ import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/rest/onramper.env';
 import { Currency } from '$lib/enums/currency';
 import type { OnramperNetworkWallet, OnramperWalletAddress } from '$lib/types/onramper';
-import type { Nullish } from '@dfinity/zod-schemas';
 import {
 	buildOnramperLink,
 	mapOnramperNetworkWallets,
@@ -17,6 +16,7 @@ import {
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockAccountIdentifierText } from '$tests/mocks/identity.mock';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 describe('onramper.utils', () => {
 	describe('buildOnramperLink', () => {

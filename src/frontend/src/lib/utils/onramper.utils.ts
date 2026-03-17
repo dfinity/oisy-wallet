@@ -9,8 +9,8 @@ import type {
 	OnramperNetworkWallet,
 	OnramperWalletAddress
 } from '$lib/types/onramper';
-import type { Nullish } from '@dfinity/zod-schemas';
 import { nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 export interface BuildOnramperLinkParams {
 	mode: OnramperMode;

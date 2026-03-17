@@ -1,5 +1,5 @@
-import type { Nullish } from '@dfinity/zod-schemas';
 import type { OptionWalletConnectListener, WalletConnectListener } from '$lib/types/wallet-connect';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { writable, type Readable } from 'svelte/store';
 

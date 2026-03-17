@@ -8,7 +8,6 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import type { Nullish } from '@dfinity/zod-schemas';
 import {
 	getNftDisplayId,
 	getNftDisplayImageUrl,
@@ -32,6 +31,7 @@ import {
 import { MOCK_EXT_TOKENS, mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 describe('nft.utils', () => {
 	describe('isTokenNonFungible', () => {

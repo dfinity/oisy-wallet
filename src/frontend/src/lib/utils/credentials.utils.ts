@@ -1,7 +1,7 @@
 import type { UserCredential, UserProfile } from '$declarations/backend/backend.did';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
-import type { Nullish } from '@dfinity/zod-schemas';
 import { isNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 const isVerifiedCredential = (credential: UserCredential): boolean =>
 	credential.verified_date_timestamp.length > 0;
