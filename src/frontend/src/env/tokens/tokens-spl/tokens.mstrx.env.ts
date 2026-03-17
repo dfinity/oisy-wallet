@@ -16,6 +16,7 @@ export const MSTRX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'MicroStrategy xStock',
 	symbol: MSTRX_SYMBOL,
 	decimals: MSTRX_DECIMALS,

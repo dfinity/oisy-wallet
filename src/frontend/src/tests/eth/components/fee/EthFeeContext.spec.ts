@@ -1,8 +1,11 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
+import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
 import * as infuraMod from '$eth/providers/infura.providers';
 import { InfuraGasRest } from '$eth/rest/infura.rest';
+import * as approveServices from '$eth/services/approve.services';
+import * as erc4626Services from '$eth/services/erc4626.services';
 import * as listenerServices from '$eth/services/eth-listener.services';
 import * as feeServices from '$eth/services/fee.services';
 import * as nftTransfer from '$eth/services/nft-transfer.services';
@@ -11,6 +14,7 @@ import {
 	type EthFeeStore,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import type { Erc4626ContractAddress } from '$eth/types/erc4626';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthereumNetwork } from '$eth/types/network';
 import * as ethUtils from '$eth/utils/eth.utils';
@@ -25,6 +29,8 @@ import type { Nft } from '$lib/types/nft';
 import type { OptionAmount } from '$lib/types/send';
 import type { Token, TokenId } from '$lib/types/token';
 import * as networkUtils from '$lib/utils/network.utils';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
@@ -58,6 +64,9 @@ describe('EthFeeContext', () => {
 		destination: string;
 		amount: OptionAmount;
 		data: string | undefined;
+		erc4626ContractAddress: Erc4626ContractAddress | undefined;
+		erc4626Operation: 'deposit' | 'withdraw' | undefined;
+		maxAmount: bigint | undefined;
 		sourceNetwork: EthereumNetwork;
 		targetNetwork: Network | undefined;
 		nativeEthereumToken: Token;
@@ -70,6 +79,9 @@ describe('EthFeeContext', () => {
 		destination,
 		amount: 1,
 		data: undefined,
+		erc4626ContractAddress: undefined,
+		erc4626Operation: undefined,
+		maxAmount: undefined,
 		sourceNetwork: network,
 		targetNetwork: network,
 		nativeEthereumToken,
@@ -132,6 +144,15 @@ describe('EthFeeContext', () => {
 		vi.spyOn(nftTransfer, 'encodeErc1155SafeTransfer').mockReturnValue({
 			to: '0x3333333333333333333333333333333333333333',
 			data: '0xfeedbead'
+		});
+
+		vi.spyOn(approveServices, 'encodeErc20Approve').mockReturnValue({
+			to: '0x4444444444444444444444444444444444444444',
+			data: '0xapprovedata'
+		});
+		vi.spyOn(erc4626Services, 'encodeErc4626Withdraw').mockReturnValue({
+			to: '0x5555555555555555555555555555555555555555',
+			data: '0xwithdrawdata'
 		});
 	});
 
@@ -214,6 +235,138 @@ describe('EthFeeContext', () => {
 				gas: 90n
 			})
 		);
+	});
+
+	describe('erc4626 fee estimation', () => {
+		const erc4626ContractAddress =
+			'0x6666666666666666666666666666666666666666' as Erc4626ContractAddress;
+
+		it('should estimate deposit fee as approveGas + fallback', async () => {
+			const provider = infuraMod.infuraProviders(network.id) as unknown as {
+				safeEstimateGas: (p: unknown) => Promise<bigint | undefined>;
+			};
+			vi.spyOn(provider, 'safeEstimateGas').mockResolvedValue(100n);
+
+			renderWith({
+				sendToken: mockValidErc20Token,
+				sendTokenId: mockValidErc20Token.id,
+				erc4626ContractAddress,
+				erc4626Operation: 'deposit'
+			});
+
+			await vi.runAllTimersAsync();
+
+			expect(approveServices.encodeErc20Approve).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					tokenAddress: mockValidErc20Token.address,
+					spender: erc4626ContractAddress
+				})
+			);
+
+			expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					gas: 100n + ERC20_FALLBACK_FEE
+				})
+			);
+		});
+
+		it('should use fallback when approve gas estimation returns undefined', async () => {
+			const provider = infuraMod.infuraProviders(network.id) as unknown as {
+				safeEstimateGas: (p: unknown) => Promise<bigint | undefined>;
+			};
+			vi.spyOn(provider, 'safeEstimateGas').mockResolvedValue(undefined);
+
+			renderWith({
+				sendToken: mockValidErc20Token,
+				sendTokenId: mockValidErc20Token.id,
+				erc4626ContractAddress,
+				erc4626Operation: 'deposit'
+			});
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					gas: ERC20_FALLBACK_FEE + ERC20_FALLBACK_FEE
+				})
+			);
+		});
+
+		it('should estimate withdraw fee using encodeErc4626Withdraw', async () => {
+			const provider = infuraMod.infuraProviders(network.id) as unknown as {
+				safeEstimateGas: (p: unknown) => Promise<bigint | undefined>;
+			};
+			vi.spyOn(provider, 'safeEstimateGas').mockResolvedValue(200n);
+
+			renderWith({
+				sendToken: mockValidErc4626Token,
+				sendTokenId: mockValidErc4626Token.id,
+				erc4626ContractAddress,
+				erc4626Operation: 'withdraw'
+			});
+
+			await vi.runAllTimersAsync();
+
+			expect(erc4626Services.encodeErc4626Withdraw).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					contractAddress: erc4626ContractAddress,
+					receiver: fromAddr,
+					owner: fromAddr
+				})
+			);
+
+			expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					gas: 200n
+				})
+			);
+		});
+
+		it('should use fallback fee when withdraw gas estimation returns undefined', async () => {
+			const provider = infuraMod.infuraProviders(network.id) as unknown as {
+				safeEstimateGas: (p: unknown) => Promise<bigint | undefined>;
+			};
+			vi.spyOn(provider, 'safeEstimateGas').mockResolvedValue(undefined);
+
+			renderWith({
+				sendToken: mockValidErc4626Token,
+				sendTokenId: mockValidErc4626Token.id,
+				erc4626ContractAddress,
+				erc4626Operation: 'withdraw'
+			});
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					gas: ERC20_FALLBACK_FEE
+				})
+			);
+		});
+
+		it('should cap withdraw amount to maxAmount when parsedAmount exceeds it', async () => {
+			const provider = infuraMod.infuraProviders(network.id) as unknown as {
+				safeEstimateGas: (p: unknown) => Promise<bigint | undefined>;
+			};
+			vi.spyOn(provider, 'safeEstimateGas').mockResolvedValue(300n);
+
+			renderWith({
+				sendToken: mockValidErc4626Token,
+				sendTokenId: mockValidErc4626Token.id,
+				erc4626ContractAddress,
+				erc4626Operation: 'withdraw',
+				amount: 999_999,
+				maxAmount: 50n
+			});
+
+			await vi.runAllTimersAsync();
+
+			expect(erc4626Services.encodeErc4626Withdraw).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					assets: 50n
+				})
+			);
+		});
 	});
 
 	it('should do nothing when no eth address is available', async () => {

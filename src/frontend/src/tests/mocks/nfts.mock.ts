@@ -16,6 +16,7 @@ export const getMockNonFungibleToken = (params: {
 	params.addresses.map((address, index) => ({
 		address,
 		category: 'custom',
+		tags: [],
 		decimals: 0,
 		id: parseTokenId(String(index)),
 		name: params.names[index],

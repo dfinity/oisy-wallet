@@ -16,6 +16,7 @@ export const CRWDX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'CrowdStrike xStock',
 	symbol: CRWDX_SYMBOL,
 	decimals: CRWDX_DECIMALS,

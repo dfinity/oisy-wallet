@@ -16,6 +16,7 @@ export const NVDAON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'NVIDIA (Ondo Tokenized)',
 	symbol: NVDAON_SYMBOL,
 	decimals: NVDAON_DECIMALS,

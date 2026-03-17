@@ -16,6 +16,7 @@ export const ABBVX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'AbbVie xStock',
 	symbol: ABBVX_SYMBOL,
 	decimals: ABBVX_DECIMALS,

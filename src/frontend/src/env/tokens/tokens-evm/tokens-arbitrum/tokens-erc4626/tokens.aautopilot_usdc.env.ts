@@ -15,6 +15,7 @@ export const AAUTOPILOT_USDC_TOKEN: RequiredErc4626Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc4626' },
 	category: 'default',
+	tags: [],
 	name: 'Autopilot USDC Arbitrum',
 	symbol: AAUTOPILOT_USDC_SYMBOL,
 	decimals: AAUTOPILOT_USDC_DECIMALS,

@@ -16,6 +16,7 @@ export const TQQQX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'TQQQ xStock',
 	symbol: TQQQX_SYMBOL,
 	decimals: TQQQX_DECIMALS,

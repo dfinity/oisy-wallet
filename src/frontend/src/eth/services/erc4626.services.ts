@@ -143,6 +143,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: ETHEREUM_DEFAULT_DECIMALS,
 					standard: { code: 'erc4626' as const },
 					category: 'custom' as const,
+					tags: [],
 					assetAddress: '' as Erc4626ContractAddress,
 					assetDecimals: ETHEREUM_DEFAULT_DECIMALS,
 					assetSymbol: '',

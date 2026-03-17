@@ -16,6 +16,7 @@ export const WETH_TOKEN: RequiredAdditionalErc20Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Wrapped Ether',
 	symbol: WETH_SYMBOL,
 	decimals: WETH_DECIMALS,

@@ -13,6 +13,7 @@ describe('icpunks-token.schema', () => {
 		network: ICP_NETWORK,
 		standard: { code: 'icpunks' },
 		category: 'default',
+		tags: [],
 		name: 'SampleToken',
 		symbol: 'STK',
 		decimals: 8

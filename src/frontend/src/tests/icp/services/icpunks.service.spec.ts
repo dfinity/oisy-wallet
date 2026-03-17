@@ -174,6 +174,7 @@ describe('icpunks.services', () => {
 						enabled: true,
 						standard: { code: 'icpunks' },
 						category: 'custom',
+						tags: [],
 						canisterId: mockCanisterId,
 						symbol: mockFetchedMetadata.symbol,
 						name: mockFetchedMetadata.name,
