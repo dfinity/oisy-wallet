@@ -50,7 +50,7 @@ describe('ext-add-custom-tokens.service', () => {
 					...validParams,
 					identity: undefined
 				})
-			).toThrowError();
+			).toThrow();
 		});
 
 		it('should return error if canisterId is missing', () => {

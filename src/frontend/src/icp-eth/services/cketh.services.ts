@@ -6,6 +6,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Network } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { isNullish, queryAndUpdate } from '@dfinity/utils';
 import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
@@ -37,7 +38,7 @@ export const loadCkEthMinterInfo = async ({
 			ckEthMinterInfoStore.set({ id: tokenId, data: { data, certified } }),
 		onUpdateError: ({ error }) => {
 			// We silence the error here because we display a visual error when we try to effectively use the information
-			console.error(error);
+			consoleError(error);
 
 			ckEthMinterInfoStore.reset(tokenId);
 		},

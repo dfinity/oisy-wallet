@@ -64,7 +64,7 @@ describe('approve.services', () => {
 			const mockError = new Error('Mock Error');
 			allowanceSpy.mockRejectedValueOnce(mockError);
 
-			await expect(erc20ContractAllowance(mockParams)).rejects.toThrowError(mockError);
+			await expect(erc20ContractAllowance(mockParams)).rejects.toThrow(mockError);
 
 			expect(allowanceSpy).toHaveBeenCalledExactlyOnceWith({
 				contract: USDC_TOKEN,
@@ -182,7 +182,7 @@ describe('approve.services', () => {
 			const mockError = new Error('Transaction count error');
 			getTransactionCountSpy.mockRejectedValueOnce(mockError);
 
-			await expect(approve(mockParams)).rejects.toThrowError(mockError);
+			await expect(approve(mockParams)).rejects.toThrow(mockError);
 
 			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
 				address: mockEthAddress,

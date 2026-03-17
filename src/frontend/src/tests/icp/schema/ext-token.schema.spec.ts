@@ -36,13 +36,13 @@ describe('ext-token.schema', () => {
 				canisterId: 'abc'
 			};
 
-			expect(() => ExtCanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => ExtCanistersSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with missing canister field', () => {
 			const invalidData = {};
 
-			expect(() => ExtCanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => ExtCanistersSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -61,7 +61,7 @@ describe('ext-token.schema', () => {
 				canisterId: 123
 			};
 
-			expect(() => ExtInterfaceSchema.parse(invalidData)).toThrowError();
+			expect(() => ExtInterfaceSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -81,7 +81,7 @@ describe('ext-token.schema', () => {
 				id: 'not-a-symbol'
 			};
 
-			expect(() => ExtTokenSchema.parse(invalidData)).toThrowError();
+			expect(() => ExtTokenSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with invalid canister', () => {
@@ -90,7 +90,7 @@ describe('ext-token.schema', () => {
 				canisterId: 123
 			};
 
-			expect(() => ExtTokenSchema.parse(invalidData)).toThrowError();
+			expect(() => ExtTokenSchema.parse(invalidData)).toThrow();
 		});
 	});
 });

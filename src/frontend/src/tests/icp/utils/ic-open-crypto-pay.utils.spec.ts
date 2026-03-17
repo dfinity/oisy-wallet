@@ -185,7 +185,7 @@ describe('ic-open-crypto-pay.utils', () => {
 							destination: 'aaaaa-aa'
 						}
 					})
-				).toThrowError(en.pay.error.token_address_mismatch);
+				).toThrow(en.pay.error.token_address_mismatch);
 			});
 
 			it('should throw if the "to" principal is invalid', () => {
@@ -197,7 +197,7 @@ describe('ic-open-crypto-pay.utils', () => {
 							to: 'invalid_principal'
 						}
 					})
-				).toThrowError(en.pay.error.data_is_incompleted);
+				).toThrow(en.pay.error.data_is_incompleted);
 			});
 
 			it('should throw if amount does not match', () => {
@@ -206,7 +206,7 @@ describe('ic-open-crypto-pay.utils', () => {
 						...params,
 						amount: 987_654_321n
 					})
-				).toThrowError(en.pay.error.amount_does_not_match);
+				).toThrow(en.pay.error.amount_does_not_match);
 			});
 
 			it('should throw if functionName is transfer but "to" is missing', () => {
@@ -220,7 +220,7 @@ describe('ic-open-crypto-pay.utils', () => {
 							amount: mockAmount
 						}
 					})
-				).toThrowError(en.pay.error.data_is_incompleted);
+				).toThrow(en.pay.error.data_is_incompleted);
 			});
 		});
 
@@ -251,7 +251,7 @@ describe('ic-open-crypto-pay.utils', () => {
 							destination: 'invalid_principal'
 						}
 					})
-				).toThrowError(en.pay.error.data_is_incompleted);
+				).toThrow(en.pay.error.data_is_incompleted);
 			});
 
 			it('should throw if amount does not match', () => {
@@ -260,7 +260,7 @@ describe('ic-open-crypto-pay.utils', () => {
 						...params,
 						amount: 987_654_321n
 					})
-				).toThrowError(en.pay.error.amount_does_not_match);
+				).toThrow(en.pay.error.amount_does_not_match);
 			});
 		});
 
@@ -287,7 +287,7 @@ describe('ic-open-crypto-pay.utils', () => {
 							fee: mockFee
 						} as PayableTokenWithConvertedAmount
 					})
-				).toThrowError(en.pay.error.data_is_incompleted);
+				).toThrow(en.pay.error.data_is_incompleted);
 			});
 
 			it('should throw if destination is missing', () => {
@@ -300,7 +300,7 @@ describe('ic-open-crypto-pay.utils', () => {
 							destination: undefined
 						}
 					})
-				).toThrowError(en.pay.error.data_is_incompleted);
+				).toThrow(en.pay.error.data_is_incompleted);
 			});
 
 			it('should throw if amount is missing', () => {
@@ -312,7 +312,7 @@ describe('ic-open-crypto-pay.utils', () => {
 							amount: undefined
 						}
 					})
-				).toThrowError(en.pay.error.data_is_incompleted);
+				).toThrow(en.pay.error.data_is_incompleted);
 			});
 
 			it('should throw if fee is missing', () => {
@@ -324,7 +324,7 @@ describe('ic-open-crypto-pay.utils', () => {
 							fee: undefined
 						} as PayableTokenWithConvertedAmount
 					})
-				).toThrowError(en.pay.error.data_is_incompleted);
+				).toThrow(en.pay.error.data_is_incompleted);
 			});
 
 			it('should throw if fee is not IC-related', () => {
@@ -343,7 +343,7 @@ describe('ic-open-crypto-pay.utils', () => {
 							}
 						} as PayableTokenWithConvertedAmount
 					})
-				).toThrowError(en.pay.error.data_is_incompleted);
+				).toThrow(en.pay.error.data_is_incompleted);
 			});
 		});
 	});
