@@ -45,7 +45,8 @@ describe('EarningsList', () => {
 			standard: { code: 'icrc' },
 			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
 			fee: 100n,
-			category: 'custom'
+			category: 'custom',
+			tags: []
 		};
 
 		beforeEach(() => {
