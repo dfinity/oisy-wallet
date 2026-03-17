@@ -29,7 +29,6 @@
 	}: Props = $props();
 </script>
 
-
 {#if nonNullish(vault) && isTokenHarvestAutopilot(vault.token)}
 	<HarvestUnstakeWizard
 		{currentStep}
