@@ -16,7 +16,7 @@ export const WETH_TOKEN: RequiredAdditionalErc20Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Wrapped Ether',
 	symbol: WETH_SYMBOL,
 	decimals: WETH_DECIMALS,
