@@ -1156,7 +1156,8 @@
 			"edit_token": "टोकन संपादित करें",
 			"sort_by_value": "",
 			"sort_by_performance": "",
-			"sort_by_symbol": ""
+			"sort_by_symbol": "",
+			"hide_asset_types": ""
 		},
 		"details": {
 			"title": "टोकन विवरण",
