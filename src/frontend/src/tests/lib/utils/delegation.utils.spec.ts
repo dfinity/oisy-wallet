@@ -1,6 +1,7 @@
 import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
+import type { DerEncodedPublicKey, Signature } from '@icp-sdk/core/agent';
 import { Delegation, DelegationChain, DelegationIdentity } from '@icp-sdk/core/identity';
 
 describe('delegation.utils', () => {
@@ -13,11 +14,11 @@ describe('delegation.utils', () => {
 
 		it('should extract delegation chain from DelegationIdentity', () => {
 			const mockExpiration = BigInt(Date.now()) * 1_000_000n + 600_000_000_000n;
-			const mockSignature = new Uint8Array([7, 8, 9]);
+			const mockSignature = new Uint8Array([7, 8, 9]) as Signature;
 			const mockSessionPubkey = new Uint8Array([1, 2, 3]);
 
 			const delegation = new Delegation(mockSessionPubkey, mockExpiration);
-			const mockPublicKey = new Uint8Array([4, 5, 6]) as unknown as ArrayBuffer;
+			const mockPublicKey = new Uint8Array([4, 5, 6]) as DerEncodedPublicKey;
 
 			const chain = DelegationChain.fromDelegations(
 				[{ delegation, signature: mockSignature }],
@@ -48,11 +49,11 @@ describe('delegation.utils', () => {
 
 		it('should extract delegation chain with targets', () => {
 			const mockExpiration = BigInt(Date.now()) * 1_000_000n + 600_000_000_000n;
-			const mockSignature = new Uint8Array([7, 8, 9]);
+			const mockSignature = new Uint8Array([7, 8, 9]) as Signature;
 			const mockSessionPubkey = new Uint8Array([1, 2, 3]);
 
 			const delegation = new Delegation(mockSessionPubkey, mockExpiration, [mockPrincipal]);
-			const mockPublicKey = new Uint8Array([4, 5, 6]) as unknown as ArrayBuffer;
+			const mockPublicKey = new Uint8Array([4, 5, 6]) as DerEncodedPublicKey;
 
 			const chain = DelegationChain.fromDelegations(
 				[{ delegation, signature: mockSignature }],
