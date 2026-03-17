@@ -15,6 +15,7 @@ export const RNDR_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Render Token',
 	symbol: RNDR_SYMBOL,
 	decimals: RNDR_DECIMALS,

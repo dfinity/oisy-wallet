@@ -16,6 +16,7 @@ export const IAUON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'iShares Gold Trust (Ondo Tokenized)',
 	symbol: IAUON_SYMBOL,
 	decimals: IAUON_DECIMALS,

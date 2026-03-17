@@ -15,6 +15,7 @@ export const BAUTOPILOT_WETH_TOKEN: RequiredErc4626Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc4626' },
 	category: 'default',
+	tags: [],
 	name: 'Autopilot wETH Base',
 	symbol: BAUTOPILOT_WETH_SYMBOL,
 	decimals: BAUTOPILOT_WETH_DECIMALS,

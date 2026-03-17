@@ -16,6 +16,7 @@ export const METAX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Meta xStock',
 	symbol: METAX_SYMBOL,
 	decimals: METAX_DECIMALS,

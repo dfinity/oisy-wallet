@@ -16,6 +16,7 @@ export const AZNX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'AstraZeneca xStock',
 	symbol: AZNX_SYMBOL,
 	decimals: AZNX_DECIMALS,

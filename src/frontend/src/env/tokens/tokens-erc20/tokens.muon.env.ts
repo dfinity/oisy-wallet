@@ -16,6 +16,7 @@ export const MUON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Micron Technology (Ondo Tokenized)',
 	symbol: MUON_SYMBOL,
 	decimals: MUON_DECIMALS,

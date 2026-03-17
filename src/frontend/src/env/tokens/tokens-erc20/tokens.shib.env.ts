@@ -16,6 +16,7 @@ export const SHIB_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'SHIBA INU',
 	symbol: SHIB_SYMBOL,
 	decimals: SHIB_DECIMALS,

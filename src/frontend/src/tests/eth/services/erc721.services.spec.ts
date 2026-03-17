@@ -53,6 +53,7 @@ describe('erc721.services', () => {
 			data: {
 				standard: { code: 'erc721' },
 				category: 'custom',
+				tags: [],
 				version: 1n,
 				enabled: true,
 				network: ETHEREUM_NETWORK,
@@ -68,6 +69,7 @@ describe('erc721.services', () => {
 			data: {
 				standard: { code: 'erc721' },
 				category: 'custom',
+				tags: [],
 				version: 2n,
 				enabled: true,
 				network: BASE_NETWORK,
@@ -82,6 +84,7 @@ describe('erc721.services', () => {
 			data: {
 				standard: { code: 'erc721' },
 				category: 'custom',
+				tags: [],
 				version: undefined,
 				enabled: false,
 				network: POLYGON_AMOY_NETWORK,

@@ -113,6 +113,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
 					standard: { code: 'spl' as const },
 					category: 'custom' as const,
+					tags: [],
 					enabled,
 					version,
 					allowExternalContentSource

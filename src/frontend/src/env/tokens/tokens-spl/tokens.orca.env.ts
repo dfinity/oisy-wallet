@@ -16,6 +16,7 @@ export const ORCA_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Orca',
 	symbol: ORCA_SYMBOL,
 	decimals: ORCA_DECIMALS,

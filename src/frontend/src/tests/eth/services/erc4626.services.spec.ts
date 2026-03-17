@@ -93,6 +93,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
+					tags: [],
 					version: 1n,
 					allowExternalContentSource: undefined,
 					enabled: true,
@@ -112,6 +113,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
+					tags: [],
 					version: 2n,
 					allowExternalContentSource: true,
 					enabled: true,
@@ -131,6 +133,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
+					tags: [],
 					version: undefined,
 					allowExternalContentSource: false,
 					enabled: false,
