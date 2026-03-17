@@ -156,9 +156,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(balance(mockParams)).rejects.toThrow(
-				new CanisterInternalError('other error')
-			);
+			await expect(balance(mockParams)).rejects.toThrow(new CanisterInternalError('other error'));
 
 			expect(service.balance).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
@@ -552,9 +550,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(transfer(mockParams)).rejects.toThrow(
-				new CanisterInternalError('other error')
-			);
+			await expect(transfer(mockParams)).rejects.toThrow(new CanisterInternalError('other error'));
 
 			expect(service.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
@@ -870,9 +866,7 @@ describe('ext-v2-token.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(metadata(mockParams)).rejects.toThrow(
-				new CanisterInternalError('other error')
-			);
+			await expect(metadata(mockParams)).rejects.toThrow(new CanisterInternalError('other error'));
 
 			expect(service.ext_metadata).toHaveBeenCalledExactlyOnceWith(mockExtV2TokenIdentifier);
 		});

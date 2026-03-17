@@ -408,9 +408,7 @@ describe('erc4626.services', () => {
 			it('should not throw if getAssetAddress fails', async () => {
 				mockGetAssetAddress.mockRejectedValue(new Error('Error fetching asset'));
 
-				await expect(
-					loadCustomErc4626Tokens({ identity: mockIdentity })
-				).resolves.not.toThrow();
+				await expect(loadCustomErc4626Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 			});
 
 			it('should cache the custom tokens in IDB on update call', async () => {

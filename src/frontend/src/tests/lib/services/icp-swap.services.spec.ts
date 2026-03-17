@@ -132,9 +132,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(setCustomToken).mockResolvedValue();
 			vi.mocked(loadCustomTokens).mockResolvedValue();
 
-			await expect(
-				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })
-			).resolves.not.toThrow();
+			await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).resolves.not.toThrow();
 
 			expect(swapArgs.progress).toHaveBeenCalledTimes(3);
 			expect(swapArgs.progress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SWAP);
@@ -157,9 +155,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(withdraw).mockResolvedValue(1n);
 			vi.mocked(waitAndTriggerWallet).mockResolvedValue();
 
-			await expect(
-				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })
-			).resolves.not.toThrow();
+			await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })).resolves.not.toThrow();
 
 			expect(hasSufficientIcrcAllowance).toHaveBeenCalled();
 			expect(approve).not.toHaveBeenCalled();
@@ -178,9 +174,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(withdraw).mockResolvedValue(1n);
 			vi.mocked(waitAndTriggerWallet).mockResolvedValue();
 
-			await expect(
-				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })
-			).resolves.not.toThrow();
+			await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })).resolves.not.toThrow();
 
 			expect(hasSufficientIcrcAllowance).toHaveBeenCalled();
 			expect(approve).toHaveBeenCalled();
@@ -199,9 +193,7 @@ describe('icp-swap.services', () => {
 			vi.mocked(withdraw).mockResolvedValue(1n);
 			vi.mocked(waitAndTriggerWallet).mockResolvedValue();
 
-			await expect(
-				fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })
-			).resolves.not.toThrow();
+			await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: true })).resolves.not.toThrow();
 
 			expect(hasSufficientIcrcAllowance).toHaveBeenCalled();
 			// Should still proceed with approval on error (safe fallback)
@@ -212,9 +204,7 @@ describe('icp-swap.services', () => {
 		it('Swap failed. Pool not found', async () => {
 			vi.mocked(getPoolCanister).mockRejectedValue(new Error('Swap failed. Pool not found.'));
 
-			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrow(
-				en.swap.error.pool_not_found
-			);
+			await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrow(en.swap.error.pool_not_found);
 		});
 
 		it('Swap failed. Deposit failed', async () => {

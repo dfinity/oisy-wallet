@@ -102,9 +102,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(
-				setManyCustomTokens({ ...mockParams, identity: undefined })
-			).rejects.toThrow();
+			await expect(setManyCustomTokens({ ...mockParams, identity: undefined })).rejects.toThrow();
 		});
 
 		it('should throw an error if setManyCustomTokens throws', async () => {
@@ -172,9 +170,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(
-				removeCustomToken({ ...mockParams, identity: undefined })
-			).rejects.toThrow();
+			await expect(removeCustomToken({ ...mockParams, identity: undefined })).rejects.toThrow();
 		});
 
 		it('should throw an error if removeCustomToken throws', async () => {
@@ -203,9 +199,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(
-				createUserProfile({ ...mockParams, identity: undefined })
-			).rejects.toThrow();
+			await expect(createUserProfile({ ...mockParams, identity: undefined })).rejects.toThrow();
 		});
 
 		it('should throw an error if createUserProfile throws', async () => {
@@ -304,9 +298,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if identity is undefined', async () => {
-			await expect(
-				addUserCredential({ ...mockParams, identity: undefined })
-			).rejects.toThrow();
+			await expect(addUserCredential({ ...mockParams, identity: undefined })).rejects.toThrow();
 		});
 
 		it('should throw an error if addUserCredential throws', async () => {
