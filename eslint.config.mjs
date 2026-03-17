@@ -32,6 +32,30 @@ export default [
 		}
 	},
 
+	{
+		files: ['src/frontend/src/**/*'],
+		ignores: ['src/frontend/src/lib/utils/console.utils.ts', 'src/frontend/src/tests/**/*'],
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				{
+					selector: "Literal[raw='0n']",
+					message: 'Use the shared constant `ZERO` instead of `0n`.'
+				},
+				{
+					selector: "MemberExpression[object.name='console'][property.name='error']",
+					message:
+						'Use `consoleError` from `$lib/utils/console.utils` instead of `console.error` to format IC canister errors.'
+				},
+				{
+					selector: "MemberExpression[object.name='console'][property.name='warn']",
+					message:
+						'Use `consoleWarn` from `$lib/utils/console.utils` instead of `console.warn` to format IC canister errors.'
+				}
+			]
+		}
+	},
+
 	// TODO: re-enable this rule when we fix all the warnings that it causes.
 	{
 		rules: {
