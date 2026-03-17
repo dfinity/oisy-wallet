@@ -2,6 +2,7 @@ import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import nvdax from '$sol/assets/nvdax.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { RequiredSpl2022Token } from '$sol/types/spl';
 
@@ -16,7 +17,7 @@ export const NVDAX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'NVIDIA xStock',
 	symbol: NVDAX_SYMBOL,
 	decimals: NVDAX_DECIMALS,

@@ -2,6 +2,7 @@ import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import orca from '$sol/assets/orca.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { RequiredSplToken } from '$sol/types/spl';
 
@@ -16,7 +17,7 @@ export const ORCA_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Orca',
 	symbol: ORCA_SYMBOL,
 	decimals: ORCA_DECIMALS,

@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import googlx from '$sol/assets/googlx.svg';
@@ -16,7 +17,7 @@ export const GOOGLX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'Alphabet xStock',
 	symbol: GOOGLX_SYMBOL,
 	decimals: GOOGLX_DECIMALS,
