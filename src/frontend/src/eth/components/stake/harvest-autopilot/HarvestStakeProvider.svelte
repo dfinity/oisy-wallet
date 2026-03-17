@@ -10,7 +10,7 @@
 		apy: number;
 	}
 
-	const { apy }: Props = $props();
+	let { apy }: Props = $props();
 </script>
 
 {#snippet item1()}
