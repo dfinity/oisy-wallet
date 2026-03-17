@@ -1,7 +1,7 @@
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import dai from '$eth/assets/dai.svg';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 

@@ -1,8 +1,8 @@
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ZCHF_TOKEN_GROUP } from '$env/tokens/groups/groups.zchf.env';
 import zchf from '$eth/assets/zchf.webp';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 

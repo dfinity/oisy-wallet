@@ -1,8 +1,8 @@
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import usdt from '$eth/assets/usdt.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 

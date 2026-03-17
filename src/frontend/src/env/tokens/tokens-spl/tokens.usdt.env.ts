@@ -1,7 +1,7 @@
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import usdt from '$eth/assets/usdt.svg';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';

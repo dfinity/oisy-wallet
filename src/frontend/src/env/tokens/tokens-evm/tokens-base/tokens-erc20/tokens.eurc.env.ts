@@ -1,4 +1,3 @@
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	BASE_NETWORK,
 	BASE_SEPOLIA_NETWORK
@@ -6,6 +5,7 @@ import {
 import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
 import eurc from '$eth/assets/eurc.svg';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
