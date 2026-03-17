@@ -1,5 +1,6 @@
 import { TokenTypes as TokenTypesEnum, type TokenTypes } from '$lib/enums/token-types';
 import { initStorageStore } from '$lib/stores/storage.store';
+import type { TokenCategoryFilterData } from '$lib/types/tokens-filter';
 import type { TokensSortingType } from '$lib/types/tokens-sort';
 
 export interface SettingsData {
@@ -36,6 +37,11 @@ export const tokensSortStore = initStorageStore<TokensSortingType>({
 export const tokenCategoryFilterEnabledStore = initStorageStore<SettingsData>({
 	key: 'token-category-filter-enabled',
 	defaultValue: { enabled: false }
+});
+
+export const tokenCategoryFilterStore = initStorageStore<TokenCategoryFilterData>({
+	key: 'token-category-filter',
+	defaultValue: { value: undefined }
 });
 
 export type NftSortOrder = 'asc' | 'desc';
