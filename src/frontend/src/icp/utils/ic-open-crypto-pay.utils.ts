@@ -177,6 +177,10 @@ export const validateIcTransfer = ({
 		}
 	};
 
+	if (decodedData.functionName === 'transfer' && !isNewIcUriFormat(decodedData)) {
+		throw new Error(data_is_incompleted);
+	}
+
 	const spender = isNewIcUriFormat(decodedData)
 		? validateNewFormatIcTransfer({
 				decodedData,

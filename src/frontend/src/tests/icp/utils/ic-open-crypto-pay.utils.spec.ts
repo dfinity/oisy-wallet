@@ -208,6 +208,20 @@ describe('ic-open-crypto-pay.utils', () => {
 					})
 				).toThrowError(en.pay.error.amount_does_not_match);
 			});
+
+			it('should throw if functionName is transfer but "to" is missing', () => {
+				expect(() =>
+					validateIcTransfer({
+						...params,
+						decodedData: {
+							prefix: 'icp',
+							destination: ICP_TOKEN.ledgerCanisterId,
+							functionName: 'transfer',
+							amount: mockAmount
+						}
+					})
+				).toThrowError(en.pay.error.data_is_incompleted);
+			});
 		});
 
 		// TODO: Remove legacy format tests once DFX completes migration to the new URI format.

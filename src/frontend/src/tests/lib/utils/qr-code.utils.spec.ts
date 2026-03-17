@@ -253,6 +253,7 @@ describe('decodeUrn', () => {
 			const icpLedgerCanisterId = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
 			const vchfLedgerCanisterId = 'ly36x-wiaaa-aaaai-aqj7q-cai';
 			const spenderPrincipal = 'ygf2v-iniac-cojwe-damoz-s4act-k4xft-xgpjy-776wl-wr754-qxkgo-4ae';
+			const digitLeadingPrincipal = '2vxsx-fae';
 
 			describe('new format: icp:{canister-id}/transfer?to={principal}&amount={amount}', () => {
 				it('should parse ICP new format URI', () => {
@@ -266,6 +267,20 @@ describe('decodeUrn', () => {
 						functionName: 'transfer',
 						to: spenderPrincipal,
 						amount: 0.47311479
+					});
+				});
+
+				it('should keep digit-leading principal as string, not coerce to number', () => {
+					const result = decodeQrCodeUrn({
+						urn: `icp:${icpLedgerCanisterId}/transfer?to=${digitLeadingPrincipal}&amount=0.1`
+					});
+
+					expect(result).toEqual({
+						prefix: 'icp',
+						destination: icpLedgerCanisterId,
+						functionName: 'transfer',
+						to: digitLeadingPrincipal,
+						amount: 0.1
 					});
 				});
 
