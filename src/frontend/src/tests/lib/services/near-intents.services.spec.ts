@@ -75,15 +75,12 @@ describe('near-intents.services', () => {
 		it('should map a quote response to a SwapMappedResult', () => {
 			const result = mapNearIntentsQuoteResult(mockNearIntentsQuoteResponse);
 
-			expect(result.provider).toBe(SwapProvider.NEAR_INTENTS);
-
-			assert(result.provider === SwapProvider.NEAR_INTENTS);
-
-			expect(result.receiveAmount).toBe(BigInt(mockNearIntentsQuoteResponse.quote.amountOut));
-			expect(result.receiveOutMinimum).toBe(
-				BigInt(mockNearIntentsQuoteResponse.quote.minAmountOut ?? '0')
-			);
-			expect(result.swapDetails).toBe(mockNearIntentsQuoteResponse);
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: BigInt(mockNearIntentsQuoteResponse.quote.amountOut),
+				receiveOutMinimum: BigInt(mockNearIntentsQuoteResponse.quote.minAmountOut ?? '0'),
+				swapDetails: mockNearIntentsQuoteResponse
+			});
 		});
 
 		it('should set receiveOutMinimum to undefined when minAmountOut is absent', () => {
@@ -94,9 +91,12 @@ describe('near-intents.services', () => {
 
 			const result = mapNearIntentsQuoteResult(quoteWithoutMin);
 
-			assert(result.provider === SwapProvider.NEAR_INTENTS);
-
-			expect(result.receiveOutMinimum).toBeUndefined();
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: BigInt(mockNearIntentsQuoteResponse.quote.amountOut),
+				receiveOutMinimum: undefined,
+				swapDetails: quoteWithoutMin
+			});
 		});
 	});
 
@@ -132,9 +132,12 @@ describe('near-intents.services', () => {
 				slippage
 			});
 
-			expect(result).not.toBeNull();
-			expect(result?.provider).toBe(SwapProvider.NEAR_INTENTS);
-			expect(result?.receiveAmount).toBe(BigInt(mockNearIntentsQuoteResponse.quote.amountOut));
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: BigInt(mockNearIntentsQuoteResponse.quote.amountOut),
+				receiveOutMinimum: BigInt(mockNearIntentsQuoteResponse.quote.minAmountOut ?? '0'),
+				swapDetails: mockNearIntentsQuoteResponse
+			});
 		});
 
 		it('should call the API with dry: true and EXACT_INPUT swap type', async () => {
