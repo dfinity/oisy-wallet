@@ -4,8 +4,8 @@ import {
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import bnb from '$evm/bsc/assets/bnb.svg';
-import type { RequiredToken, TokenId } from '$lib/types/token';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 
