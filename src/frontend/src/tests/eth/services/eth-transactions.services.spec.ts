@@ -15,6 +15,7 @@ import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.st
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
+import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -253,8 +254,6 @@ describe('eth-transactions.services', () => {
 		}, 60000);
 
 		describe('when token is ERC4626', () => {
-			const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-
 			let etherscanProvidersSpy: MockInstance;
 
 			const mockErcTransactions = vi.fn();
@@ -276,7 +275,7 @@ describe('eth-transactions.services', () => {
 			it('should replace zero address with vault address for mint transactions', async () => {
 				const mintTransaction = {
 					...createMockEthTransactions(1)[0],
-					from: ZERO_ADDRESS,
+					from: ZERO_ETH_ADDRESS,
 					to: mockEthAddress
 				};
 
@@ -304,7 +303,7 @@ describe('eth-transactions.services', () => {
 				const burnTransaction = {
 					...createMockEthTransactions(1)[0],
 					from: mockEthAddress,
-					to: ZERO_ADDRESS
+					to: ZERO_ETH_ADDRESS
 				};
 
 				mockErcTransactions.mockResolvedValueOnce([burnTransaction]);
