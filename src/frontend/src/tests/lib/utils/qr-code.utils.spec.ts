@@ -252,8 +252,7 @@ describe('decodeUrn', () => {
 		describe('ICP URIs', () => {
 			const icpLedgerCanisterId = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
 			const vchfLedgerCanisterId = 'ly36x-wiaaa-aaaai-aqj7q-cai';
-			const spenderPrincipal =
-				'ygf2v-iniac-cojwe-damoz-s4act-k4xft-xgpjy-776wl-wr754-qxkgo-4ae';
+			const spenderPrincipal = 'ygf2v-iniac-cojwe-damoz-s4act-k4xft-xgpjy-776wl-wr754-qxkgo-4ae';
 
 			describe('new format: icp:{canister-id}/transfer?to={principal}&amount={amount}', () => {
 				it('should parse ICP new format URI', () => {
