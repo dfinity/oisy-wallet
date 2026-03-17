@@ -20,6 +20,7 @@ use crate::types::{
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::AddUserCredentialError,
+    user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -352,6 +353,20 @@ impl From<Result<(), UpdateExperimentalFeaturesSettingsError>>
         match result {
             Ok(()) => UpdateExperimentalFeaturesSettingsResult::Ok(()),
             Err(err) => UpdateExperimentalFeaturesSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetUserTransactionsResult {
+    Ok(GetUserTransactionsResponse),
+    Err(UserTransactionError),
+}
+impl From<Result<GetUserTransactionsResponse, UserTransactionError>> for GetUserTransactionsResult {
+    fn from(result: Result<GetUserTransactionsResponse, UserTransactionError>) -> Self {
+        match result {
+            Ok(response) => GetUserTransactionsResult::Ok(response),
+            Err(err) => GetUserTransactionsResult::Err(err),
         }
     }
 }

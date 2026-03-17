@@ -1491,6 +1491,8 @@ interface I18nStake {
 	text: {
 		harvest_autopilot_page_description: string;
 		harvest_autopilot_vault_page_description: string;
+		harvest_autopilot_provider_description: string;
+		harvest_autopilot_stake_terms: string;
 		my_positions: string;
 		available_autopilots: string;
 		vault_info: string;
@@ -1505,6 +1507,8 @@ interface I18nStake {
 		stake_now: string;
 		stake_amount: string;
 		not_enough_to_stake: string;
+		estimated_received: string;
+		estimated_yearly_yield: string;
 		unstake: string;
 		unstake_now: string;
 		unstaking: string;
@@ -1564,6 +1568,7 @@ interface I18nStake {
 	error: {
 		unexpected_error_on_withdraw: string;
 		unexpected_error_on_unstake: string;
+		unexpected_error_on_stake: string;
 		dissolvement_limit_reached: string;
 	};
 	info: {

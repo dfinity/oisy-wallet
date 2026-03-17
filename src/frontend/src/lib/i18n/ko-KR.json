@@ -1908,6 +1908,8 @@
 		"text": {
 			"harvest_autopilot_page_description": "원클릭 자동 운용 볼트로 최대 수익 효율 실현.",
 			"harvest_autopilot_vault_page_description": "자동 운용은 <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">감사 완료된 IPOR</a> Fusion Vault 기술을 기반으로 합니다.",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
 			"my_positions": "내 포지션",
 			"available_autopilots": "사용 가능한 자동 운용",
 			"vault_info": "볼트 정보",
@@ -1922,6 +1924,8 @@
 			"stake_now": "지금 스테이킹",
 			"stake_amount": "$amount $token_symbol 스테이킹",
 			"not_enough_to_stake": "스테이킹할 $token_symbol이 없습니다",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "언스테이킹",
 			"unstake_now": "지금 언스테이킹",
 			"unstaking": "언스테이킹 중...",
@@ -1981,6 +1985,7 @@
 		"error": {
 			"unexpected_error_on_withdraw": "토큰 출금 중 문제가 발생했습니다.",
 			"unexpected_error_on_unstake": "토큰 언스테이킹 중 문제가 발생했습니다.",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": "활성 잠금 해제 요청의 최대 $limit개에 도달했습니다. 새 요청을 만들기 전에 일부를 완료하세요.<br/>참고로 '즉시' 옵션을 사용하여 언제든지 언스테이킹할 수 있습니다."
 		},
 		"info": {
