@@ -268,7 +268,6 @@ describe('infura-erc4626.providers', () => {
 				).rejects.toThrowError(errorMessage);
 			});
 		});
-
 	});
 
 	describe('infuraErc4626Providers', () => {
