@@ -16,6 +16,7 @@ export const DFDVX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'DFDV xStock',
 	symbol: DFDVX_SYMBOL,
 	decimals: DFDVX_DECIMALS,

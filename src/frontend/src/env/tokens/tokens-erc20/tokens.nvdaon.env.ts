@@ -16,6 +16,7 @@ export const NVDAON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'NVIDIA (Ondo Tokenized)',
 	symbol: NVDAON_SYMBOL,
 	decimals: NVDAON_DECIMALS,

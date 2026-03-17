@@ -33,6 +33,7 @@ describe('nft-send.services', () => {
 		const token721: NonFungibleToken = {
 			address: from,
 			category: 'custom',
+			tags: [],
 			decimals: 0,
 			id: parseTokenId('721'),
 			name: 'My721',
@@ -44,6 +45,7 @@ describe('nft-send.services', () => {
 		const token1155: NonFungibleToken = {
 			address: from,
 			category: 'custom',
+			tags: [],
 			decimals: 0,
 			id: parseTokenId('1155'),
 			name: 'My1155',

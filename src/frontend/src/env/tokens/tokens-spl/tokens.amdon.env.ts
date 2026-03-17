@@ -17,6 +17,7 @@ export const AMDON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'AMD (Ondo Tokenized Stock)',
 	symbol: AMDON_SYMBOL,
 	decimals: AMDON_DECIMALS,

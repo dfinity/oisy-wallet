@@ -16,6 +16,7 @@ export const AMZNX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Amazon xStock',
 	symbol: AMZNX_SYMBOL,
 	decimals: AMZNX_DECIMALS,
