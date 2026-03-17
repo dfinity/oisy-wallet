@@ -159,7 +159,7 @@ describe('infura-erc4626.providers', () => {
 
 				const provider = new InfuraErc4626Provider(infura);
 
-				await expect(provider.getAssetAddress(contractAddress)).rejects.toThrowError(errorMessage);
+				await expect(provider.getAssetAddress(contractAddress)).rejects.toThrow(errorMessage);
 			});
 		});
 
@@ -212,7 +212,7 @@ describe('infura-erc4626.providers', () => {
 
 				await expect(
 					provider.convertToAssets({ contract: contractAddress, shares: mockShares })
-				).rejects.toThrowError(errorMessage);
+				).rejects.toThrow(errorMessage);
 			});
 		});
 	});
@@ -227,7 +227,7 @@ describe('infura-erc4626.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => infuraErc4626Providers(ICP_NETWORK_ID)).toThrowError(
+			expect(() => infuraErc4626Providers(ICP_NETWORK_ID)).toThrow(
 				replacePlaceholders(en.init.error.no_infura_erc4626_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})

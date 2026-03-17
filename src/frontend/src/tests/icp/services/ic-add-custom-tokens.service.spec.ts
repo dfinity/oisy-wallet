@@ -86,7 +86,7 @@ describe('ic-add-custom-tokens.service', () => {
 						ledgerCanisterId: mockLedgerCanisterId,
 						indexCanisterId: mockIndexCanisterId
 					})
-				).rejects.toThrowError();
+				).rejects.toThrow();
 			});
 
 			it('should return error if ledgerCanisterId is missing', async () => {

@@ -29,6 +29,7 @@
 	} from '$lib/types/custom-token';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
+	import { consoleWarn } from '$lib/utils/console.utils';
 	import { isRouteActivity, isRouteNfts } from '$lib/utils/nav.utils';
 
 	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
@@ -97,7 +98,7 @@
 
 				return tokens.length > 0 ? [canisterId] : [];
 			} catch (error: unknown) {
-				console.warn(`Error fetching EXT tokens from canister ${canisterId}:`, error);
+				consoleWarn(`Error fetching EXT tokens from canister ${canisterId}:`, error);
 
 				return [];
 			}

@@ -316,9 +316,7 @@ describe('format.utils', () => {
 				futureDate.setDate(currentDate.getDate() + 1);
 				const futureTimestamp = Math.floor(futureDate.getTime() / 1000);
 
-				expect(() =>
-					formatSecondsToNormalizedDate({ seconds: futureTimestamp })
-				).not.toThrowError();
+				expect(() => formatSecondsToNormalizedDate({ seconds: futureTimestamp })).not.toThrow();
 			});
 
 			it('should return "yesterday" even if the date was in the past year', () => {

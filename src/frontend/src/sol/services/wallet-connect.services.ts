@@ -17,6 +17,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
@@ -118,7 +119,7 @@ const getSignatureWithSending = async ({
 
 	// We cannot send transaction with additional signers that have not signed yet
 	if (additionalSigners.length > 0) {
-		console.warn(
+		consoleWarn(
 			`WalletConnect Solana transaction has additional signers that have not signed yet: ${additionalSigners}`
 		);
 
@@ -135,7 +136,7 @@ const getSignatureWithSending = async ({
 	// It should not happen, since we receive transaction with blockhash lifetime,
 	// but just to guarantee the correct type casting
 	if (!isTransactionMessageWithBlockhashLifetime(transactionMessageRaw)) {
-		console.warn(
+		consoleWarn(
 			'WalletConnect Solana transaction does not have blockhash lifetime, cannot be sent'
 		);
 
@@ -171,7 +172,7 @@ const getSignatureWithSending = async ({
 
 	if (nonNullish(simulationResult.value.err)) {
 		// In case of simulation error, it is useful to log the error to the console for development purposes
-		console.warn('WalletConnect Solana transaction simulation error', simulationResult);
+		consoleWarn('WalletConnect Solana transaction simulation error', simulationResult);
 	}
 
 	progress(ProgressStepsSendSol.SEND);

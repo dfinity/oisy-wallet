@@ -31,8 +31,8 @@ describe('AiAssistantUserMessages', () => {
 		await waitFor(() => {
 			expect(getByText(userMessage)).toBeInTheDocument();
 			expect(getByText(assistantMessage)).toBeInTheDocument();
-			expect(() => getByText(systemMessage)).toThrowError();
-			expect(() => getByText(en.ai_assistant.text.loading)).toThrowError();
+			expect(() => getByText(systemMessage)).toThrow();
+			expect(() => getByText(en.ai_assistant.text.loading)).toThrow();
 		});
 	});
 
@@ -48,7 +48,7 @@ describe('AiAssistantUserMessages', () => {
 			expect(getByText(userMessage)).toBeInTheDocument();
 			expect(getByText(assistantMessage)).toBeInTheDocument();
 			expect(getByText(en.ai_assistant.text.loading)).toBeInTheDocument();
-			expect(() => getByText(systemMessage)).toThrowError();
+			expect(() => getByText(systemMessage)).toThrow();
 		});
 	});
 });

@@ -58,7 +58,7 @@ describe('icpunks.canister', () => {
 
 			const res = getTokensByOwner(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 
 			expect(service.user_tokens).toHaveBeenCalledExactlyOnceWith(mockPrincipal);
 		});
@@ -93,7 +93,7 @@ describe('icpunks.canister', () => {
 
 			const res = transfer(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 
 			expect(service.transfer_to).toHaveBeenCalledExactlyOnceWith(mockTo, mockTokenId);
 		});
@@ -127,7 +127,7 @@ describe('icpunks.canister', () => {
 
 			const res = metadata(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 
 			expect(service.data_of).toHaveBeenCalledExactlyOnceWith(mockTokenId);
 		});
@@ -181,7 +181,7 @@ describe('icpunks.canister', () => {
 
 			const res = collectionMetadata(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 
 			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
 			expect(service.name).toHaveBeenCalledExactlyOnceWith();
@@ -197,7 +197,7 @@ describe('icpunks.canister', () => {
 
 			const res = collectionMetadata(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 
 			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
 			expect(service.name).toHaveBeenCalledExactlyOnceWith();
@@ -213,7 +213,7 @@ describe('icpunks.canister', () => {
 
 			const res = collectionMetadata(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 
 			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
 			expect(service.name).toHaveBeenCalledExactlyOnceWith();
@@ -229,7 +229,7 @@ describe('icpunks.canister', () => {
 
 			const res = collectionMetadata(mockParams);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 
 			expect(service.symbol).toHaveBeenCalledExactlyOnceWith();
 			expect(service.name).toHaveBeenCalledExactlyOnceWith();

@@ -263,7 +263,9 @@ export const sendBtc = async ({
 		network: mapToSignerBitcoinNetwork({ network }),
 		address: source,
 		txId: txidStringToUint8Array(txid),
-		utxos: utxosFee.utxos
+		utxos: utxosFee.utxos,
+		// TODO: add the correct delegation chain here
+		iiDelegationChain: []
 	});
 
 	onProgress?.();
