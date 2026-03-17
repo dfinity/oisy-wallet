@@ -4,11 +4,11 @@ import {
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK
 } from '$env/networks/networks.sol.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import sol from '$sol/assets/sol.svg';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 
 export const SOLANA_DEFAULT_DECIMALS = 9;
 

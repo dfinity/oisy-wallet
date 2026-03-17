@@ -12,11 +12,11 @@ import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import { buildIndexedIcTokens } from '$icp/utils/ic-tokens.utils';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { Principal } from '@icp-sdk/core/principal';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 
 /**
  * ICP
