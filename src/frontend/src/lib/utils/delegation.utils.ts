@@ -9,8 +9,8 @@ import { DelegationIdentity } from '@icp-sdk/core/identity';
  * Only the public data is extracted (public keys, expiration, targets, signatures).
  * The private session key is never included.
  *
- * @returns The delegation chain in Candid-compatible format, or undefined if the identity
- *          is not a DelegationIdentity.
+ * @returns The delegation chain in Candid-compatible optional format (`[] | [IIDelegationChain]`).
+ *          Returns `[]` when the identity is not a DelegationIdentity (i.e., not delegated).
  */
 export const extractIIDelegationChain = (identity: Identity): [] | [IIDelegationChain] => {
 	if (!(identity instanceof DelegationIdentity)) {
