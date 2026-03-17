@@ -191,7 +191,7 @@ describe('sol-send.services', () => {
 					...mockParams,
 					token: SOLANA_TOKEN
 				})
-			).resolves.not.toThrowError();
+			).resolves.not.toThrow();
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(SOLANA_TOKEN.network.id);
 
@@ -213,7 +213,7 @@ describe('sol-send.services', () => {
 					...mockParams,
 					token: DEVNET_USDC_TOKEN
 				})
-			).resolves.not.toThrowError();
+			).resolves.not.toThrow();
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 
@@ -239,7 +239,7 @@ describe('sol-send.services', () => {
 					...mockParams,
 					token: { ...DEVNET_USDC_TOKEN, mintAuthority: mockSolAddress3 } as SplToken
 				})
-			).resolves.not.toThrowError();
+			).resolves.not.toThrow();
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 
@@ -267,7 +267,7 @@ describe('sol-send.services', () => {
 					...mockParams,
 					token: { ...DEVNET_USDC_TOKEN, owner: TOKEN_2022_PROGRAM_ADDRESS } as SplToken
 				})
-			).resolves.not.toThrowError();
+			).resolves.not.toThrow();
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 
@@ -307,7 +307,7 @@ describe('sol-send.services', () => {
 					...mockParams,
 					token: DEVNET_USDC_TOKEN
 				})
-			).resolves.not.toThrowError();
+			).resolves.not.toThrow();
 
 			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledTimes(2);
 			expect(spyCreateAtaInstruction).toHaveBeenCalledExactlyOnceWith({
@@ -358,7 +358,7 @@ describe('sol-send.services', () => {
 					destination: mockAtaAddress3,
 					token: DEVNET_USDC_TOKEN
 				})
-			).resolves.not.toThrowError();
+			).resolves.not.toThrow();
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledOnce();
@@ -389,7 +389,7 @@ describe('sol-send.services', () => {
 					...mockParams,
 					token: { ...SOLANA_TOKEN, network: ETHEREUM_NETWORK }
 				})
-			).rejects.toThrowError(
+			).rejects.toThrow(
 				replacePlaceholders(en.init.error.no_solana_network, {
 					$network: ETHEREUM_NETWORK.id.description ?? ''
 				})
@@ -404,7 +404,7 @@ describe('sol-send.services', () => {
 				}))
 			} as unknown as Rpc<SolanaRpcApi>);
 
-			await expect(sendSol({ ...mockParams, token: DEVNET_USDC_TOKEN })).rejects.toThrowError(
+			await expect(sendSol({ ...mockParams, token: DEVNET_USDC_TOKEN })).rejects.toThrow(
 				`Destination ATA address is different from the calculated one. Destination: different-address, Calculated: ${mockAtaAddress2}`
 			);
 		});

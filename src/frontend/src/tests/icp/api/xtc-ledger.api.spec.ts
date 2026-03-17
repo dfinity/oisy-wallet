@@ -46,7 +46,7 @@ describe('xtc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transfer({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -71,7 +71,7 @@ describe('xtc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(balance({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(balance({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -134,7 +134,7 @@ describe('xtc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transactions({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(transactions({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 });

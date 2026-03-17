@@ -246,7 +246,7 @@ describe('TokenModal', () => {
 			}
 		});
 
-		expect(() => getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON)).toThrowError();
+		expect(() => getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON)).toThrow();
 	});
 
 	it('handles an error on token delete correctly', async () => {
