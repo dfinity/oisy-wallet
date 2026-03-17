@@ -14,6 +14,7 @@ export interface ClaimStakingRewardParams {
 
 export interface StakeProviderConfig {
 	name: string;
+	description: string;
 	logo: string;
 	url: string;
 	card: EarningCardData;
