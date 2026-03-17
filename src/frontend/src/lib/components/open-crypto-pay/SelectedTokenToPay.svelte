@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import Divider from '$lib/components/common/Divider.svelte';
 	import BottomSheetTokensList from '$lib/components/open-crypto-pay/BottomSheetTokensList.svelte';
 	import OpenCryptoPayTokenAmount from '$lib/components/open-crypto-pay/OpenCryptoPayTokenAmount.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -49,11 +49,7 @@
 			{/snippet}
 
 			{#snippet description()}
-				{$selectedToken.name}
-
-				<span class="text-tertiary"><Divider /></span>
-
-				{$selectedToken.network.name}
+				<TokenNameAndNetwork data={$selectedToken} />
 			{/snippet}
 
 			{#snippet logo()}

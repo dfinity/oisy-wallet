@@ -137,6 +137,7 @@ const mapErc1155CustomToken = async ({
 			decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 			standard: { code: 'erc1155' as const },
 			category: 'custom' as const,
+			tags: [],
 			enabled,
 			version,
 			...(nonNullish(mappedSection) && {
@@ -175,4 +176,32 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.erc1155_custom_tokens },
 		err
 	});
+};
+
+// ERC1155 metadata is fetched from Alchemy and doesn't depend on the IC certified flag.
+// On the certified round we reuse the query round's response to skip redundant HTTP calls.
+let lastCustomTokensResponse: Erc1155CustomToken[] | undefined;
+
+export const processCustomTokens = async ({
+	certified,
+	...rest
+}: LoadCustomTokenParams): Promise<void> => {
+	try {
+		if (certified && nonNullish(lastCustomTokensResponse)) {
+			loadCustomTokenData({ response: lastCustomTokensResponse, certified });
+
+			return;
+		}
+
+		const response = await loadCustomTokensWithMetadata({ ...rest, certified });
+		lastCustomTokensResponse = response;
+
+		loadCustomTokenData({ response, certified });
+	} catch (err: unknown) {
+		lastCustomTokensResponse = undefined;
+
+		if (certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };

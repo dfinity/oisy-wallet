@@ -35,6 +35,8 @@ import type { IcCkToken } from '$icp/types/ic-token';
 import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
+import { derivedMemo } from '$lib/utils/derived-memo.utils';
+import { exchangesDataEqual } from '$lib/utils/exchange.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -49,7 +51,7 @@ export const exchangeNotInitialized: Readable<boolean> = derived(
 	([$exchangeInitialized]) => !$exchangeInitialized
 );
 
-export const exchanges: Readable<ExchangesData> = derived(
+export const exchanges: Readable<ExchangesData> = derivedMemo(
 	[exchangeStore, enabledErc20Tokens, erc4626Tokens, allIcrcTokens, enabledSplTokens],
 	([$exchangeStore, $erc20Tokens, $erc4626Tokens, $icrcTokens, $splTokens]) => {
 		const ethPrice = $exchangeStore?.ethereum;
@@ -132,5 +134,6 @@ export const exchanges: Readable<ExchangesData> = derived(
 				};
 			}, {})
 		};
-	}
+	},
+	exchangesDataEqual
 );

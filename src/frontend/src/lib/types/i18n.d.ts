@@ -262,7 +262,6 @@ interface I18nDapps {
 		caffeine: {
 			name: string;
 			one_liner: string;
-			call_to_action: string;
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
@@ -281,6 +280,7 @@ interface I18nDapps {
 		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		parcl: { name: string; one_liner: string; description: string };
+		liquidium: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -428,7 +428,8 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
-		icrc_canister_loading: string;
+		icrc_canister_loading_curated: string;
+		icrc_canister_loading_custom: string;
 		erc20_custom_tokens: string;
 		erc4626_custom_tokens: string;
 		erc721_custom_tokens: string;
@@ -438,6 +439,7 @@ interface I18nInit {
 		icrc_custom_token: string;
 		ext_custom_tokens: string;
 		icpunks_custom_tokens: string;
+		custom_tokens: string;
 		loading_wallet_timeout: string;
 		allow_signing: string;
 		waiting_for_allowed_cycles_aborted: string;
@@ -591,6 +593,7 @@ interface I18nReceive {
 interface I18nSend {
 	text: {
 		send: string;
+		send_token: string;
 		destination: string;
 		source: string;
 		balance: string;
@@ -1486,9 +1489,10 @@ interface I18nVaults {
 
 interface I18nStake {
 	text: {
-		gldt_stake_page_description: string;
 		harvest_autopilot_page_description: string;
 		harvest_autopilot_vault_page_description: string;
+		harvest_autopilot_provider_description: string;
+		harvest_autopilot_stake_terms: string;
 		my_positions: string;
 		available_autopilots: string;
 		vault_info: string;
@@ -1503,6 +1507,8 @@ interface I18nStake {
 		stake_now: string;
 		stake_amount: string;
 		not_enough_to_stake: string;
+		estimated_received: string;
+		estimated_yearly_yield: string;
 		unstake: string;
 		unstake_now: string;
 		unstaking: string;
@@ -1562,33 +1568,10 @@ interface I18nStake {
 	error: {
 		unexpected_error_on_withdraw: string;
 		unexpected_error_on_unstake: string;
+		unexpected_error_on_stake: string;
 		dissolvement_limit_reached: string;
 	};
-	terms: {
-		gldt: {
-			item1_title: string;
-			item1_description: string;
-			item2_title_1: string;
-			item2_title_2: string;
-			item3_title: string;
-			item3_description: string;
-			item4_title: string;
-			item4_description: string;
-			item5_title: string;
-		};
-	};
 	info: {
-		gldt: {
-			title: string;
-			description: string;
-			fact_1_title: string;
-			fact_1_description: string;
-			fact_2_title: string;
-			fact_2_description: string;
-			fact_3_title: string;
-			fact_3_description: string;
-			fact_3_description_fallback: string;
-		};
 		harvest_autopilot: {
 			title: string;
 			description: string;

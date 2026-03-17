@@ -48,7 +48,7 @@ const ALL_DEFAULT_ERC20_TOKENS = [
 ];
 
 // TODO(GIX-2740): use environment static metadata
-const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
+export const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 	try {
 		type ContractData = Erc20Contract &
 			Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
@@ -177,6 +177,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: ETHEREUM_DEFAULT_DECIMALS,
 					standard: { code: 'erc20' as const },
 					category: 'custom' as const,
+					tags: [],
 					enabled,
 					version,
 					allowExternalContentSource
@@ -227,4 +228,33 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.erc20_custom_tokens },
 		err
 	});
+};
+
+// ERC20 metadata is fetched from third-party APIs (Infura) that don't depend on
+// the IC certified flag. On the certified round we reuse the query round's response
+// to avoid redundant HTTP calls — only the store's certified tag is updated.
+let lastCustomTokensResponse: Erc20CustomToken[] | undefined;
+
+export const processCustomTokens = async ({
+	certified,
+	...rest
+}: LoadCustomTokenParams): Promise<void> => {
+	try {
+		if (certified && nonNullish(lastCustomTokensResponse)) {
+			loadCustomTokenData({ response: lastCustomTokensResponse, certified });
+
+			return;
+		}
+
+		const response = await loadCustomTokensWithMetadata({ ...rest, certified });
+		lastCustomTokensResponse = response;
+
+		loadCustomTokenData({ response, certified });
+	} catch (err: unknown) {
+		lastCustomTokensResponse = undefined;
+
+		if (certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };

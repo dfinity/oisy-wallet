@@ -634,13 +634,13 @@ export const saveAllCustomTokens = async ({
 	});
 };
 
-export const filterTokensByNft = ({
+export const filterTokensByNft = <T extends Token>({
 	tokens,
 	filterNfts
 }: {
-	tokens: Token[];
+	tokens: T[];
 	filterNfts?: boolean;
-}): Token[] =>
+}): T[] =>
 	isNullish(filterNfts)
 		? tokens
 		: tokens.filter((t) => {
@@ -751,3 +751,37 @@ export const findPutativeToken = <T extends Token>({
 				});
 			})
 		: undefined;
+
+/**
+ * Compares two token arrays by length, token identity (symbol id),
+ * and — for toggleable tokens — the `enabled` flag.
+ * Fast O(n) check — catches the common case of identical token lists
+ * produced from unchanged inputs.
+ */
+// eslint-disable-next-line local-rules/prefer-object-params -- Being a comparison function, it's more ergonomic to take two separate arrays than an object param with two arrays.
+export const tokenListEqual = <T extends { id: symbol }>(a: T[], b: T[]): boolean => {
+	if (a.length !== b.length) {
+		return false;
+	}
+
+	return a.every((item, i) => {
+		const other = b[i];
+
+		if (item.id !== other.id) {
+			return false;
+		}
+
+		const itemHasEnabled = 'enabled' in item;
+		const otherHasEnabled = 'enabled' in other;
+
+		if (itemHasEnabled !== otherHasEnabled) {
+			return false;
+		}
+
+		if (itemHasEnabled && otherHasEnabled) {
+			return (item as { enabled: unknown }).enabled === (other as { enabled: unknown }).enabled;
+		}
+
+		return true;
+	});
+};

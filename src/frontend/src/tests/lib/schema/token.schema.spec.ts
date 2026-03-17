@@ -319,6 +319,7 @@ describe('token.schema', () => {
 			network: mockNetwork,
 			standard: { code: 'ethereum' },
 			category: 'default',
+			tags: [],
 			name: 'SampleToken',
 			symbol: 'STK',
 			decimals: 8
@@ -362,6 +363,12 @@ describe('token.schema', () => {
 
 		it('should fail validation when category is missing', () => {
 			const { category: _, ...invalidToken } = validToken;
+
+			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
+		});
+
+		it('should fail validation when tags is missing', () => {
+			const { tags: _, ...invalidToken } = validToken;
 
 			expect(() => TokenSchema.parse(invalidToken)).toThrowError();
 		});

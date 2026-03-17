@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import Divider from '$lib/components/common/Divider.svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import OpenCryptoPayTokenAmount from '$lib/components/open-crypto-pay/OpenCryptoPayTokenAmount.svelte';
 	import EmptyTokenList from '$lib/components/tokens/EmptyTokenList.svelte';
 	import TokenFeeValue from '$lib/components/tokens/TokenFeeValue.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
@@ -45,11 +45,7 @@
 						{/snippet}
 
 						{#snippet description()}
-							{token.name}
-
-							<span class="text-tertiary"><Divider /></span>
-
-							{token.network.name}
+							<TokenNameAndNetwork data={token} />
 						{/snippet}
 
 						{#snippet logo()}

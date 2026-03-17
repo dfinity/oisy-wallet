@@ -48,6 +48,12 @@ export interface AllowSigningResponse {
 }
 export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
+export interface ApiKeys {
+	alchemy_api_key: [] | [string];
+	etherscan_api_key: [] | [string];
+	coingecko_api_key: [] | [string];
+	infura_api_key: [] | [string];
+}
 export type ApproveError =
 	| {
 			GenericError: { message: string; error_code: bigint };
@@ -200,6 +206,15 @@ export interface ErcToken {
 	chain_id: bigint;
 }
 export type EthAddress = { Public: string };
+export interface ExchangeData {
+	price_24h_change_pct: [] | [number];
+	market_cap: [] | [number];
+	timestamp_ns: bigint;
+	price: [] | [number];
+}
+export interface ExchangeRate {
+	usd: ExchangeData;
+}
 export interface ExperimentalFeatureSettings {
 	enabled: boolean;
 }
@@ -335,7 +350,9 @@ export interface SplToken {
 }
 export interface Stats {
 	user_profile_count: bigint;
+	user_transactions_count: bigint;
 	custom_token_count: bigint;
+	exchange_rates_count: bigint;
 	token_activity_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
@@ -366,6 +383,23 @@ export type TokenAccountId =
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
+export type TokenId =
+	| { Erc20: [string, bigint] }
+	| { ExtV2: Principal }
+	| { SolNativeDevnet: null }
+	| { Icrc: Principal }
+	| { EvmNative: bigint }
+	| { BtcNativeMainnet: null }
+	| { Erc721: [string, bigint] }
+	| { SolNativeMainnet: null }
+	| { SplDevnet: string }
+	| { SplMainnet: string }
+	| { IcpNative: null }
+	| { IcPunks: Principal }
+	| { BtcNativeTestnet: null }
+	| { Erc1155: [string, bigint] }
+	| { Erc4626: [string, bigint] }
+	| { Dip721: Principal };
 export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
@@ -567,6 +601,12 @@ export interface _SERVICE {
 	 */
 	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
 	/**
+	 * Returns the currently stored API keys.
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	get_api_keys: ActorMethod<[], ApiKeys>;
+	/**
 	 * API method to get cycle balance and burn rate.
 	 */
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
@@ -589,6 +629,8 @@ export interface _SERVICE {
 	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
+	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
+	get_exchange_rates: ActorMethod<[Array<TokenId>], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
 	 * Returns the caller's user profile.
 	 *
@@ -633,6 +675,12 @@ export interface _SERVICE {
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
+	/**
+	 * Overwrites the stored API keys.
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_api_keys: ActorMethod<[ApiKeys], undefined>;
 	/**
 	 * Add or update custom token for the user.
 	 */

@@ -10,7 +10,6 @@
 use candid::{CandidType, Deserialize, Principal};
 use serde::Serialize;
 
-use super::token_id::TokenId;
 use crate::types::network::marker_trait::{
     BitcoinMainnet, BitcoinRegtest, BitcoinTestnet, EthereumMainnet, EthereumSepolia,
     InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet,
@@ -181,6 +180,7 @@ pub enum BtcAddress {
 impl AccountId<BitcoinMainnet> for BtcAddress {}
 impl AccountId<BitcoinTestnet> for BtcAddress {}
 impl AccountId<BitcoinRegtest> for BtcAddress {}
+
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum EthAddress {
     /// A public Ethereum address.
@@ -197,3 +197,11 @@ impl AccountId<EthereumMainnet> for EthAddress {}
 impl AccountId<EthereumSepolia> for EthAddress {}
 impl TokenId<EthereumMainnet> for EthAddress {}
 impl TokenId<EthereumSepolia> for EthAddress {}
+
+/// A marker trait, used to indicate that a type can be used as a token identifier for a given
+/// network.
+pub trait TokenId<T>
+where
+    T: Network,
+{
+}

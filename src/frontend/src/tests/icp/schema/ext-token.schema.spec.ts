@@ -13,6 +13,7 @@ describe('ext-token.schema', () => {
 		network: ICP_NETWORK,
 		standard: { code: 'ext' },
 		category: 'default',
+		tags: [],
 		name: 'SampleToken',
 		symbol: 'STK',
 		decimals: 8

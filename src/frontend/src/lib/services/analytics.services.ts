@@ -9,6 +9,7 @@ import {
 import { loadPlausibleTracker } from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
 import type { RateLimitInfo } from '$lib/types/api';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { init, track } from '@plausible-analytics/tracker';
 
@@ -38,7 +39,7 @@ export const initPlausibleAnalytics = async () => {
 
 		plausibleTracker = tracker;
 	} catch (_: unknown) {
-		console.warn('An unexpected error occurred during initialization.');
+		consoleWarn('An unexpected error occurred during initialization.');
 		plausibleTracker = undefined;
 	}
 };
@@ -60,7 +61,7 @@ export const trackEvent = ({ name, metadata, warning }: TrackEventParams) => {
 
 		if (nonNullish(warning)) {
 			// We print the error to console just for debugging purposes
-			console.warn(warning);
+			consoleWarn(warning);
 		}
 	}
 };

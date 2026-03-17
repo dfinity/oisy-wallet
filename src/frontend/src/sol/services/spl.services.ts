@@ -27,7 +27,7 @@ export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }):
 	await Promise.all([loadDefaultSplTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
-const loadDefaultSplTokens = (): ResultSuccess => {
+export const loadDefaultSplTokens = (): ResultSuccess => {
 	try {
 		splDefaultTokensStore.set(SPL_TOKENS);
 	} catch (err: unknown) {
@@ -113,6 +113,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
 					standard: { code: 'spl' as const },
 					category: 'custom' as const,
+					tags: [],
 					enabled,
 					version,
 					allowExternalContentSource
@@ -194,6 +195,33 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.spl_custom_tokens },
 		err
 	});
+};
+
+// SPL metadata is fetched from Solana RPCs / QuickNode and doesn't depend on the IC certified flag.
+// On the certified round we reuse the query round's response to skip redundant HTTP calls.
+let lastCustomTokensResponse: SplCustomToken[] | undefined;
+
+export const processCustomTokens = async ({
+	certified,
+	...rest
+}: LoadCustomTokenParams): Promise<void> => {
+	try {
+		if (certified && nonNullish(lastCustomTokensResponse)) {
+			loadCustomTokenData({ response: lastCustomTokensResponse, certified });
+			return;
+		}
+
+		const response = await loadCustomTokensWithMetadata({ ...rest, certified });
+		lastCustomTokensResponse = response;
+
+		loadCustomTokenData({ response, certified });
+	} catch (err: unknown) {
+		lastCustomTokensResponse = undefined;
+
+		if (certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };
 
 export const getSplMetadata = async ({

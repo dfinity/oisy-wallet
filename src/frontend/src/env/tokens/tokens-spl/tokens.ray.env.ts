@@ -16,6 +16,7 @@ export const RAY_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Raydium',
 	symbol: RAY_SYMBOL,
 	decimals: RAY_DECIMALS,

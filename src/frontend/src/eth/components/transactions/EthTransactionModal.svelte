@@ -4,11 +4,13 @@
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import {
-		decodeErc20AbiDataValue,
+		decodeErc20AbiData,
+		isErc20TransactionDeposit,
 		isMaxUint256,
 		mapAddressToName
 	} from '$eth/utils/transactions.utils';
@@ -62,7 +64,31 @@
 		gasPrice
 	} = $derived(transaction);
 
+	let isSend = $derived(type === 'send');
+	let isDeposit = $derived(type === 'deposit');
 	let isApprove = $derived(type === 'approve');
+
+	let isOutFlow = $derived(isSend || isDeposit || isApprove);
+
+	let isErc20Deposit = $derived(isErc20TransactionDeposit(data));
+
+	let { to: dataTo, value: dataValue } = $derived(
+		(isApprove || isErc20Deposit) && nonNullish(data)
+			? decodeErc20AbiData({ data })
+			: { to: undefined, value: undefined }
+	);
+
+	let depositToken = $derived(
+		isErc20Deposit && nonNullish(dataTo) && nonNullish(token)
+			? $ercFungibleTokens.find(
+					({ address, network: { id: networkId } }) =>
+						areAddressesEqual({ address1: address, address2: dataTo, networkId }) &&
+						networkId === token.network.id
+				)
+			: undefined
+	);
+
+	let depositValue = $derived(isErc20Deposit ? dataValue : undefined);
 
 	let approveToken = $derived(
 		isApprove && nonNullish(to) && nonNullish(token)
@@ -74,13 +100,11 @@
 			: undefined
 	);
 
-	let approveValue = $derived(
-		isApprove && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : undefined
-	);
+	let approveValue = $derived(isApprove ? dataValue : undefined);
 
 	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
 
-	let displayToken = $derived(approveToken ?? token);
+	let displayToken = $derived(depositToken ?? approveToken ?? token);
 
 	let explorerBaseUrl = $derived(getExplorerUrl({ token }));
 
@@ -135,7 +159,13 @@
 		nonNullish(gasUsed) && nonNullish(gasPrice) ? gasUsed * gasPrice : undefined
 	);
 
-	let fee = $derived(isApprove ? gasFee : undefined);
+	let fee = $derived(isOutFlow ? gasFee : undefined);
+
+	let nativeToken = $derived(
+		$enabledEthEvmNativeTokens.find(
+			({ network: { id: networkId } }) => networkId === token?.network.id
+		)
+	);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openEthTransaction({
@@ -152,6 +182,10 @@
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(String(transaction.tokenId)) })
 			: undefined
 	);
+
+	let displayValue = $derived(isErc20Deposit && nonNullish(gasFee) ? gasFee : value);
+
+	let displayType = $derived(isErc20Deposit ? 'deposit' : type);
 </script>
 
 <Modal onClose={modalStore.close}>
@@ -170,11 +204,11 @@
 			{/snippet}
 
 			{#snippet subtitle()}
-				<span class="capitalize">{$i18n.transaction.type[type]}</span>
+				<span class="capitalize">{$i18n.transaction.type[displayType]}</span>
 			{/snippet}
 
 			{#snippet title()}
-				{#if isApprove && nonNullish(displayToken)}
+				{#if (isApprove || isErc20Deposit) && nonNullish(displayToken)}
 					<output>
 						{#if isUnlimitedApprove}
 							{replacePlaceholders($i18n.core.text.unlimited, {
@@ -187,12 +221,19 @@
 								displayDecimals: displayToken.decimals
 							})}
 							{displayToken.symbol}
+						{:else if nonNullish(depositValue)}
+							{formatToken({
+								value: depositValue,
+								unitName: displayToken.decimals,
+								displayDecimals: displayToken.decimals
+							})}
+							{displayToken.symbol}
 						{/if}
 					</output>
 				{:else if nonNullish(token) && !isTokenErc721(token) && nonNullish(value)}
 					<output class:text-success-primary={type === 'receive'}>
 						{formatToken({
-							value,
+							value: displayValue,
 							unitName: token.decimals,
 							displayDecimals: token.decimals,
 							showPlusSign: type === 'receive'
@@ -310,17 +351,17 @@
 				</ListItem>
 			{/if}
 
-			{#if isApprove && nonNullish(fee) && nonNullish(token)}
+			{#if nonNullish(fee) && nonNullish(nativeToken)}
 				<ListItem>
 					<span>{$i18n.fee.text.fee}</span>
 
 					<output>
 						{formatToken({
 							value: fee,
-							unitName: token.decimals,
-							displayDecimals: token.decimals
+							unitName: nativeToken.decimals,
+							displayDecimals: nativeToken.decimals
 						})}
-						{token.symbol}
+						{nativeToken.symbol}
 					</output>
 				</ListItem>
 			{/if}

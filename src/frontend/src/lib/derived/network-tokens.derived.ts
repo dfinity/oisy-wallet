@@ -3,15 +3,18 @@ import { enabledFungibleTokens, enabledNonFungibleTokens } from '$lib/derived/to
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
+import { derivedMemo } from '$lib/utils/derived-memo.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
+import { tokenListEqual } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
  * All user-enabled fungible tokens matching the selected network or chain fusion.
  */
-export const enabledFungibleNetworkTokens: Readable<Token[]> = derived(
+export const enabledFungibleNetworkTokens: Readable<Token[]> = derivedMemo(
 	[enabledFungibleTokens, selectedNetwork, pseudoNetworkChainFusion],
-	filterTokensForSelectedNetwork
+	filterTokensForSelectedNetwork,
+	tokenListEqual
 );
 
 /**

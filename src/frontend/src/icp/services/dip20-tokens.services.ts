@@ -50,6 +50,7 @@ const mapDip20Token = ({
 	exchangeCoinId: undefined,
 	standard: { code: 'dip20' },
 	category: 'custom',
+	tags: [],
 	fee,
 	alternativeName,
 	icon: `/icons/dip20/${ledgerCanisterId}.png`

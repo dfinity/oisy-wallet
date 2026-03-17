@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "Платформа для создания приложений с помощью ИИ",
-				"call_to_action": "Узнать больше",
 				"description": "Caffeine — платформа для создания приложений с помощью ИИ. Просто обратитесь к ИИ на компьютере или телефоне, и он создаст для вас приложения или сервисы, включая интеграцию с кошельком OISY. Почувствуйте будущее разработки с ИИ.",
 				"carousel": {
 					"text": "Меняйте токены на DEX",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -649,7 +653,8 @@
 			"btc_withdrawal_statuses": "Ошибка при получении статусов вывода BTC.",
 			"transaction_price": "Ошибка при загрузке оценки стоимости транзакции.",
 			"icrc_canisters": "Ошибка при загрузке контейнеров ICRC.",
-			"icrc_canister_loading": "Токен $ledgerCanisterId не может быть загружен, поскольку он в настоящее время не отвечает.",
+			"icrc_canister_loading_curated": "Токен $tokenSymbol не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
+			"icrc_canister_loading_custom": "Токен с канистером леджера $ledgerCanisterId не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
 			"erc20_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-721.",
@@ -659,6 +664,7 @@
 			"icrc_custom_token": "Ошибка при загрузке пользовательского токена ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "Вашему кошельку требуются некоторые начальные данные, которые еще не загружены. Пожалуйста, попробуйте еще раз.",
 			"allow_signing": "Проблема с настройкой вашего кошелька для подписи. Вы были выведены из системы. Если проблема не исчезнет, обратитесь в службу поддержки.",
 			"waiting_for_allowed_cycles_aborted": "Пожалуйста, попробуйте войти позже",
@@ -821,6 +827,7 @@
 	"send": {
 		"text": {
 			"send": "Отправить",
+			"send_token": "",
 			"destination": "Получатель",
 			"source": "Источник",
 			"balance": "Баланс",
@@ -1899,9 +1906,10 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "Стейкайте токены GLDT для получения наград, обеспеченных физическим золотом",
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
 			"my_positions": "",
 			"available_autopilots": "",
 			"vault_info": "",
@@ -1912,10 +1920,12 @@
 			"total_value_locked": "",
 			"manager": "",
 			"vault_description": "",
-			"stake": "Стейкинг $token_symbol",
+			"stake": "",
 			"stake_now": "Стейкать сейчас",
 			"stake_amount": "Сумма стейкинга $token_symbol",
 			"not_enough_to_stake": "Нет $token_symbol для стейкинга",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "Анстейк",
 			"unstake_now": "Анстейкнуть сейчас",
 			"unstaking": "Анстейкинг...",
@@ -1975,33 +1985,10 @@
 		"error": {
 			"unexpected_error_on_withdraw": "Что-то пошло не так при выводе токенов.",
 			"unexpected_error_on_unstake": "Что-то пошло не так при анстейкинге токенов.",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": "Достигнут максимум активных запросов на разблокировку ($limit). Завершите некоторые, прежде чем создавать новый.<br/>Обратите внимание: вы можете одновременно иметь до $limit активных запросов на разблокировку."
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "Текущая APY $apy%",
-				"item1_description": "На основе последних наград. Эффективная APY зависит от общего количества стейканных $token каждый день.",
-				"item2_title_1": "Награды стейкинга в",
-				"item2_title_2": "GOLDAO Токены ",
-				"item3_title": "Задержка разблокировки 1 неделя",
-				"item3_description": "При разблокировке GLDT из стейкинга токены блокируются на 1 неделю без дальнейших наград, после чего их можно вывести.",
-				"item4_title": "Бонус за возраст",
-				"item4_description": "Стейки GLDT начинают получать бонус за возраст с 1-го дня. Чем дольше стейк, тем выше бонус, линейно растёт до 100% при максимальном возрасте.",
-				"item5_title": "Когда вы начинаете разблокировку GLDT-стейка, вы больше не будете получать новые награды."
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "Что такое GLDT",
-				"description": "GLDT — это «Gold Token», взаимозаменяемый токен, обеспеченный NFT GLD. NFT GLD — это NFT, представляющие неоспоримое владение физическим золотом.",
-				"fact_1_title": "Обеспечено реальным золотом",
-				"fact_1_description": "Каждый токен GLDT обеспечен настоящим золотом, хранящимся в защищённых хранилищах.",
-				"fact_2_title": "Гибкие сроки",
-				"fact_2_description": "Нет периодов блокировки, стейкайте и анстейкайте в любое время.",
-				"fact_3_title": "Стабильные доходы",
-				"fact_3_description": "Зарабатывайте $apy% APY с минимальным риском волатильности",
-				"fact_3_description_fallback": "Получайте стабильные награды с минимальным риском волатильности"
-			},
 			"harvest_autopilot": {
 				"title": "",
 				"description": "",

@@ -6,11 +6,13 @@ pub type Timestamp = u64;
 
 pub mod account;
 pub mod agreement;
+pub mod api_keys;
 pub mod backend_config;
 pub mod bitcoin;
 pub mod contact;
 pub mod custom_token;
 pub mod dapp;
+pub mod exchange;
 pub mod experimental_feature;
 pub mod network;
 pub mod number;
@@ -23,6 +25,7 @@ pub mod token_id;
 pub mod token_standard;
 pub mod transaction;
 pub mod user_profile;
+pub mod user_transaction;
 pub mod verifiable_credential;
 
 #[cfg(test)]
@@ -53,4 +56,6 @@ pub struct Stats {
     pub user_token_count: u64,
     pub custom_token_count: u64,
     pub token_activity_count: u64,
+    pub exchange_rates_count: u64,
+    pub user_transactions_count: u64,
 }

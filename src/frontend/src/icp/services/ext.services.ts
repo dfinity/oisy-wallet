@@ -22,7 +22,7 @@ export const loadExtTokens = async ({ identity }: { identity: OptionIdentity }):
 	await Promise.all([loadDefaultExtTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
-const loadDefaultExtTokens = (): ResultSuccess => {
+export const loadDefaultExtTokens = (): ResultSuccess => {
 	extDefaultTokensStore.set(
 		EXT_BUILTIN_TOKENS.map((token) => ({ ...token, id: parseTokenId(token.symbol) }))
 	);
@@ -86,6 +86,7 @@ const mapExtCustomToken = async ({
 		symbol,
 		standard: { code: 'ext' as const, version: 'v2' },
 		category: 'custom' as const,
+		tags: [],
 		enabled,
 		version,
 		...(nonNullish(mappedSection) && {
@@ -122,4 +123,16 @@ const onUpdateError = ({ error: err }: { error: unknown }) => {
 		msg: { text: get(i18n).init.error.ext_custom_tokens },
 		err
 	});
+};
+
+export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+	try {
+		const response = await loadCustomTokensWithMetadata(params);
+
+		loadCustomTokenData({ response, certified: params.certified });
+	} catch (err) {
+		if (params.certified) {
+			onUpdateError({ error: err });
+		}
+	}
 };

@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "La première plateforme pour développer des applications qui s'écrivent toutes seules.",
-				"call_to_action": "Essayer Caffeine",
 				"description": "Caffeine est la première plateforme pour développer des applications qui s'écrivent toutes seules. Il suffit de parler à l'IA sur ordinateur ou mobile, et elle crée des applications et services pour vous – y compris celles qui se connectent à OISY Wallet. Découvrez l'avenir du développement d'applications avec la création assistée par IA.",
 				"carousel": {
 					"text": "Bonjour, internet auto-écrit",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -649,7 +653,8 @@
 			"btc_withdrawal_statuses": "Erreur lors de la récupération des statuts de retrait BTC.",
 			"transaction_price": "Erreur lors du chargement de l'estimation du prix d'une transaction.",
 			"icrc_canisters": "Erreur lors du chargement des canisters ICRC.",
-			"icrc_canister_loading": "Le token avec le canister Ledger $ledgerCanisterId n'a pas pu être chargé car il ne répond pas actuellement.",
+			"icrc_canister_loading_curated": "Le token $tokenSymbol ne répond pas et ne peut pas être chargé pour le moment. Veuillez réessayer plus tard.",
+			"icrc_canister_loading_custom": "Le token avec le canister Ledger $ledgerCanisterId ne répond pas et ne peut être chargé pour le moment. Veuillez réessayer plus tard.",
 			"erc20_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC721.",
@@ -659,6 +664,7 @@
 			"icrc_custom_token": "Erreur lors du chargement du token personnalisé ICRC.",
 			"ext_custom_tokens": "Erreur lors du chargement des tokens personnalisés EXT.",
 			"icpunks_custom_tokens": "",
+			"custom_tokens": "",
 			"loading_wallet_timeout": "Votre portefeuille nécessite des données initiales qui n'ont pas encore été chargées. Veuillez réessayer.",
 			"allow_signing": "Un problème est survenu lors de la configuration de votre portefeuille pour la signature. Vous avez été déconnecté. Si le problème persiste, contactez le support.",
 			"waiting_for_allowed_cycles_aborted": "Préparation du ledger de cycles abandonnée. Veuillez essayer de vous connecter plus tard",
@@ -821,6 +827,7 @@
 	"send": {
 		"text": {
 			"send": "Envoyer",
+			"send_token": "",
 			"destination": "Destination",
 			"source": "Source",
 			"balance": "Solde",
@@ -1899,9 +1906,10 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "Stakez des tokens GLDT pour gagner des récompenses adossées à de l'or physique",
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
 			"my_positions": "",
 			"available_autopilots": "",
 			"vault_info": "",
@@ -1912,10 +1920,12 @@
 			"total_value_locked": "",
 			"manager": "",
 			"vault_description": "",
-			"stake": "Staker $token_symbol",
+			"stake": "",
 			"stake_now": "Staker maintenant",
 			"stake_amount": "Staker $amount $token_symbol",
 			"not_enough_to_stake": "Pas de $token_symbol à staker",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "Unstaker",
 			"unstake_now": "Unstaker maintenant",
 			"unstaking": "Unstaking...",
@@ -1975,33 +1985,10 @@
 		"error": {
 			"unexpected_error_on_withdraw": "Quelque chose s'est mal passé lors du retrait des tokens.",
 			"unexpected_error_on_unstake": "Quelque chose s'est mal passé lors de l'unstaking des tokens.",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": "Vous avez atteint le maximum de $limit demandes de déverrouillage actives. Complétez-en certaines avant d'en créer une nouvelle.<br/>Notez que vous pouvez toujours unstaker en utilisant l'option « immédiatement »."
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "APY actuel $apy%",
-				"item1_description": "Basé sur les dernières récompenses. L'APY effectif dépend du montant total de $token staké chaque jour.",
-				"item2_title_1": "Les récompenses de staking sont payées en ",
-				"item2_title_2": " tokens GOLDAO",
-				"item3_title": "Délai de déverrouillage de 1 semaine",
-				"item3_description": "Lors du déverrouillage de GLDT du staking, les tokens sont verrouillés pendant 1 semaine sans recevoir de récompenses supplémentaires, avant de pouvoir être retirés. Vous pouvez payer des frais de 5 % sur votre staking pour déverrouiller immédiatement.",
-				"item4_title": "Bonus d'ancienneté",
-				"item4_description": "Les stakings GLDT commencent à obtenir un bonus d'ancienneté dès le premier jour. Plus les stakings sont anciens, plus le bonus d'ancienneté est important, augmentant linéairement à 100 % par an.",
-				"item5_title": "Lorsque vous commencez à déverrouiller votre staking GLDT, vous ne recevrez plus de nouvelles récompenses"
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "Qu'est-ce que GLDT",
-				"description": "GLDT signifie « Gold Token », étant un token fongible adossé à des NFT GLD. Les NFT GLD sont des NFT qui représentent la propriété irréfutable de lingots d'or physiques. 1 GLDT représente exactement 0,01 g d'or, et les NFT GLD peuvent être échangés à un ratio de 1 g pour 100 GLDT.",
-				"fact_1_title": "Adossé à de l'or réel",
-				"fact_1_description": "Chaque token GLDT est adossé à de l'or réel stocké dans des coffres sécurisés",
-				"fact_2_title": "Conditions flexibles",
-				"fact_2_description": "Pas de périodes de blocage, stakez et unstakez quand vous le souhaitez",
-				"fact_3_title": "Rendements stables",
-				"fact_3_description": "Gagnez $apy% APY avec un risque de volatilité minimal",
-				"fact_3_description_fallback": "Gagnez des récompenses constantes avec un risque de volatilité minimal"
-			},
 			"harvest_autopilot": {
 				"title": "",
 				"description": "",

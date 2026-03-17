@@ -5,9 +5,10 @@
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';
 	import {
-		decodeErc20AbiDataValue,
 		isTransactionPending,
-		isMaxUint256
+		isMaxUint256,
+		decodeErc20AbiData,
+		isErc20TransactionDeposit
 	} from '$eth/utils/transactions.utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -47,6 +48,34 @@
 
 	let isApprove = $derived(type === 'approve');
 
+	let isErc20Deposit = $derived(isErc20TransactionDeposit(data));
+
+	let { to: dataTo, value: dataValue } = $derived(
+		(isApprove || isErc20Deposit) && nonNullish(data)
+			? decodeErc20AbiData({ data })
+			: { to: undefined, value: undefined }
+	);
+
+	let depositToken = $derived(
+		isErc20Deposit && nonNullish(dataTo)
+			? $ercFungibleTokens.find(
+					({ address, network: { id: networkId } }) =>
+						areAddressesEqual({ address1: address, address2: dataTo, networkId }) &&
+						networkId === token.network.id
+				)
+			: undefined
+	);
+
+	let depositValue = $derived(
+		isErc20Deposit && nonNullish(depositToken) && nonNullish(dataValue)
+			? formatToken({
+					value: dataValue,
+					displayDecimals: depositToken.decimals,
+					unitName: depositToken.decimals
+				})
+			: undefined
+	);
+
 	let approveToken = $derived(
 		isApprove && nonNullish(to)
 			? $ercFungibleTokens.find(
@@ -59,9 +88,7 @@
 
 	let displayToken = $derived(approveToken ?? token);
 
-	let approveValue = $derived(
-		isApprove && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : undefined
-	);
+	let approveValue = $derived(isApprove ? dataValue : undefined);
 
 	let approveAmountText = $derived.by(() => {
 		if (!isApprove) {
@@ -91,6 +118,12 @@
 
 	let label = $derived.by(() => {
 		if (type === 'send') {
+			if (isErc20Deposit && nonNullish(depositToken) && nonNullish(depositValue)) {
+				return replacePlaceholders($i18n.send.text.send_token, {
+					$token: `${depositValue} ${depositToken.symbol}`
+				});
+			}
+
 			return $i18n.send.text.send;
 		}
 
@@ -122,6 +155,12 @@
 		}
 
 		if (type === 'deposit') {
+			if (isErc20Deposit && nonNullish(depositToken)) {
+				return replacePlaceholders($i18n.send.text.send_token, {
+					$token: depositToken.symbol
+				});
+			}
+
 			return replacePlaceholders(
 				pending ? $i18n.transaction.label.converting_twin_token : $i18n.send.text.send,
 				{
@@ -139,7 +178,7 @@
 	);
 
 	let displayAmount = $derived(
-		isApprove
+		isApprove || isErc20Deposit
 			? nonNullish(gasFee)
 				? gasFee * -1n
 				: undefined

@@ -138,7 +138,8 @@ describe('ext.utils', () => {
 			symbol: mockName,
 			decimals: 0,
 			standard: { code: 'ext', version: 'v2' },
-			category: 'custom'
+			category: 'custom',
+			tags: []
 		};
 
 		it('should correctly map an EXT token', () => {

@@ -16,6 +16,7 @@ export const UNI_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Uniswap',
 	symbol: UNI_SYMBOL,
 	decimals: UNI_DECIMALS,
