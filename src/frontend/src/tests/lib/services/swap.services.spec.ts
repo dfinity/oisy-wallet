@@ -68,7 +68,7 @@ const mockVeloraGetQuote = vi.hoisted(() => vi.fn());
 vi.mock('$lib/providers/evm-swap.providers', () => ({
 	evmSwapProviders: [
 		{
-			key: SwapProvider.VELORA,
+			key: 'velora',
 			getQuote: mockVeloraGetQuote,
 			isEnabled: true
 		}
