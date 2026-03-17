@@ -35,7 +35,6 @@ vi.mock('$lib/derived/exchange.derived', () => ({
 	}
 }));
 
-
 describe('HarvestStakeWizard', () => {
 	const mockVaultToken = {
 		...mockValidErc4626Token,
