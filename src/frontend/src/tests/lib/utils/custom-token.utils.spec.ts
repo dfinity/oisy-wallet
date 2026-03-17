@@ -285,7 +285,7 @@ describe('custom-token.utils', () => {
 					decimals: 8,
 					symbol: 'mock-symbol'
 				})
-			).toThrowError('Unsupported network key: UnsupportedNetwork');
+			).toThrow('Unsupported network key: UnsupportedNetwork');
 		});
 	});
 });

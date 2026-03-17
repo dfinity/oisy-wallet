@@ -16,6 +16,7 @@ export const TRUMP_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'OFFICIAL TRUMP',
 	symbol: TRUMP_SYMBOL,
 	decimals: TRUMP_DECIMALS,

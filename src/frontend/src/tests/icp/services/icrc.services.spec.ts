@@ -141,6 +141,7 @@ describe('icrc.services', () => {
 					certified: true,
 					data: {
 						category: 'custom',
+						tags: [],
 						decimals: Number(mockDecimals),
 						enabled: true,
 						fee: mockFee,
@@ -220,6 +221,7 @@ describe('icrc.services', () => {
 					certified: true,
 					data: {
 						category: 'custom',
+						tags: [],
 						decimals: 8,
 						enabled: true,
 						fee: 100000n,
@@ -768,7 +770,7 @@ describe('icrc.services', () => {
 					spender: mockSpender,
 					amount: mockAmount
 				})
-			).rejects.toThrowError(err);
+			).rejects.toThrow(err);
 		});
 	});
 

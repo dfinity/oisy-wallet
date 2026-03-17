@@ -50,6 +50,7 @@ describe('load-tokens.services', () => {
 				network: ICP_NETWORK,
 				standard: { code: 'icrc' as const },
 				category: 'custom' as const,
+				tags: [],
 				fee: 123n,
 				name: `Token ${ledgerCanisterId}`,
 				symbol: `TKN${ledgerCanisterId.slice(0, 4)}`,
@@ -117,7 +118,7 @@ describe('load-tokens.services', () => {
 
 			const { tokens: _, ...paramsWithoutTokens } = params;
 
-			await expect(mapBackendTokensTyped(paramsWithoutTokens)).rejects.toThrowError(mockError);
+			await expect(mapBackendTokensTyped(paramsWithoutTokens)).rejects.toThrow(mockError);
 
 			expect(loadNetworkCustomTokens).toHaveBeenCalledExactlyOnceWith(loadParams);
 

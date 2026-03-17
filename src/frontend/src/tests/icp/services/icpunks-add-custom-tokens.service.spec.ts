@@ -37,6 +37,7 @@ describe('icpunks-add-custom-tokens.service', () => {
 			canisterId: mockCanisterId,
 			standard: { code: 'icpunks' },
 			category: 'custom',
+			tags: [],
 			name: mockFetchedMetadata.name,
 			symbol: mockFetchedMetadata.symbol,
 			decimals: 0,
@@ -57,7 +58,7 @@ describe('icpunks-add-custom-tokens.service', () => {
 					...validParams,
 					identity: undefined
 				})
-			).rejects.toThrowError();
+			).rejects.toThrow();
 		});
 
 		it('should return error if canisterId is missing', async () => {

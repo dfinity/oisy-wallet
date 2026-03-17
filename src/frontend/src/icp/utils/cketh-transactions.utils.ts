@@ -23,6 +23,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import { consoleError } from '$lib/utils/console.utils';
 import {
 	fromNullable,
 	isNullish,
@@ -135,7 +136,7 @@ const mintMemoInfo = (
 			)
 		};
 	} catch (err: unknown) {
-		console.error('Failed to decode ckETH mint memo', memo, err);
+		consoleError('Failed to decode ckETH mint memo', memo, err);
 		return undefined;
 	}
 };
@@ -147,7 +148,7 @@ const burnMemoInfo = (memo: Uint8Array): { toAddress: string | undefined } | und
 			toAddress: toAddress instanceof Uint8Array ? uint8ArrayToHexString(toAddress) : undefined
 		};
 	} catch (err: unknown) {
-		console.error('Failed to decode ckETH burn memo', memo, err);
+		consoleError('Failed to decode ckETH burn memo', memo, err);
 		return undefined;
 	}
 };

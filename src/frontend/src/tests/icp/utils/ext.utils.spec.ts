@@ -116,7 +116,7 @@ describe('ext.utils', () => {
 			const collectionId = Principal.fromText('oeee4-qaaaa-aaaak-qaaeq-cai');
 			const index = -1;
 
-			expect(() => extIndexToIdentifier({ collectionId, index })).toThrowError(
+			expect(() => extIndexToIdentifier({ collectionId, index })).toThrow(
 				'EXT token index -1 is out of bounds'
 			);
 		});
@@ -138,7 +138,8 @@ describe('ext.utils', () => {
 			symbol: mockName,
 			decimals: 0,
 			standard: { code: 'ext', version: 'v2' },
-			category: 'custom'
+			category: 'custom',
+			tags: []
 		};
 
 		it('should correctly map an EXT token', () => {

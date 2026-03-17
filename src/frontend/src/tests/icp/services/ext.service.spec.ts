@@ -95,7 +95,7 @@ describe('ext.services', () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadExtTokens({ identity: mockIdentity })).resolves.not.toThrowError();
+			await expect(loadExtTokens({ identity: mockIdentity })).resolves.not.toThrow();
 		});
 	});
 
@@ -175,6 +175,7 @@ describe('ext.services', () => {
 						enabled: true,
 						standard: { code: 'ext', version: 'v2' },
 						category: 'custom',
+						tags: [],
 						canisterId: mockCanisterId,
 						symbol: mockCanisterId,
 						name: mockCanisterId,

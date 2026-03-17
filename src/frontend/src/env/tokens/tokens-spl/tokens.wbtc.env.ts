@@ -17,6 +17,7 @@ export const WBTC_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Wrapped BTC',
 	symbol: WBTC_SYMBOL,
 	decimals: WBTC_DECIMALS,

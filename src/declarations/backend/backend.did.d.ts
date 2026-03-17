@@ -72,11 +72,13 @@ export type BtcAddPendingTransactionError =
 	| { InvalidUtxos: null }
 	| { EmptyUtxos: null }
 	| { DuplicateUtxos: null }
+	| { InvalidDelegationChain: { msg: string } }
 	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } }
 	| { UtxosAlreadyReserved: null };
 export interface BtcAddPendingTransactionRequest {
 	txid: Uint8Array;
+	ii_delegation_chain: [] | [IIDelegationChain];
 	network: Network;
 	utxos: Array<Utxo>;
 }
@@ -200,6 +202,11 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
+export interface Delegation {
+	pubkey: Uint8Array;
+	targets: [] | [Array<Principal>];
+	expiration: bigint;
+}
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
 export interface ErcToken {
 	token_address: string;
@@ -249,6 +256,10 @@ export interface HttpResponse {
 	body: Uint8Array;
 	headers: Array<[string, string]>;
 	status_code: number;
+}
+export interface IIDelegationChain {
+	public_key: Uint8Array;
+	delegations: Array<SignedDelegation>;
 }
 export interface IcrcToken {
 	ledger_id: Principal;
@@ -340,6 +351,10 @@ export interface Settings {
 	dapp: DappSettings;
 	experimental_features: ExperimentalFeaturesSettings;
 }
+export interface SignedDelegation {
+	signature: Uint8Array;
+	delegation: Delegation;
+}
 export interface SplToken {
 	decimals: [] | [number];
 	token_address: string;
@@ -347,6 +362,7 @@ export interface SplToken {
 }
 export interface Stats {
 	user_profile_count: bigint;
+	user_transactions_count: bigint;
 	custom_token_count: bigint;
 	exchange_rates_count: bigint;
 	token_activity_count: bigint;

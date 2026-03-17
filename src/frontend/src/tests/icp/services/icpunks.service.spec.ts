@@ -85,7 +85,7 @@ describe('icpunks.services', () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadIcPunksTokens({ identity: mockIdentity })).resolves.not.toThrowError();
+			await expect(loadIcPunksTokens({ identity: mockIdentity })).resolves.not.toThrow();
 		});
 	});
 
@@ -174,6 +174,7 @@ describe('icpunks.services', () => {
 						enabled: true,
 						standard: { code: 'icpunks' },
 						category: 'custom',
+						tags: [],
 						canisterId: mockCanisterId,
 						symbol: mockFetchedMetadata.symbol,
 						name: mockFetchedMetadata.name,

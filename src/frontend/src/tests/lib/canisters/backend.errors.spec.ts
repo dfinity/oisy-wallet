@@ -65,6 +65,15 @@ describe('backend.errors', () => {
 			expect(err.message).toBe('Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.');
 		});
 
+		it('should map InvalidDelegationChain', () => {
+			const err = mapBtcAddPendingTransactionError({
+				InvalidDelegationChain: { msg: 'chain expired' }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('II delegation chain verification failed: chain expired');
+		});
+
 		it('should return unknown error for unrecognized variant', () => {
 			// @ts-expect-error testing unknown error variant
 			const err = mapBtcAddPendingTransactionError({ SomeOther: null });

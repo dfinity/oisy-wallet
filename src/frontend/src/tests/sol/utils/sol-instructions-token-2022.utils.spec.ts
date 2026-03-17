@@ -204,7 +204,7 @@ describe('sol-instructions-token-2022.utils', () => {
 		it('should raise an error if the instruction is missing the data', () => {
 			const { data: _, ...withoutData } = mockInstruction;
 
-			expect(() => parseSolToken2022Instruction(withoutData)).toThrowError(
+			expect(() => parseSolToken2022Instruction(withoutData)).toThrow(
 				'The instruction does not have any data'
 			);
 		});
@@ -214,7 +214,7 @@ describe('sol-instructions-token-2022.utils', () => {
 
 			expect(() =>
 				parseSolToken2022Instruction(withoutAccounts as unknown as SolInstruction)
-			).toThrowError('The instruction does not have any accounts');
+			).toThrow('The instruction does not have any accounts');
 		});
 
 		it('should parse an InitializeMint instruction', () => {
@@ -1313,7 +1313,7 @@ describe('sol-instructions-token-2022.utils', () => {
 			// @ts-expect-error intentional for testing unknown discriminant
 			vi.mocked(identifyToken2022Instruction).mockReturnValue('unknown-instruction');
 
-			expect(() => parseSolToken2022Instruction(mockInstruction)).toThrowError(
+			expect(() => parseSolToken2022Instruction(mockInstruction)).toThrow(
 				'Unknown Solana Token 2022 instruction: unknown-instruction'
 			);
 		});

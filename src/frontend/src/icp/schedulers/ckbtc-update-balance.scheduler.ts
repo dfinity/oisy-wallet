@@ -14,6 +14,7 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
+import { consoleError } from '$lib/utils/console.utils';
 import { isEmptyString, isNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 import {
 	MinterNoNewUtxosError,
@@ -52,13 +53,13 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 		const { minterCanisterId, bitcoinNetwork, btcAddress } = data ?? {};
 
 		if (isNullish(minterCanisterId)) {
-			console.error('No data - minterCanisterId - provided to update the BTC balance. Skipping.');
+			consoleError('No data - minterCanisterId - provided to update the BTC balance. Skipping.');
 
 			return;
 		}
 
 		if (isNullish(bitcoinNetwork)) {
-			console.error('No data - bitcoinNetwork - provided to update the BTC balance. Skipping.');
+			consoleError('No data - bitcoinNetwork - provided to update the BTC balance. Skipping.');
 
 			return;
 		}
@@ -67,7 +68,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			btcAddress ?? this.btcAddress ?? (await this.loadBtcAddress({ minterCanisterId, identity }));
 
 		if (isEmptyString(address)) {
-			console.error('No BTC address could be derived from the ckBTC minter. Skipping.');
+			consoleError('No BTC address could be derived from the ckBTC minter. Skipping.');
 
 			return;
 		}
@@ -99,7 +100,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			}
 
 			// We only log and continue to poll on purpose. UpdateBalance can fail for various non UX blocker reasons and user can trigger it again manually.
-			console.error(err);
+			consoleError(err);
 		}
 	};
 

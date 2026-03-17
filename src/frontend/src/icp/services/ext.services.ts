@@ -86,6 +86,7 @@ const mapExtCustomToken = async ({
 		symbol,
 		standard: { code: 'ext' as const, version: 'v2' },
 		category: 'custom' as const,
+		tags: [],
 		enabled,
 		version,
 		...(nonNullish(mappedSection) && {

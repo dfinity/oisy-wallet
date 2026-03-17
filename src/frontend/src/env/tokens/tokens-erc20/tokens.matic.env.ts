@@ -15,6 +15,7 @@ export const MATIC_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Matic Token',
 	symbol: MATIC_SYMBOL,
 	decimals: MATIC_DECIMALS,

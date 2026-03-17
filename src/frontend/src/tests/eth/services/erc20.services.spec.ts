@@ -54,6 +54,7 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
+				tags: [],
 				version: 1n,
 				allowExternalContentSource: undefined,
 				enabled: true,
@@ -70,6 +71,7 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
+				tags: [],
 				version: 2n,
 				allowExternalContentSource: true,
 				enabled: true,
@@ -86,6 +88,7 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
+				tags: [],
 				version: undefined,
 				allowExternalContentSource: false,
 				enabled: false,
@@ -168,14 +171,14 @@ describe('erc20.services', () => {
 			const mockError = new Error('Error loading metadata');
 			vi.mocked(mockMetadata).mockRejectedValue(mockError);
 
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
+			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 		});
 
 		it('should not throw error if list custom tokens throws', async () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
+			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 		});
 
 		it('should reset both tokens stores on error', async () => {

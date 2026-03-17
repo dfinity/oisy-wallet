@@ -17,6 +17,7 @@ export const PBRON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Petrobras (Ondo Tokenized)',
 	symbol: PBRON_SYMBOL,
 	decimals: PBRON_DECIMALS,

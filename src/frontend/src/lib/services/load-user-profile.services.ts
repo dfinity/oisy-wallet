@@ -6,6 +6,7 @@ import { userProfileStore } from '$lib/stores/user-profile.store';
 import { UserProfileNotFoundError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -56,7 +57,7 @@ export const loadCertifiedUserProfile = async ({
 		userProfileStore.set({ certified: true, profile });
 	} catch (err) {
 		// We ignore the error because this is a background task.
-		console.error('Failed to load certified user profile.', err);
+		consoleError('Failed to load certified user profile.', err);
 	}
 };
 

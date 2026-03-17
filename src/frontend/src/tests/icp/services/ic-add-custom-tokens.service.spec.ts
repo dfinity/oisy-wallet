@@ -50,6 +50,7 @@ describe('ic-add-custom-tokens.service', () => {
 			indexCanisterId: '2awyi-oyaaa-aaaaq-aaanq-cai',
 			standard: { code: 'icp' },
 			category: 'custom',
+			tags: [],
 			name: tokenName,
 			symbol: tokenSymbol,
 			decimals: tokenDecimals,
@@ -85,7 +86,7 @@ describe('ic-add-custom-tokens.service', () => {
 						ledgerCanisterId: mockLedgerCanisterId,
 						indexCanisterId: mockIndexCanisterId
 					})
-				).rejects.toThrowError();
+				).rejects.toThrow();
 			});
 
 			it('should return error if ledgerCanisterId is missing', async () => {
@@ -126,6 +127,7 @@ describe('ic-add-custom-tokens.service', () => {
 							indexCanisterId: mockIndexCanisterId,
 							standard: { code: 'icp' },
 							category: 'custom',
+							tags: [],
 							name: 'Test',
 							symbol: 'TEST',
 							decimals: 8,

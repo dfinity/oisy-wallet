@@ -28,6 +28,7 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
 import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
@@ -102,7 +103,7 @@ export const safeLoadMetadata = async ({
 		// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
 		return await infuraErc20Providers(networkId).metadata({ address });
 	} catch (err: unknown) {
-		console.error(
+		consoleError(
 			`Error loading metadata for custom ERC20 token ${address} on network ${networkId.description}`,
 			err
 		);
@@ -177,6 +178,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: ETHEREUM_DEFAULT_DECIMALS,
 					standard: { code: 'erc20' as const },
 					category: 'custom' as const,
+					tags: [],
 					enabled,
 					version,
 					allowExternalContentSource

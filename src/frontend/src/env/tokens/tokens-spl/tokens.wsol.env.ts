@@ -16,6 +16,7 @@ export const WSOL_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Wrapped SOL',
 	symbol: WSOL_SYMBOL,
 	decimals: WSOL_DECIMALS,
