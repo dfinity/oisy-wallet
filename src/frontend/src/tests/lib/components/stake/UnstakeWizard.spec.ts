@@ -49,6 +49,7 @@ describe('UnstakeWizard', () => {
 		});
 
 		expect(container).not.toHaveTextContent(en.stake.text.unsupported_token_staking);
+		expect(container).toHaveTextContent(en.send.text.review);
 	});
 
 	it('renders unsupported message when vault token is not harvest autopilot', () => {
