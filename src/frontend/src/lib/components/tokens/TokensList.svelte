@@ -14,7 +14,6 @@
 	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { tokenCategoryFilter, tokenCategoryFilterEnabled } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
