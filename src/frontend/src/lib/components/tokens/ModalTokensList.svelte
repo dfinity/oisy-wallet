@@ -4,12 +4,14 @@
 	import { getContext, type Snippet } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
+	import AssetTypeFilterBar from '$lib/components/tokens/AssetTypeFilterBar.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import {
 		MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS,
 		MODAL_TOKENS_LIST
 	} from '$lib/constants/test-ids.constants';
+	import { tokenCategoryFilterEnabled } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -70,7 +72,7 @@
 		/>
 	</div>
 
-	<div class="flex items-center">
+	<div class="flex items-center gap-2">
 		<button
 			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
 			class:hover:border-brand-primary={networkSelectorViewOnly}
@@ -82,6 +84,12 @@
 			<IconExpandMore size="24" />
 		</button>
 	</div>
+
+	{#if $tokenCategoryFilterEnabled}
+		<div class="mt-3">
+			<AssetTypeFilterBar />
+		</div>
+	{/if}
 </div>
 
 <div class="my-4 flex flex-col overflow-y-hidden sm:max-h-[26rem]">

@@ -2,13 +2,15 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconHide from '$lib/components/icons/IconHide.svelte';
+	import IconFilter from '$lib/components/icons/lucide/IconFilter.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import TokensAssetTypeToggle from '$lib/components/tokens/TokensAssetTypeToggle.svelte';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import NotificationBlob from '$lib/components/ui/NotificationBlob.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { hideZeroBalances } from '$lib/derived/settings.derived';
+	import { hideZeroBalances, tokenCategoryFilterEnabled } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { emit } from '$lib/utils/events.utils';
@@ -20,6 +22,10 @@
 
 	const toggleHideZeros = () => {
 		emit({ message: 'oisyToggleZeroBalances' });
+	};
+
+	const toggleAssetTypes = () => {
+		emit({ message: 'oisyToggleAssetTypes' });
 	};
 
 	const openManageTokens = () => {
@@ -37,7 +43,10 @@
 	bind:button
 >
 	{#snippet icon()}
-		<NotificationBlob display={$hideZeroBalances} position="top-right">
+		<NotificationBlob
+			display={$hideZeroBalances || $tokenCategoryFilterEnabled}
+			position="top-right"
+		>
 			<IconManage />
 		</NotificationBlob>
 	{/snippet}
@@ -60,6 +69,21 @@
 					{/snippet}
 				</LogoButton>
 			</ListItem>
+
+			<ListItem>
+				<LogoButton fullWidth onClick={toggleAssetTypes}>
+					{#snippet logo()}
+						<IconFilter />
+					{/snippet}
+					{#snippet title()}
+						<span class="text-sm font-normal">{$i18n.tokens.text.hide_asset_types}</span>
+					{/snippet}
+					{#snippet action()}
+						<TokensAssetTypeToggle />
+					{/snippet}
+				</LogoButton>
+			</ListItem>
+
 			<ListItem>
 				<LogoButton fullWidth onClick={openManageTokens}>
 					{#snippet logo()}
