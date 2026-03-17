@@ -24,11 +24,11 @@ import {
 	withdrawICPSwapAfterFailedSwap,
 	withdrawUserUnusedBalance
 } from '$lib/services/swap.services';
+import { fetchVeloraSwapAmount } from '$lib/services/velora-swap.services';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
 import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
-import { geSwapEthTokenAddress } from '$lib/utils/swap.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -61,6 +61,18 @@ vi.mock('$lib/api/icp-swap-pool.api', () => ({
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
+}));
+
+const mockVeloraGetQuote = vi.hoisted(() => vi.fn());
+
+vi.mock('$lib/providers/evm-swap.providers', () => ({
+	evmSwapProviders: [
+		{
+			key: 'velora',
+			getQuote: mockVeloraGetQuote,
+			isEnabled: true
+		}
+	]
 }));
 
 vi.mock('@velora-dex/sdk', () => ({
@@ -320,13 +332,7 @@ describe('swap.services', () => {
 		});
 
 		it('should call fetchSwapAmountsEVM when network.id !== ICP_NETWORK_ID', async () => {
-			const mockGetQuote = vi.fn();
-
-			vi.mocked(constructSimpleSDK).mockReturnValue({
-				quote: { getQuote: mockGetQuote }
-			} as unknown as ReturnType<typeof constructSimpleSDK>);
-
-			mockGetQuote.mockResolvedValue({});
+			mockVeloraGetQuote.mockResolvedValue(null);
 
 			const evmToken = {
 				...mockValidErc20Token,
@@ -349,7 +355,7 @@ describe('swap.services', () => {
 				userEthAddress: '0xUser'
 			});
 
-			expect(mockGetQuote).toHaveBeenCalled();
+			expect(mockVeloraGetQuote).toHaveBeenCalled();
 		});
 	});
 
@@ -372,96 +378,100 @@ describe('swap.services', () => {
 
 		const amount = BigInt('1000000000000000000');
 		const userEthAddress = '0xUser';
-
-		const mockGetQuote = vi.fn();
+		const slippage = 1.5;
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-
-			vi.mocked(constructSimpleSDK).mockReturnValue({
-				quote: { getQuote: mockGetQuote }
-			} as unknown as ReturnType<typeof constructSimpleSDK>);
 		});
 
-		afterEach(() => {
-			mockGetQuote.mockReset();
-		});
-
-		it('returns [] when quote has neither delta nor market', async () => {
-			mockGetQuote.mockResolvedValue({});
+		it('returns [] when all providers return null', async () => {
+			mockVeloraGetQuote.mockResolvedValue(null);
 
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(result).toEqual([]);
 		});
 
-		it('calls delta mapper when quote contains delta without bridge and returns single-item array', async () => {
-			mockGetQuote.mockResolvedValue({
-				delta: {
-					destAmount: '123',
-					bridge: { scalingFactor: 0 }
-				}
+		it('returns provider results and passes params correctly', async () => {
+			mockVeloraGetQuote.mockResolvedValue({
+				provider: SwapProvider.VELORA,
+				receiveAmount: 123n,
+				swapDetails: {},
+				type: 'delta'
 			});
 
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
-			expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
+			expect(mockVeloraGetQuote).toHaveBeenCalledWith({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress,
+				slippage
+			});
 			expect(result).toHaveLength(1);
 			expect(result[0].provider).toBe(SwapProvider.VELORA);
 			expect(result[0].receiveAmount).toBe(123n);
 			expect(result[0].type).toBe('delta');
 		});
 
-		it('calls delta mapper when quote contains delta with bridge and returns correct receiveAmount', async () => {
-			mockGetQuote.mockResolvedValue({
-				delta: {
-					destAmount: '123',
-					bridgeInfo: { destAmountAfterBridge: '949920' }
-				}
-			});
-
+		it('returns [] when userEthAddress is nullish', async () => {
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress: undefined,
+				slippage
 			});
 
-			expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
-			expect(result).toHaveLength(1);
-			expect(result[0].provider).toBe(SwapProvider.VELORA);
-			expect(result[0].receiveAmount).toBe(949920n);
-			expect(result[0].type).toBe('delta');
+			expect(mockVeloraGetQuote).not.toHaveBeenCalled();
+			expect(result).toEqual([]);
 		});
 
-		it('calls market mapper when quote contains market and returns single-item array', async () => {
-			mockGetQuote.mockResolvedValue({
-				market: {
-					destAmount: '456'
-				}
+		it('sorts results by receiveAmount descending', async () => {
+			mockVeloraGetQuote.mockResolvedValue({
+				provider: SwapProvider.VELORA,
+				receiveAmount: 100n,
+				swapDetails: {},
+				type: 'delta'
 			});
 
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(result).toHaveLength(1);
-			expect(result[0].provider).toBe(SwapProvider.VELORA);
-			expect(result[0].receiveAmount).toBe(456n);
-			expect(result[0].type).toBe('market');
+			expect(result[0].receiveAmount).toBe(100n);
+		});
+
+		it('skips providers whose quote rejects', async () => {
+			mockVeloraGetQuote.mockRejectedValue(new Error('Velora error'));
+
+			const result = await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress,
+				slippage
+			});
+
+			expect(result).toEqual([]);
 		});
 	});
 
@@ -1151,6 +1161,8 @@ describe('swap.services', () => {
 
 		const amount = BigInt('1000000000000000000');
 		const userEthAddress = '0xUser';
+		const slippage = 1.5;
+
 		const mockGetQuote = vi.fn();
 
 		beforeEach(() => {
@@ -1178,11 +1190,12 @@ describe('swap.services', () => {
 				}
 			});
 
-			await fetchSwapAmountsEVM({
+			await fetchVeloraSwapAmount({
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -1205,11 +1218,12 @@ describe('swap.services', () => {
 				}
 			});
 
-			await fetchSwapAmountsEVM({
+			await fetchVeloraSwapAmount({
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -1227,11 +1241,12 @@ describe('swap.services', () => {
 			const error = new Error('Velora API Error');
 			mockGetQuote.mockRejectedValue(error);
 
-			await fetchSwapAmountsEVM({
+			await fetchVeloraSwapAmount({
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -1253,11 +1268,12 @@ describe('swap.services', () => {
 				}
 			});
 
-			await fetchSwapAmountsEVM({
+			await fetchVeloraSwapAmount({
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
