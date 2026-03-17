@@ -251,9 +251,7 @@ export const resolveNearIntentsSwapAssets = ({
 	nearTokens: NearIntentsToken[];
 	sourceToken: Erc20Token;
 	destinationToken: Erc20Token;
-}):
-	| { srcAsset: NearIntentsToken; destAsset: NearIntentsToken }
-	| undefined => {
+}): { srcAsset: NearIntentsToken; destAsset: NearIntentsToken } | undefined => {
 	const srcBlockchain = resolveNearIntentsBlockchain(sourceToken.network.id);
 	const destBlockchain = resolveNearIntentsBlockchain(destinationToken.network.id);
 
