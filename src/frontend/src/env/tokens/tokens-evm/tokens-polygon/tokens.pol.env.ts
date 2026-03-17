@@ -4,8 +4,8 @@ import {
 	POLYGON_MAINNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import pol from '$evm/polygon/assets/pol.svg';
-import type { RequiredToken, TokenId } from '$lib/types/token';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 

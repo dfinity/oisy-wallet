@@ -7,8 +7,8 @@ import {
 	BTC_TESTNET_NETWORK
 } from '$env/networks/networks.btc.env';
 import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
-import type { RequiredToken, RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import type { RequiredToken, RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 

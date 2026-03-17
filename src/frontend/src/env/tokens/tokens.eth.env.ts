@@ -5,8 +5,8 @@ import {
 } from '$env/networks/networks.eth.env';
 import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import eth from '$icp-eth/assets/eth.svg';
-import type { RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import type { RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 
