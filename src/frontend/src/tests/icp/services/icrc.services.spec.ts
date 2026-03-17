@@ -770,7 +770,7 @@ describe('icrc.services', () => {
 					spender: mockSpender,
 					amount: mockAmount
 				})
-			).rejects.toThrowError(err);
+			).rejects.toThrow(err);
 		});
 	});
 

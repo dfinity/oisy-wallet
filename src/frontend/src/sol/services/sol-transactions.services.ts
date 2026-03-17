@@ -5,6 +5,7 @@ import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/deriv
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import { fetchTransactionDetailForSignature, getAccountOwner } from '$sol/api/solana.api';
@@ -324,7 +325,7 @@ const loadSolTransactions = async ({
 	} catch (error: unknown) {
 		solTransactionsStore.reset(tokenId);
 
-		console.error(`Failed to load transactions for ${tokenId.description}:`, error);
+		consoleError(`Failed to load transactions for ${tokenId.description}:`, error);
 		return [];
 	}
 };

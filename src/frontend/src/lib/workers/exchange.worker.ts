@@ -25,6 +25,7 @@ import type {
 	PostMessageDataRequestExchangeTimer,
 	PostMessageDataResponseExchange
 } from '$lib/types/post-message';
+import { consoleError } from '$lib/utils/console.utils';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -282,7 +283,7 @@ const syncExchange = async (params: SyncExchangeParams) => {
 			data
 		} as PostMessage<PostMessageDataResponseExchange>);
 	} catch (err: unknown) {
-		console.error('Unexpected error while fetching symbol average price:', err);
+		consoleError('Unexpected error while fetching symbol average price:', err);
 
 		postMessage({
 			msg: 'syncExchangeError',

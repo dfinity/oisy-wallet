@@ -36,13 +36,13 @@ describe('icpunks-token.schema', () => {
 				canisterId: 'abc'
 			};
 
-			expect(() => IcPunksCanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => IcPunksCanistersSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with missing canister field', () => {
 			const invalidData = {};
 
-			expect(() => IcPunksCanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => IcPunksCanistersSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -61,7 +61,7 @@ describe('icpunks-token.schema', () => {
 				canisterId: 123
 			};
 
-			expect(() => IcPunksInterfaceSchema.parse(invalidData)).toThrowError();
+			expect(() => IcPunksInterfaceSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -81,7 +81,7 @@ describe('icpunks-token.schema', () => {
 				id: 'not-a-symbol'
 			};
 
-			expect(() => IcPunksTokenSchema.parse(invalidData)).toThrowError();
+			expect(() => IcPunksTokenSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with invalid canister', () => {
@@ -90,7 +90,7 @@ describe('icpunks-token.schema', () => {
 				canisterId: 123
 			};
 
-			expect(() => IcPunksTokenSchema.parse(invalidData)).toThrowError();
+			expect(() => IcPunksTokenSchema.parse(invalidData)).toThrow();
 		});
 	});
 });

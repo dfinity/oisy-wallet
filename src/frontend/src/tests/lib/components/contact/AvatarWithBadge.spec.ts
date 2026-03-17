@@ -18,7 +18,7 @@ describe('AvatarWithBadge', () => {
 			}
 		});
 
-		expect(() => getByTestId(AVATAR_WITH_BADGE_FALLBACK_IMAGE)).toThrowError();
+		expect(() => getByTestId(AVATAR_WITH_BADGE_FALLBACK_IMAGE)).toThrow();
 		expect(getByText(`${name[0]}`)).toBeInTheDocument();
 	});
 

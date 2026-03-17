@@ -152,9 +152,9 @@ describe('icp-account.utils', () => {
 
 		it('should return undefined for invalid Icrcv2AccountId objects', () => {
 			// @ts-expect-error Testing invalid input
-			expect(() => getIcrcv2AccountIdString({})).toThrowError();
+			expect(() => getIcrcv2AccountIdString({})).toThrow();
 			// @ts-expect-error Testing invalid input
-			expect(() => getIcrcv2AccountIdString({ InvalidType: 'address' })).toThrowError();
+			expect(() => getIcrcv2AccountIdString({ InvalidType: 'address' })).toThrow();
 		});
 	});
 

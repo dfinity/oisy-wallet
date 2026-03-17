@@ -69,6 +69,7 @@ fn test_select_user_utxos_fee_pending_transaction_error() {
         txid: txid.clone(),
         utxos: utxos.clone(),
         network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: None,
     };
 
     let add_response = pic_setup.update::<Result<(), BtcAddPendingTransactionError>>(
@@ -125,6 +126,7 @@ fn test_add_and_read_pending_transactions() {
         txid: txid.clone(),
         utxos: utxos.clone(),
         network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: None,
     };
 
     let add_response = pic_setup.update::<Result<(), BtcAddPendingTransactionError>>(
@@ -257,6 +259,7 @@ fn call_btc_add_pending_transaction(
         txid: vec![],
         utxos: vec![UTXO_1],
         network: BitcoinNetwork::Regtest,
+        ii_delegation_chain: None,
     };
     pic_setup
         .update::<Result<(), BtcAddPendingTransactionError>>(

@@ -12,11 +12,16 @@ import type {
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
-import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
+import type {
+	AddUserCredentialParams,
+	BtcAddPendingTransactionParams,
+	BtcSelectUserUtxosFeeParams
+} from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockIIDelegationChain } from '$tests/mocks/ii-delegation.mock';
 import { mockUserAgreements } from '$tests/mocks/user-agreements.mock';
 import {
 	mockUserExperimentalFeatures,
@@ -70,7 +75,7 @@ describe('backend.canister', () => {
 		credential_spec: addUserCredentialParams.credentialSpec
 	};
 
-	const btcAddPendingTransactionParams = {
+	const btcAddPendingTransactionParams: BtcAddPendingTransactionParams = {
 		txId: Uint8Array.from([1, 2, 3]),
 		network: { testnet: null },
 		address: mockBtcAddress,
@@ -83,13 +88,15 @@ describe('backend.canister', () => {
 					vout: 1
 				}
 			}
-		]
+		],
+		iiDelegationChain: mockIIDelegationChain
 	};
 	const btcAddPendingTransactionEndpointParams = {
 		txid: btcAddPendingTransactionParams.txId,
 		network: btcAddPendingTransactionParams.network,
 		address: btcAddPendingTransactionParams.address,
-		utxos: btcAddPendingTransactionParams.utxos
+		utxos: btcAddPendingTransactionParams.utxos,
+		ii_delegation_chain: btcAddPendingTransactionParams.iiDelegationChain
 	};
 
 	const btcGetPendingTransactionParams = {
@@ -163,7 +170,7 @@ describe('backend.canister', () => {
 
 		const res = listCustomTokens();
 
-		await expect(res).rejects.toThrowError(mockResponseError);
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	it('sets many custom tokens', async () => {
@@ -189,7 +196,7 @@ describe('backend.canister', () => {
 
 		const res = setManyCustomTokens({ tokens: customTokens });
 
-		await expect(res).rejects.toThrowError(mockResponseError);
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	it('sets custom token', async () => {
@@ -215,7 +222,7 @@ describe('backend.canister', () => {
 
 		const res = setCustomToken({ token: mockedCustomToken });
 
-		await expect(res).rejects.toThrowError(mockResponseError);
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	it('creates user profile', async () => {
@@ -242,7 +249,7 @@ describe('backend.canister', () => {
 
 		const res = createUserProfile();
 
-		await expect(res).rejects.toThrowError(mockResponseError);
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	it('returns user profile success response', async () => {
@@ -283,7 +290,7 @@ describe('backend.canister', () => {
 
 		const res = getUserProfile(queryParams);
 
-		await expect(res).rejects.toThrowError(mockResponseError);
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	it('adds user credentials with success response', async () => {
@@ -327,7 +334,7 @@ describe('backend.canister', () => {
 
 		const res = addUserCredential(addUserCredentialParams);
 
-		await expect(res).rejects.toThrowError(mockResponseError);
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	describe('btc_add_pending_transaction', () => {
@@ -357,7 +364,7 @@ describe('backend.canister', () => {
 
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
-			await expect(res).rejects.toThrowError(
+			await expect(res).rejects.toThrow(
 				new CanisterInternalError(errorResponse.Err.InternalError.msg)
 			);
 		});
@@ -372,7 +379,7 @@ describe('backend.canister', () => {
 
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
-			await expect(res).rejects.toThrowError(
+			await expect(res).rejects.toThrow(
 				new CanisterInternalError('Unknown BtcAddPendingTransactionError')
 			);
 		});
@@ -389,7 +396,7 @@ describe('backend.canister', () => {
 
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 
 		it('should throw an error if btc_add_pending_transaction returns an unexpected response', async () => {
@@ -402,7 +409,7 @@ describe('backend.canister', () => {
 
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
-			await expect(res).rejects.toThrowError();
+			await expect(res).rejects.toThrow();
 		});
 
 		it('should return rateLimitInfo if RateLimited error is returned', async () => {
@@ -430,6 +437,24 @@ describe('backend.canister', () => {
 					limiter: 'BTC_ADD_PENDING_TX_RATE_LIMITER'
 				}
 			});
+		});
+
+		it('should throw a CanisterInternalError if InvalidDelegationChain error is returned', async () => {
+			const response = {
+				Err: { InvalidDelegationChain: { msg: 'chain expired' } }
+			};
+
+			service.btc_add_pending_transaction.mockResolvedValue(
+				response as unknown as BtcAddPendingTransactionResult
+			);
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcAddPendingTransaction(btcAddPendingTransactionParams)).rejects.toThrow(
+				new CanisterInternalError('II delegation chain verification failed: chain expired')
+			);
 		});
 	});
 
@@ -469,7 +494,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetPendingTransactions(btcGetPendingTransactionParams);
 
-			await expect(res).rejects.toThrowError(
+			await expect(res).rejects.toThrow(
 				new CanisterInternalError(errorResponse.Err.InternalError.msg)
 			);
 		});
@@ -486,7 +511,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetPendingTransactions(btcGetPendingTransactionParams);
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 
 		it('should throw an error if btc_get_pending_transactions returns an unexpected response', async () => {
@@ -499,7 +524,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetPendingTransactions(btcGetPendingTransactionParams);
 
-			await expect(res).rejects.toThrowError();
+			await expect(res).rejects.toThrow();
 		});
 
 		it('should return rateLimitInfo if RateLimited error is returned', async () => {
@@ -562,7 +587,7 @@ describe('backend.canister', () => {
 
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
-			await expect(res).rejects.toThrowError(
+			await expect(res).rejects.toThrow(
 				new CanisterInternalError(errorResponse.Err.InternalError.msg)
 			);
 		});
@@ -576,7 +601,7 @@ describe('backend.canister', () => {
 
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
-			await expect(res).rejects.toThrowError(
+			await expect(res).rejects.toThrow(
 				new CanisterInternalError(
 					'Selecting utxos fee is not possible - pending transactions found.'
 				)
@@ -593,7 +618,7 @@ describe('backend.canister', () => {
 
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
-			await expect(res).rejects.toThrowError(
+			await expect(res).rejects.toThrow(
 				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
 			);
 		});
@@ -610,7 +635,7 @@ describe('backend.canister', () => {
 
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 
 		it('should throw an error if btc_select_user_utxos_fee returns an unexpected response', async () => {
@@ -623,7 +648,7 @@ describe('backend.canister', () => {
 
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
-			await expect(res).rejects.toThrowError();
+			await expect(res).rejects.toThrow();
 		});
 
 		it('should return rateLimitInfo if RateLimited error is returned', async () => {
@@ -684,7 +709,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getAllowedCycles()).rejects.toThrowError(
+			await expect(getAllowedCycles()).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -699,7 +724,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getAllowedCycles()).rejects.toThrowError(new CanisterInternalError(errorMsg));
+			await expect(getAllowedCycles()).rejects.toThrow(new CanisterInternalError(errorMsg));
 		});
 
 		it('should throw CanisterInternalError with custom message when a generic canister error is returned', async () => {
@@ -710,7 +735,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getAllowedCycles()).rejects.toThrowError(
+			await expect(getAllowedCycles()).rejects.toThrow(
 				new CanisterInternalError('Unknown GetAllowedCyclesError')
 			);
 		});
@@ -724,7 +749,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getAllowedCycles()).rejects.toThrowError(
+			await expect(getAllowedCycles()).rejects.toThrow(
 				new CanisterInternalError('Some unknown error')
 			);
 		});
@@ -739,7 +764,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(getAllowedCycles()).rejects.toThrowError(mockResponseError);
+			await expect(getAllowedCycles()).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -777,7 +802,7 @@ describe('backend.canister', () => {
 
 			const res = allowSigning();
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 
 		// We do not test all types of ApproveError:
@@ -793,9 +818,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrowError(
-				mapIcrc2ApproveError(response.Err.ApproveError)
-			);
+			await expect(allowSigning()).rejects.toThrow(mapIcrc2ApproveError(response.Err.ApproveError));
 		});
 
 		it('should throw a CanisterInternalError if FailedToContactCyclesLedger error is returned', async () => {
@@ -807,7 +830,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrowError(
+			await expect(allowSigning()).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -822,7 +845,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrowError(new CanisterInternalError(errorMsg));
+			await expect(allowSigning()).rejects.toThrow(new CanisterInternalError(errorMsg));
 		});
 
 		it('should throw a CanisterInternalError with message if unrecognized error is returned', async () => {
@@ -834,7 +857,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrowError(
+			await expect(allowSigning()).rejects.toThrow(
 				new CanisterInternalError('Unknown AllowSigningError')
 			);
 		});
@@ -931,7 +954,7 @@ describe('backend.canister', () => {
 
 			const res = addUserHiddenDappId({ dappId: 'test-dapp-id' });
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -970,7 +993,7 @@ describe('backend.canister', () => {
 				showTestnets: true
 			});
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -1009,7 +1032,7 @@ describe('backend.canister', () => {
 				networks: mockUserNetworks
 			});
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -1048,7 +1071,7 @@ describe('backend.canister', () => {
 				experimentalFeatures: mockUserExperimentalFeatures
 			});
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -1115,7 +1138,7 @@ describe('backend.canister', () => {
 				agreements: mockUserAgreements
 			});
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -1148,7 +1171,7 @@ describe('backend.canister', () => {
 
 			const res = getContact(1n);
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -1181,7 +1204,7 @@ describe('backend.canister', () => {
 
 			const res = getContacts();
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -1214,7 +1237,7 @@ describe('backend.canister', () => {
 
 			const res = createContact('John');
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -1246,7 +1269,7 @@ describe('backend.canister', () => {
 
 			const res = deleteContact(1n);
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -1280,7 +1303,7 @@ describe('backend.canister', () => {
 
 			const res = updateContact(mockContact);
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -1317,7 +1340,7 @@ describe('backend.canister', () => {
 				token: mockedCustomToken
 			});
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -1356,7 +1379,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
-			await expect(res).rejects.toThrowError(
+			await expect(res).rejects.toThrow(
 				new CanisterInternalError(errorResponse.Err.InternalError.msg)
 			);
 		});
@@ -1372,7 +1395,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
-			await expect(res).rejects.toThrowError(
+			await expect(res).rejects.toThrow(
 				new CanisterInternalError(
 					'Selecting utxos fee is not possible - pending transactions found.'
 				)
@@ -1389,7 +1412,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
-			await expect(res).rejects.toThrowError(
+			await expect(res).rejects.toThrow(
 				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
 			);
 		});
@@ -1406,7 +1429,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
-			await expect(res).rejects.toThrowError(mockResponseError);
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 
 		it('should throw an error if btc_get_current_fee_percentiles returns an unexpected response', async () => {
@@ -1419,7 +1442,7 @@ describe('backend.canister', () => {
 
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
-			await expect(res).rejects.toThrowError();
+			await expect(res).rejects.toThrow();
 		});
 	});
 });

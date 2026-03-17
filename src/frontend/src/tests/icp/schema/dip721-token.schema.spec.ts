@@ -36,13 +36,13 @@ describe('dip721-token.schema', () => {
 				canisterId: 'abc'
 			};
 
-			expect(() => Dip721CanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => Dip721CanistersSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with missing canister field', () => {
 			const invalidData = {};
 
-			expect(() => Dip721CanistersSchema.parse(invalidData)).toThrowError();
+			expect(() => Dip721CanistersSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -61,7 +61,7 @@ describe('dip721-token.schema', () => {
 				canisterId: 123
 			};
 
-			expect(() => Dip721InterfaceSchema.parse(invalidData)).toThrowError();
+			expect(() => Dip721InterfaceSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -81,7 +81,7 @@ describe('dip721-token.schema', () => {
 				id: 'not-a-symbol'
 			};
 
-			expect(() => Dip721TokenSchema.parse(invalidData)).toThrowError();
+			expect(() => Dip721TokenSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with invalid canister', () => {
@@ -90,7 +90,7 @@ describe('dip721-token.schema', () => {
 				canisterId: 123
 			};
 
-			expect(() => Dip721TokenSchema.parse(invalidData)).toThrowError();
+			expect(() => Dip721TokenSchema.parse(invalidData)).toThrow();
 		});
 	});
 });

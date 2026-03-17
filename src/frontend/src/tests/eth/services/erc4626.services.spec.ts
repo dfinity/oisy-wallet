@@ -239,13 +239,13 @@ describe('erc4626.services', () => {
 			it('should not throw error if metadata throws', async () => {
 				vi.mocked(mockMetadataFn).mockRejectedValue(new Error('Error loading metadata'));
 
-				await expect(loadErc4626Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
+				await expect(loadErc4626Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 			});
 
 			it('should not throw error if list custom tokens throws', async () => {
 				vi.mocked(listCustomTokens).mockRejectedValue(new Error('Error loading custom tokens'));
 
-				await expect(loadErc4626Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
+				await expect(loadErc4626Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 			});
 		});
 
@@ -408,9 +408,7 @@ describe('erc4626.services', () => {
 			it('should not throw if getAssetAddress fails', async () => {
 				mockGetAssetAddress.mockRejectedValue(new Error('Error fetching asset'));
 
-				await expect(
-					loadCustomErc4626Tokens({ identity: mockIdentity })
-				).resolves.not.toThrowError();
+				await expect(loadCustomErc4626Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 			});
 
 			it('should cache the custom tokens in IDB on update call', async () => {
