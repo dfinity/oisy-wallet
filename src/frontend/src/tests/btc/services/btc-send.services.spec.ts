@@ -74,7 +74,9 @@ describe('btc-send.services', () => {
 				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
 				address: defaultParams.source,
 				txId: new Uint8Array(),
-				utxos: defaultParams.utxosFee.utxos
+				utxos: defaultParams.utxosFee.utxos,
+				// TODO: add the correct delegation chain here
+				iiDelegationChain: []
 			});
 		});
 
