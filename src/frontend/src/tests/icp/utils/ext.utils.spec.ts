@@ -9,6 +9,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import type { ExtTokenWithoutId } from '$icp/types/ext-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	extIndexToIdentifier,
 	isTokenExt,
@@ -139,7 +140,7 @@ describe('ext.utils', () => {
 			decimals: 0,
 			standard: { code: 'ext', version: 'v2' },
 			category: 'custom',
-			tags: []
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
 		};
 
 		it('should correctly map an EXT token', () => {

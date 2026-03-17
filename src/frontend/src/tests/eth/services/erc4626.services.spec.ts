@@ -9,6 +9,7 @@ import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as infuraProvidersModule from '$eth/providers/infura.providers';
 import * as approveServicesModule from '$eth/services/approve.services';
 import * as erc20ServicesModule from '$eth/services/erc20.services';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	depositErc4626,
 	loadCustomErc4626Tokens,
@@ -93,7 +94,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					version: 1n,
 					allowExternalContentSource: undefined,
 					enabled: true,
@@ -113,7 +114,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					version: 2n,
 					allowExternalContentSource: true,
 					enabled: true,
@@ -133,7 +134,7 @@ describe('erc4626.services', () => {
 				data: {
 					standard: { code: 'erc4626' },
 					category: 'custom',
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					version: undefined,
 					allowExternalContentSource: false,
 					enabled: false,

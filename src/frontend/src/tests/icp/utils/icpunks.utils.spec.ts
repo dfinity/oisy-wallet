@@ -8,6 +8,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import type { IcPunksTokenWithoutId } from '$icp/types/icpunks-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	isTokenIcPunks,
 	isTokenIcPunksCustomToken,
@@ -92,7 +93,7 @@ describe('icpunks.utils', () => {
 			decimals: 0,
 			standard: { code: 'icpunks' },
 			category: 'custom',
-			tags: []
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
 		};
 
 		it('should correctly map an ICPunks token', () => {

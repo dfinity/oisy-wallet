@@ -4,6 +4,7 @@ import type { IcCanisters, IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIcrcAccount, mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
@@ -50,7 +51,7 @@ describe('ic-add-custom-tokens.service', () => {
 			indexCanisterId: '2awyi-oyaaa-aaaaq-aaanq-cai',
 			standard: { code: 'icp' },
 			category: 'custom',
-			tags: [],
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			name: tokenName,
 			symbol: tokenSymbol,
 			decimals: tokenDecimals,
@@ -127,7 +128,7 @@ describe('ic-add-custom-tokens.service', () => {
 							indexCanisterId: mockIndexCanisterId,
 							standard: { code: 'icp' },
 							category: 'custom',
-							tags: [],
+							tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 							name: 'Test',
 							symbol: 'TEST',
 							decimals: 8,

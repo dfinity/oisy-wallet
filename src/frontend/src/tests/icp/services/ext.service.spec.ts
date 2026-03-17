@@ -7,6 +7,7 @@ import { extDefaultTokensStore } from '$icp/stores/ext-default-tokens.store';
 import { listCustomTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCustomTokensExt } from '$tests/mocks/custom-tokens.mock';
@@ -175,7 +176,7 @@ describe('ext.services', () => {
 						enabled: true,
 						standard: { code: 'ext', version: 'v2' },
 						category: 'custom',
-						tags: [],
+						tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 						canisterId: mockCanisterId,
 						symbol: mockCanisterId,
 						name: mockCanisterId,

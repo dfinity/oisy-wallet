@@ -13,6 +13,7 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import * as icrcMetadataUtils from '$icp/utils/icrc-metadata.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENTS,
@@ -141,7 +142,7 @@ describe('icrc.services', () => {
 					certified: true,
 					data: {
 						category: 'custom',
-						tags: [],
+						tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 						decimals: Number(mockDecimals),
 						enabled: true,
 						fee: mockFee,
@@ -221,7 +222,7 @@ describe('icrc.services', () => {
 					certified: true,
 					data: {
 						category: 'custom',
-						tags: [],
+						tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 						decimals: 8,
 						enabled: true,
 						fee: 100000n,
