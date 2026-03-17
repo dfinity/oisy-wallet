@@ -5,11 +5,11 @@
 	import { goto } from '$app/navigation';
 	import shocked from '$lib/assets/shocked.svg';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
-	import TokenTypeFilterBar from '$lib/components/tokens/TokenTypeFilterBar.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
+	import TokenTypeFilterBar from '$lib/components/tokens/TokenTypeFilterBar.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
