@@ -6,10 +6,11 @@ use ic_stable_structures::{
 use shared::types::{
     api_keys::ApiKeys, backend_config::Config, bitcoin::StoredPendingTransaction,
     contact::StoredContacts, custom_token::CustomToken, exchange::ExchangeRate,
-    pow::StoredChallenge, token::UserToken, user_profile::StoredUserProfile, Timestamp,
+    pow::StoredChallenge, token::UserToken, user_profile::StoredUserProfile,
+    user_transaction::UserTransaction, Timestamp,
 };
 
-use crate::types::storable::{Candid, StoredPrincipal, StoredTokenId};
+use crate::types::storable::{Candid, StoredPrincipal, StoredTokenId, UserTransactionKey};
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 
@@ -41,3 +42,8 @@ pub type BtcUserPendingTransactionsMap =
 pub type TokenActivityMap = StableBTreeMap<StoredTokenId, Timestamp, VMem>;
 
 pub type ExchangeRateMap = StableBTreeMap<StoredTokenId, Candid<ExchangeRate>, VMem>;
+
+/// Per-user, per-token storage of finalized transactions.
+/// Key: (user principal, token identifier), Value: sorted Vec of finalized transactions.
+pub type UserTransactionsMap =
+    StableBTreeMap<UserTransactionKey, Candid<Vec<UserTransaction>>, VMem>;
