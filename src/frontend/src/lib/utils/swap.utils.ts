@@ -346,12 +346,14 @@ export const findSwapProvider = (
 	}
 
 	const exactMatch = swapProvidersDetails[providerId];
-	if (exactMatch) {
+
+	if (nonNullish(exactMatch)) {
 		return { id: providerId, ...exactMatch };
 	}
 
 	const normalizedMatch = swapProvidersDetails[normalizedId];
-	if (normalizedMatch) {
+
+	if (nonNullish(normalizedMatch)) {
 		return { id: normalizedId, ...normalizedMatch };
 	}
 };

@@ -12,6 +12,7 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
+	import { consoleWarn } from '$lib/utils/console.utils';
 	import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -75,7 +76,7 @@
 				return BigInt(details.amount);
 			} catch (_: unknown) {
 				// It could not be parsed as a BigInt, so we return undefined.
-				console.warn('Could not parse amount as BigInt:', details.amount);
+				consoleWarn('Could not parse amount as BigInt:', details.amount);
 			}
 		}
 	});
@@ -89,14 +90,14 @@
 				const timestamp = Number(details.expiration);
 
 				if (isNaN(timestamp)) {
-					console.warn('Could not parse expiration as a number:', details.expiration);
+					consoleWarn('Could not parse expiration as a number:', details.expiration);
 					return;
 				}
 
 				return formatSecondsToDate({ seconds: timestamp, language: $currentLanguage });
 			} catch (_: unknown) {
 				// It could not be parsed as a BigInt, so we return undefined.
-				console.warn('Could not parse expiration as Date:', details.expiration);
+				consoleWarn('Could not parse expiration as Date:', details.expiration);
 			}
 		}
 	});

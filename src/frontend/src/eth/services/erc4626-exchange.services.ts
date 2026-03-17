@@ -5,6 +5,7 @@ import type {
 	CoingeckoSimpleErc4626TokenPriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider } from 'ethers/providers';
@@ -48,7 +49,7 @@ export const calculateErc4626Prices = async ({
 						usd_market_cap: 0
 					};
 				} catch (err: unknown) {
-					console.error(`Error calculating ERC4626 vault price for ${vaultAddress}:`, err);
+					consoleError(`Error calculating ERC4626 vault price for ${vaultAddress}:`, err);
 				}
 			}
 		)

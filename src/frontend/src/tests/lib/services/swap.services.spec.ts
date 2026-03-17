@@ -345,7 +345,7 @@ describe('swap.services', () => {
 		});
 
 		it('should call fetchSwapAmountsEVM when network.id !== ICP_NETWORK_ID', async () => {
-			mockVeloraGetQuote.mockResolvedValue(null);
+			mockVeloraGetQuote.mockResolvedValue(undefined);
 
 			const evmToken = {
 				...mockValidErc20Token,
@@ -397,8 +397,8 @@ describe('swap.services', () => {
 			vi.clearAllMocks();
 		});
 
-		it('returns [] when all providers return null', async () => {
-			mockVeloraGetQuote.mockResolvedValue(null);
+		it('returns [] when all providers return undefined', async () => {
+			mockVeloraGetQuote.mockResolvedValue(undefined);
 
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
@@ -1173,6 +1173,8 @@ describe('swap.services', () => {
 
 		const amount = BigInt('1000000000000000000');
 		const userEthAddress = '0xUser';
+		const slippage = 1.5;
+
 		const mockGetQuote = vi.fn();
 
 		beforeEach(() => {
@@ -1204,7 +1206,8 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -1231,7 +1234,8 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -1253,7 +1257,8 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -1279,7 +1284,8 @@ describe('swap.services', () => {
 				sourceToken,
 				destinationToken,
 				amount,
-				userEthAddress
+				userEthAddress,
+				slippage
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({

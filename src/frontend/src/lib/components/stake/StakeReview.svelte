@@ -13,11 +13,8 @@
 
 	interface Props {
 		amount?: OptionAmount;
-		destination?: Snippet;
 		disabled?: boolean;
-		network?: Snippet;
-		fee?: Snippet;
-		provider?: Snippet;
+		content?: Snippet;
 		subtitle?: Snippet;
 		onBack?: () => void;
 		onClose?: () => void;
@@ -27,11 +24,8 @@
 
 	let {
 		amount,
-		destination,
 		disabled = false,
-		network,
-		fee,
-		provider,
+		content,
 		subtitle,
 		onBack,
 		onClose,
@@ -50,13 +44,7 @@
 		token={$sendToken}
 	/>
 
-	{@render destination?.()}
-
-	{@render network?.()}
-
-	{@render fee?.()}
-
-	{@render provider?.()}
+	{@render content?.()}
 
 	{#snippet toolbar()}
 		<ButtonGroup testId="toolbar">

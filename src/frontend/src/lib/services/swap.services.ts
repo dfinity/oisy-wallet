@@ -71,6 +71,7 @@ import {
 	type SwapParams,
 	type SwapVeloraParams
 } from '$lib/types/swap';
+import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
@@ -384,7 +385,9 @@ const fetchSwapAmountsICP = async ({
 		[]
 	);
 
-	return mappedProvidersResults.sort((a, b) => Number(b.receiveAmount) - Number(a.receiveAmount));
+	return mappedProvidersResults.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
 };
 
 export const fetchIcpSwap = async ({
@@ -510,7 +513,7 @@ export const fetchIcpSwap = async ({
 			});
 		}
 	} catch (err: unknown) {
-		console.error(err);
+		consoleError(err);
 
 		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
 
@@ -796,7 +799,9 @@ export const fetchSwapAmountsEVM = async ({
 		return acc;
 	}, []);
 
-	return results.sort((a, b) => Number(b.receiveAmount) - Number(a.receiveAmount));
+	return results.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
 };
 
 export const withdrawUserUnusedBalance = async ({
