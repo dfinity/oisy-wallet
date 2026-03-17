@@ -16,6 +16,7 @@ export const USDT_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: 'category', value: 'stablecoin' }],
 	name: 'Tether USD',
 	symbol: USDT_SYMBOL,
 	decimals: USDT_DECIMALS,

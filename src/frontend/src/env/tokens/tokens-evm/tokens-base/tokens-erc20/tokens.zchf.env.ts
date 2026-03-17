@@ -16,6 +16,7 @@ export const ZCHF_TOKEN: RequiredEvmErc20Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: 'category', value: 'stablecoin' }],
 	name: 'Frankencoin',
 	symbol: ZCHF_SYMBOL,
 	decimals: ZCHF_DECIMALS,

@@ -16,6 +16,7 @@ export const AVGOX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Broadcom xStock',
 	symbol: AVGOX_SYMBOL,
 	decimals: AVGOX_DECIMALS,

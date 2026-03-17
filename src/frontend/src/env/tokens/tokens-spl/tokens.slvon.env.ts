@@ -17,6 +17,7 @@ export const SLVON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'iShares Silver Trust (Ondo Tokenized Stock)',
 	symbol: SLVON_SYMBOL,
 	decimals: SLVON_DECIMALS,

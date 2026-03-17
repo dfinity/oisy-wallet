@@ -17,6 +17,7 @@ export const BIDUON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Baidu (Ondo Tokenized)',
 	symbol: BIDUON_SYMBOL,
 	decimals: BIDUON_DECIMALS,

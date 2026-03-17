@@ -15,6 +15,7 @@ export const DMAIL_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Dmail Network',
 	symbol: DMAIL_SYMBOL,
 	decimals: DMAIL_DECIMALS,

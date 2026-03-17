@@ -17,6 +17,7 @@ export const USDT_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [{ type: 'category', value: 'stablecoin' }],
 	name: 'Tether USD',
 	symbol: USDT_SYMBOL,
 	decimals: USDT_DECIMALS,

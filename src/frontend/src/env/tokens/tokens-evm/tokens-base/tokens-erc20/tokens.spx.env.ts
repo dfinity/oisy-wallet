@@ -16,6 +16,7 @@ export const SPX_TOKEN: RequiredEvmErc20Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'SPX6900',
 	symbol: SPX_SYMBOL,
 	decimals: SPX_DECIMALS,

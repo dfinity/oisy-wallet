@@ -16,6 +16,7 @@ export const TSLAX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Tesla xStock',
 	symbol: TSLAX_SYMBOL,
 	decimals: TSLAX_DECIMALS,

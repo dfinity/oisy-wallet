@@ -16,6 +16,7 @@ export const USDC_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: 'category', value: 'stablecoin' }],
 	name: 'USD Coin',
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,

@@ -15,6 +15,7 @@ export const BAUTOPILOT_CBBTC_TOKEN: RequiredErc4626Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc4626' },
 	category: 'default',
+	tags: [],
 	name: 'Autopilot cbBTC Base',
 	symbol: BAUTOPILOT_CBBTC_SYMBOL,
 	decimals: BAUTOPILOT_CBBTC_DECIMALS,

@@ -15,6 +15,7 @@ export const DAI_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [{ type: 'category', value: 'stablecoin' }],
 	name: 'Dai Stablecoin',
 	symbol: DAI_SYMBOL,
 	decimals: DAI_DECIMALS,

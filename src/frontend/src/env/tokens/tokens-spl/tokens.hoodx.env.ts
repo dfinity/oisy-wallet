@@ -16,6 +16,7 @@ export const HOODX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Robinhood xStock',
 	symbol: HOODX_SYMBOL,
 	decimals: HOODX_DECIMALS,

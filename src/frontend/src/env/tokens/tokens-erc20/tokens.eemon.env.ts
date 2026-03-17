@@ -16,6 +16,7 @@ export const EEMON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'iShares MSCI Emerging Markets ETF (Ondo Tokenized)',
 	symbol: EEMON_SYMBOL,
 	decimals: EEMON_DECIMALS,
