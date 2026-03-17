@@ -10,11 +10,8 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { ZERO } from '$lib/constants/app.constants';
 import {
-	ICP_SWAP_PROVIDER,
-	KONG_SWAP_PROVIDER,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
-	SWAP_ETH_TOKEN_PLACEHOLDER,
-	VELORA_SWAP_PROVIDER
+	SWAP_ETH_TOKEN_PLACEHOLDER
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
 import {
@@ -184,9 +181,9 @@ describe('swap utils', () => {
 				destToken: mockDestToken
 			});
 
-			expect(result.provider).toBe(ICP_SWAP_PROVIDER);
+			expect(result.provider).toBe(SwapProvider.ICP_SWAP);
 
-			assert(result.provider === ICP_SWAP_PROVIDER);
+			assert(result.provider === SwapProvider.ICP_SWAP);
 
 			expect(result.receiveAmount).toBe(990n);
 			expect(result.receiveOutMinimum).toBe(
@@ -202,7 +199,7 @@ describe('swap utils', () => {
 				destToken: mockDestToken
 			});
 
-			assert(result.provider === ICP_SWAP_PROVIDER);
+			assert(result.provider === SwapProvider.ICP_SWAP);
 
 			expect(result.receiveAmount).toBe(990n);
 			expect(result.receiveOutMinimum).toBe(
@@ -217,7 +214,7 @@ describe('swap utils', () => {
 				destToken: mockDestToken
 			});
 
-			assert(result.provider === ICP_SWAP_PROVIDER);
+			assert(result.provider === SwapProvider.ICP_SWAP);
 
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({
@@ -234,7 +231,7 @@ describe('swap utils', () => {
 				destToken: mockDestToken
 			});
 
-			assert(result.provider === ICP_SWAP_PROVIDER);
+			assert(result.provider === SwapProvider.ICP_SWAP);
 
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({
@@ -295,9 +292,9 @@ describe('swap utils', () => {
 		it('should return mapped kong swap result', () => {
 			const result = mapKongSwapResult({ swap, tokens });
 
-			expect(result.provider).toBe(KONG_SWAP_PROVIDER);
+			expect(result.provider).toBe(SwapProvider.KONG_SWAP);
 
-			assert(result.provider === KONG_SWAP_PROVIDER);
+			assert(result.provider === SwapProvider.KONG_SWAP);
 
 			expect(result.slippage).toBe(0.3);
 			expect(result.receiveAmount).toBe(2000n);
@@ -399,7 +396,7 @@ describe('swap utils', () => {
 
 			const result = mapVeloraSwapResult(mockDeltaSwap);
 
-			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
+			expect(result.provider).toBe(SwapProvider.VELORA);
 			expect(result.receiveAmount).toBe(900n);
 			expect(result.swapDetails).toBe(mockDeltaSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
@@ -412,7 +409,7 @@ describe('swap utils', () => {
 
 			const result = mapVeloraSwapResult(mockBridgeSwap);
 
-			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
+			expect(result.provider).toBe(SwapProvider.VELORA);
 			expect(result.receiveAmount).toBe(800n);
 			expect(result.swapDetails).toBe(mockBridgeSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
@@ -447,7 +444,7 @@ describe('swap utils', () => {
 
 			const result = mapVeloraMarketSwapResult(mockOptimalRate);
 
-			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
+			expect(result.provider).toBe(SwapProvider.VELORA);
 			expect(result.receiveAmount).toBe(950n);
 			expect(result.swapDetails).toBe(mockOptimalRate);
 			expect(result.type).toBe(VeloraSwapTypes.MARKET);

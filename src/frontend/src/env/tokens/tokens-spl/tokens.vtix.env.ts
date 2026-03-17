@@ -16,6 +16,7 @@ export const VTIX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Vanguard xStock',
 	symbol: VTIX_SYMBOL,
 	decimals: VTIX_DECIMALS,

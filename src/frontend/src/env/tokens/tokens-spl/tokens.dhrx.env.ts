@@ -16,6 +16,7 @@ export const DHRX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Danaher xStock',
 	symbol: DHRX_SYMBOL,
 	decimals: DHRX_DECIMALS,

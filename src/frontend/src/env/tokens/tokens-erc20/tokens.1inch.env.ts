@@ -15,6 +15,7 @@ export const ONEINCH_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: '1INCH Token',
 	symbol: ONEINCH_SYMBOL,
 	decimals: ONEINCH_DECIMALS,

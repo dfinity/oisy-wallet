@@ -16,6 +16,7 @@ export const NVDAX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'NVIDIA xStock',
 	symbol: NVDAX_SYMBOL,
 	decimals: NVDAX_DECIMALS,

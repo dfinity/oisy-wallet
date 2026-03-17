@@ -7,6 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Token } from '$lib/types/token';
+	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { getTokenDisplayName } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -19,6 +20,10 @@
 	let { token, logoSize = 'lg', onClick, showDividers = true }: Props = $props();
 
 	const { oisyName, oisySymbol, symbol, network } = $derived(token);
+
+	// For disabled tokens, we don't have the balance workers running, so we can't show the balance.
+	// TODO: Instead of hiding balances we should show a toggle or button to enable the token saying "Enable to see balance"
+	let showBalance = $derived(!isTokenToggleable(token) || token.enabled);
 </script>
 
 <LogoButton dividers={showDividers} fullWidth {onClick}>
@@ -45,12 +50,16 @@
 	{/snippet}
 
 	{#snippet titleEnd()}
-		<div class="ml-1 min-w-12 text-nowrap">
-			<TokenBalance data={token} />
-		</div>
+		{#if showBalance}
+			<div class="ml-1 min-w-12 text-nowrap">
+				<TokenBalance data={token} />
+			</div>
+		{/if}
 	{/snippet}
 
 	{#snippet descriptionEnd()}
-		<ExchangeTokenValue data={token} />
+		{#if showBalance}
+			<ExchangeTokenValue data={token} />
+		{/if}
 	{/snippet}
 </LogoButton>

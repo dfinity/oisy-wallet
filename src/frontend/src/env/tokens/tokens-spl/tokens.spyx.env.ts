@@ -16,6 +16,7 @@ export const SPYX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'SP500 xStock',
 	symbol: SPYX_SYMBOL,
 	decimals: SPYX_DECIMALS,

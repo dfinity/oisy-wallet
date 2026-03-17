@@ -16,6 +16,7 @@ export const ARMON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Arm Holdings plc (Ondo Tokenized)',
 	symbol: ARMON_SYMBOL,
 	decimals: ARMON_DECIMALS,

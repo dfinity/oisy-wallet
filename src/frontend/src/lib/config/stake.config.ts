@@ -71,6 +71,7 @@ export const claimStakingRewardWizardSteps = ({
 export const stakeProvidersConfig: Record<StakeProvider, StakeProviderConfig> = {
 	[StakeProvider.GLDT]: {
 		name: 'Gold DAO',
+		description: 'Gold DAO',
 		logo: '/images/dapps/gold-dao-logo.svg',
 		url: 'https://app.gldt.org/earn/',
 		card: {
@@ -80,6 +81,7 @@ export const stakeProvidersConfig: Record<StakeProvider, StakeProviderConfig> = 
 	},
 	[StakeProvider.HARVEST_AUTOPILOTS]: {
 		name: 'Harvest - Autopilot',
+		description: 'Harvest Autopilot: Smart Yield Farming',
 		logo: '/images/dapps/harvest-autopilot-logo.svg',
 		url: `${HARVEST_AUTOPILOT_URL}autopilot/`,
 		card: {

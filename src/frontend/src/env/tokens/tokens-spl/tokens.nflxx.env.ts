@@ -16,6 +16,7 @@ export const NFLXX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Netflix xStock',
 	symbol: NFLXX_SYMBOL,
 	decimals: NFLXX_DECIMALS,

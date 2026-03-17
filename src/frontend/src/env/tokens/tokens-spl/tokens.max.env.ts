@@ -16,6 +16,7 @@ export const MAX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Mastercard xStock',
 	symbol: MAX_SYMBOL,
 	decimals: MAX_DECIMALS,

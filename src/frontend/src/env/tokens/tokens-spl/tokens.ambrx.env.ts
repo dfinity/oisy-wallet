@@ -16,6 +16,7 @@ export const AMBRX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Amber xStock',
 	symbol: AMBRX_SYMBOL,
 	decimals: AMBRX_DECIMALS,
