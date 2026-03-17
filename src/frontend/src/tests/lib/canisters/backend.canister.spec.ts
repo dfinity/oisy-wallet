@@ -12,11 +12,16 @@ import type {
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
-import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
+import type {
+	AddUserCredentialParams,
+	BtcAddPendingTransactionParams,
+	BtcSelectUserUtxosFeeParams
+} from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockIIDelegationChain } from '$tests/mocks/ii-delegation.mock';
 import { mockUserAgreements } from '$tests/mocks/user-agreements.mock';
 import {
 	mockUserExperimentalFeatures,
@@ -70,7 +75,7 @@ describe('backend.canister', () => {
 		credential_spec: addUserCredentialParams.credentialSpec
 	};
 
-	const btcAddPendingTransactionParams = {
+	const btcAddPendingTransactionParams: BtcAddPendingTransactionParams = {
 		txId: Uint8Array.from([1, 2, 3]),
 		network: { testnet: null },
 		address: mockBtcAddress,
@@ -83,13 +88,15 @@ describe('backend.canister', () => {
 					vout: 1
 				}
 			}
-		]
+		],
+		iiDelegationChain: mockIIDelegationChain
 	};
 	const btcAddPendingTransactionEndpointParams = {
 		txid: btcAddPendingTransactionParams.txId,
 		network: btcAddPendingTransactionParams.network,
 		address: btcAddPendingTransactionParams.address,
-		utxos: btcAddPendingTransactionParams.utxos
+		utxos: btcAddPendingTransactionParams.utxos,
+		ii_delegation_chain: btcAddPendingTransactionParams.iiDelegationChain
 	};
 
 	const btcGetPendingTransactionParams = {
@@ -430,6 +437,24 @@ describe('backend.canister', () => {
 					limiter: 'BTC_ADD_PENDING_TX_RATE_LIMITER'
 				}
 			});
+		});
+
+		it('should throw a CanisterInternalError if InvalidDelegationChain error is returned', async () => {
+			const response = {
+				Err: { InvalidDelegationChain: { msg: 'chain expired' } }
+			};
+
+			service.btc_add_pending_transaction.mockResolvedValue(
+				response as unknown as BtcAddPendingTransactionResult
+			);
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcAddPendingTransaction(btcAddPendingTransactionParams)).rejects.toThrowError(
+				new CanisterInternalError('II delegation chain verification failed: chain expired')
+			);
 		});
 	});
 
