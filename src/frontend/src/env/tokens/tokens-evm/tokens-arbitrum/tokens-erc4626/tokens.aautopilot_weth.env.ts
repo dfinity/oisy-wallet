@@ -15,7 +15,7 @@ export const AAUTOPILOT_WETH_TOKEN: RequiredErc4626Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc4626' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Autopilot WETH Arbitrum',
 	symbol: AAUTOPILOT_WETH_SYMBOL,
 	decimals: AAUTOPILOT_WETH_DECIMALS,
