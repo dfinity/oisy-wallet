@@ -40,7 +40,7 @@ describe('near-intents.rest', () => {
 				statusText: 'Internal Server Error'
 			} as Response);
 
-			await expect(fetchNearIntentsTokens()).rejects.toThrowError(
+			await expect(fetchNearIntentsTokens()).rejects.toThrow(
 				'Failed to fetch NEAR Intents tokens: Internal Server Error'
 			);
 		});
@@ -87,7 +87,7 @@ describe('near-intents.rest', () => {
 				json: () => Promise.resolve({ message: 'Invalid origin asset' })
 			} as unknown as Response);
 
-			await expect(fetchNearIntentsQuote(quoteRequest)).rejects.toThrowError(
+			await expect(fetchNearIntentsQuote(quoteRequest)).rejects.toThrow(
 				'NEAR Intents quote failed: Invalid origin asset'
 			);
 		});
@@ -99,7 +99,7 @@ describe('near-intents.rest', () => {
 				json: () => Promise.reject(new Error('parse error'))
 			} as unknown as Response);
 
-			await expect(fetchNearIntentsQuote(quoteRequest)).rejects.toThrowError(
+			await expect(fetchNearIntentsQuote(quoteRequest)).rejects.toThrow(
 				'NEAR Intents quote failed: Bad Request'
 			);
 		});
@@ -150,7 +150,7 @@ describe('near-intents.rest', () => {
 				statusText: 'Not Found'
 			} as Response);
 
-			await expect(fetchNearIntentsStatus({ depositAddress: '0xInvalid' })).rejects.toThrowError(
+			await expect(fetchNearIntentsStatus({ depositAddress: '0xInvalid' })).rejects.toThrow(
 				'NEAR Intents status check failed: Not Found'
 			);
 		});
@@ -191,7 +191,7 @@ describe('near-intents.rest', () => {
 					txHash: '0xTxHash',
 					depositAddress: '0xDeposit'
 				})
-			).rejects.toThrowError('NEAR Intents deposit submit failed: Bad Request');
+			).rejects.toThrow('NEAR Intents deposit submit failed: Bad Request');
 		});
 	});
 });
