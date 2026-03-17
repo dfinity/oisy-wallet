@@ -452,7 +452,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(btcAddPendingTransaction(btcAddPendingTransactionParams)).rejects.toThrowError(
+			await expect(btcAddPendingTransaction(btcAddPendingTransactionParams)).rejects.toThrow(
 				new CanisterInternalError('II delegation chain verification failed: chain expired')
 			);
 		});
