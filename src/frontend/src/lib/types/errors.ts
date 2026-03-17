@@ -10,8 +10,6 @@ export class AlreadyClaimedError extends Error {}
 
 export class InvalidCampaignError extends Error {}
 
-export class GldtUnstakeDissolvementsLimitReached extends Error {}
-
 export class NftError extends Error {
 	constructor(
 		private readonly _tokenUri: string,

@@ -73,6 +73,57 @@ describe('StakeTransaction', () => {
 		});
 	});
 
+	describe('harvest autopilot asset token', () => {
+		const assetTokenTx = {
+			...baseTx,
+			vaultToken: { ...BAUTOPILOT_USDC_TOKEN, enabled: true },
+			blockNumber: 123
+		};
+
+		it('should display label "staked" for send type', () => {
+			render(StakeTransaction, { transaction: assetTokenTx });
+
+			expect(screen.getByText(get(i18n).stake.text.staked)).toBeInTheDocument();
+		});
+
+		it('should display label "unstaked" for receive type', () => {
+			render(StakeTransaction, {
+				transaction: { ...assetTokenTx, type: 'receive', from: '0xaaaaaaa' }
+			});
+
+			expect(screen.getByText(get(i18n).stake.text.unstaked)).toBeInTheDocument();
+		});
+
+		it('should show pending status when blockNumber is missing', () => {
+			const { blockNumber: _, ...txWithoutBlock } = assetTokenTx;
+
+			render(StakeTransaction, {
+				transaction: txWithoutBlock as unknown as StakingTransactionsUiWithToken
+			});
+
+			expect(screen.getByText(/pending/i)).toBeInTheDocument();
+		});
+
+		it('should show positive amount for send type', () => {
+			render(StakeTransaction, { transaction: { ...assetTokenTx, value: 10000000000n } });
+
+			expect(screen.getByText(/\+100/i)).toBeInTheDocument();
+		});
+
+		it('should show negative amount for receive type', () => {
+			render(StakeTransaction, {
+				transaction: {
+					...assetTokenTx,
+					type: 'receive',
+					from: '0xaaaaaaa',
+					value: 5000000000n
+				}
+			});
+
+			expect(screen.getByText(/-50/i)).toBeInTheDocument();
+		});
+	});
+
 	describe('display amount', () => {
 		it('should show negative amount for send type', () => {
 			renderTx({ value: 10000000000n });

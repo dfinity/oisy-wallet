@@ -2,13 +2,15 @@ import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { nativeTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { CustomToken } from '$lib/types/custom-token';
-import type { Token } from '$lib/types/token';
+import type { RequiredToken, Token } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { derivedMemo } from '$lib/utils/derived-memo.utils';
 import { isTokenFungible } from '$lib/utils/nft.utils';
 import { tokenListEqual } from '$lib/utils/tokens.utils';
@@ -69,10 +71,9 @@ export const allFungibleTokens: Readable<Token[]> = derivedMemo(
 	tokenListEqual
 );
 
-export const allCrossChainSwapTokens = derived(
-	[erc20Tokens, enabledEthEvmNativeTokens],
-	([$erc20Tokens, $ethEvmNativeTokens]) => [
-		...$ethEvmNativeTokens.map((token) => ({ ...token, enabled: true })),
-		...$erc20Tokens.map((token) => ({ ...token, enabled: true }))
-	]
-);
+export const allCrossChainSwapTokens: Readable<
+	TokenToggleable<RequiredToken | Erc20CustomToken>[]
+> = derived([erc20Tokens, enabledEthEvmNativeTokens], ([$erc20Tokens, $ethEvmNativeTokens]) => [
+	...$ethEvmNativeTokens.map((token) => ({ ...token, enabled: true })),
+	...$erc20Tokens
+]);

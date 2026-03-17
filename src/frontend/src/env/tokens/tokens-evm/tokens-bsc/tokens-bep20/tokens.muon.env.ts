@@ -16,6 +16,7 @@ export const MUON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Micron Technology (Ondo Tokenized)',
 	symbol: MUON_SYMBOL,
 	decimals: MUON_DECIMALS,

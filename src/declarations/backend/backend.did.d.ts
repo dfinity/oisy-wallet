@@ -347,6 +347,7 @@ export interface SplToken {
 }
 export interface Stats {
 	user_profile_count: bigint;
+	user_transactions_count: bigint;
 	custom_token_count: bigint;
 	exchange_rates_count: bigint;
 	token_activity_count: bigint;

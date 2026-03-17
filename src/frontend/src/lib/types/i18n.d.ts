@@ -1489,9 +1489,10 @@ interface I18nVaults {
 
 interface I18nStake {
 	text: {
-		gldt_stake_page_description: string;
 		harvest_autopilot_page_description: string;
 		harvest_autopilot_vault_page_description: string;
+		harvest_autopilot_provider_description: string;
+		harvest_autopilot_stake_terms: string;
 		my_positions: string;
 		available_autopilots: string;
 		vault_info: string;
@@ -1506,6 +1507,8 @@ interface I18nStake {
 		stake_now: string;
 		stake_amount: string;
 		not_enough_to_stake: string;
+		estimated_received: string;
+		estimated_yearly_yield: string;
 		unstake: string;
 		unstake_now: string;
 		unstaking: string;
@@ -1565,33 +1568,10 @@ interface I18nStake {
 	error: {
 		unexpected_error_on_withdraw: string;
 		unexpected_error_on_unstake: string;
+		unexpected_error_on_stake: string;
 		dissolvement_limit_reached: string;
 	};
-	terms: {
-		gldt: {
-			item1_title: string;
-			item1_description: string;
-			item2_title_1: string;
-			item2_title_2: string;
-			item3_title: string;
-			item3_description: string;
-			item4_title: string;
-			item4_description: string;
-			item5_title: string;
-		};
-	};
 	info: {
-		gldt: {
-			title: string;
-			description: string;
-			fact_1_title: string;
-			fact_1_description: string;
-			fact_2_title: string;
-			fact_2_description: string;
-			fact_3_title: string;
-			fact_3_description: string;
-			fact_3_description_fallback: string;
-		};
 		harvest_autopilot: {
 			title: string;
 			description: string;

@@ -16,6 +16,7 @@ export const OCT_TOKEN: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Octopus Network Token',
 	symbol: OCT_SYMBOL,
 	decimals: OCT_DECIMALS,

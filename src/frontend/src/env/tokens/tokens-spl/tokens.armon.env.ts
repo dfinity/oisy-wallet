@@ -17,6 +17,7 @@ export const ARMON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Arm Holdings plc (Ondo Tokenized)',
 	symbol: ARMON_SYMBOL,
 	decimals: ARMON_DECIMALS,

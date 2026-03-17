@@ -16,6 +16,7 @@ export const CMCSAX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Comcast xStock',
 	symbol: CMCSAX_SYMBOL,
 	decimals: CMCSAX_DECIMALS,

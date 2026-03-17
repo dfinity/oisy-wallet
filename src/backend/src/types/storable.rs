@@ -86,3 +86,38 @@ impl Storable for StoredTokenId {
         Self(decode_one(bytes.as_ref()).expect("failed to candid-decode TokenId"))
     }
 }
+
+/// Composite key for per-user, per-token transaction storage.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct UserTransactionKey(pub StoredPrincipal, pub StoredTokenId);
+
+impl Storable for UserTransactionKey {
+    const BOUND: Bound = Bound::Unbounded;
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        let principal_bytes = self.0.to_bytes();
+        let token_id_bytes = self.1.to_bytes();
+        let principal_len =
+            u32::try_from(principal_bytes.len()).expect("principal length should fit in u32");
+        let mut buf = Vec::with_capacity(4 + principal_bytes.len() + token_id_bytes.len());
+        buf.extend_from_slice(&principal_len.to_be_bytes());
+        buf.extend_from_slice(&principal_bytes);
+        buf.extend_from_slice(&token_id_bytes);
+        Cow::Owned(buf)
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        self.to_bytes().to_vec()
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        let principal_len = u32::from_be_bytes(
+            bytes[..4]
+                .try_into()
+                .expect("failed to decode principal length"),
+        ) as usize;
+        let principal = StoredPrincipal::from_bytes(Cow::Borrowed(&bytes[4..4 + principal_len]));
+        let token_id = StoredTokenId::from_bytes(Cow::Borrowed(&bytes[4 + principal_len..]));
+        Self(principal, token_id)
+    }
+}

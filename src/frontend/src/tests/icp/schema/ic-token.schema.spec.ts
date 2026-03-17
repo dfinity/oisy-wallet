@@ -27,6 +27,7 @@ describe('ic-token.schema', () => {
 		network: mockNetwork,
 		standard: { code: 'icp' },
 		category: 'default',
+		tags: [],
 		name: 'SampleToken',
 		symbol: 'STK',
 		decimals: 8,

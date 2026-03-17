@@ -1906,9 +1906,10 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "Stakez des tokens GLDT pour gagner des récompenses adossées à de l'or physique",
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
 			"my_positions": "",
 			"available_autopilots": "",
 			"vault_info": "",
@@ -1919,10 +1920,12 @@
 			"total_value_locked": "",
 			"manager": "",
 			"vault_description": "",
-			"stake": "Staker $token_symbol",
+			"stake": "",
 			"stake_now": "Staker maintenant",
 			"stake_amount": "Staker $amount $token_symbol",
 			"not_enough_to_stake": "Pas de $token_symbol à staker",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "Unstaker",
 			"unstake_now": "Unstaker maintenant",
 			"unstaking": "Unstaking...",
@@ -1982,33 +1985,10 @@
 		"error": {
 			"unexpected_error_on_withdraw": "Quelque chose s'est mal passé lors du retrait des tokens.",
 			"unexpected_error_on_unstake": "Quelque chose s'est mal passé lors de l'unstaking des tokens.",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": "Vous avez atteint le maximum de $limit demandes de déverrouillage actives. Complétez-en certaines avant d'en créer une nouvelle.<br/>Notez que vous pouvez toujours unstaker en utilisant l'option « immédiatement »."
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "APY actuel $apy%",
-				"item1_description": "Basé sur les dernières récompenses. L'APY effectif dépend du montant total de $token staké chaque jour.",
-				"item2_title_1": "Les récompenses de staking sont payées en ",
-				"item2_title_2": " tokens GOLDAO",
-				"item3_title": "Délai de déverrouillage de 1 semaine",
-				"item3_description": "Lors du déverrouillage de GLDT du staking, les tokens sont verrouillés pendant 1 semaine sans recevoir de récompenses supplémentaires, avant de pouvoir être retirés. Vous pouvez payer des frais de 5 % sur votre staking pour déverrouiller immédiatement.",
-				"item4_title": "Bonus d'ancienneté",
-				"item4_description": "Les stakings GLDT commencent à obtenir un bonus d'ancienneté dès le premier jour. Plus les stakings sont anciens, plus le bonus d'ancienneté est important, augmentant linéairement à 100 % par an.",
-				"item5_title": "Lorsque vous commencez à déverrouiller votre staking GLDT, vous ne recevrez plus de nouvelles récompenses"
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "Qu'est-ce que GLDT",
-				"description": "GLDT signifie « Gold Token », étant un token fongible adossé à des NFT GLD. Les NFT GLD sont des NFT qui représentent la propriété irréfutable de lingots d'or physiques. 1 GLDT représente exactement 0,01 g d'or, et les NFT GLD peuvent être échangés à un ratio de 1 g pour 100 GLDT.",
-				"fact_1_title": "Adossé à de l'or réel",
-				"fact_1_description": "Chaque token GLDT est adossé à de l'or réel stocké dans des coffres sécurisés",
-				"fact_2_title": "Conditions flexibles",
-				"fact_2_description": "Pas de périodes de blocage, stakez et unstakez quand vous le souhaitez",
-				"fact_3_title": "Rendements stables",
-				"fact_3_description": "Gagnez $apy% APY avec un risque de volatilité minimal",
-				"fact_3_description_fallback": "Gagnez des récompenses constantes avec un risque de volatilité minimal"
-			},
 			"harvest_autopilot": {
 				"title": "",
 				"description": "",

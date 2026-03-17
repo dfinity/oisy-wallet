@@ -15,6 +15,7 @@ export const AAUTOPILOT_WBTC_TOKEN: RequiredErc4626Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc4626' },
 	category: 'default',
+	tags: [],
 	name: 'Autopilot WBTC Arbitrum',
 	symbol: AAUTOPILOT_WBTC_SYMBOL,
 	decimals: AAUTOPILOT_WBTC_DECIMALS,

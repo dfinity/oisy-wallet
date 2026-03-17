@@ -16,6 +16,7 @@ export const BIDUON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Baidu (Ondo Tokenized)',
 	symbol: BIDUON_SYMBOL,
 	decimals: BIDUON_DECIMALS,

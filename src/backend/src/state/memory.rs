@@ -16,6 +16,7 @@ pub(crate) const BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::n
 pub(crate) const TOKEN_ACTIVITY_MEMORY_ID: MemoryId = MemoryId::new(8);
 pub(crate) const API_KEYS_MEMORY_ID: MemoryId = MemoryId::new(9);
 pub(crate) const EXCHANGE_RATE_MEMORY_ID: MemoryId = MemoryId::new(10);
+pub(crate) const USER_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(11);
 
 thread_local! {
     pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
