@@ -57,10 +57,7 @@ impl CoinGeckoClient {
         }
     }
 
-    async fn fetch_prices(
-        &self,
-        url: &str,
-    ) -> Result<HashMap<String, ExchangeData>, String> {
+    async fn fetch_prices(&self, url: &str) -> Result<HashMap<String, ExchangeData>, String> {
         let response = get(url, vec![self.auth_header()], MAX_RESPONSE_BYTES).await?;
 
         let prices: HashMap<String, CoinGeckoPrice> = serde_json::from_slice(&response.body)
