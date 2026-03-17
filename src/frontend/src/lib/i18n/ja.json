@@ -1908,6 +1908,8 @@
 		"text": {
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
 			"my_positions": "",
 			"available_autopilots": "",
 			"vault_info": "",
@@ -1918,10 +1920,12 @@
 			"total_value_locked": "",
 			"manager": "",
 			"vault_description": "",
-			"stake": "$token_symbolをステーキング",
+			"stake": "",
 			"stake_now": "今すぐステーキング",
 			"stake_amount": "$amount $token_symbolをステーキング",
 			"not_enough_to_stake": "ステーキング可能な$token_symbolがありません。",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "ステーキング解除",
 			"unstake_now": "今すぐ解除",
 			"unstaking": "解除中...",
@@ -1981,6 +1985,7 @@
 		"error": {
 			"unexpected_error_on_withdraw": "出金中に問題が発生しました。",
 			"unexpected_error_on_unstake": "ステーキング解除中に問題が発生しました。",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": "アクティブな解除リクエストの上限$limitに達しました。新しいリクエストを作成する前に、一部を完了してください。<br/>注意: 「即時」オプションを使用すれば、いつでもステーキング解除できます。"
 		},
 		"info": {

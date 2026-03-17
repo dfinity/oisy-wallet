@@ -16,6 +16,7 @@ export const ARB_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Arbitrum',
 	symbol: ARB_SYMBOL,
 	decimals: ARB_DECIMALS,

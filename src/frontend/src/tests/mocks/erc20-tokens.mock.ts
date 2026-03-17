@@ -31,6 +31,7 @@ export const createMockErc20Tokens = ({
 		network: networkEnv === 'mainnet' ? ETHEREUM_NETWORK : SEPOLIA_NETWORK,
 		standard: { code: 'erc20' },
 		category: 'default',
+		tags: [],
 		decimals: 8,
 		address: `0x${start + i + 1}-${networkEnv}`
 	}));

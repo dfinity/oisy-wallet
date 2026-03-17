@@ -15,6 +15,7 @@ export const AUTOPILOT_USDC_TOKEN: RequiredErc4626Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc4626' },
 	category: 'default',
+	tags: [],
 	name: 'Autopilot USDC Ethereum',
 	symbol: AUTOPILOT_USDC_SYMBOL,
 	decimals: AUTOPILOT_USDC_DECIMALS,

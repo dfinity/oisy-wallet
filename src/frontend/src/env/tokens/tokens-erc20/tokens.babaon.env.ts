@@ -16,6 +16,7 @@ export const BABAON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Alibaba (Ondo Tokenized)',
 	symbol: BABAON_SYMBOL,
 	decimals: BABAON_DECIMALS,

@@ -16,6 +16,7 @@ export const UNHX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'UnitedHealth xStock',
 	symbol: UNHX_SYMBOL,
 	decimals: UNHX_DECIMALS,

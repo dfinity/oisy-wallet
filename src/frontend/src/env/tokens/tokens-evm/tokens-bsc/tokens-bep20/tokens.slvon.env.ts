@@ -16,6 +16,7 @@ export const SLVON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'iShares Silver Trust (Ondo Tokenized Stock)',
 	symbol: SLVON_SYMBOL,
 	decimals: SLVON_DECIMALS,

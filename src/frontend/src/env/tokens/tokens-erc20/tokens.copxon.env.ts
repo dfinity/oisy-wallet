@@ -16,6 +16,7 @@ export const COPXON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Global X Copper Miners ETF (Ondo Tokenized)',
 	symbol: COPXON_SYMBOL,
 	decimals: COPXON_DECIMALS,

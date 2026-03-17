@@ -16,6 +16,7 @@ export const CRCLX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Circle xStock',
 	symbol: CRCLX_SYMBOL,
 	decimals: CRCLX_DECIMALS,
