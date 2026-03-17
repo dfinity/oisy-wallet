@@ -264,8 +264,6 @@
 					swapDetails: selectedProvider.swapDetails
 				};
 
-				console.log({params})
-
 				await fetchNearIntentsSwap(params);
 			} else {
 				const params = {

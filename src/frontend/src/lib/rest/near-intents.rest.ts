@@ -29,8 +29,6 @@ export const fetchNearIntentsTokens = async (): Promise<NearIntentsToken[]> => {
 export const fetchNearIntentsQuote = async (
 	request: NearIntentsQuoteRequest
 ): Promise<NearIntentsQuoteResponse> => {
-	console.log({ request });
-
 	const response = await fetch(`${NEAR_INTENTS_API_URL}/quote`, {
 		method: 'POST',
 		headers: buildHeaders(),

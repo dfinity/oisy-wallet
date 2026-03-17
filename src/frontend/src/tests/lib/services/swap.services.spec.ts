@@ -1566,8 +1566,7 @@ describe('swap.services', () => {
 				swapDetails: mockWetQuote
 			});
 
-			expect(mockProgress).toHaveBeenCalledTimes(4);
-			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SWAP);
+			expect(mockProgress).toHaveBeenCalledTimes(3);
 			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.SIGN_TRANSFER);
 			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.SWAP);
 			expect(mockProgress).toHaveBeenNthCalledWith(4, ProgressStepsSwap.UPDATE_UI);

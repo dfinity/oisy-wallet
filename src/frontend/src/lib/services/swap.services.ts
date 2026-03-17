@@ -618,8 +618,6 @@ export const fetchNearIntentsSwap = async ({
 		unitName: sourceToken.decimals
 	});
 
-	progress(ProgressStepsSwap.SWAP);
-
 	const slippageBasisPoints = Math.round(Number(slippageValue) * 100);
 
 	const wetQuote = await executeNearIntentsSwap({
