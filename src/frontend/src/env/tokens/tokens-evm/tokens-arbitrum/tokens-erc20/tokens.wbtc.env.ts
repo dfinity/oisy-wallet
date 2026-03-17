@@ -16,7 +16,7 @@ export const WBTC_TOKEN: RequiredEvmErc20Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'Wrapped BTC',
 	symbol: WBTC_SYMBOL,
 	decimals: WBTC_DECIMALS,
