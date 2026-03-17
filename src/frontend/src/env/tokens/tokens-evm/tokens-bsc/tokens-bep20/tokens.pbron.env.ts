@@ -16,6 +16,7 @@ export const PBRON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Petrobras (Ondo Tokenized)',
 	symbol: PBRON_SYMBOL,
 	decimals: PBRON_DECIMALS,

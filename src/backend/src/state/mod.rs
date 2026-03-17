@@ -11,10 +11,10 @@ use crate::{
         API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID,
         CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, POW_CHALLENGE_MEMORY_ID,
         TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
-        USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID,
+        USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
-        maps::{ApiKeysCell, ExchangeRateMap},
+        maps::{ApiKeysCell, ExchangeRateMap, UserTransactionsMap},
         BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
         PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
     },
@@ -44,6 +44,7 @@ pub(crate) struct State {
     // TODO: limit the map size with an eviction policy
     pub(crate) token_activity: TokenActivityMap,
     pub(crate) exchange_rates: ExchangeRateMap,
+    pub(crate) user_transactions: UserTransactionsMap,
 }
 
 impl From<&State> for Stats {
@@ -55,6 +56,7 @@ impl From<&State> for Stats {
             custom_token_count: state.custom_token.len(),
             token_activity_count: state.token_activity.len(),
             exchange_rates_count: state.exchange_rates.len(),
+            user_transactions_count: state.user_transactions.len(),
         }
     }
 }
@@ -76,6 +78,7 @@ thread_local! {
             ),
             token_activity: TokenActivityMap::init(mm.borrow().get(TOKEN_ACTIVITY_MEMORY_ID)),
             exchange_rates: ExchangeRateMap::init(mm.borrow().get(EXCHANGE_RATE_MEMORY_ID)),
+            user_transactions: UserTransactionsMap::init(mm.borrow().get(USER_TRANSACTIONS_MEMORY_ID)),
         })
     );
 }

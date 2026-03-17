@@ -10,7 +10,6 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { StakeProvider } from '$lib/types/stake';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		provider: StakeProvider;
@@ -31,9 +30,7 @@
 				testId={STAKE_PROVIDER_LOGO}
 			/>
 			<span class="font-bold">
-				{replacePlaceholders($i18n.stake.text.provider, {
-					$provider: stakeProvidersConfig[provider].name
-				})}
+				{stakeProvidersConfig[provider].description}
 			</span>
 		</div>
 

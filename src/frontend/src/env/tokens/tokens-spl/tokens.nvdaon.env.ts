@@ -17,6 +17,7 @@ export const NVDAON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'NVIDIA (Ondo Tokenized)',
 	symbol: NVDAON_SYMBOL,
 	decimals: NVDAON_DECIMALS,

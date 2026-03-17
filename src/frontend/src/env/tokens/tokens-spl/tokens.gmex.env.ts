@@ -16,6 +16,7 @@ export const GMEX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Gamestop xStock',
 	symbol: GMEX_SYMBOL,
 	decimals: GMEX_DECIMALS,

@@ -586,6 +586,54 @@ Call context:
 			expect(result).not.toContain('"ok"');
 		});
 
+		it('should preserve the canister trap message while hiding HTTP details', () => {
+			const err = new Error(
+				'Something went wrong while saving the token. / The replica returned a rejection error:\n' +
+					'  Request ID: 8d0f1e2f33f0dc19656dc3d48a27a51978bb1538d182aec1af23432d97188740\n' +
+					'  Reject code: 5\n' +
+					'  Reject text: Error from Canister d3nvo-aaaaa-aaaar-qagzq-cai: Canister called `ic0.trap` with message: \'Version mismatch, token update not allowed. Existing token: CustomToken { token: Erc4626(ErcToken { token_address: ErcTokenId("0xd6701905c59ee618dc36dc747506bce0a4ac760a"), chain_id: 8453 }), enabled: false, version: Some(1) }, New token: CustomToken { token: Erc4626(ErcToken { token_address: ErcTokenId("0xd6701905c59ee618dc36dc747506bce0a4ac760a"), chain_id: 8453 }), enabled: true, version: Some(4) }\'.\n' +
+					'Consider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation: https://internetcomputer.org/docs/current/references/execution-errors#trapped-explicitly\n' +
+					'  Error code: IC0503\n\n' +
+					'Call context:\n' +
+					'  Canister ID: d3nvo-aaaaa-aaaar-qagzq-cai\n' +
+					'  Method name: set_many_custom_tokens\n' +
+					'  HTTP details: {"ok":true,"status":200,"statusText":"","headers":[],"body":{"status":"replied","certificate":{"0":217,"1":217,"2":247}}}'
+			);
+
+			const result = formatIcCallError({ err }) as string;
+
+			expect(result).toContain('Version mismatch, token update not allowed');
+			expect(result).toContain('Reject code: 5');
+			expect(result).toContain('Error code: IC0503');
+			expect(result).toContain('Canister ID: d3nvo-aaaaa-aaaar-qagzq-cai');
+			expect(result).toContain('Method name: set_many_custom_tokens');
+			expect(result).not.toContain('Request ID');
+			expect(result).not.toContain('Consider gracefully');
+			expect(result).not.toContain('certificate');
+			expect(result).not.toContain('"ok"');
+			expect(result).not.toContain('HTTP details');
+		});
+
+		it('should strip the "Consider gracefully handling" boilerplate', () => {
+			const err = new Error(
+				'The replica returned a rejection error:\n' +
+					'  Reject code: 5\n' +
+					'  Reject text: Canister trapped\n' +
+					'  Error code: IC0503\n' +
+					'Consider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation: https://internetcomputer.org/docs/current/references/ic-interface-spec/#error-handling\n' +
+					'Call context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: {"ok":true,"status":200}'
+			);
+
+			const result = formatIcCallError({ err }) as string;
+
+			expect(result).toContain('Reject code: 5');
+			expect(result).not.toContain('Consider gracefully');
+			expect(result).not.toContain('See documentation');
+		});
+
 		it('should truncate long Return types in UnknownError', () => {
 			const err = new Error(
 				'Unexpected error: "Call was returned undefined. We cannot determine if the call was successful or not. Return types: [variant {Ok:record {balance:nat; transactions:vec record {id:nat; transaction:record {burn:opt record {fee:opt nat}}}}; Err:record {message:text}}]."\n' +

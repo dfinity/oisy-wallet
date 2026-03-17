@@ -16,6 +16,7 @@ export const GOOGLX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Alphabet xStock',
 	symbol: GOOGLX_SYMBOL,
 	decimals: GOOGLX_DECIMALS,

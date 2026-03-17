@@ -171,12 +171,7 @@ export const parseIcErrorMessage = (err: unknown): Record<string, string> | unde
 		}
 
 		// Remove the "Request ID" key if it exists, since it is unique per request, so not useful for general error handling
-		const {
-			[IC_REQUEST_ID_KEY]: _,
-			['Consider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation']:
-				__,
-			...rest
-		} = errObj;
+		const { [IC_REQUEST_ID_KEY]: _, [IC_CONSIDER_HANDLING_PREFIX]: __, ...rest } = errObj;
 
 		return rest;
 	} catch (_: unknown) {
@@ -195,6 +190,8 @@ export const mapIcErrorMetadata = (err: unknown): Record<string, string> | undef
 const IC_CALL_CONTEXT_MARKER = 'Call context:';
 const IC_CANISTER_ID_KEY = 'Canister ID';
 const IC_METHOD_NAME_KEY = 'Method name';
+const IC_CONSIDER_HANDLING_PREFIX =
+	'Consider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation';
 
 const isIcCallError = (err: unknown): err is Error =>
 	err instanceof Error && err.message.includes(IC_CALL_CONTEXT_MARKER);
@@ -291,10 +288,9 @@ export const formatIcCallError = <T>({
 	const callContextIndex = message.indexOf(IC_CALL_CONTEXT_MARKER);
 
 	const errorHeader = cleanTrailingCommasAndLines(
-		truncateReturnTypes(message.substring(0, callContextIndex).trim()).replace(
-			buildTextPattern(IC_REQUEST_ID_KEY),
-			''
-		)
+		truncateReturnTypes(message.substring(0, callContextIndex).trim())
+			.replace(buildTextPattern(IC_REQUEST_ID_KEY), '')
+			.replace(new RegExp(`${IC_CONSIDER_HANDLING_PREFIX}[^\\n]*`), '')
 	);
 
 	const callContext = message.substring(callContextIndex);

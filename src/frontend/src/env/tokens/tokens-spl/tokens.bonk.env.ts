@@ -17,6 +17,7 @@ export const BONK_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Bonk',
 	symbol: BONK_SYMBOL,
 	decimals: BONK_DECIMALS,
