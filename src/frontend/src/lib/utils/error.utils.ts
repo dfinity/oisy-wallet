@@ -97,8 +97,10 @@ export const replaceErrorFields = ({
 	return String(err);
 };
 
+const IC_REQUEST_ID_KEY = 'Request ID';
+
 export const replaceIcErrorFields = (err: unknown): string | undefined =>
-	replaceErrorFields({ err, keysToRemove: ['Request ID'] });
+	replaceErrorFields({ err, keysToRemove: [IC_REQUEST_ID_KEY] });
 
 const stripHttpDetails = (text: string): string =>
 	text
@@ -170,7 +172,7 @@ export const parseIcErrorMessage = (err: unknown): Record<string, string> | unde
 
 		// Remove the "Request ID" key if it exists, since it is unique per request, so not useful for general error handling
 		const {
-			['Request ID']: _,
+			[IC_REQUEST_ID_KEY]: _,
 			['Consider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation']:
 				__,
 			...rest
@@ -188,4 +190,155 @@ export const mapIcErrorMetadata = (err: unknown): Record<string, string> | undef
 	}
 
 	return parseIcErrorMessage(err) ?? { error: replaceIcErrorFields(err) ?? `${err}` };
+};
+
+const IC_CALL_CONTEXT_MARKER = 'Call context:';
+const IC_CANISTER_ID_KEY = 'Canister ID';
+const IC_METHOD_NAME_KEY = 'Method name';
+
+const isIcCallError = (err: unknown): err is Error =>
+	err instanceof Error && err.message.includes(IC_CALL_CONTEXT_MARKER);
+
+const truncateReturnTypes = (text: string): string =>
+	text.replace(/Return types:\s*\[[\s\S]*?\]\./g, 'Return types: [...].');
+
+const isByteArrayLike = (value: unknown): boolean => {
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+		return false;
+	}
+	const entries = Object.entries(value);
+	if (entries.length <= 4) {
+		return false;
+	}
+	return entries.slice(0, 5).every(([key, val], i) => key === String(i) && typeof val === 'number');
+};
+
+const sanitizeValue = (value: unknown): unknown => {
+	if (isByteArrayLike(value)) {
+		return `[${Object.keys(value as object).length} bytes]`;
+	}
+	if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+		return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, sanitizeValue(v)]));
+	}
+	return value;
+};
+
+const extractJsonBlock = ({
+	text,
+	fromIndex
+}: {
+	text: string;
+	fromIndex: number;
+}): Record<string, unknown> | undefined => {
+	const braceStart = text.indexOf('{', fromIndex);
+	if (braceStart === -1) {
+		return undefined;
+	}
+	let depth = 0;
+	for (let i = braceStart; i < text.length; i++) {
+		if (text[i] === '{') {
+			depth++;
+		} else if (text[i] === '}') {
+			depth--;
+			if (depth === 0) {
+				try {
+					return JSON.parse(text.substring(braceStart, i + 1));
+				} catch {
+					return undefined;
+				}
+			}
+		}
+	}
+	return undefined;
+};
+
+/**
+ * Formats an IC canister call error for clean console output.
+ *
+ * Detects errors containing "Call context:" (from @dfinity/agent), strips the verbose
+ * HTTP details / certificate byte arrays / request details, and returns a compact string.
+ * Non-IC errors pass through unchanged.
+ *
+ * @param err - The error to format.
+ * @param options - Optional flags to include additional HTTP metadata in the output.
+ * @returns A formatted string for IC errors, or the original value for non-IC errors.
+ */
+export const formatIcCallError = <T>({
+	err,
+	options = {}
+}: {
+	err: T;
+	options?: {
+		showHttpStatus?: boolean;
+		showHttpHeaders?: boolean;
+		showHttpBody?: boolean;
+		showRequestDetails?: boolean;
+	};
+}): T | string => {
+	if (!isIcCallError(err)) {
+		return err;
+	}
+
+	const { message, name } = err;
+
+	const {
+		showHttpStatus = false,
+		showHttpHeaders = false,
+		showHttpBody = false,
+		showRequestDetails = false
+	} = options;
+
+	const callContextIndex = message.indexOf(IC_CALL_CONTEXT_MARKER);
+
+	const errorHeader = cleanTrailingCommasAndLines(
+		truncateReturnTypes(message.substring(0, callContextIndex).trim()).replace(
+			buildTextPattern(IC_REQUEST_ID_KEY),
+			''
+		)
+	);
+
+	const callContext = message.substring(callContextIndex);
+
+	const canisterId = callContext.match(new RegExp(`${IC_CANISTER_ID_KEY}:\\s*(\\S+)`))?.[1];
+
+	const methodName = callContext.match(new RegExp(`${IC_METHOD_NAME_KEY}:\\s*(\\S+)`))?.[1];
+
+	const baseLines = [
+		`${name}: ${errorHeader}`,
+		nonNullish(canisterId) ? `  ${IC_CANISTER_ID_KEY}: ${canisterId}` : null,
+		nonNullish(methodName) ? `  ${IC_METHOD_NAME_KEY}: ${methodName}` : null
+	].filter(notEmptyString);
+
+	const httpIndex = callContext.indexOf('HTTP details:');
+
+	const httpDetails =
+		httpIndex !== -1 ? extractJsonBlock({ text: callContext, fromIndex: httpIndex }) : null;
+
+	const httpLines =
+		showHttpStatus || showHttpHeaders || showHttpBody || showRequestDetails
+			? nonNullish(httpDetails)
+				? [
+						showHttpStatus
+							? `  HTTP: ${httpDetails.status ?? 'unknown'}${
+									notEmptyString(httpDetails.statusText as string)
+										? ` ${httpDetails.statusText}`
+										: ''
+								}`
+							: null,
+						showHttpHeaders && nonNullish(httpDetails.headers)
+							? `  Headers: ${JSON.stringify(httpDetails.headers)}`
+							: null,
+						showHttpBody && nonNullish(httpDetails.body)
+							? `  Body: ${JSON.stringify(sanitizeValue(httpDetails.body))}`
+							: null,
+						showRequestDetails && nonNullish(httpDetails.requestDetails)
+							? `  Request: ${JSON.stringify(sanitizeValue(httpDetails.requestDetails))}`
+							: null
+					].filter(notEmptyString)
+				: []
+			: [];
+
+	const result = [...baseLines, ...httpLines].join('\n');
+
+	return result;
 };
