@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "首个用于构建自我编写应用的平台。",
-				"call_to_action": "试用 Caffeine",
 				"description": "Caffeine 是首个用于构建自我编写应用的平台。只需在桌面或移动端与 AI 对话，它就会为你创建应用和服务——包括那些能连接到 OISY 钱包的。体验由 AI 驱动的应用开发未来。",
 				"carousel": {
 					"text": "你好，自我编写的互联网",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -649,7 +653,8 @@
 			"btc_withdrawal_statuses": "获取 BTC 提现状态时出错。",
 			"transaction_price": "加载交易价格预估时出错。",
 			"icrc_canisters": "加载 ICRC 容器时出错。",
-			"icrc_canister_loading": "无法加载带有 Ledger 容器 $ledgerCanisterId 的令牌，因为它目前没有响应。",
+			"icrc_canister_loading_curated": "$tokenSymbol 代币暂无响应，目前无法加载。请稍后再试。",
+			"icrc_canister_loading_custom": "账本容器 $ledgerCanisterId 的代币暂无响应，目前无法加载。请稍后再试。",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
@@ -1901,7 +1906,6 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
 			"my_positions": "",
@@ -1979,31 +1983,7 @@
 			"unexpected_error_on_unstake": "",
 			"dissolvement_limit_reached": ""
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
-			},
 			"harvest_autopilot": {
 				"title": "",
 				"description": "",

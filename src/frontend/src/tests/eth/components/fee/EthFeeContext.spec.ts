@@ -19,6 +19,7 @@ import * as evmNativeUtils from '$evm/utils/native-token.utils';
 import * as ckethStoreMod from '$icp-eth/stores/cketh.store';
 import { ZERO } from '$lib/constants/app.constants';
 import * as addressDerived from '$lib/derived/address.derived';
+import * as toastsStore from '$lib/stores/toasts.store';
 import type { Network } from '$lib/types/network';
 import type { Nft } from '$lib/types/nft';
 import type { OptionAmount } from '$lib/types/send';
@@ -102,6 +103,7 @@ describe('EthFeeContext', () => {
 
 		vi.spyOn(ckethStoreMod, 'ckEthMinterInfoStore', 'get').mockReturnValue({
 			...writable({}),
+			batchSet: vi.fn(),
 			reset: vi.fn(),
 			reinitialize: vi.fn()
 		});
@@ -137,7 +139,7 @@ describe('EthFeeContext', () => {
 		vi.useRealTimers();
 	});
 
-	it('sets fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
+	it('should set fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
 		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
 
 		const provider = infuraMod.infuraProviders(network.id) as unknown as {
@@ -159,7 +161,7 @@ describe('EthFeeContext', () => {
 		);
 	});
 
-	it('sets fee for ckERC20 twin using getCkErc20FeeData', async () => {
+	it('should set fee for ckERC20 twin using getCkErc20FeeData', async () => {
 		vi.mocked(tokenUtils.isSupportedErc20TwinTokenId).mockReturnValue(true);
 		vi.mocked(feeServices.getCkErc20FeeData).mockResolvedValue(123n);
 
@@ -174,7 +176,7 @@ describe('EthFeeContext', () => {
 		);
 	});
 
-	it('sets fee for NFT (ERC-721) by encoding and estimating gas', async () => {
+	it('should set fee for NFT (ERC-721) by encoding and estimating gas', async () => {
 		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(false);
 		vi.mocked(evmNativeUtils.isSupportedEvmNativeTokenId).mockReturnValue(false);
 		vi.mocked(tokenUtils.isSupportedErc20TwinTokenId).mockReturnValue(false);
@@ -214,7 +216,7 @@ describe('EthFeeContext', () => {
 		);
 	});
 
-	it('does nothing when no eth address is available', async () => {
+	it('should do nothing when no eth address is available', async () => {
 		vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(undefined));
 
 		renderWith();
@@ -222,5 +224,62 @@ describe('EthFeeContext', () => {
 		await vi.runAllTimersAsync();
 
 		expect(feeStore.setFee).not.toHaveBeenCalled();
+	});
+
+	describe('safety after unmount', () => {
+		it('should not fetch fee data when debounced call fires after component is destroyed', async () => {
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const { unmount } = renderWith();
+
+			unmount();
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).not.toHaveBeenCalled();
+		});
+
+		it('should not schedule new fee fetches after component is destroyed', async () => {
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const { unmount } = renderWith();
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).toHaveBeenCalledOnce();
+
+			setFeeMock.mockClear();
+
+			unmount();
+
+			await vi.advanceTimersByTimeAsync(15_000);
+
+			expect(feeStore.setFee).not.toHaveBeenCalled();
+		});
+
+		it('should not throw or show error toast when sendToken is nullish', async () => {
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+
+			renderWith({ sendToken: undefined as unknown as Token });
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).not.toHaveBeenCalled();
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+		});
+
+		it('should not show "cannot fetch gas fee" toast after unmount', async () => {
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const { unmount } = renderWith();
+
+			unmount();
+
+			await vi.runAllTimersAsync();
+
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+		});
 	});
 });

@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "자체 작성 앱을 구축하기 위한 최초의 플랫폼.",
-				"call_to_action": "Caffeine 사용해보기",
 				"description": "Caffeine은 자체 작성 앱을 구축하기 위한 최초의 플랫폼입니다. 데스크탑 또는 모바일에서 AI와 대화하기만 하면 OISY 지갑에 연결되는 앱과 서비스를 포함한 앱이 생성됩니다. AI 기반 개발로 앱 개발의 미래를 경험해보세요.",
 				"carousel": {
 					"text": "안녕하세요, 자체 작성 인터넷",
@@ -434,6 +433,11 @@
 				"name": "Parcl",
 				"one_liner": "크로스 마진 및 LP 지원 유동성으로 합성 부동산 시장을 제공하는 솔라나 기반 영구 거래소.",
 				"description": "Parcl은 사용자가 합성 부동산 지수를 롱 또는 숏할 수 있는 부동산 가격 영구 계약을 위한 솔라나 기반 탈중앙화 거래소입니다. Parcl Labs의 가격 데이터와 LP 지원 유동성을 사용하여 크로스 마진 거래를 제공합니다. 이 프로토콜은 기초 부동산을 보유하지 않고도 실물 자산 성과에 노출을 원하는 트레이더를 위해 맞춤화되었습니다."
+			},
+			"liquidium": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -649,7 +653,8 @@
 			"btc_withdrawal_statuses": "BTC 출금 상태를 가져오는 중 오류가 발생했습니다.",
 			"transaction_price": "트랜잭션 가격 추정치를 불러오는 중 오류가 발생했습니다.",
 			"icrc_canisters": "ICRC 캐니스터를 불러오는 중 오류가 발생했습니다.",
-			"icrc_canister_loading": "레저 캐니스터 $ledgerCanisterId의 토큰을 현재 응답이 없어 불러올 수 없습니다.",
+			"icrc_canister_loading_curated": "$tokenSymbol 토큰이 응답하지 않아 현재 불러올 수 없습니다. 나중에 다시 시도해 주세요.",
+			"icrc_canister_loading_custom": "원장 캐니스터 $ledgerCanisterId 의 토큰이 응답하지 않아 현재 불러올 수 없습니다. 나중에 다시 시도해 주세요.",
 			"erc20_custom_tokens": "ERC20 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"erc4626_custom_tokens": "ERC4626 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"erc721_custom_tokens": "ERC721 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
@@ -1901,7 +1906,6 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "GLDT 토큰을 스테이킹하여 실물 금으로 뒷받침된 보상을 받으세요",
 			"harvest_autopilot_page_description": "원클릭 자동 운용 볼트로 최대 수익 효율 실현.",
 			"harvest_autopilot_vault_page_description": "자동 운용은 <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">감사 완료된 IPOR</a> Fusion Vault 기술을 기반으로 합니다.",
 			"my_positions": "내 포지션",
@@ -1979,31 +1983,7 @@
 			"unexpected_error_on_unstake": "토큰 언스테이킹 중 문제가 발생했습니다.",
 			"dissolvement_limit_reached": "활성 잠금 해제 요청의 최대 $limit개에 도달했습니다. 새 요청을 만들기 전에 일부를 완료하세요.<br/>참고로 '즉시' 옵션을 사용하여 언제든지 언스테이킹할 수 있습니다."
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "현재 APY $apy%",
-				"item1_description": "최신 보상을 기반으로 합니다. 실효 APY는 매일 스테이킹된 $token의 총 수량에 따라 달라집니다.",
-				"item2_title_1": "스테이킹 보상은 ",
-				"item2_title_2": " GOLDAO 토큰으로 지급됩니다",
-				"item3_title": "1주일 잠금 해제 지연",
-				"item3_description": "GLDT를 스테이킹에서 잠금 해제할 때, 토큰은 추가 보상 없이 1주일 동안 잠기며 이후 출금 가능합니다. 즉시 잠금 해제를 위해 스테이크의 5% 수수료를 지불할 수 있습니다.",
-				"item4_title": "나이 보너스",
-				"item4_description": "GLDT 스테이크는 1일차부터 나이 보너스를 획득하기 시작합니다. 스테이크가 오래될수록 나이 보너스가 커지며, 연간 100%의 선형 증가율로 성장합니다.",
-				"item5_title": "GLDT 스테이크 잠금 해제를 시작하면 새로운 보상을 더 이상 받지 못합니다"
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "GLDT란 무엇인가",
-				"description": "GLDT는 '골드 토큰(Gold Token)'의 약자로, GLD NFT로 뒷받침되는 대체 가능한 토큰입니다. GLD NFT는 실물 금괴의 확실한 소유권을 나타내는 NFT입니다. 1 GLDT는 정확히 0.01g의 금을 나타내며, GLD NFT는 1g당 100 GLDT의 비율로 교환할 수 있습니다.",
-				"fact_1_title": "실물 금으로 뒷받침",
-				"fact_1_description": "모든 GLDT 토큰은 안전한 금고에 보관된 실제 금으로 뒷받침됩니다",
-				"fact_2_title": "유연한 조건",
-				"fact_2_description": "잠금 기간 없이 원할 때 언제든지 스테이킹 및 언스테이킹 가능",
-				"fact_3_title": "안정적인 수익",
-				"fact_3_description": "최소한의 변동성 위험으로 $apy% APY 수익 창출",
-				"fact_3_description_fallback": "최소한의 변동성 위험으로 일관된 보상 획득"
-			},
 			"harvest_autopilot": {
 				"title": "하베스트 자동 운용이란",
 				"description": "하베스트 자동 운용은 최소한의 노력으로 탈중앙화 금융(DeFi) 포지션을 자동화하고 최적화하기 위해 설계된 하베스트 파이낸스 생태계 내의 전문 기능(및 특정 제품 라인)입니다.",

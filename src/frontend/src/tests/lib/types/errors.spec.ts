@@ -2,7 +2,6 @@ import {
 	AlreadyClaimedError,
 	AuthClientNotInitializedError,
 	EligibilityError,
-	GldtUnstakeDissolvementsLimitReached,
 	InvalidCampaignError,
 	InvalidCodeError,
 	InvalidMetadataImageUrl,
@@ -46,12 +45,6 @@ describe('errors', () => {
 	describe('InvalidCampaignError', () => {
 		it('should be an instance of Error', () => {
 			expect(new InvalidCampaignError()).toBeInstanceOf(Error);
-		});
-	});
-
-	describe('GldtUnstakeDissolvementsLimitReached', () => {
-		it('should be an instance of Error', () => {
-			expect(new GldtUnstakeDissolvementsLimitReached()).toBeInstanceOf(Error);
 		});
 	});
 

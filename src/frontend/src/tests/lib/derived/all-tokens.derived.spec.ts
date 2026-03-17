@@ -455,35 +455,28 @@ describe('all-tokens.derived', () => {
 			expect(result).toEqual([{ ...mockEvmToken, enabled: true }]);
 		});
 
-		it('should include ERC20 tokens with enabled: true', () => {
+		it('should include ERC20 tokens with their enabled property', () => {
+			const tokens = [
+				{ ...mockErc20Token, id: parseTokenId('MOCK1'), enabled: true },
+				{ ...mockErc20Token, id: parseTokenId('MOCK2'), enabled: false }
+			];
+
 			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
-				fn([mockErc20Token]);
+				fn(tokens);
 				return () => {};
 			});
 
 			const result = get(allCrossChainSwapTokens);
 
-			expect(result).toEqual([{ ...mockErc20Token, enabled: true }]);
-		});
-
-		it('should set enabled: true for all tokens regardless of original enabled state', () => {
-			const disabledErc20Token = { ...mockErc20Token, enabled: false };
-
-			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
-				fn([disabledErc20Token]);
-				return () => {};
-			});
-
-			const result = get(allCrossChainSwapTokens);
-
-			expect(result).toEqual([{ ...disabledErc20Token, enabled: true }]);
+			expect(result).toEqual(tokens);
 		});
 
 		it('should handle multiple tokens of the same type', () => {
 			const mockErc20Token2 = {
 				...mockErc20Token,
 				id: parseTokenId('MOCK2'),
-				symbol: 'MOCK2'
+				symbol: 'MOsCK2',
+				enabled: false
 			};
 
 			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
@@ -493,10 +486,7 @@ describe('all-tokens.derived', () => {
 
 			const result = get(allCrossChainSwapTokens);
 
-			expect(result).toEqual([
-				{ ...mockErc20Token, enabled: true },
-				{ ...mockErc20Token2, enabled: true }
-			]);
+			expect(result).toEqual([mockErc20Token, mockErc20Token2]);
 		});
 	});
 });

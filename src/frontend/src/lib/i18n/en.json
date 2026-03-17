@@ -351,11 +351,10 @@
 			},
 			"caffeine": {
 				"name": "Caffeine",
-				"one_liner": "The first platform for building self-writing apps.",
-				"call_to_action": "Try Caffeine",
-				"description": "Caffeine is the first platform for building self-writing apps. Just talk to AI on desktop or mobile, and it creates apps and services for you – including ones that connect to OISY Wallet. Experience the future of app development with AI-powered creation.",
+				"one_liner": "Create the future internet, one app at a time. Chat with AI on Caffeine to create apps and websites.",
+				"description": "Chat with AI on Caffeine to create apps and websites. Our AI builds on a new open tech stack designed to power apps that are self-writing, which grants them incredible security and resilience, and provides a guarantee that a mistake during a software update cannot cause data loss. AI writes your backend software using Motoko, the first programming language for AI, and runs your apps on the revolutionary Internet Computer network (ICP).",
 				"carousel": {
-					"text": "Hello, self-writing internet",
+					"text": "Chat to create!",
 					"call_to_action": "Learn more"
 				}
 			},
@@ -434,6 +433,11 @@
 				"name": "Parcl",
 				"one_liner": "A Solana‑based perpetuals exchange offering synthetic real‑estate markets—trade real‑estate price indexes with cross‑margin and LP‑backed liquidity.",
 				"description": "Parcl is a Solana-based decentralized exchange for real-estate price perpetuals, enabling users to long or short synthetic property indexes. It uses price data from Parcl Labs and LP-backed liquidity for cross-margined trading. The protocol is tailored to traders seeking exposure to real-world asset performance without holding the underlying property."
+			},
+			"liquidium": {
+				"name": "Liquidium",
+				"one_liner": "Borrow & lend native Bitcoin against USDT.",
+				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes."
 			}
 		}
 	},
@@ -649,7 +653,8 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
-			"icrc_canister_loading": "The token with Ledger canister $ledgerCanisterId could not be loaded because it’s currently not responding.",
+			"icrc_canister_loading_curated": "The $tokenSymbol token is not responding and can't be loaded right now. Try again later.",
+			"icrc_canister_loading_custom": "The token with ledger canister $ledgerCanisterId is not responding and can't be loaded right now. Try again later.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc4626_custom_tokens": "Error while loading the ERC4626 custom tokens.",
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
@@ -1901,7 +1906,6 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "Stake GLDT tokens to earn rewards backed by physical gold",
 			"harvest_autopilot_page_description": "Maximized yield efficiency with 1-click autopilot vaults.",
 			"harvest_autopilot_vault_page_description": "Autopilot is powered by <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://docs.ipor.io/\">audited IPOR</a> Fusion Vault technology.",
 			"my_positions": "My positions",
@@ -1979,31 +1983,7 @@
 			"unexpected_error_on_unstake": "Something went wrong while unstaking tokens.",
 			"dissolvement_limit_reached": "You reached the maximum of $limit active unlock requests. Complete some before creating a new one.<br/>Note that you can always unstake using the ‘immediately’ option."
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "Current APY $apy%",
-				"item1_description": "Based on the latest rewards. The effective APY depends on the amount of $token staked in total each day.",
-				"item2_title_1": "Staking rewards are being paid in ",
-				"item2_title_2": " GOLDAO tokens",
-				"item3_title": "Unlock delay of 1 week",
-				"item3_description": "When unlocking GLDT from staking, the tokens are locked for 1 week without receiving any further rewards, before they can be withdrawn. You can pay a 5% fee on your stake to unlock immediately.",
-				"item4_title": "Age bonus",
-				"item4_description": "GLDT stakes start obtaining an age bonus from day 1. The older the stakes, the bigger the age bonus, growing linearly at 100% per year.",
-				"item5_title": "When you start unlocking your GLDT stake, you will no longer receive new rewards"
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "What is GLDT",
-				"description": "GLDT stands for “Gold Token”, being a fungible token backed by GLD NFTs. GLD NFTs are NFTs that represent irrefutable ownership of physical gold bars. 1 GLDT represents exactly 0.01g of gold, and GLD NFTs can be swapped at a ratio of 1g for 100 GLDTs.",
-				"fact_1_title": "Backed by real gold",
-				"fact_1_description": "Every GLDT token is backed by actual gold stored in secure vaults",
-				"fact_2_title": "Flexible terms",
-				"fact_2_description": "No lock-up periods, stake and unstake anytime you want",
-				"fact_3_title": "Stable returns",
-				"fact_3_description": "Earn $apy% APY with minimal volatility risk",
-				"fact_3_description_fallback": "Earn consistent rewards with minimal volatility risk"
-			},
 			"harvest_autopilot": {
 				"title": "What is Harvest Autopilot",
 				"description": "Harvest Autopilot is a specialized feature (and a specific product line) within the Harvest Finance ecosystem designed to automate and optimize your decentralized finance (DeFi) positions with minimal effort.",

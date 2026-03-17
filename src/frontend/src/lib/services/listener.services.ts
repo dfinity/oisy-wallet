@@ -44,7 +44,7 @@ export const syncBalancesFromCache = async ({ tokenId, ...params }: GetIdbTransa
 		return;
 	}
 
-	balancesStore.set({
+	balancesStore.batchSet({
 		id: tokenId,
 		data: {
 			data: balance,

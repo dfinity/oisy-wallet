@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "První platforma pro tvorbu self-writing aplikací.",
-				"call_to_action": "Vyzkoušejte Caffeine",
 				"description": "Caffeine je první platforma pro vytváření aplikací, které se samy píší. Stačí si promluvit s umělou inteligencí na počítači nebo mobilu a ona pro vás vytvoří aplikace a služby – včetně těch, které se připojují k peněžence OISY Wallet. Zažijte budoucnost vývoje aplikací s pomocí umělé inteligence.",
 				"carousel": {
 					"text": "Hello, self-writing internet",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -649,7 +653,8 @@
 			"btc_withdrawal_statuses": "Chyba při načítání stavů výběru BTC.",
 			"transaction_price": "Chyba při načítání odhadu ceny transakce.",
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
-			"icrc_canister_loading": "Token s Ledger kanystrem $ledgerCanisterId nelze načíst, protože v současné době neodpovídá.",
+			"icrc_canister_loading_curated": "Token $tokenSymbol neodpovedá a momentálne ho nie je možné načítať. Skúste to znova neskôr.",
+			"icrc_canister_loading_custom": "Token s Ledger kanystrem $ledgerCanisterId neodpovedá a momentálne ho nie je možné načítať. Skúste to znova neskôr.",
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
@@ -1901,7 +1906,6 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "Stakujte tokeny GLDT a získávejte odměny kryté fyzickým zlatem",
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
 			"my_positions": "",
@@ -1979,31 +1983,7 @@
 			"unexpected_error_on_unstake": "Při odstakování tokenů došlo k chybě.",
 			"dissolvement_limit_reached": "Dosáhli jste maximálního počtu $limit aktivních žádostí o odemčení. Nejprve některé dokončete, než vytvoříte novou.<br/>Vždy můžete použít možnost „okamžitě“."
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "Aktuální APY $apy%",
-				"item1_description": "Na základě nejnovějších odměn. Efektivní APY závisí na celkovém množství $token stakovaného každý den.",
-				"item2_title_1": "Odměny za stakování jsou vypláceny v ",
-				"item2_title_2": " GOLDAO tokenech",
-				"item3_title": "Zpoždění odemčení 1 týden",
-				"item3_description": "Při odemykání GLDT ze stakování jsou tokeny uzamčeny na 1 týden bez dalších odměn, než je možné je vybrat. Okamžité odemčení je možné za poplatek 5 %.",
-				"item4_title": "Věkový bonus",
-				"item4_description": "GLDT staky získávají věkový bonus od 1. dne. Čím starší je stake, tím vyšší bonus — lineárně až 100 % ročně.",
-				"item5_title": "Jakmile zahájíte odemykání svého GLDT staku, přestanete dostávat nové odměny"
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "Co je GLDT",
-				"description": "GLDT znamená „Gold Token“ a je to zastupitelný token krytý GLD NFT. GLD NFT představují nezpochybnitelné vlastnictví fyzických zlatých slitků. 1 GLDT představuje přesně 0,01 g zlata a GLD NFT lze směnit v poměru 1 g za 100 GLDT.",
-				"fact_1_title": "Kryto skutečným zlatem",
-				"fact_1_description": "Každý token GLDT je kryt skutečným zlatem uloženým v zabezpečených trezorech",
-				"fact_2_title": "Flexibilní podmínky",
-				"fact_2_description": "Žádné uzamykací lhůty, stakujte a odstakujte kdykoli",
-				"fact_3_title": "Stabilní výnosy",
-				"fact_3_description": "Získejte $apy% APY s minimálním rizikem volatility",
-				"fact_3_description_fallback": "Získejte stabilní odměny s minimálním rizikem volatility"
-			},
 			"harvest_autopilot": {
 				"title": "",
 				"description": "",

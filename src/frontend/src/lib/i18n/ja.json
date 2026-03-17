@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "自己記述型アプリを構築するための初のプラットフォーム",
-				"call_to_action": "Caffeineを試す",
 				"description": "Caffeine は、自己記述型アプリを構築するための初のプラットフォームです。デスクトップやモバイルで AI と会話するだけで、OISY Wallet と連携するものを含むアプリやサービスを自動で作成します。AI主導の開発によって実現する、アプリ開発の未来を体験してください。",
 				"carousel": {
 					"text": "こんにちは、自己記述型インターネット",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -649,7 +653,8 @@
 			"btc_withdrawal_statuses": "BTC引き出しステータスの取得中にエラーが発生しました。",
 			"transaction_price": "トランザクション価格の見積もりの読み込み中にエラーが発生しました。",
 			"icrc_canisters": "ICRCキャニスターの読み込み中にエラーが発生しました。",
-			"icrc_canister_loading": "Ledgerキャニスター$ledgerCanisterIdのトークンを読み込めませんでした。現在、応答していません。",
+			"icrc_canister_loading_curated": "トークン$tokenSymbolを読み取ることができませんでした。現在、応答がありません。後ほどもう一度お試しください。",
+			"icrc_canister_loading_custom": "Ledgerキャニスター$ledgerCanisterIdのトークンを読み込めませんでした。現在、応答していません。後ほどもう一度お試しください。",
 			"erc20_custom_tokens": "ERC20カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "ERC721カスタムトークンの読み込み中にエラーが発生しました。",
@@ -1901,7 +1906,6 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "GLDTトークンをステーキングして、実物のゴールドに裏付けられた報酬を獲得",
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
 			"my_positions": "",
@@ -1979,31 +1983,7 @@
 			"unexpected_error_on_unstake": "ステーキング解除中に問題が発生しました。",
 			"dissolvement_limit_reached": "アクティブな解除リクエストの上限$limitに達しました。新しいリクエストを作成する前に、一部を完了してください。<br/>注意: 「即時」オプションを使用すれば、いつでもステーキング解除できます。"
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "現在のAPY $apy%",
-				"item1_description": "最新の報酬に基づいています。実効APYは、毎日ステーキングされる$tokenの総額によって変動します。",
-				"item2_title_1": "ステーキング報酬は",
-				"item2_title_2": "GOLDAOトークンで支払われます。",
-				"item3_title": "ロック解除まで1週間",
-				"item3_description": "GLDTをステーキングから解除する際、トークンは引き出し可能になるまで1週間ロックされ、その間報酬は発生しません。ステーク額の5%の手数料を支払うことで、即座に解除できます。",
-				"item4_title": "保有期間ボーナス",
-				"item4_description": "GLDTステークは1日目から保有期間ボーナスを獲得できます。ステーク期間が長いほどボーナスが大きくなり、年率100%で直線的に増加します。",
-				"item5_title": "GLDTステークの解除を開始すると、新しい報酬は受け取れなくなります。"
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "GLDTとは",
-				"description": "GLDTは「ゴールドトークン」の略で、GLD NFTに裏付けられたファンジブルトークンです。GLD NFTは、実物のゴールドバーの紛れもない所有権を表すNFTです。1 GLDTは正確に0.01gのゴールドを表し、GLD NFTは1gあたり100 GLDTの比率で交換できます。",
-				"fact_1_title": "実物のゴールドに裏付け",
-				"fact_1_description": "すべてのGLDTトークンは、安全な金庫に保管された実物のゴールドに裏付けられています。",
-				"fact_2_title": "柔軟な条件",
-				"fact_2_description": "ロック期間なし、いつでもステーキング・解除が可能",
-				"fact_3_title": "安定したリターン",
-				"fact_3_description": "最小限のボラティリティリスクで$apy%のAPYを獲得",
-				"fact_3_description_fallback": "最小限のボラティリティリスクで安定した報酬を獲得"
-			},
 			"harvest_autopilot": {
 				"title": "",
 				"description": "",

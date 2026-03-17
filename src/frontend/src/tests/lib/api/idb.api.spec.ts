@@ -74,9 +74,9 @@ describe('idb.api', () => {
 
 		it('should delete only OISY-related databases', async () => {
 			mockDatabases.mockResolvedValueOnce([
-				{ name: 'oisy-btc-addresses' },
+				{ name: 'oisy-btc-transactions' },
 				{ name: 'other-db' },
-				{ name: 'oisy-eth-addresses' }
+				{ name: 'oisy-balances' }
 			]);
 
 			mockDeleteDatabase.mockImplementation(() => ({
@@ -93,14 +93,14 @@ describe('idb.api', () => {
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
 			expect(mockDeleteDatabase).toHaveBeenCalledTimes(2);
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-addresses');
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-eth-addresses');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-transactions');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-balances');
 		});
 
 		it('should handle gracefully a failure during a database deletion', async () => {
 			mockDatabases.mockResolvedValueOnce([
-				{ name: 'oisy-btc-addresses' },
-				{ name: 'oisy-eth-addresses' }
+				{ name: 'oisy-btc-transactions' },
+				{ name: 'oisy-balances' }
 			]);
 
 			mockDeleteDatabase
@@ -126,14 +126,14 @@ describe('idb.api', () => {
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
 			expect(mockDeleteDatabase).toHaveBeenCalledTimes(2);
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-addresses');
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-eth-addresses');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-transactions');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-balances');
 		});
 
 		it('should handle gracefully a blocked database deletion', async () => {
 			mockDatabases.mockResolvedValueOnce([
-				{ name: 'oisy-btc-addresses' },
-				{ name: 'oisy-eth-addresses' }
+				{ name: 'oisy-btc-transactions' },
+				{ name: 'oisy-balances' }
 			]);
 
 			mockDeleteDatabase
@@ -159,8 +159,8 @@ describe('idb.api', () => {
 			expect(mockDatabases).toHaveBeenCalledExactlyOnceWith();
 
 			expect(mockDeleteDatabase).toHaveBeenCalledTimes(2);
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-addresses');
-			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-eth-addresses');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-transactions');
+			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-balances');
 		});
 	});
 });

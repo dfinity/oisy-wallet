@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "Nền tảng đầu tiên để xây dựng các ứng dụng tự viết.",
-				"call_to_action": "Thử Caffeine",
 				"description": "Caffeine là nền tảng đầu tiên để xây dựng các ứng dụng tự viết. Chỉ cần trò chuyện với AI trên máy tính hoặc điện thoại, nó sẽ tạo ra các ứng dụng và dịch vụ cho bạn – bao gồm cả những ứng dụng kết nối với Ví OISY. Trải nghiệm tương lai của việc phát triển ứng dụng với khả năng sáng tạo được hỗ trợ bởi AI.",
 				"carousel": {
 					"text": "Xin chào, internet tự viết",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -649,7 +653,8 @@
 			"btc_withdrawal_statuses": "Lỗi khi tìm nạp trạng thái rút BTC.",
 			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
-			"icrc_canister_loading": "Token với canister Ledger $ledgerCanisterId không thể được tải vì hiện tại nó không phản hồi.",
+			"icrc_canister_loading_curated": "Token $tokenSymbol không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
+			"icrc_canister_loading_custom": "Token với canister ledger $ledgerCanisterId không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
 			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",
@@ -1901,7 +1906,6 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
 			"my_positions": "",
@@ -1979,31 +1983,7 @@
 			"unexpected_error_on_unstake": "",
 			"dissolvement_limit_reached": ""
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
-			},
 			"harvest_autopilot": {
 				"title": "",
 				"description": "",
