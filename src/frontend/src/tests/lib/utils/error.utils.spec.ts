@@ -586,6 +586,26 @@ Call context:
 			expect(result).not.toContain('"ok"');
 		});
 
+		it('should strip the "Consider gracefully handling" boilerplate', () => {
+			const err = new Error(
+				'The replica returned a rejection error:\n' +
+					'  Reject code: 5\n' +
+					'  Reject text: Canister trapped\n' +
+					'  Error code: IC0503\n' +
+					'Consider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation: https://internetcomputer.org/docs/current/references/ic-interface-spec/#error-handling\n' +
+					'Call context:\n' +
+					'  Canister ID: abc-cai\n' +
+					'  Method name: test\n' +
+					'  HTTP details: {"ok":true,"status":200}'
+			);
+
+			const result = formatIcCallError({ err }) as string;
+
+			expect(result).toContain('Reject code: 5');
+			expect(result).not.toContain('Consider gracefully');
+			expect(result).not.toContain('See documentation');
+		});
+
 		it('should truncate long Return types in UnknownError', () => {
 			const err = new Error(
 				'Unexpected error: "Call was returned undefined. We cannot determine if the call was successful or not. Return types: [variant {Ok:record {balance:nat; transactions:vec record {id:nat; transaction:record {burn:opt record {fee:opt nat}}}}; Err:record {message:text}}]."\n' +

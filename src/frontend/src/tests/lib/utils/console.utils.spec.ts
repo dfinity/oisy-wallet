@@ -2,9 +2,6 @@ import { consoleError, consoleWarn } from '$lib/utils/console.utils';
 import type { MockInstance } from 'vitest';
 
 describe('console.utils', () => {
-	const originalError = console.error;
-	const originalWarn = console.warn;
-
 	let errorSpy: MockInstance;
 	let warnSpy: MockInstance;
 
@@ -16,8 +13,8 @@ describe('console.utils', () => {
 	});
 
 	afterEach(() => {
-		console.error = originalError;
-		console.warn = originalWarn;
+		errorSpy.mockRestore();
+		warnSpy.mockRestore();
 	});
 
 	describe('consoleError', () => {
