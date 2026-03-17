@@ -101,6 +101,7 @@ export const mapIcrcToken = ({
 		...(nonNullish(customTokenSymbol?.deprecated) && {
 			deprecated: customTokenSymbol.deprecated
 		}),
+		tags: [],
 		ledgerCanisterId,
 		...metadataToken,
 		...rest

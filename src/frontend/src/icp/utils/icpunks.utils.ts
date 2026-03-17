@@ -25,5 +25,6 @@ export const mapIcPunksToken = ({
 	standard: {
 		code: 'icpunks'
 	},
-	category: 'custom'
+	category: 'custom',
+	tags: []
 });
