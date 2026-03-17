@@ -215,6 +215,60 @@ describe('infura-erc4626.providers', () => {
 				).rejects.toThrowError(errorMessage);
 			});
 		});
+
+		describe('convertToShares', () => {
+			const mockConvertToShares = vi.fn();
+			const mockAssets = 1050000n;
+			const mockSharesResult = 10n ** 8n;
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+
+				mockConvertToShares.mockResolvedValue(mockSharesResult);
+
+				mockContract.prototype.convertToShares =
+					mockConvertToShares as unknown as typeof mockContract.prototype.convertToShares;
+			});
+
+			it('should return the converted shares amount', async () => {
+				const provider = new InfuraErc4626Provider(infura);
+
+				const result = await provider.convertToShares({
+					contract: contractAddress,
+					assets: mockAssets
+				});
+
+				expect(result).toBe(mockSharesResult);
+			});
+
+			it('should call convertToShares on the contract with the correct assets', async () => {
+				const provider = new InfuraErc4626Provider(infura);
+
+				await provider.convertToShares({ contract: contractAddress, assets: mockAssets });
+
+				expect(mockContract).toHaveBeenCalledOnce();
+				expect(mockContract).toHaveBeenNthCalledWith(
+					1,
+					...expectedContractParams,
+					new mockProvider()
+				);
+
+				expect(mockConvertToShares).toHaveBeenCalledOnce();
+				expect(mockConvertToShares).toHaveBeenNthCalledWith(1, mockAssets);
+			});
+
+			it('should handle errors gracefully', async () => {
+				const errorMessage = 'Error converting to shares';
+				mockConvertToShares.mockRejectedValue(new Error(errorMessage));
+
+				const provider = new InfuraErc4626Provider(infura);
+
+				await expect(
+					provider.convertToShares({ contract: contractAddress, assets: mockAssets })
+				).rejects.toThrowError(errorMessage);
+			});
+		});
+
 	});
 
 	describe('infuraErc4626Providers', () => {

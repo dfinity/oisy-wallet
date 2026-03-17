@@ -40,6 +40,17 @@ export class InfuraErc4626Provider extends InfuraErc20Provider {
 		const vault = new Contract(contract, ERC4626_ABI, this.provider);
 		return await vault.convertToAssets(shares);
 	};
+
+	convertToShares = async ({
+		contract,
+		assets
+	}: {
+		contract: Erc4626ContractAddress;
+		assets: bigint;
+	}): Promise<bigint> => {
+		const vault = new Contract(contract, ERC4626_ABI, this.provider);
+		return await vault.convertToShares(assets);
+	};
 }
 
 const providers: Record<NetworkId, InfuraErc4626Provider> = [
