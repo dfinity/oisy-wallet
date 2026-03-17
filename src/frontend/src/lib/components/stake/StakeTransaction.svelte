@@ -16,10 +16,9 @@
 	}
 	const { transaction, onClick, testId }: Props = $props();
 
-	let isHarvestAutopilot = $derived(isTokenHarvestAutopilot(transaction.token));
-
 	let {
 		token,
+		vaultToken,
 		type,
 		value,
 		from,
@@ -27,21 +26,35 @@
 		timestamp: unparsedTimestamp
 	} = $derived(transaction);
 
+	let isHarvestAutopilot = $derived(isTokenHarvestAutopilot(token));
+
+	let isHarvestAutopilotAssetToken = $derived(
+		nonNullish(vaultToken) && isTokenHarvestAutopilot(vaultToken)
+	);
+
 	let pending = $derived(
-		isHarvestAutopilot ? isTransactionPending(transaction as EthTransactionUi) : false
+		isHarvestAutopilot || isHarvestAutopilotAssetToken
+			? isTransactionPending(transaction as EthTransactionUi)
+			: false
 	);
 
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
 	let incoming = $derived(type === 'receive');
 
-	let displayAmount = $derived((value ?? ZERO) * (incoming ? 1n : -1n));
+	let displayAmount = $derived(
+		(value ?? ZERO) * (isHarvestAutopilotAssetToken ? (incoming ? -1n : 1n) : incoming ? 1n : -1n)
+	);
 
 	let label = $derived(
 		!isHarvestAutopilot
-			? incoming
-				? $i18n.stake.text.staked
-				: $i18n.stake.text.unstaked
+			? isHarvestAutopilotAssetToken
+				? incoming
+					? $i18n.stake.text.unstaked
+					: $i18n.stake.text.staked
+				: incoming
+					? $i18n.stake.text.staked
+					: $i18n.stake.text.unstaked
 			: incoming
 				? $i18n.receive.text.receive
 				: $i18n.send.text.send
