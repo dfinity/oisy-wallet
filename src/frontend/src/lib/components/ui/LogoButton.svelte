@@ -75,8 +75,8 @@
 					</span>
 				{/if}
 				{#if nonNullish(logo)}
-				<span class="mr-2 flex">{@render logo()}</span>
-					{/if}
+					<span class="mr-2 flex">{@render logo()}</span>
+				{/if}
 				<span class="flex min-w-0 flex-col text-left">
 					<span class="flex min-w-0 items-center truncate text-nowrap">
 						{#if nonNullish(title)}

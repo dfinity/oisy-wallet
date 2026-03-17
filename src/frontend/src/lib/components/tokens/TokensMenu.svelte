@@ -3,6 +3,7 @@
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconHide from '$lib/components/icons/IconHide.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import TokensCategoryFilterToggle from '$lib/components/tokens/TokensCategoryFilterToggle.svelte';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -12,7 +13,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { emit } from '$lib/utils/events.utils';
-	import TokensCategoryFilterToggle from "$lib/components/tokens/TokensCategoryFilterToggle.svelte";
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
