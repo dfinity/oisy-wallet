@@ -1,9 +1,9 @@
 import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
-import { type CkEthMinterInfoData, ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+import { ckEthMinterInfoStore, type CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
-import { type CkBtcMinterInfoData, ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+import { ckBtcMinterInfoStore, type CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import {
 	isTokenCkBtcLedger,
 	isTokenCkErc20Ledger,
@@ -14,7 +14,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { derived, type Readable, writable } from 'svelte/store';
+import { derived, writable, type Readable } from 'svelte/store';
 
 export interface ConvertData {
 	sourceToken: Token;

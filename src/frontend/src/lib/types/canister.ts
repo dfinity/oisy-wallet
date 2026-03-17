@@ -1,6 +1,7 @@
 import type { OptionIdentity } from '$lib/types/identity';
 import type { CanisterOptions } from '@dfinity/utils';
-import { type Nullish, PrincipalTextSchema } from '@dfinity/zod-schemas';
+import type { Nullish } from '@dfinity/zod-schemas';
+import { PrincipalTextSchema } from '@dfinity/zod-schemas';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 import type * as z from 'zod';

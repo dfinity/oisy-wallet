@@ -43,22 +43,22 @@ import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import type { TransactionType } from '$lib/types/transaction';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
+import type { Nullish } from '@dfinity/zod-schemas';
 import {
-	isNetworkIdBitcoin,
 	isNetworkIdBTCMainnet,
 	isNetworkIdBTCTestnet,
+	isNetworkIdBitcoin,
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdICP,
-	isNetworkIdSepolia,
-	isNetworkIdSolana,
 	isNetworkIdSOLDevnet,
-	isNetworkIdSOLMainnet
+	isNetworkIdSOLMainnet,
+	isNetworkIdSepolia,
+	isNetworkIdSolana
 } from '$lib/utils/network.utils';
 import { findNftsByToken } from '$lib/utils/nfts.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
-import type { Nullish } from '@dfinity/zod-schemas';
 import { get } from 'svelte/store';
 
 type AccountSnapshotFor = Extract<RcAccountSnapshotFor, { Any: AccountSnapshot_Any }>;
@@ -197,7 +197,7 @@ const toAnySnapshot = ({
 		groupData
 	} = token;
 
-	const account: Nullish<AccountId_Any> =
+	const account: Option<AccountId_Any> =
 		isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)
 			? get(ethAddress)
 			: isNetworkIdBTCTestnet(networkId)

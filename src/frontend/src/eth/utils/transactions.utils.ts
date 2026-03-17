@@ -11,10 +11,10 @@ import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Transaction } from '$lib/types/transaction';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { getContactForAddress } from '$lib/utils/contact.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { Nullish } from '@dfinity/zod-schemas';
 import { AbiCoder } from 'ethers/abi';
 import { dataSlice } from 'ethers/utils';
 

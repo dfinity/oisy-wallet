@@ -10,6 +10,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { TokenActionErrorType } from '$lib/types/token-action';
+import type { Nullish } from '@dfinity/zod-schemas';
 import {
 	assertAmount,
 	assertCkBtcAmount,
@@ -20,7 +21,6 @@ import {
 import { formatToken } from '$lib/utils/format.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { nonNullish } from '@dfinity/utils';
-import type { Nullish } from '@dfinity/zod-schemas';
 
 export const validateUserAmount = ({
 	userAmount,

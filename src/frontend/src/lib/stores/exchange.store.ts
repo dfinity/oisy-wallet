@@ -1,7 +1,7 @@
 import type { CoingeckoPriceResponse } from '$lib/types/coingecko';
-import { nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { type Readable, writable } from 'svelte/store';
+import { nonNullish } from '@dfinity/utils';
+import { writable, type Readable } from 'svelte/store';
 
 export type ExchangeData = Nullish<CoingeckoPriceResponse>;
 

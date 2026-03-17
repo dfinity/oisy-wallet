@@ -11,11 +11,11 @@ import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { Nullish } from '@dfinity/zod-schemas';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { NavigationTarget } from '@sveltejs/kit';
-import { type Readable, writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export interface Modal<T> {
 	type:

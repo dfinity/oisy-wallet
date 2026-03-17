@@ -10,8 +10,8 @@ import type {
 	NonFungibleTokensByNetwork
 } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
-import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const isTokenNonFungible = (token: Token): token is NonFungibleToken =>
 	isTokenErc721(token) || isTokenErc1155(token) || isTokenIcNft(token);

@@ -1,19 +1,19 @@
 import { REPLICA_HOST } from '$lib/constants/app.constants';
+import type { Nullish } from '@dfinity/zod-schemas';
 import {
-	type AccountsPromptPayload,
-	type CallCanisterPromptPayload,
-	type ConsentMessagePromptPayload,
 	ICRC21_CALL_CONSENT_MESSAGE,
 	ICRC25_REQUEST_PERMISSIONS,
 	ICRC27_ACCOUNTS,
 	ICRC49_CALL_CANISTER,
+	type AccountsPromptPayload,
+	type CallCanisterPromptPayload,
+	type ConsentMessagePromptPayload,
 	type PermissionsPromptPayload
 } from '@dfinity/oisy-wallet-signer';
 import { Signer } from '@dfinity/oisy-wallet-signer/signer';
 import { isNullish } from '@dfinity/utils';
-import type { Nullish } from '@dfinity/zod-schemas';
 import type { Identity } from '@icp-sdk/core/agent';
-import { derived, type Readable, writable } from 'svelte/store';
+import { derived, writable, type Readable } from 'svelte/store';
 
 /**
  * Interface for managing the OISY Wallet Signer context in any route or component.

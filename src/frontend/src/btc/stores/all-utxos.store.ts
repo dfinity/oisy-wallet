@@ -1,7 +1,10 @@
 import type { Nullish } from '@dfinity/zod-schemas';
-import { type Readable, writable } from 'svelte/store';
+import type { BitcoinDid } from '@icp-sdk/canisters/ckbtc';
+import { writable, type Readable } from 'svelte/store';
 
-export type AllUtxosStoreData = Nullish<{ allUtxos?: utxo[] }>;
+export type AllUtxosStoreData = Nullish<{
+	allUtxos?: BitcoinDid.utxo[];
+}>;
 
 export interface AllUtxosStore extends Readable<AllUtxosStoreData> {
 	setAllUtxos: (data: AllUtxosStoreData) => void;

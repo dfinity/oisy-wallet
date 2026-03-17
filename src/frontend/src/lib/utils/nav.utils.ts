@@ -16,9 +16,9 @@ import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-import type { Nullish } from '@dfinity/zod-schemas';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
 const normalizePath = (s: string | null) =>

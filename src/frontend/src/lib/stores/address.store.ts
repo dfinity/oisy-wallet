@@ -4,7 +4,7 @@ import type { Address } from '$lib/types/address';
 import type { CertifiedData } from '$lib/types/store';
 import type { SolAddress } from '$sol/types/address';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { type Readable, writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 type CertifiedAddressData<T extends Address> = CertifiedData<T>;
 

@@ -1,8 +1,8 @@
 import type { OptionAmount } from '$lib/types/send';
 import type { SwapMappedResult } from '$lib/types/swap';
-import { isNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { type Readable, writable } from 'svelte/store';
+import { isNullish } from '@dfinity/utils';
+import { writable, type Readable } from 'svelte/store';
 
 export interface SwapAmountsStoreData {
 	swaps: SwapMappedResult[];

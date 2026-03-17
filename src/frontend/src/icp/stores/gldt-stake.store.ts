@@ -1,6 +1,6 @@
 import type { Response, StakePositionResponse } from '$declarations/gldt_stake/gldt_stake.did';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { type Readable, writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export type GldtStakeStoreData = Nullish<{
 	apy?: number;

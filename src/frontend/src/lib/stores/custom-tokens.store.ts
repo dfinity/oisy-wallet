@@ -7,10 +7,10 @@ import { isTokenIc } from '$icp/utils/icrc.utils';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { CertifiedData } from '$lib/types/store';
 import type { Token, TokenId } from '$lib/types/token';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import type { Nullish } from '@dfinity/zod-schemas';
-import { type Readable, writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 type CertifiedCustomTokensData<T extends Token> = Nullish<CertifiedData<CustomToken<T>>[]>;
 

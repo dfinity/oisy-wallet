@@ -2,7 +2,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { CertifiedData } from '$lib/types/store';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { type Readable, writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export type CertifiedIcrcTokensData<T extends IcToken> = Nullish<CertifiedData<T>[]>;
 

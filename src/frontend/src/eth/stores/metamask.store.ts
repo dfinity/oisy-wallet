@@ -1,5 +1,5 @@
 import type { Nullish } from '@dfinity/zod-schemas';
-import { type Readable, writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 interface MetamaskData {
 	available: Nullish<boolean>;

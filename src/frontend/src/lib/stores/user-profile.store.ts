@@ -1,6 +1,6 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { type Readable, writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 interface CertifiedUserProfileData {
 	profile: UserProfile;

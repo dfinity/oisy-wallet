@@ -1,6 +1,6 @@
 import type { ICTokenReply } from '$declarations/kong_backend/kong_backend.did';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { type Readable, writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export type KongSwapTokensStoreData = Nullish<Record<string, ICTokenReply>>;
 
