@@ -8,6 +8,7 @@ import {
 } from '$env/networks/networks.eth.env';
 import { ERC4626_TOKENS } from '$env/tokens/tokens.erc4626.env';
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { ERC4626_ABI } from '$eth/constants/erc4626.constants';
 import { infuraErc4626Providers } from '$eth/providers/infura-erc4626.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
@@ -144,7 +145,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: ETHEREUM_DEFAULT_DECIMALS,
 					standard: { code: 'erc4626' as const },
 					category: 'custom' as const,
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					assetAddress: '' as Erc4626ContractAddress,
 					assetDecimals: ETHEREUM_DEFAULT_DECIMALS,
 					assetSymbol: '',

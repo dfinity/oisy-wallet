@@ -6,6 +6,7 @@ import {
 	ICONFUCIUS_LEDGER_CANISTER_ID
 } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type {
 	IcCkInterface,
 	IcFee,
@@ -101,7 +102,7 @@ export const mapIcrcToken = ({
 		...(nonNullish(customTokenSymbol?.deprecated) && {
 			deprecated: customTokenSymbol.deprecated
 		}),
-		tags: [],
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		ledgerCanisterId,
 		...metadataToken,
 		...rest
