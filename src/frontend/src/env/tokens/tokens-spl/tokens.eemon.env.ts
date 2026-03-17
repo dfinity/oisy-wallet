@@ -17,6 +17,7 @@ export const EEMON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'iShares MSCI Emerging Markets ETF (Ondo Tokenized)',
 	symbol: EEMON_SYMBOL,
 	decimals: EEMON_DECIMALS,

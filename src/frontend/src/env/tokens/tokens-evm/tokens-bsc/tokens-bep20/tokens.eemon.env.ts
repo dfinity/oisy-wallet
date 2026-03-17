@@ -16,6 +16,7 @@ export const EEMON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'iShares MSCI Emerging Markets ETF (Ondo Tokenized)',
 	symbol: EEMON_SYMBOL,
 	decimals: EEMON_DECIMALS,

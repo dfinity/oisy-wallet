@@ -16,6 +16,7 @@ export const HONX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Honeywell xStock',
 	symbol: HONX_SYMBOL,
 	decimals: HONX_DECIMALS,

@@ -1,4 +1,5 @@
 import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
+import { ERC20_ABI } from '$eth/constants/erc20.constants';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { getNonce } from '$eth/services/nonce.services';
@@ -16,6 +17,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { Interface } from 'ethers/abi';
 
 /**
  * Get the current allowance of an Erc20 contract.
@@ -37,6 +39,20 @@ export const erc20ContractAllowance = async ({
 		owner,
 		spender
 	});
+};
+
+export const encodeErc20Approve = ({
+	tokenAddress,
+	spender,
+	amount
+}: {
+	tokenAddress: string;
+	spender: string;
+	amount: bigint;
+}): { to: string; data: string } => {
+	const data = new Interface(ERC20_ABI).encodeFunctionData('approve', [spender, amount]);
+
+	return { to: tokenAddress, data };
 };
 
 /**

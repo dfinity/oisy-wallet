@@ -16,6 +16,7 @@ export const JUP_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Jupiter',
 	symbol: JUP_SYMBOL,
 	decimals: JUP_DECIMALS,

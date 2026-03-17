@@ -137,7 +137,7 @@ const mapOptionalToken = (
 	const { symbol, name, fee, decimals, ...rest } = nullishToken;
 
 	if (isNullish(symbol) || isNullish(name) || isNullish(fee) || isNullish(decimals)) {
-		return undefined;
+		return;
 	}
 
 	return {

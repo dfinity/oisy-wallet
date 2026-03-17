@@ -16,6 +16,7 @@ export const IVVON_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'iShares Core S&P 500 ETF (Ondo Tokenized)',
 	symbol: IVVON_SYMBOL,
 	decimals: IVVON_DECIMALS,

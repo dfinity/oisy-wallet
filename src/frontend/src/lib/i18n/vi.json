@@ -352,7 +352,6 @@
 			"caffeine": {
 				"name": "Caffeine",
 				"one_liner": "Nền tảng đầu tiên để xây dựng các ứng dụng tự viết.",
-				"call_to_action": "Thử Caffeine",
 				"description": "Caffeine là nền tảng đầu tiên để xây dựng các ứng dụng tự viết. Chỉ cần trò chuyện với AI trên máy tính hoặc điện thoại, nó sẽ tạo ra các ứng dụng và dịch vụ cho bạn – bao gồm cả những ứng dụng kết nối với Ví OISY. Trải nghiệm tương lai của việc phát triển ứng dụng với khả năng sáng tạo được hỗ trợ bởi AI.",
 				"carousel": {
 					"text": "Xin chào, internet tự viết",
@@ -431,6 +430,11 @@
 				"description": ""
 			},
 			"parcl": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"liquidium": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1902,9 +1906,10 @@
 	},
 	"stake": {
 		"text": {
-			"gldt_stake_page_description": "",
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
 			"my_positions": "",
 			"available_autopilots": "",
 			"vault_info": "",
@@ -1919,6 +1924,8 @@
 			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "",
 			"unstake_now": "",
 			"unstaking": "",
@@ -1978,33 +1985,10 @@
 		"error": {
 			"unexpected_error_on_withdraw": "",
 			"unexpected_error_on_unstake": "",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": ""
 		},
-		"terms": {
-			"gldt": {
-				"item1_title": "",
-				"item1_description": "",
-				"item2_title_1": "",
-				"item2_title_2": "",
-				"item3_title": "",
-				"item3_description": "",
-				"item4_title": "",
-				"item4_description": "",
-				"item5_title": ""
-			}
-		},
 		"info": {
-			"gldt": {
-				"title": "",
-				"description": "",
-				"fact_1_title": "",
-				"fact_1_description": "",
-				"fact_2_title": "",
-				"fact_2_description": "",
-				"fact_3_title": "",
-				"fact_3_description": "",
-				"fact_3_description_fallback": ""
-			},
 			"harvest_autopilot": {
 				"title": "",
 				"description": "",

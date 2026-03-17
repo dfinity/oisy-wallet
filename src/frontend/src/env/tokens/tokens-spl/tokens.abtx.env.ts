@@ -16,6 +16,7 @@ export const ABTX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Abbott xStock',
 	symbol: ABTX_SYMBOL,
 	decimals: ABTX_DECIMALS,

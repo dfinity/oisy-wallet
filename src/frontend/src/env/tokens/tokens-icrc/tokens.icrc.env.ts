@@ -1,6 +1,5 @@
 import { ADDITIONAL_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
-import ckErc20Tokens from '$env/tokens/tokens.ckerc20.json';
 import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
 import snsTokens from '$env/tokens/tokens.sns.json';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -18,18 +17,11 @@ export const ICRC_TOKENS: IcInterface[] = [
 const additionalIcrcTokensMetadataEntries = buildIcrcTokensMetadataEntries(
 	Object.values(additionalIcrcTokens)
 		.filter(nonNullish)
-		.map(({ ledgerCanisterId, ...rest }) => ({
+		.map(({ ledgerCanisterId, icon, ...rest }) => ({
 			...rest,
 			ledgerCanisterId,
-			icon: `/icons/icrc/${ledgerCanisterId}.png`
+			icon: icon ?? `/icons/icrc/${ledgerCanisterId}.png`
 		}))
-);
-
-const ckErc20MetadataEntries = buildIcrcTokensMetadataEntries(
-	Object.values(ckErc20Tokens.production ?? {})
-		.concat(Object.values(ckErc20Tokens.staging ?? {}))
-		.filter(nonNullish)
-		.map(({ fee: { __bigint__ }, ...rest }) => ({ ...rest, fee: BigInt(__bigint__) }))
 );
 
 const snsMetadataEntries = buildIcrcTokensMetadataEntries(
@@ -65,8 +57,10 @@ const snsMetadataEntries = buildIcrcTokensMetadataEntries(
 
 // Metadata pseudo-responses for built-in ICRC tokens whose name, symbol, decimals
 // and fee are already known at build time. Avoids redundant canister metadata() calls.
+// The ckERC20 tokens are excluded because they have no static icons at all and their
+// metadata is more complex than that of the other ICRC tokens (for example, twin-token properties).
+// TODO: Add static icons for ckERC20 and include them in this list.
 export const ICRC_TOKENS_METADATA: Map<LedgerCanisterIdText, IcrcTokenMetadataResponse> = new Map([
 	...additionalIcrcTokensMetadataEntries,
-	...ckErc20MetadataEntries,
 	...snsMetadataEntries
 ]);

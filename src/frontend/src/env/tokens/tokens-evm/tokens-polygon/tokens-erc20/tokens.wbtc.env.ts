@@ -16,6 +16,7 @@ export const WBTC_TOKEN: RequiredEvmBep20Token = {
 	network: POLYGON_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Wrapped BTC',
 	symbol: WBTC_SYMBOL,
 	decimals: WBTC_DECIMALS,

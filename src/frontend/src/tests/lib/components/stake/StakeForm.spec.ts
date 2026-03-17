@@ -1,9 +1,7 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import StakeForm from '$lib/components/stake/StakeForm.svelte';
-import * as appConstants from '$lib/constants/app.constants';
 import { STAKE_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
-import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { render } from '@testing-library/svelte';
 
@@ -21,10 +19,6 @@ describe('StakeForm', () => {
 
 	beforeEach(() => {
 		vi.resetAllMocks();
-
-		vi.spyOn(appConstants, 'GLDT_STAKE_CANISTER_ID', 'get').mockImplementation(
-			() => mockLedgerCanisterId
-		);
 	});
 
 	it('should keep the next button clickable if all requirements are met', () => {

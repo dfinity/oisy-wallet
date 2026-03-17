@@ -206,6 +206,15 @@ export interface ErcToken {
 	chain_id: bigint;
 }
 export type EthAddress = { Public: string };
+export interface ExchangeData {
+	price_24h_change_pct: [] | [number];
+	market_cap: [] | [number];
+	timestamp_ns: bigint;
+	price: [] | [number];
+}
+export interface ExchangeRate {
+	usd: ExchangeData;
+}
 export interface ExperimentalFeatureSettings {
 	enabled: boolean;
 }
@@ -338,7 +347,9 @@ export interface SplToken {
 }
 export interface Stats {
 	user_profile_count: bigint;
+	user_transactions_count: bigint;
 	custom_token_count: bigint;
+	exchange_rates_count: bigint;
 	token_activity_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
@@ -369,6 +380,23 @@ export type TokenAccountId =
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
+export type TokenId =
+	| { Erc20: [string, bigint] }
+	| { ExtV2: Principal }
+	| { SolNativeDevnet: null }
+	| { Icrc: Principal }
+	| { EvmNative: bigint }
+	| { BtcNativeMainnet: null }
+	| { Erc721: [string, bigint] }
+	| { SolNativeMainnet: null }
+	| { SplDevnet: string }
+	| { SplMainnet: string }
+	| { IcpNative: null }
+	| { IcPunks: Principal }
+	| { BtcNativeTestnet: null }
+	| { Erc1155: [string, bigint] }
+	| { Erc4626: [string, bigint] }
+	| { Dip721: Principal };
 export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
@@ -596,6 +624,8 @@ export interface _SERVICE {
 	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
+	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
+	get_exchange_rates: ActorMethod<[Array<TokenId>], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
 	 * Returns the caller's user profile.
 	 *

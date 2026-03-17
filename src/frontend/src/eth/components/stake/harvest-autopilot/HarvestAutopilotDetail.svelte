@@ -60,13 +60,25 @@
 		toCkMinterInfoAddresses($ckEthMinterInfoStore?.[ETHEREUM_TOKEN_ID])
 	);
 
+	let vaultTransactions = $derived(
+		nonNullish(vault) ? ($ethTransactionsStore?.[vault.token.id] ?? []) : []
+	);
+
+	let assetTransactions = $derived(
+		nonNullish(assetToken) ? ($ethTransactionsStore?.[assetToken.id] ?? []) : []
+	);
+
 	let transactions: StakingTransactionsUiWithToken[] = $derived(
-		getHarvestAutopilotVaultTransactions({
-			vault,
-			ethTransactionsStore: $ethTransactionsStore,
-			ethAddress: $ethAddress,
-			ckMinterInfoAddresses
-		})
+		nonNullish(vault)
+			? getHarvestAutopilotVaultTransactions({
+					vaultToken: vault.token,
+					assetToken,
+					vaultTransactions,
+					assetTransactions,
+					ethAddress: $ethAddress,
+					ckMinterInfoAddresses
+				})
+			: []
 	);
 
 	let highestEarningPotentialUsd = $derived(

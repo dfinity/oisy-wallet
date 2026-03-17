@@ -16,6 +16,7 @@ export const PGX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Procter & Gamble xStock',
 	symbol: PGX_SYMBOL,
 	decimals: PGX_DECIMALS,

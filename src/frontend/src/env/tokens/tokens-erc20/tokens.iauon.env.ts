@@ -16,6 +16,7 @@ export const IAUON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'iShares Gold Trust (Ondo Tokenized)',
 	symbol: IAUON_SYMBOL,
 	decimals: IAUON_DECIMALS,

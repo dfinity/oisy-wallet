@@ -184,6 +184,13 @@ type DefiniteCanisterSettingsArgs = record {
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
+type ExchangeData = record {
+	price_24h_change_pct : opt float64;
+	market_cap : opt float64;
+	timestamp_ns : nat64;
+	price : opt float64
+};
+type ExchangeRate = record { usd : ExchangeData };
 type ExperimentalFeatureSettings = record { enabled : bool };
 type ExperimentalFeatureSettingsFor = variant { AiAssistantBeta };
 type ExperimentalFeaturesSettings = record {
@@ -308,7 +315,9 @@ type SplToken = record {
 };
 type Stats = record {
 	user_profile_count : nat64;
+	user_transactions_count : nat64;
 	custom_token_count : nat64;
+	exchange_rates_count : nat64;
 	token_activity_count : nat64;
 	user_timestamps_count : nat64;
 	user_token_count : nat64
@@ -338,6 +347,24 @@ type TokenAccountId = variant {
 	Eth : EthAddress;
 	Sol : text;
 	Icrcv2 : Icrcv2AccountId
+};
+type TokenId = variant {
+	Erc20 : record { text; nat64 };
+	ExtV2 : principal;
+	SolNativeDevnet;
+	Icrc : principal;
+	EvmNative : nat64;
+	BtcNativeMainnet;
+	Erc721 : record { text; nat64 };
+	SolNativeMainnet;
+	SplDevnet : text;
+	SplMainnet : text;
+	IcpNative;
+	IcPunks : principal;
+	BtcNativeTestnet;
+	Erc1155 : record { text; nat64 };
+	Erc4626 : record { text; nat64 };
+	Dip721 : principal
 };
 type TokenSection = variant { Spam; Hidden };
 type TopUpCyclesLedgerError = variant {
@@ -529,6 +556,10 @@ service : (Arg) -> {
 	// # Returns
 	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
+	get_exchange_rate : (TokenId) -> (opt ExchangeRate) query;
+	get_exchange_rates : (vec TokenId) -> (
+		vec record { TokenId; opt ExchangeRate }
+	) query;
 	// Returns the caller's user profile.
 	//
 	// # Errors
