@@ -4,10 +4,10 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionString } from '$lib/types/string';
-	import type { Option } from '$lib/types/utils';
+	import type { Nullish } from '@dfinity/zod-schemas';
 
 	interface Props {
-		payload: Option<PayloadOrigin>;
+		payload: Nullish<PayloadOrigin>;
 	}
 
 	let { payload }: Props = $props();

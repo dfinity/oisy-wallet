@@ -1,7 +1,7 @@
-import type { Option } from '$lib/types/utils';
 import type { OptionWalletConnectListener, WalletConnectListener } from '$lib/types/wallet-connect';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { writable, type Readable } from 'svelte/store';
+import { type Readable, writable } from 'svelte/store';
 
 type WalletConnectListenerStoreData = OptionWalletConnectListener;
 
@@ -24,7 +24,7 @@ const initWalletConnectListenerStore = (): WalletConnectListenerStore => {
 
 export const walletConnectListenerStore = initWalletConnectListenerStore();
 
-type WalletConnectProposalStoreData = Option<WalletKitTypes.SessionProposal>;
+type WalletConnectProposalStoreData = Nullish<WalletKitTypes.SessionProposal>;
 
 interface WalletConnectProposalStore extends Readable<WalletConnectProposalStoreData> {
 	set: (data: WalletKitTypes.SessionProposal) => void;

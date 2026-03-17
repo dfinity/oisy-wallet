@@ -1,8 +1,8 @@
 import type { OptionAmount } from '$lib/types/send';
 import type { SwapMappedResult } from '$lib/types/swap';
-import type { Option } from '$lib/types/utils';
 import { isNullish } from '@dfinity/utils';
-import { writable, type Readable } from 'svelte/store';
+import type { Nullish } from '@dfinity/zod-schemas';
+import { type Readable, writable } from 'svelte/store';
 
 export interface SwapAmountsStoreData {
 	swaps: SwapMappedResult[];
@@ -10,7 +10,7 @@ export interface SwapAmountsStoreData {
 	selectedProvider?: SwapMappedResult;
 }
 
-export interface SwapAmountsStore extends Readable<Option<SwapAmountsStoreData>> {
+export interface SwapAmountsStore extends Readable<Nullish<SwapAmountsStoreData>> {
 	setSwaps: (params: {
 		swaps: SwapMappedResult[];
 		amountForSwap: OptionAmount;
@@ -21,7 +21,7 @@ export interface SwapAmountsStore extends Readable<Option<SwapAmountsStoreData>>
 }
 
 export const initSwapAmountsStore = (): SwapAmountsStore => {
-	const { subscribe, set, update } = writable<Option<SwapAmountsStoreData>>(undefined);
+	const { subscribe, set, update } = writable<Nullish<SwapAmountsStoreData>>(undefined);
 
 	return {
 		subscribe,

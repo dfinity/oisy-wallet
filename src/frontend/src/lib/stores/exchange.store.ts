@@ -1,9 +1,9 @@
 import type { CoingeckoPriceResponse } from '$lib/types/coingecko';
-import type { Option } from '$lib/types/utils';
 import { nonNullish } from '@dfinity/utils';
-import { writable, type Readable } from 'svelte/store';
+import type { Nullish } from '@dfinity/zod-schemas';
+import { type Readable, writable } from 'svelte/store';
 
-export type ExchangeData = Option<CoingeckoPriceResponse>;
+export type ExchangeData = Nullish<CoingeckoPriceResponse>;
 
 export interface ExchangeStore extends Readable<ExchangeData> {
 	set: (params: CoingeckoPriceResponse[]) => void;

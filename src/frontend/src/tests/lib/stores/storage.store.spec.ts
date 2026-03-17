@@ -1,6 +1,6 @@
 import { initStorageStore, type StorageStore } from '$lib/stores/storage.store';
-import type { Option } from '$lib/types/utils';
 import { del as delStorage, get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/utils/storage.utils', () => ({
@@ -87,7 +87,7 @@ describe('storage.store', () => {
 			});
 
 			it('should reset the store to default value even if it is nullish', () => {
-				const nullStore = initStorageStore<Option<MockData>>({ key: mockKey, defaultValue: null });
+				const nullStore = initStorageStore<Nullish<MockData>>({ key: mockKey, defaultValue: null });
 
 				nullStore.set(mockParams);
 
@@ -97,7 +97,7 @@ describe('storage.store', () => {
 
 				expect(get(nullStore)).toBeNull();
 
-				const undefinedStore = initStorageStore<Option<MockData>>({
+				const undefinedStore = initStorageStore<Nullish<MockData>>({
 					key: mockKey,
 					defaultValue: undefined
 				});

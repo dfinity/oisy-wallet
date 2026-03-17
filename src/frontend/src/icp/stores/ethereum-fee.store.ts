@@ -1,9 +1,7 @@
-import type { Option } from '$lib/types/utils';
-import { writable, type Readable } from 'svelte/store';
+import type { Nullish } from '@dfinity/zod-schemas';
+import { type Readable, writable } from 'svelte/store';
 
-export type EthereumFeeStoreData = Option<{
-	maxTransactionFee?: bigint;
-}>;
+export type EthereumFeeStoreData = Nullish<{ maxTransactionFee?: bigint }>;
 
 export interface EthereumFeeStore extends Readable<EthereumFeeStoreData> {
 	setFee: (data: EthereumFeeStoreData) => void;

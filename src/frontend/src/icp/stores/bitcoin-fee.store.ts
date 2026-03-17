@@ -1,10 +1,8 @@
-import type { Option } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { EstimateWithdrawalFee } from '@icp-sdk/canisters/ckbtc';
-import { writable, type Readable } from 'svelte/store';
+import { type Readable, writable } from 'svelte/store';
 
-export type BitcoinFeeStoreData = Option<{
-	bitcoinFee?: EstimateWithdrawalFee;
-}>;
+export type BitcoinFeeStoreData = Nullish<{ bitcoinFee?: EstimateWithdrawalFee }>;
 
 export interface BitcoinFeeStore extends Readable<BitcoinFeeStoreData> {
 	setFee: (data: BitcoinFeeStoreData) => void;

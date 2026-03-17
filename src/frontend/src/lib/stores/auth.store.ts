@@ -10,20 +10,20 @@ import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { InternetIdentityDomain } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { AuthClient } from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
-import { writable, type Readable } from 'svelte/store';
+import { type Readable, writable } from 'svelte/store';
 
 export interface AuthStoreData {
 	identity: OptionIdentity;
 }
 
-let authClient: Option<AuthClient>;
+let authClient: Nullish<AuthClient>;
 
 export interface AuthSignInParams {
 	domain?: InternetIdentityDomain;

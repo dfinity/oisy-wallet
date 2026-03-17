@@ -1,6 +1,6 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
-import type { Option } from '$lib/types/utils';
-import { writable, type Readable } from 'svelte/store';
+import type { Nullish } from '@dfinity/zod-schemas';
+import { type Readable, writable } from 'svelte/store';
 
 interface CertifiedUserProfileData {
 	profile: UserProfile;
@@ -10,7 +10,7 @@ interface CertifiedUserProfileData {
 // * `undefined` means the store is not loaded yet.
 // * `null` means there was an error.
 // * `UserProfile` is the data.
-export type UserProfileStoreData = Option<CertifiedUserProfileData>;
+export type UserProfileStoreData = Nullish<CertifiedUserProfileData>;
 
 export interface UserProfileStore extends Readable<UserProfileStoreData> {
 	set: (data: CertifiedUserProfileData | null) => void;

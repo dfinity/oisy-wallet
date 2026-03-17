@@ -2,13 +2,13 @@ import type { BtcAddress } from '$btc/types/address';
 import type { EthAddress } from '$eth/types/address';
 import type { Address } from '$lib/types/address';
 import type { CertifiedData } from '$lib/types/store';
-import type { Option } from '$lib/types/utils';
 import type { SolAddress } from '$sol/types/address';
-import { writable, type Readable } from 'svelte/store';
+import type { Nullish } from '@dfinity/zod-schemas';
+import { type Readable, writable } from 'svelte/store';
 
 type CertifiedAddressData<T extends Address> = CertifiedData<T>;
 
-export type AddressStoreData<T extends Address> = Option<CertifiedAddressData<T>>;
+export type AddressStoreData<T extends Address> = Nullish<CertifiedAddressData<T>>;
 
 export interface AddressStore<T extends Address> extends Readable<AddressStoreData<T>> {
 	set: (data: CertifiedAddressData<T>) => void;

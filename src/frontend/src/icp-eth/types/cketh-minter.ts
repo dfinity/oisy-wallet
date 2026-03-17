@@ -1,5 +1,4 @@
 import type { CertifiedData } from '$lib/types/store';
-import type { Option } from '$lib/types/utils';
-import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
+import type { Nullish } from '@dfinity/zod-schemas';
 
-export type OptionCertifiedMinterInfo = Option<CertifiedData<CkEthMinterDid.MinterInfo>>;
+export type OptionCertifiedMinterInfo = Nullish<CertifiedData<MinterInfo>>;

@@ -2,10 +2,10 @@
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Option } from '$lib/types/utils';
+	import type { Nullish } from '@dfinity/zod-schemas';
 
 	interface Props {
-		proposal: Option<WalletKitTypes.SessionProposal>;
+		proposal: Nullish<WalletKitTypes.SessionProposal>;
 	}
 
 	let { proposal }: Props = $props();

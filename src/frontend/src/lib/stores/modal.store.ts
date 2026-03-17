@@ -11,11 +11,11 @@ import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
-import type { Option } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { NavigationTarget } from '@sveltejs/kit';
-import { writable, type Readable } from 'svelte/store';
+import { type Readable, writable } from 'svelte/store';
 
 export interface Modal<T> {
 	type:
@@ -72,7 +72,7 @@ export interface Modal<T> {
 	id?: symbol;
 }
 
-export type ModalData<T> = Option<Modal<T>>;
+export type ModalData<T> = Nullish<Modal<T>>;
 
 interface SetWithDataParams<D> {
 	id: symbol;

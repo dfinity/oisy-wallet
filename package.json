@@ -75,7 +75,7 @@
 		"@dfinity/oisy-wallet-signer": "^4.0.0",
 		"@dfinity/utils": "^4.0.2",
 		"@dfinity/verifiable-credentials": "^1.2.0",
-		"@dfinity/zod-schemas": "^3.0.2",
+		"@dfinity/zod-schemas": "^3.2.0",
 		"@icp-sdk/auth": "^4.2.0",
 		"@icp-sdk/canisters": "^3.0.0",
 		"@icp-sdk/core": "^4.2.1",
