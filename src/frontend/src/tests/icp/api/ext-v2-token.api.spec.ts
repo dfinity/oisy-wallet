@@ -45,9 +45,9 @@ describe('ext-v2-token.api', () => {
 		});
 
 		it('should throw an error if identity is nullish', async () => {
-			await expect(transactions({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(transactions({ ...params, identity: undefined })).rejects.toThrow();
 
-			await expect(transactions({ ...params, identity: null })).rejects.toThrowError();
+			await expect(transactions({ ...params, identity: null })).rejects.toThrow();
 		});
 	});
 
@@ -140,7 +140,7 @@ describe('ext-v2-token.api', () => {
 
 			tokenCanisterMock.getTokensByOwnerLegacy.mockRejectedValueOnce(mockError);
 
-			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError);
+			await expect(getTokensByOwner(params)).rejects.toThrow(mockError);
 
 			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
 
@@ -157,7 +157,7 @@ describe('ext-v2-token.api', () => {
 
 			tokenCanisterMock.getTokensByOwnerLegacy.mockRejectedValueOnce(mockError2);
 
-			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError1);
+			await expect(getTokensByOwner(params)).rejects.toThrow(mockError1);
 
 			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
 
@@ -173,7 +173,7 @@ describe('ext-v2-token.api', () => {
 
 			tokenCanisterMock.getTokensByOwnerLegacy.mockRejectedValueOnce(new Error('Legacy error'));
 
-			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError);
+			await expect(getTokensByOwner(params)).rejects.toThrow(mockError);
 
 			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
 
@@ -215,9 +215,9 @@ describe('ext-v2-token.api', () => {
 		});
 
 		it('should raise an error if identity is nullish', async () => {
-			await expect(transfer({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
 
-			await expect(transfer({ ...params, identity: null })).rejects.toThrowError();
+			await expect(transfer({ ...params, identity: null })).rejects.toThrow();
 
 			expect(tokenCanisterMock.transfer).not.toHaveBeenCalled();
 		});
@@ -239,7 +239,7 @@ describe('ext-v2-token.api', () => {
 
 			tokenCanisterMock.transferAlias.mockRejectedValueOnce(mockError);
 
-			await expect(transfer(params)).rejects.toThrowError(mockError);
+			await expect(transfer(params)).rejects.toThrow(mockError);
 
 			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 
@@ -254,7 +254,7 @@ describe('ext-v2-token.api', () => {
 
 			tokenCanisterMock.transferAlias.mockRejectedValueOnce(mockError2);
 
-			await expect(transfer(params)).rejects.toThrowError(mockError1);
+			await expect(transfer(params)).rejects.toThrow(mockError1);
 
 			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 
@@ -268,7 +268,7 @@ describe('ext-v2-token.api', () => {
 
 			tokenCanisterMock.transferAlias.mockRejectedValueOnce(new Error('Legacy transfer error'));
 
-			await expect(transfer(params)).rejects.toThrowError(mockError);
+			await expect(transfer(params)).rejects.toThrow(mockError);
 
 			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 
@@ -300,9 +300,9 @@ describe('ext-v2-token.api', () => {
 		});
 
 		it('should raise an error if identity is nullish', async () => {
-			await expect(metadata({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(metadata({ ...params, identity: undefined })).rejects.toThrow();
 
-			await expect(metadata({ ...params, identity: null })).rejects.toThrowError();
+			await expect(metadata({ ...params, identity: null })).rejects.toThrow();
 
 			expect(tokenCanisterMock.metadata).not.toHaveBeenCalled();
 		});

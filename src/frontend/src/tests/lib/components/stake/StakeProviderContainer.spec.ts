@@ -19,7 +19,7 @@ describe('StakeProviderContainer', () => {
 
 		expect(getByTestId('content')).toBeInTheDocument();
 		expect(container).toHaveTextContent(pageTitle);
-		expect(() => getByText(en.stake.text.max_apy_label)).toThrowError();
+		expect(() => getByText(en.stake.text.max_apy_label)).toThrow();
 	});
 
 	it('renders data correctly if maxApy is provided', () => {
