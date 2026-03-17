@@ -5,6 +5,7 @@ import {
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import pol from '$evm/polygon/assets/pol.svg';
 import type { RequiredToken, TokenId } from '$lib/types/token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -19,7 +20,7 @@ export const POL_MAINNET_TOKEN: RequiredToken = {
 	network: POLYGON_MAINNET_NETWORK,
 	standard: { code: 'ethereum' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'POL (prev. MATIC)',
 	symbol: POL_MAINNET_SYMBOL,
 	decimals: POL_DECIMALS,
@@ -38,7 +39,7 @@ export const POL_AMOY_TOKEN: RequiredToken = {
 	network: POLYGON_AMOY_NETWORK,
 	standard: { code: 'ethereum' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	name: 'POL (Amoy Testnet)',
 	symbol: POL_AMOY_SYMBOL,
 	decimals: POL_DECIMALS,
