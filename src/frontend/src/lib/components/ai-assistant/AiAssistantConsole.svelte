@@ -25,6 +25,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ChatMessage } from '$lib/types/ai-assistant';
 	import { generateAiAssistantResponseEventMetadata } from '$lib/utils/ai-assistant.utils';
+	import { consoleError } from '$lib/utils/console.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
@@ -109,7 +110,7 @@
 							}
 			});
 		} catch (err: unknown) {
-			console.error($i18n.ai_assistant.errors.unknown, err);
+			consoleError($i18n.ai_assistant.errors.unknown, err);
 
 			aiAssistantStore.appendMessage({
 				role: 'assistant',

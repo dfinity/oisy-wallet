@@ -26,6 +26,7 @@ import type {
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
+import { consoleError } from '$lib/utils/console.utils';
 import {
 	mapCkBtcBitcoinNetworkToBackendBitcoinNetwork,
 	mapToSignerBitcoinNetwork
@@ -124,7 +125,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				}))
 			};
 		} catch (error) {
-			console.error('Error fetching pending BTC transactions:', error);
+			consoleError('Error fetching pending BTC transactions:', error);
 			return {
 				transactions: []
 			};

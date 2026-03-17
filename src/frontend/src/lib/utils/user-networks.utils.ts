@@ -29,6 +29,7 @@ import {
 } from '$env/networks/networks.sol.env';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { isNullish } from '@dfinity/utils';
 
 const networkIdToKey = (networkId: NetworkId): NetworkSettingsFor | undefined => {
@@ -70,7 +71,7 @@ const networkIdToKey = (networkId: NetworkId): NetworkSettingsFor | undefined =>
 			return { ArbitrumSepolia: null };
 		default:
 			// We just print the error to console and ignore the missing network, for the sake of the user's experience.
-			console.warn(`Unknown networkId: ${networkId.description}`);
+			consoleWarn(`Unknown networkId: ${networkId.description}`);
 	}
 };
 

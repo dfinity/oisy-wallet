@@ -12,6 +12,7 @@ import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { AuthClient } from '@icp-sdk/auth/client';
@@ -118,7 +119,7 @@ const initAuthStore = (): AuthStore => {
 							// We don't really care if the broadcast channel fails to open or if it fails to post messages.
 							// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
 							// We just print a warning in the console for debugging purposes.
-							console.warn('Auth BroadcastChannel posting failed', err);
+							consoleWarn('Auth BroadcastChannel posting failed', err);
 						}
 
 						resolve();
