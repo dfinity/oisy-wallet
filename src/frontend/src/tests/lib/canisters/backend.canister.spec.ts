@@ -438,6 +438,24 @@ describe('backend.canister', () => {
 				}
 			});
 		});
+
+		it('should throw a CanisterInternalError if InvalidDelegationChain error is returned', async () => {
+			const response = {
+				Err: { InvalidDelegationChain: { msg: 'chain expired' } }
+			};
+
+			service.btc_add_pending_transaction.mockResolvedValue(
+				response as unknown as BtcAddPendingTransactionResult
+			);
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcAddPendingTransaction(btcAddPendingTransactionParams)).rejects.toThrowError(
+				new CanisterInternalError('II delegation chain verification failed: chain expired')
+			);
+		});
 	});
 
 	describe('btc_get_pending_transactions', () => {
