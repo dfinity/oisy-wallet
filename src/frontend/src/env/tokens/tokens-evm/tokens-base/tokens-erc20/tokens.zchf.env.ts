@@ -3,7 +3,6 @@ import { ZCHF_TOKEN_GROUP } from '$env/tokens/groups/groups.zchf.env';
 import zchf from '$eth/assets/zchf.webp';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
