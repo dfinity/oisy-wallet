@@ -371,7 +371,7 @@
 					{/snippet}
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-				<SwapProgress sendWithApproval={true} {swapProgressStep} />
+				<SwapProgress sendWithApproval={isApproveNeeded} {swapProgressStep} />
 			{/if}
 		{/key}
 	</EthFeeContext>
