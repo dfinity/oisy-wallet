@@ -2,9 +2,9 @@ import { ICP_LEDGER_CANISTER_ID, ICP_NETWORK } from '$env/networks/networks.icp.
 import { loadAndAssertAddCustomToken } from '$icp/services/ic-add-custom-tokens.service';
 import type { IcCanisters, IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIcrcAccount, mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';

@@ -1,10 +1,10 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { toastsError } from '$lib/stores/toasts.store';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';

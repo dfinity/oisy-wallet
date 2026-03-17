@@ -13,7 +13,6 @@ import {
 	ERC20_TWIN_TOKENS
 } from '$env/tokens/tokens.erc20.env';
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -22,6 +21,7 @@ import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20'
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token } from '$eth/utils/erc20.utils';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';

@@ -1,4 +1,5 @@
 import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	TokenAppearanceSchema,
 	TokenBuyableSchema,
@@ -9,7 +10,6 @@ import {
 	TokenStandardCodeSchema,
 	TokenStandardSchema
 } from '$lib/schema/token.schema';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 describe('token.schema', () => {

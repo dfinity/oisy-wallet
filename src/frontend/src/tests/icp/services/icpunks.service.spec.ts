@@ -6,9 +6,9 @@ import { loadCustomTokens, loadIcPunksTokens } from '$icp/services/icpunks.servi
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icPunksDefaultTokensStore } from '$icp/stores/icpunks-default-tokens.store';
 import { listCustomTokens } from '$lib/api/backend.api';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCustomTokensIcPunks } from '$tests/mocks/custom-tokens.mock';

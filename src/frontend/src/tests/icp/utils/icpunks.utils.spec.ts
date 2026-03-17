@@ -8,12 +8,12 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import type { IcPunksTokenWithoutId } from '$icp/types/icpunks-token';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	isTokenIcPunks,
 	isTokenIcPunksCustomToken,
 	mapIcPunksToken
 } from '$icp/utils/icpunks.utils';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenStandardCode } from '$lib/types/token';
 import { mockIcPunksCanisterId, mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';

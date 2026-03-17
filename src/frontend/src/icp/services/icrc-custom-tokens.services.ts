@@ -4,8 +4,8 @@ import { EnvSnsTokenSchema, EnvSnsTokensSchema } from '$env/schema/env-sns-token
 import snsTokens from '$env/tokens/tokens.sns.json';
 import type { EnvSnsToken } from '$env/types/env-sns-token';
 import type { IcTokenWithoutId } from '$icp/types/ic-token';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { Principal } from '@icp-sdk/core/principal';

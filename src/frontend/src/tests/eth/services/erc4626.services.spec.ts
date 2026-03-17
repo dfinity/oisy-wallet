@@ -9,7 +9,6 @@ import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as infuraProvidersModule from '$eth/providers/infura.providers';
 import * as approveServicesModule from '$eth/services/approve.services';
 import * as erc20ServicesModule from '$eth/services/erc20.services';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	depositErc4626,
 	loadCustomErc4626Tokens,
@@ -24,6 +23,7 @@ import { listCustomTokens } from '$lib/api/backend.api';
 import * as signerApiModule from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
 import { ProgressStepsStake, ProgressStepsUnstake } from '$lib/enums/progress-steps';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Vault } from '$lib/types/vaults';

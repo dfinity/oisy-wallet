@@ -9,13 +9,13 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import type { ExtTokenWithoutId } from '$icp/types/ext-token';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	extIndexToIdentifier,
 	isTokenExt,
 	isTokenExtCustomToken,
 	mapExtToken
 } from '$icp/utils/ext.utils';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenStandardCode } from '$lib/types/token';
 import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';

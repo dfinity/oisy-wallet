@@ -8,7 +8,6 @@ import {
 } from '$env/networks/networks.eth.env';
 import { ERC4626_TOKENS } from '$env/tokens/tokens.erc4626.env';
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { ERC4626_ABI } from '$eth/constants/erc4626.constants';
 import { infuraErc4626Providers } from '$eth/providers/infura-erc4626.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
@@ -25,6 +24,7 @@ import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsStake, ProgressStepsUnstake } from '$lib/enums/progress-steps';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';

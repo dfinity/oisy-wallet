@@ -7,10 +7,10 @@ import {
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { extDefaultTokensStore } from '$icp/stores/ext-default-tokens.store';
 import type { ExtCustomToken } from '$icp/types/ext-custom-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
