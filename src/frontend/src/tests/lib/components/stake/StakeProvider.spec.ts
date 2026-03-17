@@ -14,7 +14,7 @@ describe('StakeProvider', () => {
 	const mockContext = () =>
 		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: ICP_TOKEN })]]);
 	const props = {
-		provider: StakeProviderType.GLDT,
+		provider: StakeProviderType.HARVEST_AUTOPILOTS,
 		terms: [mockSnippet]
 	};
 
@@ -24,7 +24,9 @@ describe('StakeProvider', () => {
 			context: mockContext()
 		});
 
-		expect(container).toHaveTextContent(stakeProvidersConfig[StakeProviderType.GLDT].name);
+		expect(container).toHaveTextContent(
+			stakeProvidersConfig[StakeProviderType.HARVEST_AUTOPILOTS].name
+		);
 		expect(getByTestId(STAKE_PROVIDER_LOGO)).toBeInTheDocument();
 		expect(getByTestId(STAKE_PROVIDER_EXTERNAL_URL)).toBeInTheDocument();
 	});

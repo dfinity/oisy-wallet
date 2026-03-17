@@ -115,14 +115,6 @@ export const LLM_CANISTER_ID = LOCAL
 			? import.meta.env.VITE_BETA_LLM_CANISTER_ID
 			: import.meta.env.VITE_IC_LLM_CANISTER_ID;
 
-export const GLDT_STAKE_CANISTER_ID = LOCAL
-	? import.meta.env.VITE_LOCAL_GLDT_STAKE_CANISTER_ID
-	: STAGING
-		? import.meta.env.VITE_STAGING_GLDT_STAKE_CANISTER_ID
-		: BETA
-			? import.meta.env.VITE_BETA_GLDT_STAKE_CANISTER_ID
-			: import.meta.env.VITE_IC_GLDT_STAKE_CANISTER_ID;
-
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1_000 * 1_000 * 1_000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1_000 * 1_000 * 1_000);
@@ -231,3 +223,6 @@ export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;
 
 // NFT max filesize limit (10MB)
 export const NFT_MAX_FILESIZE_LIMIT = 1024 * 1024 * 10;
+
+// ZERO ETH address
+export const ZERO_ETH_ADDRESS = '0x0000000000000000000000000000000000000000';
