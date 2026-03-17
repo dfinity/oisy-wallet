@@ -5,7 +5,7 @@ use std::time::Duration;
 use candid::CandidType;
 use ic_cdk::bitcoin_canister::{MillisatoshiPerByte, Network as BitcoinNetwork, Utxo};
 use serde::Deserialize;
-
+use crate::types::delegation::IIDelegationChain;
 use crate::types::signer::RateLimitError;
 
 /// The maximum length of a bitcoin address, expressed as a string.
@@ -78,6 +78,7 @@ pub struct BtcAddPendingTransactionRequest {
     pub txid: Vec<u8>,
     pub utxos: Vec<Utxo>,
     pub network: BitcoinNetwork,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -94,6 +95,8 @@ pub enum BtcAddPendingTransactionError {
     InternalError { msg: String },
     /// The caller has exceeded the call rate limit.
     RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain { msg: String },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
