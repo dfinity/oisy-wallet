@@ -4,6 +4,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { mapBackendTokens } from '$lib/services/load-tokens.services';
 import { toastsError } from '$lib/stores/toasts.store';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
@@ -50,7 +51,7 @@ describe('load-tokens.services', () => {
 				network: ICP_NETWORK,
 				standard: { code: 'icrc' as const },
 				category: 'custom' as const,
-				tags: [],
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 				fee: 123n,
 				name: `Token ${ledgerCanisterId}`,
 				symbol: `TKN${ledgerCanisterId.slice(0, 4)}`,

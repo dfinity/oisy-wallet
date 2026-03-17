@@ -9,6 +9,7 @@ import {
 	TokenStandardCodeSchema,
 	TokenStandardSchema
 } from '$lib/schema/token.schema';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 describe('token.schema', () => {
@@ -319,7 +320,7 @@ describe('token.schema', () => {
 			network: mockNetwork,
 			standard: { code: 'ethereum' },
 			category: 'default',
-			tags: [],
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 			name: 'SampleToken',
 			symbol: 'STK',
 			decimals: 8

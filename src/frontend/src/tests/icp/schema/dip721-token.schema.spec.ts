@@ -4,6 +4,7 @@ import {
 	Dip721InterfaceSchema,
 	Dip721TokenSchema
 } from '$icp/schema/dip721-token.schema';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 
@@ -13,7 +14,7 @@ describe('dip721-token.schema', () => {
 		network: ICP_NETWORK,
 		standard: { code: 'dip721' },
 		category: 'default',
-		tags: [],
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 		name: 'SampleToken',
 		symbol: 'STK',
 		decimals: 8

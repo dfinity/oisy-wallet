@@ -10,6 +10,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { EARNING_CARD, EARNING_NO_POSITION_PLACEHOLDER } from '$lib/constants/test-ids.constants';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { StakeProvider } from '$lib/types/stake';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -46,7 +47,7 @@ describe('EarningsList', () => {
 			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
 			fee: 100n,
 			category: 'custom',
-			tags: []
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
 		};
 
 		beforeEach(() => {
