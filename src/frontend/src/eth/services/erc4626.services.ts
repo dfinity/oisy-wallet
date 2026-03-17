@@ -20,6 +20,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
+import { consoleError } from '$lib/utils/console.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
 import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
@@ -155,7 +156,7 @@ const loadCustomTokensWithMetadata = async ({
 				// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
 				return await infuraErc4626Providers(networkId).metadata({ address });
 			} catch (err: unknown) {
-				console.error(
+				consoleError(
 					`Error loading metadata for custom ERC4626 token ${address} on network ${networkId.description}`,
 					err
 				);
@@ -172,7 +173,7 @@ const loadCustomTokensWithMetadata = async ({
 			try {
 				return await infuraErc4626Providers(networkId).getAssetAddress(address);
 			} catch (err: unknown) {
-				console.error(
+				consoleError(
 					`Error loading asset address for custom ERC4626 token ${address} on network ${networkId.description}`,
 					err
 				);

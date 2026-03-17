@@ -67,6 +67,7 @@ import {
 	type SwapVeloraParams,
 	type VeloraQuoteParams
 } from '$lib/types/swap';
+import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
@@ -507,7 +508,7 @@ export const fetchIcpSwap = async ({
 			});
 		}
 	} catch (err: unknown) {
-		console.error(err);
+		consoleError(err);
 
 		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
 

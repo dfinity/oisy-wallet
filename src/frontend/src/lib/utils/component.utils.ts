@@ -1,3 +1,4 @@
+import { consoleError } from '$lib/utils/console.utils';
 import { mount, unmount, type Component, type ComponentProps } from 'svelte';
 
 export const componentToHtml = <T extends Component>({
@@ -21,7 +22,7 @@ export const componentToHtml = <T extends Component>({
 
 		return html;
 	} catch (error: unknown) {
-		console.error('Error rendering component to HTML:', error);
+		consoleError('Error rendering component to HTML:', error);
 		return '';
 	} finally {
 		container.remove();
