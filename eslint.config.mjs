@@ -1,6 +1,11 @@
 import { default as svelteConfig } from '@dfinity/eslint-config-oisy-wallet/svelte';
 import { default as vitestConfig } from '@dfinity/eslint-config-oisy-wallet/vitest';
 
+const ZERO_BIGINT_RESTRICTION = {
+	selector: "Literal[raw='0n']",
+	message: 'Use the shared constant `ZERO` instead of `0n`.'
+};
+
 export default [
 	...vitestConfig,
 	...svelteConfig,
@@ -22,13 +27,7 @@ export default [
 
 	{
 		rules: {
-			'no-restricted-syntax': [
-				'error',
-				{
-					selector: "Literal[raw='0n']",
-					message: 'Use the shared constant `ZERO` instead of `0n`.'
-				}
-			]
+			'no-restricted-syntax': ['error', ZERO_BIGINT_RESTRICTION]
 		}
 	},
 
@@ -38,10 +37,7 @@ export default [
 		rules: {
 			'no-restricted-syntax': [
 				'error',
-				{
-					selector: "Literal[raw='0n']",
-					message: 'Use the shared constant `ZERO` instead of `0n`.'
-				},
+				ZERO_BIGINT_RESTRICTION,
 				{
 					selector: "MemberExpression[object.name='console'][property.name='error']",
 					message:
