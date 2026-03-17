@@ -15,7 +15,7 @@
 		condensed?: boolean;
 		styleClass?: string;
 		testId?: string;
-		logo: Snippet;
+		logo?: Snippet;
 		title?: Snippet;
 		subtitle?: Snippet;
 		titleEnd?: Snippet;
@@ -74,7 +74,9 @@
 						{/if}
 					</span>
 				{/if}
-				<span class="mr-2 flex">{@render logo()}</span>
+				{#if nonNullish(logo)}
+					<span class="mr-2 flex">{@render logo()}</span>
+				{/if}
 				<span class="flex min-w-0 flex-col text-left">
 					<span class="flex min-w-0 items-center truncate text-nowrap">
 						{#if nonNullish(title)}
