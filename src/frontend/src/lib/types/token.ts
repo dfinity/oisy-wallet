@@ -12,6 +12,7 @@ import type { OptionBalance } from '$lib/types/balance';
 import type { TokenDeprecated } from '$lib/types/token-deprecated';
 import type { TokenGroup } from '$lib/types/token-group';
 import type { RequiredExcept } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type * as z from 'zod';
 
 export type TokenId = z.infer<typeof TokenIdSchema>;
