@@ -1,3 +1,4 @@
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import usdc from '$eth/assets/usdc.svg';
@@ -16,7 +17,7 @@ export const USDC_TOKEN: RequiredEvmBep20Token = {
 	network: BSC_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: 'category', value: 'stablecoin' }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'USD Coin',
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,

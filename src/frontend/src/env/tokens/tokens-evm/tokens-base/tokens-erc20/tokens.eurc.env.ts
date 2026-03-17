@@ -1,3 +1,4 @@
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	BASE_NETWORK,
 	BASE_SEPOLIA_NETWORK
@@ -19,7 +20,7 @@ export const EURC_TOKEN: RequiredEvmErc20Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: 'category', value: 'stablecoin' }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'Euro Coin',
 	symbol: EURC_SYMBOL,
 	decimals: EURC_DECIMALS,
@@ -37,7 +38,7 @@ export const SEPOLIA_EURC_TOKEN: RequiredEvmErc20Token = {
 	network: BASE_SEPOLIA_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: 'category', value: 'stablecoin' }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'EURC',
 	symbol: EURC_SYMBOL,
 	decimals: EURC_DECIMALS,

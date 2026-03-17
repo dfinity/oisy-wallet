@@ -1,3 +1,4 @@
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	ARBITRUM_MAINNET_NETWORK,
 	ARBITRUM_SEPOLIA_NETWORK
@@ -19,7 +20,7 @@ export const USDC_TOKEN: RequiredEvmErc20Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: 'category', value: 'stablecoin' }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'USD Coin',
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,
@@ -40,7 +41,7 @@ export const ARB_SEPOLIA_USDC_TOKEN: RequiredEvmErc20Token = {
 	network: ARBITRUM_SEPOLIA_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: 'category', value: 'stablecoin' }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'USDC (Sepolia Testnet)',
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,

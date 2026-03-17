@@ -1,3 +1,4 @@
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import usdt from '$eth/assets/usdt.svg';
@@ -16,7 +17,7 @@ export const USDT_TOKEN: RequiredEvmBep20Token = {
 	network: POLYGON_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: 'category', value: 'stablecoin' }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'Tether USD',
 	symbol: USDT_SYMBOL,
 	decimals: USDT_DECIMALS,

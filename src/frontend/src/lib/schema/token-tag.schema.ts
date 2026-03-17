@@ -1,20 +1,17 @@
+import { TokenCategoryTagValue, TokenRiskTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as z from 'zod';
 
-const TOKEN_CATEGORY_TAG_VALUES = ['crypto', 'stablecoin', 'stock', 'commodity'] as const;
-
-export const TokenCategoryTagValueSchema = z.enum(TOKEN_CATEGORY_TAG_VALUES);
+export const TokenCategoryTagValueSchema = z.enum(TokenCategoryTagValue);
 
 export const TokenCategoryTagSchema = z.object({
-	type: z.literal('category'),
+	type: z.literal(TokenTagType.CATEGORY),
 	value: TokenCategoryTagValueSchema
 });
 
-const TOKEN_RISK_TAG_VALUES = ['low', 'medium', 'high'] as const;
-
-export const TokenRiskTagValueSchema = z.enum(TOKEN_RISK_TAG_VALUES);
+export const TokenRiskTagValueSchema = z.enum(TokenRiskTagValue);
 
 export const TokenRiskTagSchema = z.object({
-	type: z.literal('risk'),
+	type: z.literal(TokenTagType.RISK),
 	value: TokenRiskTagValueSchema
 });
 

@@ -1,3 +1,4 @@
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	POLYGON_AMOY_NETWORK,
 	POLYGON_MAINNET_NETWORK
@@ -19,7 +20,7 @@ export const USDC_TOKEN: RequiredEvmErc20Token = {
 	network: POLYGON_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: 'category', value: 'stablecoin' }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'USD Coin',
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,
@@ -40,7 +41,7 @@ export const AMOY_USDC_TOKEN: RequiredEvmErc20Token = {
 	network: POLYGON_AMOY_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: 'category', value: 'stablecoin' }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'USDC',
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,

@@ -1,3 +1,4 @@
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { ZCHF_TOKEN_GROUP } from '$env/tokens/groups/groups.zchf.env';
 import zchf from '$eth/assets/zchf.webp';
@@ -16,7 +17,7 @@ export const ZCHF_TOKEN: RequiredEvmErc20Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [{ type: 'category', value: 'stablecoin' }],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
 	name: 'Frankencoin',
 	symbol: ZCHF_SYMBOL,
 	decimals: ZCHF_DECIMALS,
