@@ -11,10 +11,7 @@ use shared::types::{
 };
 
 use crate::{
-    exchange::{
-        provider::{ExchangePriceProvider, PriceData},
-        providers::coingecko::CoinGeckoProvider,
-    },
+    exchange::{provider::ExchangePriceProvider, providers::coingecko::CoinGeckoProvider},
     read_state,
     state::{mutate_state, with_api_keys},
     types::storable::{Candid, StoredTokenId},
@@ -55,19 +52,12 @@ pub(crate) fn start_exchange_rate_timer() {
     });
 }
 
-fn update_price(token_id: &StoredTokenId, price_data: &PriceData) {
-    let timestamp_ns = price_data.timestamp_nanos.unwrap_or_else(time);
-
+fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
     mutate_state(|s| {
         s.exchange_rates.insert(
             token_id.clone(),
             Candid(ExchangeRate {
-                usd: ExchangeData {
-                    timestamp_ns,
-                    price: price_data.price,
-                    price_24h_change_pct: price_data.price_24h_change_pct,
-                    market_cap: price_data.market_cap,
-                },
+                usd: exchange_data.clone(),
             }),
         );
     });
@@ -79,8 +69,8 @@ async fn fetch_and_update_prices(
 ) {
     match provider.fetch_prices(token_ids).await {
         Ok(prices) => {
-            for (token_id, price_data) in &prices {
-                update_price(token_id, price_data);
+            for (token_id, exchange_data) in &prices {
+                update_price(token_id, exchange_data);
             }
         }
         Err(err) => {

@@ -3,16 +3,13 @@ mod platform;
 
 use std::collections::HashMap;
 
-use shared::types::token_id::TokenId;
+use shared::types::{exchange::ExchangeData, token_id::TokenId};
 
 use self::{
     client::CoinGeckoClient,
     platform::{coingecko_native_coin, coingecko_platform},
 };
-use crate::{
-    exchange::provider::{ExchangePriceProvider, PriceData},
-    types::storable::StoredTokenId,
-};
+use crate::{exchange::provider::ExchangePriceProvider, types::storable::StoredTokenId};
 
 const CHUNK_SIZE: usize = 50;
 
@@ -38,7 +35,7 @@ impl ExchangePriceProvider for CoinGeckoProvider {
     async fn fetch_prices(
         &self,
         token_ids: &[StoredTokenId],
-    ) -> Result<Vec<(StoredTokenId, PriceData)>, String> {
+    ) -> Result<Vec<(StoredTokenId, ExchangeData)>, String> {
         let mut result = Vec::new();
 
         let mut native_coins: HashMap<&str, Vec<StoredTokenId>> = HashMap::new();

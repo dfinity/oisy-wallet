@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
-use ic_cdk::management_canister::HttpHeader;
+use ic_cdk::{api::time, management_canister::HttpHeader};
+use serde_json::{from_slice, Value};
+use shared::types::exchange::ExchangeData;
 
-use crate::{exchange::provider::PriceData, utils::http_outcall::get};
+use crate::utils::http_outcall::get;
 
 const DEFAULT_BASE_URL: &str = "https://pro-api.coingecko.com/api/v3";
 const SIMPLE_PRICE_PATH: &str = "/simple/price";
@@ -34,6 +36,19 @@ impl CoinGeckoClient {
         }
     }
 
+    fn parse_exchange_data(data: &Value) -> ExchangeData {
+        let timestamp_ns = data["last_updated_at"]
+            .as_u64()
+            .map_or_else(time, |secs| secs * 1_000_000_000);
+
+        ExchangeData {
+            timestamp_ns,
+            price: data["usd"].as_f64(),
+            price_24h_change_pct: data["usd_24h_change"].as_f64(),
+            market_cap: data["usd_market_cap"].as_f64(),
+        }
+    }
+
     /// Fetches prices for native coins (e.g. ETH, BTC, SOL) from the `CoinGecko`
     /// [`/simple/price`](https://docs.coingecko.com/reference/simple-price) endpoint.
     ///
@@ -41,7 +56,7 @@ impl CoinGeckoClient {
     pub async fn fetch_coin_prices(
         &self,
         coin_ids: &[&str],
-    ) -> Result<HashMap<String, PriceData>, String> {
+    ) -> Result<HashMap<String, ExchangeData>, String> {
         if coin_ids.is_empty() {
             return Ok(HashMap::new());
         }
@@ -55,26 +70,14 @@ impl CoinGeckoClient {
 
         let response = get(&url, vec![self.auth_header()], MAX_RESPONSE_BYTES).await?;
 
-        let json: serde_json::Value = serde_json::from_slice(&response.body)
-            .map_err(|e| format!("Failed to parse JSON: {e}"))?;
+        let json: Value =
+            from_slice(&response.body).map_err(|e| format!("Failed to parse JSON: {e}"))?;
 
         let mut result = HashMap::new();
 
         for &coin_id in coin_ids {
             if let Some(data) = json.get(coin_id) {
-                let timestamp_nanos = data["last_updated_at"]
-                    .as_u64()
-                    .map(|secs| secs * 1_000_000_000);
-
-                result.insert(
-                    coin_id.to_string(),
-                    PriceData {
-                        timestamp_nanos,
-                        price: data["usd"].as_f64(),
-                        price_24h_change_pct: data["usd_24h_change"].as_f64(),
-                        market_cap: data["usd_market_cap"].as_f64(),
-                    },
-                );
+                result.insert(coin_id.to_string(), Self::parse_exchange_data(data));
             }
         }
 
@@ -87,7 +90,7 @@ impl CoinGeckoClient {
         &self,
         platform: &str,
         addresses: &[String],
-    ) -> Result<HashMap<String, PriceData>, String> {
+    ) -> Result<HashMap<String, ExchangeData>, String> {
         let addr_str = addresses.join(",");
 
         let url = format!(
@@ -97,26 +100,14 @@ impl CoinGeckoClient {
 
         let response = get(&url, vec![self.auth_header()], MAX_RESPONSE_BYTES).await?;
 
-        let json: serde_json::Value = serde_json::from_slice(&response.body)
-            .map_err(|e| format!("Failed to parse JSON: {e}"))?;
+        let json: Value =
+            from_slice(&response.body).map_err(|e| format!("Failed to parse JSON: {e}"))?;
 
         let mut result = HashMap::new();
 
         for addr in addresses {
             if let Some(data) = json.get(addr.to_lowercase()) {
-                let timestamp_nanos = data["last_updated_at"]
-                    .as_u64()
-                    .map(|secs| secs * 1_000_000_000);
-
-                result.insert(
-                    addr.clone(),
-                    PriceData {
-                        timestamp_nanos,
-                        price: data["usd"].as_f64(),
-                        price_24h_change_pct: data["usd_24h_change"].as_f64(),
-                        market_cap: data["usd_market_cap"].as_f64(),
-                    },
-                );
+                result.insert(addr.clone(), Self::parse_exchange_data(data));
             }
         }
 
