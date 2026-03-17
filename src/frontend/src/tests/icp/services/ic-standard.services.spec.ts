@@ -207,7 +207,7 @@ describe('ic-standard.services', () => {
 				new Error('Unexpected error')
 			);
 
-			await expect(detectNftCanisterStandard(params)).rejects.toThrowError('Unexpected error');
+			await expect(detectNftCanisterStandard(params)).rejects.toThrow('Unexpected error');
 
 			expect(extBalance).not.toHaveBeenCalled();
 			expect(extGetTokensByOwner).not.toHaveBeenCalled();

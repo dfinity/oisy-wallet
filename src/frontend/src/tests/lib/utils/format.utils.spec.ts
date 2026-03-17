@@ -318,7 +318,7 @@ describe('format.utils', () => {
 
 				expect(() =>
 					formatSecondsToNormalizedDate({ seconds: futureTimestamp })
-				).not.toThrowError();
+				).not.toThrow();
 			});
 
 			it('should return "yesterday" even if the date was in the past year', () => {

@@ -149,21 +149,21 @@ describe('open-crypto-pay.service', () => {
 		});
 
 		it('should throw error for empty code', async () => {
-			await expect(processOpenCryptoPayCode('')).rejects.toThrowError('QR Code cannot be empty');
+			await expect(processOpenCryptoPayCode('')).rejects.toThrow('QR Code cannot be empty');
 		});
 
 		it('should throw error for whitespace-only code', async () => {
-			await expect(processOpenCryptoPayCode('   ')).rejects.toThrowError('QR Code cannot be empty');
+			await expect(processOpenCryptoPayCode('   ')).rejects.toThrow('QR Code cannot be empty');
 		});
 
 		it('should throw error for invalid URL format', async () => {
-			await expect(processOpenCryptoPayCode('not-a-valid-url')).rejects.toThrowError();
+			await expect(processOpenCryptoPayCode('not-a-valid-url')).rejects.toThrow();
 		});
 
 		it('should throw error for missing lightning parameter', async () => {
 			const codeWithoutLightning = 'https://app.dfx.swiss/pl/?other=param';
 
-			await expect(processOpenCryptoPayCode(codeWithoutLightning)).rejects.toThrowError(
+			await expect(processOpenCryptoPayCode(codeWithoutLightning)).rejects.toThrow(
 				'Missing lightning parameter'
 			);
 		});
@@ -171,7 +171,7 @@ describe('open-crypto-pay.service', () => {
 		it('should throw error when LNURL decoding fails', async () => {
 			const codeWithInvalidLnurl = 'https://app.dfx.swiss/pl/?lightning=INVALID_LNURL';
 
-			await expect(processOpenCryptoPayCode(codeWithInvalidLnurl)).rejects.toThrowError(
+			await expect(processOpenCryptoPayCode(codeWithInvalidLnurl)).rejects.toThrow(
 				'Failed to decode lightning parameter'
 			);
 		});
@@ -183,7 +183,7 @@ describe('open-crypto-pay.service', () => {
 
 			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 
-			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrowError(
+			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrow(
 				'API request failed: 404'
 			);
 
@@ -199,7 +199,7 @@ describe('open-crypto-pay.service', () => {
 
 			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 
-			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrowError('Network error');
+			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrow('Network error');
 			expect(fetchOpenCryptoPay).toHaveBeenCalledOnce();
 		});
 
@@ -807,7 +807,7 @@ describe('open-crypto-pay.service', () => {
 					progress: mockProgress,
 					amount: 100000n
 				})
-			).rejects.toThrowError('Payment failed');
+			).rejects.toThrow('Payment failed');
 		});
 
 		it('should handle transaction signing errors', async () => {
@@ -838,7 +838,7 @@ describe('open-crypto-pay.service', () => {
 					progress: mockProgress,
 					amount: 100000n
 				})
-			).rejects.toThrowError('Signing failed');
+			).rejects.toThrow('Signing failed');
 
 			expect(mockProgress).toHaveBeenCalledTimes(2);
 		});

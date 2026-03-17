@@ -53,7 +53,7 @@ describe('token.services', () => {
 
 			await expect(
 				loadTokenAndRun({ token: mockValidToken, callback: failingCallback })
-			).rejects.toThrowError('Callback failed');
+			).rejects.toThrow('Callback failed');
 
 			const tokenStore = get(token);
 

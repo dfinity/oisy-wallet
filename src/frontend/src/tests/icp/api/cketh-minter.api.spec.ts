@@ -57,7 +57,7 @@ describe('cketh-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(withdrawEth({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(withdrawEth({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -94,7 +94,7 @@ describe('cketh-minter.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(withdrawErc20({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(withdrawErc20({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -155,7 +155,7 @@ describe('cketh-minter.api', () => {
 		it('throws an error if identity is undefined', async () => {
 			await expect(
 				eip1559TransactionPrice({ ...params, identity: undefined })
-			).rejects.toThrowError();
+			).rejects.toThrow();
 		});
 	});
 });

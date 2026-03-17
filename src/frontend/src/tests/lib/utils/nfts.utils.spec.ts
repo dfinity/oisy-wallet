@@ -232,7 +232,7 @@ describe('nfts.utils', () => {
 		it('should raise an error if URL is not a parseable URL', () => {
 			const url = 'invalid-url';
 
-			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrowError(mockError);
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
 		});
 
 		it('should return the same URL if not IPFS protocol', () => {
@@ -282,7 +282,7 @@ describe('nfts.utils', () => {
 		it('should not allow URL with localhost', () => {
 			const url = 'http://localhost:3000/some-data';
 
-			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrowError(mockError);
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
 		});
 	});
 

@@ -80,7 +80,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(metadata({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(metadata({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -118,7 +118,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transactionFee({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(transactionFee({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -163,7 +163,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(balance({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(balance({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -222,7 +222,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(transfer({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -285,7 +285,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(approve({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(approve({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -474,7 +474,7 @@ describe('icrc-ledger.api', () => {
 					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
 					identity: undefined
 				})
-			).rejects.toThrowError();
+			).rejects.toThrow();
 		});
 	});
 
@@ -520,7 +520,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(getBlocks({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(getBlocks({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 
@@ -563,7 +563,7 @@ describe('icrc-ledger.api', () => {
 		it('throws an error if identity is undefined', async () => {
 			await expect(
 				icrc1SupportedStandards({ ...params, identity: undefined })
-			).rejects.toThrowError();
+			).rejects.toThrow();
 		});
 	});
 
@@ -606,7 +606,7 @@ describe('icrc-ledger.api', () => {
 		it('throws an error if identity is undefined', async () => {
 			await expect(
 				icrc10SupportedStandards({ ...params, identity: undefined })
-			).rejects.toThrowError();
+			).rejects.toThrow();
 		});
 	});
 
@@ -648,7 +648,7 @@ describe('icrc-ledger.api', () => {
 		});
 
 		it('throws an error if identity is undefined', async () => {
-			await expect(getMintingAccount({ ...params, identity: undefined })).rejects.toThrowError();
+			await expect(getMintingAccount({ ...params, identity: undefined })).rejects.toThrow();
 		});
 
 		it('returns undefined if getMintingAccount throws', async () => {

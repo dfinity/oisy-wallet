@@ -115,7 +115,7 @@ describe('alchemy.providers', () => {
 		it('should throw an error if the input is not an hash', async () => {
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 
-			await expect(provider.wait('notAnHash')).rejects.toThrowError(
+			await expect(provider.wait('notAnHash')).rejects.toThrow(
 				'Invalid transaction hash while waiting for transaction receipt: notAnHash'
 			);
 		});
@@ -175,7 +175,7 @@ describe('alchemy.providers', () => {
 		it('should throw an error if the input is not an hash', async () => {
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 
-			await expect(provider.getTransaction('notAnHash')).rejects.toThrowError(
+			await expect(provider.getTransaction('notAnHash')).rejects.toThrow(
 				'Invalid transaction hash while fetching transaction details: notAnHash'
 			);
 		});
@@ -437,7 +437,7 @@ describe('alchemy.providers', () => {
 
 			await expect(
 				provider.getNftsByOwner({ address: mockEthAddress, tokens: [mockValidErc1155Token] })
-			).rejects.toThrowError('Nfts Error');
+			).rejects.toThrow('Nfts Error');
 
 			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
 		});
@@ -554,7 +554,7 @@ describe('alchemy.providers', () => {
 
 			await expect(
 				provider.getNftMetadata({ token: mockValidErc1155Token, tokenId: mockTokenId })
-			).rejects.toThrowError('Nfts Error');
+			).rejects.toThrow('Nfts Error');
 
 			expect(Alchemy.prototype.nft.getNftMetadata).toHaveBeenCalledOnce();
 		});
@@ -745,7 +745,7 @@ describe('alchemy.providers', () => {
 
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 
-			await expect(provider.getContractMetadata(mockEthAddress)).rejects.toThrowError(
+			await expect(provider.getContractMetadata(mockEthAddress)).rejects.toThrow(
 				'Invalid token standard'
 			);
 
@@ -827,7 +827,7 @@ describe('alchemy.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrowError(
+			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrow(
 				replacePlaceholders(en.init.error.no_alchemy_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})

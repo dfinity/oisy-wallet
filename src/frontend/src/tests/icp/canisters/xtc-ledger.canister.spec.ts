@@ -62,7 +62,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Notify DFX failed'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Notify DFX failed'));
 		});
 
 		it('should throw an error if transfer returns an InsufficientAllowance error', async () => {
@@ -74,7 +74,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Insufficient allowance'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Insufficient allowance'));
 		});
 
 		it('should throw an error if transfer returns an UnexpectedCyclesResponse error', async () => {
@@ -86,7 +86,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(
+			await expect(res).rejects.toThrow(
 				new CanisterInternalError('Unexpected cycles response')
 			);
 		});
@@ -100,7 +100,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Insufficient balance'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Insufficient balance'));
 		});
 
 		it('should throw an error if transfer returns an InsufficientXTCFee error', async () => {
@@ -112,7 +112,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Insufficient XTC fee'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Insufficient XTC fee'));
 		});
 
 		it('should throw an error if transfer returns an ErrorOperationStyle error', async () => {
@@ -124,7 +124,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Error operation style'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Error operation style'));
 		});
 
 		it('should throw an error if transfer returns an Unauthorized error', async () => {
@@ -136,7 +136,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Unauthorized'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Unauthorized'));
 		});
 
 		it('should throw an error if transfer returns a LedgerTrap error', async () => {
@@ -148,7 +148,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Ledger trap'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Ledger trap'));
 		});
 
 		it('should throw an error if transfer returns an ErrorTo error', async () => {
@@ -160,7 +160,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Error To'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Error To'));
 		});
 
 		it('should throw an error if transfer returns an Other error', async () => {
@@ -172,7 +172,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Other'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Other'));
 		});
 
 		it('should throw an error if transfer returns a FetchRateFailed error', async () => {
@@ -184,7 +184,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Fetch rate failed'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Fetch rate failed'));
 		});
 
 		it('should throw an error if transfer returns a BlockUsed error', async () => {
@@ -196,7 +196,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Block used'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Block used'));
 		});
 
 		it('should throw an error if transfer returns an AmountTooSmall error', async () => {
@@ -208,7 +208,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(new CanisterInternalError('Amount too small'));
+			await expect(res).rejects.toThrow(new CanisterInternalError('Amount too small'));
 		});
 
 		it('should throw an error if transfer returns an unexpected response', async () => {
@@ -221,7 +221,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = transfer(params);
 
-			await expect(res).rejects.toThrowError(
+			await expect(res).rejects.toThrow(
 				new CanisterInternalError('Unknown XtcLedgerCanisterError')
 			);
 		});
@@ -257,7 +257,7 @@ describe('xtc-ledger.canister', () => {
 
 			const res = balance(mockPrincipal);
 
-			await expect(res).rejects.toThrowError(mockError);
+			await expect(res).rejects.toThrow(mockError);
 		});
 	});
 });

@@ -51,7 +51,7 @@ describe('icrc-nft-ledger.api', () => {
 		it('throws an error if identity is undefined', async () => {
 			await expect(
 				icrc10SupportedStandards({ ...params, identity: undefined })
-			).rejects.toThrowError();
+			).rejects.toThrow();
 		});
 	});
 });

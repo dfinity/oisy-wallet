@@ -118,7 +118,7 @@ describe('load-tokens.services', () => {
 
 			const { tokens: _, ...paramsWithoutTokens } = params;
 
-			await expect(mapBackendTokensTyped(paramsWithoutTokens)).rejects.toThrowError(mockError);
+			await expect(mapBackendTokensTyped(paramsWithoutTokens)).rejects.toThrow(mockError);
 
 			expect(loadNetworkCustomTokens).toHaveBeenCalledExactlyOnceWith(loadParams);
 

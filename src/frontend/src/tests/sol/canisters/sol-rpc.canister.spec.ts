@@ -100,7 +100,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(
 					new SolRpcCanisterError(error)
 				);
 			});
@@ -119,7 +119,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(
 					new SolRpcCanisterError(error)
 				);
 			});
@@ -138,7 +138,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(
 					new SolRpcCanisterError(error)
 				);
 			});
@@ -157,7 +157,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(
 					new SolRpcCanisterError(error)
 				);
 			});
@@ -172,7 +172,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(
 					new SolRpcCanisterError(error)
 				);
 			});
@@ -191,7 +191,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(
 					new SolRpcCanisterError(error)
 				);
 			});
@@ -214,7 +214,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(
 					new SolRpcCanisterError(error)
 				);
 			});
@@ -228,7 +228,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(
 					expectedUnknownRpcError.message
 				);
 			});
@@ -244,7 +244,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(
 					expectedUnknownRpcError.message
 				);
 			});
@@ -259,7 +259,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(
 					expectedInconsistentErrorResponse
 				);
 			});
@@ -273,7 +273,7 @@ describe('sol-rpc.canister', () => {
 					serviceOverride: service
 				});
 
-				await expect(getAccountInfo(mockParams)).rejects.toThrowError(mockResponseError);
+				await expect(getAccountInfo(mockParams)).rejects.toThrow(mockResponseError);
 			});
 
 			it('should throw an error if the network is unknown', async () => {
@@ -286,7 +286,7 @@ describe('sol-rpc.canister', () => {
 				await expect(
 					// @ts-expect-error we test this in purposes
 					getAccountInfo({ ...mockParams, network: 'unknown-network' })
-				).rejects.toThrowError(expectedUnknownNetworkError);
+				).rejects.toThrow(expectedUnknownNetworkError);
 			});
 		});
 	});
