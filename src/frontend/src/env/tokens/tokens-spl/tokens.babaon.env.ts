@@ -17,6 +17,7 @@ export const BABAON_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'Alibaba (Ondo Tokenized)',
 	symbol: BABAON_SYMBOL,
 	decimals: BABAON_DECIMALS,

@@ -16,6 +16,7 @@ export const PEPX_TOKEN: RequiredSpl2022Token = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'spl' },
 	category: 'default',
+	tags: [],
 	name: 'PepsiCo xStock',
 	symbol: PEPX_SYMBOL,
 	decimals: PEPX_DECIMALS,

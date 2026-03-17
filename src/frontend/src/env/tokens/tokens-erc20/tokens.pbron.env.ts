@@ -16,6 +16,7 @@ export const PBRON_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Petrobras (Ondo Tokenized)',
 	symbol: PBRON_SYMBOL,
 	decimals: PBRON_DECIMALS,

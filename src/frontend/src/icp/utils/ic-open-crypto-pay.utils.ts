@@ -83,6 +83,65 @@ export const enrichIcPayableToken = ({
 	};
 };
 
+/**
+ * Determines whether the decoded URN uses the new ICP URI format.
+ *
+ * New format: icp:{canister-id}/transfer?to={principal}&amount={amount}
+ * Legacy format: icp:{principal}?amount={amount}
+ */
+const isNewIcUriFormat = (
+	decodedData: DecodedUrn
+): decodedData is DecodedUrn & { functionName: 'transfer'; to: string } =>
+	decodedData.functionName === 'transfer' && nonNullish(decodedData.to);
+
+/**
+ * Validates an IC transfer from the new URI format.
+ *
+ * New format: icp:{canister-id}/transfer?to={principal}&amount={amount}
+ * In this format, `destination` is the ledger canister ID and `to` is the spender principal.
+ * The ledger canister ID is verified against the selected token.
+ */
+const validateNewFormatIcTransfer = ({
+	decodedData,
+	token,
+	parsePrincipal,
+	errorMessages
+}: {
+	decodedData: DecodedUrn & { functionName: 'transfer'; to: string };
+	token: PayableTokenWithConvertedAmount & IcToken;
+	parsePrincipal: (value: string) => Principal;
+	errorMessages: { token_address_mismatch: string };
+}): Principal => {
+	const { destination, to } = decodedData;
+
+	if (destination !== token.ledgerCanisterId) {
+		throw new Error(errorMessages.token_address_mismatch);
+	}
+
+	return parsePrincipal(to);
+};
+
+/**
+ * Validates an IC transfer from the legacy URI format.
+ *
+ * TODO: Remove legacy format support once DFX completes migration to the new URI format.
+ * The legacy format does not include the ledger canister ID, so we cannot verify the token.
+ *
+ * Legacy format: icp:{principal}?amount={amount}
+ * In this format, `destination` is the spender principal directly.
+ */
+const validateLegacyIcTransfer = ({
+	decodedData,
+	parsePrincipal
+}: {
+	decodedData: DecodedUrn;
+	parsePrincipal: (value: string) => Principal;
+}): Principal => {
+	const { destination } = decodedData;
+
+	return parsePrincipal(destination);
+};
+
 export const validateIcTransfer = ({
 	decodedData,
 	amount,
@@ -96,7 +155,7 @@ export const validateIcTransfer = ({
 
 	const {
 		pay: {
-			error: { data_is_incompleted, amount_does_not_match }
+			error: { data_is_incompleted, amount_does_not_match, token_address_mismatch }
 		}
 	} = get(i18n);
 
@@ -110,15 +169,26 @@ export const validateIcTransfer = ({
 		throw new Error(data_is_incompleted);
 	}
 
-	const parseDestination = (destination: string): Principal => {
+	const parsePrincipal = (value: string): Principal => {
 		try {
-			return Principal.fromText(destination);
+			return Principal.fromText(value);
 		} catch {
 			throw new Error(data_is_incompleted);
 		}
 	};
 
-	const spender = parseDestination(destination);
+	if (decodedData.functionName === 'transfer' && !isNewIcUriFormat(decodedData)) {
+		throw new Error(data_is_incompleted);
+	}
+
+	const spender = isNewIcUriFormat(decodedData)
+		? validateNewFormatIcTransfer({
+				decodedData,
+				token,
+				parsePrincipal,
+				errorMessages: { token_address_mismatch }
+			})
+		: validateLegacyIcTransfer({ decodedData, parsePrincipal });
 
 	const dfxAmount = parseToken({
 		value: amountParam.toString(),

@@ -15,6 +15,7 @@ export const FLOKI_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'FLOKI',
 	symbol: FLOKI_SYMBOL,
 	decimals: FLOKI_DECIMALS,

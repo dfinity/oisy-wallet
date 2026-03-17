@@ -137,6 +137,7 @@ const mapErc721CustomToken = async ({
 			decimals: 0, // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 			standard: { code: 'erc721' as const },
 			category: 'custom' as const,
+			tags: [],
 			enabled,
 			version,
 			...(nonNullish(mappedSection) && {

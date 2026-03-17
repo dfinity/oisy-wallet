@@ -15,6 +15,7 @@ export const MORPHOAUTOPILOT_USDC_TOKEN: RequiredErc4626Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc4626' },
 	category: 'default',
+	tags: [],
 	name: 'Autopilot USDC Morpho (Base)',
 	symbol: MORPHOAUTOPILOT_USDC_SYMBOL,
 	decimals: MORPHOAUTOPILOT_USDC_DECIMALS,

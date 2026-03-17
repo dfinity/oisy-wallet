@@ -15,6 +15,7 @@ export const WEETH_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
+	tags: [],
 	name: 'Wrapped eETH',
 	symbol: WEETH_SYMBOL,
 	decimals: WEETH_DECIMALS,
