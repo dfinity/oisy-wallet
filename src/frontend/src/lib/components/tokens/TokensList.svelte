@@ -3,9 +3,6 @@
 	import { untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { goto } from '$app/navigation';
-	import shocked from '$lib/assets/shocked.svg';
-	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
-	import AssetTypeFilterBar from '$lib/components/tokens/AssetTypeFilterBar.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
@@ -13,24 +10,20 @@
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { tokenCategoryFilter, tokenCategoryFilterEnabled } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
-	import { filterTokensByAssetType } from '$lib/utils/token-tag.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
@@ -122,12 +115,6 @@
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
-		{#if $tokenCategoryFilterEnabled}
-			<div class="mb-4">
-				<AssetTypeFilterBar />
-			</div>
-		{/if}
-
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each tokensWithKey as { tokenOrGroup, key } (key)}
 				<div class="overflow-hidden rounded-xl">
