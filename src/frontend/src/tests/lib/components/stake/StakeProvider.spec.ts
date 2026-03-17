@@ -25,7 +25,7 @@ describe('StakeProvider', () => {
 		});
 
 		expect(container).toHaveTextContent(
-			stakeProvidersConfig[StakeProviderType.HARVEST_AUTOPILOTS].name
+			stakeProvidersConfig[StakeProviderType.HARVEST_AUTOPILOTS].description
 		);
 		expect(getByTestId(STAKE_PROVIDER_LOGO)).toBeInTheDocument();
 		expect(getByTestId(STAKE_PROVIDER_EXTERNAL_URL)).toBeInTheDocument();
