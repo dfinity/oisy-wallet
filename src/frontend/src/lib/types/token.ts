@@ -11,7 +11,8 @@ import type {
 import type { OptionBalance } from '$lib/types/balance';
 import type { TokenDeprecated } from '$lib/types/token-deprecated';
 import type { TokenGroup } from '$lib/types/token-group';
-import type { Option, RequiredExcept } from '$lib/types/utils';
+import type { RequiredExcept } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type * as z from 'zod';
 
 export type TokenId = z.infer<typeof TokenIdSchema>;
@@ -50,9 +51,9 @@ export type RequiredToken<T extends Token = Token, M extends object = {}> = Requ
 
 export type RequiredTokenWithLinkedData = RequiredToken<TokenWithLinkedData>;
 
-export type OptionToken = Option<Token>;
-export type OptionTokenId = Option<TokenId>;
-export type OptionTokenStandardCode = Option<TokenStandardCode>;
+export type OptionToken = Nullish<Token>;
+export type OptionTokenId = Nullish<TokenId>;
+export type OptionTokenStandardCode = Nullish<TokenStandardCode>;
 
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 

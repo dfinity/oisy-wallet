@@ -7,7 +7,7 @@ import type {
 	TokenMetadata,
 	TokenStandardCode
 } from '$lib/types/token';
-import type { Option } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 type Erc20Standard = Extract<TokenStandardCode, 'erc20'>;
 
@@ -25,4 +25,4 @@ export type Erc20Contract = Erc20ContractAddress & TokenLinkedData;
 
 export type Erc20Metadata = TokenMetadata;
 
-export type OptionErc20Token = Option<Erc20Token>;
+export type OptionErc20Token = Nullish<Erc20Token>;
