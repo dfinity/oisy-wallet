@@ -17,10 +17,9 @@ use crate::{
         maps::{
             ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap,
             ExchangeRateMap, PowChallengeMap, TokenActivityMap, UserProfileMap,
-            UserProfileUpdatedMap, UserTokenMap,
+            UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
         },
         storable::Candid,
-        maps::{ApiKeysCell, ExchangeRateMap, UserTransactionsMap},
         BtcUserPendingTransactionsMap, Candid, ConfigCell, ContactMap, CustomTokenMap,
         PowChallengeMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
     },
