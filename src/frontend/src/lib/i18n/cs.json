@@ -1908,6 +1908,8 @@
 		"text": {
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
 			"my_positions": "",
 			"available_autopilots": "",
 			"vault_info": "",
@@ -1918,10 +1920,12 @@
 			"total_value_locked": "",
 			"manager": "",
 			"vault_description": "",
-			"stake": "Stakovat $token_symbol",
+			"stake": "",
 			"stake_now": "Stakovat nyní",
 			"stake_amount": "Stakovat $amount $token_symbol",
 			"not_enough_to_stake": "Nemáte žádné $token_symbol ke stakování",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "Odstakovat",
 			"unstake_now": "Odstakovat nyní",
 			"unstaking": "Odstakování...",
@@ -1981,6 +1985,7 @@
 		"error": {
 			"unexpected_error_on_withdraw": "Při výběru tokenů došlo k chybě.",
 			"unexpected_error_on_unstake": "Při odstakování tokenů došlo k chybě.",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": "Dosáhli jste maximálního počtu $limit aktivních žádostí o odemčení. Nejprve některé dokončete, než vytvoříte novou.<br/>Vždy můžete použít možnost „okamžitě“."
 		},
 		"info": {

@@ -1908,6 +1908,8 @@
 		"text": {
 			"harvest_autopilot_page_description": "",
 			"harvest_autopilot_vault_page_description": "",
+			"harvest_autopilot_provider_description": "",
+			"harvest_autopilot_stake_terms": "",
 			"my_positions": "",
 			"available_autopilots": "",
 			"vault_info": "",
@@ -1922,6 +1924,8 @@
 			"stake_now": "",
 			"stake_amount": "",
 			"not_enough_to_stake": "",
+			"estimated_received": "",
+			"estimated_yearly_yield": "",
 			"unstake": "",
 			"unstake_now": "",
 			"unstaking": "",
@@ -1981,6 +1985,7 @@
 		"error": {
 			"unexpected_error_on_withdraw": "",
 			"unexpected_error_on_unstake": "",
+			"unexpected_error_on_stake": "",
 			"dissolvement_limit_reached": ""
 		},
 		"info": {
