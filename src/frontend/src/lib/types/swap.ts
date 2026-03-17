@@ -121,6 +121,12 @@ type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, Ic
 
 export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
 
+export interface EvmSwapProviderConfig {
+	key: SwapProvider;
+	getQuote: (params: EvmQuoteParams) => Promise<SwapMappedResult | undefined>;
+	isEnabled: boolean;
+}
+
 export interface SwapParams {
 	identity: Identity;
 	progress: (step: ProgressStepsSwap) => void;
@@ -175,11 +181,12 @@ export interface GetQuoteParams extends QuoteParams<'all'> {
 	destChainId?: number;
 }
 
-export interface VeloraQuoteParams {
+export interface EvmQuoteParams {
 	sourceToken: Erc20Token;
 	destinationToken: Erc20Token;
 	amount: bigint;
 	userEthAddress: OptionEthAddress;
+	slippage: Slippage;
 }
 
 export interface GetWithdrawableTokenParams {
