@@ -12,6 +12,7 @@
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
+	import { consoleWarn } from '$lib/utils/console.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
 
 	interface Props {
@@ -39,7 +40,7 @@
 
 			return 'ready';
 		} catch (_err: unknown) {
-			console.warn('Failed to load KongSwap tokens.');
+			consoleWarn('Failed to load KongSwap tokens.');
 
 			return undefined;
 		}

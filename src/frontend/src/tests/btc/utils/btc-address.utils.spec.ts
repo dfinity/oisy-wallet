@@ -124,9 +124,9 @@ describe('btc-address.utils', () => {
 
 		it('should return undefined for invalid BtcAddress objects', () => {
 			// @ts-expect-error Testing invalid input
-			expect(() => getBtcAddressString({})).toThrowError();
+			expect(() => getBtcAddressString({})).toThrow();
 			// @ts-expect-error Testing invalid input
-			expect(() => getBtcAddressString({ InvalidType: 'address' })).toThrowError();
+			expect(() => getBtcAddressString({ InvalidType: 'address' })).toThrow();
 		});
 	});
 

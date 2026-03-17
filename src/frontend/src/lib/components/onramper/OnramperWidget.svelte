@@ -18,6 +18,7 @@
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import { consoleError } from '$lib/utils/console.utils';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
 
 	let defaultCrypto = $derived(
@@ -95,7 +96,7 @@
 				'*'
 			);
 		} catch (error) {
-			console.error('Could not apply onramper widget theme', error);
+			consoleError('Could not apply onramper widget theme', error);
 		} finally {
 			themeLoaded = true;
 		}

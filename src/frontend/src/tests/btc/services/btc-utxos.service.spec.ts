@@ -272,7 +272,7 @@ describe('btc-utxos.service', () => {
 					identity: mockIdentity,
 					network: mockNetwork
 				})
-			).rejects.toThrowError('No fee percentiles available - cannot calculate transaction fee');
+			).rejects.toThrow('No fee percentiles available - cannot calculate transaction fee');
 		});
 
 		it('should throw error when fee percentiles is null', async () => {
@@ -285,7 +285,7 @@ describe('btc-utxos.service', () => {
 					identity: mockIdentity,
 					network: mockNetwork
 				})
-			).rejects.toThrowError('No fee percentiles available - cannot calculate transaction fee');
+			).rejects.toThrow('No fee percentiles available - cannot calculate transaction fee');
 		});
 
 		it('should return minimum fee rate when calculated fee is too low', async () => {
@@ -479,7 +479,7 @@ describe('btc-utxos.service', () => {
 					identity: mockIdentity,
 					network: mockNetwork
 				})
-			).rejects.toThrowError('Backend API error');
+			).rejects.toThrow('Backend API error');
 		});
 
 		it('should handle very small non-zero fee that rounds to zero', async () => {

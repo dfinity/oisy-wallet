@@ -66,8 +66,8 @@ describe('Info', () => {
 
 		const { getByText } = render(Info);
 
-		expect(() => getByText(en.info.ethereum.title)).toThrowError();
-		expect(() => getByText(en.info.bitcoin.title)).toThrowError();
+		expect(() => getByText(en.info.ethereum.title)).toThrow();
+		expect(() => getByText(en.info.bitcoin.title)).toThrow();
 	});
 
 	describe('ckBTC', () => {
@@ -91,7 +91,7 @@ describe('Info', () => {
 
 			const { getByText } = render(Info);
 
-			expect(() => getByText(en.info.bitcoin.title)).toThrowError();
+			expect(() => getByText(en.info.bitcoin.title)).toThrow();
 		});
 
 		it('should not render bitcoin info if page token is not set', () => {
@@ -99,7 +99,7 @@ describe('Info', () => {
 
 			const { getByText } = render(Info);
 
-			expect(() => getByText(en.info.bitcoin.title)).toThrowError();
+			expect(() => getByText(en.info.bitcoin.title)).toThrow();
 		});
 	});
 
@@ -126,7 +126,7 @@ describe('Info', () => {
 
 			const { getByText } = render(Info);
 
-			expect(() => getByText(en.info.ethereum.title)).toThrowError();
+			expect(() => getByText(en.info.ethereum.title)).toThrow();
 		});
 
 		it('should not render ethereum info if page token is not set', () => {
@@ -134,7 +134,7 @@ describe('Info', () => {
 
 			const { getByText } = render(Info);
 
-			expect(() => getByText(en.info.ethereum.title)).toThrowError();
+			expect(() => getByText(en.info.ethereum.title)).toThrow();
 		});
 	});
 
@@ -161,7 +161,7 @@ describe('Info', () => {
 
 			const { getByText } = render(Info);
 
-			expect(() => getByText(en.info.ethereum.title)).toThrowError();
+			expect(() => getByText(en.info.ethereum.title)).toThrow();
 		});
 
 		it('should not render ethereum info if page token is not set', () => {
@@ -169,7 +169,7 @@ describe('Info', () => {
 
 			const { getByText } = render(Info);
 
-			expect(() => getByText(en.info.ethereum.title)).toThrowError();
+			expect(() => getByText(en.info.ethereum.title)).toThrow();
 		});
 	});
 });

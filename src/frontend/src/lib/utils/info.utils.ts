@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { consoleError } from '$lib/utils/console.utils';
 
 export type HideInfoKey =
 	| 'oisy_ic_hide_bitcoin_info'
@@ -13,7 +14,7 @@ export const saveHideInfo = (key: HideInfoKey) => {
 		sessionStorage.setItem(key, 'true');
 	} catch (err: unknown) {
 		// We use the session storage for the operational part of the app but, not crucial
-		console.error(err);
+		consoleError(err);
 	}
 };
 
@@ -23,7 +24,7 @@ export const shouldHideInfo = (key: HideInfoKey): boolean => {
 		return store[key] === 'true';
 	} catch (err: unknown) {
 		// We use the session storage for the operational part of the app but, not crucial
-		console.error(err);
+		consoleError(err);
 		return false;
 	}
 };

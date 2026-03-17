@@ -225,7 +225,7 @@ describe('save-custom-tokens.services', () => {
 
 			vi.mocked(setManyCustomTokens).mockRejectedValueOnce(mockError);
 
-			await expect(saveCustomTokens(mockParams)).rejects.toThrowError(mockError);
+			await expect(saveCustomTokens(mockParams)).rejects.toThrow(mockError);
 
 			expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsAddToken.SAVE);
 
@@ -243,7 +243,7 @@ describe('save-custom-tokens.services', () => {
 
 			vi.mocked(loadCustomErc20Tokens).mockRejectedValueOnce(mockError);
 
-			await expect(saveCustomTokens(mockParams)).rejects.toThrowError(mockError);
+			await expect(saveCustomTokens(mockParams)).rejects.toThrow(mockError);
 		});
 	});
 });

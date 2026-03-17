@@ -8,6 +8,7 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { hardenMetadata } from '$lib/utils/metadata.utils';
 import { getCodebaseTokenIconPath } from '$lib/utils/tokens.utils';
@@ -254,6 +255,6 @@ export const getSplMetadata = async ({
 		};
 	} catch (err: unknown) {
 		// We care only for development purposes.
-		console.warn(`Failed to fetch SPL metadata for token ${address} on ${network} network`, err);
+		consoleWarn(`Failed to fetch SPL metadata for token ${address} on ${network} network`, err);
 	}
 };

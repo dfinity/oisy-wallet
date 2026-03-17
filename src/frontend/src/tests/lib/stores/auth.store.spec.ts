@@ -8,7 +8,7 @@ describe('auth.store', () => {
 		const identity = Ed25519KeyIdentity.generate();
 
 		it('should set the identity for testing', () => {
-			expect(() => authStore.setForTesting(identity)).not.toThrowError();
+			expect(() => authStore.setForTesting(identity)).not.toThrow();
 
 			const storeIdentity = get(authStore).identity;
 
@@ -18,7 +18,7 @@ describe('auth.store', () => {
 		it('should throw an error if not TEST environment', () => {
 			const spy = vi.spyOn(constants, 'TEST', 'get').mockReturnValue(false);
 
-			expect(() => authStore.setForTesting(identity)).toThrowError(
+			expect(() => authStore.setForTesting(identity)).toThrow(
 				'This function should only be used in npm run test environment'
 			);
 
