@@ -68,7 +68,7 @@ const mockVeloraGetQuote = vi.hoisted(() => vi.fn());
 vi.mock('$lib/providers/evm-swap.providers', () => ({
 	evmSwapProviders: [
 		{
-			key: 'velora',
+			key: SwapProvider.VELORA,
 			getQuote: mockVeloraGetQuote,
 			isEnabled: true
 		}
@@ -332,7 +332,7 @@ describe('swap.services', () => {
 		});
 
 		it('should call fetchSwapAmountsEVM when network.id !== ICP_NETWORK_ID', async () => {
-			mockVeloraGetQuote.mockResolvedValue(null);
+			mockVeloraGetQuote.mockResolvedValue(undefined);
 
 			const evmToken = {
 				...mockValidErc20Token,
@@ -384,8 +384,8 @@ describe('swap.services', () => {
 			vi.clearAllMocks();
 		});
 
-		it('returns [] when all providers return null', async () => {
-			mockVeloraGetQuote.mockResolvedValue(null);
+		it('returns [] when all providers return undefined', async () => {
+			mockVeloraGetQuote.mockResolvedValue(undefined);
 
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
