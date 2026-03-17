@@ -4,6 +4,7 @@ import { EnvSnsTokenSchema, EnvSnsTokensSchema } from '$env/schema/env-sns-token
 import snsTokens from '$env/tokens/tokens.sns.json';
 import type { EnvSnsToken } from '$env/types/env-sns-token';
 import type { IcTokenWithoutId } from '$icp/types/ic-token';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -62,7 +63,7 @@ const mapIcrcCustomToken = ({
 	exchangeCoinId: undefined,
 	standard: { code: 'icrc' },
 	category: 'custom',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 	fee,
 	alternativeName,
 	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`,

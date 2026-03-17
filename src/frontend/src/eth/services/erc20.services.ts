@@ -13,6 +13,7 @@ import {
 	ERC20_TWIN_TOKENS
 } from '$env/tokens/tokens.erc20.env';
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -178,7 +179,7 @@ const loadCustomTokensWithMetadata = async ({
 					decimals: ETHEREUM_DEFAULT_DECIMALS,
 					standard: { code: 'erc20' as const },
 					category: 'custom' as const,
-					tags: [],
+					tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 					enabled,
 					version,
 					allowExternalContentSource
