@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Backdrop } from '@dfinity/gix-components';
+	import type { Nullish } from '@dfinity/zod-schemas';
 	import { onMount, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
@@ -10,7 +11,6 @@
 	import { MediaType } from '$lib/enums/media-type';
 	import { extractMediaTypeAndSize } from '$lib/services/url.services';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Nullish } from '@dfinity/zod-schemas';
 
 	interface Props {
 		mediaSrc: string;

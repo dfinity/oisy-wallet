@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Origin, PayloadOrigin } from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Nullish } from '@dfinity/zod-schemas';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionString } from '$lib/types/string';
-	import type { Nullish } from '@dfinity/zod-schemas';
 
 	interface Props {
 		payload: Nullish<PayloadOrigin>;

@@ -1,8 +1,8 @@
 <script lang="ts">
+	import type { Nullish } from '@dfinity/zod-schemas';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Nullish } from '@dfinity/zod-schemas';
 
 	interface Props {
 		proposal: Nullish<WalletKitTypes.SessionProposal>;
