@@ -13,6 +13,6 @@
 		});
 </script>
 
-<svelte:window onoisyToggleAssetTypes={toggleHide} />
+<svelte:window onoisyToggleTokenCategoryFilter={toggleHide} />
 
 <Toggle ariaLabel={$i18n.tokens.text.hide_asset_types} bind:checked on:nnsToggle={toggleHide} />

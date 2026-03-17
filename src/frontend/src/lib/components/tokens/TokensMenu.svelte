@@ -4,7 +4,6 @@
 	import IconHide from '$lib/components/icons/IconHide.svelte';
 	import IconFilter from '$lib/components/icons/lucide/IconFilter.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
-	import TokensAssetTypeToggle from '$lib/components/tokens/TokensAssetTypeToggle.svelte';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -24,8 +23,8 @@
 		emit({ message: 'oisyToggleZeroBalances' });
 	};
 
-	const toggleAssetTypes = () => {
-		emit({ message: 'oisyToggleAssetTypes' });
+	const toggleTokenCategoryFilter = () => {
+		emit({ message: 'oisyToggleTokenCategoryFilter' });
 	};
 
 	const openManageTokens = () => {
@@ -71,7 +70,7 @@
 			</ListItem>
 
 			<ListItem>
-				<LogoButton fullWidth onClick={toggleAssetTypes}>
+				<LogoButton fullWidth onClick={toggleTokenCategoryFilter}>
 					{#snippet logo()}
 						<IconFilter />
 					{/snippet}
@@ -79,7 +78,7 @@
 						<span class="text-sm font-normal">{$i18n.tokens.text.hide_asset_types}</span>
 					{/snippet}
 					{#snippet action()}
-						<TokensAssetTypeToggle />
+						<TokensCategoryFilterToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
