@@ -35,6 +35,12 @@ vi.mock('$lib/derived/exchange.derived', () => ({
 	}
 }));
 
+vi.mock('$eth/services/eth-listener.services', () => ({
+	initMinedTransactionsListener: vi.fn(() => ({
+		disconnect: vi.fn()
+	}))
+}));
+
 describe('HarvestUnstakeWizard', () => {
 	const mockVaultToken = {
 		...mockValidErc4626Token,
