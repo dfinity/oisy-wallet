@@ -91,10 +91,11 @@ describe('erc4626.services', () => {
 			{
 				certified: true,
 				data: {
-					standard: { code: 'erc4626' },
-					category: 'custom',
-					version: 1n,
-					allowExternalContentSource: undefined,
+				standard: { code: 'erc4626' },
+				category: 'custom',
+				tags: [],
+				version: 1n,
+				allowExternalContentSource: undefined,
 					enabled: true,
 					network: ETHEREUM_NETWORK,
 					address: mockEthAddress,
@@ -110,10 +111,11 @@ describe('erc4626.services', () => {
 			{
 				certified: true,
 				data: {
-					standard: { code: 'erc4626' },
-					category: 'custom',
-					version: 2n,
-					allowExternalContentSource: true,
+				standard: { code: 'erc4626' },
+				category: 'custom',
+				tags: [],
+				version: 2n,
+				allowExternalContentSource: true,
 					enabled: true,
 					network: BASE_NETWORK,
 					address: mockEthAddress2.toUpperCase(),
@@ -129,10 +131,11 @@ describe('erc4626.services', () => {
 			{
 				certified: true,
 				data: {
-					standard: { code: 'erc4626' },
-					category: 'custom',
-					version: undefined,
-					allowExternalContentSource: false,
+				standard: { code: 'erc4626' },
+				category: 'custom',
+				tags: [],
+				version: undefined,
+				allowExternalContentSource: false,
 					enabled: false,
 					network: POLYGON_AMOY_NETWORK,
 					address: mockEthAddress3,
