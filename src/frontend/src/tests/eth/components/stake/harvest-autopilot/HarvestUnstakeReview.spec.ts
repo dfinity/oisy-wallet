@@ -45,7 +45,6 @@ describe('HarvestUnstakeReview', () => {
 	const props = {
 		amount: 0.01,
 		onBack: vi.fn(),
-		onClose: vi.fn(),
 		onUnstake: vi.fn()
 	};
 
