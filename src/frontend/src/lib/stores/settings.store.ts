@@ -33,8 +33,8 @@ export const tokensSortStore = initStorageStore<TokensSortingType>({
 	}
 });
 
-export const tokenCategoryFilterEnabledStore = initStorageStore<SettingsData>({
-	key: 'token-category-filter-enabled',
+export const hideTokenCategoryFilterStore = initStorageStore<SettingsData>({
+	key: 'hide-token-category-filter',
 	defaultValue: { enabled: false }
 });
 

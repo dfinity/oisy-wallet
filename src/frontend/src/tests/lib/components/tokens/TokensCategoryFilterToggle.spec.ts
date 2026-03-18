@@ -1,13 +1,13 @@
 import TokensCategoryFilterToggle from '$lib/components/tokens/TokensCategoryFilterToggle.svelte';
-import { tokenCategoryFilterEnabled } from '$lib/derived/settings.derived';
-import { tokenCategoryFilterEnabledStore } from '$lib/stores/settings.store';
+import { hideTokenCategoryFilter } from '$lib/derived/settings.derived';
+import { hideTokenCategoryFilterStore } from '$lib/stores/settings.store';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('TokensCategoryFilterToggle', () => {
 	beforeEach(() => {
-		tokenCategoryFilterEnabledStore.reset({ key: 'token-category-filter-enabled' });
+		hideTokenCategoryFilterStore.reset({ key: 'hide-token-category-filter' });
 	});
 
 	it('should render a toggle with the correct aria label', () => {
@@ -27,11 +27,11 @@ describe('TokensCategoryFilterToggle', () => {
 	it('should toggle store on oisyToggleTokenCategoryFilter event', () => {
 		render(TokensCategoryFilterToggle);
 
-		expect(get(tokenCategoryFilterEnabled)).toBeFalsy();
+		expect(get(hideTokenCategoryFilter)).toBeFalsy();
 
 		window.dispatchEvent(new CustomEvent('oisyToggleTokenCategoryFilter'));
 
-		expect(get(tokenCategoryFilterEnabled)).toBeTruthy();
+		expect(get(hideTokenCategoryFilter)).toBeTruthy();
 	});
 
 	it('should toggle back to disabled on second event', () => {
@@ -39,10 +39,10 @@ describe('TokensCategoryFilterToggle', () => {
 
 		window.dispatchEvent(new CustomEvent('oisyToggleTokenCategoryFilter'));
 
-		expect(get(tokenCategoryFilterEnabled)).toBeTruthy();
+		expect(get(hideTokenCategoryFilter)).toBeTruthy();
 
 		window.dispatchEvent(new CustomEvent('oisyToggleTokenCategoryFilter'));
 
-		expect(get(tokenCategoryFilterEnabled)).toBeFalsy();
+		expect(get(hideTokenCategoryFilter)).toBeFalsy();
 	});
 });
