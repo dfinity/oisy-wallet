@@ -10,10 +10,11 @@ import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { InternetIdentityDomain } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { AuthClient } from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
 import { writable, type Readable } from 'svelte/store';
@@ -22,7 +23,7 @@ export interface AuthStoreData {
 	identity: OptionIdentity;
 }
 
-let authClient: Option<AuthClient>;
+let authClient: Nullish<AuthClient>;
 
 export interface AuthSignInParams {
 	domain?: InternetIdentityDomain;
@@ -118,7 +119,7 @@ const initAuthStore = (): AuthStore => {
 							// We don't really care if the broadcast channel fails to open or if it fails to post messages.
 							// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
 							// We just print a warning in the console for debugging purposes.
-							console.warn('Auth BroadcastChannel posting failed', err);
+							consoleWarn('Auth BroadcastChannel posting failed', err);
 						}
 
 						resolve();

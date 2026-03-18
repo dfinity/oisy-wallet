@@ -1,8 +1,8 @@
-import type { Option } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { BitcoinDid } from '@icp-sdk/canisters/ckbtc';
 import { writable, type Readable } from 'svelte/store';
 
-export type AllUtxosStoreData = Option<{
+export type AllUtxosStoreData = Nullish<{
 	allUtxos?: BitcoinDid.utxo[];
 }>;
 

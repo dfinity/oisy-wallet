@@ -19,6 +19,7 @@ declare module 'svelte/elements' {
 		) => void;
 		onoisyRefreshUserProfile?: (event: CustomEvent<NoParamEvent>) => void;
 		onoisyToggleZeroBalances?: (event: CustomEvent<NoParamEvent>) => void;
+		onoisyToggleTokenCategoryFilter?: (event: CustomEvent<NoParamEvent>) => void;
 		onoisyRefreshContacts?: (event: CustomEvent<NoParamEvent>) => void;
 		onoisyDisconnectWalletConnect?: (event: CustomEvent<NoParamEvent>) => void;
 		onoisyReloadCollections?: (event: CustomEvent<OisyReloadCollectionsEvent>) => void;

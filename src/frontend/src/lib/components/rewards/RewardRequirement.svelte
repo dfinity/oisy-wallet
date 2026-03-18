@@ -1,5 +1,11 @@
 <script lang="ts" module>
-	import type { CampaignCriterion } from '$lib/types/reward';
+	import type {
+		CampaignCriterion,
+		HangoverCriterion,
+		MinLoginsCriterion,
+		MinTotalAssetsUsdCriterion,
+		MinTransactionsCriterion
+	} from '$lib/types/reward';
 
 	type T = CampaignCriterion;
 </script>
@@ -9,12 +15,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type {
-		HangoverCriterion,
-		MinLoginsCriterion,
-		MinTotalAssetsUsdCriterion,
-		MinTransactionsCriterion
-	} from '$lib/types/reward';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {

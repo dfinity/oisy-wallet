@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 
 	type T = Token;
 </script>
@@ -9,7 +9,6 @@
 	import { onDestroy } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { InitWalletWorkerFn, WalletWorker } from '$lib/types/listener';
-	import type { TokenId } from '$lib/types/token';
 	import { cleanWorkers, loadWorker } from '$lib/utils/wallet.utils';
 
 	interface Props {

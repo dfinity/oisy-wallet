@@ -13,7 +13,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
-import type { Option } from '$lib/types/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { derived, writable, type Readable } from 'svelte/store';
 
 export interface ConvertData {
@@ -97,7 +97,7 @@ export interface ConvertContext {
 	balanceForFee: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
-	minterInfo: Readable<Option<CkBtcMinterInfoData | CkEthMinterInfoData>>;
+	minterInfo: Readable<Nullish<CkBtcMinterInfoData | CkEthMinterInfoData>>;
 }
 
 export const CONVERT_CONTEXT_KEY = Symbol('convert');

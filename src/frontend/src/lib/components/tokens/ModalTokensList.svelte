@@ -70,7 +70,7 @@
 		/>
 	</div>
 
-	<div class="flex items-center">
+	<div class="flex items-center gap-2">
 		<button
 			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
 			class:hover:border-brand-primary={networkSelectorViewOnly}

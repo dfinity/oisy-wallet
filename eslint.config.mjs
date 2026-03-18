@@ -1,6 +1,11 @@
 import { default as svelteConfig } from '@dfinity/eslint-config-oisy-wallet/svelte';
 import { default as vitestConfig } from '@dfinity/eslint-config-oisy-wallet/vitest';
 
+const ZERO_BIGINT_RESTRICTION = {
+	selector: "Literal[raw='0n']",
+	message: 'Use the shared constant `ZERO` instead of `0n`.'
+};
+
 export default [
 	...vitestConfig,
 	...svelteConfig,
@@ -22,11 +27,26 @@ export default [
 
 	{
 		rules: {
+			'no-restricted-syntax': ['error', ZERO_BIGINT_RESTRICTION]
+		}
+	},
+
+	{
+		files: ['src/frontend/src/**/*'],
+		ignores: ['src/frontend/src/lib/utils/console.utils.ts', 'src/frontend/src/tests/**/*'],
+		rules: {
 			'no-restricted-syntax': [
 				'error',
+				ZERO_BIGINT_RESTRICTION,
 				{
-					selector: "Literal[raw='0n']",
-					message: 'Use the shared constant `ZERO` instead of `0n`.'
+					selector: "MemberExpression[object.name='console'][property.name='error']",
+					message:
+						'Use `consoleError` from `$lib/utils/console.utils` instead of `console.error` to format IC canister errors.'
+				},
+				{
+					selector: "MemberExpression[object.name='console'][property.name='warn']",
+					message:
+						'Use `consoleWarn` from `$lib/utils/console.utils` instead of `console.warn` to format IC canister errors.'
 				}
 			]
 		}

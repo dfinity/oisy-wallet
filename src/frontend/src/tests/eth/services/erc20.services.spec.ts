@@ -13,6 +13,7 @@ import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import type { Erc20Metadata } from '$eth/types/erc20';
 import { listCustomTokens } from '$lib/api/backend.api';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -54,7 +55,7 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				tags: [],
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 				version: 1n,
 				allowExternalContentSource: undefined,
 				enabled: true,
@@ -71,7 +72,7 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				tags: [],
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 				version: 2n,
 				allowExternalContentSource: true,
 				enabled: true,
@@ -88,7 +89,7 @@ describe('erc20.services', () => {
 			data: {
 				standard: { code: 'erc20' },
 				category: 'custom',
-				tags: [],
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
 				version: undefined,
 				allowExternalContentSource: false,
 				enabled: false,
@@ -171,14 +172,14 @@ describe('erc20.services', () => {
 			const mockError = new Error('Error loading metadata');
 			vi.mocked(mockMetadata).mockRejectedValue(mockError);
 
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
+			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 		});
 
 		it('should not throw error if list custom tokens throws', async () => {
 			const mockError = new Error('Error loading custom tokens');
 			vi.mocked(listCustomTokens).mockRejectedValue(mockError);
 
-			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrowError();
+			await expect(loadErc20Tokens({ identity: mockIdentity })).resolves.not.toThrow();
 		});
 
 		it('should reset both tokens stores on error', async () => {

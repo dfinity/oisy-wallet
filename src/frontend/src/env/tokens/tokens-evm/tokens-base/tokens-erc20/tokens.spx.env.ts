@@ -2,6 +2,7 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SPX_TOKEN_GROUP } from '$env/tokens/groups/groups.spx.env';
 import spx from '$eth/assets/spx.png';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -16,7 +17,7 @@ export const SPX_TOKEN: RequiredEvmErc20Token = {
 	network: BASE_NETWORK,
 	standard: { code: 'erc20' },
 	category: 'default',
-	tags: [],
+	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }],
 	name: 'SPX6900',
 	symbol: SPX_SYMBOL,
 	decimals: SPX_DECIMALS,

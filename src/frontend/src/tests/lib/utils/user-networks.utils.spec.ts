@@ -35,7 +35,7 @@ describe('user-networks.utils', () => {
 		});
 
 		it('should be able to map all networks', () => {
-			expect(() => mapUserNetworks(mockUserNetworksComplete)).not.toThrowError();
+			expect(() => mapUserNetworks(mockUserNetworksComplete)).not.toThrow();
 
 			expect(console.warn).not.toHaveBeenCalled();
 			expect(console.error).not.toHaveBeenCalled();

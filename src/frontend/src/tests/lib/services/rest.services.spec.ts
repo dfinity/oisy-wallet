@@ -42,7 +42,7 @@ describe('rest.services', () => {
 					request: mockFailedRequest,
 					maxRetries
 				})
-			).rejects.toThrowError(mockError);
+			).rejects.toThrow(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
 
@@ -86,7 +86,7 @@ describe('rest.services', () => {
 					onRetry: mockOnRetry,
 					maxRetries
 				})
-			).rejects.toThrowError(mockError);
+			).rejects.toThrow(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
 			expect(mockOnRetry).toHaveBeenCalledTimes(maxRetries);
@@ -99,7 +99,7 @@ describe('rest.services', () => {
 					onRetry: mockOnRetry,
 					maxRetries: 0
 				})
-			).rejects.toThrowError(mockError);
+			).rejects.toThrow(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledOnce();
 			expect(mockOnRetry).not.toHaveBeenCalled();
@@ -181,7 +181,7 @@ describe('rest.services', () => {
 					request: mockFailedRequest,
 					maxRetries
 				})
-			).rejects.toThrowError(mockError);
+			).rejects.toThrow(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
 
@@ -195,7 +195,7 @@ describe('rest.services', () => {
 					request: mockFailedRequest,
 					maxRetries: 2
 				})
-			).rejects.toThrowError(mockError);
+			).rejects.toThrow(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(3);
 			expect(randomWait).toHaveBeenCalledTimes(2);
@@ -207,7 +207,7 @@ describe('rest.services', () => {
 					request: mockFailedRequest,
 					maxRetries: 0
 				})
-			).rejects.toThrowError(mockError);
+			).rejects.toThrow(mockError);
 
 			expect(mockFailedRequest).toHaveBeenCalledOnce();
 			expect(randomWait).not.toHaveBeenCalled();

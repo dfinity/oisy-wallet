@@ -15,6 +15,7 @@ import {
 	isTokenExtCustomToken,
 	mapExtToken
 } from '$icp/utils/ext.utils';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenStandardCode } from '$lib/types/token';
 import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
@@ -116,7 +117,7 @@ describe('ext.utils', () => {
 			const collectionId = Principal.fromText('oeee4-qaaaa-aaaak-qaaeq-cai');
 			const index = -1;
 
-			expect(() => extIndexToIdentifier({ collectionId, index })).toThrowError(
+			expect(() => extIndexToIdentifier({ collectionId, index })).toThrow(
 				'EXT token index -1 is out of bounds'
 			);
 		});
@@ -139,7 +140,7 @@ describe('ext.utils', () => {
 			decimals: 0,
 			standard: { code: 'ext', version: 'v2' },
 			category: 'custom',
-			tags: []
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }]
 		};
 
 		it('should correctly map an EXT token', () => {

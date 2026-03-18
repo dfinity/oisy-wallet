@@ -56,7 +56,7 @@ describe('icpunks.api', () => {
 
 			tokenCanisterMock.getTokensByOwner.mockRejectedValueOnce(mockError);
 
-			await expect(getTokensByOwner(params)).rejects.toThrowError(mockError);
+			await expect(getTokensByOwner(params)).rejects.toThrow(mockError);
 
 			expect(tokenCanisterMock.getTokensByOwner).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
@@ -93,7 +93,7 @@ describe('icpunks.api', () => {
 
 			tokenCanisterMock.transfer.mockRejectedValueOnce(mockError);
 
-			await expect(transfer(params)).rejects.toThrowError(mockError);
+			await expect(transfer(params)).rejects.toThrow(mockError);
 
 			expect(tokenCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
@@ -130,7 +130,7 @@ describe('icpunks.api', () => {
 
 			tokenCanisterMock.metadata.mockRejectedValueOnce(mockError);
 
-			await expect(metadata(params)).rejects.toThrowError(mockError);
+			await expect(metadata(params)).rejects.toThrow(mockError);
 
 			expect(tokenCanisterMock.metadata).toHaveBeenCalledExactlyOnceWith(expectedParams);
 		});
@@ -160,7 +160,7 @@ describe('icpunks.api', () => {
 
 			tokenCanisterMock.collectionMetadata.mockRejectedValueOnce(mockError);
 
-			await expect(collectionMetadata(params)).rejects.toThrowError(mockError);
+			await expect(collectionMetadata(params)).rejects.toThrow(mockError);
 
 			expect(tokenCanisterMock.collectionMetadata).toHaveBeenCalledExactlyOnceWith({});
 		});

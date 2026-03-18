@@ -8,14 +8,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import type { Vault } from '$lib/types/vaults';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		token: Token;
+		vault?: Vault;
 	}
 
-	let { token }: Props = $props();
+	let { token, vault }: Props = $props();
 
 	let modal: WizardModal<WizardStepsStake> | undefined = $state();
 	let currentStep: WizardStep<WizardStepsStake> | undefined = $state();
@@ -24,8 +25,7 @@
 
 	const steps: WizardSteps<WizardStepsStake> = $derived(
 		stakeWizardSteps({
-			i18n: $i18n,
-			tokenSymbol: getTokenDisplaySymbol(token)
+			i18n: $i18n
 		})
 	);
 
@@ -58,6 +58,7 @@
 			onBack={modal.back}
 			onClose={close}
 			onNext={modal.next}
+			{vault}
 			bind:amount
 			bind:stakeProgressStep
 		/>
