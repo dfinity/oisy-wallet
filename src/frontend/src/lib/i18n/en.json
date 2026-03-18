@@ -1158,6 +1158,7 @@
 			"sort_by_performance": "Token performance",
 			"sort_by_symbol": "Symbol",
 			"hide_asset_types": "Hide asset types",
+			"asset_type_all": "All asset types",
 			"no_tokens_for_asset_type": "There are no $asset_type in your wallet",
 			"no_tokens_for_asset_type_description": "Choose from <strong>$count supported tokens</strong> to customize your portfolio view."
 		},
