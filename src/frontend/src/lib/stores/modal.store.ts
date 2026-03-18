@@ -66,6 +66,8 @@ export interface Modal<T> {
 		| 'nft-image-consent'
 		| 'nft-fullscreen-display'
 		| 'get-token'
+		| 'harvest-stake'
+		| 'harvest-unstake'
 		| 'universal-scanner'
 		| 'pay-dialog';
 	data?: T;
@@ -134,6 +136,8 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
 	openNftImageConsent: (params: SetWithDataParams<NftCollection>) => void;
 	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
+	openHarvestStake: (id: symbol) => void;
+	openHarvestUnstake: (id: symbol) => void;
 	openUniversalScanner: (id: symbol) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
@@ -240,6 +244,8 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openNftFullscreenDisplay: <(params: SetWithDataParams<Nft>) => void>(
 			setTypeWithData('nft-fullscreen-display')
 		),
+		openHarvestStake: setType('harvest-stake'),
+		openHarvestUnstake: setType('harvest-unstake'),
 		openUniversalScanner: setType('universal-scanner'),
 		openPayDialog: setType('pay-dialog'),
 		openGetToken: setType('get-token'),

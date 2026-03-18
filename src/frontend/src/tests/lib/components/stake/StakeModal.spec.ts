@@ -6,6 +6,12 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
+vi.mock('$eth/services/eth-listener.services', () => ({
+	initMinedTransactionsListener: vi.fn(() => ({
+		disconnect: vi.fn()
+	}))
+}));
+
 describe('StakeModal', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
