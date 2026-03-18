@@ -29,6 +29,7 @@
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { filterTokensByCategory } from '$lib/utils/token-tag.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
+	import {SLIDE_PARAMS} from "$lib/constants/transition.constants";
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -134,7 +135,7 @@
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		{#if $showTokenCategoryFilter}
-			<div class="mb-4" transition:slide>
+			<div class="mb-4" transition:slide={SLIDE_PARAMS}>
 				<TokenTypeFilterBar />
 			</div>
 		{/if}
