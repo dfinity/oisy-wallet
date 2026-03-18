@@ -40,7 +40,7 @@ describe('near-intents.rest', () => {
 				statusText: 'Internal Server Error'
 			} as Response);
 
-			await expect(fetchNearIntentsTokens()).rejects.toThrowError(
+			await expect(fetchNearIntentsTokens()).rejects.toThrow(
 				'Failed to fetch NEAR Intents tokens: Internal Server Error'
 			);
 		});

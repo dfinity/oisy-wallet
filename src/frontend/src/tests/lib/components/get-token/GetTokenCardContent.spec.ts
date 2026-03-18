@@ -42,7 +42,7 @@ describe('GetTokenCardContent', () => {
 			props
 		});
 
-		expect(() => getByText(ETHEREUM_TOKEN.symbol)).toThrowError();
+		expect(() => getByText(ETHEREUM_TOKEN.symbol)).toThrow();
 	});
 
 	it('should not display balance value if it is zero', () => {
@@ -53,7 +53,7 @@ describe('GetTokenCardContent', () => {
 			}
 		});
 
-		expect(() => getByText(ETHEREUM_TOKEN.symbol)).toThrowError();
+		expect(() => getByText(ETHEREUM_TOKEN.symbol)).toThrow();
 	});
 
 	it('displays "< " prefix when potential token balance is less than 1', () => {

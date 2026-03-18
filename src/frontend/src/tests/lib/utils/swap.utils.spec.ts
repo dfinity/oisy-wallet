@@ -553,7 +553,7 @@ describe('swap utils', () => {
 					sourceToken,
 					destinationToken
 				})
-			).toThrowError('Unknown token address');
+			).toThrow('Unknown token address');
 		});
 	});
 

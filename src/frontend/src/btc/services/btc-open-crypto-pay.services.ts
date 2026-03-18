@@ -75,6 +75,8 @@ export const payBtc = async ({
 			network: mapToSignerBitcoinNetwork({ network: token.network.env }),
 			address,
 			txId: txidStringToUint8Array(txid),
-			utxos: validatedData.utxosFee.utxos
+			utxos: validatedData.utxosFee.utxos,
+			// TODO: add the correct delegation chain here
+			iiDelegationChain: []
 		}));
 };

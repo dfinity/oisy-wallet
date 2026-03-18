@@ -88,7 +88,7 @@ describe('IcSendAmount', () => {
 
 		await waitFor(() => {
 			expect(input?.value).toBe(`${newAmount}`);
-			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrowError();
+			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrow();
 		});
 	});
 
@@ -111,7 +111,7 @@ describe('IcSendAmount', () => {
 
 		await waitFor(() => {
 			expect(input?.value).toBe(`${newAmount}`);
-			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrowError();
+			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrow();
 		});
 	});
 
@@ -139,7 +139,7 @@ describe('IcSendAmount', () => {
 
 		await waitFor(() => {
 			expect(input?.value).toBe(`${newAmount}`);
-			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrowError();
+			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrow();
 		});
 	});
 });
