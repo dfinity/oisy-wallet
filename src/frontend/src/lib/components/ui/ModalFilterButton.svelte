@@ -16,12 +16,12 @@
 
 <button
 	bind:this={button}
-	type="button"
 	class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
 	class:hover:border-brand-primary={!disabled}
 	aria-label={ariaLabel}
 	{disabled}
 	{onclick}
+	type="button"
 >
 	<span class="font-medium">{@render children()}</span>
 	<IconExpandMore size="24" />

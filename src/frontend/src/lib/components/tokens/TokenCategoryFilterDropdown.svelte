@@ -32,11 +32,7 @@
 	};
 </script>
 
-<ModalFilterButton
-	ariaLabel={currentLabel}
-	onclick={() => (visible = !visible)}
-	bind:button
->
+<ModalFilterButton ariaLabel={currentLabel} onclick={() => (visible = !visible)} bind:button>
 	{currentLabel}
 </ModalFilterButton>
 
