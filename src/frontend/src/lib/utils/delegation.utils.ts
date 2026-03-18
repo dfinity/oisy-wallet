@@ -1,5 +1,4 @@
 import type { IIDelegationChain } from '$declarations/backend/backend.did';
-import { toNullable } from '@dfinity/utils';
 import { type Nullable, toNullable } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { DelegationIdentity } from '@icp-sdk/core/identity';
