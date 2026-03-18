@@ -32,7 +32,7 @@ Both approaches can coexist: cron for convenience, manual reclaim as fallback.
 ```mermaid
 sequenceDiagram
     participant P as Payer (User A)
-    participant F as Frontend
+    participant F as Frontend (OISY)
     participant E as Escrow Canister
     participant L as Token Ledger (ICRC)
     participant R as Recipient (User B)
