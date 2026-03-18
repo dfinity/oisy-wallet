@@ -5,6 +5,7 @@ import {
 	privacyModeStore,
 	showHiddenStore,
 	showSpamStore,
+	tokenCategoryFilterEnabledStore,
 	tokensSortStore,
 	type NftSortOrder,
 	type NftSortType
@@ -55,4 +56,9 @@ export const nftSortType: Readable<NftSortType> = derived(
 export const nftGroupByCollection: Readable<boolean> = derived(
 	[nftGroupByCollectionStore],
 	([$nftGroupByCollectionStore]) => $nftGroupByCollectionStore
+);
+
+export const tokenCategoryFilterEnabled: Readable<boolean> = derived(
+	[tokenCategoryFilterEnabledStore],
+	([$store]) => $store.enabled
 );
