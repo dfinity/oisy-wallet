@@ -45,11 +45,20 @@
 	);
 
 	// Token list for enabling when filtering
-	let enableMoreTokensList: TokenUiOrGroupUi[] = $state([]);
+	let enableMoreTokensListRaw: TokenUiOrGroupUi[] = $state([]);
+
+	let enableMoreTokensList: TokenUiOrGroupUi[] = $derived(
+		$showTokenCategoryFilter
+			? filterTokensByCategory({
+					tokens: enableMoreTokensListRaw,
+					category: $tokenCategoryFilter
+				})
+			: enableMoreTokensListRaw
+	);
 
 	const updateFilterList = ({ filter }: { filter: string }) => {
 		// Sort alphabetically and apply filter
-		enableMoreTokensList = getFilteredTokenList({
+		enableMoreTokensListRaw = getFilteredTokenList({
 			filter,
 			list: sortTokenOrGroupUi(
 				getDisabledOrModifiedTokens({

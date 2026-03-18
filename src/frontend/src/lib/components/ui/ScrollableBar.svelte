@@ -27,6 +27,7 @@
 		const update = (): void => {
 			if (mediaQuery.matches) {
 				setFadeState({ node, fadeState: 'none' });
+
 				return;
 			}
 
@@ -74,6 +75,7 @@
 
 <div
 	class="scrollable-bar flex items-center gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible"
+	data-fade="none"
 	use:scrollFade
 >
 	{@render children()}
