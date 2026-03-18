@@ -3,6 +3,7 @@ import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -161,7 +162,7 @@ describe('TokenModalContent', () => {
 			}
 		});
 
-		expect(getByText(en.tokens.text.asset_type)).toBeInTheDocument();
+		expect(getByText(replaceOisyPlaceholders(en.tokens.text.asset_type))).toBeInTheDocument();
 
 		const badge = getByText(en.token_tag.category.crypto);
 

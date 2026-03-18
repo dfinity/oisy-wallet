@@ -39,6 +39,8 @@
 	}
 
 	let { children, token, onDeleteClick, onEditClick }: BaseTokenModalProps = $props();
+
+	let categoryTag = $derived(nonNullish(token) ? getTokenCategoryTag(token) : undefined);
 </script>
 
 <ContentWithToolbar>
@@ -79,23 +81,6 @@
 					/>
 				{/snippet}
 			</ModalListItem>
-
-			{@const categoryTag = getTokenCategoryTag(token)}
-			{#if nonNullish(categoryTag)}
-				<ModalListItem>
-					{#snippet label()}
-						{$i18n.tokens.text.asset_type}
-					{/snippet}
-
-					{#snippet content()}
-						<span
-							class="inline-block rounded-md border border-secondary px-2 py-0.5 text-xs font-medium"
-						>
-							{$i18n.token_tag.category[categoryTag]}
-						</span>
-					{/snippet}
-				</ModalListItem>
-			{/if}
 
 			{@render children?.()}
 
@@ -205,6 +190,22 @@
 							displayDecimals: token.decimals
 						})}
 						{token.symbol}
+					{/snippet}
+				</ModalListItem>
+			{/if}
+
+			{#if nonNullish(categoryTag)}
+				<ModalListItem>
+					{#snippet label()}
+						{replaceOisyPlaceholders($i18n.tokens.text.asset_type)}
+					{/snippet}
+
+					{#snippet content()}
+						<span
+							class="inline-block rounded-md border border-secondary px-2 py-0.5 text-xs font-medium"
+						>
+							{$i18n.token_tag.category[categoryTag]}
+						</span>
 					{/snippet}
 				</ModalListItem>
 			{/if}
