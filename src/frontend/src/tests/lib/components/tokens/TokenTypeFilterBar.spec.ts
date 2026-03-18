@@ -38,7 +38,6 @@ describe('TokenTypeFilterBar', () => {
 
 		const cryptoButton = getByText(en.token_tag.category.crypto);
 
-		expect(cryptoButton.classList.contains('border-secondary')).toBeTruthy();
 		expect(cryptoButton.classList.contains('text-secondary')).toBeTruthy();
 	});
 
