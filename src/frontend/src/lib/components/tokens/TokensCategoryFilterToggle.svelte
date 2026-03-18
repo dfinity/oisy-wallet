@@ -15,7 +15,7 @@
 			value: { enabled: !checked }
 		});
 
-		tokenCategoryFilterStore.reset({ key: 'token-category-filter' })
+		tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 	};
 </script>
 
