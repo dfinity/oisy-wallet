@@ -75,7 +75,6 @@ describe('btc-send.services', () => {
 				address: defaultParams.source,
 				txId: new Uint8Array(),
 				utxos: defaultParams.utxosFee.utxos,
-				// TODO: add the correct delegation chain here
 				iiDelegationChain: []
 			});
 		});
