@@ -1156,7 +1156,8 @@
 			"edit_token": "토큰 편집",
 			"sort_by_value": "가치",
 			"sort_by_performance": "토큰 성과",
-			"sort_by_symbol": "심볼"
+			"sort_by_symbol": "심볼",
+			"hide_asset_types": ""
 		},
 		"details": {
 			"title": "토큰 상세 정보",

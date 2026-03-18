@@ -52,6 +52,14 @@ export const modalGetToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'get-token'
 );
+export const modalHarvestStake: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'harvest-stake'
+);
+export const modalHarvestUnstake: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'harvest-unstake'
+);
 export const modalSwap: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'swap'

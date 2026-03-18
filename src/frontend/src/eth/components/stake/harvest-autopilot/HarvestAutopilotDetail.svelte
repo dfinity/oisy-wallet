@@ -18,23 +18,34 @@
 	import EarningPotentialCard from '$lib/components/earning/EarningPotentialCard.svelte';
 	import GetTokenModal from '$lib/components/get-token/GetTokenModal.svelte';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
+	import StakeModal from '$lib/components/stake/StakeModal.svelte';
 	import StakeProviderContainer from '$lib/components/stake/StakeProviderContainer.svelte';
 	import StakeTransactions from '$lib/components/stake/StakeTransactions.svelte';
+	import UnstakeModal from '$lib/components/stake/UnstakeModal.svelte';
 	import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { modalGetToken } from '$lib/derived/modal.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import {
+		modalGetToken,
+		modalHarvestStake,
+		modalHarvestUnstake
+	} from '$lib/derived/modal.derived';
 	import { routeAutopilotVault } from '$lib/derived/nav.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { StakingTransactionsUiWithToken } from '$lib/types/transaction-ui';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -48,6 +59,12 @@
 
 	let assetToken = $derived(
 		$erc20Tokens.find(({ address }) => address === vault?.token.assetAddress)
+	);
+
+	let assetTokenBalance = $derived(
+		nonNullish($balancesStore) && nonNullish(assetToken)
+			? ($balancesStore[assetToken.id]?.data ?? ZERO)
+			: ZERO
 	);
 
 	let availableBalance = $derived(
@@ -91,6 +108,29 @@
 
 	let earningPositionsUsd = $derived(
 		nonNullish(vault?.apy) ? earningYearlyAmountUsd * (Number(vault.apy) / 100) : 0
+	);
+
+	let exchange = $derived(nonNullish(vault) ? $exchanges?.[vault.token.id] : undefined);
+
+	let assetsPerShare = $derived(
+		nonNullish(exchange) && 'assets_per_share' in exchange
+			? (exchange.assets_per_share as number)
+			: undefined
+	);
+
+	let totalStakedAssetsBalance = $derived(
+		nonNullish(vault) && nonNullish(vault.token.balance) && nonNullish(assetsPerShare)
+			? parseToken({
+					value: (
+						formatTokenBigintToNumber({
+							value: vault.token.balance,
+							unitName: vault.token.decimals,
+							displayDecimals: vault.token.decimals
+						}) * assetsPerShare
+					).toFixed(vault.token.assetDecimals),
+					unitName: vault.token.assetDecimals
+				})
+			: ZERO
 	);
 </script>
 
@@ -151,11 +191,41 @@
 									{/if}
 								{/snippet}
 							</ButtonWithModal>
+
+							{#if nonNullish(vault) && assetTokenBalance > ZERO}
+								<ButtonWithModal isOpen={$modalHarvestStake} onOpen={modalStore.openHarvestStake}>
+									{#snippet button(onclick)}
+										<Button colorStyle="success" fullWidth {onclick}>
+											{$i18n.stake.text.stake}
+										</Button>
+									{/snippet}
+
+									{#snippet modal()}
+										<StakeModal token={assetToken} {vault} />
+									{/snippet}
+								</ButtonWithModal>
+							{/if}
 						{/if}
 					{/snippet}
 				</EarningPotentialCard>
 
-				<EarningPositionCard {earningPositionsUsd} {earningYearlyAmountUsd} />
+				<EarningPositionCard {earningPositionsUsd} {earningYearlyAmountUsd}>
+					{#snippet buttons()}
+						{#if nonNullish(assetToken) && nonNullish(vault) && totalStakedAssetsBalance > ZERO}
+							<ButtonWithModal isOpen={$modalHarvestUnstake} onOpen={modalStore.openHarvestUnstake}>
+								{#snippet button(onclick)}
+									<Button fullWidth {onclick}>
+										{$i18n.stake.text.unstake}
+									</Button>
+								{/snippet}
+
+								{#snippet modal()}
+									<UnstakeModal token={assetToken} totalStaked={totalStakedAssetsBalance} {vault} />
+								{/snippet}
+							</ButtonWithModal>
+						{/if}
+					{/snippet}
+				</EarningPositionCard>
 			</div>
 		{/snippet}
 	</StakeProviderContainer>

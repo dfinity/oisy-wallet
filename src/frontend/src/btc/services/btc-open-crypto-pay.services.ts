@@ -9,6 +9,7 @@ import { btcAddressMainnet } from '$lib/derived/address.derived';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import type { PayableToken, PayParams, ValidatedBtcPaymentData } from '$lib/types/open-crypto-pay';
+import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { getPaymentUri } from '$lib/utils/open-crypto-pay.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -76,7 +77,6 @@ export const payBtc = async ({
 			address,
 			txId: txidStringToUint8Array(txid),
 			utxos: validatedData.utxosFee.utxos,
-			// TODO: add the correct delegation chain here
-			iiDelegationChain: []
+			iiDelegationChain: extractIIDelegationChain(identity)
 		}));
 };
